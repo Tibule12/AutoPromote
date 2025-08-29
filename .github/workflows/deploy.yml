@@ -60,7 +60,7 @@ jobs:
         github_token: ${{ secrets.DEPLOY_TOKEN || secrets.GITHUB_TOKEN }}
         publish_dir: ../autopromote-client/build
         keep_files: false
-        publish_branch: main
+        publish_branch: gh-pages
 
   deploy-backend:
     runs-on: ubuntu-latest
