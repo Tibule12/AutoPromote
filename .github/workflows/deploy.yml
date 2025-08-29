@@ -1,0 +1,88 @@
+name: Deploy AutoPromote
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: package-lock.json
+        
+    - name: Install backend dependencies
+      run: npm ci
+      
+    - name: Run backend tests
+      run: npm test
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        PORT: 5000
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: test-backend
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: client/package-lock.json
+        
+    - name: Install frontend dependencies
+      working-directory: client
+      run: npm ci
+      
+    - name: Build frontend
+      working-directory: client
+      run: npm run build
+      
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: client/build
+        cname: autopromote.example.com  # Update with your domain if needed
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    needs: test-backend
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: package-lock.json
+        
+    - name: Install backend dependencies
+      run: npm ci
+      
+    - name: Deploy backend (Heroku example)
+      run: echo "Backend deployment would go here"
+      # Example for Heroku deployment:
+      # uses: akhileshns/heroku-deploy@v3.12.12
+      # with:
+      #   heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+      #   heroku_app_name: "your-app-name"
+      #   heroku_email: "your-email@example.com"
