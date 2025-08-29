@@ -1,4 +1,4 @@
-const Analytics = require('../models/Analytics');
+const supabase = require('./supabaseClient');
 
 // @desc    Create new analytics record
 // @route   POST /api/analytics
@@ -7,12 +7,21 @@ const createAnalytics = async (req, res) => {
   const { contentId, views, engagement, revenue } = req.body;
 
   try {
-    const analytics = await Analytics.create({
-      contentId,
-      views,
-      engagement,
-      revenue,
-    });
+    const { data: analytics, error } = await supabase
+      .from('analytics')
+      .insert({
+        content_id: contentId,
+        views,
+        engagement,
+        revenue,
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
 
     res.status(201).json(analytics);
   } catch (error) {
@@ -25,10 +34,16 @@ const createAnalytics = async (req, res) => {
 // @access  Public
 const getAnalyticsByContentId = async (req, res) => {
   try {
-    const analytics = await Analytics.findOne({ contentId: req.params.contentId });
-    if (!analytics) {
+    const { data: analytics, error } = await supabase
+      .from('analytics')
+      .select('*')
+      .eq('content_id', req.params.contentId)
+      .single();
+
+    if (error || !analytics) {
       return res.status(404).json({ message: 'Analytics not found' });
     }
+
     res.json(analytics);
   } catch (error) {
     res.status(500).json({ message: error.message });
