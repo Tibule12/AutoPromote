@@ -1,0 +1,49 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Declare files that will always have LF line endings on checkout
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Declare files that will always have CRLF line endings on checkout
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Denote all files that are truly binary and should not be modified
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.eot binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# Explicitly declare text files you want to always be normalized and converted
+*.css text
+*.html text
+*.js text
+*.json text
+*.md text
+*.txt text
+*.xml text
+*.yml text
+*.yaml text
+
+# Exclude node_modules from line ending conversion
+node_modules/ -text
+node_modules/** -text
+
+# Exclude package-lock.json from line ending conversion (it should remain with LF)
+package-lock.json -text
