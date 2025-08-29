@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "generate-secret": "node generate-secret.js"
+    "generate-secret": "node generate-secret.js",
+    "test": "node test-api.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",
