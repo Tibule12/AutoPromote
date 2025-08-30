@@ -1,49 +1,33 @@
 const jwt = require('jsonwebtoken');
 const supabase = require('./supabaseClient');
 
-// Protect routes - verify JWT token
-const protect = async (req, res, next) => {
-  let token;
-
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    try {
-      // Get token from header
-      token = req.headers.authorization.split(' ')[1];
-
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Get user from Supabase using the ID from token
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('id, name, email, role, created_at')
-        .eq('id', decoded.id)
-        .single();
-
-      if (error || !user) {
-        return res.status(401).json({ message: 'Not authorized, user not found' });
-      }
-
-      req.user = user;
-      next();
-    } catch (error) {
-      console.error('JWT verification error:', error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
+const authMiddleware = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
     }
-  }
 
-  if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
-  }
-};
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+    
+    // Verify user exists in database
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('id, role')
+      .eq('id', decoded.userId)
+      .limit(1);
 
-// Admin middleware - check if user is admin
-const admin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+    if (error || !users || users.length === 0) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    req.userId = decoded.userId;
+    req.userRole = decoded.role;
     next();
-  } else {
-    res.status(403).json({ message: 'Not authorized as admin' });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
   }
 };
 
-module.exports = { protect, admin };
+module.exports = authMiddleware;

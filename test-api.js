@@ -25,11 +25,11 @@ async function testAPI() {
     console.log('\n2. Testing user registration...');
     const userData = {
       name: 'Test User',
-      email: 'test@example.com',
+      email: 'newtest@example.com',
       password: 'password123',
       role: 'creator'
     };
-    const registerResponse = await axios.post(`${API_URL}/users/register`, userData);
+    const registerResponse = await axios.post(`${API_URL}/auth/register`, userData);
     console.log('✓ User registered:', registerResponse.data);
   } catch (error) {
     console.log('✗ User registration error:', error.response?.data?.message || error.message);
@@ -46,7 +46,7 @@ async function testAPI() {
       email: 'test@example.com',
       password: 'password123'
     };
-    const loginResponse = await axios.post(`${API_URL}/users/login`, loginData);
+    const loginResponse = await axios.post(`${API_URL}/auth/login`, loginData);
     console.log('✓ User logged in:', loginResponse.data);
   } catch (error) {
     console.log('✗ User login error:', error.response?.data?.message || error.message);
