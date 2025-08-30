@@ -21,7 +21,7 @@ console.log('✅ All required environment variables are set!');
 console.log('Starting server...');
 
 // Start the server
-const server = spawn('node', ['app.js'], {
+const server = spawn('node', ['server.js'], {
   stdio: 'inherit',
   env: { ...process.env } // Pass all environment variables
 });
