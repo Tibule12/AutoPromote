@@ -1,3 +1,14 @@
+// BUSINESS RULE: Revenue per 1M views is $900,000. Creator gets 5% of revenue. Target views: 2M/day.
+// Creator payout per 2M views: 2 * $900,000 * 0.05 = $90,000
+// BUSINESS RULE: Content must be auto-removed after 2 days of upload.
+// In production, implement a scheduled job (e.g., with node-cron or Supabase Edge Functions)
+// to delete or archive content where created_at is older than 2 days.
+
+// Example (pseudo):
+// setInterval(async () => {
+//   const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+//   await supabase.from('content').delete().lt('created_at', twoDaysAgo);
+// }, 24 * 60 * 60 * 1000); // Run daily
 const express = require('express');
 const supabase = require('./supabaseClient');
 const authMiddleware = require('./authMiddleware');
@@ -39,15 +50,33 @@ router.post('/upload', authMiddleware, async (req, res) => {
       min_views_threshold,
       max_budget
     } = req.body;
-    
+
+    // Enforce one content upload per three weeks per creator
+    const threeWeeksAgo = new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentContent, error: recentError } = await supabase
+      .from('content')
+      .select('id, created_at')
+      .eq('user_id', req.userId)
+      .gte('created_at', threeWeeksAgo);
+    if (recentError) {
+      return res.status(500).json({ error: 'Failed to check posting limit' });
+    }
+    if (recentContent && recentContent.length > 0) {
+      return res.status(400).json({ error: 'You can only post one content every three weeks.' });
+    }
+
     // Validate required fields
     if (!title || !type || !url) {
       return res.status(400).json({ error: 'Title, type, and URL are required' });
     }
 
-    // Calculate optimal RPM if not provided
-    const optimalRPM = target_rpm || optimizationService.calculateOptimalRPM(type, 'youtube');
-    
+    // Set business rules
+    const optimalRPM = 900000; // Revenue per million views
+    const minViews = 2000000; // 2 million views per day
+  const creatorPayoutRate = 0.01; // 1%
+    const maxBudget = max_budget || 1000;
+
+    // Insert content
     const { data, error } = await supabase
       .from('content')
       .insert([
@@ -58,15 +87,17 @@ router.post('/upload', authMiddleware, async (req, res) => {
           url,
           description: description || '',
           target_platforms: target_platforms || ['youtube', 'tiktok', 'instagram'],
-          status: scheduled_promotion_time ? 'scheduled' : 'published',
+          status: 'pending', // All new content must be reviewed by admin
           scheduled_promotion_time: scheduled_promotion_time || null,
           promotion_frequency: promotion_frequency || 'once',
           next_promotion_time: scheduled_promotion_time || null,
           target_rpm: optimalRPM,
-          min_views_threshold: min_views_threshold || 1000000,
-          max_budget: max_budget || 1000,
+          min_views_threshold: minViews,
+          max_budget: maxBudget,
           created_at: new Date().toISOString(),
-          promotion_started_at: scheduled_promotion_time ? null : new Date().toISOString()
+          promotion_started_at: scheduled_promotion_time ? null : new Date().toISOString(),
+          revenue_per_million: optimalRPM,
+          creator_payout_rate: creatorPayoutRate
         }
       ])
       .select();
@@ -87,9 +118,9 @@ router.post('/upload', authMiddleware, async (req, res) => {
           start_time: scheduled_promotion_time,
           frequency: promotion_frequency,
           is_active: true,
-          budget: max_budget || 1000,
+          budget: maxBudget,
           target_metrics: {
-            target_views: min_views_threshold || 1000000,
+            target_views: minViews,
             target_rpm: optimalRPM
           }
         });
@@ -101,12 +132,16 @@ router.post('/upload', authMiddleware, async (req, res) => {
     // Generate optimization recommendations
     const recommendations = optimizationService.generateOptimizationRecommendations(content);
 
+    // Schedule content for auto-removal after 2 days (pseudo, needs background job in production)
+    // You should implement a cron job or scheduled function to delete content after 2 days
+
     res.status(201).json({
       message: scheduled_promotion_time ? 'Content uploaded and scheduled for promotion' : 'Content uploaded successfully',
       content,
       promotion_schedule: promotionSchedule,
       optimization_recommendations: recommendations,
-      optimal_rpm: optimalRPM
+      optimal_rpm: optimalRPM,
+  creator_payout: minViews * (optimalRPM / 1000000) * creatorPayoutRate
     });
   } catch (error) {
     console.error('Upload error:', error);

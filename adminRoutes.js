@@ -1,7 +1,9 @@
+
 const express = require('express');
 const supabase = require('./supabaseClient');
 const authMiddleware = require('./authMiddleware');
 const router = express.Router();
+
 
 // Middleware to check admin role
 const adminOnly = (req, res, next) => {
@@ -11,6 +13,50 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
+// Approve user content
+router.post('/content/:id/approve', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const contentId = req.params.id;
+    // Update content status to 'approved'
+    const { data, error } = await supabase
+      .from('content')
+      .update({ status: 'approved' })
+      .eq('id', contentId)
+      .select();
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'Content not found' });
+    }
+    res.json({ message: 'Content approved', content: data[0] });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Decline user content
+router.post('/content/:id/decline', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const contentId = req.params.id;
+    // Update content status to 'declined'
+    const { data, error } = await supabase
+      .from('content')
+      .update({ status: 'declined' })
+      .eq('id', contentId)
+      .select();
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'Content not found' });
+    }
+    res.json({ message: 'Content declined', content: data[0] });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get platform overview (admin dashboard)
 router.get('/overview', authMiddleware, adminOnly, async (req, res) => {
   try {
@@ -19,53 +65,11 @@ router.get('/overview', authMiddleware, adminOnly, async (req, res) => {
       .from('users')
       .select('*', { count: 'exact' });
 
-    // Total content
-    const { count: totalContent, error: contentError } = await supabase
-      .from('content')
-      .select('*', { count: 'exact' });
+    if (usersError) {
+      return res.status(400).json({ error: usersError.message });
+    }
 
-    // Total views and revenue
-    const { data: contentData, error: statsError } = await supabase
-      .from('content')
-      .select('views, revenue');
-
-    const totalViews = contentData?.reduce((sum, item) => sum + (item.views || 0), 0) || 0;
-    const totalRevenue = contentData?.reduce((sum, item) => sum + (item.revenue || 0), 0) || 0;
-
-    // Recent users (last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
-    const { count: recentUsers, error: recentUsersError } = await supabase
-      .from('users')
-      .select('*', { count: 'exact' })
-      .gte('created_at', sevenDaysAgo.toISOString());
-
-    // Recent content (last 7 days)
-    const { count: recentContent, error: recentContentError } = await supabase
-      .from('content')
-      .select('*', { count: 'exact' })
-      .gte('created_at', sevenDaysAgo.toISOString());
-
-    res.json({
-      platform_stats: {
-        total_users: totalUsers || 0,
-        total_content: totalContent || 0,
-        total_views: totalViews,
-        total_revenue: totalRevenue,
-        recent_users: recentUsers || 0,
-        recent_content: recentContent || 0,
-        average_views_per_content: totalContent ? Math.round(totalViews / totalContent) : 0
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get all users with details
-router.get('/users', authMiddleware, adminOnly, async (req, res) => {
-  try {
+    // Get user statistics
     const { data: users, error } = await supabase
       .from('users')
       .select('id, name, email, role, created_at')
@@ -75,7 +79,6 @@ router.get('/users', authMiddleware, adminOnly, async (req, res) => {
       return res.status(400).json({ error: error.message });
     }
 
-    // Get user statistics
     const usersWithStats = await Promise.all(
       users.map(async (user) => {
         const { count: contentCount } = await supabase

@@ -56,6 +56,26 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Hardcoded admin credentials
+    if (email === 'admin123@gmail.com' && password === 'Admin12345') {
+      const adminUser = {
+        id: '00000000-0000-0000-0000-000000000001',
+        name: 'Admin',
+        email: 'admin123@gmail.com',
+        role: 'admin'
+      };
+      const token = jwt.sign(
+        { userId: adminUser.id, email: adminUser.email, role: adminUser.role },
+        process.env.JWT_SECRET || 'fallback-secret',
+        { expiresIn: '7d' }
+      );
+      return res.json({
+        message: 'Login successful',
+        user: adminUser,
+        token
+      });
+    }
     
     // Get user from database
     const { data: users, error } = await supabase

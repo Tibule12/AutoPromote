@@ -72,11 +72,20 @@ CREATE TABLE IF NOT EXISTS public.analytics (
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 CREATE INDEX IF NOT EXISTS idx_content_user_id ON public.content(user_id);
-CREATE INDEX IF NOT EXISTS idx_content_status ON public.content(status);
 CREATE INDEX IF NOT EXISTS idx_content_scheduled_time ON public.content(scheduled_promotion_time);
 CREATE INDEX IF NOT EXISTS idx_promotion_schedules_content ON public.promotion_schedules(content_id);
 CREATE INDEX IF NOT EXISTS idx_promotion_schedules_active ON public.promotion_schedules(is_active);
 CREATE INDEX IF NOT EXISTS idx_promotion_schedules_time ON public.promotion_schedules(start_time);
 CREATE INDEX IF NOT EXISTS idx_analytics_content_id ON public.analytics(content_id);
-CREATE INDEX IF NOT EXISTS idx_analytics_platform ON public.analytics(platform);
-CREATE INDEX IF NOT EXISTS idx_analytics_metrics_time ON public.analytics(metrics_updated_at);
+
+-- Insert hardcoded admin user
+INSERT INTO public.users (id, name, email, password, role, created_at)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  'Admin',
+  'admin123@gmail.com',
+  '$2a$12$trwTiBoxgdLw/dxqFSHeN.NQ1QWOF5RS3QSW/wTr9cHTaByZswgfm',
+  'admin',
+  now()
+)
+ON CONFLICT (email) DO NOTHING;

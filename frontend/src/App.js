@@ -2,30 +2,46 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [user, setUser] = useState(null);
+  // Load user from localStorage if available
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  });
   const [content, setContent] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [analytics, setAnalytics] = useState(null);
 
+  // Save user to localStorage whenever it changes
   useEffect(() => {
     if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
       setIsAdmin(user.role === 'admin');
       fetchUserContent();
       if (user.role === 'admin') {
         fetchAnalytics();
       }
+    } else {
+      localStorage.removeItem('user');
     }
   }, [user]);
 
   const fetchUserContent = async () => {
     try {
-      const res = await fetch('/api/content/user', {
+      const res = await fetch('http://localhost:5000/api/content/my-content', {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
       });
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
+      if (!res.ok) {
+        console.error('Failed to fetch content: HTTP', res.status);
+        return;
+      }
       const data = await res.json();
       setContent(data.content || []);
     } catch (error) {
@@ -35,11 +51,19 @@ function App() {
 
   const fetchAnalytics = async () => {
     try {
-      const res = await fetch('/api/admin/analytics/overview', {
+      const res = await fetch('http://localhost:5000/api/admin/analytics/overview', {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
       });
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
+      if (!res.ok) {
+        console.error('Failed to fetch analytics: HTTP', res.status);
+        return;
+      }
       const data = await res.json();
       setAnalytics(data);
     } catch (error) {
@@ -47,7 +71,30 @@ function App() {
     }
   };
 
+  const loginUser = async (email, password) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Use data.user and data.token from backend response
+        handleLogin({ ...data.user, token: data.token });
+      } else {
+        alert('Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login error');
+    }
+  };
+
   const handleLogin = (userData) => {
+    // Remove any legacy keys
+    localStorage.removeItem('token');
+    localStorage.removeItem('adminToken');
     setUser(userData);
     setShowLogin(false);
   };
@@ -62,11 +109,14 @@ function App() {
     setContent([]);
     setAnalytics(null);
     setIsAdmin(false);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('adminToken');
   };
 
   const handleUploadContent = async (contentData) => {
     try {
-      const res = await fetch('/api/content/upload', {
+      const res = await fetch('http://localhost:5000/api/content/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +154,7 @@ function App() {
       </header>
 
       <main>
-        {showLogin && <LoginForm onLogin={handleLogin} />}
+        {showLogin && <LoginForm onLogin={handleLogin} loginUser={loginUser} />}
         {showRegister && <RegisterForm onRegister={handleRegister} />}
 
         {user && !isAdmin && (
@@ -119,10 +169,45 @@ function App() {
         )}
 
         {!user && !showLogin && !showRegister && (
-          <div>
-            <h2>Welcome to AutoPromote</h2>
-            <p>AI-powered platform for content promotion and monetization</p>
-            <button onClick={() => setShowRegister(true)}>Get Started</button>
+          <div className="WelcomeSection" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60vh',
+            background: 'linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)',
+            color: '#fff',
+            borderRadius: '16px',
+            boxShadow: '0 8px 32px rgba(25, 118, 210, 0.2)',
+            padding: '48px 24px',
+            margin: '32px auto',
+            maxWidth: '500px',
+          }}>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="AutoPromote Logo" style={{ width: 80, marginBottom: 24 }} />
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: 16 }}>Welcome to AutoPromote</h2>
+            <p style={{ fontSize: '1.2rem', marginBottom: 32, textAlign: 'center', maxWidth: 400 }}>
+              <span style={{ fontWeight: 500 }}>AI-powered platform</span> for content promotion and monetization.<br />
+              Grow your audience, boost your revenue, and automate your success.
+            </p>
+            <button 
+              onClick={() => setShowRegister(true)}
+              style={{
+                background: '#fff',
+                color: '#1976d2',
+                fontWeight: 600,
+                fontSize: '1.1rem',
+                padding: '12px 32px',
+                borderRadius: '8px',
+                border: 'none',
+                boxShadow: '0 2px 8px rgba(25, 118, 210, 0.15)',
+                cursor: 'pointer',
+                transition: 'background 0.2s',
+              }}
+              onMouseOver={e => e.target.style.background = '#e3f2fd'}
+              onMouseOut={e => e.target.style.background = '#fff'}
+            >
+              Get Started
+            </button>
           </div>
         )}
       </main>
@@ -130,27 +215,13 @@ function App() {
   );
 }
 
-const LoginForm = ({ onLogin }) => {
+const LoginForm = ({ onLogin, loginUser }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        onLogin(data);
-      } else {
-        alert('Login failed');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-    }
+    await loginUser(email, password);
   };
 
   return (
@@ -216,15 +287,26 @@ const RegisterForm = ({ onRegister }) => {
 const ContentUploadForm = ({ onUpload }) => {
   const [title, setTitle] = useState('');
   const [type, setType] = useState('video');
-  const [url, setUrl] = useState('');
+  const [file, setFile] = useState(null);
   const [description, setDescription] = useState('');
+  const [articleText, setArticleText] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onUpload({ title, type, url, description });
+    if (type === 'article') {
+      onUpload({ title, type, description, articleText });
+    } else {
+      if (!file) {
+        alert('Please select a file to upload.');
+        return;
+      }
+      // For now, just pass the file object; backend should handle file upload
+      onUpload({ title, type, description, file });
+    }
     setTitle('');
-    setUrl('');
+    setFile(null);
     setDescription('');
+    setArticleText('');
   };
 
   return (
@@ -243,10 +325,18 @@ const ContentUploadForm = ({ onUpload }) => {
           <option value="article">Article</option>
         </select>
       </div>
-      <div>
-        <label>URL:</label>
-        <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} required />
-      </div>
+      {type !== 'article' && (
+        <div>
+          <label>File:</label>
+          <input type="file" accept={type === 'video' ? 'video/*' : type === 'audio' ? 'audio/*' : 'image/*'} onChange={e => setFile(e.target.files[0])} required />
+        </div>
+      )}
+      {type === 'article' && (
+        <div>
+          <label>Article Text:</label>
+          <textarea value={articleText} onChange={e => setArticleText(e.target.value)} required />
+        </div>
+      )}
       <div>
         <label>Description:</label>
         <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
@@ -293,7 +383,7 @@ const AdminDashboard = ({ analytics, user }) => {
 
   const fetchAllUsers = async () => {
     try {
-      const res = await fetch('/api/admin/analytics/users', {
+      const res = await fetch('http://localhost:5000/api/admin/analytics/users', {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -307,7 +397,7 @@ const AdminDashboard = ({ analytics, user }) => {
 
   const fetchAllContent = async () => {
     try {
-      const res = await fetch('/api/admin/analytics/content', {
+      const res = await fetch('http://localhost:5000/api/admin/analytics/content', {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -322,7 +412,7 @@ const AdminDashboard = ({ analytics, user }) => {
   const promoteContent = async (contentId) => {
     try {
       setLoadingContentIds(prev => new Set(prev).add(contentId));
-      const res = await fetch(`/api/content/promote/${contentId}`, {
+      const res = await fetch(`http://localhost:5000/api/content/promote/${contentId}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${user.token}`,
@@ -349,6 +439,23 @@ const AdminDashboard = ({ analytics, user }) => {
   if (!analytics) {
     return <div className="Loading">Loading admin dashboard...</div>;
   }
+
+  // Fallbacks for analytics values to prevent errors
+  const totalUsers = analytics.totalUsers ?? 0;
+  const newUsersToday = analytics.newUsersToday ?? 0;
+  const totalContent = analytics.totalContent ?? 0;
+  const newContentToday = analytics.newContentToday ?? 0;
+  const totalViews = analytics.totalViews ?? 0;
+  const viewsToday = analytics.viewsToday ?? 0;
+  const totalRevenue = analytics.totalRevenue ?? 0;
+  const revenueToday = analytics.revenueToday ?? 0;
+  const avgRevenuePerContent = analytics.avgRevenuePerContent ?? 0;
+  const projectedMonthlyRevenue = analytics.projectedMonthlyRevenue ?? 0;
+  const engagementRate = analytics.engagementRate ?? 0;
+  const engagementChange = analytics.engagementChange ?? 0;
+  const activePromotions = analytics.activePromotions ?? 0;
+  const promotionsCompleted = analytics.promotionsCompleted ?? 0;
+  const revenueByPlatform = analytics.revenueByPlatform ?? {};
 
   return (
     <div className="AdminDashboard">
@@ -385,33 +492,33 @@ const AdminDashboard = ({ analytics, user }) => {
         <div className="overview-grid">
           <div className="stat-card">
             <h3>👥 Total Users</h3>
-            <p className="stat-number">{analytics.totalUsers}</p>
-            <p className="stat-change">+{analytics.newUsersToday} today</p>
+            <p className="stat-number">{totalUsers}</p>
+            <p className="stat-change">+{newUsersToday} today</p>
           </div>
           <div className="stat-card">
             <h3>🎬 Total Content</h3>
-            <p className="stat-number">{analytics.totalContent}</p>
-            <p className="stat-change">+{analytics.newContentToday} today</p>
+            <p className="stat-number">{totalContent}</p>
+            <p className="stat-change">+{newContentToday} today</p>
           </div>
           <div className="stat-card">
             <h3>👀 Total Views</h3>
-            <p className="stat-number">{analytics.totalViews.toLocaleString()}</p>
-            <p className="stat-change">+{analytics.viewsToday.toLocaleString()} today</p>
+            <p className="stat-number">{totalViews.toLocaleString()}</p>
+            <p className="stat-change">+{viewsToday.toLocaleString()} today</p>
           </div>
           <div className="stat-card">
             <h3>💰 Total Revenue</h3>
-            <p className="stat-number">${analytics.totalRevenue.toLocaleString()}</p>
-            <p className="stat-change">+${analytics.revenueToday.toLocaleString()} today</p>
+            <p className="stat-number">${totalRevenue.toLocaleString()}</p>
+            <p className="stat-change">+${revenueToday.toLocaleString()} today</p>
           </div>
           <div className="stat-card">
             <h3>📈 Engagement Rate</h3>
-            <p className="stat-number">{analytics.engagementRate}%</p>
-            <p className="stat-change">{analytics.engagementChange >= 0 ? '+' : ''}{analytics.engagementChange}% change</p>
+            <p className="stat-number">{engagementRate}%</p>
+            <p className="stat-change">{engagementChange >= 0 ? '+' : ''}{engagementChange}% change</p>
           </div>
           <div className="stat-card">
             <h3>⚡ Active Promotions</h3>
-            <p className="stat-number">{analytics.activePromotions}</p>
-            <p className="stat-change">{analytics.promotionsCompleted} completed</p>
+            <p className="stat-number">{activePromotions}</p>
+            <p className="stat-change">{promotionsCompleted} completed</p>
           </div>
         </div>
       )}
@@ -506,26 +613,26 @@ const AdminDashboard = ({ analytics, user }) => {
           <div className="revenue-stats">
             <div className="revenue-card">
               <h4>Total Revenue</h4>
-              <p className="revenue-amount">${analytics.totalRevenue.toLocaleString()}</p>
+              <p className="revenue-amount">${totalRevenue.toLocaleString()}</p>
             </div>
             <div className="revenue-card">
               <h4>Today's Revenue</h4>
-              <p className="revenue-amount">${analytics.revenueToday.toLocaleString()}</p>
+              <p className="revenue-amount">${revenueToday.toLocaleString()}</p>
             </div>
             <div className="revenue-card">
               <h4>Average per Content</h4>
-              <p className="revenue-amount">${analytics.avgRevenuePerContent.toLocaleString()}</p>
+              <p className="revenue-amount">${avgRevenuePerContent.toLocaleString()}</p>
             </div>
             <div className="revenue-card">
               <h4>Projected Monthly</h4>
-              <p className="revenue-amount">${analytics.projectedMonthlyRevenue.toLocaleString()}</p>
+              <p className="revenue-amount">${projectedMonthlyRevenue.toLocaleString()}</p>
             </div>
           </div>
           
           <div className="revenue-breakdown">
             <h4>Revenue by Platform</h4>
             <div className="platform-revenue">
-              {analytics.revenueByPlatform && Object.entries(analytics.revenueByPlatform).map(([platform, amount]) => (
+              {revenueByPlatform && Object.entries(revenueByPlatform).map(([platform, amount]) => (
                 <div key={platform} className="platform-item">
                   <span className="platform-name">{platform}</span>
                   <span className="platform-amount">${amount.toLocaleString()}</span>
