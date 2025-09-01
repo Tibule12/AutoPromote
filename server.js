@@ -35,8 +35,9 @@ app.use('/api/admin/analytics', adminAnalyticsRoutes);
 // Register withdrawals route after app is defined
 app.use('/api/withdrawals', withdrawalRoutes);
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'frontend/build')));
+
+// Static file serving is disabled for API-only deployment on Render
+// app.use(express.static(path.join(__dirname, 'frontend/build')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -47,11 +48,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
-});
+
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+// });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
