@@ -29,7 +29,7 @@ function App() {
 
   const fetchUserContent = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/content/my-content', {
+      const res = await fetch('https://autopromote.onrender.com/api/content/my-content', {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -51,7 +51,7 @@ function App() {
 
   const fetchAnalytics = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/admin/analytics/overview', {
+      const res = await fetch('https://autopromote.onrender.com/api/admin/analytics/overview', {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -73,7 +73,7 @@ function App() {
 
   const loginUser = async (email, password) => {
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch('https://autopromote.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -114,16 +114,37 @@ function App() {
     localStorage.removeItem('adminToken');
   };
 
+  // UPDATED FUNCTION: handleUploadContent
   const handleUploadContent = async (contentData) => {
     try {
-      const res = await fetch('http://localhost:5000/api/content/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(contentData),
-      });
+      let res;
+      if (contentData.type === 'article') {
+        // Article: send as JSON
+        res = await fetch('https://autopromote.onrender.com/api/content/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify(contentData),
+        });
+      } else {
+        // File upload: use FormData
+        const formData = new FormData();
+        formData.append('title', contentData.title);
+        formData.append('type', contentData.type);
+        formData.append('description', contentData.description);
+        formData.append('file', contentData.file);
+
+        res = await fetch('https://autopromote.onrender.com/api/content/upload', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            // Do NOT set Content-Type for FormData!
+          },
+          body: formData,
+        });
+      }
       if (res.ok) {
         fetchUserContent();
       } else {
@@ -383,7 +404,7 @@ const AdminDashboard = ({ analytics, user }) => {
 
   const fetchAllUsers = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/admin/analytics/users', {
+      const res = await fetch('https://autopromote.onrender.com/api/admin/analytics/users', {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -397,7 +418,7 @@ const AdminDashboard = ({ analytics, user }) => {
 
   const fetchAllContent = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/admin/analytics/content', {
+      const res = await fetch('https://autopromote.onrender.com/api/admin/analytics/content', {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -412,7 +433,7 @@ const AdminDashboard = ({ analytics, user }) => {
   const promoteContent = async (contentId) => {
     try {
       setLoadingContentIds(prev => new Set(prev).add(contentId));
-      const res = await fetch(`http://localhost:5000/api/content/promote/${contentId}`, {
+      const res = await fetch(`https://autopromote.onrender.com/api/content/promote/${contentId}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${user.token}`,
