@@ -1,41 +1,57 @@
 # Deployment Fix for Render
 
-## Issue Fixed
+## Issues Fixed
 
-This commit fixes a deployment error on Render where the server failed to start due to a missing dependency:
+This commit fixes multiple deployment errors on Render:
 
-```
-Error: Cannot find module '@supabase/supabase-js'
-```
+1. Missing Supabase dependency: `Error: Cannot find module '@supabase/supabase-js'`
+2. Missing service account file: `Error: Cannot find module '../serviceAccountKey.json'`
+3. Missing adminTestRoutes module: `Error: Cannot find module './adminTestRoutes'`
 
 ## Changes Made
 
-1. Created a Firebase-based compatibility layer in `supabaseClient.js` that handles any legacy code still referencing Supabase
-2. The solution avoids adding a Supabase dependency, maintaining the Firebase-only approach
+### 1. Supabase Fix
+- Created a Firebase-based compatibility layer in `supabaseClient.js` that handles any legacy code still referencing Supabase
 
-## How It Works
+### 2. Firebase Service Account Fix
+- Updated the Firebase configuration to check for credentials in multiple locations:
+  - First priority: `FIREBASE_SERVICE_ACCOUNT` environment variable (full JSON)
+  - Second priority: Individual credential fields (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`)
+  - Third priority: Local `serviceAccountKey.json` file
+  - Last resort: Application default credentials
 
-There appears to be some legacy code in the application that still references a `supabaseClient.js` file, even though the project now uses Firebase. Instead of adding a Supabase dependency, we've created a compatibility layer that:
-
-1. Provides a dummy implementation of Supabase methods
-2. Logs when these methods are called (to help identify legacy code)
-3. Returns empty results that match the expected Supabase format (to avoid errors)
+### 3. Admin Test Routes Fix
+- Modified server.js to handle missing adminTestRoutes module gracefully
+- The server will now create a dummy router if the module is missing
 
 ## Deployment Instructions
 
-When deploying to Render, no special environment variables are needed for Supabase since we're using a Firebase-only approach.
+When deploying to Render, make sure to set at least one of these options for Firebase credentials:
 
-The key Firebase environment variables to set in Render are:
+### Option 1: Full Service Account JSON (Recommended)
+Set the `FIREBASE_SERVICE_ACCOUNT` environment variable with the entire JSON content of your service account key file. Make sure to escape newlines with `\n`.
 
-- `FIREBASE_PROJECT_ID` 
-- `FIREBASE_DATABASE_URL` 
-- `FIREBASE_STORAGE_BUCKET`
-- `FIREBASE_SERVICE_ACCOUNT` (the JSON service account file contents)
+### Option 2: Individual Credential Fields
+Set these three environment variables:
+- `FIREBASE_PROJECT_ID`: Your Firebase project ID
+- `FIREBASE_CLIENT_EMAIL`: Your Firebase client email
+- `FIREBASE_PRIVATE_KEY`: Your Firebase private key (with newlines as `\n`)
 
-## Future Improvements
+### Option 3: Upload serviceAccountKey.json
+If you're using a custom build command in Render, you could include steps to generate or download the service account key file before starting the server.
 
-In the future, you may want to:
+### Additional Configuration
+Other helpful environment variables:
+- `FIREBASE_DATABASE_URL`: Your Firebase database URL
+- `FIREBASE_STORAGE_BUCKET`: Your Firebase storage bucket
+- `FRONTEND_URL`: URL of your frontend app (for CORS)
+- `JWT_SECRET`: Secret for JWT token generation
 
-1. Identify any code still using the supabaseClient.js file (check the logs for "[Legacy Supabase]" messages)
-2. Update those files to use Firebase directly
-3. Remove the supabaseClient.js compatibility layer once all legacy code is updated
+## Troubleshooting
+
+If you encounter issues:
+
+1. Check the Render logs for specific error messages
+2. Verify that your environment variables are correctly set
+3. Confirm that your Firebase project has the necessary services enabled
+4. Make sure that the service account has the required permissions

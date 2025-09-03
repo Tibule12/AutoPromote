@@ -10,7 +10,15 @@ const contentRoutes = require('./contentRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const adminRoutes = require('./adminRoutes');
 const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
-const adminTestRoutes = require('./adminTestRoutes');
+// Try to load adminTestRoutes, but continue if not available
+let adminTestRoutes;
+try {
+  adminTestRoutes = require('./adminTestRoutes');
+} catch (error) {
+  console.log('adminTestRoutes not available:', error.message);
+  // Create a dummy router if the module is missing
+  adminTestRoutes = express.Router();
+}
 const withdrawalRoutes = require('./routes/withdrawalRoutes');
 const monetizationRoutes = require('./routes/monetizationRoutes');
 const stripeOnboardRoutes = require('./routes/stripeOnboardRoutes');
