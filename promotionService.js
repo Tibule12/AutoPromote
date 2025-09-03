@@ -1,24 +1,24 @@
-const supabase = require('./supabaseClient');
+const { db } = require('./firebaseAdmin');
 const optimizationService = require('./optimizationService');
 
 class PromotionService {
-  // Schedule a promotion for content with advanced algorithms
+    // Schedule a promotion for content with advanced algorithms
   async schedulePromotion(contentId, scheduleData) {
     try {
       console.log(`📊 Scheduling promotion for content ID: ${contentId}`);
       console.log('📋 Schedule data:', scheduleData);
       
       // Get content details for optimization
-      const { data: content, error: contentError } = await supabase
-        .from('content')
-        .select('*')
-        .eq('id', contentId)
-        .single();
+      const contentRef = db.collection('content').doc(contentId);
+      const contentDoc = await contentRef.get();
 
-      if (contentError) {
-        console.error('❌ Error fetching content:', contentError);
-        throw contentError;
+      if (!contentDoc.exists) {
+        const error = new Error('Content not found');
+        console.error('❌ Error fetching content:', error);
+        throw error;
       }
+
+      const content = { id: contentDoc.id, ...contentDoc.data() };
 
       // Apply platform-specific optimization if not specified
       let optimizedScheduleData = { ...scheduleData };
@@ -35,46 +35,36 @@ class PromotionService {
         );
       }
 
-      const { data, error } = await supabase
-        .from('promotion_schedules')
-        .insert([
-          {
-            content_id: contentId,
-            platform: optimizedScheduleData.platform,
-            schedule_type: optimizedScheduleData.schedule_type || 'specific',
-            start_time: optimizedScheduleData.start_time,
-            end_time: optimizedScheduleData.end_time,
-            frequency: optimizedScheduleData.frequency,
-            is_active: optimizedScheduleData.is_active !== false,
-            budget: optimizedScheduleData.budget || 0,
-            target_metrics: optimizedScheduleData.target_metrics || {},
-            platform_specific_settings: optimizedScheduleData.platform_specific_settings || {},
-            recurrence_pattern: optimizedScheduleData.recurrence_pattern,
-            max_occurrences: optimizedScheduleData.max_occurrences,
-            timezone: optimizedScheduleData.timezone || 'UTC'
-          }
-        ])
-        .select();
+      // Create new promotion schedule in Firestore
+      const scheduleRef = db.collection('promotion_schedules').doc();
+      const promotionScheduleData = {
+        contentId,
+        platform: optimizedScheduleData.platform,
+        scheduleType: optimizedScheduleData.schedule_type || 'specific',
+        startTime: optimizedScheduleData.start_time,
+        endTime: optimizedScheduleData.end_time,
+        frequency: optimizedScheduleData.frequency,
+        isActive: optimizedScheduleData.is_active !== false,
+        budget: optimizedScheduleData.budget || 0,
+        targetMetrics: optimizedScheduleData.target_metrics || {},
+        platformSpecificSettings: optimizedScheduleData.platform_specific_settings || {},
+        recurrencePattern: optimizedScheduleData.recurrence_pattern,
+        maxOccurrences: optimizedScheduleData.max_occurrences,
+        timezone: optimizedScheduleData.timezone || 'UTC',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
 
-      if (error) {
-        console.error('❌ Supabase insert error:', error);
-        console.error('📋 Error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint
-        });
-        throw error;
-      }
-      
-      console.log('✅ Promotion scheduled successfully:', data[0]);
+      await scheduleRef.set(promotionScheduleData);
+      const newSchedule = { id: scheduleRef.id, ...promotionScheduleData };
+      console.log('✅ Promotion scheduled successfully:', newSchedule);
       
       // If this is a recurring schedule, create the next occurrence
       if (optimizedScheduleData.frequency && optimizedScheduleData.frequency !== 'once') {
-        await this.createNextRecurrence(data[0]);
+        await this.createNextRecurrence(newSchedule);
       }
       
-      return data[0];
+      return newSchedule;
     } catch (error) {
       console.error('❌ Error scheduling promotion:', error);
       console.error('📋 Error stack:', error.stack);
@@ -169,30 +159,36 @@ class PromotionService {
 
   // Get occurrence count for a schedule
   async getOccurrenceCount(scheduleId) {
-    const { count, error } = await supabase
-      .from('promotion_schedules')
-      .select('*', { count: 'exact' })
-      .or(`id.eq.${scheduleId},parent_schedule_id.eq.${scheduleId}`);
+    try {
+      const snapshot = await db.collection('promotion_schedules')
+        .where('id', '==', scheduleId)
+        .get();
 
-    if (error) {
+      const recurrencesSnapshot = await db.collection('promotion_schedules')
+        .where('parentScheduleId', '==', scheduleId)
+        .get();
+
+      return snapshot.size + recurrencesSnapshot.size;
+    } catch (error) {
       console.error('Error getting occurrence count:', error);
       return 0;
     }
-
-    return count;
   }
 
   // Get all promotion schedules for content
   async getContentPromotionSchedules(contentId) {
     try {
-      const { data, error } = await supabase
-        .from('promotion_schedules')
-        .select('*')
-        .eq('content_id', contentId)
-        .order('start_time', { ascending: true });
+      const snapshot = await db.collection('promotion_schedules')
+        .where('contentId', '==', contentId)
+        .orderBy('startTime')
+        .get();
 
-      if (error) throw error;
-      return data;
+      const schedules = [];
+      snapshot.forEach(doc => {
+        schedules.push({ id: doc.id, ...doc.data() });
+      });
+
+      return schedules;
     } catch (error) {
       console.error('Error getting promotion schedules:', error);
       throw error;
@@ -202,17 +198,20 @@ class PromotionService {
   // Update promotion schedule
   async updatePromotionSchedule(scheduleId, updates) {
     try {
-      const { data, error } = await supabase
-        .from('promotion_schedules')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', scheduleId)
-        .select();
+      const scheduleRef = db.collection('promotion_schedules').doc(scheduleId);
+      const updateData = {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
 
-      if (error) throw error;
-      return data[0];
+      await scheduleRef.update(updateData);
+      const updatedDoc = await scheduleRef.get();
+      
+      if (!updatedDoc.exists) {
+        throw new Error('Schedule not found after update');
+      }
+
+      return { id: updatedDoc.id, ...updatedDoc.data() };
     } catch (error) {
       console.error('Error updating promotion schedule:', error);
       throw error;
@@ -222,23 +221,24 @@ class PromotionService {
   // Delete promotion schedule and its recurrences
   async deletePromotionSchedule(scheduleId) {
     try {
-      // First delete all recurrences
-      const { error: recurrencesError } = await supabase
-        .from('promotion_schedules')
-        .delete()
-        .eq('parent_schedule_id', scheduleId);
+      // First get all recurrences
+      const recurrencesSnapshot = await db.collection('promotion_schedules')
+        .where('parentScheduleId', '==', scheduleId)
+        .get();
 
-      if (recurrencesError) {
-        console.error('Error deleting recurrences:', recurrencesError);
-      }
+      // Delete recurrences in a batch
+      const batch = db.batch();
+      recurrencesSnapshot.forEach(doc => {
+        batch.delete(doc.ref);
+      });
 
-      // Then delete the main schedule
-      const { error } = await supabase
-        .from('promotion_schedules')
-        .delete()
-        .eq('id', scheduleId);
+      // Add main schedule deletion to batch
+      const scheduleRef = db.collection('promotion_schedules').doc(scheduleId);
+      batch.delete(scheduleRef);
 
-      if (error) throw error;
+      // Execute the batch
+      await batch.commit();
+
       return { success: true };
     } catch (error) {
       console.error('Error deleting promotion schedule:', error);
@@ -249,31 +249,44 @@ class PromotionService {
   // Get active promotions with advanced filtering
   async getActivePromotions(filters = {}) {
     try {
-      let query = supabase
-        .from('promotion_schedules')
-        .select('*, content:content_id(*)')
-        .eq('is_active', true)
-        .lte('start_time', new Date().toISOString())
-        .order('start_time', { ascending: true });
+      let query = db.collection('promotion_schedules')
+        .where('isActive', '==', true)
+        .where('startTime', '<=', new Date().toISOString())
+        .orderBy('startTime');
 
       // Apply filters
       if (filters.platform) {
-        query = query.eq('platform', filters.platform);
+        query = query.where('platform', '==', filters.platform);
       }
-      if (filters.content_type) {
-        query = query.eq('content.type', filters.content_type);
+      if (filters.minBudget) {
+        query = query.where('budget', '>=', filters.minBudget);
       }
-      if (filters.min_budget) {
-        query = query.gte('budget', filters.min_budget);
-      }
-      if (filters.max_budget) {
-        query = query.lte('budget', filters.max_budget);
+      if (filters.maxBudget) {
+        query = query.where('budget', '<=', filters.maxBudget);
       }
 
-      const { data, error } = await query;
+      const snapshot = await query.get();
+      const promotions = [];
 
-      if (error) throw error;
-      return data;
+      // Get all promotions
+      for (const doc of snapshot.docs) {
+        const promotion = { id: doc.id, ...doc.data() };
+        
+        // Get associated content
+        const contentDoc = await db.collection('content').doc(promotion.contentId).get();
+        if (contentDoc.exists) {
+          promotion.content = { id: contentDoc.id, ...contentDoc.data() };
+          
+          // Apply content type filter if specified
+          if (filters.content_type && promotion.content.type !== filters.content_type) {
+            continue;
+          }
+          
+          promotions.push(promotion);
+        }
+      }
+
+      return promotions;
     } catch (error) {
       console.error('Error getting active promotions:', error);
       throw error;
@@ -344,26 +357,32 @@ class PromotionService {
       const now = new Date().toISOString();
       
       // Get promotions that have ended
-      const { data: completedPromotions, error } = await supabase
-        .from('promotion_schedules')
-        .select('*')
-        .lte('end_time', now)
-        .eq('is_active', true);
+      const snapshot = await db.collection('promotion_schedules')
+        .where('isActive', '==', true)
+        .where('endTime', '<=', now)
+        .get();
 
-      if (error) throw error;
+      const batch = db.batch();
+      const completedPromotions = [];
 
+      snapshot.forEach(doc => {
+        const promotion = { id: doc.id, ...doc.data() };
+        completedPromotions.push(promotion);
+
+        // Mark as completed in batch
+        batch.update(doc.ref, { 
+          isActive: false,
+          status: 'completed',
+          completedAt: now,
+          updatedAt: now
+        });
+      });
+
+      // Execute batch update
+      await batch.commit();
+
+      // Create next recurrences for recurring promotions
       for (const promotion of completedPromotions) {
-        // Mark as completed
-        await supabase
-          .from('promotion_schedules')
-          .update({ 
-            is_active: false,
-            status: 'completed',
-            completed_at: now 
-          })
-          .eq('id', promotion.id);
-
-        // Create next recurrence for recurring promotions
         if (promotion.frequency && promotion.frequency !== 'once') {
           await this.createNextRecurrence(promotion);
         }
@@ -380,13 +399,19 @@ class PromotionService {
   // Get promotion performance analytics
   async getPromotionAnalytics(scheduleId) {
     try {
-      const { data: schedule, error: scheduleError } = await supabase
-        .from('promotion_schedules')
-        .select('*, content:content_id(*)')
-        .eq('id', scheduleId)
-        .single();
+      const scheduleDoc = await db.collection('promotion_schedules').doc(scheduleId).get();
+      
+      if (!scheduleDoc.exists) {
+        throw new Error('Schedule not found');
+      }
 
-      if (scheduleError) throw scheduleError;
+      const schedule = { id: scheduleDoc.id, ...scheduleDoc.data() };
+
+      // Get associated content
+      const contentDoc = await db.collection('content').doc(schedule.contentId).get();
+      if (contentDoc.exists) {
+        schedule.content = { id: contentDoc.id, ...contentDoc.data() };
+      }
 
       // Simulate analytics data (in real implementation, this would come from actual analytics)
       const analytics = {
