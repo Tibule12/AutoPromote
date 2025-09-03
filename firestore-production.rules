@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow full access for Admin SDK (backend operations)
+    // This is necessary because the backend uses Firebase Admin SDK
+    function isAdminSDK() {
+      return request.auth == null || request.auth.token.admin == true;
+    }
+
+    // Users collection - Admin SDK has full access, authenticated users have limited access
+    match /users/{userId} {
+      // Admin SDK can do anything
+      allow read, write: if isAdminSDK();
+
+      // Authenticated users can read their own data and admins can read all
+      allow read: if request.auth != null && (
+        request.auth.uid == userId ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+
+      // Users can create their own account
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Users can update their own data, admins can update any
+      allow update: if request.auth != null && (
+        request.auth.uid == userId ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+
+      // Only Admin SDK can delete users
+      allow delete: if isAdminSDK();
+    }
+
+    // Content collection - Admin SDK has full access, users have controlled access
+    match /content/{contentId} {
+      // Admin SDK can do anything
+      allow read, write: if isAdminSDK();
+
+      // All authenticated users can read content
+      allow read: if request.auth != null;
+
+      // Authenticated users can create content
+      allow create: if request.auth != null;
+
+      // Users can update/delete their own content, admins can update any
+      allow update, delete: if request.auth != null && (
+        resource.data.user_id == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // Analytics collection - Admin SDK has full access, users have limited access
+    match /analytics/{analyticsId} {
+      // Admin SDK can do anything
+      allow read, write: if isAdminSDK();
+
+      // Users can read their own analytics, admins can read all
+      allow read: if request.auth != null && (
+        resource.data.user_id == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+
+      // Only Admin SDK can write analytics
+      allow write: if isAdminSDK();
+    }
+
+    // Promotions collection - Admin SDK has full access, users have limited access
+    match /promotions/{promotionId} {
+      // Admin SDK can do anything
+      allow read, write: if isAdminSDK();
+
+      // Users can read their own promotions, admins can read all
+      allow read: if request.auth != null && (
+        resource.data.user_id == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+
+      // Users can create their own promotions
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.user_id;
+
+      // Only Admin SDK can update promotions
+      allow update: if isAdminSDK();
+    }
+
+    // Admin collection - Only Admin SDK access
+    match /admin/{adminId} {
+      allow read, write: if isAdminSDK();
+    }
+
+    // Promotion schedules collection - Admin SDK has full access
+    match /promotion_schedules/{scheduleId} {
+      allow read, write: if isAdminSDK();
+    }
+
+    // Allow access to any other collections for Admin SDK
+    match /{document=**} {
+      allow read, write: if isAdminSDK();
+    }
+  }
+}
