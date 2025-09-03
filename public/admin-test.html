@@ -1,0 +1,207 @@
+/**
+ * This HTML file provides a simple test interface for the admin login flow
+ * It tests both the admins collection and the login process
+ */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .panel {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    h2 {
+      margin-top: 0;
+      background: #f5f5f5;
+      padding: 10px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      margin: 5px 0;
+      border-radius: 4px;
+    }
+    button:disabled {
+      background: #cccccc;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .warning {
+      color: orange;
+      font-weight: bold;
+    }
+    input {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .input-row {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Login Test</h1>
+  
+  <div class="panel">
+    <h2>Step 1: Setup Admin Collection</h2>
+    <p>Create the admins collection and admin user in Firestore.</p>
+    <button id="setupBtn">Setup Admin Collection</button>
+    <div id="setupResult"></div>
+  </div>
+  
+  <div class="panel">
+    <h2>Step 2: Test Admin Login</h2>
+    <div class="input-row">
+      <label for="email">Email:</label>
+      <input type="email" id="email" value="admin123@gmail.com">
+    </div>
+    <div class="input-row">
+      <label for="password">Password:</label>
+      <input type="password" id="password" value="Admin12345">
+    </div>
+    <button id="loginBtn">Login as Admin</button>
+    <div id="loginResult"></div>
+  </div>
+  
+  <div class="panel">
+    <h2>Step 3: Test Admin API Access</h2>
+    <button id="apiBtn" disabled>Test Admin API</button>
+    <div id="apiResult"></div>
+  </div>
+  
+  <script>
+    let token = null;
+    
+    // Setup admin collection
+    document.getElementById('setupBtn').addEventListener('click', async () => {
+      const resultDiv = document.getElementById('setupResult');
+      resultDiv.innerHTML = '<p>Setting up admin collection...</p>';
+      
+      try {
+        const response = await fetch('/api/setup-admin', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <p class="success">Admin collection setup successful!</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          resultDiv.innerHTML = `
+            <p class="error">Admin collection setup failed</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    });
+    
+    // Test admin login
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const resultDiv = document.getElementById('loginResult');
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      resultDiv.innerHTML = '<p>Logging in...</p>';
+      
+      try {
+        const loginResponse = await fetch('/api/auth/login-test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const loginData = await loginResponse.json();
+        
+        if (loginResponse.ok && loginData.token) {
+          token = loginData.token;
+          resultDiv.innerHTML = `
+            <p class="success">Login successful!</p>
+            <p>User: ${loginData.user.email}</p>
+            <p>Role: ${loginData.user.role}</p>
+            <p>From collection: ${loginData.user.fromCollection || 'unknown'}</p>
+            <p>Token: ${token.substring(0, 20)}...</p>
+          `;
+          document.getElementById('apiBtn').disabled = false;
+        } else {
+          resultDiv.innerHTML = `
+            <p class="error">Login failed</p>
+            <pre>${JSON.stringify(loginData, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    });
+    
+    // Test admin API access
+    document.getElementById('apiBtn').addEventListener('click', async () => {
+      if (!token) {
+        document.getElementById('apiResult').innerHTML = 
+          '<p class="error">Please login first to get a token</p>';
+        return;
+      }
+      
+      const resultDiv = document.getElementById('apiResult');
+      resultDiv.innerHTML = '<p>Testing API access...</p>';
+      
+      try {
+        const apiResponse = await fetch('/api/admin/analytics/overview', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const apiData = await apiResponse.json();
+        
+        if (apiResponse.ok) {
+          resultDiv.innerHTML = `
+            <p class="success">API access successful!</p>
+            <p>Is mock data: ${apiData.isMockData ? 'Yes' : 'No'}</p>
+            <pre>${JSON.stringify(apiData, null, 2).substring(0, 500)}...</pre>
+          `;
+        } else {
+          resultDiv.innerHTML = `
+            <p class="error">API access failed</p>
+            <pre>${JSON.stringify(apiData, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
