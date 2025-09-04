@@ -404,20 +404,17 @@ function App() {
         role: isAdminUser ? 'admin' : userData.role,
         isAdmin: isAdminUser
       };
-      
       // Store the complete user data
       localStorage.setItem('user', JSON.stringify(updatedUserData));
-      
       // Update the state
       setUser(updatedUserData);
       setIsAdmin(isAdminUser);
       setShowLogin(false);
-      
       console.log('Login successful:', updatedUserData.role, 'IsAdmin:', isAdminUser);
-      
-      // Fetch data based on user role
+      // Redirect admin to dashboard
       if (isAdminUser) {
         await fetchAnalytics();
+        window.location.pathname = '/admin-dashboard';
       } else {
         await fetchUserContent();
       }
