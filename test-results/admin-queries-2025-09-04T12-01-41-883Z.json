@@ -1,0 +1,1362 @@
+{
+  "timestamp": "2025-09-04T12:01:40.608Z",
+  "passed": [
+    {
+      "name": "Recent Users",
+      "description": "Fetches recently created users",
+      "data": [
+        {
+          "id": "t1KO9NVgSqPoc7bJAljZZ7jyXBg1",
+          "uid": "t1KO9NVgSqPoc7bJAljZZ7jyXBg1",
+          "email": "testadmin@example.com",
+          "displayName": "Test Admin",
+          "role": "admin",
+          "isAdmin": true,
+          "createdAt": "2025-09-03T12:54:21.221Z",
+          "updatedAt": "2025-09-03T12:54:21.221Z",
+          "balance": 0,
+          "totalEarnings": 0,
+          "subscriptionPlan": "free",
+          "subscriptionStatus": "inactive"
+        },
+        {
+          "id": "TXwECDwNX9T4N8ErGWnF4Z5y3K72",
+          "email": "admin123@gmail.com",
+          "name": "Admin User",
+          "role": "admin",
+          "isAdmin": true,
+          "createdAt": "2025-09-03T11:43:24.227Z"
+        },
+        {
+          "id": "nQ8ssQlO0WXwTHtyvIVR3PTPyNE2",
+          "email": "admin123@gmail.com",
+          "name": "admin123",
+          "role": "user",
+          "isAdmin": false,
+          "createdAt": {
+            "_seconds": 1756984258,
+            "_nanoseconds": 899000000
+          }
+        },
+        {
+          "id": "YqByIkMxbGg4xxS8fOg5WOpmjPs2",
+          "name": "Test User",
+          "email": "testuser1756981406584@example.com",
+          "role": "user",
+          "createdAt": {
+            "_seconds": 1756981408,
+            "_nanoseconds": 949000000
+          }
+        },
+        {
+          "id": "wDGAn39YutTVl8BNjEVaPv4YhbE2",
+          "name": "Test User",
+          "email": "testuser1756981324080@example.com",
+          "role": "user",
+          "createdAt": {
+            "_seconds": 1756981326,
+            "_nanoseconds": 743000000
+          }
+        },
+        {
+          "id": "nz0avbd5MBXpIHBysxw7sIxL2HX2",
+          "name": "Test User",
+          "email": "testuser1756981252638@example.com",
+          "role": "user",
+          "createdAt": {
+            "_seconds": 1756981254,
+            "_nanoseconds": 894000000
+          }
+        },
+        {
+          "id": "I381QyH3ZhVC83gzxW2zBsZPWls2",
+          "email": "tmtshwelo21@gmail.com",
+          "name": "tmtshwelo21",
+          "role": "user",
+          "isAdmin": false,
+          "createdAt": {
+            "_seconds": 1756978873,
+            "_nanoseconds": 846000000
+          }
+        },
+        {
+          "id": "SVTbfKhuxPSO9RWNp8r9J3dxc2c2",
+          "name": "Test User",
+          "email": "test@example.com",
+          "role": "user",
+          "createdAt": {
+            "_seconds": 1756904291,
+            "_nanoseconds": 193000000
+          }
+        },
+        {
+          "id": "6QGJBNmyz3P9uzIeDYs5ftcHoyR2",
+          "name": "Test User",
+          "email": "test@example.com",
+          "role": "user",
+          "createdAt": {
+            "_seconds": 1756898635,
+            "_nanoseconds": 633000000
+          }
+        },
+        {
+          "id": "user_9",
+          "name": "James Wilson",
+          "email": "james.wilson@example.com",
+          "userType": "premium",
+          "status": "active",
+          "createdAt": {
+            "_seconds": 1751970362,
+            "_nanoseconds": 433000000
+          },
+          "lastLogin": {
+            "_seconds": 1755972208,
+            "_nanoseconds": 904000000
+          },
+          "promotions": 9,
+          "contentCount": 14,
+          "engagementScore": 69,
+          "isAdmin": false,
+          "settings": {
+            "notifications": true,
+            "autoPromotion": true,
+            "theme": "system",
+            "language": "es"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Users",
+      "description": "Fetches users with admin privileges",
+      "data": [
+        {
+          "id": "TXwECDwNX9T4N8ErGWnF4Z5y3K72",
+          "email": "admin123@gmail.com",
+          "name": "Admin User",
+          "role": "admin",
+          "isAdmin": true,
+          "createdAt": "2025-09-03T11:43:24.227Z"
+        },
+        {
+          "id": "t1KO9NVgSqPoc7bJAljZZ7jyXBg1",
+          "uid": "t1KO9NVgSqPoc7bJAljZZ7jyXBg1",
+          "email": "testadmin@example.com",
+          "displayName": "Test Admin",
+          "role": "admin",
+          "isAdmin": true,
+          "createdAt": "2025-09-03T12:54:21.221Z",
+          "updatedAt": "2025-09-03T12:54:21.221Z",
+          "balance": 0,
+          "totalEarnings": 0,
+          "subscriptionPlan": "free",
+          "subscriptionStatus": "inactive"
+        },
+        {
+          "id": "user_1",
+          "name": "John Smith",
+          "email": "john.smith@example.com",
+          "userType": "free",
+          "status": "suspended",
+          "createdAt": {
+            "_seconds": 1719983834,
+            "_nanoseconds": 542000000
+          },
+          "lastLogin": {
+            "_seconds": 1721696776,
+            "_nanoseconds": 247000000
+          },
+          "promotions": 3,
+          "contentCount": 10,
+          "engagementScore": 39,
+          "isAdmin": true,
+          "settings": {
+            "notifications": false,
+            "autoPromotion": false,
+            "theme": "light",
+            "language": "fr"
+          }
+        },
+        {
+          "id": "user_2",
+          "name": "Jane Doe",
+          "email": "jane.doe@example.com",
+          "userType": "premium",
+          "status": "suspended",
+          "createdAt": {
+            "_seconds": 1694505305,
+            "_nanoseconds": 876000000
+          },
+          "lastLogin": {
+            "_seconds": 1746500624,
+            "_nanoseconds": 640000000
+          },
+          "promotions": 11,
+          "contentCount": 26,
+          "engagementScore": 9,
+          "isAdmin": true,
+          "settings": {
+            "notifications": true,
+            "autoPromotion": false,
+            "theme": "system",
+            "language": "fr"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Top Content",
+      "description": "Fetches content with highest view counts",
+      "data": [
+        {
+          "id": "pS9Exu6RMZnukVWdjMHm",
+          "title": null,
+          "created_at": "invalid-date",
+          "views": "not-a-number"
+        },
+        {
+          "id": "baaBiHaEAySCkGqK5U8y",
+          "title": null,
+          "created_at": "invalid-date",
+          "views": "not-a-number"
+        },
+        {
+          "id": "OfFxEeUmGcfQuEu3IbV8",
+          "title": null,
+          "created_at": "invalid-date",
+          "views": "not-a-number"
+        },
+        {
+          "id": "5i60CMCwwJaPn592e3KG",
+          "title": null,
+          "created_at": "invalid-date",
+          "views": "not-a-number"
+        },
+        {
+          "id": "content_16",
+          "title": "SEO Tips for Content",
+          "author": "user_6",
+          "contentType": "image",
+          "status": "draft",
+          "createdAt": {
+            "_seconds": 1715860258,
+            "_nanoseconds": 722000000
+          },
+          "lastUpdated": {
+            "_seconds": 1733392058,
+            "_nanoseconds": 757000000
+          },
+          "views": 9819,
+          "likes": 52,
+          "shares": 22,
+          "comments": 0,
+          "promotionCount": 5,
+          "metrics": {
+            "clickThroughRate": 0.11490320833765318,
+            "conversionRate": 0.0013956734673074567,
+            "bounceRate": 0.253946149038442,
+            "averageTimeOnPage": 146
+          },
+          "tags": [
+            "brand"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Active Promotions",
+      "description": "Fetches currently active promotions",
+      "data": [
+        {
+          "id": "promotion_1",
+          "title": "Promotion Campaign 1",
+          "contentId": "content_19",
+          "userId": "user_19",
+          "platform": "linkedin",
+          "status": "active",
+          "type": "featured",
+          "createdAt": {
+            "_seconds": 1720091686,
+            "_nanoseconds": 325000000
+          },
+          "startDate": {
+            "_seconds": 1720583070,
+            "_nanoseconds": 588000000
+          },
+          "endDate": {
+            "_seconds": 1722867380,
+            "_nanoseconds": 186000000
+          },
+          "budget": 836,
+          "spent": 73,
+          "impressions": 21111,
+          "clicks": 3346,
+          "conversions": 341,
+          "targeting": {
+            "ageRange": "45-54",
+            "locations": [
+              "United States",
+              "Japan",
+              "United Kingdom"
+            ],
+            "interests": [
+              "technology",
+              "travel",
+              "music",
+              "sports"
+            ]
+          }
+        },
+        {
+          "id": "promotion_10",
+          "title": "Promotion Campaign 10",
+          "contentId": "content_20",
+          "userId": "user_18",
+          "platform": "tiktok",
+          "status": "active",
+          "type": "standard",
+          "createdAt": {
+            "_seconds": 1663550629,
+            "_nanoseconds": 640000000
+          },
+          "startDate": {
+            "_seconds": 1663649390,
+            "_nanoseconds": 434000000
+          },
+          "endDate": {
+            "_seconds": 1664940951,
+            "_nanoseconds": 254000000
+          },
+          "budget": 921,
+          "spent": 409,
+          "impressions": 44368,
+          "clicks": 1109,
+          "conversions": 172,
+          "targeting": {
+            "ageRange": "25-34",
+            "locations": [
+              "Canada",
+              "France"
+            ],
+            "interests": [
+              "technology",
+              "movies",
+              "movies"
+            ]
+          }
+        },
+        {
+          "id": "promotion_12",
+          "title": "Promotion Campaign 12",
+          "contentId": "content_15",
+          "userId": "user_11",
+          "platform": "facebook",
+          "status": "active",
+          "type": "premium",
+          "createdAt": {
+            "_seconds": 1698571388,
+            "_nanoseconds": 559000000
+          },
+          "startDate": {
+            "_seconds": 1698660409,
+            "_nanoseconds": 820000000
+          },
+          "endDate": {
+            "_seconds": 1700597495,
+            "_nanoseconds": 473000000
+          },
+          "budget": 980,
+          "spent": 248,
+          "impressions": 28044,
+          "clicks": 102,
+          "conversions": 421,
+          "targeting": {
+            "ageRange": "18-24",
+            "locations": [
+              "United Kingdom"
+            ],
+            "interests": [
+              "movies",
+              "fashion",
+              "music"
+            ]
+          }
+        },
+        {
+          "id": "promotion_14",
+          "title": "Promotion Campaign 14",
+          "contentId": "content_5",
+          "userId": "user_4",
+          "platform": "facebook",
+          "status": "active",
+          "type": "standard",
+          "createdAt": {
+            "_seconds": 1688023852,
+            "_nanoseconds": 370000000
+          },
+          "startDate": {
+            "_seconds": 1690029543,
+            "_nanoseconds": 746000000
+          },
+          "endDate": {
+            "_seconds": 1691547652,
+            "_nanoseconds": 344000000
+          },
+          "budget": 792,
+          "spent": 110,
+          "impressions": 39946,
+          "clicks": 1686,
+          "conversions": 306,
+          "targeting": {
+            "ageRange": "55+",
+            "locations": [
+              "Canada",
+              "Germany"
+            ],
+            "interests": [
+              "music",
+              "music",
+              "food",
+              "business"
+            ]
+          }
+        },
+        {
+          "id": "promotion_16",
+          "title": "Promotion Campaign 16",
+          "contentId": "content_5",
+          "userId": "user_2",
+          "platform": "pinterest",
+          "status": "active",
+          "type": "standard",
+          "createdAt": {
+            "_seconds": 1724506809,
+            "_nanoseconds": 409000000
+          },
+          "startDate": {
+            "_seconds": 1725738148,
+            "_nanoseconds": 909000000
+          },
+          "endDate": {
+            "_seconds": 1727302085,
+            "_nanoseconds": 169000000
+          },
+          "budget": 365,
+          "spent": 17,
+          "impressions": 13961,
+          "clicks": 1655,
+          "conversions": 266,
+          "targeting": {
+            "ageRange": "18-24",
+            "locations": [
+              "Japan",
+              "Japan"
+            ],
+            "interests": [
+              "travel",
+              "fashion",
+              "music",
+              "fashion"
+            ]
+          }
+        },
+        {
+          "id": "promotion_18",
+          "title": "Promotion Campaign 18",
+          "contentId": "content_22",
+          "userId": "user_10",
+          "platform": "tiktok",
+          "status": "active",
+          "type": "standard",
+          "createdAt": {
+            "_seconds": 1661764003,
+            "_nanoseconds": 279000000
+          },
+          "startDate": {
+            "_seconds": 1663080424,
+            "_nanoseconds": 313000000
+          },
+          "endDate": {
+            "_seconds": 1665493940,
+            "_nanoseconds": 368000000
+          },
+          "budget": 245,
+          "spent": 8,
+          "impressions": 1216,
+          "clicks": 4195,
+          "conversions": 291,
+          "targeting": {
+            "ageRange": "18-24",
+            "locations": [
+              "France",
+              "France",
+              "United Kingdom"
+            ],
+            "interests": [
+              "business"
+            ]
+          }
+        },
+        {
+          "id": "promotion_19",
+          "title": "Promotion Campaign 19",
+          "contentId": "content_19",
+          "userId": "user_15",
+          "platform": "twitter",
+          "status": "active",
+          "type": "sponsored",
+          "createdAt": {
+            "_seconds": 1705780018,
+            "_nanoseconds": 468000000
+          },
+          "startDate": {
+            "_seconds": 1707334725,
+            "_nanoseconds": 40000000
+          },
+          "endDate": {
+            "_seconds": 1708877102,
+            "_nanoseconds": 169000000
+          },
+          "budget": 963,
+          "spent": 447,
+          "impressions": 47525,
+          "clicks": 1347,
+          "conversions": 410,
+          "targeting": {
+            "ageRange": "18-24",
+            "locations": [
+              "Australia",
+              "Japan"
+            ],
+            "interests": [
+              "movies",
+              "sports",
+              "travel"
+            ]
+          }
+        },
+        {
+          "id": "promotion_5",
+          "title": "Promotion Campaign 5",
+          "contentId": "content_13",
+          "userId": "user_4",
+          "platform": "twitter",
+          "status": "active",
+          "type": "premium",
+          "createdAt": {
+            "_seconds": 1709266603,
+            "_nanoseconds": 17000000
+          },
+          "startDate": {
+            "_seconds": 1709620665,
+            "_nanoseconds": 305000000
+          },
+          "endDate": {
+            "_seconds": 1710733332,
+            "_nanoseconds": 865000000
+          },
+          "budget": 53,
+          "spent": 10,
+          "impressions": 33048,
+          "clicks": 4541,
+          "conversions": 75,
+          "targeting": {
+            "ageRange": "18-24",
+            "locations": [
+              "United Kingdom",
+              "Germany"
+            ],
+            "interests": [
+              "music",
+              "movies",
+              "technology"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recent Activities",
+      "description": "Fetches recent user activities",
+      "data": [
+        {
+          "id": "activity_14",
+          "actionType": "content_created",
+          "timestamp": {
+            "_seconds": 1756193431,
+            "_nanoseconds": 446000000
+          },
+          "ipAddress": "192.168.85.96",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+          "details": {
+            "contentId": "content_16",
+            "userId": "user_17",
+            "contentType": "product"
+          }
+        },
+        {
+          "id": "activity_47",
+          "actionType": "subscription_changed",
+          "timestamp": {
+            "_seconds": 1755458826,
+            "_nanoseconds": 532000000
+          },
+          "ipAddress": "192.168.2.25",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+          "details": {
+            "userId": "user_7",
+            "status": "success",
+            "change": "plan upgrade"
+          }
+        },
+        {
+          "id": "activity_28",
+          "actionType": "settings_updated",
+          "timestamp": {
+            "_seconds": 1753372813,
+            "_nanoseconds": 535000000
+          },
+          "ipAddress": "192.168.183.97",
+          "userAgent": "Mozilla/5.0 (Linux; Android 11; SM-G998B) AppleWebKit/537.36",
+          "details": {
+            "userId": "user_5",
+            "status": "success",
+            "change": "plan upgrade"
+          }
+        },
+        {
+          "id": "activity_3",
+          "actionType": "promotion_created",
+          "timestamp": {
+            "_seconds": 1751703734,
+            "_nanoseconds": 32000000
+          },
+          "ipAddress": "192.168.146.118",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+          "details": {
+            "promotionId": "promotion_24",
+            "userId": "user_11",
+            "platform": "linkedin"
+          }
+        },
+        {
+          "id": "activity_1",
+          "actionType": "user_login",
+          "timestamp": {
+            "_seconds": 1748939346,
+            "_nanoseconds": 275000000
+          },
+          "ipAddress": "192.168.118.128",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+          "details": {
+            "userId": "user_10",
+            "userEmail": "user7@example.com"
+          }
+        },
+        {
+          "id": "activity_5",
+          "actionType": "profile_updated",
+          "timestamp": {
+            "_seconds": 1748932778,
+            "_nanoseconds": 231000000
+          },
+          "ipAddress": "192.168.30.169",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "details": {
+            "userId": "user_20",
+            "status": "success",
+            "change": "account settings"
+          }
+        },
+        {
+          "id": "activity_48",
+          "actionType": "user_login",
+          "timestamp": {
+            "_seconds": 1744396276,
+            "_nanoseconds": 988000000
+          },
+          "ipAddress": "192.168.151.79",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+          "details": {
+            "userId": "user_1",
+            "userEmail": "user6@example.com"
+          }
+        },
+        {
+          "id": "activity_44",
+          "actionType": "subscription_changed",
+          "timestamp": {
+            "_seconds": 1744202423,
+            "_nanoseconds": 721000000
+          },
+          "ipAddress": "192.168.84.190",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+          "details": {
+            "userId": "user_15",
+            "status": "success",
+            "change": "account settings"
+          }
+        },
+        {
+          "id": "activity_46",
+          "actionType": "content_viewed",
+          "timestamp": {
+            "_seconds": 1743001397,
+            "_nanoseconds": 99000000
+          },
+          "ipAddress": "192.168.54.225",
+          "userAgent": "Mozilla/5.0 (Linux; Android 11; SM-G998B) AppleWebKit/537.36",
+          "details": {
+            "contentId": "content_8",
+            "userId": "user_18",
+            "contentType": "article"
+          }
+        },
+        {
+          "id": "activity_9",
+          "actionType": "content_viewed",
+          "timestamp": {
+            "_seconds": 1742761344,
+            "_nanoseconds": 688000000
+          },
+          "ipAddress": "192.168.49.184",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+          "details": {
+            "contentId": "content_24",
+            "userId": "user_5",
+            "contentType": "article"
+          }
+        },
+        {
+          "id": "activity_24",
+          "actionType": "content_viewed",
+          "timestamp": {
+            "_seconds": 1742420365,
+            "_nanoseconds": 118000000
+          },
+          "ipAddress": "192.168.228.129",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+          "details": {
+            "contentId": "content_18",
+            "userId": "user_12",
+            "contentType": "image"
+          }
+        },
+        {
+          "id": "activity_19",
+          "actionType": "user_login",
+          "timestamp": {
+            "_seconds": 1741366889,
+            "_nanoseconds": 589000000
+          },
+          "ipAddress": "192.168.75.155",
+          "userAgent": "Mozilla/5.0 (Linux; Android 11; SM-G998B) AppleWebKit/537.36",
+          "details": {
+            "userId": "user_15",
+            "userEmail": "user11@example.com"
+          }
+        },
+        {
+          "id": "activity_49",
+          "actionType": "content_viewed",
+          "timestamp": {
+            "_seconds": 1739469733,
+            "_nanoseconds": 5000000
+          },
+          "ipAddress": "192.168.15.84",
+          "userAgent": "Mozilla/5.0 (Linux; Android 11; SM-G998B) AppleWebKit/537.36",
+          "details": {
+            "contentId": "content_13",
+            "userId": "user_19",
+            "contentType": "video"
+          }
+        },
+        {
+          "id": "activity_15",
+          "actionType": "profile_updated",
+          "timestamp": {
+            "_seconds": 1737832177,
+            "_nanoseconds": 854000000
+          },
+          "ipAddress": "192.168.185.41",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "details": {
+            "userId": "user_8",
+            "status": "success",
+            "change": "plan upgrade"
+          }
+        },
+        {
+          "id": "activity_22",
+          "actionType": "content_updated",
+          "timestamp": {
+            "_seconds": 1737091222,
+            "_nanoseconds": 693000000
+          },
+          "ipAddress": "192.168.185.117",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "details": {
+            "contentId": "content_17",
+            "userId": "user_7",
+            "contentType": "video"
+          }
+        },
+        {
+          "id": "activity_21",
+          "actionType": "settings_updated",
+          "timestamp": {
+            "_seconds": 1736893892,
+            "_nanoseconds": 189000000
+          },
+          "ipAddress": "192.168.201.238",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+          "details": {
+            "userId": "user_6",
+            "status": "success",
+            "change": "plan upgrade"
+          }
+        },
+        {
+          "id": "activity_18",
+          "actionType": "user_registered",
+          "timestamp": {
+            "_seconds": 1736564809,
+            "_nanoseconds": 987000000
+          },
+          "ipAddress": "192.168.92.187",
+          "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15",
+          "details": {
+            "userId": "user_15",
+            "userEmail": "user5@example.com"
+          }
+        },
+        {
+          "id": "activity_17",
+          "actionType": "promotion_created",
+          "timestamp": {
+            "_seconds": 1736499368,
+            "_nanoseconds": 640000000
+          },
+          "ipAddress": "192.168.39.94",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "details": {
+            "promotionId": "promotion_25",
+            "userId": "user_20",
+            "platform": "linkedin"
+          }
+        },
+        {
+          "id": "activity_40",
+          "actionType": "content_updated",
+          "timestamp": {
+            "_seconds": 1732194951,
+            "_nanoseconds": 758000000
+          },
+          "ipAddress": "192.168.172.137",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "details": {
+            "contentId": "content_29",
+            "userId": "user_15",
+            "contentType": "article"
+          }
+        },
+        {
+          "id": "activity_37",
+          "actionType": "payment_processed",
+          "timestamp": {
+            "_seconds": 1730824064,
+            "_nanoseconds": 725000000
+          },
+          "ipAddress": "192.168.181.130",
+          "userAgent": "Mozilla/5.0 (Linux; Android 11; SM-G998B) AppleWebKit/537.36",
+          "details": {
+            "userId": "user_5",
+            "status": "success",
+            "change": "plan upgrade"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics Summary",
+      "description": "Fetches analytics summary document",
+      "data": {
+        "lastUpdated": {
+          "_seconds": 1756987245,
+          "_nanoseconds": 816000000
+        },
+        "summary": {
+          "totalUsers": 1351,
+          "activeUsers": 923,
+          "totalContent": 3705,
+          "activePromotions": 285,
+          "totalRevenue": 192010,
+          "averageDailyUsers": 170
+        },
+        "comparison": {
+          "users": {
+            "current": 911,
+            "previous": 836
+          },
+          "content": {
+            "current": 338,
+            "previous": 304
+          },
+          "promotions": {
+            "current": 100,
+            "previous": 83
+          },
+          "revenue": {
+            "current": 24854,
+            "previous": 22444
+          }
+        },
+        "platforms": {
+          "facebook": {
+            "impressions": 46818,
+            "clicks": 3506,
+            "conversions": 343,
+            "ctr": 0.07533328595934964,
+            "cpc": 0.348097138192322
+          },
+          "instagram": {
+            "impressions": 42209,
+            "clicks": 2976,
+            "conversions": 299,
+            "ctr": 0.08322537909895592,
+            "cpc": 0.4774918744278741
+          },
+          "twitter": {
+            "impressions": 27121,
+            "clicks": 1938,
+            "conversions": 192,
+            "ctr": 0.06757150871941897,
+            "cpc": 0.31904246579444384
+          },
+          "linkedin": {
+            "impressions": 21164,
+            "clicks": 1390,
+            "conversions": 170,
+            "ctr": 0.0765619168269275,
+            "cpc": 0.5065851502260276
+          }
+        },
+        "dailyData": [
+          {
+            "date": {
+              "_seconds": 1754258400,
+              "_nanoseconds": 0
+            },
+            "newUsers": 1,
+            "activeUsers": 164,
+            "contentCreated": 9,
+            "promotionsStarted": 13,
+            "revenue": 916,
+            "pageViews": 588
+          },
+          {
+            "date": {
+              "_seconds": 1754344800,
+              "_nanoseconds": 0
+            },
+            "newUsers": 10,
+            "activeUsers": 96,
+            "contentCreated": 10,
+            "promotionsStarted": 12,
+            "revenue": 1262,
+            "pageViews": 3553
+          },
+          {
+            "date": {
+              "_seconds": 1754431200,
+              "_nanoseconds": 0
+            },
+            "newUsers": 9,
+            "activeUsers": 175,
+            "contentCreated": 8,
+            "promotionsStarted": 10,
+            "revenue": 1278,
+            "pageViews": 4532
+          },
+          {
+            "date": {
+              "_seconds": 1754517600,
+              "_nanoseconds": 0
+            },
+            "newUsers": 1,
+            "activeUsers": 126,
+            "contentCreated": 18,
+            "promotionsStarted": 10,
+            "revenue": 190,
+            "pageViews": 4934
+          },
+          {
+            "date": {
+              "_seconds": 1754604000,
+              "_nanoseconds": 0
+            },
+            "newUsers": 1,
+            "activeUsers": 169,
+            "contentCreated": 19,
+            "promotionsStarted": 10,
+            "revenue": 713,
+            "pageViews": 1261
+          },
+          {
+            "date": {
+              "_seconds": 1754690400,
+              "_nanoseconds": 0
+            },
+            "newUsers": 5,
+            "activeUsers": 93,
+            "contentCreated": 10,
+            "promotionsStarted": 3,
+            "revenue": 1919,
+            "pageViews": 4758
+          },
+          {
+            "date": {
+              "_seconds": 1754776800,
+              "_nanoseconds": 0
+            },
+            "newUsers": 4,
+            "activeUsers": 61,
+            "contentCreated": 20,
+            "promotionsStarted": 3,
+            "revenue": 850,
+            "pageViews": 3568
+          },
+          {
+            "date": {
+              "_seconds": 1754863200,
+              "_nanoseconds": 0
+            },
+            "newUsers": 1,
+            "activeUsers": 151,
+            "contentCreated": 15,
+            "promotionsStarted": 8,
+            "revenue": 1903,
+            "pageViews": 3055
+          },
+          {
+            "date": {
+              "_seconds": 1754949600,
+              "_nanoseconds": 0
+            },
+            "newUsers": 4,
+            "activeUsers": 200,
+            "contentCreated": 16,
+            "promotionsStarted": 7,
+            "revenue": 120,
+            "pageViews": 1082
+          },
+          {
+            "date": {
+              "_seconds": 1755036000,
+              "_nanoseconds": 0
+            },
+            "newUsers": 8,
+            "activeUsers": 155,
+            "contentCreated": 9,
+            "promotionsStarted": 11,
+            "revenue": 530,
+            "pageViews": 1688
+          },
+          {
+            "date": {
+              "_seconds": 1755122400,
+              "_nanoseconds": 0
+            },
+            "newUsers": 10,
+            "activeUsers": 111,
+            "contentCreated": 7,
+            "promotionsStarted": 3,
+            "revenue": 1597,
+            "pageViews": 2506
+          },
+          {
+            "date": {
+              "_seconds": 1755208800,
+              "_nanoseconds": 0
+            },
+            "newUsers": 4,
+            "activeUsers": 182,
+            "contentCreated": 5,
+            "promotionsStarted": 4,
+            "revenue": 1808,
+            "pageViews": 2205
+          },
+          {
+            "date": {
+              "_seconds": 1755295200,
+              "_nanoseconds": 0
+            },
+            "newUsers": 3,
+            "activeUsers": 102,
+            "contentCreated": 19,
+            "promotionsStarted": 12,
+            "revenue": 1528,
+            "pageViews": 1954
+          },
+          {
+            "date": {
+              "_seconds": 1755381600,
+              "_nanoseconds": 0
+            },
+            "newUsers": 9,
+            "activeUsers": 138,
+            "contentCreated": 6,
+            "promotionsStarted": 13,
+            "revenue": 606,
+            "pageViews": 3303
+          },
+          {
+            "date": {
+              "_seconds": 1755468000,
+              "_nanoseconds": 0
+            },
+            "newUsers": 2,
+            "activeUsers": 119,
+            "contentCreated": 8,
+            "promotionsStarted": 3,
+            "revenue": 926,
+            "pageViews": 2585
+          },
+          {
+            "date": {
+              "_seconds": 1755554400,
+              "_nanoseconds": 0
+            },
+            "newUsers": 3,
+            "activeUsers": 50,
+            "contentCreated": 5,
+            "promotionsStarted": 9,
+            "revenue": 284,
+            "pageViews": 1179
+          },
+          {
+            "date": {
+              "_seconds": 1755640800,
+              "_nanoseconds": 0
+            },
+            "newUsers": 4,
+            "activeUsers": 184,
+            "contentCreated": 9,
+            "promotionsStarted": 8,
+            "revenue": 705,
+            "pageViews": 3917
+          },
+          {
+            "date": {
+              "_seconds": 1755727200,
+              "_nanoseconds": 0
+            },
+            "newUsers": 9,
+            "activeUsers": 164,
+            "contentCreated": 7,
+            "promotionsStarted": 11,
+            "revenue": 1787,
+            "pageViews": 2900
+          },
+          {
+            "date": {
+              "_seconds": 1755813600,
+              "_nanoseconds": 0
+            },
+            "newUsers": 3,
+            "activeUsers": 99,
+            "contentCreated": 19,
+            "promotionsStarted": 6,
+            "revenue": 791,
+            "pageViews": 756
+          },
+          {
+            "date": {
+              "_seconds": 1755900000,
+              "_nanoseconds": 0
+            },
+            "newUsers": 5,
+            "activeUsers": 198,
+            "contentCreated": 8,
+            "promotionsStarted": 2,
+            "revenue": 199,
+            "pageViews": 4175
+          },
+          {
+            "date": {
+              "_seconds": 1755986400,
+              "_nanoseconds": 0
+            },
+            "newUsers": 10,
+            "activeUsers": 124,
+            "contentCreated": 17,
+            "promotionsStarted": 6,
+            "revenue": 398,
+            "pageViews": 3432
+          },
+          {
+            "date": {
+              "_seconds": 1756072800,
+              "_nanoseconds": 0
+            },
+            "newUsers": 9,
+            "activeUsers": 107,
+            "contentCreated": 13,
+            "promotionsStarted": 14,
+            "revenue": 107,
+            "pageViews": 4577
+          },
+          {
+            "date": {
+              "_seconds": 1756159200,
+              "_nanoseconds": 0
+            },
+            "newUsers": 8,
+            "activeUsers": 83,
+            "contentCreated": 19,
+            "promotionsStarted": 14,
+            "revenue": 1736,
+            "pageViews": 3607
+          },
+          {
+            "date": {
+              "_seconds": 1756245600,
+              "_nanoseconds": 0
+            },
+            "newUsers": 4,
+            "activeUsers": 122,
+            "contentCreated": 18,
+            "promotionsStarted": 8,
+            "revenue": 1184,
+            "pageViews": 2753
+          },
+          {
+            "date": {
+              "_seconds": 1756332000,
+              "_nanoseconds": 0
+            },
+            "newUsers": 8,
+            "activeUsers": 148,
+            "contentCreated": 16,
+            "promotionsStarted": 6,
+            "revenue": 367,
+            "pageViews": 4767
+          },
+          {
+            "date": {
+              "_seconds": 1756418400,
+              "_nanoseconds": 0
+            },
+            "newUsers": 3,
+            "activeUsers": 75,
+            "contentCreated": 19,
+            "promotionsStarted": 6,
+            "revenue": 140,
+            "pageViews": 4147
+          },
+          {
+            "date": {
+              "_seconds": 1756504800,
+              "_nanoseconds": 0
+            },
+            "newUsers": 10,
+            "activeUsers": 108,
+            "contentCreated": 10,
+            "promotionsStarted": 6,
+            "revenue": 778,
+            "pageViews": 526
+          },
+          {
+            "date": {
+              "_seconds": 1756591200,
+              "_nanoseconds": 0
+            },
+            "newUsers": 10,
+            "activeUsers": 116,
+            "contentCreated": 19,
+            "promotionsStarted": 10,
+            "revenue": 430,
+            "pageViews": 602
+          },
+          {
+            "date": {
+              "_seconds": 1756677600,
+              "_nanoseconds": 0
+            },
+            "newUsers": 6,
+            "activeUsers": 68,
+            "contentCreated": 9,
+            "promotionsStarted": 9,
+            "revenue": 1670,
+            "pageViews": 1482
+          },
+          {
+            "date": {
+              "_seconds": 1756764000,
+              "_nanoseconds": 0
+            },
+            "newUsers": 3,
+            "activeUsers": 82,
+            "contentCreated": 20,
+            "promotionsStarted": 12,
+            "revenue": 2000,
+            "pageViews": 4045
+          }
+        ]
+      }
+    },
+    {
+      "name": "User Types Distribution",
+      "description": "Aggregates users by type",
+      "data": {
+        "undefined": 9,
+        "free": 7,
+        "premium": 8,
+        "enterprise": 5
+      }
+    },
+    {
+      "name": "Platform Performance",
+      "description": "Fetches promotion metrics by platform",
+      "data": {
+        "linkedin": {
+          "count": 2,
+          "impressions": 43966,
+          "clicks": 7210,
+          "conversions": 542
+        },
+        "tiktok": {
+          "count": 4,
+          "impressions": 101141,
+          "clicks": 10868,
+          "conversions": 697
+        },
+        "twitter": {
+          "count": 7,
+          "impressions": 247585,
+          "clicks": 17628,
+          "conversions": 1784
+        },
+        "facebook": {
+          "count": 2,
+          "impressions": 67990,
+          "clicks": 1788,
+          "conversions": 727
+        },
+        "instagram": {
+          "count": 4,
+          "impressions": 118668,
+          "clicks": 14193,
+          "conversions": 1013
+        },
+        "pinterest": {
+          "count": 6,
+          "impressions": 153377,
+          "clicks": 10649,
+          "conversions": 1759
+        }
+      }
+    }
+  ],
+  "failed": []
+}
