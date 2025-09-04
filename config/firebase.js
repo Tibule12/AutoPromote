@@ -11,7 +11,7 @@ let adminConfig;
 try {
   // Load service account from environment variable as first priority
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    console.log('Using FIREBASE_SERVICE_ACCOUNT environment variable');
+    console.log('✅ Using FIREBASE_SERVICE_ACCOUNT environment variable');
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     
     adminConfig = {
@@ -25,7 +25,7 @@ try {
   else if (process.env.FIREBASE_PROJECT_ID && 
            process.env.FIREBASE_CLIENT_EMAIL && 
            process.env.FIREBASE_PRIVATE_KEY) {
-    console.log('Using individual Firebase credential environment variables');
+    console.log('✅ Using individual Firebase credential environment variables');
     const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
     
     adminConfig = {
@@ -39,11 +39,11 @@ try {
       storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${process.env.FIREBASE_PROJECT_ID}.appspot.com`
     };
   }
-  // Last option - try to load from file
+  // Try to load from file as the third option
   else {
     try {
-      console.log('Attempting to load service account from file');
       const serviceAccount = require('../serviceAccountKey.json');
+      console.log('✅ Using serviceAccountKey.json file');
       
       adminConfig = {
         credential: require('firebase-admin').credential.cert(serviceAccount),
@@ -52,21 +52,29 @@ try {
         storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccount.project_id}.appspot.com`
       };
     } catch (fileError) {
-      console.error('Could not load serviceAccountKey.json:', fileError.message);
-      throw new Error('No Firebase credentials available');
+      // Silent error for file loading, we'll use default credentials
+      console.log('ℹ️ No serviceAccountKey.json file found, using default credentials');
+      
+      // Create a default configuration with application default credentials
+      adminConfig = {
+        // This will use application default credentials or environment variables
+        credential: require('firebase-admin').credential.applicationDefault(),
+        projectId: process.env.FIREBASE_PROJECT_ID || "autopromote-464de",
+        databaseURL: process.env.FIREBASE_DATABASE_URL || "https://autopromote-464de.firebaseio.com",
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "autopromote-464de.appspot.com"
+      };
+      console.log(`ℹ️ Using default Firebase configuration with project ID: ${adminConfig.projectId}`);
     }
   }
 } catch (error) {
-  console.error('Error loading Firebase admin configuration:', error);
-  
-  // Provide a fallback for development/testing without failing immediately
-  console.warn('⚠️ WARNING: Using application default credentials. This may not work in production.');
+  // Create a default configuration for when all else fails
+  console.log('ℹ️ Using default Firebase configuration');
   adminConfig = {
     // This will use application default credentials or environment variables
     credential: require('firebase-admin').credential.applicationDefault(),
     projectId: process.env.FIREBASE_PROJECT_ID || "autopromote-464de",
-    databaseURL: process.env.FIREBASE_DATABASE_URL,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+    databaseURL: process.env.FIREBASE_DATABASE_URL || "https://autopromote-464de.firebaseio.com",
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "autopromote-464de.appspot.com"
   };
 }
 

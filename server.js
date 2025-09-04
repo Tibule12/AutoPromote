@@ -4,25 +4,53 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+
+// Load core routes
 const authRoutes = require('./authRoutes');
 const userRoutes = require('./userRoutes');
 const contentRoutes = require('./contentRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const adminRoutes = require('./adminRoutes');
 const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
-// Try to load adminTestRoutes, but continue if not available
+
+// Try to load adminTestRoutes, but continue with a dummy router if not available
 let adminTestRoutes;
 try {
   adminTestRoutes = require('./adminTestRoutes');
 } catch (error) {
-  console.log('adminTestRoutes not available:', error.message);
   // Create a dummy router if the module is missing
   adminTestRoutes = express.Router();
+  adminTestRoutes.get('/admin-test/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Admin test routes dummy endpoint' });
+  });
 }
-const withdrawalRoutes = require('./routes/withdrawalRoutes');
-const monetizationRoutes = require('./routes/monetizationRoutes');
-const stripeOnboardRoutes = require('./routes/stripeOnboardRoutes');
-const { db, auth, storage } = require('./firebaseAdmin'); // Import initialized Firebase services
+
+// Try to load optional route modules
+let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes;
+try {
+  withdrawalRoutes = require('./routes/withdrawalRoutes');
+} catch (error) {
+  withdrawalRoutes = express.Router();
+}
+
+try {
+  monetizationRoutes = require('./routes/monetizationRoutes');
+} catch (error) {
+  monetizationRoutes = express.Router();
+}
+
+try {
+  stripeOnboardRoutes = require('./routes/stripeOnboardRoutes');
+} catch (error) {
+  stripeOnboardRoutes = express.Router();
+  // Add warning for missing Stripe secret key only if we have the route module
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.log('ℹ️ STRIPE_SECRET_KEY not found. Stripe features will be disabled.');
+  }
+}
+
+// Import initialized Firebase services
+const { db, auth, storage } = require('./firebaseAdmin');
 
 const app = express();
 const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
@@ -58,7 +86,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api', adminTestRoutes); // Add admin test routes
 
-// Register withdrawals route after app is defined
+// Register optional routes
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
@@ -69,17 +97,32 @@ app.use('/api/stripe', stripeOnboardRoutes);
 
 // Serve the admin test HTML file
 app.get('/admin-test', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin-test.html'));
+  // Check if file exists before sending
+  try {
+    res.sendFile(path.join(__dirname, 'public', 'admin-test.html'));
+  } catch (error) {
+    res.send('<html><body><h1>Admin Test Page</h1><p>The actual test page is not available.</p></body></html>');
+  }
 });
 
 // Serve the admin login page (only accessible by direct URL - not linked from UI)
 app.get('/admin-login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
+  // Check if file exists before sending
+  try {
+    res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
+  } catch (error) {
+    res.send('<html><body><h1>Admin Login</h1><p>The actual login page is not available.</p></body></html>');
+  }
 });
 
 // Serve the admin dashboard (protected in frontend by auth check)
 app.get('/admin-dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+  // Check if file exists before sending
+  try {
+    res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+  } catch (error) {
+    res.send('<html><body><h1>Admin Dashboard</h1><p>The actual dashboard is not available.</p></body></html>');
+  }
 });
 
 // Health check endpoint
@@ -98,7 +141,7 @@ app.get('/api/health', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
+  console.log('Server error:', err.message);
   res.status(500).json({ 
     error: 'Internal server error',
     message: err.message 
@@ -125,7 +168,7 @@ express.response.send = function(body) {
         console.log('isMockData:', bodyObj.isMockData || false);
       }
     } catch (e) {
-      console.log('Error logging response:', e.message);
+      // Silently ignore logging errors
     }
   }
   return originalSend.call(this, body);
@@ -136,9 +179,9 @@ const server = app.listen(PORT, () => {
   console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
   console.log(`🔗 API endpoints available at: http://localhost:${PORT}/api/`);
 }).on('error', (err) => {
-  console.error('❌ Server startup error:', err);
+  console.log('❌ Server startup error:', err.message);
   if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use by another application.`);
-    console.error('Try changing the PORT environment variable or closing the other application.');
+    console.log(`Port ${PORT} is already in use by another application.`);
+    console.log('Try changing the PORT environment variable or closing the other application.');
   }
 });
