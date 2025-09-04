@@ -10,7 +10,8 @@
     "deploy": "npm install && npm run build && firebase deploy",
     "build": "npm run clean && npm run compile",
     "clean": "rimraf dist",
-    "compile": "mkdir dist && cp -r *.js *.json .env dist/"
+    "compile": "mkdir dist && cp -r *.js *.json .env dist/",
+    "test:integration": "node runTests.js"
   },
   "dependencies": {
     "axios": "^1.11.0",

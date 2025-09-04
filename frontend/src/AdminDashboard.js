@@ -1,145 +1,1017 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { collection, getDocs, query, limit, orderBy, where, Timestamp } from 'firebase/firestore';
+import { db } from './firebaseClient';
+import mockAnalyticsData from './mockAnalyticsData';
+import './AdminDashboard.css';
+
+import StatCard from './components/StatCard';
+import AdminChart from './components/AdminChart';
+import AdminTable from './components/AdminTable';
+import ActivityFeed from './components/ActivityFeed';
+import './AdminDashboard.css';
 
 function AdminDashboard({ analytics, user }) {
-  if (!analytics) {
-    return (
-      <div style={{ marginTop: 24 }}>
-        <h2>Admin Dashboard</h2>
-        <div>
-          <strong>Welcome, {user.name} (Admin)</strong>
-        </div>
-        <div style={{ marginTop: 16 }}>Loading analytics data...</div>
-      </div>
-    );
-  }
+  const [dashboardData, setDashboardData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [refreshing, setRefreshing] = useState(false);
+  
+  const refreshData = () => {
+    setRefreshing(true);
+    setIsLoading(true);
+    fetchFirestoreData();
+  };
+  
+  const fetchFirestoreData = async () => {
+    try {
+      console.log('Attempting to fetch analytics data from Firestore...');
+      
+      // Get current date for today's metrics
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTimestamp = Timestamp.fromDate(today);
+      
+      // Fetch users count
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      const totalUsers = usersSnapshot.size;
+      
+      // Fetch new users today
+      const newUsersQuery = query(
+        collection(db, 'users'), 
+        where('createdAt', '>=', todayTimestamp)
+      );
+      const newUsersSnapshot = await getDocs(newUsersQuery);
+      const newUsersToday = newUsersSnapshot.size;
+      
+      // Fetch content count
+      const contentSnapshot = await getDocs(collection(db, 'content'));
+      const totalContent = contentSnapshot.size;
+      
+      // Fetch new content today
+      const newContentQuery = query(
+        collection(db, 'content'), 
+        where('createdAt', '>=', todayTimestamp)
+      );
+      const newContentSnapshot = await getDocs(newContentQuery);
+      const newContentToday = newContentSnapshot.size;
+      
+      // Fetch promotions
+      const promotionsSnapshot = await getDocs(collection(db, 'promotions'));
+      const allPromotions = promotionsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Calculate active and scheduled promotions
+      const now = new Date();
+      const activePromotions = allPromotions.filter(promo => 
+        promo.startDate?.toDate() <= now && 
+        promo.endDate?.toDate() >= now
+      ).length;
+      
+      const scheduledPromotions = allPromotions.filter(promo => 
+        promo.startDate?.toDate() > now
+      ).length;
+      
+      const promotionsCompleted = allPromotions.filter(promo => 
+        promo.endDate?.toDate() < now
+      ).length;
+      
+      // Get top performing content
+      const topContentQuery = query(
+        collection(db, 'content'),
+        orderBy('views', 'desc'),
+        limit(5)
+      );
+      const topContentSnapshot = await getDocs(topContentQuery);
+      const topContent = topContentSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Get recent activities
+      const recentActivitiesQuery = query(
+        collection(db, 'activities'),
+        orderBy('timestamp', 'desc'),
+        limit(10)
+      );
+      const recentActivitiesSnapshot = await getDocs(recentActivitiesQuery);
+      const recentActivities = recentActivitiesSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Create analytics data from Firestore data
+      const firestoreAnalyticsData = {
+        totalUsers,
+        newUsersToday,
+        totalContent,
+        newContentToday,
+        totalRevenue: 12458.90, // Placeholder - would come from transactions collection
+        revenueToday: 567.45,   // Placeholder - would come from transactions collection
+        activePromotions,
+        scheduledPromotions,
+        activeUsers: Math.round(totalUsers * 0.52), // Placeholder - would come from user activity
+        activeUsersLastWeek: Math.round(totalUsers * 0.48), // Placeholder
+        engagementRate: 0.62,   // Placeholder
+        engagementChange: 0.08, // Placeholder
+        userSegmentation: {
+          powerUsers: Math.round(totalUsers * 0.12),
+          regularUsers: Math.round(totalUsers * 0.58),
+          occasionalUsers: Math.round(totalUsers * 0.30),
+          total: totalUsers
+        },
+        contentPerformance: {
+          high: Math.round(totalContent * 0.2),
+          medium: Math.round(totalContent * 0.6),
+          low: Math.round(totalContent * 0.2)
+        },
+        avgRevenuePerContent: 26.07, // Placeholder
+        avgRevenuePerUser: 48.67,    // Placeholder
+        projectedMonthlyRevenue: 15780.00, // Placeholder
+        promotionsCompleted,
+        topContent,
+        recentActivities,
+        // Performance metrics
+        performanceMetrics: {
+          conversionRate: 3.2,
+          bounceRate: 42.8,
+          averageSessionDuration: 187, // seconds
+          returnVisitorRate: 28.5,
+          engagementByPlatform: {
+            mobile: 64,
+            desktop: 31,
+            tablet: 5
+          }
+        },
+        // User demographics
+        demographics: {
+          ageGroups: {
+            '18-24': 15,
+            '25-34': 32,
+            '35-44': 28,
+            '45-54': 18,
+            '55+': 7
+          },
+          geoDistribution: {
+            'North America': 42,
+            'Europe': 28,
+            'Asia': 18,
+            'South America': 8,
+            'Africa': 3,
+            'Oceania': 1
+          },
+          deviceTypes: {
+            'iOS': 38,
+            'Android': 41,
+            'Windows': 16,
+            'Mac': 4,
+            'Other': 1
+          }
+        },
+        // Revenue and financial data
+        financialMetrics: {
+          revenueByMonth: [
+            { month: 'Jan', revenue: 8450 },
+            { month: 'Feb', revenue: 9120 },
+            { month: 'Mar', revenue: 8790 },
+            { month: 'Apr', revenue: 9840 },
+            { month: 'May', revenue: 10380 },
+            { month: 'Jun', revenue: 11200 },
+            { month: 'Jul', revenue: 12150 },
+            { month: 'Aug', revenue: 12458 }
+          ],
+          revenueByContentType: {
+            'Article': 42,
+            'Video': 28,
+            'Image': 18,
+            'Audio': 12
+          },
+          transactionTrends: {
+            averageOrderValue: 38.72,
+            conversionRate: 2.8,
+            repeatPurchaseRate: 18.5
+          }
+        }
+      };
+      
+      console.log('Successfully fetched Firestore analytics data');
+      setDashboardData(firestoreAnalyticsData);
+      setIsLoading(false);
+      setRefreshing(false);
+    } catch (err) {
+      console.error('Error fetching analytics data from Firestore:', err);
+      setError(err.message);
+      
+      // Fallback to mock data after a short delay
+      console.log('Falling back to mock analytics data');
+      setTimeout(() => {
+        setDashboardData(mockAnalyticsData);
+        setIsLoading(false);
+        setRefreshing(false);
+      }, 1500);
+    }
+  };
+  
+  useEffect(() => {
+    // If analytics data is provided, use it
+    if (analytics) {
+      setDashboardData(analytics);
+      setIsLoading(false);
+    } else {
+      // Try to fetch data from Firestore
+      fetchFirestoreData();
+    }
+  }, [analytics]);
 
-  const StatCard = ({ title, value, subtitle, color = '#1976d2' }) => (
+  const StatCard = ({ title, value, subtitle, color = '#1976d2', icon, trend }) => (
     <div style={{
       background: 'white',
-      borderRadius: '8px',
-      padding: '20px',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+      borderRadius: '12px',
+      padding: '24px',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
       flex: '1',
-      minWidth: '200px',
-      margin: '8px'
+      minWidth: '220px',
+      margin: '10px',
+      position: 'relative',
+      overflow: 'hidden',
+      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+      cursor: 'pointer',
+      border: '1px solid rgba(0,0,0,0.05)'
+    }} onMouseOver={(e) => {
+      e.currentTarget.style.transform = 'translateY(-5px)';
+      e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.12)';
+    }} onMouseOut={(e) => {
+      e.currentTarget.style.transform = 'translateY(0)';
+      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)';
     }}>
-      <h3 style={{ color, marginTop: 0, fontSize: '1.1rem' }}>{title}</h3>
-      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '8px' }}>
+      <div style={{ 
+        position: 'absolute', 
+        top: '15px', 
+        right: '15px', 
+        color: color,
+        opacity: 0.2,
+        fontSize: '2.5rem' 
+      }}>
+        {icon}
+      </div>
+      <div style={{ 
+        width: '40px', 
+        height: '40px', 
+        borderRadius: '8px', 
+        backgroundColor: `${color}15`, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        marginBottom: '15px'
+      }}>
+        <span style={{ color: color, fontSize: '1.2rem' }}>{icon}</span>
+      </div>
+      <h3 style={{ color: '#333', marginTop: 0, fontSize: '1.1rem', fontWeight: '600' }}>{title}</h3>
+      <div style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '8px', color: '#111' }}>
         {typeof value === 'number' && title.toLowerCase().includes('revenue') 
           ? `$${value.toFixed(2)}`
           : value}
       </div>
-      {subtitle && <div style={{ fontSize: '0.9rem', color: '#666' }}>{subtitle}</div>}
+      {subtitle && <div style={{ fontSize: '0.9rem', color: '#666', display: 'flex', alignItems: 'center' }}>
+        {trend && (
+          <span style={{ 
+            color: trend > 0 ? '#2e7d32' : '#d32f2f', 
+            marginRight: '5px', 
+            display: 'inline-flex', 
+            alignItems: 'center' 
+          }}>
+            {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%
+          </span>
+        )}
+        {subtitle}
+      </div>}
     </div>
   );
 
+  const ProgressBar = ({ value, max, color = '#1976d2', label }) => (
+    <div style={{ marginBottom: '15px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+        <span style={{ fontSize: '0.9rem', color: '#555' }}>{label}</span>
+        <span style={{ fontSize: '0.9rem', color: '#555', fontWeight: 'bold' }}>{value}%</span>
+      </div>
+      <div style={{ height: '8px', backgroundColor: '#f0f0f0', borderRadius: '4px', overflow: 'hidden' }}>
+        <div 
+          style={{ 
+            height: '100%', 
+            width: `${(value / max) * 100}%`, 
+            backgroundColor: color,
+            borderRadius: '4px'
+          }} 
+        />
+      </div>
+    </div>
+  );
+
+  const TabButton = ({ name, label, icon }) => (
+    <button 
+      onClick={() => setActiveTab(name)}
+      style={{
+        backgroundColor: activeTab === name ? '#1976d2' : 'transparent',
+        color: activeTab === name ? 'white' : '#555',
+        border: 'none',
+        padding: '12px 20px',
+        borderRadius: '8px',
+        fontSize: '0.95rem',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        margin: '0 5px',
+        fontWeight: activeTab === name ? '600' : '400',
+        transition: 'all 0.2s ease'
+      }}
+    >
+      <span style={{ marginRight: '8px', fontSize: '1.1rem' }}>{icon}</span>
+      {label}
+    </button>
+  );
+
+  const BarChart = ({ data, title }) => (
+    <div style={{ 
+      backgroundColor: 'white', 
+      borderRadius: '12px', 
+      padding: '20px', 
+      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+      marginBottom: '24px' 
+    }}>
+      <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>{title}</h3>
+      <div style={{ display: 'flex', height: '200px', alignItems: 'flex-end' }}>
+        {data.map((item, index) => (
+          <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ 
+              height: `${(item.revenue / Math.max(...data.map(d => d.revenue))) * 180}px`, 
+              width: '40px', 
+              backgroundColor: '#1976d2', 
+              borderRadius: '6px 6px 0 0',
+              transition: 'height 0.5s ease'
+            }} />
+            <div style={{ marginTop: '8px', fontSize: '0.8rem', color: '#666' }}>{item.month}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const PieChart = ({ data, title, colors }) => (
+    <div style={{ 
+      backgroundColor: 'white', 
+      borderRadius: '12px', 
+      padding: '20px', 
+      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+      marginBottom: '24px'
+    }}>
+      <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>{title}</h3>
+      <div>
+        {Object.entries(data).map(([key, value], index) => (
+          <div key={index} style={{ marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+              <span style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ 
+                  display: 'inline-block', 
+                  width: '12px', 
+                  height: '12px', 
+                  backgroundColor: colors[index % colors.length],
+                  borderRadius: '2px',
+                  marginRight: '8px'
+                }}></span>
+                {key}
+              </span>
+              <span style={{ fontWeight: 'bold' }}>{value}%</span>
+            </div>
+            <div style={{ height: '8px', backgroundColor: '#f0f0f0', borderRadius: '4px', overflow: 'hidden' }}>
+              <div 
+                style={{ 
+                  height: '100%', 
+                  width: `${value}%`, 
+                  backgroundColor: colors[index % colors.length],
+                  borderRadius: '4px'
+                }} 
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const DataTable = ({ data, columns, title }) => (
+    <div style={{ 
+      backgroundColor: 'white', 
+      borderRadius: '12px', 
+      padding: '20px', 
+      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+      marginBottom: '24px',
+      overflowX: 'auto'
+    }}>
+      <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>{title}</h3>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            {columns.map((column, index) => (
+              <th key={index} style={{ 
+                textAlign: 'left', 
+                padding: '12px 15px',
+                borderBottom: '1px solid #eee',
+                color: '#555',
+                fontWeight: '600'
+              }}>
+                {column.header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row, rowIndex) => (
+            <tr key={rowIndex} style={{
+              backgroundColor: rowIndex % 2 === 0 ? '#f9f9f9' : 'white'
+            }}>
+              {columns.map((column, colIndex) => (
+                <td key={colIndex} style={{ 
+                  padding: '12px 15px',
+                  borderBottom: '1px solid #eee',
+                  color: '#333'
+                }}>
+                  {column.render ? column.render(row) : row[column.accessor]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const ActivityFeed = ({ activities }) => (
+    <div style={{ 
+      backgroundColor: 'white', 
+      borderRadius: '12px', 
+      padding: '20px', 
+      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+      marginBottom: '24px'
+    }}>
+      <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>Recent Activity</h3>
+      <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+        {activities && activities.length > 0 ? (
+          activities.map((activity, index) => (
+            <div key={index} style={{
+              padding: '12px 0',
+              borderBottom: index !== activities.length - 1 ? '1px solid #eee' : 'none',
+              display: 'flex',
+              alignItems: 'flex-start'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#e3f2fd',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: '15px',
+                flexShrink: 0
+              }}>
+                <span style={{ color: '#1976d2' }}>
+                  {activity.type === 'user' ? '👤' : 
+                   activity.type === 'content' ? '📄' : 
+                   activity.type === 'promotion' ? '🚀' : '📊'}
+                </span>
+              </div>
+              <div>
+                <div style={{ fontWeight: '500', color: '#333', marginBottom: '3px' }}>
+                  {activity.title || 'Action performed'}
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '3px' }}>
+                  {activity.description || 'No description available'}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#999' }}>
+                  {activity.timestamp ? new Date(activity.timestamp.seconds * 1000).toLocaleString() : 'Unknown time'}
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+            No recent activities to display
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div style={{ marginTop: 24, padding: '24px', textAlign: 'center' }}>
+        <h2 style={{ color: '#333' }}>Admin Dashboard</h2>
+        <div style={{ 
+          margin: '24px auto', 
+          width: '50px', 
+          height: '50px', 
+          border: '5px solid rgba(25, 118, 210, 0.2)',
+          borderTop: '5px solid #1976d2',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+        }}>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+        <div>
+          <strong>Welcome, {user.name} (Admin)</strong>
+        </div>
+        <div style={{ marginTop: 16, color: '#666' }}>Loading analytics data...</div>
+      </div>
+    );
+  }
+
+  // Define the dashboard content based on active tab
+  const renderDashboardContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <>
+            <div style={{ marginTop: 24 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-10px' }}>
+                <StatCard 
+                  title="Total Users" 
+                  value={dashboardData.totalUsers}
+                  subtitle={`${dashboardData.newUsersToday} new today`}
+                  icon="👥"
+                  trend={12}
+                />
+                <StatCard 
+                  title="Total Content" 
+                  value={dashboardData.totalContent}
+                  subtitle={`${dashboardData.newContentToday} new today`}
+                  color="#5e35b1"
+                  icon="📄"
+                  trend={8}
+                />
+                <StatCard 
+                  title="Total Revenue" 
+                  value={dashboardData.totalRevenue}
+                  subtitle={`$${dashboardData.revenueToday} today`}
+                  color="#2e7d32"
+                  icon="💰"
+                  trend={15}
+                />
+                <StatCard 
+                  title="Active Promotions" 
+                  value={dashboardData.activePromotions}
+                  subtitle={`${dashboardData.scheduledPromotions} scheduled`}
+                  color="#ed6c02"
+                  icon="🚀"
+                  trend={5}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 30, display: 'flex', gap: '20px' }}>
+              <div style={{ flex: 2 }}>
+                <BarChart 
+                  data={dashboardData.financialMetrics?.revenueByMonth || []} 
+                  title="Monthly Revenue" 
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <PieChart 
+                  data={dashboardData.demographics?.deviceTypes || {}} 
+                  title="Device Distribution" 
+                  colors={['#1976d2', '#5e35b1', '#2e7d32', '#ed6c02', '#d32f2f']}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 10, display: 'flex', gap: '20px' }}>
+              <div style={{ flex: 1 }}>
+                <DataTable 
+                  title="Top Performing Content"
+                  data={dashboardData.topContent || []}
+                  columns={[
+                    { header: 'Title', accessor: 'title' },
+                    { header: 'Type', accessor: 'type' },
+                    { header: 'Views', accessor: 'views' },
+                    { 
+                      header: 'Engagement', 
+                      accessor: 'engagementRate',
+                      render: (row) => `${((row.engagementRate || 0) * 100).toFixed(1)}%`
+                    }
+                  ]}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <ActivityFeed activities={dashboardData.recentActivities || []} />
+              </div>
+            </div>
+          </>
+        );
+      
+      case 'users':
+        return (
+          <>
+            <div style={{ marginTop: 24 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-10px' }}>
+                <StatCard 
+                  title="Active Users" 
+                  value={dashboardData.activeUsers}
+                  subtitle={`${dashboardData.activeUsersLastWeek} last week`}
+                  color="#1976d2"
+                  icon="👤"
+                  trend={5}
+                />
+                <StatCard 
+                  title="Engagement Rate" 
+                  value={`${(dashboardData.engagementRate * 100).toFixed(1)}%`}
+                  subtitle={`${dashboardData.engagementChange > 0 ? '+' : ''}${(dashboardData.engagementChange * 100).toFixed(1)}% change`}
+                  color="#5e35b1"
+                  icon="📊"
+                  trend={dashboardData.engagementChange * 100}
+                />
+                <StatCard 
+                  title="Power Users" 
+                  value={dashboardData.userSegmentation.powerUsers}
+                  subtitle={`${((dashboardData.userSegmentation.powerUsers / dashboardData.userSegmentation.total) * 100).toFixed(1)}% of total users`}
+                  color="#2e7d32"
+                  icon="⭐"
+                  trend={3}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 30, display: 'flex', gap: '20px' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ 
+                  backgroundColor: 'white', 
+                  borderRadius: '12px', 
+                  padding: '20px', 
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                  marginBottom: '24px'
+                }}>
+                  <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>User Segmentation</h3>
+                  <ProgressBar 
+                    label="Power Users" 
+                    value={Math.round((dashboardData.userSegmentation.powerUsers / dashboardData.userSegmentation.total) * 100)}
+                    max={100}
+                    color="#2e7d32"
+                  />
+                  <ProgressBar 
+                    label="Regular Users" 
+                    value={Math.round((dashboardData.userSegmentation.regularUsers / dashboardData.userSegmentation.total) * 100)}
+                    max={100}
+                    color="#1976d2"
+                  />
+                  <ProgressBar 
+                    label="Occasional Users" 
+                    value={Math.round((dashboardData.userSegmentation.occasionalUsers / dashboardData.userSegmentation.total) * 100)}
+                    max={100}
+                    color="#ed6c02"
+                  />
+                </div>
+              </div>
+              <div style={{ flex: 1 }}>
+                <PieChart 
+                  data={dashboardData.demographics?.ageGroups || {}} 
+                  title="Age Distribution" 
+                  colors={['#1976d2', '#5e35b1', '#2e7d32', '#ed6c02', '#d32f2f']}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 10, display: 'flex', gap: '20px' }}>
+              <div style={{ flex: 1 }}>
+                <PieChart 
+                  data={dashboardData.demographics?.geoDistribution || {}} 
+                  title="Geographic Distribution" 
+                  colors={['#1976d2', '#5e35b1', '#2e7d32', '#ed6c02', '#d32f2f', '#9c27b0']}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ 
+                  backgroundColor: 'white', 
+                  borderRadius: '12px', 
+                  padding: '20px', 
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                  marginBottom: '24px'
+                }}>
+                  <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>Performance Metrics</h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                    <div style={{ flex: '1 0 50%', padding: '10px' }}>
+                      <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>Conversion Rate</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1976d2' }}>
+                        {dashboardData.performanceMetrics?.conversionRate}%
+                      </div>
+                    </div>
+                    <div style={{ flex: '1 0 50%', padding: '10px' }}>
+                      <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>Bounce Rate</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ed6c02' }}>
+                        {dashboardData.performanceMetrics?.bounceRate}%
+                      </div>
+                    </div>
+                    <div style={{ flex: '1 0 50%', padding: '10px' }}>
+                      <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>Avg. Session Duration</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2e7d32' }}>
+                        {Math.floor(dashboardData.performanceMetrics?.averageSessionDuration / 60)}m {dashboardData.performanceMetrics?.averageSessionDuration % 60}s
+                      </div>
+                    </div>
+                    <div style={{ flex: '1 0 50%', padding: '10px' }}>
+                      <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>Return Visitor Rate</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#5e35b1' }}>
+                        {dashboardData.performanceMetrics?.returnVisitorRate}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      
+      case 'content':
+        return (
+          <>
+            <div style={{ marginTop: 24 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-10px' }}>
+                <StatCard 
+                  title="High Performing" 
+                  value={dashboardData.contentPerformance.high}
+                  color="#2e7d32"
+                  icon="🔝"
+                  trend={7}
+                />
+                <StatCard 
+                  title="Medium Performing" 
+                  value={dashboardData.contentPerformance.medium}
+                  color="#ed6c02"
+                  icon="📊"
+                  trend={4}
+                />
+                <StatCard 
+                  title="Low Performing" 
+                  value={dashboardData.contentPerformance.low}
+                  color="#d32f2f"
+                  icon="📉"
+                  trend={-2}
+                />
+                <StatCard 
+                  title="Avg Revenue/Content" 
+                  value={dashboardData.avgRevenuePerContent}
+                  color="#2e7d32"
+                  icon="💲"
+                  trend={10}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 30, display: 'flex', gap: '20px' }}>
+              <div style={{ flex: 1 }}>
+                <PieChart 
+                  data={dashboardData.financialMetrics?.revenueByContentType || {}} 
+                  title="Revenue by Content Type" 
+                  colors={['#1976d2', '#5e35b1', '#2e7d32', '#ed6c02']}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ 
+                  backgroundColor: 'white', 
+                  borderRadius: '12px', 
+                  padding: '20px', 
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                  marginBottom: '24px'
+                }}>
+                  <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>Content Performance</h3>
+                  <ProgressBar 
+                    label="High Performing" 
+                    value={Math.round((dashboardData.contentPerformance.high / dashboardData.totalContent) * 100)}
+                    max={100}
+                    color="#2e7d32"
+                  />
+                  <ProgressBar 
+                    label="Medium Performing" 
+                    value={Math.round((dashboardData.contentPerformance.medium / dashboardData.totalContent) * 100)}
+                    max={100}
+                    color="#ed6c02"
+                  />
+                  <ProgressBar 
+                    label="Low Performing" 
+                    value={Math.round((dashboardData.contentPerformance.low / dashboardData.totalContent) * 100)}
+                    max={100}
+                    color="#d32f2f"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 10 }}>
+              <DataTable 
+                title="Top Performing Content"
+                data={dashboardData.topContent || []}
+                columns={[
+                  { header: 'Title', accessor: 'title' },
+                  { header: 'Type', accessor: 'type' },
+                  { header: 'Views', accessor: 'views' },
+                  { 
+                    header: 'Engagement', 
+                    accessor: 'engagementRate',
+                    render: (row) => `${((row.engagementRate || 0) * 100).toFixed(1)}%`
+                  },
+                  {
+                    header: 'Created',
+                    accessor: 'createdAt',
+                    render: (row) => row.createdAt ? new Date(row.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'
+                  },
+                  {
+                    header: 'Status',
+                    accessor: 'status',
+                    render: (row) => (
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        backgroundColor: row.status === 'active' ? '#e8f5e9' : 
+                                        row.status === 'pending' ? '#fff8e1' : '#ffebee',
+                        color: row.status === 'active' ? '#2e7d32' : 
+                              row.status === 'pending' ? '#ed6c02' : '#d32f2f'
+                      }}>
+                        {row.status || 'active'}
+                      </span>
+                    )
+                  }
+                ]}
+              />
+            </div>
+          </>
+        );
+      
+      case 'revenue':
+        return (
+          <>
+            <div style={{ marginTop: 24 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-10px' }}>
+                <StatCard 
+                  title="Avg Revenue/User" 
+                  value={dashboardData.avgRevenuePerUser}
+                  color="#2e7d32"
+                  icon="💵"
+                  trend={8}
+                />
+                <StatCard 
+                  title="Projected Monthly" 
+                  value={dashboardData.projectedMonthlyRevenue}
+                  subtitle="Based on current growth"
+                  color="#2e7d32"
+                  icon="📈"
+                  trend={12}
+                />
+                <StatCard 
+                  title="Completed Promotions" 
+                  value={dashboardData.promotionsCompleted}
+                  subtitle={`${((dashboardData.promotionsCompleted / (dashboardData.promotionsCompleted + dashboardData.activePromotions)) * 100).toFixed(1)}% completion rate`}
+                  color="#1976d2"
+                  icon="✅"
+                  trend={6}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 30 }}>
+              <BarChart 
+                data={dashboardData.financialMetrics?.revenueByMonth || []} 
+                title="Monthly Revenue" 
+              />
+            </div>
+
+            <div style={{ marginTop: 10, display: 'flex', gap: '20px' }}>
+              <div style={{ flex: 1 }}>
+                <PieChart 
+                  data={dashboardData.financialMetrics?.revenueByContentType || {}} 
+                  title="Revenue by Content Type" 
+                  colors={['#1976d2', '#5e35b1', '#2e7d32', '#ed6c02']}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ 
+                  backgroundColor: 'white', 
+                  borderRadius: '12px', 
+                  padding: '20px', 
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                  marginBottom: '24px'
+                }}>
+                  <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>Transaction Metrics</h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                    <div style={{ flex: '1 0 50%', padding: '10px' }}>
+                      <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>Avg. Order Value</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1976d2' }}>
+                        ${dashboardData.financialMetrics?.transactionTrends?.averageOrderValue}
+                      </div>
+                    </div>
+                    <div style={{ flex: '1 0 50%', padding: '10px' }}>
+                      <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>Conversion Rate</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2e7d32' }}>
+                        {dashboardData.financialMetrics?.transactionTrends?.conversionRate}%
+                      </div>
+                    </div>
+                    <div style={{ flex: '1 0 50%', padding: '10px' }}>
+                      <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>Repeat Purchase Rate</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#5e35b1' }}>
+                        {dashboardData.financialMetrics?.transactionTrends?.repeatPurchaseRate}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      
+      default:
+        return (
+          <div>No content available for this tab</div>
+        );
+    }
+  };
+
   return (
-    <div style={{ marginTop: 24, padding: '0 24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0 }}>Admin Dashboard</h2>
-        <div style={{ background: '#1976d2', color: 'white', padding: '8px 16px', borderRadius: '4px' }}>
-          <strong>{user.name} (Admin)</strong>
+    <div style={{ marginTop: 24, padding: '0 24px 40px', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        marginBottom: '20px',
+        backgroundColor: 'white',
+        padding: '15px 20px',
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+      }}>
+        <h2 style={{ margin: 0, color: '#333', fontSize: '1.8rem' }}>Admin Dashboard</h2>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          background: '#f5f5f5', 
+          padding: '8px 16px', 
+          borderRadius: '8px'
+        }}>
+          <div style={{ 
+            width: '40px', 
+            height: '40px', 
+            borderRadius: '50%', 
+            backgroundColor: '#1976d2', 
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+            marginRight: '10px'
+          }}>
+            {user.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style={{ fontWeight: '600' }}>{user.name}</div>
+            <div style={{ fontSize: '0.8rem', color: '#666' }}>Administrator</div>
+          </div>
+          
+          <button onClick={refreshData} style={{
+            marginLeft: '20px',
+            backgroundColor: '#1976d2',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            opacity: refreshing ? 0.7 : 1
+          }}>
+            <span style={{ marginRight: '5px' }}>↻</span>
+            {refreshing ? 'Refreshing...' : 'Refresh Data'}
+          </button>
         </div>
       </div>
 
-      <div style={{ marginTop: 24 }}>
-        <h3>Overview</h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-8px' }}>
-          <StatCard 
-            title="Total Users" 
-            value={analytics.totalUsers}
-            subtitle={`${analytics.newUsersToday} new today`}
-          />
-          <StatCard 
-            title="Total Content" 
-            value={analytics.totalContent}
-            subtitle={`${analytics.newContentToday} new today`}
-          />
-          <StatCard 
-            title="Total Revenue" 
-            value={analytics.totalRevenue}
-            subtitle={`$${analytics.revenueToday} today`}
-            color="#2e7d32"
-          />
-          <StatCard 
-            title="Active Promotions" 
-            value={analytics.activePromotions}
-            subtitle={`${analytics.scheduledPromotions} scheduled`}
-            color="#ed6c02"
-          />
-        </div>
+      <div style={{ 
+        display: 'flex', 
+        marginBottom: '25px',
+        backgroundColor: 'white',
+        padding: '10px',
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        justifyContent: 'center'
+      }}>
+        <TabButton name="overview" label="Overview" icon="📊" />
+        <TabButton name="users" label="User Analytics" icon="👥" />
+        <TabButton name="content" label="Content Performance" icon="📄" />
+        <TabButton name="revenue" label="Revenue & Finance" icon="💰" />
       </div>
 
-      <div style={{ marginTop: 24 }}>
-        <h3>User Engagement</h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-8px' }}>
-          <StatCard 
-            title="Active Users" 
-            value={analytics.activeUsers}
-            subtitle={`${analytics.activeUsersLastWeek} last week`}
-          />
-          <StatCard 
-            title="Engagement Rate" 
-            value={`${(analytics.engagementRate * 100).toFixed(1)}%`}
-            subtitle={`${analytics.engagementChange > 0 ? '+' : ''}${(analytics.engagementChange * 100).toFixed(1)}% change`}
-          />
-          <StatCard 
-            title="Power Users" 
-            value={analytics.userSegmentation.powerUsers}
-            subtitle={`${((analytics.userSegmentation.powerUsers / analytics.userSegmentation.total) * 100).toFixed(1)}% of total users`}
-          />
-        </div>
-      </div>
-
-      <div style={{ marginTop: 24 }}>
-        <h3>Content Performance</h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-8px' }}>
-          <StatCard 
-            title="High Performing" 
-            value={analytics.contentPerformance.high}
-            color="#2e7d32"
-          />
-          <StatCard 
-            title="Medium Performing" 
-            value={analytics.contentPerformance.medium}
-            color="#ed6c02"
-          />
-          <StatCard 
-            title="Low Performing" 
-            value={analytics.contentPerformance.low}
-            color="#d32f2f"
-          />
-          <StatCard 
-            title="Avg Revenue/Content" 
-            value={analytics.avgRevenuePerContent}
-            color="#2e7d32"
-          />
-        </div>
-      </div>
-
-      <div style={{ marginTop: 24, marginBottom: 24 }}>
-        <h3>Revenue Metrics</h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-8px' }}>
-          <StatCard 
-            title="Avg Revenue/User" 
-            value={analytics.avgRevenuePerUser}
-            color="#2e7d32"
-          />
-          <StatCard 
-            title="Projected Monthly" 
-            value={analytics.projectedMonthlyRevenue}
-            subtitle="Based on current growth"
-            color="#2e7d32"
-          />
-          <StatCard 
-            title="Completed Promotions" 
-            value={analytics.promotionsCompleted}
-            subtitle={`${((analytics.promotionsCompleted / (analytics.promotionsCompleted + analytics.activePromotions)) * 100).toFixed(1)}% completion rate`}
-          />
-        </div>
-      </div>
+      {renderDashboardContent()}
     </div>
   );
 }
 
-export default AdminDashboard;

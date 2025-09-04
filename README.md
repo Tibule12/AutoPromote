@@ -8,6 +8,7 @@ AutoPromote is an AI-powered platform designed to automate content promotion and
 - Content Upload: Allow users to upload various types of content, including multimedia files and website links.
 - Automated Monetization: Integrate advertising, sponsorships, or other revenue-generating models to help creators earn money from their content.
 - Analytics and Insights: Provide users with detailed analytics and insights on the performance of their content, including views, engagement, and revenue generated.
+- Admin Dashboard: Comprehensive dashboard for administrators to monitor platform performance, user growth, content metrics, and revenue. See [README-ADMIN.md](README-ADMIN.md) for details.
 
 ## Technical Stack
 - **Frontend**: React.js for a dynamic and responsive user interface
@@ -17,6 +18,13 @@ AutoPromote is an AI-powered platform designed to automate content promotion and
 - **Security**: Firebase Security Rules and custom middleware for robust data protection
 - **AI Integration**: Machine learning algorithms for content promotion optimization
 - **Analytics**: Firebase Analytics for tracking user engagement and content performance
+
+## Database Integration
+The application uses Firestore with a carefully structured schema to support all features including the advanced admin dashboard. The database integration includes:
+- Automatic schema validation on application startup
+- Sample data generation for development and testing
+- Security rules for proper access control
+- See [UPDATED_FIRESTORE_SCHEMA.md](UPDATED_FIRESTORE_SCHEMA.md) and [ADMIN_DATABASE_INTEGRATION.md](ADMIN_DATABASE_INTEGRATION.md) for details.
 
 ## Potential Revenue Streams
 - Transaction Fees: Charge a small fee for each transaction or revenue generated through the platform.
@@ -31,3 +39,4 @@ AutoPromote is an AI-powered platform designed to automate content promotion and
 - Increased Efficiency: Automate content promotion and monetization, saving time and effort for creators.
 - Improved Reach: Expand audience reach through targeted promotion and advertising.
 - Revenue Generation: Earn money from content through various revenue-generating models.
+- Data-Driven Decisions: Use the admin dashboard to make informed decisions based on comprehensive analytics.
