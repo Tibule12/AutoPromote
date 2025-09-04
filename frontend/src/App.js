@@ -398,21 +398,19 @@ function App() {
         tokenLength: userData.token.length
       });
       
-      // Update the user data with definitive admin status
+      // Always treat admin login response as admin
+      const forceAdmin = userData.role === 'admin' || userData.isAdmin === true;
       const updatedUserData = {
         ...userData,
-        role: isAdminUser ? 'admin' : userData.role,
-        isAdmin: isAdminUser
+        role: forceAdmin ? 'admin' : userData.role,
+        isAdmin: forceAdmin
       };
-      // Store the complete user data
       localStorage.setItem('user', JSON.stringify(updatedUserData));
-      // Update the state
       setUser(updatedUserData);
-      setIsAdmin(isAdminUser);
+      setIsAdmin(forceAdmin);
       setShowLogin(false);
-      console.log('Login successful:', updatedUserData.role, 'IsAdmin:', isAdminUser);
-      // Redirect admin to dashboard
-      if (isAdminUser) {
+      console.log('Login successful:', updatedUserData.role, 'IsAdmin:', forceAdmin);
+      if (forceAdmin) {
         await fetchAnalytics();
         window.location.pathname = '/admin-dashboard';
       } else {
