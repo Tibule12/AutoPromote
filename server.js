@@ -34,6 +34,7 @@ const corsOptions = {
     'http://localhost:3001', 
     'http://localhost:3002',
     'https://autopromote-app.vercel.app', // Add your deployed frontend URL when available
+    'https://tibule12.github.io', // Allow GitHub Pages frontend
     process.env.FRONTEND_URL // Allow dynamic frontend URL from environment
   ].filter(Boolean), // Remove any undefined values
   credentials: true,
