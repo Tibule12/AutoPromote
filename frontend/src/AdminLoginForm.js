@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebaseClient';
+import { API_ENDPOINTS } from './config';
 import './Auth.css';
 
 const AdminLoginForm = ({ onLogin }) => {
@@ -33,12 +34,11 @@ const AdminLoginForm = ({ onLogin }) => {
       // Get the ID token
       const idToken = await user.getIdToken(true);  // Force refresh the token to ensure it's up-to-date
 
-      // Verify token and get user data from our backend - use admin-specific endpoint
-      const apiUrl = 'http://localhost:5000'; // Updated port to 5000
-      console.log('Using API URL for admin login:', apiUrl);
+      // Use the API_ENDPOINTS from config.js
+      console.log('Using API endpoint for admin login:', API_ENDPOINTS.ADMIN_LOGIN);
       
       try {
-        const response = await fetch(`${apiUrl}/api/auth/admin-login`, {
+        const response = await fetch(API_ENDPOINTS.ADMIN_LOGIN, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
