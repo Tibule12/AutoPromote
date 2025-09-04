@@ -6,12 +6,15 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { API_ENDPOINTS } from './config';
 import LoginForm from './LoginForm';
 import AdminLoginForm from './AdminLoginForm';
+import AdminLoginFix from './AdminLoginFix';
 import RegisterForm from './RegisterForm';
 import ContentUploadForm from './ContentUploadForm';
 import ContentList from './ContentList';
 import AdminDashboard from './AdminDashboard';
 import EnvTest from './components/EnvTest';
 import EnvChecker from './components/EnvChecker';
+import DatabaseSync from './components/DatabaseSync';
+import IntegrationTester from './components/IntegrationTester';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -616,6 +619,8 @@ function App() {
     <div className="App">
       <EnvTest />
       <EnvChecker />
+      {/* Add the database schema sync component */}
+      <DatabaseSync />
       <header className="App-header">
         <h1>AutoPromote</h1>
         <nav>
@@ -623,6 +628,11 @@ function App() {
             <div>
               <span>Welcome, {user.name}!</span>
               <button onClick={handleLogout}>Logout</button>
+              {isAdmin && (
+                <button onClick={() => window.location.href = '/integration-test'} style={{ marginLeft: '10px' }}>
+                  Run Tests
+                </button>
+              )}
             </div>
           ) : (
             <div>
@@ -676,7 +686,7 @@ function App() {
           </>
         )}
 
-        {!user && !showLogin && !showRegister && (
+        {!user && !showLogin && !showRegister && !showAdminLogin && (
           <div className="WelcomeSection" style={{
             display: 'flex',
             flexDirection: 'column',
@@ -716,7 +726,34 @@ function App() {
             >
               Get Started
             </button>
+            
+            <div style={{ marginTop: '30px' }}>
+              <button 
+                onClick={() => setShowAdminLogin(true)}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  color: '#fff',
+                  border: '1px solid rgba(255,255,255,0.4)',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                }}
+              >
+                Admin Login
+              </button>
+            </div>
           </div>
+        )}
+        
+        {/* Add the direct admin login fix component */}
+        {!user && !showLogin && !showRegister && !showAdminLogin && (
+          <AdminLoginFix />
+        )}
+        
+        {/* Integration Tester - only shown for admin users when URL path is /integration-test */}
+        {isAdmin && window.location.pathname === '/integration-test' && (
+          <IntegrationTester />
         )}
       </main>
     </div>
