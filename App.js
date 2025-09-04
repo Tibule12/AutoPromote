@@ -11,6 +11,9 @@ import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import AdminDashboard from './AdminDashboard';
 
+// Import API configuration
+import { API_BASE_URL, apiUrl } from './config/apiConfig';
+
 const auth = getAuth(app);
 const storage = getStorage(app);
 const STORAGE_PATH = 'uploads';
@@ -44,7 +47,7 @@ function App() {
   // Fetch user profile from backend (which gets it from Supabase)
   const fetchUserProfile = async () => {
     try {
-      const res = await fetch('https://autopromote.onrender.com/api/users/profile', {
+      const res = await fetch(apiUrl('/api/users/profile'), {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -61,7 +64,7 @@ function App() {
 
   const fetchUserContent = async () => {
     try {
-      const res = await fetch('https://autopromote.onrender.com/api/content/my-content', {
+      const res = await fetch(apiUrl('/api/content/my-content'), {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -83,7 +86,7 @@ function App() {
 
   const fetchAnalytics = async () => {
     try {
-      const res = await fetch('https://autopromote.onrender.com/api/admin/analytics/overview', {
+      const res = await fetch(apiUrl('/api/admin/analytics/overview'), {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -117,7 +120,7 @@ function App() {
         console.log('Firebase Auth successful, sending ID token to backend');
         
         // Send the token to the backend
-        const res = await fetch('https://autopromote.onrender.com/api/auth/login', {
+        const res = await fetch(apiUrl('/api/auth/login'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -142,7 +145,7 @@ function App() {
       
       // Second try: Send credentials directly to backend
       console.log('Trying direct backend authentication');
-      const res = await fetch('https://autopromote.onrender.com/api/auth/login', {
+      const res = await fetch(apiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -239,7 +242,7 @@ function App() {
         description: contentData.description || '',
       };
 
-      const res = await fetch('https://autopromote.onrender.com/api/content/upload', {
+      const res = await fetch(apiUrl('/api/content/upload'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
