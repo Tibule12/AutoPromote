@@ -1,27 +1,6 @@
 const express = require('express');
 const admin = require('firebase-admin');
-con      } else if (email && password) {
-      console.log('Using email/password authentication...');
-      // This is a more risky approach as we're handling credentials directly
-      // Sign in with email and password using admin SDK
-      try {
-        const userRecord = await admin.auth().getUserByEmail(email);
-        // We can't verify the password directly with Admin SDK
-        // Creating a custom token for the user
-        const customToken = await admin.auth().createCustomToken(userRecord.uid);
-        
-        // Instead of directly using this as decoded token, we should provide 
-        // the custom token to the client and have them exchange it for an ID token
-        decodedToken = {
-          uid: userRecord.uid,
-          email: userRecord.email,
-          name: userRecord.displayName || email.split('@')[0]
-        };
-        console.log('Email/password auth successful, user:', decodedToken);
-      } catch (error) {
-        console.error('Email/password authentication failed:', error);
-        return res.status(401).json({ error: 'Invalid email or password' });
-      }.Router();
+const router = express.Router();
 
 // Middleware to verify Firebase token
 const verifyFirebaseToken = async (req, res, next) => {
@@ -108,6 +87,9 @@ router.post('/login', async (req, res) => {
         // We can't verify the password directly with Admin SDK
         // Creating a custom token for the user
         const customToken = await admin.auth().createCustomToken(userRecord.uid);
+        
+        // Instead of directly using this as decoded token, we should provide 
+        // the custom token to the client and have them exchange it for an ID token
         decodedToken = {
           uid: userRecord.uid,
           email: userRecord.email,
