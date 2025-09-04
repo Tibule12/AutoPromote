@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithCustomToken } from 'firebase/auth';
 import { app } from './firebaseConfig';
 
 // Import all required components
@@ -150,7 +150,29 @@ function App() {
       
       if (res.ok) {
         const data = await res.json();
-        setUser({ ...data.user, token: data.token });
+        
+        // If we receive a custom token, we need to exchange it for an ID token
+        if (data.token && !data.token.startsWith('eyJ')) {
+          try {
+            // Exchange the custom token for an ID token
+            const auth = getAuth();
+            const userCredential = await signInWithCustomToken(auth, data.token);
+            const user = userCredential.user;
+            const idToken = await user.getIdToken();
+            
+            // Now use the ID token
+            setUser({ ...data.user, token: idToken });
+            console.log('Exchanged custom token for ID token, length:', idToken.length);
+          } catch (tokenExchangeError) {
+            console.error('Failed to exchange custom token:', tokenExchangeError);
+            // Still use the token we got, even if not ideal
+            setUser({ ...data.user, token: data.token });
+          }
+        } else {
+          // Use the token as is (likely already an ID token)
+          setUser({ ...data.user, token: data.token });
+        }
+        
         setShowLogin(false);
       } else {
         const errorData = await res.json();

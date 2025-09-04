@@ -8,6 +8,18 @@ const authMiddleware = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({ error: 'No token provided' });
     }
+    
+    // Log the first 10 chars of token for debugging
+    console.log('Token preview:', token.substring(0, 10) + '...');
+    
+    // Check if this is a custom token (shouldn't be used directly for auth)
+    if (token.length < 100 || !token.startsWith('eyJ')) {
+      console.log('Warning: Received token does not appear to be a valid Firebase ID token');
+      return res.status(401).json({ 
+        error: 'Invalid token format', 
+        message: 'Please exchange your custom token for an ID token before making authenticated requests'
+      });
+    }
 
     // Verify Firebase token
     const decodedToken = await auth.verifyIdToken(token);
