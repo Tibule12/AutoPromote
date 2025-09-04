@@ -142,9 +142,41 @@ app.get('/api/health', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.log('Server error:', err.message);
+  
+  // Provide more specific error messages for common errors
+  if (err.name === 'FirebaseError') {
+    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+      return res.status(401).json({ 
+        error: 'Authentication failed',
+        message: 'Invalid email or password' 
+      });
+    } else if (err.code === 'auth/id-token-expired') {
+      return res.status(401).json({ 
+        error: 'Authentication failed',
+        message: 'Your session has expired. Please login again.' 
+      });
+    } else if (err.code === 'auth/id-token-revoked') {
+      return res.status(401).json({ 
+        error: 'Authentication failed',
+        message: 'Your session has been revoked. Please login again.' 
+      });
+    }
+  }
+  
+  // For validation errors, return a 400
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({ 
+      error: 'Validation error',
+      message: err.message 
+    });
+  }
+  
+  // Default error response
   res.status(500).json({ 
     error: 'Internal server error',
-    message: err.message 
+    message: process.env.NODE_ENV === 'production' 
+      ? 'Something went wrong. Please try again later.'
+      : err.message 
   });
 });
 
