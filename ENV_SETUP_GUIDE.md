@@ -4,54 +4,68 @@
 
 Create a `.env` file in the root directory with the following variables:
 
-```
-# Supabase Configuration
-SUPABASE_URL=your_supabase_project_url_here
+```env
+# Firebase Backend Config (Service Account)
+FIREBASE_PRIVATE_KEY_JSON=your_service_account_json_here
 
-# IMPORTANT: Use Service Role Key (not anon key) to bypass RLS
-SUPABASE_ANON_KEY=your_supabase_service_role_key_here
+# Firebase Client Config (Frontend)
+REACT_APP_FIREBASE_API_KEY=your_firebase_api_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+REACT_APP_FIREBASE_APP_ID=your_app_id
+REACT_APP_FIREBASE_MEASUREMENT_ID=your_measurement_id
 
-# JWT Secret (must be at least 32 characters)
-JWT_SECRET=your_very_long_and_secure_jwt_secret_here_at_least_32_characters
-
-# Server Configuration
+# Other Backend Settings
+JWT_SECRET=your_jwt_secret_for_additional_token_signing
+NODE_ENV=development
 PORT=5000
 
 # Optional: Allowed CORS origins (comma-separated)
 ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
 ```
 
-## Getting Service Role Key
+## Getting Firebase Configuration
 
-1. Go to your Supabase dashboard
-2. Navigate to Settings > API
-3. Copy the "service_role" key (not the anon key)
-4. Use this as your `SUPABASE_ANON_KEY` value
+1. **Service Account Setup**:
+   - Go to Firebase Console > Project Settings > Service Accounts
+   - Click "Generate New Private Key"
+   - Save the JSON file and copy its contents to `FIREBASE_PRIVATE_KEY_JSON`
 
-## Generating JWT Secret
-
-Run this command to generate a strong JWT secret:
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-Or use the provided script:
-```bash
-npm run generate-secret
-```
+2. **Web App Configuration**:
+   - Go to Firebase Console > Project Settings > Your Apps
+   - Create a web app if you haven't already
+   - Copy the configuration object values to the respective `REACT_APP_FIREBASE_*` variables
 
 ## Testing Setup
 
 After setting up your `.env` file, test the configuration:
 ```bash
 node test-env.js
-node simple-supabase-test.js
+node test-firebase-connection.js
 ```
 
-## Starting the Server
+## Running the Server
 
 ```bash
 node start-server.js
 ```
 
-For more details on Supabase RLS issues, see `SUPABASE_SETUP.md`
+## Setting Up Firebase Security Rules
+
+1. **Firestore Rules** (`firestore.rules`):
+   - Ensure proper access control for your data
+   - Deploy using `firebase deploy --only firestore:rules`
+
+2. **Storage Rules** (`storage.rules`):
+   - Configure access rules for file uploads
+   - Deploy using `firebase deploy --only storage`
+
+## Additional Security Considerations
+
+- Keep your Firebase service account JSON private
+- Set appropriate security rules in Firestore and Storage
+- Use Firebase Authentication for user management
+- Implement proper role-based access control
+- Regularly update Firebase SDK dependencies

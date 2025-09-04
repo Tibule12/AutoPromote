@@ -1,0 +1,30 @@
+{
+  "server": {
+    "status": "Failed",
+    "details": {
+      "error": "request to http://localhost:5000/api/health failed, reason: ",
+      "status": 500
+    }
+  },
+  "firebase": {
+    "status": "Not Tested",
+    "details": {}
+  },
+  "auth": {
+    "status": "Not Tested",
+    "details": {}
+  },
+  "content": {
+    "status": "Not Tested",
+    "details": {}
+  },
+  "admin": {
+    "status": "Not Tested",
+    "details": {}
+  },
+  "analytics": {
+    "status": "Not Tested",
+    "details": {}
+  },
+  "overall": "Failed"
+}

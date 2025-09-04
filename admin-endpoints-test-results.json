@@ -1,0 +1,15 @@
+{
+  "adminLogin": {
+    "status": 401,
+    "data": {
+      "error": "Admin authentication failed"
+    }
+  },
+  "overview": null,
+  "users": null,
+  "content": null,
+  "platformPerformance": null,
+  "revenueTrends": null,
+  "promotionPerformance": null,
+  "optimizationRecommendations": null
+}

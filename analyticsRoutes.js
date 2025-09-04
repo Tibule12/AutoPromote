@@ -1,201 +1,74 @@
 const express = require('express');
-const supabase = require('./supabaseClient');
+const { db } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
 const router = express.Router();
 
-// Get overall platform analytics
+// Get content analytics
+router.get('/content/:id', authMiddleware, async (req, res) => {
+  try {
+    const contentId = req.params.id;
+    
+    const contentRef = db.collection('content').doc(contentId);
+    const contentDoc = await contentRef.get();
+    
+    if (!contentDoc.exists) {
+      return res.status(404).json({ error: 'Content not found' });
+    }
+
+    const content = contentDoc.data();
+    
+    // Check if user has permission to view this content's analytics
+    if (content.userId !== req.user.uid && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Get analytics data
+    const analyticsRef = db.collection('analytics').doc(contentId);
+    const analyticsDoc = await analyticsRef.get();
+    const analytics = analyticsDoc.exists ? analyticsDoc.data() : {
+      views: 0,
+      likes: 0,
+      shares: 0,
+      revenue: 0
+    };
+
+    res.json({ analytics });
+  } catch (error) {
+    console.error('Error getting content analytics:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user analytics overview
 router.get('/overview', authMiddleware, async (req, res) => {
   try {
-    // Get total content count
-    const { count: totalContent, error: contentError } = await supabase
-      .from('content')
-      .select('*', { count: 'exact' })
-      .eq('user_id', req.userId);
-
-    // Get total views
-    const { data: viewsData, error: viewsError } = await supabase
-      .from('content')
-      .select('views')
-      .eq('user_id', req.userId);
-
-    const totalViews = viewsData?.reduce((sum, item) => sum + (item.views || 0), 0) || 0;
-
-    // Get total revenue
-    const { data: revenueData, error: revenueError } = await supabase
-      .from('content')
-      .select('revenue')
-      .eq('user_id', req.userId);
-
-    const totalRevenue = revenueData?.reduce((sum, item) => sum + (item.revenue || 0), 0) || 0;
-
-    // Get content by type
-    const { data: typeData, error: typeError } = await supabase
-      .from('content')
-      .select('type, views, revenue')
-      .eq('user_id', req.userId);
-
-    const contentByType = {};
-    typeData?.forEach(item => {
-      if (!contentByType[item.type]) {
-        contentByType[item.type] = { count: 0, views: 0, revenue: 0 };
-      }
-      contentByType[item.type].count++;
-      contentByType[item.type].views += item.views || 0;
-      contentByType[item.type].revenue += item.revenue || 0;
-    });
-
-    // Get daily performance (last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const contentRef = db.collection('content').where('userId', '==', req.user.uid);
+    const contentSnapshot = await contentRef.get();
     
-    const { data: dailyData, error: dailyError } = await supabase
-      .from('content')
-      .select('created_at, views, revenue')
-      .eq('user_id', req.userId)
-      .gte('created_at', sevenDaysAgo.toISOString())
-      .order('created_at', { ascending: true });
-
-    const dailyPerformance = {};
-    dailyData?.forEach(item => {
-      const date = new Date(item.created_at).toISOString().split('T')[0];
-      if (!dailyPerformance[date]) {
-        dailyPerformance[date] = { views: 0, revenue: 0, content: 0 };
-      }
-      dailyPerformance[date].views += item.views || 0;
-      dailyPerformance[date].revenue += item.revenue || 0;
-      dailyPerformance[date].content++;
+    let totalViews = 0;
+    let totalLikes = 0;
+    let totalShares = 0;
+    let totalRevenue = 0;
+    
+    contentSnapshot.forEach(doc => {
+      const content = doc.data();
+      totalViews += content.views || 0;
+      totalLikes += content.likes || 0;
+      totalShares += content.shares || 0;
+      totalRevenue += content.revenue || 0;
     });
 
     res.json({
       overview: {
-        totalContent: totalContent || 0,
+        totalContent: contentSnapshot.size,
         totalViews,
-        totalRevenue,
-        averageViewsPerContent: totalContent ? Math.round(totalViews / totalContent) : 0,
-        averageRevenuePerContent: totalContent ? Math.round(totalRevenue / totalContent) : 0
-      },
-      contentByType,
-      dailyPerformance: Object.entries(dailyPerformance).map(([date, stats]) => ({
-        date,
-        ...stats
-      }))
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get revenue analytics
-router.get('/revenue', authMiddleware, async (req, res) => {
-  try {
-    const { data: revenueData, error } = await supabase
-      .from('content')
-      .select('title, views, revenue, created_at, type')
-      .eq('user_id', req.userId)
-      .order('revenue', { ascending: false });
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    // Calculate revenue metrics
-    const totalRevenue = revenueData?.reduce((sum, item) => sum + (item.revenue || 0), 0) || 0;
-    const topPerforming = revenueData?.slice(0, 5) || [];
-    const revenueByType = {};
-
-    revenueData?.forEach(item => {
-      if (!revenueByType[item.type]) {
-        revenueByType[item.type] = 0;
+        totalLikes,
+        totalShares,
+        totalRevenue
       }
-      revenueByType[item.type] += item.revenue || 0;
-    });
-
-    res.json({
-      totalRevenue,
-      averageRPM: 900000, // Fixed revenue per million
-      topPerforming,
-      revenueByType,
-      allContent: revenueData
     });
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get platform performance
-router.get('/platforms', authMiddleware, async (req, res) => {
-  try {
-    const { data: contentData, error } = await supabase
-      .from('content')
-      .select('target_platforms, views, revenue')
-      .eq('user_id', req.userId);
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    const platformPerformance = {};
-    contentData?.forEach(item => {
-      const platforms = item.target_platforms || [];
-      platforms.forEach(platform => {
-        if (!platformPerformance[platform]) {
-          platformPerformance[platform] = { views: 0, revenue: 0, contentCount: 0 };
-        }
-        platformPerformance[platform].views += item.views || 0;
-        platformPerformance[platform].revenue += item.revenue || 0;
-        platformPerformance[platform].contentCount++;
-      });
-    });
-
-    res.json({ platformPerformance });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get performance trends
-router.get('/trends', authMiddleware, async (req, res) => {
-  try {
-    const { period = '7d' } = req.query;
-    let days = 7;
-    
-    if (period === '30d') days = 30;
-    if (period === '90d') days = 90;
-
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-
-    const { data: trendData, error } = await supabase
-      .from('content')
-      .select('created_at, views, revenue')
-      .eq('user_id', req.userId)
-      .gte('created_at', startDate.toISOString())
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    // Group by date
-    const trends = {};
-    trendData?.forEach(item => {
-      const date = new Date(item.created_at).toISOString().split('T')[0];
-      if (!trends[date]) {
-        trends[date] = { views: 0, revenue: 0, content: 0 };
-      }
-      trends[date].views += item.views || 0;
-      trends[date].revenue += item.revenue || 0;
-      trends[date].content++;
-    });
-
-    res.json({
-      period,
-      trends: Object.entries(trends).map(([date, stats]) => ({
-        date,
-        ...stats
-      }))
-    });
-  } catch (error) {
+    console.error('Error getting analytics overview:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
