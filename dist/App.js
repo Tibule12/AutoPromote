@@ -1,0 +1,348 @@
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithCustomToken } from 'firebase/auth';
+import { app } from './firebaseConfig';
+
+// Import all required components
+import ContentUploadForm from './ContentUploadForm';
+import ContentList from './ContentList';
+import LoginForm from './LoginForm';
+import RegisterForm from './RegisterForm';
+import AdminDashboard from './AdminDashboard';
+
+// Import API configuration
+import { API_BASE_URL, apiUrl } from './config/apiConfig';
+
+const auth = getAuth(app);
+const storage = getStorage(app);
+const STORAGE_PATH = 'uploads';
+
+function App() {
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [content, setContent] = useState([]);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [analytics, setAnalytics] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+      setIsAdmin(user.role === 'admin');
+      fetchUserProfile();
+      fetchUserContent();
+      if (user.role === 'admin') {
+        fetchAnalytics();
+      }
+    } else {
+      localStorage.removeItem('user');
+    }
+    // eslint-disable-next-line
+  }, [user]);
+
+  // Fetch user profile from backend (which gets it from Supabase)
+  const fetchUserProfile = async () => {
+    try {
+      const res = await fetch(apiUrl('/api/users/profile'), {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error);
+    }
+  };
+
+  const fetchUserContent = async () => {
+    try {
+      const res = await fetch(apiUrl('/api/content/my-content'), {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
+      if (!res.ok) {
+        console.error('Failed to fetch content: HTTP', res.status);
+        return;
+      }
+      const data = await res.json();
+      setContent(data.content || []);
+    } catch (error) {
+      console.error('Failed to fetch content:', error);
+    }
+  };
+
+  const fetchAnalytics = async () => {
+    try {
+      const res = await fetch(apiUrl('/api/admin/analytics/overview'), {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
+      if (!res.ok) {
+        console.error('Failed to fetch analytics: HTTP', res.status);
+        return;
+      }
+      const data = await res.json();
+      setAnalytics(data);
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error);
+    }
+  };
+
+  const loginUser = async (email, password) => {
+    try {
+      console.log('Attempting login with email and password');
+      
+      // First try: Use direct Firebase Auth and get the ID token
+      try {
+        const auth = getAuth();
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        const idToken = await user.getIdToken();
+        
+        console.log('Firebase Auth successful, sending ID token to backend');
+        
+        // Send the token to the backend
+        const res = await fetch(apiUrl('/api/auth/login'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            idToken,
+            email
+          }),
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          setUser({ ...data.user, token: data.token });
+          setShowLogin(false);
+          return;
+        } else {
+          console.error('Backend verification failed with token');
+          // Fall through to second approach
+        }
+      } catch (firebaseError) {
+        console.error('Firebase Auth error:', firebaseError);
+        // Fall through to second approach
+      }
+      
+      // Second try: Send credentials directly to backend
+      console.log('Trying direct backend authentication');
+      const res = await fetch(apiUrl('/api/auth/login'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        
+        // If we receive a custom token, we need to exchange it for an ID token
+        if (data.token && !data.token.startsWith('eyJ')) {
+          try {
+            // Exchange the custom token for an ID token
+            const auth = getAuth();
+            const userCredential = await signInWithCustomToken(auth, data.token);
+            const user = userCredential.user;
+            const idToken = await user.getIdToken();
+            
+            // Now use the ID token
+            setUser({ ...data.user, token: idToken });
+            console.log('Exchanged custom token for ID token, length:', idToken.length);
+          } catch (tokenExchangeError) {
+            console.error('Failed to exchange custom token:', tokenExchangeError);
+            // Still use the token we got, even if not ideal
+            setUser({ ...data.user, token: data.token });
+          }
+        } else {
+          // Use the token as is (likely already an ID token)
+          setUser({ ...data.user, token: data.token });
+        }
+        
+        setShowLogin(false);
+      } else {
+        const errorData = await res.json();
+        console.error('Login failed:', errorData);
+        alert('Login failed: ' + (errorData.error || 'Invalid credentials'));
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login error: ' + (error.message || 'Connection error'));
+    }
+  };
+
+  const handleLogin = (userData) => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('adminToken');
+    setUser(userData);
+    setShowLogin(false);
+  };
+
+  const handleRegister = (userData) => {
+    setUser(userData);
+    setShowRegister(false);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setContent([]);
+    setAnalytics(null);
+    setIsAdmin(false);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('adminToken');
+  };
+
+  // Firebase-powered upload
+  const handleUploadContent = async (contentData) => {
+    try {
+      let url = '';
+      if (contentData.type === 'article') {
+        url = contentData.articleText || '';
+      } else {
+        // Upload file to Firebase Storage
+        const file = contentData.file;
+        if (!file) {
+          alert('No file selected!');
+          return;
+        }
+        const filePath = `${STORAGE_PATH}/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, filePath);
+        
+        await uploadBytes(storageRef, file);
+        url = await getDownloadURL(storageRef);
+        
+        if (!url) {
+          alert('Could not get public URL for uploaded file.');
+          return;
+        }
+      }
+
+      const payload = {
+        title: contentData.title,
+        type: contentData.type,
+        url,
+        description: contentData.description || '',
+      };
+
+      const res = await fetch(apiUrl('/api/content/upload'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        fetchUserContent();
+      } else {
+        const error = await res.json();
+        console.error('Failed to upload content', error);
+        alert(error.error || 'Failed to upload content');
+      }
+    } catch (error) {
+      console.error('Error uploading content:', error);
+      alert('Error uploading content: ' + error.message);
+    }
+  };
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>AutoPromote</h1>
+        <nav>
+          {user ? (
+            <div>
+              <span>Welcome, {user.name}!</span>
+              <button onClick={handleLogout}>Logout</button>
+            </div>
+          ) : (
+            <div>
+              <button onClick={() => { setShowLogin(true); setShowRegister(false); }}>Login</button>
+              <button onClick={() => { setShowRegister(true); setShowLogin(false); }}>Register</button>
+            </div>
+          )}
+        </nav>
+      </header>
+
+      <main>
+        {showLogin && <LoginForm onLogin={handleLogin} loginUser={loginUser} />}
+        {showRegister && <RegisterForm onRegister={handleRegister} />}
+
+        {user && !isAdmin && (
+          <div>
+            <ContentUploadForm onUpload={handleUploadContent} />
+            <ContentList content={content} />
+          </div>
+        )}
+
+        {user && isAdmin && (
+          <AdminDashboard analytics={analytics} user={user} />
+        )}
+
+        {!user && !showLogin && !showRegister && (
+          <div className="WelcomeSection" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60vh',
+            background: 'linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)',
+            color: '#fff',
+            borderRadius: '16px',
+            boxShadow: '0 8px 32px rgba(25, 118, 210, 0.2)',
+            padding: '48px 24px',
+            margin: '32px auto',
+            maxWidth: '500px',
+          }}>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="AutoPromote Logo" style={{ width: 80, marginBottom: 24 }} />
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: 16 }}>Welcome to AutoPromote</h2>
+            <p style={{ fontSize: '1.2rem', marginBottom: 32, textAlign: 'center', maxWidth: 400 }}>
+              <span style={{ fontWeight: 500 }}>AI-powered platform</span> for content promotion and monetization.<br />
+              Grow your audience, boost your revenue, and automate your success.
+            </p>
+            <button 
+              onClick={() => setShowRegister(true)}
+              style={{
+                background: '#fff',
+                color: '#1976d2',
+                fontWeight: 600,
+                fontSize: '1.1rem',
+                padding: '12px 32px',
+                borderRadius: '8px',
+                border: 'none',
+                boxShadow: '0 2px 8px rgba(25, 118, 210, 0.15)',
+                cursor: 'pointer',
+                transition: 'background 0.2s',
+              }}
+              onMouseOver={e => e.target.style.background = '#e3f2fd'}
+              onMouseOut={e => e.target.style.background = '#fff'}
+            >
+              Get Started
+            </button>
+          </div>
+        )}
+      </main>
+   </div>
+  );
+}
+
+export default App;
