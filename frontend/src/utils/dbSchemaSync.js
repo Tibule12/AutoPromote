@@ -2,7 +2,7 @@
 // This file ensures Firebase collections align with admin dashboard requirements
 
 import { collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
-import { db } from './firebaseClient';
+import { db } from '../firebaseClient';
 
 /**
  * Utility class to ensure database schema aligns with admin dashboard
