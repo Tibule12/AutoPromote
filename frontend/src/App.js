@@ -3,6 +3,7 @@ import './App.css';
 import { auth, db, storage } from './firebaseClient';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { API_ENDPOINTS } from './config';
 import LoginForm from './LoginForm';
 import AdminLoginForm from './AdminLoginForm';
 import RegisterForm from './RegisterForm';
@@ -145,7 +146,7 @@ function App() {
 
       // Try remote API
       try {
-        const res = await fetch('https://autopromote.onrender.com/api/content/my-content', {
+        const res = await fetch(API_ENDPOINTS.MY_CONTENT, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -216,7 +217,7 @@ function App() {
       
       // Try remote endpoint directly
       try {
-        const res = await fetch('https://autopromote.onrender.com/api/admin/analytics/overview', {
+        const res = await fetch(API_ENDPOINTS.ADMIN_ANALYTICS, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -269,12 +270,11 @@ function App() {
       console.log('Firebase ID token length:', idToken.length);
 
       // Verify token with our backend
-      const res = await fetch('https://autopromote.onrender.com/api/auth/login', {
+      const res = await fetch(API_ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': 'http://localhost:3000'
+          'Accept': 'application/json'
         },
         body: JSON.stringify({ idToken }),
       });
@@ -313,7 +313,7 @@ function App() {
       console.log('Firebase registration successful, token length:', idToken.length);
       
       // Now register with our backend to create additional user data
-      const res = await fetch('https://autopromote.onrender.com/api/auth/register', {
+      const res = await fetch(API_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -561,13 +561,12 @@ function App() {
             console.log('Attempting remote upload...');
             // Get another fresh token for remote call
             const remoteFreshToken = await firebaseUser.getIdToken(true);
-            res = await fetch('https://autopromote.onrender.com/api/content/upload', {
+            res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${remoteFreshToken}`,
-                'Accept': 'application/json',
-                'Origin': 'http://localhost:3000'
+                'Accept': 'application/json'
               },
               body: JSON.stringify(payload),
             });
