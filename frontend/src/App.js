@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { auth, db, storage } from './firebaseClient';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import LoginForm from './LoginForm';
 import AdminLoginForm from './AdminLoginForm';
@@ -81,95 +81,127 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (user && user.token) {
+    if (user) {
       setIsAdmin(user.role === 'admin');
-      if (user.role === 'admin') {
-        fetchAnalytics();
-      } else {
-        fetchUserContent();
-      }
+      
+      // If we have a user but need a fresh token
+      const getTokenAndFetchData = async () => {
+        try {
+          // Get a fresh token directly from Firebase
+          const currentUser = auth.currentUser;
+          if (!currentUser) {
+            console.log('No Firebase user available, using stored token');
+            return;
+          }
+          
+          const freshToken = await currentUser.getIdToken(true);
+          console.log('Got fresh token from Firebase, length:', freshToken.length);
+          
+          // Store the fresh token
+          const updatedUserData = {
+            ...user,
+            token: freshToken
+          };
+          localStorage.setItem('user', JSON.stringify(updatedUserData));
+          setUser(updatedUserData);
+          
+          // Fetch data with the fresh token
+          if (user.role === 'admin') {
+            fetchAnalytics(freshToken);
+          } else {
+            fetchUserContent(freshToken);
+          }
+        } catch (err) {
+          console.error('Error getting fresh token:', err);
+        }
+      };
+      
+      getTokenAndFetchData();
     }
     // eslint-disable-next-line
   }, [user]);
 
-  const fetchUserContent = async () => {
+  const fetchUserContent = async (providedToken = null) => {
     try {
-      if (!user || !user.token) {
-        console.log('No user or token available');
-        return;
+      // Get the best token we can
+      let token = providedToken;
+      
+      if (!token) {
+        // If no token provided, try to get a fresh one from Firebase
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          token = await currentUser.getIdToken(true);
+          console.log('Generated fresh token for content fetch, length:', token.length);
+        } else if (user && user.token) {
+          token = user.token;
+          console.log('Using stored token for content fetch, length:', token.length);
+        } else {
+          console.log('No user or token available');
+          return;
+        }
       }
 
-      console.log('Fetching user content with fresh token');
+      console.log('Fetching user content with token');
 
-      // Get a fresh token
-      const currentUser = auth.currentUser;
-      const freshToken = currentUser ? await currentUser.getIdToken(true) : user.token;
-
-      // Try local API first, then remote as fallback
-      let res = null;
-      let error = null;
-
+      // Try remote API
       try {
-        res = await fetch('http://localhost:5000/api/content/my-content', {
+        const res = await fetch('https://autopromote.onrender.com/api/content/my-content', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${freshToken}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Origin': 'http://localhost:3000'
+            'Accept': 'application/json'
           },
           mode: 'cors'
         });
-        console.log('Local content fetch response status:', res.status);
-      } catch (localError) {
-        console.warn('Local content fetch API failed, trying remote:', localError);
-        error = localError;
-      }
+        
+        console.log('Content fetch response status:', res.status);
 
-      // If local fails or returns non-2xx, try remote
-      if (!res || !res.ok) {
-        try {
-          res = await fetch('https://autopromote.onrender.com/api/content/my-content', {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${freshToken}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Origin': 'http://localhost:3000'
-            },
-            mode: 'cors'
-          });
-          console.log('Remote content fetch response status:', res.status);
-        } catch (remoteError) {
-          console.error('Remote content fetch API also failed:', remoteError);
-          error = error || remoteError;
-        }
-      }
+        if (!res.ok) {
+          if (res.status === 401) {
+            console.error('Content fetch authentication failed:', await res.text());
+            // Try to refresh token and retry once
+            if (!providedToken && auth.currentUser) {
+              console.log('Token failed, trying with a fresh one...');
+              const freshToken = await auth.currentUser.getIdToken(true);
+              return fetchUserContent(freshToken);
+            }
+            alert('Authentication failed. Please try logging in again.');
+            return;
+          }
 
-      if (!res || !res.ok) {
-        if (res && res.status === 401) {
-          console.error('Content fetch authentication failed:', await res.text());
-          // Don't immediately log out - user might still be valid but token expired
-          alert('Authentication failed. Please try logging in again.');
+          console.error('Failed to fetch content:', res.status);
           return;
         }
 
-        console.error('Failed to fetch content:', res ? res.status : 'No response');
-        return;
+        const data = await res.json();
+        console.log('User content fetched successfully, items:', data.content?.length || 0);
+        setContent(data.content || []);
+      } catch (error) {
+        console.error('Content fetch API failed:', error);
       }
-
-      const data = await res.json();
-      console.log('User content fetched successfully, items:', data.content?.length || 0);
-      setContent(data.content || []);
     } catch (error) {
       console.error('Failed to fetch content:', error);
     }
   };
 
-  const fetchAnalytics = async () => {
-    if (!user || !user.token) {
-      console.log('No user or token available for analytics');
-      return;
+  const fetchAnalytics = async (providedToken = null) => {
+    // Get the best token we can
+    let token = providedToken;
+    
+    if (!token) {
+      // If no token provided, try to get a fresh one from Firebase
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        token = await currentUser.getIdToken(true);
+        console.log('Generated fresh token for analytics fetch, length:', token.length);
+      } else if (user && user.token) {
+        token = user.token;
+        console.log('Using stored token for analytics fetch, length:', token.length);
+      } else {
+        console.log('No user or token available for analytics');
+        return;
+      }
     }
     
     // Check admin status again to be sure
@@ -182,58 +214,45 @@ function App() {
     try {
       console.log('Fetching admin analytics with token');
       
-      // Try both endpoints - first the local one, then the remote one if needed
-      let res = null;
-      let error = null;
-      
+      // Try remote endpoint directly
       try {
-        res = await fetch('http://localhost:5000/api/admin/analytics/overview', {
+        const res = await fetch('https://autopromote.onrender.com/api/admin/analytics/overview', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${user.token}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
         });
-        console.log('Local analytics API response status:', res.status);
-      } catch (localError) {
-        console.warn('Local analytics API failed, trying remote:', localError);
-        error = localError;
-      }
-      
-      // If local fails or returns non-2xx, try remote
-      if (!res || !res.ok) {
-        try {
-          res = await fetch('https://autopromote.onrender.com/api/admin/analytics/overview', {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${user.token}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
+        
+        console.log('Analytics API response status:', res.status);
+        
+        if (!res.ok) {
+          if (res.status === 401) {
+            console.error('Admin authentication failed:', await res.text());
+            
+            // Try to refresh token and retry once
+            if (!providedToken && auth.currentUser) {
+              console.log('Token failed, trying with a fresh one...');
+              const freshToken = await auth.currentUser.getIdToken(true);
+              return fetchAnalytics(freshToken);
             }
-          });
-          console.log('Remote analytics API response status:', res.status);
-        } catch (remoteError) {
-          console.error('Remote analytics API also failed:', remoteError);
-          error = error || remoteError;
-        }
-      }
-      
-      if (!res || !res.ok) {
-        if (res && res.status === 401) {
-          console.error('Admin authentication failed:', await res.text());
-          // Don't log out - user might still be valid but not admin
-          setIsAdmin(false);
+            
+            // If retried with fresh token and still failed, user might not be admin
+            setIsAdmin(false);
+            return;
+          }
+          
+          console.error('Failed to fetch analytics:', res.status);
           return;
         }
         
-        console.error('Failed to fetch analytics:', res ? res.status : 'No response');
-        return;
+        const data = await res.json();
+        console.log('Analytics data received:', Object.keys(data).length, 'fields');
+        setAnalytics(data);
+      } catch (error) {
+        console.error('Analytics API failed:', error);
       }
-      
-      const data = await res.json();
-      console.log('Analytics data received:', Object.keys(data).length, 'fields');
-      setAnalytics(data);
     } catch (error) {
       console.error('Error in fetchAnalytics:', error);
     }
@@ -280,20 +299,71 @@ function App() {
 
   const registerUser = async (name, email, password) => {
     try {
+      console.log('Starting registration process for:', email);
+      
+      // First register with Firebase
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Update the profile with the name
+      await updateProfile(firebaseUser, { displayName: name });
+      
+      // Get a token for the backend call
+      const idToken = await firebaseUser.getIdToken();
+      console.log('Firebase registration successful, token length:', idToken.length);
+      
+      // Now register with our backend to create additional user data
       const res = await fetch('https://autopromote.onrender.com/api/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ 
+          name, 
+          email, 
+          uid: firebaseUser.uid,
+          idToken 
+        }),
       });
+      
       if (res.ok) {
         const data = await res.json();
-        handleRegister({ ...data.user, token: data.token });
+        // Use the Firebase token for authentication
+        handleRegister({ 
+          ...data.user, 
+          token: idToken,  // Use the Firebase token, not the one from the server
+          uid: firebaseUser.uid
+        });
+        alert('Registration successful! You are now logged in.');
       } else {
-        alert('Registration failed');
+        const errorData = await res.text();
+        console.error('Backend registration failed:', errorData);
+        
+        // Even if backend registration fails, we can still log in with the Firebase user
+        handleRegister({ 
+          uid: firebaseUser.uid,
+          email: email,
+          name: name,
+          token: idToken,
+          role: 'user'
+        });
+        alert('Registration partially successful. Some features may be limited.');
       }
     } catch (error) {
       console.error('Registration error:', error);
-      alert('Registration error');
+      
+      // Provide more specific error messages based on Firebase error codes
+      if (error.code === 'auth/email-already-in-use') {
+        alert('Email is already in use. Please use a different email or try logging in.');
+      } else if (error.code === 'auth/invalid-email') {
+        alert('Invalid email address. Please check and try again.');
+      } else if (error.code === 'auth/weak-password') {
+        alert('Password is too weak. Please use a stronger password (at least 6 characters).');
+      } else {
+        alert('Registration failed: ' + (error.message || 'Unknown error'));
+      }
     }
   };
 
