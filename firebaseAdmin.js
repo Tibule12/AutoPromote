@@ -28,7 +28,7 @@ try {
     try {
         if (admin.apps.length === 0) {
             admin.initializeApp({
-                projectId: process.env.FIREBASE_PROJECT_ID || "autopromote-464de"
+                projectId: process.env.FIREBASE_PROJECT_ID
             });
             console.log('✅ Firebase Admin initialized with fallback configuration');
         }
