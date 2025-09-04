@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/AutoPromote/static/css/main.ae1e5073.css",
-    "main.js": "/AutoPromote/static/js/main.de533313.js",
+    "main.js": "/AutoPromote/static/js/main.a21662a3.js",
     "index.html": "/AutoPromote/index.html",
     "main.ae1e5073.css.map": "/AutoPromote/static/css/main.ae1e5073.css.map",
-    "main.de533313.js.map": "/AutoPromote/static/js/main.de533313.js.map"
+    "main.a21662a3.js.map": "/AutoPromote/static/js/main.a21662a3.js.map"
   },
   "entrypoints": [
     "static/css/main.ae1e5073.css",
-    "static/js/main.de533313.js"
+    "static/js/main.a21662a3.js"
   ]
 }
