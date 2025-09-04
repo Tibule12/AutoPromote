@@ -1,9 +1,9 @@
 // testIntegration.js
 // This script tests the integration between the database and admin dashboard
 
-import { db } from './firebaseClient';
+import { db } from '../firebaseClient';
 import { collection, getDocs, query, limit, where, Timestamp } from 'firebase/firestore';
-import DatabaseSyncService from './utils/dbSchemaSync';
+import DatabaseSyncService from './dbSchemaSync';
 
 /**
  * Test connection to Firestore and verify collections

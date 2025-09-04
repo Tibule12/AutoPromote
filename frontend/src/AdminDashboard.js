@@ -1015,3 +1015,5 @@ function AdminDashboard({ analytics, user }) {
   );
 }
 
+export default AdminDashboard;
+
