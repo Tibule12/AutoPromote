@@ -22,6 +22,8 @@ echo.
 echo If you still experience 401 Unauthorized errors:
 echo 1. Make sure your backend server is running
 echo 2. Check that your Firebase credentials are correct
-echo 3. Try registering a new user
+echo 3. Run 'node debug-token.js YOUR_TOKEN_HERE' to analyze token issues
+echo 4. Ensure you're using an ID token, not a custom token
+echo 5. Token length should be much longer than 9 characters
 echo.
 pause
