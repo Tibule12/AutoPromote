@@ -2,7 +2,8 @@
  * Firebase Configuration
  * 
  * This file centralizes Firebase configuration settings.
- * For production, all these values should be set in environment variables.
+ * SECURITY NOTICE: All credentials must be stored in environment variables.
+ * Never hardcode credentials in source code.
  */
 
 // Firebase Admin SDK configuration
@@ -53,39 +54,39 @@ try {
       };
     } catch (fileError) {
       // Silent error for file loading, we'll use default credentials
-      console.log('ℹ️ No serviceAccountKey.json file found, using default credentials');
+      console.log('ℹ️ No serviceAccountKey.json file found, using application default credentials');
       
       // Create a default configuration with application default credentials
       adminConfig = {
         // This will use application default credentials or environment variables
         credential: require('firebase-admin').credential.applicationDefault(),
-        projectId: process.env.FIREBASE_PROJECT_ID || "autopromote-464de",
-        databaseURL: process.env.FIREBASE_DATABASE_URL || "https://autopromote-464de.firebaseio.com",
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "autopromote-464de.appspot.com"
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        databaseURL: process.env.FIREBASE_DATABASE_URL,
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET
       };
-      console.log(`ℹ️ Using default Firebase configuration with project ID: ${adminConfig.projectId}`);
+      console.log(`ℹ️ Using application default credentials with project ID: ${adminConfig.projectId || 'unknown'}`);
     }
   }
 } catch (error) {
   // Create a default configuration for when all else fails
-  console.log('ℹ️ Using default Firebase configuration');
+  console.log('⚠️ Error setting up Firebase config, using application default credentials');
   adminConfig = {
     // This will use application default credentials or environment variables
     credential: require('firebase-admin').credential.applicationDefault(),
-    projectId: process.env.FIREBASE_PROJECT_ID || "autopromote-464de",
-    databaseURL: process.env.FIREBASE_DATABASE_URL || "https://autopromote-464de.firebaseio.com",
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "autopromote-464de.appspot.com"
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET
   };
 }
 
-// Firebase Client SDK configuration
+// Firebase Client SDK configuration - NEVER use hardcoded fallbacks in production
 const clientConfig = {
-  apiKey: process.env.FIREBASE_API_KEY || "AIzaSyASTUuMkz821PoHRopZ8yy1dW5COrAQPZY",
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN || "autopromote-464de.firebaseapp.com",
-  projectId: process.env.FIREBASE_PROJECT_ID || "autopromote-464de",
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "autopromote-464de.firebasestorage.app",
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "317746682241",
-  appId: process.env.FIREBASE_APP_ID || "1:317746682241:web:f363e099d55ffd1af1b080"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID
 };
 
 module.exports = {
