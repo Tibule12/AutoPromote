@@ -1,36 +1,126 @@
-const jwt = require('jsonwebtoken');
-const supabase = require('./supabaseClient');
+const { auth, db } = require('./firebaseAdmin');
 
 const authMiddleware = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
-    console.log('Token:', token);
+    console.log('Auth middleware - token provided:', token ? 'Yes (length: ' + token.length + ')' : 'No');
+    
     if (!token) {
-      console.log('No token provided');
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
-    console.log('Decoded JWT payload:', decoded);
-
-    // Verify user exists in database
-    const { data: users, error } = await supabase
-      .from('users')
-      .select('id, role')
-      .eq('id', decoded.userId)
-      .limit(1);
-    console.log('User lookup result:', users, error);
-
-    if (error || !users || users.length === 0) {
-      console.log('Invalid token or user not found');
-      return res.status(401).json({ error: 'Invalid token' });
+    // Verify Firebase token
+    const decodedToken = await auth.verifyIdToken(token);
+    console.log('Token verification successful, decoded:', JSON.stringify({
+      uid: decodedToken.uid,
+      email: decodedToken.email,
+      admin: decodedToken.admin,
+      role: decodedToken.role
+    }, null, 2));
+    
+    // Extract any custom claims
+    const isAdminFromClaims = decodedToken.admin === true;
+    const roleFromClaims = isAdminFromClaims ? 'admin' : (decodedToken.role || 'user');
+    
+    // Set the user ID on the request for later use
+    req.userId = decodedToken.uid;
+    
+    try {
+      // Get user data from Firestore
+      const userDoc = await db.collection('users').doc(decodedToken.uid).get();
+      const userData = userDoc.exists ? userDoc.data() : null;
+      
+      // Check if user is an admin by checking the admins collection
+      const adminDoc = await db.collection('admins').doc(decodedToken.uid).get();
+      const isAdminInCollection = adminDoc.exists;
+      
+      // If admin is found in admins collection, use that data instead
+      if (isAdminInCollection) {
+        console.log('User found in admins collection:', decodedToken.uid);
+        const adminData = adminDoc.data();
+        req.user = {
+          uid: decodedToken.uid,
+          email: decodedToken.email,
+          ...adminData,
+          isAdmin: true,
+          role: 'admin',
+          fromCollection: 'admins'
+        };
+        console.log('Admin user data attached to request');
+        return next();
+      }
+      
+      if (!userData) {
+        // Create a basic user document if it doesn't exist
+        console.log('No user document found in Firestore, creating one...');
+        const basicUserData = {
+          email: decodedToken.email,
+          name: decodedToken.name || decodedToken.email?.split('@')[0],
+          role: roleFromClaims, // Use role from claims
+          isAdmin: isAdminFromClaims,
+          createdAt: new Date().toISOString()
+        };
+        console.log('Creating user with data:', JSON.stringify(basicUserData, null, 2));
+        await db.collection('users').doc(decodedToken.uid).set(basicUserData);
+        req.user = {
+          uid: decodedToken.uid,
+          email: decodedToken.email,
+          ...basicUserData
+        };
+        console.log('New user document created and attached to request');
+      } else {
+        // If user exists but role needs to be updated based on claims
+        console.log('User document found:', JSON.stringify({
+          uid: decodedToken.uid,
+          email: userData.email,
+          role: userData.role,
+          isAdmin: userData.isAdmin
+        }, null, 2));
+        
+        if (isAdminFromClaims && userData.role !== 'admin') {
+          console.log('Updating user to admin role based on token claims');
+          await db.collection('users').doc(decodedToken.uid).update({
+            role: 'admin',
+            isAdmin: true,
+            updatedAt: new Date().toISOString()
+          });
+          userData.role = 'admin';
+          userData.isAdmin = true;
+        }
+        
+        // Attach full user data to request
+        req.user = {
+          uid: decodedToken.uid,
+          email: decodedToken.email,
+          ...userData
+        };
+        console.log('User data attached to request');
+      }
+    } catch (firestoreError) {
+      console.error('Firestore error in auth middleware:', firestoreError);
+      console.log('Firestore error details:', JSON.stringify({
+        code: firestoreError.code,
+        message: firestoreError.message
+      }, null, 2));
+      
+      // Even if Firestore fails, still allow the request to proceed with basic user info
+      req.user = {
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        role: roleFromClaims,
+        isAdmin: isAdminFromClaims
+      };
+      
+      console.log('Proceeding with basic user info from token claims only');
+      console.log('User from token claims:', JSON.stringify(req.user, null, 2));
     }
 
-    req.userId = decoded.userId;
-    req.userRole = decoded.role;
     next();
   } catch (error) {
-    console.log('JWT verification or DB error:', error);
+    console.error('Auth error:', error);
+    if (error.code === 'auth/id-token-expired') {
+      return res.status(401).json({ error: 'Token expired' });
+    }
     res.status(401).json({ error: 'Invalid token' });
   }
 };

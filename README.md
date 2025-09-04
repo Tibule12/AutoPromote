@@ -9,11 +9,14 @@ AutoPromote is an AI-powered platform designed to automate content promotion and
 - Automated Monetization: Integrate advertising, sponsorships, or other revenue-generating models to help creators earn money from their content.
 - Analytics and Insights: Provide users with detailed analytics and insights on the performance of their content, including views, engagement, and revenue generated.
 
-## Technical Requirements
-- Front-end Development: Build the platform using modern front-end technologies, such as React or Angular, to create a user-friendly interface.
-- Back-end Development: Develop the back-end using a robust framework, such as Node.js or Django, to handle content upload, promotion, and monetization.
-- AI and Machine Learning: Integrate AI-powered algorithms to optimize content promotion and targeting.
-- Database Management: Design a database management system to store user data, content metadata, and analytics.
+## Technical Stack
+- **Frontend**: React.js for a dynamic and responsive user interface
+- **Backend**: Node.js with Express for scalable API development
+- **Database & Authentication**: Firebase (Firestore for data storage, Firebase Authentication for user management)
+- **File Storage**: Firebase Storage for secure content storage
+- **Security**: Firebase Security Rules and custom middleware for robust data protection
+- **AI Integration**: Machine learning algorithms for content promotion optimization
+- **Analytics**: Firebase Analytics for tracking user engagement and content performance
 
 ## Potential Revenue Streams
 - Transaction Fees: Charge a small fee for each transaction or revenue generated through the platform.

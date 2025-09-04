@@ -1,36 +1,58 @@
-
 const express = require('express');
-const supabase = require('./supabaseClient');
+const { db, auth, storage } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
 const router = express.Router();
 
-
 // Middleware to check admin role
-const adminOnly = (req, res, next) => {
-  if (req.userRole !== 'admin') {
+const adminOnly = async (req, res, next) => {
+  try {
+    // Check if the user data from auth middleware has admin role
+    if (req.user && (req.user.role === 'admin' || req.user.isAdmin === true)) {
+      return next();
+    }
+    
+    // Double-check with Firebase Auth custom claims as fallback
+    try {
+      const userRecord = await auth.getUser(req.userId);
+      const customClaims = userRecord.customClaims || {};
+      
+      if (customClaims.admin === true) {
+        console.log('User has admin claim in Firebase Auth');
+        return next();
+      }
+    } catch (authError) {
+      console.error('Error checking Firebase Auth claims:', authError);
+    }
+    
+    // If we get here, the user is not an admin
+    console.log('Access denied - not admin. User:', req.user);
     return res.status(403).json({ error: 'Access denied. Admin only.' });
+  } catch (error) {
+    console.error('Error in admin middleware:', error);
+    res.status(403).json({ error: 'Access denied' });
   }
-  next();
 };
 
 // Approve user content
 router.post('/content/:id/approve', authMiddleware, adminOnly, async (req, res) => {
   try {
     const contentId = req.params.id;
-    // Update content status to 'approved'
-    const { data, error } = await supabase
-      .from('content')
-      .update({ status: 'approved' })
-      .eq('id', contentId)
-      .select();
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-    if (!data || data.length === 0) {
+    const contentRef = db.collection('content').doc(contentId);
+    const contentDoc = await contentRef.get();
+
+    if (!contentDoc.exists) {
       return res.status(404).json({ error: 'Content not found' });
     }
-    res.json({ message: 'Content approved', content: data[0] });
+
+    await contentRef.update({ 
+      status: 'approved',
+      updatedAt: new Date().toISOString()
+    });
+
+    const updatedDoc = await contentRef.get();
+    res.json({ message: 'Content approved', content: { id: updatedDoc.id, ...updatedDoc.data() } });
   } catch (error) {
+    console.error('Error approving content:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -39,20 +61,22 @@ router.post('/content/:id/approve', authMiddleware, adminOnly, async (req, res) 
 router.post('/content/:id/decline', authMiddleware, adminOnly, async (req, res) => {
   try {
     const contentId = req.params.id;
-    // Update content status to 'declined'
-    const { data, error } = await supabase
-      .from('content')
-      .update({ status: 'declined' })
-      .eq('id', contentId)
-      .select();
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-    if (!data || data.length === 0) {
+    const contentRef = db.collection('content').doc(contentId);
+    const contentDoc = await contentRef.get();
+
+    if (!contentDoc.exists) {
       return res.status(404).json({ error: 'Content not found' });
     }
-    res.json({ message: 'Content declined', content: data[0] });
+
+    await contentRef.update({ 
+      status: 'declined',
+      updatedAt: new Date().toISOString()
+    });
+
+    const updatedDoc = await contentRef.get();
+    res.json({ message: 'Content declined', content: { id: updatedDoc.id, ...updatedDoc.data() } });
   } catch (error) {
+    console.error('Error declining content:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -60,51 +84,40 @@ router.post('/content/:id/decline', authMiddleware, adminOnly, async (req, res) 
 // Get platform overview (admin dashboard)
 router.get('/overview', authMiddleware, adminOnly, async (req, res) => {
   try {
-    // Total users
-    const { count: totalUsers, error: usersError } = await supabase
-      .from('users')
-      .select('*', { count: 'exact' });
-
-    if (usersError) {
-      return res.status(400).json({ error: usersError.message });
-    }
-
-    // Get user statistics
-    const { data: users, error } = await supabase
-      .from('users')
-      .select('id, name, email, role, created_at')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
+    // Get all users
+    const usersSnapshot = await db.collection('users').get();
+    const totalUsers = usersSnapshot.size;
 
     const usersWithStats = await Promise.all(
-      users.map(async (user) => {
-        const { count: contentCount } = await supabase
-          .from('content')
-          .select('*', { count: 'exact' })
-          .eq('user_id', user.id);
+      usersSnapshot.docs.map(async (userDoc) => {
+        const userData = userDoc.data();
+        const contentSnapshot = await db.collection('content')
+          .where('userId', '==', userDoc.id)
+          .get();
 
-        const { data: contentData } = await supabase
-          .from('content')
-          .select('views, revenue')
-          .eq('user_id', user.id);
-
-        const totalViews = contentData?.reduce((sum, item) => sum + (item.views || 0), 0) || 0;
-        const totalRevenue = contentData?.reduce((sum, item) => sum + (item.revenue || 0), 0) || 0;
+        const contentStats = contentSnapshot.docs.reduce((stats, doc) => {
+          const content = doc.data();
+          return {
+            content_count: stats.content_count + 1,
+            total_views: stats.total_views + (content.views || 0),
+            total_revenue: stats.total_revenue + (content.revenue || 0)
+          };
+        }, { content_count: 0, total_views: 0, total_revenue: 0 });
 
         return {
-          ...user,
-          content_count: contentCount || 0,
-          total_views: totalViews,
-          total_revenue: totalRevenue
+          id: userDoc.id,
+          ...userData,
+          ...contentStats
         };
       })
     );
 
-    res.json({ users: usersWithStats });
+    res.json({ 
+      total_users: totalUsers,
+      users: usersWithStats 
+    });
   } catch (error) {
+    console.error('Error getting overview:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -112,20 +125,31 @@ router.get('/overview', authMiddleware, adminOnly, async (req, res) => {
 // Get all content with user details
 router.get('/content', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { data: content, error } = await supabase
-      .from('content')
-      .select(`
-        *,
-        users (id, name, email)
-      `)
-      .order('created_at', { ascending: false });
+    const contentSnapshot = await db.collection('content')
+      .orderBy('createdAt', 'desc')
+      .get();
 
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
+    const contentWithUsers = await Promise.all(
+      contentSnapshot.docs.map(async (doc) => {
+        const content = doc.data();
+        const userDoc = await db.collection('users').doc(content.userId).get();
+        const userData = userDoc.data();
 
-    res.json({ content });
+        return {
+          id: doc.id,
+          ...content,
+          user: userData ? {
+            id: userDoc.id,
+            name: userData.name,
+            email: userData.email
+          } : null
+        };
+      })
+    );
+
+    res.json({ content: contentWithUsers });
   } catch (error) {
+    console.error('Error getting content:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -140,21 +164,28 @@ router.put('/users/:id/role', authMiddleware, adminOnly, async (req, res) => {
       return res.status(400).json({ error: 'Invalid role' });
     }
 
-    const { data, error } = await supabase
-      .from('users')
-      .update({ role })
-      .eq('id', userId)
-      .select('id, name, email, role, created_at');
+    const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
 
-    if (error) {
-      return res.status(400).json({ error: error.message });
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
+    await userRef.update({ 
+      role,
+      updatedAt: new Date().toISOString()
+    });
+
+    const updatedDoc = await userRef.get();
     res.json({ 
       message: 'User role updated successfully',
-      user: data[0]
+      user: {
+        id: updatedDoc.id,
+        ...updatedDoc.data()
+      }
     });
   } catch (error) {
+    console.error('Error updating user role:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -163,29 +194,47 @@ router.put('/users/:id/role', authMiddleware, adminOnly, async (req, res) => {
 router.delete('/users/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const userId = req.params.id;
+    const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
 
-    // First delete user's content
-    const { error: contentError } = await supabase
-      .from('content')
-      .delete()
-      .eq('user_id', userId);
-
-    if (contentError) {
-      return res.status(400).json({ error: contentError.message });
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // Then delete user
-    const { error: userError } = await supabase
-      .from('users')
-      .delete()
-      .eq('id', userId);
+    // Delete user's content and associated files
+    const contentSnapshot = await db.collection('content')
+      .where('userId', '==', userId)
+      .get();
 
-    if (userError) {
-      return res.status(400).json({ error: userError.message });
+    const batch = db.batch();
+    const bucket = storage.bucket();
+
+    // Delete content documents and associated files
+    for (const doc of contentSnapshot.docs) {
+      const content = doc.data();
+      if (content.fileUrl) {
+        try {
+          const fileName = content.fileUrl.split('/').pop();
+          await bucket.file(fileName).delete();
+        } catch (error) {
+          console.warn('Error deleting file:', error);
+        }
+      }
+      batch.delete(doc.ref);
     }
+
+    // Delete the user document
+    batch.delete(userRef);
+
+    // Execute the batch
+    await batch.commit();
+
+    // Delete the user from Firebase Auth
+    await auth.deleteUser(userId);
 
     res.json({ message: 'User and associated content deleted successfully' });
   } catch (error) {
+    console.error('Error deleting user:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -201,31 +250,32 @@ router.get('/analytics', authMiddleware, adminOnly, async (req, res) => {
 
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
+    const startTimestamp = startDate.toISOString();
 
-    // User growth
-    const { data: userGrowth, error: userError } = await supabase
-      .from('users')
-      .select('created_at')
-      .gte('created_at', startDate.toISOString())
-      .order('created_at', { ascending: true });
+    // Get user growth
+    const usersSnapshot = await db.collection('users')
+      .where('createdAt', '>=', startTimestamp)
+      .orderBy('createdAt')
+      .get();
 
-    // Content growth
-    const { data: contentGrowth, error: contentError } = await supabase
-      .from('content')
-      .select('created_at, views, revenue')
-      .gte('created_at', startDate.toISOString())
-      .order('created_at', { ascending: true });
+    // Get content growth
+    const contentSnapshot = await db.collection('content')
+      .where('createdAt', '>=', startTimestamp)
+      .orderBy('createdAt')
+      .get();
 
     // Process growth data
     const userGrowthByDate = {};
-    userGrowth?.forEach(user => {
-      const date = new Date(user.created_at).toISOString().split('T')[0];
+    usersSnapshot.forEach(doc => {
+      const userData = doc.data();
+      const date = new Date(userData.createdAt).toISOString().split('T')[0];
       userGrowthByDate[date] = (userGrowthByDate[date] || 0) + 1;
     });
 
     const contentStatsByDate = {};
-    contentGrowth?.forEach(content => {
-      const date = new Date(content.created_at).toISOString().split('T')[0];
+    contentSnapshot.forEach(doc => {
+      const content = doc.data();
+      const date = new Date(content.createdAt).toISOString().split('T')[0];
       if (!contentStatsByDate[date]) {
         contentStatsByDate[date] = { content: 0, views: 0, revenue: 0 };
       }
@@ -240,6 +290,7 @@ router.get('/analytics', authMiddleware, adminOnly, async (req, res) => {
       content_growth: Object.entries(contentStatsByDate).map(([date, stats]) => ({ date, ...stats }))
     });
   } catch (error) {
+    console.error('Error getting analytics:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

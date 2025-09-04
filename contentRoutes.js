@@ -1,42 +1,101 @@
 // BUSINESS RULE: Revenue per 1M views is $900,000. Creator gets 5% of revenue. Target views: 2M/day.
 // Creator payout per 2M views: 2 * $900,000 * 0.05 = $90,000
 // BUSINESS RULE: Content must be auto-removed after 2 days of upload.
-// In production, implement a scheduled job (e.g., with node-cron or Supabase Edge Functions)
+// In production, implement a scheduled job (e.g., with Firebase Cloud Functions or Cloud Scheduler)
 // to delete or archive content where created_at is older than 2 days.
 
-// Example (pseudo):
-// setInterval(async () => {
-//   const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
-//   await supabase.from('content').delete().lt('created_at', twoDaysAgo);
-// }, 24 * 60 * 60 * 1000); // Run daily
+// Example (using Firebase Cloud Functions):
+// exports.cleanupOldContent = functions.pubsub.schedule('every 24 hours').onRun(async (context) => {
+//   const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+//   const snapshot = await db.collection('content')
+//     .where('created_at', '<', twoDaysAgo)
+//     .get();
+//   
+//   const batch = db.batch();
+//   snapshot.docs.forEach((doc) => {
+//     batch.delete(doc.ref);
+//   });
+//   
+//   await batch.commit();
+// });
+
 const express = require('express');
-const supabase = require('./supabaseClient');
+const { db } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
+const {
+  validateContentData,
+  validateAnalyticsData,
+  validatePromotionData,
+  validateRateLimit,
+  sanitizeInput
+} = require('./validationMiddleware');
 const promotionService = require('./promotionService');
 const optimizationService = require('./optimizationService');
 const router = express.Router();
 
+// Helper function to check if user can upload (rate limiting)
+const canUserUpload = async (userId, daysAgo = 21) => {
+  const cutoffDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+  try {
+    const snapshot = await db.collection('content')
+      .where('user_id', '==', userId)
+      .where('created_at', '>=', cutoffDate)
+      .orderBy('created_at', 'desc')
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      // No recent content, can upload
+      return { canUpload: true, reason: null };
+    }
+
+    const mostRecentContent = snapshot.docs[0].data();
+    const createdAt = mostRecentContent.created_at;
+
+    // If created_at is a Firestore Timestamp, convert to Date
+    const createdDate = createdAt && createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
+    const daysSinceUpload = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (daysSinceUpload < daysAgo) {
+      return {
+        canUpload: false,
+        reason: `Last upload was ${daysSinceUpload.toFixed(1)} days ago. Must wait ${daysAgo} days between uploads.`,
+        daysSinceLastUpload: daysSinceUpload,
+        lastUploadDate: createdDate.toISOString()
+      };
+    }
+
+    return { canUpload: true, reason: null };
+  } catch (error) {
+    console.error('Error checking user upload eligibility:', error);
+    // On error, allow upload to avoid blocking users
+    return { canUpload: true, reason: null };
+  }
+};
+
 // Get all content (public endpoint)
 router.get('/', async (req, res) => {
   try {
-    const { data: content, error } = await supabase
-      .from('content')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(10);
+    const contentRef = db.collection('content');
+    const snapshot = await contentRef
+      .orderBy('created_at', 'desc')
+      .limit(10)
+      .get();
 
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
+    const content = [];
+    snapshot.forEach(doc => {
+      content.push({ id: doc.id, ...doc.data() });
+    });
 
     res.json({ content });
   } catch (error) {
+    console.error('Error getting content:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // Upload content with advanced scheduling and optimization
-router.post('/upload', authMiddleware, async (req, res) => {
+router.post('/upload', authMiddleware, sanitizeInput, validateContentData, validateRateLimit, async (req, res) => {
   try {
     const {
       title,
@@ -51,24 +110,29 @@ router.post('/upload', authMiddleware, async (req, res) => {
       max_budget
     } = req.body;
 
-    // Enforce one content upload per three weeks per creator
-    const threeWeeksAgo = new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: recentContent, error: recentError } = await supabase
-      .from('content')
-      .select('id, created_at')
-      .eq('user_id', req.userId)
-      .gte('created_at', threeWeeksAgo);
-    if (recentError) {
-      return res.status(500).json({ error: 'Failed to check posting limit' });
-    }
-    if (recentContent && recentContent.length > 0) {
-      return res.status(400).json({ error: 'You can only post one content every three weeks.' });
-    }
+    console.log('Content upload request received:', {
+      userId: req.userId,
+      title,
+      type,
+      url: url ? 'provided' : 'missing',
+      description: description || 'none'
+    });
 
-    // Validate required fields
-    if (!title || !type || !url) {
-      return res.status(400).json({ error: 'Title, type, and URL are required' });
+    // TEMPORARILY DISABLED: Rate limiting for testing
+    // TODO: Re-enable after testing is complete
+    console.log('Rate limiting temporarily disabled for testing');
+    /*
+    const uploadCheck = await canUserUpload(req.userId, 21);
+    if (!uploadCheck.canUpload) {
+      console.log('Rate limit exceeded for user:', req.userId, 'Reason:', uploadCheck.reason);
+      return res.status(400).json({
+        error: 'Rate limit exceeded',
+        message: uploadCheck.reason,
+        days_since_last_upload: uploadCheck.daysSinceLastUpload,
+        last_upload_date: uploadCheck.lastUploadDate
+      });
     }
+    */
 
     // Set business rules
     const optimalRPM = 900000; // Revenue per million views
@@ -76,37 +140,49 @@ router.post('/upload', authMiddleware, async (req, res) => {
   const creatorPayoutRate = 0.01; // 1%
     const maxBudget = max_budget || 1000;
 
-    // Insert content
-    const { data, error } = await supabase
-      .from('content')
-      .insert([
-        {
-          user_id: req.userId,
-          title,
-          type,
-          url,
-          description: description || '',
-          target_platforms: target_platforms || ['youtube', 'tiktok', 'instagram'],
-          status: 'pending', // All new content must be reviewed by admin
-          scheduled_promotion_time: scheduled_promotion_time || null,
-          promotion_frequency: promotion_frequency || 'once',
-          next_promotion_time: scheduled_promotion_time || null,
-          target_rpm: optimalRPM,
-          min_views_threshold: minViews,
-          max_budget: maxBudget,
-          created_at: new Date().toISOString(),
-          promotion_started_at: scheduled_promotion_time ? null : new Date().toISOString(),
-          revenue_per_million: optimalRPM,
-          creator_payout_rate: creatorPayoutRate
-        }
-      ])
-      .select();
+    // Insert content into Firestore
+    console.log('Preparing to save content to Firestore...');
+    const contentRef = db.collection('content').doc();
+    const contentData = {
+      user_id: req.userId,
+      title,
+      type,
+      url,
+      description: description || '',
+      target_platforms: target_platforms || ['youtube', 'tiktok', 'instagram'],
+      status: 'pending', // All new content must be reviewed by admin
+      scheduled_promotion_time: scheduled_promotion_time || null,
+      promotion_frequency: promotion_frequency || 'once',
+      next_promotion_time: scheduled_promotion_time || null,
+      target_rpm: optimalRPM,
+      min_views_threshold: minViews,
+      max_budget: maxBudget,
+      created_at: new Date(),
+      promotion_started_at: scheduled_promotion_time ? null : new Date(),
+      revenue_per_million: optimalRPM,
+      creator_payout_rate: creatorPayoutRate,
+      views: 0,
+      revenue: 0
+    };
 
-    if (error) {
-      return res.status(400).json({ error: error.message });
+    console.log('Content data to save:', JSON.stringify(contentData, null, 2));
+    console.log('Firestore document ID will be:', contentRef.id);
+
+    try {
+      await contentRef.set(contentData);
+      console.log('✅ Content successfully saved to Firestore with ID:', contentRef.id);
+    } catch (firestoreError) {
+      console.error('❌ Firestore write error:', firestoreError);
+      console.error('Error details:', {
+        code: firestoreError.code,
+        message: firestoreError.message,
+        stack: firestoreError.stack
+      });
+      throw firestoreError;
     }
 
-    const content = data[0];
+    const content = { id: contentRef.id, ...contentData };
+    console.log('Content object created:', { id: content.id, title: content.title, type: content.type });
     let promotionSchedule = null;
 
     // Create promotion schedule if scheduled time is provided
@@ -135,6 +211,14 @@ router.post('/upload', authMiddleware, async (req, res) => {
     // Schedule content for auto-removal after 2 days (pseudo, needs background job in production)
     // You should implement a cron job or scheduled function to delete content after 2 days
 
+    console.log('✅ Upload process completed successfully');
+    console.log('Response data:', {
+      message: scheduled_promotion_time ? 'Content uploaded and scheduled for promotion' : 'Content uploaded successfully',
+      contentId: content.id,
+      hasPromotionSchedule: !!promotionSchedule,
+      hasRecommendations: !!recommendations
+    });
+
     res.status(201).json({
       message: scheduled_promotion_time ? 'Content uploaded and scheduled for promotion' : 'Content uploaded successfully',
       content,
@@ -152,18 +236,29 @@ router.post('/upload', authMiddleware, async (req, res) => {
 // Get user's content
 router.get('/my-content', authMiddleware, async (req, res) => {
   try {
-    const { data: content, error } = await supabase
-      .from('content')
-      .select('*')
-      .eq('user_id', req.userId)
-      .order('created_at', { ascending: false });
+    console.log('Fetching user content for userId:', req.userId);
 
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
+    const contentSnapshot = await db.collection('content')
+      .where('user_id', '==', req.userId)
+      .orderBy('created_at', 'desc')
+      .get();
 
+    console.log('Found', contentSnapshot.size, 'content items for user');
+
+    const content = [];
+    contentSnapshot.forEach(doc => {
+      const data = doc.data();
+      content.push({
+        id: doc.id,
+        ...data,
+        created_at: data.created_at?.toDate?.() ? data.created_at.toDate().toISOString() : data.created_at
+      });
+    });
+
+    console.log('Successfully processed', content.length, 'content items');
     res.json({ content });
   } catch (error) {
+    console.error('Error getting user content:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -192,27 +287,27 @@ router.get('/:id', authMiddleware, async (req, res) => {
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { title, description, target_platforms } = req.body;
-    
-    const { data, error } = await supabase
-      .from('content')
-      .update({ title, description, target_platforms })
-      .eq('id', req.params.id)
-      .eq('user_id', req.userId)
-      .select();
+    const contentRef = db.collection('content').doc(req.params.id);
+    const contentDoc = await contentRef.get();
 
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    if (!data || data.length === 0) {
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.user.uid) {
       return res.status(404).json({ error: 'Content not found' });
     }
 
-    res.json({ 
+    await contentRef.update({
+      title,
+      description,
+      target_platforms,
+      updated_at: new Date()
+    });
+
+    const updatedDoc = await contentRef.get();
+    res.json({
       message: 'Content updated successfully',
-      content: data[0]
+      content: { id: updatedDoc.id, ...updatedDoc.data() }
     });
   } catch (error) {
+    console.error('Error updating content:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -220,18 +315,17 @@ router.put('/:id', authMiddleware, async (req, res) => {
 // Delete content
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    const { error } = await supabase
-      .from('content')
-      .delete()
-      .eq('id', req.params.id)
-      .eq('user_id', req.userId);
+    const contentRef = db.collection('content').doc(req.params.id);
+    const contentDoc = await contentRef.get();
 
-    if (error) {
-      return res.status(400).json({ error: error.message });
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.user.uid) {
+      return res.status(404).json({ error: 'Content not found' });
     }
 
+    await contentRef.delete();
     res.json({ message: 'Content deleted successfully' });
   } catch (error) {
+    console.error('Error deleting content:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
