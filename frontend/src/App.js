@@ -247,6 +247,7 @@ function App() {
 
       // Get the ID token
       const idToken = await firebaseUser.getIdToken();
+      console.log('Firebase ID token length:', idToken.length);
 
       // Verify token with our backend
       const res = await fetch('https://autopromote.onrender.com/api/auth/login', {
@@ -261,9 +262,11 @@ function App() {
 
       if (res.ok) {
         const data = await res.json();
+        // Use the idToken directly instead of the one from the server
+        // This ensures we're using the full Firebase ID token
         handleLogin({
           ...data.user,
-          token: data.token
+          token: idToken // Use the original Firebase token
         });
       } else {
         const error = await res.json();
@@ -305,6 +308,9 @@ function App() {
         return;
       }
       
+      // Log token info for debugging
+      console.log('Token received, length:', userData.token.length);
+      
       // Check for admin status from various sources
       const isAdminRole = userData.role === 'admin';
       const hasAdminClaim = userData.isAdmin === true;
@@ -315,7 +321,8 @@ function App() {
         email: userData.email,
         role: userData.role,
         isAdmin: isAdminUser,
-        hasToken: Boolean(userData.token)
+        hasToken: Boolean(userData.token),
+        tokenLength: userData.token.length
       });
       
       // Update the user data with definitive admin status
