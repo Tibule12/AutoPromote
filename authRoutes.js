@@ -159,18 +159,20 @@ router.post('/login', async (req, res) => {
 
     // Create a custom token if we're using email/password login
     let tokenToReturn = idToken;
-    
+    let tokenType = 'id_token';
+
     if (!idToken && email && password) {
       // Create a proper Firebase custom token
       tokenToReturn = await admin.auth().createCustomToken(decodedToken.uid, {
         role: role,
         isAdmin: isAdmin
       });
+      tokenType = 'custom_token';
       console.log('Created custom token for email/password login, length:', tokenToReturn.length);
     }
 
     // Return proper token with the response
-    res.json({
+    const response = {
       message: 'Login successful',
       user: {
         uid: decodedToken.uid,
@@ -180,8 +182,21 @@ router.post('/login', async (req, res) => {
         isAdmin: isAdmin,
         fromCollection: fromCollection
       },
-      token: tokenToReturn
-    });
+      token: tokenToReturn,
+      tokenType: tokenType
+    };
+
+    // Add instructions for custom token usage
+    if (tokenType === 'custom_token') {
+      response.tokenInstructions = {
+        type: 'custom_token',
+        message: 'This is a Firebase custom token. You must exchange it for an ID token before using it for authenticated requests.',
+        exchangeInstructions: 'Use Firebase Auth SDK: firebase.auth().signInWithCustomToken(token).then(() => firebase.auth().currentUser.getIdToken())',
+        note: 'Do not send custom tokens directly in Authorization headers. Always exchange them for ID tokens first.'
+      };
+    }
+
+    res.json(response);
   } catch (error) {
     console.error('Login error:', error);
     res.status(401).json({ error: 'Authentication failed' });
