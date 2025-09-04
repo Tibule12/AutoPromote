@@ -1,10 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from './firebaseClient';
 import './Auth.css';
 
-const RegisterForm = () => {
+const RegisterForm = ({ registerUser }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -43,23 +40,9 @@ const RegisterForm = () => {
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Update user profile with name
-      await updateProfile(user, { displayName: name });
-      console.log('Profile updated with name');
-
-      // Create user document in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        id: user.uid,
-        name,
-        email,
-        role: 'user', // Default role for new registrations
-        createdAt: new Date().toISOString()
-      });
-      console.log('User document created in Firestore');
-
+      // Use the registerUser function passed from App.js
+      await registerUser(name, email, password);
+      
       setSuccess('Registration successful! You can now log in.');
       setFormData({
         name: '',
@@ -70,22 +53,28 @@ const RegisterForm = () => {
     } catch (error) {
       console.error('Registration error:', error);
       let errorMessage = 'Registration failed. ';
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          errorMessage += 'This email is already registered.';
-          break;
-        case 'auth/invalid-email':
-          errorMessage += 'Invalid email address.';
-          break;
-        case 'auth/operation-not-allowed':
-          errorMessage += 'Email/password accounts are not enabled. Please contact support.';
-          break;
-        case 'auth/weak-password':
-          errorMessage += 'Please choose a stronger password (at least 6 characters).';
-          break;
-        default:
-          errorMessage += error.message;
+      
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage += 'This email is already registered.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage += 'Invalid email address.';
+            break;
+          case 'auth/operation-not-allowed':
+            errorMessage += 'Email/password accounts are not enabled. Please contact support.';
+            break;
+          case 'auth/weak-password':
+            errorMessage += 'Please choose a stronger password (at least 6 characters).';
+            break;
+          default:
+            errorMessage += error.message;
+        }
+      } else {
+        errorMessage += error.message || 'Unknown error occurred.';
       }
+      
       setError(errorMessage);
     } finally {
       setIsLoading(false);
