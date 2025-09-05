@@ -1,57 +1,45 @@
-const admin = require('firebase-admin');
-const { adminConfig } = require('./config/firebase');
-
-let db, auth, storage;
-
-try {
-    // Use the config from our centralized firebase config
-    if (admin.apps.length === 0) {
-        admin.initializeApp(adminConfig);
-        console.log('✅ Firebase Admin initialized successfully');
-    }
-
-    // Initialize Firestore with custom settings
-    db = admin.firestore();
-    db.settings({
-        ignoreUndefinedProperties: true,
-        timestampsInSnapshots: true
-    });
-
-    // Initialize other services
-    auth = admin.auth();
-    storage = admin.storage();
-
-} catch (error) {
-    console.log('ℹ️ Firebase Admin initialization issue - attempting to recover');
-    
-    // Try to initialize with minimal configuration as a fallback
-    try {
-        if (admin.apps.length === 0) {
+// ...existing code...
+if (admin.apps.length === 0) {
+    // Try to load service account from environment variable first
+    let serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
+    if (serviceAccount) {
+        try {
+            serviceAccount = JSON.parse(serviceAccount);
             admin.initializeApp({
-                projectId: process.env.FIREBASE_PROJECT_ID
+                credential: admin.credential.cert(serviceAccount),
+                databaseURL: adminConfig.databaseURL,
+                storageBucket: adminConfig.storageBucket,
+                projectId: serviceAccount.project_id || adminConfig.projectId
             });
-            console.log('✅ Firebase Admin initialized with fallback configuration');
+            console.log('✅ Firebase Admin initialized from FIREBASE_SERVICE_ACCOUNT env');
+        } catch (err) {
+            console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', err);
+            admin.initializeApp(adminConfig);
+            console.log('✅ Firebase Admin initialized with adminConfig');
         }
-        
-        // Initialize services
-        db = admin.firestore();
-        auth = admin.auth();
-        storage = admin.storage();
-    } catch (fallbackError) {
-        console.log('Unable to initialize Firebase Admin, some features may not work correctly');
-        
-        // Create mock objects so the app doesn't crash
-        db = { collection: () => ({ doc: () => ({ get: async () => ({ exists: false, data: () => ({}) }) }) }) };
-        auth = { verifyIdToken: async () => ({ uid: 'mock-uid', email: 'mock@example.com' }) };
-        storage = { bucket: () => ({}) };
+    } else {
+        // Fallback to config file
+        let configServiceAccount = adminConfig.credential;
+        if (typeof configServiceAccount === 'string') {
+            try {
+                configServiceAccount = JSON.parse(configServiceAccount);
+            } catch (parseError) {
+                console.error('Failed to parse adminConfig.credential:', parseError);
+                configServiceAccount = null;
+            }
+        }
+        if (configServiceAccount) {
+            admin.initializeApp({
+                credential: admin.credential.cert(configServiceAccount),
+                databaseURL: adminConfig.databaseURL,
+                storageBucket: adminConfig.storageBucket,
+                projectId: configServiceAccount.project_id || adminConfig.projectId
+            });
+            console.log('✅ Firebase Admin initialized from adminConfig');
+        } else {
+            admin.initializeApp(adminConfig);
+            console.log('✅ Firebase Admin initialized with adminConfig (no credential)');
+        }
     }
 }
-
-// Export initialized services
-module.exports = { 
-    db, 
-    auth, 
-    storage, 
-    admin,
-    isInitialized: () => admin.apps.length > 0 
-};
+// ...existing code...
