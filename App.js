@@ -47,9 +47,11 @@ function App() {
   // Fetch user profile from backend (which gets it from Supabase)
   const fetchUserProfile = async () => {
     try {
+      if (!auth.currentUser) return;
+      const idToken = await auth.currentUser.getIdToken(true);
       const res = await fetch(apiUrl('/api/users/profile'), {
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${idToken}`,
         },
       });
       if (res.ok) {
@@ -64,9 +66,11 @@ function App() {
 
   const fetchUserContent = async () => {
     try {
+      if (!auth.currentUser) return;
+      const idToken = await auth.currentUser.getIdToken(true);
       const res = await fetch(apiUrl('/api/content/my-content'), {
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${idToken}`,
         },
       });
       if (res.status === 401) {
@@ -86,9 +90,11 @@ function App() {
 
   const fetchAnalytics = async () => {
     try {
+      if (!auth.currentUser) return;
+      const idToken = await auth.currentUser.getIdToken(true);
       const res = await fetch(apiUrl('/api/admin/analytics/overview'), {
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${idToken}`,
         },
       });
       if (res.status === 401) {
@@ -223,11 +229,13 @@ function App() {
         description: contentData.description || '',
       };
 
+      if (!auth.currentUser) return;
+      const idToken = await auth.currentUser.getIdToken(true);
       const res = await fetch(apiUrl('/api/content/upload'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify(payload),
       });
