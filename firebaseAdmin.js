@@ -45,3 +45,4 @@ if (admin.apps.length === 0) {
     }
 }
 // ...existing code...
+module.exports = admin;
