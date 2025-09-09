@@ -1,5 +1,4 @@
-const admin = require('./firebaseAdmin');
-const db = admin.firestore();
+const { admin, db } = require('./firebaseAdmin');
 
 const authMiddleware = async (req, res, next) => {
   try {
