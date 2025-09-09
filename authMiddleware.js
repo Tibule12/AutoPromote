@@ -1,4 +1,5 @@
-const { auth, db } = require('./firebaseAdmin');
+const admin = require('./firebaseAdmin');
+const db = admin.firestore();
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -22,7 +23,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // Verify Firebase token
-    const decodedToken = await auth.verifyIdToken(token);
+  const decodedToken = await admin.auth().verifyIdToken(token);
     console.log('Token verification successful, decoded:', JSON.stringify({
       uid: decodedToken.uid,
       email: decodedToken.email,
