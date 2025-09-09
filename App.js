@@ -106,84 +106,65 @@ function App() {
     }
   };
 
+  // Updated loginUser function
   const loginUser = async (email, password) => {
     try {
-      console.log('Attempting login with email and password');
-      
-      // First try: Use direct Firebase Auth and get the ID token
+      // Try direct Firebase Auth first
       try {
-        const auth = getAuth();
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         const idToken = await user.getIdToken();
-        
-        console.log('Firebase Auth successful, sending ID token to backend');
-        
-        // Send the token to the backend
+
+        // Send the ID token to the backend
         const res = await fetch(apiUrl('/api/auth/login'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            idToken,
-            email
-          }),
+          body: JSON.stringify({ idToken, email }),
         });
-        
+
         if (res.ok) {
           const data = await res.json();
-          setUser({ ...data.user, token: data.token });
+          setUser({ ...data.user, token: idToken }); // Always use ID token
           setShowLogin(false);
           return;
-        } else {
-          console.error('Backend verification failed with token');
-          // Fall through to second approach
         }
       } catch (firebaseError) {
-        console.error('Firebase Auth error:', firebaseError);
-        // Fall through to second approach
+        // If Firebase Auth fails, try backend authentication
       }
-      
-      // Second try: Send credentials directly to backend
-      console.log('Trying direct backend authentication');
+
+      // Try backend authentication
       const res = await fetch(apiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      
+
       if (res.ok) {
         const data = await res.json();
-        
-        // If we receive a custom token, we need to exchange it for an ID token
+
+        // If backend returns a custom token, exchange it for an ID token
         if (data.token && !data.token.startsWith('eyJ')) {
           try {
-            // Exchange the custom token for an ID token
-            const auth = getAuth();
             const userCredential = await signInWithCustomToken(auth, data.token);
             const user = userCredential.user;
             const idToken = await user.getIdToken();
-            
-            // Now use the ID token
-            setUser({ ...data.user, token: idToken });
-            console.log('Exchanged custom token for ID token, length:', idToken.length);
+            setUser({ ...data.user, token: idToken }); // Always use ID token
           } catch (tokenExchangeError) {
             console.error('Failed to exchange custom token:', tokenExchangeError);
-            // Still use the token we got, even if not ideal
-            setUser({ ...data.user, token: data.token });
+            alert('Login failed: Could not exchange custom token for ID token.');
+            return;
           }
         } else {
-          // Use the token as is (likely already an ID token)
+          // If backend returns an ID token, use it
           setUser({ ...data.user, token: data.token });
         }
-        
+
         setShowLogin(false);
       } else {
         const errorData = await res.json();
-        console.error('Login failed:', errorData);
         alert('Login failed: ' + (errorData.error || 'Invalid credentials'));
       }
     } catch (error) {
-      console.error('Login error:', error);
       alert('Login error: ' + (error.message || 'Connection error'));
     }
   };
