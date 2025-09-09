@@ -19,10 +19,7 @@ const storage = getStorage(app);
 const STORAGE_PATH = 'uploads';
 
 function App() {
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('user');
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [user, setUser] = useState(null);
   const [content, setContent] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
@@ -31,15 +28,12 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
       setIsAdmin(user.role === 'admin');
       fetchUserProfile();
       fetchUserContent();
       if (user.role === 'admin') {
         fetchAnalytics();
       }
-    } else {
-      localStorage.removeItem('user');
     }
     // eslint-disable-next-line
   }, [user]);
@@ -176,8 +170,6 @@ function App() {
   };
 
   const handleLogin = (userData) => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('adminToken');
     setUser(userData);
     setShowLogin(false);
   };
@@ -192,9 +184,6 @@ function App() {
     setContent([]);
     setAnalytics(null);
     setIsAdmin(false);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    localStorage.removeItem('adminToken');
   };
 
   // Firebase-powered upload
