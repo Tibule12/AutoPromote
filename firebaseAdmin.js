@@ -45,4 +45,5 @@ if (admin.apps.length === 0) {
     }
 }
 // ...existing code...
-module.exports = admin;
+const db = admin.firestore();
+module.exports = { admin, db };
