@@ -1,4 +1,6 @@
-// ...existing code...
+const admin = require('firebase-admin');
+const adminConfig = require('./firebaseConfig');
+
 if (admin.apps.length === 0) {
     // Try to load service account from environment variable first
     let serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
