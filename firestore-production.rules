@@ -9,26 +9,12 @@ service cloud.firestore {
 
     // Users collection - Admin SDK has full access, authenticated users have limited access
     match /users/{userId} {
-      // Admin SDK can do anything
-      allow read, write: if isAdminSDK();
-
-      // Authenticated users can read their own data and admins can read all
-      allow read: if request.auth != null && (
-        request.auth.uid == userId ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
-      );
-
-      // Users can create their own account
-      allow create: if request.auth != null && request.auth.uid == userId;
-
-      // Users can update their own data, admins can update any
-      allow update: if request.auth != null && (
-        request.auth.uid == userId ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
-      );
-
-      // Only Admin SDK can delete users
-      allow delete: if isAdminSDK();
+  // TEMPORARY: Allow all authenticated users to read all users for launch day
+  allow read: if request.auth != null;
+  // Authenticated users can create and update their own account
+  allow create, update: if request.auth != null && request.auth.uid == userId;
+  // Only Admin SDK can delete users
+  allow delete: if isAdminSDK();
     }
 
     // Content collection - Admin SDK has full access, users have controlled access
@@ -47,6 +33,14 @@ service cloud.firestore {
     match /promotions/{promotionId} {
   // TEMPORARY: Allow all authenticated users to read and write promotions for launch day
   allow read, write: if request.auth != null;
+    }
+
+
+    // Activities collection - TEMPORARY: Allow all authenticated users to read for launch day
+    match /activities/{activityId} {
+      allow read: if request.auth != null;
+      // Only Admin SDK can write/delete activities
+      allow write, delete: if isAdminSDK();
     }
 
     // Admin collection - Only Admin SDK access
