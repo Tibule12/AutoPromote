@@ -1,62 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow full access for Admin SDK (backend operations)
-    // This is necessary because the backend uses Firebase Admin SDK
-    function isAdminSDK() {
-      return request.auth == null || request.auth.token.admin == true;
-    }
-
-    // Users collection - Admin SDK has full access, authenticated users have limited access
-    match /users/{userId} {
-  // TEMPORARY: Allow all authenticated users to read all users for launch day
-  allow read: if request.auth != null;
-  // Authenticated users can create and update their own account
-  allow create, update: if request.auth != null && request.auth.uid == userId;
-  // Only Admin SDK can delete users
-  allow delete: if isAdminSDK();
-    }
-
-    // Content collection - Admin SDK has full access, users have controlled access
-    match /content/{contentId} {
-  // TEMPORARY: Allow all authenticated users to read and write content for launch day
-  allow read, write: if request.auth != null;
-    }
-
-    // Analytics collection - Admin SDK has full access, users have limited access
-    match /analytics/{analyticsId} {
-  // TEMPORARY: Allow all authenticated users to read and write analytics for launch day
-  allow read, write: if request.auth != null;
-    }
-
-    // Promotions collection - Admin SDK has full access, users have limited access
-    match /promotions/{promotionId} {
-  // TEMPORARY: Allow all authenticated users to read and write promotions for launch day
-  allow read, write: if request.auth != null;
-    }
-
-
-    // Activities collection - TEMPORARY: Allow all authenticated users to read for launch day
-    match /activities/{activityId} {
-      allow read: if request.auth != null;
-      // Only Admin SDK can write/delete activities
-      allow write, delete: if isAdminSDK();
-    }
-
-    // Admin collection - Only Admin SDK access
-    match /admin/{adminId} {
-      allow read, write: if isAdminSDK();
-    }
-
-    // Promotion schedules collection - Admin SDK has full access
-    match /promotion_schedules/{scheduleId} {
-  // TEMPORARY: Allow all authenticated users to read and write promotion schedules for launch day
-  allow read, write: if request.auth != null;
-    }
-
-    // Allow access to any other collections for Admin SDK
+    // LAUNCH DAY: Allow all authenticated users to read and write all collections
     match /{document=**} {
-      allow read, write: if isAdminSDK();
+      allow read, write: if request.auth != null;
     }
   }
 }
