@@ -10,7 +10,7 @@
     "deploy": "npm install && npm run build && firebase deploy",
     "build": "npm run clean && npm run compile",
     "clean": "rimraf dist",
-    "compile": "mkdir dist && cp -r *.js *.json .env dist/",
+  "compile": "mkdir dist && copy *.js dist\\ && copy *.json dist\\",
     "test:integration": "node runTests.js"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
     "firebase-admin": "^13.5.0",
     "jsonwebtoken": "^9.0.2",
     "node-fetch": "^2.7.0",
+    "react-router-dom": "^7.8.2",
     "stripe": "^18.5.0"
   },
   "devDependencies": {
