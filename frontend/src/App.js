@@ -721,23 +721,6 @@ function App() {
             >
               Get Started
             </button>
-            
-            <div style={{ marginTop: '30px' }}>
-              <button 
-                onClick={() => setShowAdminLogin(true)}
-                style={{
-                  background: 'rgba(255,255,255,0.2)',
-                  color: '#fff',
-                  border: '1px solid rgba(255,255,255,0.4)',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                }}
-              >
-                Admin Login
-              </button>
-            </div>
           </div>
         )}
         
