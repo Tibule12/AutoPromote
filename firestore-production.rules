@@ -51,35 +51,14 @@ service cloud.firestore {
 
     // Analytics collection - Admin SDK has full access, users have limited access
     match /analytics/{analyticsId} {
-      // Admin SDK can do anything
-      allow read, write: if isAdminSDK();
-
-      // Users can read their own analytics, admins can read all
-      allow read: if request.auth != null && (
-        resource.data.user_id == request.auth.uid ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
-      );
-
-      // Only Admin SDK can write analytics
-      allow write: if isAdminSDK();
+  // TEMPORARY: Allow all authenticated users to read and write analytics for launch day
+  allow read, write: if request.auth != null;
     }
 
     // Promotions collection - Admin SDK has full access, users have limited access
     match /promotions/{promotionId} {
-      // Admin SDK can do anything
-      allow read, write: if isAdminSDK();
-
-      // Users can read their own promotions, admins can read all
-      allow read: if request.auth != null && (
-        resource.data.user_id == request.auth.uid ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
-      );
-
-      // Users can create their own promotions
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.user_id;
-
-      // Only Admin SDK can update promotions
-      allow update: if isAdminSDK();
+  // TEMPORARY: Allow all authenticated users to read and write promotions for launch day
+  allow read, write: if request.auth != null;
     }
 
     // Admin collection - Only Admin SDK access
