@@ -725,9 +725,7 @@ function App() {
         )}
         
         {/* Add the direct admin login fix component */}
-        {!user && !showLogin && !showRegister && !showAdminLogin && (
-          <AdminLoginFix />
-        )}
+  // ...existing code...
         
         {/* Integration Tester - only shown for admin users when URL path is /integration-test */}
         {isAdmin && window.location.pathname === '/integration-test' && (
