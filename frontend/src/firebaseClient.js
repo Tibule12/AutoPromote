@@ -15,13 +15,7 @@ const firebaseConfig = {
   measurementId: "G-8QDQXF0FPQ"
 };
 
-// Log Firebase initialization for debugging
-console.log('Initializing Firebase with configuration:', {
-  apiKey: firebaseConfig.apiKey,
-  authDomain: firebaseConfig.authDomain,
-  projectId: firebaseConfig.projectId,
-  storageBucket: firebaseConfig.storageBucket
-});
+// Firebase initialized successfully
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
