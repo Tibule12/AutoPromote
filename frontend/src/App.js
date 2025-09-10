@@ -208,7 +208,13 @@ function App() {
       }
     }
     
-    // Check admin status again to be sure
+    // Null check for user and user.role
+    if (!user || !user.role) {
+      console.error('User or role is missing for analytics fetch:', user);
+      setIsAdmin(false);
+      return;
+    }
+    
     const isAdminUser = user.role === 'admin' || user.isAdmin === true;
     if (!isAdminUser) {
       console.error('Non-admin user attempting to fetch analytics');
@@ -372,24 +378,23 @@ function App() {
 
   const handleLogin = async (userData) => {
     try {
-      // Clear any existing data
       localStorage.clear();
-      
-      // Ensure we have a token
+      // Null check for userData and userData.role
+      if (!userData || !userData.role) {
+        console.error('User or role is missing after login:', userData);
+        setShowLogin(true);
+        setUser(null);
+        setIsAdmin(false);
+        return;
+      }
       if (!userData.token) {
         console.error('No token provided in user data');
         return;
       }
-      
-      // Log token info for debugging
       console.log('Token received, length:', userData.token.length);
-      
-      // Check for admin status from various sources
       const isAdminRole = userData.role === 'admin';
       const hasAdminClaim = userData.isAdmin === true;
       const isAdminUser = isAdminRole || hasAdminClaim;
-      
-      // Log the authentication data
       console.log('Logging in user:', {
         email: userData.email,
         role: userData.role,
@@ -397,8 +402,6 @@ function App() {
         hasToken: Boolean(userData.token),
         tokenLength: userData.token.length
       });
-      
-      // Always treat admin login response as admin
       const forceAdmin = userData.role === 'admin' || userData.isAdmin === true;
       const updatedUserData = {
         ...userData,
@@ -725,7 +728,7 @@ function App() {
         )}
         
         {/* Add the direct admin login fix component */}
-  // ...existing code...
+        <AdminLoginFix />
         
         {/* Integration Tester - only shown for admin users when URL path is /integration-test */}
         {isAdmin && window.location.pathname === '/integration-test' && (
