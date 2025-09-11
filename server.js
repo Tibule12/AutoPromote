@@ -35,7 +35,9 @@ try {
 
 try {
   monetizationRoutes = require('./routes/monetizationRoutes');
+  console.log('✅ Monetization routes loaded successfully');
 } catch (error) {
+  console.log('⚠️ Monetization routes not found, using dummy router:', error.message);
   monetizationRoutes = express.Router();
 }
 
@@ -79,8 +81,8 @@ app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
 
 
-// Static file serving is disabled for API-only deployment on Render
-// app.use(express.static(path.join(__dirname, 'frontend/build')));
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, 'frontend/build')));
 
 // Serve the admin test HTML file
 app.get('/admin-test', (req, res) => {
@@ -122,9 +124,10 @@ app.get('/api/health', (req, res) => {
 });
 
 
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
-// });
+// Catch all handler: send back React's index.html file for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
