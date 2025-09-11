@@ -82,7 +82,7 @@ app.use('/api/stripe', stripeOnboardRoutes);
 
 
 // Serve static files from the React app build directory
-app.use(express.static(path.join(__dirname, 'frontend/build')));
+app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // Serve the admin test HTML file
 app.get('/admin-test', (req, res) => {
@@ -126,7 +126,7 @@ app.get('/api/health', (req, res) => {
 
 // Catch all handler: send back React's index.html file for client-side routing
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
 // Error handling middleware
