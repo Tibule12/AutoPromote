@@ -37,6 +37,14 @@ service cloud.firestore {
       allow update: if false;  // Only allow updates through admin SDK
     }
 
+    // All authenticated users can read promotion schedules for admin dashboard
+    match /promotion_schedules/{scheduleId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+
     // Allow reading activities for admin dashboard
     match /activities/{activityId} {
       allow read: if request.auth != null;
