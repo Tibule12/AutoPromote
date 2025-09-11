@@ -1,5 +1,7 @@
 const { db } = require('./firebaseAdmin');
 const optimizationService = require('./optimizationService');
+const paypalClient = require('./paypalClient');
+const paypal = require('@paypal/paypal-server-sdk');
 
 class PromotionService {
     // Schedule a promotion for content with advanced algorithms
@@ -463,17 +465,57 @@ class PromotionService {
         }
       });
 
-      // Generate revenue through monetization service if available
+      // Process PayPal payment order
+      const request = new paypal.orders.OrdersCreateRequest();
+      request.prefer('return=representation');
+      request.requestBody({
+        intent: 'CAPTURE',
+        purchase_units: [{
+          amount: {
+            currency_code: 'USD',
+            value: revenue.toFixed(2)
+          },
+          description: `Promotion payment for content ID ${schedule.contentId}`
+        }]
+      });
+
+      const client = paypalClient.client();
+      let order;
+      try {
+        order = await client.execute(request);
+        console.log('✅ PayPal order created:', order.result.id);
+      } catch (paypalError) {
+        console.error('❌ PayPal order creation failed:', paypalError);
+        throw paypalError;
+      }
+
+      // Capture the order immediately (for simplicity)
+      const captureRequest = new paypal.orders.OrdersCaptureRequest(order.result.id);
+      captureRequest.requestBody({});
+      let capture;
+      try {
+        capture = await client.execute(captureRequest);
+        console.log('✅ PayPal payment captured:', capture.result.id);
+      } catch (captureError) {
+        console.error('❌ PayPal payment capture failed:', captureError);
+        throw captureError;
+      }
+
+      // Process transaction through monetization service
       try {
         const monetizationService = require('./monetizationService');
-        await monetizationService.processTransaction(
-          schedule.contentId,
-          revenue * 0.1, // 10% platform fee
-          content.userId || 'system',
-          'promotion'
-        );
+        await monetizationService.processTransaction({
+          contentId: schedule.contentId,
+          userId: content.userId || 'system',
+          viewsGenerated: actualViews,
+          engagementsGenerated: actualEngagements,
+          cost: schedule.budget,
+          paypalOrderId: order.result.id,
+          paypalCaptureId: capture.result.id
+        });
+        console.log('✅ Monetization transaction processed successfully');
       } catch (monetizationError) {
-        console.warn('Could not process monetization transaction:', monetizationError);
+        console.error('❌ Could not process monetization transaction:', monetizationError);
       }
 
       console.log(`✅ Executed promotion for content ${schedule.contentId}: ${actualViews} views, $${revenue.toFixed(2)} revenue`);
@@ -484,6 +526,8 @@ class PromotionService {
         viewsGenerated: actualViews,
         engagementsGenerated: actualEngagements,
         revenueGenerated: revenue,
+        paypalOrderId: order.result.id,
+        paypalCaptureId: capture.result.id,
         metrics: {
           views: actualViews,
           engagements: actualEngagements,

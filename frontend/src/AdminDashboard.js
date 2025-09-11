@@ -4,12 +4,6 @@ import { db } from './firebaseClient';
 import mockAnalyticsData from './mockAnalyticsData';
 import './AdminDashboard.css';
 
-import StatCard from './components/StatCard';
-import AdminChart from './components/AdminChart';
-import AdminTable from './components/AdminTable';
-import ActivityFeed from './components/ActivityFeed';
-import './AdminDashboard.css';
-
 function AdminDashboard({ analytics, user }) {
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,6 +71,10 @@ function AdminDashboard({ analytics, user }) {
       const promotionsCompleted = allPromotionSchedules.filter(schedule =>
         !schedule.isActive || (schedule.endTime && schedule.endTime?.toDate() < now)
       ).length;
+
+      // Fetch revenue analytics from monetization API
+      const revenueResponse = await fetch('/api/monetization/revenue-analytics?timeframe=month');
+      const revenueApiData = revenueResponse.ok ? await revenueResponse.json() : null;
 
       // Fetch real transactions data
       const transactionsSnapshot = await getDocs(collection(db, 'transactions'));
@@ -355,6 +353,7 @@ function AdminDashboard({ analytics, user }) {
     }
   }, [analytics]);
 
+  // Simple StatCard component
   const StatCard = ({ title, value, subtitle, color = '#1976d2', icon, trend }) => (
     <div style={{
       background: 'white',
@@ -369,12 +368,6 @@ function AdminDashboard({ analytics, user }) {
       transition: 'transform 0.3s ease, box-shadow 0.3s ease',
       cursor: 'pointer',
       border: '1px solid rgba(0,0,0,0.05)'
-    }} onMouseOver={(e) => {
-      e.currentTarget.style.transform = 'translateY(-5px)';
-      e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.12)';
-    }} onMouseOut={(e) => {
-      e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)';
     }}>
       <div style={{
         position: 'absolute',
@@ -577,6 +570,7 @@ function AdminDashboard({ analytics, user }) {
     </div>
   );
 
+  // Simple ActivityFeed component
   const ActivityFeed = ({ activities }) => (
     <div style={{
       backgroundColor: 'white',
