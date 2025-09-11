@@ -56,26 +56,26 @@ function AdminDashboard({ analytics, user }) {
       const newContentSnapshot = await getDocs(newContentQuery);
       const newContentToday = newContentSnapshot.size;
       
-      // Fetch promotions
-      const promotionsSnapshot = await getDocs(collection(db, 'promotions'));
-      const allPromotions = promotionsSnapshot.docs.map(doc => ({
+      // Fetch promotion schedules
+      const promotionSchedulesSnapshot = await getDocs(collection(db, 'promotion_schedules'));
+      const allPromotionSchedules = promotionSchedulesSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-      
+
       // Calculate active and scheduled promotions
       const now = new Date();
-      const activePromotions = allPromotions.filter(promo => 
-        promo.startDate?.toDate() <= now && 
-        promo.endDate?.toDate() >= now
+      const activePromotions = allPromotionSchedules.filter(schedule =>
+        schedule.isActive && schedule.startTime?.toDate() <= now &&
+        (!schedule.endTime || schedule.endTime?.toDate() >= now)
       ).length;
-      
-      const scheduledPromotions = allPromotions.filter(promo => 
-        promo.startDate?.toDate() > now
+
+      const scheduledPromotions = allPromotionSchedules.filter(schedule =>
+        schedule.isActive && schedule.startTime?.toDate() > now
       ).length;
-      
-      const promotionsCompleted = allPromotions.filter(promo => 
-        promo.endDate?.toDate() < now
+
+      const promotionsCompleted = allPromotionSchedules.filter(schedule =>
+        !schedule.isActive || (schedule.endTime && schedule.endTime?.toDate() < now)
       ).length;
       
       // Get top performing content
@@ -133,6 +133,7 @@ function AdminDashboard({ analytics, user }) {
         promotionsCompleted,
         topContent,
         recentActivities,
+        promotionSchedules: allPromotionSchedules, // Add promotion schedules data
         // Performance metrics
         performanceMetrics: {
           conversionRate: 3.2,
@@ -592,15 +593,15 @@ function AdminDashboard({ analytics, user }) {
 
             <div style={{ marginTop: 10, display: 'flex', gap: '20px' }}>
               <div style={{ flex: 1 }}>
-                <DataTable 
+                <DataTable
                   title="Top Performing Content"
                   data={dashboardData.topContent || []}
                   columns={[
                     { header: 'Title', accessor: 'title' },
                     { header: 'Type', accessor: 'type' },
                     { header: 'Views', accessor: 'views' },
-                    { 
-                      header: 'Engagement', 
+                    {
+                      header: 'Engagement',
                       accessor: 'engagementRate',
                       render: (row) => `${((row.engagementRate || 0) * 100).toFixed(1)}%`
                     }
@@ -608,7 +609,38 @@ function AdminDashboard({ analytics, user }) {
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <ActivityFeed activities={dashboardData.recentActivities || []} />
+                <DataTable
+                  title="Recent Promotion Schedules"
+                  data={(dashboardData.promotionSchedules || []).slice(0, 5)}
+                  columns={[
+                    {
+                      header: 'Content ID',
+                      accessor: 'contentId',
+                      render: (row) => row.contentId ? row.contentId.substring(0, 8) + '...' : 'N/A'
+                    },
+                    { header: 'Platform', accessor: 'platform' },
+                    {
+                      header: 'Status',
+                      accessor: 'isActive',
+                      render: (row) => (
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '0.8rem',
+                          backgroundColor: row.isActive ? '#e8f5e9' : '#ffebee',
+                          color: row.isActive ? '#2e7d32' : '#d32f2f'
+                        }}>
+                          {row.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      )
+                    },
+                    {
+                      header: 'Start Time',
+                      accessor: 'startTime',
+                      render: (row) => row.startTime ? new Date(row.startTime.seconds * 1000).toLocaleDateString() : 'N/A'
+                    }
+                  ]}
+                />
               </div>
             </div>
           </>
