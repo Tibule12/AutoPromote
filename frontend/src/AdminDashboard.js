@@ -78,6 +78,54 @@ function AdminDashboard({ analytics, user }) {
         !schedule.isActive || (schedule.endTime && schedule.endTime?.toDate() < now)
       ).length;
 
+      // Fetch real transactions data
+      const transactionsSnapshot = await getDocs(collection(db, 'transactions'));
+      const allTransactions = transactionsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      // Calculate real revenue metrics from transactions
+      const totalRevenue = allTransactions.reduce((sum, transaction) => sum + (transaction.amount || 0), 0);
+      const revenueToday = allTransactions
+        .filter(transaction => {
+          const transactionDate = transaction.timestamp?.toDate();
+          return transactionDate && transactionDate.toDateString() === today.toDateString();
+        })
+        .reduce((sum, transaction) => sum + (transaction.amount || 0), 0);
+
+      // Fetch user activity data
+      const userActivitySnapshot = await getDocs(collection(db, 'user_activity'));
+      const allUserActivities = userActivitySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      // Calculate real user activity metrics
+      const activeUsersToday = new Set(
+        allUserActivities
+          .filter(activity => {
+            const activityDate = activity.timestamp?.toDate();
+            return activityDate && activityDate.toDateString() === today.toDateString();
+          })
+          .map(activity => activity.userId)
+      ).size;
+
+      const activeUsersLastWeek = new Set(
+        allUserActivities
+          .filter(activity => {
+            const activityDate = activity.timestamp?.toDate();
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return activityDate && activityDate >= weekAgo;
+          })
+          .map(activity => activity.userId)
+      ).size;
+
+      // Calculate engagement metrics
+      const totalEngagementActions = allUserActivities.length;
+      const avgEngagementRate = totalUsers > 0 ? (totalEngagementActions / totalUsers) * 100 : 0;
+
       // Get top performing content
       const topContentQuery = query(
         collection(db, 'content'),
@@ -157,7 +205,7 @@ function AdminDashboard({ analytics, user }) {
         totalEngagement += (content.engagementRate || 0) * (content.views || 0);
       });
 
-      const avgEngagementRate = totalViews > 0 ? totalEngagement / totalViews : 0;
+      const contentEngagementRate = totalViews > 0 ? totalEngagement / totalViews : 0;
 
       // Create analytics data from Firestore data
       const firestoreAnalyticsData = {
@@ -165,14 +213,14 @@ function AdminDashboard({ analytics, user }) {
         newUsersToday,
         totalContent,
         newContentToday,
-        totalRevenue: revenueData.totalRevenue,
-        revenueToday: revenueData.revenueToday,
+        totalRevenue: totalRevenue || revenueData.totalRevenue,
+        revenueToday: revenueToday || revenueData.revenueToday,
         activePromotions,
         scheduledPromotions,
-        activeUsers: Math.round(totalUsers * 0.52), // Could be improved with real activity data
-        activeUsersLastWeek: Math.round(totalUsers * 0.48),
-        engagementRate: avgEngagementRate,
-        engagementChange: 0.08, // Could be calculated from historical data
+        activeUsers: activeUsersToday || Math.round(totalUsers * 0.52),
+        activeUsersLastWeek: activeUsersLastWeek || Math.round(totalUsers * 0.48),
+        engagementRate: avgEngagementRate / 100, // Convert to decimal for display
+        engagementChange: activeUsersLastWeek > 0 ? ((activeUsersToday - activeUsersLastWeek) / activeUsersLastWeek) : 0.08,
         userSegmentation: {
           powerUsers: Math.round(totalUsers * 0.12),
           regularUsers: Math.round(totalUsers * 0.58),
@@ -228,8 +276,54 @@ function AdminDashboard({ analytics, user }) {
             'Other': 1
           }
         },
-        // Revenue and financial data
-        financialMetrics: revenueData.financialMetrics
+        // Revenue and financial data with real transaction calculations
+        financialMetrics: {
+          revenueByMonth: (() => {
+            const monthlyRevenue = {};
+            allTransactions.forEach(transaction => {
+              const date = transaction.timestamp?.toDate();
+              if (date) {
+                const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + (transaction.amount || 0);
+              }
+            });
+            return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
+              month,
+              revenue
+            })).slice(-6); // Last 6 months
+          })(),
+          revenueByContentType: (() => {
+            const revenueByType = {};
+            allTransactions.forEach(transaction => {
+              const type = transaction.contentType || 'Other';
+              revenueByType[type] = (revenueByType[type] || 0) + (transaction.amount || 0);
+            });
+            // Convert to percentages
+            const total = Object.values(revenueByType).reduce((sum, amount) => sum + amount, 0);
+            const percentages = {};
+            Object.entries(revenueByType).forEach(([type, amount]) => {
+              percentages[type] = Math.round((amount / total) * 100);
+            });
+            return percentages;
+          })(),
+          transactionTrends: {
+            averageOrderValue: allTransactions.length > 0
+              ? allTransactions.reduce((sum, t) => sum + (t.amount || 0), 0) / allTransactions.length
+              : 0,
+            conversionRate: totalUsers > 0 ? (allTransactions.length / totalUsers) * 100 : 0,
+            repeatPurchaseRate: (() => {
+              const userPurchaseCount = {};
+              allTransactions.forEach(transaction => {
+                const userId = transaction.userId;
+                if (userId) {
+                  userPurchaseCount[userId] = (userPurchaseCount[userId] || 0) + 1;
+                }
+              });
+              const repeatUsers = Object.values(userPurchaseCount).filter(count => count > 1).length;
+              return totalUsers > 0 ? (repeatUsers / totalUsers) * 100 : 0;
+            })()
+          }
+        }
       };
 
       console.log('Successfully fetched Firestore analytics data');
