@@ -337,31 +337,28 @@ router.post('/promote/:id', authMiddleware, async (req, res) => {
     console.log(`🔍 Promotion request for content ID: ${contentId} by user ID: ${req.userId}`);
 
     // Verify content ownership
-    const { data: content, error: contentError } = await supabase
-      .from('content')
-      .select('id')
-      .eq('id', contentId)
-      .eq('user_id', req.userId)
-      .single();
+    const contentRef = db.collection('content').doc(contentId);
+    const contentDoc = await contentRef.get();
 
-    if (contentError || !content) {
-      console.error('❌ Content ownership verification failed:', contentError?.message || 'Content not found');
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
+      console.error('❌ Content ownership verification failed: Content not found or access denied');
       return res.status(404).json({ error: 'Content not found or access denied' });
     }
 
+    const content = { id: contentDoc.id, ...contentDoc.data() };
     console.log('✅ Content ownership verified successfully');
 
     // Schedule promotion with default parameters or customize as needed
     const scheduleData = {
-      platform: 'all',
+      platform: req.body.platform || 'all',
       schedule_type: 'specific',
       start_time: new Date().toISOString(),
       frequency: 'once',
       is_active: true,
-      budget: 1000,
+      budget: req.body.budget || 1000,
       target_metrics: {
-        target_views: 1000000,
-        target_rpm: 1000
+        target_views: req.body.target_views || 1000000,
+        target_rpm: req.body.target_rpm || 900000
       }
     };
 
@@ -369,10 +366,24 @@ router.post('/promote/:id', authMiddleware, async (req, res) => {
     const promotion = await promotionService.schedulePromotion(contentId, scheduleData);
     console.log('✅ Promotion scheduled successfully:', promotion);
 
-    res.status(200).json({
-      message: 'Promotion started successfully',
-      promotion
-    });
+    // Immediately execute the promotion for instant results
+    try {
+      const executionResult = await promotionService.executePromotion(promotion.id);
+      console.log('✅ Promotion executed immediately:', executionResult);
+
+      res.status(200).json({
+        message: 'Promotion started and executed successfully',
+        promotion,
+        execution: executionResult
+      });
+    } catch (executionError) {
+      console.error('❌ Error executing promotion:', executionError);
+      res.status(200).json({
+        message: 'Promotion scheduled successfully, but execution failed',
+        promotion,
+        execution_error: executionError.message
+      });
+    }
   } catch (error) {
     console.error('❌ Error starting promotion:', error);
     console.error('📋 Error details:', {
@@ -380,7 +391,7 @@ router.post('/promote/:id', authMiddleware, async (req, res) => {
       stack: error.stack,
       code: error.code
     });
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Internal server error',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
