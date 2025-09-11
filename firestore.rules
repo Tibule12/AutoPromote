@@ -24,10 +24,12 @@ service cloud.firestore {
         (resource.data.userId == request.auth.uid || isAdmin());
     }
 
-    // All authenticated users can read analytics for admin dashboard
+    // All authenticated users can read/write analytics for admin dashboard
     match /analytics/{analyticsId} {
       allow read: if request.auth != null;
-      allow write: if false;  // Only allow writes through admin SDK
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
     }
 
     // All authenticated users can read promotions for admin dashboard
@@ -45,16 +47,20 @@ service cloud.firestore {
       allow delete: if request.auth != null;
     }
 
-    // Allow reading activities for admin dashboard
+    // Allow reading/writing activities for admin dashboard
     match /activities/{activityId} {
       allow read: if request.auth != null;
-      allow write: if false;  // Only allow writes through admin SDK
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
     }
 
-    // Allow reading transactions for revenue tracking
+    // Allow reading/writing transactions for revenue tracking
     match /transactions/{transactionId} {
       allow read: if request.auth != null;
-      allow write: if false;  // Only allow writes through admin SDK
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
     }
   }
 }
