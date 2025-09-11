@@ -1,5 +1,5 @@
 const admin = require('firebase-admin');
-const adminConfig = require('./firebaseConfig.server');
+const adminConfig = require('./firebaseConfig.server.js');
 
 if (admin.apps.length === 0) {
     admin.initializeApp({
