@@ -1,6 +1,5 @@
 // Firebase Configuration for Server-Side (CommonJS)
 // File presence confirmed for Render deployment troubleshooting
-const admin = require('firebase-admin');
 
 // Firebase Admin SDK configuration for the backend
 // These values should be set in environment variables for security
