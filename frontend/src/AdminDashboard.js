@@ -56,26 +56,28 @@ function AdminDashboard({ analytics, user }) {
       const newContentSnapshot = await getDocs(newContentQuery);
       const newContentToday = newContentSnapshot.size;
       
-      // Fetch promotions
-      const promotionsSnapshot = await getDocs(collection(db, 'promotions'));
-      const allPromotions = promotionsSnapshot.docs.map(doc => ({
+      // Fetch promotion schedules
+      const promotionSchedulesSnapshot = await getDocs(collection(db, 'promotion_schedules'));
+      const allPromotionSchedules = promotionSchedulesSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-      
+
       // Calculate active and scheduled promotions
       const now = new Date();
-      const activePromotions = allPromotions.filter(promo => 
-        promo.startDate?.toDate() <= now && 
-        promo.endDate?.toDate() >= now
+      const activePromotions = allPromotionSchedules.filter(schedule =>
+        schedule.isActive &&
+        schedule.startTime <= now.toISOString() &&
+        (!schedule.endTime || schedule.endTime >= now.toISOString())
       ).length;
-      
-      const scheduledPromotions = allPromotions.filter(promo => 
-        promo.startDate?.toDate() > now
+
+      const scheduledPromotions = allPromotionSchedules.filter(schedule =>
+        schedule.isActive &&
+        schedule.startTime > now.toISOString()
       ).length;
-      
-      const promotionsCompleted = allPromotions.filter(promo => 
-        promo.endDate?.toDate() < now
+
+      const promotionsCompleted = allPromotionSchedules.filter(schedule =>
+        schedule.endTime && schedule.endTime < now.toISOString()
       ).length;
       
       // Get top performing content
