@@ -35,7 +35,9 @@ try {
 
 try {
   monetizationRoutes = require('./routes/monetizationRoutes');
+  console.log('✅ Monetization routes loaded successfully');
 } catch (error) {
+  console.log('⚠️ Monetization routes not found, using dummy router:', error.message);
   monetizationRoutes = express.Router();
 }
 
@@ -55,25 +57,12 @@ const { db, auth, storage } = require('./firebaseAdmin');
 const app = express();
 const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
 
-// CORS configuration
-const corsOptions = {
-  origin: [
-    'http://localhost:3000', 
-    'http://localhost:3001', 
-    'http://localhost:3002',
-    'https://autopromote-app.vercel.app', // Add your deployed frontend URL when available
-    'https://tibule12.github.io', // Allow GitHub Pages frontend
-    process.env.FRONTEND_URL // Allow dynamic frontend URL from environment
-  ].filter(Boolean), // Remove any undefined values
-  credentials: true,
+// CORS configuration - allow all origins for debugging
+app.use(cors({
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
-
-// Middleware
-app.use(cors(corsOptions));
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin']
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -92,8 +81,8 @@ app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
 
 
-// Static file serving is disabled for API-only deployment on Render
-// app.use(express.static(path.join(__dirname, 'frontend/build')));
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, 'frontend/build')));
 
 // Serve the admin test HTML file
 app.get('/admin-test', (req, res) => {
@@ -135,9 +124,10 @@ app.get('/api/health', (req, res) => {
 });
 
 
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
-// });
+// Catch all handler: send back React's index.html file for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

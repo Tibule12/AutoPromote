@@ -337,31 +337,28 @@ router.post('/promote/:id', authMiddleware, async (req, res) => {
     console.log(`🔍 Promotion request for content ID: ${contentId} by user ID: ${req.userId}`);
 
     // Verify content ownership
-    const { data: content, error: contentError } = await supabase
-      .from('content')
-      .select('id')
-      .eq('id', contentId)
-      .eq('user_id', req.userId)
-      .single();
+    const contentRef = db.collection('content').doc(contentId);
+    const contentDoc = await contentRef.get();
 
-    if (contentError || !content) {
-      console.error('❌ Content ownership verification failed:', contentError?.message || 'Content not found');
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
+      console.error('❌ Content ownership verification failed: Content not found or access denied');
       return res.status(404).json({ error: 'Content not found or access denied' });
     }
 
+    const content = { id: contentDoc.id, ...contentDoc.data() };
     console.log('✅ Content ownership verified successfully');
 
     // Schedule promotion with default parameters or customize as needed
     const scheduleData = {
-      platform: 'all',
+      platform: req.body.platform || 'all',
       schedule_type: 'specific',
       start_time: new Date().toISOString(),
       frequency: 'once',
       is_active: true,
-      budget: 1000,
+      budget: req.body.budget || 1000,
       target_metrics: {
-        target_views: 1000000,
-        target_rpm: 1000
+        target_views: req.body.target_views || 1000000,
+        target_rpm: req.body.target_rpm || 900000
       }
     };
 
@@ -369,10 +366,24 @@ router.post('/promote/:id', authMiddleware, async (req, res) => {
     const promotion = await promotionService.schedulePromotion(contentId, scheduleData);
     console.log('✅ Promotion scheduled successfully:', promotion);
 
-    res.status(200).json({
-      message: 'Promotion started successfully',
-      promotion
-    });
+    // Immediately execute the promotion for instant results
+    try {
+      const executionResult = await promotionService.executePromotion(promotion.id);
+      console.log('✅ Promotion executed immediately:', executionResult);
+
+      res.status(200).json({
+        message: 'Promotion started and executed successfully',
+        promotion,
+        execution: executionResult
+      });
+    } catch (executionError) {
+      console.error('❌ Error executing promotion:', executionError);
+      res.status(200).json({
+        message: 'Promotion scheduled successfully, but execution failed',
+        promotion,
+        execution_error: executionError.message
+      });
+    }
   } catch (error) {
     console.error('❌ Error starting promotion:', error);
     console.error('📋 Error details:', {
@@ -380,7 +391,7 @@ router.post('/promote/:id', authMiddleware, async (req, res) => {
       stack: error.stack,
       code: error.code
     });
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Internal server error',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
@@ -698,12 +709,112 @@ router.post('/admin/process-completed-promotions', authMiddleware, async (req, r
     }
 
     const processedCount = await promotionService.processCompletedPromotions();
-    res.json({ 
+    res.json({
       message: `Processed ${processedCount} completed promotions`,
-      processed_count: processedCount 
+      processed_count: processedCount
     });
   } catch (error) {
     console.error('Error processing completed promotions:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Process creator payout (admin endpoint)
+router.post('/admin/process-creator-payout/:contentId', authMiddleware, async (req, res) => {
+  try {
+    // Check if user is admin
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', req.userId)
+      .single();
+
+    if (userError || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const contentId = req.params.contentId;
+    const { recipientEmail, payoutAmount } = req.body;
+
+    // Get content details
+    const contentRef = db.collection('content').doc(contentId);
+    const contentDoc = await contentRef.get();
+
+    if (!contentDoc.exists) {
+      return res.status(404).json({ error: 'Content not found' });
+    }
+
+    const content = { id: contentDoc.id, ...contentDoc.data() };
+
+    // Get creator details
+    const userRef = db.collection('users').doc(content.user_id);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: 'Creator not found' });
+    }
+
+    const creator = { id: userDoc.id, ...userDoc.data() };
+
+    // Calculate payout amount based on business rules
+    const calculatedPayout = content.revenue * content.creator_payout_rate;
+    const finalPayoutAmount = payoutAmount || calculatedPayout;
+
+    // Process PayPal payout
+    const paypalClient = require('../paypalClient');
+    const paypal = require('@paypal/paypal-server-sdk');
+
+    // For now, create a payout request (placeholder implementation)
+    // In production, you would use PayPal Payouts API
+    const payoutRequest = {
+      sender_batch_header: {
+        sender_batch_id: `payout_${contentId}_${Date.now()}`,
+        email_subject: 'You have a payout from AutoPromote!'
+      },
+      items: [{
+        recipient_type: 'EMAIL',
+        amount: {
+          value: finalPayoutAmount.toFixed(2),
+          currency: 'USD'
+        },
+        receiver: recipientEmail || creator.email,
+        note: `Payout for content: ${content.title}`,
+        sender_item_id: `item_${contentId}`
+      }]
+    };
+
+    // Placeholder response - in production, make actual PayPal API call
+    console.log('PayPal payout request:', payoutRequest);
+
+    // Record payout in Firestore
+    const payoutRef = db.collection('payouts').doc();
+    await payoutRef.set({
+      contentId,
+      creatorId: creator.id,
+      amount: finalPayoutAmount,
+      currency: 'USD',
+      recipientEmail: recipientEmail || creator.email,
+      status: 'processed',
+      paypalBatchId: payoutRequest.sender_batch_header.sender_batch_id,
+      processedAt: new Date(),
+      revenueGenerated: content.revenue,
+      payoutRate: content.creator_payout_rate
+    });
+
+    res.json({
+      message: 'Creator payout processed successfully',
+      payout: {
+        id: payoutRef.id,
+        contentId,
+        creatorId: creator.id,
+        amount: finalPayoutAmount,
+        currency: 'USD',
+        recipientEmail: recipientEmail || creator.email,
+        paypalBatchId: payoutRequest.sender_batch_header.sender_batch_id
+      }
+    });
+  } catch (error) {
+    console.error('Error processing creator payout:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

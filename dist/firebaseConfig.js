@@ -4,7 +4,7 @@ import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 
 // Import the client config from our centralized config
-import { clientConfig } from './config/firebaseClient';
+import { clientConfig } from './config/firebaseClient.js';
 
 // Initialize Firebase with the client configuration
 const app = initializeApp(clientConfig);
