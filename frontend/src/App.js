@@ -148,7 +148,15 @@ function App() {
       });
       if (res.ok) {
         const data = await res.json();
-        handleLogin({ ...data.user, token: idToken });
+        // If backend returns a custom token, exchange it for an ID token
+        if (data.customToken) {
+          // Sign in with custom token
+          const customUserCredential = await auth.signInWithCustomToken(data.customToken);
+          const customIdToken = await customUserCredential.user.getIdToken();
+          handleLogin({ ...data.user, token: customIdToken });
+        } else {
+          handleLogin({ ...data.user, token: idToken });
+        }
       } else {
         const error = await res.json();
         throw new Error(error.message || 'Login failed');
