@@ -10,7 +10,7 @@
     "deploy": "npm install && npm run build && firebase deploy",
     "build": "npm run clean && npm run compile",
     "clean": "rimraf dist",
-  "compile": "mkdir dist && copy *.js dist\\ && copy *.json dist\\",
+    "compile": "mkdir dist && copy *.js dist\\ && copy *.json dist\\",
     "test:integration": "node runTests.js"
   },
   "dependencies": {
