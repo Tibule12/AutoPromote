@@ -1,4 +1,5 @@
 # AutoPromote
+<!-- Triggered redeploy: 2025-09-12 -->
 
 ## Overview
 AutoPromote is an AI-powered platform designed to automate content promotion and monetization for creators. The platform will enable users to upload their content, including songs, videos, websites, platforms, and pictures, and automatically promote it across various channels to increase views, followers, and revenue.
