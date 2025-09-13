@@ -1,5 +1,6 @@
 {
   "name": "autopromote-server",
+  "homepage": "https://Tibule12.github.io/AutoPromote",
   "version": "1.0.0",
   "description": "Back-end for AutoPromote platform",
   "main": "server.js",
