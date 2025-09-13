@@ -13,12 +13,12 @@
   "scripts": {
     "start": "react-scripts start",
     "clean-docs": "rimraf docs",
-    "build": "npm run clean-docs && react-scripts build && cpy build/**/* docs --parents",
-    "build:win": "npm run clean-docs && react-scripts build && xcopy build docs /e /i /h /y",
+  "build": "react-scripts build && rimraf ../docs && cpy build/**/* ../docs --parents",
+  "build:win": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d docs"
+  "deploy": "git add ../docs && git commit -m 'Update docs for GitHub Pages' && git push"
   },
   "browserslist": {
     "production": [
