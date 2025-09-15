@@ -189,9 +189,10 @@ function App() {
   // Firebase-powered upload
   const handleUploadContent = async (contentData) => {
     try {
-      let url = '';
+
+      let url;
       if (contentData.type === 'article') {
-        url = contentData.articleText || '';
+        url = contentData.articleText || undefined;
       } else {
         // Upload file to Firebase Storage
         const file = contentData.file;
@@ -201,21 +202,20 @@ function App() {
         }
         const filePath = `${STORAGE_PATH}/${Date.now()}_${file.name}`;
         const storageRef = ref(storage, filePath);
-        
         await uploadBytes(storageRef, file);
         url = await getDownloadURL(storageRef);
-        
         if (!url) {
           alert('Could not get public URL for uploaded file.');
           return;
         }
       }
 
+      // Only include url if valid
       const payload = {
         title: contentData.title,
         type: contentData.type,
-        url,
         description: contentData.description || '',
+        ...(url ? { url } : {})
       };
 
       if (!auth.currentUser) return;
