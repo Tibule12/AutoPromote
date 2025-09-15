@@ -33,13 +33,13 @@ router.post('/upload-content', authMiddleware, async (req, res) => {
     // Only add url if present and valid
     if (videoUrl) {
       contentData.url = videoUrl;
-    } else if (req.body.url && req.body.url !== 'missing' && req.body.url !== undefined) {
+    } else if (req.body.url && req.body.url !== 'missing' && req.body.url !== undefined && req.body.url !== '') {
       contentData.url = req.body.url;
     }
 
-    // Remove any undefined or 'missing' fields
+    // Remove any undefined, 'missing', or empty string fields
     Object.keys(contentData).forEach(key => {
-      if (contentData[key] === undefined || contentData[key] === 'missing') {
+      if (contentData[key] === undefined || contentData[key] === 'missing' || contentData[key] === '') {
         delete contentData[key];
       }
     });
