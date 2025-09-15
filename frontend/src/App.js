@@ -246,14 +246,20 @@ function App() {
   const handleContentUpload = async (contentData) => {
     try {
       // Build payload for backend
+      let url;
+      if (contentData.type === 'article') {
+        url = contentData.articleText;
+      } else if (contentData.url && contentData.url !== 'missing' && contentData.url !== undefined && contentData.url !== '') {
+        url = contentData.url;
+      }
       const payload = {
         title: contentData.title,
         type: contentData.type,
         description: contentData.description,
-        url: contentData.type === 'article' ? contentData.articleText : undefined,
+        ...(url ? { url } : {})
       };
       // Use correct endpoint for automation
-  const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
+      const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
