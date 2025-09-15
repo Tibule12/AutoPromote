@@ -49,6 +49,8 @@ function App() {
           setUser(userData);
           setIsAdmin(hasAdminClaim || userData.role === 'admin');
         }
+          // Debug log for current UID
+          console.log("Current UID:", firebaseUser.uid);
       } catch (error) {
         handleLogout();
       }
