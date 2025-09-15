@@ -253,7 +253,7 @@ function App() {
         url: contentData.type === 'article' ? contentData.articleText : undefined,
       };
       // Use correct endpoint for automation
-      const res = await fetch('https://autopromote.onrender.com/api/upload-content', {
+  const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
