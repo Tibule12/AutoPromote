@@ -7,22 +7,37 @@ const { aggregateAndPopulateAnalytics } = require('./optimizationService');
 // Full implementation: upload content, create promotion, update analytics
 router.post('/upload-content', authMiddleware, async (req, res) => {
   try {
-    // Save content
-    await db.collection('content').add({
+    let videoUrl = null;
+    // If type is video and file is present, upload to Firebase Storage
+    if (req.body.type === 'video' && req.body.file) {
+      const { storage } = require('./firebaseAdmin');
+      const buffer = Buffer.from(req.body.file, 'base64');
+      const fileName = `videos/${req.user.uid}_${Date.now()}.mp4`;
+      const fileRef = storage.bucket().file(fileName);
+      await fileRef.save(buffer, {
+        contentType: 'video/mp4',
+        public: true
+      });
+      videoUrl = `https://storage.googleapis.com/${storage.bucket().name}/${fileName}`;
+    }
+
+    // Prepare content data
+    const contentData = {
       userId: req.user.uid,
       title: req.body.title,
       description: req.body.description,
+      type: req.body.type,
+      url: videoUrl || req.body.url || null,
       createdAt: new Date()
-    });
+    };
+    // Remove undefined fields
+    Object.keys(contentData).forEach(key => contentData[key] === undefined && delete contentData[key]);
 
-    // Save promotion
+    await db.collection('content').add(contentData);
+
+    // Save promotion (dummy for now)
     await db.collection('promotion_schedules').add({
       userId: req.user.uid,
-      platform: req.body.platform,
-      revenue: req.body.revenue,
-      views: req.body.views,
-      engagement: req.body.engagement,
-      conversionRate: req.body.conversionRate,
       createdAt: new Date()
     });
 
