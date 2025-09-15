@@ -314,13 +314,6 @@ function App() {
                 <ContentList content={content} />
               </>
             )}
-  // Content upload handler
-                {user && !(isAdmin || user.role === 'admin' || user.isAdmin === true) && (
-                  <>
-                    <ContentUploadForm onUpload={handleContentUpload} />
-                    <ContentList content={content} />
-                  </>
-                )}
             {!user && !showLogin && !showRegister && !showAdminLogin && (
               <div className="WelcomeSection" style={{
                 display: 'flex',
