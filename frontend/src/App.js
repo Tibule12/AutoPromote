@@ -315,38 +315,12 @@ function App() {
               </>
             )}
   // Content upload handler
-  const handleContentUpload = async (contentData) => {
-    try {
-      // Build payload for backend
-      const payload = {
-        title: contentData.title,
-        type: contentData.type,
-        description: contentData.description,
-        // For articles, send articleText as url (or as a separate field if backend expects)
-        url: contentData.type === 'article' ? contentData.articleText : undefined,
-        // For files, you may need to handle file upload differently (FormData)
-        // Add other fields as needed (target_platforms, etc.)
-      };
-      // Use correct endpoint for automation
-      const res = await fetch('https://autopromote.onrender.com/api/upload-content', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        fetchUserContent();
-        alert('Content uploaded and promoted successfully!');
-      } else {
-        const error = await res.json();
-        alert(error.error || 'Failed to upload content');
-      }
-    } catch (error) {
-      alert('Error uploading content: ' + error.message);
-    }
-  };
+                {user && !(isAdmin || user.role === 'admin' || user.isAdmin === true) && (
+                  <>
+                    <ContentUploadForm onUpload={handleContentUpload} />
+                    <ContentList content={content} />
+                  </>
+                )}
             {!user && !showLogin && !showRegister && !showAdminLogin && (
               <div className="WelcomeSection" style={{
                 display: 'flex',
