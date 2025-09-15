@@ -242,6 +242,7 @@ function App() {
 
   return (
     <div className="App">
+      <h2 style={{color: 'red', textAlign: 'center'}}>Test Render: If you see this, React is working!</h2>
       <EnvTest />
       <EnvChecker />
       <DatabaseSync />
