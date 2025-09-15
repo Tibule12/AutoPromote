@@ -50,55 +50,35 @@ function ContentUploadForm({ onUpload }) {
     <div className="content-upload-container">
       <form onSubmit={handleSubmit} className="content-upload-form">
         <h3>Upload Content</h3>
-        
-        try {
-          if (type === 'article' && !articleText.trim()) {
-            throw new Error('Please enter article text.');
-          }
-
-          if (type !== 'article' && !file) {
-            throw new Error('Please select a file to upload.');
-          }
-
-          let fileBase64 = null;
-          if (type === 'video' && file) {
-            // Convert video file to base64
-            fileBase64 = await new Promise((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => {
-                const base64 = reader.result.split(',')[1];
-                resolve(base64);
-              };
-              reader.onerror = reject;
-              reader.readAsDataURL(file);
-            });
-          }
-
-          const contentData = {
-            title,
-            type,
-            description,
-            ...(type === 'article' ? { articleText } : {}),
-            ...(type === 'video' && fileBase64 ? { file: fileBase64 } : {})
-          };
-
-          await onUpload(contentData);
-
-          // Clear form on successful upload
-          setTitle('');
-          setDescription('');
-          setFile(null);
-          setArticleText('');
-        } catch (err) {
-          setError(err.message || 'Failed to upload content. Please try again.');
-        } finally {
-          setIsUploading(false);
-        }
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+        <div className="form-group">
+          <label>Title</label>
+          <input
+            type="text"
+            placeholder="Enter content title"
+            value={title}
+            required
+            onChange={e => setTitle(e.target.value)}
+            className="form-input"
+          />
+        </div>
+        <div className="form-group">
+          <label>Content Type</label>
+          <select 
+            value={type} 
+            onChange={e => setType(e.target.value)}
+            className="form-select"
+          >
+            <option value="article">Article</option>
+            <option value="video">Video</option>
             <option value="image">Image</option>
             <option value="audio">Audio</option>
           </select>
         </div>
-
         <div className="form-group">
           <label>Description</label>
           <input
@@ -110,8 +90,6 @@ function ContentUploadForm({ onUpload }) {
             className="form-input"
           />
         </div>
-
-
         <div className="form-group">
           <label>{type === 'article' ? 'Content' : 'File'}</label>
           {type === 'article' ? (
@@ -140,7 +118,6 @@ function ContentUploadForm({ onUpload }) {
             </div>
           )}
         </div>
-
         <button 
           type="submit" 
           disabled={isUploading}
