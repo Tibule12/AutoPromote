@@ -1,3 +1,45 @@
+const { db } = require('./firebaseAdmin');
+
+async function aggregateAndPopulateAnalytics() {
+  const promotionsSnapshot = await db.collection('promotion_schedules').get();
+  const analytics = {};
+
+  promotionsSnapshot.forEach(doc => {
+    const data = doc.data();
+    const platform = data.platform;
+    if (!platform) return;
+    if (!analytics[platform]) {
+      analytics[platform] = { revenue: 0, views: 0, engagement: 0, conversionRate: 0, count: 0 };
+    }
+    analytics[platform].revenue += data.revenue || 0;
+    analytics[platform].views += data.views || 0;
+    analytics[platform].engagement += data.engagement || 0;
+    analytics[platform].conversionRate += data.conversionRate || 0;
+    analytics[platform].count++;
+  });
+
+  // Optionally clear old analytics documents
+  const analyticsSnapshot = await db.collection('analytics').get();
+  const batch = db.batch();
+  analyticsSnapshot.forEach(doc => batch.delete(doc.ref));
+  await batch.commit();
+
+  // Write new analytics documents
+  for (const platform in analytics) {
+    const a = analytics[platform];
+    await db.collection('analytics').add({
+      platform,
+      revenue: a.revenue,
+      views: a.views,
+      engagement: a.count ? a.engagement / a.count : 0,
+      conversionRate: a.count ? a.conversionRate / a.count : 0,
+      metricsUpdatedAt: new Date()
+    });
+  }
+  console.log('Analytics aggregation complete!');
+}
+
+module.exports = { aggregateAndPopulateAnalytics };
 class OptimizationService {
   // Calculate optimal RPM based on content type and platform with advanced ML algorithms
   calculateOptimalRPM(contentType, platform, historicalData = {}) {
