@@ -110,11 +110,16 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       max_budget
     } = req.body;
 
+    // Only include url if valid
+    let validUrl = undefined;
+    if (url && url !== 'missing' && url !== undefined && url !== '') {
+      validUrl = url;
+    }
     console.log('Content upload request received:', {
       userId: req.userId,
       title,
       type,
-      url: url ? 'provided' : 'missing',
+      url: validUrl ? 'provided' : 'missing',
       description: description || 'none'
     });
 
@@ -147,7 +152,6 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       user_id: req.userId,
       title,
       type,
-      url,
       description: description || '',
       target_platforms: target_platforms || ['youtube', 'tiktok', 'instagram'],
       status: 'pending', // All new content must be reviewed by admin
@@ -162,7 +166,8 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       revenue_per_million: optimalRPM,
       creator_payout_rate: creatorPayoutRate,
       views: 0,
-      revenue: 0
+      revenue: 0,
+      ...(validUrl ? { url: validUrl } : {})
     };
 
     console.log('Content data to save:', JSON.stringify(contentData, null, 2));
