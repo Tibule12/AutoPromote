@@ -1,3 +1,42 @@
+const express = require('express');
+const router = express.Router();
+const { db } = require('./firebaseAdmin');
+const authMiddleware = require('./authMiddleware');
+const { aggregateAndPopulateAnalytics } = require('./optimizationService');
+
+// Full implementation: upload content, create promotion, update analytics
+router.post('/upload-content', authMiddleware, async (req, res) => {
+  try {
+    // Save content
+    await db.collection('content').add({
+      userId: req.user.uid,
+      title: req.body.title,
+      description: req.body.description,
+      createdAt: new Date()
+    });
+
+    // Save promotion
+    await db.collection('promotion_schedules').add({
+      userId: req.user.uid,
+      platform: req.body.platform,
+      revenue: req.body.revenue,
+      views: req.body.views,
+      engagement: req.body.engagement,
+      conversionRate: req.body.conversionRate,
+      createdAt: new Date()
+    });
+
+    // Update analytics
+    await aggregateAndPopulateAnalytics();
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Failed to upload content and update analytics.' });
+  }
+});
+
+module.exports = router;
 const { db } = require('./firebaseAdmin');
 
 async function aggregateAndPopulateAnalytics() {

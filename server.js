@@ -75,10 +75,15 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api', adminTestRoutes); // Add admin test routes
 
+
 // Register optional routes
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
+
+// Register optimization routes (content upload, promotion, analytics aggregation)
+const optimizationRoutes = require('./optimizationService');
+app.use('/api', optimizationRoutes);
 
 
 // Serve static files from the React app build directory
