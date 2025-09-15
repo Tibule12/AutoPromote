@@ -36,6 +36,8 @@ router.post('/upload-content', authMiddleware, async (req, res) => {
   }
 });
 
+// Export router and attach aggregateAndPopulateAnalytics for use elsewhere
+router.aggregateAndPopulateAnalytics = aggregateAndPopulateAnalytics;
 module.exports = router;
 const { db } = require('./firebaseAdmin');
 
@@ -78,7 +80,7 @@ async function aggregateAndPopulateAnalytics() {
   console.log('Analytics aggregation complete!');
 }
 
-module.exports = { aggregateAndPopulateAnalytics };
+// Remove duplicate export
 class OptimizationService {
   // Calculate optimal RPM based on content type and platform with advanced ML algorithms
   calculateOptimalRPM(contentType, platform, historicalData = {}) {
