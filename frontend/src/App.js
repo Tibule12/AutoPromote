@@ -250,8 +250,12 @@ function App() {
         title: contentData.title,
         type: contentData.type,
         description: contentData.description,
+        platform: contentData.platform,
+        revenue: contentData.revenue,
+        views: contentData.views,
+        engagement: contentData.engagement,
+        conversionRate: contentData.conversionRate,
         url: contentData.type === 'article' ? contentData.articleText : undefined,
-        // Add other fields as needed (target_platforms, etc.)
       };
       // Use correct endpoint for automation
       const res = await fetch('https://autopromote.onrender.com/api/upload-content', {
