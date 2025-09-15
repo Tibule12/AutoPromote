@@ -5,7 +5,7 @@
  */
 
 // Base API URL - this should be your backend server
-const API_BASE_URL = 'https://autopromote.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://autopromote.onrender.com';
 
 // Auth endpoints
 const AUTH_ENDPOINTS = {
