@@ -27,10 +27,16 @@ router.post('/upload-content', authMiddleware, async (req, res) => {
       title: req.body.title,
       description: req.body.description,
       type: req.body.type,
-      url: videoUrl || req.body.url || null,
       createdAt: new Date()
     };
-    // Remove undefined fields
+    // Only add url if present
+    if (videoUrl) {
+      contentData.url = videoUrl;
+    } else if (req.body.url) {
+      contentData.url = req.body.url;
+    }
+
+    // Remove any undefined fields
     Object.keys(contentData).forEach(key => contentData[key] === undefined && delete contentData[key]);
 
     await db.collection('content').add(contentData);
