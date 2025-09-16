@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from './config';
+import { auth } from './firebaseClient';
 import { collection, getDocs, query, limit, orderBy, where, Timestamp } from 'firebase/firestore';
 import { db } from './firebaseClient';
 import mockAnalyticsData from './mockAnalyticsData';
@@ -19,6 +20,13 @@ function AdminDashboard({ analytics, user }) {
   };
 
   const fetchFirestoreData = async () => {
+    // Helper to get ID token
+    async function getIdToken() {
+      if (auth.currentUser) {
+        return await auth.currentUser.getIdToken();
+      }
+      return null;
+    }
     try {
       console.log('Attempting to fetch analytics data from Firestore...');
 
@@ -75,9 +83,20 @@ function AdminDashboard({ analytics, user }) {
   !schedule.isActive || (schedule.endTime && (typeof schedule.endTime.toDate === 'function' ? schedule.endTime.toDate() : new Date(schedule.endTime)) < now)
       ).length;
 
-  // Fetch revenue analytics from monetization API
-  const revenueResponse = await fetch(`${API_BASE_URL}/api/monetization/revenue-analytics?timeframe=month`);
-  const revenueApiData = revenueResponse.ok ? await revenueResponse.json() : null;
+  // Fetch revenue analytics from monetization API (with auth)
+  let revenueApiData = null;
+  try {
+    const idToken = await getIdToken();
+    const revenueResponse = await fetch(
+      `${API_BASE_URL}/api/monetization/revenue-analytics?timeframe=month`,
+      idToken ? { headers: { Authorization: `Bearer ${idToken}` } } : undefined
+    );
+    if (revenueResponse.ok) {
+      revenueApiData = await revenueResponse.json();
+    }
+  } catch (err) {
+    console.warn('Could not fetch revenue analytics:', err);
+  }
 
       // Fetch real transactions data
       const transactionsSnapshot = await getDocs(collection(db, 'transactions'));
@@ -187,7 +206,11 @@ function AdminDashboard({ analytics, user }) {
       };
 
       try {
-        const revenueResponse = await fetch(`${API_BASE_URL}/api/monetization/revenue-analytics?timeframe=month`);
+        const idToken = await getIdToken();
+        const revenueResponse = await fetch(
+          `${API_BASE_URL}/api/monetization/revenue-analytics?timeframe=month`,
+          idToken ? { headers: { Authorization: `Bearer ${idToken}` } } : undefined
+        );
         if (revenueResponse.ok) {
           const revenueAnalytics = await revenueResponse.json();
           revenueData = {
