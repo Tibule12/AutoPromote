@@ -60,16 +60,18 @@ function AdminDashboard({ analytics, user }) {
       // Calculate active and scheduled promotions
       const now = new Date();
       const activePromotions = allPromotionSchedules.filter(schedule =>
-        schedule.isActive && schedule.startTime?.toDate() <= now &&
-        (!schedule.endTime || schedule.endTime?.toDate() >= now)
+  schedule.isActive &&
+  (schedule.startTime && (typeof schedule.startTime.toDate === 'function' ? schedule.startTime.toDate() : new Date(schedule.startTime)) <= now) &&
+  (!schedule.endTime || (typeof schedule.endTime.toDate === 'function' ? schedule.endTime.toDate() : new Date(schedule.endTime)) >= now)
       ).length;
 
       const scheduledPromotions = allPromotionSchedules.filter(schedule =>
-        schedule.isActive && schedule.startTime?.toDate() > now
+  schedule.isActive &&
+  (schedule.startTime && (typeof schedule.startTime.toDate === 'function' ? schedule.startTime.toDate() : new Date(schedule.startTime)) > now)
       ).length;
 
       const promotionsCompleted = allPromotionSchedules.filter(schedule =>
-        !schedule.isActive || (schedule.endTime && schedule.endTime?.toDate() < now)
+  !schedule.isActive || (schedule.endTime && (typeof schedule.endTime.toDate === 'function' ? schedule.endTime.toDate() : new Date(schedule.endTime)) < now)
       ).length;
 
       // Fetch revenue analytics from monetization API
@@ -87,7 +89,14 @@ function AdminDashboard({ analytics, user }) {
       const totalRevenue = allTransactions.reduce((sum, transaction) => sum + (transaction.amount || 0), 0);
       const revenueToday = allTransactions
         .filter(transaction => {
-          const transactionDate = transaction.timestamp?.toDate();
+          let transactionDate = null;
+          if (transaction.timestamp) {
+            if (typeof transaction.timestamp.toDate === 'function') {
+              transactionDate = transaction.timestamp.toDate();
+            } else {
+              transactionDate = new Date(transaction.timestamp);
+            }
+          }
           return transactionDate && transactionDate.toDateString() === today.toDateString();
         })
         .reduce((sum, transaction) => sum + (transaction.amount || 0), 0);
@@ -103,7 +112,14 @@ function AdminDashboard({ analytics, user }) {
       const activeUsersToday = new Set(
         allUserActivities
           .filter(activity => {
-            const activityDate = activity.timestamp?.toDate();
+            let activityDate = null;
+            if (activity.timestamp) {
+              if (typeof activity.timestamp.toDate === 'function') {
+                activityDate = activity.timestamp.toDate();
+              } else {
+                activityDate = new Date(activity.timestamp);
+              }
+            }
             return activityDate && activityDate.toDateString() === today.toDateString();
           })
           .map(activity => activity.userId)
@@ -112,7 +128,14 @@ function AdminDashboard({ analytics, user }) {
       const activeUsersLastWeek = new Set(
         allUserActivities
           .filter(activity => {
-            const activityDate = activity.timestamp?.toDate();
+            let activityDate = null;
+            if (activity.timestamp) {
+              if (typeof activity.timestamp.toDate === 'function') {
+                activityDate = activity.timestamp.toDate();
+              } else {
+                activityDate = new Date(activity.timestamp);
+              }
+            }
             const weekAgo = new Date();
             weekAgo.setDate(weekAgo.getDate() - 7);
             return activityDate && activityDate >= weekAgo;
@@ -279,7 +302,14 @@ function AdminDashboard({ analytics, user }) {
           revenueByMonth: (() => {
             const monthlyRevenue = {};
             allTransactions.forEach(transaction => {
-              const date = transaction.timestamp?.toDate();
+              let date = null;
+              if (transaction.timestamp) {
+                if (typeof transaction.timestamp.toDate === 'function') {
+                  date = transaction.timestamp.toDate();
+                } else {
+                  date = new Date(transaction.timestamp);
+                }
+              }
               if (date) {
                 const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
                 monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + (transaction.amount || 0);
