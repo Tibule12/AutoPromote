@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from './config';
 import { collection, getDocs, query, limit, orderBy, where, Timestamp } from 'firebase/firestore';
 import { db } from './firebaseClient';
 import mockAnalyticsData from './mockAnalyticsData';
@@ -74,9 +75,9 @@ function AdminDashboard({ analytics, user }) {
   !schedule.isActive || (schedule.endTime && (typeof schedule.endTime.toDate === 'function' ? schedule.endTime.toDate() : new Date(schedule.endTime)) < now)
       ).length;
 
-      // Fetch revenue analytics from monetization API
-      const revenueResponse = await fetch('/api/monetization/revenue-analytics?timeframe=month');
-      const revenueApiData = revenueResponse.ok ? await revenueResponse.json() : null;
+  // Fetch revenue analytics from monetization API
+  const revenueResponse = await fetch(`${API_BASE_URL}/api/monetization/revenue-analytics?timeframe=month`);
+  const revenueApiData = revenueResponse.ok ? await revenueResponse.json() : null;
 
       // Fetch real transactions data
       const transactionsSnapshot = await getDocs(collection(db, 'transactions'));
@@ -186,7 +187,7 @@ function AdminDashboard({ analytics, user }) {
       };
 
       try {
-        const revenueResponse = await fetch('/api/monetization/revenue-analytics?timeframe=month');
+        const revenueResponse = await fetch(`${API_BASE_URL}/api/monetization/revenue-analytics?timeframe=month`);
         if (revenueResponse.ok) {
           const revenueAnalytics = await revenueResponse.json();
           revenueData = {
