@@ -15,22 +15,44 @@ exports.createPromotionOnApproval = functions.firestore
                 contentId,
                 isActive: true,
                 startTime: admin.firestore.Timestamp.now(),
-                // Set your own logic for endTime, e.g., 7 days from now
                 endTime: admin.firestore.Timestamp.fromDate(
                     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                 ),
                 createdAt: admin.firestore.Timestamp.now()
-                // Add any other fields you need
             };
-
-            // Create a new promotion schedule
             await admin
                 .firestore()
                 .collection("promotion_schedules")
                 .add(promotionData);
-
             console.log(
-                `Promotion schedule created for content: ${contentId}`
+                `Promotion schedule created for content (onUpdate): ${contentId}`
+            );
+        }
+        return null;
+    });
+
+// Also create promotion schedule when content is created and status is approved
+exports.createPromotionOnContentCreate = functions.firestore
+    .document("content/{contentId}")
+    .onCreate(async (snap, context) => {
+        const data = snap.data();
+        if (data.status === "approved") {
+            const contentId = context.params.contentId;
+            const promotionData = {
+                contentId,
+                isActive: true,
+                startTime: admin.firestore.Timestamp.now(),
+                endTime: admin.firestore.Timestamp.fromDate(
+                    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                ),
+                createdAt: admin.firestore.Timestamp.now()
+            };
+            await admin
+                .firestore()
+                .collection("promotion_schedules")
+                .add(promotionData);
+            console.log(
+                `Promotion schedule created for content (onCreate): ${contentId}`
             );
         }
         return null;
