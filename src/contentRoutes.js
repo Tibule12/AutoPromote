@@ -143,11 +143,13 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
     // Insert content into Firestore
     console.log('Preparing to save content to Firestore...');
     const contentRef = db.collection('content').doc();
+    // Ensure url is not undefined (Firestore does not allow undefined values)
+    const safeUrl = typeof url === 'undefined' ? null : url;
     const contentData = {
       user_id: req.userId,
       title,
       type,
-      url,
+      url: safeUrl,
       description: description || '',
       target_platforms: target_platforms || ['youtube', 'tiktok', 'instagram'],
       status: 'pending', // All new content must be reviewed by admin
