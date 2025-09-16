@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './ContentUploadForm.css';
+import { storage } from './firebaseClient';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 function ContentUploadForm({ onUpload }) {
   const [title, setTitle] = useState('');
@@ -19,16 +21,24 @@ function ContentUploadForm({ onUpload }) {
       if (type === 'article' && !articleText.trim()) {
         throw new Error('Please enter article text.');
       }
-      
       if (type !== 'article' && !file) {
         throw new Error('Please select a file to upload.');
+      }
+
+      let url = '';
+      if (type !== 'article' && file) {
+        // Upload file to Firebase Storage
+        const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, filePath);
+        await uploadBytes(storageRef, file);
+        url = await getDownloadURL(storageRef);
       }
 
       const contentData = {
         title,
         type,
         description,
-        ...(type === 'article' ? { articleText } : { file })
+        ...(type === 'article' ? { articleText } : { url })
       };
 
       await onUpload(contentData);
@@ -38,7 +48,6 @@ function ContentUploadForm({ onUpload }) {
       setDescription('');
       setFile(null);
       setArticleText('');
-      
     } catch (err) {
       setError(err.message || 'Failed to upload content. Please try again.');
     } finally {
