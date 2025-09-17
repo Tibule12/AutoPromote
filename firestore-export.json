@@ -1,0 +1,562 @@
+{
+  "ab_tests": [
+    {
+      "id": "C1EovqqyUOixouUS8v7X",
+      "data": {
+        "contentId": "test-content-1",
+        "startDate": {
+          "_seconds": 1756904455,
+          "_nanoseconds": 852000000
+        },
+        "status": "active",
+        "winner": null,
+        "variants": [
+          {
+            "id": "variant-a",
+            "name": "Version A",
+            "promotionSettings": {
+              "platform": "youtube",
+              "target_audience": [
+                "tech-enthusiasts"
+              ],
+              "budget": 100
+            },
+            "metrics": {
+              "views": 1500,
+              "engagement": 450,
+              "conversions": 50,
+              "revenue": 200
+            }
+          },
+          {
+            "id": "variant-b",
+            "name": "Version B",
+            "promotionSettings": {
+              "platform": "facebook",
+              "target_audience": [
+                "general-audience"
+              ],
+              "budget": 100
+            },
+            "metrics": {
+              "views": 0,
+              "engagement": 0,
+              "conversions": 0,
+              "revenue": 0
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "activities": [
+    {
+      "id": "activity1",
+      "data": {
+        "id": "activity1",
+        "type": "user",
+        "title": "New User Registered",
+        "description": "A new user has registered on the platform",
+        "timestamp": {
+          "_seconds": 1757839467,
+          "_nanoseconds": 132000000
+        },
+        "userId": "user2"
+      }
+    },
+    {
+      "id": "activity2",
+      "data": {
+        "id": "activity2",
+        "type": "content",
+        "title": "Content Published",
+        "description": "A new article has been published",
+        "timestamp": {
+          "_seconds": 1757925867,
+          "_nanoseconds": 132000000
+        },
+        "contentId": "content3",
+        "userId": "user1"
+      }
+    },
+    {
+      "id": "activity3",
+      "data": {
+        "id": "activity3",
+        "type": "promotion",
+        "title": "Promotion Started",
+        "description": "A new promotion campaign has begun",
+        "timestamp": {
+          "_seconds": 1757969067,
+          "_nanoseconds": 132000000
+        },
+        "promotionId": "promo1",
+        "userId": "user1"
+      }
+    }
+  ],
+  "admin_logs": [
+    {
+      "id": "8YpwoUqC9mNBz3Ka6N0g",
+      "data": {
+        "action": "admin_login",
+        "adminId": "TXwECDwNX9T4N8ErGWnF4Z5y3K72",
+        "email": "admin123@gmail.com",
+        "ipAddress": "::1",
+        "timestamp": {
+          "_seconds": 1756903368,
+          "_nanoseconds": 192000000
+        }
+      }
+    },
+    {
+      "id": "F3piSZnlYL7D1JuCE9UB",
+      "data": {
+        "action": "admin_login",
+        "adminId": "nQ8ssQlO0WXwTHtyvIVR3PTPyNE2",
+        "email": "admin123@gmail.com",
+        "ipAddress": "::1",
+        "timestamp": {
+          "_seconds": 1757321376,
+          "_nanoseconds": 820000000
+        }
+      }
+    },
+    {
+      "id": "JNDvb2376qpMmGNpk0u9",
+      "data": {
+        "action": "admin_login",
+        "adminId": "nQ8ssQlO0WXwTHtyvIVR3PTPyNE2",
+        "email": "admin123@gmail.com",
+        "ipAddress": "::1",
+        "timestamp": {
+          "_seconds": 1757323279,
+          "_nanoseconds": 989000000
+        }
+      }
+    },
+    {
+      "id": "LEgAt0ibVI1LuTqFBQfz",
+      "data": {
+        "action": "admin_login",
+        "adminId": "nQ8ssQlO0WXwTHtyvIVR3PTPyNE2",
+        "email": "admin123@gmail.com",
+        "ipAddress": "::1",
+        "timestamp": {
+          "_seconds": 1757323273,
+          "_nanoseconds": 204000000
+        }
+      }
+    },
+    {
+      "id": "cp76yY4OWbZ92YTzyYxi",
+      "data": {
+        "action": "admin_login",
+        "adminId": "nQ8ssQlO0WXwTHtyvIVR3PTPyNE2",
+        "email": "admin123@gmail.com",
+        "ipAddress": "::1",
+        "timestamp": {
+          "_seconds": 1757409581,
+          "_nanoseconds": 606000000
+        }
+      }
+    },
+    {
+      "id": "gFOwJ7EErVPQyz2UKNCN",
+      "data": {
+        "action": "admin_login",
+        "adminId": "nQ8ssQlO0WXwTHtyvIVR3PTPyNE2",
+        "email": "admin123@gmail.com",
+        "ipAddress": "::1",
+        "timestamp": {
+          "_seconds": 1757323273,
+          "_nanoseconds": 35000000
+        }
+      }
+    },
+    {
+      "id": "setup",
+      "data": {
+        "action": "admin_setup",
+        "performedBy": "system",
+        "timestamp": "2025-09-03T12:42:52.194Z",
+        "details": "Initial admin collections setup"
+      }
+    },
+    {
+      "id": "tJUKG7n1WZlGn9pd0AfV",
+      "data": {
+        "action": "admin_login",
+        "adminId": "nQ8ssQlO0WXwTHtyvIVR3PTPyNE2",
+        "email": "admin123@gmail.com",
+        "ipAddress": "::1",
+        "timestamp": {
+          "_seconds": 1757400096,
+          "_nanoseconds": 814000000
+        }
+      }
+    }
+  ],
+  "admin_settings": [
+    {
+      "id": "default",
+      "data": {
+        "dashboardLayout": "default",
+        "defaultView": "overview",
+        "notificationsEnabled": true,
+        "emailNotifications": true,
+        "createdAt": "2025-09-03T12:42:51.743Z",
+        "updatedAt": "2025-09-03T12:42:51.743Z"
+      }
+    }
+  ],
+  "admins": [
+    {
+      "id": "TXwECDwNX9T4N8ErGWnF4Z5y3K72",
+      "data": {
+        "createdAt": "2025-09-03T12:42:50.455Z",
+        "uid": "TXwECDwNX9T4N8ErGWnF4Z5y3K72",
+        "role": "admin",
+        "accessLevel": "super",
+        "permissions": [
+          "manage_users",
+          "manage_content",
+          "manage_promotions",
+          "view_analytics",
+          "manage_settings"
+        ],
+        "name": "System Administrator",
+        "isAdmin": true,
+        "email": "admin123@gmail.com",
+        "updatedAt": "2025-09-03T12:42:50.455Z",
+        "lastLogin": {
+          "_seconds": 1756903367,
+          "_nanoseconds": 871000000
+        }
+      }
+    },
+    {
+      "id": "nQ8ssQlO0WXwTHtyvIVR3PTPyNE2",
+      "data": {
+        "email": "admin123@gmail.com",
+        "name": "Admin User",
+        "role": "admin",
+        "isAdmin": true,
+        "createdAt": {
+          "_seconds": 1757320651,
+          "_nanoseconds": 211000000
+        },
+        "lastLogin": {
+          "_seconds": 1757409580,
+          "_nanoseconds": 339000000
+        }
+      }
+    }
+  ],
+  "analytics": [
+    {
+      "id": "BxqbU6lfBJQSm0uPWpdQ",
+      "data": {
+        "facebook": "",
+        "instagram": "",
+        "tiktok": "",
+        "youtube": "",
+        "twitter": "",
+        "revenue": 9000000,
+        "views": 2000000,
+        "engagement": 0.12,
+        "conversionRate": 0.05,
+        "metricsUpdatedAt": {
+          "_seconds": 1757927859,
+          "_nanoseconds": 820000000
+        }
+      }
+    }
+  ],
+  "content": [
+    {
+      "id": "JnrmvMvPu4GA5Y7lZXh2",
+      "data": {
+        "user_id": "I381QyH3ZhVC83gzxW2zBsZPWls2",
+        "title": "Tibule-come on",
+        "type": "video",
+        "url": "https://firebasestorage.googleapis.com/v0/b/autopromote-464de.firebasestorage.app/o/uploads%2Fvideos%2F1758007070832_WhatsApp%20Video%202025-09-02%20at%2009.54.32.mp4?alt=media&token=c9ce6124-81a5-4f8f-8d35-c4135f724c75",
+        "description": "Long Journey",
+        "target_platforms": [
+          "youtube",
+          "tiktok",
+          "instagram"
+        ],
+        "scheduled_promotion_time": null,
+        "promotion_frequency": "once",
+        "next_promotion_time": null,
+        "target_rpm": 900000,
+        "min_views_threshold": 2000000,
+        "max_budget": 1000,
+        "created_at": {
+          "_seconds": 1758007077,
+          "_nanoseconds": 93000000
+        },
+        "promotion_started_at": {
+          "_seconds": 1758007077,
+          "_nanoseconds": 93000000
+        },
+        "revenue_per_million": 900000,
+        "creator_payout_rate": 0.01,
+        "views": 0,
+        "revenue": 0,
+        "status": "approved"
+      }
+    }
+  ],
+  "promotion_schedules": [
+    {
+      "id": "GmojEB0vo1z3Cx3RX6sI",
+      "data": {
+        "contentId": "JnrmvMvPu4GA5Y7lZXh2",
+        "isActive": true,
+        "startTime": {
+          "_seconds": 1758021861,
+          "_nanoseconds": 574000000
+        },
+        "endTime": {
+          "_seconds": 1758626661,
+          "_nanoseconds": 574000000
+        },
+        "createdAt": {
+          "_seconds": 1758021861,
+          "_nanoseconds": 574000000
+        }
+      }
+    },
+    {
+      "id": "HAa9Lx5p09KjJ7a4SplQ",
+      "data": {
+        "contentId": "test-content-1",
+        "platform": "facebook",
+        "scheduleType": "specific",
+        "isActive": true,
+        "budget": 100,
+        "targetMetrics": {},
+        "platformSpecificSettings": {
+          "optimal_time": "09:00-11:00,13:00-15:00",
+          "boost_duration": "7d",
+          "targeting": [
+            "interests",
+            "location"
+          ]
+        },
+        "timezone": "UTC",
+        "createdAt": "2025-09-03T13:00:56.274Z",
+        "updatedAt": "2025-09-03T13:00:56.274Z"
+      }
+    },
+    {
+      "id": "NfipnHnByygR199geZtT",
+      "data": {
+        "contentId": "JnrmvMvPu4GA5Y7lZXh2",
+        "isActive": true,
+        "startTime": {
+          "_seconds": 1758021012,
+          "_nanoseconds": 973000000
+        },
+        "endTime": {
+          "_seconds": 1758625812,
+          "_nanoseconds": 973000000
+        },
+        "createdAt": {
+          "_seconds": 1758021012,
+          "_nanoseconds": 974000000
+        }
+      }
+    },
+    {
+      "id": "SzcCLnMpG0WXReka8fFp",
+      "data": {
+        "contentId": "O8ZYKbXvFcg9qIQv9RtQ",
+        "platform": "youtube",
+        "scheduleType": "specific",
+        "startTime": "2025-09-03T12:50:39.398Z",
+        "endTime": "2025-09-04T12:50:39.398Z",
+        "frequency": "once",
+        "isActive": true,
+        "budget": 100,
+        "targetMetrics": {
+          "views": 1000,
+          "engagement_rate": 0.1
+        },
+        "platformSpecificSettings": {
+          "optimal_time": "15:00-17:00",
+          "target_cpm": 960,
+          "audience_targeting": [
+            "related_content",
+            "demographic"
+          ]
+        },
+        "timezone": "UTC",
+        "createdAt": "2025-09-03T12:50:39.489Z",
+        "updatedAt": "2025-09-03T12:50:39.489Z"
+      }
+    },
+    {
+      "id": "Xxbd7rajugoF9Wlul91J",
+      "data": {
+        "isActive": true,
+        "platform": [
+          "facebook",
+          "youtube",
+          "tiktok",
+          "instagram",
+          "twitter"
+        ],
+        "budget": 0,
+        "contentid": "PkplICcj7X4R4lEgnAEk",
+        "startTime": {
+          "_seconds": 1757571600,
+          "_nanoseconds": 413000000
+        }
+      }
+    },
+    {
+      "id": "zDAs7L2y1ZsXJzD6Cg5B",
+      "data": {
+        "contentId": "test-content-1",
+        "platform": "youtube",
+        "scheduleType": "specific",
+        "isActive": true,
+        "budget": 100,
+        "targetMetrics": {},
+        "platformSpecificSettings": {
+          "optimal_time": "15:00-17:00",
+          "target_cpm": 960,
+          "audience_targeting": [
+            "related_content",
+            "demographic"
+          ]
+        },
+        "timezone": "UTC",
+        "createdAt": "2025-09-03T13:00:56.150Z",
+        "updatedAt": "2025-09-03T13:00:56.150Z"
+      }
+    }
+  ],
+  "promotions": [
+    {
+      "id": "promo1",
+      "data": {
+        "id": "promo1",
+        "contentId": "content1",
+        "userId": "user1",
+        "status": "active",
+        "platform": "twitter",
+        "startDate": {
+          "_seconds": 1757839466,
+          "_nanoseconds": 509000000
+        },
+        "endDate": {
+          "_seconds": 1758444266,
+          "_nanoseconds": 509000000
+        },
+        "budget": 50,
+        "results": {
+          "impressions": 2450,
+          "clicks": 127,
+          "conversions": 5
+        },
+        "createdAt": {
+          "_seconds": 1757753066,
+          "_nanoseconds": 509000000
+        }
+      }
+    },
+    {
+      "id": "promo2",
+      "data": {
+        "id": "promo2",
+        "contentId": "content2",
+        "userId": "user2",
+        "status": "scheduled",
+        "platform": "facebook",
+        "startDate": {
+          "_seconds": 1758098666,
+          "_nanoseconds": 509000000
+        },
+        "endDate": {
+          "_seconds": 1758703466,
+          "_nanoseconds": 509000000
+        },
+        "budget": 75,
+        "createdAt": {
+          "_seconds": 1757925866,
+          "_nanoseconds": 509000000
+        }
+      }
+    },
+    {
+      "id": "promo3",
+      "data": {
+        "id": "promo3",
+        "contentId": "content1",
+        "userId": "user1",
+        "status": "completed",
+        "platform": "instagram",
+        "startDate": {
+          "_seconds": 1756716266,
+          "_nanoseconds": 509000000
+        },
+        "endDate": {
+          "_seconds": 1757321066,
+          "_nanoseconds": 509000000
+        },
+        "budget": 30,
+        "results": {
+          "impressions": 1850,
+          "clicks": 93,
+          "conversions": 3
+        },
+        "createdAt": {
+          "_seconds": 1756629866,
+          "_nanoseconds": 509000000
+        }
+      }
+    }
+  ],
+  "users": [
+    {
+      "id": "I381QyH3ZhVC83gzxW2zBsZPWls2",
+      "data": {
+        "email": "tmtshwelo21@gmail.com",
+        "name": "tmtshwelo21",
+        "role": "user",
+        "isAdmin": false,
+        "createdAt": {
+          "_seconds": 1756978873,
+          "_nanoseconds": 846000000
+        }
+      }
+    },
+    {
+      "id": "X23HIHgCshSdZD4h0dXHdht1GTi1",
+      "data": {
+        "email": "asandasinalo2@gmail.com",
+        "name": "Asanda Mbangata",
+        "role": "user",
+        "isAdmin": false,
+        "createdAt": "2025-09-04T19:59:20.667Z"
+      }
+    },
+    {
+      "id": "nQ8ssQlO0WXwTHtyvIVR3PTPyNE2",
+      "data": {
+        "email": "admin123@gmail.com",
+        "name": "Admin User",
+        "role": "admin",
+        "isAdmin": true,
+        "createdAt": {
+          "_seconds": 1757320651,
+          "_nanoseconds": 711000000
+        }
+      }
+    }
+  ]
+}
