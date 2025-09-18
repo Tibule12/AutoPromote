@@ -1,3 +1,18 @@
+// TikTok and Facebook integrations
+const tiktokRoutes = require('./tiktokRoutes');
+// facebookPoster is a utility, not a router, so no need to use as middleware
+
+// Register TikTok API routes
+app.use('/api/tiktok', tiktokRoutes);
+// Serve Terms of Service for TikTok verification
+app.get('/terms', (req, res) => {
+  res.send('<h1>Terms of Service</h1><p>This is the Terms of Service for AutoPromote. If you have questions, contact support@autopromote.com.</p>');
+});
+
+// Serve Privacy Policy for TikTok verification
+app.get('/privacy', (req, res) => {
+  res.send('<h1>Privacy Policy</h1><p>This is the Privacy Policy for AutoPromote. We respect your privacy and do not share your data with third parties.</p>');
+});
 
 require('dotenv').config();
 
@@ -88,7 +103,6 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api', adminTestRoutes); // Add admin test routes
 
-
 // Register optional routes
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
@@ -97,7 +111,6 @@ app.use('/api/stripe', stripeOnboardRoutes);
 // Register optimization routes (content upload, promotion, analytics aggregation)
 const optimizationRoutes = require('./optimizationService');
 app.use('/api', optimizationRoutes);
-
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, 'frontend/build')));
@@ -140,7 +153,6 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-
 
 // Catch all handler: send back React's index.html file for client-side routing
 app.get('*', (req, res) => {
@@ -225,3 +237,4 @@ const server = app.listen(PORT, () => {
     console.log('Try changing the PORT environment variable or closing the other application.');
   }
 });
+
