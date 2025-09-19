@@ -1,3 +1,14 @@
+// Export YouTube video upload function
+exports.uploadVideoToYouTube = require('./youtubeUploader').uploadVideoToYouTube;
+// Export TikTok OAuth utilities
+exports.getTikTokAuthUrl = require('./tiktokOAuth').getTikTokAuthUrl;
+exports.tiktokOAuthCallback = require('./tiktokOAuth').tiktokOAuthCallback;
+// Export Facebook OAuth utilities
+exports.getFacebookAuthUrl = require('./facebookOAuth').getFacebookAuthUrl;
+exports.facebookOAuthCallback = require('./facebookOAuth').facebookOAuthCallback;
+// Export YouTube OAuth utilities
+exports.getYouTubeAuthUrl = require('./youtubeOAuth').getYouTubeAuthUrl;
+exports.youtubeOAuthCallback = require('./youtubeOAuth').youtubeOAuthCallback;
 // Export Creator Attribution & Referral System
 exports.addReferrerToContent = require('./referralSystem').addReferrerToContent;
 exports.getReferralStats = require('./referralSystem').getReferralStats;

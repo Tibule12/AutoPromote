@@ -6,12 +6,59 @@ const tiktokRoutes = require('./tiktokRoutes');
 app.use('/api/tiktok', tiktokRoutes);
 // Serve Terms of Service for TikTok verification
 app.get('/terms', (req, res) => {
-  res.send('<h1>Terms of Service</h1><p>This is the Terms of Service for AutoPromote. If you have questions, contact support@autopromote.com.</p>');
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service | AutoPromote</title>
+</head>
+<body>
+  <h1>Terms of Service</h1>
+  <p>Welcome to AutoPromote. By accessing or using our platform, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
+  <h2>1. Use of Service</h2>
+  <p>You must be at least 13 years old to use AutoPromote. You agree to use the service only for lawful purposes and in accordance with all applicable laws.</p>
+  <h2>2. User Content</h2>
+  <p>You retain ownership of any content you upload, but you grant AutoPromote a license to use, display, and distribute your content as necessary to provide the service.</p>
+  <h2>3. Privacy</h2>
+  <p>Your privacy is important to us. Please review our <a href="/privacy">Privacy Policy</a> for details on how we handle your information.</p>
+  <h2>4. Limitation of Liability</h2>
+  <p>AutoPromote is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of the service.</p>
+  <h2>5. Changes to Terms</h2>
+  <p>We may update these Terms of Service from time to time. Continued use of the service constitutes acceptance of the new terms.</p>
+  <h2>6. Contact</h2>
+  <p>If you have questions about these terms, contact us at <a href="mailto:support@autopromote.com">support@autopromote.com</a>.</p>
+</body>
+</html>`);
 });
 
-// Serve Privacy Policy for TikTok verification
 app.get('/privacy', (req, res) => {
-  res.send('<h1>Privacy Policy</h1><p>This is the Privacy Policy for AutoPromote. We respect your privacy and do not share your data with third parties.</p>');
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | AutoPromote</title>
+</head>
+<body>
+  <h1>Privacy Policy</h1>
+  <p>AutoPromote is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your information.</p>
+  <h2>1. Information We Collect</h2>
+  <p>We collect information you provide directly (such as account details and uploaded content) and information from connected social platforms as needed to provide our services.</p>
+  <h2>2. Use of Information</h2>
+  <p>We use your information to operate, maintain, and improve AutoPromote, and to communicate with you about your account or our services.</p>
+  <h2>3. Sharing of Information</h2>
+  <p>We do not sell or share your personal information with third parties except as required to provide our services or comply with the law.</p>
+  <h2>4. Data Security</h2>
+  <p>We implement reasonable security measures to protect your data, but cannot guarantee absolute security.</p>
+  <h2>5. Your Rights</h2>
+  <p>You may request access to or deletion of your personal data by contacting us at <a href="mailto:support@autopromote.com">support@autopromote.com</a>.</p>
+  <h2>6. Changes to Policy</h2>
+  <p>We may update this Privacy Policy from time to time. Continued use of the service constitutes acceptance of the new policy.</p>
+  <h2>7. Contact</h2>
+  <p>If you have questions about this policy, contact us at <a href="mailto:support@autopromote.com">support@autopromote.com</a>.</p>
+</body>
+</html>`);
 });
 
 require('dotenv').config();
