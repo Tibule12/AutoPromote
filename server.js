@@ -1,10 +1,9 @@
 // TikTok and Facebook integrations
-const tiktokRoutes = require('./tiktokRoutes');
-// facebookPoster is a utility, not a router, so no need to use as middleware
-
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const tiktokRoutes = require('./tiktokRoutes');
+// facebookPoster is a utility, not a router, so no need to use as middleware
 
 const app = express();
 const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
@@ -72,11 +71,8 @@ app.get('/privacy', (req, res) => {
 </html>`);
 });
 
-require('dotenv').config();
 
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
+require('dotenv').config();
 
 // Load core routes
 const authRoutes = require('./authRoutes');
@@ -124,11 +120,9 @@ try {
   }
 }
 
+
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
-
-const app = express();
-const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
 
 // CORS configuration - allow all origins for debugging
 app.use(cors({
