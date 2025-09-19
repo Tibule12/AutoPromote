@@ -59,7 +59,34 @@ function AdminDashboard({ analytics, user }) {
       const newContentSnapshot = await getDocs(newContentQuery);
       const newContentToday = newContentSnapshot.size;
 
-      // Fetch promotion schedules
+  // Fetch promotion schedules
+      // Fetch revenue by platform from analytics collection
+      const analyticsSnapshot = await getDocs(collection(db, 'analytics'));
+      const analyticsEvents = analyticsSnapshot.docs.map(doc => doc.data());
+      const revenueByPlatform = {};
+      const eventCounts = { ad_impression: 0, ad_click: 0, affiliate_click: 0, affiliate_conversion: 0 };
+      analyticsEvents.forEach(event => {
+        if (event.platform && event.type && (event.type === 'ad_click' || event.type === 'affiliate_conversion')) {
+          revenueByPlatform[event.platform] = (revenueByPlatform[event.platform] || 0) + (event.value || 0);
+        }
+        if (event.type && eventCounts.hasOwnProperty(event.type)) {
+          eventCounts[event.type] += 1;
+        }
+      });
+
+      // Fetch revenue per content/user from revenue collection
+      const revenueSnapshot = await getDocs(collection(db, 'revenue'));
+      const revenuePerContent = [];
+      const revenuePerUser = {};
+      revenueSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.contentId) {
+          revenuePerContent.push({ contentId: data.contentId, totalRevenue: data.totalRevenue || 0 });
+        }
+        if (data.userId) {
+          revenuePerUser[data.userId] = (revenuePerUser[data.userId] || 0) + (data.totalRevenue || 0);
+        }
+      });
       const promotionSchedulesSnapshot = await getDocs(collection(db, 'promotion_schedules'));
       const allPromotionSchedules = promotionSchedulesSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -252,8 +279,8 @@ function AdminDashboard({ analytics, user }) {
 
       const contentEngagementRate = totalViews > 0 ? totalEngagement / totalViews : 0;
 
-      // Create analytics data from Firestore data
-      const firestoreAnalyticsData = {
+  // Create analytics data from Firestore data
+  const firestoreAnalyticsData = {
         totalUsers,
         newUsersToday,
         totalContent,
@@ -284,7 +311,12 @@ function AdminDashboard({ analytics, user }) {
         topContent,
         recentActivities,
         promotionSchedules: allPromotionSchedules,
-        // Performance metrics
+  // Revenue/event analytics
+  revenueByPlatform,
+  revenuePerContent,
+  revenuePerUser,
+  eventCounts,
+  // Performance metrics
         performanceMetrics: {
           conversionRate: 3.2,
           bounceRate: 42.8,
@@ -752,11 +784,16 @@ function AdminDashboard({ analytics, user }) {
               </div>
             </div>
 
+
             <div style={{ marginTop: 30, display: 'flex', gap: '20px' }}>
               <div style={{ flex: 2 }}>
                 <BarChart
                   data={dashboardData.financialMetrics?.revenueByMonth || []}
                   title="Monthly Revenue"
+                />
+                <BarChart
+                  data={Object.entries(dashboardData.revenueByPlatform || {}).map(([platform, revenue]) => ({ month: platform, revenue }))}
+                  title="Revenue by Platform"
                 />
               </div>
               <div style={{ flex: 1 }}>
@@ -764,6 +801,34 @@ function AdminDashboard({ analytics, user }) {
                   data={dashboardData.demographics?.deviceTypes || {}}
                   title="Device Distribution"
                   colors={['#1976d2', '#5e35b1', '#2e7d32', '#ed6c02', '#d32f2f']}
+                />
+                <PieChart
+                  data={dashboardData.eventCounts || {}}
+                  title="Event Counts (Impressions, Clicks, Conversions)"
+                  colors={['#1976d2', '#5e35b1', '#2e7d32', '#ed6c02']}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 10, display: 'flex', gap: '20px' }}>
+              <div style={{ flex: 1 }}>
+                <DataTable
+                  title="Revenue per Content"
+                  data={dashboardData.revenuePerContent || []}
+                  columns={[
+                    { header: 'Content ID', accessor: 'contentId' },
+                    { header: 'Total Revenue', accessor: 'totalRevenue', render: row => `$${row.totalRevenue.toFixed(2)}` }
+                  ]}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <DataTable
+                  title="Revenue per User"
+                  data={Object.entries(dashboardData.revenuePerUser || {}).map(([userId, totalRevenue]) => ({ userId, totalRevenue }))}
+                  columns={[
+                    { header: 'User ID', accessor: 'userId' },
+                    { header: 'Total Revenue', accessor: 'totalRevenue', render: row => `$${row.totalRevenue.toFixed(2)}` }
+                  ]}
                 />
               </div>
             </div>
