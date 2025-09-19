@@ -2,14 +2,20 @@
 const tiktokRoutes = require('./tiktokRoutes');
 // facebookPoster is a utility, not a router, so no need to use as middleware
 
-// Register TikTok API routes
-app.use('/api/tiktok', tiktokRoutes);
-// Serve Terms of Service for TikTok verification
-// TikTok site verification file
+const express = require('express');
+const cors = require('cors');
 const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
+
+// TikTok site verification file (must be before static/catch-all routes)
 app.get('/tiktok_verify.txt', (req, res) => {
   res.sendFile(path.join(__dirname, 'tiktok_verify.txt'));
 });
+
+// Register TikTok API routes
+app.use('/api/tiktok', tiktokRoutes);
 app.get('/terms', (req, res) => {
   res.send(`<!DOCTYPE html>
 <html lang="en">
