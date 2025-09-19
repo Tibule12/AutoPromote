@@ -1,3 +1,4 @@
+
 // TikTok and Facebook integrations
 const express = require('express');
 const cors = require('cors');
@@ -82,12 +83,15 @@ const analyticsRoutes = require('./analyticsRoutes');
 const adminRoutes = require('./adminRoutes');
 const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
 
+
 // Try to load adminTestRoutes, but continue with a dummy router if not available
 let adminTestRoutes;
 try {
   adminTestRoutes = require('./adminTestRoutes');
+  if (typeof adminTestRoutes !== 'function' && typeof adminTestRoutes !== 'object') {
+    adminTestRoutes = express.Router();
+  }
 } catch (error) {
-  // Create a dummy router if the module is missing
   adminTestRoutes = express.Router();
   adminTestRoutes.get('/admin-test/health', (req, res) => {
     res.json({ status: 'ok', message: 'Admin test routes dummy endpoint' });
@@ -98,6 +102,9 @@ try {
 let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes;
 try {
   withdrawalRoutes = require('./routes/withdrawalRoutes');
+  if (typeof withdrawalRoutes !== 'function' && typeof withdrawalRoutes !== 'object') {
+    withdrawalRoutes = express.Router();
+  }
 } catch (error) {
   withdrawalRoutes = express.Router();
 }
@@ -105,6 +112,9 @@ try {
 try {
   monetizationRoutes = require('./routes/monetizationRoutes');
   console.log('✅ Monetization routes loaded successfully');
+  if (typeof monetizationRoutes !== 'function' && typeof monetizationRoutes !== 'object') {
+    monetizationRoutes = express.Router();
+  }
 } catch (error) {
   console.log('⚠️ Monetization routes not found, using dummy router:', error.message);
   monetizationRoutes = express.Router();
@@ -112,9 +122,11 @@ try {
 
 try {
   stripeOnboardRoutes = require('./routes/stripeOnboardRoutes');
+  if (typeof stripeOnboardRoutes !== 'function' && typeof stripeOnboardRoutes !== 'object') {
+    stripeOnboardRoutes = express.Router();
+  }
 } catch (error) {
   stripeOnboardRoutes = express.Router();
-  // Add warning for missing Stripe secret key only if we have the route module
   if (!process.env.STRIPE_SECRET_KEY) {
     console.log('ℹ️ STRIPE_SECRET_KEY not found. Stripe features will be disabled.');
   }
