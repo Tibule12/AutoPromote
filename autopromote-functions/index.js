@@ -1,3 +1,18 @@
+// Export Creator Attribution & Referral System
+exports.addReferrerToContent = require('./referralSystem').addReferrerToContent;
+exports.getReferralStats = require('./referralSystem').getReferralStats;
+// Export Promotion Templates
+exports.createPromotionTemplate = require('./promotionTemplates').createPromotionTemplate;
+exports.listPromotionTemplates = require('./promotionTemplates').listPromotionTemplates;
+exports.attachTemplateToContent = require('./promotionTemplates').attachTemplateToContent;
+// Export Revenue Attribution System
+exports.logMonetizationEvent = require('./revenueAttribution').logMonetizationEvent;
+exports.getRevenueSummary = require('./revenueAttribution').getRevenueSummary;
+// Export Social Media Auto-Promotion Engine
+exports.autoPromoteContent = require('./socialAutoPromotion').autoPromoteContent;
+// Export Smart Link Tracker
+exports.generateSmartLink = require('./smartLinkTracker').generateSmartLink;
+exports.smartLinkRedirect = require('./smartLinkTracker').smartLinkRedirect;
 const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -37,6 +52,9 @@ exports.createPromotionOnApproval = functions.region(region).firestore
       return null;
     }
   });
+
+// Export Monetized Landing Page Generator
+exports.generateMonetizedLandingPage = require('./monetizedLandingPage').generateMonetizedLandingPage;
 
 exports.createPromotionOnContentCreate = functions.region(region).firestore
   .document("content/{contentId}")
