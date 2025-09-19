@@ -65,5 +65,20 @@ service cloud.firestore {
       allow update: if request.auth != null;
       allow delete: if request.auth != null;
     }
+
+    // Allow reading/writing admins for admin management
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Allow reading/writing payouts for revenue tracking
+    match /payouts/{payoutId} {
+      allow read, write: if request.auth != null && isAdmin();
+    }
+
+    // Allow reading/writing promotion executions for scheduling
+    match /promotion_executions/{execId} {
+      allow read, write: if request.auth != null && isAdmin();
+    }
   }
 }
