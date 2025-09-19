@@ -5,6 +5,11 @@ const tiktokRoutes = require('./tiktokRoutes');
 // Register TikTok API routes
 app.use('/api/tiktok', tiktokRoutes);
 // Serve Terms of Service for TikTok verification
+// TikTok site verification file
+const path = require('path');
+app.get('/tiktok_verify.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'tiktok_verify.txt'));
+});
 app.get('/terms', (req, res) => {
   res.send(`<!DOCTYPE html>
 <html lang="en">
