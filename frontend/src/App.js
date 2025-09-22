@@ -16,6 +16,7 @@ import EnvChecker from './components/EnvChecker';
 import DatabaseSync from './components/DatabaseSync';
 import IntegrationTester from './components/IntegrationTester';
 import WelcomePage from './WelcomePage';
+import UserDashboard from './UserDashboard';
 
 function App() {
   const navigate = useNavigate();
