@@ -4,7 +4,15 @@ import React from 'react';
 import './WelcomePage.css';
 
 const WelcomePage = ({ onGetStarted }) => (
-  <div className="welcome-container">
+  <div className="welcome-bg">
+    <div className="test-banner">Test Render: If you see this, React is working!</div>
+    <div className="main-header">
+      <h1 className="main-title">AutoPromote</h1>
+      <div className="main-header-btns">
+        <button className="header-btn">Login</button>
+        <button className="header-btn">Register</button>
+      </div>
+    </div>
     <header className="welcome-header">
       <div className="logo-row">
         <img src="/logo192.png" alt="Auto-Promote Logo" className="welcome-logo" />
@@ -21,21 +29,21 @@ const WelcomePage = ({ onGetStarted }) => (
     </header>
     <main className="welcome-main">
       <section className="welcome-hero">
-        <h1>Promote Your Content For Free, <br />Earn Revenue On Autopilot!</h1>
-        <p>Reach millions, monetize instantly—Auto-Promote handles the rest. No cost, just clicks all dash.</p>
+        <h1 className="hero-headline">Promote Your Content<br />For Free,<br />Earn Revenue On Autopilot!</h1>
+        <p className="hero-desc">Reach millions, monetize instantly—Auto-Promote handles the rest. No cost, just clicks all dash.</p>
         <button className="get-started-btn" onClick={onGetStarted}>Get Started</button>
-        <div className="welcome-features">
-          <div className="feature-item">
-            <span role="img" aria-label="boost">🚀</span>
-            <span>Free Multi-Platform Boosting</span>
+        <div className="welcome-features-row">
+          <div className="feature-card">
+            <span className="feature-icon">🚀</span>
+            <div>Free Multi-Platform</div>
           </div>
-          <div className="feature-item">
-            <span role="img" aria-label="money">💸</span>
-            <span>Automated Monetisation</span>
+          <div className="feature-card">
+            <span className="feature-icon">💸</span>
+            <div>Automated Monetisation</div>
           </div>
-          <div className="feature-item">
-            <span role="img" aria-label="analytics">📊</span>
-            <span>Analytics & Growth Tools</span>
+          <div className="feature-card">
+            <span className="feature-icon">📊</span>
+            <div>Analytics & Growth</div>
           </div>
         </div>
       </section>
