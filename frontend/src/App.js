@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
-import { auth } from './firebaseClient';
+import { auth, db } from './firebaseClient';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { API_ENDPOINTS } from './config';
 import LoginForm from './LoginForm';
@@ -15,6 +15,7 @@ import EnvTest from './components/EnvTest';
 import EnvChecker from './components/EnvChecker';
 import DatabaseSync from './components/DatabaseSync';
 import IntegrationTester from './components/IntegrationTester';
+import WelcomePage from './WelcomePage';
 
 function App() {
   const navigate = useNavigate();
@@ -28,6 +29,62 @@ function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [analytics, setAnalytics] = useState(null);
+  const [profileStats, setProfileStats] = useState({ views: 0, revenue: 0, ctr: 0, chart: [] });
+  const [badges, setBadges] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  // Fetch user profile, stats, badges, notifications from Firestore
+  useEffect(() => {
+    const fetchUserDashboardData = async () => {
+      if (!user || !user.uid) return;
+      try {
+        // Profile stats
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        let stats = { views: 0, revenue: 0, ctr: 0, chart: [] };
+        if (userDoc.exists) {
+          const data = userDoc.data();
+          stats.views = data.views || 0;
+          stats.revenue = data.revenue || 0;
+        }
+        // Fetch analytics for chart and CTR
+        const analyticsSnap = await db.collection('analytics')
+          .where('userId', '==', user.uid)
+          .orderBy('timestamp', 'desc')
+          .limit(30)
+          .get();
+        let chart = [];
+        let totalViews = 0;
+        let totalClicks = 0;
+        analyticsSnap.forEach(doc => {
+          const d = doc.data();
+          chart.push({
+            date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleDateString() : '',
+            views: d.views || 0,
+            clicks: d.clicks || 0
+          });
+          totalViews += d.views || 0;
+          totalClicks += d.clicks || 0;
+        });
+        stats.chart = chart.reverse();
+        stats.ctr = totalViews ? ((totalClicks / totalViews) * 100).toFixed(2) : 0;
+        setProfileStats(stats);
+
+        // Fetch badges from subcollection
+        const badgesSnap = await db.collection('users').doc(user.uid).collection('badges').get();
+        const badgeList = badgesSnap.docs.map(doc => doc.data());
+        setBadges(badgeList);
+
+        // Fetch notifications from subcollection
+        const notifSnap = await db.collection('users').doc(user.uid).collection('notifications').orderBy('timestamp', 'desc').limit(10).get();
+        const notifList = notifSnap.docs.map(doc => doc.data().message || '');
+        setNotifications(notifList);
+      } catch (e) {
+        setProfileStats({ views: 0, revenue: 0, ctr: 0, chart: [] });
+        setBadges([]);
+        setNotifications([]);
+      }
+    };
+    fetchUserDashboardData();
+  }, [user]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -242,38 +299,26 @@ function App() {
     } catch (error) {}
   };
 
-  // Content upload handler
-  const handleContentUpload = async (contentData) => {
+  // Content upload handler (with file and platforms)
+  const handleContentUpload = async ({ file, platforms }) => {
     try {
-      // Build payload for backend
-      let url;
-      if (contentData.type === 'article') {
-        url = contentData.articleText;
-      } else if (contentData.url && contentData.url !== 'missing' && contentData.url !== undefined && contentData.url !== '') {
-        url = contentData.url;
-      }
-      const payload = {
-        title: contentData.title,
-        type: contentData.type,
-        description: contentData.description,
-        ...(url ? { url } : {})
-      };
-      // Use correct endpoint for automation
-      const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(payload),
+      if (!file) return;
+      // Upload file to Firebase Storage
+      const storageRef = db.app.storage().ref();
+      const userFolder = storageRef.child(`uploads/${user.uid}`);
+      const fileRef = userFolder.child(file.name);
+      await fileRef.put(file);
+      const url = await fileRef.getDownloadURL();
+      // Save content to Firestore
+      await db.collection('content').add({
+        userId: user.uid,
+        url,
+        platforms,
+        createdAt: new Date(),
+        status: 'pending',
       });
-      if (res.ok) {
-        fetchUserContent();
-        alert('Content uploaded and promoted successfully!');
-      } else {
-        const error = await res.json();
-        alert(error.error || 'Failed to upload content');
-      }
+      fetchUserContent();
+      alert('Content uploaded and promoted successfully!');
     } catch (error) {
       alert('Error uploading content: ' + error.message);
     }
@@ -314,52 +359,18 @@ function App() {
             {showAdminLogin && <AdminLoginForm onLogin={handleLogin} />}
             {showRegister && <RegisterForm registerUser={registerUser} />}
             {user && !(isAdmin || user.role === 'admin' || user.isAdmin === true) && (
-              <>
-                <ContentUploadForm onUpload={handleContentUpload} />
-                <ContentList content={content} />
-              </>
+              <UserDashboard
+                user={user}
+                content={content}
+                stats={profileStats}
+                badges={badges}
+                notifications={notifications}
+                onUpload={handleContentUpload}
+                onPromoteToggle={() => {}}
+              />
             )}
             {!user && !showLogin && !showRegister && !showAdminLogin && (
-              <div className="WelcomeSection" style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '60vh',
-                background: 'linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)',
-                color: '#fff',
-                borderRadius: '16px',
-                boxShadow: '0 8px 32px rgba(25, 118, 210, 0.2)',
-                padding: '48px 24px',
-                margin: '32px auto',
-                maxWidth: '500px',
-              }}>
-                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="AutoPromote Logo" style={{ width: 80, marginBottom: 24 }} />
-                <h2 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: 16 }}>Welcome to AutoPromote</h2>
-                <p style={{ fontSize: '1.2rem', marginBottom: 32, textAlign: 'center', maxWidth: 400 }}>
-                  <span style={{ fontWeight: 500 }}>AI-powered platform</span> for content promotion and monetization.<br />
-                  Grow your audience, boost your revenue, and automate your success.
-                </p>
-                <button 
-                  onClick={() => setShowRegister(true)}
-                  style={{
-                    background: '#fff',
-                    color: '#1976d2',
-                    fontWeight: 600,
-                    fontSize: '1.1rem',
-                    padding: '12px 32px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    boxShadow: '0 2px 8px rgba(25, 118, 210, 0.15)',
-                    cursor: 'pointer',
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseOver={e => e.target.style.background = '#e3f2fd'}
-                  onMouseOut={e => e.target.style.background = '#fff'}
-                >
-                  Get Started
-                </button>
-              </div>
+              <WelcomePage onGetStarted={() => setShowRegister(true)} />
             )}
           </>
         } />

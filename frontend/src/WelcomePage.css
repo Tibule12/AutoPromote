@@ -1,0 +1,130 @@
+.welcome-container {
+  min-height: 100vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', Arial, sans-serif;
+}
+.welcome-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 3rem 1rem 3rem;
+  background: #fff;
+}
+.logo-row {
+  display: flex;
+  align-items: center;
+}
+.welcome-logo {
+  width: 48px;
+  height: 48px;
+  margin-right: 1rem;
+}
+.welcome-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4f2ff7;
+}
+.welcome-nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+.welcome-nav a {
+  color: #222;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+.welcome-nav a:hover {
+  color: #4f2ff7;
+}
+.sign-in-btn {
+  background: none;
+  border: 2px solid #4f2ff7;
+  color: #4f2ff7;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.sign-in-btn:hover {
+  background: #4f2ff7;
+  color: #fff;
+}
+.welcome-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5vw;
+  gap: 2vw;
+}
+.welcome-hero {
+  max-width: 600px;
+}
+.welcome-hero h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #222;
+  margin-bottom: 1.2rem;
+}
+.welcome-hero p {
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 2rem;
+}
+.get-started-btn {
+  background: #4f2ff7;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 2px 12px rgba(79,47,247,0.08);
+  transition: background 0.2s;
+}
+.get-started-btn:hover {
+  background: #3a1fd6;
+}
+.welcome-features {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  color: #4f2ff7;
+  font-weight: 600;
+}
+.welcome-illustration {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.welcome-illustration-img {
+  max-width: 420px;
+  width: 100%;
+  height: auto;
+}
+@media (max-width: 900px) {
+  .welcome-main {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 2vw;
+  }
+  .welcome-illustration {
+    margin-top: 2rem;
+    justify-content: flex-start;
+  }
+}
