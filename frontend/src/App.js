@@ -292,6 +292,7 @@ function App() {
   const [justLoggedOut, setJustLoggedOut] = useState(false);
   const handleLogout = async () => {
     try {
+      console.log('handleLogout called');
       await auth.signOut();
       setUser(null);
       setContent([]);
@@ -301,7 +302,7 @@ function App() {
       setShowAdminLogin(false);
       localStorage.clear();
       setJustLoggedOut(true);
-    } catch (error) {}
+    } catch (error) { console.error('Logout error:', error); }
   };
 
   // Redirect after logout
