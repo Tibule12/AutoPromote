@@ -1,7 +1,6 @@
 /* Gradient background and fade-in animation */
 .gradient-bg {
   background: linear-gradient(120deg, #f8f7ff 0%, #e6e0ff 60%, #f7f3ff 100%);
-}
 .fade-in {
   animation: fadeIn 1.2s ease-in;
 }
