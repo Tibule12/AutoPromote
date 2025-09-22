@@ -9,7 +9,7 @@ const defaultPlatforms = [
   { key: 'facebook', label: 'Facebook' },
 ];
 
-const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, onPromoteToggle }) => {
+const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, onPromoteToggle, onLogout }) => {
   // Example streak and perks (replace with real data from backend if available)
   const streak = user?.streak || 0;
   const perks = user?.perks || ['Extra Slot', 'Priority Schedule'];
@@ -103,6 +103,13 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
             <div className="profile-referral">
               <span>{user?.referralLink || 'autopromote.com/yourref'}</span>
             </div>
+            <button
+              className="dashboard-logout-btn"
+              style={{ marginTop: 16, padding: '0.5rem 1.2rem', background: '#6c4cf7', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', width: '100%' }}
+              onClick={onLogout}
+            >
+              Log out
+            </button>
           </div>
         </div>
         <div className="sidebar-section earnings">
