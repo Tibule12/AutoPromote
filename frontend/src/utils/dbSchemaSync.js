@@ -11,19 +11,25 @@ export class DatabaseSyncService {
   /**
    * Check if all required collections exist and create sample data if needed
    */
-  static async validateDatabaseSchema() {
+  /**
+   * Validate database schema, only checking admin collections if user is admin
+   * @param {Object} user - The current user object (should have role or isAdmin)
+   */
+  static async validateDatabaseSchema(user) {
     console.log('Validating database schema for admin dashboard...');
-    
     try {
-      // Check for required collections
+      // Always check user and content collections
       await this.validateCollection('users');
       await this.validateCollection('content');
-      await this.validateCollection('promotions');
-      await this.validateCollection('activities');
-      
-      // Check for analytics-related collections
-      await this.validateCollection('analytics');
-      
+
+      // Only check admin collections if user is admin
+      const isAdmin = user && (user.role === 'admin' || user.isAdmin === true);
+      if (isAdmin) {
+        await this.validateCollection('promotions');
+        await this.validateCollection('activities');
+        await this.validateCollection('analytics');
+      }
+
       console.log('Database schema validation complete');
       return true;
     } catch (error) {

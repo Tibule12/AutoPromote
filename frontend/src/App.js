@@ -363,7 +363,7 @@ function App() {
       <h2 style={{color: 'red', textAlign: 'center'}}>Test Render: If you see this, React is working!</h2>
       <EnvTest />
       <EnvChecker />
-      <DatabaseSync />
+      <DatabaseSync user={user} />
 
       <Routes>
   <Route path="/admin-dashboard" element={<AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />} />
