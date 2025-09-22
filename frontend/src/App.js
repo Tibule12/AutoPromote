@@ -202,6 +202,7 @@ function App() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const { user: firebaseUser } = userCredential;
       const idToken = await firebaseUser.getIdToken();
+      console.log('LOGIN API ENDPOINT:', API_ENDPOINTS.LOGIN);
       const res = await fetch(API_ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
