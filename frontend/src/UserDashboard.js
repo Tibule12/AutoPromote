@@ -145,7 +145,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
             <button
               className="dashboard-logout-btn"
               style={{ marginTop: 16, padding: '0.5rem 1.2rem', background: '#6c4cf7', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', width: '100%' }}
-              onClick={onLogout}
+              onClick={() => { console.log('Logout button clicked'); onLogout(); }}
             >
               Log out
             </button>
