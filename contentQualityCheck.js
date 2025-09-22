@@ -12,8 +12,14 @@ router.post('/api/content/quality-check', upload.single('file'), (req, res) => {
   const filePath = req.file.path;
   ffmpeg.ffprobe(filePath, (err, metadata) => {
     if (err) {
+      console.error('FFmpeg analysis failed:', err);
       fs.unlinkSync(filePath);
-      return res.status(500).json({ error: 'FFmpeg analysis failed' });
+      return res.json({
+        error: 'FFmpeg analysis failed',
+        qualityScore: 0,
+        feedback: ['Could not analyze file. Upload allowed with warning.'],
+        enhanced: false
+      });
     }
 
     const videoStream = metadata.streams.find(s => s.codec_type === 'video');
@@ -64,8 +70,19 @@ router.post('/api/content/quality-check', upload.single('file'), (req, res) => {
           });
         })
         .on('error', (err) => {
+          console.error('Enhancement failed:', err);
           fs.unlinkSync(filePath);
-          return res.status(500).json({ error: 'Enhancement failed', details: err.message, feedback });
+          // Allow upload with warnings if enhancement fails
+          return res.json({
+            resolution: `${width}x${height}`,
+            videoBitrate,
+            audioBitrate,
+            duration,
+            format: metadata.format.format_name,
+            qualityScore: 0,
+            feedback: [...feedback, 'Enhancement failed: ' + err.message],
+            enhanced: false
+          });
         })
         .run();
     } else {
