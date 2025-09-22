@@ -1,3 +1,94 @@
+/* --- Mobile-first responsive improvements --- */
+@media (max-width: 700px) {
+  .dashboard-container {
+    flex-direction: column;
+    min-height: unset;
+    padding: 0;
+  }
+  .dashboard-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #ece8fa;
+    padding: 1rem 0.5rem 0.5rem 0.5rem;
+    box-shadow: none;
+    gap: 1rem;
+  }
+  .profile-section {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+    background: none;
+    box-shadow: none;
+    padding: 0.5rem 0;
+  }
+  .profile-avatar img {
+    width: 60px;
+    height: 60px;
+  }
+  .profile-info h2 {
+    font-size: 1.1rem;
+  }
+  .dashboard-main {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+  .upload-section, .analytics-section, .badges-section {
+    padding: 1rem 0.5rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: none;
+  }
+  .upload-drop {
+    padding: 1rem 0.5rem;
+    font-size: 1rem;
+  }
+  .upload-drop button {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.7rem 0;
+  }
+  .upload-meta-fields label,
+  .upload-meta-fields input {
+    width: 100%;
+    font-size: 1rem;
+  }
+  .platform-toggles {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .content-link {
+    font-size: 0.95rem;
+    padding: 0.4rem 0.7rem;
+  }
+  .badges-section .badges-list {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 0.95rem;
+    padding: 0.3rem 0.7rem;
+  }
+  .earnings-amount {
+    font-size: 1.2rem;
+  }
+  .view-breakdown-btn, .earn-more-btn {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.7rem 0;
+  }
+  .content-list-item {
+    font-size: 0.98rem;
+    padding: 0.7rem 0.3rem;
+  }
+  .analytics-section .analytics-chart {
+    height: 90px;
+    min-width: 0;
+  }
+  .daily-stats {
+    gap: 0.7rem;
+    font-size: 0.98rem;
+  }
+}
 .dashboard-container {
   display: flex;
   min-height: 100vh;
