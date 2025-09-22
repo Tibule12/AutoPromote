@@ -361,6 +361,7 @@ function App() {
                 notifications={notifications}
                 onUpload={handleContentUpload}
                 onPromoteToggle={() => {}}
+                onLogout={handleLogout}
               />
             )}
             {!user && !showLogin && !showRegister && !showAdminLogin && (
