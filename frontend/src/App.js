@@ -20,10 +20,7 @@ import UserDashboard from './UserDashboard';
 
 function App() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('user');
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [user, setUser] = useState(null);
   const [content, setContent] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -90,27 +87,32 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
-        handleLogout();
+        setUser(null);
+        setIsAdmin(false);
+        localStorage.clear();
         return;
       }
       try {
         const token = await firebaseUser.getIdToken(true);
         const idTokenResult = await firebaseUser.getIdTokenResult(true);
         const hasAdminClaim = idTokenResult.claims.admin === true || idTokenResult.claims.role === 'admin';
-        const storedUser = localStorage.getItem('user');
-        const userData = storedUser ? JSON.parse(storedUser) : null;
-        if (userData && userData.email === firebaseUser.email) {
-          userData.token = token;
-          userData.isAdmin = hasAdminClaim;
-          userData.role = hasAdminClaim ? 'admin' : userData.role;
-          localStorage.setItem('user', JSON.stringify(userData));
-          setUser(userData);
-          setIsAdmin(hasAdminClaim || userData.role === 'admin');
-        }
-          // Debug log for current UID
-          console.log("Current UID:", firebaseUser.uid);
+        const userData = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: firebaseUser.displayName,
+          token,
+          isAdmin: hasAdminClaim,
+          role: hasAdminClaim ? 'admin' : 'user',
+        };
+        setUser(userData);
+        setIsAdmin(hasAdminClaim);
+        localStorage.setItem('user', JSON.stringify(userData));
+        // Debug log for current UID
+        console.log("Current UID:", firebaseUser.uid);
       } catch (error) {
-        handleLogout();
+        setUser(null);
+        setIsAdmin(false);
+        localStorage.clear();
       }
     });
     if (window.location.pathname === '/admin-login') {
