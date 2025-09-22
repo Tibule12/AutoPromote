@@ -21,6 +21,7 @@ import UserDashboard from './UserDashboard';
 function App() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [userLoaded, setUserLoaded] = useState(false);
   const [content, setContent] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -33,7 +34,10 @@ function App() {
   // Fetch user profile, stats, badges, notifications from Firestore
   useEffect(() => {
     const fetchUserDashboardData = async () => {
-      if (!user || !user.uid) return;
+      if (!user || !user.uid) {
+        setUserLoaded(false);
+        return;
+      }
       try {
         // Profile stats
         const userDoc = await db.collection('users').doc(user.uid).get();
@@ -42,10 +46,8 @@ function App() {
           const data = userDoc.data();
           stats.views = data.views || 0;
           stats.revenue = data.revenue || 0;
-          // Update user with avatarUrl if available
-          if (data.avatarUrl) {
-            setUser(prev => prev ? { ...prev, avatarUrl: data.avatarUrl } : prev);
-          }
+          // Merge Firestore user fields into user state
+          setUser(prev => prev ? { ...prev, ...data } : { ...data, uid: user.uid });
         }
         // Fetch analytics for chart and CTR
         const analyticsSnap = await db.collection('analytics')
@@ -83,6 +85,8 @@ function App() {
         setProfileStats({ views: 0, revenue: 0, ctr: 0, chart: [] });
         setBadges([]);
         setNotifications([]);
+      } finally {
+        setUserLoaded(true);
       }
     };
     fetchUserDashboardData();
@@ -363,7 +367,7 @@ function App() {
       <h2 style={{color: 'red', textAlign: 'center'}}>Test Render: If you see this, React is working!</h2>
       <EnvTest />
       <EnvChecker />
-      {user && <DatabaseSync user={user} />}
+  {user && userLoaded && <DatabaseSync user={user} />}
 
       <Routes>
   <Route path="/admin-dashboard" element={<AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />} />
