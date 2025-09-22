@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { storage, db, auth } from './firebaseClient';
 import './UserDashboard.css';
 
 const defaultPlatforms = [
@@ -22,6 +23,29 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
   const [scheduledTime, setScheduledTime] = useState('');
   const [caption, setCaption] = useState('');
   const [hashtags, setHashtags] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '/avatar-default.png');
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef();
+  // Handle avatar upload
+  const handleAvatarChange = async (e) => {
+    if (!e.target.files || !e.target.files[0]) return;
+    setAvatarUploading(true);
+    const file = e.target.files[0];
+    try {
+      const userId = user?.uid || auth.currentUser?.uid;
+      const storageRef = storage.ref(`avatars/${userId}`);
+      await storageRef.put(file);
+      const url = await storageRef.getDownloadURL();
+      setAvatarUrl(url);
+      // Update Firestore user doc
+      if (userId) {
+        await db.collection('users').doc(userId).update({ avatarUrl: url });
+      }
+    } catch (err) {
+      alert('Failed to upload avatar.');
+    }
+    setAvatarUploading(false);
+  };
 
   const handlePlatformToggle = (platform) => {
     setSelectedPlatforms((prev) =>
@@ -89,8 +113,23 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
     <div className="dashboard-container">
       <aside className="dashboard-sidebar">
         <div className="profile-section">
-          <div className="profile-avatar">
-            <img src="/avatar-default.png" alt="User avatar" />
+          <div className="profile-avatar" style={{ position: 'relative', textAlign: 'center' }}>
+            <img src={avatarUrl} alt="User avatar" style={{ width: 90, height: 90, borderRadius: '50%', objectFit: 'cover', border: '2px solid #6c4cf7' }} />
+            <input
+              type="file"
+              accept="image/*"
+              ref={avatarInputRef}
+              style={{ display: 'none' }}
+              onChange={handleAvatarChange}
+            />
+            <button
+              type="button"
+              style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', background: '#fff', color: '#6c4cf7', border: '1px solid #6c4cf7', borderRadius: 16, padding: '2px 12px', fontSize: 13, cursor: 'pointer' }}
+              onClick={() => avatarInputRef.current && avatarInputRef.current.click()}
+              disabled={avatarUploading}
+            >
+              {avatarUploading ? 'Uploading...' : 'Change'}
+            </button>
           </div>
           <div className="profile-info">
             <h2>{user?.name || 'User'}</h2>
@@ -131,10 +170,31 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
         <section className="upload-section">
           <h3>Create and Promote Content</h3>
           <div className="upload-panel">
-            <input type="file" id="upload-input" style={{ display: 'none' }} onChange={handleFileChange} />
-            <label htmlFor="upload-input" className="upload-drop">
-              <span>Drag and drop a file = ubabdding content</span>
-              <button type="button" disabled={uploading || !!fileToUpload}>{uploading ? 'Uploading...' : 'Select File'}</button>
+            <input
+              type="file"
+              id="upload-input"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+              accept="video/*,image/*,audio/*"
+            />
+            <label
+              htmlFor="upload-input"
+              className="upload-drop"
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: uploading ? 'not-allowed' : 'pointer', border: '2px dashed #6c4cf7', borderRadius: 12, padding: '1.2rem', background: '#f8f7ff', marginBottom: 12 }}
+              onClick={e => {
+                if (uploading) e.preventDefault();
+                else document.getElementById('upload-input').click();
+              }}
+            >
+              <span style={{ marginBottom: 8 }}>Drag and drop a file or</span>
+              <button
+                type="button"
+                disabled={uploading}
+                style={{ background: '#6c4cf7', color: '#fff', border: 'none', borderRadius: 8, padding: '0.5rem 1.5rem', fontWeight: 600, fontSize: '1rem', cursor: uploading ? 'not-allowed' : 'pointer' }}
+              >
+                {uploading ? 'Uploading...' : 'Select File'}
+              </button>
+              {fileToUpload && <span style={{ marginTop: 8, color: '#4f2ff7' }}>Selected: {fileToUpload.name}</span>}
             </label>
             {/* Scheduling, caption, and hashtags */}
             {fileToUpload && (
