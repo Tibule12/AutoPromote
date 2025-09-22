@@ -351,7 +351,10 @@ function App() {
               />
             )}
             {!user && !showLogin && !showRegister && !showAdminLogin && (
-              <WelcomePage onGetStarted={() => setShowRegister(true)} />
+                <WelcomePage 
+                  onGetStarted={() => setShowRegister(true)} 
+                  onSignIn={() => setShowLogin(true)} 
+                />
             )}
           </>
         } />
