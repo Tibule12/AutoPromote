@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { storage, db, auth } from './firebaseClient';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import './UserDashboard.css';
 
 const defaultPlatforms = [
@@ -33,9 +34,9 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
     const file = e.target.files[0];
     try {
       const userId = user?.uid || auth.currentUser?.uid;
-      const storageRef = storage.ref(`avatars/${userId}`);
-      await storageRef.put(file);
-      const url = await storageRef.getDownloadURL();
+      const fileRef = storageRef(storage, `avatars/${userId}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
       setAvatarUrl(url);
       // Update Firestore user doc
       if (userId) {
