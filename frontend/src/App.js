@@ -330,27 +330,7 @@ function App() {
       <EnvTest />
       <EnvChecker />
       <DatabaseSync />
-      <header className="App-header">
-        <h1>AutoPromote</h1>
-        <nav>
-          {user ? (
-            <div>
-              <span>Welcome, {user.name}!</span>
-              <button onClick={handleLogout}>Logout</button>
-              {isAdmin && (
-                <button onClick={() => navigate('/integration-test')} style={{ marginLeft: '10px' }}>
-                  Run Tests
-                </button>
-              )}
-            </div>
-          ) : (
-            <div>
-              <button onClick={() => { setShowLogin(true); setShowRegister(false); setShowAdminLogin(false); }}>Login</button>
-              <button onClick={() => { setShowRegister(true); setShowLogin(false); setShowAdminLogin(false); }}>Register</button>
-            </div>
-          )}
-        </nav>
-      </header>
+
       <Routes>
         <Route path="/admin-dashboard" element={<AdminDashboard analytics={analytics} user={user} />} />
         <Route path="/integration-test" element={<IntegrationTester />} />
