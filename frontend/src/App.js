@@ -42,6 +42,10 @@ function App() {
           const data = userDoc.data();
           stats.views = data.views || 0;
           stats.revenue = data.revenue || 0;
+          // Update user with avatarUrl if available
+          if (data.avatarUrl) {
+            setUser(prev => prev ? { ...prev, avatarUrl: data.avatarUrl } : prev);
+          }
         }
         // Fetch analytics for chart and CTR
         const analyticsSnap = await db.collection('analytics')
