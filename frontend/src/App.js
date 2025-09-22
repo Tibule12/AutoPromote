@@ -327,13 +327,30 @@ function App() {
       const fileRef = userFolder.child(file.name);
       await fileRef.put(file);
       const url = await fileRef.getDownloadURL();
-      // Save content to Firestore
+      // Build platformStatus object for all selected platforms
+      const allPlatforms = ['youtube', 'tiktok', 'instagram', 'twitter', 'facebook'];
+      const platformStatus = {};
+      allPlatforms.forEach((platform) => {
+        platformStatus[platform] = {
+          status: platforms.includes(platform) ? 'pending' : 'not_selected',
+          postId: '',
+          error: '',
+          postedAt: ''
+        };
+      });
+      // Save content to Firestore with recommended schema
       await db.collection('content').add({
         userId: user.uid,
         url,
         platforms,
         createdAt: new Date(),
         status: 'pending',
+        platformStatus,
+        qualityFeedback: {
+          score: 0,
+          issues: [],
+          enhancedFileUrl: ''
+        }
       });
       fetchUserContent();
       alert('Content uploaded and promoted successfully!');
