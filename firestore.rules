@@ -33,6 +33,11 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow update: if request.auth != null;
       allow delete: if request.auth != null;
+
+      // Allow reads on all subcollections under analytics
+      match /{subCollection=**} {
+        allow read: if request.auth != null;
+      }
     }
 
     // All authenticated users can read promotions for admin dashboard
