@@ -325,6 +325,24 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
           {content && content.length > 0 ? content.map((item, idx) => (
             <li key={item.id || idx} className="content-list-item">
               <span>{item.title || item.url || 'Untitled Content'}</span>
+              {/* Platform posting status */}
+              {item.platformStatus && (
+                <div className="platform-status-list" style={{ marginTop: 6, marginBottom: 6 }}>
+                  {Object.entries(item.platformStatus).map(([platform, statusObj]) => (
+                    <div key={platform} className={`platform-status platform-${platform}`} style={{ fontSize: '0.92em', marginBottom: 2 }}>
+                      <strong>{platform.charAt(0).toUpperCase() + platform.slice(1)}:</strong>{' '}
+                      {statusObj.status === 'posted' && <span style={{ color: 'green' }}>Posted</span>}
+                      {statusObj.status === 'failed' && <span style={{ color: 'red' }}>Failed: {statusObj.error}</span>}
+                      {statusObj.status === 'pending' && <span style={{ color: 'orange' }}>Pending</span>}
+                      {statusObj.status === 'scheduled' && <span style={{ color: 'blue' }}>Scheduled</span>}
+                      {statusObj.status === 'posting' && <span style={{ color: '#888' }}>Posting...</span>}
+                      {statusObj.postedAt && statusObj.status === 'posted' && (
+                        <span style={{ color: '#888', marginLeft: 6 }}>(at {new Date(statusObj.postedAt).toLocaleString()})</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
               {item.landingPageUrl && (
                 <button
                   className="view-breakdown-btn"
