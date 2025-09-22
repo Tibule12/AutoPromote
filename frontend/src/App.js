@@ -287,6 +287,7 @@ function App() {
     setShowRegister(false);
   };
 
+  const [justLoggedOut, setJustLoggedOut] = useState(false);
   const handleLogout = async () => {
     try {
       await auth.signOut();
@@ -297,9 +298,17 @@ function App() {
       setShowRegister(false);
       setShowAdminLogin(false);
       localStorage.clear();
-      navigate('/');
+      setJustLoggedOut(true);
     } catch (error) {}
   };
+
+  // Redirect after logout
+  React.useEffect(() => {
+    if (justLoggedOut && !user) {
+      navigate('/');
+      setJustLoggedOut(false);
+    }
+  }, [justLoggedOut, user, navigate]);
 
   // Content upload handler (with file and platforms)
   const handleContentUpload = async ({ file, platforms }) => {
