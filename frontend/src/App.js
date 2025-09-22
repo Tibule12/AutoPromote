@@ -345,7 +345,7 @@ function App() {
       <DatabaseSync />
 
       <Routes>
-        <Route path="/admin-dashboard" element={<AdminDashboard analytics={analytics} user={user} />} />
+  <Route path="/admin-dashboard" element={<AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />} />
         <Route path="/integration-test" element={<IntegrationTester />} />
         <Route path="/" element={
           <>
