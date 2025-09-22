@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { storage, db, auth } from './firebaseClient';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 import './UserDashboard.css';
+import { API_BASE_URL } from './config';
 
 const defaultPlatforms = [
   { key: 'tiktok', label: 'TikTok' },
@@ -81,7 +83,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const res = await fetch('/api/content/quality-check', {
+      const res = await fetch(`${API_BASE_URL}/api/content/quality-check`, {
         method: 'POST',
         body: formData
       });
