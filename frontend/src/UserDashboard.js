@@ -25,6 +25,10 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
   const [caption, setCaption] = useState('');
   const [hashtags, setHashtags] = useState('');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '/avatar-default.png');
+  // Update avatarUrl if user prop changes (e.g., after login)
+  React.useEffect(() => {
+    setAvatarUrl(user?.avatarUrl || '/avatar-default.png');
+  }, [user]);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const avatarInputRef = useRef();
   // Handle avatar upload
@@ -241,10 +245,39 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
                     <span>Duration: {qualityFeedback.duration ? qualityFeedback.duration.toFixed(1) + 's' : 'N/A'}</span><br />
                     <span>Format: {qualityFeedback.format || 'N/A'}</span><br />
                     <span>Quality Score: {qualityFeedback.qualityScore}</span><br />
+                    {Array.isArray(qualityFeedback.feedback) && qualityFeedback.feedback.length > 0 && (
+                      <div style={{ margin: '8px 0' }}>
+                        <strong>Feedback:</strong>
+                        <ul style={{ margin: 0, paddingLeft: 18 }}>
+                          {qualityFeedback.feedback.map((msg, i) => (
+                            <li key={i} style={{ color: '#ed6c02' }}>{msg}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {qualityFeedback.enhanced && qualityFeedback.enhancedFile && !canUpload && (
+                      <button
+                        className="view-breakdown-btn"
+                        style={{ marginTop: 8, background: '#2e7d32', color: '#fff' }}
+                        onClick={async () => {
+                          setUploading(true);
+                          // Download the enhanced file and set as fileToUpload
+                          const response = await fetch(qualityFeedback.enhancedFile);
+                          const blob = await response.blob();
+                          const enhancedFile = new File([blob], 'enhanced_' + (fileToUpload?.name || 'upload.mp4'), { type: blob.type });
+                          setFileToUpload(enhancedFile);
+                          setCanUpload(true);
+                          setUploading(false);
+                        }}
+                        disabled={uploading}
+                      >
+                        Use Enhanced File
+                      </button>
+                    )}
                     {canUpload ? (
                       <span style={{ color: 'green' }}>Quality is acceptable. You can upload.</span>
                     ) : (
-                      <span style={{ color: 'orange' }}>Quality is low. Please select a higher quality file.</span>
+                      <span style={{ color: 'orange' }}>Quality is low. Please select a higher quality file or use the enhanced file if available.</span>
                     )}
                   </>
                 )}
