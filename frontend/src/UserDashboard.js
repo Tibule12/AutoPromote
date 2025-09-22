@@ -288,9 +288,6 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
                 {uploading ? 'Uploading...' : 'Upload Content'}
               </button>
             )}
-            <div className="content-quality">
-              <span>Score: 54 • Burry</span>
-            </div>
             <div className="platform-toggles">
               {defaultPlatforms.map((p) => (
                 <label key={p.key}>
