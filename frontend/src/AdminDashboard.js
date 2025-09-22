@@ -6,7 +6,7 @@ import { db } from './firebaseClient';
 import mockAnalyticsData from './mockAnalyticsData';
 import './AdminDashboard.css';
 
-function AdminDashboard({ analytics, user }) {
+function AdminDashboard({ analytics, user, onLogout }) {
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -1231,6 +1231,23 @@ function AdminDashboard({ analytics, user }) {
           >
             <span style={{ marginRight: '8px' }}>🔄</span>
             {refreshing ? 'Refreshing...' : 'Refresh Data'}
+          </button>
+          <button
+            onClick={() => { if (onLogout) { console.log('Admin logout button clicked'); onLogout(); } }}
+            style={{
+              backgroundColor: '#d32f2f',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              marginRight: '15px',
+              marginLeft: '10px',
+              fontWeight: 600
+            }}
+          >
+            Log out
           </button>
           <div style={{ fontSize: '0.9rem', color: '#666' }}>
             Last updated: {new Date().toLocaleString()}
