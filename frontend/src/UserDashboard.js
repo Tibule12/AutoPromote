@@ -10,8 +10,18 @@ const defaultPlatforms = [
 ];
 
 const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, onPromoteToggle }) => {
+  // Example streak and perks (replace with real data from backend if available)
+  const streak = user?.streak || 0;
+  const perks = user?.perks || ['Extra Slot', 'Priority Schedule'];
+  const rank = user?.rank || 'Rising Star';
   const [selectedPlatforms, setSelectedPlatforms] = useState(defaultPlatforms.map(p => p.key));
   const [uploading, setUploading] = useState(false);
+  const [qualityFeedback, setQualityFeedback] = useState(null);
+  const [fileToUpload, setFileToUpload] = useState(null);
+  const [canUpload, setCanUpload] = useState(false);
+  const [scheduledTime, setScheduledTime] = useState('');
+  const [caption, setCaption] = useState('');
+  const [hashtags, setHashtags] = useState('');
 
   const handlePlatformToggle = (platform) => {
     setSelectedPlatforms((prev) =>
@@ -22,12 +32,56 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
     if (onPromoteToggle) onPromoteToggle(platform);
   };
 
+  // Simple auto-caption/hashtag suggestion based on filename
+  const suggestCaptionAndHashtags = (file) => {
+    if (!file) return;
+    const base = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ');
+    setCaption(`Check out my new upload: ${base}`);
+    setHashtags(`#${base.split(' ').join(' #')}`);
+  };
+
   const handleFileChange = async (e) => {
     if (!e.target.files || !e.target.files[0]) return;
     setUploading(true);
+    setQualityFeedback(null);
+    setCanUpload(false);
     const file = e.target.files[0];
-    // Pass file and selected platforms to parent handler
-    await onUpload({ file, platforms: selectedPlatforms });
+  setFileToUpload(file);
+  suggestCaptionAndHashtags(file);
+    // Send file to backend for quality check
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch('/api/content/quality-check', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      setQualityFeedback(data);
+      setCanUpload(data.qualityScore >= 1); // Only allow upload if score is acceptable
+    } catch (err) {
+      setQualityFeedback({ error: 'Quality check failed' });
+      setCanUpload(false);
+    }
+    setUploading(false);
+  };
+
+  const handleFinalUpload = async () => {
+    if (!fileToUpload || !canUpload) return;
+    setUploading(true);
+    await onUpload({
+      file: fileToUpload,
+      platforms: selectedPlatforms,
+      scheduledTime,
+      caption,
+      hashtags
+    });
+    setFileToUpload(null);
+    setQualityFeedback(null);
+    setCanUpload(false);
+    setCaption('');
+    setHashtags('');
+    setScheduledTime('');
     setUploading(false);
   };
 
@@ -73,8 +127,66 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
             <input type="file" id="upload-input" style={{ display: 'none' }} onChange={handleFileChange} />
             <label htmlFor="upload-input" className="upload-drop">
               <span>Drag and drop a file = ubabdding content</span>
-              <button type="button" disabled={uploading}>{uploading ? 'Uploading...' : 'Upload is'}</button>
+              <button type="button" disabled={uploading || !!fileToUpload}>{uploading ? 'Uploading...' : 'Select File'}</button>
             </label>
+            {/* Scheduling, caption, and hashtags */}
+            {fileToUpload && (
+              <div className="upload-meta-fields" style={{ margin: '12px 0' }}>
+                <label style={{ display: 'block', marginBottom: 6 }}>
+                  Schedule Promotion:
+                  <input
+                    type="datetime-local"
+                    value={scheduledTime}
+                    onChange={e => setScheduledTime(e.target.value)}
+                    style={{ marginLeft: 8 }}
+                  />
+                </label>
+                <label style={{ display: 'block', marginBottom: 6 }}>
+                  Caption:
+                  <input
+                    type="text"
+                    value={caption}
+                    onChange={e => setCaption(e.target.value)}
+                    style={{ marginLeft: 8, width: 260 }}
+                  />
+                </label>
+                <label style={{ display: 'block', marginBottom: 6 }}>
+                  Hashtags:
+                  <input
+                    type="text"
+                    value={hashtags}
+                    onChange={e => setHashtags(e.target.value)}
+                    style={{ marginLeft: 8, width: 260 }}
+                  />
+                </label>
+              </div>
+            )}
+            {qualityFeedback && (
+              <div className="content-quality">
+                {qualityFeedback.error ? (
+                  <span style={{ color: 'red' }}>{qualityFeedback.error}</span>
+                ) : (
+                  <>
+                    <span>Resolution: {qualityFeedback.resolution || 'N/A'}</span><br />
+                    <span>Video Bitrate: {qualityFeedback.videoBitrate || 'N/A'}</span><br />
+                    <span>Audio Bitrate: {qualityFeedback.audioBitrate || 'N/A'}</span><br />
+                    <span>Duration: {qualityFeedback.duration ? qualityFeedback.duration.toFixed(1) + 's' : 'N/A'}</span><br />
+                    <span>Format: {qualityFeedback.format || 'N/A'}</span><br />
+                    <span>Quality Score: {qualityFeedback.qualityScore}</span><br />
+                    {canUpload ? (
+                      <span style={{ color: 'green' }}>Quality is acceptable. You can upload.</span>
+                    ) : (
+                      <span style={{ color: 'orange' }}>Quality is low. Please select a higher quality file.</span>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+            {fileToUpload && canUpload && (
+              <button className="view-breakdown-btn" onClick={handleFinalUpload} disabled={uploading} style={{ marginTop: 12 }}>
+                {uploading ? 'Uploading...' : 'Upload Content'}
+              </button>
+            )}
             <div className="content-quality">
               <span>Score: 54 • Burry</span>
             </div>
@@ -117,14 +229,47 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
           </div>
         </section>
         <section className="badges-section">
-          <h3>Badges</h3>
+          <h3>Badges & Rewards</h3>
           <div className="badges-list">
             {badges?.map((badge, i) => (
               <span key={i} className={`badge badge-${badge.type}`}>{badge.label}</span>
             ))}
           </div>
+          <div className="streaks-perks" style={{ margin: '16px 0' }}>
+            <div style={{ fontWeight: 600, color: '#4f2ff7' }}>🔥 Streak: {streak} days</div>
+            <div style={{ marginTop: 8 }}>
+              <span style={{ fontWeight: 600 }}>Unlocked Perks:</span>
+              {perks.length > 0 ? (
+                <ul style={{ margin: '6px 0 0 18px', color: '#4f2ff7' }}>
+                  {perks.map((perk, i) => <li key={i}>{perk}</li>)}
+                </ul>
+              ) : <span style={{ marginLeft: 8 }}>None yet</span>}
+            </div>
+            <div style={{ marginTop: 8, fontWeight: 600 }}>
+              Rank: <span style={{ color: '#7C4DFF' }}>{rank}</span>
+            </div>
+          </div>
           <button className="earn-more-btn">Earn More!</button>
         </section>
+      <section className="content-list-section">
+        <h3>Your Content</h3>
+        <ul className="content-list">
+          {content && content.length > 0 ? content.map((item, idx) => (
+            <li key={item.id || idx} className="content-list-item">
+              <span>{item.title || item.url || 'Untitled Content'}</span>
+              {item.landingPageUrl && (
+                <button
+                  className="view-breakdown-btn"
+                  style={{ marginLeft: 12 }}
+                  onClick={() => window.open(item.landingPageUrl, '_blank')}
+                >
+                  Preview
+                </button>
+              )}
+            </li>
+          )) : <li>No content uploaded yet.</li>}
+        </ul>
+      </section>
       </main>
       <aside className="dashboard-rightbar">
         <section className="latest-promotions">
