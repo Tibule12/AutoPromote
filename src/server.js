@@ -77,7 +77,7 @@ app.use('/api', adminTestRoutes); // Add admin test routes
 
 // Content Quality Check Route
 const contentQualityCheck = require('./contentQualityCheck');
-app.use(contentQualityCheck);
+app.use('/api/content', contentQualityCheck);
 
 // Register optional routes
 app.use('/api/withdrawals', withdrawalRoutes);
