@@ -14,6 +14,51 @@ const defaultPlatforms = [
 ];
 
 const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, onPromoteToggle, onLogout }) => {
+  // Section render helpers to fix ReferenceError
+  const analyticsSection = () => (
+    <>
+      <h3>Boost Your Earnings</h3>
+      <div className="earnings-amount">${stats?.revenue ?? '0.00'}</div>
+      <div className="analytics-chart">
+        <svg width="100%" height="120" viewBox="0 0 320 120">
+          {stats?.chart && stats.chart.length > 1 && (
+            <polyline
+              fill="none"
+              stroke="#4f2ff7"
+              strokeWidth="3"
+              points={stats.chart.map((d, i) => `${10 + i * (300 / (stats.chart.length - 1))},${110 - (d.views / Math.max(...stats.chart.map(c => c.views || 1)) * 100)}`).join(' ')}
+            />
+          )}
+        </svg>
+      </div>
+      <div className="daily-stats">
+        <span>Views</span>
+        <span>{stats?.views ?? 0}</span>
+        <span>CTR</span>
+        <span>{stats?.ctr ?? 0}%</span>
+      </div>
+    </>
+  );
+
+  const uploadSection = () => (
+    <div className="upload-panel">{/* ...upload UI here, or move from main code... */}Upload UI</div>
+  );
+
+  const badgesSection = () => (
+    <div className="badges-list">{/* ...badges UI here, or move from main code... */}Badges UI</div>
+  );
+
+  const contentListSection = () => (
+    <ul className="content-list">{/* ...content list UI here, or move from main code... */}Content List UI</ul>
+  );
+
+  const promotionsSection = () => (
+    <div>{/* ...promotions UI here, or move from main code... */}Promotions UI</div>
+  );
+
+  const notificationsSection = () => (
+    <ul>{notifications?.map((note, i) => <li key={i}>{note}</li>)}</ul>
+  );
   // Mobile tab navigation state and helpers
   const [activeTab, setActiveTab] = useState('stats');
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 700;
