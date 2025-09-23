@@ -17,21 +17,35 @@ function ContentUploadForm({ onUpload }) {
     setError('');
     setIsUploading(true);
 
+    console.log('[Upload] Starting upload process');
     try {
+      console.log('[Upload] Content type:', type);
       if (type === 'article' && !articleText.trim()) {
+        console.error('[Upload] No article text provided');
         throw new Error('Please enter article text.');
       }
       if (type !== 'article' && !file) {
+        console.error('[Upload] No file selected');
         throw new Error('Please select a file to upload.');
       }
 
       let url = '';
       if (type !== 'article' && file) {
+        console.log('[Upload] File selected:', file);
         // Upload file to Firebase Storage
         const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
+        console.log('[Upload] Firebase Storage filePath:', filePath);
         const storageRef = ref(storage, filePath);
-        await uploadBytes(storageRef, file);
-        url = await getDownloadURL(storageRef);
+        console.log('[Upload] Storage ref created:', storageRef);
+        try {
+          const uploadResult = await uploadBytes(storageRef, file);
+          console.log('[Upload] uploadBytes result:', uploadResult);
+          url = await getDownloadURL(storageRef);
+          console.log('[Upload] File available at URL:', url);
+        } catch (uploadErr) {
+          console.error('[Upload] Error uploading to Firebase Storage:', uploadErr);
+          throw uploadErr;
+        }
       }
 
       const contentData = {
@@ -40,18 +54,23 @@ function ContentUploadForm({ onUpload }) {
         description,
         ...(type === 'article' ? { articleText } : { url })
       };
+      console.log('[Upload] Content data to send:', contentData);
 
       await onUpload(contentData);
+      console.log('[Upload] onUpload callback completed');
 
       // Clear form on successful upload
       setTitle('');
       setDescription('');
       setFile(null);
       setArticleText('');
+      console.log('[Upload] Form cleared after successful upload');
     } catch (err) {
+      console.error('[Upload] Upload error:', err);
       setError(err.message || 'Failed to upload content. Please try again.');
     } finally {
       setIsUploading(false);
+      console.log('[Upload] Upload process finished');
     }
   };
 
