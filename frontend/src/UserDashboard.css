@@ -1,3 +1,72 @@
+/* --- Extra mobile improvements for very small screens --- */
+@media (max-width: 480px) {
+  .dashboard-main, .upload-section, .analytics-section, .badges-section {
+    padding: 0.5rem 0.2rem !important;
+    font-size: 0.98rem;
+  }
+  .profile-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.5rem 0.2rem;
+  }
+  .profile-avatar img {
+    width: 44px;
+    height: 44px;
+  }
+  .dashboard-container {
+    flex-direction: column;
+    min-width: 0;
+    padding: 0;
+  }
+  .dashboard-sidebar, .dashboard-rightbar {
+    display: none !important;
+  }
+  .upload-drop {
+    padding: 0.5rem 0.2rem;
+    font-size: 0.95rem;
+  }
+  .platform-toggles {
+    gap: 0.3rem;
+  }
+  .content-list-item {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.1rem;
+  }
+  .badges-section .badges-list {
+    gap: 0.3rem;
+  }
+  .badge {
+    font-size: 0.9rem;
+    padding: 0.2rem 0.5rem;
+  }
+  .earnings-amount {
+    font-size: 1rem;
+  }
+  .view-breakdown-btn, .earn-more-btn {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 0.5rem 0;
+  }
+  .analytics-section .analytics-chart {
+    height: 60px;
+    min-width: 0;
+  }
+  .daily-stats {
+    gap: 0.3rem;
+    font-size: 0.95rem;
+  }
+}
+.dashboard-main {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+.upload-section, .analytics-section, .badges-section {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
 /* --- Mobile-first responsive improvements --- */
 @media (max-width: 700px) {
   .dashboard-container {
