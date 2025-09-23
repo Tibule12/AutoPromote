@@ -3,10 +3,25 @@ import { storage, db, auth } from './firebaseClient';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import './UserDashboard.css';
+// Mobile tab navigation state
+const [activeTab, setActiveTab] = useState('stats');
+
+// Helper: is mobile
+const isMobile = typeof window !== 'undefined' && window.innerWidth <= 700;
+
+// Tab bar for mobile
+const MobileTabBar = () => (
+  <nav className="mobile-tab-bar">
+    <button className={activeTab === 'stats' ? 'active' : ''} onClick={() => setActiveTab('stats')}>Stats</button>
+    <button className={activeTab === 'upload' ? 'active' : ''} onClick={() => setActiveTab('upload')}>Upload</button>
+    <button className={activeTab === 'badges' ? 'active' : ''} onClick={() => setActiveTab('badges')}>Badges</button>
+    <button className={activeTab === 'notifications' ? 'active' : ''} onClick={() => setActiveTab('notifications')}>Notifications</button>
+  </nav>
+);
 import { API_BASE_URL } from './config';
 
 const defaultPlatforms = [
-  { key: 'tiktok', label: 'TikTok' },
+    {isMobile && <MobileTabBar />}
   { key: 'youtube', label: 'YouTube' },
   { key: 'instagram', label: 'Instagram' },
   { key: 'twitter', label: 'Twitter' },
