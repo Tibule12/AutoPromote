@@ -14,6 +14,26 @@ const defaultPlatforms = [
 ];
 
 const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, onPromoteToggle, onLogout }) => {
+  // Avatar upload state and logic
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || user?.photoURL || '/default-avatar.png');
+  const avatarInputRef = useRef(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setAvatarUploading(true);
+    try {
+      const fileRef = storageRef(storage, `avatars/${user?.uid || 'unknown'}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      setAvatarUrl(url);
+      // Optionally update user profile in Firestore or Auth here
+    } catch (err) {
+      alert('Failed to upload avatar.');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
   // Restore all original section JSX directly in the return statement below
   // Mobile tab navigation state and helpers
   const [activeTab, setActiveTab] = useState('stats');
