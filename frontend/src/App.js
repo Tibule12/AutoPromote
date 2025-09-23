@@ -377,7 +377,7 @@ function App() {
             {showLogin && <LoginForm onLogin={handleLogin} loginUser={loginUser} />}
             {showAdminLogin && <AdminLoginForm onLogin={handleLogin} />}
             {showRegister && <RegisterForm registerUser={registerUser} />}
-            {user && !(isAdmin || user.role === 'admin' || user.isAdmin === true) && (
+            {userLoaded && user && !(isAdmin || user.role === 'admin' || user.isAdmin === true) && (
               <UserDashboard
                 user={user}
                 content={content}
