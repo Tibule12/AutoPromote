@@ -6,7 +6,7 @@ const fs = require('fs');
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
-router.post('/api/content/quality-check', upload.single('file'), (req, res) => {
+router.post('/quality-check', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
   const filePath = req.file.path;
