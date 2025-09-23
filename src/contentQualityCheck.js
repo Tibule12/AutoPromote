@@ -46,6 +46,7 @@ router.post('/quality-check', upload.single('file'), (req, res) => {
       needsEnhancement = true;
     }
 
+
     // If enhancement is needed, attempt to upscale using FFmpeg
     if (needsEnhancement) {
       const enhancedPath = filePath + '_enhanced.mp4';
@@ -57,11 +58,40 @@ router.post('/quality-check', upload.single('file'), (req, res) => {
         .output(enhancedPath)
         .on('end', () => {
           fs.unlinkSync(filePath);
-          return res.json({
-            qualityScore: 50,
-            feedback,
-            enhanced: true,
-            enhancedPath
+          // Analyze the enhanced file
+          ffmpeg.ffprobe(enhancedPath, (enhErr, enhMetadata) => {
+            if (enhErr) {
+              fs.unlinkSync(enhancedPath);
+              return res.json({
+                error: 'Enhanced file analysis failed',
+                qualityScore: 0,
+                feedback: [...feedback, 'Could not analyze enhanced file.'],
+                enhanced: false
+              });
+            }
+            const enhVideoStream = enhMetadata.streams.find(s => s.codec_type === 'video');
+            const enhAudioStream = enhMetadata.streams.find(s => s.codec_type === 'audio');
+            const enhWidth = enhVideoStream ? enhVideoStream.width : 0;
+            const enhHeight = enhVideoStream ? enhVideoStream.height : 0;
+            const enhVideoBitrate = enhVideoStream ? enhVideoStream.bit_rate : 0;
+            const enhAudioBitrate = enhAudioStream ? enhAudioStream.bit_rate : 0;
+            let enhFeedback = [];
+            if (enhWidth < 1280 || enhHeight < 720) {
+              enhFeedback.push(`Resolution too low: ${enhWidth}x${enhHeight}. Recommended: 1280x720 or higher.`);
+            }
+            if (enhVideoBitrate < 1000000) {
+              enhFeedback.push(`Video bitrate too low: ${enhVideoBitrate}. Recommended: 1,000,000 or higher.`);
+            }
+            if (enhAudioBitrate < 64000) {
+              enhFeedback.push(`Audio bitrate too low: ${enhAudioBitrate}. Recommended: 64,000 or higher.`);
+            }
+            const qualityScore = enhFeedback.length === 0 ? 100 : 75;
+            fs.unlinkSync(enhancedPath);
+            return res.json({
+              qualityScore,
+              feedback: enhFeedback.length ? enhFeedback : ['Content meets quality standards after enhancement.'],
+              enhanced: true
+            });
           });
         })
         .on('error', (err) => {
