@@ -38,3 +38,39 @@ router.get('/content/:id', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// Get user analytics overview
+router.get('/overview', authMiddleware, async (req, res) => {
+  try {
+    const contentRef = db.collection('content').where('userId', '==', req.user.uid);
+    const contentSnapshot = await contentRef.get();
+    
+    let totalViews = 0;
+    let totalLikes = 0;
+    let totalShares = 0;
+    let totalRevenue = 0;
+    
+    contentSnapshot.forEach(doc => {
+      const content = doc.data();
+      totalViews += content.views || 0;
+      totalLikes += content.likes || 0;
+      totalShares += content.shares || 0;
+      totalRevenue += content.revenue || 0;
+    });
+
+    res.json({
+      overview: {
+        totalContent: contentSnapshot.size,
+        totalViews,
+        totalLikes,
+        totalShares,
+        totalRevenue
+      }
+    });
+  } catch (error) {
+    console.error('Error getting analytics overview:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+module.exports = router;
