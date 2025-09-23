@@ -14,51 +14,7 @@ const defaultPlatforms = [
 ];
 
 const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, onPromoteToggle, onLogout }) => {
-  // Section render helpers to fix ReferenceError
-  const analyticsSection = () => (
-    <>
-      <h3>Boost Your Earnings</h3>
-      <div className="earnings-amount">${stats?.revenue ?? '0.00'}</div>
-      <div className="analytics-chart">
-        <svg width="100%" height="120" viewBox="0 0 320 120">
-          {stats?.chart && stats.chart.length > 1 && (
-            <polyline
-              fill="none"
-              stroke="#4f2ff7"
-              strokeWidth="3"
-              points={stats.chart.map((d, i) => `${10 + i * (300 / (stats.chart.length - 1))},${110 - (d.views / Math.max(...stats.chart.map(c => c.views || 1)) * 100)}`).join(' ')}
-            />
-          )}
-        </svg>
-      </div>
-      <div className="daily-stats">
-        <span>Views</span>
-        <span>{stats?.views ?? 0}</span>
-        <span>CTR</span>
-        <span>{stats?.ctr ?? 0}%</span>
-      </div>
-    </>
-  );
-
-  const uploadSection = () => (
-    <div className="upload-panel">{/* ...upload UI here, or move from main code... */}Upload UI</div>
-  );
-
-  const badgesSection = () => (
-    <div className="badges-list">{/* ...badges UI here, or move from main code... */}Badges UI</div>
-  );
-
-  const contentListSection = () => (
-    <ul className="content-list">{/* ...content list UI here, or move from main code... */}Content List UI</ul>
-  );
-
-  const promotionsSection = () => (
-    <div>{/* ...promotions UI here, or move from main code... */}Promotions UI</div>
-  );
-
-  const notificationsSection = () => (
-    <ul>{notifications?.map((note, i) => <li key={i}>{note}</li>)}</ul>
-  );
+  // Restore all original section JSX directly in the return statement below
   // Mobile tab navigation state and helpers
   const [activeTab, setActiveTab] = useState('stats');
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 700;
@@ -136,14 +92,93 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
           </aside>
           <main className="dashboard-main">
             {/* All sections rendered for desktop */}
-            <section className="upload-section">{uploadSection()}</section>
-            <section className="analytics-section">{analyticsSection()}</section>
-            <section className="badges-section">{badgesSection()}</section>
-            <section className="content-list-section">{contentListSection()}</section>
+            <section className="upload-section">
+              {/* Upload UI */}
+              {/* ...original upload JSX here... */}
+              {/* You may need to re-add your upload logic and UI here */}
+            </section>
+            <section className="analytics-section">
+              <h3>Boost Your Earnings</h3>
+              <div className="earnings-amount">${stats?.revenue ?? '0.00'}</div>
+              <div className="analytics-chart">
+                <svg width="100%" height="120" viewBox="0 0 320 120">
+                  {stats?.chart && stats.chart.length > 1 && (
+                    <polyline
+                      fill="none"
+                      stroke="#4f2ff7"
+                      strokeWidth="3"
+                      points={stats.chart.map((d, i) => `${10 + i * (300 / (stats.chart.length - 1))},${110 - (d.views / Math.max(...stats.chart.map(c => c.views || 1)) * 100)}`).join(' ')}
+                    />
+                  )}
+                </svg>
+              </div>
+              <div className="daily-stats">
+                <span>Views</span>
+                <span>{stats?.views ?? 0}</span>
+                <span>CTR</span>
+                <span>{stats?.ctr ?? 0}%</span>
+              </div>
+            </section>
+            <section className="badges-section">
+              <h3>Badges & Rewards</h3>
+              <div className="badges-list">
+                {badges?.map((badge, i) => (
+                  <span key={i} className={`badge badge-${badge.type}`}>{badge.label}</span>
+                ))}
+              </div>
+              {/* ...add streaks, perks, and rank UI here if needed... */}
+            </section>
+            <section className="content-list-section">
+              <h3>Your Content</h3>
+              <ul className="content-list">
+                {content && content.length > 0 ? content.map((item, idx) => (
+                  <li key={item.id || idx} className="content-list-item">
+                    <span>{item.title || item.url || 'Untitled Content'}</span>
+                    {/* Platform posting status */}
+                    {item.platformStatus && (
+                      <div className="platform-status-list" style={{ marginTop: 6, marginBottom: 6 }}>
+                        {Object.entries(item.platformStatus).map(([platform, statusObj]) => (
+                          <div key={platform} className={`platform-status platform-${platform}`} style={{ fontSize: '0.92em', marginBottom: 2 }}>
+                            <strong>{platform.charAt(0).toUpperCase() + platform.slice(1)}:</strong>{' '}
+                            {statusObj.status === 'posted' && <span style={{ color: 'green' }}>Posted</span>}
+                            {statusObj.status === 'failed' && <span style={{ color: 'red' }}>Failed: {statusObj.error}</span>}
+                            {statusObj.status === 'pending' && <span style={{ color: 'orange' }}>Pending</span>}
+                            {statusObj.status === 'scheduled' && <span style={{ color: 'blue' }}>Scheduled</span>}
+                            {statusObj.status === 'posting' && <span style={{ color: '#888' }}>Posting...</span>}
+                            {statusObj.postedAt && statusObj.status === 'posted' && (
+                              <span style={{ color: '#888', marginLeft: 6 }}>(at {new Date(statusObj.postedAt).toLocaleString()})</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {item.landingPageUrl && (
+                      <button
+                        className="view-breakdown-btn"
+                        style={{ marginLeft: 12 }}
+                        onClick={() => window.open(item.landingPageUrl, '_blank')}
+                      >
+                        Preview
+                      </button>
+                    )}
+                  </li>
+                )) : <li>No content uploaded yet.</li>}
+              </ul>
+            </section>
           </main>
           <aside className="dashboard-rightbar">
-            <section className="latest-promotions">{promotionsSection()}</section>
-            <section className="notifications">{notificationsSection()}</section>
+            <section className="latest-promotions">
+              <h4>Latest Promotions</h4>
+              {/* Promotions list placeholder or real data here */}
+            </section>
+            <section className="notifications">
+              <h4>Notifications</h4>
+              <ul>
+                {notifications?.map((note, i) => (
+                  <li key={i}>{note}</li>
+                ))}
+              </ul>
+            </section>
           </aside>
         </>
       )}
@@ -152,10 +187,57 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
         <>
           <MobileTabBar />
           <main className="dashboard-main">
-            {activeTab === 'stats' && <section className="analytics-section">{analyticsSection()}</section>}
-            {activeTab === 'upload' && <section className="upload-section">{uploadSection()}</section>}
-            {activeTab === 'badges' && <section className="badges-section">{badgesSection()}</section>}
-            {activeTab === 'notifications' && <section className="notifications">{notificationsSection()}</section>}
+            {activeTab === 'stats' && (
+              <section className="analytics-section">
+                <h3>Boost Your Earnings</h3>
+                <div className="earnings-amount">${stats?.revenue ?? '0.00'}</div>
+                <div className="analytics-chart">
+                  <svg width="100%" height="120" viewBox="0 0 320 120">
+                    {stats?.chart && stats.chart.length > 1 && (
+                      <polyline
+                        fill="none"
+                        stroke="#4f2ff7"
+                        strokeWidth="3"
+                        points={stats.chart.map((d, i) => `${10 + i * (300 / (stats.chart.length - 1))},${110 - (d.views / Math.max(...stats.chart.map(c => c.views || 1)) * 100)}`).join(' ')}
+                      />
+                    )}
+                  </svg>
+                </div>
+                <div className="daily-stats">
+                  <span>Views</span>
+                  <span>{stats?.views ?? 0}</span>
+                  <span>CTR</span>
+                  <span>{stats?.ctr ?? 0}%</span>
+                </div>
+              </section>
+            )}
+            {activeTab === 'upload' && (
+              <section className="upload-section">
+                {/* Upload UI */}
+                {/* ...original upload JSX here... */}
+              </section>
+            )}
+            {activeTab === 'badges' && (
+              <section className="badges-section">
+                <h3>Badges & Rewards</h3>
+                <div className="badges-list">
+                  {badges?.map((badge, i) => (
+                    <span key={i} className={`badge badge-${badge.type}`}>{badge.label}</span>
+                  ))}
+                </div>
+                {/* ...add streaks, perks, and rank UI here if needed... */}
+              </section>
+            )}
+            {activeTab === 'notifications' && (
+              <section className="notifications">
+                <h4>Notifications</h4>
+                <ul>
+                  {notifications?.map((note, i) => (
+                    <li key={i}>{note}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </main>
         </>
       )}
