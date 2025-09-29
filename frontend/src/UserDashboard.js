@@ -37,7 +37,22 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
   // Restore all original section JSX directly in the return statement below
   // Mobile tab navigation state and helpers
   const [activeTab, setActiveTab] = useState('stats');
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 700;
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth <= 700;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 700);
+    };
+    window.addEventListener('resize', handleResize);
+    // Set initial value on mount
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const MobileTabBar = () => (
     <nav className="mobile-tab-bar">
       <button className={activeTab === 'stats' ? 'active' : ''} onClick={() => setActiveTab('stats')}>Stats</button>
