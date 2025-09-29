@@ -21,15 +21,16 @@
 .new-welcome-content {
   position: relative;
   z-index: 1;
-  background: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.97);
   border-radius: 32px;
   box-shadow: 0 8px 32px rgba(79,47,247,0.13);
-  padding: 2.5rem 1.2rem 2.2rem 1.2rem;
-  max-width: 420px;
-  width: 95vw;
+  padding: 3rem 2rem 2.5rem 2rem;
+  max-width: 440px;
+  width: 98vw;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 1.2rem;
 }
 .new-welcome-logo-row {
   display: flex;
@@ -66,7 +67,7 @@
 .new-welcome-btn-row {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -75,19 +76,25 @@
   color: #fff;
   border: none;
   border-radius: 24px;
-  padding: 0.7rem 2.2rem;
-  font-size: 1.1rem;
+  padding: 0.85rem 2.5rem;
+  font-size: 1.15rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(79,47,247,0.08);
-  transition: background 0.2s;
+  box-shadow: 0 2px 12px rgba(79,47,247,0.10);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  outline: none;
+  margin-bottom: 0.2rem;
 }
 .new-welcome-btn.primary {
   background: linear-gradient(90deg, #4f2ff7 60%, #6c4cf7 100%);
   color: #fff;
+  box-shadow: 0 4px 16px rgba(79,47,247,0.13);
+  transform: translateY(-2px) scale(1.03);
 }
 .new-welcome-btn:hover {
   background: #4f2ff7;
+  box-shadow: 0 6px 24px rgba(79,47,247,0.18);
+  transform: translateY(-2px) scale(1.04);
 }
 .new-welcome-features {
   display: flex;
@@ -95,18 +102,26 @@
   margin-top: 1.2rem;
   justify-content: center;
   flex-wrap: wrap;
+  margin-bottom: 1.2rem;
 }
 .feature-card {
   background: #f6f3ff;
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(79,47,247,0.04);
-  padding: 0.7rem 1.2rem;
+  box-shadow: 0 2px 12px rgba(79,47,247,0.08);
+  padding: 0.9rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  font-size: 1rem;
+  font-size: 1.08rem;
   color: #6c4cf7;
   font-weight: 600;
+  min-width: 140px;
+}
+  width: 100%;
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ece8fa;
 }
 .feature-icon {
   font-size: 1.5rem;
@@ -142,10 +157,6 @@
     font-size: 0.98rem;
     padding: 0.5rem 0.7rem;
   }
-}
-  font-size: 1.1rem;
-  color: #111;
-  font-weight: 600;
 }
 .feature-svg {
   font-size: 1.5rem;
