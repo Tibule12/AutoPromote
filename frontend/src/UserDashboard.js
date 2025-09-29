@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { storage, db, auth } from './firebaseClient';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
