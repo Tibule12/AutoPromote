@@ -175,7 +175,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onUpload, 
                 <section className="content-list-section">
                   <h4>Your Content</h4>
                   <ul className="content-list">
-                    {contentList?.length ? contentList.map((item, idx) => (
+                    {content?.length ? content.map((item, idx) => (
                       <li key={idx} className="content-list-item">
                         <span className="content-title">{item.title}</span>
                         {/* Platform status */}
