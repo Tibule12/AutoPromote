@@ -12,7 +12,7 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => (
     <div className="new-welcome-bg-gradient" />
     <div className="new-welcome-content">
       <div className="new-welcome-logo-row">
-        <img src="/avatar-icon.png" alt="AutoPromote Logo" className="new-welcome-logo" />
+  <img src="/image.png" alt="AutoPromote Logo" className="new-welcome-logo" />
         <h1 className="new-welcome-title">AutoPromote</h1>
       </div>
       <h2 className="new-welcome-headline">Promote. Monetize. Grow.</h2>
