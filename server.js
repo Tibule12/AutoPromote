@@ -3,96 +3,27 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const tiktokRoutes = require('./tiktokRoutes');
-// facebookPoster is a utility, not a router, so no need to use as middleware
-
-const app = express();
-const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
-
-// TikTok site verification file (must be before static/catch-all routes)
-app.get('/tiktok_verify.txt', (req, res) => {
-  res.sendFile(path.join(__dirname, 'tiktok_verify.txt'));
-});
-
-// Register TikTok API routes
-app.use('/api/tiktok', tiktokRoutes);
-app.get('/terms', (req, res) => {
-  res.send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terms of Service | AutoPromote</title>
-</head>
-<body>
-  <h1>Terms of Service</h1>
-  <p>Welcome to AutoPromote. By accessing or using our platform, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
-  <h2>1. Use of Service</h2>
-  <p>You must be at least 13 years old to use AutoPromote. You agree to use the service only for lawful purposes and in accordance with all applicable laws.</p>
-  <h2>2. User Content</h2>
-  <p>You retain ownership of any content you upload, but you grant AutoPromote a license to use, display, and distribute your content as necessary to provide the service.</p>
-  <h2>3. Privacy</h2>
-  <p>Your privacy is important to us. Please review our <a href="/privacy">Privacy Policy</a> for details on how we handle your information.</p>
-  <h2>4. Limitation of Liability</h2>
-  <p>AutoPromote is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of the service.</p>
-  <h2>5. Changes to Terms</h2>
-  <p>We may update these Terms of Service from time to time. Continued use of the service constitutes acceptance of the new terms.</p>
-  <h2>6. Contact</h2>
-  <p>If you have questions about these terms, contact us at <a href="mailto:support@autopromote.com">support@autopromote.com</a>.</p>
-</body>
-</html>`);
-});
-
-app.get('/privacy', (req, res) => {
-  res.send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy | AutoPromote</title>
-</head>
-<body>
-  <h1>Privacy Policy</h1>
-  <p>AutoPromote is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your information.</p>
-  <h2>1. Information We Collect</h2>
-  <p>We collect information you provide directly (such as account details and uploaded content) and information from connected social platforms as needed to provide our services.</p>
-  <h2>2. Use of Information</h2>
-  <p>We use your information to operate, maintain, and improve AutoPromote, and to communicate with you about your account or our services.</p>
-  <h2>3. Sharing of Information</h2>
-  <p>We do not sell or share your personal information with third parties except as required to provide our services or comply with the law.</p>
-  <h2>4. Data Security</h2>
-  <p>We implement reasonable security measures to protect your data, but cannot guarantee absolute security.</p>
-  <h2>5. Your Rights</h2>
-  <p>You may request access to or deletion of your personal data by contacting us at <a href="mailto:support@autopromote.com">support@autopromote.com</a>.</p>
-  <h2>6. Changes to Policy</h2>
-  <p>We may update this Privacy Policy from time to time. Continued use of the service constitutes acceptance of the new policy.</p>
-  <h2>7. Contact</h2>
-  <p>If you have questions about this policy, contact us at <a href="mailto:support@autopromote.com">support@autopromote.com</a>.</p>
-</body>
-</html>`);
-});
-
 
 require('dotenv').config();
+
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
 
 // Load core routes
 const authRoutes = require('./authRoutes');
 const userRoutes = require('./userRoutes');
 const contentRoutes = require('./contentRoutes');
-const contentQualityCheck = require('./contentQualityCheck');
 const analyticsRoutes = require('./analyticsRoutes');
 const adminRoutes = require('./adminRoutes');
 const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
-
 
 // Try to load adminTestRoutes, but continue with a dummy router if not available
 let adminTestRoutes;
 try {
   adminTestRoutes = require('./adminTestRoutes');
-  if (typeof adminTestRoutes !== 'function' && typeof adminTestRoutes !== 'object') {
-    adminTestRoutes = express.Router();
-  }
 } catch (error) {
+  // Create a dummy router if the module is missing
   adminTestRoutes = express.Router();
   adminTestRoutes.get('/admin-test/health', (req, res) => {
     res.json({ status: 'ok', message: 'Admin test routes dummy endpoint' });
@@ -103,9 +34,6 @@ try {
 let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes;
 try {
   withdrawalRoutes = require('./routes/withdrawalRoutes');
-  if (typeof withdrawalRoutes !== 'function' && typeof withdrawalRoutes !== 'object') {
-    withdrawalRoutes = express.Router();
-  }
 } catch (error) {
   withdrawalRoutes = express.Router();
 }
@@ -113,9 +41,6 @@ try {
 try {
   monetizationRoutes = require('./routes/monetizationRoutes');
   console.log('✅ Monetization routes loaded successfully');
-  if (typeof monetizationRoutes !== 'function' && typeof monetizationRoutes !== 'object') {
-    monetizationRoutes = express.Router();
-  }
 } catch (error) {
   console.log('⚠️ Monetization routes not found, using dummy router:', error.message);
   monetizationRoutes = express.Router();
@@ -123,36 +48,22 @@ try {
 
 try {
   stripeOnboardRoutes = require('./routes/stripeOnboardRoutes');
-  if (typeof stripeOnboardRoutes !== 'function' && typeof stripeOnboardRoutes !== 'object') {
-    stripeOnboardRoutes = express.Router();
-  }
 } catch (error) {
   stripeOnboardRoutes = express.Router();
+  // Add warning for missing Stripe secret key only if we have the route module
   if (!process.env.STRIPE_SECRET_KEY) {
     console.log('ℹ️ STRIPE_SECRET_KEY not found. Stripe features will be disabled.');
   }
 }
 
-
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
 
-// CORS configuration - allow all origins for debugging
+const app = express();
+const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
+
 app.use(cors({
-  origin: function (origin, callback) {
-    const allowedOrigins = [
-      'https://autopromote-1.onrender.com',
-      'http://localhost:3000'
-    ];
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin']
 }));
@@ -163,7 +74,6 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/content', contentRoutes);
-app.use('/api/content', contentQualityCheck);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
@@ -173,10 +83,6 @@ app.use('/api', adminTestRoutes); // Add admin test routes
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
-
-// Register optimization routes (content upload, promotion, analytics aggregation)
-const optimizationRoutes = require('./optimizationService');
-app.use('/api', optimizationRoutes);
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, 'frontend/build')));
@@ -303,4 +209,5 @@ const server = app.listen(PORT, () => {
     console.log('Try changing the PORT environment variable or closing the other application.');
   }
 });
+
 

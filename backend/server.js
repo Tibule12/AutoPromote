@@ -28,7 +28,7 @@ try {
 // Try to load optional route modules
 let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes;
 try {
-  withdrawalRoutes = require('./routes/withdrawalRoutes');
+  withdrawalRoutes = require('../src/routes/withdrawalRoutes');
 } catch (error) {
   withdrawalRoutes = express.Router();
 }
@@ -42,7 +42,7 @@ try {
 }
 
 try {
-  stripeOnboardRoutes = require('./routes/stripeOnboardRoutes');
+  stripeOnboardRoutes = require('../src/routes/stripeOnboardRoutes');
 } catch (error) {
   stripeOnboardRoutes = express.Router();
   // Add warning for missing Stripe secret key only if we have the route module
