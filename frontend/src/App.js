@@ -44,6 +44,7 @@ function App() {
   const [profileStats, setProfileStats] = useState({ views: 0, revenue: 0, ctr: 0, chart: [] });
   const [badges, setBadges] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [userDefaults, setUserDefaults] = useState({ timezone: 'UTC', schedulingDefaults: {}, defaultPlatforms: [], defaultFrequency: 'once' });
   // Fetch user profile, stats, badges, notifications from Firestore
   useEffect(() => {
     const fetchUserDashboardData = async () => {
@@ -87,20 +88,34 @@ function App() {
         stats.ctr = totalViews ? ((totalClicks / totalViews) * 100).toFixed(2) : 0;
         setProfileStats(stats);
 
-        // Fetch badges from subcollection
-        const badgesSnap = await getDocs(collection(db, 'users', user.uid, 'badges'));
-        const badgeList = badgesSnap.docs.map((d) => d.data());
-        setBadges(badgeList);
+        // Fetch badges from subcollection (best-effort)
+        try {
+          const badgesSnap = await getDocs(collection(db, 'users', user.uid, 'badges'));
+          const badgeList = badgesSnap.docs.map((d) => d.data());
+          setBadges(badgeList);
+        } catch {}
 
-        // Fetch notifications from subcollection
-        const notifQuery = query(
-          collection(db, 'users', user.uid, 'notifications'),
-          orderBy('timestamp', 'desc'),
-          fslimit(10)
-        );
-        const notifSnap = await getDocs(notifQuery);
-        const notifList = notifSnap.docs.map((d) => d.data().message || '');
-        setNotifications(notifList);
+        // Fetch user defaults and notifications from backend APIs
+        try {
+          const token = await auth.currentUser.getIdToken(true);
+          const meRes = await fetch(API_ENDPOINTS.USERS_ME, { headers: { Authorization: `Bearer ${token}` } });
+          if (meRes.ok) {
+            const meData = await meRes.json();
+            const u = meData && meData.user ? meData.user : meData;
+            const sched = u.schedulingDefaults || {};
+            setUserDefaults({
+              timezone: u.timezone || 'UTC',
+              schedulingDefaults: sched,
+              defaultPlatforms: sched.platforms || u.defaultPlatforms || [],
+              defaultFrequency: sched.frequency || u.defaultFrequency || 'once'
+            });
+          }
+          const notifRes = await fetch(API_ENDPOINTS.USERS_NOTIFICATIONS, { headers: { Authorization: `Bearer ${token}` } });
+          if (notifRes.ok) {
+            const { notifications } = await notifRes.json();
+            setNotifications((notifications || []).map(n => n.message || ''));
+          }
+        } catch {}
       } catch (e) {
         setProfileStats({ views: 0, revenue: 0, ctr: 0, chart: [] });
         setBadges([]);
@@ -317,6 +332,41 @@ function App() {
     setShowRegister(false);
   };
 
+  // Save user defaults (timezone, default platforms, frequency)
+  const saveUserDefaults = async ({ timezone, defaultPlatforms, defaultFrequency }) => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Not authenticated');
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.USERS_ME, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ timezone, defaultPlatforms, defaultFrequency })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || err.message || 'Failed to save defaults');
+      }
+      const data = await res.json();
+      const u = data && data.user ? data.user : {};
+      const sched = u.schedulingDefaults || {};
+      setUserDefaults({
+        timezone: u.timezone || timezone || 'UTC',
+        schedulingDefaults: sched,
+        defaultPlatforms: sched.platforms || defaultPlatforms || [],
+        defaultFrequency: sched.frequency || defaultFrequency || 'once'
+      });
+      return true;
+    } catch (e) {
+      alert(e.message || 'Could not save settings');
+      return false;
+    }
+  };
+
   const [justLoggedOut, setJustLoggedOut] = useState(false);
   const handleLogout = async () => {
     try {
@@ -350,37 +400,35 @@ function App() {
       const fileRef = storageRef(storage, path);
       await uploadBytes(fileRef, file);
       const url = await getDownloadURL(fileRef);
-      // Build platformStatus object for all selected platforms
-      const allPlatforms = ['youtube', 'tiktok', 'instagram', 'twitter', 'facebook'];
-      const platformStatus = {};
-      allPlatforms.forEach((platform) => {
-        platformStatus[platform] = {
-          status: platforms.includes(platform) ? 'pending' : 'not_selected',
-          postId: '',
-          error: '',
-          postedAt: ''
-        };
+      // Build schedule_hint using defaults
+      const schedule_hint = {
+        ...schedule,
+        frequency: schedule?.frequency || userDefaults.defaultFrequency || 'once',
+        timezone: userDefaults.timezone || 'UTC'
+      };
+      const token = await auth.currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          title: title || file.name,
+          type: type || 'video',
+          url,
+          description: description || '',
+          target_platforms: platforms && platforms.length ? platforms : (userDefaults.defaultPlatforms || ['youtube','tiktok','instagram']),
+          schedule_hint
+        })
       });
-      // Save content to Firestore with recommended schema (modular API)
-      await addDoc(collection(db, 'content'), {
-        userId: user.uid,
-        url,
-        platforms,
-        title: title || file.name,
-        description: description || '',
-        type: type || 'video',
-        createdAt: serverTimestamp(),
-        status: 'pending',
-        platformStatus,
-        scheduleHint: schedule || null,
-        qualityFeedback: {
-          score: 0,
-          issues: [],
-          enhancedFileUrl: ''
-        }
-      });
-      fetchUserContent();
-      alert('Content uploaded and promoted successfully!');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Upload failed');
+      }
+      await fetchUserContent(token);
+      alert('Content uploaded! We\'ll generate a landing page and smart link shortly.');
     } catch (error) {
       alert('Error uploading content: ' + error.message);
     }
@@ -407,6 +455,8 @@ function App() {
                 stats={profileStats}
                 badges={badges}
                 notifications={notifications}
+                userDefaults={userDefaults}
+                onSaveDefaults={saveUserDefaults}
                 onUpload={handleContentUpload}
                 onPromoteToggle={() => {}}
                 onLogout={handleLogout}

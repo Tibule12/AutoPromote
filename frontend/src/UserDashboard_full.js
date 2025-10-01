@@ -4,7 +4,7 @@ import './UserDashboard.css';
 // Use PUBLIC_URL so assets resolve correctly on GitHub Pages and Render
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
 
-const UserDashboard = ({ user, content, stats, badges, notifications, onLogout, onUpload }) => {
+const UserDashboard = ({ user, content, stats, badges, notifications, userDefaults, onSaveDefaults, onLogout, onUpload }) => {
   const [activeTab, setActiveTab] = useState('profile');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -15,12 +15,17 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onLogout, 
   const [scheduleMode, setScheduleMode] = useState('auto'); // 'auto' | 'manual'
   const [manualWhen, setManualWhen] = useState(''); // yyyy-MM-ddTHH:mm
   const [frequency, setFrequency] = useState('once'); // once | daily | weekly
+  // Profile defaults local state
+  const [tz, setTz] = useState(userDefaults?.timezone || 'UTC');
+  const [defaultsPlatforms, setDefaultsPlatforms] = useState(Array.isArray(userDefaults?.defaultPlatforms) ? userDefaults.defaultPlatforms : []);
+  const [defaultsFrequency, setDefaultsFrequency] = useState(userDefaults?.defaultFrequency || 'once');
 
   // Ensure content is an array to simplify rendering
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
   const firstItem = contentList[0] || {};
   const safeFirstThumb = firstItem?.thumbnailUrl || DEFAULT_IMAGE;
   const safeLandingUrl = typeof firstItem?.landingPageUrl === 'string' ? firstItem.landingPageUrl : undefined;
+  const safeSmartLink = typeof firstItem?.smartLink === 'string' ? firstItem.smartLink : undefined;
 
   const handleNav = (tab) => {
     setActiveTab(tab);
@@ -83,6 +88,17 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onLogout, 
     setScheduleMode('auto');
     setManualWhen('');
     setFrequency('once');
+  };
+
+  const toggleDefaultPlatform = (name) => {
+    setDefaultsPlatforms((prev) =>
+      prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]
+    );
+  };
+
+  const handleSaveDefaults = async () => {
+    if (!onSaveDefaults) return;
+    await onSaveDefaults({ timezone: tz, defaultPlatforms: defaultsPlatforms, defaultFrequency: defaultsFrequency });
   };
 
   return (
@@ -152,11 +168,42 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onLogout, 
               ) : (
                 <span style={{ color: '#9aa4b2' }}>No landing page set</span>
               )}
+              {safeSmartLink && (
+                <div style={{marginTop: '.5rem'}}>
+                  Smart Link: <a href={safeSmartLink} target="_blank" rel="noopener noreferrer">{safeSmartLink}</a>
+                </div>
+              )}
             </div>
             <div className="performance-summary">
               <div><strong>Views:</strong> {firstItem?.views ?? 0}</div>
               <div><strong>Clicks:</strong> {firstItem?.clicks ?? 0}</div>
               <div><strong>Conversions:</strong> {firstItem?.conversions ?? 0}</div>
+            </div>
+            <div className="profile-defaults" style={{marginTop:'1rem'}}>
+              <h4>Profile Defaults</h4>
+              <div style={{display:'grid', gap:'.5rem', maxWidth: 520}}>
+                <label style={{color:'#9aa4b2'}}>Timezone
+                  <input type="text" value={tz} onChange={(e)=>setTz(e.target.value)} style={{display:'block', width:'100%', marginTop:'.25rem', padding:'.4rem', borderRadius:'8px', border:'1px solid rgba(255,255,255,0.15)', background:'rgba(255,255,255,0.05)', color:'#eef2ff'}} />
+                </label>
+                <div style={{color:'#9aa4b2'}}>Default Platforms</div>
+                <div className="platform-toggles">
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('tiktok')} onChange={() => toggleDefaultPlatform('tiktok')} /> TikTok</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('youtube')} onChange={() => toggleDefaultPlatform('youtube')} /> YouTube</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('instagram')} onChange={() => toggleDefaultPlatform('instagram')} /> Instagram</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('twitter')} onChange={() => toggleDefaultPlatform('twitter')} /> Twitter</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('facebook')} onChange={() => toggleDefaultPlatform('facebook')} /> Facebook</label>
+                </div>
+                <label style={{color:'#9aa4b2'}}>Default Frequency
+                  <select value={defaultsFrequency} onChange={(e)=>setDefaultsFrequency(e.target.value)} style={{display:'block', width:'100%', marginTop:'.25rem', background:'rgba(255,255,255,0.05)', color:'#eef2ff', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'8px', padding:'.3rem .5rem'}}>
+                    <option value="once">Once</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                  </select>
+                </label>
+                <div style={{display:'flex', gap:'.5rem'}}>
+                  <button className="check-quality" onClick={handleSaveDefaults}>Save Defaults</button>
+                </div>
+              </div>
             </div>
           </section>
         )}

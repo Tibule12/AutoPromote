@@ -20,6 +20,10 @@ export const API_ENDPOINTS = {
   CONTENT_UPLOAD: `${API_BASE_URL}/api/content/upload`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
   
+  // User endpoints
+  USERS_ME: `${API_BASE_URL}/api/users/me`,
+  USERS_NOTIFICATIONS: `${API_BASE_URL}/api/users/notifications`,
+  
   // Admin endpoints
   ADMIN_ANALYTICS: `${API_BASE_URL}/api/admin/analytics/overview`,
   
