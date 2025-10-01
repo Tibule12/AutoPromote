@@ -105,16 +105,22 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       target_platforms,
       scheduled_promotion_time,
       promotion_frequency,
+      schedule_hint,
       target_rpm,
       min_views_threshold,
       max_budget
     } = req.body;
 
+    // Only include url if valid
+    let validUrl = undefined;
+    if (url && url !== 'missing' && url !== undefined && url !== '') {
+      validUrl = url;
+    }
     console.log('Content upload request received:', {
       userId: req.userId,
       title,
       type,
-      url: url ? 'provided' : 'missing',
+      url: validUrl ? 'provided' : 'missing',
       description: description || 'none'
     });
 
@@ -143,13 +149,10 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
     // Insert content into Firestore
     console.log('Preparing to save content to Firestore...');
     const contentRef = db.collection('content').doc();
-    // Ensure url is not undefined (Firestore does not allow undefined values)
-    const safeUrl = typeof url === 'undefined' ? null : url;
     const contentData = {
       user_id: req.userId,
       title,
       type,
-      url: safeUrl,
       description: description || '',
       target_platforms: target_platforms || ['youtube', 'tiktok', 'instagram'],
       status: 'pending', // All new content must be reviewed by admin
@@ -164,7 +167,9 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       revenue_per_million: optimalRPM,
       creator_payout_rate: creatorPayoutRate,
       views: 0,
-      revenue: 0
+      revenue: 0,
+      schedule_hint: schedule_hint || null,
+      ...(validUrl ? { url: validUrl } : {})
     };
 
     console.log('Content data to save:', JSON.stringify(contentData, null, 2));
@@ -187,14 +192,30 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
     console.log('Content object created:', { id: content.id, title: content.title, type: content.type });
     let promotionSchedule = null;
 
-    // Create promotion schedule if scheduled time is provided
-    if (scheduled_promotion_time) {
+    // Create promotion schedule if scheduled time is provided or hinted
+    const deriveSchedule = () => {
+      const hint = schedule_hint;
+      if (hint && hint.when) {
+        return {
+          start_time: hint.when,
+          schedule_type: hint.frequency && hint.frequency !== 'once' ? 'recurring' : 'specific',
+          frequency: hint.frequency || 'once'
+        };
+      }
+      if (scheduled_promotion_time) {
+        return { start_time: scheduled_promotion_time, schedule_type: 'specific', frequency: 'once' };
+      }
+      return null;
+    };
+
+    const scheduleTemplate = deriveSchedule();
+    if (scheduleTemplate) {
       try {
         promotionSchedule = await promotionService.schedulePromotion(content.id, {
           platform: 'all',
-          schedule_type: promotion_frequency === 'once' ? 'specific' : 'recurring',
-          start_time: scheduled_promotion_time,
-          frequency: promotion_frequency,
+          schedule_type: scheduleTemplate.schedule_type,
+          start_time: scheduleTemplate.start_time,
+          frequency: scheduleTemplate.frequency,
           is_active: true,
           budget: maxBudget,
           target_metrics: {
