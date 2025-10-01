@@ -4,6 +4,24 @@ const paypalClient = require('./paypalClient');
 const paypal = require('@paypal/paypal-server-sdk');
 
 class PromotionService {
+    // Normalize incoming schedule data (accept snake_case or camelCase) to canonical camelCase
+  normalizeScheduleData(data = {}) {
+    return {
+      platform: data.platform,
+      scheduleType: data.scheduleType || data.schedule_type || 'specific',
+      startTime: data.startTime || data.start_time || null,
+      endTime: data.endTime || data.end_time || null,
+      frequency: data.frequency || 'once',
+      isActive: typeof data.isActive === 'boolean' ? data.isActive : (typeof data.is_active === 'boolean' ? data.is_active : true),
+      budget: data.budget ?? 0,
+      targetMetrics: data.targetMetrics || data.target_metrics || {},
+      platformSpecificSettings: data.platformSpecificSettings || data.platform_specific_settings || {},
+      recurrencePattern: data.recurrencePattern || data.recurrence_pattern || null,
+      maxOccurrences: data.maxOccurrences || data.max_occurrences || null,
+      timezone: data.timezone || 'UTC'
+    };
+  }
+
     // Schedule a promotion for content with advanced algorithms
   async schedulePromotion(contentId, scheduleData) {
     try {
@@ -22,18 +40,19 @@ class PromotionService {
 
       const content = { id: contentDoc.id, ...contentDoc.data() };
 
+      // Normalize incoming data and apply defaults/optimizations
+      let normalized = this.normalizeScheduleData(scheduleData);
+
       // Apply platform-specific optimization if not specified
-      let optimizedScheduleData = { ...scheduleData };
-      if (!scheduleData.platform_specific_settings && scheduleData.platform) {
-        optimizedScheduleData.platform_specific_settings = 
-          this.optimizePlatformSettings(content, scheduleData.platform, scheduleData);
+      if (!normalized.platformSpecificSettings && normalized.platform) {
+        normalized.platformSpecificSettings = this.optimizePlatformSettings(content, normalized.platform, normalized);
       }
 
       // Calculate optimal budget if not specified
-      if (!scheduleData.budget && content) {
-        optimizedScheduleData.budget = optimizationService.calculateOptimalBudget(
-          content, 
-          { platform: scheduleData.platform || 'all' }
+      if ((normalized.budget === undefined || normalized.budget === null) && content) {
+        normalized.budget = optimizationService.calculateOptimalBudget(
+          content,
+          { platform: normalized.platform || 'all' }
         );
       }
 
@@ -41,18 +60,18 @@ class PromotionService {
       const scheduleRef = db.collection('promotion_schedules').doc();
       const promotionScheduleData = {
         contentId,
-        platform: optimizedScheduleData.platform,
-        scheduleType: optimizedScheduleData.schedule_type || 'specific',
-        startTime: optimizedScheduleData.start_time,
-        endTime: optimizedScheduleData.end_time,
-        frequency: optimizedScheduleData.frequency,
-        isActive: optimizedScheduleData.is_active !== false,
-        budget: optimizedScheduleData.budget || 0,
-        targetMetrics: optimizedScheduleData.target_metrics || {},
-        platformSpecificSettings: optimizedScheduleData.platform_specific_settings || {},
-        recurrencePattern: optimizedScheduleData.recurrence_pattern,
-        maxOccurrences: optimizedScheduleData.max_occurrences,
-        timezone: optimizedScheduleData.timezone || 'UTC',
+        platform: normalized.platform,
+        scheduleType: normalized.scheduleType,
+        startTime: normalized.startTime,
+        endTime: normalized.endTime,
+        frequency: normalized.frequency,
+        isActive: normalized.isActive,
+        budget: normalized.budget || 0,
+        targetMetrics: normalized.targetMetrics || {},
+        platformSpecificSettings: normalized.platformSpecificSettings || {},
+        recurrencePattern: normalized.recurrencePattern,
+        maxOccurrences: normalized.maxOccurrences,
+        timezone: normalized.timezone || 'UTC',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -62,7 +81,7 @@ class PromotionService {
       console.log('✅ Promotion scheduled successfully:', newSchedule);
       
       // If this is a recurring schedule, create the next occurrence
-      if (optimizedScheduleData.frequency && optimizedScheduleData.frequency !== 'once') {
+      if (normalized.frequency && normalized.frequency !== 'once') {
         await this.createNextRecurrence(newSchedule);
       }
       
@@ -110,49 +129,53 @@ class PromotionService {
   async createNextRecurrence(schedule) {
     try {
       const nextTime = this.calculateNextPromotionTime(
-        schedule.start_time, 
+        schedule.startTime,
         schedule.frequency,
-        schedule.recurrence_pattern
+        schedule.recurrencePattern
       );
 
       if (!nextTime) return null;
 
-      const nextSchedule = {
-        content_id: schedule.content_id,
+      // Derive endTime if original had a duration
+      let derivedEndTime = null;
+      if (schedule.endTime && schedule.startTime) {
+        const durationMs = new Date(schedule.endTime).getTime() - new Date(schedule.startTime).getTime();
+        if (!Number.isNaN(durationMs) && durationMs > 0) {
+          derivedEndTime = new Date(new Date(nextTime).getTime() + durationMs).toISOString();
+        }
+      }
+
+      const nextScheduleData = {
+        contentId: schedule.contentId,
         platform: schedule.platform,
-        schedule_type: schedule.schedule_type,
-        start_time: nextTime,
+        scheduleType: schedule.scheduleType,
+        startTime: nextTime,
+        endTime: derivedEndTime,
         frequency: schedule.frequency,
-        is_active: schedule.is_active,
+        isActive: schedule.isActive,
         budget: schedule.budget,
-        target_metrics: schedule.target_metrics,
-        platform_specific_settings: schedule.platform_specific_settings,
-        recurrence_pattern: schedule.recurrence_pattern,
-        parent_schedule_id: schedule.id,
-        timezone: schedule.timezone
+        targetMetrics: schedule.targetMetrics,
+        platformSpecificSettings: schedule.platformSpecificSettings,
+        recurrencePattern: schedule.recurrencePattern,
+        parentScheduleId: schedule.id,
+        timezone: schedule.timezone,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
 
       // Check max occurrences
-      if (schedule.max_occurrences) {
+      if (schedule.maxOccurrences) {
         const occurrenceCount = await this.getOccurrenceCount(schedule.id);
-        if (occurrenceCount >= schedule.max_occurrences) {
-          console.log(`⏹️ Max occurrences (${schedule.max_occurrences}) reached for schedule ${schedule.id}`);
+        if (occurrenceCount >= schedule.maxOccurrences) {
+          console.log(`⏹️ Max occurrences (${schedule.maxOccurrences}) reached for schedule ${schedule.id}`);
           return null;
         }
       }
 
-      const { data, error } = await supabase
-        .from('promotion_schedules')
-        .insert([nextSchedule])
-        .select();
-
-      if (error) {
-        console.error('Error creating next recurrence:', error);
-        return null;
-      }
-
-      console.log(`✅ Created next recurrence for schedule ${schedule.id}:`, data[0]);
-      return data[0];
+      const ref = await db.collection('promotion_schedules').add(nextScheduleData);
+      const created = { id: ref.id, ...nextScheduleData };
+      console.log(`✅ Created next recurrence for schedule ${schedule.id}:`, created);
+      return created;
     } catch (error) {
       console.error('Error in createNextRecurrence:', error);
       return null;
@@ -162,15 +185,12 @@ class PromotionService {
   // Get occurrence count for a schedule
   async getOccurrenceCount(scheduleId) {
     try {
-      const snapshot = await db.collection('promotion_schedules')
-        .where('id', '==', scheduleId)
-        .get();
-
+      // Count the parent schedule implicitly as 1, plus its recurrences
       const recurrencesSnapshot = await db.collection('promotion_schedules')
         .where('parentScheduleId', '==', scheduleId)
         .get();
 
-      return snapshot.size + recurrencesSnapshot.size;
+      return 1 + recurrencesSnapshot.size;
     } catch (error) {
       console.error('Error getting occurrence count:', error);
       return 0;
@@ -626,13 +646,13 @@ class PromotionService {
       const analytics = {
         views: totalViews,
         engagements: totalEngagements,
-        engagement_rate: totalViews > 0 ? totalEngagements / totalViews : 0,
-        conversion_rate: 0.02, // Placeholder
+        engagementRate: totalViews > 0 ? totalEngagements / totalViews : 0,
+        conversionRate: 0.02, // Placeholder
         revenue: totalRevenue,
         cost: totalCost,
-        cost_per_view: totalViews > 0 ? totalCost / totalViews : 0,
+        costPerView: totalViews > 0 ? totalCost / totalViews : 0,
         roi: totalCost > 0 ? totalRevenue / totalCost : 0,
-        executions_count: executionsSnapshot.size
+        executionsCount: executionsSnapshot.size
       };
 
       return {
