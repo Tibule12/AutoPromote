@@ -90,6 +90,30 @@ app.use('/.well-known', express.static(path.join(__dirname, '../public/.well-kno
 // 2) Fallback to /docs/.well-known (used for GitHub Pages and documentation hosting)
 app.use('/.well-known', express.static(path.join(__dirname, '../docs/.well-known')));
 
+// Explicit root-level routes for TikTok verification variations
+function sendFirstExisting(res, candidates) {
+  const fs = require('fs');
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) {
+        return res.sendFile(p);
+      }
+    } catch (_) { /* ignore */ }
+  }
+  return res.status(404).send('Not found');
+}
+
+app.get(['/tiktok-developers-site-verification.txt', '/tiktok-site-verification.txt'], (req, res) => {
+  const targetFile = req.path.endsWith('developers-site-verification.txt')
+    ? 'tiktok-developers-site-verification.txt'
+    : 'tiktok-site-verification.txt';
+  const candidates = [
+    path.join(__dirname, '../public/.well-known/', targetFile),
+    path.join(__dirname, '../docs/.well-known/', targetFile)
+  ];
+  return sendFirstExisting(res, candidates);
+});
+
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, '../frontend/build')));
