@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
   // Content endpoints
   CONTENT_UPLOAD: `${API_BASE_URL}/api/content/upload`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
+  MY_SCHEDULES: `${API_BASE_URL}/api/content/my-promotion-schedules`,
   
   // User endpoints
   USERS_ME: `${API_BASE_URL}/api/users/me`,

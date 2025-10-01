@@ -363,6 +363,67 @@ router.get('/my-content', authMiddleware, async (req, res) => {
   }
 });
 
+// Get all promotion schedules across user's content (flattened list)
+router.get('/my-promotion-schedules', authMiddleware, async (req, res) => {
+  try {
+    // Find user's content IDs
+    const contentSnapshot = await db.collection('content')
+      .where('user_id', '==', req.userId)
+      .get();
+
+    if (contentSnapshot.empty) {
+      return res.json({ schedules: [] });
+    }
+
+    const contents = contentSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    const contentIds = contents.map(c => c.id);
+
+    // Query schedules for these content IDs
+    const schedulesSnap = await db.collection('promotion_schedules')
+      .where('contentId', 'in', contentIds.slice(0, 10)) // Firestore 'in' has max 10 items; batch if needed
+      .orderBy('startTime')
+      .get();
+
+    let schedules = schedulesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // If more than 10 contents, batch remaining
+    if (contentIds.length > 10) {
+      for (let i = 10; i < contentIds.length; i += 10) {
+        const batchIds = contentIds.slice(i, i + 10);
+        const snap = await db.collection('promotion_schedules')
+          .where('contentId', 'in', batchIds)
+          .orderBy('startTime')
+          .get();
+        schedules = schedules.concat(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      }
+    }
+
+    // Attach content info and filter to upcoming + recent
+    const nowIso = new Date().toISOString();
+    const contentMap = contents.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
+    const enriched = schedules
+      .filter(s => !s.endTime || s.endTime >= nowIso)
+      .map(s => ({
+        id: s.id,
+        contentId: s.contentId,
+        contentTitle: contentMap[s.contentId]?.title || 'Untitled',
+        platform: s.platform || 'all',
+        frequency: s.frequency || 'once',
+        scheduleType: s.scheduleType || 'specific',
+        startTime: s.startTime,
+        endTime: s.endTime || null,
+        isActive: s.isActive !== false,
+      }))
+      .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+      .slice(0, 50);
+
+    res.json({ schedules: enriched });
+  } catch (error) {
+    console.error('Error getting my promotion schedules:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get content by ID
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
