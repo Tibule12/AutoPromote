@@ -3,6 +3,62 @@ const { db } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
 const router = express.Router();
 
+// Get current user (profile defaults)
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const ref = db.collection('users').doc(req.userId);
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ error: 'User not found' });
+    const data = snap.data();
+    res.json({
+      user: {
+        id: snap.id,
+        name: data.name || '',
+        email: data.email || '',
+        timezone: data.timezone || 'UTC',
+        schedulingDefaults: data.schedulingDefaults || {
+          windows: [], // e.g., [{ days:[1-5], start:'19:00', end:'21:00' }]
+          frequency: 'once',
+          platforms: ['youtube','tiktok','instagram']
+        },
+        notifications: data.notifications || { email: { uploadSuccess: true, scheduleCreated: true, weeklyDigest: false } },
+        role: data.role || 'user',
+        isAdmin: data.isAdmin || false
+      }
+    });
+  } catch (err) {
+    console.error('Error getting /me:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update current user (profile defaults)
+router.put('/me', authMiddleware, async (req, res) => {
+  try {
+    const { name, timezone, schedulingDefaults, notifications, defaultPlatforms, defaultFrequency } = req.body;
+    const ref = db.collection('users').doc(req.userId);
+    const updates = {
+      ...(name !== undefined ? { name } : {}),
+      ...(timezone ? { timezone } : {}),
+      ...(schedulingDefaults ? { schedulingDefaults } : {}),
+      ...(notifications ? { notifications } : {}),
+      updatedAt: new Date()
+    };
+    // For backward compatibility fields
+    if (defaultPlatforms || defaultFrequency) {
+      updates.schedulingDefaults = updates.schedulingDefaults || {};
+      if (defaultPlatforms) updates.schedulingDefaults.platforms = defaultPlatforms;
+      if (defaultFrequency) updates.schedulingDefaults.frequency = defaultFrequency;
+    }
+    await ref.set(updates, { merge: true });
+    const snap = await ref.get();
+    res.json({ user: { id: snap.id, ...snap.data() } });
+  } catch (err) {
+    console.error('Error updating /me:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get user profile
 router.get('/profile', authMiddleware, async (req, res) => {
   try {
@@ -92,6 +148,22 @@ router.get('/stats', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Error getting user stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get recent notifications for current user
+router.get('/notifications', authMiddleware, async (req, res) => {
+  try {
+    const snapshot = await db.collection('notifications')
+      .where('user_id', '==', req.userId)
+      .orderBy('created_at', 'desc')
+      .limit(50)
+      .get();
+    const notifications = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ notifications });
+  } catch (err) {
+    console.error('Error getting notifications:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
