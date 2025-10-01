@@ -114,6 +114,19 @@ app.get(['/tiktok-developers-site-verification.txt', '/tiktok-site-verification.
   return sendFirstExisting(res, candidates);
 });
 
+// Legal policy pages served from docs on the same domain
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, '../docs/privacy.html'));
+});
+
+app.get('/terms', (req, res) => {
+  res.sendFile(path.join(__dirname, '../docs/terms.html'));
+});
+
+app.get('/data-deletion', (req, res) => {
+  res.sendFile(path.join(__dirname, '../docs/data-deletion.html'));
+});
+
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, '../frontend/build')));
