@@ -1,43 +1,84 @@
 # AutoPromote
-<!-- Triggered redeploy: 2025-09-12 -->
 
-## Overview
-AutoPromote is an AI-powered platform designed to automate content promotion and monetization for creators. The platform will enable users to upload their content, including songs, videos, websites, platforms, and pictures, and automatically promote it across various channels to increase views, followers, and revenue.
+AutoPromote is a free, automated content promotion platform that helps creators distribute content across major platforms, drive traffic to monetized landing pages, and generate daily revenue. Phase 1 is built entirely with free and open‑source tools; premium features (VFX‑style enhancements, auto‑tune, realistic background replacement) will be phased in later as the platform scales.
 
-## Key Features
-- AI-Powered Promotion: Utilize machine learning algorithms to optimize content promotion and targeting across social media platforms, online marketplaces, and advertising networks.
-- Content Upload: Allow users to upload various types of content, including multimedia files and website links.
-- Automated Monetization: Integrate advertising, sponsorships, or other revenue-generating models to help creators earn money from their content.
-- Analytics and Insights: Provide users with detailed analytics and insights on the performance of their content, including views, engagement, and revenue generated.
-- Admin Dashboard: Comprehensive dashboard for administrators to monitor platform performance, user growth, content metrics, and revenue. See [README-ADMIN.md](README-ADMIN.md) for details.
+## Vision
 
-## Technical Stack
-- **Frontend**: React.js for a dynamic and responsive user interface
-- **Backend**: Node.js with Express for scalable API development
-- **Database & Authentication**: Firebase (Firestore for data storage, Firebase Authentication for user management)
-- **File Storage**: Firebase Storage for secure content storage
-- **Security**: Firebase Security Rules and custom middleware for robust data protection
-- **AI Integration**: Machine learning algorithms for content promotion optimization
-- **Analytics**: Firebase Analytics for tracking user engagement and content performance
+- Promote creator content for free across multiple platforms
+- Route traffic to monetized landing pages you own (you keep 100% of AutoPromote revenue)
+- Users retain 100% of any revenue they earn directly from external platforms (TikTok, YouTube, Instagram, etc.)
 
-## Database Integration
-The application uses Firestore with a carefully structured schema to support all features including the advanced admin dashboard. The database integration includes:
-- Automatic schema validation on application startup
-- Sample data generation for development and testing
-- Security rules for proper access control
-- See [UPDATED_FIRESTORE_SCHEMA.md](UPDATED_FIRESTORE_SCHEMA.md) and [ADMIN_DATABASE_INTEGRATION.md](ADMIN_DATABASE_INTEGRATION.md) for details.
+## MVP Features (Current Status)
 
-## Potential Revenue Streams
-- Transaction Fees: Charge a small fee for each transaction or revenue generated through the platform.
-- Premium Features: Offer advanced features and tools for a subscription fee.
-- Advertising: Display targeted ads on the platform and earn revenue from clicks or impressions.
+- Auth & Profiles
+	- [x] Firebase Auth with token verification and Firestore user provisioning (`src/authMiddleware.js`)
+	- [ ] Profile defaults API (timezone, preferred windows, default platforms/frequency)
 
-## Target Audience
-- Content Creators: Individuals and businesses creating content in various formats, including music, videos, articles, and more.
-- Marketers and Advertisers: Businesses and agencies looking to promote their products or services through targeted advertising.
+- Upload & Quality Check
+	- [x] Upload API with schedule_hint support and safe URL handling (`src/contentRoutes.js`)
+	- [x] Dry‑run preview to see derived schedule without saving
+	- [x] FFmpeg‑based content quality check with auto‑enhance fallback (`src/contentQualityCheck.js`)
 
-## Benefits
-- Increased Efficiency: Automate content promotion and monetization, saving time and effort for creators.
-- Improved Reach: Expand audience reach through targeted promotion and advertising.
-- Revenue Generation: Earn money from content through various revenue-generating models.
-- Data-Driven Decisions: Use the admin dashboard to make informed decisions based on comprehensive analytics.
+- Scheduling & Promotion
+	- [x] Schedule derivation from `schedule_hint` or explicit time
+	- [x] Firestore promotion schedules and simulated execution (`src/promotionService.js`)
+	- [x] Admin endpoints for listing active promotions and managing schedules
+	- [ ] Clean up naming and remove legacy artifacts in `promotionService`
+
+- Monetized Landing Pages & Smart Links
+	- [~] Cloud Functions exported: `generateMonetizedLandingPage`, `generateSmartLink` (`autopromote-functions/index.js`)
+	- [~] Server marks intents on content (`landingPageRequestedAt`, `smartLinkRequestedAt`) to integrate generation
+
+- Analytics & Optimization
+	- [x] Basic content analytics and simulated platform breakdowns
+	- [x] Optimization recommendations and platform timing suggestions (`src/optimizationService.js`)
+
+- Admin
+	- [x] Admin routes mounted; moderation via status updates; active promotions listing
+	- [ ] Minimal admin UI screens for approve/flag/boost/pause and global counters
+
+- Notifications & Rewards
+	- [ ] Notifications writer (Firestore collection + optional email)
+	- [ ] Gamified rewards engine (badges, streaks, unlocks)
+
+## Firebase Functions (Free Tier)
+
+Located in `autopromote-functions/` and exported by `index.js`:
+
+- Landing Page Generator: `generateMonetizedLandingPage`
+- Smart Link Tracker: `generateSmartLink`, `smartLinkRedirect`
+- Social Media Auto‑Promotion Engine: `autoPromoteContent`
+- Revenue Attribution: `logMonetizationEvent`, `getRevenueSummary`
+- Referral System: `addReferrerToContent`, `getReferralStats`
+- Promotion Templates: create/list/attach
+- Firestore triggers: create schedule on content create/approval
+
+## Firestore Collections
+
+- `users`: Profile data, roles, defaults
+- `content`: Media metadata, quality scores, landingPageUrl, schedule_hint
+- `promotion_schedules`, `promotion_executions`
+- `analytics`: Views, clicks, CTR, conversions
+- `revenue`: Earnings per content/user (via functions)
+- `referrals`: Invite tracking and bonuses (via functions)
+- `templates`: Captions, hashtags, thumbnails (via functions)
+- `notifications` (planned), `rewards` (planned)
+
+## Tech Stack
+
+- Frontend: React (SPA served from `frontend/build`)
+- Backend: Node.js + Express (`src/server.js`)
+- Firebase: Firestore, Auth, Storage, Cloud Functions (free tier)
+- Media: FFmpeg via `fluent-ffmpeg` for quality checks
+
+## Roadmap (near‑term)
+
+1) Wire landing page + smart link generation into upload/approval and save to content doc
+2) Add notifications MVP (Firestore collection, optional email)
+3) Add user profile defaults API and use for better schedule_hint generation
+4) Minimal admin UI screens for moderation and analytics
+5) Promotion service naming cleanup (remove legacy artifacts)
+
+---
+
+For admin details, see [README-ADMIN.md](README-ADMIN.md).
