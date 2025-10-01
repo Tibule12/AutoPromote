@@ -4,7 +4,7 @@ import './UserDashboard.css';
 // Use PUBLIC_URL so assets resolve correctly on GitHub Pages and Render
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
 
-const UserDashboard = ({ user, content, stats, badges, notifications, userDefaults, onSaveDefaults, onLogout, onUpload }) => {
+const UserDashboard = ({ user, content, stats, badges, notifications, userDefaults, onSaveDefaults, onLogout, onUpload, mySchedules }) => {
   const [activeTab, setActiveTab] = useState('profile');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -22,6 +22,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
 
   // Ensure content is an array to simplify rendering
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
+  const schedulesList = useMemo(() => (Array.isArray(mySchedules) ? mySchedules : []), [mySchedules]);
   const firstItem = contentList[0] || {};
   const safeFirstThumb = firstItem?.thumbnailUrl || DEFAULT_IMAGE;
   const safeLandingUrl = typeof firstItem?.landingPageUrl === 'string' ? firstItem.landingPageUrl : undefined;
@@ -101,6 +102,21 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     await onSaveDefaults({ timezone: tz, defaultPlatforms: defaultsPlatforms, defaultFrequency: defaultsFrequency });
   };
 
+  const formatWhen = (iso) => {
+    if (!iso) return '—';
+    try {
+      const d = new Date(iso);
+      // Prefer Intl with timezone if available/valid
+      return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short', timeZone: tz || 'UTC' }).format(d);
+    } catch (e) {
+      try {
+        return new Date(iso).toLocaleString();
+      } catch {
+        return String(iso);
+      }
+    }
+  };
+
   return (
     <div className="dashboard-root">
       {/* Topbar with mobile hamburger */}
@@ -144,6 +160,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
           <ul>
             <li className={activeTab === 'profile' ? 'active' : ''} onClick={() => handleNav('profile')}>Profile</li>
             <li className={activeTab === 'upload' ? 'active' : ''} onClick={() => handleNav('upload')}>Upload</li>
+            <li className={activeTab === 'schedules' ? 'active' : ''} onClick={() => handleNav('schedules')}>Schedules</li>
             <li className={activeTab === 'analytics' ? 'active' : ''} onClick={() => handleNav('analytics')}>Analytics</li>
             <li className={activeTab === 'rewards' ? 'active' : ''} onClick={() => handleNav('rewards')}>Rewards</li>
             <li className={activeTab === 'notifications' ? 'active' : ''} onClick={() => handleNav('notifications')}>Notifications</li>
@@ -288,6 +305,37 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
                 })}
               </ul>
             </div>
+          </section>
+        )}
+
+        {activeTab === 'schedules' && (
+          <section className="schedules-panel">
+            <h3>My Schedules</h3>
+            {schedulesList.length === 0 ? (
+              <div style={{ color: '#9aa4b2' }}>No schedules yet. Create one by uploading content and selecting platforms.</div>
+            ) : (
+              <div className="schedules-list" style={{ display: 'grid', gap: '.5rem' }}>
+                {schedulesList.map((sch, i) => {
+                  const titleText = typeof sch?.contentTitle === 'string' ? sch.contentTitle : (sch?.contentTitle ? JSON.stringify(sch.contentTitle) : 'Untitled');
+                  const platform = sch?.platform || (Array.isArray(sch?.platforms) ? sch.platforms.join(', ') : '—');
+                  const frequency = (sch?.frequency || sch?.scheduleType || 'once');
+                  const when = formatWhen(sch?.startTime || sch?.startAt || sch?.when);
+                  const isActive = sch?.isActive !== false; // default to true unless explicitly false
+                  const statusText = isActive ? 'active' : 'paused';
+                  return (
+                    <div key={i} className="schedule-row" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr 0.8fr', gap: '.5rem', alignItems: 'center', padding: '.5rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                      <div title={titleText} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleText}</div>
+                      <div style={{ color: '#cbd5e1' }}>{platform}</div>
+                      <div style={{ color: '#cbd5e1', textTransform: 'capitalize' }}>{frequency}</div>
+                      <div style={{ color: '#e2e8f0' }}>{when}</div>
+                      <div>
+                        <span className={`status status-${statusText}`}>{statusText}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
         )}
 

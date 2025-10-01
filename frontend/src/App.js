@@ -45,6 +45,7 @@ function App() {
   const [badges, setBadges] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [userDefaults, setUserDefaults] = useState({ timezone: 'UTC', schedulingDefaults: {}, defaultPlatforms: [], defaultFrequency: 'once' });
+  const [mySchedules, setMySchedules] = useState([]);
   // Fetch user profile, stats, badges, notifications from Firestore
   useEffect(() => {
     const fetchUserDashboardData = async () => {
@@ -197,7 +198,32 @@ function App() {
       }
       const data = await res.json();
       setContent(data.content || []);
+      // After content, also fetch schedules (reuse token)
+      await fetchMySchedules(token);
     } catch (error) {}
+  };
+
+  const fetchMySchedules = async (providedToken = null) => {
+    try {
+      let token = providedToken;
+      if (!token) {
+        const currentUser = auth.currentUser;
+        if (currentUser) token = await currentUser.getIdToken(true);
+        else if (user && user.token) token = user.token; else return;
+      }
+      const res = await fetch(API_ENDPOINTS.MY_SCHEDULES, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMySchedules(Array.isArray(data.schedules) ? data.schedules : []);
+      }
+    } catch (_) {}
   };
 
   const fetchAnalytics = async (providedToken = null) => {
@@ -457,6 +483,7 @@ function App() {
                 notifications={notifications}
                 userDefaults={userDefaults}
                 onSaveDefaults={saveUserDefaults}
+                mySchedules={mySchedules}
                 onUpload={handleContentUpload}
                 onPromoteToggle={() => {}}
                 onLogout={handleLogout}
