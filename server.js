@@ -86,6 +86,10 @@ app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
 
+// Serve well-known static files (e.g., TikTok site verification) from /public/.well-known
+const wellKnownDir = path.join(__dirname, 'public', '.well-known');
+app.use('/.well-known', express.static(wellKnownDir, { dotfiles: 'allow' }));
+
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 
