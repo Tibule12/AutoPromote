@@ -84,10 +84,11 @@ app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
 
-// Serve site verification and other well-known files from /public/.well-known
-app.use('/.well-known', express.static(path.join(__dirname, 'public', '.well-known'), {
-  fallthrough: false
-}));
+// Serve site verification and other well-known files
+// 1) Try root-level /public/.well-known
+app.use('/.well-known', express.static(path.join(__dirname, '../public/.well-known')));
+// 2) Fallback to /docs/.well-known (used for GitHub Pages and documentation hosting)
+app.use('/.well-known', express.static(path.join(__dirname, '../docs/.well-known')));
 
 
 // Serve static files from the React app build directory
