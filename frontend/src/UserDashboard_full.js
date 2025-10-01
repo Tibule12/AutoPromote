@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import './UserDashboard.css';
 
+// Use PUBLIC_URL so assets resolve correctly on GitHub Pages and Render
+const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
+
 const UserDashboard = ({ user, content, stats, badges, notifications, onLogout }) => {
   const [activeTab, setActiveTab] = useState('profile');
   return (
     <div className="dashboard-root">
       <aside className="dashboard-sidebar">
         <div className="profile-section">
-          <img className="profile-avatar" src={user?.avatarUrl || '/default-avatar.png'} alt="Avatar" />
+          <img className="profile-avatar" src={user?.avatarUrl || DEFAULT_IMAGE} alt="Avatar" />
           <h2>{user?.name || 'User Name'}</h2>
           <div className="profile-referral">
             Referral: <span className="referral-link">{user?.referralCode || 'N/A'}</span>
@@ -36,7 +39,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onLogout }
           <section className="profile-details">
             <div className="landing-preview">
               <h3>Landing Page Preview</h3>
-              <img className="landing-thumbnail" src={content?.[0]?.thumbnailUrl || '/default-thumb.png'} alt="Landing Thumbnail" />
+              <img className="landing-thumbnail" src={content?.[0]?.thumbnailUrl || DEFAULT_IMAGE} alt="Landing Thumbnail" />
               <a href={content?.[0]?.landingPageUrl} target="_blank" rel="noopener noreferrer">View Landing Page</a>
               <div className="performance-summary">
                 <div><strong>Views:</strong> {content?.[0]?.views ?? 0}</div>
