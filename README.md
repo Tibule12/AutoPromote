@@ -104,6 +104,12 @@ Test login flow:
 2. Approve on TikTok, you’ll be redirected back to the dashboard with `?tiktok=connected`.
 3. Tokens are stored at Firestore: `users/{uid}/connections/tiktok`.
 
+Property verification (if requested):
+
+- TikTok may require a verification file: they’ll provide a token string like `tiktok-site-verification=xxxxxxxx`. Place it at:
+	- `docs/.well-known/tiktok-verify.txt` (so it is served at `https://Tibule12.github.io/AutoPromote/.well-known/tiktok-verify.txt`)
+- Replace the placeholder token in that file with the exact token TikTok provides, then wait ~1–3 minutes and click Verify again.
+
 ## Roadmap (near‑term)
 
 1) Wire landing page + smart link generation into upload/approval and save to content doc
