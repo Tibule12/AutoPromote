@@ -108,8 +108,12 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       schedule_hint,
       target_rpm,
       min_views_threshold,
-      max_budget
+      max_budget,
+      dry_run
     } = req.body;
+
+    // Support dry run via body or query param
+    const isDryRun = dry_run === true || req.query.dry_run === 'true';
 
     // Only include url if valid
     let validUrl = undefined;
@@ -147,8 +151,7 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
     const maxBudget = max_budget || 1000;
 
     // Insert content into Firestore
-    console.log('Preparing to save content to Firestore...');
-    const contentRef = db.collection('content').doc();
+    console.log(isDryRun ? 'Preparing dry-run content preview...' : 'Preparing to save content to Firestore...');
     const contentData = {
       user_id: req.userId,
       title,
@@ -172,24 +175,28 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       ...(validUrl ? { url: validUrl } : {})
     };
 
-    console.log('Content data to save:', JSON.stringify(contentData, null, 2));
-    console.log('Firestore document ID will be:', contentRef.id);
-
-    try {
-      await contentRef.set(contentData);
-      console.log('✅ Content successfully saved to Firestore with ID:', contentRef.id);
-    } catch (firestoreError) {
-      console.error('❌ Firestore write error:', firestoreError);
-      console.error('Error details:', {
-        code: firestoreError.code,
-        message: firestoreError.message,
-        stack: firestoreError.stack
-      });
-      throw firestoreError;
+    let contentId = `preview_${Date.now()}`;
+    if (!isDryRun) {
+      const contentRef = db.collection('content').doc();
+      console.log('Content data to save:', JSON.stringify(contentData, null, 2));
+      console.log('Firestore document ID will be:', contentRef.id);
+      try {
+        await contentRef.set(contentData);
+        console.log('✅ Content successfully saved to Firestore with ID:', contentRef.id);
+      } catch (firestoreError) {
+        console.error('❌ Firestore write error:', firestoreError);
+        console.error('Error details:', {
+          code: firestoreError.code,
+          message: firestoreError.message,
+          stack: firestoreError.stack
+        });
+        throw firestoreError;
+      }
+      contentId = contentRef.id;
     }
 
-    const content = { id: contentRef.id, ...contentData };
-    console.log('Content object created:', { id: content.id, title: content.title, type: content.type });
+    const content = { id: contentId, ...contentData };
+    console.log('Content object', isDryRun ? 'preview' : 'created', { id: content.id, title: content.title, type: content.type });
     let promotionSchedule = null;
 
     // Create promotion schedule if scheduled time is provided or hinted
@@ -209,6 +216,26 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
     };
 
     const scheduleTemplate = deriveSchedule();
+    if (isDryRun) {
+      // In dry run, return the schedule template preview only
+      const recommendations = optimizationService.generateOptimizationRecommendations(content);
+      return res.status(200).json({
+        message: 'Dry run: content and schedule preview',
+        dry_run: true,
+        content_preview: content,
+        promotion_schedule_preview: scheduleTemplate ? {
+          platform: 'all',
+          schedule_type: scheduleTemplate.schedule_type,
+          start_time: scheduleTemplate.start_time,
+          frequency: scheduleTemplate.frequency,
+          is_active: true,
+          budget: maxBudget,
+          target_metrics: { target_views: minViews, target_rpm: optimalRPM }
+        } : null,
+        optimization_recommendations: recommendations
+      });
+    }
+
     if (scheduleTemplate) {
       try {
         promotionSchedule = await promotionService.schedulePromotion(content.id, {
