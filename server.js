@@ -91,7 +91,16 @@ const wellKnownDir = path.join(__dirname, 'public', '.well-known');
 app.use('/.well-known', express.static(wellKnownDir, { dotfiles: 'allow' }));
 
 // Serve static files from the React app build directory
-app.use(express.static(path.join(__dirname, 'frontend/build')));
+const frontendBuild = path.join(__dirname, 'frontend', 'build');
+app.use(express.static(frontendBuild, { index: false, fallthrough: true }));
+
+// Avoid serving index.html for asset paths to prevent HTML in JS errors
+app.get(['/*.js', '/*.css', '/static/*', '/asset-manifest.json', '/favicon.ico', '/manifest.json'], (req, res, next) => {
+  const filePath = path.join(frontendBuild, req.path.replace(/^\/+/, ''));
+  res.sendFile(filePath, (err) => {
+    if (err) next();
+  });
+});
 
 // Serve the admin test HTML file
 app.get('/admin-test', (req, res) => {
@@ -134,7 +143,7 @@ app.get('/api/health', (req, res) => {
 
 // Catch all handler: send back React's index.html file for client-side routing
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+  res.sendFile(path.join(frontendBuild, 'index.html'));
 });
 
 // Error handling middleware
