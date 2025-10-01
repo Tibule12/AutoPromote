@@ -193,6 +193,17 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
         throw firestoreError;
       }
       contentId = contentRef.id;
+
+      // Attempt to generate monetized landing page and smart link (best-effort)
+      try {
+        // Mark intent for functions to pickup (if callable functions are not wired here)
+        await db.collection('content').doc(contentId).update({
+          landingPageRequestedAt: new Date()
+        });
+        console.log('📩 Marked landing page generation intent');
+      } catch (lpErr) {
+        console.log('⚠️ Could not mark landing page intent:', lpErr.message);
+      }
     }
 
     const content = { id: contentId, ...contentData };
@@ -250,6 +261,15 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
             target_rpm: optimalRPM
           }
         });
+        // After schedule creation, attempt to add a smart link placeholder
+        try {
+          await db.collection('content').doc(content.id).update({
+            smartLinkRequestedAt: new Date()
+          });
+          console.log('🔗 Marked smart link generation intent');
+        } catch (slErr) {
+          console.log('⚠️ Could not mark smart link intent:', slErr.message);
+        }
       } catch (scheduleError) {
         console.error('Error creating promotion schedule:', scheduleError);
       }
