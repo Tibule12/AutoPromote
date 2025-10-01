@@ -114,6 +114,16 @@ app.get(['/tiktok-developers-site-verification.txt', '/tiktok-site-verification.
   return sendFirstExisting(res, candidates);
 });
 
+// Wildcard for TikTok URL prefix verification files e.g. /tiktokXYZ123.txt
+app.get(/^\/tiktok.*\.txt$/, (req, res) => {
+  const filename = req.path.replace('/', '');
+  const candidates = [
+    path.join(__dirname, '../public/.well-known/', filename),
+    path.join(__dirname, '../docs/.well-known/', filename)
+  ];
+  return sendFirstExisting(res, candidates);
+});
+
 // Legal policy pages served from docs on the same domain
 app.get('/privacy', (req, res) => {
   res.sendFile(path.join(__dirname, '../docs/privacy.html'));
