@@ -342,7 +342,7 @@ function App() {
   }, [justLoggedOut, user, navigate]);
 
   // Content upload handler (with file and platforms)
-  const handleContentUpload = async ({ file, platforms }) => {
+  const handleContentUpload = async ({ file, platforms, title, description, type, schedule }) => {
     try {
       if (!file) return;
       // Upload file to Firebase Storage (modular API)
@@ -366,9 +366,13 @@ function App() {
         userId: user.uid,
         url,
         platforms,
+        title: title || file.name,
+        description: description || '',
+        type: type || 'video',
         createdAt: serverTimestamp(),
         status: 'pending',
         platformStatus,
+        scheduleHint: schedule || null,
         qualityFeedback: {
           score: 0,
           issues: [],
