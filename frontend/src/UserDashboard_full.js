@@ -4,9 +4,11 @@ import './UserDashboard.css';
 // Use PUBLIC_URL so assets resolve correctly on GitHub Pages and Render
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
 
-const UserDashboard = ({ user, content, stats, badges, notifications, onLogout }) => {
+const UserDashboard = ({ user, content, stats, badges, notifications, onLogout, onUpload }) => {
   const [activeTab, setActiveTab] = useState('profile');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
 
   // Ensure content is an array to simplify rendering
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
@@ -17,6 +19,19 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onLogout }
   const handleNav = (tab) => {
     setActiveTab(tab);
     setSidebarOpen(false);
+  };
+
+  const togglePlatform = (name) => {
+    setSelectedPlatforms((prev) =>
+      prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]
+    );
+  };
+
+  const handleUploadSubmit = async () => {
+    if (!onUpload) return;
+    await onUpload({ file: selectedFile, platforms: selectedPlatforms });
+    setSelectedFile(null);
+    setSelectedPlatforms([]);
   };
 
   return (
@@ -98,15 +113,24 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onLogout }
         {activeTab === 'upload' && (
           <section className="upload-panel">
             <h3>Upload Content</h3>
-            <div className="upload-drag-drop">Drag & drop files here</div>
-            <div className="platform-toggles">
-              <label><input type="checkbox" /> TikTok</label>
-              <label><input type="checkbox" /> YouTube</label>
-              <label><input type="checkbox" /> Instagram</label>
-              <label><input type="checkbox" /> Twitter</label>
-              <label><input type="checkbox" /> Facebook</label>
+            <div className="upload-drag-drop">
+              <input
+                type="file"
+                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+              />
+              {selectedFile && <div style={{marginTop: '.5rem', color: '#9aa4b2'}}>Selected: {selectedFile.name}</div>}
             </div>
-            <button className="check-quality">Check Quality</button>
+            <div className="platform-toggles">
+              <label><input type="checkbox" checked={selectedPlatforms.includes('tiktok')} onChange={() => togglePlatform('tiktok')} /> TikTok</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('youtube')} onChange={() => togglePlatform('youtube')} /> YouTube</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('instagram')} onChange={() => togglePlatform('instagram')} /> Instagram</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('twitter')} onChange={() => togglePlatform('twitter')} /> Twitter</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('facebook')} onChange={() => togglePlatform('facebook')} /> Facebook</label>
+            </div>
+            <div style={{display: 'flex', gap: '.5rem'}}>
+              <button className="check-quality" onClick={handleUploadSubmit} disabled={!selectedFile || selectedPlatforms.length === 0}>Upload</button>
+              <button className="logout-btn" onClick={() => { setSelectedFile(null); setSelectedPlatforms([]); }}>Reset</button>
+            </div>
             <div className="upload-history">
               <h4>Upload History</h4>
               <ul>

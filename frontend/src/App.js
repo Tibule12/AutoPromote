@@ -2,8 +2,21 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
-import { auth, db } from './firebaseClient';
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth, db, storage } from './firebaseClient';
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, signInWithCustomToken } from 'firebase/auth';
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  orderBy,
+  limit as fslimit,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { API_ENDPOINTS } from './config';
 import LoginForm from './LoginForm';
 import AdminLoginForm from './AdminLoginForm';
@@ -40,26 +53,28 @@ function App() {
       }
       try {
         // Profile stats
-        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userSnap = await getDoc(doc(db, 'users', user.uid));
         let stats = { views: 0, revenue: 0, ctr: 0, chart: [] };
-        if (userDoc.exists) {
-          const data = userDoc.data();
+        if (userSnap.exists()) {
+          const data = userSnap.data();
           stats.views = data.views || 0;
           stats.revenue = data.revenue || 0;
           // Merge Firestore user fields into user state
-          setUser(prev => prev ? { ...prev, ...data } : { ...data, uid: user.uid });
+          setUser(prev => (prev ? { ...prev, ...data } : { ...data, uid: user.uid }));
         }
         // Fetch analytics for chart and CTR
-        const analyticsSnap = await db.collection('analytics')
-          .where('userId', '==', user.uid)
-          .orderBy('timestamp', 'desc')
-          .limit(30)
-          .get();
+        const analyticsQuery = query(
+          collection(db, 'analytics'),
+          where('userId', '==', user.uid),
+          orderBy('timestamp', 'desc'),
+          fslimit(30)
+        );
+        const analyticsSnap = await getDocs(analyticsQuery);
         let chart = [];
         let totalViews = 0;
         let totalClicks = 0;
-        analyticsSnap.forEach(doc => {
-          const d = doc.data();
+        analyticsSnap.forEach((docSnap) => {
+          const d = docSnap.data();
           chart.push({
             date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleDateString() : '',
             views: d.views || 0,
@@ -73,13 +88,18 @@ function App() {
         setProfileStats(stats);
 
         // Fetch badges from subcollection
-        const badgesSnap = await db.collection('users').doc(user.uid).collection('badges').get();
-        const badgeList = badgesSnap.docs.map(doc => doc.data());
+        const badgesSnap = await getDocs(collection(db, 'users', user.uid, 'badges'));
+        const badgeList = badgesSnap.docs.map((d) => d.data());
         setBadges(badgeList);
 
         // Fetch notifications from subcollection
-        const notifSnap = await db.collection('users').doc(user.uid).collection('notifications').orderBy('timestamp', 'desc').limit(10).get();
-        const notifList = notifSnap.docs.map(doc => doc.data().message || '');
+        const notifQuery = query(
+          collection(db, 'users', user.uid, 'notifications'),
+          orderBy('timestamp', 'desc'),
+          fslimit(10)
+        );
+        const notifSnap = await getDocs(notifQuery);
+        const notifList = notifSnap.docs.map((d) => d.data().message || '');
         setNotifications(notifList);
       } catch (e) {
         setProfileStats({ views: 0, revenue: 0, ctr: 0, chart: [] });
@@ -222,8 +242,8 @@ function App() {
         const data = await res.json();
         // If backend returns a custom token, exchange it for an ID token
         if (data.customToken) {
-          // Sign in with custom token
-          const customUserCredential = await auth.signInWithCustomToken(data.customToken);
+          // Sign in with custom token (modular API)
+          const customUserCredential = await signInWithCustomToken(auth, data.customToken);
           const customIdToken = await customUserCredential.user.getIdToken();
           handleLogin({ ...data.user, token: customIdToken });
         } else {
@@ -301,7 +321,7 @@ function App() {
   const handleLogout = async () => {
     try {
       console.log('handleLogout called');
-      await auth.signOut();
+      await signOut(auth);
       setUser(null);
       setContent([]);
       setIsAdmin(false);
@@ -325,12 +345,11 @@ function App() {
   const handleContentUpload = async ({ file, platforms }) => {
     try {
       if (!file) return;
-      // Upload file to Firebase Storage
-      const storageRef = db.app.storage().ref();
-      const userFolder = storageRef.child(`uploads/${user.uid}`);
-      const fileRef = userFolder.child(file.name);
-      await fileRef.put(file);
-      const url = await fileRef.getDownloadURL();
+      // Upload file to Firebase Storage (modular API)
+      const path = `uploads/${user.uid}/${file.name}`;
+      const fileRef = storageRef(storage, path);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
       // Build platformStatus object for all selected platforms
       const allPlatforms = ['youtube', 'tiktok', 'instagram', 'twitter', 'facebook'];
       const platformStatus = {};
@@ -342,12 +361,12 @@ function App() {
           postedAt: ''
         };
       });
-      // Save content to Firestore with recommended schema
-      await db.collection('content').add({
+      // Save content to Firestore with recommended schema (modular API)
+      await addDoc(collection(db, 'content'), {
         userId: user.uid,
         url,
         platforms,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
         status: 'pending',
         platformStatus,
         qualityFeedback: {
