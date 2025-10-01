@@ -71,6 +71,12 @@ Located in `autopromote-functions/` and exported by `index.js`:
 - Firebase: Firestore, Auth, Storage, Cloud Functions (free tier)
 - Media: FFmpeg via `fluent-ffmpeg` for quality checks
 
+## Legal & Compliance
+
+- Privacy Policy: https://Tibule12.github.io/AutoPromote/docs/privacy.html
+- Terms of Service: https://Tibule12.github.io/AutoPromote/docs/terms.html
+- Data Deletion: https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
+
 ## Roadmap (near‑term)
 
 1) Wire landing page + smart link generation into upload/approval and save to content doc
