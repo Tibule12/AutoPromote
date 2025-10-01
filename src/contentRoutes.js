@@ -204,6 +204,21 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       } catch (lpErr) {
         console.log('⚠️ Could not mark landing page intent:', lpErr.message);
       }
+
+      // Create notification: content uploaded
+      try {
+        await db.collection('notifications').add({
+          user_id: req.userId,
+          type: 'content_uploaded',
+          content_id: contentId,
+          title: 'Content uploaded',
+          message: `Your content "${title}" was uploaded successfully.`,
+          created_at: new Date(),
+          read: false
+        });
+      } catch (nErr) {
+        console.log('⚠️ Could not write upload notification:', nErr.message);
+      }
     }
 
     const content = { id: contentId, ...contentData };
@@ -269,6 +284,21 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
           console.log('🔗 Marked smart link generation intent');
         } catch (slErr) {
           console.log('⚠️ Could not mark smart link intent:', slErr.message);
+        }
+
+        // Create notification: schedule created
+        try {
+          await db.collection('notifications').add({
+            user_id: req.userId,
+            type: 'schedule_created',
+            content_id: content.id,
+            title: 'Promotion scheduled',
+            message: `Your content "${title}" has been scheduled (${promotionSchedule.frequency}).`,
+            created_at: new Date(),
+            read: false
+          });
+        } catch (n2Err) {
+          console.log('⚠️ Could not write schedule notification:', n2Err.message);
         }
       } catch (scheduleError) {
         console.error('Error creating promotion schedule:', scheduleError);
