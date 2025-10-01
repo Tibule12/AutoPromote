@@ -105,6 +105,7 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       target_platforms,
       scheduled_promotion_time,
       promotion_frequency,
+      schedule_hint,
       target_rpm,
       min_views_threshold,
       max_budget
@@ -167,6 +168,7 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       creator_payout_rate: creatorPayoutRate,
       views: 0,
       revenue: 0,
+      schedule_hint: schedule_hint || null,
       ...(validUrl ? { url: validUrl } : {})
     };
 
@@ -190,14 +192,30 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
     console.log('Content object created:', { id: content.id, title: content.title, type: content.type });
     let promotionSchedule = null;
 
-    // Create promotion schedule if scheduled time is provided
-    if (scheduled_promotion_time) {
+    // Create promotion schedule if scheduled time is provided or hinted
+    const deriveSchedule = () => {
+      const hint = schedule_hint;
+      if (hint && hint.when) {
+        return {
+          start_time: hint.when,
+          schedule_type: hint.frequency && hint.frequency !== 'once' ? 'recurring' : 'specific',
+          frequency: hint.frequency || 'once'
+        };
+      }
+      if (scheduled_promotion_time) {
+        return { start_time: scheduled_promotion_time, schedule_type: 'specific', frequency: 'once' };
+      }
+      return null;
+    };
+
+    const scheduleTemplate = deriveSchedule();
+    if (scheduleTemplate) {
       try {
         promotionSchedule = await promotionService.schedulePromotion(content.id, {
           platform: 'all',
-          schedule_type: promotion_frequency === 'once' ? 'specific' : 'recurring',
-          start_time: scheduled_promotion_time,
-          frequency: promotion_frequency,
+          schedule_type: scheduleTemplate.schedule_type,
+          start_time: scheduleTemplate.start_time,
+          frequency: scheduleTemplate.frequency,
           is_active: true,
           budget: maxBudget,
           target_metrics: {

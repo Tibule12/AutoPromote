@@ -9,6 +9,12 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onLogout, 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [type, setType] = useState('video');
+  const [scheduleMode, setScheduleMode] = useState('auto'); // 'auto' | 'manual'
+  const [manualWhen, setManualWhen] = useState(''); // yyyy-MM-ddTHH:mm
+  const [frequency, setFrequency] = useState('once'); // once | daily | weekly
 
   // Ensure content is an array to simplify rendering
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
@@ -27,11 +33,56 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onLogout, 
     );
   };
 
+  const suggestNextTime = () => {
+    // Very simple heuristic windows in local time
+    const windows = {
+      youtube: [[15, 0], [17, 0]],
+      tiktok: [[19, 0], [21, 0]],
+      instagram: [[11, 0], [13, 0]], // we'll also consider evening implicitly by overlap with tiktok
+      facebook: [[9, 0], [11, 0]],
+      twitter: [[8, 0], [10, 0]],
+    };
+    const now = new Date();
+    let candidates = [];
+    selectedPlatforms.forEach((p) => {
+      const win = windows[p];
+      if (!win) return;
+      const [startH, startM] = win[0];
+      const candidate = new Date(now);
+      candidate.setHours(startH, startM, 0, 0);
+      if (candidate <= now) candidate.setDate(candidate.getDate() + 1);
+      candidates.push(candidate.getTime());
+    });
+    if (candidates.length === 0) {
+      const fallback = new Date(now);
+      fallback.setHours(now.getHours() + 2, 0, 0, 0);
+      return fallback.toISOString();
+    }
+    const ts = Math.min(...candidates);
+    return new Date(ts + 10 * 60 * 1000).toISOString(); // +10min jitter
+  };
+
   const handleUploadSubmit = async () => {
     if (!onUpload) return;
-    await onUpload({ file: selectedFile, platforms: selectedPlatforms });
+    const whenIso = scheduleMode === 'manual' && manualWhen
+      ? new Date(manualWhen).toISOString()
+      : suggestNextTime();
+    await onUpload({
+      file: selectedFile,
+      platforms: selectedPlatforms,
+      title,
+      description,
+      type,
+      schedule: { mode: scheduleMode, when: whenIso, frequency }
+    });
     setSelectedFile(null);
     setSelectedPlatforms([]);
+    setTitle('');
+    setDescription('');
+    setType('video');
+    setScheduleMode('auto');
+    setManualWhen('');
+    setFrequency('once');
   };
 
   return (
@@ -120,12 +171,56 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onLogout, 
               />
               {selectedFile && <div style={{marginTop: '.5rem', color: '#9aa4b2'}}>Selected: {selectedFile.name}</div>}
             </div>
+            <div style={{display: 'grid', gap: '.5rem', marginTop: '.5rem'}}>
+              <input
+                type="text"
+                placeholder="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                style={{padding: '.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#eef2ff'}}
+              />
+              <textarea
+                placeholder="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                style={{padding: '.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#eef2ff'}}
+              />
+              <label style={{color:'#9aa4b2'}}>Type: 
+                <select value={type} onChange={(e) => setType(e.target.value)} style={{marginLeft: '.5rem', background:'rgba(255,255,255,0.05)', color:'#eef2ff', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'8px', padding:'.3rem .5rem'}}>
+                  <option value="video">Video</option>
+                  <option value="image">Image</option>
+                </select>
+              </label>
+            </div>
             <div className="platform-toggles">
               <label><input type="checkbox" checked={selectedPlatforms.includes('tiktok')} onChange={() => togglePlatform('tiktok')} /> TikTok</label>
               <label><input type="checkbox" checked={selectedPlatforms.includes('youtube')} onChange={() => togglePlatform('youtube')} /> YouTube</label>
               <label><input type="checkbox" checked={selectedPlatforms.includes('instagram')} onChange={() => togglePlatform('instagram')} /> Instagram</label>
               <label><input type="checkbox" checked={selectedPlatforms.includes('twitter')} onChange={() => togglePlatform('twitter')} /> Twitter</label>
               <label><input type="checkbox" checked={selectedPlatforms.includes('facebook')} onChange={() => togglePlatform('facebook')} /> Facebook</label>
+            </div>
+            <div style={{display:'grid', gap:'.5rem', marginTop:'.5rem'}}>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
+                <label><input type="radio" name="schedmode" checked={scheduleMode==='auto'} onChange={()=>setScheduleMode('auto')} /> Auto-schedule</label>
+                <label><input type="radio" name="schedmode" checked={scheduleMode==='manual'} onChange={()=>setScheduleMode('manual')} /> Manual</label>
+              </div>
+              {scheduleMode==='manual' ? (
+                <div style={{display:'flex', gap:'.5rem', alignItems:'center'}}>
+                  <input type="datetime-local" value={manualWhen} onChange={(e)=>setManualWhen(e.target.value)} style={{padding:'.4rem', borderRadius:'8px', border:'1px solid rgba(255,255,255,0.15)', background:'rgba(255,255,255,0.05)', color:'#eef2ff'}} />
+                  <label style={{color:'#9aa4b2'}}>Frequency:
+                    <select value={frequency} onChange={(e)=>setFrequency(e.target.value)} style={{marginLeft: '.5rem', background:'rgba(255,255,255,0.05)', color:'#eef2ff', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'8px', padding:'.3rem .5rem'}}>
+                      <option value="once">Once</option>
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                    </select>
+                  </label>
+                </div>
+              ) : (
+                <div style={{color:'#9aa4b2'}}>
+                  Suggested next time: <span style={{color:'#eef2ff'}}>{new Date(suggestNextTime()).toLocaleString()}</span> · Frequency: {frequency}
+                </div>
+              )}
             </div>
             <div style={{display: 'flex', gap: '.5rem'}}>
               <button className="check-quality" onClick={handleUploadSubmit} disabled={!selectedFile || selectedPlatforms.length === 0}>Upload</button>
