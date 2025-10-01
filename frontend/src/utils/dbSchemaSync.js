@@ -18,16 +18,16 @@ export class DatabaseSyncService {
   static async validateDatabaseSchema(user) {
     console.log('Validating database schema for admin dashboard...');
     try {
-      // Always check user and content collections
-      await this.validateCollection('users');
-      await this.validateCollection('content');
+      // Always check user and content collections (read-only)
+      await this.validateCollection('users', { allowWrite: false });
+      await this.validateCollection('content', { allowWrite: false });
 
-      // Only check admin collections if user is admin
+      // Only check admin collections if user is admin; still avoid writes on client
       const isAdmin = user && (user.role === 'admin' || user.isAdmin === true);
       if (isAdmin) {
-        await this.validateCollection('promotions');
-        await this.validateCollection('activities');
-        await this.validateCollection('analytics');
+        await this.validateCollection('promotions', { allowWrite: false });
+        await this.validateCollection('activities', { allowWrite: false });
+        await this.validateCollection('analytics', { allowWrite: false });
       }
 
       console.log('Database schema validation complete');
@@ -41,13 +41,15 @@ export class DatabaseSyncService {
   /**
    * Validate that a collection exists with at least one document
    */
-  static async validateCollection(collectionName) {
+  static async validateCollection(collectionName, options = { allowWrite: false }) {
     const collectionRef = collection(db, collectionName);
     const snapshot = await getDocs(query(collectionRef, limit(1)));
     
     if (snapshot.empty) {
-      console.log(`Collection '${collectionName}' is empty, adding sample data...`);
-      await this.createSampleData(collectionName);
+      console.log(`Collection '${collectionName}' is empty${options.allowWrite ? ', adding sample data...' : ', skipping client-side writes.'}`);
+      if (options.allowWrite) {
+        await this.createSampleData(collectionName);
+      }
     } else {
       console.log(`Collection '${collectionName}' exists and contains data`);
     }

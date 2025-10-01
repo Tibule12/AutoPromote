@@ -2,11 +2,12 @@ import React from 'react';
 import './UserDashboard.css';
 
 const UserDashboard = ({ user, stats, onLogout }) => {
+const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
   return (
     <div className="dashboard-root">
       <aside className="dashboard-sidebar">
         <div className="profile-section">
-          <img className="profile-avatar" src={user?.avatarUrl || '/default-avatar.png'} alt="Avatar" />
+          <img className="profile-avatar" src={user?.avatarUrl || DEFAULT_IMAGE} alt="Avatar" />
           <h2>{user?.name || 'User Name'}</h2>
           <div className="profile-referral">
             Referral: <span className="referral-link">{user?.referralCode || 'N/A'}</span>
