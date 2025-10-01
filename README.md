@@ -109,8 +109,10 @@ Property verification (if requested):
 - TikTok may provide one of two file names and token formats:
 	1) `tiktok-verify.txt` with content like `tiktok-site-verification=xxxx`
 	2) `tiktok-developers-site-verification.txt` with content like `tiktok-developers-site-verification=xxxx`
-- Place the file under: `docs/.well-known/` so it serves at:
+- If using GitHub Pages, place the file under: `docs/.well-known/` so it serves at:
 	- `https://Tibule12.github.io/AutoPromote/.well-known/<file>`
+- If using Render as your live domain, place the file under `public/.well-known/` (already mounted), so it serves at:
+	- `https://<your-render-domain>/.well-known/<file>`
 - Wait ~1–3 minutes after pushing, then click Verify in the TikTok console.
 
 ## Roadmap (near‑term)
