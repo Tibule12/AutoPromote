@@ -289,18 +289,13 @@ router.get('/my-content', authMiddleware, async (req, res) => {
 // Get content by ID
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
-    const { data: content, error } = await supabase
-      .from('content')
-      .select('*')
-      .eq('id', req.params.id)
-      .eq('user_id', req.userId)
-      .single();
-
-    if (error || !content) {
+    const contentRef = db.collection('content').doc(req.params.id);
+    const contentDoc = await contentRef.get();
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
       return res.status(404).json({ error: 'Content not found' });
     }
-
-    res.json({ content });
+    const data = contentDoc.data();
+    res.json({ content: { id: contentDoc.id, ...data } });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -313,7 +308,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     const contentRef = db.collection('content').doc(req.params.id);
     const contentDoc = await contentRef.get();
 
-    if (!contentDoc.exists || contentDoc.data().user_id !== req.user.uid) {
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
       return res.status(404).json({ error: 'Content not found' });
     }
 
@@ -341,7 +336,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     const contentRef = db.collection('content').doc(req.params.id);
     const contentDoc = await contentRef.get();
 
-    if (!contentDoc.exists || contentDoc.data().user_id !== req.user.uid) {
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
       return res.status(404).json({ error: 'Content not found' });
     }
 
@@ -426,15 +421,10 @@ router.post('/promote/:id', authMiddleware, async (req, res) => {
 // Get all promotion schedules for content
 router.get('/:id/promotion-schedules', authMiddleware, async (req, res) => {
   try {
-    // Verify content ownership
-    const { data: content, error: contentError } = await supabase
-      .from('content')
-      .select('id')
-      .eq('id', req.params.id)
-      .eq('user_id', req.userId)
-      .single();
-
-    if (contentError || !content) {
+    // Verify content ownership via Firestore
+    const contentRef = db.collection('content').doc(req.params.id);
+    const contentDoc = await contentRef.get();
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
       return res.status(404).json({ error: 'Content not found' });
     }
 
@@ -449,15 +439,10 @@ router.get('/:id/promotion-schedules', authMiddleware, async (req, res) => {
 // Create promotion schedule
 router.post('/:id/promotion-schedules', authMiddleware, async (req, res) => {
   try {
-    // Verify content ownership
-    const { data: content, error: contentError } = await supabase
-      .from('content')
-      .select('id')
-      .eq('id', req.params.id)
-      .eq('user_id', req.userId)
-      .single();
-
-    if (contentError || !content) {
+    // Verify content ownership via Firestore
+    const contentRef = db.collection('content').doc(req.params.id);
+    const contentDoc = await contentRef.get();
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
       return res.status(404).json({ error: 'Content not found' });
     }
 
@@ -494,26 +479,27 @@ router.delete('/promotion-schedules/:scheduleId', authMiddleware, async (req, re
 // Get optimization recommendations for content
 router.get('/:id/optimization', authMiddleware, async (req, res) => {
   try {
-    const { data: content, error } = await supabase
-      .from('content')
-      .select('*')
-      .eq('id', req.params.id)
-      .eq('user_id', req.userId)
-      .single();
-
-    if (error || !content) {
+    const contentRef = db.collection('content').doc(req.params.id);
+    const contentDoc = await contentRef.get();
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
       return res.status(404).json({ error: 'Content not found' });
     }
+    const content = { id: contentDoc.id, ...contentDoc.data() };
 
     // Get analytics data for better recommendations
-    const { data: analytics } = await supabase
-      .from('analytics')
-      .select('*')
-      .eq('content_id', req.params.id)
-      .order('metrics_updated_at', { ascending: false })
-      .limit(1);
-
-    const analyticsData = analytics && analytics.length > 0 ? analytics[0] : {};
+    let analyticsData = {};
+    try {
+      const analyticsSnapshot = await db.collection('analytics')
+        .where('content_id', '==', req.params.id)
+        .orderBy('metrics_updated_at', 'desc')
+        .limit(1)
+        .get();
+      if (!analyticsSnapshot.empty) {
+        analyticsData = analyticsSnapshot.docs[0].data();
+      }
+    } catch (e) {
+      console.log('No analytics collection or query error, proceeding without analytics');
+    }
 
     const recommendations = optimizationService.generateOptimizationRecommendations(content, analyticsData);
     const platformOptimization = optimizationService.optimizePromotionSchedule(
@@ -544,32 +530,25 @@ router.patch('/:id/status', authMiddleware, async (req, res) => {
     if (!['draft', 'scheduled', 'published', 'paused', 'archived'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
-
-    const { data, error } = await supabase
-      .from('content')
-      .update({ 
-        status,
-        updated_at: new Date().toISOString(),
-        ...(status === 'published' && !req.body.keep_promotion_time ? {
-          promotion_started_at: new Date().toISOString(),
-          scheduled_promotion_time: null
-        } : {})
-      })
-      .eq('id', req.params.id)
-      .eq('user_id', req.userId)
-      .select();
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    if (!data || data.length === 0) {
+    const contentRef = db.collection('content').doc(req.params.id);
+    const contentDoc = await contentRef.get();
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
       return res.status(404).json({ error: 'Content not found' });
     }
 
-    res.json({ 
+    const updatePayload = {
+      status,
+      updated_at: new Date()
+    };
+    if (status === 'published' && !req.body.keep_promotion_time) {
+      updatePayload.promotion_started_at = new Date();
+      updatePayload.scheduled_promotion_time = null;
+    }
+    await contentRef.update(updatePayload);
+    const updated = await contentRef.get();
+    res.json({
       message: `Content status updated to ${status}`,
-      content: data[0]
+      content: { id: updated.id, ...updated.data() }
     });
   } catch (error) {
     console.error('Error updating content status:', error);
@@ -589,28 +568,28 @@ router.patch('/bulk/status', authMiddleware, async (req, res) => {
     if (!['draft', 'scheduled', 'published', 'paused', 'archived'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
-
-    const { data, error } = await supabase
-      .from('content')
-      .update({ 
-        status,
-        updated_at: new Date().toISOString(),
-        ...(status === 'published' ? {
-          promotion_started_at: new Date().toISOString(),
-          scheduled_promotion_time: null
-        } : {})
-      })
-      .in('id', content_ids)
-      .eq('user_id', req.userId)
-      .select();
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
+    const batch = db.batch();
+    const updated_content = [];
+    for (const id of content_ids) {
+      const ref = db.collection('content').doc(id);
+      const doc = await ref.get();
+      if (doc.exists && doc.data().user_id === req.userId) {
+        const updatePayload = {
+          status,
+          updated_at: new Date()
+        };
+        if (status === 'published') {
+          updatePayload.promotion_started_at = new Date();
+          updatePayload.scheduled_promotion_time = null;
+        }
+        batch.update(ref, updatePayload);
+        updated_content.push({ id, ...doc.data(), ...updatePayload });
+      }
     }
-
-    res.json({ 
-      message: `Updated status for ${data?.length || 0} content items to ${status}`,
-      updated_content: data
+    await batch.commit();
+    res.json({
+      message: `Updated status for ${updated_content.length} content items to ${status}`,
+      updated_content
     });
   } catch (error) {
     console.error('Error bulk updating content status:', error);
@@ -621,16 +600,12 @@ router.patch('/bulk/status', authMiddleware, async (req, res) => {
 // Get content analytics
 router.get('/:id/analytics', authMiddleware, async (req, res) => {
   try {
-    const { data: content, error } = await supabase
-      .from('content')
-      .select('*')
-      .eq('id', req.params.id)
-      .eq('user_id', req.userId)
-      .single();
-
-    if (error || !content) {
+    const contentRef = db.collection('content').doc(req.params.id);
+    const contentDoc = await contentRef.get();
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
       return res.status(404).json({ error: 'Content not found' });
     }
+    const content = { id: contentDoc.id, ...contentDoc.data() };
 
     // Simulate platform breakdown
     const platformBreakdown = {
@@ -662,14 +637,14 @@ router.get('/promotion-schedules/:scheduleId/analytics', authMiddleware, async (
   try {
     const { scheduleId } = req.params;
     
-    // Verify user has access to this schedule
-    const { data: schedule, error: scheduleError } = await supabase
-      .from('promotion_schedules')
-      .select('content:content_id(*)')
-      .eq('id', scheduleId)
-      .single();
-
-    if (scheduleError || !schedule || schedule.content.user_id !== req.userId) {
+    // Verify user has access to this schedule via Firestore
+    const scheduleDoc = await db.collection('promotion_schedules').doc(scheduleId).get();
+    if (!scheduleDoc.exists) {
+      return res.status(404).json({ error: 'Schedule not found or access denied' });
+    }
+    const scheduleData = scheduleDoc.data();
+    const contentDoc = await db.collection('content').doc(scheduleData.contentId).get();
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
       return res.status(404).json({ error: 'Schedule not found or access denied' });
     }
 
@@ -693,20 +668,12 @@ router.post('/bulk/schedule', authMiddleware, async (req, res) => {
     if (!schedule_template || typeof schedule_template !== 'object') {
       return res.status(400).json({ error: 'Schedule template is required' });
     }
-
-    // Verify user owns all content
-    const { data: userContent, error } = await supabase
-      .from('content')
-      .select('id')
-      .in('id', content_ids)
-      .eq('user_id', req.userId);
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    if (userContent.length !== content_ids.length) {
-      return res.status(403).json({ error: 'Access denied to some content items' });
+    // Verify user owns all content via Firestore
+    for (const id of content_ids) {
+      const doc = await db.collection('content').doc(id).get();
+      if (!doc.exists || doc.data().user_id !== req.userId) {
+        return res.status(403).json({ error: 'Access denied to some content items' });
+      }
     }
 
     const results = await promotionService.bulkSchedulePromotions(content_ids, schedule_template);
@@ -720,14 +687,8 @@ router.post('/bulk/schedule', authMiddleware, async (req, res) => {
 // Process completed promotions (admin endpoint)
 router.post('/admin/process-completed-promotions', authMiddleware, async (req, res) => {
   try {
-    // Check if user is admin
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', req.userId)
-      .single();
-
-    if (userError || user.role !== 'admin') {
+    // Check if user is admin (from auth middleware)
+    if (!req.user || req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
@@ -745,14 +706,8 @@ router.post('/admin/process-completed-promotions', authMiddleware, async (req, r
 // Process creator payout (admin endpoint)
 router.post('/admin/process-creator-payout/:contentId', authMiddleware, async (req, res) => {
   try {
-    // Check if user is admin
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', req.userId)
-      .single();
-
-    if (userError || user.role !== 'admin') {
+    // Check if user is admin (from auth middleware)
+    if (!req.user || req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
@@ -845,14 +800,8 @@ router.post('/admin/process-creator-payout/:contentId', authMiddleware, async (r
 // Get active promotions with filters
 router.get('/admin/active-promotions', authMiddleware, async (req, res) => {
   try {
-    // Check if user is admin
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', req.userId)
-      .single();
-
-    if (userError || user.role !== 'admin') {
+    // Check if user is admin (from auth middleware)
+    if (!req.user || req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
@@ -874,16 +823,12 @@ router.get('/admin/active-promotions', authMiddleware, async (req, res) => {
 // Advanced scheduling options endpoint
 router.get('/:id/scheduling-options', authMiddleware, async (req, res) => {
   try {
-    const { data: content, error } = await supabase
-      .from('content')
-      .select('*')
-      .eq('id', req.params.id)
-      .eq('user_id', req.userId)
-      .single();
-
-    if (error || !content) {
+    const contentRef = db.collection('content').doc(req.params.id);
+    const contentDoc = await contentRef.get();
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
       return res.status(404).json({ error: 'Content not found' });
     }
+    const content = { id: contentDoc.id, ...contentDoc.data() };
 
     const schedulingOptions = {
       frequencies: [
