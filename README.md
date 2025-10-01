@@ -77,6 +77,33 @@ Located in `autopromote-functions/` and exported by `index.js`:
 - Terms of Service: https://Tibule12.github.io/AutoPromote/docs/terms.html
 - Data Deletion: https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
 
+### TikTok Developer Setup
+
+Use these values in the TikTok Developer Console (App > Basic Info / OAuth):
+
+- Official Website URL: https://Tibule12.github.io/AutoPromote
+- Privacy Policy URL: https://Tibule12.github.io/AutoPromote/docs/privacy.html
+- Terms of Service URL: https://Tibule12.github.io/AutoPromote/docs/terms.html
+- Data Deletion URL: https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
+- Platform: Web
+- Redirect URI: https://autopromote.onrender.com/api/tiktok/callback
+- Scopes (initial): user.info.basic
+
+Server env required (Render):
+
+```
+TIKTOK_CLIENT_KEY=...
+TIKTOK_CLIENT_SECRET=...
+TIKTOK_REDIRECT_URI=https://autopromote.onrender.com/api/tiktok/callback
+DASHBOARD_URL=https://Tibule12.github.io/AutoPromote
+```
+
+Test login flow:
+
+1. Sign in to the dashboard, then visit: https://autopromote.onrender.com/api/tiktok/auth
+2. Approve on TikTok, you’ll be redirected back to the dashboard with `?tiktok=connected`.
+3. Tokens are stored at Firestore: `users/{uid}/connections/tiktok`.
+
 ## Roadmap (near‑term)
 
 1) Wire landing page + smart link generation into upload/approval and save to content doc

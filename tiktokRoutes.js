@@ -1,26 +1,58 @@
 // tiktokRoutes.js
-// TikTok OAuth and API integration
+// TikTok OAuth and API integration (server-side only)
 const express = require('express');
 const fetch = require('node-fetch');
 const router = express.Router();
+const authMiddleware = require('./authMiddleware');
+const { admin, db } = require('./firebaseAdmin');
 
-const TIKTOK_CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY || 'awudt12ca5z52khb';
-const TIKTOK_CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET || '0ogHPNXjebE6YbkskrTVzpceA9cmrvXW';
-const TIKTOK_REDIRECT_URI = process.env.TIKTOK_REDIRECT_URI || 'http://localhost:5000/api/tiktok/callback';
+const TIKTOK_CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
+const TIKTOK_CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
+const TIKTOK_REDIRECT_URI = process.env.TIKTOK_REDIRECT_URI; // e.g., https://autopromote.onrender.com/api/tiktok/callback
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://Tibule12.github.io/AutoPromote';
 
-// 1. Redirect user to TikTok for OAuth
-router.get('/auth', (req, res) => {
-  const scope = 'user.info.basic,video.list,video.upload';
-  const state = Math.random().toString(36).substring(2, 15); // random string for CSRF protection
-  const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${TIKTOK_CLIENT_KEY}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(TIKTOK_REDIRECT_URI)}&state=${state}`;
-  res.redirect(authUrl);
+function ensureTikTokEnv(res) {
+  if (!TIKTOK_CLIENT_KEY || !TIKTOK_CLIENT_SECRET || !TIKTOK_REDIRECT_URI) {
+    return res.status(500).json({ error: 'TikTok is not configured on the server. Missing TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, or TIKTOK_REDIRECT_URI.' });
+  }
+}
+
+// 1) Begin OAuth (requires user auth) — keeps scopes minimal for review
+router.get('/auth', authMiddleware, async (req, res) => {
+  if (ensureTikTokEnv(res)) return;
+  try {
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+    const nonce = Math.random().toString(36).slice(2);
+    const state = `${uid}.${nonce}`;
+    await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
+      state,
+      nonce,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+    // Request minimal scope for initial approval; can expand later (video.upload requires program access)
+    const scope = 'user.info.basic';
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(TIKTOK_CLIENT_KEY)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(TIKTOK_REDIRECT_URI)}&state=${encodeURIComponent(state)}`;
+    res.redirect(authUrl);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to start TikTok OAuth', details: e.message });
+  }
 });
 
-// 2. Handle TikTok OAuth callback
+// 2) OAuth callback — verify state, exchange code, store tokens under users/{uid}/connections/tiktok
 router.get('/callback', async (req, res) => {
+  if (ensureTikTokEnv(res)) return;
   const { code, state } = req.query;
-  if (!code) return res.status(400).json({ error: 'Missing code from TikTok' });
+  if (!code || !state) return res.status(400).send('Missing code or state');
   try {
+    const [uid, nonce] = String(state).split('.');
+    if (!uid || !nonce) return res.status(400).send('Invalid state');
+    const stateDoc = await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').get();
+    const stateData = stateDoc.exists ? stateDoc.data() : null;
+    if (!stateData || stateData.state !== state) {
+      return res.status(400).send('State mismatch');
+    }
+    // Exchange code
     const tokenRes = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -33,14 +65,32 @@ router.get('/callback', async (req, res) => {
       })
     });
     const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) {
-      return res.status(400).json({ error: 'Failed to get TikTok access token', details: tokenData });
+    if (!tokenRes.ok || !tokenData.access_token) {
+      return res.status(400).send('Failed to get TikTok access token');
     }
-    // Save access_token and refresh_token as needed (e.g., in DB, session, etc.)
-    // For demo, just return them
-    res.json({ access_token: tokenData.access_token, refresh_token: tokenData.refresh_token, open_id: tokenData.open_id });
+    // Store tokens securely under user
+    const connRef = db.collection('users').doc(uid).collection('connections').doc('tiktok');
+    await connRef.set({
+      provider: 'tiktok',
+      open_id: tokenData.open_id,
+      scope: tokenData.scope,
+      access_token: tokenData.access_token,
+      refresh_token: tokenData.refresh_token,
+      expires_in: tokenData.expires_in,
+      obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+    // redirect back to dashboard with success
+    const url = new URL(DASHBOARD_URL);
+    url.searchParams.set('tiktok', 'connected');
+    res.redirect(url.toString());
   } catch (err) {
-    res.status(500).json({ error: 'TikTok token exchange failed', details: err.message });
+    try {
+      const url = new URL(DASHBOARD_URL);
+      url.searchParams.set('tiktok', 'error');
+      return res.redirect(url.toString());
+    } catch (_) {
+      return res.status(500).send('TikTok token exchange failed');
+    }
   }
 });
 
