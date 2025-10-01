@@ -61,11 +61,13 @@ const UserDashboard = ({ user, content, stats, badges, notifications, onLogout }
             <div className="upload-history">
               <h4>Upload History</h4>
               <ul>
-                {content?.map((item, idx) => (
+                {Array.isArray(content) ? content.map((item, idx) => (
                   <li key={idx}>
-                    {item.title} - <span className={`status status-${item.status}`}>{item.status}</span>
+                    {typeof item.title === 'string' ? item.title : JSON.stringify(item.title)}
+                    {' - '}
+                    <span className={`status status-${typeof item.status === 'string' ? item.status : JSON.stringify(item.status)}`}>{typeof item.status === 'string' ? item.status : JSON.stringify(item.status)}</span>
                   </li>
-                ))}
+                )) : null}
               </ul>
             </div>
           </section>
