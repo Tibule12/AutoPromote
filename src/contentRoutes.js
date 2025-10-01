@@ -381,7 +381,6 @@ router.get('/my-promotion-schedules', authMiddleware, async (req, res) => {
     // Query schedules for these content IDs
     const schedulesSnap = await db.collection('promotion_schedules')
       .where('contentId', 'in', contentIds.slice(0, 10)) // Firestore 'in' has max 10 items; batch if needed
-      .orderBy('startTime')
       .get();
 
     let schedules = schedulesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -392,7 +391,6 @@ router.get('/my-promotion-schedules', authMiddleware, async (req, res) => {
         const batchIds = contentIds.slice(i, i + 10);
         const snap = await db.collection('promotion_schedules')
           .where('contentId', 'in', batchIds)
-          .orderBy('startTime')
           .get();
         schedules = schedules.concat(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       }
