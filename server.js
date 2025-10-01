@@ -17,6 +17,7 @@ const contentRoutes = require('./contentRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const adminRoutes = require('./adminRoutes');
 const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
+const tiktokRoutes = require('./tiktokRoutes');
 
 // Try to load adminTestRoutes, but continue with a dummy router if not available
 let adminTestRoutes;
@@ -77,6 +78,7 @@ app.use('/api/content', contentRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
+app.use('/api/tiktok', tiktokRoutes);
 app.use('/api', adminTestRoutes); // Add admin test routes
 
 // Register optional routes
