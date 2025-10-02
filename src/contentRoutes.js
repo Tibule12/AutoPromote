@@ -156,7 +156,11 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       views: 0,
       revenue: 0,
       schedule_hint: schedule_hint || null,
-      ...(validUrl ? { url: validUrl } : {})
+      ...(validUrl ? { url: validUrl } : {}),
+      // Optional quality results if the client ran /api/content/quality-check first
+      ...(req.body.quality_score !== undefined ? { quality_score: Number(req.body.quality_score) } : {}),
+      ...(Array.isArray(req.body.quality_feedback) ? { quality_feedback: req.body.quality_feedback.slice(0, 20) } : {}),
+      ...(typeof req.body.quality_enhanced === 'boolean' ? { quality_enhanced: req.body.quality_enhanced } : {})
     };
 
     let contentId = `preview_${Date.now()}`;
