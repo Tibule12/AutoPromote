@@ -61,6 +61,9 @@ The app enforces a daily upload cap of 10 items per user (UTC day) and auto-sche
   - schedule_hint: { when?: string, timezone?: string, frequency?: string } | null
   - landingPageRequestedAt: Timestamp (optional)
   - smartLinkRequestedAt: Timestamp (optional)
+  - quality_score: number (0-100, optional)
+  - quality_feedback: string[] (optional)
+  - quality_enhanced: boolean (optional)
 
 Indexes (recommended):
 - content by created_at desc
@@ -137,4 +140,4 @@ Auto-scheduling windows (if you don’t specify a time):
 Quality checks:
 - Endpoint: POST /api/content/quality-check (multipart/form-data file="file")
 - The server analyzes with ffmpeg and, if needed, enhances to 1280x720, ~1.5 Mbps video, 128 kbps audio, returning a qualityScore and feedback.
-- Consider running a quick quality check before final upload for best results.
+- Consider running a quick quality check before final upload for best results. If you pass `quality_score`, `quality_feedback`, and `quality_enhanced` in `/api/content/upload` body, they will be stored on the content document for auditing.
