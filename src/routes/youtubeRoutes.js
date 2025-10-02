@@ -19,7 +19,7 @@ function ensureEnv(res) {
 }
 
 router.get('/health', (req, res) => {
-  res.json({ ok: true, hasClientId: !!YT_CLIENT_ID, hasRedirect: !!YT_REDIRECT_URI });
+  res.json({ ok: true, hasClientId: !!YT_CLIENT_ID, hasClientSecret: !!YT_CLIENT_SECRET, hasRedirect: !!YT_REDIRECT_URI });
 });
 
 async function getUidFromAuthHeader(req) {
@@ -40,6 +40,11 @@ router.post('/auth/prepare', async (req, res) => {
   try {
     const uid = await getUidFromAuthHeader(req);
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+    // Light diagnostics (masked)
+    try {
+      const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
+      console.log('[YouTube][prepare] Using client/redirect', { clientId: mask(YT_CLIENT_ID), redirect: YT_REDIRECT_URI });
+    } catch (_) {}
     const nonce = Math.random().toString(36).slice(2);
     const state = `${uid}.${nonce}`;
     await db.collection('users').doc(uid).collection('oauth_state').doc('youtube').set({
@@ -87,6 +92,11 @@ router.get('/callback', async (req, res) => {
   const { code, state } = req.query;
   if (!code) return res.status(400).json({ error: 'Missing code' });
   try {
+    // Light diagnostics (masked)
+    try {
+      const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
+      console.log('[YouTube][callback] Exchanging code with', { clientId: mask(YT_CLIENT_ID), redirect: YT_REDIRECT_URI });
+    } catch (_) {}
     let uidFromState;
     if (state && typeof state === 'string' && state.includes('.')) {
       const [uid] = state.split('.');
