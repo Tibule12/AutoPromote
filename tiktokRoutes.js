@@ -9,8 +9,8 @@ const { admin, db } = require('./firebaseAdmin');
 const TIKTOK_CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 const TIKTOK_CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
 const TIKTOK_REDIRECT_URI = process.env.TIKTOK_REDIRECT_URI; // e.g., https://autopromote.onrender.com/api/tiktok/callback
-// Default dashboard URL to Render domain to ensure redirects land on the live app unless overridden
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote.onrender.com';
+// Default dashboard URL to your live frontend; can be overridden via env
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote-1.onrender.com';
 
 function ensureTikTokEnv(res) {
   if (!TIKTOK_CLIENT_KEY || !TIKTOK_CLIENT_SECRET || !TIKTOK_REDIRECT_URI) {
