@@ -33,44 +33,38 @@ const promotionService = require('./promotionService');
 const optimizationService = require('./optimizationService');
 const router = express.Router();
 
-// Helper function to check if user can upload (rate limiting)
-const canUserUpload = async (userId, daysAgo = 21) => {
-  const cutoffDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+// Enforce max 10 uploads per user per calendar day (UTC)
+const getStartOfDayUTC = (date = new Date()) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0));
+const canUserUploadToday = async (userId, maxPerDay = 10) => {
   try {
+    const startOfDay = getStartOfDayUTC();
     const snapshot = await db.collection('content')
       .where('user_id', '==', userId)
-      .where('created_at', '>=', cutoffDate)
-      .orderBy('created_at', 'desc')
-      .limit(1)
+      .where('created_at', '>=', startOfDay)
       .get();
-
-    if (snapshot.empty) {
-      // No recent content, can upload
-      return { canUpload: true, reason: null };
-    }
-
-    const mostRecentContent = snapshot.docs[0].data();
-    const createdAt = mostRecentContent.created_at;
-
-    // If created_at is a Firestore Timestamp, convert to Date
-    const createdDate = createdAt && createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
-    const daysSinceUpload = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
-
-    if (daysSinceUpload < daysAgo) {
-      return {
-        canUpload: false,
-        reason: `Last upload was ${daysSinceUpload.toFixed(1)} days ago. Must wait ${daysAgo} days between uploads.`,
-        daysSinceLastUpload: daysSinceUpload,
-        lastUploadDate: createdDate.toISOString()
-      };
-    }
-
-    return { canUpload: true, reason: null };
+    const count = snapshot.size;
+    return { canUpload: count < maxPerDay, reason: count >= maxPerDay ? `Daily limit reached (${maxPerDay}). Try again tomorrow.` : null, countToday: count, maxPerDay };
   } catch (error) {
-    console.error('Error checking user upload eligibility:', error);
+    console.error('Error checking daily upload limit:', error);
     // On error, allow upload to avoid blocking users
-    return { canUpload: true, reason: null };
+    return { canUpload: true, reason: null, countToday: 0, maxPerDay };
   }
+};
+
+// Derive next optimal posting time per platform (simple window heuristic, returns ISO UTC)
+const nextOptimalTimeForPlatform = (platform, tz = 'UTC') => {
+  // Using UTC windows; a future improvement: shift by timezone
+  const windowsUTC = {
+    youtube: [15, 0],      // 15:00 UTC
+    tiktok: [19, 0],       // 19:00 UTC
+    instagram: [11, 0],    // 11:00 UTC
+    facebook: [9, 0],      // 09:00 UTC
+  };
+  const now = new Date();
+  const [h, m] = windowsUTC[platform] || [12, 0];
+  const candidate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), h, m, 0, 0));
+  if (candidate <= now) candidate.setUTCDate(candidate.getUTCDate() + 1);
+  return candidate.toISOString();
 };
 
 // Get all content (public endpoint)
@@ -128,21 +122,11 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       description: description || 'none'
     });
 
-    // TEMPORARILY DISABLED: Rate limiting for testing
-    // TODO: Re-enable after testing is complete
-    console.log('Rate limiting temporarily disabled for testing');
-    /*
-    const uploadCheck = await canUserUpload(req.userId, 21);
-    if (!uploadCheck.canUpload) {
-      console.log('Rate limit exceeded for user:', req.userId, 'Reason:', uploadCheck.reason);
-      return res.status(400).json({
-        error: 'Rate limit exceeded',
-        message: uploadCheck.reason,
-        days_since_last_upload: uploadCheck.daysSinceLastUpload,
-        last_upload_date: uploadCheck.lastUploadDate
-      });
+    // Enforce max 10 uploads per calendar day (UTC)
+    const daily = await canUserUploadToday(req.userId, 10);
+    if (!daily.canUpload) {
+      return res.status(400).json({ error: 'Daily limit reached', message: daily.reason, uploads_today: daily.countToday, max_per_day: daily.maxPerDay });
     }
-    */
 
     // Set business rules
     const optimalRPM = 900000; // Revenue per million views
@@ -264,18 +248,28 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
 
     if (scheduleTemplate) {
       try {
-        promotionSchedule = await promotionService.schedulePromotion(content.id, {
-          platform: 'all',
-          schedule_type: scheduleTemplate.schedule_type,
-          start_time: scheduleTemplate.start_time,
-          frequency: scheduleTemplate.frequency,
-          is_active: true,
-          budget: maxBudget,
-          target_metrics: {
-            target_views: minViews,
-            target_rpm: optimalRPM
+        const platformList = Array.isArray(target_platforms) && target_platforms.length ? target_platforms : ['youtube','tiktok','instagram','facebook'];
+        const createdSchedules = [];
+        for (const platform of platformList) {
+          const startAt = scheduleTemplate.schedule_type === 'specific' && scheduleTemplate.start_time
+            ? scheduleTemplate.start_time
+            : nextOptimalTimeForPlatform(platform, schedule_hint?.timezone || 'UTC');
+          try {
+            const sched = await promotionService.schedulePromotion(content.id, {
+              platform,
+              schedule_type: scheduleTemplate.schedule_type,
+              start_time: startAt,
+              frequency: scheduleTemplate.frequency,
+              is_active: true,
+              budget: maxBudget,
+              target_metrics: { target_views: minViews, target_rpm: optimalRPM }
+            });
+            createdSchedules.push(sched);
+          } catch (perPlatformErr) {
+            console.log(`⚠️ Could not schedule for ${platform}:`, perPlatformErr.message);
           }
-        });
+        }
+        promotionSchedule = createdSchedules[0] || null;
         // After schedule creation, attempt to add a smart link placeholder
         try {
           await db.collection('content').doc(content.id).update({
@@ -293,7 +287,7 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
             type: 'schedule_created',
             content_id: content.id,
             title: 'Promotion scheduled',
-            message: `Your content "${title}" has been scheduled (${promotionSchedule.frequency}).`,
+            message: `Your content "${title}" has been scheduled (${scheduleTemplate.frequency}) across ${Array.isArray(target_platforms) ? target_platforms.join(', ') : 'platforms'}.`,
             created_at: new Date(),
             read: false
           });
