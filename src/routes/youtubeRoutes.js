@@ -114,7 +114,17 @@ router.get('/callback', async (req, res) => {
       })
     });
     const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) return res.status(400).json({ error: 'Failed to obtain YouTube access token', details: tokenData });
+    if (!tokenData.access_token) {
+      // Redirect back to dashboard with an error hint so the UI can surface it cleanly
+      try {
+        const url = new URL(DASHBOARD_URL);
+        url.searchParams.set('youtube', 'error');
+        if (tokenData && tokenData.error) url.searchParams.set('reason', String(tokenData.error));
+        return res.redirect(url.toString());
+      } catch (_) {
+        return res.status(400).json({ error: 'Failed to obtain YouTube access token', details: tokenData });
+      }
+    }
 
     // Optional: fetch channel info
     let channel = null;
