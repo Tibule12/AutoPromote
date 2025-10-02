@@ -28,6 +28,16 @@ export const API_ENDPOINTS = {
   // Admin endpoints
   ADMIN_ANALYTICS: `${API_BASE_URL}/api/admin/analytics/overview`,
   
+  // TikTok endpoints
+  TIKTOK_AUTH_START: `${API_BASE_URL}/api/tiktok/auth/start`,
+  TIKTOK_STATUS: `${API_BASE_URL}/api/tiktok/status`,
+
+  // Schedule actions (construct with ID)
+  SCHEDULE_PAUSE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/pause`,
+  SCHEDULE_RESUME: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/resume`,
+  SCHEDULE_RESCHEDULE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/reschedule`,
+  SCHEDULE_DELETE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}`,
+
   // Health check
   HEALTH: `${API_BASE_URL}/api/health`
 };

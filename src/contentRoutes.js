@@ -601,6 +601,40 @@ router.put('/promotion-schedules/:scheduleId', authMiddleware, async (req, res) 
   }
 });
 
+// Convenience endpoints for schedule actions
+router.post('/promotion-schedules/:scheduleId/pause', authMiddleware, async (req, res) => {
+  try {
+    const schedule = await promotionService.updatePromotionSchedule(req.params.scheduleId, { is_active: false, isActive: false });
+    res.json({ schedule });
+  } catch (error) {
+    console.error('Error pausing promotion schedule:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.post('/promotion-schedules/:scheduleId/resume', authMiddleware, async (req, res) => {
+  try {
+    const schedule = await promotionService.updatePromotionSchedule(req.params.scheduleId, { is_active: true, isActive: true });
+    res.json({ schedule });
+  } catch (error) {
+    console.error('Error resuming promotion schedule:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.post('/promotion-schedules/:scheduleId/reschedule', authMiddleware, async (req, res) => {
+  try {
+    const { startTime, start_time } = req.body || {};
+    const newStart = startTime || start_time;
+    if (!newStart) return res.status(400).json({ error: 'startTime is required' });
+    const schedule = await promotionService.updatePromotionSchedule(req.params.scheduleId, { start_time: newStart, startTime: newStart });
+    res.json({ schedule });
+  } catch (error) {
+    console.error('Error rescheduling promotion schedule:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // Delete promotion schedule
 router.delete('/promotion-schedules/:scheduleId', authMiddleware, async (req, res) => {
   try {

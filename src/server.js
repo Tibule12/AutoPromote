@@ -12,6 +12,16 @@ const contentRoutes = require('./contentRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const adminRoutes = require('./adminRoutes');
 const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
+let tiktokRoutes;
+try {
+  tiktokRoutes = require('../tiktokRoutes'); // use top-level tiktokRoutes which includes auth + storage
+} catch (e) {
+  try {
+    tiktokRoutes = require('./routes/tiktokRoutes'); // fallback to older location if present
+  } catch (_) {
+    tiktokRoutes = express.Router();
+  }
+}
 
 // Try to load adminTestRoutes, but continue with a dummy router if not available
 let adminTestRoutes;
@@ -74,6 +84,8 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api', adminTestRoutes); // Add admin test routes
+// Mount TikTok routes if available
+app.use('/api/tiktok', tiktokRoutes);
 
 // Content Quality Check Route
 const contentQualityCheck = require('./contentQualityCheck');
