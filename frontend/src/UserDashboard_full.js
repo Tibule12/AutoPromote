@@ -200,9 +200,14 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       const currentUser = auth.currentUser;
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
-      // Redirect to backend to initiate TikTok OAuth
-      const url = `${API_ENDPOINTS.TIKTOK_AUTH_START}?id_token=${encodeURIComponent(idToken)}`;
-      window.location.href = url;
+      // Secure prepare: request authUrl, then redirect without exposing tokens in URL
+      const prep = await fetch(`${API_ENDPOINTS.TIKTOK_AUTH_START.replace('/auth/start','/auth/prepare')}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${idToken}` }
+      });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare TikTok OAuth');
+      window.location.href = data.authUrl;
     } catch (e) {
       alert(e.message || 'Unable to start TikTok connect');
     }
@@ -213,8 +218,13 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       const currentUser = auth.currentUser;
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
-      const url = `${API_ENDPOINTS.FACEBOOK_AUTH_START}?id_token=${encodeURIComponent(idToken)}`;
-      window.location.href = url;
+      const prep = await fetch(`${API_ENDPOINTS.FACEBOOK_AUTH_START.replace('/auth/start','/auth/prepare')}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${idToken}` }
+      });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Facebook OAuth');
+      window.location.href = data.authUrl;
     } catch (e) {
       alert(e.message || 'Unable to start Facebook connect');
     }
@@ -225,8 +235,13 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       const currentUser = auth.currentUser;
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
-      const url = `${API_ENDPOINTS.YOUTUBE_AUTH_START}?id_token=${encodeURIComponent(idToken)}`;
-      window.location.href = url;
+      const prep = await fetch(`${API_ENDPOINTS.YOUTUBE_AUTH_START.replace('/auth/start','/auth/prepare')}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${idToken}` }
+      });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare YouTube OAuth');
+      window.location.href = data.authUrl;
     } catch (e) {
       alert(e.message || 'Unable to start YouTube connect');
     }

@@ -20,14 +20,58 @@ router.get('/health', (req, res) => {
   res.json({ ok: true, hasClientId: !!FB_CLIENT_ID, hasRedirect: !!FB_REDIRECT_URI });
 });
 
+async function getUidFromAuthHeader(req) {
+  try {
+    const authz = req.headers.authorization || '';
+    const [scheme, token] = authz.split(' ');
+    if (scheme === 'Bearer' && token) {
+      const decoded = await admin.auth().verifyIdToken(String(token));
+      return decoded.uid;
+    }
+  } catch (_) {}
+  return null;
+}
+
+// Preferred: prepare OAuth URL without exposing id_token in query
+router.post('/auth/prepare', async (req, res) => {
+  if (ensureEnv(res)) return;
+  try {
+    const uid = await getUidFromAuthHeader(req);
+    if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+    const nonce = Math.random().toString(36).slice(2);
+    const state = `${uid}.${nonce}`;
+    await db.collection('users').doc(uid).collection('oauth_state').doc('facebook').set({
+      state,
+      nonce,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+    const scope = [
+      'pages_show_list',
+      'pages_manage_posts',
+      'pages_read_engagement',
+      'pages_manage_metadata',
+      'instagram_basic',
+      'instagram_content_publish'
+    ].join(',');
+    const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_URI)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}`;
+    return res.json({ authUrl });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to prepare Facebook OAuth' });
+  }
+});
+
 // Begin OAuth: verify Firebase ID token, bind state to uid, redirect to Facebook
 router.get('/auth/start', async (req, res) => {
   if (ensureEnv(res)) return;
   try {
-    const idToken = req.query.id_token;
-    if (!idToken) return res.status(401).json({ error: 'Missing id_token' });
-    const decoded = await admin.auth().verifyIdToken(String(idToken));
-    const uid = decoded.uid;
+    // Prefer Authorization header; id_token query is deprecated and will be removed
+    let uid = await getUidFromAuthHeader(req);
+    if (!uid) {
+      const idToken = req.query.id_token; // deprecated
+      if (!idToken) return res.status(401).json({ error: 'Unauthorized' });
+      const decoded = await admin.auth().verifyIdToken(String(idToken));
+      uid = decoded.uid;
+    }
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
     const nonce = Math.random().toString(36).slice(2);
     const state = `${uid}.${nonce}`;
