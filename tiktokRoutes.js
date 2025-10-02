@@ -18,6 +18,11 @@ function ensureTikTokEnv(res) {
   }
 }
 
+// Health endpoint to verify mount
+router.get('/health', (req, res) => {
+  res.json({ ok: true, hasClientKey: !!TIKTOK_CLIENT_KEY, hasRedirect: !!TIKTOK_REDIRECT_URI });
+});
+
 // 1) Begin OAuth (requires user auth) — keeps scopes minimal for review
 router.get('/auth', authMiddleware, async (req, res) => {
   if (ensureTikTokEnv(res)) return;
