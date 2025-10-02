@@ -458,8 +458,65 @@ function App() {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || 'Upload failed');
       }
+      // Attempt immediate posting to selected platforms (best-effort)
+      try {
+        const chosen = Array.isArray(platforms) ? platforms : [];
+        // Helper to call provider upload endpoints
+        const postYouTube = async () => {
+          if (!chosen.includes('youtube')) return;
+          try {
+            const r = await fetch(API_ENDPOINTS.YOUTUBE_UPLOAD, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({ title: title || file.name, description: description || '', videoUrl: url })
+            });
+            if (!r.ok) console.warn('YouTube upload failed');
+          } catch (_) {}
+        };
+        const getFacebookStatus = async () => {
+          const s = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' } });
+          if (!s.ok) return null;
+          return s.json();
+        };
+        const postFacebook = async () => {
+          if (!chosen.includes('facebook')) return;
+          try {
+            const st = await getFacebookStatus();
+            const pageId = st?.pages?.[0]?.id;
+            if (!pageId) return;
+            const body = { pageId, content: { type: type || 'video', url, title: title || file.name, description: description || '' } };
+            const r = await fetch(API_ENDPOINTS.FACEBOOK_UPLOAD, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify(body)
+            });
+            if (!r.ok) console.warn('Facebook upload failed');
+          } catch (_) {}
+        };
+        const postInstagram = async () => {
+          if (!chosen.includes('instagram')) return;
+          try {
+            const st = await getFacebookStatus();
+            const pageId = st?.pages?.[0]?.id;
+            if (!pageId) return;
+            const mediaType = (type || 'video').toLowerCase();
+            const r = await fetch(API_ENDPOINTS.INSTAGRAM_UPLOAD, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({ pageId, mediaUrl: url, caption: `${title || ''}\n${description || ''}`.trim(), mediaType })
+            });
+            if (!r.ok) console.warn('Instagram upload failed');
+          } catch (_) {}
+        };
+        // Fire requests sequentially to reduce API contention
+        await postYouTube();
+        await postFacebook();
+        await postInstagram();
+      } catch (e) {
+        console.warn('Auto-post skipped or partial:', e?.message);
+      }
       await fetchUserContent(token);
-      alert('Content uploaded! We\'ll generate a landing page and smart link shortly.');
+      alert('Content uploaded! Posting to connected platforms has been triggered.');
     } catch (error) {
       alert('Error uploading content: ' + error.message);
     }
