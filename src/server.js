@@ -15,11 +15,14 @@ const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
 let tiktokRoutes;
 try {
   tiktokRoutes = require('../tiktokRoutes'); // use top-level tiktokRoutes which includes auth + storage
+  console.log('✅ Using top-level tiktokRoutes.js');
 } catch (e) {
   try {
     tiktokRoutes = require('./routes/tiktokRoutes'); // fallback to older location if present
+    console.log('✅ Using legacy src/routes/tiktokRoutes.js');
   } catch (_) {
     tiktokRoutes = express.Router();
+    console.log('⚠️ TikTok routes not found; using empty router');
   }
 }
 
@@ -86,6 +89,7 @@ app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api', adminTestRoutes); // Add admin test routes
 // Mount TikTok routes if available
 app.use('/api/tiktok', tiktokRoutes);
+console.log('🚏 TikTok routes mounted at /api/tiktok');
 
 // Content Quality Check Route
 const contentQualityCheck = require('./contentQualityCheck');
