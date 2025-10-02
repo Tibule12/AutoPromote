@@ -26,6 +26,30 @@ try {
   }
 }
 
+// Load social routers
+let facebookRoutes, youtubeRoutes, instagramRoutes;
+try {
+  facebookRoutes = require('./routes/facebookRoutes');
+  console.log('✅ Facebook routes loaded');
+} catch (e) {
+  console.log('⚠️ Facebook routes not found:', e.message);
+  facebookRoutes = express.Router();
+}
+try {
+  youtubeRoutes = require('./routes/youtubeRoutes');
+  console.log('✅ YouTube routes loaded');
+} catch (e) {
+  console.log('⚠️ YouTube routes not found:', e.message);
+  youtubeRoutes = express.Router();
+}
+try {
+  instagramRoutes = require('./routes/instagramRoutes');
+  console.log('✅ Instagram routes loaded');
+} catch (e) {
+  console.log('⚠️ Instagram routes not found:', e.message);
+  instagramRoutes = express.Router();
+}
+
 // Try to load adminTestRoutes, but continue with a dummy router if not available
 let adminTestRoutes;
 try {
@@ -90,6 +114,13 @@ app.use('/api', adminTestRoutes); // Add admin test routes
 // Mount TikTok routes if available
 app.use('/api/tiktok', tiktokRoutes);
 console.log('🚏 TikTok routes mounted at /api/tiktok');
+// Mount new social routes
+app.use('/api/facebook', facebookRoutes);
+console.log('🚏 Facebook routes mounted at /api/facebook');
+app.use('/api/youtube', youtubeRoutes);
+console.log('🚏 YouTube routes mounted at /api/youtube');
+app.use('/api/instagram', instagramRoutes);
+console.log('🚏 Instagram routes mounted at /api/instagram');
 
 // Content Quality Check Route
 const contentQualityCheck = require('./contentQualityCheck');
