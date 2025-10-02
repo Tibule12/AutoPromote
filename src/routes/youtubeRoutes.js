@@ -22,13 +22,50 @@ router.get('/health', (req, res) => {
   res.json({ ok: true, hasClientId: !!YT_CLIENT_ID, hasRedirect: !!YT_REDIRECT_URI });
 });
 
+async function getUidFromAuthHeader(req) {
+  try {
+    const authz = req.headers.authorization || '';
+    const [scheme, token] = authz.split(' ');
+    if (scheme === 'Bearer' && token) {
+      const decoded = await admin.auth().verifyIdToken(String(token));
+      return decoded.uid;
+    }
+  } catch (_) {}
+  return null;
+}
+
+// Preferred: prepare OAuth URL securely
+router.post('/auth/prepare', async (req, res) => {
+  if (ensureEnv(res)) return;
+  try {
+    const uid = await getUidFromAuthHeader(req);
+    if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+    const nonce = Math.random().toString(36).slice(2);
+    const state = `${uid}.${nonce}`;
+    await db.collection('users').doc(uid).collection('oauth_state').doc('youtube').set({
+      state,
+      nonce,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+    const scope = ['https://www.googleapis.com/auth/youtube.upload','https://www.googleapis.com/auth/youtube.readonly'].join(' ');
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(YT_CLIENT_ID)}&redirect_uri=${encodeURIComponent(YT_REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent&state=${encodeURIComponent(state)}`;
+    return res.json({ authUrl });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to prepare YouTube OAuth' });
+  }
+});
+
 router.get('/auth/start', async (req, res) => {
   if (ensureEnv(res)) return;
   try {
-    const idToken = req.query.id_token;
-    if (!idToken) return res.status(401).json({ error: 'Missing id_token' });
-    const decoded = await admin.auth().verifyIdToken(String(idToken));
-    const uid = decoded.uid;
+    // Prefer Authorization header; id_token query is deprecated
+    let uid = await getUidFromAuthHeader(req);
+    if (!uid) {
+      const idToken = req.query.id_token; // deprecated
+      if (!idToken) return res.status(401).json({ error: 'Unauthorized' });
+      const decoded = await admin.auth().verifyIdToken(String(idToken));
+      uid = decoded.uid;
+    }
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
     const nonce = Math.random().toString(36).slice(2);
     const state = `${uid}.${nonce}`;

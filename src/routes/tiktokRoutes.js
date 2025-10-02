@@ -22,14 +22,51 @@ router.get('/health', (req, res) => {
   res.json({ ok: true, hasClientKey: !!TIKTOK_CLIENT_KEY, hasRedirect: !!TIKTOK_REDIRECT_URI });
 });
 
+async function getUidFromAuthHeader(req) {
+  try {
+    const authz = req.headers.authorization || '';
+    const [scheme, token] = authz.split(' ');
+    if (scheme === 'Bearer' && token) {
+      const decoded = await admin.auth().verifyIdToken(String(token));
+      return decoded.uid;
+    }
+  } catch (_) {}
+  return null;
+}
+
+// Preferred: prepare OAuth URL securely without exposing id_token in URL
+router.post('/auth/prepare', async (req, res) => {
+  if (ensureTikTokEnv(res)) return;
+  try {
+    const uid = await getUidFromAuthHeader(req);
+    if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+    const nonce = Math.random().toString(36).slice(2);
+    const state = `${uid}.${nonce}`;
+    await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
+      state,
+      nonce,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+    const scope = 'user.info.basic';
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(TIKTOK_CLIENT_KEY)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(TIKTOK_REDIRECT_URI)}&state=${encodeURIComponent(state)}`;
+    return res.json({ authUrl });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to prepare TikTok OAuth' });
+  }
+});
+
 // 1a. Preferred start: accept Firebase ID token via query, verify, set state with uid, and redirect to TikTok
 router.get('/auth/start', async (req, res) => {
   if (ensureTikTokEnv(res)) return;
   try {
-    const idToken = req.query.id_token;
-    if (!idToken) return res.status(401).json({ error: 'Missing id_token' });
-    const decoded = await admin.auth().verifyIdToken(String(idToken));
-    const uid = decoded.uid;
+    // Prefer Authorization header; id_token query is deprecated
+    let uid = await getUidFromAuthHeader(req);
+    if (!uid) {
+      const idToken = req.query.id_token; // deprecated
+      if (!idToken) return res.status(401).json({ error: 'Unauthorized' });
+      const decoded = await admin.auth().verifyIdToken(String(idToken));
+      uid = decoded.uid;
+    }
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
     const nonce = Math.random().toString(36).slice(2);
     const state = `${uid}.${nonce}`;
