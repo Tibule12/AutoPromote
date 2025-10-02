@@ -32,6 +32,20 @@ export const API_ENDPOINTS = {
   TIKTOK_AUTH_START: `${API_BASE_URL}/api/tiktok/auth/start`,
   TIKTOK_STATUS: `${API_BASE_URL}/api/tiktok/status`,
 
+  // Facebook endpoints
+  FACEBOOK_AUTH_START: `${API_BASE_URL}/api/facebook/auth/start`,
+  FACEBOOK_STATUS: `${API_BASE_URL}/api/facebook/status`,
+  FACEBOOK_UPLOAD: `${API_BASE_URL}/api/facebook/upload`,
+
+  // YouTube endpoints
+  YOUTUBE_AUTH_START: `${API_BASE_URL}/api/youtube/auth/start`,
+  YOUTUBE_STATUS: `${API_BASE_URL}/api/youtube/status`,
+  YOUTUBE_UPLOAD: `${API_BASE_URL}/api/youtube/upload`,
+
+  // Instagram endpoints (via Facebook Graph)
+  INSTAGRAM_STATUS: `${API_BASE_URL}/api/instagram/status`,
+  INSTAGRAM_UPLOAD: `${API_BASE_URL}/api/instagram/upload`,
+
   // Schedule actions (construct with ID)
   SCHEDULE_PAUSE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/pause`,
   SCHEDULE_RESUME: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/resume`,

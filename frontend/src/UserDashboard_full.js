@@ -22,6 +22,8 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [defaultsPlatforms, setDefaultsPlatforms] = useState(Array.isArray(userDefaults?.defaultPlatforms) ? userDefaults.defaultPlatforms : []);
   const [defaultsFrequency, setDefaultsFrequency] = useState(userDefaults?.defaultFrequency || 'once');
   const [tiktokStatus, setTikTokStatus] = useState({ connected: false });
+  const [facebookStatus, setFacebookStatus] = useState({ connected: false });
+  const [youtubeStatus, setYouTubeStatus] = useState({ connected: false });
 
   // Ensure content is an array to simplify rendering
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
@@ -51,14 +53,58 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     }
   };
 
+  // Load Facebook connection status
+  const loadFacebookStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setFacebookStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setFacebookStatus({ connected: false });
+      const data = await res.json();
+      setFacebookStatus({ connected: !!data.connected, pages: data.pages || [], ig_business_account_id: data.ig_business_account_id || null });
+    } catch (_) {
+      setFacebookStatus({ connected: false });
+    }
+  };
+
+  // Load YouTube connection status
+  const loadYouTubeStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setYouTubeStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.YOUTUBE_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setYouTubeStatus({ connected: false });
+      const data = await res.json();
+      setYouTubeStatus({ connected: !!data.connected, channel: data.channel || null });
+    } catch (_) {
+      setYouTubeStatus({ connected: false });
+    }
+  };
+
   useEffect(() => {
     loadTikTokStatus();
+    loadFacebookStatus();
+    loadYouTubeStatus();
     // If coming back from OAuth, the URL may contain ?tiktok=connected
     const params = new URLSearchParams(window.location.search);
     if (params.get('tiktok')) {
       // Refresh status then clean the query to avoid confusion
       loadTikTokStatus();
       params.delete('tiktok');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+    if (params.get('facebook')) {
+      loadFacebookStatus();
+      params.delete('facebook');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+    if (params.get('youtube')) {
+      loadYouTubeStatus();
+      params.delete('youtube');
       const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
       window.history.replaceState({}, '', url);
     }
@@ -159,6 +205,30 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       window.location.href = url;
     } catch (e) {
       alert(e.message || 'Unable to start TikTok connect');
+    }
+  };
+
+  const handleConnectFacebook = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      const url = `${API_ENDPOINTS.FACEBOOK_AUTH_START}?id_token=${encodeURIComponent(idToken)}`;
+      window.location.href = url;
+    } catch (e) {
+      alert(e.message || 'Unable to start Facebook connect');
+    }
+  };
+
+  const handleConnectYouTube = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      const url = `${API_ENDPOINTS.YOUTUBE_AUTH_START}?id_token=${encodeURIComponent(idToken)}`;
+      window.location.href = url;
+    } catch (e) {
+      alert(e.message || 'Unable to start YouTube connect');
     }
   };
 
@@ -307,6 +377,38 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
                   <>
                     <button className="check-quality" onClick={handleConnectTikTok}>Connect TikTok</button>
                     <span style={{color:'#9aa4b2'}}>Connect to link your TikTok account for future posting and analytics.</span>
+                  </>
+                )}
+              </div>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center', marginTop: '.5rem'}}>
+                {facebookStatus.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>Facebook connected</span>
+                    {facebookStatus.pages?.length > 0 && (
+                      <span style={{color:'#9aa4b2'}}>Pages: {facebookStatus.pages.slice(0,2).map(p => p.name).join(', ')}{facebookStatus.pages.length>2?'…':''}</span>
+                    )}
+                    <button className="check-quality" onClick={handleConnectFacebook}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectFacebook}>Connect Facebook</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to manage Pages and Instagram.</span>
+                  </>
+                )}
+              </div>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center', marginTop: '.5rem'}}>
+                {youtubeStatus.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>YouTube connected</span>
+                    {youtubeStatus.channel?.snippet?.title && (
+                      <span style={{color:'#9aa4b2'}}>Channel: {youtubeStatus.channel.snippet.title}</span>
+                    )}
+                    <button className="check-quality" onClick={handleConnectYouTube}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectYouTube}>Connect YouTube</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to upload videos directly.</span>
                   </>
                 )}
               </div>
