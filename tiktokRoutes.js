@@ -9,7 +9,8 @@ const { admin, db } = require('./firebaseAdmin');
 const TIKTOK_CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 const TIKTOK_CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
 const TIKTOK_REDIRECT_URI = process.env.TIKTOK_REDIRECT_URI; // e.g., https://autopromote.onrender.com/api/tiktok/callback
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://Tibule12.github.io/AutoPromote';
+// Default dashboard URL to Render domain to ensure redirects land on the live app unless overridden
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote.onrender.com';
 
 function ensureTikTokEnv(res) {
   if (!TIKTOK_CLIENT_KEY || !TIKTOK_CLIENT_SECRET || !TIKTOK_REDIRECT_URI) {
@@ -36,6 +37,31 @@ router.get('/auth', authMiddleware, async (req, res) => {
     res.redirect(authUrl);
   } catch (e) {
     res.status(500).json({ error: 'Failed to start TikTok OAuth', details: e.message });
+  }
+});
+
+// Alternative start endpoint that accepts an ID token via query when headers aren't available (for link redirects)
+router.get('/auth/start', async (req, res) => {
+  if (ensureTikTokEnv(res)) return;
+  try {
+    const idToken = req.query.id_token;
+    if (!idToken) return res.status(401).send('Missing id_token');
+    // Verify Firebase token manually and derive uid
+    const decoded = await admin.auth().verifyIdToken(String(idToken));
+    const uid = decoded.uid;
+    if (!uid) return res.status(401).send('Unauthorized');
+    const nonce = Math.random().toString(36).slice(2);
+    const state = `${uid}.${nonce}`;
+    await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
+      state,
+      nonce,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+    const scope = 'user.info.basic';
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(TIKTOK_CLIENT_KEY)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(TIKTOK_REDIRECT_URI)}&state=${encodeURIComponent(state)}`;
+    return res.redirect(authUrl);
+  } catch (e) {
+    return res.status(500).send('Failed to start TikTok OAuth');
   }
 });
 
@@ -91,6 +117,44 @@ router.get('/callback', async (req, res) => {
     } catch (_) {
       return res.status(500).send('TikTok token exchange failed');
     }
+  }
+});
+
+// 2.1) Connection status — returns whether TikTok is connected and basic profile info
+router.get('/status', authMiddleware, async (req, res) => {
+  try {
+    if (ensureTikTokEnv(res)) return;
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(401).json({ connected: false, error: 'Unauthorized' });
+    const snap = await db.collection('users').doc(uid).collection('connections').doc('tiktok').get();
+    if (!snap.exists) {
+      return res.json({ connected: false });
+    }
+    const data = snap.data() || {};
+    const result = {
+      connected: true,
+      open_id: data.open_id,
+      scope: data.scope,
+      obtainedAt: data.obtainedAt,
+    };
+    // Try to fetch basic user info if we have an access token and scope allows
+    if (data.access_token && String(data.scope || '').includes('user.info.basic')) {
+      try {
+        const infoRes = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url', {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${data.access_token}` }
+        });
+        if (infoRes.ok) {
+          const info = await infoRes.json();
+          const u = info.data && info.data.user ? info.data.user : info.data || {};
+          result.display_name = u.display_name || u.displayName || undefined;
+          result.avatar_url = u.avatar_url || u.avatarUrl || undefined;
+        }
+      } catch (_) { /* ignore */ }
+    }
+    return res.json(result);
+  } catch (e) {
+    return res.status(500).json({ connected: false, error: 'Failed to load TikTok status' });
   }
 });
 

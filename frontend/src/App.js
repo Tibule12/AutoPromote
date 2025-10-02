@@ -226,6 +226,11 @@ function App() {
     } catch (_) {}
   };
 
+  // Expose a refresh handler to child components that perform schedule actions
+  const refreshSchedules = async () => {
+    await fetchMySchedules();
+  };
+
   const fetchAnalytics = async (providedToken = null) => {
     let token = providedToken;
     if (!token) {
@@ -486,6 +491,7 @@ function App() {
                 mySchedules={mySchedules}
                 onUpload={handleContentUpload}
                 onPromoteToggle={() => {}}
+                onSchedulesChanged={refreshSchedules}
                 onLogout={handleLogout}
               />
             )}

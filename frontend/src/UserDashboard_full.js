@@ -1,10 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import './UserDashboard.css';
+import { auth } from './firebaseClient';
+import { API_ENDPOINTS } from './config';
 
 // Use PUBLIC_URL so assets resolve correctly on GitHub Pages and Render
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
 
-const UserDashboard = ({ user, content, stats, badges, notifications, userDefaults, onSaveDefaults, onLogout, onUpload, mySchedules }) => {
+const UserDashboard = ({ user, content, stats, badges, notifications, userDefaults, onSaveDefaults, onLogout, onUpload, mySchedules, onSchedulesChanged }) => {
   const [activeTab, setActiveTab] = useState('profile');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -19,6 +21,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [tz, setTz] = useState(userDefaults?.timezone || 'UTC');
   const [defaultsPlatforms, setDefaultsPlatforms] = useState(Array.isArray(userDefaults?.defaultPlatforms) ? userDefaults.defaultPlatforms : []);
   const [defaultsFrequency, setDefaultsFrequency] = useState(userDefaults?.defaultFrequency || 'once');
+  const [tiktokStatus, setTikTokStatus] = useState({ connected: false });
 
   // Ensure content is an array to simplify rendering
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
@@ -32,6 +35,34 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     setActiveTab(tab);
     setSidebarOpen(false);
   };
+
+  // Load TikTok connection status
+  const loadTikTokStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setTikTokStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.TIKTOK_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setTikTokStatus({ connected: false });
+      const data = await res.json();
+      setTikTokStatus({ connected: !!data.connected, display_name: data.display_name, avatar_url: data.avatar_url, open_id: data.open_id });
+    } catch (_) {
+      setTikTokStatus({ connected: false });
+    }
+  };
+
+  useEffect(() => {
+    loadTikTokStatus();
+    // If coming back from OAuth, the URL may contain ?tiktok=connected
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tiktok')) {
+      // Refresh status then clean the query to avoid confusion
+      loadTikTokStatus();
+      params.delete('tiktok');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+  }, [user?.uid]);
 
   const togglePlatform = (name) => {
     setSelectedPlatforms((prev) =>
@@ -117,6 +148,71 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     }
   };
 
+  // TikTok connect flow via backend start endpoint
+  const handleConnectTikTok = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      // Redirect to backend to initiate TikTok OAuth
+      const url = `${API_ENDPOINTS.TIKTOK_AUTH_START}?id_token=${encodeURIComponent(idToken)}`;
+      window.location.href = url;
+    } catch (e) {
+      alert(e.message || 'Unable to start TikTok connect');
+    }
+  };
+
+  // Schedule action helpers
+  const withAuth = async (fn) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error('Not authenticated');
+    const token = await currentUser.getIdToken(true);
+    return fn(token);
+  };
+
+  const doPause = async (scheduleId) => withAuth(async (token) => {
+    const res = await fetch(API_ENDPOINTS.SCHEDULE_PAUSE(scheduleId), {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Failed to pause');
+    onSchedulesChanged && onSchedulesChanged();
+  });
+
+  const doResume = async (scheduleId) => withAuth(async (token) => {
+    const res = await fetch(API_ENDPOINTS.SCHEDULE_RESUME(scheduleId), {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Failed to resume');
+    onSchedulesChanged && onSchedulesChanged();
+  });
+
+  const doReschedule = async (scheduleId) => {
+    const when = prompt('New start time (YYYY-MM-DDTHH:mm, local time):');
+    if (!when) return;
+    const iso = new Date(when).toISOString();
+    await withAuth(async (token) => {
+      const res = await fetch(API_ENDPOINTS.SCHEDULE_RESCHEDULE(scheduleId), {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ startTime: iso })
+      });
+      if (!res.ok) throw new Error('Failed to reschedule');
+    });
+    onSchedulesChanged && onSchedulesChanged();
+  };
+
+  const doDelete = async (scheduleId) => withAuth(async (token) => {
+    if (!window.confirm('Delete this schedule?')) return;
+    const res = await fetch(API_ENDPOINTS.SCHEDULE_DELETE(scheduleId), {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Failed to delete');
+    onSchedulesChanged && onSchedulesChanged();
+  });
+
   return (
     <div className="dashboard-root">
       {/* Topbar with mobile hamburger */}
@@ -195,6 +291,25 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
               <div><strong>Views:</strong> {firstItem?.views ?? 0}</div>
               <div><strong>Clicks:</strong> {firstItem?.clicks ?? 0}</div>
               <div><strong>Conversions:</strong> {firstItem?.conversions ?? 0}</div>
+            </div>
+            <div className="platform-connections" style={{marginTop:'1rem'}}>
+              <h4>Platform Connections</h4>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
+                {tiktokStatus.connected ? (
+                  <>
+                    {tiktokStatus.avatar_url && (
+                      <img src={tiktokStatus.avatar_url} alt="TikTok avatar" style={{width:28, height:28, borderRadius:'50%'}} />
+                    )}
+                    <span style={{color:'#cbd5e1'}}>Connected as <strong>{tiktokStatus.display_name || tiktokStatus.open_id || 'TikTok User'}</strong></span>
+                    <button className="check-quality" onClick={handleConnectTikTok}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectTikTok}>Connect TikTok</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to link your TikTok account for future posting and analytics.</span>
+                  </>
+                )}
+              </div>
             </div>
             <div className="profile-defaults" style={{marginTop:'1rem'}}>
               <h4>Profile Defaults</h4>
@@ -322,14 +437,24 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
                   const when = formatWhen(sch?.startTime || sch?.startAt || sch?.when);
                   const isActive = sch?.isActive !== false; // default to true unless explicitly false
                   const statusText = isActive ? 'active' : 'paused';
+                  const scheduleId = sch?.id || sch?.scheduleId || sch?.uid || sch?.docId;
                   return (
-                    <div key={i} className="schedule-row" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr 0.8fr', gap: '.5rem', alignItems: 'center', padding: '.5rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    <div key={i} className="schedule-row" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr 0.8fr 1.6fr', gap: '.5rem', alignItems: 'center', padding: '.5rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)' }}>
                       <div title={titleText} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleText}</div>
                       <div style={{ color: '#cbd5e1' }}>{platform}</div>
                       <div style={{ color: '#cbd5e1', textTransform: 'capitalize' }}>{frequency}</div>
                       <div style={{ color: '#e2e8f0' }}>{when}</div>
                       <div>
                         <span className={`status status-${statusText}`}>{statusText}</span>
+                      </div>
+                      <div style={{display:'flex', gap:'.35rem', justifyContent:'flex-end'}}>
+                        {isActive ? (
+                          <button className="logout-btn" onClick={() => scheduleId && doPause(scheduleId)}>Pause</button>
+                        ) : (
+                          <button className="check-quality" onClick={() => scheduleId && doResume(scheduleId)}>Resume</button>
+                        )}
+                        <button className="check-quality" onClick={() => scheduleId && doReschedule(scheduleId)}>Reschedule</button>
+                        <button className="logout-btn" onClick={() => scheduleId && doDelete(scheduleId)}>Delete</button>
                       </div>
                     </div>
                   );
