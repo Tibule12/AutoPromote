@@ -19,7 +19,15 @@ function ensureEnv(res) {
 }
 
 router.get('/health', (req, res) => {
-  res.json({ ok: true, hasClientId: !!YT_CLIENT_ID, hasClientSecret: !!YT_CLIENT_SECRET, hasRedirect: !!YT_REDIRECT_URI });
+  const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : null);
+  res.json({
+    ok: true,
+    hasClientId: !!YT_CLIENT_ID,
+    hasClientSecret: !!YT_CLIENT_SECRET,
+    hasRedirect: !!YT_REDIRECT_URI,
+    clientIdMasked: mask(YT_CLIENT_ID),
+    redirect: YT_REDIRECT_URI || null,
+  });
 });
 
 async function getUidFromAuthHeader(req) {
