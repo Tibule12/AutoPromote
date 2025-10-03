@@ -119,7 +119,22 @@ router.get('/auth/start', async (req, res) => {
 // OAuth callback: exchange code, fetch pages, store tokens
 router.get('/callback', async (req, res) => {
   if (ensureEnv(res)) return;
-  const { code, state } = req.query;
+  const { code, state, error, error_description, error_message, error_reason, error_code } = req.query;
+  // If Facebook returned an error (e.g., Invalid Scopes), surface it cleanly in the dashboard
+  if (error || error_message || error_description) {
+    try {
+      const url = new URL(DASHBOARD_URL);
+      url.searchParams.set('facebook', 'error');
+      const msg = String(error_message || error_description || error || 'oauth_error');
+      // Normalize a few common reasons
+      const reason = /invalid\s*scopes?/i.test(msg) ? 'invalid_scopes' : (error_reason || 'oauth_error');
+      url.searchParams.set('reason', reason);
+      if (error_code) url.searchParams.set('code', String(error_code));
+      return res.redirect(url.toString());
+    } catch (_) {
+      return res.status(400).json({ error: 'OAuth error', details: { error, error_description, error_message, error_reason, error_code } });
+    }
+  }
   if (!code) return res.status(400).json({ error: 'Missing code' });
   try {
     // Light diagnostics (masked)
