@@ -17,7 +17,15 @@ function ensureEnv(res) {
 }
 
 router.get('/health', (req, res) => {
-  res.json({ ok: true, hasClientId: !!FB_CLIENT_ID, hasRedirect: !!FB_REDIRECT_URI });
+  const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : null);
+  res.json({
+    ok: true,
+    hasClientId: !!FB_CLIENT_ID,
+    hasClientSecret: !!FB_CLIENT_SECRET,
+    hasRedirect: !!FB_REDIRECT_URI,
+    clientIdMasked: mask(FB_CLIENT_ID),
+    redirect: FB_REDIRECT_URI || null,
+  });
 });
 
 async function getUidFromAuthHeader(req) {
@@ -38,6 +46,11 @@ router.post('/auth/prepare', async (req, res) => {
   try {
     const uid = await getUidFromAuthHeader(req);
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+    // Light diagnostics (masked)
+    try {
+      const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
+      console.log('[Facebook][prepare] Using client/redirect', { clientId: mask(FB_CLIENT_ID), redirect: FB_REDIRECT_URI });
+    } catch (_) {}
     const nonce = Math.random().toString(36).slice(2);
     const state = `${uid}.${nonce}`;
     await db.collection('users').doc(uid).collection('oauth_state').doc('facebook').set({
@@ -101,6 +114,11 @@ router.get('/callback', async (req, res) => {
   const { code, state } = req.query;
   if (!code) return res.status(400).json({ error: 'Missing code' });
   try {
+    // Light diagnostics (masked)
+    try {
+      const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
+      console.log('[Facebook][callback] Exchanging code with', { clientId: mask(FB_CLIENT_ID), redirect: FB_REDIRECT_URI });
+    } catch (_) {}
     let uidFromState;
     if (state && typeof state === 'string' && state.includes('.')) {
       const [uid] = state.split('.');
@@ -109,7 +127,15 @@ router.get('/callback', async (req, res) => {
     const tokenRes = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_URI)}&client_secret=${encodeURIComponent(FB_CLIENT_SECRET)}&code=${encodeURIComponent(code)}`);
     const tokenData = await tokenRes.json();
     if (!tokenData.access_token) {
-      return res.status(400).json({ error: 'Failed to obtain Facebook access token', details: tokenData });
+      // Redirect back to dashboard with an error flag so the UI can surface it cleanly
+      try {
+        const url = new URL(DASHBOARD_URL);
+        url.searchParams.set('facebook', 'error');
+        if (tokenData && tokenData.error && tokenData.error.code) url.searchParams.set('reason', String(tokenData.error.code));
+        return res.redirect(url.toString());
+      } catch (_) {
+        return res.status(400).json({ error: 'Failed to obtain Facebook access token', details: tokenData });
+      }
     }
     // Fetch managed pages
     const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${encodeURIComponent(tokenData.access_token)}`);
