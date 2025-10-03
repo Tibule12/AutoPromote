@@ -16,6 +16,16 @@ function ensureEnv(res) {
   }
 }
 
+// Centralized list of permissions we request
+const REQUESTED_SCOPES = [
+  'pages_show_list',
+  'pages_manage_posts',
+  'pages_read_engagement',
+  'pages_manage_metadata',
+  'instagram_basic',
+  'instagram_content_publish'
+];
+
 router.get('/health', (req, res) => {
   const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : null);
   res.json({
@@ -25,6 +35,18 @@ router.get('/health', (req, res) => {
     hasRedirect: !!FB_REDIRECT_URI,
     clientIdMasked: mask(FB_CLIENT_ID),
     redirect: FB_REDIRECT_URI || null,
+  });
+});
+
+// Diagnostics: show the exact scopes we request and redirect URL
+router.get('/requirements', (req, res) => {
+  const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : null);
+  res.json({
+    ok: !!(FB_CLIENT_ID && FB_CLIENT_SECRET && FB_REDIRECT_URI),
+    clientIdMasked: mask(FB_CLIENT_ID),
+    redirect: FB_REDIRECT_URI || null,
+    requestedScopes: REQUESTED_SCOPES,
+    notes: 'Ensure these permissions are added under App Review → Permissions and features, and add the Instagram Graph API product to unlock instagram_*.'
   });
 });
 
@@ -58,15 +80,8 @@ router.post('/auth/prepare', async (req, res) => {
       nonce,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
-    const scope = [
-      'pages_show_list',
-      'pages_manage_posts',
-      'pages_read_engagement',
-      'pages_manage_metadata',
-      'instagram_basic',
-      'instagram_content_publish'
-    ].join(',');
-    const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_URI)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}`;
+    const scope = REQUESTED_SCOPES.join(',');
+    const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_URI)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auth_type=rerequest`;
     return res.json({ authUrl });
   } catch (e) {
     return res.status(500).json({ error: 'Failed to prepare Facebook OAuth' });
@@ -93,15 +108,8 @@ router.get('/auth/start', async (req, res) => {
       nonce,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
-    const scope = [
-      'pages_show_list',
-      'pages_manage_posts',
-      'pages_read_engagement',
-      'pages_manage_metadata',
-      'instagram_basic',
-      'instagram_content_publish'
-    ].join(',');
-    const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_URI)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}`;
+    const scope = REQUESTED_SCOPES.join(',');
+    const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_URI)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auth_type=rerequest`;
     return res.redirect(authUrl);
   } catch (e) {
     return res.status(500).json({ error: 'Failed to start Facebook OAuth' });
