@@ -1,0 +1,298 @@
+// promotionTaskQueue.js
+// Phase 2: Simple Firestore-backed task queue for YouTube auto uploads
+
+const { db } = require('../firebaseAdmin');
+const { recordTaskCompletion, recordRateLimitEvent } = require('./aggregationService');
+const { getCooldown, noteRateLimit } = require('./rateLimitTracker');
+const { uploadVideo } = require('./youtubeService');
+
+const MAX_ATTEMPTS = parseInt(process.env.TASK_MAX_ATTEMPTS || '5', 10);
+const BASE_BACKOFF_MS = parseInt(process.env.TASK_BASE_BACKOFF_MS || '60000', 10); // 1 min default
+
+function classifyError(message = '') {
+  const m = message.toLowerCase();
+  if (m.includes('quota') || m.includes('rate limit') || m.includes('too many requests') || m.includes('429')) return 'rate_limit';
+  if (m.includes('timeout') || m.includes('network') || m.includes('fetch failed')) return 'transient';
+  if (m.includes('auth') || m.includes('unauthorized') || m.includes('permission')) return 'auth';
+  if (m.includes('not found')) return 'not_found';
+  return 'generic';
+}
+
+function computeNextAttempt(attempts, classification) {
+  // Exponential backoff with jitter, classification-based modifier
+  const base = BASE_BACKOFF_MS * Math.pow(2, Math.min(attempts, 6));
+  const classFactor = classification === 'rate_limit' ? 2 : classification === 'auth' ? 3 : 1;
+  const jitter = Math.floor(Math.random() * (base * 0.3));
+  return Date.now() + (base * classFactor) + jitter;
+}
+
+function canRetry(classification) {
+  if (classification === 'auth') return false; // require manual intervention
+  if (classification === 'not_found') return false; // likely unrecoverable for this resource
+  return true;
+}
+
+async function enqueueYouTubeUploadTask({ contentId, uid, title, description, fileUrl, shortsMode }) {
+  if (!contentId || !uid || !fileUrl) throw new Error('contentId, uid, fileUrl required');
+  const ref = db.collection('promotion_tasks').doc();
+  const task = {
+    type: 'youtube_upload',
+    status: 'queued',
+    contentId,
+    uid,
+    title: title || 'Untitled',
+    description: description || '',
+    fileUrl,
+    shortsMode: !!shortsMode,
+    attempts: 0,
+    nextAttemptAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  await ref.set(task);
+  return { id: ref.id, ...task };
+}
+
+async function processNextYouTubeTask() {
+  // Fetch one queued task (simple FIFO by createdAt)
+  const nowIso = new Date().toISOString();
+  const snapshot = await db.collection('promotion_tasks')
+    .where('type', '==', 'youtube_upload')
+    .where('status', 'in', ['queued'])
+    .orderBy('createdAt')
+    .limit(5)
+    .get();
+
+  if (snapshot.empty) return null;
+  const doc = snapshot.docs[0];
+  // Pick first eligible by nextAttemptAt <= now
+  let selectedDoc = null;
+  let selectedData = null;
+  const now = Date.now();
+  for (const d of snapshot.docs) {
+    const data = d.data();
+    const nextAt = data.nextAttemptAt ? Date.parse(data.nextAttemptAt) : Date.now();
+    if (nextAt <= now) { selectedDoc = d; selectedData = data; break; }
+  }
+  if (!selectedDoc) return null; // none ready yet
+  const task = { id: selectedDoc.id, ...selectedData };
+
+  const taskRef = selectedDoc.ref;
+  await taskRef.update({ status: 'processing', updatedAt: new Date().toISOString() });
+
+  try {
+    const outcome = await uploadVideo({
+      uid: task.uid,
+      title: task.title,
+      description: task.description,
+      fileUrl: task.fileUrl,
+      mimeType: 'video/mp4',
+      contentId: task.contentId,
+      shortsMode: task.shortsMode
+    });
+    await taskRef.update({
+      status: 'completed',
+      outcome,
+      completedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    await recordTaskCompletion('youtube_upload', true);
+    return { taskId: task.id, outcome };
+  } catch (err) {
+    const attempts = (task.attempts || 0) + 1;
+    const classification = classifyError(err.message);
+    const retryable = attempts < MAX_ATTEMPTS && canRetry(classification);
+    const nextAttemptAt = retryable ? new Date(computeNextAttempt(attempts, classification)).toISOString() : null;
+    const failed = {
+      status: retryable ? 'queued' : 'failed',
+      error: err.message,
+      errorClass: classification,
+      attempts,
+      nextAttemptAt,
+      updatedAt: new Date().toISOString(),
+      failedAt: new Date().toISOString()
+    };
+    await taskRef.update(failed);
+    if (failed.status === 'failed') {
+      // Dead-letter (J): copy to collection for manual inspection
+      try { await db.collection('dead_letter_tasks').doc(task.id).set({ ...task, failed }); } catch(_){}
+      await recordTaskCompletion('youtube_upload', false);
+    }
+    return { taskId: task.id, error: err.message, classification, retrying: failed.status === 'queued' };
+  }
+}
+
+// Enqueue a generic cross-platform promotion task (e.g., tiktok/instagram/twitter/facebook)
+async function enqueuePlatformPostTask({ contentId, uid, platform, reason = 'manual', payload = {}, skipIfDuplicate = true, forceRepost = false }) {
+  if (!contentId || !uid || !platform) throw new Error('contentId, uid, platform required');
+  const crypto = require('crypto');
+  // Canonical subset of payload for hashing (avoid volatile fields)
+  const canonical = {
+    message: payload.message || '',
+    link: payload.link || payload.url || '',
+    media: payload.mediaUrl || payload.videoUrl || ''
+  };
+  const postHash = crypto.createHash('sha256').update(`${platform}|${contentId}|${reason}|${JSON.stringify(canonical)}`,'utf8').digest('hex');
+
+  const COOLDOWN_HOURS = parseInt(process.env.PLATFORM_POST_DUPLICATE_COOLDOWN_HOURS || '24', 10);
+  const sinceMs = Date.now() - COOLDOWN_HOURS * 3600000;
+  let duplicateRecent = null;
+  if (skipIfDuplicate && !forceRepost) {
+    try {
+      const dupSnap = await db.collection('platform_posts')
+        .where('postHash','==', postHash)
+        .where('success','==', true)
+        .orderBy('createdAt','desc')
+        .limit(1)
+        .get();
+      if (!dupSnap.empty) {
+        const d = dupSnap.docs[0];
+        const data = d.data();
+        const ts = data.createdAt && data.createdAt.toMillis ? data.createdAt.toMillis() : null;
+        if (!ts || ts >= sinceMs) duplicateRecent = { id: d.id, externalId: data.externalId };
+      }
+    } catch(_) { /* ignore */ }
+  }
+
+  if (duplicateRecent && skipIfDuplicate && !forceRepost) {
+    try { const { recordPlatformPostDuplicate } = require('./aggregationService'); recordPlatformPostDuplicate(true); } catch(_){}
+    return { skipped: true, reason: 'duplicate_recent_post', platform, contentId, postHash, existing: duplicateRecent };
+  }
+
+  // Also guard tasks level (pending tasks) for same hash
+  const existingTask = await db.collection('promotion_tasks')
+    .where('type','==','platform_post')
+    .where('platform','==', platform)
+    .where('contentId','==', contentId)
+    .where('reason','==', reason)
+    .where('status','in',['queued','processing'])
+    .limit(1)
+    .get().catch(()=>({ empty: true }));
+  if (!existingTask.empty) {
+    return { skipped: true, reason: 'duplicate_pending', platform, contentId, postHash };
+  }
+
+  const ref = db.collection('promotion_tasks').doc();
+  const task = {
+    type: 'platform_post',
+    status: 'queued',
+    platform,
+    contentId,
+    uid,
+    reason,
+    payload,
+    postHash,
+    attempts: 0,
+    nextAttemptAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  await ref.set(task);
+  try { const { recordPlatformPostDuplicate } = require('./aggregationService'); recordPlatformPostDuplicate(false); } catch(_){ }
+  return { id: ref.id, ...task };
+}
+
+async function processNextPlatformTask() {
+  const snapshot = await db.collection('promotion_tasks')
+    .where('type', '==', 'platform_post')
+    .where('status', 'in', ['queued'])
+    .orderBy('createdAt')
+    .limit(5)
+    .get();
+  if (snapshot.empty) return null;
+  let selectedDoc = null; let selectedData = null; const now = Date.now();
+  for (const d of snapshot.docs) {
+    const data = d.data();
+    const nextAt = data.nextAttemptAt ? Date.parse(data.nextAttemptAt) : Date.now();
+    if (nextAt <= now) { selectedDoc = d; selectedData = data; break; }
+  }
+  if (!selectedDoc) return null;
+  const task = { id: selectedDoc.id, ...selectedData };
+  await selectedDoc.ref.update({ status: 'processing', updatedAt: new Date().toISOString() });
+  try {
+    const { dispatchPlatformPost } = require('./platformPoster');
+    const { recordPlatformPost } = require('./platformPostsService');
+
+    // Check platform rate limit cooldown before dispatch
+    const cooldownUntil = await getCooldown(task.platform);
+    if (cooldownUntil && cooldownUntil > Date.now()) {
+      // Re-queue with nextAttemptAt = cooldownUntil
+      await selectedDoc.ref.update({
+        status: 'queued',
+        nextAttemptAt: new Date(cooldownUntil + 500).toISOString(),
+        updatedAt: new Date().toISOString(),
+        rateLimitDeferred: true
+      });
+      return { taskId: task.id, deferredUntil: cooldownUntil, reason: 'rate_limit_cooldown' };
+    }
+    const simulatedResult = await dispatchPlatformPost({
+      platform: task.platform,
+      contentId: task.contentId,
+      payload: task.payload,
+      reason: task.reason
+    });
+    await selectedDoc.ref.update({
+      status: 'completed',
+      outcome: simulatedResult,
+      completedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    // Record persistent platform post (Phase 1)
+    try {
+      await recordPlatformPost({
+        platform: task.platform,
+        contentId: task.contentId,
+        uid: task.uid,
+        reason: task.reason,
+        payload: task.payload,
+        outcome: simulatedResult,
+        taskId: task.id,
+        postHash: task.postHash
+      });
+    } catch (e) {
+      console.warn('[platform_posts][record] failed:', e.message);
+    }
+    await recordTaskCompletion('platform_post', true);
+    return { taskId: task.id, outcome: simulatedResult };
+  } catch (err) {
+    const attempts = (task.attempts || 0) + 1;
+    const classification = classifyError(err.message);
+    if (classification === 'rate_limit') {
+      // Note platform-wide cooldown (configurable window)
+      const windowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS_DEFAULT || '900000', 10); // 15min default
+      try { await noteRateLimit(task.platform, windowMs); await recordRateLimitEvent(task.platform); } catch(_){ }
+    }
+    const retryable = attempts < MAX_ATTEMPTS && canRetry(classification);
+    const nextAttemptAt = retryable ? new Date(computeNextAttempt(attempts, classification)).toISOString() : null;
+    const failed = {
+      status: retryable ? 'queued' : 'failed',
+      error: err.message,
+      errorClass: classification,
+      attempts,
+      nextAttemptAt,
+      updatedAt: new Date().toISOString(),
+      failedAt: new Date().toISOString()
+    };
+    await selectedDoc.ref.update(failed);
+    if (failed.status === 'failed') {
+      try { await db.collection('dead_letter_tasks').doc(task.id).set({ ...task, failed }); } catch(_){}
+      await recordTaskCompletion('platform_post', false);
+      // Even on terminal failure, record a platform post record for observability
+      try {
+        const { recordPlatformPost } = require('./platformPostsService');
+        await recordPlatformPost({
+          platform: task.platform,
+            contentId: task.contentId,
+            uid: task.uid,
+            reason: task.reason,
+            payload: task.payload,
+            outcome: { success: false, error: err.message },
+            taskId: task.id
+        });
+      } catch(_){ }
+    }
+    return { taskId: task.id, error: err.message, classification, retrying: failed.status === 'queued' };
+  }
+}
+
+module.exports = { enqueueYouTubeUploadTask, processNextYouTubeTask, enqueuePlatformPostTask, processNextPlatformTask };

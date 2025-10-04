@@ -179,33 +179,70 @@ router.get('/status', authMiddleware, async (req, res) => {
   }
 });
 
-// Upload a video to YouTube given a file URL
+// Fetch live stats for one video (requires contentId or explicit videoId)
+router.get('/stats', authMiddleware, async (req, res) => {
+  try {
+    const uid = req.userId || req.user?.uid;
+    const { contentId, videoId } = req.query;
+    let vId = videoId;
+    let contentDoc = null;
+    if (contentId) {
+      const snap = await db.collection('content').doc(String(contentId)).get();
+      if (!snap.exists) return res.status(404).json({ error: 'Content not found' });
+      contentDoc = { id: snap.id, ...snap.data() };
+      vId = vId || (contentDoc.youtube && contentDoc.youtube.videoId);
+    }
+    if (!vId) return res.status(400).json({ error: 'videoId or contentId required' });
+    const { fetchVideoStats } = require('../services/youtubeService');
+    const stats = await fetchVideoStats({ uid, videoId: vId });
+    return res.json({ success: true, stats });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Batch poll (manual trigger) for stale stats & velocity update
+router.post('/stats/poll', authMiddleware, async (req, res) => {
+  try {
+    const uid = req.userId || req.user?.uid;
+    const { velocityThreshold, batchSize } = req.body || {};
+    const { pollYouTubeStatsBatch } = require('../services/youtubeStatsPoller');
+    const result = await pollYouTubeStatsBatch({ uid, velocityThreshold, batchSize: batchSize || 5 });
+    return res.json({ success: true, ...result });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Upload a video to YouTube given a file URL (Phase 1 unified service)
 router.post('/upload', authMiddleware, async (req, res) => {
   try {
-    const { title, description, videoUrl, mimeType } = req.body || {};
+  const { title, description, videoUrl, mimeType, contentId, shortsMode, optimizeMetadata = true, forceReupload = false, skipIfDuplicate = true } = req.body || {};
     if (!title || !videoUrl) return res.status(400).json({ error: 'title and videoUrl are required' });
     const uid = req.userId || req.user?.uid;
-    const snap = await db.collection('users').doc(uid).collection('connections').doc('youtube').get();
-    if (!snap.exists) return res.status(400).json({ error: 'YouTube not connected' });
-    const tokenData = snap.data();
-    const oauth2Client = new google.auth.OAuth2(YT_CLIENT_ID, YT_CLIENT_SECRET, YT_REDIRECT_URI);
-    oauth2Client.setCredentials({
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
-      scope: tokenData.scope,
-      token_type: tokenData.token_type,
-      expiry_date: Date.now() + (tokenData.expires_in * 1000)
+    let tags = [];
+    if (contentId) {
+      const snap = await db.collection('content').doc(String(contentId)).get();
+      if (snap.exists) {
+        const cData = snap.data();
+        if (Array.isArray(cData.tags)) tags = cData.tags;
+      }
+    }
+    const { uploadVideo } = require('../services/youtubeService');
+    const outcome = await uploadVideo({
+      uid,
+      title,
+      description: description || '',
+      fileUrl: videoUrl,
+      mimeType: mimeType || 'video/mp4',
+      contentId: contentId || null,
+      shortsMode: !!shortsMode,
+      optimizeMetadata: !!optimizeMetadata,
+      contentTags: tags,
+      forceReupload: !!forceReupload,
+      skipIfDuplicate: !!skipIfDuplicate
     });
-    const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
-    const vRes = await fetch(videoUrl);
-    if (!vRes.ok) return res.status(400).json({ error: 'Failed to download video' });
-    const videoBuffer = await vRes.buffer();
-    const insertRes = await youtube.videos.insert({
-      part: 'snippet,status',
-      requestBody: { snippet: { title, description: description || '' }, status: { privacyStatus: 'public' } },
-      media: { mimeType: mimeType || 'video/mp4', body: streamifier.createReadStream(videoBuffer) }
-    });
-    return res.json({ success: true, result: insertRes.data });
+    return res.json(outcome);
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }

@@ -12,6 +12,8 @@ const contentRoutes = require('./contentRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const adminRoutes = require('./adminRoutes');
 const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
+let promotionTaskRoutes;
+let metricsRoutes;
 let tiktokRoutes;
 try {
   tiktokRoutes = require('../tiktokRoutes'); // use top-level tiktokRoutes which includes auth + storage
@@ -41,6 +43,20 @@ try {
 } catch (e) {
   console.log('⚠️ YouTube routes not found:', e.message);
   youtubeRoutes = express.Router();
+}
+try {
+  promotionTaskRoutes = require('./routes/promotionTaskRoutes');
+  console.log('✅ Promotion task routes loaded');
+} catch (e) {
+  console.log('⚠️ Promotion task routes not found:', e.message);
+  promotionTaskRoutes = express.Router();
+}
+try {
+  metricsRoutes = require('./routes/metricsRoutes');
+  console.log('✅ Metrics routes loaded');
+} catch (e) {
+  console.log('⚠️ Metrics routes not found:', e.message);
+  metricsRoutes = express.Router();
 }
 try {
   instagramRoutes = require('./routes/instagramRoutes');
@@ -103,6 +119,15 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
+// Correlation ID middleware (K)
+app.use((req, res, next) => {
+  const incoming = req.headers['x-correlation-id'] || req.headers['x-request-id'];
+  const cid = incoming || require('crypto').randomUUID();
+  req.correlationId = cid;
+  res.setHeader('x-correlation-id', cid);
+  next();
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -119,6 +144,10 @@ app.use('/api/facebook', facebookRoutes);
 console.log('🚏 Facebook routes mounted at /api/facebook');
 app.use('/api/youtube', youtubeRoutes);
 console.log('🚏 YouTube routes mounted at /api/youtube');
+app.use('/api/promotion-tasks', promotionTaskRoutes);
+console.log('🚏 Promotion task routes mounted at /api/promotion-tasks');
+app.use('/api/metrics', metricsRoutes);
+console.log('🚏 Metrics routes mounted at /api/metrics');
 app.use('/api/instagram', instagramRoutes);
 console.log('🚏 Instagram routes mounted at /api/instagram');
 
@@ -311,3 +340,83 @@ const server = app.listen(PORT, () => {
     console.log('Try changing the PORT environment variable or closing the other application.');
   }
 });
+
+// -------------------------------------------------
+// Background Workers (Phase B - Automatic Scheduling)
+// -------------------------------------------------
+// Controlled via env flags so we can disable on serverless / multi-instance deployments
+const ENABLE_BACKGROUND = process.env.ENABLE_BACKGROUND_JOBS === 'true';
+const STATS_POLL_INTERVAL_MS = parseInt(process.env.STATS_POLL_INTERVAL_MS || '180000', 10); // 3 minutes default
+const TASK_PROCESS_INTERVAL_MS = parseInt(process.env.TASK_PROCESS_INTERVAL_MS || '60000', 10); // 1 minute default
+const PLATFORM_STATS_POLL_INTERVAL_MS = parseInt(process.env.PLATFORM_STATS_POLL_INTERVAL_MS || '300000', 10); // 5 minutes default
+
+if (ENABLE_BACKGROUND) {
+  console.log('🛠  Background job runner enabled.');
+  try {
+  const { pollYouTubeStatsBatch } = require('./services/youtubeStatsPoller');
+  const { pollPlatformPostMetricsBatch } = require('./services/platformStatsPoller');
+    const { processNextYouTubeTask, processNextPlatformTask } = require('./services/promotionTaskQueue');
+
+    // Simple re-entrancy guard flags
+  let statsRunning = false;
+  let taskRunning = false;
+  let platformMetricsRunning = false;
+
+    setInterval(async () => {
+      if (statsRunning) return; // skip overlapping
+      statsRunning = true;
+      try {
+        // Poll stats with a conservative batch size
+        const uidHint = process.env.DEFAULT_STATS_UID || null; // optional: if certain actions require a user context
+        const result = await pollYouTubeStatsBatch({ uid: uidHint, velocityThreshold: parseInt(process.env.VELOCITY_THRESHOLD || '800', 10), batchSize: 5 });
+        if (result.processed) {
+          console.log(`[BG][stats] Updated ${result.processed} content docs`);
+        }
+      } catch (e) {
+        console.warn('[BG][stats] error:', e.message);
+      } finally {
+        statsRunning = false;
+      }
+    }, STATS_POLL_INTERVAL_MS).unref();
+
+    setInterval(async () => {
+      if (taskRunning) return;
+      taskRunning = true;
+      try {
+        let processed = 0;
+        // Process up to N tasks per interval (interleave types)
+        const MAX_BATCH = 5;
+        for (let i = 0; i < MAX_BATCH; i++) {
+          const yt = await processNextYouTubeTask();
+          const pf = await processNextPlatformTask();
+          if (!yt && !pf) break;
+          processed += (yt ? 1 : 0) + (pf ? 1 : 0);
+        }
+        if (processed) {
+          console.log(`[BG][tasks] Processed ${processed} queued tasks`);
+        }
+      } catch (e) {
+        console.warn('[BG][tasks] error:', e.message);
+      } finally {
+        taskRunning = false;
+      }
+    }, TASK_PROCESS_INTERVAL_MS).unref();
+
+    setInterval(async () => {
+      if (platformMetricsRunning) return;
+      platformMetricsRunning = true;
+      try {
+        const r = await pollPlatformPostMetricsBatch({ batchSize: 5 });
+        if (r.processed) console.log(`[BG][platform-metrics] Updated ${r.processed} platform post metrics`);
+      } catch (e) {
+        console.warn('[BG][platform-metrics] error:', e.message);
+      } finally {
+        platformMetricsRunning = false;
+      }
+    }, PLATFORM_STATS_POLL_INTERVAL_MS).unref();
+  } catch (e) {
+    console.warn('⚠️ Background job initialization failed:', e.message);
+  }
+} else {
+  console.log('ℹ️ Background job runner disabled (set ENABLE_BACKGROUND_JOBS=true to enable).');
+}
