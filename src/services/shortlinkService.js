@@ -1,11 +1,11 @@
-// shortlinkService.js - create short codes mapping to (contentId, platform, variantIndex, taskId)
+// shortlinkService.js - create short codes mapping to (contentId, platform, variantIndex, taskId, usedVariant)
 const { db, admin } = require('../firebaseAdmin');
 const crypto = require('crypto');
 
-async function createShortlink({ contentId, platform, variantIndex = null, taskId = null }) {
+async function createShortlink({ contentId, platform, variantIndex = null, taskId = null, usedVariant = null }) {
   const code = crypto.randomBytes(4).toString('hex');
   await db.collection('shortlinks').doc(code).set({
-    contentId, platform, variantIndex, taskId,
+    contentId, platform, variantIndex, taskId, usedVariant,
     createdAt: admin.firestore.FieldValue.serverTimestamp()
   });
   return code;

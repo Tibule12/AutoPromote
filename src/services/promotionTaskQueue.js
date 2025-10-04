@@ -328,7 +328,7 @@ async function processNextPlatformTask() {
           const hasLanding = data.landingPageUrl || data.smartLink || data.url;
           if (hasLanding) {
             const { createShortlink } = require('./shortlinkService');
-            const code = await createShortlink({ contentId: task.contentId, platform: task.platform, variantIndex, taskId: task.id });
+            const code = await createShortlink({ contentId: task.contentId, platform: task.platform, variantIndex, taskId: task.id, usedVariant: selectedVariant });
             const base = process.env.SHORTLINK_BASE_URL || process.env.LANDING_BASE_URL || '';
             if (base) {
               payload.shortlink = base.replace(/\/$/,'') + '/s/' + code;
