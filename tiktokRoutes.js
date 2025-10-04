@@ -39,6 +39,10 @@ function ensureTikTokEnv(res, cfg, opts = { requireSecret: true }) {
   }
 }
 
+function constructAuthUrl(cfg, state, scope) {
+  return `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(cfg.key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(cfg.redirect)}&state=${encodeURIComponent(state)}`;
+}
+
 // Diagnostics: quick config visibility with sandbox/production breakdown
 router.get('/config', (req, res) => {
   const cfg = activeConfig();
@@ -100,7 +104,7 @@ router.post('/auth/prepare', async (req, res) => {
       mode: TIKTOK_ENV
     }, { merge: true });
     const scope = 'user.info.basic';
-    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(cfg.key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(cfg.redirect)}&state=${encodeURIComponent(state)}`;
+  const authUrl = constructAuthUrl(cfg, state, scope);
     // Store authUrl for debugging (non-sensitive)
     await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({ lastAuthUrl: authUrl }, { merge: true });
     if (DEBUG_TIKTOK_OAUTH) {
@@ -129,7 +133,7 @@ router.get('/auth', authMiddleware, async (req, res) => {
     }, { merge: true });
     // Request minimal scope for initial approval; can expand later (video.upload requires program access)
     const scope = 'user.info.basic';
-    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(cfg.key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(cfg.redirect)}&state=${encodeURIComponent(state)}`;
+  const authUrl = constructAuthUrl(cfg, state, scope);
     res.redirect(authUrl);
   } catch (e) {
     res.status(500).json({ error: 'Failed to start TikTok OAuth', details: e.message });
@@ -155,11 +159,37 @@ router.get('/auth/start', async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
     const scope = 'user.info.basic';
-    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(cfg.key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(cfg.redirect)}&state=${encodeURIComponent(state)}`;
+    const authUrl = constructAuthUrl(cfg, state, scope);
     return res.redirect(authUrl);
   } catch (e) {
     return res.status(500).send('Failed to start TikTok OAuth');
   }
+});
+
+// Preflight diagnostics (does NOT store state) to help debug client_key rejections
+router.get('/auth/preflight', authMiddleware, async (req, res) => {
+  const cfg = activeConfig();
+  if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
+  const fakeState = 'preflight.' + Math.random().toString(36).slice(2,10);
+  const scope = 'user.info.basic';
+  const url = constructAuthUrl(cfg, fakeState, scope);
+  const issues = [];
+  if (/\s/.test(cfg.key || '')) issues.push('client_key_contains_whitespace');
+  if (cfg.key && cfg.key.length < 10) issues.push('client_key_suspicious_length');
+  if (!/^https:\/\//.test(cfg.redirect || '')) issues.push('redirect_not_https');
+  if (cfg.redirect && /\/$/.test(cfg.redirect)) issues.push('redirect_trailing_slash');
+  if (!scope.includes('user.info.basic')) issues.push('scope_missing_user.info.basic');
+  if (cfg.key && /[^a-zA-Z0-9]/.test(cfg.key)) issues.push('client_key_non_alphanumeric_chars');
+  res.json({
+    mode: TIKTOK_ENV,
+    constructedAuthUrl: url,
+    redirect: cfg.redirect,
+    keyFirst4: cfg.key ? cfg.key.slice(0,4) : null,
+    keyLast4: cfg.key ? cfg.key.slice(-4) : null,
+    scope,
+    issues,
+    note: 'Use /auth/prepare for real flow; this endpoint only constructs the URL.'
+  });
 });
 
 // 2) OAuth callback — verify state, exchange code, store tokens under users/{uid}/connections/tiktok
