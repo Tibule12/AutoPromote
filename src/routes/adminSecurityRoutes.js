@@ -4,7 +4,6 @@ const { db } = require('../firebaseAdmin');
 const authMiddleware = require('../authMiddleware');
 const adminOnly = require('../middlewares/adminOnly');
 const { encryptToken, hasEncryption } = require('../services/secretVault');
-const adminOnly = require('../middlewares/adminOnly');
 
 // Heuristic scan for plaintext tokens.
 router.get('/plaintext-token-scan', authMiddleware, adminOnly, async (_req, res) => {
@@ -56,8 +55,6 @@ router.post('/encrypt-migrate', authMiddleware, adminOnly, async (_req, res) => 
   }
 });
 
-module.exports = router;
-
 // List current system locks (debug/admin observability)
 router.get('/locks', authMiddleware, adminOnly, async (_req, res) => {
   try {
@@ -68,3 +65,5 @@ router.get('/locks', authMiddleware, adminOnly, async (_req, res) => {
     return res.json({ ok: true, locks });
   } catch (e) { return res.status(500).json({ ok: false, error: e.message }); }
 });
+
+module.exports = router;
