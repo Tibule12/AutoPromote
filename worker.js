@@ -4,6 +4,7 @@ const { db } = require('./src/firebaseAdmin');
 const { processNextPlatformTask, processNextYouTubeTask } = require('./src/services/promotionTaskQueue');
 let poller; try { poller = require('./src/services/youtubeStatsPoller'); } catch(_) { poller = null; }
 const { setStatus } = require('./src/services/statusRecorder');
+let engagementIngestion; try { engagementIngestion = require('./src/services/engagementIngestionService'); } catch(_) { }
 
 const LOOP_INTERVAL_MS = parseInt(process.env.JOB_LOOP_INTERVAL_MS || '5000', 10);
 const YT_POLL_INTERVAL_MS = parseInt(process.env.YT_STATS_LOOP_INTERVAL_MS || '60000', 10);
@@ -45,6 +46,30 @@ async function loop() {
       } catch (e) {
         console.warn('[worker] youtube_stats_batch error:', e.message);
       }
+    }
+    // Engagement ingestion (lightweight) every other stats cycle
+    if (engagementIngestion && Math.random() < 0.3) {
+      try {
+        const eg = await engagementIngestion.ingestBatch({ limit: 20 });
+        if (eg.processed) await setStatus('engagement_ingest', { ts: Date.now(), processed: eg.processed });
+      } catch(e){ console.warn('[worker] engagement_ingest error:', e.message); }
+    }
+    // Periodic variant pruning (probabilistic trigger)
+    if (Math.random() < 0.05) {
+      try {
+        // Sample a high-velocity content doc and prune variants
+        const highSnap = await require('./src/firebaseAdmin').db.collection('content')
+          .where('youtube.velocityStatus','==','high')
+          .limit(1).get();
+        if (!highSnap.empty) {
+          const c = highSnap.docs[0];
+            const fetch = require('node-fetch');
+            const base = process.env.WORKER_SELF_BASE_URL || '';
+            if (base) {
+              await fetch(base + '/api/metrics/variants/prune', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contentId: c.id, keepTop:2, minPosts:2 }) });
+            }
+        }
+      } catch (e) { console.warn('[worker] variant_prune error:', e.message); }
     }
   } catch (e) {
     console.warn('[worker] loop error top-level:', e.message);

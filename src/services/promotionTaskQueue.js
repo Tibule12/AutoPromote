@@ -263,8 +263,20 @@ async function processNextPlatformTask() {
         if (cData.youtube && typeof cData.youtube.velocity === 'number') {
           priority += Math.min(cData.youtube.velocity, 1000); // cap contribution
         }
-        // If content has high status add boost
         if (cData.youtube && cData.youtube.velocityStatus === 'high') priority += 250;
+      }
+      // Engagement-based boost (aggregate recent platform_posts metrics for this content)
+      const postsSnap = await db.collection('platform_posts')
+        .where('contentId','==', data.contentId)
+        .orderBy('createdAt','desc')
+        .limit(5)
+        .get();
+      let impressions = 0, likes = 0;
+      postsSnap.forEach(p => { const d = p.data(); if (d.metrics) { impressions += d.metrics.impressions||0; likes += d.metrics.likes||0; } });
+      if (impressions > 0) {
+        const likeRate = likes / impressions; // 0..1
+        priority += Math.min(impressions, 500) * 0.5; // moderate weight
+        priority += likeRate * 200; // amplify quality
       }
     } catch(_){}
     priority += Math.random();

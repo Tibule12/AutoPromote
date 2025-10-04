@@ -75,7 +75,14 @@ router.get('/revenue/projection', authMiddleware, async (req, res) => {
     const rpm = parseFloat(process.env.MODEL_LANDING_RPM || '4');
     const landingRevenue = (landingVisits/1000)*rpm;
     const addonsMRR = 0; // future
-    const grossMRR = subscriptionMRR + promotionMRR + aiMRR + landingRevenue + addonsMRR;
+    // Real ledger overlay (best-effort)
+    let ledgerTotals = null;
+    try {
+      const { aggregateUsageSince } = require('../services/usageLedgerService');
+      ledgerTotals = await aggregateUsageSince({ sinceMs: since });
+    } catch(_){}
+    const ledgerRevenue = ledgerTotals ? (ledgerTotals.subscription_fee + ledgerTotals.overage + ledgerTotals.ai) : 0;
+    const grossMRR = subscriptionMRR + promotionMRR + aiMRR + landingRevenue + addonsMRR + ledgerRevenue;
     const procCost = grossMRR * 0.03 + (paidUsers * 0.30);
     const infraPerPaid = parseFloat(process.env.MODEL_INFRA_PER_PAID || '2');
     const infraCost = paidUsers * infraPerPaid;
@@ -100,6 +107,7 @@ router.get('/revenue/projection', authMiddleware, async (req, res) => {
         arppu: ARPPU,
         landing_rpm: rpm
       },
+      ledger: ledgerTotals || null,
       sample: { events: events.length, uploads: uploadEvents.length, tasks_enqueued: taskEvents.length, excess_tasks: excessTasks },
       generatedAt: new Date().toISOString()
     });
@@ -116,7 +124,7 @@ router.post('/landing/track', async (req, res) => {
     const ua = req.get('user-agent') || null;
     const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
     // Attribution parse (if path includes ?src=...)
-    let src = null, cId = contentId || null;
+  let src = null, cId = contentId || null; let variantIndex = null; let taskId = null;
     if (path && path.includes('?')) {
       try {
         const q = path.split('?')[1];
@@ -124,6 +132,12 @@ router.post('/landing/track', async (req, res) => {
         src = params.get('src');
         const contentParam = params.get('c');
         if (contentParam && !cId) cId = contentParam;
+        const vIdx = params.get('v');
+        if (vIdx !== null && vIdx !== undefined) {
+          const parsed = parseInt(vIdx,10); if (!Number.isNaN(parsed)) variantIndex = parsed;
+        }
+        const tParam = params.get('t');
+        if (tParam) taskId = tParam;
       } catch(_) { }
     }
     const doc = {
@@ -134,7 +148,9 @@ router.post('/landing/track', async (req, res) => {
       referer,
       ua: ua ? ua.slice(0,200) : null,
       ipHash: ip ? require('crypto').createHash('sha256').update(ip).digest('hex').slice(0,16) : null,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      variantIndex,
+      taskId
     };
     await db.collection('events').add(doc);
     return res.json({ ok: true });
@@ -237,6 +253,49 @@ router.get('/variants/performance', async (req, res) => {
     // Derive simple score: views/posts
     Object.values(variantStats).forEach(v => { v.viewPerPost = v.posts ? v.estimatedViews / v.posts : 0; });
     return res.json({ ok: true, window_days: days, variants: Object.values(variantStats).sort((a,b)=>b.viewPerPost - a.viewPerPost).slice(0,200) });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
+// Prune underperforming variants: deactivates bottom performers for a contentId
+router.post('/variants/prune', async (req, res) => {
+  try {
+    const { contentId, keepTop = 1, minPosts = 2 } = req.body || {};
+    if (!contentId) return res.status(400).json({ ok:false, error: 'contentId required' });
+    // Reuse performance logic (local calculation)
+    const days = 30;
+    const since = Date.now() - days * 86400000;
+    const postSnap = await db.collection('platform_posts')
+      .where('contentId','==', contentId)
+      .orderBy('createdAt','desc')
+      .limit(500)
+      .get();
+    const posts = []; postSnap.docs.forEach(d => { const v = d.data(); posts.push(v); });
+    const lvSnap = await db.collection('events')
+      .where('type','==','landing_view')
+      .orderBy('createdAt','desc')
+      .limit(3000)
+      .get().catch(()=>({ empty: true, docs: [] }));
+    const views = []; lvSnap.docs.forEach(d => { const v = d.data(); const ts = Date.parse(v.createdAt||'')||0; if (ts>=since) views.push(v); });
+    const viewIndex = {}; views.forEach(v => { if (v.contentId && v.src) { const k=`${v.contentId}|${v.src}`; viewIndex[k]=(viewIndex[k]||0)+1; } });
+    const stats = {};
+    posts.forEach(p => {
+      if (!p.usedVariant) return;
+      const srcCode = p.platform === 'twitter' ? 'tw' : p.platform;
+      const vk = `${p.contentId}|${srcCode}`;
+      const viewsForPair = viewIndex[vk] || 0;
+      const key = p.usedVariant;
+      if (!stats[key]) stats[key] = { variant: key, posts:0, views:0 };
+      stats[key].posts += 1;
+      stats[key].views += viewsForPair; // naive allocation
+    });
+    const arr = Object.values(stats).filter(v => v.posts >= minPosts).map(v => ({ ...v, vpp: v.posts ? v.views / v.posts : 0 }));
+    if (!arr.length) return res.json({ ok:true, pruned: [], reason: 'insufficient_data' });
+    arr.sort((a,b)=> b.vpp - a.vpp);
+    const keep = new Set(arr.slice(0, keepTop).map(v=>v.variant));
+    const disabled = arr.slice(keepTop).map(v=>v.variant);
+    // Mark on content doc
+    try { await db.collection('content').doc(contentId).set({ disabledVariants: disabled, variantKeep: Array.from(keep), variantStatsSnapshot: arr }, { merge: true }); } catch(_){ }
+    return res.json({ ok:true, kept: Array.from(keep), disabled, evaluated: arr.length });
   } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
 });
 

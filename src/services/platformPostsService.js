@@ -32,6 +32,7 @@ async function recordPlatformPost({ platform, contentId, uid, reason, payload = 
     if (base) {
       const sep = base.includes('?') ? '&' : '?';
       const parts = [ `src=${encodeURIComponent(platform)}`, `c=${encodeURIComponent(contentId)}` ];
+      if (typeof variantIndex === 'number') parts.push(`v=${variantIndex}`);
       if (taskId) parts.push(`t=${encodeURIComponent(taskId)}`);
       trackedLink = base + sep + parts.join('&');
     }
