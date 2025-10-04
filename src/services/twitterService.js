@@ -4,6 +4,7 @@
 const fetch = require('node-fetch');
 const crypto = require('crypto');
 const { db, admin } = require('../firebaseAdmin');
+const { encryptToken, decryptToken, hasEncryption } = require('./secretVault');
 
 const TOKEN_URL = 'https://api.twitter.com/2/oauth2/token';
 const AUTH_BASE = 'https://twitter.com/i/oauth2/authorize';
@@ -74,57 +75,11 @@ async function refreshToken({ refresh_token, clientId }) {
   return json;
 }
 
-// Optional at-rest encryption for tokens
-const ENC_KEY_RAW = process.env.TWITTER_TOKEN_ENCRYPTION_KEY || null; // Provide 32+ chars for good entropy
-
-function deriveKey() {
-  if (!ENC_KEY_RAW) return null;
-  // Derive a 32-byte key via SHA-256 of provided secret
-  return crypto.createHash('sha256').update(ENC_KEY_RAW).digest();
-}
-
-function encryptToken(plaintext) {
-  if (!plaintext) return null;
-  const key = deriveKey();
-  if (!key) return plaintext; // store plaintext if no key
-  try {
-    const iv = crypto.randomBytes(12);
-    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-    const enc = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
-    const tag = cipher.getAuthTag();
-    const packed = Buffer.concat([iv, tag, enc]).toString('base64');
-    return packed;
-  } catch (e) {
-    console.warn('[Twitter][encryptToken] failed, storing plaintext:', e.message);
-    return plaintext;
-  }
-}
-
-function decryptToken(stored) {
-  if (!stored) return null;
-  const key = deriveKey();
-  if (!key) return stored; // plaintext path
-  try {
-    const buf = Buffer.from(stored, 'base64');
-    if (buf.length < 16) return stored; // not encrypted or malformed
-    const iv = buf.slice(0, 12);
-    const tag = buf.slice(12, 28);
-    const data = buf.slice(28);
-    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
-    decipher.setAuthTag(tag);
-    const dec = Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
-    return dec;
-  } catch (e) {
-    // Return original so caller may attempt usage (could have been plaintext)
-    console.warn('[Twitter][decryptToken] failed, returning raw value:', e.message);
-    return stored;
-  }
-}
 
 async function storeUserTokens(uid, tokens) {
   const ref = db.collection('users').doc(uid).collection('connections').doc('twitter');
   const expires_at = Date.now() + (tokens.expires_in ? tokens.expires_in * 1000 : 3600 * 1000);
-  const useEncryption = !!deriveKey();
+  const useEncryption = hasEncryption();
   const doc = {
     token_type: tokens.token_type,
     scope: tokens.scope,
