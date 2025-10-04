@@ -50,6 +50,7 @@ function buildAuthUrl({ clientId, redirectUri, state, code_challenge }) {
 }
 
 async function exchangeCode({ code, code_verifier, redirectUri, clientId }) {
+  const clientSecret = process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CLIENT_SECTRET; // accept typo fallback
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     code,
@@ -57,20 +58,38 @@ async function exchangeCode({ code, code_verifier, redirectUri, clientId }) {
     code_verifier,
     client_id: clientId
   });
-  const res = await fetch(TOKEN_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
-  const json = await res.json().catch(()=>({}));
+  // If confidential client, Twitter expects HTTP Basic header (client_id:client_secret)
+  const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+  if (clientSecret) {
+    headers['Authorization'] = 'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  }
+  const res = await fetch(TOKEN_URL, { method: 'POST', headers, body });
+  const txt = await res.text();
+  let json; try { json = JSON.parse(txt); } catch { json = { raw: txt }; }
+  if (process.env.DEBUG_TWITTER_OAUTH) {
+    console.log('[Twitter][exchangeCode] status', res.status, 'bodyKeys:', Object.keys(json));
+  }
   if (!res.ok) throw new Error(json.error_description || json.error || 'twitter_token_exchange_failed');
   return json; // { token_type, expires_in, access_token, scope, refresh_token }
 }
 
 async function refreshToken({ refresh_token, clientId }) {
+  const clientSecret = process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CLIENT_SECTRET;
   const body = new URLSearchParams({
     grant_type: 'refresh_token',
     refresh_token,
     client_id: clientId
   });
-  const res = await fetch(TOKEN_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
-  const json = await res.json().catch(()=>({}));
+  const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+  if (clientSecret) {
+    headers['Authorization'] = 'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  }
+  const res = await fetch(TOKEN_URL, { method: 'POST', headers, body });
+  const txt = await res.text();
+  let json; try { json = JSON.parse(txt); } catch { json = { raw: txt }; }
+  if (process.env.DEBUG_TWITTER_OAUTH) {
+    console.log('[Twitter][refreshToken] status', res.status, 'keys:', Object.keys(json));
+  }
   if (!res.ok) throw new Error(json.error_description || json.error || 'twitter_refresh_failed');
   return json;
 }
