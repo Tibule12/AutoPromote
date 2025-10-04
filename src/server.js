@@ -345,6 +345,88 @@ app.get('/api/health', async (req, res) => {
   return res.json(extended);
 });
 
+// Readiness probe - returns 200 if system considered ready, else 503.
+// Criteria (configurable via env):
+// - Pending promotion tasks below threshold (READY_MAX_PENDING_TASKS, default 500)
+// - Dead letter queue absent unless ignored (READY_ALLOW_DEAD_LETTER=true to ignore)
+// - Required workers (when background enabled) have run recently (READY_WORKER_STALE_SEC default 900s)
+// - Stale locks below threshold (READY_MAX_STALE_LOCKS default 10)
+// If background jobs disabled, worker freshness is skipped unless READY_REQUIRE_JOBS=true.
+app.get('/api/health/ready', async (req, res) => {
+  const start = Date.now();
+  const cfg = {
+    maxPending: parseInt(process.env.READY_MAX_PENDING_TASKS || '500', 10),
+    workerStaleSec: parseInt(process.env.READY_WORKER_STALE_SEC || '900', 10),
+    maxStaleLocks: parseInt(process.env.READY_MAX_STALE_LOCKS || '10', 10),
+    allowDeadLetter: process.env.READY_ALLOW_DEAD_LETTER === 'true',
+    requireJobs: process.env.READY_REQUIRE_JOBS === 'true'
+  };
+  const out = { ok: true, status: 'ready', checks: {}, config: cfg, generatedAt: new Date().toISOString() };
+  try {
+    const { db } = require('./firebaseAdmin');
+    // Pending tasks
+    try {
+      const pendingSnap = await db.collection('promotion_tasks').where('status','==','pending').limit(cfg.maxPending + 1).get();
+      const pending = pendingSnap.size; // limited sample but enough to know if threshold exceeded
+      const ok = pending <= cfg.maxPending;
+      out.checks.backlog = { pending, threshold: cfg.maxPending, ok };
+      if (!ok) { out.ok = false; out.status = 'degraded'; }
+    } catch (e) { out.checks.backlog = { error: e.message, ok: false }; out.ok = false; out.status = 'degraded'; }
+
+    // Dead letter presence
+    try {
+      const dl = await db.collection('dead_letter_tasks').limit(1).get();
+      const present = !dl.empty;
+      const ok = present ? cfg.allowDeadLetter : true;
+      out.checks.deadLetter = { present, ok, allowDeadLetter: cfg.allowDeadLetter };
+      if (!ok) { out.ok = false; out.status = 'degraded'; }
+    } catch (e) { out.checks.deadLetter = { error: e.message, ok: false }; out.ok = false; out.status = 'degraded'; }
+
+    // Locks assessment
+    try {
+      const lockSnap = await db.collection('system_locks').limit(200).get();
+      const now = Date.now();
+      let stale = 0;
+      lockSnap.forEach(d => { const v = d.data() || {}; if (v.expiresAt && v.expiresAt < now) stale++; });
+      const ok = stale <= cfg.maxStaleLocks;
+      out.checks.locks = { stale, threshold: cfg.maxStaleLocks, ok };
+      if (!ok) { out.ok = false; out.status = 'degraded'; }
+    } catch (e) { out.checks.locks = { error: e.message, ok: false }; out.ok = false; out.status = 'degraded'; }
+
+    // Worker freshness (optional if background disabled and not required)
+    const bgEnabled = process.env.ENABLE_BACKGROUND_JOBS === 'true';
+    if (bgEnabled || cfg.requireJobs) {
+      try {
+        const requiredWorkers = ['statsPoller','promotionTasks','platformMetrics','earningsAggregator'];
+        const staleCutoff = Date.now() - cfg.workerStaleSec * 1000;
+        const statusSnap = await db.collection('system_status').where('__name__','in', requiredWorkers.filter((_,i)=>i<10)) // Firestore in limit safety
+          .get().catch(()=>({ empty: true, docs: [] }));
+        const workerStatus = {};
+        let allOk = true;
+        requiredWorkers.forEach(name => workerStatus[name] = { found: false, ok: !cfg.requireJobs && !bgEnabled });
+        statusSnap.docs.forEach(d => {
+          const v = d.data() || {};
+            const lastRun = v.lastRun ? Date.parse(v.lastRun) : null;
+            const fresh = lastRun && lastRun >= staleCutoff;
+            workerStatus[d.id] = { found: true, lastRun: v.lastRun || null, ok: fresh };
+            if (!fresh) allOk = false;
+        });
+        if ((cfg.requireJobs || bgEnabled) && !allOk) { out.ok = false; out.status = 'degraded'; }
+        out.checks.workers = { ok: allOk || (!cfg.requireJobs && !bgEnabled), required: requiredWorkers, details: workerStatus, staleThresholdSec: cfg.workerStaleSec, backgroundEnabled: bgEnabled };
+      } catch (e) { out.checks.workers = { error: e.message, ok: false }; out.ok = false; out.status = 'degraded'; }
+    } else {
+      out.checks.workers = { skipped: true, backgroundEnabled: bgEnabled, ok: true };
+    }
+
+    out.latencyMs = Date.now() - start;
+  } catch (e) {
+    out.ok = false;
+    out.status = 'error';
+    out.error = e.message;
+  }
+  return res.status(out.ok ? 200 : 503).json(out);
+});
+
 
 // Catch all handler: send back React's index.html file for client-side routing
 app.get('*', (req, res) => {
