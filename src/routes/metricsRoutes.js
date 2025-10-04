@@ -13,6 +13,124 @@ const adminOnly = require('../middlewares/adminOnly');
 
 const router = express.Router();
 
+// New: business config + revenue projection endpoints
+router.get('/business-config', async (req, res) => {
+  try {
+    const { getPlans } = require('../services/planService');
+    const plans = getPlans();
+    const out = {
+      revenue_per_million: parseInt(process.env.REVENUE_PER_MILLION || '3000', 10),
+      creator_payout_rate: parseFloat(process.env.CREATOR_PAYOUT_RATE || '0.05'),
+      platform_fee_rate: parseFloat(process.env.PLATFORM_FEE_RATE || '0.10'),
+      daily_target_views: parseInt(process.env.DAILY_TARGET_VIEWS || '200000', 10),
+      auto_remove_days: parseInt(process.env.AUTO_REMOVE_DAYS || '2', 10),
+      plans
+    };
+    return res.json({ ok: true, business: out, generatedAt: new Date().toISOString() });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+router.get('/revenue/projection', authMiddleware, async (req, res) => {
+  try {
+    const windowDays = Math.min(parseInt(req.query.days || '30', 10), 90);
+    const since = Date.now() - windowDays * 86400000;
+    const { getPlans } = require('../services/planService');
+    const plans = getPlans();
+    // Pull recent events (cap 5000) - for MVP sampling
+    const snap = await db.collection('events')
+      .orderBy('createdAt','desc')
+      .limit(5000)
+      .get().catch(()=>({ empty: true, docs: [] }));
+    const events = [];
+    snap.docs.forEach(d => {
+      const v = d.data();
+      const ts = Date.parse(v.createdAt || '') || 0;
+      if (ts >= since) events.push(v);
+    });
+    // Basic aggregation
+    const usersActive = new Set(events.filter(e=>e.userId).map(e=>e.userId));
+    // Fetch paid user count (best effort) - users collection where plan.tier != 'free'
+    let paidUsers = 0;
+    try {
+      const paidSnap = await db.collection('users').where('plan.tier','!=','free').limit(500).get();
+      paidUsers = paidSnap.size;
+    } catch(_) { /* ignore (index may be missing) */ }
+    const ARPPU = parseFloat(process.env.MODEL_ARPPU || '32');
+    const subscriptionMRR = paidUsers * ARPPU;
+    const taskEvents = events.filter(e=>e.type === 'platform_post_enqueued');
+    // Simulate overage: assume each user free quota 15 tasks
+    const tasksPerUser = {};
+    taskEvents.forEach(t => { tasksPerUser[t.userId] = (tasksPerUser[t.userId]||0)+1; });
+    let excessTasks = 0; const FREE = 15;
+    Object.values(tasksPerUser).forEach(ct => { if (ct>FREE) excessTasks += (ct-FREE); });
+    const taskFee = parseFloat(process.env.TASK_FEE || '0.15');
+    const promotionMRR = excessTasks * taskFee * (30 / windowDays); // scale to monthly
+    // AI events placeholder (none yet) -> zero
+    const aiMRR = 0;
+    // Landing page estimate (if we had visits) -> simulate using content uploads * factor
+    const uploadEvents = events.filter(e=>e.type==='content_uploaded');
+    const landingVisits = uploadEvents.length * parseInt(process.env.MODEL_VISITS_PER_UPLOAD || '20',10);
+    const rpm = parseFloat(process.env.MODEL_LANDING_RPM || '4');
+    const landingRevenue = (landingVisits/1000)*rpm;
+    const addonsMRR = 0; // future
+    const grossMRR = subscriptionMRR + promotionMRR + aiMRR + landingRevenue + addonsMRR;
+    const procCost = grossMRR * 0.03 + (paidUsers * 0.30);
+    const infraPerPaid = parseFloat(process.env.MODEL_INFRA_PER_PAID || '2');
+    const infraCost = paidUsers * infraPerPaid;
+    const netMRR = grossMRR - procCost - infraCost;
+    return res.json({
+      ok: true,
+      window_days: windowDays,
+      users: { active: usersActive.size, paid: paidUsers },
+      mrr_breakdown: {
+        subscription: subscriptionMRR,
+        promotion_overage: promotionMRR,
+        ai: aiMRR,
+        landing: landingRevenue,
+        addons: addonsMRR
+      },
+      gross_mrr: grossMRR,
+      costs: { processing: procCost, infra: infraCost },
+      net_mrr: netMRR,
+      assumptions: {
+        task_fee: taskFee,
+        free_task_quota: FREE,
+        arppu: ARPPU,
+        landing_rpm: rpm
+      },
+      sample: { events: events.length, uploads: uploadEvents.length, tasks_enqueued: taskEvents.length, excess_tasks: excessTasks },
+      generatedAt: new Date().toISOString()
+    });
+  } catch (e) {
+    return res.status(500).json({ ok:false, error: e.message });
+  }
+});
+
+// Landing page view tracker (public, lightweight). Accepts contentId (optional) & path.
+router.post('/landing/track', async (req, res) => {
+  try {
+    const { contentId, path } = req.body || {};
+    const referer = req.get('referer') || null;
+    const ua = req.get('user-agent') || null;
+    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+    const doc = {
+      type: 'landing_view',
+      contentId: contentId || null,
+      path: path || '/',
+      referer,
+      ua: ua ? ua.slice(0,200) : null,
+      ipHash: ip ? require('crypto').createHash('sha256').update(ip).digest('hex').slice(0,16) : null,
+      createdAt: new Date().toISOString()
+    };
+    await db.collection('events').add(doc);
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(500).json({ ok:false, error: e.message });
+  }
+});
+
 // Utility safe number
 function num(v) { return typeof v === 'number' && !Number.isNaN(v) ? v : 0; }
 

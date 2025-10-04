@@ -2,10 +2,10 @@ const { db } = require('./firebaseAdmin');
 
 class MonetizationService {
   constructor() {
-    // Business rules
-    this.REVENUE_PER_MILLION_VIEWS = 900000; // $900,000 per 1M views
-    this.CREATOR_PAYOUT_RATE = 0.01; // 1% of revenue goes to creator
-    this.PLATFORM_FEE_RATE = 0.10; // 10% of revenue goes to platform
+  // Business rules now env-driven with conservative defaults
+  this.REVENUE_PER_MILLION_VIEWS = parseInt(process.env.REVENUE_PER_MILLION || '3000', 10);
+  this.CREATOR_PAYOUT_RATE = parseFloat(process.env.CREATOR_PAYOUT_RATE || '0.05');
+  this.PLATFORM_FEE_RATE = parseFloat(process.env.PLATFORM_FEE_RATE || '0.10');
   }
 
   /**

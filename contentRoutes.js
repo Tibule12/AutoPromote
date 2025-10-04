@@ -108,7 +108,9 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       schedule_hint,
       target_rpm,
       min_views_threshold,
-      max_budget
+      max_budget,
+      videoUrl, // optional direct field
+      auto_promote // optional structure controlling immediate cross-posting
     } = req.body;
 
     // Only include url if valid
@@ -188,7 +190,7 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       throw firestoreError;
     }
 
-    const content = { id: contentRef.id, ...contentData };
+  const content = { id: contentRef.id, ...contentData };
     console.log('Content object created:', { id: content.id, title: content.title, type: content.type });
     let promotionSchedule = null;
 
@@ -228,31 +230,157 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       }
     }
 
-    // Generate optimization recommendations
+  // Generate optimization recommendations
     const recommendations = optimizationService.generateOptimizationRecommendations(content);
 
     // Schedule content for auto-removal after 2 days (pseudo, needs background job in production)
     // You should implement a cron job or scheduled function to delete content after 2 days
 
-    console.log('✅ Upload process completed successfully');
-    console.log('Response data:', {
-      message: scheduled_promotion_time ? 'Content uploaded and scheduled for promotion' : 'Content uploaded successfully',
-      contentId: content.id,
-      hasPromotionSchedule: !!promotionSchedule,
-      hasRecommendations: !!recommendations
-    });
+    // ---------------------------------------------
+    // Auto Promotion (Immediate YouTube + Twitter)
+    // ---------------------------------------------
+    const autoPromotionResults = {};
+    const selectedPlatforms = Array.isArray(target_platforms) ? target_platforms.map(p=>String(p).toLowerCase()) : [];
+    const ap = auto_promote || {}; // expected shape { youtube: { enabled, videoUrl, shortsMode, title, description }, twitter: { enabled, message } }
+
+    // Helper: safe Firestore update merge
+    async function mergePromotionSummary(summary) {
+      try { await db.collection('content').doc(content.id).set({ promotion_summary: summary }, { merge: true }); } catch (_) {}
+    }
+
+    // YOUTUBE
+    const wantYouTube = (ap.youtube && ap.youtube.enabled) || selectedPlatforms.includes('youtube');
+    if (wantYouTube) {
+      const effectiveVideoUrl = (ap.youtube && ap.youtube.videoUrl) || videoUrl || validUrl; // allow using original url if it is a direct video file
+      if (!effectiveVideoUrl) {
+        autoPromotionResults.youtube = { skipped: true, reason: 'missing_video_url' };
+      } else {
+        // Check connection
+        try {
+          const ytConn = await db.collection('users').doc(req.userId).collection('connections').doc('youtube').get();
+          if (!ytConn.exists) {
+            autoPromotionResults.youtube = { skipped: true, reason: 'not_connected' };
+          } else {
+            const { uploadVideo } = require('./services/youtubeService');
+            const ytTitle = (ap.youtube && ap.youtube.title) || title;
+            const ytDesc = (ap.youtube && ap.youtube.description) || description || '';
+            const shortsMode = !!(ap.youtube && ap.youtube.shortsMode);
+            const startedAt = Date.now();
+            try {
+              const up = await uploadVideo({
+                uid: req.userId,
+                title: ytTitle,
+                description: ytDesc,
+                fileUrl: effectiveVideoUrl,
+                mimeType: 'video/mp4',
+                contentId: content.id,
+                shortsMode,
+                optimizeMetadata: true,
+                contentTags: [],
+                forceReupload: !!(ap.youtube && ap.youtube.forceReupload),
+                skipIfDuplicate: true
+              });
+              autoPromotionResults.youtube = { success: true, videoId: up.videoId, duplicate: !!up.duplicate, uploadHash: up.uploadHash, latencyMs: Date.now() - startedAt };
+            } catch (err) {
+              autoPromotionResults.youtube = { success: false, error: err.message };
+            }
+          }
+        } catch (e) {
+          autoPromotionResults.youtube = { success: false, error: e.message || 'youtube_upload_failed' };
+        }
+      }
+    } else {
+      autoPromotionResults.youtube = { skipped: true, reason: 'not_requested' };
+    }
+
+    // TWITTER
+    const wantTwitter = (ap.twitter && ap.twitter.enabled) || selectedPlatforms.includes('twitter');
+    if (wantTwitter) {
+      try {
+        const twConn = await db.collection('users').doc(req.userId).collection('connections').doc('twitter').get();
+        if (!twConn.exists) {
+          autoPromotionResults.twitter = { skipped: true, reason: 'not_connected' };
+        } else {
+          const { enqueuePlatformPostTask } = require('./services/promotionTaskQueue');
+          const message = (ap.twitter && ap.twitter.message) || title || 'New content';
+          const link = validUrl || null;
+          try {
+            const task = await enqueuePlatformPostTask({
+              contentId: content.id,
+              uid: req.userId,
+              platform: 'twitter',
+              reason: 'post_upload',
+              payload: { message, link }
+            });
+            if (task.skipped) {
+              autoPromotionResults.twitter = { skipped: true, reason: task.reason };
+            } else {
+              autoPromotionResults.twitter = { enqueued: true, taskId: task.id, simulated: !!task.simulated };
+            }
+          } catch (err) {
+            autoPromotionResults.twitter = { enqueued: false, error: err.message };
+          }
+        }
+      } catch (e) {
+        autoPromotionResults.twitter = { enqueued: false, error: e.message };
+      }
+    } else {
+      autoPromotionResults.twitter = { skipped: true, reason: 'not_requested' };
+    }
+
+    // Persist summary (best-effort)
+    await mergePromotionSummary(autoPromotionResults);
+
+    console.log('✅ Upload + auto-promotion completed', { contentId: content.id, youtube: autoPromotionResults.youtube, twitter: autoPromotionResults.twitter });
 
     res.status(201).json({
       message: scheduled_promotion_time ? 'Content uploaded and scheduled for promotion' : 'Content uploaded successfully',
       content,
       promotion_schedule: promotionSchedule,
       optimization_recommendations: recommendations,
+      auto_promotion: autoPromotionResults,
       optimal_rpm: optimalRPM,
-  creator_payout: minViews * (optimalRPM / 1000000) * creatorPayoutRate
+      creator_payout: minViews * (optimalRPM / 1000000) * creatorPayoutRate
     });
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Promotion status endpoint (fetch combined snapshot)
+router.get('/:id/promotion-status', authMiddleware, async (req, res) => {
+  try {
+    const contentRef = db.collection('content').doc(req.params.id);
+    const snap = await contentRef.get();
+    if (!snap.exists || snap.data().user_id !== req.userId) return res.status(404).json({ error: 'Content not found' });
+    const data = snap.data();
+    const promotionSummary = data.promotion_summary || {};
+    // Fetch recent platform_posts
+    let platformPosts = [];
+    try {
+      const pSnap = await db.collection('platform_posts').where('contentId','==', req.params.id).orderBy('createdAt','desc').limit(10).get();
+      pSnap.forEach(d => platformPosts.push({ id: d.id, ...d.data() }));
+    } catch(_) {}
+    // Fetch queued tasks (best-effort)
+    let queuedTasks = [];
+    try {
+      const tSnap = await db.collection('promotion_tasks')
+        .where('contentId','==', req.params.id)
+        .where('status','==','queued')
+        .limit(10)
+        .get();
+      tSnap.forEach(d => queuedTasks.push({ id: d.id, type: d.data().type, platform: d.data().platform, reason: d.data().reason }));
+    } catch(_) {}
+    return res.json({
+      contentId: req.params.id,
+      promotion_summary: promotionSummary,
+      youtube: data.youtube || null,
+      platform_posts: platformPosts,
+      queued_tasks: queuedTasks
+    });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
 });
 
