@@ -248,7 +248,18 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
       }
     }
 
-    const content = { id: contentId, ...contentData };
+    // Attach immutable business snapshot for future audit
+    const businessSnapshot = {
+      revenue_per_million: BUSINESS.REVENUE_PER_MILLION,
+      creator_payout_rate: BUSINESS.CREATOR_PAYOUT_RATE,
+      daily_target_views: BUSINESS.DAILY_TARGET_VIEWS,
+      auto_remove_days: BUSINESS.AUTO_REMOVE_DAYS,
+      captured_at: new Date().toISOString()
+    };
+    if (!isDryRun) {
+      try { await db.collection('content').doc(contentId).set({ business_snapshot: businessSnapshot }, { merge: true }); } catch(e){ console.log('⚠️ snapshot store failed', e.message); }
+    }
+    const content = { id: contentId, ...contentData, business_snapshot: businessSnapshot };
     console.log('Content object', isDryRun ? 'preview' : 'created', { id: content.id, title: content.title, type: content.type });
     let promotionSchedule = null;
 
@@ -361,6 +372,10 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
     // Skipped for dry runs or if no auto_promote object provided.
     // ----------------------------------------------------
     const autoPromotionResults = {};
+    const { recordEvent } = require('./services/eventRecorder');
+    if (!isDryRun) {
+      recordEvent('content_uploaded', { userId: req.userId, contentId: content.id, payload: { title, type, target_platforms } });
+    }
     if (!isDryRun && autoPromote && typeof autoPromote === 'object') {
       const backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === 'true';
       // Helper safe update of promotion_summary on content doc
@@ -396,6 +411,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
                 skipIfDuplicate: autoPromote.youtube.skipIfDuplicate !== false
               });
               autoPromotionResults.youtube = { requested: true, ...ytOutcome };
+              recordEvent('youtube_upload', { userId: req.userId, contentId: content.id, payload: { videoId: ytOutcome.videoId, duplicate: ytOutcome.duplicate } });
             }
           }
         } catch (e) {
@@ -426,6 +442,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
               forceRepost: !!autoPromote.twitter.forceRepost
             });
             autoPromotionResults.twitter = { requested: true, queued: !enqueueRes.skipped, ...enqueueRes, backgroundJobsEnabled };
+            recordEvent('platform_post_enqueued', { userId: req.userId, contentId: content.id, payload: { platform: 'twitter', queued: !enqueueRes.skipped, reason: 'post_upload' } });
           }
         } catch (e) {
           autoPromotionResults.twitter = { requested: true, queued: false, error: e.message };
