@@ -1,43 +1,72 @@
 // tiktokRoutes.js
-// TikTok OAuth and API integration (server-side only)
+// TikTok OAuth and API integration (server-side only) with sandbox/production mode support
 const express = require('express');
 const fetch = require('node-fetch');
 const router = express.Router();
 const authMiddleware = require('./authMiddleware');
 const { admin, db } = require('./firebaseAdmin');
 
-const TIKTOK_CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
-const TIKTOK_CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
-const TIKTOK_REDIRECT_URI = process.env.TIKTOK_REDIRECT_URI; // e.g., https://autopromote.onrender.com/api/tiktok/callback
-// Default dashboard URL to your live frontend; can be overridden via env
+// Mode selection: defaults to sandbox unless explicitly set to 'production'
+const TIKTOK_ENV = (process.env.TIKTOK_ENV || 'sandbox').toLowerCase() === 'production' ? 'production' : 'sandbox';
+
+// Gather both sandbox & production env sets (prefixed) plus legacy fallbacks
+const sandboxConfig = {
+  key: process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || null,
+  secret: process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || null,
+  redirect: process.env.TIKTOK_SANDBOX_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || null,
+};
+const productionConfig = {
+  key: process.env.TIKTOK_PROD_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || null,
+  secret: process.env.TIKTOK_PROD_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || null,
+  redirect: process.env.TIKTOK_PROD_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || null,
+};
+
+function activeConfig() {
+  return TIKTOK_ENV === 'production' ? productionConfig : sandboxConfig;
+}
+
+// For dashboard redirect
 const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote-1.onrender.com';
 
-function ensureTikTokEnv(res, opts = { requireSecret: true }) {
+function ensureTikTokEnv(res, cfg, opts = { requireSecret: true }) {
   const missing = [];
-  if (!TIKTOK_CLIENT_KEY) missing.push('TIKTOK_CLIENT_KEY');
-  if (opts.requireSecret && !TIKTOK_CLIENT_SECRET) missing.push('TIKTOK_CLIENT_SECRET');
-  if (!TIKTOK_REDIRECT_URI) missing.push('TIKTOK_REDIRECT_URI');
+  if (!cfg.key) missing.push(`${TIKTOK_ENV === 'production' ? 'TIKTOK_PROD_CLIENT_KEY' : 'TIKTOK_SANDBOX_CLIENT_KEY'} (or fallback TIKTOK_CLIENT_KEY)`);
+  if (opts.requireSecret && !cfg.secret) missing.push(`${TIKTOK_ENV === 'production' ? 'TIKTOK_PROD_CLIENT_SECRET' : 'TIKTOK_SANDBOX_CLIENT_SECRET'} (or fallback TIKTOK_CLIENT_SECRET)`);
+  if (!cfg.redirect) missing.push(`${TIKTOK_ENV === 'production' ? 'TIKTOK_PROD_REDIRECT_URI' : 'TIKTOK_SANDBOX_REDIRECT_URI'} (or fallback TIKTOK_REDIRECT_URI)`);
   if (missing.length) {
-    return res.status(500).json({ error: 'tiktok_config_missing', missing });
+    return res.status(500).json({ error: 'tiktok_config_missing', mode: TIKTOK_ENV, missing });
   }
 }
 
-// Diagnostics: quick config visibility (no secrets exposed beyond boolean flags)
+// Diagnostics: quick config visibility with sandbox/production breakdown
 router.get('/config', (req, res) => {
-  res.json({
+  const cfg = activeConfig();
+  const mask = (val) => (val && val.length > 8) ? `${val.slice(0,4)}***${val.slice(-4)}` : (val ? '***' : null);
+  const response = {
     ok: true,
-    hasClientKey: !!TIKTOK_CLIENT_KEY,
-    hasClientSecret: !!TIKTOK_CLIENT_SECRET,
-    hasRedirect: !!TIKTOK_REDIRECT_URI,
-    redirectUri: TIKTOK_REDIRECT_URI || null,
-    // Masked client key (first 4 + last 4) to verify which key is deployed without exposing full value
-    clientKeyMask: TIKTOK_CLIENT_KEY ? `${TIKTOK_CLIENT_KEY.slice(0,4)}***${TIKTOK_CLIENT_KEY.slice(-4)}` : null
-  });
+    mode: TIKTOK_ENV,
+    active: {
+      hasClientKey: !!cfg.key,
+      hasClientSecret: !!cfg.secret,
+      hasRedirect: !!cfg.redirect,
+      redirectUri: cfg.redirect || null,
+      clientKeyMask: mask(cfg.key)
+    },
+    sandboxConfigured: !!sandboxConfig.key && !!sandboxConfig.redirect,
+    productionConfigured: !!productionConfig.key && !!productionConfig.redirect,
+    // Indicate whether legacy fallback vars (unscoped) are supplying values
+    usingFallbackLegacy: (
+      (TIKTOK_ENV === 'sandbox' && !process.env.TIKTOK_SANDBOX_CLIENT_KEY && !!process.env.TIKTOK_CLIENT_KEY) ||
+      (TIKTOK_ENV === 'production' && !process.env.TIKTOK_PROD_CLIENT_KEY && !!process.env.TIKTOK_CLIENT_KEY)
+    )
+  };
+  res.json(response);
 });
 
 // Health endpoint to verify mount
 router.get('/health', (req, res) => {
-  res.json({ ok: true, hasClientKey: !!TIKTOK_CLIENT_KEY, hasRedirect: !!TIKTOK_REDIRECT_URI });
+  const cfg = activeConfig();
+  res.json({ ok: true, mode: TIKTOK_ENV, hasClientKey: !!cfg.key, hasRedirect: !!cfg.redirect });
 });
 
 // Helper: extract UID from Authorization: Bearer <firebase id token>
@@ -56,7 +85,8 @@ async function getUidFromAuthHeader(req) {
 // POST /auth/prepare – preferred secure flow used by frontend (returns JSON { authUrl })
 // Frontend calls this with Authorization header; server stores state and returns the TikTok OAuth URL
 router.post('/auth/prepare', async (req, res) => {
-  if (ensureTikTokEnv(res, { requireSecret: true })) return;
+  const cfg = activeConfig();
+  if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
     const uid = await getUidFromAuthHeader(req);
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
@@ -68,8 +98,8 @@ router.post('/auth/prepare', async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
     const scope = 'user.info.basic';
-    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(TIKTOK_CLIENT_KEY)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(TIKTOK_REDIRECT_URI)}&state=${encodeURIComponent(state)}`;
-    return res.json({ authUrl });
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(cfg.key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(cfg.redirect)}&state=${encodeURIComponent(state)}`;
+    return res.json({ authUrl, mode: TIKTOK_ENV });
   } catch (e) {
     return res.status(500).json({ error: 'Failed to prepare TikTok OAuth' });
   }
@@ -77,7 +107,8 @@ router.post('/auth/prepare', async (req, res) => {
 
 // 1) Begin OAuth (requires user auth) — keeps scopes minimal for review
 router.get('/auth', authMiddleware, async (req, res) => {
-  if (ensureTikTokEnv(res, { requireSecret: true })) return;
+  const cfg = activeConfig();
+  if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
     const uid = req.userId || req.user?.uid;
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
@@ -90,7 +121,7 @@ router.get('/auth', authMiddleware, async (req, res) => {
     }, { merge: true });
     // Request minimal scope for initial approval; can expand later (video.upload requires program access)
     const scope = 'user.info.basic';
-    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(TIKTOK_CLIENT_KEY)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(TIKTOK_REDIRECT_URI)}&state=${encodeURIComponent(state)}`;
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(cfg.key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(cfg.redirect)}&state=${encodeURIComponent(state)}`;
     res.redirect(authUrl);
   } catch (e) {
     res.status(500).json({ error: 'Failed to start TikTok OAuth', details: e.message });
@@ -99,7 +130,8 @@ router.get('/auth', authMiddleware, async (req, res) => {
 
 // Alternative start endpoint that accepts an ID token via query when headers aren't available (for link redirects)
 router.get('/auth/start', async (req, res) => {
-  if (ensureTikTokEnv(res, { requireSecret: true })) return;
+  const cfg = activeConfig();
+  if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
     const idToken = req.query.id_token;
     if (!idToken) return res.status(401).send('Missing id_token');
@@ -115,7 +147,7 @@ router.get('/auth/start', async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
     const scope = 'user.info.basic';
-    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(TIKTOK_CLIENT_KEY)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(TIKTOK_REDIRECT_URI)}&state=${encodeURIComponent(state)}`;
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(cfg.key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(cfg.redirect)}&state=${encodeURIComponent(state)}`;
     return res.redirect(authUrl);
   } catch (e) {
     return res.status(500).send('Failed to start TikTok OAuth');
@@ -124,7 +156,8 @@ router.get('/auth/start', async (req, res) => {
 
 // 2) OAuth callback — verify state, exchange code, store tokens under users/{uid}/connections/tiktok
 router.get('/callback', async (req, res) => {
-  if (ensureTikTokEnv(res, { requireSecret: true })) return;
+  const cfg = activeConfig();
+  if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   const { code, state } = req.query;
   if (!code || !state) return res.status(400).send('Missing code or state');
   try {
@@ -140,11 +173,11 @@ router.get('/callback', async (req, res) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_key: TIKTOK_CLIENT_KEY,
-        client_secret: TIKTOK_CLIENT_SECRET,
+        client_key: cfg.key,
+        client_secret: cfg.secret,
         code,
         grant_type: 'authorization_code',
-        redirect_uri: TIKTOK_REDIRECT_URI
+        redirect_uri: cfg.redirect
       })
     });
     const tokenData = await tokenRes.json();
@@ -160,6 +193,7 @@ router.get('/callback', async (req, res) => {
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
       expires_in: tokenData.expires_in,
+      mode: TIKTOK_ENV,
       obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
     // redirect back to dashboard with success
@@ -180,7 +214,8 @@ router.get('/callback', async (req, res) => {
 // 2.1) Connection status — returns whether TikTok is connected and basic profile info
 router.get('/status', authMiddleware, async (req, res) => {
   try {
-    if (ensureTikTokEnv(res)) return;
+    const cfg = activeConfig();
+    if (ensureTikTokEnv(res, cfg, { requireSecret: false })) return;
     const uid = req.userId || req.user?.uid;
     if (!uid) return res.status(401).json({ connected: false, error: 'Unauthorized' });
     const snap = await db.collection('users').doc(uid).collection('connections').doc('tiktok').get();
@@ -193,6 +228,9 @@ router.get('/status', authMiddleware, async (req, res) => {
       open_id: data.open_id,
       scope: data.scope,
       obtainedAt: data.obtainedAt,
+      storedMode: data.mode || null,
+      serverMode: TIKTOK_ENV,
+      reauthRequired: !!(data.mode && data.mode !== TIKTOK_ENV)
     };
     // Try to fetch basic user info if we have an access token and scope allows
     if (data.access_token && String(data.scope || '').includes('user.info.basic')) {
