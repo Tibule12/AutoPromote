@@ -17,7 +17,10 @@ router.get('/:code', async (req, res) => {
     if (data.taskId) params.set('t', data.taskId);
     const url = base + (base.includes('?') ? '&' : '?') + params.toString();
     // Fire-and-forget event log
-    try { await db.collection('events').add({ type:'shortlink_resolve', code, ...data, createdAt: new Date().toISOString() }); } catch(_){}
+    try {
+      const event = { type:'shortlink_resolve', code, ...data, createdAt: new Date().toISOString() };
+      await db.collection('events').add(event);
+    } catch(_){}
     return res.redirect(302, url);
   } catch (e) { return res.status(500).send('error'); }
 });

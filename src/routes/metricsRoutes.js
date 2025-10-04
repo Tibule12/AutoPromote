@@ -355,12 +355,14 @@ router.get('/dashboard/performance', authMiddleware, async (req, res) => {
     });
     resolves.forEach(r => {
       if (r.contentId && contentStats[r.contentId]) {
-        contentStats[r.contentId].clicks +=1;
-        // variantIndex lookup: we stored variantIndex/taskId in shortlink doc; event has them copied
+        const cs = contentStats[r.contentId];
+        cs.clicks +=1;
         if (typeof r.variantIndex === 'number') {
-          // Map variant by index: find any variant with same index (approx). For precise mapping ensure variantIndex stored in platform_posts.
-          const cs = contentStats[r.contentId];
-          Object.values(cs.variants).forEach(vs => { /* placeholder: variant string not index */ });
+          // Attempt to map variantIndex -> variant by scanning posts for same content & variantIndex
+          const matchingPost = posts.find(p => p.contentId === r.contentId && p.variantIndex === r.variantIndex && p.usedVariant);
+          if (matchingPost && matchingPost.usedVariant && cs.variants[matchingPost.usedVariant]) {
+            cs.variants[matchingPost.usedVariant].clicks += 1;
+          }
         }
       }
     });
