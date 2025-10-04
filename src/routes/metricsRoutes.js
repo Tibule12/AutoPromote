@@ -143,6 +143,36 @@ router.post('/landing/track', async (req, res) => {
   }
 });
 
+// Funnel attribution summary: aggregates recent landing_view events and platform_posts
+router.get('/funnel/summary', async (req, res) => {
+  try {
+    const days = Math.min(parseInt(req.query.days || '7',10), 30);
+    const since = Date.now() - days * 86400000;
+    const landingSnap = await db.collection('events')
+      .where('type','==','landing_view')
+      .orderBy('createdAt','desc')
+      .limit(3000)
+      .get().catch(()=>({ empty: true, docs: [] }));
+    const views = [];
+    landingSnap.docs.forEach(d => { const v = d.data(); const ts = Date.parse(v.createdAt||'') || 0; if (ts >= since) views.push(v); });
+    const bySrc = {}; const byContent = {};
+    views.forEach(v => {
+      if (v.src) bySrc[v.src] = (bySrc[v.src]||0)+1;
+      if (v.contentId) byContent[v.contentId] = (byContent[v.contentId]||0)+1;
+    });
+    // Top posts join attempt: fetch platform_posts for recent contentIds (sample)
+    const contentIds = Object.keys(byContent).slice(0, 25);
+    const posts = [];
+    for (const cid of contentIds) {
+      try {
+        const snap = await db.collection('platform_posts').where('contentId','==', cid).limit(10).get();
+        snap.forEach(p => { const d = p.data(); posts.push({ id: p.id, platform: d.platform, contentId: d.contentId, success: d.success, trackedLink: d.trackedLink || null }); });
+      } catch(_){}
+    }
+    return res.json({ ok: true, window_days: days, totals: { views: views.length }, bySrc, byContentSample: byContent, samplePosts: posts });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
 // Utility safe number
 function num(v) { return typeof v === 'number' && !Number.isNaN(v) ? v : 0; }
 
