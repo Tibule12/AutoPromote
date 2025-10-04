@@ -116,6 +116,7 @@ try {
 // Try to load optional route modules
 let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes;
 let shortlinkRoutes;
+let billingRoutes;
 try {
   withdrawalRoutes = require('./routes/withdrawalRoutes');
 } catch (error) {
@@ -146,6 +147,10 @@ try {
   shortlinkRoutes = express.Router();
   console.log('⚠️ Shortlink routes not found');
 }
+try {
+  billingRoutes = require('./routes/billingRoutes');
+  console.log('✅ Billing routes loaded');
+} catch (e) { billingRoutes = express.Router(); }
 
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
@@ -217,6 +222,7 @@ app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
 app.use('/s', shortlinkRoutes);
+app.use('/api/billing', billingRoutes);
 
 // Serve site verification and other well-known files
 // 1) Try root-level /public/.well-known

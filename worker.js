@@ -5,6 +5,7 @@ const { processNextPlatformTask, processNextYouTubeTask } = require('./src/servi
 let poller; try { poller = require('./src/services/youtubeStatsPoller'); } catch(_) { poller = null; }
 const { setStatus } = require('./src/services/statusRecorder');
 let engagementIngestion; try { engagementIngestion = require('./src/services/engagementIngestionService'); } catch(_) { }
+let twitterMetrics; try { twitterMetrics = require('./src/services/twitterMetricsService'); } catch(_) {}
 
 const LOOP_INTERVAL_MS = parseInt(process.env.JOB_LOOP_INTERVAL_MS || '5000', 10);
 const YT_POLL_INTERVAL_MS = parseInt(process.env.YT_STATS_LOOP_INTERVAL_MS || '60000', 10);
@@ -53,6 +54,12 @@ async function loop() {
         const eg = await engagementIngestion.ingestBatch({ limit: 20 });
         if (eg.processed) await setStatus('engagement_ingest', { ts: Date.now(), processed: eg.processed });
       } catch(e){ console.warn('[worker] engagement_ingest error:', e.message); }
+    }
+    if (twitterMetrics && Math.random() < 0.25) {
+      try {
+        const tw = await twitterMetrics.ingestRecentTwitterMetrics({ limit: 40 });
+        if (tw.processed) await setStatus('twitter_metrics', { ts: Date.now(), processed: tw.processed });
+      } catch(e){ console.warn('[worker] twitter_metrics error:', e.message); }
     }
     // Periodic variant pruning (probabilistic trigger)
     if (Math.random() < 0.05) {
