@@ -1,19 +1,21 @@
 // Simple dynamic import test to ensure route modules resolve without missing dependencies.
+const path = require('path');
 const required = [
-  './src/contentRoutes.js',
-  './src/routes/monetizationRoutes.js',
-  './src/routes/promotionTaskRoutes.js',
-  './src/routes/metricsRoutes.js',
-  './src/routes/adminSecurityRoutes.js'
+  'src/contentRoutes.js',
+  'src/routes/monetizationRoutes.js',
+  'src/routes/promotionTaskRoutes.js',
+  'src/routes/metricsRoutes.js',
+  'src/routes/adminSecurityRoutes.js'
 ];
 let failures = 0;
-for (const mod of required) {
+for (const rel of required) {
+  const abs = path.join(process.cwd(), rel);
   try {
-    require(mod);
-    console.log('OK import', mod);
+    require(abs);
+    console.log('OK import', rel);
   } catch (e) {
     failures++;
-    console.error('FAIL import', mod, e.message);
+    console.error('FAIL import', rel, e.message);
   }
 }
 if (failures) {
