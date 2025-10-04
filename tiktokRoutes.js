@@ -12,11 +12,28 @@ const TIKTOK_REDIRECT_URI = process.env.TIKTOK_REDIRECT_URI; // e.g., https://au
 // Default dashboard URL to your live frontend; can be overridden via env
 const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote-1.onrender.com';
 
-function ensureTikTokEnv(res) {
-  if (!TIKTOK_CLIENT_KEY || !TIKTOK_CLIENT_SECRET || !TIKTOK_REDIRECT_URI) {
-    return res.status(500).json({ error: 'TikTok is not configured on the server. Missing TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, or TIKTOK_REDIRECT_URI.' });
+function ensureTikTokEnv(res, opts = { requireSecret: true }) {
+  const missing = [];
+  if (!TIKTOK_CLIENT_KEY) missing.push('TIKTOK_CLIENT_KEY');
+  if (opts.requireSecret && !TIKTOK_CLIENT_SECRET) missing.push('TIKTOK_CLIENT_SECRET');
+  if (!TIKTOK_REDIRECT_URI) missing.push('TIKTOK_REDIRECT_URI');
+  if (missing.length) {
+    return res.status(500).json({ error: 'tiktok_config_missing', missing });
   }
 }
+
+// Diagnostics: quick config visibility (no secrets exposed beyond boolean flags)
+router.get('/config', (req, res) => {
+  res.json({
+    ok: true,
+    hasClientKey: !!TIKTOK_CLIENT_KEY,
+    hasClientSecret: !!TIKTOK_CLIENT_SECRET,
+    hasRedirect: !!TIKTOK_REDIRECT_URI,
+    redirectUri: TIKTOK_REDIRECT_URI || null,
+    // Masked client key (first 4 + last 4) to verify which key is deployed without exposing full value
+    clientKeyMask: TIKTOK_CLIENT_KEY ? `${TIKTOK_CLIENT_KEY.slice(0,4)}***${TIKTOK_CLIENT_KEY.slice(-4)}` : null
+  });
+});
 
 // Health endpoint to verify mount
 router.get('/health', (req, res) => {
@@ -39,7 +56,7 @@ async function getUidFromAuthHeader(req) {
 // POST /auth/prepare – preferred secure flow used by frontend (returns JSON { authUrl })
 // Frontend calls this with Authorization header; server stores state and returns the TikTok OAuth URL
 router.post('/auth/prepare', async (req, res) => {
-  if (ensureTikTokEnv(res)) return;
+  if (ensureTikTokEnv(res, { requireSecret: true })) return;
   try {
     const uid = await getUidFromAuthHeader(req);
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
@@ -60,7 +77,7 @@ router.post('/auth/prepare', async (req, res) => {
 
 // 1) Begin OAuth (requires user auth) — keeps scopes minimal for review
 router.get('/auth', authMiddleware, async (req, res) => {
-  if (ensureTikTokEnv(res)) return;
+  if (ensureTikTokEnv(res, { requireSecret: true })) return;
   try {
     const uid = req.userId || req.user?.uid;
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
@@ -82,7 +99,7 @@ router.get('/auth', authMiddleware, async (req, res) => {
 
 // Alternative start endpoint that accepts an ID token via query when headers aren't available (for link redirects)
 router.get('/auth/start', async (req, res) => {
-  if (ensureTikTokEnv(res)) return;
+  if (ensureTikTokEnv(res, { requireSecret: true })) return;
   try {
     const idToken = req.query.id_token;
     if (!idToken) return res.status(401).send('Missing id_token');
@@ -107,7 +124,7 @@ router.get('/auth/start', async (req, res) => {
 
 // 2) OAuth callback — verify state, exchange code, store tokens under users/{uid}/connections/tiktok
 router.get('/callback', async (req, res) => {
-  if (ensureTikTokEnv(res)) return;
+  if (ensureTikTokEnv(res, { requireSecret: true })) return;
   const { code, state } = req.query;
   if (!code || !state) return res.status(400).send('Missing code or state');
   try {
