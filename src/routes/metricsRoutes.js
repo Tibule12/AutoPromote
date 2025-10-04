@@ -115,10 +115,22 @@ router.post('/landing/track', async (req, res) => {
     const referer = req.get('referer') || null;
     const ua = req.get('user-agent') || null;
     const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+    // Attribution parse (if path includes ?src=...)
+    let src = null, cId = contentId || null;
+    if (path && path.includes('?')) {
+      try {
+        const q = path.split('?')[1];
+        const params = new URLSearchParams(q);
+        src = params.get('src');
+        const contentParam = params.get('c');
+        if (contentParam && !cId) cId = contentParam;
+      } catch(_) { }
+    }
     const doc = {
       type: 'landing_view',
-      contentId: contentId || null,
+      contentId: cId,
       path: path || '/',
+      src: src || null,
       referer,
       ua: ua ? ua.slice(0,200) : null,
       ipHash: ip ? require('crypto').createHash('sha256').update(ip).digest('hex').slice(0,16) : null,
