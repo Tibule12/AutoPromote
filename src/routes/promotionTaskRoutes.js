@@ -4,11 +4,19 @@ const adminOnly = require('../middlewares/adminOnly');
 const { db } = require('../firebaseAdmin');
 const { enqueueYouTubeUploadTask, processNextYouTubeTask, enqueuePlatformPostTask, processNextPlatformTask } = require('../services/promotionTaskQueue');
 const { admin } = require('../firebaseAdmin');
+const { rateLimit } = require('../middleware/rateLimit');
+const { validateBody } = require('../middleware/validate');
 
 const router = express.Router();
 
 // Enqueue a YouTube upload task for a content item
-router.post('/youtube/enqueue', authMiddleware, async (req, res) => {
+router.post('/youtube/enqueue', authMiddleware, rateLimit({ field: 'ytEnqueue', perMinute: 30 }), validateBody({
+  contentId: { type: 'string', required: true },
+  fileUrl: { type: 'string', required: true },
+  title: { type: 'string', required: false, maxLength: 140 },
+  description: { type: 'string', required: false, maxLength: 5000 },
+  shortsMode: { type: 'boolean', required: false }
+}), async (req, res) => {
   try {
     const { contentId, title, description, fileUrl, shortsMode } = req.body || {};
     if (!contentId || !fileUrl) return res.status(400).json({ error: 'contentId and fileUrl required' });
@@ -84,9 +92,8 @@ router.post('/reset-attempts/:id', authMiddleware, adminOnly, async (req, res) =
     return res.json({ success: true });
   } catch (e) { return res.status(500).json({ error: e.message }); }
 });
-const { validateBody } = require('../middleware/validate');
 // Enqueue cross-platform post (generic)
-router.post('/platform/enqueue', authMiddleware, validateBody({
+router.post('/platform/enqueue', authMiddleware, rateLimit({ field: 'platformEnqueue', perMinute: 60, weight: 2 }), validateBody({
   contentId: { type: 'string', required: true },
   platform: { type: 'string', required: true, enum: ['twitter','facebook','instagram','tiktok','youtube'] },
   reason: { type: 'string', required: false, maxLength: 120 },

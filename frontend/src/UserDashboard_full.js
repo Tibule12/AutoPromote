@@ -25,6 +25,10 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [facebookStatus, setFacebookStatus] = useState({ connected: false });
   const [youtubeStatus, setYouTubeStatus] = useState({ connected: false });
   const [twitterStatus, setTwitterStatus] = useState({ connected: false });
+  const [earnings, setEarnings] = useState({ pendingEarnings: 0, totalEarnings: 0, payoutEligible: false, minPayoutAmount: 0 });
+  const [payouts, setPayouts] = useState([]);
+  const [progress, setProgress] = useState({ contentCount: 0, requiredForRevenue: 0, remaining: 0, revenueEligible: false });
+  const [platformSummary, setPlatformSummary] = useState({ platforms: {} });
 
   // Ensure content is an array to simplify rendering
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
@@ -104,6 +108,24 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     loadFacebookStatus();
     loadYouTubeStatus();
   loadTwitterStatus();
+    // Earnings & progress & platform summary
+    (async () => {
+      try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
+        const token = await currentUser.getIdToken(true);
+        const [earnRes, payRes, progRes, platRes] = await Promise.all([
+          fetch(API_ENDPOINTS.EARNINGS_SUMMARY, { headers: { Authorization: `Bearer ${token}` }}),
+          fetch(API_ENDPOINTS.EARNINGS_PAYOUTS, { headers: { Authorization: `Bearer ${token}` }}),
+          fetch(API_ENDPOINTS.USER_PROGRESS, { headers: { Authorization: `Bearer ${token}` }}),
+          fetch(API_ENDPOINTS.PLATFORM_STATUS, { headers: { Authorization: `Bearer ${token}` }}),
+        ]);
+        if (earnRes.ok) { const d = await earnRes.json(); if (d.ok) setEarnings(d); }
+        if (payRes.ok) { const d = await payRes.json(); if (d.ok) setPayouts(d.payouts || []); }
+        if (progRes.ok) { const d = await progRes.json(); if (d.ok) setProgress(d); }
+        if (platRes.ok) { const d = await platRes.json(); if (d.ok) setPlatformSummary(d); }
+      } catch(_){}
+    })();
     // If coming back from OAuth, the URL may contain ?tiktok=connected
     const params = new URLSearchParams(window.location.search);
     if (params.get('tiktok')) {
@@ -385,6 +407,8 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
             <li className={activeTab === 'analytics' ? 'active' : ''} onClick={() => handleNav('analytics')}>Analytics</li>
             <li className={activeTab === 'rewards' ? 'active' : ''} onClick={() => handleNav('rewards')}>Rewards</li>
             <li className={activeTab === 'notifications' ? 'active' : ''} onClick={() => handleNav('notifications')}>Notifications</li>
+            <li className={activeTab === 'earnings' ? 'active' : ''} onClick={() => handleNav('earnings')}>Earnings</li>
+            <li className={activeTab === 'connections' ? 'active' : ''} onClick={() => handleNav('connections')}>Connections</li>
           </ul>
         </nav>
         <button className="logout-btn" onClick={onLogout}>Logout</button>
@@ -675,6 +699,48 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
                 <li key={i}>{typeof note === 'string' ? note : JSON.stringify(note)}</li>
               ))}
             </ul>
+          </section>
+        )}
+
+        {activeTab === 'earnings' && (
+          <section className="earnings-panel">
+            <h3>Earnings</h3>
+            <div style={{display:'grid', gap:'.5rem', maxWidth:480}}>
+              <div><strong>Pending:</strong> ${earnings.pendingEarnings?.toFixed ? earnings.pendingEarnings.toFixed(2) : earnings.pendingEarnings}</div>
+              <div><strong>Total:</strong> ${earnings.totalEarnings?.toFixed ? earnings.totalEarnings.toFixed(2) : earnings.totalEarnings}</div>
+              <div><strong>Min Payout:</strong> ${earnings.minPayoutAmount}</div>
+              <div><strong>Revenue Eligible:</strong> {earnings.revenueEligible ? 'Yes' : 'No'} (Progress: {progress.contentCount}/{progress.requiredForRevenue} · Remaining: {progress.remaining})</div>
+              <div><strong>Payout Eligible:</strong> {earnings.payoutEligible ? 'Yes' : 'No'}</div>
+              <button className="check-quality" disabled={!earnings.payoutEligible} onClick={async ()=>{
+                try {
+                  const currentUser = auth.currentUser; if (!currentUser) return;
+                  const token = await currentUser.getIdToken(true);
+                  const res = await fetch(API_ENDPOINTS.EARNINGS_PAYOUT_SELF, { method:'POST', headers:{ Authorization:`Bearer ${token}` }});
+                  if(res.ok){
+                    const d = await res.json();
+                    alert('Payout processed: $'+d.amount);
+                  }
+                } catch(e){ alert(e.message||'Payout failed'); }
+              }}>Request Payout</button>
+            </div>
+            <h4 style={{marginTop:'1rem'}}>Recent Payouts</h4>
+            {payouts.length===0? <div style={{color:'#9aa4b2'}}>No payouts yet.</div> : (
+              <table style={{width:'100%', fontSize:'.85rem'}}>
+                <thead><tr><th style={{textAlign:'left'}}>Date</th><th style={{textAlign:'right'}}>Amount</th><th>Status</th></tr></thead>
+                <tbody>
+                  {payouts.map(p=> (
+                    <tr key={p.id}><td>{new Date(p.createdAt).toLocaleString()}</td><td style={{textAlign:'right'}}>${p.amount}</td><td>{p.status}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
+        )}
+
+        {activeTab === 'connections' && (
+          <section className="connections-panel">
+            <h3>Aggregated Platform Connections</h3>
+            <pre style={{background:'rgba(255,255,255,0.05)', padding:'.75rem', borderRadius:8, maxHeight:300, overflow:'auto'}}>{JSON.stringify(platformSummary, null, 2)}</pre>
           </section>
         )}
       </main>

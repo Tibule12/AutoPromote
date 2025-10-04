@@ -32,6 +32,8 @@ const {
 const promotionService = require('./promotionService');
 const optimizationService = require('./optimizationService');
 const router = express.Router();
+const { rateLimit } = require('./middleware/rateLimit');
+const { validateBody } = require('./middleware/validate');
 
 // Enforce max 10 uploads per user per calendar day (UTC)
 const getStartOfDayUTC = (date = new Date()) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0));
@@ -89,7 +91,17 @@ router.get('/', async (req, res) => {
 });
 
 // Upload content with advanced scheduling and optimization
-router.post('/upload', authMiddleware, sanitizeInput, validateContentData, validateRateLimit, async (req, res) => {
+router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMinute: 15, dailyLimit: 500 }),
+  sanitizeInput,
+  validateBody({
+    title: { type: 'string', required: true, maxLength: 140 },
+    type: { type: 'string', required: true },
+    url: { type: 'string', required: false, maxLength: 1000 },
+    description: { type: 'string', required: false, maxLength: 5000 }
+  }),
+  validateContentData,
+  validateRateLimit,
+  async (req, res) => {
   try {
     const {
       title,
