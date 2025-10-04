@@ -23,6 +23,41 @@ router.get('/health', (req, res) => {
   res.json({ ok: true, hasClientKey: !!TIKTOK_CLIENT_KEY, hasRedirect: !!TIKTOK_REDIRECT_URI });
 });
 
+// Helper: extract UID from Authorization: Bearer <firebase id token>
+async function getUidFromAuthHeader(req) {
+  try {
+    const authz = req.headers.authorization || '';
+    const [scheme, token] = authz.split(' ');
+    if (scheme === 'Bearer' && token) {
+      const decoded = await admin.auth().verifyIdToken(String(token));
+      return decoded.uid;
+    }
+  } catch (_) {}
+  return null;
+}
+
+// POST /auth/prepare – preferred secure flow used by frontend (returns JSON { authUrl })
+// Frontend calls this with Authorization header; server stores state and returns the TikTok OAuth URL
+router.post('/auth/prepare', async (req, res) => {
+  if (ensureTikTokEnv(res)) return;
+  try {
+    const uid = await getUidFromAuthHeader(req);
+    if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+    const nonce = Math.random().toString(36).slice(2);
+    const state = `${uid}.${nonce}`;
+    await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
+      state,
+      nonce,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+    const scope = 'user.info.basic';
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(TIKTOK_CLIENT_KEY)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(TIKTOK_REDIRECT_URI)}&state=${encodeURIComponent(state)}`;
+    return res.json({ authUrl });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to prepare TikTok OAuth' });
+  }
+});
+
 // 1) Begin OAuth (requires user auth) — keeps scopes minimal for review
 router.get('/auth', authMiddleware, async (req, res) => {
   if (ensureTikTokEnv(res)) return;
