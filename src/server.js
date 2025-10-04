@@ -29,7 +29,7 @@ try {
 }
 
 // Load social routers
-let facebookRoutes, youtubeRoutes, instagramRoutes;
+let facebookRoutes, youtubeRoutes, instagramRoutes, twitterAuthRoutes;
 try {
   facebookRoutes = require('./routes/facebookRoutes');
   console.log('✅ Facebook routes loaded');
@@ -43,6 +43,13 @@ try {
 } catch (e) {
   console.log('⚠️ YouTube routes not found:', e.message);
   youtubeRoutes = express.Router();
+}
+try {
+  twitterAuthRoutes = require('./routes/twitterAuthRoutes');
+  console.log('✅ Twitter auth routes loaded');
+} catch (e) {
+  console.log('⚠️ Twitter auth routes not found:', e.message);
+  twitterAuthRoutes = express.Router();
 }
 try {
   promotionTaskRoutes = require('./routes/promotionTaskRoutes');
@@ -144,6 +151,8 @@ app.use('/api/facebook', facebookRoutes);
 console.log('🚏 Facebook routes mounted at /api/facebook');
 app.use('/api/youtube', youtubeRoutes);
 console.log('🚏 YouTube routes mounted at /api/youtube');
+app.use('/api/twitter', twitterAuthRoutes);
+console.log('🚏 Twitter routes mounted at /api/twitter');
 app.use('/api/promotion-tasks', promotionTaskRoutes);
 console.log('🚏 Promotion task routes mounted at /api/promotion-tasks');
 app.use('/api/metrics', metricsRoutes);
@@ -349,6 +358,7 @@ const ENABLE_BACKGROUND = process.env.ENABLE_BACKGROUND_JOBS === 'true';
 const STATS_POLL_INTERVAL_MS = parseInt(process.env.STATS_POLL_INTERVAL_MS || '180000', 10); // 3 minutes default
 const TASK_PROCESS_INTERVAL_MS = parseInt(process.env.TASK_PROCESS_INTERVAL_MS || '60000', 10); // 1 minute default
 const PLATFORM_STATS_POLL_INTERVAL_MS = parseInt(process.env.PLATFORM_STATS_POLL_INTERVAL_MS || '300000', 10); // 5 minutes default
+const OAUTH_STATE_CLEAN_INTERVAL_MS = parseInt(process.env.OAUTH_STATE_CLEAN_INTERVAL_MS || '900000', 10); // 15 min default
 
 if (ENABLE_BACKGROUND) {
   console.log('🛠  Background job runner enabled.');
@@ -414,6 +424,22 @@ if (ENABLE_BACKGROUND) {
         platformMetricsRunning = false;
       }
     }, PLATFORM_STATS_POLL_INTERVAL_MS).unref();
+
+    // Cleanup old oauth_states docs (stale PKCE state) to reduce clutter
+    try {
+      const { cleanupOldStates } = require('./services/twitterService');
+      setInterval(async () => {
+        try {
+          const removed = await cleanupOldStates(30); // older than 30 minutes
+          if (removed) console.log(`[BG][oauth-states] cleaned ${removed} stale records`);
+        } catch (e) {
+          console.warn('[BG][oauth-states] cleanup failed:', e.message);
+        }
+      }, OAUTH_STATE_CLEAN_INTERVAL_MS).unref();
+    } catch (e) {
+      // twitterService may not exist if feature not deployed yet
+      console.log('[BG][oauth-states] cleanup skipped:', e.message);
+    }
   } catch (e) {
     console.warn('⚠️ Background job initialization failed:', e.message);
   }

@@ -48,14 +48,26 @@ async function postToFacebook({ contentId, payload, reason }) {
   return { platform: 'facebook', success: true, postId: json.id, reason, masked: { page: mask(PAGE_ID) } };
 }
 
-async function postToTwitter({ contentId, payload, reason }) {
-  const BEARER = process.env.TWITTER_BEARER_TOKEN; // NOTE: Elevated access required
-  if (!BEARER) return { platform: 'twitter', simulated: true, reason: 'missing_credentials' };
+async function postToTwitter({ contentId, payload, reason, uid }) {
+  // Prefer user-context token via twitterService; fallback to env bearer (legacy)
+  let bearer = null;
+  if (uid) {
+    try {
+      const { getValidAccessToken } = require('./twitterService');
+      bearer = await getValidAccessToken(uid);
+    } catch (e) {
+      console.warn('[Twitter] user token fetch failed:', e.message);
+    }
+  }
+  if (!bearer) {
+    bearer = process.env.TWITTER_BEARER_TOKEN || null;
+  }
+  if (!bearer) return { platform: 'twitter', simulated: true, reason: 'missing_credentials' };
   const ctx = await buildContentContext(contentId);
   const text = (payload?.message || ctx.title || 'New content').slice(0, 270) + (ctx.landingPageUrl ? `\n${ctx.landingPageUrl}` : '');
   const res = await fetch('https://api.twitter.com/2/tweets', {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${BEARER}`, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': `Bearer ${bearer}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ text })
   });
   const json = await safeJson(res);
@@ -96,10 +108,10 @@ const handlers = {
   tiktok: postToTikTok
 };
 
-async function dispatchPlatformPost({ platform, contentId, payload, reason }) {
+async function dispatchPlatformPost({ platform, contentId, payload, reason, uid }) {
   const handler = handlers[platform];
   if (!handler) return { platform, success: false, error: 'unsupported_platform' };
-  return handler({ contentId, payload, reason });
+  return handler({ contentId, payload, reason, uid });
 }
 
 module.exports = { dispatchPlatformPost };
