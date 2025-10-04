@@ -33,4 +33,22 @@ async function aggregateUsageSince({ sinceMs }) {
   return out;
 }
 
-module.exports = { recordUsage, aggregateUsageSince };
+async function countUsageRecords({ userId, type, sinceMs }) {
+  if (!userId || !type) return 0;
+  const snap = await db.collection('usage_ledger')
+    .where('userId','==', userId)
+    .where('type','==', type)
+    .orderBy('createdAt','desc')
+    .limit(500)
+    .get().catch(()=>({ empty:true, docs: [] }));
+  let count = 0;
+  snap.docs.forEach(d => {
+    const v = d.data();
+    const ts = v.createdAt?.toMillis ? v.createdAt.toMillis() : 0;
+    if (sinceMs && ts && ts < sinceMs) return;
+    count += 1;
+  });
+  return count;
+}
+
+module.exports = { recordUsage, aggregateUsageSince, countUsageRecords };
