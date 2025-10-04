@@ -6,11 +6,25 @@ const router = express.Router();
 // Helper to fetch connection doc if exists
 async function getConn(uid, name) {
   try {
-    const snap = await db.collection('users').doc(uid).collection('connections').doc(name).get();
-    if (!snap.exists) return { connected: false };
-    const data = snap.data();
-    return { connected: true, ...data };
-  } catch (_) { return { connected: false }; }
+    const userRef = db.collection('users').doc(uid);
+    const snap = await userRef.collection('connections').doc(name).get();
+    if (snap.exists) {
+      const data = snap.data();
+      return { connected: true, ...data, source: 'subcollection' };
+    }
+    // Heuristic fallback: inspect top-level user doc for token/identity hints
+    const userSnap = await userRef.get();
+    if (userSnap.exists) {
+      const u = userSnap.data() || {};
+      const lowerKeys = Object.keys(u).map(k => k.toLowerCase());
+      const hasToken = lowerKeys.some(k => k.includes(name) && k.includes('token'));
+      const identity = u[`${name}Identity`] || u[`${name}_identity`] || u[`${name}Profile`] || null;
+      if (hasToken || identity) {
+        return { connected: true, inferred: true, identity, source: 'userDoc' };
+      }
+    }
+    return { connected: false };
+  } catch (_) { return { connected: false, error: 'lookup_failed' }; }
 }
 
 router.get('/status', authMiddleware, async (req, res) => {
@@ -28,7 +42,7 @@ router.get('/status', authMiddleware, async (req, res) => {
       facebook: { connected: facebook.connected, pages: Array.isArray(facebook.pages) ? facebook.pages.map(p=>p.name).slice(0,3) : [] },
       tiktok: { connected: tiktok.connected, display_name: tiktok.display_name }
     };
-    res.json({ summary, raw: { twitter, youtube, facebook, tiktok } });
+  res.json({ ok: true, summary, raw: { twitter, youtube, facebook, tiktok } });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
