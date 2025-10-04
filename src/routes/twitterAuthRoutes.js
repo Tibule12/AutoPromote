@@ -32,16 +32,66 @@ router.get('/oauth/config', (req, res) => {
   });
 });
 
-// Start OAuth (PKCE)
+// Helper: log only if DEBUG_TWITTER_OAUTH enabled
+function debugLog(...args) {
+  if (process.env.DEBUG_TWITTER_OAUTH) {
+    console.log('[Twitter][routes]', ...args);
+  }
+}
+
+// Lightweight in-memory usage metrics (best-effort)
+let oauthStartCount = 0;
+let oauthPrepareCount = 0;
+let oauthPreflightCount = 0;
+
+// GET /oauth/preflight - does NOT create state; surfaces config + sample (non-usable) auth URL for diagnostics
+router.get('/oauth/preflight', (req, res) => {
+  try {
+    oauthPreflightCount++;
+    const { clientId, redirectUri, clientSecret } = resolveTwitterConfig();
+    const issues = [];
+    if (!clientId) issues.push('missing_client_id');
+    if (!redirectUri) issues.push('missing_redirect_uri');
+    // Build a preview URL with placeholder state & PKCE (not persisted)
+    let previewAuthUrl = null;
+    if (clientId && redirectUri) {
+      const { code_verifier, code_challenge } = generatePkcePair(); // ephemeral
+      previewAuthUrl = buildAuthUrl({ clientId, redirectUri, state: 'PREVIEW_STATE', code_challenge });
+    }
+    debugLog('preflight', { issues, havePreview: !!previewAuthUrl });
+    return res.json({
+      ok: issues.length === 0,
+      mode: 'diagnostic',
+      clientIdPresent: !!clientId,
+      redirectUriPresent: !!redirectUri,
+      clientSecretPresent: !!clientSecret,
+      usedFallbackRedirect: !process.env.TWITTER_REDIRECT_URI && !!process.env.TWITTER_CLIENT_REDIRECT_URI,
+      usedFallbackSecret: !process.env.TWITTER_CLIENT_SECRET && !!process.env.TWITTER_CLIENT_SECTRET,
+      previewAuthUrl,
+      issues,
+      metrics: { oauthPreflightCount, oauthStartCount, oauthPrepareCount }
+    });
+  } catch (e) {
+    return res.status(500).json({ error: 'preflight_failed', detail: e.message });
+  }
+});
+
+// Start OAuth (PKCE) - redirects user agent
 router.get('/oauth/start', authMiddleware, async (req, res) => {
   try {
+    oauthStartCount++;
     const { clientId, redirectUri } = resolveTwitterConfig();
-    if (!clientId || !redirectUri) return res.status(500).json({ error: 'twitter_client_config_missing', detail: { clientId: !!clientId, redirectUri: !!redirectUri } });
+    if (!clientId || !redirectUri) {
+      debugLog('start missing config', { clientId: !!clientId, redirectUri: !!redirectUri });
+      return res.status(500).json({ error: 'twitter_client_config_missing', detail: { clientId: !!clientId, redirectUri: !!redirectUri } });
+    }
     const { code_verifier, code_challenge } = generatePkcePair();
     const state = await createAuthStateDoc({ uid: req.userId || req.user?.uid, code_verifier });
     const url = buildAuthUrl({ clientId, redirectUri, state, code_challenge });
+    debugLog('start redirect', { state });
     return res.redirect(url);
   } catch (e) {
+    debugLog('start error', e.message);
     return res.status(500).json({ error: e.message });
   }
 });
@@ -49,13 +99,19 @@ router.get('/oauth/start', authMiddleware, async (req, res) => {
 // Prepare OAuth (returns JSON authUrl to allow frontend fetch + redirect with auth header)
 router.post('/oauth/prepare', authMiddleware, async (req, res) => {
   try {
+    oauthPrepareCount++;
     const { clientId, redirectUri } = resolveTwitterConfig();
-    if (!clientId || !redirectUri) return res.status(500).json({ error: 'twitter_client_config_missing', detail: { clientId: !!clientId, redirectUri: !!redirectUri } });
+    if (!clientId || !redirectUri) {
+      debugLog('prepare missing config', { clientId: !!clientId, redirectUri: !!redirectUri });
+      return res.status(500).json({ error: 'twitter_client_config_missing', detail: { clientId: !!clientId, redirectUri: !!redirectUri } });
+    }
     const { code_verifier, code_challenge } = generatePkcePair();
     const state = await createAuthStateDoc({ uid: req.userId || req.user?.uid, code_verifier });
     const authUrl = buildAuthUrl({ clientId, redirectUri, state, code_challenge });
+    debugLog('prepare generated', { state });
     return res.json({ authUrl, state });
   } catch (e) {
+    debugLog('prepare error', e.message);
     return res.status(500).json({ error: e.message });
   }
 });
@@ -63,16 +119,31 @@ router.post('/oauth/prepare', authMiddleware, async (req, res) => {
 // OAuth callback
 router.get('/oauth/callback', async (req, res) => {
   const { state, code, error } = req.query;
-  if (error) return res.status(400).send(`Twitter auth error: ${error}`);
-  if (!state || !code) return res.status(400).send('Missing state or code');
+  if (error) {
+    debugLog('callback error param', error);
+    return res.status(400).send(`Twitter auth error: ${error}`);
+  }
+  if (!state || !code) {
+    debugLog('callback missing param', { state: !!state, code: !!code });
+    return res.status(400).send('Missing state or code');
+  }
   try {
     const stored = await consumeAuthState(state);
-    if (!stored) return res.status(400).send('Invalid or expired state');
+    if (!stored) {
+      debugLog('callback invalid/expired state', state);
+      return res.status(400).send('Invalid or expired state');
+    }
     const { clientId, redirectUri } = resolveTwitterConfig();
+    if (!clientId || !redirectUri) {
+      debugLog('callback missing config', { clientId: !!clientId, redirectUri: !!redirectUri });
+      return res.status(500).send('Server missing client config');
+    }
     const tokens = await exchangeCode({ code, code_verifier: stored.code_verifier, redirectUri, clientId });
     await storeUserTokens(stored.uid, tokens);
+    debugLog('callback success for uid', stored.uid);
     return res.send('<html><body><h2>Twitter connected successfully.</h2><p>You can close this window.</p></body></html>');
   } catch (e) {
+    debugLog('callback exchange error', e.message);
     return res.status(500).send('Exchange failed: ' + e.message);
   }
 });
