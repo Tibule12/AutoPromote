@@ -21,8 +21,8 @@ RUN adduser -S autopromote -u 1001
 RUN chown -R autopromote:nodejs /app
 USER autopromote
 
-# Expose port
-EXPOSE 10000
+# Expose the application port (Express defaults to 5000 unless PORT env is set by platform)
+EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
