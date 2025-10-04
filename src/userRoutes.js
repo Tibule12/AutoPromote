@@ -152,6 +152,28 @@ router.get('/stats', authMiddleware, async (req, res) => {
   }
 });
 
+// Revenue / growth progress (content count vs eligibility threshold)
+router.get('/progress', authMiddleware, async (req, res) => {
+  try {
+    const MIN_CONTENT_FOR_REVENUE = parseInt(process.env.MIN_CONTENT_FOR_REVENUE || '100', 10);
+    // Use cached contentCount on user doc if present, else compute lightweight count query
+    const userRef = db.collection('users').doc(req.userId);
+    const userSnap = await userRef.get();
+    let contentCount = userSnap.exists && typeof userSnap.data().contentCount === 'number' ? userSnap.data().contentCount : null;
+    if (contentCount === null) {
+      const cntSnap = await db.collection('content').where('user_id','==', req.userId).select().get();
+      contentCount = cntSnap.size;
+      // update cache (best effort)
+      try { await userRef.set({ contentCount }, { merge: true }); } catch(_){}
+    }
+    const remaining = Math.max(0, MIN_CONTENT_FOR_REVENUE - contentCount);
+    const revenueEligible = contentCount >= MIN_CONTENT_FOR_REVENUE;
+    res.json({ revenueEligible, contentCount, requiredForRevenue: MIN_CONTENT_FOR_REVENUE, remaining });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Get recent notifications for current user
 router.get('/notifications', authMiddleware, async (req, res) => {
   try {

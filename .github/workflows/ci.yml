@@ -26,4 +26,4 @@ jobs:
           npm run test:unit
       - name: Route Import Tests
         run: |
-          npm run test:routes
+          CI_ROUTE_IMPORTS=1 npm run test:routes
