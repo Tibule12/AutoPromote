@@ -20,6 +20,10 @@ jobs:
       - name: Install root deps
         run: |
           npm install
-      - name: Sanity Test
+      - name: Preflight & Unit Tests
         run: |
-          npm run test:unit || (echo "Sanity tests failed" && exit 1)
+          npm run preflight
+          npm run test:unit
+      - name: Route Import Tests
+        run: |
+          npm run test:routes

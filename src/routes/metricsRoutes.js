@@ -200,3 +200,25 @@ router.get('/raw', authMiddleware, (req, res, next) => {
 });
 
 module.exports = router;
+
+// Prometheus-style export (best-effort) at /api/metrics/prom
+// Only exposes counters from system_counters collection.
+router.get('/prom', async (req, res) => {
+  try {
+    const snap = await db.collection('system_counters').limit(500).get();
+    const lines = [
+      '# HELP autopromote_counter Generic system counters',
+      '# TYPE autopromote_counter counter'
+    ];
+    snap.forEach(d => {
+      const v = d.data();
+      const val = (v && typeof v.value === 'number') ? v.value : 0;
+      const name = d.id.replace(/[^a-zA-Z0-9_]/g,'_');
+      lines.push(`autopromote_counter{name="${name}"} ${val}`);
+    });
+    res.set('Content-Type','text/plain; version=0.0.4');
+    return res.send(lines.join('\n') + '\n');
+  } catch (e) {
+    return res.status(500).send(`# error ${e.message}`);
+  }
+});
