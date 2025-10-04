@@ -1,8 +1,14 @@
-// BUSINESS RULE: Revenue per 1M views is $900,000. Creator gets 5% of revenue. Target views: 2M/day.
-// Creator payout per 2M views: 2 * $900,000 * 0.05 = $90,000
-// BUSINESS RULE: Content must be auto-removed after 2 days of upload.
-// In production, implement a scheduled job (e.g., with Firebase Cloud Functions or Cloud Scheduler)
-// to delete or archive content where created_at is older than 2 days.
+// BUSINESS RULES (CONFIGURABLE)
+// These values were previously hard‑coded with unrealistic placeholders (e.g. $900,000 per 1M views).
+// They are now environment‑driven so you can tune the economic model without code changes.
+// ENV VARS (with sane defaults):
+//   REVENUE_PER_MILLION      -> integer USD per 1,000,000 views (default 3000)
+//   CREATOR_PAYOUT_RATE      -> decimal share of revenue to creator (default 0.05 = 5%)
+//   DAILY_TARGET_VIEWS       -> integer target daily views used for projections (default 200000)
+//   AUTO_REMOVE_DAYS         -> integer days after which content should be auto-archived (default 2)
+// NOTE: Actual enforcement of removal must be done by a scheduled job / background worker.
+// Example projected payout: (DAILY_TARGET_VIEWS / 1,000,000) * REVENUE_PER_MILLION * CREATOR_PAYOUT_RATE
+// Keep projections conservative to avoid user distrust.
 
 // Example (using Firebase Cloud Functions):
 // exports.cleanupOldContent = functions.pubsub.schedule('every 24 hours').onRun(async (context) => {
@@ -90,6 +96,14 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Central business configuration (resolved once per process)
+const BUSINESS = {
+  REVENUE_PER_MILLION: parseInt(process.env.REVENUE_PER_MILLION || '3000', 10),
+  CREATOR_PAYOUT_RATE: parseFloat(process.env.CREATOR_PAYOUT_RATE || '0.05'),
+  DAILY_TARGET_VIEWS: parseInt(process.env.DAILY_TARGET_VIEWS || '200000', 10),
+  AUTO_REMOVE_DAYS: parseInt(process.env.AUTO_REMOVE_DAYS || '2', 10)
+};
+
 // Upload content with advanced scheduling and optimization
 router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMinute: 15, dailyLimit: 500 }),
   sanitizeInput,
@@ -142,10 +156,10 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
       return res.status(400).json({ error: 'Daily limit reached', message: daily.reason, uploads_today: daily.countToday, max_per_day: daily.maxPerDay });
     }
 
-    // Set business rules
-    const optimalRPM = 900000; // Revenue per million views
-    const minViews = 2000000; // 2 million views per day
-  const creatorPayoutRate = 0.01; // 1%
+    // Resolve business rule variables (env driven)
+    const optimalRPM = BUSINESS.REVENUE_PER_MILLION; // kept name for backward compatibility in response
+    const minViews = BUSINESS.DAILY_TARGET_VIEWS;
+    const creatorPayoutRate = BUSINESS.CREATOR_PAYOUT_RATE;
     const maxBudget = max_budget || 1000;
 
     // Insert content into Firestore
@@ -428,6 +442,12 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
       optimization_recommendations: recommendations,
       optimal_rpm: optimalRPM,
       creator_payout: minViews * (optimalRPM / 1000000) * creatorPayoutRate,
+      business_rules: {
+        revenue_per_million: optimalRPM,
+        creator_payout_rate: creatorPayoutRate,
+        daily_target_views: minViews,
+        auto_remove_days: BUSINESS.AUTO_REMOVE_DAYS
+      },
       auto_promotion: Object.keys(autoPromotionResults).length ? autoPromotionResults : null
     });
   } catch (error) {
