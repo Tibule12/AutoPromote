@@ -84,8 +84,14 @@ router.post('/reset-attempts/:id', authMiddleware, adminOnly, async (req, res) =
     return res.json({ success: true });
   } catch (e) { return res.status(500).json({ error: e.message }); }
 });
+const { validateBody } = require('../middleware/validate');
 // Enqueue cross-platform post (generic)
-router.post('/platform/enqueue', authMiddleware, async (req, res) => {
+router.post('/platform/enqueue', authMiddleware, validateBody({
+  contentId: { type: 'string', required: true },
+  platform: { type: 'string', required: true, enum: ['twitter','facebook','instagram','tiktok','youtube'] },
+  reason: { type: 'string', required: false, maxLength: 120 },
+  payload: { type: 'object', required: false }
+}), async (req, res) => {
   try {
     const { contentId, platform, reason, payload } = req.body || {};
     if (!contentId || !platform) return res.status(400).json({ error: 'contentId and platform required' });
