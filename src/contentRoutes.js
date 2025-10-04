@@ -432,12 +432,20 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
           } else {
             const message = (autoPromote.twitter.message || title || 'New content').slice(0, 260);
             const link = autoPromote.twitter.link || content.url || null;
+            // Variant generation (if variantMode requested)
+            let variants = null;
+            if (autoPromote.twitter.variantMode) {
+              try {
+                const { getOrGenerateVariants } = require('./services/optimizationService');
+                variants = await getOrGenerateVariants({ contentId: content.id, uid: req.userId, baseMessage: message, tags: content.tags || [] });
+              } catch (ovErr) { variants = null; }
+            }
             if (immediate) {
               // Direct post path
               try {
                 const { dispatchPlatformPost } = require('./services/platformPoster');
-                const directRes = await dispatchPlatformPost({ platform: 'twitter', contentId: content.id, payload: { message, link }, reason: 'post_upload_immediate', uid: req.userId });
-                autoPromotionResults.twitter = { requested: true, immediate: true, posted: directRes.success !== false, outcome: directRes };
+                const directRes = await dispatchPlatformPost({ platform: 'twitter', contentId: content.id, payload: { message, link, variants }, reason: 'post_upload_immediate', uid: req.userId });
+                autoPromotionResults.twitter = { requested: true, immediate: true, posted: directRes.success !== false, outcome: directRes, variantsUsed: !!variants };
                 recordEvent('platform_post_immediate', { userId: req.userId, contentId: content.id, payload: { platform: 'twitter', success: directRes.success !== false } });
               } catch (e) {
                 autoPromotionResults.twitter = { requested: true, immediate: true, posted: false, error: e.message };
@@ -449,7 +457,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
                 uid: req.userId,
                 platform: 'twitter',
                 reason: 'post_upload',
-                payload: { message, link },
+                payload: { message, link, variants },
                 skipIfDuplicate: autoPromote.twitter.skipIfDuplicate !== false,
                 forceRepost: !!autoPromote.twitter.forceRepost
               });
