@@ -23,6 +23,8 @@ async function recordPlatformPost({ platform, contentId, uid, reason, payload = 
   const ref = db.collection('platform_posts').doc();
   const success = outcome.success !== false; // treat missing flag as success (unless explicitly false)
   const externalId = outcome.postId || outcome.tweetId || outcome.mediaId || outcome.externalId || null;
+  const usedVariant = outcome.usedVariant || null;
+  const variantIndex = typeof outcome.variantIndex === 'number' ? outcome.variantIndex : null;
   // Build tracked link (attribution) if link or landing page ref available
   let trackedLink = null;
   try {
@@ -45,7 +47,9 @@ async function recordPlatformPost({ platform, contentId, uid, reason, payload = 
     simulated: !!outcome.simulated,
     externalId,
     payload: payload || {},
-    rawOutcome: sanitizeOutcome(outcome),
+  rawOutcome: sanitizeOutcome(outcome),
+  usedVariant,
+  variantIndex,
     trackedLink: trackedLink,
     metrics: null, // placeholder for Phase 3
     normalizedScore: null, // placeholder for Phase 4
