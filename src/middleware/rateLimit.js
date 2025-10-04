@@ -6,7 +6,7 @@ const { db } = require('../firebaseAdmin');
 const IN_MEMORY_WINDOW_MS = 60 * 1000; // 1 minute
 const memoryBuckets = new Map(); // key: uid -> { count, windowStart }
 
-async function rateLimit(options = {}) {
+function rateLimit(options = {}) {
   const {
     dailyLimit = parseInt(process.env.DAILY_API_LIMIT || '2000', 10),
     field = 'apiCalls',
