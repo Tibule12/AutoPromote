@@ -7,25 +7,36 @@ const { enqueuePlatformPostTask } = require('../services/promotionTaskQueue');
 
 const router = express.Router();
 
-// Diagnostic: report whether required Twitter OAuth env vars are present
-router.get('/oauth/config', (req, res) => {
+// Helper to resolve Twitter env config with fallbacks (covers common typos / alt names)
+function resolveTwitterConfig() {
   const clientId = process.env.TWITTER_CLIENT_ID || null;
-  const redirectUri = process.env.TWITTER_REDIRECT_URI || null;
+  // Accept both canonical TWITTER_REDIRECT_URI and an alternate TWITTER_CLIENT_REDIRECT_URI (found in screenshot)
+  const redirectUri = process.env.TWITTER_REDIRECT_URI || process.env.TWITTER_CLIENT_REDIRECT_URI || null;
+  // Secret not currently required for PKCE start, but detect both correct and common misspelling SECTRET
+  const clientSecret = process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CLIENT_SECTRET || null;
+  return { clientId, redirectUri, clientSecret };
+}
+
+// Diagnostic: report whether required Twitter OAuth env vars are present (with fallbacks)
+router.get('/oauth/config', (req, res) => {
+  const cfg = resolveTwitterConfig();
   return res.json({
     ok: true,
-    hasClientId: !!clientId,
-    hasRedirectUri: !!redirectUri,
-    // Provide redirectUri for debugging (not sensitive); do not expose client secret here
-    redirectUri
+    hasClientId: !!cfg.clientId,
+    hasRedirectUri: !!cfg.redirectUri,
+    hasClientSecret: !!cfg.clientSecret,
+    redirectUri: cfg.redirectUri,
+    // Indicate if fallback names were used so user can clean up naming
+    usedFallbackRedirect: !process.env.TWITTER_REDIRECT_URI && !!process.env.TWITTER_CLIENT_REDIRECT_URI,
+    usedFallbackSecret: !process.env.TWITTER_CLIENT_SECRET && !!process.env.TWITTER_CLIENT_SECTRET
   });
 });
 
 // Start OAuth (PKCE)
 router.get('/oauth/start', authMiddleware, async (req, res) => {
   try {
-    const clientId = process.env.TWITTER_CLIENT_ID;
-    const redirectUri = process.env.TWITTER_REDIRECT_URI;
-    if (!clientId || !redirectUri) return res.status(500).json({ error: 'twitter_client_config_missing' });
+    const { clientId, redirectUri } = resolveTwitterConfig();
+    if (!clientId || !redirectUri) return res.status(500).json({ error: 'twitter_client_config_missing', detail: { clientId: !!clientId, redirectUri: !!redirectUri } });
     const { code_verifier, code_challenge } = generatePkcePair();
     const state = await createAuthStateDoc({ uid: req.userId || req.user?.uid, code_verifier });
     const url = buildAuthUrl({ clientId, redirectUri, state, code_challenge });
@@ -38,9 +49,8 @@ router.get('/oauth/start', authMiddleware, async (req, res) => {
 // Prepare OAuth (returns JSON authUrl to allow frontend fetch + redirect with auth header)
 router.post('/oauth/prepare', authMiddleware, async (req, res) => {
   try {
-    const clientId = process.env.TWITTER_CLIENT_ID;
-    const redirectUri = process.env.TWITTER_REDIRECT_URI;
-    if (!clientId || !redirectUri) return res.status(500).json({ error: 'twitter_client_config_missing' });
+    const { clientId, redirectUri } = resolveTwitterConfig();
+    if (!clientId || !redirectUri) return res.status(500).json({ error: 'twitter_client_config_missing', detail: { clientId: !!clientId, redirectUri: !!redirectUri } });
     const { code_verifier, code_challenge } = generatePkcePair();
     const state = await createAuthStateDoc({ uid: req.userId || req.user?.uid, code_verifier });
     const authUrl = buildAuthUrl({ clientId, redirectUri, state, code_challenge });
@@ -58,8 +68,7 @@ router.get('/oauth/callback', async (req, res) => {
   try {
     const stored = await consumeAuthState(state);
     if (!stored) return res.status(400).send('Invalid or expired state');
-    const clientId = process.env.TWITTER_CLIENT_ID;
-    const redirectUri = process.env.TWITTER_REDIRECT_URI;
+    const { clientId, redirectUri } = resolveTwitterConfig();
     const tokens = await exchangeCode({ code, code_verifier: stored.code_verifier, redirectUri, clientId });
     await storeUserTokens(stored.uid, tokens);
     return res.send('<html><body><h2>Twitter connected successfully.</h2><p>You can close this window.</p></body></html>');
