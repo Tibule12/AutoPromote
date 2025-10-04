@@ -446,6 +446,20 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
                 const { dispatchPlatformPost } = require('./services/platformPoster');
                 const directRes = await dispatchPlatformPost({ platform: 'twitter', contentId: content.id, payload: { message, link, variants }, reason: 'post_upload_immediate', uid: req.userId });
                 autoPromotionResults.twitter = { requested: true, immediate: true, posted: directRes.success !== false, outcome: directRes, variantsUsed: !!variants };
+                // Persist platform post record for immediate path
+                try {
+                  const { recordPlatformPost } = require('./services/platformPostsService');
+                  await recordPlatformPost({
+                    platform: 'twitter',
+                    contentId: content.id,
+                    uid: req.userId,
+                    reason: 'post_upload_immediate',
+                    payload: { message, link, variants },
+                    outcome: directRes,
+                    taskId: null,
+                    postHash: null
+                  });
+                } catch (persistErr) { /* non-fatal */ }
                 recordEvent('platform_post_immediate', { userId: req.userId, contentId: content.id, payload: { platform: 'twitter', success: directRes.success !== false } });
               } catch (e) {
                 autoPromotionResults.twitter = { requested: true, immediate: true, posted: false, error: e.message };

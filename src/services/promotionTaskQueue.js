@@ -292,6 +292,7 @@ async function processNextPlatformTask() {
     // Variant rotation: if payload.variants array exists, select next based on existing post count
     let payload = task.payload || {};
     let selectedVariant = null;
+    let variantIndex = null;
     if (Array.isArray(payload.variants) && payload.variants.length) {
       try {
         const prevPostsSnap = await db.collection('platform_posts')
@@ -302,6 +303,7 @@ async function processNextPlatformTask() {
         const count = prevPostsSnap.size;
         const idx = count % payload.variants.length;
         selectedVariant = payload.variants[idx];
+        variantIndex = idx;
         payload = { ...payload, message: selectedVariant };
       } catch(_){}
     }
@@ -312,7 +314,10 @@ async function processNextPlatformTask() {
       reason: task.reason,
       uid: task.uid
     });
-    if (selectedVariant) simulatedResult.usedVariant = selectedVariant;
+    if (selectedVariant) {
+      simulatedResult.usedVariant = selectedVariant;
+      simulatedResult.variantIndex = variantIndex;
+    }
     await selectedDoc.ref.update({
       status: 'completed',
       outcome: simulatedResult,
@@ -327,7 +332,7 @@ async function processNextPlatformTask() {
         uid: task.uid,
         reason: task.reason,
           payload,
-        outcome: simulatedResult,
+          outcome: simulatedResult,
         taskId: task.id,
         postHash: task.postHash
       });
