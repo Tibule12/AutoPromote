@@ -115,6 +115,7 @@ try {
 
 // Try to load optional route modules
 let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes;
+let shortlinkRoutes;
 try {
   withdrawalRoutes = require('./routes/withdrawalRoutes');
 } catch (error) {
@@ -137,6 +138,13 @@ try {
   if (!process.env.STRIPE_SECRET_KEY) {
     console.log('ℹ️ STRIPE_SECRET_KEY not found. Stripe features will be disabled.');
   }
+}
+try {
+  shortlinkRoutes = require('./routes/shortlinkRoutes');
+  console.log('✅ Shortlink routes loaded');
+} catch (e) {
+  shortlinkRoutes = express.Router();
+  console.log('⚠️ Shortlink routes not found');
 }
 
 // Import initialized Firebase services
@@ -208,6 +216,7 @@ app.use('/api/content', contentQualityCheck);
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
+app.use('/s', shortlinkRoutes);
 
 // Serve site verification and other well-known files
 // 1) Try root-level /public/.well-known
