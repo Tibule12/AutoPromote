@@ -2,19 +2,20 @@ const { admin, db } = require('./firebaseAdmin');
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    console.log('Auth middleware - token provided:', token ? 'Yes (length: ' + token.length + ')' : 'No');
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  const debugAuth = process.env.DEBUG_AUTH === 'true';
+  if (debugAuth) console.log('Auth middleware - token provided:', token ? 'Yes (length: ' + token.length + ')' : 'No');
     
     if (!token) {
       return res.status(401).json({ error: 'No token provided' });
     }
     
     // Log the first 10 chars of token for debugging
-    console.log('Token preview:', token.substring(0, 10) + '...');
+  if (debugAuth) console.log('Token preview:', token.substring(0, 10) + '...');
     
     // Check if this is a custom token (shouldn't be used directly for auth)
     if (token.length < 100 || !token.startsWith('eyJ')) {
-      console.log('Warning: Received token does not appear to be a valid Firebase ID token');
+  if (debugAuth) console.log('Warning: Received token does not appear to be a valid Firebase ID token');
       return res.status(401).json({ 
         error: 'Invalid token format', 
         message: 'Please exchange your custom token for an ID token before making authenticated requests'
@@ -23,7 +24,7 @@ const authMiddleware = async (req, res, next) => {
 
     // Verify Firebase token
     const decodedToken = await admin.auth().verifyIdToken(token);
-    console.log('Token verification successful, decoded:', JSON.stringify({
+  if (debugAuth) console.log('Token verification successful, decoded:', JSON.stringify({
       uid: decodedToken.uid,
       email: decodedToken.email,
       admin: decodedToken.admin,
@@ -48,7 +49,7 @@ const authMiddleware = async (req, res, next) => {
       
       // If admin is found in admins collection, use that data instead
       if (isAdminInCollection) {
-        console.log('User found in admins collection:', decodedToken.uid);
+  if (debugAuth) console.log('User found in admins collection:', decodedToken.uid);
         const adminData = adminDoc.data();
         req.user = {
           uid: decodedToken.uid,
@@ -58,13 +59,13 @@ const authMiddleware = async (req, res, next) => {
           role: 'admin',
           fromCollection: 'admins'
         };
-        console.log('Admin user data attached to request');
+  if (debugAuth) console.log('Admin user data attached to request');
         return next();
       }
       
       if (!userData) {
         // Create a basic user document if it doesn't exist
-        console.log('No user document found in Firestore, creating one...');
+  if (debugAuth) console.log('No user document found in Firestore, creating one...');
         const basicUserData = {
           email: decodedToken.email,
           name: decodedToken.name || decodedToken.email?.split('@')[0],
@@ -72,17 +73,17 @@ const authMiddleware = async (req, res, next) => {
           isAdmin: isAdminFromClaims,
           createdAt: new Date().toISOString()
         };
-        console.log('Creating user with data:', JSON.stringify(basicUserData, null, 2));
+  if (debugAuth) console.log('Creating user with data:', JSON.stringify(basicUserData, null, 2));
         await db.collection('users').doc(decodedToken.uid).set(basicUserData);
         req.user = {
           uid: decodedToken.uid,
           email: decodedToken.email,
           ...basicUserData
         };
-        console.log('New user document created and attached to request');
+  if (debugAuth) console.log('New user document created and attached to request');
       } else {
         // If user exists but role needs to be updated based on claims
-        console.log('User document found:', JSON.stringify({
+  if (debugAuth) console.log('User document found:', JSON.stringify({
           uid: decodedToken.uid,
           email: userData.email,
           role: userData.role,
@@ -90,7 +91,7 @@ const authMiddleware = async (req, res, next) => {
         }, null, 2));
         
         if (isAdminFromClaims && userData.role !== 'admin') {
-          console.log('Updating user to admin role based on token claims');
+          if (debugAuth) console.log('Updating user to admin role based on token claims');
           await db.collection('users').doc(decodedToken.uid).update({
             role: 'admin',
             isAdmin: true,

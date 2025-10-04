@@ -167,11 +167,22 @@ router.post('/earnings/payout/self', authMiddleware, async (req, res) => {
 // List recent payout history (self)
 router.get('/earnings/payouts', authMiddleware, async (req, res) => {
   try {
-    const snap = await db.collection('earnings_payouts')
-      .where('userId','==', req.userId)
-      .orderBy('createdAt','desc')
-      .limit(25)
-      .get();
+    let snap;
+    try {
+      snap = await db.collection('earnings_payouts')
+        .where('userId','==', req.userId)
+        .orderBy('createdAt','desc')
+        .limit(25)
+        .get();
+    } catch (e) {
+      // Fallback if composite index missing
+      if (/needs to create an index/i.test(e.message) || /FAILED_PRECONDITION/i.test(e.message)) {
+        snap = await db.collection('earnings_payouts')
+          .where('userId','==', req.userId)
+          .limit(25)
+          .get();
+      } else throw e;
+    }
     const payouts = [];
     snap.forEach(d => payouts.push({ id: d.id, ...d.data() }));
     return res.json({ ok: true, payouts });
