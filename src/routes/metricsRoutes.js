@@ -256,6 +256,28 @@ router.get('/variants/performance', async (req, res) => {
   } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
 });
 
+// Usage ledger summary (admin or owner)
+router.get('/usage/summary', authMiddleware, async (req, res) => {
+  try {
+    const days = Math.min(parseInt(req.query.days || '30',10), 90);
+    const since = Date.now() - days*86400000;
+    const { aggregateUsageSince } = require('../services/usageLedgerService');
+    const totals = await aggregateUsageSince({ sinceMs: since });
+    return res.json({ ok: true, window_days: days, totals });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
+// Record a usage line (temporary - would be behind billing auth in production)
+router.post('/usage/record', authMiddleware, async (req, res) => {
+  try {
+    const { type, amount = 0, currency = 'USD', meta = {} } = req.body || {};
+    if (!type) return res.status(400).json({ ok:false, error: 'type required' });
+    const { recordUsage } = require('../services/usageLedgerService');
+    await recordUsage({ type, userId: req.userId, amount: Number(amount)||0, currency, meta });
+    return res.json({ ok: true });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
 // Prune underperforming variants: deactivates bottom performers for a contentId
 router.post('/variants/prune', async (req, res) => {
   try {
