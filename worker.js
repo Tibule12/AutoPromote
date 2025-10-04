@@ -74,8 +74,10 @@ async function loop() {
     if (usageLedger && Math.random() < 0.15) {
       try {
         const planService = require('./src/services/planService');
+        const { countUsageRecords } = require('./src/services/usageLedgerService');
         // Sample a few recent tasks and check counts per user for month
         const monthStart = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString();
+        const monthStartMs = Date.parse(monthStart);
         const sampleSnap = await db.collection('promotion_tasks')
           .where('createdAt','>=', monthStart)
           .orderBy('createdAt','desc')
@@ -88,8 +90,12 @@ async function loop() {
             const planTier = userSnap.exists && userSnap.data().plan ? (userSnap.data().plan.tier || userSnap.data().plan.id) : 'free';
             const plan = planService.getPlan(planTier);
             if (plan.monthlyTaskQuota && count > plan.monthlyTaskQuota) {
-              // Record one overage unit (idempotency not guaranteed; rely on downstream aggregation to dedupe if needed)
-              await usageLedger.recordUsage({ type: 'overage', userId: uid, amount: 1, currency: 'USD', meta: { metric: 'task', monthStart, quota: plan.monthlyTaskQuota } });
+              // Idempotency: only record at most (count - quota) overage records; existing overage entries tracked via countUsageRecords
+              const existing = await countUsageRecords({ userId: uid, type: 'overage', sinceMs: monthStartMs });
+              const target = count - plan.monthlyTaskQuota;
+              if (existing < target) {
+                await usageLedger.recordUsage({ type: 'overage', userId: uid, amount: 1, currency: 'USD', meta: { metric: 'task', monthStart, quota: plan.monthlyTaskQuota } });
+              }
             }
           } catch(_){ }
         }
