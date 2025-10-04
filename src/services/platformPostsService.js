@@ -18,7 +18,7 @@ const { db, admin } = require('../firebaseAdmin');
  * @param {string} [params.taskId] - Associated promotion_tasks doc id
  * @returns {Promise<{id:string, success:boolean}>}
  */
-async function recordPlatformPost({ platform, contentId, uid, reason, payload = {}, outcome = {}, taskId, postHash }) {
+async function recordPlatformPost({ platform, contentId, uid, reason, payload = {}, outcome = {}, taskId, postHash, shortlinkCode }) {
   if (!platform || !contentId) throw new Error('platform & contentId required');
   const ref = db.collection('platform_posts').doc();
   const success = outcome.success !== false; // treat missing flag as success (unless explicitly false)
@@ -28,13 +28,19 @@ async function recordPlatformPost({ platform, contentId, uid, reason, payload = 
   // Build tracked link (attribution) if link or landing page ref available
   let trackedLink = null;
   try {
-    const base = payload.link || payload.url || null;
+    // Prefer shortlink if provided (already attribution-enabled)
+    const base = payload.shortlink || payload.link || payload.url || null;
     if (base) {
       const sep = base.includes('?') ? '&' : '?';
       const parts = [ `src=${encodeURIComponent(platform)}`, `c=${encodeURIComponent(contentId)}` ];
       if (typeof variantIndex === 'number') parts.push(`v=${variantIndex}`);
       if (taskId) parts.push(`t=${encodeURIComponent(taskId)}`);
-      trackedLink = base + sep + parts.join('&');
+      // If base already looks like a shortlink (contains /s/), don't append params (redirect layer handles)
+      if (/\/s\//.test(base)) {
+        trackedLink = base; // shortlink encodes attribution on redirect
+      } else {
+        trackedLink = base + sep + parts.join('&');
+      }
     }
   } catch(_) { /* ignore */ }
   const doc = {
@@ -48,6 +54,7 @@ async function recordPlatformPost({ platform, contentId, uid, reason, payload = 
     simulated: !!outcome.simulated,
     externalId,
     payload: payload || {},
+    shortlinkCode: shortlinkCode || null,
   rawOutcome: sanitizeOutcome(outcome),
   usedVariant,
   variantIndex,

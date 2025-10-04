@@ -12,6 +12,7 @@ const adminOnly = require('../middlewares/adminOnly');
 // NOTE: This is a lightweight aggregation; for very large datasets, migrate to pre-aggregated counters.
 
 const router = express.Router();
+const rateLimitBasic = require('../middlewares/rateLimitBasic');
 
 // New: business config + revenue projection endpoints
 router.get('/business-config', async (req, res) => {
@@ -268,7 +269,7 @@ router.get('/usage/summary', authMiddleware, async (req, res) => {
 });
 
 // Record a usage line (temporary - would be behind billing auth in production)
-router.post('/usage/record', authMiddleware, async (req, res) => {
+router.post('/usage/record', authMiddleware, rateLimitBasic({ windowMs: 60000, max: 10 }), async (req, res) => {
   try {
     const { type, amount = 0, currency = 'USD', meta = {} } = req.body || {};
     if (!type) return res.status(400).json({ ok:false, error: 'type required' });
@@ -318,6 +319,60 @@ router.post('/variants/prune', async (req, res) => {
     // Mark on content doc
     try { await db.collection('content').doc(contentId).set({ disabledVariants: disabled, variantKeep: Array.from(keep), variantStatsSnapshot: arr }, { merge: true }); } catch(_){ }
     return res.json({ ok:true, kept: Array.from(keep), disabled, evaluated: arr.length });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
+// Performance dashboard: aggregate impressions, clicks (via shortlink resolves), CTR, variant winners
+router.get('/dashboard/performance', authMiddleware, async (req, res) => {
+  try {
+    const days = Math.min(parseInt(req.query.days || '7',10), 30);
+    const since = Date.now() - days*86400000;
+    // Sample platform posts
+    const postsSnap = await db.collection('platform_posts')
+      .orderBy('createdAt','desc')
+      .limit(1000).get().catch(()=>({ empty:true, docs: [] }));
+    const posts = [];
+    postsSnap.docs.forEach(d => { const v=d.data(); const ts=v.createdAt && v.createdAt.toMillis? v.createdAt.toMillis(): Date.parse(v.createdAt||'')||0; if (ts>=since) posts.push({ id:d.id, contentId: v.contentId, platform: v.platform, variantIndex: v.variantIndex, usedVariant: v.usedVariant, metrics: v.metrics||null, shortlinkCode: v.shortlinkCode||null }); });
+    // Clicks via shortlink resolves (events type shortlink_resolve)
+    const shortlinkSnap = await db.collection('events')
+      .where('type','==','shortlink_resolve')
+      .orderBy('createdAt','desc')
+      .limit(4000).get().catch(()=>({ empty:true, docs: [] }));
+    const resolves = []; shortlinkSnap.docs.forEach(d => { const v=d.data(); const ts= Date.parse(v.createdAt||'')||0; if (ts>=since) resolves.push(v); });
+    // Map by content
+    const contentStats = {};
+    posts.forEach(p => {
+      if (!contentStats[p.contentId]) contentStats[p.contentId] = { contentId: p.contentId, posts:0, impressions:0, clicks:0, variants:{} };
+      const cs = contentStats[p.contentId];
+      cs.posts +=1;
+      if (p.metrics && p.metrics.impressions) cs.impressions += p.metrics.impressions;
+      if (p.usedVariant) {
+        if (!cs.variants[p.usedVariant]) cs.variants[p.usedVariant] = { variant: p.usedVariant, posts:0, impressions:0, clicks:0 };
+        const vs = cs.variants[p.usedVariant];
+        vs.posts +=1;
+        if (p.metrics && p.metrics.impressions) vs.impressions += p.metrics.impressions;
+      }
+    });
+    resolves.forEach(r => {
+      if (r.contentId && contentStats[r.contentId]) {
+        contentStats[r.contentId].clicks +=1;
+        // variantIndex lookup: we stored variantIndex/taskId in shortlink doc; event has them copied
+        if (typeof r.variantIndex === 'number') {
+          // Map variant by index: find any variant with same index (approx). For precise mapping ensure variantIndex stored in platform_posts.
+          const cs = contentStats[r.contentId];
+          Object.values(cs.variants).forEach(vs => { /* placeholder: variant string not index */ });
+        }
+      }
+    });
+    // Derive CTR and winner
+    Object.values(contentStats).forEach(cs => {
+      cs.ctr = cs.impressions ? cs.clicks / cs.impressions : 0;
+      // Winner variant by impressions for now
+      let winner = null; let best = -Infinity;
+      Object.values(cs.variants).forEach(vs => { const score = vs.impressions; if (score>best){ best=score; winner = vs.variant; } });
+      cs.winnerVariant = winner;
+    });
+    return res.json({ ok:true, window_days: days, contents: Object.values(contentStats).slice(0,200) });
   } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
 });
 
