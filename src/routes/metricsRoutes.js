@@ -442,6 +442,37 @@ router.get('/content/:id/performance', authMiddleware, async (req, res) => {
   } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
 });
 
+// Champion variant endpoint: selects top variant with minimum impressions & significance threshold
+router.get('/content/:id/champion', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const minImpressions = parseInt(req.query.minImpressions || '30',10);
+    const contentSnap = await db.collection('content').doc(id).get();
+    if (!contentSnap.exists) return res.status(404).json({ ok:false, error: 'content_not_found' });
+    // Reuse performance aggregation quickly (subset)
+    const postSnap = await db.collection('platform_posts')
+      .where('contentId','==', id)
+      .orderBy('createdAt','desc')
+      .limit(250).get().catch(()=>({ empty:true, docs: [] }));
+    const variants = {};
+    postSnap.docs.forEach(d => { const v=d.data(); if (!v.usedVariant) return; const key=v.usedVariant; if (!variants[key]) variants[key]={ variant:key, impressions:0, clicks:0 }; variants[key].impressions += v.metrics?.impressions||0; variants[key].clicks += v.clicks||0; });
+    const arr = Object.values(variants).filter(v=>v.impressions>=minImpressions);
+    if (!arr.length) return res.json({ ok:true, champion:null, reason:'insufficient_impressions' });
+    arr.forEach(v => { v.ctr = v.impressions ? v.clicks / v.impressions : 0; v.wilson = wilsonLowerBound(v.clicks, v.impressions); });
+    arr.sort((a,b)=> b.wilson - a.wilson);
+    const champion = arr[0];
+    // Simple significance check vs runner-up
+    let significant = false;
+    if (arr.length > 1) {
+      const runner = arr[1];
+      significant = champion.wilson > runner.wilson; // conservative: lower-bound of champion greater than lower-bound of runner
+    } else {
+      significant = champion.impressions >= (minImpressions*2);
+    }
+    return res.json({ ok:true, champion: { ...champion, significant }, evaluated: arr.length });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
 // Current user task usage vs quota (month)
 router.get('/usage/current', authMiddleware, async (req, res) => {
   try {

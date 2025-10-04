@@ -32,6 +32,10 @@ AutoPromote is a free, automated content promotion platform that helps creators 
 - Analytics & Optimization
 	- [x] Basic content analytics and simulated platform breakdowns
 	- [x] Optimization recommendations and platform timing suggestions (`src/optimizationService.js`)
+	- [x] Shortlink-based variant attribution (auto-generated per post)
+	- [x] Denormalized click counters (content + platform post)
+	- [x] Wilson-scored variant ranking & champion selection
+	- [x] Performance dashboards & per-content performance APIs
 
 - Admin
 	- [x] Admin routes mounted; moderation via status updates; active promotions listing
@@ -116,6 +120,48 @@ Property verification (if requested):
 - Wait ~1–3 minutes after pushing, then click Verify in the TikTok console.
 
 ## Roadmap (near‑term)
+
+## Key Analytics & Billing Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/metrics/dashboard/performance` | GET | Aggregate impressions, clicks, CTR, variant winners |
+| `/api/metrics/content/:id/performance` | GET | Detailed variant performance & Wilson scores |
+| `/api/metrics/content/:id/champion` | GET | Current champion variant + significance flag |
+| `/api/metrics/usage/current` | GET | User monthly usage vs quota & overage |
+| `/api/metrics/usage/summary` | GET | Aggregated ledger totals (tasks, subscription, overage) |
+| `/api/metrics/variants/prune` | POST | Prunes underperforming variants |
+
+## Backfill Script
+
+Rebuild denormalized click counters from historical shortlink events:
+
+```
+node scripts/backfillClickCounters.js --dry   # preview
+node scripts/backfillClickCounters.js         # apply
+```
+
+## Variant Ranking Method
+
+Wilson lower bound (95% confidence) applied to CTR stabilizes rankings with low impressions.
+
+Champion criteria:
+- Minimum impressions threshold (default 30, override `?minImpressions=`)
+- Champion lower bound strictly greater than runner-up lower bound OR large impression multiple.
+
+## Overage Billing Flow
+
+1. Enqueue checks plan quota.
+2. Worker samples monthly tasks and computes overage.
+3. Idempotent overage ledger insertion (ensures at most one record per excess task).
+
+## Future Enhancements
+
+- Daily rollup snapshots for long-range analytics
+- Bayesian variant selection
+- Stripe metered usage for overage events
+- Websocket push for champion changes
+
 
 1) Wire landing page + smart link generation into upload/approval and save to content doc
 2) Add notifications MVP (Firestore collection, optional email)
