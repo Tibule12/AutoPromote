@@ -319,6 +319,26 @@ async function processNextPlatformTask() {
         payload = { ...payload, message: selectedVariant };
       } catch(_){}
     }
+    // Auto shortlink generation (per post & variant) if content has landing page
+    try {
+      if (!payload.shortlink) {
+        const contentSnap = await db.collection('content').doc(task.contentId).get();
+        if (contentSnap.exists) {
+          const data = contentSnap.data();
+          const hasLanding = data.landingPageUrl || data.smartLink || data.url;
+          if (hasLanding) {
+            const { createShortlink } = require('./shortlinkService');
+            const code = await createShortlink({ contentId: task.contentId, platform: task.platform, variantIndex, taskId: task.id });
+            const base = process.env.SHORTLINK_BASE_URL || process.env.LANDING_BASE_URL || '';
+            if (base) {
+              payload.shortlink = base.replace(/\/$/,'') + '/s/' + code;
+              payload.link = payload.shortlink; // prefer shortlink going forward
+              payload.__shortlinkCode = code;
+            }
+          }
+        }
+      }
+    } catch (e) { /* non-fatal */ }
     const simulatedResult = await dispatchPlatformPost({
       platform: task.platform,
       contentId: task.contentId,
@@ -346,7 +366,8 @@ async function processNextPlatformTask() {
           payload,
           outcome: simulatedResult,
         taskId: task.id,
-        postHash: task.postHash
+        postHash: task.postHash,
+        shortlinkCode: payload.__shortlinkCode || null
       });
     } catch (e) {
       console.warn('[platform_posts][record] failed:', e.message);
