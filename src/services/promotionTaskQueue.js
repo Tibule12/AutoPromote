@@ -125,6 +125,24 @@ async function processNextYouTubeTask() {
 // Enqueue a generic cross-platform promotion task (e.g., tiktok/instagram/twitter/facebook)
 async function enqueuePlatformPostTask({ contentId, uid, platform, reason = 'manual', payload = {}, skipIfDuplicate = true, forceRepost = false }) {
   if (!contentId || !uid || !platform) throw new Error('contentId, uid, platform required');
+  // Revenue eligibility gate: user must have >= MIN_CONTENT_FOR_REVENUE content docs to count for revenue
+  const MIN_CONTENT_FOR_REVENUE = parseInt(process.env.MIN_CONTENT_FOR_REVENUE || '100', 10);
+  try {
+    const contentCountSnap = await db.collection('content').where('user_id','==', uid).select().get();
+    const totalContent = contentCountSnap.size;
+    if (totalContent < MIN_CONTENT_FOR_REVENUE) {
+      // Mark user doc with progress to eligibility (best-effort)
+      try { await db.collection('users').doc(uid).set({ revenueEligible: false, contentCount: totalContent, requiredForRevenue: MIN_CONTENT_FOR_REVENUE }, { merge: true }); } catch(_){}
+      // We still enqueue the task (platform growth) but note in payload metadata not revenue eligible yet
+      payload.__revenueEligible = false;
+    } else {
+      try { await db.collection('users').doc(uid).set({ revenueEligible: true, contentCount: totalContent, requiredForRevenue: MIN_CONTENT_FOR_REVENUE }, { merge: true }); } catch(_){}
+      payload.__revenueEligible = true;
+    }
+  } catch (e) {
+    // On error, proceed without blocking; mark unknown
+    payload.__revenueEligible = null;
+  }
   const crypto = require('crypto');
   // Canonical subset of payload for hashing (avoid volatile fields)
   const canonical = {
