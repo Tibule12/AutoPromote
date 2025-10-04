@@ -20,6 +20,7 @@ router.get('/:code', async (req, res) => {
     try {
       const event = { type:'shortlink_resolve', code, ...data, createdAt: new Date().toISOString() };
       await db.collection('events').add(event);
+      try { const { applyShortlinkClick } = require('../services/attributionUpdater'); applyShortlinkClick(code, data); } catch(_){ }
     } catch(_){}
     return res.redirect(302, url);
   } catch (e) { return res.status(500).send('error'); }
