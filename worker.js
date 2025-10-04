@@ -2,6 +2,7 @@
 require('dotenv').config();
 const { db } = require('./src/firebaseAdmin');
 const { processNextPlatformTask, processNextYouTubeTask } = require('./src/services/promotionTaskQueue');
+let dailyRollup; try { dailyRollup = require('./src/services/dailyRollupService'); } catch(_) {}
 let poller; try { poller = require('./src/services/youtubeStatsPoller'); } catch(_) { poller = null; }
 const { setStatus } = require('./src/services/statusRecorder');
 let engagementIngestion; try { engagementIngestion = require('./src/services/engagementIngestionService'); } catch(_) { }
@@ -19,6 +20,7 @@ if (!ENABLE) {
 }
 
 let lastYouTubePoll = 0;
+let lastRollupDate = null; // YYYYMMDD of last completed rollup
 
 async function loop() {
   const startedAt = Date.now();
@@ -117,6 +119,38 @@ async function loop() {
             }
         }
       } catch (e) { console.warn('[worker] variant_prune error:', e.message); }
+    }
+    // Daily rollup trigger: run shortly after UTC midnight or if not run today (probabilistic guard to avoid multiple workers duplicating)
+    if (dailyRollup) {
+      try {
+        const now = new Date();
+        const utcDate = now.toISOString().slice(0,10).replace(/-/g,''); // YYYYMMDD current
+        if (lastRollupDate !== utcDate) {
+          // Allow execution if within first 2 hours of day OR if manually forced via env, with small probability to avoid stampede
+          const hourUTC = now.getUTCHours();
+          const force = process.env.FORCE_DAILY_ROLLUP === 'true';
+          if (force || hourUTC < 2) {
+            if (force || Math.random() < 0.2) {
+              const { rollupContentDailyMetrics } = dailyRollup;
+              // Roll up for yesterday (target default). If already run (checked via status doc), skip.
+              const statusKey = 'daily_rollup_' + utcDate;
+              let already = false;
+              try {
+                const statusSnap = await require('./src/firebaseAdmin').db.collection('status').doc(statusKey).get();
+                already = statusSnap.exists;
+              } catch(_){}
+              if (!already || force) {
+                const result = await rollupContentDailyMetrics({});
+                await setStatus(statusKey, { ts: Date.now(), result });
+                lastRollupDate = utcDate;
+                console.log('[worker] daily_rollup', result);
+              } else {
+                lastRollupDate = utcDate; // mark to avoid re-check in same loop
+              }
+            }
+          }
+        }
+      } catch (e) { console.warn('[worker] daily_rollup error:', e.message); }
     }
   } catch (e) {
     console.warn('[worker] loop error top-level:', e.message);

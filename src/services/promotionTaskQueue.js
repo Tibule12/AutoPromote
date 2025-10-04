@@ -301,23 +301,79 @@ async function processNextPlatformTask() {
       });
       return { taskId: task.id, deferredUntil: cooldownUntil, reason: 'rate_limit_cooldown' };
     }
-    // Variant rotation: if payload.variants array exists, select next based on existing post count
+    // Variant selection
+    // Strategy controlled by VARIANT_SELECTION_STRATEGY env: 'bandit' (UCB1) or 'rotation' (default)
     let payload = task.payload || {};
     let selectedVariant = null;
     let variantIndex = null;
     if (Array.isArray(payload.variants) && payload.variants.length) {
-      try {
-        const prevPostsSnap = await db.collection('platform_posts')
-          .where('platform','==', task.platform)
-          .where('contentId','==', task.contentId)
-          .limit(50)
-          .get();
-        const count = prevPostsSnap.size;
-        const idx = count % payload.variants.length;
-        selectedVariant = payload.variants[idx];
-        variantIndex = idx;
-        payload = { ...payload, message: selectedVariant };
-      } catch(_){}
+      const strategy = (process.env.VARIANT_SELECTION_STRATEGY || 'rotation').toLowerCase();
+      if (strategy === 'bandit') {
+        try {
+          // Fetch recent posts for this content/platform (sample)
+            const prevPostsSnap = await db.collection('platform_posts')
+              .where('platform','==', task.platform)
+              .where('contentId','==', task.contentId)
+              .orderBy('createdAt','desc')
+              .limit(200)
+              .get();
+            const stats = payload.variants.map(v => ({ variant: v, posts: 0, clicks: 0 }));
+            prevPostsSnap.forEach(p => {
+              const d = p.data();
+              if (d.usedVariant) {
+                const idx = payload.variants.indexOf(d.usedVariant);
+                if (idx !== -1) {
+                  stats[idx].posts += 1;
+                  stats[idx].clicks += d.clicks || 0;
+                }
+              }
+            });
+            const totalPosts = stats.reduce((a,b)=>a+b.posts,0);
+            // UCB1 scoring (reward = clicks/posts). Encourage exploration for untried variants.
+            let bestScore = -Infinity; let bestIdx = 0; const lnTotal = totalPosts > 0 ? Math.log(totalPosts) : 0;
+            stats.forEach((s,i) => {
+              if (s.posts === 0) {
+                // Force exploration: assign very high score
+                if (bestScore < 1e9) { bestScore = 1e9; bestIdx = i; }
+                return;
+              }
+              const mean = s.clicks / s.posts; // clicks per post proxy for CTR
+              const bonus = Math.sqrt((2 * lnTotal) / s.posts);
+              const score = mean + bonus;
+              if (score > bestScore) { bestScore = score; bestIdx = i; }
+            });
+            selectedVariant = payload.variants[bestIdx];
+            variantIndex = bestIdx;
+            payload = { ...payload, message: selectedVariant };
+        } catch (e) {
+          // Fallback to rotation on error
+          try {
+            const prevPostsSnap = await db.collection('platform_posts')
+              .where('platform','==', task.platform)
+              .where('contentId','==', task.contentId)
+              .limit(50)
+              .get();
+            const count = prevPostsSnap.size;
+            const idx = count % payload.variants.length;
+            selectedVariant = payload.variants[idx];
+            variantIndex = idx;
+            payload = { ...payload, message: selectedVariant };
+          } catch(_){}
+        }
+      } else { // rotation
+        try {
+          const prevPostsSnap = await db.collection('platform_posts')
+            .where('platform','==', task.platform)
+            .where('contentId','==', task.contentId)
+            .limit(50)
+            .get();
+          const count = prevPostsSnap.size;
+          const idx = count % payload.variants.length;
+          selectedVariant = payload.variants[idx];
+          variantIndex = idx;
+          payload = { ...payload, message: selectedVariant };
+        } catch(_){}
+      }
     }
     // Auto shortlink generation (per post & variant) if content has landing page
     try {
