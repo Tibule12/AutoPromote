@@ -161,6 +161,19 @@ router.get('/dashboard', authMiddleware, (req, res, next) => {
   }
 });
 
+// System counters (lightweight, best-effort) - guarded by same admin rule if enabled
+router.get('/counters', authMiddleware, (req,res,next) => {
+  if (METRICS_REQUIRE_ADMIN) return adminOnly(req,res,next);
+  return next();
+}, async (req,res) => {
+  try {
+    const snap = await db.collection('system_counters').limit(200).get();
+    const counters = {};
+    snap.forEach(d => { const v = d.data(); counters[d.id] = v.value || 0; });
+    return res.json({ ok: true, counters, count: Object.keys(counters).length, generatedAt: new Date().toISOString() });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
 // Raw export (F) - limited sample for BI ingestion (admin only already enforced at router level)
 router.get('/raw', authMiddleware, (req, res, next) => {
   if (METRICS_REQUIRE_ADMIN) return adminOnly(req, res, next);

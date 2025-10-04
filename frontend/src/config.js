@@ -60,7 +60,21 @@ export const API_ENDPOINTS = {
   SCHEDULE_DELETE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}`,
 
   // Health check
-  HEALTH: `${API_BASE_URL}/api/health`
+  HEALTH: `${API_BASE_URL}/api/health`,
+
+  // Monetization / Earnings
+  EARNINGS_SUMMARY: `${API_BASE_URL}/api/monetization/earnings/summary`,
+  EARNINGS_PAYOUT_SELF: `${API_BASE_URL}/api/monetization/earnings/payout/self`,
+  EARNINGS_PAYOUTS: `${API_BASE_URL}/api/monetization/earnings/payouts`,
+  EARNINGS_AGGREGATE_ADMIN: `${API_BASE_URL}/api/monetization/earnings/aggregate`,
+
+  // Notifications (v2)
+  NOTIFICATIONS_LIST: `${API_BASE_URL}/api/notifications`,
+  NOTIFICATIONS_MARK_READ: `${API_BASE_URL}/api/notifications/read`,
+
+  // Platform aggregated status & user progress
+  PLATFORM_STATUS: `${API_BASE_URL}/api/platform/status`,
+  USER_PROGRESS: `${API_BASE_URL}/api/users/progress`
 };
 
 // Firebase configuration

@@ -15,6 +15,7 @@ const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
 let promotionTaskRoutes;
 let metricsRoutes;
 let tiktokRoutes;
+let notificationsRoutes;
 try {
   tiktokRoutes = require('../tiktokRoutes'); // use top-level tiktokRoutes which includes auth + storage
   console.log('✅ Using top-level tiktokRoutes.js');
@@ -67,6 +68,13 @@ try {
   promotionTaskRoutes = express.Router();
 }
 try {
+  notificationsRoutes = require('./routes/notificationsRoutes');
+  console.log('✅ Notifications routes loaded');
+} catch (e) {
+  console.log('⚠️ Notifications routes not found:', e.message);
+  notificationsRoutes = express.Router();
+}
+try {
   metricsRoutes = require('./routes/metricsRoutes');
   console.log('✅ Metrics routes loaded');
 } catch (e) {
@@ -83,9 +91,17 @@ try {
 
 // Try to load adminTestRoutes, but continue with a dummy router if not available
 let adminTestRoutes;
+let adminSecurityRoutes;
 try {
   adminTestRoutes = require('./adminTestRoutes');
 } catch (error) {
+try {
+  adminSecurityRoutes = require('./routes/adminSecurityRoutes');
+  console.log('✅ Admin security routes loaded');
+} catch (e) {
+  console.log('⚠️ Admin security routes not found:', e.message);
+  adminSecurityRoutes = express.Router();
+}
   // Create a dummy router if the module is missing
   adminTestRoutes = express.Router();
   adminTestRoutes.get('/admin-test/health', (req, res) => {
@@ -149,6 +165,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/security', adminSecurityRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api', adminTestRoutes); // Add admin test routes
 // Mount TikTok routes if available
@@ -169,6 +186,8 @@ app.use('/api/metrics', metricsRoutes);
 console.log('🚏 Metrics routes mounted at /api/metrics');
 app.use('/api/instagram', instagramRoutes);
 console.log('🚏 Instagram routes mounted at /api/instagram');
+app.use('/api/notifications', notificationsRoutes);
+console.log('🚏 Notifications routes mounted at /api/notifications');
 
 // Content Quality Check Route
 const contentQualityCheck = require('./contentQualityCheck');
@@ -369,6 +388,8 @@ const STATS_POLL_INTERVAL_MS = parseInt(process.env.STATS_POLL_INTERVAL_MS || '1
 const TASK_PROCESS_INTERVAL_MS = parseInt(process.env.TASK_PROCESS_INTERVAL_MS || '60000', 10); // 1 minute default
 const PLATFORM_STATS_POLL_INTERVAL_MS = parseInt(process.env.PLATFORM_STATS_POLL_INTERVAL_MS || '300000', 10); // 5 minutes default
 const OAUTH_STATE_CLEAN_INTERVAL_MS = parseInt(process.env.OAUTH_STATE_CLEAN_INTERVAL_MS || '900000', 10); // 15 min default
+const EARNINGS_AGG_INTERVAL_MS = parseInt(process.env.EARNINGS_AGG_INTERVAL_MS || '600000', 10); // 10 min default
+const LOCK_CLEAN_INTERVAL_MS = parseInt(process.env.LOCK_CLEAN_INTERVAL_MS || '300000', 10); // 5 min default
 
 if (ENABLE_BACKGROUND) {
   console.log('🛠  Background job runner enabled.');
@@ -376,6 +397,8 @@ if (ENABLE_BACKGROUND) {
   const { pollYouTubeStatsBatch } = require('./services/youtubeStatsPoller');
   const { pollPlatformPostMetricsBatch } = require('./services/platformStatsPoller');
     const { processNextYouTubeTask, processNextPlatformTask } = require('./services/promotionTaskQueue');
+    const { acquireLock, INSTANCE_ID } = require('./services/workerLockService');
+    console.log('🔐 Worker instance id:', INSTANCE_ID);
 
     // Simple re-entrancy guard flags
   let statsRunning = false;
@@ -384,16 +407,23 @@ if (ENABLE_BACKGROUND) {
 
     setInterval(async () => {
       if (statsRunning) return; // skip overlapping
+      const ok = await acquireLock('statsPoller', STATS_POLL_INTERVAL_MS * 2).catch(()=>false);
+      if (!ok) return; // another instance owns lock
       statsRunning = true;
       try {
+        const jitter = Math.random() * 250;
+        if (jitter) await new Promise(r=>setTimeout(r,jitter));
         // Poll stats with a conservative batch size
         const uidHint = process.env.DEFAULT_STATS_UID || null; // optional: if certain actions require a user context
         const result = await pollYouTubeStatsBatch({ uid: uidHint, velocityThreshold: parseInt(process.env.VELOCITY_THRESHOLD || '800', 10), batchSize: 5 });
         if (result.processed) {
           console.log(`[BG][stats] Updated ${result.processed} content docs`);
+          try { require('./services/metricsRecorder').incrCounter('statsPoller.runs'); } catch(_){ }
         }
+        try { require('./services/statusRecorder').recordRun('statsPoller', { lastProcessed: result.processed || 0, ok: true }); } catch(_){ }
       } catch (e) {
         console.warn('[BG][stats] error:', e.message);
+        try { require('./services/statusRecorder').recordRun('statsPoller', { error: e.message, ok: false }); } catch(_){ }
       } finally {
         statsRunning = false;
       }
@@ -401,8 +431,12 @@ if (ENABLE_BACKGROUND) {
 
     setInterval(async () => {
       if (taskRunning) return;
+      const ok = await acquireLock('promotionTasks', TASK_PROCESS_INTERVAL_MS * 2).catch(()=>false);
+      if (!ok) return;
       taskRunning = true;
       try {
+        const jitter = Math.random() * 250;
+        if (jitter) await new Promise(r=>setTimeout(r,jitter));
         let processed = 0;
         // Process up to N tasks per interval (interleave types)
         const MAX_BATCH = 5;
@@ -414,9 +448,12 @@ if (ENABLE_BACKGROUND) {
         }
         if (processed) {
           console.log(`[BG][tasks] Processed ${processed} queued tasks`);
+          try { require('./services/metricsRecorder').incrCounter('promotionTasks.processed', processed); } catch(_){}
         }
+        try { require('./services/statusRecorder').recordRun('promotionTasks', { processed, ok: true }); } catch(_){ }
       } catch (e) {
         console.warn('[BG][tasks] error:', e.message);
+        try { require('./services/statusRecorder').recordRun('promotionTasks', { error: e.message, ok: false }); } catch(_){ }
       } finally {
         taskRunning = false;
       }
@@ -424,12 +461,19 @@ if (ENABLE_BACKGROUND) {
 
     setInterval(async () => {
       if (platformMetricsRunning) return;
+      const ok = await acquireLock('platformMetrics', PLATFORM_STATS_POLL_INTERVAL_MS * 2).catch(()=>false);
+      if (!ok) return;
       platformMetricsRunning = true;
       try {
+        const jitter = Math.random() * 250;
+        if (jitter) await new Promise(r=>setTimeout(r,jitter));
         const r = await pollPlatformPostMetricsBatch({ batchSize: 5 });
         if (r.processed) console.log(`[BG][platform-metrics] Updated ${r.processed} platform post metrics`);
+        if (r.processed) { try { require('./services/metricsRecorder').incrCounter('platformMetrics.processed', r.processed); } catch(_){} }
+        try { require('./services/statusRecorder').recordRun('platformMetrics', { processed: r.processed || 0, ok: true }); } catch(_){ }
       } catch (e) {
         console.warn('[BG][platform-metrics] error:', e.message);
+        try { require('./services/statusRecorder').recordRun('platformMetrics', { error: e.message, ok: false }); } catch(_){ }
       } finally {
         platformMetricsRunning = false;
       }
@@ -442,14 +486,53 @@ if (ENABLE_BACKGROUND) {
         try {
           const removed = await cleanupOldStates(30); // older than 30 minutes
           if (removed) console.log(`[BG][oauth-states] cleaned ${removed} stale records`);
+          if (removed) { try { require('./services/metricsRecorder').incrCounter('oauthStates.cleaned', removed); } catch(_){} }
+          try { require('./services/statusRecorder').recordRun('oauthStateCleanup', { removed: removed || 0, ok: true }); } catch(_){ }
         } catch (e) {
           console.warn('[BG][oauth-states] cleanup failed:', e.message);
+          try { require('./services/statusRecorder').recordRun('oauthStateCleanup', { error: e.message, ok: false }); } catch(_){ }
         }
       }, OAUTH_STATE_CLEAN_INTERVAL_MS).unref();
     } catch (e) {
       // twitterService may not exist if feature not deployed yet
       console.log('[BG][oauth-states] cleanup skipped:', e.message);
     }
+
+    // Periodic earnings aggregation (best-effort, idempotent per batch)
+    try {
+      const { aggregateUnprocessed } = require('./services/earningsService');
+      const { acquireLock } = require('./services/workerLockService');
+      setInterval(async () => {
+        try {
+          const locked = await acquireLock('earningsAggregator', EARNINGS_AGG_INTERVAL_MS * 2).catch(()=>false);
+          if (!locked) return; // another instance aggregating
+          const jitter = Math.random() * 250;
+          if (jitter) await new Promise(r=>setTimeout(r,jitter));
+          const r = await aggregateUnprocessed({ batchSize: 300 });
+          if (r.processedEvents) console.log(`[BG][earnings] aggregated ${r.processedEvents} events for ${r.usersUpdated} users`);
+          if (r.processedEvents) { try { require('./services/metricsRecorder').incrCounter('earnings.eventsProcessed', r.processedEvents); } catch(_){} }
+          try { require('./services/statusRecorder').recordRun('earningsAggregator', { processedEvents: r.processedEvents || 0, usersUpdated: r.usersUpdated || 0, ok: true }); } catch(_){ }
+        } catch (e) {
+          console.warn('[BG][earnings] aggregation failed:', e.message);
+          try { require('./services/statusRecorder').recordRun('earningsAggregator', { error: e.message, ok: false }); } catch(_){ }
+        }
+      }, EARNINGS_AGG_INTERVAL_MS).unref();
+    } catch (e) {
+      console.log('[BG][earnings] service not available:', e.message);
+    }
+
+    // Stale lock cleanup (best-effort) - removes expired locks to prevent clutter
+    setInterval(async () => {
+      try {
+        const now = Date.now();
+        const snap = await db.collection('system_locks').limit(200).get();
+        const batch = db.batch();
+        let removed = 0;
+        snap.forEach(d => { const v = d.data(); if (v.expiresAt && v.expiresAt < now - 60000) { batch.delete(d.ref); removed++; } });
+        if (removed) { await batch.commit(); console.log(`[BG][locks] cleaned ${removed} stale locks`); }
+        try { require('./services/statusRecorder').recordRun('lockCleanup', { removed: removed || 0, ok: true }); } catch(_){ }
+      } catch (e) { console.warn('[BG][locks] cleanup error:', e.message); }
+    }, LOCK_CLEAN_INTERVAL_MS).unref();
   } catch (e) {
     console.warn('⚠️ Background job initialization failed:', e.message);
   }
