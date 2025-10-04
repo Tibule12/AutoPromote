@@ -229,7 +229,8 @@ async function processNextPlatformTask() {
       platform: task.platform,
       contentId: task.contentId,
       payload: task.payload,
-      reason: task.reason
+      reason: task.reason,
+      uid: task.uid
     });
     await selectedDoc.ref.update({
       status: 'completed',
