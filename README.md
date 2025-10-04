@@ -162,6 +162,40 @@ Champion criteria:
 - Stripe metered usage for overage events
 - Websocket push for champion changes
 
+## Daily Rollups (New)
+Daily aggregated metrics are stored in `content_daily_metrics` documents with id format `<contentId>_<YYYYMMDD>` capturing:
+
+- posts: number of platform posts sampled that day
+- impressions: sum of sampled impressions
+- clicks: total shortlink resolves attributed that day
+- variants: per variant string breakdown `{ posts, impressions, clicks }`
+- variantClicks: per variantIndex click counts from events
+
+The background worker performs a rollup shortly after UTC midnight (probabilistically to avoid contention) or when `FORCE_DAILY_ROLLUP=true`.
+
+## Variant Selection Strategies
+Environment variable `VARIANT_SELECTION_STRATEGY` controls how the next variant is chosen when multiple message variants are present:
+
+- `rotation` (default): round-robin by historical post count
+- `bandit`: UCB1 multi-armed bandit using clicks/post as reward, with exploration bonus `sqrt((2 * ln(totalPosts)) / posts)`
+
+Set in `.env`:
+
+```
+VARIANT_SELECTION_STRATEGY=bandit
+```
+
+Untried variants are forced early by assigning them a very high sentinel score ensuring initial exploration.
+
+## Firebase Credential Diagnostic
+Run the script to verify service account detection and perform a lightweight Firestore read:
+
+```
+node scripts/checkFirebaseCredentials.js
+```
+
+Supports JSON path, raw JSON, base64 JSON, or individual FIREBASE_* key fields.
+
 
 1) Wire landing page + smart link generation into upload/approval and save to content doc
 2) Add notifications MVP (Firestore collection, optional email)
