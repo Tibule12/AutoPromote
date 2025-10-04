@@ -92,6 +92,19 @@ router.post('/reset-attempts/:id', authMiddleware, adminOnly, async (req, res) =
     return res.json({ success: true });
   } catch (e) { return res.status(500).json({ error: e.message }); }
 });
+// Requeue a failed (non-dead-letter) task by id
+router.post('/requeue/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ref = require('../firebaseAdmin').db.collection('promotion_tasks').doc(id);
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ error: 'task_not_found' });
+    const data = snap.data();
+    if (data.status !== 'failed') return res.status(400).json({ error: 'task_not_failed' });
+    await ref.update({ status: 'queued', attempts: 0, nextAttemptAt: new Date().toISOString(), updatedAt: new Date().toISOString(), requeuedAt: new Date().toISOString() });
+    return res.json({ success: true });
+  } catch (e) { return res.status(500).json({ error: e.message }); }
+});
 // Enqueue cross-platform post (generic)
 router.post('/platform/enqueue', authMiddleware, rateLimit({ field: 'platformEnqueue', perMinute: 60, weight: 2 }), validateBody({
   contentId: { type: 'string', required: true },
