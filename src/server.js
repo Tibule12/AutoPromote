@@ -4,12 +4,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-// Security & performance middlewares
+// Security & performance middlewares (declare once)
 let helmet, compression;
-try { helmet = require('helmet'); } catch(_) { /* optional until installed */ }
-try { compression = require('compression'); } catch(_) { /* optional until installed */ }
-// Performance & security middleware (added)
-let compression, helmet;
 try { compression = require('compression'); } catch(_) { /* optional */ }
 try { helmet = require('helmet'); } catch(_) { /* optional */ }
 
