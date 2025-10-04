@@ -199,6 +199,47 @@ router.get('/variants/summary', async (req, res) => {
   } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
 });
 
+// Variant performance scoring: join landing_view counts (by contentId + src) with variant usage
+router.get('/variants/performance', async (req, res) => {
+  try {
+    const days = Math.min(parseInt(req.query.days || '7',10), 30);
+    const since = Date.now() - days * 86400000;
+    const postSnap = await db.collection('platform_posts')
+      .orderBy('createdAt','desc')
+      .limit(1000)
+      .get().catch(()=>({ empty: true, docs: [] }));
+    const posts = [];
+    postSnap.docs.forEach(d => { const v = d.data(); posts.push({ id: d.id, platform: v.platform, contentId: v.contentId, usedVariant: v.usedVariant, variantIndex: v.variantIndex, createdAt: v.createdAt }); });
+    // Landing views sample
+    const lvSnap = await db.collection('events')
+      .where('type','==','landing_view')
+      .orderBy('createdAt','desc')
+      .limit(4000)
+      .get().catch(()=>({ empty: true, docs: [] }));
+    const views = [];
+    lvSnap.docs.forEach(d => { const v = d.data(); const ts = Date.parse(v.createdAt||'')||0; if (ts >= since) views.push(v); });
+    // Aggregate views by (contentId, src)
+    const viewIndex = {};
+    views.forEach(v => { if (!v.contentId || !v.src) return; const key = `${v.contentId}|${v.src}`; viewIndex[key] = (viewIndex[key]||0) + 1; });
+    // Score variants (assume src == platform code: tw, fb, etc.)
+    const variantStats = {};
+    posts.forEach(p => {
+      if (!p.usedVariant) return;
+      const platformCode = p.platform === 'twitter' ? 'tw' : p.platform === 'facebook' ? 'fb' : p.platform === 'instagram' ? 'instagram' : p.platform === 'tiktok' ? 'tiktok' : null;
+      if (!platformCode) return;
+      const keyViews = `${p.contentId}|${platformCode}`;
+      const viewsForPair = viewIndex[keyViews] || 0;
+      const keyVariant = `${p.platform}|${p.contentId}|${p.usedVariant}`;
+      if (!variantStats[keyVariant]) variantStats[keyVariant] = { platform: p.platform, contentId: p.contentId, variant: p.usedVariant, variantIndex: p.variantIndex, posts: 0, estimatedViews: 0 };
+      variantStats[keyVariant].posts += 1;
+      variantStats[keyVariant].estimatedViews += viewsForPair; // naive: all views attributed equally per post variant
+    });
+    // Derive simple score: views/posts
+    Object.values(variantStats).forEach(v => { v.viewPerPost = v.posts ? v.estimatedViews / v.posts : 0; });
+    return res.json({ ok: true, window_days: days, variants: Object.values(variantStats).sort((a,b)=>b.viewPerPost - a.viewPerPost).slice(0,200) });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
 // Utility safe number
 function num(v) { return typeof v === 'number' && !Number.isNaN(v) ? v : 0; }
 
