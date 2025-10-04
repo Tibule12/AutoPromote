@@ -378,6 +378,97 @@ router.get('/dashboard/performance', authMiddleware, async (req, res) => {
   } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
 });
 
+// Helper: Wilson score lower bound (95%) for CTR to stabilize rankings with low impressions
+function wilsonLowerBound(clicks, impressions, z = 1.96) {
+  if (!impressions || impressions <= 0) return 0;
+  const p = clicks / impressions;
+  const denom = 1 + (z*z)/impressions;
+  const centre = p + (z*z)/(2*impressions);
+  const margin = z * Math.sqrt((p*(1-p) + (z*z)/(4*impressions)) / impressions);
+  return Math.max(0, (centre - margin) / denom);
+}
+
+// Content performance (denormalized + event enriched) per contentId
+router.get('/content/:id/performance', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const contentSnap = await db.collection('content').doc(id).get();
+    if (!contentSnap.exists) return res.status(404).json({ ok:false, error: 'content_not_found' });
+    const content = contentSnap.data();
+    // Gather recent posts for this content
+    const postSnap = await db.collection('platform_posts')
+      .where('contentId','==', id)
+      .orderBy('createdAt','desc')
+      .limit(250)
+      .get().catch(()=>({ empty:true, docs: [] }));
+    const posts = [];
+    postSnap.docs.forEach(d => {
+      const v = d.data();
+      posts.push({ id: d.id, platform: v.platform, variantIndex: v.variantIndex, usedVariant: v.usedVariant, impressions: v.metrics?.impressions || 0, clicks: v.clicks || 0, createdAt: v.createdAt });
+    });
+    // Aggregate variant string performance
+    const variantPerf = {};
+    posts.forEach(p => {
+      if (!p.usedVariant) return;
+      if (!variantPerf[p.usedVariant]) variantPerf[p.usedVariant] = { variant: p.usedVariant, posts:0, impressions:0, clicks:0 };
+      const vp = variantPerf[p.usedVariant];
+      vp.posts += 1;
+      vp.impressions += p.impressions;
+      vp.clicks += p.clicks;
+    });
+    // Merge denormalized click counts (variantStringClicks)
+    if (content.variantStringClicks && typeof content.variantStringClicks === 'object') {
+      Object.entries(content.variantStringClicks).forEach(([k,v]) => {
+        if (!variantPerf[k]) variantPerf[k] = { variant: k, posts:0, impressions:0, clicks:0 };
+        // Only augment clicks if higher (avoid double counting)
+        if (v > variantPerf[k].clicks) variantPerf[k].clicks = v;
+      });
+    }
+    // Compute CTR + Wilson
+    Object.values(variantPerf).forEach(v => {
+      v.ctr = v.impressions ? v.clicks / v.impressions : 0;
+      v.wilson = wilsonLowerBound(v.clicks, v.impressions);
+    });
+    const rankedVariants = Object.values(variantPerf).sort((a,b)=> b.wilson - a.wilson).slice(0,100);
+    // Variant index based clicks
+    const variantIndexClicks = content.variantClicks || {};
+    const summary = {
+      clicksTotal: content.clicksTotal || 0,
+      variantIndexClicks,
+      variantsRanked: rankedVariants,
+      posts: posts.slice(0,100)
+    };
+    return res.json({ ok:true, contentId: id, performance: summary, generatedAt: new Date().toISOString() });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
+// Current user task usage vs quota (month)
+router.get('/usage/current', authMiddleware, async (req, res) => {
+  try {
+    const uid = req.userId;
+    const monthStart = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString();
+    // Count tasks (approx; sample up to 5000)
+    const taskSnap = await db.collection('promotion_tasks')
+      .where('uid','==', uid)
+      .where('createdAt','>=', monthStart)
+      .limit(5000)
+      .get();
+    const tasksUsed = taskSnap.size;
+    // Plan quota
+    let quota = 0; let planTier = 'free';
+    try {
+      const userSnap = await db.collection('users').doc(uid).get();
+      if (userSnap.exists) {
+        const plan = userSnap.data().plan || {}; planTier = plan.tier || plan.id || 'free';
+        const { getPlan } = require('../services/planService');
+        quota = getPlan(planTier).monthlyTaskQuota || 0;
+      }
+    } catch(_){}
+    const overage = quota ? Math.max(0, tasksUsed - quota) : 0;
+    return res.json({ ok:true, monthStart, plan: planTier, quota, tasksUsed, overage });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
 // Utility safe number
 function num(v) { return typeof v === 'number' && !Number.isNaN(v) ? v : 0; }
 
