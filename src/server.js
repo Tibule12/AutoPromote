@@ -4,6 +4,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+// Security & performance middlewares
+let helmet, compression;
+try { helmet = require('helmet'); } catch(_) { /* optional until installed */ }
+try { compression = require('compression'); } catch(_) { /* optional until installed */ }
+// Performance & security middleware (added)
+let compression, helmet;
+try { compression = require('compression'); } catch(_) { /* optional */ }
+try { helmet = require('helmet'); } catch(_) { /* optional */ }
 
 // Load core routes
 const authRoutes = require('./authRoutes');
@@ -141,14 +149,21 @@ const { db, auth, storage } = require('./firebaseAdmin');
 const app = express();
 const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
 
-// CORS configuration - allow all origins for debugging
+// CORS configuration - allow all origins for debugging (tighten in prod)
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin']
 }));
+// Apply compression if installed
+if (compression) app.use(compression());
+// Apply security headers (disable CSP by default to avoid blocking React build assets)
+if (helmet) app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// Apply helmet (relaxed CSP off for React inline styles) & compression if available
+if (helmet) app.use(helmet({ contentSecurityPolicy: false }));
+if (compression) app.use(compression());
 
 // Correlation ID middleware (K)
 app.use((req, res, next) => {
