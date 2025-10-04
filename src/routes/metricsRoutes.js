@@ -173,6 +173,27 @@ router.get('/funnel/summary', async (req, res) => {
   } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
 });
 
+// Variant performance summary (counts of usedVariant occurrences per platform/content)
+router.get('/variants/summary', async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit || '500',10), 2000);
+    const snap = await db.collection('platform_posts')
+      .orderBy('createdAt','desc')
+      .limit(limit)
+      .get().catch(()=>({ empty: true, docs: [] }));
+    const variantCounts = {};
+    snap.docs.forEach(d => {
+      const v = d.data();
+      const variant = v.rawOutcome && v.rawOutcome.usedVariant ? v.rawOutcome.usedVariant : null;
+      if (!variant) return;
+      const key = `${v.platform}|${v.contentId}`;
+      if (!variantCounts[key]) variantCounts[key] = { platform: v.platform, contentId: v.contentId, variants: {} };
+      variantCounts[key].variants[variant] = (variantCounts[key].variants[variant]||0) + 1;
+    });
+    return res.json({ ok: true, groups: Object.values(variantCounts), sampled: snap.docs.length });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
 // Utility safe number
 function num(v) { return typeof v === 'number' && !Number.isNaN(v) ? v : 0; }
 
