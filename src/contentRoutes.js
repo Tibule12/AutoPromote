@@ -117,6 +117,8 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
       max_budget,
       dry_run
     } = req.body;
+    // Optional auto promotion descriptor
+    const autoPromote = req.body.auto_promote || {};
 
     // Support dry run via body or query param
     const isDryRun = dry_run === true || req.query.dry_run === 'true';
@@ -340,16 +342,140 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
       hasRecommendations: !!recommendations
     });
 
+    // ----------------------------------------------------
+    // Auto-Promotion Phase (YouTube upload + Twitter post)
+    // Skipped for dry runs or if no auto_promote object provided.
+    // ----------------------------------------------------
+    const autoPromotionResults = {};
+    if (!isDryRun && autoPromote && typeof autoPromote === 'object') {
+      const backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === 'true';
+      // Helper safe update of promotion_summary on content doc
+      async function persistSummary() {
+        try {
+          await db.collection('content').doc(content.id).set({ promotion_summary: autoPromotionResults }, { merge: true });
+        } catch (e) { console.log('⚠️ Could not persist promotion_summary:', e.message); }
+      }
+
+      // 1. YouTube Immediate Upload (direct call, not queued)
+      if (autoPromote.youtube && (autoPromote.youtube.enabled !== false)) {
+        autoPromotionResults.youtube = { requested: true };
+        try {
+          const { getUserYouTubeConnection, uploadVideo } = require('./services/youtubeService');
+          const ytConn = await getUserYouTubeConnection(req.userId);
+          if (!ytConn) {
+            autoPromotionResults.youtube = { requested: true, skipped: true, reason: 'not_connected' };
+          } else {
+            const videoUrl = autoPromote.youtube.videoUrl || autoPromote.youtube.fileUrl || url; // fallback to content URL if supplied
+            if (!videoUrl) {
+              autoPromotionResults.youtube = { requested: true, skipped: true, reason: 'missing_videoUrl' };
+            } else {
+              const ytOutcome = await uploadVideo({
+                uid: req.userId,
+                title: autoPromote.youtube.title || title,
+                description: autoPromote.youtube.description || description || '',
+                fileUrl: videoUrl,
+                mimeType: autoPromote.youtube.mimeType || 'video/mp4',
+                contentId: content.id,
+                shortsMode: !!autoPromote.youtube.shortsMode,
+                optimizeMetadata: autoPromote.youtube.optimizeMetadata !== false,
+                forceReupload: !!autoPromote.youtube.forceReupload,
+                skipIfDuplicate: autoPromote.youtube.skipIfDuplicate !== false
+              });
+              autoPromotionResults.youtube = { requested: true, ...ytOutcome };
+            }
+          }
+        } catch (e) {
+          autoPromotionResults.youtube = { requested: true, success: false, error: e.message };
+        } finally {
+          await persistSummary();
+        }
+      }
+
+      // 2. Twitter enqueue (queue will process if background jobs enabled; otherwise pending)
+      if (autoPromote.twitter && (autoPromote.twitter.enabled !== false)) {
+        autoPromotionResults.twitter = { requested: true };
+        try {
+          const twitterConnSnap = await db.collection('users').doc(req.userId).collection('connections').doc('twitter').get();
+          if (!twitterConnSnap.exists) {
+            autoPromotionResults.twitter = { requested: true, skipped: true, reason: 'not_connected' };
+          } else {
+            const { enqueuePlatformPostTask } = require('./services/promotionTaskQueue');
+            const message = (autoPromote.twitter.message || title || 'New content').slice(0, 260);
+            const link = autoPromote.twitter.link || content.url || null;
+            const enqueueRes = await enqueuePlatformPostTask({
+              contentId: content.id,
+              uid: req.userId,
+              platform: 'twitter',
+              reason: 'post_upload',
+              payload: { message, link },
+              skipIfDuplicate: autoPromote.twitter.skipIfDuplicate !== false,
+              forceRepost: !!autoPromote.twitter.forceRepost
+            });
+            autoPromotionResults.twitter = { requested: true, queued: !enqueueRes.skipped, ...enqueueRes, backgroundJobsEnabled };
+          }
+        } catch (e) {
+          autoPromotionResults.twitter = { requested: true, queued: false, error: e.message };
+        } finally {
+          await persistSummary();
+        }
+      }
+    }
+
     res.status(201).json({
       message: scheduled_promotion_time ? 'Content uploaded and scheduled for promotion' : 'Content uploaded successfully',
       content,
       promotion_schedule: promotionSchedule,
       optimization_recommendations: recommendations,
       optimal_rpm: optimalRPM,
-  creator_payout: minViews * (optimalRPM / 1000000) * creatorPayoutRate
+      creator_payout: minViews * (optimalRPM / 1000000) * creatorPayoutRate,
+      auto_promotion: Object.keys(autoPromotionResults).length ? autoPromotionResults : null
     });
   } catch (error) {
     console.error('Upload error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Promotion status snapshot for a content item
+router.get('/:id/promotion-status', authMiddleware, async (req, res) => {
+  try {
+    const contentRef = db.collection('content').doc(req.params.id);
+    const snap = await contentRef.get();
+    if (!snap.exists || snap.data().user_id !== req.userId) {
+      return res.status(404).json({ error: 'Content not found' });
+    }
+    const data = snap.data();
+    const summary = data.promotion_summary || {};
+    // Fetch recent related platform tasks (best-effort)
+    let tasks = [];
+    try {
+      const taskSnap = await db.collection('promotion_tasks')
+        .where('contentId','==', req.params.id)
+        .orderBy('createdAt','desc')
+        .limit(10)
+        .get();
+      taskSnap.forEach(d => tasks.push({ id: d.id, type: d.data().type, platform: d.data().platform, status: d.data().status, reason: d.data().reason, createdAt: d.data().createdAt }));
+    } catch (_) {}
+    // Fetch recorded platform posts if any
+    let posts = [];
+    try {
+      const postSnap = await db.collection('platform_posts')
+        .where('contentId','==', req.params.id)
+        .orderBy('createdAt','desc')
+        .limit(10)
+        .get();
+      postSnap.forEach(d => posts.push({ id: d.id, platform: d.data().platform, success: d.data().success, createdAt: d.data().createdAt, externalId: d.data().externalId || null }));
+    } catch (_) {}
+    return res.json({
+      contentId: req.params.id,
+      youtube: data.youtube || null,
+      promotion_summary: summary,
+      tasks,
+      posts,
+      backgroundJobsEnabled: process.env.ENABLE_BACKGROUND_JOBS === 'true'
+    });
+  } catch (e) {
+    console.error('promotion-status error:', e.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
