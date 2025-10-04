@@ -285,13 +285,64 @@ app.get('/admin-dashboard', (req, res) => {
   }
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+// Health check endpoint (supports verbose diagnostics via ?verbose=1 or header x-health-verbose=1)
+app.get('/api/health', async (req, res) => {
+  const verbose = req.query.verbose === '1' || req.query.full === '1' || req.headers['x-health-verbose'] === '1';
+  const base = {
+    status: 'OK',
     message: 'AutoPromote Server is running',
-    timestamp: new Date().toISOString()
-  });
+    timestamp: new Date().toISOString(),
+    uptimeSec: Math.round(process.uptime()),
+  };
+  if (!verbose) return res.json(base);
+
+  // Collect extended diagnostics best-effort; failures should not break health.
+  const extended = { ...base, diagnostics: {} };
+  try {
+    const { db } = require('./firebaseAdmin');
+    const { getAllStatus } = require('./services/statusRecorder');
+    // System status docs (background workers)
+    extended.diagnostics.systemStatus = await getAllStatus(50);
+    // System counters (sample)
+    try {
+      const snap = await db.collection('system_counters').limit(100).get();
+      const counters = {};
+      snap.forEach(d => { const v = d.data(); counters[d.id] = v.value || 0; });
+      extended.diagnostics.counters = counters;
+    } catch (e) {
+      extended.diagnostics.countersError = e.message;
+    }
+    // Locks sample
+    try {
+      const lockSnap = await db.collection('system_locks').limit(50).get();
+      const now = Date.now();
+      const locks = [];
+      lockSnap.forEach(d => { const v = d.data() || {}; locks.push({ id: d.id, owner: v.owner, msRemaining: v.expiresAt ? v.expiresAt - now : null }); });
+      extended.diagnostics.locks = locks;
+    } catch (e) {
+      extended.diagnostics.locksError = e.message;
+    }
+    // Dead letter presence
+    try {
+      const dl = await db.collection('dead_letter_tasks').limit(1).get();
+      extended.diagnostics.deadLetterPresent = !dl.empty;
+    } catch (e) {
+      extended.diagnostics.deadLetterError = e.message;
+    }
+    // Promotion task backlog sample (pending count limited)
+    try {
+      const pendingSnap = await db.collection('promotion_tasks').where('status','==','pending').limit(25).get();
+      extended.diagnostics.taskSamplePending = pendingSnap.size;
+    } catch (e) {
+      extended.diagnostics.taskSampleError = e.message;
+    }
+    // Commit / version info (best-effort)
+    extended.diagnostics.version = process.env.GIT_COMMIT || process.env.COMMIT_HASH || process.env.VERCEL_GIT_COMMIT_SHA || null;
+    extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === 'true';
+  } catch (e) {
+    extended.diagnosticsError = e.message;
+  }
+  return res.json(extended);
 });
 
 
