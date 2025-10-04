@@ -22,6 +22,21 @@ router.get('/oauth/start', authMiddleware, async (req, res) => {
   }
 });
 
+// Prepare OAuth (returns JSON authUrl to allow frontend fetch + redirect with auth header)
+router.post('/oauth/prepare', authMiddleware, async (req, res) => {
+  try {
+    const clientId = process.env.TWITTER_CLIENT_ID;
+    const redirectUri = process.env.TWITTER_REDIRECT_URI;
+    if (!clientId || !redirectUri) return res.status(500).json({ error: 'twitter_client_config_missing' });
+    const { code_verifier, code_challenge } = generatePkcePair();
+    const state = await createAuthStateDoc({ uid: req.userId || req.user?.uid, code_verifier });
+    const authUrl = buildAuthUrl({ clientId, redirectUri, state, code_challenge });
+    return res.json({ authUrl, state });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
 // OAuth callback
 router.get('/oauth/callback', async (req, res) => {
   const { state, code, error } = req.query;
@@ -55,11 +70,23 @@ router.get('/connection/status', authMiddleware, async (req, res) => {
     const snap = await ref.get();
     if (!snap.exists) return res.json({ connected: false });
     const data = snap.data();
+    let identity = null;
+    try {
+      const token = await getValidAccessToken(req.userId);
+      if (token) {
+        const r = await fetch('https://api.twitter.com/2/users/me', { headers: { Authorization: `Bearer ${token}` } });
+        if (r.ok) {
+          const j = await r.json();
+            if (j?.data) identity = { id: j.data.id, name: j.data.name, username: j.data.username };
+        }
+      }
+    } catch (_) { /* ignore identity errors */ }
     res.json({
       connected: true,
       scope: data.scope,
       expires_at: data.expires_at || null,
-      willRefreshInMs: data.expires_at ? Math.max(0, data.expires_at - Date.now()) : null
+      willRefreshInMs: data.expires_at ? Math.max(0, data.expires_at - Date.now()) : null,
+      identity
     });
   } catch (e) {
     res.status(500).json({ error: e.message });

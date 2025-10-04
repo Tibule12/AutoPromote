@@ -24,6 +24,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [tiktokStatus, setTikTokStatus] = useState({ connected: false });
   const [facebookStatus, setFacebookStatus] = useState({ connected: false });
   const [youtubeStatus, setYouTubeStatus] = useState({ connected: false });
+  const [twitterStatus, setTwitterStatus] = useState({ connected: false });
 
   // Ensure content is an array to simplify rendering
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
@@ -83,10 +84,26 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     }
   };
 
+  // Load Twitter connection status
+  const loadTwitterStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setTwitterStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.TWITTER_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setTwitterStatus({ connected: false });
+      const data = await res.json();
+      setTwitterStatus({ connected: !!data.connected, identity: data.identity || null });
+    } catch (_) {
+      setTwitterStatus({ connected: false });
+    }
+  };
+
   useEffect(() => {
     loadTikTokStatus();
     loadFacebookStatus();
     loadYouTubeStatus();
+  loadTwitterStatus();
     // If coming back from OAuth, the URL may contain ?tiktok=connected
     const params = new URLSearchParams(window.location.search);
     if (params.get('tiktok')) {
@@ -105,6 +122,12 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     if (params.get('youtube')) {
       loadYouTubeStatus();
       params.delete('youtube');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+    if (params.get('twitter')) {
+      loadTwitterStatus();
+      params.delete('twitter');
       const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
       window.history.replaceState({}, '', url);
     }
@@ -244,6 +267,23 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       window.location.href = data.authUrl;
     } catch (e) {
       alert(e.message || 'Unable to start YouTube connect');
+    }
+  };
+
+  const handleConnectTwitter = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      const prep = await fetch(API_ENDPOINTS.TWITTER_AUTH_PREPARE, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${idToken}` }
+      });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Twitter OAuth');
+      window.location.href = data.authUrl;
+    } catch (e) {
+      alert(e.message || 'Unable to start Twitter connect');
     }
   };
 
@@ -424,6 +464,22 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
                   <>
                     <button className="check-quality" onClick={handleConnectYouTube}>Connect YouTube</button>
                     <span style={{color:'#9aa4b2'}}>Connect to upload videos directly.</span>
+                  </>
+                )}
+              </div>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center', marginTop: '.5rem'}}>
+                {twitterStatus.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>Twitter connected</span>
+                    {twitterStatus.identity?.username && (
+                      <span style={{color:'#9aa4b2'}}>@{twitterStatus.identity.username}</span>
+                    )}
+                    <button className="check-quality" onClick={handleConnectTwitter}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectTwitter}>Connect Twitter</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to enable tweeting & analytics.</span>
                   </>
                 )}
               </div>
