@@ -240,18 +240,35 @@ async function enqueuePlatformPostTask({ contentId, uid, platform, reason = 'man
 }
 
 async function processNextPlatformTask() {
+  // Fetch small batch of queued tasks then pick highest priority dynamically (velocity-aware)
   const snapshot = await db.collection('promotion_tasks')
     .where('type', '==', 'platform_post')
     .where('status', 'in', ['queued'])
     .orderBy('createdAt')
-    .limit(5)
+    .limit(10)
     .get();
   if (snapshot.empty) return null;
   let selectedDoc = null; let selectedData = null; const now = Date.now();
+  let bestScore = -Infinity;
   for (const d of snapshot.docs) {
     const data = d.data();
     const nextAt = data.nextAttemptAt ? Date.parse(data.nextAttemptAt) : Date.now();
-    if (nextAt <= now) { selectedDoc = d; selectedData = data; break; }
+    if (nextAt > now) continue; // not ready
+    // Dynamic priority heuristic: base 0 + youtube velocity if present on content + random tie breaker
+    let priority = 0;
+    try {
+      const cSnap = await db.collection('content').doc(data.contentId).get();
+      if (cSnap.exists) {
+        const cData = cSnap.data();
+        if (cData.youtube && typeof cData.youtube.velocity === 'number') {
+          priority += Math.min(cData.youtube.velocity, 1000); // cap contribution
+        }
+        // If content has high status add boost
+        if (cData.youtube && cData.youtube.velocityStatus === 'high') priority += 250;
+      }
+    } catch(_){}
+    priority += Math.random();
+    if (priority > bestScore) { bestScore = priority; selectedDoc = d; selectedData = data; }
   }
   if (!selectedDoc) return null;
   const task = { id: selectedDoc.id, ...selectedData };
@@ -272,13 +289,30 @@ async function processNextPlatformTask() {
       });
       return { taskId: task.id, deferredUntil: cooldownUntil, reason: 'rate_limit_cooldown' };
     }
+    // Variant rotation: if payload.variants array exists, select next based on existing post count
+    let payload = task.payload || {};
+    let selectedVariant = null;
+    if (Array.isArray(payload.variants) && payload.variants.length) {
+      try {
+        const prevPostsSnap = await db.collection('platform_posts')
+          .where('platform','==', task.platform)
+          .where('contentId','==', task.contentId)
+          .limit(50)
+          .get();
+        const count = prevPostsSnap.size;
+        const idx = count % payload.variants.length;
+        selectedVariant = payload.variants[idx];
+        payload = { ...payload, message: selectedVariant };
+      } catch(_){}
+    }
     const simulatedResult = await dispatchPlatformPost({
       platform: task.platform,
       contentId: task.contentId,
-      payload: task.payload,
+      payload,
       reason: task.reason,
       uid: task.uid
     });
+    if (selectedVariant) simulatedResult.usedVariant = selectedVariant;
     await selectedDoc.ref.update({
       status: 'completed',
       outcome: simulatedResult,
@@ -287,12 +321,12 @@ async function processNextPlatformTask() {
     });
     // Record persistent platform post (Phase 1)
     try {
-      await recordPlatformPost({
+        await recordPlatformPost({
         platform: task.platform,
         contentId: task.contentId,
         uid: task.uid,
         reason: task.reason,
-        payload: task.payload,
+          payload,
         outcome: simulatedResult,
         taskId: task.id,
         postHash: task.postHash
