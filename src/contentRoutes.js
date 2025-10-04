@@ -182,6 +182,17 @@ router.post('/upload', authMiddleware, sanitizeInput, validateContentData, valid
       }
       contentId = contentRef.id;
 
+      // Update revenue eligibility progress after each real upload
+      try {
+        const MIN_CONTENT_FOR_REVENUE = parseInt(process.env.MIN_CONTENT_FOR_REVENUE || '100', 10);
+        const countSnap = await db.collection('content').where('user_id','==', req.userId).select().get();
+        const total = countSnap.size;
+        const eligible = total >= MIN_CONTENT_FOR_REVENUE;
+        await db.collection('users').doc(req.userId).set({ revenueEligible: eligible, contentCount: total, requiredForRevenue: MIN_CONTENT_FOR_REVENUE }, { merge: true });
+      } catch (eligErr) {
+        console.log('⚠️ Could not update revenue eligibility:', eligErr.message);
+      }
+
       // Attempt to generate monetized landing page and smart link (best-effort)
       try {
         // Mark intent for functions to pickup (if callable functions are not wired here)
