@@ -7,6 +7,19 @@ const { enqueuePlatformPostTask } = require('../services/promotionTaskQueue');
 
 const router = express.Router();
 
+// Diagnostic: report whether required Twitter OAuth env vars are present
+router.get('/oauth/config', (req, res) => {
+  const clientId = process.env.TWITTER_CLIENT_ID || null;
+  const redirectUri = process.env.TWITTER_REDIRECT_URI || null;
+  return res.json({
+    ok: true,
+    hasClientId: !!clientId,
+    hasRedirectUri: !!redirectUri,
+    // Provide redirectUri for debugging (not sensitive); do not expose client secret here
+    redirectUri
+  });
+});
+
 // Start OAuth (PKCE)
 router.get('/oauth/start', authMiddleware, async (req, res) => {
   try {
