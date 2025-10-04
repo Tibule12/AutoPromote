@@ -4,20 +4,31 @@ const fetch = require('node-fetch');
 
 const region = 'us-central1';
 
-// TikTok OAuth config (must be set in environment variables)
-const TIKTOK_CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
-const TIKTOK_CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
-const TIKTOK_REDIRECT_URI = process.env.TIKTOK_REDIRECT_URI;
+// TikTok OAuth config with sandbox/production switching
+const TIKTOK_ENV = (process.env.TIKTOK_ENV || 'sandbox').toLowerCase() === 'production' ? 'production' : 'sandbox';
+const sandboxConfig = {
+  key: process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || null,
+  secret: process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || null,
+  redirect: process.env.TIKTOK_SANDBOX_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || null,
+};
+const productionConfig = {
+  key: process.env.TIKTOK_PROD_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || null,
+  secret: process.env.TIKTOK_PROD_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || null,
+  redirect: process.env.TIKTOK_PROD_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || null,
+};
+function activeConfig() { return TIKTOK_ENV === 'production' ? productionConfig : sandboxConfig; }
+const { key: TIKTOK_CLIENT_KEY, secret: TIKTOK_CLIENT_SECRET, redirect: TIKTOK_REDIRECT_URI } = activeConfig();
 
 if (!TIKTOK_CLIENT_KEY || !TIKTOK_CLIENT_SECRET || !TIKTOK_REDIRECT_URI) {
-  throw new Error('TikTok OAuth environment variables not set. Please set TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, and TIKTOK_REDIRECT_URI.');
+  throw new Error(`TikTok OAuth environment variables not set for mode ${TIKTOK_ENV}. Expected ${TIKTOK_ENV === 'production' ? 'TIKTOK_PROD_CLIENT_KEY/SECRET/REDIRECT_URI' : 'TIKTOK_SANDBOX_CLIENT_KEY/SECRET/REDIRECT_URI'} (or fallback TIKTOK_CLIENT_KEY/SECRET/REDIRECT_URI).`);
 }
 // 1. Generate TikTok OAuth URL
 exports.getTikTokAuthUrl = functions.region(region).https.onCall(async (data, context) => {
   const state = data.state || Math.random().toString(36).substring(2);
-  const scope = 'user.info.basic,video.list,video.upload';
+  // Keep function scope broad here; frontend route uses narrower initial scope
+  const scope = 'user.info.basic';
   const url = `https://www.tiktok.com/v2/auth/authorize/?client_key=${TIKTOK_CLIENT_KEY}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(TIKTOK_REDIRECT_URI)}&state=${state}`;
-  return { url };
+  return { url, mode: TIKTOK_ENV };
 });
 
 // 2. Handle TikTok OAuth callback and exchange code for access token
