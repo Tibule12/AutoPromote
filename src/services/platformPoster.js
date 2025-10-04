@@ -38,7 +38,13 @@ async function postToFacebook({ contentId, payload, reason }) {
   }
   const ctx = await buildContentContext(contentId);
   const messageBase = payload?.message || ctx.title || 'New content';
-  const link = payload?.link || ctx.landingPageUrl || '';
+  let link = payload?.link || ctx.landingPageUrl || '';
+  if (link) {
+    // Append attribution param if not already present
+    if (!/([?&])src=/.test(link)) {
+      link += (link.includes('?') ? '&' : '?') + 'src=fb&c=' + encodeURIComponent(contentId || '');
+    }
+  }
   const body = new URLSearchParams({ message: link ? `${messageBase}\n${link}` : messageBase, access_token: PAGE_TOKEN });
   const res = await fetch(`https://graph.facebook.com/${PAGE_ID}/feed`, { method: 'POST', body });
   const json = await safeJson(res);
@@ -64,7 +70,13 @@ async function postToTwitter({ contentId, payload, reason, uid }) {
   }
   if (!bearer) return { platform: 'twitter', simulated: true, reason: 'missing_credentials' };
   const ctx = await buildContentContext(contentId);
-  const text = (payload?.message || ctx.title || 'New content').slice(0, 270) + (ctx.landingPageUrl ? `\n${ctx.landingPageUrl}` : '');
+  let link = ctx.landingPageUrl || '';
+  if (link) {
+    if (!/([?&])src=/.test(link)) {
+      link += (link.includes('?') ? '&' : '?') + 'src=tw&c=' + encodeURIComponent(contentId || '');
+    }
+  }
+  const text = (payload?.message || ctx.title || 'New content').slice(0, 270) + (link ? `\n${link}` : '');
   const res = await fetch('https://api.twitter.com/2/tweets', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${bearer}`, 'Content-Type': 'application/json' },

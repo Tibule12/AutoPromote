@@ -125,6 +125,35 @@ async function processNextYouTubeTask() {
 // Enqueue a generic cross-platform promotion task (e.g., tiktok/instagram/twitter/facebook)
 async function enqueuePlatformPostTask({ contentId, uid, platform, reason = 'manual', payload = {}, skipIfDuplicate = true, forceRepost = false }) {
   if (!contentId || !uid || !platform) throw new Error('contentId, uid, platform required');
+  // Quota enforcement (monthly task quota based on plan)
+  try {
+    const userRef = db.collection('users').doc(uid);
+    const userSnap = await userRef.get();
+    const planTier = userSnap.exists && userSnap.data().plan ? (userSnap.data().plan.tier || userSnap.data().plan.id || 'free') : 'free';
+    const { getPlan } = require('./planService');
+    const plan = getPlan(planTier);
+    const quota = plan.monthlyTaskQuota || 0;
+    if (quota > 0) {
+      // Count tasks enqueued this calendar month
+      const now = new Date();
+      const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+      // Lightweight: sample up to quota+5 tasks to detect overage
+      const snap = await db.collection('promotion_tasks')
+        .where('uid','==', uid)
+        .where('createdAt','>=', monthStart)
+        .where('type','==','platform_post')
+        .limit(quota + 5)
+        .get();
+      const used = snap.size;
+      if (used >= quota) {
+        // Record overage event (best effort)
+        try { await db.collection('events').add({ type: 'task_quota_block', uid, plan: planTier, quota, createdAt: new Date().toISOString() }); } catch(_){ }
+        return { skipped: true, reason: 'quota_exceeded', platform, contentId, quota, plan: planTier };
+      }
+    }
+  } catch (qe) {
+    // Non-fatal; continue without blocking if quota check fails
+  }
   // Revenue eligibility gate: user must have >= MIN_CONTENT_FOR_REVENUE content docs to count for revenue
   const MIN_CONTENT_FOR_REVENUE = parseInt(process.env.MIN_CONTENT_FOR_REVENUE || '100', 10);
   try {
