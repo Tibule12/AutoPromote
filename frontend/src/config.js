@@ -46,6 +46,13 @@ export const API_ENDPOINTS = {
   INSTAGRAM_STATUS: `${API_BASE_URL}/api/instagram/status`,
   INSTAGRAM_UPLOAD: `${API_BASE_URL}/api/instagram/upload`,
 
+  // Twitter endpoints
+  TWITTER_AUTH_START: `${API_BASE_URL}/api/twitter/oauth/start`,
+  TWITTER_AUTH_PREPARE: `${API_BASE_URL}/api/twitter/oauth/prepare`,
+  TWITTER_STATUS: `${API_BASE_URL}/api/twitter/connection/status`,
+  TWITTER_TWEET_TEST: `${API_BASE_URL}/api/twitter/tweet/test`,
+  TWITTER_TWEET_IMMEDIATE: `${API_BASE_URL}/api/twitter/tweet/immediate`,
+
   // Schedule actions (construct with ID)
   SCHEDULE_PAUSE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/pause`,
   SCHEDULE_RESUME: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/resume`,
