@@ -214,3 +214,36 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
+// Plan endpoints (after exports intentionally for clarity if imported earlier)
+// Get available plans (public)
+router.get('/plans', async (req, res) => {
+  try {
+    const { getPlans } = require('./services/planService');
+    return res.json({ ok: true, plans: getPlans() });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
+// Get my plan
+router.get('/me/plan', authMiddleware, async (req, res) => {
+  try {
+    const snap = await db.collection('users').doc(req.userId).get();
+    const plan = snap.exists && snap.data().plan ? snap.data().plan : { tier: 'free', assignedAt: null };
+    return res.json({ ok: true, plan });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});
+
+// Assign / change my plan (temporary pseudo billing until Stripe integration)
+router.post('/me/plan', authMiddleware, async (req, res) => {
+  try {
+    const { tier } = req.body || {};
+    if (!tier) return res.status(400).json({ ok:false, error: 'tier required' });
+    const { getPlans } = require('./services/planService');
+    const plans = getPlans();
+    const found = plans.find(p => p.tier === tier);
+    if (!found) return res.status(400).json({ ok:false, error: 'unknown tier' });
+    const ref = db.collection('users').doc(req.userId);
+    await ref.set({ plan: { tier, assignedAt: new Date().toISOString(), pricing: { monthly: found.monthly || null } } }, { merge: true });
+    return res.json({ ok: true, plan: { tier, assignedAt: new Date().toISOString() } });
+  } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
+});

@@ -376,7 +376,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
     if (!isDryRun) {
       recordEvent('content_uploaded', { userId: req.userId, contentId: content.id, payload: { title, type, target_platforms } });
     }
-    if (!isDryRun && autoPromote && typeof autoPromote === 'object') {
+  if (!isDryRun && autoPromote && typeof autoPromote === 'object') {
       const backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === 'true';
       // Helper safe update of promotion_summary on content doc
       async function persistSummary() {
@@ -421,28 +421,59 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
         }
       }
 
-      // 2. Twitter enqueue (queue will process if background jobs enabled; otherwise pending)
+      // 2. Twitter promotion (immediate or queued)
       if (autoPromote.twitter && (autoPromote.twitter.enabled !== false)) {
-        autoPromotionResults.twitter = { requested: true };
+        const immediate = !!autoPromote.twitter.immediate;
+        autoPromotionResults.twitter = { requested: true, immediate };
         try {
           const twitterConnSnap = await db.collection('users').doc(req.userId).collection('connections').doc('twitter').get();
           if (!twitterConnSnap.exists) {
-            autoPromotionResults.twitter = { requested: true, skipped: true, reason: 'not_connected' };
+            autoPromotionResults.twitter = { requested: true, skipped: true, reason: 'not_connected', immediate };
           } else {
-            const { enqueuePlatformPostTask } = require('./services/promotionTaskQueue');
             const message = (autoPromote.twitter.message || title || 'New content').slice(0, 260);
             const link = autoPromote.twitter.link || content.url || null;
-            const enqueueRes = await enqueuePlatformPostTask({
-              contentId: content.id,
-              uid: req.userId,
-              platform: 'twitter',
-              reason: 'post_upload',
-              payload: { message, link },
-              skipIfDuplicate: autoPromote.twitter.skipIfDuplicate !== false,
-              forceRepost: !!autoPromote.twitter.forceRepost
-            });
-            autoPromotionResults.twitter = { requested: true, queued: !enqueueRes.skipped, ...enqueueRes, backgroundJobsEnabled };
-            recordEvent('platform_post_enqueued', { userId: req.userId, contentId: content.id, payload: { platform: 'twitter', queued: !enqueueRes.skipped, reason: 'post_upload' } });
+            if (immediate) {
+              // Direct post path
+              try {
+                const { dispatchPlatformPost } = require('./services/platformPoster');
+                const directRes = await dispatchPlatformPost({ platform: 'twitter', contentId: content.id, payload: { message, link }, reason: 'post_upload_immediate', uid: req.userId });
+                autoPromotionResults.twitter = { requested: true, immediate: true, posted: directRes.success !== false, outcome: directRes };
+                recordEvent('platform_post_immediate', { userId: req.userId, contentId: content.id, payload: { platform: 'twitter', success: directRes.success !== false } });
+              } catch (e) {
+                autoPromotionResults.twitter = { requested: true, immediate: true, posted: false, error: e.message };
+              }
+            } else {
+              const { enqueuePlatformPostTask, processNextPlatformTask } = require('./services/promotionTaskQueue');
+              const enqueueRes = await enqueuePlatformPostTask({
+                contentId: content.id,
+                uid: req.userId,
+                platform: 'twitter',
+                reason: 'post_upload',
+                payload: { message, link },
+                skipIfDuplicate: autoPromote.twitter.skipIfDuplicate !== false,
+                forceRepost: !!autoPromote.twitter.forceRepost
+              });
+              autoPromotionResults.twitter = { requested: true, immediate: false, queued: !enqueueRes.skipped, ...enqueueRes, backgroundJobsEnabled };
+              recordEvent('platform_post_enqueued', { userId: req.userId, contentId: content.id, payload: { platform: 'twitter', queued: !enqueueRes.skipped, reason: 'post_upload' } });
+              // Inline processing fallback if background disabled
+              if (!backgroundJobsEnabled && !enqueueRes.skipped && enqueueRes.id) {
+                try {
+                  let loops = 0; let processed = [];
+                  while (loops < 3) { // limit safeguards
+                    loops++;
+                    const p = await processNextPlatformTask();
+                    if (!p) break;
+                    processed.push(p);
+                  }
+                  if (processed.length) {
+                    autoPromotionResults.twitter.inlineProcessed = true;
+                    recordEvent('platform_post_processed_inline', { userId: req.userId, contentId: content.id, payload: { platform: 'twitter', processed: processed.length } });
+                  }
+                } catch (inlineErr) {
+                  autoPromotionResults.twitter.inlineProcessError = inlineErr.message;
+                }
+              }
+            }
           }
         } catch (e) {
           autoPromotionResults.twitter = { requested: true, queued: false, error: e.message };
