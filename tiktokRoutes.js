@@ -5,6 +5,7 @@ const fetch = require('node-fetch');
 const router = express.Router();
 const authMiddleware = require('./authMiddleware');
 const { admin, db } = require('./firebaseAdmin');
+const DEBUG_TIKTOK_OAUTH = process.env.DEBUG_TIKTOK_OAUTH === 'true';
 
 // Mode selection: defaults to sandbox unless explicitly set to 'production'
 const TIKTOK_ENV = (process.env.TIKTOK_ENV || 'sandbox').toLowerCase() === 'production' ? 'production' : 'sandbox';
@@ -96,11 +97,18 @@ router.post('/auth/prepare', async (req, res) => {
       state,
       nonce,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      mode: TIKTOK_ENV
     }, { merge: true });
     const scope = 'user.info.basic';
     const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(cfg.key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(cfg.redirect)}&state=${encodeURIComponent(state)}`;
+    // Store authUrl for debugging (non-sensitive)
+    await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({ lastAuthUrl: authUrl }, { merge: true });
+    if (DEBUG_TIKTOK_OAUTH) {
+      console.log('[TikTok][prepare] uid=%s mode=%s state=%s authUrl=%s', uid, TIKTOK_ENV, state, authUrl);
+    }
     return res.json({ authUrl, mode: TIKTOK_ENV });
   } catch (e) {
+    if (DEBUG_TIKTOK_OAUTH) console.error('[TikTok][prepare][error]', e);
     return res.status(500).json({ error: 'Failed to prepare TikTok OAuth' });
   }
 });
@@ -159,7 +167,13 @@ router.get('/callback', async (req, res) => {
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   const { code, state } = req.query;
-  if (!code || !state) return res.status(400).send('Missing code or state');
+  if (DEBUG_TIKTOK_OAUTH) {
+    console.log('[TikTok][callback] rawQuery', req.query);
+  }
+  if (!code || !state) {
+    if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] Missing code/state. query=%o url=%s', req.query, req.originalUrl);
+    return res.status(400).send('Missing code or state');
+  }
   try {
     const [uid, nonce] = String(state).split('.');
     if (!uid || !nonce) return res.status(400).send('Invalid state');
@@ -182,6 +196,7 @@ router.get('/callback', async (req, res) => {
     });
     const tokenData = await tokenRes.json();
     if (!tokenRes.ok || !tokenData.access_token) {
+      if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] token exchange failed status=%s body=%o', tokenRes.status, tokenData);
       return res.status(400).send('Failed to get TikTok access token');
     }
     // Store tokens securely under user
@@ -196,11 +211,13 @@ router.get('/callback', async (req, res) => {
       mode: TIKTOK_ENV,
       obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
+    if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s open_id=%s scope=%s', uid, tokenData.open_id, tokenData.scope);
     // redirect back to dashboard with success
     const url = new URL(DASHBOARD_URL);
     url.searchParams.set('tiktok', 'connected');
     res.redirect(url.toString());
   } catch (err) {
+    if (DEBUG_TIKTOK_OAUTH) console.error('[TikTok][callback][error]', err);
     try {
       const url = new URL(DASHBOARD_URL);
       url.searchParams.set('tiktok', 'error');
@@ -250,6 +267,21 @@ router.get('/status', authMiddleware, async (req, res) => {
     return res.json(result);
   } catch (e) {
     return res.status(500).json({ connected: false, error: 'Failed to load TikTok status' });
+  }
+});
+
+// Debug endpoint: show last prepared state and auth URL (auth required)
+router.get('/debug/state', authMiddleware, async (req, res) => {
+  if (!DEBUG_TIKTOK_OAUTH) return res.status(404).json({ error: 'debug_disabled' });
+  try {
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+    const doc = await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').get();
+    if (!doc.exists) return res.json({ exists: false });
+    const data = doc.data();
+    res.json({ exists: true, state: data.state, mode: data.mode, lastAuthUrl: data.lastAuthUrl, createdAt: data.createdAt });
+  } catch (e) {
+    res.status(500).json({ error: 'debug_state_failed' });
   }
 });
 
