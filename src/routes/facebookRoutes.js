@@ -176,15 +176,28 @@ router.get('/callback', async (req, res) => {
     }
 
     if (uidFromState) {
-      await db.collection('users').doc(uidFromState).collection('connections').doc('facebook').set({
+      let stored = {
         provider: 'facebook',
-        user_access_token: tokenData.access_token,
         token_type: tokenData.token_type,
         expires_in: tokenData.expires_in,
         pages,
         ig_business_account_id: igBusinessAccountId,
         obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
-      }, { merge: true });
+      };
+      try {
+        const { encryptToken, hasEncryption } = require('../services/secretVault');
+        if (hasEncryption()) {
+          stored.encrypted_user_access_token = encryptToken(tokenData.access_token);
+          stored.user_access_token = admin.firestore.FieldValue.delete();
+          stored.hasEncryption = true;
+        } else {
+          stored.user_access_token = tokenData.access_token;
+          stored.hasEncryption = false;
+        }
+      } catch (e) {
+        stored.user_access_token = tokenData.access_token; // fallback
+      }
+      await db.collection('users').doc(uidFromState).collection('connections').doc('facebook').set(stored, { merge: true });
       const url = new URL(DASHBOARD_URL);
       url.searchParams.set('facebook', 'connected');
       return res.redirect(url.toString());
@@ -208,6 +221,15 @@ router.get('/status', authMiddleware, async (req, res) => {
     const snap = await db.collection('users').doc(uid).collection('connections').doc('facebook').get();
     if (!snap.exists) return res.json({ connected: false });
     const data = snap.data();
+    // Lazy migrate plaintext token to encrypted if key now present
+    if (data.user_access_token && !data.encrypted_user_access_token) {
+      try {
+        const { encryptToken, hasEncryption } = require('../services/secretVault');
+        if (hasEncryption()) {
+          await snap.ref.set({ encrypted_user_access_token: encryptToken(data.user_access_token), user_access_token: admin.firestore.FieldValue.delete(), hasEncryption: true }, { merge: true });
+        }
+      } catch (_) { /* ignore */ }
+    }
     const out = {
       connected: true,
       pages: (data.pages || []).map(p => ({ id: p.id, name: p.name })),
