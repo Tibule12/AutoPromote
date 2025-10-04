@@ -9,13 +9,24 @@ if (bypass) {
     admin = require('firebase-admin');
     const adminConfig = require('./firebaseConfig.server.js');
     if (admin.apps.length === 0) {
-        admin.initializeApp({
-            credential: admin.credential.cert(adminConfig),
-            databaseURL: process.env.FIREBASE_DATABASE_URL || '',
-            storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
-            projectId: process.env.FIREBASE_PROJECT_ID || ''
-        });
-        console.log('✅ Firebase Admin initialized with server config');
+        // Validate minimal required fields before attempting init to produce more actionable error.
+        const required = ['project_id','private_key','client_email'];
+        const missing = required.filter(k => !adminConfig[k] || typeof adminConfig[k] !== 'string' || !adminConfig[k].trim());
+        if (missing.length) {
+            throw new Error(`Firebase Admin missing required fields: ${missing.join(', ')}. Provide either FIREBASE_SERVICE_ACCOUNT_JSON / FIREBASE_SERVICE_ACCOUNT_BASE64 or individual FIREBASE_* vars.`);
+        }
+        try {
+            admin.initializeApp({
+                credential: admin.credential.cert(adminConfig),
+                databaseURL: process.env.FIREBASE_DATABASE_URL || '',
+                storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
+                projectId: process.env.FIREBASE_PROJECT_ID || adminConfig.project_id
+            });
+            console.log('✅ Firebase Admin initialized with server config');
+        } catch (e) {
+            console.error('[firebaseAdmin] Initialization failed:', e.message);
+            throw e;
+        }
     }
     db = admin.firestore();
 }
