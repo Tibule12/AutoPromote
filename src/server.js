@@ -30,6 +30,7 @@ try {
 
 // Load social routers
 let facebookRoutes, youtubeRoutes, instagramRoutes, twitterAuthRoutes;
+let platformConnectionsRoutes;
 try {
   facebookRoutes = require('./routes/facebookRoutes');
   console.log('✅ Facebook routes loaded');
@@ -50,6 +51,13 @@ try {
 } catch (e) {
   console.log('⚠️ Twitter auth routes not found:', e.message);
   twitterAuthRoutes = express.Router();
+}
+try {
+  platformConnectionsRoutes = require('./routes/platformConnectionsRoutes');
+  console.log('✅ Platform connections routes loaded');
+} catch (e) {
+  console.log('⚠️ Platform connections routes not found:', e.message);
+  platformConnectionsRoutes = express.Router();
 }
 try {
   promotionTaskRoutes = require('./routes/promotionTaskRoutes');
@@ -153,6 +161,8 @@ app.use('/api/youtube', youtubeRoutes);
 console.log('🚏 YouTube routes mounted at /api/youtube');
 app.use('/api/twitter', twitterAuthRoutes);
 console.log('🚏 Twitter routes mounted at /api/twitter');
+app.use('/api/platform', platformConnectionsRoutes);
+console.log('🚏 Platform connections routes mounted at /api/platform');
 app.use('/api/promotion-tasks', promotionTaskRoutes);
 console.log('🚏 Promotion task routes mounted at /api/promotion-tasks');
 app.use('/api/metrics', metricsRoutes);
