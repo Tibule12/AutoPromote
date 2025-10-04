@@ -145,12 +145,31 @@ router.get('/callback', async (req, res) => {
     } catch (_) {}
 
     if (uidFromState) {
-      await db.collection('users').doc(uidFromState).collection('connections').doc('youtube').set({
+      const stored = {
         provider: 'youtube',
-        ...tokenData,
         channel,
-        obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
-      }, { merge: true });
+        obtainedAt: admin.firestore.FieldValue.serverTimestamp()
+      };
+      try {
+        const { encryptToken, hasEncryption } = require('../services/secretVault');
+        // tokenData may contain: access_token, refresh_token, scope, token_type, expires_in, id_token
+        const copyWhitelist = ['scope','token_type','expires_in'];
+        copyWhitelist.forEach(k => { if (tokenData[k] !== undefined) stored[k] = tokenData[k]; });
+        if (hasEncryption()) {
+          if (tokenData.access_token) stored.encrypted_access_token = encryptToken(tokenData.access_token);
+          if (tokenData.refresh_token) stored.encrypted_refresh_token = encryptToken(tokenData.refresh_token);
+          stored.hasEncryption = true;
+        } else {
+          if (tokenData.access_token) stored.access_token = tokenData.access_token;
+          if (tokenData.refresh_token) stored.refresh_token = tokenData.refresh_token;
+          stored.hasEncryption = false;
+        }
+      } catch (e) {
+        // fallback raw store
+        if (tokenData.access_token) stored.access_token = tokenData.access_token;
+        if (tokenData.refresh_token) stored.refresh_token = tokenData.refresh_token;
+      }
+      await db.collection('users').doc(uidFromState).collection('connections').doc('youtube').set(stored, { merge: true });
       const url = new URL(DASHBOARD_URL);
       url.searchParams.set('youtube', 'connected');
       return res.redirect(url.toString());
