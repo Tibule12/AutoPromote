@@ -121,6 +121,7 @@ Property verification (if requested):
 | `/api/metrics/usage/current` | GET | User monthly usage vs quota & overage |
 | `/api/metrics/usage/summary` | GET | Aggregated ledger totals (tasks, subscription, overage) |
 | `/api/metrics/variants/prune` | POST | Prunes underperforming variants |
+| GET | `/api/content/:id/captions/raw?format=srt|vtt` | Download raw caption text (SRT or VTT) |
 
 ## Backfill Script
 
