@@ -69,6 +69,31 @@ const { db, auth, storage } = require('./firebaseAdmin');
 const app = express();
 // Request context (requestId, timing)
 try { app.use(require('./src/middlewares/requestContext')); } catch(_) { /* optional */ }
+// Lightweight latency profiler & slow request logger (only logs > SLOW_REQ_MS)
+const SLOW_REQ_MS = parseInt(process.env.SLOW_REQ_MS || '3000', 10);
+app.use((req,res,next)=>{
+  const start = Date.now();
+  res.once('finish', () => {
+    const dur = Date.now() - start;
+    if (dur >= SLOW_REQ_MS) {
+      console.warn(`[slow] ${req.method} ${req.originalUrl} ${dur}ms status=${res.statusCode} requestId=${req.requestId||'-'}`);
+    }
+  });
+  next();
+});
+
+// One-time startup reminder for missing security envs (mirrors envValidator warnings but at runtime here)
+setTimeout(() => {
+  const missing = [];
+  if (!process.env.SESSION_SECRET) missing.push('SESSION_SECRET');
+  if (!process.env.JWT_AUDIENCE) missing.push('JWT_AUDIENCE');
+  if (!process.env.JWT_ISSUER) missing.push('JWT_ISSUER');
+  if (!process.env.RATE_LIMIT_GLOBAL_MAX) missing.push('RATE_LIMIT_GLOBAL_MAX');
+  if (missing.length) {
+    console.warn('[startup] Missing recommended env vars:', missing.join(', '));
+    console.warn('  Add them in Render dashboard -> Environment, then redeploy.');
+  }
+}, 1500);
 const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
 
 app.use(cors({
@@ -233,6 +258,9 @@ const server = app.listen(PORT, () => {
   console.log(`🚀 AutoPromote Server is running on port ${PORT}`);
   console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
   console.log(`🔗 API endpoints available at: http://localhost:${PORT}/api/`);
+  if (process.env.ENABLE_BACKGROUND_JOBS !== 'true') {
+    console.log('ℹ️ Background jobs DISABLED. Set ENABLE_BACKGROUND_JOBS=true to activate autonomous tuning/regeneration.');
+  }
 }).on('error', (err) => {
   console.log('❌ Server startup error:', err.message);
   if (err.code === 'EADDRINUSE') {
