@@ -34,6 +34,24 @@ function getLatencyStats(){
   return { count: sorted.length, avg: Math.round(avg), p50, p90, p95, p99, max: sorted[sorted.length-1] };
 }
 
+// Startup warm-up state (readiness gate)
+const __warmupState = { started:false, done:false, error:null, tookMs:null, at:null };
+async function runWarmup(){
+  if (__warmupState.started) return; __warmupState.started = true; const t0 = Date.now();
+  try {
+    const tasks = [];
+    try { const { db } = require('./firebaseAdmin');
+      // Light queries to warm Firestore indexes
+      tasks.push(db.collection('promotion_tasks').limit(1).get().catch(()=>null));
+      tasks.push(db.collection('content').orderBy('createdAt','desc').limit(1).get().catch(()=>null));
+      tasks.push(db.collection('system_counters').limit(3).get().catch(()=>null));
+    } catch(e) { /* ignore */ }
+    await Promise.all(tasks);
+    __warmupState.done = true;
+  } catch(e){ __warmupState.error = e.message; __warmupState.done = true; }
+  __warmupState.tookMs = Date.now() - t0; __warmupState.at = new Date().toISOString();
+}
+
 function printMissingEnvOnce() {
   if (__printedStartupMissing) return;
   const missing = [];
@@ -81,6 +99,7 @@ let tiktokRoutes;
 let notificationsRoutes;
 let captionsRoutes;
 let adminCacheRoutes;
+let adminOpsRoutes;
 try {
   tiktokRoutes = require('../tiktokRoutes'); // use top-level tiktokRoutes which includes auth + storage
   console.log('✅ Using top-level tiktokRoutes.js');
@@ -282,6 +301,10 @@ try {
   adminAlertsRoutes = require('./routes/adminAlertsRoutes');
   console.log('✅ Admin alerts routes loaded');
 } catch(e) { adminAlertsRoutes = express.Router(); console.log('⚠️ Admin alerts routes not found'); }
+try {
+  adminOpsRoutes = require('./routes/adminOpsRoutes');
+  console.log('✅ Admin ops routes loaded');
+} catch(e) { adminOpsRoutes = express.Router(); console.log('⚠️ Admin ops routes not found'); }
 
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
@@ -380,6 +403,7 @@ app.use('/api/admin/config', adminConfigRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
 app.use('/api/admin/bandit', adminBanditRoutes);
 app.use('/api/admin/alerts', adminAlertsRoutes);
+app.use('/api/admin/ops', adminOpsRoutes);
 
 // Serve site verification and other well-known files
 // 1) Try root-level /public/.well-known
@@ -482,6 +506,16 @@ app.get('/api/ping', (_req,res) => {
   return res.json({ ok:true, ts: Date.now() });
 });
 
+// Readiness endpoint (503 until warm-up completes unless disabled)
+const READINESS_REQUIRE_WARMUP = process.env.READINESS_REQUIRE_WARMUP !== 'false';
+app.get('/api/ready', (_req,res) => {
+  if (!READINESS_REQUIRE_WARMUP) return res.json({ ready:true, disabled:true });
+  if (!__warmupState.started) return res.status(503).json({ ready:false, state:'not_started' });
+  if (!__warmupState.done) return res.status(503).json({ ready:false, state:'warming' });
+  if (__warmupState.error) return res.json({ ready:true, warning: __warmupState.error, tookMs: __warmupState.tookMs });
+  return res.json({ ready:true, tookMs: __warmupState.tookMs, at: __warmupState.at });
+});
+
 // Cache extended diagnostics to avoid repeated heavy Firestore queries.
 let __healthCache = { ts:0, data:null };
 const HEALTH_CACHE_MS = parseInt(process.env.HEALTH_CACHE_MS || '15000',10); // 15s default
@@ -539,6 +573,8 @@ app.get('/api/health', async (req, res) => {
     }
       // Latency stats (in-memory only, reset on deploy)
       try { extended.diagnostics.latency = getLatencyStats(); } catch(_){ }
+    // Warm-up status
+    extended.diagnostics.warmup = { started: __warmupState.started, done: __warmupState.done, error: __warmupState.error, tookMs: __warmupState.tookMs };
     // Commit / version info (best-effort)
     extended.diagnostics.version = process.env.GIT_COMMIT || process.env.COMMIT_HASH || process.env.VERCEL_GIT_COMMIT_SHA || null;
     extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === 'true';
@@ -769,6 +805,19 @@ if (ENABLE_BACKGROUND) {
   setInterval(electLeader, parseInt(process.env.LEADER_ELECTION_INTERVAL_MS || '45000',10)).unref();
 }
 
+// Expose leader control globally for admin routes
+global.__bgLeader = {
+  isLeader: () => __isLeader,
+  relinquish: async () => {
+    try {
+      const { db } = require('./firebaseAdmin');
+      await db.collection('system_locks').doc('bg_leader').delete().catch(()=>{});
+      __isLeader = false; console.log('[leader] relinquished manually via admin endpoint');
+      return true;
+    } catch(e){ console.warn('[leader] relinquish failed:', e.message); return false; }
+  }
+};
+
 if (ENABLE_BACKGROUND) {
   console.log('🛠  Background job runner enabled.');
   try {
@@ -952,9 +1001,32 @@ if (ENABLE_BACKGROUND) {
         try { const r = await runAlertChecks(); if (r.exploration.alerted || r.diversity.alerted) console.log('[BG][alerts] alerts dispatched'); } catch(e){ console.warn('[BG][alerts] error:', e.message); }
       }, ALERT_CHECK_INTERVAL_MS);
     } catch(e) { console.log('[BG][alerts] skipped:', e.message); }
+
+    // Latency snapshot persistence (leader only)
+    const LAT_SNAPSHOT_INTERVAL_MS = parseInt(process.env.LAT_SNAPSHOT_INTERVAL_MS || '60000', 10);
+    leaderInterval(async () => {
+      const stats = getLatencyStats(); if (!stats.count) return;
+      try {
+        await db.collection('system_latency_snapshots').add({ at: Date.now(), stats });
+        // Prune older docs beyond 200
+        const snap = await db.collection('system_latency_snapshots').orderBy('at','asc').get();
+        if (snap.size > 220) {
+          const excess = snap.docs.slice(0, snap.size - 200);
+          const batch = db.batch(); excess.forEach(d => batch.delete(d.ref)); await batch.commit();
+        }
+      } catch(e){ console.warn('[BG][latency-snapshot] error:', e.message); }
+    }, LAT_SNAPSHOT_INTERVAL_MS);
   } catch (e) {
     console.warn('⚠️ Background job initialization failed:', e.message);
   }
 } else {
   console.log('ℹ️ Background job runner disabled (set ENABLE_BACKGROUND_JOBS=true to enable).');
 }
+
+// Kick off warmup asynchronously after server start
+setTimeout(runWarmup, 50);
+
+// Export selected internals for routes/tests (avoid breaking existing behavior)
+module.exports.getLatencyStats = getLatencyStats;
+module.exports.runWarmup = runWarmup;
+module.exports.__warmupState = () => ({ ...__warmupState });
