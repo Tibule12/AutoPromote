@@ -118,6 +118,8 @@ let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes;
 let shortlinkRoutes;
 let billingRoutes;
 let paymentsStatusRoutes;
+let paymentsExtendedRoutes;
+let paypalWebhookRoutes;
 try {
   withdrawalRoutes = require('./routes/withdrawalRoutes');
 } catch (error) {
@@ -156,6 +158,14 @@ try {
   paymentsStatusRoutes = require('./routes/paymentsStatusRoutes');
   console.log('✅ Payments status routes loaded');
 } catch (e) { paymentsStatusRoutes = express.Router(); }
+try {
+  paymentsExtendedRoutes = require('./routes/paymentsExtendedRoutes');
+  console.log('✅ Payments extended routes loaded');
+} catch (e) { paymentsExtendedRoutes = express.Router(); }
+try {
+  paypalWebhookRoutes = require('./routes/paypalWebhookRoutes');
+  console.log('✅ PayPal webhook routes loaded');
+} catch (e) { paypalWebhookRoutes = express.Router(); }
 
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
@@ -229,6 +239,8 @@ app.use('/api/stripe', stripeOnboardRoutes);
 app.use('/s', shortlinkRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/payments', paymentsStatusRoutes);
+app.use('/api/payments', paymentsExtendedRoutes);
+app.use('/api/paypal', paypalWebhookRoutes);
 
 // Serve site verification and other well-known files
 // 1) Try root-level /public/.well-known
