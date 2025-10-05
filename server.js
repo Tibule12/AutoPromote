@@ -32,7 +32,7 @@ try {
 }
 
 // Try to load optional route modules
-let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes, paymentsStatusRoutes, paymentsExtendedRoutes;
+let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes, paymentsStatusRoutes, paymentsExtendedRoutes, notificationsRoutes, profileDefaultsRoutes;
 try {
   withdrawalRoutes = require('./routes/withdrawalRoutes');
 } catch (error) {
@@ -59,6 +59,8 @@ try {
 
 try { paymentsStatusRoutes = require('./src/routes/paymentsStatusRoutes'); } catch(e) { try { paymentsStatusRoutes = require('./routes/paymentsStatusRoutes'); } catch(_) { paymentsStatusRoutes = express.Router(); } }
 try { paymentsExtendedRoutes = require('./src/routes/paymentsExtendedRoutes'); } catch(e) { try { paymentsExtendedRoutes = require('./routes/paymentsExtendedRoutes'); } catch(_) { paymentsExtendedRoutes = express.Router(); } }
+try { notificationsRoutes = require('./src/routes/notificationsRoutes'); } catch(e) { notificationsRoutes = express.Router(); }
+try { profileDefaultsRoutes = require('./src/routes/profileDefaultsRoutes'); } catch(e) { profileDefaultsRoutes = express.Router(); }
 
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
@@ -92,6 +94,8 @@ app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
 app.use('/api/payments', paymentsStatusRoutes); // /status + dev mocks
 app.use('/api/payments', paymentsExtendedRoutes); // /balance /plans /admin/overview
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/profile', profileDefaultsRoutes);
 
 // Serve well-known static files (e.g., TikTok site verification) from /public/.well-known
 const wellKnownDir = path.join(__dirname, 'public', '.well-known');

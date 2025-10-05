@@ -266,10 +266,37 @@ node scripts/checkFirebaseCredentials.js
 
 Supports JSON path, raw JSON, base64 JSON, or individual FIREBASE_* key fields.
 
+## Notifications API (MVP)
+
+Endpoints:
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/notifications` | List recent notifications (default 50, `?limit=` up to 100) |
+| POST | `/api/notifications/:id/read` | Mark a single notification read |
+| POST | `/api/notifications/read-all` | Mark all unread (≤200) notifications as read |
+
+Notification documents (`notifications` collection) store: `user_id`, `type`, `title`, `message`, `created_at`, `read`.
+
+## Profile Defaults API
+
+Endpoints:
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/profile/defaults` | Fetch the user's current defaults |
+| POST | `/api/profile/defaults` | Merge provided defaults |
+
+Accepted fields (all optional):
+`timezone` (e.g. `UTC`), `preferredPlatforms` (string[]), `postingWindow` ({ start:"HH:MM", end:"HH:MM", timezone? }), `maxDailyUploads` (number), `variantStrategy` (e.g. `bandit` / `rotation`).
+
+Upload Auto-Enrichment:
+- If no `schedule_hint` sent and a `postingWindow.start` exists, server sets next occurrence as a one-off schedule hint.
+- If `variantStrategy` stored and content upload lacks `variant_strategy`, it is applied to the content document.
+
+
 
 1) Wire landing page + smart link generation into upload/approval and save to content doc
-2) Add notifications MVP (Firestore collection, optional email)
-3) Add user profile defaults API and use for better schedule_hint generation
+2) Add notifications MVP (Firestore collection, optional email) ✅ basic API
+3) Add user profile defaults API and use for better schedule_hint generation ✅ initial implementation
 4) Minimal admin UI screens for moderation and analytics
 5) Promotion service naming cleanup (remove legacy artifacts)
 
