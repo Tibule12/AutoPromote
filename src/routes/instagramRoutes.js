@@ -8,19 +8,15 @@ const router = express.Router();
 router.get('/health', (req, res) => res.json({ ok: true }));
 
 // Instagram relies on Facebook connection to get IG Business Account ID
-router.get('/status', authMiddleware, async (req, res) => {
-  try {
-    const uid = req.userId || req.user?.uid;
-    const fbSnap = await db.collection('users').doc(uid).collection('connections').doc('facebook').get();
-    if (!fbSnap.exists) return res.json({ connected: false });
-    const data = fbSnap.data();
-    const pages = Array.isArray(data.pages) ? data.pages : [];
-    const pageSummary = pages.map(p => ({ id: p.id, name: p.name, has_ig: !!data.ig_business_account_id }));
-    return res.json({ connected: true, ig_business_account_id: data.ig_business_account_id || null, pages: pageSummary });
-  } catch (e) {
-    return res.status(500).json({ connected: false, error: 'Failed to load IG status' });
-  }
-});
+router.get('/status', authMiddleware, require('../statusInstrument')('instagramStatus', async (req, res) => {
+  const uid = req.userId || req.user?.uid;
+  const fbSnap = await db.collection('users').doc(uid).collection('connections').doc('facebook').get();
+  if (!fbSnap.exists) return res.json({ connected: false });
+  const data = fbSnap.data();
+  const pages = Array.isArray(data.pages) ? data.pages : [];
+  const pageSummary = pages.map(p => ({ id: p.id, name: p.name, has_ig: !!data.ig_business_account_id }));
+  return res.json({ connected: true, ig_business_account_id: data.ig_business_account_id || null, pages: pageSummary });
+}));
 
 // Upload an image or reel to Instagram via IG Graph API
 router.post('/upload', authMiddleware, async (req, res) => {

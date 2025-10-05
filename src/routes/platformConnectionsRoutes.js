@@ -27,25 +27,20 @@ async function getConn(uid, name) {
   } catch (_) { return { connected: false, error: 'lookup_failed' }; }
 }
 
-router.get('/status', authMiddleware, async (req, res) => {
-  try {
-    const [twitter, youtube, facebook, tiktok] = await Promise.all([
-      getConn(req.userId, 'twitter'),
-      getConn(req.userId, 'youtube'),
-      getConn(req.userId, 'facebook'),
-      getConn(req.userId, 'tiktok')
-    ]);
-    // Derive high-level summary fields
-    const summary = {
-      twitter: { connected: twitter.connected, username: twitter.identity?.username },
-      youtube: { connected: youtube.connected, channelTitle: youtube.channel?.snippet?.title },
-      facebook: { connected: facebook.connected, pages: Array.isArray(facebook.pages) ? facebook.pages.map(p=>p.name).slice(0,3) : [] },
-      tiktok: { connected: tiktok.connected, display_name: tiktok.display_name }
-    };
+router.get('/status', authMiddleware, require('../statusInstrument')('platformConnectionsStatus', async (req, res) => {
+  const [twitter, youtube, facebook, tiktok] = await Promise.all([
+    getConn(req.userId, 'twitter'),
+    getConn(req.userId, 'youtube'),
+    getConn(req.userId, 'facebook'),
+    getConn(req.userId, 'tiktok')
+  ]);
+  const summary = {
+    twitter: { connected: twitter.connected, username: twitter.identity?.username },
+    youtube: { connected: youtube.connected, channelTitle: youtube.channel?.snippet?.title },
+    facebook: { connected: facebook.connected, pages: Array.isArray(facebook.pages) ? facebook.pages.map(p=>p.name).slice(0,3) : [] },
+    tiktok: { connected: tiktok.connected, display_name: tiktok.display_name }
+  };
   res.json({ ok: true, summary, raw: { twitter, youtube, facebook, tiktok } });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+}));
 
 module.exports = router;

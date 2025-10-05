@@ -215,31 +215,27 @@ router.get('/callback', async (req, res) => {
 });
 
 // Connection status
-router.get('/status', authMiddleware, async (req, res) => {
-  try {
-    const uid = req.userId || req.user?.uid;
-    const snap = await db.collection('users').doc(uid).collection('connections').doc('facebook').get();
-    if (!snap.exists) return res.json({ connected: false });
-    const data = snap.data();
-    // Lazy migrate plaintext token to encrypted if key now present
-    if (data.user_access_token && !data.encrypted_user_access_token) {
-      try {
-        const { encryptToken, hasEncryption } = require('../services/secretVault');
-        if (hasEncryption()) {
-          await snap.ref.set({ encrypted_user_access_token: encryptToken(data.user_access_token), user_access_token: admin.firestore.FieldValue.delete(), hasEncryption: true }, { merge: true });
-        }
-      } catch (_) { /* ignore */ }
-    }
-    const out = {
-      connected: true,
-      pages: (data.pages || []).map(p => ({ id: p.id, name: p.name })),
-      ig_business_account_id: data.ig_business_account_id || null
-    };
-    return res.json(out);
-  } catch (e) {
-    return res.status(500).json({ connected: false, error: 'Failed to load status' });
+router.get('/status', authMiddleware, require('../statusInstrument')('facebookStatus', async (req, res) => {
+  const uid = req.userId || req.user?.uid;
+  const snap = await db.collection('users').doc(uid).collection('connections').doc('facebook').get();
+  if (!snap.exists) return res.json({ connected: false });
+  const data = snap.data();
+  const suppressMigration = process.env.SUPPRESS_STATUS_TOKEN_MIGRATION === 'true';
+  if (!suppressMigration && data.user_access_token && !data.encrypted_user_access_token) {
+    try {
+      const { encryptToken, hasEncryption } = require('../services/secretVault');
+      if (hasEncryption()) {
+        await snap.ref.set({ encrypted_user_access_token: encryptToken(data.user_access_token), user_access_token: admin.firestore.FieldValue.delete(), hasEncryption: true }, { merge: true });
+      }
+    } catch (_) { /* ignore */ }
   }
-});
+  const out = {
+    connected: true,
+    pages: (data.pages || []).map(p => ({ id: p.id, name: p.name })),
+    ig_business_account_id: data.ig_business_account_id || null
+  };
+  return res.json(out);
+}));
 
 // Upload to a Facebook Page feed/photos/videos
 router.post('/upload', authMiddleware, async (req, res) => {

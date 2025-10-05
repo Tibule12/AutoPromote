@@ -95,26 +95,22 @@ router.post('/earnings/aggregate', authMiddleware, adminOnly, async (_req, res) 
 });
 
 // User earnings summary (self)
-router.get('/earnings/summary', authMiddleware, rateLimit({ field: 'earningsSummary', perMinute: 10 }), async (req, res) => {
-  try {
-    const userRef = await db.collection('users').doc(req.userId).get();
-    if (!userRef.exists) return res.status(404).json({ ok: false, error: 'user_not_found' });
-    const u = userRef.data();
-    const minPayout = parseFloat(process.env.MIN_PAYOUT_AMOUNT || '0');
-    const pending = u.pendingEarnings || 0;
-    return res.json({
-      ok: true,
-      pendingEarnings: pending,
-      totalEarnings: u.totalEarnings || 0,
-      revenueEligible: u.revenueEligible || false,
-      contentCount: u.contentCount || 0,
-      minPayoutAmount: minPayout,
-      payoutEligible: (u.revenueEligible || false) && pending >= minPayout
-    });
-  } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
-  }
-});
+router.get('/earnings/summary', authMiddleware, rateLimit({ field: 'earningsSummary', perMinute: 10 }), require('../statusInstrument')('earningsSummary', async (req, res) => {
+  const userRef = await db.collection('users').doc(req.userId).get();
+  if (!userRef.exists) return res.status(404).json({ ok: false, error: 'user_not_found' });
+  const u = userRef.data();
+  const minPayout = parseFloat(process.env.MIN_PAYOUT_AMOUNT || '0');
+  const pending = u.pendingEarnings || 0;
+  return res.json({
+    ok: true,
+    pendingEarnings: pending,
+    totalEarnings: u.totalEarnings || 0,
+    revenueEligible: u.revenueEligible || false,
+    contentCount: u.contentCount || 0,
+    minPayoutAmount: minPayout,
+    payoutEligible: (u.revenueEligible || false) && pending >= minPayout
+  });
+}));
 
 // Self payout route: moves all pendingEarnings to totalEarnings and creates a payout record
 router.post('/earnings/payout/self', authMiddleware, async (req, res) => {
