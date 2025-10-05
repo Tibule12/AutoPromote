@@ -29,6 +29,7 @@ router.post('/webhook', express.json({ limit:'2mb', verify: rawBodySaver }), asy
   audit.log('stripe.webhook.received', { type: event.type });
   // Minimal handlers
   try {
+    try { const { applyStripeEvent } = require('../services/subscriptionSyncService'); await applyStripeEvent(event); } catch(_){ }
     switch(event.type) {
       case 'checkout.session.completed':
       case 'invoice.paid':

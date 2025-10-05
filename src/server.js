@@ -1,5 +1,7 @@
 
 require('dotenv').config();
+// Early environment validation (non-fatal in dev)
+try { const { validateEnv } = require('./utils/envValidator'); validateEnv({ strict: process.env.STRICT_ENV === 'true' }); } catch(e){ console.warn('Env validator load failed:', e.message); }
 
 const express = require('express');
 const cors = require('cors');
@@ -204,6 +206,7 @@ app.use(cors({
 if (compression) app.use(compression());
 // Apply security headers (disable CSP by default to avoid blocking React build assets)
 if (helmet) app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+try { app.use(require('./middlewares/securityHeaders')()); } catch(_){ }
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Apply helmet (relaxed CSP off for React inline styles) & compression if available
@@ -220,6 +223,7 @@ app.use((req, res, next) => {
 });
 
 // API Routes
+try { const { rateLimiter } = require('./middlewares/globalRateLimiter'); app.use('/api/', rateLimiter({})); } catch(_){ }
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/content', contentRoutes);
