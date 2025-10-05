@@ -123,6 +123,23 @@ Property verification (if requested):
 | `/api/metrics/variants/prune` | POST | Prunes underperforming variants |
 | GET | `/api/content/:id/captions/raw?format=srt|vtt` | Download raw caption text (SRT or VTT) |
 
+## Security Hardening (Recent)
+- Environment validation (`envValidator`) with startup warnings & optional strict fail.
+- Layered security headers (Helmet + custom: X-Frame-Options, XCTO, Referrer-Policy, Permissions-Policy, COOP, CORP).
+- Global token bucket rate limiter scaffold (pluggable backend; currently in-memory) on all `/api/` routes.
+- JWT audience & issuer enforcement (optional via `JWT_AUDIENCE`, `JWT_ISSUER`).
+- Webhook security: Stripe signature verification; PayPal RSA cert verification with cert caching.
+- Document integrity signatures for queued promotion tasks (`docSigner` attaches `_sig`, verified before processing).
+- Admin cache introspection endpoint for operational transparency.
+
+Planned Next Security Enhancements:
+- Redis adapter for distributed rate limiting & user defaults cache.
+- Doc signing extended to financial/payout documents.
+- PII classification & automatic redaction in audit logs.
+- Automated security audit script summarizing posture & drift detection.
+- Dead-letter replay tool with integrity verification preview.
+
+
 ## Backfill Script
 
 Rebuild denormalized click counters from historical shortlink events:
