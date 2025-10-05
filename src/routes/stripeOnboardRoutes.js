@@ -15,9 +15,11 @@ const router = express.Router();
 // Prefer local src middleware if available; fallback to backend copy for legacy structure
 let authMiddleware;
 try { authMiddleware = require('../authMiddleware'); } catch(_) { try { authMiddleware = require('../../authMiddleware'); } catch(e) { authMiddleware = (req,_res,next)=> next(); } }
+let rateLimit; try { rateLimit = require('../middlewares/simpleRateLimit'); } catch(_) { rateLimit = ()=> (req,res,next)=> next(); }
+const { audit } = require('../services/auditLogger');
 
 // POST /api/withdrawals/onboard - Start Stripe Connect onboarding for user
-router.post('/onboard', authMiddleware, async (req, res) => {
+router.post('/onboard', authMiddleware, rateLimit({ max:5, windowMs:3600000, key: r=> r.userId||r.ip }), async (req, res) => {
   try {
     const userId = req.user.uid;
     // Create or retrieve Stripe account for user
@@ -55,7 +57,8 @@ router.post('/onboard', authMiddleware, async (req, res) => {
       type: 'account_onboarding',
     });
     
-    res.json({ url: accountLink.url });
+  audit.log('stripe.onboard.started', { userId, accountId });
+  res.json({ url: accountLink.url, requestId: req.requestId });
   } catch (error) {
     console.error('Stripe onboarding failed:', error);
     res.status(500).json({ error: 'Stripe onboarding failed', details: error.message });
@@ -85,6 +88,7 @@ router.get('/account/status', authMiddleware, async (req, res) => {
       const remaining = currentlyDue.length;
       return Math.max(0, Math.min(100, Math.round(100 - (remaining/total)*100)));
     })();
+    audit.log('stripe.account.status', { userId, accountId: account.id, chargesEnabled, payoutsEnabled, pctComplete });
     return res.json({
       ok:true,
       onboarded:true,
@@ -99,7 +103,8 @@ router.get('/account/status', authMiddleware, async (req, res) => {
         pastDue,
         pendingVerification: reqs.pending_verification || []
       },
-      nextAction: !chargesEnabled || !payoutsEnabled ? 'Complete outstanding requirements in Stripe onboarding' : 'Ready'
+      nextAction: !chargesEnabled || !payoutsEnabled ? 'Complete outstanding requirements in Stripe onboarding' : 'Ready',
+      requestId: req.requestId
     });
   } catch (e) {
     console.error('[stripe][status] error', e);
@@ -108,7 +113,7 @@ router.get('/account/status', authMiddleware, async (req, res) => {
 });
 
 // POST /api/stripe/account/login-link - generate a fresh Express dashboard link (helpful while waiting for manual review)
-router.post('/account/login-link', authMiddleware, async (req, res) => {
+router.post('/account/login-link', authMiddleware, rateLimit({ max:10, windowMs:3600000, key: r=> r.userId||r.ip }), async (req, res) => {
   try {
     if (!stripe) return res.status(400).json({ ok:false, error: 'stripe_not_configured' });
     const userId = req.user.uid;
@@ -118,7 +123,8 @@ router.post('/account/login-link', authMiddleware, async (req, res) => {
     const login = await stripe.accounts.createLoginLink(accountId, {
       redirect_url: process.env.STRIPE_ONBOARD_RETURN_URL
     });
-    return res.json({ ok:true, url: login.url, expires_at: login.expires_at });
+  audit.log('stripe.login_link.created', { userId, accountId, expires_at: login.expires_at });
+  return res.json({ ok:true, url: login.url, expires_at: login.expires_at, requestId: req.requestId });
   } catch (e) {
     console.error('[stripe][login-link] error', e);
     return res.status(500).json({ ok:false, error: e.message });
