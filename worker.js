@@ -3,6 +3,7 @@ require('dotenv').config();
 const { db } = require('./src/firebaseAdmin');
 const { processNextPlatformTask, processNextYouTubeTask } = require('./src/services/promotionTaskQueue');
 let dailyRollup; try { dailyRollup = require('./src/services/dailyRollupService'); } catch(_) {}
+let balanceService; try { balanceService = require('./src/services/payments/balanceService'); } catch(_) {}
 let poller; try { poller = require('./src/services/youtubeStatsPoller'); } catch(_) { poller = null; }
 const { setStatus } = require('./src/services/statusRecorder');
 let engagementIngestion; try { engagementIngestion = require('./src/services/engagementIngestionService'); } catch(_) { }
@@ -102,6 +103,16 @@ async function loop() {
           } catch(_){ }
         }
       } catch(e){ console.warn('[worker] overage_auto error:', e.message); }
+    }
+    // Periodic earnings snapshot (simulate accrual) - dev placeholder: store latest provisional balance summary every ~loop with low probability
+    if (balanceService && Math.random() < 0.05) {
+      try {
+        const userSampleSnap = await require('./src/firebaseAdmin').db.collection('users').limit(10).get();
+        for (const doc of userSampleSnap.docs) {
+          const bal = await balanceService.computeUserBalance(doc.id);
+          await setStatus('balance_'+doc.id, { ts: Date.now(), provisional: bal.provisional, available: bal.available });
+        }
+      } catch(e){ console.warn('[worker] balance snapshot error:', e.message); }
     }
     // Periodic variant pruning (probabilistic trigger)
     if (Math.random() < 0.05) {

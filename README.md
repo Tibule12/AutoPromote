@@ -181,6 +181,26 @@ Dev mocks (when ALLOW_PAYMENTS_DEV_MOCK=true):
 
 Provider abstraction lives under `src/services/payments/` (stripe, paypal placeholder, manual). This lets you finalize UI & balance logic before real credentials are active.
 
+### Balance & Financial Endpoints (New)
+ - `GET /api/payments/balance` (auth) provisional vs available (hold days) vs lifetime.
+ - `GET /api/payments/plans` public plan catalog derived from env.
+ - `GET /api/payments/admin/overview` (admin) 30-day revenue & payouts summary.
+ - `POST /api/paypal/webhook` placeholder logging endpoint.
+ - Reconciliation script: `node scripts/reconcilePayouts.js` marks stale processing payouts failed after `RECONCILE_PAYOUT_STALE_HOURS`.
+ - Worker now periodically snapshots balances (probabilistic) to status docs.
+
+Additional env:
+```
+ALLOW_LIVE_PAYMENTS=false
+PAYOUT_HOLD_DAYS=7
+STRIPE_PRICE_PRO=price_12345
+STRIPE_PRICE_SCALE=price_67890
+FREE_PLAN_QUOTA=50
+PRO_PLAN_QUOTA=500
+SCALE_PLAN_QUOTA=5000
+RECONCILE_PAYOUT_STALE_HOURS=24
+```
+
 ## Daily Rollups (New)
 Daily aggregated metrics are stored in `content_daily_metrics` documents with id format `<contentId>_<YYYYMMDD>` capturing:
 
