@@ -16,6 +16,23 @@ try { helmet = require('helmet'); } catch(_) { /* optional */ }
 // ---------------------------------------------------------------------------
 const SLOW_REQ_MS = parseInt(process.env.SLOW_REQ_MS || '3000', 10);
 let __printedStartupMissing = false;
+// Latency aggregation (simple ring buffer + percentile calc)
+const LAT_SAMPLE_SIZE = parseInt(process.env.LAT_SAMPLE_SIZE || '500', 10); // keep last 500 by default
+let __latSamples = new Array(LAT_SAMPLE_SIZE);
+let __latIndex = 0; let __latCount = 0;
+function recordLatency(ms){
+  __latSamples[__latIndex] = ms; __latIndex = (__latIndex + 1) % LAT_SAMPLE_SIZE; if (__latCount < LAT_SAMPLE_SIZE) __latCount++;
+}
+function getLatencyStats(){
+  const n = __latCount; if (!n) return { count:0 };
+  const arr = __latSamples.slice(0, n).filter(v => typeof v === 'number');
+  if (!arr.length) return { count:0 };
+  const sorted = arr.slice().sort((a,b)=>a-b);
+  const pick = (p)=> sorted[Math.min(sorted.length-1, Math.floor(p * sorted.length))];
+  const p50 = pick(0.50), p90 = pick(0.90), p95 = pick(0.95), p99 = pick(0.99);
+  const avg = sorted.reduce((s,v)=>s+v,0)/sorted.length;
+  return { count: sorted.length, avg: Math.round(avg), p50, p90, p95, p99, max: sorted[sorted.length-1] };
+}
 
 function printMissingEnvOnce() {
   if (__printedStartupMissing) return;
@@ -42,6 +59,7 @@ function slowRequestLogger(req,res,next){
   const started = Date.now();
   res.once('finish', () => {
     const dur = Date.now() - started;
+    recordLatency(dur);
     if (dur >= SLOW_REQ_MS) {
       console.warn(`[slow] ${req.method} ${req.originalUrl} ${dur}ms status=${res.statusCode}`);
     }
@@ -519,6 +537,8 @@ app.get('/api/health', async (req, res) => {
     } catch (e) {
       extended.diagnostics.taskSampleError = e.message;
     }
+      // Latency stats (in-memory only, reset on deploy)
+      try { extended.diagnostics.latency = getLatencyStats(); } catch(_){ }
     // Commit / version info (best-effort)
     extended.diagnostics.version = process.env.GIT_COMMIT || process.env.COMMIT_HASH || process.env.VERCEL_GIT_COMMIT_SHA || null;
     extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === 'true';
@@ -711,6 +731,44 @@ const BANDIT_TUNER_INTERVAL_MS = parseInt(process.env.BANDIT_TUNER_INTERVAL_MS |
 const EXPLORATION_CTRL_INTERVAL_MS = parseInt(process.env.EXPLORATION_CTRL_INTERVAL_MS || '600000', 10); // 10 min default
 const ALERT_CHECK_INTERVAL_MS = parseInt(process.env.ALERT_CHECK_INTERVAL_MS || '900000', 10); // 15 min default
 
+// Leader election: only one instance (the leader) should launch intervals.
+let __isLeader = false;
+async function electLeader(){
+  try {
+    const { db } = require('./firebaseAdmin');
+    const id = require('crypto').randomUUID();
+    const doc = db.collection('system_locks').doc('bg_leader');
+    const now = Date.now();
+    const leaseMs = parseInt(process.env.LEADER_LEASE_MS || '120000',10); // 2m lease
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(doc);
+      const v = snap.exists ? snap.data() : null;
+      if (v && v.expiresAt && v.expiresAt > now) {
+        // Existing leader valid
+        if (v.owner === id) {
+          tx.update(doc, { expiresAt: now + leaseMs });
+          __isLeader = true;
+        } else {
+          __isLeader = false;
+        }
+      } else {
+        tx.set(doc, { owner: id, expiresAt: now + leaseMs, renewedAt: now });
+        __isLeader = true;
+      }
+    });
+    if (__isLeader) {
+      if (!electLeader.__announced) { console.log('👑 Leader elected for background jobs.'); electLeader.__announced = true; }
+    }
+  } catch (e) {
+    console.warn('[leader] election error:', e.message);
+  }
+}
+if (ENABLE_BACKGROUND) {
+  // Periodically renew election
+  electLeader();
+  setInterval(electLeader, parseInt(process.env.LEADER_ELECTION_INTERVAL_MS || '45000',10)).unref();
+}
+
 if (ENABLE_BACKGROUND) {
   console.log('🛠  Background job runner enabled.');
   try {
@@ -854,10 +912,13 @@ if (ENABLE_BACKGROUND) {
       } catch (e) { console.warn('[BG][locks] cleanup error:', e.message); }
     }, LOCK_CLEAN_INTERVAL_MS).unref();
 
-    // Bandit auto-tuning job
+    // Bandit auto-tuning, exploration factor, and alerts loops guarded by leader flag
+    function leaderInterval(fn, ms){
+      setInterval(() => { if (!__isLeader) return; fn(); }, ms).unref();
+    }
     try {
       const { applyAutoTune } = require('./services/banditTuningService');
-      setInterval(async () => {
+      leaderInterval(async () => {
         try {
           const r = await applyAutoTune();
           if (r && r.updated) {
@@ -867,15 +928,12 @@ if (ENABLE_BACKGROUND) {
             try { require('./services/statusRecorder').recordRun('banditTuner', { ok:true, noop:true }); } catch(_){ }
           }
         } catch(e){ console.warn('[BG][bandit-tuner] error:', e.message); }
-      }, BANDIT_TUNER_INTERVAL_MS).unref();
-    } catch(e) {
-      console.log('[BG][bandit-tuner] skipped:', e.message);
-    }
+      }, BANDIT_TUNER_INTERVAL_MS);
+    } catch(e) { console.log('[BG][bandit-tuner] skipped:', e.message); }
 
-    // Exploration controller job
     try {
       const { adjustExplorationFactor } = require('./services/explorationControllerService');
-      setInterval(async () => {
+      leaderInterval(async () => {
         try {
           const r = await adjustExplorationFactor();
           if (r.updated) {
@@ -885,15 +943,14 @@ if (ENABLE_BACKGROUND) {
             try { require('./services/statusRecorder').recordRun('explorationController', { ok:true, noop:true, factor: r.factor, ratio: r.ratio }); } catch(_){ }
           }
         } catch(e) { console.warn('[BG][exploration-controller] error:', e.message); }
-      }, EXPLORATION_CTRL_INTERVAL_MS).unref();
+      }, EXPLORATION_CTRL_INTERVAL_MS);
     } catch(e) { console.log('[BG][exploration-controller] skipped:', e.message); }
 
-    // Alerting periodic checks (exploration drift, diversity)
     try {
       const { runAlertChecks } = require('./services/alertingService');
-      setInterval(async () => {
+      leaderInterval(async () => {
         try { const r = await runAlertChecks(); if (r.exploration.alerted || r.diversity.alerted) console.log('[BG][alerts] alerts dispatched'); } catch(e){ console.warn('[BG][alerts] error:', e.message); }
-      }, ALERT_CHECK_INTERVAL_MS).unref();
+      }, ALERT_CHECK_INTERVAL_MS);
     } catch(e) { console.log('[BG][alerts] skipped:', e.message); }
   } catch (e) {
     console.warn('⚠️ Background job initialization failed:', e.message);
