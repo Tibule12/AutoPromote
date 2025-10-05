@@ -8,6 +8,20 @@ const { uploadVideo } = require('./youtubeService');
 
 const MAX_ATTEMPTS = parseInt(process.env.TASK_MAX_ATTEMPTS || '5', 10);
 const BASE_BACKOFF_MS = parseInt(process.env.TASK_BASE_BACKOFF_MS || '60000', 10); // 1 min default
+let __lastIndexWarn = 0;
+const INDEX_WARN_INTERVAL_MS = 5 * 60 * 1000; // throttle to every 5 min
+function handleIndexError(e, context, sampleLink){
+  const msg = (e && e.message) || '';
+  if (msg.includes('requires an index')) {
+    const now = Date.now();
+    if (now - __lastIndexWarn > INDEX_WARN_INTERVAL_MS) {
+      __lastIndexWarn = now;
+      console.warn(`[IDX][${context}] Missing Firestore index. Create via console link: ${sampleLink || 'See Firebase console > Firestore Indexes (composite)'}`);
+    }
+    return true; // handled
+  }
+  return false;
+}
 
 function classifyError(message = '') {
   const m = message.toLowerCase();
@@ -58,12 +72,18 @@ async function enqueueYouTubeUploadTask({ contentId, uid, title, description, fi
 async function processNextYouTubeTask() {
   // Fetch one queued task (simple FIFO by createdAt)
   const nowIso = new Date().toISOString();
-  const snapshot = await db.collection('promotion_tasks')
-    .where('type', '==', 'youtube_upload')
-    .where('status', 'in', ['queued'])
-    .orderBy('createdAt')
-    .limit(5)
-    .get();
+  let snapshot;
+  try {
+    snapshot = await db.collection('promotion_tasks')
+      .where('type', '==', 'youtube_upload')
+      .where('status', 'in', ['queued'])
+      .orderBy('createdAt')
+      .limit(5)
+      .get();
+  } catch(e){
+    if (handleIndexError(e,'yt_task_select', 'promotion_tasks: type ASC, status ASC, createdAt ASC')) return null;
+    throw e;
+  }
 
   if (snapshot.empty) return null;
   const doc = snapshot.docs[0];
@@ -256,12 +276,18 @@ async function enqueuePlatformPostTask({ contentId, uid, platform, reason = 'man
 
 async function processNextPlatformTask() {
   // Fetch small batch of queued tasks then pick highest priority dynamically (velocity-aware)
-  const snapshot = await db.collection('promotion_tasks')
-    .where('type', '==', 'platform_post')
-    .where('status', 'in', ['queued'])
-    .orderBy('createdAt')
-    .limit(10)
-    .get();
+  let snapshot;
+  try {
+    snapshot = await db.collection('promotion_tasks')
+      .where('type', '==', 'platform_post')
+      .where('status', 'in', ['queued'])
+      .orderBy('createdAt')
+      .limit(10)
+      .get();
+  } catch(e){
+    if (handleIndexError(e,'platform_task_select','promotion_tasks: type ASC, status ASC, createdAt ASC')) return null;
+    throw e;
+  }
   if (snapshot.empty) return null;
   let selectedDoc = null; let selectedData = null; const now = Date.now();
   let bestScore = -Infinity;
