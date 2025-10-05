@@ -162,6 +162,25 @@ Champion criteria:
 - Stripe metered usage for overage events
 - Websocket push for champion changes
 
+## Payments Architecture (In-Review Mode)
+While Stripe / PayPal accounts are still under review, the app exposes a unified status endpoint:
+
+`GET /api/payments/status` -> `{ paymentsEnabled, payoutsEnabled, providers: { stripe:{...}, paypal:{...}, manual?:{...} } }`
+
+Environment flags:
+```
+PAYMENTS_ENABLED=false      # master feature gate for subscription flows
+PAYOUTS_ENABLED=false       # master gate for creator payouts
+ALLOW_PAYMENTS_DEV_MOCK=false  # enable mock subscription/payout endpoints for local testing
+ENABLE_MANUAL_PROVIDER=false   # adds a always-on dev provider
+```
+
+Dev mocks (when ALLOW_PAYMENTS_DEV_MOCK=true):
+ - POST `/api/payments/dev/mock/subscription` { plan, amount }
+ - POST `/api/payments/dev/mock/payout` { amount }
+
+Provider abstraction lives under `src/services/payments/` (stripe, paypal placeholder, manual). This lets you finalize UI & balance logic before real credentials are active.
+
 ## Daily Rollups (New)
 Daily aggregated metrics are stored in `content_daily_metrics` documents with id format `<contentId>_<YYYYMMDD>` capturing:
 
