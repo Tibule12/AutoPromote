@@ -35,7 +35,7 @@ function canRetry(classification) {
 async function enqueueYouTubeUploadTask({ contentId, uid, title, description, fileUrl, shortsMode }) {
   if (!contentId || !uid || !fileUrl) throw new Error('contentId, uid, fileUrl required');
   const ref = db.collection('promotion_tasks').doc();
-  const task = {
+  const baseTask = {
     type: 'youtube_upload',
     status: 'queued',
     contentId,
@@ -49,6 +49,8 @@ async function enqueueYouTubeUploadTask({ contentId, uid, title, description, fi
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
+  let task = baseTask;
+  try { const { attachSignature } = require('../utils/docSigner'); task = attachSignature(baseTask); } catch(_){ }
   await ref.set(task);
   return { id: ref.id, ...task };
 }
@@ -76,6 +78,17 @@ async function processNextYouTubeTask() {
   }
   if (!selectedDoc) return null; // none ready yet
   const task = { id: selectedDoc.id, ...selectedData };
+
+  // Verify signature before processing
+  try {
+    const { verifySignature } = require('../utils/docSigner');
+    const valid = verifySignature(selectedData);
+    if (!valid) {
+      await selectedDoc.ref.update({ status:'failed', integrityFailed:true, updatedAt: new Date().toISOString() });
+      try { await db.collection('dead_letter_tasks').doc(selectedDoc.id).set({ ...selectedData, integrityFailed:true }); } catch(_){ }
+      return { taskId: task.id, error:'integrity_failed' };
+    }
+  } catch(_){ /* ignore */ }
 
   const taskRef = selectedDoc.ref;
   await taskRef.update({ status: 'processing', updatedAt: new Date().toISOString() });
@@ -220,7 +233,7 @@ async function enqueuePlatformPostTask({ contentId, uid, platform, reason = 'man
   }
 
   const ref = db.collection('promotion_tasks').doc();
-  const task = {
+  const baseTask = {
     type: 'platform_post',
     status: 'queued',
     platform,
@@ -234,6 +247,8 @@ async function enqueuePlatformPostTask({ contentId, uid, platform, reason = 'man
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
+  let task = baseTask;
+  try { const { attachSignature } = require('../utils/docSigner'); task = attachSignature(baseTask); } catch(_){ }
   await ref.set(task);
   try { const { recordPlatformPostDuplicate } = require('./aggregationService'); recordPlatformPostDuplicate(false); } catch(_){ }
   return { id: ref.id, ...task };
@@ -284,6 +299,16 @@ async function processNextPlatformTask() {
   }
   if (!selectedDoc) return null;
   const task = { id: selectedDoc.id, ...selectedData };
+  // Verify signature before processing
+  try {
+    const { verifySignature } = require('../utils/docSigner');
+    const valid = verifySignature(selectedData);
+    if (!valid) {
+      await selectedDoc.ref.update({ status:'failed', integrityFailed:true, updatedAt: new Date().toISOString() });
+      try { await db.collection('dead_letter_tasks').doc(selectedDoc.id).set({ ...selectedData, integrityFailed:true }); } catch(_){ }
+      return { taskId: task.id, error:'integrity_failed' };
+    }
+  } catch(_){ }
   await selectedDoc.ref.update({ status: 'processing', updatedAt: new Date().toISOString() });
   try {
     const { dispatchPlatformPost } = require('./platformPoster');

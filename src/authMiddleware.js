@@ -24,6 +24,15 @@ const authMiddleware = async (req, res, next) => {
 
     // Verify Firebase token
     const decodedToken = await admin.auth().verifyIdToken(token);
+    // Optional audience / issuer enforcement
+    const expectedAud = process.env.JWT_AUDIENCE;
+    const expectedIss = process.env.JWT_ISSUER;
+    if (expectedAud && decodedToken.aud && decodedToken.aud !== expectedAud) {
+      return res.status(401).json({ error:'invalid_audience' });
+    }
+    if (expectedIss && decodedToken.iss && decodedToken.iss !== expectedIss) {
+      return res.status(401).json({ error:'invalid_issuer' });
+    }
   if (debugAuth) console.log('Token verification successful, decoded:', JSON.stringify({
       uid: decodedToken.uid,
       email: decodedToken.email,
