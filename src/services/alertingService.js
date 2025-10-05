@@ -17,11 +17,20 @@ async function sendAlert({ type, message, severity='info', meta={} }) {
     const a = cfg.alerting || {};
     if (a.enabledEvents && Array.isArray(a.enabledEvents) && !a.enabledEvents.includes(type)) return { skipped:true, reason:'disabled_event' };
     if (!a.webhookUrl && !a.slackWebhookUrl) return { skipped:true, reason:'no_destination' };
+    // Basic in-memory throttle (default 10 min) per alert type
+    const throttleMs = (a.throttleMinutes ? a.throttleMinutes*60000 : 600000);
+    if (!global.__alertLastSent) global.__alertLastSent = {};
+    const last = global.__alertLastSent[type] || 0;
+    const nowMs = Date.now();
+    if (nowMs - last < throttleMs) {
+      return { skipped:true, reason:'throttled', nextAllowedInMs: throttleMs - (nowMs - last) };
+    }
     const at = new Date().toISOString();
     const alertDoc = { type, message, severity, meta, at };
     try { await db.collection('events').add({ ...alertDoc, eventType:'alert' }); } catch(_){ }
     if (a.webhookUrl) await postJson(a.webhookUrl, alertDoc);
     if (a.slackWebhookUrl) await postJson(a.slackWebhookUrl, { text: `*[${severity.toUpperCase()}]* ${type}: ${message}\n\n${Object.keys(meta||{}).length? '```'+JSON.stringify(meta,null,2)+'```':''}` });
+    global.__alertLastSent[type] = nowMs;
     return { ok:true };
   } catch(e){ return { ok:false, error:e.message }; }
 }
