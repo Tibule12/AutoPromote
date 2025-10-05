@@ -92,6 +92,59 @@ function slowRequestLogger(req,res,next){
   next();
 }
 
+// -------------------------------------------------
+// Lightweight in-memory micro-cache for hot status endpoints
+// -------------------------------------------------
+const MICRO_CACHE_TTL_MS = parseInt(process.env.MICRO_STATUS_CACHE_TTL_MS || '8000',10); // 8s default
+const __microCache = new Map(); // key -> { expiry, payload, contentType }
+function microCache(req,res,next){
+  if (MICRO_CACHE_TTL_MS <= 0) return next();
+  if (req.method !== 'GET') return next();
+  // only cache explicit allowlist
+  const allow = ['/api/platform/status','/api/facebook/status','/api/youtube/status','/api/twitter/connection/status','/api/tiktok/status','/api/instagram/status','/api/monetization/earnings/summary','/api/users/progress'];
+  if (!allow.includes(req.path)) return next();
+  const entry = __microCache.get(req.path);
+  if (entry && entry.expiry > Date.now()) {
+    res.setHeader('x-micro-cache','HIT');
+    if (entry.contentType) res.setHeader('Content-Type', entry.contentType);
+    return res.send(entry.payload);
+  }
+  const originalSend = res.send.bind(res);
+  res.send = (body) => {
+    try {
+      __microCache.set(req.path, { expiry: Date.now() + MICRO_CACHE_TTL_MS, payload: body, contentType: res.get('Content-Type') });
+    } catch(_){ }
+    res.setHeader('x-micro-cache','MISS');
+    return originalSend(body);
+  };
+  next();
+}
+
+// Instrumentation helper for route handlers: measures handler time & Firestore calls (approx)
+const __routeMetrics = {}; // route -> { count, totalMs, maxMs }
+function instrumentHandler(fn, routeId){
+  return async function instrumented(req,res,next){
+    const t0 = Date.now();
+    let finished = false;
+    function finalize(){
+      if (finished) return; finished = true; const ms = Date.now()-t0;
+      const m = __routeMetrics[routeId] || { count:0, totalMs:0, maxMs:0 };
+      m.count++; m.totalMs += ms; if (ms > m.maxMs) m.maxMs = ms; __routeMetrics[routeId]=m;
+      if (ms > (parseInt(process.env.SLOW_STATUS_THRESHOLD_MS||'4000',10))) {
+        console.warn(`[status-slow] route=${routeId} ${ms}ms`);
+      }
+    }
+    res.once('finish', finalize); res.once('close', finalize);
+    try { return await fn(req,res,next); } catch(e){ finalize(); return next(e); }
+  };
+}
+global.__getRouteMetrics = () => {
+  const out = {};
+  Object.entries(__routeMetrics).forEach(([k,v]) => { out[k] = { count: v.count, avg: v.count?Math.round(v.totalMs/v.count):0, max: v.maxMs }; });
+  return out;
+};
+global.__instrumentWrapper = (routeId, fn) => instrumentHandler(fn, routeId);
+
 
 // Load core routes
 const authRoutes = require('./authRoutes');
@@ -322,6 +375,8 @@ const PORT = process.env.PORT || 5000; // Default to port 5000, Render will over
 // Attach request context (if available) then slow request logger
 try { app.use(require('./middlewares/requestContext')); } catch(_) { /* optional */ }
 app.use(slowRequestLogger);
+// Micro-cache for status endpoints
+app.use(microCache);
 
 // CORS configuration - allow all origins for debugging (tighten in prod)
 app.use(cors({

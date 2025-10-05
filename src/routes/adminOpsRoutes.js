@@ -64,4 +64,12 @@ router.get('/latency/snapshots', authMiddleware, adminOnly, async (_req,res)=>{
   } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
 });
 
+// Status route latency summary (instrumented routes)
+router.get('/status-latency', authMiddleware, adminOnly, (_req,res)=>{
+  try {
+    const m = global.__getRouteMetrics ? global.__getRouteMetrics() : {};
+    return res.json({ ok:true, routes: m });
+  } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
+});
+
 module.exports = router;

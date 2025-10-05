@@ -186,17 +186,13 @@ router.get('/callback', async (req, res) => {
   }
 });
 
-router.get('/status', authMiddleware, async (req, res) => {
-  try {
-    const uid = req.userId || req.user?.uid;
-    const snap = await db.collection('users').doc(uid).collection('connections').doc('youtube').get();
-    if (!snap.exists) return res.json({ connected: false });
-    const data = snap.data();
-    return res.json({ connected: true, channel: data.channel || null });
-  } catch (e) {
-    return res.status(500).json({ connected: false, error: 'Failed to load status' });
-  }
-});
+router.get('/status', authMiddleware, require('../statusInstrument')('youtubeStatus', async (req, res) => {
+  const uid = req.userId || req.user?.uid;
+  const snap = await db.collection('users').doc(uid).collection('connections').doc('youtube').get();
+  if (!snap.exists) return res.json({ connected: false });
+  const data = snap.data();
+  return res.json({ connected: true, channel: data.channel || null });
+}));
 
 // Fetch live stats for one video (requires contentId or explicit videoId)
 router.get('/stats', authMiddleware, async (req, res) => {
