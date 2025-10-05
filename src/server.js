@@ -66,8 +66,12 @@ function printMissingEnvOnce() {
     console.warn('[startup] Missing recommended env vars:', missing.join(', '));
     console.warn('  Add them in Render dashboard → Environment, then redeploy.');
   }
-  if (process.env.ENABLE_BACKGROUND_JOBS !== 'true') {
+  const enabledFlag = process.env.ENABLE_BACKGROUND_JOBS === 'true';
+  const typoFlag = process.env.ENABLE_BACKROUND_JOBS === 'true';
+  if (!enabledFlag && !typoFlag) {
     console.log('ℹ️ Background jobs DISABLED. Set ENABLE_BACKGROUND_JOBS=true to activate autonomous loops.');
+  } else if (typoFlag && !enabledFlag) {
+    console.log('⚠️  Using ENABLE_BACKROUND_JOBS (typo). Jobs active, but please rename to ENABLE_BACKGROUND_JOBS.');
   }
   __printedStartupMissing = true;
 }
