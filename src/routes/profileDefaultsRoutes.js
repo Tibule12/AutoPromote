@@ -4,10 +4,27 @@ let authMiddleware; try { authMiddleware = require('../authMiddleware'); } catch
 const { audit } = require('../services/auditLogger');
 const router = express.Router();
 
+function validateDefaults(input) {
+  const errors = [];
+  if (input.timezone && typeof input.timezone !== 'string') errors.push('timezone must be string');
+  if (input.variantStrategy && !['rotation','bandit'].includes(input.variantStrategy)) errors.push('variantStrategy invalid');
+  if (input.maxDailyUploads !== undefined) {
+    if (typeof input.maxDailyUploads !== 'number' || input.maxDailyUploads < 1 || input.maxDailyUploads > 1000) errors.push('maxDailyUploads out_of_range');
+  }
+  if (input.postingWindow) {
+    const pw = input.postingWindow;
+    if (typeof pw !== 'object') errors.push('postingWindow must be object');
+    if (pw.start && !/^\d{2}:\d{2}$/.test(pw.start)) errors.push('postingWindow.start HH:MM');
+    if (pw.end && !/^\d{2}:\d{2}$/.test(pw.end)) errors.push('postingWindow.end HH:MM');
+  }
+  return errors;
+}
+
 // GET /api/profile/defaults - fetch current user's scheduling/profile defaults
 router.get('/defaults', authMiddleware, async (req,res)=>{
   try {
     if (!req.userId) return res.status(401).json({ ok:false, error:'auth_required' });
+    if (process.env.TEST_OFFLINE === 'true') return res.json({ ok:true, defaults:{ mock:true }});
     const doc = await db.collection('user_defaults').doc(req.userId).get();
     return res.json({ ok:true, defaults: doc.exists ? doc.data() : {} });
   } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
@@ -19,8 +36,13 @@ router.post('/defaults', authMiddleware, async (req,res)=>{
     if (!req.userId) return res.status(401).json({ ok:false, error:'auth_required' });
     const allowed = ['timezone','preferredPlatforms','postingWindow','maxDailyUploads','variantStrategy'];
     const input = req.body || {};
+    const errs = validateDefaults(input);
+    if (errs.length) return res.status(400).json({ ok:false, error:'validation_failed', details: errs });
     const update = { updatedAt: new Date().toISOString() };
     allowed.forEach(k => { if (k in input) update[k] = input[k]; });
+    if (process.env.TEST_OFFLINE === 'true') {
+      return res.json({ ok:true, updated: update, offline:true });
+    }
     await db.collection('user_defaults').doc(req.userId).set(update, { merge:true });
     audit.log('profile.defaults.updated', { userId: req.userId, keys: Object.keys(update).filter(k=>k!=='updatedAt') });
     return res.json({ ok:true, updated: update });

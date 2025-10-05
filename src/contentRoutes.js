@@ -150,10 +150,17 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
       description: description || 'none'
     });
 
-    // Enforce max 10 uploads per calendar day (UTC)
-    const daily = await canUserUploadToday(req.userId, 10);
+    // Determine max daily uploads (user default override)
+    let maxDaily = 10;
+    try {
+      const defSnap = await db.collection('user_defaults').doc(req.userId).get();
+      if (defSnap.exists && typeof defSnap.data().maxDailyUploads === 'number') {
+        maxDaily = Math.min(Math.max(1, defSnap.data().maxDailyUploads), 1000);
+      }
+    } catch(_){ }
+    const daily = await canUserUploadToday(req.userId, maxDaily);
     if (!daily.canUpload) {
-      return res.status(400).json({ error: 'Daily limit reached', message: daily.reason, uploads_today: daily.countToday, max_per_day: daily.maxPerDay });
+  return res.status(400).json({ error: 'Daily limit reached', message: daily.reason, uploads_today: daily.countToday, max_per_day: daily.maxPerDay });
     }
 
     // Resolve business rule variables (env driven)
