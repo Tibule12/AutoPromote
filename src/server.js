@@ -31,7 +31,10 @@ function getLatencyStats(){
   const pick = (p)=> sorted[Math.min(sorted.length-1, Math.floor(p * sorted.length))];
   const p50 = pick(0.50), p90 = pick(0.90), p95 = pick(0.95), p99 = pick(0.99);
   const avg = sorted.reduce((s,v)=>s+v,0)/sorted.length;
-  return { count: sorted.length, avg: Math.round(avg), p50, p90, p95, p99, max: sorted[sorted.length-1] };
+  const buckets = [25,50,75,100,150,200,300,400,500,750,1000,1500,2000,3000,5000];
+  const counts = {}; buckets.forEach(b=>counts[b]=0); let over = 0;
+  sorted.forEach(v=>{ let placed=false; for (const b of buckets){ if (v<=b){ counts[b]++; placed=true; break; } } if (!placed) over++; });
+  return { count: sorted.length, avg: Math.round(avg), p50, p90, p95, p99, max: sorted[sorted.length-1], buckets: counts, over };
 }
 
 // Startup warm-up state (readiness gate)
@@ -571,10 +574,11 @@ app.get('/api/health', async (req, res) => {
     } catch (e) {
       extended.diagnostics.taskSampleError = e.message;
     }
-      // Latency stats (in-memory only, reset on deploy)
-      try { extended.diagnostics.latency = getLatencyStats(); } catch(_){ }
-    // Warm-up status
+    // Latency stats (in-memory only, reset on deploy)
+    try { extended.diagnostics.latency = getLatencyStats(); } catch(_){ }
+    // Warm-up status and degraded indicator
     extended.diagnostics.warmup = { started: __warmupState.started, done: __warmupState.done, error: __warmupState.error, tookMs: __warmupState.tookMs };
+    if (__warmupState.error) extended.diagnostics.degraded = true;
     // Commit / version info (best-effort)
     extended.diagnostics.version = process.env.GIT_COMMIT || process.env.COMMIT_HASH || process.env.VERCEL_GIT_COMMIT_SHA || null;
     extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === 'true';

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 let authMiddleware; try { authMiddleware = require('../authMiddleware'); } catch(_){ authMiddleware = (req,res,next)=>next(); }
 const adminOnly = require('../middlewares/adminOnly');
+const { db } = require('../firebaseAdmin');
 
 // Leader status
 router.get('/leader', authMiddleware, adminOnly, (_req,res)=>{
@@ -41,8 +42,26 @@ router.get('/latency/prom', authMiddleware, adminOnly, (_req,res)=>{
       `autopromote_latency_ms_p99 ${stats.p99}`,
       `autopromote_latency_ms_max ${stats.max}`
     ];
+    if (stats.buckets) {
+      lines.push('# HELP autopromote_latency_bucket Request latency histogram buckets');
+      lines.push('# TYPE autopromote_latency_bucket histogram');
+      Object.entries(stats.buckets).forEach(([bucket,count])=>{
+        lines.push(`autopromote_latency_bucket{le="${bucket}"} ${count}`);
+      });
+      lines.push(`autopromote_latency_bucket{le="+Inf"} ${stats.count}`);
+      lines.push(`# overflows ${stats.over||0}`);
+    }
     return res.send(lines.join('\n'));
   } catch(e){ return res.status(500).send(`# error ${e.message}`); }
+});
+
+// List recent persisted latency snapshots
+router.get('/latency/snapshots', authMiddleware, adminOnly, async (_req,res)=>{
+  try {
+    const snap = await db.collection('system_latency_snapshots').orderBy('at','desc').limit(50).get();
+    const rows = snap.docs.map(d => d.data());
+    return res.json({ ok:true, count: rows.length, snapshots: rows });
+  } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
 });
 
 module.exports = router;
