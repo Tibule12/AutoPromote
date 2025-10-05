@@ -17,6 +17,7 @@
     "test:unit": "node test/basic-sanity.js",
   "test:routes": "node test/route-imports.test.js",
   "test:payments": "node test/payments-routes.test.js",
+  "test:profile": "node test/profile-defaults-and-notifications.test.js",
     "preflight": "node scripts/preflight-critical-files.js",
     "ci": "npm run preflight && npm run test:unit && npm run test:routes"
   },
