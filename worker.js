@@ -6,6 +6,7 @@ let dailyRollup; try { dailyRollup = require('./src/services/dailyRollupService'
 let balanceService; try { balanceService = require('./src/services/payments/balanceService'); } catch(_) {}
 let poller; try { poller = require('./src/services/youtubeStatsPoller'); } catch(_) { poller = null; }
 const { setStatus } = require('./src/services/statusRecorder');
+let audit; try { ({ audit } = require('./src/services/auditLogger')); } catch(_) { audit = { log: ()=>{} }; }
 let engagementIngestion; try { engagementIngestion = require('./src/services/engagementIngestionService'); } catch(_) { }
 let twitterMetrics; try { twitterMetrics = require('./src/services/twitterMetricsService'); } catch(_) {}
 let repostScheduler; try { repostScheduler = require('./src/services/repostSchedulerService'); } catch(_) {}
@@ -74,7 +75,7 @@ async function loop() {
       } catch(e){ console.warn('[worker] repost_scheduler error:', e.message); }
     }
     // Overage billing automation: sample users approaching/exceeding quota and record overage usage lines once per loop slice probabilistically
-    if (usageLedger && Math.random() < 0.15) {
+  if (usageLedger && Math.random() < 0.15) {
       try {
         const planService = require('./src/services/planService');
         const { countUsageRecords } = require('./src/services/usageLedgerService');
@@ -98,6 +99,7 @@ async function loop() {
               const target = count - plan.monthlyTaskQuota;
               if (existing < target) {
                 await usageLedger.recordUsage({ type: 'overage', userId: uid, amount: 1, currency: 'USD', meta: { metric: 'task', monthStart, quota: plan.monthlyTaskQuota } });
+                audit.log('overage.recorded', { userId: uid, quota: plan.monthlyTaskQuota, count, monthStart });
               }
             }
           } catch(_){ }
@@ -105,12 +107,13 @@ async function loop() {
       } catch(e){ console.warn('[worker] overage_auto error:', e.message); }
     }
     // Periodic earnings snapshot (simulate accrual) - dev placeholder: store latest provisional balance summary every ~loop with low probability
-    if (balanceService && Math.random() < 0.05) {
+  if (balanceService && Math.random() < 0.05) {
       try {
         const userSampleSnap = await require('./src/firebaseAdmin').db.collection('users').limit(10).get();
         for (const doc of userSampleSnap.docs) {
           const bal = await balanceService.computeUserBalance(doc.id);
           await setStatus('balance_'+doc.id, { ts: Date.now(), provisional: bal.provisional, available: bal.available });
+          audit.log('balance.snapshot', { userId: doc.id, provisional: bal.provisional, available: bal.available });
         }
       } catch(e){ console.warn('[worker] balance snapshot error:', e.message); }
     }

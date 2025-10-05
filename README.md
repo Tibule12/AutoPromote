@@ -201,6 +201,37 @@ SCALE_PLAN_QUOTA=5000
 RECONCILE_PAYOUT_STALE_HOURS=24
 ```
 
+### Audit Logging & Request Tracing (New)
+
+Each incoming request is assigned a `requestId` (middleware `requestContext`). Selected responses now include this ID so client errors can be correlated with backend events. Structured audit entries are written to `audit_logs` with compact payloads:
+
+Events emitted:
+- `stripe.onboard.started`, `stripe.account.status`, `stripe.login_link.created`
+- `dev.subscription_fee.mocked`, `dev.payout.mocked`
+- `balance.viewed`, `admin.overview.viewed`
+- `overage.recorded`, `balance.snapshot`
+- `payout.reconciled.failed`, `payout.reconciliation.summary`
+- `server.error`
+
+To inspect recent audit entries:
+```
+firestore collection: audit_logs (order by at desc)
+```
+Disable temporarily by wrapping calls or setting a guard in `auditLogger.js`.
+
+### Simple Rate Limiting (Dev Convenience)
+
+An in-memory limiter (`simpleRateLimit`) protects a few sensitive endpoints (values per process, reset on restart):
+
+| Endpoint | Limit/hour |
+|----------|-----------:|
+| POST /api/stripe/onboard | 5 |
+| POST /api/stripe/account/login-link | 10 |
+| POST /api/payments/dev/mock/subscription | 10 |
+| POST /api/payments/dev/mock/payout | 10 |
+
+For production, replace with a shared store (Redis / Firestore counter). The middleware is isolated in `src/middlewares/simpleRateLimit.js` for easy swap.
+
 ## Daily Rollups (New)
 Daily aggregated metrics are stored in `content_daily_metrics` documents with id format `<contentId>_<YYYYMMDD>` capturing:
 

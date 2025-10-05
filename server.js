@@ -156,7 +156,8 @@ app.get('*', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.log('Server error:', err.message);
+  console.log('Server error:', err.message, 'requestId=', req.requestId);
+  try { const { audit } = require('./src/services/auditLogger'); audit.log('server.error', { message: err.message, stack: (process.env.NODE_ENV==='production')?undefined:err.stack, requestId: req.requestId }); } catch(_){ }
   
   // Provide more specific error messages for common errors
   if (err.name === 'FirebaseError') {
@@ -191,7 +192,8 @@ app.use((err, req, res, next) => {
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'production' 
       ? 'Something went wrong. Please try again later.'
-      : err.message 
+      : err.message,
+    requestId: req.requestId || null
   });
 });
 
