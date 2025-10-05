@@ -153,9 +153,10 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
     // Determine max daily uploads (user default override)
     let maxDaily = 10;
     try {
-      const defSnap = await db.collection('user_defaults').doc(req.userId).get();
-      if (defSnap.exists && typeof defSnap.data().maxDailyUploads === 'number') {
-        maxDaily = Math.min(Math.max(1, defSnap.data().maxDailyUploads), 1000);
+      const { fetchUserDefaults } = require('./services/userDefaultsCache');
+      const defs = await fetchUserDefaults(req.userId);
+      if (typeof defs.maxDailyUploads === 'number') {
+        maxDaily = Math.min(Math.max(1, defs.maxDailyUploads), 1000);
       }
     } catch(_){ }
     const daily = await canUserUploadToday(req.userId, maxDaily);
@@ -274,20 +275,18 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
     let effectiveScheduleHint = schedule_hint;
     if (!effectiveScheduleHint) {
       try {
-        const defaultsSnap = await db.collection('user_defaults').doc(req.userId).get();
-        if (defaultsSnap.exists) {
-          const d = defaultsSnap.data();
-          if (d.postingWindow) {
-            const tz = d.postingWindow.timezone || d.timezone || 'UTC';
-            const today = new Date();
-            const [h,m] = (d.postingWindow.start||'15:00').split(':').map(x=>parseInt(x,10));
-            const candidate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), h||15, m||0,0,0));
-            if (candidate < today) candidate.setUTCDate(candidate.getUTCDate()+1);
-            effectiveScheduleHint = { when: candidate.toISOString(), frequency: 'once', timezone: tz };
-          }
-          if (d.variantStrategy && !contentData.variant_strategy) {
-            contentData.variant_strategy = d.variantStrategy; // persisted later if not dry run
-          }
+        const { fetchUserDefaults } = require('./services/userDefaultsCache');
+        const d = await fetchUserDefaults(req.userId);
+        if (d.postingWindow) {
+          const tz = d.postingWindow.timezone || d.timezone || 'UTC';
+          const today = new Date();
+          const [h,m] = (d.postingWindow.start||'15:00').split(':').map(x=>parseInt(x,10));
+          const candidate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), h||15, m||0,0,0));
+          if (candidate < today) candidate.setUTCDate(candidate.getUTCDate()+1);
+          effectiveScheduleHint = { when: candidate.toISOString(), frequency: 'once', timezone: tz };
+        }
+        if (d.variantStrategy && !contentData.variant_strategy) {
+          contentData.variant_strategy = d.variantStrategy;
         }
       } catch(defErr){ console.log('defaults lookup failed', defErr.message); }
     }

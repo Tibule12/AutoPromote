@@ -300,6 +300,12 @@ Upload Auto-Enrichment:
 Schedule Preview:
 `POST /api/profile/preview-schedule` -> `{ schedule: { when, frequency, timezone } }` (derives next run using stored postingWindow without creating content).
 
+### Variant Strategy Stats (Admin)
+`GET /api/admin/variants/strategy-stats` -> distribution of `variant_strategy` values over latest 1000 content documents.
+
+### User Defaults Caching
+Server caches `user_defaults` per user for `USER_DEFAULTS_CACHE_TTL_MS` (default 30000 ms) to reduce Firestore reads on heavy upload bursts.
+
 
 
 1) Wire landing page + smart link generation into upload/approval and save to content doc

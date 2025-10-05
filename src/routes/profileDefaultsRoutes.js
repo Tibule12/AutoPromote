@@ -44,6 +44,7 @@ router.post('/defaults', authMiddleware, async (req,res)=>{
       return res.json({ ok:true, updated: update, offline:true });
     }
     await db.collection('user_defaults').doc(req.userId).set(update, { merge:true });
+    try { const { primeUserDefaults } = require('../services/userDefaultsCache'); primeUserDefaults(req.userId, update); } catch(_){ }
     audit.log('profile.defaults.updated', { userId: req.userId, keys: Object.keys(update).filter(k=>k!=='updatedAt') });
     return res.json({ ok:true, updated: update });
   } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
