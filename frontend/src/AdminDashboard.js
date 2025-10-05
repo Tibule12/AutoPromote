@@ -6,7 +6,6 @@ import { db } from './firebaseClient';
 import mockAnalyticsData from './mockAnalyticsData';
 import VariantAdminPanel from './components/VariantAdminPanel';
 import './AdminDashboard.css';
-import VariantAdminPanel from './components/VariantAdminPanel';
 
 function AdminDashboard({ analytics, user, onLogout }) {
   const [dashboardData, setDashboardData] = useState(null);
@@ -16,8 +15,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
   const [refreshing, setRefreshing] = useState(false);
 
   const refreshData = () => {
-            {/* Variant anomaly & suppression management */}
-            <VariantAdminPanel />
+    // Trigger dashboard data refresh (VariantAdminPanel rendered in UI tabs elsewhere)
     setRefreshing(true);
     setIsLoading(true);
     fetchFirestoreData();
