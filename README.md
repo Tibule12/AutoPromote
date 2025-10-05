@@ -244,10 +244,15 @@ Daily aggregated metrics are stored in `content_daily_metrics` documents with id
 The background worker performs a rollup shortly after UTC midnight (probabilistically to avoid contention) or when `FORCE_DAILY_ROLLUP=true`.
 
 ## Variant Selection Strategies
+ 
 Environment variable `VARIANT_SELECTION_STRATEGY` controls how the next variant is chosen when multiple message variants are present:
 
 - `rotation` (default): round-robin by historical post count
 - `bandit`: UCB1 multi-armed bandit using clicks/post as reward, with exploration bonus `sqrt((2 * ln(totalPosts)) / posts)`
+
+Overrides:
+- Per-content: set `variant_strategy` field on the content document (e.g. `rotation` or `bandit`).
+- User default: POST `/api/profile/defaults` with `{"variantStrategy":"bandit"}`; applied automatically on upload if content lacks `variant_strategy`.
 
 Set in `.env`:
 
@@ -291,6 +296,9 @@ Accepted fields (all optional):
 Upload Auto-Enrichment:
 - If no `schedule_hint` sent and a `postingWindow.start` exists, server sets next occurrence as a one-off schedule hint.
 - If `variantStrategy` stored and content upload lacks `variant_strategy`, it is applied to the content document.
+
+Schedule Preview:
+`POST /api/profile/preview-schedule` -> `{ schedule: { when, frequency, timezone } }` (derives next run using stored postingWindow without creating content).
 
 
 
