@@ -32,7 +32,7 @@ try {
 }
 
 // Try to load optional route modules
-let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes;
+let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes, paymentsStatusRoutes, paymentsExtendedRoutes;
 try {
   withdrawalRoutes = require('./routes/withdrawalRoutes');
 } catch (error) {
@@ -57,10 +57,15 @@ try {
   }
 }
 
+try { paymentsStatusRoutes = require('./src/routes/paymentsStatusRoutes'); } catch(e) { try { paymentsStatusRoutes = require('./routes/paymentsStatusRoutes'); } catch(_) { paymentsStatusRoutes = express.Router(); } }
+try { paymentsExtendedRoutes = require('./src/routes/paymentsExtendedRoutes'); } catch(e) { try { paymentsExtendedRoutes = require('./routes/paymentsExtendedRoutes'); } catch(_) { paymentsExtendedRoutes = express.Router(); } }
+
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
 
 const app = express();
+// Request context (requestId, timing)
+try { app.use(require('./src/middlewares/requestContext')); } catch(_) { /* optional */ }
 const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
 
 app.use(cors({
@@ -85,6 +90,8 @@ app.use('/api', adminTestRoutes); // Add admin test routes
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/stripe', stripeOnboardRoutes);
+app.use('/api/payments', paymentsStatusRoutes); // /status + dev mocks
+app.use('/api/payments', paymentsExtendedRoutes); // /balance /plans /admin/overview
 
 // Serve well-known static files (e.g., TikTok site verification) from /public/.well-known
 const wellKnownDir = path.join(__dirname, 'public', '.well-known');
@@ -137,7 +144,8 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'AutoPromote Server is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    requestId: req.requestId || null
   });
 });
 

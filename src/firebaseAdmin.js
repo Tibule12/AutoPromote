@@ -1,3 +1,12 @@
+// Shim re-export to allow src/* modules to import a single firebaseAdmin reference
+// This avoids deep relative paths that broke when payments modules were added.
+// Canonical implementation lives at project root `firebaseAdmin.js`.
+try {
+  module.exports = require('../firebaseAdmin');
+} catch (e) {
+  console.warn('[firebaseAdmin shim] Root firebaseAdmin.js not found:', e.message);
+  throw e;
+}
 // Lightweight test bypass: when CI_ROUTE_IMPORTS=1 (route import tests) or FIREBASE_ADMIN_BYPASS=1
 // we avoid real Firebase initialization and return in-memory stubs.
 const bypass = process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1';
