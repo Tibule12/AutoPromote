@@ -20,8 +20,16 @@ router.get('/:code', async (req, res) => {
     try {
       const event = { type:'shortlink_resolve', code, ...data, createdAt: new Date().toISOString() };
       await db.collection('events').add(event);
+      // Attribution updater (legacy path)
       try { const { applyShortlinkClick } = require('../services/attributionUpdater'); applyShortlinkClick(code, data); } catch(_){ }
-    } catch(_){}
+      // Materialized variant stats click increment
+      try {
+        if (typeof data.variantIndex === 'number' && data.usedVariant) {
+          const { applyClickAttribution } = require('../services/variantStatsService');
+          await applyClickAttribution({ contentId: data.contentId, platform: data.platform, variant: data.usedVariant, clicks: 1 });
+        }
+      } catch(_){ }
+    } catch(_){ }
     return res.redirect(302, url);
   } catch (e) { return res.status(500).send('error'); }
 });

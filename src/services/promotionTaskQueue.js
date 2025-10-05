@@ -345,14 +345,27 @@ async function processNextPlatformTask() {
       } catch(_){ }
       if (strategy === 'bandit') {
         try {
-          // Fetch recent posts for this content/platform (sample)
+          let stats;
+          // Try materialized stats first
+          try {
+            const { getVariantStats } = require('./variantStatsService');
+            const vs = await getVariantStats(task.contentId);
+            if (vs && vs.platforms && vs.platforms[task.platform]) {
+              const arr = vs.platforms[task.platform].variants;
+              stats = payload.variants.map(v => {
+                const row = arr.find(r => r.value === v);
+                return { variant: v, posts: row ? row.posts : 0, clicks: row ? row.clicks : 0 };
+              });
+            }
+          } catch(_) { /* ignore */ }
+          if (!stats) {
             const prevPostsSnap = await db.collection('platform_posts')
               .where('platform','==', task.platform)
               .where('contentId','==', task.contentId)
               .orderBy('createdAt','desc')
               .limit(200)
               .get();
-            const stats = payload.variants.map(v => ({ variant: v, posts: 0, clicks: 0 }));
+            stats = payload.variants.map(v => ({ variant: v, posts: 0, clicks: 0 }));
             prevPostsSnap.forEach(p => {
               const d = p.data();
               if (d.usedVariant) {
@@ -363,23 +376,95 @@ async function processNextPlatformTask() {
                 }
               }
             });
-            const totalPosts = stats.reduce((a,b)=>a+b.posts,0);
-            // UCB1 scoring (reward = clicks/posts). Encourage exploration for untried variants.
-            let bestScore = -Infinity; let bestIdx = 0; const lnTotal = totalPosts > 0 ? Math.log(totalPosts) : 0;
-            stats.forEach((s,i) => {
-              if (s.posts === 0) {
-                // Force exploration: assign very high score
-                if (bestScore < 1e9) { bestScore = 1e9; bestIdx = i; }
-                return;
+          }
+          // Reactivation sweep: unsuppress variants whose cooldown elapsed
+          try {
+            const cooldownMin = parseInt(process.env.VARIANT_REACTIVATION_COOLDOWN_MIN || '720',10); // 12h
+            const nowMs = Date.now();
+            let changed = false;
+            stats.forEach(s=>{
+              if (s.suppressed && s.suppressedAt) {
+                const ageMin = (nowMs - s.suppressedAt)/60000;
+                if (ageMin >= cooldownMin) { s.suppressed = false; delete s.suppressedAt; changed = true; }
               }
-              const mean = s.clicks / s.posts; // clicks per post proxy for CTR
-              const bonus = Math.sqrt((2 * lnTotal) / s.posts);
-              const score = mean + bonus;
-              if (score > bestScore) { bestScore = score; bestIdx = i; }
             });
-            selectedVariant = payload.variants[bestIdx];
-            variantIndex = bestIdx;
-            payload = { ...payload, message: selectedVariant };
+            if (changed) { try { await db.collection('events').add({ type:'variant_reactivation_batch', contentId: task.contentId, platform: task.platform, at: new Date().toISOString() }); } catch(_){ } }
+          } catch(_){ }
+          const totalPosts = stats.reduce((a,b)=>a+(b.posts||0),0);
+          let bestScore = -Infinity; let bestIdx = 0; const lnTotal = totalPosts > 0 ? Math.log(totalPosts) : 0; let exploration = false;
+          // Precompute medians for normalization
+          const ctrArray = stats.map(s=>{
+            const rc = typeof s.decayedClicks === 'number'? s.decayedClicks: s.clicks;
+            const rp = (typeof s.decayedPosts === 'number' && s.decayedPosts>0)? s.decayedPosts: (s.posts||1);
+            return rc / rp;
+          }).filter(n=>!Number.isNaN(n)).sort((a,b)=>a-b);
+          const medianCtr = ctrArray.length? ctrArray[Math.floor(ctrArray.length/2)]: 0.01;
+          let explorationFactor = 1.0;
+          try {
+            const { getConfig } = require('./configService');
+            const cfg = await getConfig();
+            if (cfg && typeof cfg.banditExplorationFactor === 'number') explorationFactor = cfg.banditExplorationFactor;
+          } catch(_){ }
+            // Pre-fetch config once for weights & penalties
+            let cfg = {};
+            try { const { getConfig } = require('./configService'); cfg = await getConfig(); } catch(_){ }
+            const dynamicWeights = (cfg && cfg.banditWeights) ? cfg.banditWeights : null;
+            const penaltyScaling = (cfg && cfg.penaltyScaling) ? cfg.penaltyScaling : { suppressed: 0.6, quarantined: 0.85 };
+            const wCfgCtr = dynamicWeights && typeof dynamicWeights.ctr === 'number' ? dynamicWeights.ctr : parseFloat(process.env.BANDIT_WEIGHT_CTR || '0.6');
+            const wCfgReach = dynamicWeights && typeof dynamicWeights.reach === 'number' ? dynamicWeights.reach : parseFloat(process.env.BANDIT_WEIGHT_REACH || '0.25');
+            const wCfgQual = dynamicWeights && typeof dynamicWeights.quality === 'number' ? dynamicWeights.quality : parseFloat(process.env.BANDIT_WEIGHT_QUALITY || '0.15');
+            stats.forEach((s,i) => {
+            if (s.suppressed) return; // skip suppressed
+            if (s.quarantined) return; // skip quarantined variants entirely
+            if (s.posts === 0) {
+              const coldStartScore = 1e9 * explorationFactor; // scaled by exploration factor
+              if (bestScore < coldStartScore) { bestScore = coldStartScore; bestIdx = i; exploration = true; }
+              return;
+            }
+            const recentClicks = (typeof s.decayedClicks === 'number') ? s.decayedClicks : s.clicks;
+            const recentPosts = (typeof s.decayedPosts === 'number' && s.decayedPosts>0) ? s.decayedPosts : s.posts;
+            const meanCtr = recentClicks / recentPosts;
+            const ctrNorm = medianCtr>0? Math.min(1, meanCtr / (medianCtr*2)) : meanCtr; // normalize
+            // Placeholder predicted reach proxy = posts weight (could integrate optimization profile if cheap)
+            const reachProxy = Math.log10((s.impressions || (s.posts*100) || 1) + 10)/3; // ~0..1 scale
+            const qualityComponent = typeof s.qualityScore === 'number' ? (s.qualityScore/100) : 0.5; // fallback
+              const baseScore = (ctrNorm * wCfgCtr) + (reachProxy * wCfgReach) + (qualityComponent * wCfgQual);
+            const bonus = Math.sqrt((2 * lnTotal) / s.posts) * explorationFactor;
+            let score = baseScore + bonus;
+            // Down-rank anomaly unless few alternatives
+            if (s.anomaly) score *= 0.4;
+            try {
+              const { adjustBanditScoreForBaseline } = require('./promotionOptimizerService');
+              score = adjustBanditScoreForBaseline({ score, posts: s.posts, clicks: s.clicks });
+            } catch(_){ }
+            if (score > bestScore) { bestScore = score; bestIdx = i; exploration = false; }
+          });
+          selectedVariant = payload.variants[bestIdx];
+          variantIndex = bestIdx;
+          payload = { ...payload, message: selectedVariant };
+          // Record exploration vs exploitation event (best-effort)
+          try { await db.collection('events').add({ type:'variant_selection', contentId: task.contentId, platform: task.platform, strategy:'ucb1', exploration, chosen: selectedVariant, idx: bestIdx, at: new Date().toISOString() }); } catch(_){ }
+          // Record selection metrics (reward placeholders) for tuner (use current normalized components as proxies)
+          try {
+            const { recordSelectionOutcome } = require('./banditTuningService');
+            const s = stats[bestIdx];
+            const rc = (typeof s.decayedClicks === 'number') ? s.decayedClicks : s.clicks;
+            const rp = (typeof s.decayedPosts === 'number' && s.decayedPosts>0) ? s.decayedPosts : Math.max(1,s.posts);
+            const rewardCtr = rp>0? rc/rp:0;
+            const rewardQuality = typeof s.qualityScore === 'number'? s.qualityScore/100 : 0.5;
+            const rewardReach = (s.impressions || (s.posts*100) || 0)/1000; // scaled
+            await recordSelectionOutcome({ contentId: task.contentId, platform: task.platform, variant: selectedVariant, rewardCtr, rewardQuality, rewardReach });
+            // Record penalties for suppressed/quarantined variants (negative samples)
+            // Penalty scaling configurable
+            const penaltyCtrBase = -0.05; const penaltyQualBase = -0.05; const penaltyReachBase = -0.02;
+            for (const p of stats) {
+              if (p === s) continue;
+              if (p.suppressed || p.quarantined) {
+                const scale = p.quarantined ? (penaltyScaling.quarantined || 0.85) : (penaltyScaling.suppressed || 0.6);
+                try { await recordSelectionOutcome({ contentId: task.contentId, platform: task.platform, variant: p.variant, rewardCtr: penaltyCtrBase*scale, rewardQuality: penaltyQualBase*scale, rewardReach: penaltyReachBase*scale }); } catch(_){ }
+              }
+            }
+          } catch(_){ }
         } catch (e) {
           // Fallback to rotation on error
           try {
@@ -441,6 +526,24 @@ async function processNextPlatformTask() {
       simulatedResult.usedVariant = selectedVariant;
       simulatedResult.variantIndex = variantIndex;
     }
+    // Adaptive scheduling: if bandit strategy and exploration flagged high reward, enqueue a fast-follow task
+    try {
+      if (selectedVariant && (process.env.ADAPTIVE_FAST_FOLLOW === 'true')) {
+        const meanClicks = simulatedResult.clicks || 0;
+        if (meanClicks >= parseInt(process.env.FAST_FOLLOW_MIN_CLICKS || '5',10)) {
+          // schedule another task for this content/platform sooner (15% of base backoff or 2 min)
+          const ffDelayMs = Math.min(2*60000, Math.max(30000, BASE_BACKOFF_MS * 0.15));
+          const ref = db.collection('promotion_tasks').doc();
+          const ffBase = {
+            type:'platform_post', status:'queued', platform: task.platform, contentId: task.contentId, uid: task.uid, reason:'fast_follow',
+            payload: { ...(task.payload||{}), fastFollow:true }, attempts:0, nextAttemptAt: new Date(Date.now()+ffDelayMs).toISOString(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+          };
+          let ffTask = ffBase; try { const { attachSignature } = require('../utils/docSigner'); ffTask = attachSignature(ffBase); } catch(_){ }
+          await ref.set(ffTask);
+          try { await db.collection('events').add({ type:'fast_follow_enqueued', contentId: task.contentId, platform: task.platform, variant: selectedVariant, delayMs: ffDelayMs, at: new Date().toISOString() }); } catch(_){ }
+        }
+      }
+    } catch(_){ }
     await selectedDoc.ref.update({
       status: 'completed',
       outcome: simulatedResult,
@@ -464,6 +567,13 @@ async function processNextPlatformTask() {
       console.warn('[platform_posts][record] failed:', e.message);
     }
     await recordTaskCompletion('platform_post', true);
+    // Post-selection regeneration check (non-blocking)
+    try {
+      if (process.env.ENABLE_VARIANT_REGEN === 'true' && task.contentId && task.platform) {
+        const { regenerateIfNeeded } = require('./variantRegeneratorService');
+        regenerateIfNeeded({ contentId: task.contentId, platform: task.platform }).catch(()=>{});
+      }
+    } catch(_){ }
     return { taskId: task.id, outcome: simulatedResult };
   } catch (err) {
     const attempts = (task.attempts || 0) + 1;

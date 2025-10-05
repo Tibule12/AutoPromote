@@ -6,6 +6,7 @@ const { fetchFacebookPostMetrics, fetchTwitterTweetMetrics, fetchInstagramMediaM
 const { recordPlatformAmplifyTrigger, recordPlatformAccelerationTrigger, recordPlatformDecayEvent, recordPlatformReactivationEvent } = require('./aggregationService');
 const logger = require('./logger');
 const { enqueuePlatformPostTask } = require('./promotionTaskQueue');
+const { addImpressions } = require('./variantStatsService');
 
 function computeNormalizedScore(platform, metrics) {
   if (!metrics) return null;
@@ -76,6 +77,13 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5, maxAgeMinutes = 30 
           lastMetricsCheck: admin.firestore.FieldValue.serverTimestamp(),
           updatedAt: admin.firestore.FieldValue.serverTimestamp()
         };
+        // Attempt to propagate impressions into variant materialized stats
+        try {
+          const impressions = metrics.post_impressions || metrics.impressions || metrics.impression_count || null;
+          if (impressions && d.contentId && d.variant) {
+            await addImpressions({ contentId: d.contentId, platform: d.platform, variant: d.variant, impressions });
+          }
+        } catch(imprErr){ logger.warn('impressions_update_failed', { error: imprErr.message, contentId: d.contentId, platform: d.platform }); }
         // Score history & acceleration / decay logic
         try {
           const prevHistory = Array.isArray(d.scoreHistory) ? d.scoreHistory.slice(-19) : []; // keep last 19

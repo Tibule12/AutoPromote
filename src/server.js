@@ -124,6 +124,17 @@ try {
   console.log('⚠️ Admin security routes not found:', e.message);
   adminSecurityRoutes = express.Router();
 }
+
+// Ensure adminSecurityRoutes loaded even if adminTestRoutes existed
+if (!adminSecurityRoutes) {
+  try {
+    adminSecurityRoutes = require('./routes/adminSecurityRoutes');
+    console.log('✅ Admin security routes loaded (post-load)');
+  } catch (e) {
+    adminSecurityRoutes = express.Router();
+    console.log('⚠️ Admin security routes not found (post-load):', e.message);
+  }
+}
   // Create a dummy router if the module is missing
   adminTestRoutes = express.Router();
   adminTestRoutes.get('/admin-test/health', (req, res) => {
@@ -139,6 +150,11 @@ let paymentsStatusRoutes;
 let paymentsExtendedRoutes;
 let paypalWebhookRoutes;
 let stripeWebhookRoutes;
+let variantAdminRoutes;
+let adminConfigRoutes;
+let adminDashboardRoutes;
+let adminBanditRoutes;
+let adminAlertsRoutes;
 try {
   withdrawalRoutes = require('./routes/withdrawalRoutes');
 } catch (error) {
@@ -189,6 +205,26 @@ try {
   stripeWebhookRoutes = require('./routes/stripeWebhookRoutes');
   console.log('✅ Stripe webhook routes loaded');
 } catch (e) { stripeWebhookRoutes = express.Router(); }
+try {
+  variantAdminRoutes = require('./routes/variantAdminRoutes');
+  console.log('✅ Variant admin routes loaded');
+} catch (e) { variantAdminRoutes = express.Router(); console.log('⚠️ Variant admin routes not found'); }
+try {
+  adminConfigRoutes = require('./routes/adminConfigRoutes');
+  console.log('✅ Admin config routes loaded');
+} catch(e) { adminConfigRoutes = express.Router(); console.log('⚠️ Admin config routes not found'); }
+try {
+  adminDashboardRoutes = require('./routes/adminDashboardRoutes');
+  console.log('✅ Admin dashboard routes loaded');
+} catch(e) { adminDashboardRoutes = express.Router(); console.log('⚠️ Admin dashboard routes not found'); }
+try {
+  adminBanditRoutes = require('./routes/adminBanditRoutes');
+  console.log('✅ Admin bandit routes loaded');
+} catch(e) { adminBanditRoutes = express.Router(); console.log('⚠️ Admin bandit routes not found'); }
+try {
+  adminAlertsRoutes = require('./routes/adminAlertsRoutes');
+  console.log('✅ Admin alerts routes loaded');
+} catch(e) { adminAlertsRoutes = express.Router(); console.log('⚠️ Admin alerts routes not found'); }
 
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
@@ -223,7 +259,14 @@ app.use((req, res, next) => {
 });
 
 // API Routes
-try { const { rateLimiter } = require('./middlewares/globalRateLimiter'); app.use('/api/', rateLimiter({})); } catch(_){ }
+// Prefer distributed limiter if Redis available, else fallback
+try {
+  const { distributedRateLimiter } = require('./middlewares/distributedRateLimiter');
+  app.use('/api/', distributedRateLimiter({}));
+  console.log('✅ Distributed rate limiter active');
+} catch(e) {
+  try { const { rateLimiter } = require('./middlewares/globalRateLimiter'); app.use('/api/', rateLimiter({})); console.log('⚠️ Fallback to in-memory rate limiter'); } catch(_){ }
+}
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/content', contentRoutes);
@@ -271,6 +314,11 @@ app.use('/api/payments', paymentsStatusRoutes);
 app.use('/api/payments', paymentsExtendedRoutes);
 app.use('/api/paypal', paypalWebhookRoutes);
 app.use('/api/stripe', stripeWebhookRoutes);
+app.use('/api/admin/variants', variantAdminRoutes);
+app.use('/api/admin/config', adminConfigRoutes);
+app.use('/api/admin/dashboard', adminDashboardRoutes);
+app.use('/api/admin/bandit', adminBanditRoutes);
+app.use('/api/admin/alerts', adminAlertsRoutes);
 
 // Serve site verification and other well-known files
 // 1) Try root-level /public/.well-known
@@ -360,6 +408,13 @@ app.get('/admin-dashboard', (req, res) => {
 });
 
 // Health check endpoint (supports verbose diagnostics via ?verbose=1 or header x-health-verbose=1)
+// Simple version endpoint (package version + commit hash if available)
+app.get('/api/version', (_req,res) => {
+  let pkgVersion = null; try { pkgVersion = require('../package.json').version; } catch(_){ }
+  const commit = process.env.GIT_COMMIT || process.env.COMMIT_HASH || process.env.VERCEL_GIT_COMMIT_SHA || null;
+  return res.json({ ok:true, version: pkgVersion, commit, generatedAt: new Date().toISOString() });
+});
+
 app.get('/api/health', async (req, res) => {
   const verbose = req.query.verbose === '1' || req.query.full === '1' || req.headers['x-health-verbose'] === '1';
   const base = {
@@ -597,6 +652,9 @@ const PLATFORM_STATS_POLL_INTERVAL_MS = parseInt(process.env.PLATFORM_STATS_POLL
 const OAUTH_STATE_CLEAN_INTERVAL_MS = parseInt(process.env.OAUTH_STATE_CLEAN_INTERVAL_MS || '900000', 10); // 15 min default
 const EARNINGS_AGG_INTERVAL_MS = parseInt(process.env.EARNINGS_AGG_INTERVAL_MS || '600000', 10); // 10 min default
 const LOCK_CLEAN_INTERVAL_MS = parseInt(process.env.LOCK_CLEAN_INTERVAL_MS || '300000', 10); // 5 min default
+const BANDIT_TUNER_INTERVAL_MS = parseInt(process.env.BANDIT_TUNER_INTERVAL_MS || '900000', 10); // 15 min default
+const EXPLORATION_CTRL_INTERVAL_MS = parseInt(process.env.EXPLORATION_CTRL_INTERVAL_MS || '600000', 10); // 10 min default
+const ALERT_CHECK_INTERVAL_MS = parseInt(process.env.ALERT_CHECK_INTERVAL_MS || '900000', 10); // 15 min default
 
 if (ENABLE_BACKGROUND) {
   console.log('🛠  Background job runner enabled.');
@@ -740,6 +798,48 @@ if (ENABLE_BACKGROUND) {
         try { require('./services/statusRecorder').recordRun('lockCleanup', { removed: removed || 0, ok: true }); } catch(_){ }
       } catch (e) { console.warn('[BG][locks] cleanup error:', e.message); }
     }, LOCK_CLEAN_INTERVAL_MS).unref();
+
+    // Bandit auto-tuning job
+    try {
+      const { applyAutoTune } = require('./services/banditTuningService');
+      setInterval(async () => {
+        try {
+          const r = await applyAutoTune();
+          if (r && r.updated) {
+            console.log('[BG][bandit-tuner] updated weights:', r.newWeights);
+            try { require('./services/statusRecorder').recordRun('banditTuner', { ok:true, weights: r.newWeights }); } catch(_){ }
+          } else {
+            try { require('./services/statusRecorder').recordRun('banditTuner', { ok:true, noop:true }); } catch(_){ }
+          }
+        } catch(e){ console.warn('[BG][bandit-tuner] error:', e.message); }
+      }, BANDIT_TUNER_INTERVAL_MS).unref();
+    } catch(e) {
+      console.log('[BG][bandit-tuner] skipped:', e.message);
+    }
+
+    // Exploration controller job
+    try {
+      const { adjustExplorationFactor } = require('./services/explorationControllerService');
+      setInterval(async () => {
+        try {
+          const r = await adjustExplorationFactor();
+          if (r.updated) {
+            console.log('[BG][exploration-controller] factor updated', r.newFactor, 'ratio', r.ratio.toFixed(3));
+            try { require('./services/statusRecorder').recordRun('explorationController', { ok:true, factor: r.newFactor, ratio: r.ratio }); } catch(_){ }
+          } else {
+            try { require('./services/statusRecorder').recordRun('explorationController', { ok:true, noop:true, factor: r.factor, ratio: r.ratio }); } catch(_){ }
+          }
+        } catch(e) { console.warn('[BG][exploration-controller] error:', e.message); }
+      }, EXPLORATION_CTRL_INTERVAL_MS).unref();
+    } catch(e) { console.log('[BG][exploration-controller] skipped:', e.message); }
+
+    // Alerting periodic checks (exploration drift, diversity)
+    try {
+      const { runAlertChecks } = require('./services/alertingService');
+      setInterval(async () => {
+        try { const r = await runAlertChecks(); if (r.exploration.alerted || r.diversity.alerted) console.log('[BG][alerts] alerts dispatched'); } catch(e){ console.warn('[BG][alerts] error:', e.message); }
+      }, ALERT_CHECK_INTERVAL_MS).unref();
+    } catch(e) { console.log('[BG][alerts] skipped:', e.message); }
   } catch (e) {
     console.warn('⚠️ Background job initialization failed:', e.message);
   }

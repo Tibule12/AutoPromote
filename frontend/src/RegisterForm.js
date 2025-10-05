@@ -42,14 +42,16 @@ const RegisterForm = ({ registerUser }) => {
     try {
       // Use the registerUser function passed from App.js
       await registerUser(name, email, password);
-      
-      setSuccess('Registration successful! You can now log in.');
+
+      setSuccess('Registration successful! Please check your email to verify your account before logging in.');
       setFormData({
         name: '',
         email: '',
         password: '',
         confirmPassword: ''
       });
+      // After short delay, show login (consumer can reload / parent will swap component)
+      setTimeout(()=>{ try { if (typeof window !== 'undefined') window.location.href = '/'; } catch(_){} }, 4000);
     } catch (error) {
       console.error('Registration error:', error);
       let errorMessage = 'Registration failed. ';

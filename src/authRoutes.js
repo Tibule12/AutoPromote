@@ -1,6 +1,7 @@
 const express = require('express');
 const admin = require('firebase-admin');
 const router = express.Router();
+const { sendVerificationEmail, sendPasswordResetEmail } = require('./services/emailService');
 
 // Middleware to verify Firebase token
 const verifyFirebaseToken = async (req, res, next) => {
@@ -42,23 +43,62 @@ router.post('/register', async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    // Get user token
-    const token = await admin.auth().createCustomToken(userRecord.uid);
-    
-    res.status(201).json({
-      message: 'User registered successfully',
-      user: {
-        uid: userRecord.uid,
-        name,
-        email,
-        role
-      },
-      token
-    });
+    // Generate email verification link
+    try {
+      const verifyLink = await admin.auth().generateEmailVerificationLink(email, { url: process.env.VERIFY_REDIRECT_URL || 'https://example.com/verified' });
+      await sendVerificationEmail({ email, link: verifyLink });
+    } catch (e) {
+      console.log('⚠️ Could not send verification email:', e.message);
+    }
+    res.status(201).json({ message: 'User registered. Verification email sent.', requiresEmailVerification: true });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: error.message });
   }
+});
+
+// Trigger resend verification email
+router.post('/resend-verification', async (req,res)=>{
+  try {
+    const { email } = req.body || {}; if(!email) return res.status(400).json({ error:'Email required' });
+    const user = await admin.auth().getUserByEmail(email).catch(()=>null); if(!user) return res.status(404).json({ error:'User not found' });
+    if (user.emailVerified) return res.json({ message:'Already verified' });
+    const link = await admin.auth().generateEmailVerificationLink(email, { url: process.env.VERIFY_REDIRECT_URL || 'https://example.com/verified' });
+    await sendVerificationEmail({ email, link });
+    return res.json({ message:'Verification email sent' });
+  } catch(e){ return res.status(500).json({ error:e.message }); }
+});
+
+// Email verification callback (optional passthrough if front-end not using Firebase client flow directly)
+router.post('/verify-email', async (req,res)=>{
+  try {
+    const { uid } = req.body || {}; if(!uid) return res.status(400).json({ error:'uid required' });
+    const user = await admin.auth().getUser(uid);
+    if (user.emailVerified) return res.json({ verified:true });
+    return res.json({ verified:false, message:'User must click Firebase email link directly' });
+  } catch(e){ return res.status(500).json({ error:e.message }); }
+});
+
+// Request password reset
+router.post('/request-password-reset', async (req,res)=>{
+  try {
+    const { email } = req.body || {}; if(!email) return res.status(400).json({ error:'Email required' });
+    const user = await admin.auth().getUserByEmail(email).catch(()=>null);
+    if(!user) return res.status(200).json({ message:'If the email exists, a reset link will be sent.' }); // do not leak existence
+    const link = await admin.auth().generatePasswordResetLink(email, { url: process.env.PASSWORD_RESET_REDIRECT_URL || 'https://example.com/reset-complete' });
+    await sendPasswordResetEmail({ email, link });
+    return res.json({ message:'Password reset email sent' });
+  } catch(e){ return res.status(500).json({ error:e.message }); }
+});
+
+// Complete password reset (admin override path)
+router.post('/reset-password', async (req,res)=>{
+  try {
+    const { uid, newPassword } = req.body || {}; if(!uid || !newPassword) return res.status(400).json({ error:'uid and newPassword required' });
+    if (newPassword.length < 6) return res.status(400).json({ error:'Password too short' });
+    await admin.auth().updateUser(uid, { password: newPassword });
+    return res.json({ message:'Password updated' });
+  } catch(e){ return res.status(500).json({ error:e.message }); }
 });
 
 // Login endpoint
@@ -156,6 +196,14 @@ router.post('/login', async (req, res) => {
       isAdmin,
       fromCollection
     });
+
+    // Reject login if email not verified (except admins) to enforce verification
+    try {
+      const authUser = await admin.auth().getUser(decodedToken.uid);
+      if (!authUser.emailVerified) {
+        return res.status(403).json({ error: 'email_not_verified', message: 'Please verify your email before logging in.' });
+      }
+    } catch(_){}
 
     // Create a custom token if we're using email/password login
     let tokenToReturn = idToken;
