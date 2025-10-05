@@ -11,6 +11,45 @@ let helmet, compression;
 try { compression = require('compression'); } catch(_) { /* optional */ }
 try { helmet = require('helmet'); } catch(_) { /* optional */ }
 
+// ---------------------------------------------------------------------------
+// Observability & startup environment reminders
+// ---------------------------------------------------------------------------
+const SLOW_REQ_MS = parseInt(process.env.SLOW_REQ_MS || '3000', 10);
+let __printedStartupMissing = false;
+
+function printMissingEnvOnce() {
+  if (__printedStartupMissing) return;
+  const missing = [];
+  if (!process.env.SESSION_SECRET) missing.push('SESSION_SECRET');
+  if (!process.env.JWT_AUDIENCE) missing.push('JWT_AUDIENCE');
+  if (!process.env.JWT_ISSUER) missing.push('JWT_ISSUER');
+  if (!process.env.RATE_LIMIT_GLOBAL_MAX) missing.push('RATE_LIMIT_GLOBAL_MAX');
+  if (missing.length) {
+    console.warn('[startup] Missing recommended env vars:', missing.join(', '));
+    console.warn('  Add them in Render dashboard → Environment, then redeploy.');
+  }
+  if (process.env.ENABLE_BACKGROUND_JOBS !== 'true') {
+    console.log('ℹ️ Background jobs DISABLED. Set ENABLE_BACKGROUND_JOBS=true to activate autonomous loops.');
+  }
+  __printedStartupMissing = true;
+}
+setTimeout(printMissingEnvOnce, 1200);
+
+// Middleware: slow request profiler
+// Attach as early as possible (after requestContext if present)
+// We don't import requestContext here yet (loaded later) but we still measure duration.
+function slowRequestLogger(req,res,next){
+  const started = Date.now();
+  res.once('finish', () => {
+    const dur = Date.now() - started;
+    if (dur >= SLOW_REQ_MS) {
+      console.warn(`[slow] ${req.method} ${req.originalUrl} ${dur}ms status=${res.statusCode}`);
+    }
+  });
+  next();
+}
+
+
 // Load core routes
 const authRoutes = require('./authRoutes');
 const userRoutes = require('./userRoutes');
@@ -232,6 +271,10 @@ const { db, auth, storage } = require('./firebaseAdmin');
 const app = express();
 const PORT = process.env.PORT || 5000; // Default to port 5000, Render will override with its own PORT
 
+// Attach request context (if available) then slow request logger
+try { app.use(require('./middlewares/requestContext')); } catch(_) { /* optional */ }
+app.use(slowRequestLogger);
+
 // CORS configuration - allow all origins for debugging (tighten in prod)
 app.use(cors({
   origin: '*',
@@ -415,6 +458,15 @@ app.get('/api/version', (_req,res) => {
   return res.json({ ok:true, version: pkgVersion, commit, generatedAt: new Date().toISOString() });
 });
 
+// Ultra-lightweight ping for uptime monitors (avoid heavy Firestore reads)
+app.get('/api/ping', (_req,res) => {
+  res.setHeader('Cache-Control','no-store');
+  return res.json({ ok:true, ts: Date.now() });
+});
+
+// Cache extended diagnostics to avoid repeated heavy Firestore queries.
+let __healthCache = { ts:0, data:null };
+const HEALTH_CACHE_MS = parseInt(process.env.HEALTH_CACHE_MS || '15000',10); // 15s default
 app.get('/api/health', async (req, res) => {
   const verbose = req.query.verbose === '1' || req.query.full === '1' || req.headers['x-health-verbose'] === '1';
   const base = {
@@ -424,8 +476,10 @@ app.get('/api/health', async (req, res) => {
     uptimeSec: Math.round(process.uptime()),
   };
   if (!verbose) return res.json(base);
-
-  // Collect extended diagnostics best-effort; failures should not break health.
+  const now = Date.now();
+  if (__healthCache.data && (now - __healthCache.ts) < HEALTH_CACHE_MS) {
+    return res.json(__healthCache.data);
+  }
   const extended = { ...base, diagnostics: {} };
   try {
     const { db } = require('./firebaseAdmin');
@@ -471,7 +525,8 @@ app.get('/api/health', async (req, res) => {
   } catch (e) {
     extended.diagnosticsError = e.message;
   }
-  return res.json(extended);
+  __healthCache = { ts: Date.now(), data: extended };
+  return res.json(__healthCache.data);
 });
 
 // Readiness probe - returns 200 if system considered ready, else 503.
