@@ -760,7 +760,12 @@ const server = app.listen(PORT, () => {
 // Background Workers (Phase B - Automatic Scheduling)
 // -------------------------------------------------
 // Controlled via env flags so we can disable on serverless / multi-instance deployments
-const ENABLE_BACKGROUND = process.env.ENABLE_BACKGROUND_JOBS === 'true';
+// Support common typo ENABLE_BACKROUND_JOBS (missing 'g') as a fallback
+let ENABLE_BACKGROUND = process.env.ENABLE_BACKGROUND_JOBS === 'true';
+if (!ENABLE_BACKGROUND && process.env.ENABLE_BACKROUND_JOBS === 'true') {
+  ENABLE_BACKGROUND = true;
+  console.warn("[startup] Detected ENABLE_BACKROUND_JOBS (typo). Please rename to ENABLE_BACKGROUND_JOBS to avoid future issues.");
+}
 const STATS_POLL_INTERVAL_MS = parseInt(process.env.STATS_POLL_INTERVAL_MS || '180000', 10); // 3 minutes default
 const TASK_PROCESS_INTERVAL_MS = parseInt(process.env.TASK_PROCESS_INTERVAL_MS || '60000', 10); // 1 minute default
 const PLATFORM_STATS_POLL_INTERVAL_MS = parseInt(process.env.PLATFORM_STATS_POLL_INTERVAL_MS || '300000', 10); // 5 minutes default
