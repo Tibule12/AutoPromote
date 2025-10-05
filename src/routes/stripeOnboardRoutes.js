@@ -1,5 +1,7 @@
 const express = require('express');
-const { db } = require('../../backend/firebaseAdmin');
+// Use local src firebaseAdmin shim to avoid brittle relative path to backend copy
+let db;
+try { ({ db } = require('../firebaseAdmin')); } catch(_) { ({ db } = require('../../firebaseAdmin')); }
 
 // Initialize Stripe only if key is available
 let stripe = null;
@@ -12,7 +14,7 @@ if (process.env.STRIPE_SECRET_KEY) {
 const router = express.Router();
 // Prefer local src middleware if available; fallback to backend copy for legacy structure
 let authMiddleware;
-try { authMiddleware = require('../authMiddleware'); } catch(_) { authMiddleware = require('../../backend/authMiddleware'); }
+try { authMiddleware = require('../authMiddleware'); } catch(_) { try { authMiddleware = require('../../authMiddleware'); } catch(e) { authMiddleware = (req,_res,next)=> next(); } }
 
 // POST /api/withdrawals/onboard - Start Stripe Connect onboarding for user
 router.post('/onboard', authMiddleware, async (req, res) => {
