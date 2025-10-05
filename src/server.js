@@ -20,6 +20,7 @@ let promotionTaskRoutes;
 let metricsRoutes;
 let tiktokRoutes;
 let notificationsRoutes;
+let captionsRoutes;
 try {
   tiktokRoutes = require('../tiktokRoutes'); // use top-level tiktokRoutes which includes auth + storage
   console.log('✅ Using top-level tiktokRoutes.js');
@@ -77,6 +78,13 @@ try {
 } catch (e) {
   console.log('⚠️ Notifications routes not found:', e.message);
   notificationsRoutes = express.Router();
+}
+try {
+  captionsRoutes = require('./routes/captionsRoutes');
+  console.log('✅ Captions routes loaded');
+} catch (e) {
+  console.log('⚠️ Captions routes not found:', e.message);
+  captionsRoutes = express.Router();
 }
 try {
   metricsRoutes = require('./routes/metricsRoutes');
@@ -227,6 +235,8 @@ app.use('/api/instagram', instagramRoutes);
 console.log('🚏 Instagram routes mounted at /api/instagram');
 app.use('/api/notifications', notificationsRoutes);
 console.log('🚏 Notifications routes mounted at /api/notifications');
+app.use('/api', captionsRoutes);
+console.log('🚏 Captions routes mounted at /api');
 
 // Content Quality Check Route
 const contentQualityCheck = require('./contentQualityCheck');
