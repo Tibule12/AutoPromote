@@ -28,12 +28,8 @@ AutoPromote is a free, automated content promotion platform that helps creators 
 - Monetized Landing Pages & Smart Links
 	- [~] Cloud Functions exported: `generateMonetizedLandingPage`, `generateSmartLink` (`autopromote-functions/index.js`)
 	- [~] Server marks intents on content (`landingPageRequestedAt`, `smartLinkRequestedAt`) to integrate generation
-
-- Analytics & Optimization
 	- [x] Basic content analytics and simulated platform breakdowns
 	- [x] Optimization recommendations and platform timing suggestions (`src/optimizationService.js`)
-	- [x] Shortlink-based variant attribution (auto-generated per post)
-	- [x] Denormalized click counters (content + platform post)
 	- [x] Wilson-scored variant ranking & champion selection
 	- [x] Performance dashboards & per-content performance APIs
 
@@ -41,14 +37,8 @@ AutoPromote is a free, automated content promotion platform that helps creators 
 	- [x] Admin routes mounted; moderation via status updates; active promotions listing
 	- [ ] Minimal admin UI screens for approve/flag/boost/pause and global counters
 
-- Notifications & Rewards
-	- [ ] Notifications writer (Firestore collection + optional email)
-	- [ ] Gamified rewards engine (badges, streaks, unlocks)
 
 ## Firebase Functions (Free Tier)
-
-Located in `autopromote-functions/` and exported by `index.js`:
-
 - Landing Page Generator: `generateMonetizedLandingPage`
 - Smart Link Tracker: `generateSmartLink`, `smartLinkRedirect`
 - Social Media Auto‑Promotion Engine: `autoPromoteContent`
