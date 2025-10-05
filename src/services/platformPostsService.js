@@ -66,6 +66,28 @@ async function recordPlatformPost({ platform, contentId, uid, reason, payload = 
     updatedAt: admin.firestore.FieldValue.serverTimestamp()
   };
   await ref.set(doc);
+  // Update materialized variant stats (posts level)
+  try {
+    if (usedVariant) {
+      const { updateVariantStats } = require('./variantStatsService');
+      await updateVariantStats({ contentId, platform, variant: usedVariant, clicksDelta: typeof outcome.clicks === 'number' ? outcome.clicks : 0 });
+      // Attempt inline quality scoring for the variant if not scored yet
+      try {
+        const { computeQualityScore } = require('./variantQualityService');
+        const msg = doc.payload && (doc.payload.message || doc.payload.text || doc.payload.caption);
+        if (msg) {
+          // Light touch update (merge) only if variant_stats exists & variant qualityScore missing
+          const vsRef = require('../firebaseAdmin').db.collection('variant_stats').doc(contentId);
+          await require('../firebaseAdmin').db.runTransaction(async (tx)=>{
+            const vsSnap = await tx.get(vsRef); if(!vsSnap.exists) return;
+            const data = vsSnap.data(); const plat = data.platforms && data.platforms[platform]; if(!plat) return;
+            const row = plat.variants.find(v=> v.value === usedVariant); if(!row) return;
+            if (row.qualityScore == null) { row.qualityScore = computeQualityScore(msg); tx.set(vsRef, data, { merge:true }); }
+          });
+        }
+      } catch(_){ }
+    }
+  } catch (_) { /* non-fatal */ }
   return { id: ref.id, success };
 }
 

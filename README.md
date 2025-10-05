@@ -325,3 +325,79 @@ Server caches `user_defaults` per user for `USER_DEFAULTS_CACHE_TTL_MS` (default
 ---
 
 For admin details, see [README-ADMIN.md](README-ADMIN.md).
+
+## Production Readiness Checklist (Implemented)
+
+Core Platform:
+- [x] Auth (email verification + password reset) enforced
+- [x] Variant selection with adaptive bandit (UCB1 + dynamic weights + exploration controller)
+- [x] Quality scoring + regeneration + suppression/quarantine governance
+- [x] Dynamic config service with cached retrieval & admin update endpoints
+- [x] Manual + automatic rollback with alerts for weight regressions
+- [x] Penalty scaling & reward normalization (z-score option)
+- [x] Admin dashboard JSON endpoints (overview, exploration, governance, diversity, weight history)
+- [x] Alerting subsystem (webhook / Slack) for exploration drift, low diversity, rollbacks, email failures
+- [x] Email provider abstraction (console, SendGrid, Mailgun) with templated verification/reset emails
+
+Operational Safety:
+- [x] Health & readiness probes (/api/health, /api/health/ready)
+- [x] Background worker locking with stale lock cleanup
+- [x] Dead-letter queue for failed promotion tasks
+- [x] Rate limiting (distributed-capable scaffold + fallback)
+- [x] Integrity signatures for queued tasks
+- [x] System status & counters recording
+- [x] Alert batching cadence (15m default) and configurable exploration targets
+
+Observability:
+- [x] Events collection for selection, regeneration, anomalies, rollbacks, alerts
+- [x] Weight history timeline with diffs + rollback markers
+- [x] Admin alerts endpoints (/api/admin/alerts/recent, /api/admin/alerts/stats)
+- [x] Bandit status & manual rollback endpoint (/api/admin/bandit/*)
+
+Extensibility:
+- [x] Pluggable variant generation (heuristic, LLM stub)
+- [x] Pluggable email providers
+- [x] Config-driven penalty & normalization tuning
+
+Launch TODO (Optional Enhancements, can ship post-MVP):
+- [ ] Firestore emulator integration tests for full end-to-end variant lifecycle
+- [ ] UI charts for exploration ratio & weight deltas
+- [ ] Alert deduplication & throttle window (currently sends every interval if persistent)
+- [ ] Percentile reward normalization method
+- [ ] Retry & DLQ for failed alert webhooks
+- [ ] Real LLM variant generation provider
+
+## Quick Start (Prod-Like)
+1. Set essential environment variables (.env or hosting platform):
+	 - FIREBASE_* credentials OR GOOGLE_APPLICATION_CREDENTIALS path
+	 - ENABLE_BACKGROUND_JOBS=true
+	 - VARIANT_SELECTION_STRATEGY=bandit
+	 - EMAIL_PROVIDER=console (or sendgrid/mailgun + keys)
+	 - BANDIT_TUNER_MIN_EVENTS=50
+2. (Optional) Configure alerting via /api/admin/config/update:
+```
+{
+	"alerting": {
+		"webhookUrl": "https://ops.example.com/hooks/autopromote",
+		"enabledEvents": ["exploration_drift","variant_diversity_low","bandit_manual_rollback","bandit_auto_rollback","email_delivery_failure"],
+		"minDiversityRatio": 0.2
+	}
+}
+```
+3. Monitor `/api/admin/dashboard/overview` for initial system stabilization.
+4. Adjust `banditExplorationTarget` if exploration too high/low once >200 selection events recorded.
+
+## Rollback Procedure
+Manual rollback to previous stable weights:
+POST `/api/admin/bandit/rollback` { "strategy":"previous", "reason":"stability" }
+Returns restored weights + emits alert & history doc.
+
+## Alert Types
+| Type | Severity | Description |
+|------|----------|-------------|
+| exploration_drift | warning | Exploration ratio outside tolerance * 2 |
+| variant_diversity_low | warning | Active unique variants / total variants below threshold |
+| bandit_auto_rollback | critical/warning | Automatic rollback after CTR drop |
+| bandit_manual_rollback | warning | Manual rollback executed |
+| email_delivery_failure | warning | Email provider send failed |
+

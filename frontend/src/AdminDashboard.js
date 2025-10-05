@@ -4,7 +4,9 @@ import { auth } from './firebaseClient';
 import { collection, getDocs, query, limit, orderBy, where, Timestamp } from 'firebase/firestore';
 import { db } from './firebaseClient';
 import mockAnalyticsData from './mockAnalyticsData';
+import VariantAdminPanel from './components/VariantAdminPanel';
 import './AdminDashboard.css';
+import VariantAdminPanel from './components/VariantAdminPanel';
 
 function AdminDashboard({ analytics, user, onLogout }) {
   const [dashboardData, setDashboardData] = useState(null);
@@ -14,6 +16,8 @@ function AdminDashboard({ analytics, user, onLogout }) {
   const [refreshing, setRefreshing] = useState(false);
 
   const refreshData = () => {
+            {/* Variant anomaly & suppression management */}
+            <VariantAdminPanel />
     setRefreshing(true);
     setIsLoading(true);
     fetchFirestoreData();
@@ -1082,6 +1086,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
                 </div>
               </div>
             </div>
+
+            {/* Variant anomaly & suppression management */}
+            <VariantAdminPanel />
 
             <div style={{ marginTop: 10 }}>
               <DataTable

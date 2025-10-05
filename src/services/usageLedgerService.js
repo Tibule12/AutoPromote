@@ -7,14 +7,12 @@ const { db, admin } = require('../firebaseAdmin');
 async function recordUsage({ type, userId, amount = 0, currency = 'USD', meta = {} }) {
   if (!type || !userId) return;
   try {
-    await db.collection('usage_ledger').add({
-      type,
-      userId,
-      amount,
-      currency,
-      meta,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    });
+    let doc = { type, userId, amount, currency, meta, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+    // Sign financial-impacting records
+    if (['subscription_fee','overage','payout','adjustment'].includes(type)) {
+      try { const { attachSignature } = require('../utils/docSigner'); doc = attachSignature(doc); } catch(_){ }
+    }
+    await db.collection('usage_ledger').add(doc);
   } catch (_) { /* silent */ }
 }
 

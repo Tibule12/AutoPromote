@@ -65,6 +65,18 @@ const LoginForm = ({ onLogin, loginUser }) => {
     }
   };
 
+  const [resetRequested,setResetRequested] = useState(false);
+  const [resetEmail,setResetEmail] = useState('');
+  const [resetMsg,setResetMsg] = useState('');
+  const requestReset = async (e) => {
+    e.preventDefault(); setResetMsg('');
+    const email = resetEmail || formData.email; if(!email) { setResetMsg('Enter email first'); return; }
+    try {
+      const res = await fetch((process.env.REACT_APP_API_BASE||'') + '/api/auth/request-password-reset', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email }) });
+      const data = await res.json().catch(()=>({}));
+      if(res.ok) setResetMsg(data.message || 'If the email exists, a reset link has been sent.'); else setResetMsg(data.error || 'Request failed');
+    } catch(err){ setResetMsg(err.message); }
+  };
   return (
     <div className="auth-container">
       <form onSubmit={handleSubmit} className="auth-form">
@@ -102,6 +114,21 @@ const LoginForm = ({ onLogin, loginUser }) => {
             autoComplete="current-password"
           />
         </div>
+
+        <div className="form-group" style={{marginTop:8}}>
+          <small>
+            <a href="#" onClick={(e)=>{ e.preventDefault(); setResetRequested(r=>!r); }}>
+              {resetRequested ? 'Hide password reset' : 'Forgot password?'}
+            </a>
+          </small>
+        </div>
+        {resetRequested && (
+          <div style={{marginBottom:12}}>
+            <input type="email" placeholder="Email for reset" className="form-input" value={resetEmail} onChange={e=>setResetEmail(e.target.value)} />
+            <button type="button" className="auth-button" style={{marginTop:8}} onClick={requestReset}>Send Reset Email</button>
+            {resetMsg && <div style={{marginTop:6, fontSize:12, color:'#1976d2'}}>{resetMsg}</div>}
+          </div>
+        )}
 
         <button
           type="submit"
