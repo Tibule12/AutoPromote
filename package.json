@@ -22,9 +22,10 @@
   "test:captions-download": "node test/captions-download.test.js",
   "test:paypal-webhook": "node test/paypal-webhook.test.js",
   "test:paypal-webhook-verify": "node test/paypal-webhook-verification.test.js",
+  "test:admin-cache": "node test/admin-cache-routes.test.js",
   "test:stripe-webhook": "node test/stripe-webhook.test.js",
     "preflight": "node scripts/preflight-critical-files.js",
-  "ci": "npm run preflight && npm run test:unit && npm run test:routes && npm run test:captions && npm run test:captions-download && npm run test:paypal-webhook && npm run test:paypal-webhook-verify && npm run test:stripe-webhook"
+  "ci": "npm run preflight && npm run test:unit && npm run test:routes && npm run test:captions && npm run test:captions-download && npm run test:paypal-webhook && npm run test:paypal-webhook-verify && npm run test:stripe-webhook && npm run test:admin-cache"
   },
   "dependencies": {
     "@paypal/paypal-server-sdk": "^0.6.0",

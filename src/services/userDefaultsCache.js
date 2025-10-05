@@ -25,4 +25,16 @@ function primeUserDefaults(userId, data) {
   cache.set(userId, { data, ts: Date.now() });
 }
 
-module.exports = { fetchUserDefaults, primeUserDefaults };
+function getCacheStats() {
+  const now = Date.now();
+  let valid = 0; let expired = 0; const entries = [];
+  for (const [uid, val] of cache.entries()) {
+    const age = now - val.ts;
+    const isValid = age < TTL_MS;
+    if (isValid) valid++; else expired++;
+    if (entries.length < 50) entries.push({ userId: uid, ageMs: age, valid });
+  }
+  return { size: cache.size, valid, expired, ttlMs: TTL_MS, sample: entries };
+}
+
+module.exports = { fetchUserDefaults, primeUserDefaults, getCacheStats };

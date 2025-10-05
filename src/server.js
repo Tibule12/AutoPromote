@@ -21,6 +21,7 @@ let metricsRoutes;
 let tiktokRoutes;
 let notificationsRoutes;
 let captionsRoutes;
+let adminCacheRoutes;
 try {
   tiktokRoutes = require('../tiktokRoutes'); // use top-level tiktokRoutes which includes auth + storage
   console.log('✅ Using top-level tiktokRoutes.js');
@@ -85,6 +86,13 @@ try {
 } catch (e) {
   console.log('⚠️ Captions routes not found:', e.message);
   captionsRoutes = express.Router();
+}
+try {
+  adminCacheRoutes = require('./routes/adminCacheRoutes');
+  console.log('✅ Admin cache routes loaded');
+} catch (e) {
+  console.log('⚠️ Admin cache routes not found:', e.message);
+  adminCacheRoutes = express.Router();
 }
 try {
   metricsRoutes = require('./routes/metricsRoutes');
@@ -242,6 +250,8 @@ app.use('/api/notifications', notificationsRoutes);
 console.log('🚏 Notifications routes mounted at /api/notifications');
 app.use('/api', captionsRoutes);
 console.log('🚏 Captions routes mounted at /api');
+app.use('/api/admin/cache', adminCacheRoutes);
+console.log('🚏 Admin cache routes mounted at /api/admin/cache');
 
 // Content Quality Check Route
 const contentQualityCheck = require('./contentQualityCheck');
