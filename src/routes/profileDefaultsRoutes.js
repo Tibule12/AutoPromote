@@ -50,3 +50,20 @@ router.post('/defaults', authMiddleware, async (req,res)=>{
 });
 
 module.exports = router;
+// Append schedule preview route (mounted separately if needed)
+router.post('/preview-schedule', authMiddleware, async (req,res)=>{
+  try {
+    if (!req.userId) return res.status(401).json({ ok:false, error:'auth_required' });
+    const defaultsSnap = await db.collection('user_defaults').doc(req.userId).get();
+    const defaults = defaultsSnap.exists ? defaultsSnap.data() : {};
+    const now = new Date();
+    let schedule = null;
+    if (defaults.postingWindow && defaults.postingWindow.start) {
+      const [h,m] = defaults.postingWindow.start.split(':').map(n=>parseInt(n,10));
+      const cand = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), h||15, m||0,0,0));
+      if (cand < now) cand.setUTCDate(cand.getUTCDate()+1);
+      schedule = { when: cand.toISOString(), frequency: 'once', timezone: defaults.postingWindow.timezone || defaults.timezone || 'UTC' };
+    }
+    return res.json({ ok:true, schedule, variantStrategy: defaults.variantStrategy || null });
+  } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
+});

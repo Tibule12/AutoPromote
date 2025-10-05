@@ -307,7 +307,17 @@ async function processNextPlatformTask() {
     let selectedVariant = null;
     let variantIndex = null;
     if (Array.isArray(payload.variants) && payload.variants.length) {
-      const strategy = (process.env.VARIANT_SELECTION_STRATEGY || 'rotation').toLowerCase();
+      let strategy = (process.env.VARIANT_SELECTION_STRATEGY || 'rotation').toLowerCase();
+      // Allow per-content override (content.variant_strategy) or user default (content.variant_strategy set during upload)
+      try {
+        const contentSnap = await db.collection('content').doc(task.contentId).get();
+        if (contentSnap.exists) {
+          const c = contentSnap.data();
+          if (c.variant_strategy && ['rotation','bandit'].includes(String(c.variant_strategy).toLowerCase())) {
+            strategy = String(c.variant_strategy).toLowerCase();
+          }
+        }
+      } catch(_){ }
       if (strategy === 'bandit') {
         try {
           // Fetch recent posts for this content/platform (sample)
