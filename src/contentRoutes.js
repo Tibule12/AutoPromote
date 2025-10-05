@@ -263,9 +263,29 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
     console.log('Content object', isDryRun ? 'preview' : 'created', { id: content.id, title: content.title, type: content.type });
     let promotionSchedule = null;
 
-    // Create promotion schedule if scheduled time is provided or hinted
-    const deriveSchedule = () => {
-      const hint = schedule_hint;
+    // Derive schedule template using explicit schedule_hint, user defaults, or scheduled_promotion_time
+    let effectiveScheduleHint = schedule_hint;
+    if (!effectiveScheduleHint) {
+      try {
+        const defaultsSnap = await db.collection('user_defaults').doc(req.userId).get();
+        if (defaultsSnap.exists) {
+          const d = defaultsSnap.data();
+          if (d.postingWindow) {
+            const tz = d.postingWindow.timezone || d.timezone || 'UTC';
+            const today = new Date();
+            const [h,m] = (d.postingWindow.start||'15:00').split(':').map(x=>parseInt(x,10));
+            const candidate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), h||15, m||0,0,0));
+            if (candidate < today) candidate.setUTCDate(candidate.getUTCDate()+1);
+            effectiveScheduleHint = { when: candidate.toISOString(), frequency: 'once', timezone: tz };
+          }
+          if (d.variantStrategy && !contentData.variant_strategy) {
+            contentData.variant_strategy = d.variantStrategy; // persisted later if not dry run
+          }
+        }
+      } catch(defErr){ console.log('defaults lookup failed', defErr.message); }
+    }
+    const scheduleTemplate = (()=>{
+      const hint = effectiveScheduleHint;
       if (hint && hint.when) {
         return {
           start_time: hint.when,
@@ -274,12 +294,10 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
         };
       }
       if (scheduled_promotion_time) {
-        return { start_time: scheduled_promotion_time, schedule_type: 'specific', frequency: 'once' };
+       return { start_time: scheduled_promotion_time, schedule_type: 'specific', frequency: 'once' };
       }
       return null;
-    };
-
-    const scheduleTemplate = deriveSchedule();
+    })();
     if (isDryRun) {
       // In dry run, return the schedule template preview only
       const recommendations = optimizationService.generateOptimizationRecommendations(content);
