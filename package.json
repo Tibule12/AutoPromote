@@ -18,9 +18,10 @@
     "test:routes": "node test/route-imports.test.js",
     "test:payments": "node test/payments-routes.test.js",
     "test:profile": "node test/profile-defaults-and-notifications.test.js",
-    "test:captions": "node test/captions-routes.test.js",
+  "test:captions": "node test/captions-routes.test.js",
+  "test:paypal-webhook": "node test/paypal-webhook.test.js",
     "preflight": "node scripts/preflight-critical-files.js",
-    "ci": "npm run preflight && npm run test:unit && npm run test:routes && npm run test:captions"
+  "ci": "npm run preflight && npm run test:unit && npm run test:routes && npm run test:captions && npm run test:paypal-webhook"
   },
   "dependencies": {
     "@paypal/paypal-server-sdk": "^0.6.0",
