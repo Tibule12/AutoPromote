@@ -53,6 +53,40 @@ See `TROUBLESHOOTING_401.md` for detailed troubleshooting steps, including:
 3. **User Lookup**: If the token is valid, the middleware looks up the user in Firestore
 4. **Response**: The server responds with user data if authentication is successful, or a 401 error if not
 
+### Email Verification Enforcement (Current Behavior)
+
+By default the backend now BLOCKS login for users whose `emailVerified` flag is false in Firebase Auth.
+
+If an unverified user attempts to log in:
+```
+HTTP 403
+{ "error": "email_not_verified", "requiresEmailVerification": true }
+```
+
+After registration a verification email link is generated using:
+`admin.auth().generateEmailVerificationLink(email, { url: VERIFY_REDIRECT_URL })`
+
+Users must click the link in their inbox to flip `emailVerified` to true before the login endpoint will succeed.
+
+Optional override for staging / emergency:
+```
+ALLOW_UNVERIFIED_LOGIN=true
+```
+When this env var is true, unverified users may log in (the response includes `needsEmailVerification: true`). Remove it (or set to anything else) in production to enforce security.
+
+Resend endpoint:
+```
+POST /api/auth/resend-verification { "email": "user@example.com" }
+```
+Returns 200 even if the email already verified (idempotent) or a 404 if the user record is missing.
+
+Frontend Guidance:
+1. After registration: show banner “Check your email to verify your account”.
+2. On 403 email_not_verified during login: show a “Resend email” button calling resend endpoint.
+3. Poll / re-attempt login after user confirms verification.
+
+Security Note: Do not allow unverified login in production; verified emails reduce abuse and enable password resets reliably.
+
 ## Common 401 Error Causes
 
 1. **Revoked Credentials**: Google detected the credential leak and revoked access
