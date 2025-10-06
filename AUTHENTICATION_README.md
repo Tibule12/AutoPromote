@@ -87,6 +87,43 @@ Frontend Guidance:
 
 Security Note: Do not allow unverified login in production; verified emails reduce abuse and enable password resets reliably.
 
+### Admin Email Verification Management
+
+New admin endpoints (require admin auth token):
+
+1. List unverified users (paged within a single `listUsers` page):
+```
+GET /api/admin/email-verification/unverified?limit=50&nextPageToken=XYZ
+```
+Response: `{ ok, count, users:[{uid,email,created}], nextPageToken }`
+
+2. Bulk resend (dry run by default):
+```
+POST /api/admin/email-verification/bulk-resend { "limit": 75, "dryRun": false }
+```
+Caps at 500 per call. Use `dryRun:true` first to preview.
+
+### Resend Rate Limiting
+
+User-facing resend endpoint `/api/auth/resend-verification` is limited per email:
+- Window: 15 minutes
+- Default limit: 5 (override with `RESEND_VERIFICATION_LIMIT`)
+- Returns HTTP 429 with `retryAfterMinutes` when exceeded.
+
+### Email Provider Configuration
+
+Environment variables:
+```
+EMAIL_PROVIDER=console|sendgrid|mailgun
+EMAIL_FROM="AutoPromote <no-reply@yourdomain.com>"
+SENDGRID_API_KEY=...            # if using sendgrid
+MAILGUN_API_KEY=...             # if using mailgun
+MAILGUN_DOMAIN=mg.yourdomain.com
+EMAIL_SENDER_MODE=enabled|disabled  # if disabled, emails are logged only
+RESEND_VERIFICATION_LIMIT=5
+```
+Fallback `console` provider prints email contents to logs (safe for dev).
+
 ## Common 401 Error Causes
 
 1. **Revoked Credentials**: Google detected the credential leak and revoked access

@@ -300,6 +300,7 @@ let adminConfigRoutes;
 let adminDashboardRoutes;
 let adminBanditRoutes;
 let adminAlertsRoutes;
+let adminEmailVerificationRoutes;
 try {
   withdrawalRoutes = require('./routes/withdrawalRoutes');
 } catch (error) {
@@ -374,6 +375,10 @@ try {
   adminOpsRoutes = require('./routes/adminOpsRoutes');
   console.log('✅ Admin ops routes loaded');
 } catch(e) { adminOpsRoutes = express.Router(); console.log('⚠️ Admin ops routes not found'); }
+try {
+  adminEmailVerificationRoutes = require('./routes/adminEmailVerificationRoutes');
+  console.log('✅ Admin email verification routes loaded');
+} catch(e) { adminEmailVerificationRoutes = express.Router(); console.log('⚠️ Admin email verification routes not found'); }
 
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
@@ -475,6 +480,7 @@ app.use('/api/admin/dashboard', adminDashboardRoutes);
 app.use('/api/admin/bandit', adminBanditRoutes);
 app.use('/api/admin/alerts', adminAlertsRoutes);
 app.use('/api/admin/ops', adminOpsRoutes);
+app.use('/api/admin', adminEmailVerificationRoutes);
 
 // Serve site verification and other well-known files
 // 1) Try root-level /public/.well-known
