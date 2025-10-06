@@ -61,11 +61,25 @@ router.post('/register', async (req, res) => {
 router.post('/resend-verification', async (req,res)=>{
   try {
     const { email } = req.body || {}; if(!email) return res.status(400).json({ error:'Email required' });
+    // Basic in-memory rate limiting (per process). For production, move to Redis if scaled horizontally.
+    const key = `rv_${email.toLowerCase()}`;
+    const now = Date.now();
+    global.__resendLimiter = global.__resendLimiter || new Map();
+    const entry = global.__resendLimiter.get(key) || { count:0, first: now };
+    if (now - entry.first > 15 * 60 * 1000) { // 15 min window
+      entry.count = 0; entry.first = now;
+    }
+    entry.count++;
+    global.__resendLimiter.set(key, entry);
+    const LIMIT = parseInt(process.env.RESEND_VERIFICATION_LIMIT || '5',10); // default 5 per 15m
+    if (entry.count > LIMIT) {
+      return res.status(429).json({ error: 'too_many_requests', retryAfterMinutes: Math.ceil((entry.first + 15*60*1000 - now)/60000) });
+    }
     const user = await admin.auth().getUserByEmail(email).catch(()=>null); if(!user) return res.status(404).json({ error:'User not found' });
     if (user.emailVerified) return res.json({ message:'Already verified' });
     const link = await admin.auth().generateEmailVerificationLink(email, { url: process.env.VERIFY_REDIRECT_URL || 'https://example.com/verified' });
     await sendVerificationEmail({ email, link });
-    return res.json({ message:'Verification email sent' });
+    return res.json({ message:'Verification email sent', remaining: Math.max(0, LIMIT - entry.count) });
   } catch(e){ return res.status(500).json({ error:e.message }); }
 });
 
