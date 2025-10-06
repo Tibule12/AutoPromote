@@ -1,8 +1,12 @@
 const express = require('express');
-const { db } = require('../../backend/firebaseAdmin');
+// Use canonical src firebaseAdmin shim (which re-exports root firebaseAdmin) instead of legacy backend path
+const { db } = require('../firebaseAdmin');
 const router = express.Router();
-const authMiddleware = require('../../backend/authMiddleware');
-const monetizationService = require('../../backend/monetizationService');
+// Use consolidated authMiddleware & monetizationService in src
+const authMiddleware = require('../authMiddleware');
+const monetizationService = require('../monetizationService');
+
+// NOTE: After this refactor there should be no remaining references to ../../backend/* allowing safe deletion of backend/ directory.
 
 // POST /api/withdrawals/request - User requests a withdrawal
 // User requests a withdrawal (Wise or PayPal)
