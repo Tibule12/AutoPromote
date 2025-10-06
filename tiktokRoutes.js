@@ -259,7 +259,7 @@ router.get('/callback', async (req, res) => {
 });
 
 // 2.1) Connection status — returns whether TikTok is connected and basic profile info (cached ~7s)
-router.get('/status', authMiddleware, async (req, res) => {
+router.get('/status', authMiddleware, require('./src/statusInstrument')('tiktokStatus', async (req, res) => {
   const started = Date.now();
   try {
     const cfg = activeConfig();
@@ -267,50 +267,49 @@ router.get('/status', authMiddleware, async (req, res) => {
     const uid = req.userId || req.user?.uid;
     if (!uid) return res.status(401).json({ connected: false, error: 'Unauthorized' });
     const { getCache, setCache } = require('./src/utils/simpleCache');
+    const { dedupe } = require('./src/utils/inFlight');
+    const { instrument } = require('./src/utils/queryMetrics');
     const cacheKey = `tiktok_status:${uid}`;
     const cached = getCache(cacheKey);
-    if (cached) {
-      return res.json({ ...cached, _cached: true, ms: Date.now() - started });
-    }
-    const connRef = db.collection('users').doc(uid).collection('connections').doc('tiktok');
-    const snap = await connRef.get();
-    if (!snap.exists) {
-      const payload = { connected: false };
-      setCache(cacheKey, payload, 7000);
-      return res.json({ ...payload, ms: Date.now() - started });
-    }
-    const data = snap.data() || {};
-    const result = {
-      connected: true,
-      open_id: data.open_id,
-      scope: data.scope,
-      obtainedAt: data.obtainedAt,
-      storedMode: data.mode || null,
-      serverMode: TIKTOK_ENV,
-      reauthRequired: !!(data.mode && data.mode !== TIKTOK_ENV)
-    };
-    // Optionally enrich with basic profile (do not fail request if TikTok call fails)
-    if (data.access_token && String(data.scope || '').includes('user.info.basic')) {
-      try {
-        const infoRes = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url', {
-          method: 'GET',
-          headers: { 'Authorization': `Bearer ${data.access_token}` },
-          timeout: 3500
-        });
-        if (infoRes.ok) {
-          const info = await infoRes.json();
-          const u = info.data && info.data.user ? info.data.user : info.data || {};
-          result.display_name = u.display_name || u.displayName || undefined;
-          result.avatar_url = u.avatar_url || u.avatarUrl || undefined;
-        }
-      } catch (_) { /* swallow external errors */ }
-    }
+    if (cached) return res.json({ ...cached, _cached: true, ms: Date.now() - started });
+
+    const result = await dedupe(cacheKey, async () => {
+      const snap = await instrument('tiktokStatusDoc', () => db.collection('users').doc(uid).collection('connections').doc('tiktok').get());
+      if (!snap.exists) return { connected: false };
+      const data = snap.data() || {};
+      const base = {
+        connected: true,
+        open_id: data.open_id,
+        scope: data.scope,
+        obtainedAt: data.obtainedAt,
+        storedMode: data.mode || null,
+        serverMode: TIKTOK_ENV,
+        reauthRequired: !!(data.mode && data.mode !== TIKTOK_ENV)
+      };
+      if (data.access_token && String(data.scope || '').includes('user.info.basic')) {
+        try {
+          const info = await instrument('tiktokIdentityFetch', async () => {
+            const infoRes = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url', {
+              method: 'GET', headers: { 'Authorization': `Bearer ${data.access_token}` }, timeout: 3500
+            });
+            if (infoRes.ok) return infoRes.json();
+            return null;
+          });
+          if (info) {
+            const u = info.data && info.data.user ? info.data.user : info.data || {};
+            base.display_name = u.display_name || u.displayName || undefined;
+            base.avatar_url = u.avatar_url || u.avatarUrl || undefined;
+          }
+        } catch(_) { /* ignore profile errors */ }
+      }
+      return base;
+    });
     setCache(cacheKey, result, 7000);
     return res.json({ ...result, ms: Date.now() - started });
   } catch (e) {
     return res.status(500).json({ connected: false, error: 'Failed to load TikTok status', ms: Date.now() - started });
   }
-});
+}));
 
 // Debug endpoint: show last prepared state and auth URL (auth required)
 router.get('/debug/state', authMiddleware, async (req, res) => {

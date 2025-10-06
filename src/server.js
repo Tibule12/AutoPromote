@@ -48,6 +48,24 @@ async function runWarmup(){
       tasks.push(db.collection('promotion_tasks').limit(1).get().catch(()=>null));
       tasks.push(db.collection('content').orderBy('createdAt','desc').limit(1).get().catch(()=>null));
       tasks.push(db.collection('system_counters').limit(3).get().catch(()=>null));
+      // Additional index priming for composite indexes (best-effort)
+      try {
+        // Composite: type,status,createdAt (sample pending + createdAt ordering)
+        tasks.push(db.collection('promotion_tasks')
+          .where('type','==','platform_post')
+          .where('status','==','pending')
+          .orderBy('createdAt','desc')
+          .limit(1).get().catch(()=>null));
+      } catch(_) {}
+      try {
+        // Composite: uid,type,createdAt (sample for a synthetic uid if env provided to avoid scanning large set)
+        const sampleUid = process.env.WARMUP_SAMPLE_UID || 'warmup_noop_uid';
+        tasks.push(db.collection('promotion_tasks')
+          .where('uid','==', sampleUid)
+          .where('type','==','platform_post')
+          .orderBy('createdAt','desc')
+          .limit(1).get().catch(()=>null));
+      } catch(_) {}
     } catch(e) { /* ignore */ }
     await Promise.all(tasks);
     __warmupState.done = true;
@@ -110,7 +128,7 @@ function microCache(req,res,next){
   if (MICRO_CACHE_TTL_MS <= 0) return next();
   if (req.method !== 'GET') return next();
   // only cache explicit allowlist
-  const allow = ['/api/platform/status','/api/facebook/status','/api/youtube/status','/api/twitter/connection/status','/api/tiktok/status','/api/instagram/status','/api/monetization/earnings/summary','/api/users/progress'];
+  const allow = ['/api/platform/status','/api/facebook/status','/api/youtube/status','/api/twitter/connection/status','/api/tiktok/status','/api/instagram/status','/api/monetization/earnings/summary','/api/users/progress','/api/status/aggregate'];
   if (!allow.includes(req.path)) return next();
   const entry = __microCache.get(req.path);
   if (entry && entry.expiry > Date.now()) {
@@ -434,6 +452,9 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/security', adminSecurityRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
+try { app.use('/api/admin/metrics', require('./routes/adminMetricsRoutes')); } catch(e) { console.warn('adminMetricsRoutes mount failed:', e.message); }
+// Aggregate status (composed) routes
+try { app.use('/api/status', require('./routes/aggregateStatusRoutes')); } catch(e) { console.warn('aggregateStatusRoutes mount failed:', e.message); }
 app.use('/api', adminTestRoutes); // Add admin test routes
 // Mount TikTok routes if available
 app.use('/api/tiktok', tiktokRoutes);
@@ -751,38 +772,43 @@ app.get('/api/health/ready', async (req, res) => {
 app.get('/api/users/progress', require('./authMiddleware'), async (req, res) => {
   try {
     const { getCache, setCache } = require('./utils/simpleCache');
+    const { dedupe } = require('./utils/inFlight');
+    const { instrument } = require('./utils/queryMetrics');
     const uid = req.userId || (req.user && req.user.uid);
     if (!uid) return res.status(401).json({ error: 'unauthorized' });
     const cacheKey = `user_progress_${uid}`;
     const cached = getCache(cacheKey);
     if (cached) return res.json({ ...cached, _cached: true });
-    const { db } = require('./firebaseAdmin');
-    // Parallelize reads to minimize tail latency
-    const [userSnap, contentSnap, promoSnap] = await Promise.all([
-      db.collection('users').doc(uid).get(),
-      db.collection('content').where('owner','==', uid).limit(200).get().catch(()=>({ empty:true, forEach:()=>{} })),
-      db.collection('promotion_tasks').where('uid','==', uid).limit(200).get().catch(()=>({ empty:true, forEach:()=>{} }))
-    ]);
-    if (!userSnap.exists) return res.status(404).json({ error: 'user_not_found' });
-    const userData = userSnap.data() || {};
-    let contentCount = 0; let published = 0; let platforms = new Set();
-    contentSnap.forEach(d => { const v = d.data()||{}; contentCount++; if (v.platform) platforms.add(v.platform); if (v.published) published++; });
-    let tasks = 0; let pending = 0; let completed = 0;
-    promoSnap.forEach(d => { const v = d.data()||{}; tasks++; if (v.status==='pending') pending++; if (v.status==='completed' || v.status==='done') completed++; });
-    const progress = {
-      ok: true,
-      contentCount,
-      publishedCount: published,
-      platforms: Array.from(platforms).slice(0,10),
-      promotionTasks: { total: tasks, pending, completed },
-      earnings: {
-        pending: userData.pendingEarnings || 0,
-        total: userData.totalEarnings || 0,
-        revenueEligible: !!userData.revenueEligible
-      },
-      lastUpdated: Date.now()
-    };
-    setCache(cacheKey, progress, 7000); // ~7s TTL
+    const progress = await dedupe(cacheKey, async () => {
+      const { db } = require('./firebaseAdmin');
+      // Parallel instrumented reads
+      const [userSnap, contentSnap, promoSnap] = await Promise.all([
+        instrument('progress.userDoc', () => db.collection('users').doc(uid).get()),
+        instrument('progress.contentQuery', () => db.collection('content').where('owner','==', uid).limit(200).get().catch(()=>({ empty:true, forEach:()=>{} }))),
+        instrument('progress.taskQuery', () => db.collection('promotion_tasks').where('uid','==', uid).limit(200).get().catch(()=>({ empty:true, forEach:()=>{} })))
+      ]);
+      if (!userSnap.exists) return { ok:false, error:'user_not_found' };
+      const userData = userSnap.data() || {};
+      let contentCount = 0; let published = 0; let platforms = new Set();
+      contentSnap.forEach(d => { const v = d.data()||{}; contentCount++; if (v.platform) platforms.add(v.platform); if (v.published) published++; });
+      let tasks = 0; let pending = 0; let completed = 0;
+      promoSnap.forEach(d => { const v = d.data()||{}; tasks++; if (v.status==='pending') pending++; if (v.status==='completed' || v.status==='done') completed++; });
+      return {
+        ok: true,
+        contentCount,
+        publishedCount: published,
+        platforms: Array.from(platforms).slice(0,10),
+        promotionTasks: { total: tasks, pending, completed },
+        earnings: {
+          pending: userData.pendingEarnings || 0,
+            total: userData.totalEarnings || 0,
+            revenueEligible: !!userData.revenueEligible
+        },
+        lastUpdated: Date.now()
+      };
+    });
+    if (!progress.ok) return res.status(progress.error === 'user_not_found' ? 404 : 500).json(progress);
+    setCache(cacheKey, progress, 7000);
     return res.json(progress);
   } catch (e) {
     return res.status(500).json({ error: 'progress_failed', detail: e.message });

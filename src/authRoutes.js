@@ -99,9 +99,20 @@ router.post('/request-password-reset', async (req,res)=>{
     const { email } = req.body || {}; if(!email) return res.status(400).json({ error:'Email required' });
     const user = await admin.auth().getUserByEmail(email).catch(()=>null);
     if(!user) return res.status(200).json({ message:'If the email exists, a reset link will be sent.' }); // do not leak existence
-    const link = await admin.auth().generatePasswordResetLink(email, { url: process.env.PASSWORD_RESET_REDIRECT_URL || 'https://example.com/reset-complete' });
-    await sendPasswordResetEmail({ email, link });
-    return res.json({ message:'Password reset email sent' });
+    const redirectUrl = process.env.PASSWORD_RESET_REDIRECT_URL || 'https://example.com/reset-complete';
+    const link = await admin.auth().generatePasswordResetLink(email, { url: redirectUrl });
+    const resp = await sendPasswordResetEmail({ email, link });
+    const diagnostics = {};
+    // Detect obvious placeholder configuration so user knows why mail might not arrive
+    if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.startsWith('SG.xxxx')) diagnostics.placeholderApiKey = true;
+    if ((process.env.EMAIL_FROM || '').includes('yourdomain.com')) diagnostics.placeholderFrom = true;
+    if ((process.env.PASSWORD_RESET_REDIRECT_URL || '').includes('yourapp.com')) diagnostics.placeholderRedirect = true;
+    diagnostics.provider = process.env.EMAIL_PROVIDER || 'console';
+    diagnostics.mode = process.env.EMAIL_SENDER_MODE || 'unknown';
+    diagnostics.delivery = resp && resp.provider ? resp.provider : (resp.disabled ? 'disabled' : 'unknown');
+    // Optionally surface the raw link in non-production for manual testing
+    if (process.env.NODE_ENV !== 'production' || process.env.EXPOSE_RESET_LINK === 'true') diagnostics.resetLink = link;
+    return res.json({ message:'Password reset email requested', diagnostics });
   } catch(e){ return res.status(500).json({ error:e.message }); }
 });
 
