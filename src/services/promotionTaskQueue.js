@@ -23,6 +23,15 @@ function handleIndexError(e, context, sampleLink){
   return false;
 }
 
+// REQUIRED FIRESTORE COMPOSITE INDEX (create once in Firebase console):
+// Collection: promotion_tasks
+// Fields (order):
+//   type    Ascending
+//   status  Ascending
+//   createdAt Ascending
+// Rationale: Queries in processNextYouTubeTask() & other selectors chain where(type==), where(status in/==), orderBy(createdAt)
+// Without it you will see repeated warnings: [IDX][yt_task_select] Missing Firestore index.
+
 function classifyError(message = '') {
   const m = message.toLowerCase();
   if (m.includes('quota') || m.includes('rate limit') || m.includes('too many requests') || m.includes('429')) return 'rate_limit';

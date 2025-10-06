@@ -258,16 +258,26 @@ router.get('/callback', async (req, res) => {
   }
 });
 
-// 2.1) Connection status — returns whether TikTok is connected and basic profile info
+// 2.1) Connection status — returns whether TikTok is connected and basic profile info (cached ~7s)
 router.get('/status', authMiddleware, async (req, res) => {
+  const started = Date.now();
   try {
     const cfg = activeConfig();
     if (ensureTikTokEnv(res, cfg, { requireSecret: false })) return;
     const uid = req.userId || req.user?.uid;
     if (!uid) return res.status(401).json({ connected: false, error: 'Unauthorized' });
-    const snap = await db.collection('users').doc(uid).collection('connections').doc('tiktok').get();
+    const { getCache, setCache } = require('./src/utils/simpleCache');
+    const cacheKey = `tiktok_status:${uid}`;
+    const cached = getCache(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, _cached: true, ms: Date.now() - started });
+    }
+    const connRef = db.collection('users').doc(uid).collection('connections').doc('tiktok');
+    const snap = await connRef.get();
     if (!snap.exists) {
-      return res.json({ connected: false });
+      const payload = { connected: false };
+      setCache(cacheKey, payload, 7000);
+      return res.json({ ...payload, ms: Date.now() - started });
     }
     const data = snap.data() || {};
     const result = {
@@ -279,12 +289,13 @@ router.get('/status', authMiddleware, async (req, res) => {
       serverMode: TIKTOK_ENV,
       reauthRequired: !!(data.mode && data.mode !== TIKTOK_ENV)
     };
-    // Try to fetch basic user info if we have an access token and scope allows
+    // Optionally enrich with basic profile (do not fail request if TikTok call fails)
     if (data.access_token && String(data.scope || '').includes('user.info.basic')) {
       try {
         const infoRes = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url', {
           method: 'GET',
-          headers: { 'Authorization': `Bearer ${data.access_token}` }
+          headers: { 'Authorization': `Bearer ${data.access_token}` },
+          timeout: 3500
         });
         if (infoRes.ok) {
           const info = await infoRes.json();
@@ -292,11 +303,12 @@ router.get('/status', authMiddleware, async (req, res) => {
           result.display_name = u.display_name || u.displayName || undefined;
           result.avatar_url = u.avatar_url || u.avatarUrl || undefined;
         }
-      } catch (_) { /* ignore */ }
+      } catch (_) { /* swallow external errors */ }
     }
-    return res.json(result);
+    setCache(cacheKey, result, 7000);
+    return res.json({ ...result, ms: Date.now() - started });
   } catch (e) {
-    return res.status(500).json({ connected: false, error: 'Failed to load TikTok status' });
+    return res.status(500).json({ connected: false, error: 'Failed to load TikTok status', ms: Date.now() - started });
   }
 });
 

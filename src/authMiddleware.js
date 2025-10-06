@@ -2,6 +2,10 @@ const { admin, db } = require('./firebaseAdmin');
 
 const authMiddleware = async (req, res, next) => {
   try {
+  // If another upstream middleware already attached a user object, skip heavy work
+  if (req.user && req.user.uid) {
+    return next();
+  }
   const token = req.headers.authorization?.replace('Bearer ', '');
   const debugAuth = process.env.DEBUG_AUTH === 'true';
   if (debugAuth) console.log('Auth middleware - token provided:', token ? 'Yes (length: ' + token.length + ')' : 'No');

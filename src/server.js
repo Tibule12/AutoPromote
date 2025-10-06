@@ -55,6 +55,15 @@ async function runWarmup(){
   __warmupState.tookMs = Date.now() - t0; __warmupState.at = new Date().toISOString();
 }
 
+// Schedule warmup shortly after module load (non-blocking)
+setTimeout(() => { runWarmup().then(()=>{
+  if (!__warmupState.error) {
+    console.log(`[warmup] Firestore primed in ${__warmupState.tookMs}ms`);
+  } else {
+    console.log(`[warmup] Completed with warning: ${__warmupState.error}`);
+  }
+}).catch(e=>console.log('[warmup] failed', e.message)); }, 1500);
+
 function printMissingEnvOnce() {
   if (__printedStartupMissing) return;
   const missing = [];
