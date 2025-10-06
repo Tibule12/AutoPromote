@@ -12,6 +12,23 @@ try { compression = require('compression'); } catch(_) { /* optional */ }
 try { helmet = require('helmet'); } catch(_) { /* optional */ }
 
 // ---------------------------------------------------------------------------
+// Enable shared keep-alive agents early (reduces cold outbound latency)
+// ---------------------------------------------------------------------------
+try {
+  const { httpAgent, httpsAgent, summarizeAgent } = require('./utils/keepAliveAgents');
+  const httpMod = require('http');
+  const httpsMod = require('https');
+  httpMod.globalAgent = httpAgent; // override defaults
+  httpsMod.globalAgent = httpsAgent;
+  global.__keepAliveAgents = () => ({ http: summarizeAgent(httpAgent), https: summarizeAgent(httpsAgent) });
+  if (process.env.KEEP_ALIVE_LOG !== '0') {
+    console.log(`[startup] Keep-alive agents enabled (max=${httpAgent.maxSockets}, free=${httpAgent.maxFreeSockets})`);
+  }
+} catch (e) {
+  console.warn('[startup] keepAliveAgents initialization failed:', e.message);
+}
+
+// ---------------------------------------------------------------------------
 // Observability & startup environment reminders
 // ---------------------------------------------------------------------------
 const SLOW_REQ_MS = parseInt(process.env.SLOW_REQ_MS || '3000', 10);
@@ -38,49 +55,60 @@ function getLatencyStats(){
 }
 
 // Startup warm-up state (readiness gate)
-const __warmupState = { started:false, done:false, error:null, tookMs:null, at:null };
-async function runWarmup(){
-  if (__warmupState.started) return; __warmupState.started = true; const t0 = Date.now();
+const __warmupState = { started:false, done:false, error:null, tookMs:null, at:null, triggeredBy:'auto' };
+async function runWarmup(trigger='auto'){
+  if (__warmupState.started) return; __warmupState.started = true; __warmupState.triggeredBy = trigger; const t0 = Date.now();
   try {
     const tasks = [];
     try { const { db } = require('./firebaseAdmin');
-      // Light queries to warm Firestore indexes
-      tasks.push(db.collection('promotion_tasks').limit(1).get().catch(()=>null));
-      tasks.push(db.collection('content').orderBy('createdAt','desc').limit(1).get().catch(()=>null));
-      tasks.push(db.collection('system_counters').limit(3).get().catch(()=>null));
-      // Additional index priming for composite indexes (best-effort)
-      try {
-        // Composite: type,status,createdAt (sample pending + createdAt ordering)
-        tasks.push(db.collection('promotion_tasks')
+      const add = (p)=>tasks.push(p.catch(()=>null));
+      // Light queries to warm Firestore indexes (core)
+      add(db.collection('promotion_tasks').limit(1).get());
+      add(db.collection('content').orderBy('createdAt','desc').limit(1).get());
+      add(db.collection('system_counters').limit(3).get());
+      // Composite indexes (best-effort)
+      const sampleUid = process.env.WARMUP_SAMPLE_UID || 'warmup_noop_uid';
+      add(db.collection('promotion_tasks')
           .where('type','==','platform_post')
           .where('status','==','pending')
           .orderBy('createdAt','desc')
-          .limit(1).get().catch(()=>null));
-      } catch(_) {}
-      try {
-        // Composite: uid,type,createdAt (sample for a synthetic uid if env provided to avoid scanning large set)
-        const sampleUid = process.env.WARMUP_SAMPLE_UID || 'warmup_noop_uid';
-        tasks.push(db.collection('promotion_tasks')
+          .limit(1).get());
+      add(db.collection('promotion_tasks')
           .where('uid','==', sampleUid)
           .where('type','==','platform_post')
           .orderBy('createdAt','desc')
-          .limit(1).get().catch(()=>null));
-      } catch(_) {}
-    } catch(e) { /* ignore */ }
-    await Promise.all(tasks);
+          .limit(1).get());
+      // Additional commonly accessed collections (shallow)
+      if (process.env.WARMUP_EXTRA_COLLECTIONS) {
+        process.env.WARMUP_EXTRA_COLLECTIONS.split(',').map(s=>s.trim()).filter(Boolean).slice(0,5).forEach(col => {
+          add(db.collection(col).limit(1).get());
+        });
+      }
+    } catch(e) { /* ignore: Firebase not ready */ }
+    await Promise.allSettled(tasks);
     __warmupState.done = true;
   } catch(e){ __warmupState.error = e.message; __warmupState.done = true; }
   __warmupState.tookMs = Date.now() - t0; __warmupState.at = new Date().toISOString();
+  if (!__warmupState.error) {
+    console.log(`[warmup] completed in ${__warmupState.tookMs}ms (trigger=${__warmupState.triggeredBy})`);
+  } else {
+    console.log(`[warmup] completed with error in ${__warmupState.tookMs}ms: ${__warmupState.error}`);
+  }
 }
 
-// Schedule warmup shortly after module load (non-blocking)
-setTimeout(() => { runWarmup().then(()=>{
-  if (!__warmupState.error) {
-    console.log(`[warmup] Firestore primed in ${__warmupState.tookMs}ms`);
-  } else {
-    console.log(`[warmup] Completed with warning: ${__warmupState.error}`);
+// Immediate warmup (non-blocking). Previously delayed by 1.5s.
+runWarmup().catch(e=>console.log('[warmup] immediate failed', e.message));
+
+// Lazy trigger middleware: if a qualifying request arrives before warmup started, start it.
+function ensureWarmup(req,_res,next){
+  if (!__warmupState.started) {
+    // Only trigger on API GETs to avoid triggering from asset requests
+    if (req.method === 'GET' && req.originalUrl.startsWith('/api/')) {
+      runWarmup('lazy_request');
+    }
   }
-}).catch(e=>console.log('[warmup] failed', e.message)); }, 1500);
+  next();
+}
 
 function printMissingEnvOnce() {
   if (__printedStartupMissing) return;
@@ -122,7 +150,7 @@ function slowRequestLogger(req,res,next){
 // -------------------------------------------------
 // Lightweight in-memory micro-cache for hot status endpoints
 // -------------------------------------------------
-const MICRO_CACHE_TTL_MS = parseInt(process.env.MICRO_STATUS_CACHE_TTL_MS || '8000',10); // 8s default
+const MICRO_CACHE_TTL_MS = parseInt(process.env.MICRO_STATUS_CACHE_TTL_MS || '300',10); // 300ms default (override via env)
 const __microCache = new Map(); // key -> { expiry, payload, contentType }
 function microCache(req,res,next){
   if (MICRO_CACHE_TTL_MS <= 0) return next();
@@ -132,7 +160,8 @@ function microCache(req,res,next){
   if (!allow.includes(req.path)) return next();
   const entry = __microCache.get(req.path);
   if (entry && entry.expiry > Date.now()) {
-    res.setHeader('x-micro-cache','HIT');
+  res.setHeader('x-micro-cache','HIT');
+  res.setHeader('x-micro-cache-ttl-ms', MICRO_CACHE_TTL_MS.toString());
     if (entry.contentType) res.setHeader('Content-Type', entry.contentType);
     return res.send(entry.payload);
   }
@@ -142,6 +171,7 @@ function microCache(req,res,next){
       __microCache.set(req.path, { expiry: Date.now() + MICRO_CACHE_TTL_MS, payload: body, contentType: res.get('Content-Type') });
     } catch(_){ }
     res.setHeader('x-micro-cache','MISS');
+    res.setHeader('x-micro-cache-ttl-ms', MICRO_CACHE_TTL_MS.toString());
     return originalSend(body);
   };
   next();
@@ -407,6 +437,8 @@ const PORT = process.env.PORT || 5000; // Default to port 5000, Render will over
 // Attach request context (if available) then slow request logger
 try { app.use(require('./middlewares/requestContext')); } catch(_) { /* optional */ }
 app.use(slowRequestLogger);
+// Lazy warmup trigger (will start warmup if not already and early request hits)
+try { app.use(ensureWarmup); } catch(_) { /* ignore */ }
 // Micro-cache for status endpoints
 app.use(microCache);
 
