@@ -223,8 +223,19 @@ router.post('/login', async (req, res) => {
       emailVerified = !!authUser.emailVerified;
     } catch(_) { emailVerified = false; }
 
-    const allowUnverified = process.env.ALLOW_UNVERIFIED_LOGIN === 'true';
-    // Grandfather policy: allow existing (older) accounts to login unverified if created before cutoff
+    // Verification enforcement policy (adjusted):
+    //  - Default: DO NOT block login for unverified users (previous behavior enforced by default)
+    //  - To enforce blocking, set ENFORCE_VERIFICATION_ON_LOGIN=true
+    //  - Deprecated override ALLOW_UNVERIFIED_LOGIN remains for backward compat (will log warning)
+    const enforceLoginVerification = process.env.ENFORCE_VERIFICATION_ON_LOGIN === 'true';
+    const allowUnverifiedLegacy = process.env.ALLOW_UNVERIFIED_LOGIN === 'true';
+    if (allowUnverifiedLegacy && enforceLoginVerification) {
+      console.warn('[auth] Both ENFORCE_VERIFICATION_ON_LOGIN and ALLOW_UNVERIFIED_LOGIN set. ALLOW_UNVERIFIED_LOGIN wins (allowing unverified).');
+    }
+    const allowUnverified = (!enforceLoginVerification) || allowUnverifiedLegacy; // default allow unless enforcement explicitly on
+
+    // Grandfather policy: only relevant if enforcement is ON
+    // Allow existing (older) accounts to login unverified if created before cutoff
     // Configure with ISO8601 datetime string e.g. 2025-02-20T00:00:00Z
     const grandfatherCutoffRaw = process.env.EMAIL_VERIFICATION_GRANDFATHER_BEFORE;
     let isGrandfathered = false;
@@ -249,7 +260,7 @@ router.post('/login', async (req, res) => {
       }
     }
 
-    if (!emailVerified && !allowUnverified && !isGrandfathered) {
+    if (enforceLoginVerification && !emailVerified && !allowUnverified && !isGrandfathered) {
       return res.status(403).json({
         error: 'email_not_verified',
         message: 'Please verify your email before logging in. Check your inbox or request a new link.',
