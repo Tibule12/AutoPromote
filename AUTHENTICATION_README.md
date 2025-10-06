@@ -53,29 +53,33 @@ See `TROUBLESHOOTING_401.md` for detailed troubleshooting steps, including:
 3. **User Lookup**: If the token is valid, the middleware looks up the user in Firestore
 4. **Response**: The server responds with user data if authentication is successful, or a 401 error if not
 
-### Email Verification Enforcement (Current Behavior)
+### Email Verification Policy (Updated Behavior)
 
-By default the backend now BLOCKS login for users whose `emailVerified` flag is false in Firebase Auth.
+By default the backend now ALLOWS login for users whose `emailVerified` flag is false (non-blocking). A banner / frontend notice should still encourage verification, but backend does not 403 unless explicitly enabled.
 
-If an unverified user attempts to log in:
+If you want to ENFORCE (block login until verified) set:
+```
+ENFORCE_VERIFICATION_ON_LOGIN=true
+```
+When enforcement is on, an unverified user attempting to log in receives:
 ```
 HTTP 403
 { "error": "email_not_verified", "requiresEmailVerification": true }
 ```
 
-After registration a verification email link is generated using:
+After registration a verification email link is still generated using:
 `admin.auth().generateEmailVerificationLink(email, { url: VERIFY_REDIRECT_URL })`
 
 Users must click the link in their inbox to flip `emailVerified` to true before the login endpoint will succeed.
 
-Optional override for staging / emergency:
+Deprecated legacy flag:
 ```
 ALLOW_UNVERIFIED_LOGIN=true
 ```
-When this env var is true, unverified users may log in (the response includes `needsEmailVerification: true`). Remove it (or set to anything else) in production to enforce security.
+Previously used to allow unverified logins when blocking was the default. It is now redundant because the default is already permissive. If BOTH `ENFORCE_VERIFICATION_ON_LOGIN=true` and `ALLOW_UNVERIFIED_LOGIN=true` are set, the system will allow unverified (legacy override wins) and log a warning.
 
-Grandfathering Existing Users:
-If you need to enforce email verification only for NEW users while allowing previously created accounts to continue logging in unverified, set a cutoff timestamp:
+Grandfathering Existing Users (only applies when enforcement is ON):
+If you enforce verification but want only NEW users blocked while old accounts bypass, set a cutoff timestamp:
 ```
 EMAIL_VERIFICATION_GRANDFATHER_BEFORE=2025-02-20T00:00:00Z
 ```
