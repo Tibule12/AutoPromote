@@ -44,9 +44,9 @@ const authMiddleware = async (req, res, next) => {
       role: decodedToken.role
     }, null, 2));
     
-    // Extract any custom claims
-    const isAdminFromClaims = decodedToken.admin === true;
-    const roleFromClaims = isAdminFromClaims ? 'admin' : (decodedToken.role || 'user');
+  // Extract any custom claims (legacy allowances: admin or isAdmin)
+  const isAdminFromClaims = decodedToken.admin === true || decodedToken.isAdmin === true;
+  const roleFromClaims = isAdminFromClaims ? 'admin' : (decodedToken.role || 'user');
     
     // Set the user ID on the request for later use
     req.userId = decodedToken.uid;
@@ -60,8 +60,8 @@ const authMiddleware = async (req, res, next) => {
       const adminDoc = await db.collection('admins').doc(decodedToken.uid).get();
       const isAdminInCollection = adminDoc.exists;
       
-      // If admin is found in admins collection, use that data instead
-      if (isAdminInCollection) {
+  // If admin is found in admins collection, treat as authoritative admin regardless of stale user doc
+  if (isAdminInCollection) {
   if (debugAuth) console.log('User found in admins collection:', decodedToken.uid);
         const adminData = adminDoc.data();
         req.user = {
@@ -112,6 +112,16 @@ const authMiddleware = async (req, res, next) => {
           });
           userData.role = 'admin';
           userData.isAdmin = true;
+        } else if (!isAdminFromClaims && !isAdminInCollection && userData.role === 'admin') {
+          // Auto-demotion: user doc still thinks admin but claims / collections do not
+          if (debugAuth) console.log('Demoting user from admin -> user due to missing claims & collection membership');
+          await db.collection('users').doc(decodedToken.uid).update({
+            role: 'user',
+            isAdmin: false,
+            updatedAt: new Date().toISOString()
+          });
+            userData.role = 'user';
+            userData.isAdmin = false;
         }
         
         // Attach full user data to request
@@ -120,6 +130,11 @@ const authMiddleware = async (req, res, next) => {
           email: decodedToken.email,
           ...userData
         };
+        // Normalize: ensure isAdmin reflects effective state (collection or claims)
+        if (isAdminInCollection || isAdminFromClaims) {
+          req.user.isAdmin = true;
+          req.user.role = 'admin';
+        }
   if (debugAuth) console.log('User data attached to request');
       }
     } catch (firestoreError) {
