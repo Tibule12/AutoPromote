@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { db, admin } = require('../firebaseAdmin');
+const { getCache, setCache } = require('../utils/simpleCache');
 const authMiddleware = require('../authMiddleware');
 const adminOnly = require('../middlewares/adminOnly');
 const { rateLimit } = require('../middleware/rateLimit');
@@ -96,12 +97,15 @@ router.post('/earnings/aggregate', authMiddleware, adminOnly, async (_req, res) 
 
 // User earnings summary (self)
 router.get('/earnings/summary', authMiddleware, rateLimit({ field: 'earningsSummary', perMinute: 10 }), require('../statusInstrument')('earningsSummary', async (req, res) => {
+  const cacheKey = `earnings_summary_${req.userId}`;
+  const cached = getCache(cacheKey);
+  if (cached) return res.json({ ...cached, _cached: true });
   const userRef = await db.collection('users').doc(req.userId).get();
   if (!userRef.exists) return res.status(404).json({ ok: false, error: 'user_not_found' });
   const u = userRef.data();
   const minPayout = parseFloat(process.env.MIN_PAYOUT_AMOUNT || '0');
   const pending = u.pendingEarnings || 0;
-  return res.json({
+  const payload = {
     ok: true,
     pendingEarnings: pending,
     totalEarnings: u.totalEarnings || 0,
@@ -109,7 +113,9 @@ router.get('/earnings/summary', authMiddleware, rateLimit({ field: 'earningsSumm
     contentCount: u.contentCount || 0,
     minPayoutAmount: minPayout,
     payoutEligible: (u.revenueEligible || false) && pending >= minPayout
-  });
+  };
+  setCache(cacheKey, payload, 7000); // ~7s TTL
+  return res.json(payload);
 }));
 
 // Self payout route: moves all pendingEarnings to totalEarnings and creates a payout record
@@ -163,6 +169,9 @@ router.post('/earnings/payout/self', authMiddleware, async (req, res) => {
 // List recent payout history (self)
 router.get('/earnings/payouts', authMiddleware, async (req, res) => {
   try {
+    const cacheKey = `earnings_payouts_${req.userId}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.json({ ...cached, _cached: true });
     let snap;
     try {
       snap = await db.collection('earnings_payouts')
@@ -181,7 +190,9 @@ router.get('/earnings/payouts', authMiddleware, async (req, res) => {
     }
     const payouts = [];
     snap.forEach(d => payouts.push({ id: d.id, ...d.data() }));
-    return res.json({ ok: true, payouts });
+    const payload = { ok: true, payouts };
+    setCache(cacheKey, payload, 7000);
+    return res.json(payload);
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
   }

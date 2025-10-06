@@ -28,11 +28,16 @@ async function getConn(uid, name) {
 }
 
 router.get('/status', authMiddleware, require('../statusInstrument')('platformConnectionsStatus', async (req, res) => {
+  const { getCache, setCache } = require('../utils/simpleCache');
+  const uid = req.userId || req.user?.uid;
+  const cacheKey = `platform_connections_status_${uid}`;
+  const cached = getCache(cacheKey);
+  if (cached) return res.json({ ...cached, _cached: true });
   const [twitter, youtube, facebook, tiktok] = await Promise.all([
-    getConn(req.userId, 'twitter'),
-    getConn(req.userId, 'youtube'),
-    getConn(req.userId, 'facebook'),
-    getConn(req.userId, 'tiktok')
+    getConn(uid, 'twitter'),
+    getConn(uid, 'youtube'),
+    getConn(uid, 'facebook'),
+    getConn(uid, 'tiktok')
   ]);
   const summary = {
     twitter: { connected: twitter.connected, username: twitter.identity?.username },
@@ -40,7 +45,9 @@ router.get('/status', authMiddleware, require('../statusInstrument')('platformCo
     facebook: { connected: facebook.connected, pages: Array.isArray(facebook.pages) ? facebook.pages.map(p=>p.name).slice(0,3) : [] },
     tiktok: { connected: tiktok.connected, display_name: tiktok.display_name }
   };
-  res.json({ ok: true, summary, raw: { twitter, youtube, facebook, tiktok } });
+  const payload = { ok: true, summary, raw: { twitter, youtube, facebook, tiktok } };
+  setCache(cacheKey, payload, 7000);
+  res.json(payload);
 }));
 
 module.exports = router;

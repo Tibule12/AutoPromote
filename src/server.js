@@ -739,6 +739,50 @@ app.get('/api/health/ready', async (req, res) => {
   return res.status(out.ok ? 200 : 503).json(out);
 });
 
+// -------------------------------------------------
+// Lightweight user progress endpoint (added with micro + explicit cache)
+// -------------------------------------------------
+app.get('/api/users/progress', require('./authMiddleware'), async (req, res) => {
+  try {
+    const { getCache, setCache } = require('./utils/simpleCache');
+    const uid = req.userId || (req.user && req.user.uid);
+    if (!uid) return res.status(401).json({ error: 'unauthorized' });
+    const cacheKey = `user_progress_${uid}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.json({ ...cached, _cached: true });
+    const { db } = require('./firebaseAdmin');
+    // Parallelize reads to minimize tail latency
+    const [userSnap, contentSnap, promoSnap] = await Promise.all([
+      db.collection('users').doc(uid).get(),
+      db.collection('content').where('owner','==', uid).limit(200).get().catch(()=>({ empty:true, forEach:()=>{} })),
+      db.collection('promotion_tasks').where('uid','==', uid).limit(200).get().catch(()=>({ empty:true, forEach:()=>{} }))
+    ]);
+    if (!userSnap.exists) return res.status(404).json({ error: 'user_not_found' });
+    const userData = userSnap.data() || {};
+    let contentCount = 0; let published = 0; let platforms = new Set();
+    contentSnap.forEach(d => { const v = d.data()||{}; contentCount++; if (v.platform) platforms.add(v.platform); if (v.published) published++; });
+    let tasks = 0; let pending = 0; let completed = 0;
+    promoSnap.forEach(d => { const v = d.data()||{}; tasks++; if (v.status==='pending') pending++; if (v.status==='completed' || v.status==='done') completed++; });
+    const progress = {
+      ok: true,
+      contentCount,
+      publishedCount: published,
+      platforms: Array.from(platforms).slice(0,10),
+      promotionTasks: { total: tasks, pending, completed },
+      earnings: {
+        pending: userData.pendingEarnings || 0,
+        total: userData.totalEarnings || 0,
+        revenueEligible: !!userData.revenueEligible
+      },
+      lastUpdated: Date.now()
+    };
+    setCache(cacheKey, progress, 7000); // ~7s TTL
+    return res.json(progress);
+  } catch (e) {
+    return res.status(500).json({ error: 'progress_failed', detail: e.message });
+  }
+});
+
 
 // Catch all handler: send back React's index.html file for client-side routing
 app.get('*', (req, res) => {

@@ -1,20 +1,30 @@
 const { admin, db } = require('./firebaseAdmin');
 
+// Legacy middleware (backend/). Prefer src/authMiddleware.js. We keep this only for
+// backward compatibility while older code paths are retired. Added short-circuit
+// and DEBUG_AUTH gating to avoid duplicate Firestore work & noisy logs.
 const authMiddleware = async (req, res, next) => {
   try {
+    // Short-circuit: if a newer upstream middleware already populated user, skip.
+    if (req.user && req.user.uid) {
+      if (process.env.DEBUG_AUTH === 'true') console.log('[legacy-auth] short-circuit (user already attached)');
+      return next();
+    }
+
     const token = req.headers.authorization?.replace('Bearer ', '');
-    console.log('Auth middleware - token provided:', token ? 'Yes (length: ' + token.length + ')' : 'No');
+    const debugAuth = process.env.DEBUG_AUTH === 'true';
+    if (debugAuth) console.log('[legacy-auth] token provided:', token ? 'Yes (length: ' + token.length + ')' : 'No');
     
     if (!token) {
       return res.status(401).json({ error: 'No token provided' });
     }
     
-    // Log the first 10 chars of token for debugging
-    console.log('Token preview:', token.substring(0, 10) + '...');
+  // Log the first 10 chars of token for debugging
+  if (debugAuth && token) console.log('[legacy-auth] token preview:', token.substring(0, 10) + '...');
     
     // Check if this is a custom token (shouldn't be used directly for auth)
     if (token.length < 100 || !token.startsWith('eyJ')) {
-      console.log('Warning: Received token does not appear to be a valid Firebase ID token');
+  if (debugAuth) console.log('[legacy-auth] Warning: token format looks invalid for Firebase ID token');
       return res.status(401).json({ 
         error: 'Invalid token format', 
         message: 'Please exchange your custom token for an ID token before making authenticated requests'
@@ -23,7 +33,7 @@ const authMiddleware = async (req, res, next) => {
 
     // Verify Firebase token
     const decodedToken = await admin.auth().verifyIdToken(token);
-    console.log('Token verification successful, decoded:', JSON.stringify({
+    if (debugAuth) console.log('[legacy-auth] token verification successful, decoded:', JSON.stringify({
       uid: decodedToken.uid,
       email: decodedToken.email,
       admin: decodedToken.admin,
@@ -48,7 +58,7 @@ const authMiddleware = async (req, res, next) => {
       
       // If admin is found in admins collection, use that data instead
       if (isAdminInCollection) {
-        console.log('User found in admins collection:', decodedToken.uid);
+  if (debugAuth) console.log('[legacy-auth] user found in admins collection:', decodedToken.uid);
         const adminData = adminDoc.data();
         req.user = {
           uid: decodedToken.uid,
@@ -58,13 +68,13 @@ const authMiddleware = async (req, res, next) => {
           role: 'admin',
           fromCollection: 'admins'
         };
-        console.log('Admin user data attached to request');
+        if (debugAuth) console.log('[legacy-auth] admin user data attached to request');
         return next();
       }
       
       if (!userData) {
         // Create a basic user document if it doesn't exist
-        console.log('No user document found in Firestore, creating one...');
+  if (debugAuth) console.log('[legacy-auth] no user document found; creating one...');
         const basicUserData = {
           email: decodedToken.email,
           name: decodedToken.name || decodedToken.email?.split('@')[0],
@@ -72,17 +82,17 @@ const authMiddleware = async (req, res, next) => {
           isAdmin: isAdminFromClaims,
           createdAt: new Date().toISOString()
         };
-        console.log('Creating user with data:', JSON.stringify(basicUserData, null, 2));
+  if (debugAuth) console.log('[legacy-auth] creating user with data:', JSON.stringify(basicUserData, null, 2));
         await db.collection('users').doc(decodedToken.uid).set(basicUserData);
         req.user = {
           uid: decodedToken.uid,
           email: decodedToken.email,
           ...basicUserData
         };
-        console.log('New user document created and attached to request');
+        if (debugAuth) console.log('[legacy-auth] new user document created and attached');
       } else {
         // If user exists but role needs to be updated based on claims
-        console.log('User document found:', JSON.stringify({
+        if (debugAuth) console.log('[legacy-auth] user document found:', JSON.stringify({
           uid: decodedToken.uid,
           email: userData.email,
           role: userData.role,
@@ -90,7 +100,7 @@ const authMiddleware = async (req, res, next) => {
         }, null, 2));
         
         if (isAdminFromClaims && userData.role !== 'admin') {
-          console.log('Updating user to admin role based on token claims');
+          if (debugAuth) console.log('[legacy-auth] updating user to admin role based on token claims');
           await db.collection('users').doc(decodedToken.uid).update({
             role: 'admin',
             isAdmin: true,
@@ -106,7 +116,7 @@ const authMiddleware = async (req, res, next) => {
           email: decodedToken.email,
           ...userData
         };
-        console.log('User data attached to request');
+        if (debugAuth) console.log('[legacy-auth] user data attached to request');
       }
     } catch (firestoreError) {
       console.error('Firestore error in auth middleware:', firestoreError);
@@ -123,8 +133,8 @@ const authMiddleware = async (req, res, next) => {
         isAdmin: isAdminFromClaims
       };
       
-      console.log('Proceeding with basic user info from token claims only');
-      console.log('User from token claims:', JSON.stringify(req.user, null, 2));
+      if (debugAuth) console.log('[legacy-auth] proceeding with basic user info only');
+      if (debugAuth) console.log('[legacy-auth] user from token claims:', JSON.stringify(req.user, null, 2));
     }
 
     next();
