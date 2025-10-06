@@ -55,37 +55,42 @@ function getLatencyStats(){
 }
 
 // Startup warm-up state (readiness gate)
-const __warmupState = { started:false, done:false, error:null, tookMs:null, at:null, triggeredBy:'auto' };
+const __warmupState = { started:false, done:false, error:null, tookMs:null, at:null, triggeredBy:'auto', tasks:[] };
 async function runWarmup(trigger='auto'){
   if (__warmupState.started) return; __warmupState.started = true; __warmupState.triggeredBy = trigger; const t0 = Date.now();
   try {
     const tasks = [];
+    const taskMeta = [];
+    const timeWrap = (label, fn) => {
+      const t0 = Date.now();
+      return fn().then(r=>({ status:'fulfilled', took: Date.now()-t0, label })).catch(e=>({ status:'rejected', took: Date.now()-t0, label, error: e.message }));
+    };
     try { const { db } = require('./firebaseAdmin');
-      const add = (p)=>tasks.push(p.catch(()=>null));
-      // Light queries to warm Firestore indexes (core)
-      add(db.collection('promotion_tasks').limit(1).get());
-      add(db.collection('content').orderBy('createdAt','desc').limit(1).get());
-      add(db.collection('system_counters').limit(3).get());
-      // Composite indexes (best-effort)
       const sampleUid = process.env.WARMUP_SAMPLE_UID || 'warmup_noop_uid';
-      add(db.collection('promotion_tasks')
-          .where('type','==','platform_post')
-          .where('status','==','pending')
-          .orderBy('createdAt','desc')
-          .limit(1).get());
-      add(db.collection('promotion_tasks')
-          .where('uid','==', sampleUid)
-          .where('type','==','platform_post')
-          .orderBy('createdAt','desc')
-          .limit(1).get());
-      // Additional commonly accessed collections (shallow)
+      const add = (label, builder) => { tasks.push(timeWrap(label, builder)); };
+      // Core shallow queries
+      add('promotion_tasks.head', () => db.collection('promotion_tasks').limit(1).get());
+      add('content.latest', () => db.collection('content').orderBy('createdAt','desc').limit(1).get());
+      add('system_counters.sample', () => db.collection('system_counters').limit(3).get());
+      // Composite indexes
+      add('promotion_tasks.type_status_createdAt', () => db.collection('promotion_tasks')
+        .where('type','==','platform_post')
+        .where('status','==','pending')
+        .orderBy('createdAt','desc')
+        .limit(1).get());
+      add('promotion_tasks.uid_type_createdAt', () => db.collection('promotion_tasks')
+        .where('uid','==', sampleUid)
+        .where('type','==','platform_post')
+        .orderBy('createdAt','desc')
+        .limit(1).get());
       if (process.env.WARMUP_EXTRA_COLLECTIONS) {
         process.env.WARMUP_EXTRA_COLLECTIONS.split(',').map(s=>s.trim()).filter(Boolean).slice(0,5).forEach(col => {
-          add(db.collection(col).limit(1).get());
+          add(`extra.${col}.head`, () => db.collection(col).limit(1).get());
         });
       }
-    } catch(e) { /* ignore: Firebase not ready */ }
-    await Promise.allSettled(tasks);
+    } catch(e) { /* firebase not ready */ }
+    const results = await Promise.all(tasks);
+    __warmupState.tasks = results;
     __warmupState.done = true;
   } catch(e){ __warmupState.error = e.message; __warmupState.done = true; }
   __warmupState.tookMs = Date.now() - t0; __warmupState.at = new Date().toISOString();
@@ -156,7 +161,7 @@ function microCache(req,res,next){
   if (MICRO_CACHE_TTL_MS <= 0) return next();
   if (req.method !== 'GET') return next();
   // only cache explicit allowlist
-  const allow = ['/api/platform/status','/api/facebook/status','/api/youtube/status','/api/twitter/connection/status','/api/tiktok/status','/api/instagram/status','/api/monetization/earnings/summary','/api/users/progress','/api/status/aggregate'];
+  const allow = ['/api/platform/status','/api/facebook/status','/api/youtube/status','/api/twitter/connection/status','/api/tiktok/status','/api/instagram/status','/api/monetization/earnings/summary','/api/status/aggregate'];
   if (!allow.includes(req.path)) return next();
   const entry = __microCache.get(req.path);
   if (entry && entry.expiry > Date.now()) {
@@ -638,12 +643,18 @@ app.get('/api/ping', (_req,res) => {
 
 // Readiness endpoint (503 until warm-up completes unless disabled)
 const READINESS_REQUIRE_WARMUP = process.env.READINESS_REQUIRE_WARMUP !== 'false';
-app.get('/api/ready', (_req,res) => {
+app.get('/api/ready', (req,res) => {
+  const verbose = req.query.verbose === '1' || req.headers['x-ready-verbose'] === '1';
   if (!READINESS_REQUIRE_WARMUP) return res.json({ ready:true, disabled:true });
   if (!__warmupState.started) return res.status(503).json({ ready:false, state:'not_started' });
   if (!__warmupState.done) return res.status(503).json({ ready:false, state:'warming' });
-  if (__warmupState.error) return res.json({ ready:true, warning: __warmupState.error, tookMs: __warmupState.tookMs });
-  return res.json({ ready:true, tookMs: __warmupState.tookMs, at: __warmupState.at });
+  const base = { ready:true, tookMs: __warmupState.tookMs, at: __warmupState.at };
+  if (__warmupState.error) base.warning = __warmupState.error;
+  if (verbose) {
+    base.triggeredBy = __warmupState.triggeredBy;
+    base.tasks = (__warmupState.tasks||[]).map(t => ({ label: t.label, took: t.took, status: t.status, error: t.error }));
+  }
+  return res.json(base);
 });
 
 // Cache extended diagnostics to avoid repeated heavy Firestore queries.
