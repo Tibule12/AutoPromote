@@ -197,19 +197,25 @@ router.post('/login', async (req, res) => {
       fromCollection
     });
 
-    // Email verification handling
-    // Previous behavior: block login with 403 if email not verified.
-    // New behavior (default): allow login but include flags so UI can show a gentle reminder.
-    // To restore blocking behavior set ENFORCE_EMAIL_VERIFICATION_ON_LOGIN=true
+    // Email verification handling (ENFORCED by default now)
+    // Policy:
+    //  - If user email not verified => block login with 403
+    //  - Allow temporary override ONLY if ALLOW_UNVERIFIED_LOGIN=true (for staging/testing)
+    //  - Resend endpoint available at /api/auth/resend-verification
     let emailVerified = true;
+    let authUser = null;
     try {
-      const authUser = await admin.auth().getUser(decodedToken.uid);
+      authUser = await admin.auth().getUser(decodedToken.uid);
       emailVerified = !!authUser.emailVerified;
-    } catch(_) { /* ignore lookup errors; treat as verified to avoid lockout */ }
+    } catch(_) { emailVerified = false; }
 
-    const enforceEmailVerification = process.env.ENFORCE_EMAIL_VERIFICATION_ON_LOGIN === 'true';
-    if (enforceEmailVerification && !emailVerified) {
-      return res.status(403).json({ error: 'email_not_verified', message: 'Please verify your email before logging in.' });
+    const allowUnverified = process.env.ALLOW_UNVERIFIED_LOGIN === 'true';
+    if (!emailVerified && !allowUnverified) {
+      return res.status(403).json({
+        error: 'email_not_verified',
+        message: 'Please verify your email before logging in. Check your inbox or request a new link.',
+        requiresEmailVerification: true
+      });
     }
 
     // Create a custom token if we're using email/password login
