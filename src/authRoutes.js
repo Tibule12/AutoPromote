@@ -197,13 +197,20 @@ router.post('/login', async (req, res) => {
       fromCollection
     });
 
-    // Reject login if email not verified (except admins) to enforce verification
+    // Email verification handling
+    // Previous behavior: block login with 403 if email not verified.
+    // New behavior (default): allow login but include flags so UI can show a gentle reminder.
+    // To restore blocking behavior set ENFORCE_EMAIL_VERIFICATION_ON_LOGIN=true
+    let emailVerified = true;
     try {
       const authUser = await admin.auth().getUser(decodedToken.uid);
-      if (!authUser.emailVerified) {
-        return res.status(403).json({ error: 'email_not_verified', message: 'Please verify your email before logging in.' });
-      }
-    } catch(_){}
+      emailVerified = !!authUser.emailVerified;
+    } catch(_) { /* ignore lookup errors; treat as verified to avoid lockout */ }
+
+    const enforceEmailVerification = process.env.ENFORCE_EMAIL_VERIFICATION_ON_LOGIN === 'true';
+    if (enforceEmailVerification && !emailVerified) {
+      return res.status(403).json({ error: 'email_not_verified', message: 'Please verify your email before logging in.' });
+    }
 
     // Create a custom token if we're using email/password login
     let tokenToReturn = idToken;
@@ -228,7 +235,9 @@ router.post('/login', async (req, res) => {
         name: userData.name || decodedToken.name || decodedToken.email.split('@')[0],
         role: role,
         isAdmin: isAdmin,
-        fromCollection: fromCollection
+        fromCollection: fromCollection,
+        emailVerified: emailVerified,
+        needsEmailVerification: !emailVerified
       },
       token: tokenToReturn,
       tokenType: tokenType
