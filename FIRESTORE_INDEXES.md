@@ -25,12 +25,15 @@ Your slow endpoints (3s+):
 Some of these endpoints likely run promotion or content aggregation queries that touch `promotion_tasks` with multiple where/order clauses.
 
 ## Current Declared Indexes
-See `firestore.indexes.json` (already present in repo) which includes:
+See `firestore.indexes.json` which now includes (ASC + DESC variants to match queries ordering by createdAt desc):
 ```
- promotion_tasks:
-  - (type, status, createdAt)
-  - (uid, type, createdAt)
+promotion_tasks:
+  - (type ASC, status ASC, createdAt ASC)
+  - (uid ASC, type ASC, createdAt ASC)
+  - (type ASC, status ASC, createdAt DESC)   # newly added
+  - (uid ASC, type ASC, createdAt DESC)      # newly added
 ```
+The DESC variants are required because several queries order by `createdAt` descending while filtering on the preceding fields.
 If you deployed BEFORE this file existed, your live Firestore project may still be missing them.
 
 ## How to Deploy Indexes
@@ -82,7 +85,7 @@ If you query by `uid + status + createdAt`:
   { fieldPath: "createdAt", order: "DESCENDING" }
 ] }
 ```
-Only add indexes you actually need—each one consumes storage and write I/O.
+Only add indexes you actually need—each one consumes storage and write I/O. Avoid combinatorial explosion; start from concrete query patterns.
 
 ## Profiling Checklist
 - Enable `DEBUG_AUTH=true` only while diagnosing.
@@ -97,8 +100,9 @@ Only add indexes you actually need—each one consumes storage and write I/O.
 5. **Reduce per-request Firestore reads** in `/api/users/progress` by persisting periodically updated aggregates.
 
 ## Action Summary
-- Deploy indexes NOW (high impact).
-- Re-test latency after READY.
+- Deploy indexes (including new DESC composites) NOW (high impact).
+- Wait for status = READY (watch console or CLI).
+- Re-test latency on affected endpoints (/api/health?verbose=1 to confirm no FAILED_PRECONDITION).
 - Then consider batching and in-flight de-duplication.
 
 Questions or want scripts to benchmark latency automatically? Let me know.
