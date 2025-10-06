@@ -159,9 +159,17 @@ module.exports = router;
 // Connection status
 router.get('/connection/status', authMiddleware, async (req, res) => {
   try {
+    const { getCache, setCache } = require('../utils/simpleCache');
+    const cacheKey = `twitter_status_${req.userId}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.json({ ...cached, _cached: true });
     const ref = db.collection('users').doc(req.userId).collection('connections').doc('twitter');
     const snap = await ref.get();
-    if (!snap.exists) return res.json({ connected: false });
+    if (!snap.exists) {
+      const out = { connected: false };
+      setCache(cacheKey, out, 5000);
+      return res.json(out);
+    }
     const data = snap.data();
     let identity = null;
     try {
@@ -170,17 +178,19 @@ router.get('/connection/status', authMiddleware, async (req, res) => {
         const r = await fetch('https://api.twitter.com/2/users/me', { headers: { Authorization: `Bearer ${token}` } });
         if (r.ok) {
           const j = await r.json();
-            if (j?.data) identity = { id: j.data.id, name: j.data.name, username: j.data.username };
+          if (j?.data) identity = { id: j.data.id, name: j.data.name, username: j.data.username };
         }
       }
     } catch (_) { /* ignore identity errors */ }
-    res.json({
+    const payload = {
       connected: true,
       scope: data.scope,
       expires_at: data.expires_at || null,
       willRefreshInMs: data.expires_at ? Math.max(0, data.expires_at - Date.now()) : null,
       identity
-    });
+    };
+    setCache(cacheKey, payload, 7000);
+    res.json(payload);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

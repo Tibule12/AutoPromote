@@ -214,11 +214,19 @@ router.get('/callback', async (req, res) => {
   }
 });
 
-// Connection status
+// Connection status (cached ~7s)
 router.get('/status', authMiddleware, require('../statusInstrument')('facebookStatus', async (req, res) => {
+  const { getCache, setCache } = require('../utils/simpleCache');
   const uid = req.userId || req.user?.uid;
+  const cacheKey = `facebook_status_${uid}`;
+  const cached = getCache(cacheKey);
+  if (cached) return res.json({ ...cached, _cached: true });
   const snap = await db.collection('users').doc(uid).collection('connections').doc('facebook').get();
-  if (!snap.exists) return res.json({ connected: false });
+  if (!snap.exists) {
+    const out = { connected: false };
+    setCache(cacheKey, out, 5000);
+    return res.json(out);
+  }
   const data = snap.data();
   const suppressMigration = process.env.SUPPRESS_STATUS_TOKEN_MIGRATION === 'true';
   if (!suppressMigration && data.user_access_token && !data.encrypted_user_access_token) {
@@ -234,6 +242,7 @@ router.get('/status', authMiddleware, require('../statusInstrument')('facebookSt
     pages: (data.pages || []).map(p => ({ id: p.id, name: p.name })),
     ig_business_account_id: data.ig_business_account_id || null
   };
+  setCache(cacheKey, out, 7000);
   return res.json(out);
 }));
 

@@ -187,11 +187,21 @@ router.get('/callback', async (req, res) => {
 });
 
 router.get('/status', authMiddleware, require('../statusInstrument')('youtubeStatus', async (req, res) => {
+  const { getCache, setCache } = require('../utils/simpleCache');
   const uid = req.userId || req.user?.uid;
+  const cacheKey = `youtube_status_${uid}`;
+  const cached = getCache(cacheKey);
+  if (cached) return res.json({ ...cached, _cached: true });
   const snap = await db.collection('users').doc(uid).collection('connections').doc('youtube').get();
-  if (!snap.exists) return res.json({ connected: false });
+  if (!snap.exists) {
+    const out = { connected: false };
+    setCache(cacheKey, out, 5000);
+    return res.json(out);
+  }
   const data = snap.data();
-  return res.json({ connected: true, channel: data.channel || null });
+  const out = { connected: true, channel: data.channel || null };
+  setCache(cacheKey, out, 7000);
+  return res.json(out);
 }));
 
 // Fetch live stats for one video (requires contentId or explicit videoId)
