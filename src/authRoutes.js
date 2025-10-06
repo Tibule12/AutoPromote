@@ -224,11 +224,38 @@ router.post('/login', async (req, res) => {
     } catch(_) { emailVerified = false; }
 
     const allowUnverified = process.env.ALLOW_UNVERIFIED_LOGIN === 'true';
-    if (!emailVerified && !allowUnverified) {
+    // Grandfather policy: allow existing (older) accounts to login unverified if created before cutoff
+    // Configure with ISO8601 datetime string e.g. 2025-02-20T00:00:00Z
+    const grandfatherCutoffRaw = process.env.EMAIL_VERIFICATION_GRANDFATHER_BEFORE;
+    let isGrandfathered = false;
+    let grandfatherCutoff = null;
+    if (grandfatherCutoffRaw) {
+      const parsed = Date.parse(grandfatherCutoffRaw);
+      if (!isNaN(parsed)) {
+        grandfatherCutoff = new Date(parsed);
+        try {
+          // Prefer Auth user creation time (metadata) fallback to Firestore createdAt
+            const creationTime = authUser?.metadata?.creationTime ? Date.parse(authUser.metadata.creationTime) : null;
+            let firestoreCreated = null;
+            if (userData && userData.createdAt && userData.createdAt.toDate) {
+              try { firestoreCreated = userData.createdAt.toDate().getTime(); } catch(_) {}
+            }
+            const createdMs = creationTime || firestoreCreated;
+            if (createdMs && createdMs < grandfatherCutoff.getTime()) {
+              isGrandfathered = true;
+              console.log('[auth] Grandfather exemption applied for user', decodedToken.uid, 'created', new Date(createdMs).toISOString(), 'cutoff', grandfatherCutoff.toISOString());
+            }
+        } catch(_) { /* swallow */ }
+      }
+    }
+
+    if (!emailVerified && !allowUnverified && !isGrandfathered) {
       return res.status(403).json({
         error: 'email_not_verified',
         message: 'Please verify your email before logging in. Check your inbox or request a new link.',
-        requiresEmailVerification: true
+        requiresEmailVerification: true,
+        grandfathered: false,
+        grandfatherPolicyCutoff: grandfatherCutoff ? grandfatherCutoff.toISOString() : null
       });
     }
 
@@ -257,7 +284,9 @@ router.post('/login', async (req, res) => {
         isAdmin: isAdmin,
         fromCollection: fromCollection,
         emailVerified: emailVerified,
-        needsEmailVerification: !emailVerified
+        needsEmailVerification: !emailVerified,
+        grandfathered: isGrandfathered,
+        grandfatherPolicyCutoff: grandfatherCutoff ? grandfatherCutoff.toISOString() : null
       },
       token: tokenToReturn,
       tokenType: tokenType

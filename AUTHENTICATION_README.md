@@ -74,6 +74,23 @@ ALLOW_UNVERIFIED_LOGIN=true
 ```
 When this env var is true, unverified users may log in (the response includes `needsEmailVerification: true`). Remove it (or set to anything else) in production to enforce security.
 
+Grandfathering Existing Users:
+If you need to enforce email verification only for NEW users while allowing previously created accounts to continue logging in unverified, set a cutoff timestamp:
+```
+EMAIL_VERIFICATION_GRANDFATHER_BEFORE=2025-02-20T00:00:00Z
+```
+Behavior:
+* Users whose Auth creation time (or Firestore `users/{uid}.createdAt`) is BEFORE this timestamp are considered `grandfathered` and may log in even if not verified.
+* Users created AT or AFTER the cutoff must verify (unless `ALLOW_UNVERIFIED_LOGIN=true`).
+* Responses now include:
+   * `grandfathered: true|false`
+   * `grandfatherPolicyCutoff: <ISO string or null>`
+
+Security Notes:
+* Choose a cutoff equal to the moment you deployed enforcement (so all prior accounts are exempt).
+* Remove the variable (or set it empty) once legacy users have mostly verified to tighten policy.
+* Grandfathering is an access convenience; still encourage verification for all users for better deliverability and password reset reliability.
+
 Resend endpoint:
 ```
 POST /api/auth/resend-verification { "email": "user@example.com" }
