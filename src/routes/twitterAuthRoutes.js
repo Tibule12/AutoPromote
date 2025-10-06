@@ -156,45 +156,51 @@ module.exports = router;
 // backward compatible with existing mounts.
 // -------------------------------------------------------
 
-// Connection status
-router.get('/connection/status', authMiddleware, async (req, res) => {
+// Connection status (instrumented + in-flight dedupe)
+router.get('/connection/status', authMiddleware, require('../statusInstrument')('twitterStatus', async (req, res) => {
   try {
     const { getCache, setCache } = require('../utils/simpleCache');
-    const cacheKey = `twitter_status_${req.userId}`;
+    const { dedupe } = require('../utils/inFlight');
+    const { instrument } = require('../utils/queryMetrics');
+    const uid = req.userId;
+    const cacheKey = `twitter_status_${uid}`;
     const cached = getCache(cacheKey);
     if (cached) return res.json({ ...cached, _cached: true });
-    const ref = db.collection('users').doc(req.userId).collection('connections').doc('twitter');
-    const snap = await ref.get();
-    if (!snap.exists) {
-      const out = { connected: false };
-      setCache(cacheKey, out, 5000);
-      return res.json(out);
-    }
-    const data = snap.data();
-    let identity = null;
-    try {
-      const token = await getValidAccessToken(req.userId);
-      if (token) {
-        const r = await fetch('https://api.twitter.com/2/users/me', { headers: { Authorization: `Bearer ${token}` } });
-        if (r.ok) {
-          const j = await r.json();
-          if (j?.data) identity = { id: j.data.id, name: j.data.name, username: j.data.username };
-        }
+
+    const payload = await dedupe(cacheKey, async () => {
+      // Firestore fetch instrumented
+      const snap = await instrument('twitterStatusDoc', () => db.collection('users').doc(uid).collection('connections').doc('twitter').get());
+      if (!snap.exists) {
+        return { connected: false };
       }
-    } catch (_) { /* ignore identity errors */ }
-    const payload = {
-      connected: true,
-      scope: data.scope,
-      expires_at: data.expires_at || null,
-      willRefreshInMs: data.expires_at ? Math.max(0, data.expires_at - Date.now()) : null,
-      identity
-    };
+      const data = snap.data();
+      let identity = null;
+      // External call instrumented separately (best-effort)
+      try {
+        const token = await getValidAccessToken(uid);
+        if (token) {
+          const idJson = await instrument('twitterIdentityFetch', async () => {
+            const r = await fetch('https://api.twitter.com/2/users/me', { headers: { Authorization: `Bearer ${token}` } });
+            if (r.ok) return r.json();
+            return null;
+          });
+          if (idJson?.data) identity = { id: idJson.data.id, name: idJson.data.name, username: idJson.data.username };
+        }
+      } catch (_) { /* ignore identity errors */ }
+      return {
+        connected: true,
+        scope: data.scope,
+        expires_at: data.expires_at || null,
+        willRefreshInMs: data.expires_at ? Math.max(0, data.expires_at - Date.now()) : null,
+        identity
+      };
+    });
     setCache(cacheKey, payload, 7000);
-    res.json(payload);
+    return res.json(payload);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: e.message });
   }
-});
+}));
 
 // Disconnect (revoke local tokens; note: full revocation via Twitter API not implemented here)
 router.post('/connection/disconnect', authMiddleware, async (req, res) => {
