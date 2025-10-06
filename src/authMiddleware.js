@@ -120,7 +120,7 @@ const authMiddleware = async (req, res, next) => {
           email: decodedToken.email,
           ...userData
         };
-        console.log('User data attached to request');
+  if (debugAuth) console.log('User data attached to request');
       }
     } catch (firestoreError) {
       console.error('Firestore error in auth middleware:', firestoreError);
