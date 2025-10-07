@@ -40,10 +40,6 @@ AutoPromote is a free, automated content promotion platform that helps creators 
 
 ## Firebase Functions (Free Tier)
 - Landing Page Generator: `generateMonetizedLandingPage`
-- Smart Link Tracker: `generateSmartLink`, `smartLinkRedirect`
-- Social Media Auto‑Promotion Engine: `autoPromoteContent`
-- Revenue Attribution: `logMonetizationEvent`, `getRevenueSummary`
-- Referral System: `addReferrerToContent`, `getReferralStats`
 - Promotion Templates: create/list/attach
 - Firestore triggers: create schedule on content create/approval
 
@@ -89,12 +85,6 @@ Server env required (Render):
 TIKTOK_CLIENT_KEY=...
 TIKTOK_CLIENT_SECRET=...
 TIKTOK_REDIRECT_URI=https://autopromote.onrender.com/api/tiktok/callback
-DASHBOARD_URL=https://Tibule12.github.io/AutoPromote
-```
-
-Test login flow:
-
-1. Sign in to the dashboard, then visit: https://autopromote.onrender.com/api/tiktok/auth
 2. Approve on TikTok, you’ll be redirected back to the dashboard with `?tiktok=connected`.
 3. Tokens are stored at Firestore: `users/{uid}/connections/tiktok`.
 
@@ -118,11 +108,6 @@ Property verification (if requested):
 | `/api/metrics/dashboard/performance` | GET | Aggregate impressions, clicks, CTR, variant winners |
 | `/api/metrics/content/:id/performance` | GET | Detailed variant performance & Wilson scores |
 | `/api/metrics/content/:id/champion` | GET | Current champion variant + significance flag |
-| `/api/metrics/usage/current` | GET | User monthly usage vs quota & overage |
-| `/api/metrics/usage/summary` | GET | Aggregated ledger totals (tasks, subscription, overage) |
-| `/api/metrics/variants/prune` | POST | Prunes underperforming variants |
-| GET | `/api/content/:id/captions/raw?format=srt|vtt` | Download raw caption text (SRT or VTT) |
-
 ## Security Hardening (Recent)
 - Environment validation (`envValidator`) with startup warnings & optional strict fail.
 - Layered security headers (Helmet + custom: X-Frame-Options, XCTO, Referrer-Policy, Permissions-Policy, COOP, CORP).
@@ -130,12 +115,8 @@ Property verification (if requested):
 - JWT audience & issuer enforcement (optional via `JWT_AUDIENCE`, `JWT_ISSUER`).
 - Webhook security: Stripe signature verification; PayPal RSA cert verification with cert caching.
 - Document integrity signatures for queued promotion tasks (`docSigner` attaches `_sig`, verified before processing).
-- Admin cache introspection endpoint for operational transparency.
-
 Planned Next Security Enhancements:
 - Redis adapter for distributed rate limiting & user defaults cache.
-- Doc signing extended to financial/payout documents.
-- PII classification & automatic redaction in audit logs.
 - Automated security audit script summarizing posture & drift detection.
 - Dead-letter replay tool with integrity verification preview.
 
@@ -177,8 +158,6 @@ While Stripe / PayPal accounts are still under review, the app exposes a unified
 
 Environment flags:
 ```
-PAYMENTS_ENABLED=false      # master feature gate for subscription flows
-PAYOUTS_ENABLED=false       # master gate for creator payouts
 ALLOW_PAYMENTS_DEV_MOCK=false  # enable mock subscription/payout endpoints for local testing
 ENABLE_MANUAL_PROVIDER=false   # adds a always-on dev provider
 ```
@@ -197,50 +176,20 @@ Provider abstraction lives under `src/services/payments/` (stripe, paypal placeh
  - Reconciliation script: `node scripts/reconcilePayouts.js` marks stale processing payouts failed after `RECONCILE_PAYOUT_STALE_HOURS`.
  - Worker now periodically snapshots balances (probabilistic) to status docs.
 
-Additional env:
 ```
 ALLOW_LIVE_PAYMENTS=false
 PAYOUT_HOLD_DAYS=7
 STRIPE_PRICE_PRO=price_12345
 STRIPE_PRICE_SCALE=price_67890
 FREE_PLAN_QUOTA=50
-PRO_PLAN_QUOTA=500
-SCALE_PLAN_QUOTA=5000
-RECONCILE_PAYOUT_STALE_HOURS=24
-```
-
-### Audit Logging & Request Tracing (New)
-
-Each incoming request is assigned a `requestId` (middleware `requestContext`). Selected responses now include this ID so client errors can be correlated with backend events. Structured audit entries are written to `audit_logs` with compact payloads:
-
 Events emitted:
 - `stripe.onboard.started`, `stripe.account.status`, `stripe.login_link.created`
-- `dev.subscription_fee.mocked`, `dev.payout.mocked`
-- `balance.viewed`, `admin.overview.viewed`
-- `overage.recorded`, `balance.snapshot`
-- `payout.reconciled.failed`, `payout.reconciliation.summary`
-- `server.error`
-
-To inspect recent audit entries:
 ```
 firestore collection: audit_logs (order by at desc)
-```
-Disable temporarily by wrapping calls or setting a guard in `auditLogger.js`.
-
-### Simple Rate Limiting (Dev Convenience)
 
 An in-memory limiter (`simpleRateLimit`) protects a few sensitive endpoints (values per process, reset on restart):
-
-| Endpoint | Limit/hour |
-|----------|-----------:|
 | POST /api/stripe/onboard | 5 |
 | POST /api/stripe/account/login-link | 10 |
-| POST /api/payments/dev/mock/subscription | 10 |
-| POST /api/payments/dev/mock/payout | 10 |
-
-For production, replace with a shared store (Redis / Firestore counter). The middleware is isolated in `src/middlewares/simpleRateLimit.js` for easy swap.
-
-## Daily Rollups (New)
 Daily aggregated metrics are stored in `content_daily_metrics` documents with id format `<contentId>_<YYYYMMDD>` capturing:
 
 - posts: number of platform posts sampled that day

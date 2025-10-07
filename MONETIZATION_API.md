@@ -81,7 +81,7 @@ Payout completion triggers a `payout_completed` notification document (best-effo
 - `MIN_CONTENT_FOR_REVENUE` (content threshold for revenue eligibility, default 100)
 
 ## Future Suggestions
-- Add provider abstraction (Stripe/PayPal) for real payouts.
+Add provider abstraction (PayPal) for real payouts.
 - Sign earnings events with `createdBy` & `sourceRef`.
 - Add webhooks & audit trail for payout status transitions.
 - Scheduled aggregation job (background worker) for continual processing.

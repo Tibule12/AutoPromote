@@ -10,7 +10,6 @@ async function applyStripeEvent(event) {
         await db.collection('users').doc(session.client_reference_id).set({
           plan: {
             id: session.display_items ? inferPlan(session) : (session.metadata && session.metadata.plan) || 'pro',
-            source: 'stripe',
             subscriptionId: session.subscription,
             updatedAt: new Date().toISOString()
           }
@@ -25,7 +24,6 @@ async function applyStripeEvent(event) {
         await db.collection('users').doc(sub.metadata.userId).set({
           plan: {
             id: sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].plan && sub.items.data[0].plan.nickname || 'unknown',
-            source: 'stripe',
             subscriptionId: sub.id,
             status,
             cancelAt: sub.cancel_at ? new Date(sub.cancel_at*1000).toISOString() : null,

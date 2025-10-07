@@ -233,7 +233,7 @@ router.get('/me/plan', authMiddleware, async (req, res) => {
   } catch (e) { return res.status(500).json({ ok:false, error: e.message }); }
 });
 
-// Assign / change my plan (temporary pseudo billing until Stripe integration)
+// Assign / change my plan (temporary pseudo billing)
 router.post('/me/plan', authMiddleware, async (req, res) => {
   try {
     const { tier } = req.body || {};

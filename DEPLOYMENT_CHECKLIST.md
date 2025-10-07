@@ -5,7 +5,7 @@
 - [ ] Configure Firestore indexes (deploy `firestore.indexes.json` if modified)
 - [ ] Set Firestore & Storage security rules for production
 - [ ] Provision service account JSON & set env vars or GOOGLE_APPLICATION_CREDENTIALS path
-- [ ] (Optional) Configure Stripe / PayPal if enabling payments
+ - [ ] (Optional) Configure PayPal if enabling payments
 
 ## Environment Vars (Core Minimum)
 | Var | Purpose |

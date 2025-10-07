@@ -8,8 +8,7 @@ const REQUIRED_GROUPS = [
 const CONDITIONALS = [
   {
     condition: () => process.env.PAYMENTS_ENABLED === 'true',
-    vars: ['STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET'],
-    label: 'Stripe Payments'
+  // Stripe integration removed
   },
   {
     condition: () => process.env.PAYPAL_ENABLED === 'true',

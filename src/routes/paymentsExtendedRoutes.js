@@ -21,8 +21,8 @@ router.get('/balance', authMiddleware, async (req,res) => {
 router.get('/plans', async (_req,res) => {
   const plans = [
     { id:'free', priceId:null, monthly:0, quota: (process.env.FREE_PLAN_QUOTA||'50') },
-    { id:'pro', priceId: process.env.STRIPE_PRICE_PRO || null, monthly:29, quota: (process.env.PRO_PLAN_QUOTA||'500') },
-    { id:'scale', priceId: process.env.STRIPE_PRICE_SCALE || null, monthly:99, quota: (process.env.SCALE_PLAN_QUOTA||'5000') },
+  { id:'pro', monthly:29, quota: (process.env.PRO_PLAN_QUOTA||'500') },
+  { id:'scale', monthly:99, quota: (process.env.SCALE_PLAN_QUOTA||'5000') },
   ];
   return res.json({ ok:true, plans });
 });
