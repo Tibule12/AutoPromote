@@ -8,6 +8,14 @@ let paypalSdk;
 try { paypalSdk = require('@paypal/paypal-server-sdk'); } catch(_) { /* optional */ }
 const authMiddleware = require('../authMiddleware');
 
+// Polyfill / select fetch implementation (Render may run Node < 18 in some cases)
+let fetchFn = (typeof fetch === 'function') ? fetch : null;
+if (!fetchFn) {
+  try { fetchFn = require('node-fetch'); } catch (e) {
+    console.warn('⚠️ node-fetch not available and global fetch missing; PayPal routes will fail until fetch is provided.');
+  }
+}
+
 // Minimal in-memory OAuth token cache (because we already keep secrets in env)
 let __tokenCache = { token:null, expiresAt:0 };
 async function getAccessToken(){
@@ -16,7 +24,8 @@ async function getAccessToken(){
   if (__tokenCache.token && __tokenCache.expiresAt > now + 5000) return __tokenCache.token;
   const basic = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
   const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
-  const res = await fetch(base + '/v1/oauth2/token', {
+  if (!fetchFn) throw new Error('fetch_unavailable');
+  const res = await fetchFn(base + '/v1/oauth2/token', {
     method:'POST',
     headers:{ 'Authorization': `Basic ${basic}`, 'Content-Type':'application/x-www-form-urlencoded' },
     body:'grant_type=client_credentials'
@@ -35,7 +44,8 @@ async function createOrder({ amount, currency='USD', internalId, userId }){
     purchase_units:[{ amount:{ currency_code: currency, value: amount.toFixed(2) }, reference_id: internalId }],
     application_context:{ shipping_preference:'NO_SHIPPING', user_action:'PAY_NOW' }
   };
-  const res = await fetch(base + '/v2/checkout/orders', {
+  if (!fetchFn) throw new Error('fetch_unavailable');
+  const res = await fetchFn(base + '/v2/checkout/orders', {
     method:'POST', headers:{ 'Authorization':`Bearer ${access}`,'Content-Type':'application/json' }, body: JSON.stringify(body)
   });
   const json = await res.json();
@@ -53,7 +63,8 @@ async function createOrder({ amount, currency='USD', internalId, userId }){
 async function captureOrder(orderId){
   const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
   const access = await getAccessToken();
-  const res = await fetch(base + `/v2/checkout/orders/${orderId}/capture`, {
+  if (!fetchFn) throw new Error('fetch_unavailable');
+  const res = await fetchFn(base + `/v2/checkout/orders/${orderId}/capture`, {
     method:'POST', headers:{ 'Authorization':`Bearer ${access}`,'Content-Type':'application/json' }
   });
   const json = await res.json();
@@ -67,26 +78,47 @@ async function captureOrder(orderId){
 
 // Route: Create PayPal order
 router.post('/create-order', authMiddleware, express.json(), async (req,res) => {
+  const started = Date.now();
   try {
     const { amount, currency } = req.body || {};
     if (typeof amount !== 'number' || amount <=0) return res.status(400).json({ ok:false, error:'invalid_amount' });
-    const internalId = crypto.randomUUID();
+    // randomUUID may not exist on very old Node versions
+    const internalId = (crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex'));
     const order = await createOrder({ amount, currency: currency || 'USD', internalId, userId: req.user.uid });
-    return res.json({ ok:true, id: order.id, status: order.status, approveLinks: (order.links||[]).filter(l=>l.rel==='approve').map(l=>l.href), internalId });
+    return res.json({ ok:true, id: order.id, status: order.status, approveLinks: (order.links||[]).filter(l=>l.rel==='approve').map(l=>l.href), internalId, ms: Date.now()-started });
   } catch(e){
-    return res.status(500).json({ ok:false, error:e.message });
+    console.error('[PayPal] create-order error:', e && e.stack || e);
+    return res.status(500).json({ ok:false, error:e.message, code: (e.message||'').split(' ')[0], ms: Date.now()-started });
   }
 });
 
 // Route: Capture PayPal order (server-side)
 router.post('/capture-order/:id', authMiddleware, async (req,res) => {
+  const started = Date.now();
   try {
     const orderId = req.params.id;
+    if (!orderId) return res.status(400).json({ ok:false, error:'missing_order_id' });
     const result = await captureOrder(orderId);
-    return res.json({ ok:true, orderId, status: result.status, raw: result });
+    return res.json({ ok:true, orderId, status: result.status, raw: result, ms: Date.now()-started });
   } catch(e){
-    return res.status(500).json({ ok:false, error:e.message });
+    console.error('[PayPal] capture-order error:', e && e.stack || e);
+    return res.status(500).json({ ok:false, error:e.message, code:(e.message||'').split(' ')[0], ms: Date.now()-started });
   }
+});
+
+// Lightweight debug endpoint to introspect PayPal integration health
+router.get('/debug/status', authMiddleware, async (req,res) => {
+  const hasClientId = !!process.env.PAYPAL_CLIENT_ID;
+  const hasSecret = !!process.env.PAYPAL_CLIENT_SECRET;
+  const mode = process.env.PAYPAL_MODE || 'sandbox(default)';
+  const webhookIdPresent = !!process.env.PAYPAL_WEBHOOK_ID;
+  const tokenCached = !!__tokenCache.token && __tokenCache.expiresAt > Date.now();
+  return res.json({
+    ok:true,
+    env:{ hasClientId, hasSecret, mode, webhookIdPresent },
+    runtime:{ node: process.version, fetchAvailable: !!fetchFn, fetchType: fetchFn && fetchFn.name },
+    token:{ cached: tokenCached, expiresInMs: tokenCached ? (__tokenCache.expiresAt - Date.now()) : null }
+  });
 });
 
 // Simple in-memory cert cache (expires after TTL)
