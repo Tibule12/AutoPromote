@@ -4,6 +4,90 @@ const https = require('https');
 const router = express.Router();
 const { db } = require('../firebaseAdmin');
 const { audit } = require('../services/auditLogger');
+let paypalSdk;
+try { paypalSdk = require('@paypal/paypal-server-sdk'); } catch(_) { /* optional */ }
+const authMiddleware = require('../authMiddleware');
+
+// Minimal in-memory OAuth token cache (because we already keep secrets in env)
+let __tokenCache = { token:null, expiresAt:0 };
+async function getAccessToken(){
+  if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) throw new Error('paypal_creds_missing');
+  const now = Date.now();
+  if (__tokenCache.token && __tokenCache.expiresAt > now + 5000) return __tokenCache.token;
+  const basic = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
+  const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  const res = await fetch(base + '/v1/oauth2/token', {
+    method:'POST',
+    headers:{ 'Authorization': `Basic ${basic}`, 'Content-Type':'application/x-www-form-urlencoded' },
+    body:'grant_type=client_credentials'
+  });
+  if (!res.ok) throw new Error('token_http_'+res.status);
+  const json = await res.json();
+  __tokenCache = { token: json.access_token, expiresAt: now + (json.expires_in*1000) };
+  return __tokenCache.token;
+}
+
+async function createOrder({ amount, currency='USD', internalId, userId }){
+  const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  const access = await getAccessToken();
+  const body = {
+    intent:'CAPTURE',
+    purchase_units:[{ amount:{ currency_code: currency, value: amount.toFixed(2) }, reference_id: internalId }],
+    application_context:{ shipping_preference:'NO_SHIPPING', user_action:'PAY_NOW' }
+  };
+  const res = await fetch(base + '/v2/checkout/orders', {
+    method:'POST', headers:{ 'Authorization':`Bearer ${access}`,'Content-Type':'application/json' }, body: JSON.stringify(body)
+  });
+  const json = await res.json();
+  if (res.status >=400) throw new Error(json.message || 'order_create_failed');
+  // Persist initial payment doc
+  try {
+    await db.collection('payments').doc(json.id).set({
+      provider:'paypal', providerOrderId: json.id, status:'created', amount: body.purchase_units[0].amount.value,
+      currency: body.purchase_units[0].amount.currency_code, userId, internalId, createdAt: new Date().toISOString()
+    }, { merge:true });
+  } catch(_){ }
+  return json;
+}
+
+async function captureOrder(orderId){
+  const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  const access = await getAccessToken();
+  const res = await fetch(base + `/v2/checkout/orders/${orderId}/capture`, {
+    method:'POST', headers:{ 'Authorization':`Bearer ${access}`,'Content-Type':'application/json' }
+  });
+  const json = await res.json();
+  if (res.status >=400) throw new Error(json.message || 'capture_failed');
+  const capture = json.purchase_units && json.purchase_units[0] && json.purchase_units[0].payments && json.purchase_units[0].payments.captures && json.purchase_units[0].payments.captures[0];
+  try {
+    await db.collection('payments').doc(orderId).set({ status:'captured', capturedAt: new Date().toISOString(), captureId: capture && capture.id }, { merge:true });
+  } catch(_){ }
+  return json;
+}
+
+// Route: Create PayPal order
+router.post('/create-order', authMiddleware, express.json(), async (req,res) => {
+  try {
+    const { amount, currency } = req.body || {};
+    if (typeof amount !== 'number' || amount <=0) return res.status(400).json({ ok:false, error:'invalid_amount' });
+    const internalId = crypto.randomUUID();
+    const order = await createOrder({ amount, currency: currency || 'USD', internalId, userId: req.user.uid });
+    return res.json({ ok:true, id: order.id, status: order.status, approveLinks: (order.links||[]).filter(l=>l.rel==='approve').map(l=>l.href), internalId });
+  } catch(e){
+    return res.status(500).json({ ok:false, error:e.message });
+  }
+});
+
+// Route: Capture PayPal order (server-side)
+router.post('/capture-order/:id', authMiddleware, async (req,res) => {
+  try {
+    const orderId = req.params.id;
+    const result = await captureOrder(orderId);
+    return res.json({ ok:true, orderId, status: result.status, raw: result });
+  } catch(e){
+    return res.status(500).json({ ok:false, error:e.message });
+  }
+});
 
 // Simple in-memory cert cache (expires after TTL)
 const certCache = new Map(); // key: certUrl -> { pem, expiresAt }
@@ -103,7 +187,14 @@ router.post('/webhook', express.json({ limit:'1mb', verify: rawBodyBuffer }), as
   // Minimal event routing placeholder
   try {
     if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
-      await db.collection('payment_events').add({ provider: 'paypal', type: event.event_type, amount: event.resource && event.resource.amount, at: new Date().toISOString(), rawId: event.id });
+      const amount = event.resource && event.resource.amount && event.resource.amount.value;
+      const currency = event.resource && event.resource.amount && event.resource.amount.currency_code;
+      const captureId = event.resource && event.resource.id;
+      const orderId = event.resource && event.resource.supplementary_data && event.resource.supplementary_data.related_ids && event.resource.supplementary_data.related_ids.order_id;
+      await db.collection('payment_events').add({ provider: 'paypal', type: event.event_type, amount, currency, captureId, orderId, at: new Date().toISOString(), rawId: event.id });
+      if (orderId) {
+        await db.collection('payments').doc(orderId).set({ status:'captured', captureId, amount, currency, updatedAt: new Date().toISOString() }, { merge:true });
+      }
     }
   } catch(_){ }
 
