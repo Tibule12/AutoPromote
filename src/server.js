@@ -1,3 +1,30 @@
+// Facebook Data Deletion Instructions Page
+app.get('/facebook-data-deletion', (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <title>Facebook Data Deletion</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
+          .container { max-width: 600px; margin: auto; background: #fff; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px #ccc; }
+          h1 { color: #4267B2; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Facebook Data Deletion Request</h1>
+          <p>If you wish to delete your Facebook-related data from AutoPromote, please follow these steps:</p>
+          <ol>
+            <li>Send an email to <b>support@autopromote.onrender.com</b> with the subject "Facebook Data Deletion Request".</li>
+            <li>Include your Facebook user ID and any relevant details in your message.</li>
+            <li>We will process your request and delete your data as soon as possible, typically within 30 days.</li>
+          </ol>
+          <p>If you initiated this request from Facebook, your data will be deleted automatically as required by Facebook's policies.</p>
+        </div>
+      </body>
+    </html>
+  `);
+});
 
 const express = require('express');
 const cors = require('cors');
