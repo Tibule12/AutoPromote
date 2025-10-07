@@ -5,7 +5,7 @@ let authMiddleware; try { authMiddleware = require('../authMiddleware'); } catch
 const adminOnly = require('../middlewares/adminOnly');
 const { db } = require('../firebaseAdmin');
 const { validateEnv } = require('../utils/envValidator');
-const SENSITIVE_PREFIXES = ['STRIPE_', 'PAYPAL_', 'SESSION_SECRET', 'JWT_', 'DOC_SIGNING_SECRET'];
+const SENSITIVE_PREFIXES = ['PAYPAL_', 'SESSION_SECRET', 'JWT_', 'DOC_SIGNING_SECRET'];
 
 router.get('/', authMiddleware, adminOnly, async (_req,res)=>{
   try { const cfg = await getConfig(); return res.json({ ok:true, config: cfg }); } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
@@ -50,7 +50,7 @@ router.get('/env-status', authMiddleware, adminOnly, async (_req,res)=>{
     const { errors, warnings } = validateEnv({ strict: false });
     // Build a presence map without exposing raw secrets
     const interesting = [
-      'ENABLE_BACKGROUND_JOBS','PAYMENTS_ENABLED','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET',
+  'ENABLE_BACKGROUND_JOBS','PAYMENTS_ENABLED',
       'PAYPAL_ENABLED','PAYPAL_WEBHOOK_ID','JWT_AUDIENCE','JWT_ISSUER','SESSION_SECRET',
       'RATE_LIMIT_GLOBAL_MAX','ENABLE_DISTRIBUTED_LIMITER','REDIS_URL','REDIS_HOST'
     ];

@@ -1,8 +1,4 @@
 
-require('dotenv').config();
-// Early environment validation (non-fatal in dev)
-try { const { validateEnv } = require('./utils/envValidator'); validateEnv({ strict: process.env.STRICT_ENV === 'true' }); } catch(e){ console.warn('Env validator load failed:', e.message); }
-
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -341,13 +337,13 @@ if (!adminSecurityRoutes) {
 }
 
 // Try to load optional route modules
-let withdrawalRoutes, monetizationRoutes, stripeOnboardRoutes;
+let withdrawalRoutes, monetizationRoutes;
 let shortlinkRoutes;
 let billingRoutes;
 let paymentsStatusRoutes;
 let paymentsExtendedRoutes;
 let paypalWebhookRoutes;
-let stripeWebhookRoutes;
+// Stripe integration removed
 let variantAdminRoutes;
 let adminConfigRoutes;
 let adminDashboardRoutes;
@@ -369,14 +365,8 @@ try {
 }
 
 try {
-  stripeOnboardRoutes = require('./routes/stripeOnboardRoutes');
-} catch (error) {
-  stripeOnboardRoutes = express.Router();
-  // Add warning for missing Stripe secret key only if we have the route module
-  if (!process.env.STRIPE_SECRET_KEY) {
-    console.log('ℹ️ STRIPE_SECRET_KEY not found. Stripe features will be disabled.');
-  }
-}
+  // Stripe integration removed
+// (removed empty try block)
 try {
   shortlinkRoutes = require('./routes/shortlinkRoutes');
   console.log('✅ Shortlink routes loaded');
@@ -401,10 +391,8 @@ try {
   console.log('✅ PayPal webhook routes loaded');
 } catch (e) { paypalWebhookRoutes = express.Router(); }
 try {
-  stripeWebhookRoutes = require('./routes/stripeWebhookRoutes');
-  console.log('✅ Stripe webhook routes loaded');
-} catch (e) { stripeWebhookRoutes = express.Router(); }
-try {
+  // Stripe integration removed
+// (removed empty try block)
   variantAdminRoutes = require('./routes/variantAdminRoutes');
   console.log('✅ Variant admin routes loaded');
 } catch (e) { variantAdminRoutes = express.Router(); console.log('⚠️ Variant admin routes not found'); }
@@ -525,13 +513,13 @@ app.use('/api/content', contentQualityCheck);
 // Register optional routes
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
-app.use('/api/stripe', stripeOnboardRoutes);
+// Stripe integration removed
 app.use('/s', shortlinkRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/payments', paymentsStatusRoutes);
 app.use('/api/payments', paymentsExtendedRoutes);
 app.use('/api/paypal', paypalWebhookRoutes);
-app.use('/api/stripe', stripeWebhookRoutes);
+// Stripe integration removed
 app.use('/api/admin/variants', variantAdminRoutes);
 app.use('/api/admin/config', adminConfigRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
@@ -1017,16 +1005,16 @@ global.__bgLeader = {
 if (ENABLE_BACKGROUND) {
   console.log('🛠  Background job runner enabled.');
   try {
-  const { pollYouTubeStatsBatch } = require('./services/youtubeStatsPoller');
-  const { pollPlatformPostMetricsBatch } = require('./services/platformStatsPoller');
+    const { pollYouTubeStatsBatch } = require('./services/youtubeStatsPoller');
+    const { pollPlatformPostMetricsBatch } = require('./services/platformStatsPoller');
     const { processNextYouTubeTask, processNextPlatformTask } = require('./services/promotionTaskQueue');
     const { acquireLock, INSTANCE_ID } = require('./services/workerLockService');
     console.log('🔐 Worker instance id:', INSTANCE_ID);
 
     // Simple re-entrancy guard flags
-  let statsRunning = false;
-  let taskRunning = false;
-  let platformMetricsRunning = false;
+    let statsRunning = false;
+    let taskRunning = false;
+    let platformMetricsRunning = false;
 
     setInterval(async () => {
       if (statsRunning) return; // skip overlapping
@@ -1217,12 +1205,14 @@ if (ENABLE_BACKGROUND) {
   }
 } else {
   console.log('ℹ️ Background job runner disabled (set ENABLE_BACKGROUND_JOBS=true to enable).');
+  // Kick off warmup asynchronously after server start
+  setTimeout(runWarmup, 50);
+
 }
 
-// Kick off warmup asynchronously after server start
-setTimeout(runWarmup, 50);
 
 // Export selected internals for routes/tests (avoid breaking existing behavior)
 module.exports.getLatencyStats = getLatencyStats;
 module.exports.runWarmup = runWarmup;
-module.exports.__warmupState = () => ({ ...__warmupState });
+module.exports.__warmupState = () => (__warmupState);
+} catch (e) { console.error(e); }
