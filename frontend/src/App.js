@@ -6,6 +6,22 @@ import { auth, db, storage } from './firebaseClient';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, signInWithCustomToken } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 
+function App() {
+  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [content, setContent] = useState([]);
+  const [mySchedules, setMySchedules] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
+  const [userDefaults, setUserDefaults] = useState({
+    timezone: 'UTC',
+    defaultPlatforms: [],
+    defaultFrequency: 'once'
+  });
+  const [justLoggedOut, setJustLoggedOut] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -277,7 +293,6 @@ import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc,
     }
   };
 
-  const [justLoggedOut, setJustLoggedOut] = useState(false);
   const handleLogout = async () => {
     try {
       console.log('handleLogout called');
@@ -410,7 +425,11 @@ import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc,
       alert('Error uploading content: ' + error.message);
     }
   };
-  // ...existing code...
-// End of App function
+
+  return (
+    <div>App Component</div>
+    // ...replace with your actual JSX...
+  );
+}
 
 export default App;
