@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import './Auth.css';
 
-const RegisterForm = ({ registerUser }) => {
+const RegisterForm = ({ onRegister, onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -40,8 +40,8 @@ const RegisterForm = ({ registerUser }) => {
     }
 
     try {
-      // Use the registerUser function passed from App.js
-      await registerUser(name, email, password);
+  // Use the onRegister function passed from App.js
+  await onRegister(name, email, password);
 
       setSuccess('Registration successful! Please check your email to verify your account before logging in.');
       setFormData({
@@ -164,7 +164,7 @@ const RegisterForm = ({ registerUser }) => {
           )}
         </button>
         
-        <a href="#" onClick={() => window.location.reload()} className="auth-link">
+        <a href="#" onClick={(e) => { e.preventDefault(); if (onClose) onClose(); }} className="auth-link">
           Already have an account? Sign in
         </a>
       </form>

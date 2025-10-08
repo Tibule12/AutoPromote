@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import './Auth.css';
 
-const LoginForm = ({ onLogin, loginUser }) => {
+const LoginForm = ({ onLogin, onClose }) => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -21,8 +21,8 @@ const LoginForm = ({ onLogin, loginUser }) => {
       const { email, password } = formData;
       console.log('Attempting login with:', email);
       
-      // Use the loginUser function passed from App.js
-      await loginUser(email, password);
+  // Use the onLogin function passed from App.js
+  await onLogin(email, password);
       
     } catch (error) {
       console.error('Login error:', error);
@@ -145,7 +145,7 @@ const LoginForm = ({ onLogin, loginUser }) => {
           )}
         </button>
 
-        <a href="#" onClick={() => window.location.reload()} className="auth-link">
+        <a href="#" onClick={(e) => { e.preventDefault(); if (onClose) onClose(); }} className="auth-link">
           Don't have an account? Create one
         </a>
       </form>
