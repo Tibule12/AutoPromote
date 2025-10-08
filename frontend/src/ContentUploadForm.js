@@ -11,6 +11,42 @@ function ContentUploadForm({ onUpload }) {
   const [articleText, setArticleText] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
+  const [previews, setPreviews] = useState([]);
+  const [isPreviewing, setIsPreviewing] = useState(false);
+  // Preview handler
+  const handlePreview = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsPreviewing(true);
+    setPreviews([]);
+    try {
+      let url = '';
+      if (type !== 'article' && file) {
+        // Simulate upload to get preview URL (skip actual upload for preview)
+        url = `preview://${file.name}`;
+      }
+      const contentData = {
+        title,
+        type,
+        description,
+        ...(type === 'article' ? { articleText } : { url }),
+        isDryRun: true
+      };
+      // Call backend preview (reuse onUpload with dry run)
+      const result = await onUpload(contentData);
+      if (result && result.previews) {
+        setPreviews(result.previews);
+      } else if (result && result.content_preview) {
+        setPreviews([result.content_preview]);
+      } else {
+        setError('No preview data returned.');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to generate preview.');
+    } finally {
+      setIsPreviewing(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -146,22 +182,57 @@ function ContentUploadForm({ onUpload }) {
             </div>
           )}
         </div>
-        <button 
-          type="submit" 
-          disabled={isUploading}
-          className="submit-button"
-        >
-          {isUploading ? (
-            <>
-              <span className="loading-spinner"></span>
-              Uploading...
-            </>
-          ) : (
-            'Upload Content'
-          )}
-        </button>
+        <div style={{display:'flex', gap:'.5rem', marginTop:'.5rem'}}>
+          <button 
+            type="button"
+            disabled={isUploading || isPreviewing}
+            className="preview-button"
+            onClick={handlePreview}
+          >
+            {isPreviewing ? (
+              <><span className="loading-spinner"></span> Generating Preview...</>
+            ) : (
+              'Preview Content'
+            )}
+          </button>
+          <button 
+            type="submit" 
+            disabled={isUploading}
+            className="submit-button"
+          >
+            {isUploading ? (
+              <>
+                <span className="loading-spinner"></span>
+                Uploading...
+              </>
+            ) : (
+              'Upload Content'
+            )}
+          </button>
+        </div>
       </form>
-    </div>
+      {/* Render previews if available */}
+      {previews && previews.length > 0 && (
+        <div className="content-preview-section">
+          <h4>Platform Previews</h4>
+          <div className="preview-cards" style={{display:'flex',gap:'1rem',flexWrap:'wrap'}}>
+            {previews.map((p, idx) => (
+              <div key={idx} className="preview-card" style={{border:'1px solid #ccc',borderRadius:8,padding:'1rem',minWidth:220,maxWidth:320,background:'#f9fafb'}}>
+                <h5>{p.platform ? p.platform.charAt(0).toUpperCase()+p.platform.slice(1) : 'Preview'}</h5>
+                <img src={p.thumbnail || '/default-thumb.png'} alt="Preview Thumbnail" style={{width:'100%',height:120,objectFit:'cover',borderRadius:6}} />
+                <div><strong>Title:</strong> {p.title}</div>
+                <div><strong>Description:</strong> {p.description}</div>
+                {p.caption && <div><strong>Caption:</strong> {p.caption}</div>}
+                {Array.isArray(p.hashtags) && p.hashtags.length > 0 && (
+                  <div><strong>Hashtags:</strong> {p.hashtags.map(h=>`#${h}`).join(' ')}</div>
+                )}
+                {p.sound && <div><strong>Sound:</strong> {p.sound}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+  </div>
   );
 }
 

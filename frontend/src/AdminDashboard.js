@@ -737,7 +737,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
           `}</style>
         </div>
         <div>
-          <strong>Welcome, {user.name} (Admin)</strong>
+          <strong>Welcome, {(user && user.name) ? user.name : 'Admin'} (Admin)</strong>
         </div>
         <div style={{ marginTop: 16, color: '#666' }}>Loading analytics data...</div>
       </div>
