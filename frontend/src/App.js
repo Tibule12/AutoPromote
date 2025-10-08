@@ -4,129 +4,8 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import { auth, db, storage } from './firebaseClient';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, signInWithCustomToken } from 'firebase/auth';
-import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  orderBy,
-  limit as fslimit,
-  getDocs,
-  addDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { API_ENDPOINTS } from './config';
-import LoginForm from './LoginForm';
-import AdminLoginForm from './AdminLoginForm';
-import RegisterForm from './RegisterForm';
-import ContentUploadForm from './ContentUploadForm';
-import ContentList from './ContentList';
-import AdminDashboard from './AdminDashboard';
-import EnvTest from './components/EnvTest';
-import EnvChecker from './components/EnvChecker';
-import DatabaseSync from './components/DatabaseSync';
-import IntegrationTester from './components/IntegrationTester';
-import WelcomePage from './WelcomePage';
-import UserDashboard from './UserDashboard_full';
+import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 
-function App() {
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [userLoaded, setUserLoaded] = useState(false);
-  const [content, setContent] = useState([]);
-  const [showLogin, setShowLogin] = useState(false);
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [analytics, setAnalytics] = useState(null);
-  const [profileStats, setProfileStats] = useState({ views: 0, revenue: 0, ctr: 0, chart: [] });
-  const [badges, setBadges] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [userDefaults, setUserDefaults] = useState({ timezone: 'UTC', schedulingDefaults: {}, defaultPlatforms: [], defaultFrequency: 'once' });
-  const [mySchedules, setMySchedules] = useState([]);
-  // Fetch user profile, stats, badges, notifications from Firestore
-  useEffect(() => {
-    const fetchUserDashboardData = async () => {
-      if (!user || !user.uid) {
-        setUserLoaded(false);
-        return;
-      }
-      try {
-        // Profile stats
-        const userSnap = await getDoc(doc(db, 'users', user.uid));
-        let stats = { views: 0, revenue: 0, ctr: 0, chart: [] };
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          stats.views = data.views || 0;
-          stats.revenue = data.revenue || 0;
-          // Merge Firestore user fields into user state
-          setUser(prev => (prev ? { ...prev, ...data } : { ...data, uid: user.uid }));
-        }
-        // Fetch analytics for chart and CTR
-        const analyticsQuery = query(
-          collection(db, 'analytics'),
-          where('userId', '==', user.uid),
-          orderBy('timestamp', 'desc'),
-          fslimit(30)
-        );
-        const analyticsSnap = await getDocs(analyticsQuery);
-        let chart = [];
-        let totalViews = 0;
-        let totalClicks = 0;
-        analyticsSnap.forEach((docSnap) => {
-          const d = docSnap.data();
-          chart.push({
-            date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleDateString() : '',
-            views: d.views || 0,
-            clicks: d.clicks || 0
-          });
-          totalViews += d.views || 0;
-          totalClicks += d.clicks || 0;
-        });
-        stats.chart = chart.reverse();
-        stats.ctr = totalViews ? ((totalClicks / totalViews) * 100).toFixed(2) : 0;
-        setProfileStats(stats);
-
-        // Fetch badges from subcollection (best-effort)
-        try {
-          const badgesSnap = await getDocs(collection(db, 'users', user.uid, 'badges'));
-          const badgeList = badgesSnap.docs.map((d) => d.data());
-          setBadges(badgeList);
-        } catch {}
-
-        // Fetch user defaults and notifications from backend APIs
-        try {
-          const token = await auth.currentUser.getIdToken(true);
-          const meRes = await fetch(API_ENDPOINTS.USERS_ME, { headers: { Authorization: `Bearer ${token}` } });
-          if (meRes.ok) {
-            const meData = await meRes.json();
-            const u = meData && meData.user ? meData.user : meData;
-            const sched = u.schedulingDefaults || {};
-            setUserDefaults({
-              timezone: u.timezone || 'UTC',
-              schedulingDefaults: sched,
-              defaultPlatforms: sched.platforms || u.defaultPlatforms || [],
-              defaultFrequency: sched.frequency || u.defaultFrequency || 'once'
-            });
-          }
-          const notifRes = await fetch(API_ENDPOINTS.USERS_NOTIFICATIONS, { headers: { Authorization: `Bearer ${token}` } });
-          if (notifRes.ok) {
-            const { notifications } = await notifRes.json();
-            setNotifications((notifications || []).map(n => n.message || ''));
-          }
-        } catch {}
-      } catch (e) {
-        setProfileStats({ views: 0, revenue: 0, ctr: 0, chart: [] });
-        setBadges([]);
-        setNotifications([]);
-      } finally {
-        setUserLoaded(true);
-      }
-    };
-    fetchUserDashboardData();
-  }, [user]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -423,21 +302,38 @@ function App() {
   }, [justLoggedOut, user, navigate]);
 
   // Content upload handler (with file and platforms)
-  const handleContentUpload = async ({ file, platforms, title, description, type, schedule }) => {
+  const handleContentUpload = async (params) => {
     try {
-      if (!file) return;
-      // Upload file to Firebase Storage (modular API)
-      const path = `uploads/${user.uid}/${file.name}`;
-      const fileRef = storageRef(storage, path);
-      await uploadBytes(fileRef, file);
-      const url = await getDownloadURL(fileRef);
-      // Build schedule_hint using defaults
+      // Destructure all possible fields from params
+      const { file, platforms, title, description, type, schedule, articleText, isDryRun } = params;
+      const token = await auth.currentUser.getIdToken(true);
+      let url = '';
+      if (type !== 'article' && file) {
+        url = isDryRun ? `preview://${file.name}` : undefined;
+      }
       const schedule_hint = {
         ...schedule,
         frequency: schedule?.frequency || userDefaults.defaultFrequency || 'once',
         timezone: userDefaults.timezone || 'UTC'
       };
-      const token = await auth.currentUser.getIdToken(true);
+      const payload = {
+        title: title || (file ? file.name : ''),
+        type: type || 'video',
+        url: url || undefined,
+        description: description || '',
+        target_platforms: platforms && platforms.length ? platforms : (userDefaults.defaultPlatforms || ['youtube','tiktok','instagram']),
+        schedule_hint,
+        isDryRun: !!isDryRun
+      };
+      if (type === 'article' && articleText) {
+        payload.articleText = articleText;
+      }
+      if (!isDryRun && type !== 'article' && file) {
+        const path = `uploads/${user.uid}/${file.name}`;
+        const fileRef = storageRef(storage, path);
+        await uploadBytes(fileRef, file);
+        payload.url = await getDownloadURL(fileRef);
+      }
       const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
         method: 'POST',
         headers: {
@@ -445,30 +341,24 @@ function App() {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          title: title || file.name,
-          type: type || 'video',
-          url,
-          description: description || '',
-          target_platforms: platforms && platforms.length ? platforms : (userDefaults.defaultPlatforms || ['youtube','tiktok','instagram']),
-          schedule_hint
-        })
+        body: JSON.stringify(payload)
       });
+      const result = await res.json();
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Upload failed');
+        throw new Error(result.message || 'Upload/preview failed');
       }
-      // Attempt immediate posting to selected platforms (best-effort)
+      if (isDryRun) {
+        return result;
+      }
       try {
         const chosen = Array.isArray(platforms) ? platforms : [];
-        // Helper to call provider upload endpoints
         const postYouTube = async () => {
           if (!chosen.includes('youtube')) return;
           try {
             const r = await fetch(API_ENDPOINTS.YOUTUBE_UPLOAD, {
               method: 'POST',
               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              body: JSON.stringify({ title: title || file.name, description: description || '', videoUrl: url })
+              body: JSON.stringify({ title: title || (file ? file.name : ''), description: description || '', videoUrl: payload.url })
             });
             if (!r.ok) console.warn('YouTube upload failed');
           } catch (_) {}
@@ -484,7 +374,7 @@ function App() {
             const st = await getFacebookStatus();
             const pageId = st?.pages?.[0]?.id;
             if (!pageId) return;
-            const body = { pageId, content: { type: type || 'video', url, title: title || file.name, description: description || '' } };
+            const body = { pageId, content: { type: type || 'video', url: payload.url, title: title || (file ? file.name : ''), description: description || '' } };
             const r = await fetch(API_ENDPOINTS.FACEBOOK_UPLOAD, {
               method: 'POST',
               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -503,12 +393,11 @@ function App() {
             const r = await fetch(API_ENDPOINTS.INSTAGRAM_UPLOAD, {
               method: 'POST',
               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              body: JSON.stringify({ pageId, mediaUrl: url, caption: `${title || ''}\n${description || ''}`.trim(), mediaType })
+              body: JSON.stringify({ pageId, mediaUrl: payload.url, caption: `${title || ''}\n${description || ''}`.trim(), mediaType })
             });
             if (!r.ok) console.warn('Instagram upload failed');
           } catch (_) {}
         };
-        // Fire requests sequentially to reduce API contention
         await postYouTube();
         await postFacebook();
         await postInstagram();
@@ -563,6 +452,6 @@ function App() {
       </Routes>
     </div>
   );
-}
+// End of App function
 
 export default App;
