@@ -736,6 +736,17 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
   }
 });
 
+// Real-time Feedback Dashboard endpoint
+router.get('/dashboard/:userId/:contentId', authMiddleware, async (req, res) => {
+  try {
+    const { userId, contentId } = req.params;
+    const dashboardData = await getRealTimeFeedback(contentId);
+    res.json({ success: true, dashboard: dashboardData });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Promotion status snapshot for a content item
 router.get('/:id/promotion-status', authMiddleware, async (req, res) => {
   try {
@@ -1437,6 +1448,29 @@ router.get('/admin/active-promotions', authMiddleware, async (req, res) => {
   }
 });
 
+// Automated A/B Testing endpoint
+router.post('/ab-test/:contentId', authMiddleware, async (req, res) => {
+  try {
+    const { contentId } = req.params;
+    // Fetch content variants (stub: use original and repackaged)
+    const contentRef = db.collection('content').doc(contentId);
+    const contentDoc = await contentRef.get();
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
+      return res.status(404).json({ error: 'Content not found' });
+    }
+    const content = contentDoc.data();
+    // Simulate repackaged variant
+    const repackaged = { ...content, title: content.title + ' (Repackaged)' };
+    const variants = [content, repackaged];
+    const { runABTest, selectBestVariant } = require('./services/abTestingEngine');
+    const results = runABTest(variants);
+    const best = selectBestVariant(results);
+    res.json({ success: true, abTestResults: results, bestVariant: best });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Advanced scheduling options endpoint
 router.get('/:id/scheduling-options', authMiddleware, async (req, res) => {
   try {
@@ -1479,6 +1513,70 @@ router.get('/:id/scheduling-options', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error getting scheduling options:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Community Features Endpoints
+// Create Growth Squad
+router.post('/growth-squad', authMiddleware, async (req, res) => {
+  try {
+    const { userIds } = req.body;
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ error: 'userIds array required' });
+    }
+    const { createGrowthSquad } = require('./services/communityEngine');
+    const squad = createGrowthSquad(userIds);
+    res.json({ success: true, squad });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get Leaderboard
+router.get('/leaderboard', authMiddleware, async (req, res) => {
+  try {
+    const { getLeaderboard } = require('./services/communityEngine');
+    const leaderboard = getLeaderboard();
+    res.json({ success: true, leaderboard });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create Viral Challenge
+router.post('/viral-challenge', authMiddleware, async (req, res) => {
+  try {
+    const { name, reward } = req.body;
+    if (!name || !reward) {
+      return res.status(400).json({ error: 'name and reward required' });
+    }
+    const { createViralChallenge } = require('./services/communityEngine');
+    const challenge = createViralChallenge(name, reward);
+    res.json({ success: true, challenge });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Fraud/Spam Detection Endpoint
+router.post('/detect-fraud/:contentId', authMiddleware, async (req, res) => {
+  try {
+    const { contentId } = req.params;
+    const { metrics } = req.body;
+    if (!metrics || typeof metrics !== 'object') {
+      return res.status(400).json({ error: 'metrics object required' });
+    }
+    const contentRef = db.collection('content').doc(contentId);
+    const contentDoc = await contentRef.get();
+    if (!contentDoc.exists || contentDoc.data().user_id !== req.userId) {
+      return res.status(404).json({ error: 'Content not found' });
+    }
+    const content = contentDoc.data();
+    const { detectFraud } = require('./services/fraudDetectionEngine');
+    const result = detectFraud(content, metrics);
+    res.json({ success: true, fraudStatus: result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
