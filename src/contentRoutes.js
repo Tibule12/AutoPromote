@@ -236,6 +236,10 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
     for (const platform of platforms) {
       hashtagsByPlatform[platform] = await generateCustomHashtags({ content: { title, type, category: req.body.category }, platform, nicheTags: req.body.niche_tags || [] });
     }
+    // Clean hashtags for each platform before saving
+    Object.keys(hashtagsByPlatform).forEach(platform => {
+      hashtagsByPlatform[platform] = (hashtagsByPlatform[platform] || []).filter(tag => typeof tag === 'string' && tag.length > 0);
+    });
     // Insert content into Firestore
     console.log(isDryRun ? 'Preparing dry-run content preview...' : 'Preparing to save content to Firestore...');
   // Create boost chain for this content
