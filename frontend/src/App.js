@@ -427,8 +427,24 @@ function App() {
   };
 
   return (
-    <div>App Component</div>
-    // ...replace with your actual JSX...
+    <div>
+      <h2>My Platform Content</h2>
+      {content.length === 0 ? (
+        <p>No content found.</p>
+      ) : (
+        <ul>
+          {content.map((item, idx) => (
+            <li key={idx} style={{marginBottom: '1em'}}>
+              <strong>{item.title || item.type}</strong><br />
+              {item.description}<br />
+              {item.platform && <span>Platform: {item.platform}</span>}
+              {item.status && <span> | Status: {item.status}</span>}
+              {/* Add more fields as needed */}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
