@@ -1283,6 +1283,26 @@ function AdminDashboard({ analytics, user, onLogout }) {
       {renderDashboardContent()}
 
       <ActivityFeed activities={dashboardData.recentActivities} />
+
+      <div className="admin-dashboard">
+        <h2>Admin Dashboard</h2>
+        <h3>All Platform Content</h3>
+        {dashboardData && dashboardData.allContent && dashboardData.allContent.length > 0 ? (
+          <ul>
+            {dashboardData.allContent.map((item, idx) => (
+              <li key={item.id || idx} style={{marginBottom: '1em'}}>
+                <strong>{item.title || item.type}</strong><br />
+                {item.description}<br />
+                {item.platform && <span>Platform: {item.platform}</span>}
+                {item.status && <span> | Status: {item.status}</span>}
+                {/* Add more fields as needed */}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No content found for any user.</p>
+        )}
+      </div>
     </div>
   );
 }
