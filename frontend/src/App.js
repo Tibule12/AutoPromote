@@ -434,14 +434,34 @@ function App() {
     <div>
       {/* If no user, show welcome/login page */}
       {!user ? (
-        (() => {
-          try {
-            const WelcomePage = require('./WelcomePage').default;
-            return <WelcomePage onGetStarted={() => setShowRegister(true)} onSignIn={() => setShowLogin(true)} />;
-          } catch (e) {
-            return <div style={{color:'red'}}>Welcome page not found.</div>;
-          }
-        })()
+        <>
+          {(() => {
+            try {
+              const WelcomePage = require('./WelcomePage').default;
+              return <WelcomePage onGetStarted={() => setShowRegister(true)} onSignIn={() => setShowLogin(true)} />;
+            } catch (e) {
+              return <div style={{color:'red'}}>Welcome page not found.</div>;
+            }
+          })()}
+          {/* Show login modal if requested */}
+          {showLogin && (() => {
+            try {
+              const LoginForm = require('./LoginForm').default;
+              return <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />;
+            } catch (e) {
+              return <div style={{color:'red'}}>Login form not found.</div>;
+            }
+          })()}
+          {/* Show register modal if requested */}
+          {showRegister && (() => {
+            try {
+              const RegisterForm = require('./RegisterForm').default;
+              return <RegisterForm onRegister={registerUser} onClose={() => setShowRegister(false)} />;
+            } catch (e) {
+              return <div style={{color:'red'}}>Register form not found.</div>;
+            }
+          })()}
+        </>
       ) : user && isAdmin ? (
         // Render admin dashboard for admin users
         (() => {
