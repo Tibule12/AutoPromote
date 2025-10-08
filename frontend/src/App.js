@@ -5,6 +5,7 @@ import './App.css';
 import { auth, db, storage } from './firebaseClient';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, signInWithCustomToken } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { API_ENDPOINTS } from './config';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -447,7 +448,13 @@ function App() {
           {showLogin && (() => {
             try {
               const LoginForm = require('./LoginForm').default;
-              return <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />;
+              return (
+                <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.45)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <div style={{background:'#fff',borderRadius:'18px',boxShadow:'0 8px 32px rgba(0,0,0,0.18)',padding:'2.5rem 2rem',minWidth:340,maxWidth:420}}>
+                    <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
+                  </div>
+                </div>
+              );
             } catch (e) {
               return <div style={{color:'red'}}>Login form not found.</div>;
             }
@@ -456,13 +463,19 @@ function App() {
           {showRegister && (() => {
             try {
               const RegisterForm = require('./RegisterForm').default;
-              return <RegisterForm onRegister={registerUser} onClose={() => setShowRegister(false)} />;
+              return (
+                <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.45)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <div style={{background:'#fff',borderRadius:'18px',boxShadow:'0 8px 32px rgba(0,0,0,0.18)',padding:'2.5rem 2rem',minWidth:340,maxWidth:420}}>
+                    <RegisterForm onRegister={registerUser} onClose={() => setShowRegister(false)} />
+                  </div>
+                </div>
+              );
             } catch (e) {
               return <div style={{color:'red'}}>Register form not found.</div>;
             }
           })()}
         </>
-      ) : user && isAdmin ? (
+      ) : user && user.role === 'admin' ? (
         // Render admin dashboard for admin users
         (() => {
           try {
