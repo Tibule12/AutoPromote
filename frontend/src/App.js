@@ -433,6 +433,20 @@ function App() {
   return (
     <div>
       <h2>My Platform Content</h2>
+      {/* Show upload form for all users except when logged out */}
+      {user && (
+        <div style={{marginBottom: '2em'}}>
+          {/* Dynamically import ContentUploadForm to avoid errors if not present */}
+          {(() => {
+            try {
+              const ContentUploadForm = require('./ContentUploadForm').default;
+              return <ContentUploadForm onUpload={handleContentUpload} />;
+            } catch (e) {
+              return <div style={{color:'red'}}>Upload form not found.</div>;
+            }
+          })()}
+        </div>
+      )}
       {content.length === 0 ? (
         <p>No content found.</p>
       ) : (
