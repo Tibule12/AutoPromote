@@ -1,3 +1,25 @@
+// Integrate Content Idea Engine
+const { generateContentIdeas } = require('./services/contentIdeaEngine');
+// Integrate Cross-Post Engine
+const { crossPostContent } = require('./services/crossPostEngine');
+// Integrate Collaboration Engine
+const { startCollaborationSession } = require('./services/collaborationEngine');
+// Integrate Sentiment Moderation Engine
+const { analyzeSentiment, moderateComments } = require('./services/sentimentModerationEngine');
+// Integrate Notification Engine
+const { sendNotification } = require('./services/notificationEngine');
+// Integrate Analytics Export Engine
+const { exportAnalytics } = require('./services/analyticsExportEngine');
+// Integrate API Integration Engine
+const { registerThirdPartyApp } = require('./services/apiIntegrationEngine');
+// Integrate Dashboard Widget Engine
+const { getUserDashboard } = require('./services/dashboardWidgetEngine');
+// Integrate Tutorial Engine
+const { getTutorialSteps } = require('./services/tutorialEngine');
+// Integrate Viral Insurance Engine
+const { checkViralInsurance } = require('./services/viralInsuranceEngine');
+// Integrate Dream Changer Engine
+const { showRadicalTransparency, instantViralBoost, aiContentRescue, gamifiedGrowth, predictTrends } = require('./services/dreamChangerEngine');
 // BUSINESS RULES (CONFIGURABLE)
 // These values were previously hard‑coded with unrealistic placeholders (e.g. $900,000 per 1M views).
 // They are now environment‑driven so you can tune the economic model without code changes.
@@ -104,6 +126,36 @@ const BUSINESS = {
   AUTO_REMOVE_DAYS: parseInt(process.env.AUTO_REMOVE_DAYS || '2', 10)
 };
 
+// Integrate Growth Guarantee Badge
+const { BADGE, shouldAwardBadge, checkGrowthGuarantee, celebrateMilestone } = require('./services/growthGuaranteeBadge');
+// Integrate Boost Chain Engine
+const { createBoostChain, suggestRepostTiming, rewardReferral } = require('./services/boostChainEngine');
+// Integrate Content Preview Engine
+const { generateAllPreviews } = require('./services/contentPreviewEngine');
+// Integrate Retry/Repackage Engine
+const { shouldRetryContent, repackageContent } = require('./services/retryRepackageEngine');
+// Integrate Influencer Boost Engine
+const { scheduleInfluencerRepost, createPaidBoost } = require('./services/influencerBoostEngine');
+// Integrate Deep Analytics Engine
+const { getContentAnalytics, getCompetitorAnalytics } = require('./services/deepAnalyticsEngine');
+// Integrate Algorithm Exploitation Engine
+const { optimizeForAlgorithm } = require('./services/algorithmExploitationEngine');
+
+// Integrate Feedback Dashboard Engine
+const { getRealTimeFeedback } = require('./services/feedbackDashboardEngine');
+// Integrate A/B Testing Engine
+const { runABTest, selectBestVariant } = require('./services/abTestingEngine');
+// Integrate Community Engine
+const { createGrowthSquad, getLeaderboard, createViralChallenge } = require('./services/communityEngine');
+// Integrate Fraud Detection Engine
+const { detectFraud } = require('./services/fraudDetectionEngine');
+// Integrate Platform Integration Engine
+const { integrateWithPlatform } = require('./services/platformIntegrationEngine');
+// Integrate Coaching Engine
+const { getGrowthCoaching } = require('./services/coachingEngine');
+// Integrate Content Repurposing Engine
+const { repurposeContent } = require('./services/contentRepurposingEngine');
+
 // Upload content with advanced scheduling and optimization
 router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMinute: 15, dailyLimit: 500 }),
   sanitizeInput,
@@ -116,7 +168,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
   validateContentData,
   validateRateLimit,
   async (req, res) => {
-  try {
+    try {
     const {
       title,
       type,
@@ -170,14 +222,32 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
     const creatorPayoutRate = BUSINESS.CREATOR_PAYOUT_RATE;
     const maxBudget = max_budget || 1000;
 
+    // Integrate Hashtag Engine
+    const { generateCustomHashtags, trackHashtagPerformance } = require('./services/hashtagEngine');
+    // Integrate User Segmentation
+    const { segmentUser, getSegmentFeatures } = require('./services/userSegmentation');
+    // Fetch user profile (stub: replace with real user fetch)
+    const userProfile = { role: req.body.role, followers: req.body.followers, isBrand: req.body.isBrand };
+    const userSegment = segmentUser(userProfile);
+    const segmentFeatures = getSegmentFeatures(userSegment);
+    // Generate hashtags for each platform
+    const hashtagsByPlatform = {};
+    const platforms = target_platforms || ['youtube', 'tiktok', 'instagram'];
+    for (const platform of platforms) {
+      hashtagsByPlatform[platform] = await generateCustomHashtags({ content: { title, type, category: req.body.category }, platform, nicheTags: req.body.niche_tags || [] });
+    }
     // Insert content into Firestore
     console.log(isDryRun ? 'Preparing dry-run content preview...' : 'Preparing to save content to Firestore...');
-    const contentData = {
+  // Create boost chain for this content
+  const squadUserIds = req.body.growth_squad_user_ids || [];
+  const boostChain = createBoostChain('preview', req.userId, squadUserIds);
+
+  const contentData = {
       user_id: req.userId,
       title,
       type,
       description: description || '',
-      target_platforms: target_platforms || ['youtube', 'tiktok', 'instagram'],
+      target_platforms: platforms,
       status: 'pending', // All new content must be reviewed by admin
       scheduled_promotion_time: scheduled_promotion_time || null,
       promotion_frequency: promotion_frequency || 'once',
@@ -192,7 +262,12 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
       views: 0,
       revenue: 0,
       schedule_hint: schedule_hint || null,
-      ...(validUrl ? { url: validUrl } : {}),
+      hashtags: hashtagsByPlatform,
+      user_segment: userSegment,
+      segment_features: segmentFeatures,
+      growth_guarantee_badge: shouldAwardBadge({ hashtags: hashtagsByPlatform }) ? BADGE : null,
+  ...(validUrl ? { url: validUrl } : {}),
+  boost_chain: boostChain,
       // Optional quality results if the client ran /api/content/quality-check first
       ...(req.body.quality_score !== undefined ? { quality_score: Number(req.body.quality_score) } : {}),
       ...(Array.isArray(req.body.quality_feedback) ? { quality_feedback: req.body.quality_feedback.slice(0, 20) } : {}),
@@ -217,6 +292,10 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
         throw firestoreError;
       }
       contentId = contentRef.id;
+      // Track hashtag performance after upload
+      for (const platform of platforms) {
+        await trackHashtagPerformance({ contentId, hashtags: hashtagsByPlatform[platform], platform });
+      }
 
       // Update revenue eligibility progress after each real upload
       try {
@@ -529,7 +608,76 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
       }
     }
 
-    res.status(201).json({
+    // Algorithmic optimization
+    const optimizedContent = optimizeForAlgorithm({ title, description, hashtags: hashtagsByPlatform }, platforms[0]);
+    // Generate previews for all platforms
+    const previews = generateAllPreviews({ ...content, ...optimizedContent });
+    // Deep analytics for content and competitor (stub)
+    const analytics = getContentAnalytics(contentId);
+    const competitorAnalytics = req.body.competitor_id ? getCompetitorAnalytics(req.body.competitor_id) : null;
+    // Retry/repackage logic (stub: always 0 views on upload, but logic ready)
+    const milestone = celebrateMilestone(content, { views: 0 });
+    const retryRequired = shouldRetryContent(content, { views: 0 });
+    const repackagedContent = retryRequired ? repackageContent(content) : null;
+    // Influencer repost and paid boost (stub)
+    const influencerRepost = req.body.influencer_id ? scheduleInfluencerRepost(contentId, req.body.influencer_id, platforms[0]) : null;
+    const paidBoost = req.body.paid_boost_amount ? createPaidBoost(contentId, req.userId, req.body.paid_boost_amount, platforms[0]) : null;
+    // Suggest repost timing for each platform
+    const repostSuggestions = {};
+    for (const platform of platforms) {
+      repostSuggestions[platform] = suggestRepostTiming(boostChain, platform);
+    }
+    // Reward referral if referralId provided
+    let referralReward = null;
+    if (req.body.referral_id) {
+      referralReward = rewardReferral(req.userId, boostChain.chainId);
+    }
+  // Real-time feedback
+  const feedback = getRealTimeFeedback(contentId);
+  // A/B testing (stub: variants are just original and repackaged)
+  const abTestResults = runABTest([content, repackagedContent || content]);
+  const bestVariant = selectBestVariant(abTestResults);
+  // Community features
+  const growthSquad = createGrowthSquad([req.userId]);
+  const leaderboard = getLeaderboard();
+  const viralChallenge = createViralChallenge('Viral Growth Challenge', '1000 credits');
+  // Fraud detection
+  const fraudStatus = detectFraud(content, feedback);
+  // Platform integration
+  const platformIntegration = platforms.map(platform => integrateWithPlatform(platform, content));
+  // Coaching
+  const coaching = getGrowthCoaching(req.userId, feedback);
+  // Content repurposing
+  const repurposed = repurposeContent(content, 'short');
+  // Dream Changer features
+  const transparencyReport = showRadicalTransparency(contentId, feedback, { boostTime: new Date(), repackageCount: repackagedContent ? 1 : 0, algorithmTriggers: ['hook', 'sound', 'caption'] });
+  const viralBoost = instantViralBoost(content);
+  const contentRescue = aiContentRescue(content);
+  const gamified = gamifiedGrowth(req.userId, feedback);
+  const trendPrediction = predictTrends(content);
+  // Content ideas for user
+  const contentIdeas = generateContentIdeas(req.userId, req.body.interests || []);
+  // Cross-posting
+  const crossPostResults = crossPostContent(content, platforms);
+  // Collaboration session
+  const collaborationSession = startCollaborationSession([req.userId], contentId);
+  // Sentiment moderation
+  const comments = req.body.comments || [];
+  const sentiment = analyzeSentiment(comments);
+  const moderatedComments = moderateComments(comments);
+  // Notification
+  const notification = sendNotification(req.userId, 'Your content is live!', 'success');
+  // Analytics export
+  const analyticsExport = exportAnalytics(contentId);
+  // API integration
+  const apiApp = registerThirdPartyApp('AutoPromote Partner', 'https://callback.url');
+  // Dashboard widgets
+  const dashboard = getUserDashboard(req.userId);
+  // Tutorials
+  const tutorialSteps = getTutorialSteps('beginner');
+  // Viral insurance
+  const viralInsurance = checkViralInsurance(content, feedback);
+  res.status(201).json({
       message: scheduled_promotion_time ? 'Content uploaded and scheduled for promotion' : 'Content uploaded successfully',
       content,
       promotion_schedule: promotionSchedule,
@@ -542,7 +690,45 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
         daily_target_views: minViews,
         auto_remove_days: BUSINESS.AUTO_REMOVE_DAYS
       },
-      auto_promotion: Object.keys(autoPromotionResults).length ? autoPromotionResults : null
+      auto_promotion: Object.keys(autoPromotionResults).length ? autoPromotionResults : null,
+      growth_guarantee_badge: shouldAwardBadge({ hashtags: hashtagsByPlatform }) ? BADGE : null,
+      milestone_celebration: milestone,
+      boost_chain: boostChain,
+      repost_suggestions: repostSuggestions,
+      referral_reward: referralReward,
+      previews,
+      analytics,
+      competitor_analytics: competitorAnalytics,
+      retry_required: retryRequired,
+      repackaged_content: repackagedContent,
+      influencer_repost: influencerRepost,
+  paid_boost: paidBoost,
+  feedback,
+  ab_test_results: abTestResults,
+  best_variant: bestVariant,
+  growth_squad: growthSquad,
+  leaderboard,
+  viral_challenge: viralChallenge,
+  fraud_status: fraudStatus,
+  platform_integration: platformIntegration,
+  coaching,
+  repurposed_content: repurposed,
+  transparency_report: transparencyReport,
+  instant_viral_boost: viralBoost,
+  ai_content_rescue: contentRescue,
+  gamified_growth: gamified,
+  trend_prediction: trendPrediction,
+  content_ideas: contentIdeas,
+  cross_post_results: crossPostResults,
+  collaboration_session: collaborationSession,
+  sentiment_analysis: sentiment,
+  moderated_comments: moderatedComments,
+  notification,
+  analytics_export: analyticsExport,
+  api_integration: apiApp,
+  dashboard,
+  tutorial_steps: tutorialSteps,
+  viral_insurance: viralInsurance
     });
   } catch (error) {
     console.error('Upload error:', error);
