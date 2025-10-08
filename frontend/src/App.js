@@ -410,48 +410,7 @@ import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc,
       alert('Error uploading content: ' + error.message);
     }
   };
-  return (
-    <div className="App">
-      <h2 style={{color: 'red', textAlign: 'center'}}>Test Render: If you see this, React is working!</h2>
-      <EnvTest />
-      <EnvChecker />
-  {user && userLoaded && <DatabaseSync user={user} />}
-
-      <Routes>
-  <Route path="/admin-dashboard" element={<AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />} />
-        <Route path="/integration-test" element={<IntegrationTester />} />
-        <Route path="/" element={
-          <>
-            {showLogin && <LoginForm onLogin={handleLogin} loginUser={loginUser} />}
-            {showAdminLogin && <AdminLoginForm onLogin={handleLogin} />}
-            {showRegister && <RegisterForm registerUser={registerUser} />}
-            {userLoaded && user && !(isAdmin || user.role === 'admin' || user.isAdmin === true) && (
-              <UserDashboard
-                user={user}
-                content={content}
-                stats={profileStats}
-                badges={badges}
-                notifications={notifications}
-                userDefaults={userDefaults}
-                onSaveDefaults={saveUserDefaults}
-                mySchedules={mySchedules}
-                onUpload={handleContentUpload}
-                onPromoteToggle={() => {}}
-                onSchedulesChanged={refreshSchedules}
-                onLogout={handleLogout}
-              />
-            )}
-            {!user && !showLogin && !showRegister && !showAdminLogin && (
-                <WelcomePage 
-                  onGetStarted={() => setShowRegister(true)} 
-                  onSignIn={() => setShowLogin(true)} 
-                />
-            )}
-          </>
-        } />
-      </Routes>
-    </div>
-  );
+  // ...existing code...
 // End of App function
 
 export default App;
