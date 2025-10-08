@@ -475,7 +475,7 @@ function App() {
             }
           })()}
         </>
-      ) : user && user.role === 'admin' ? (
+      ) : (user && (user.role === 'admin' || user.isAdmin === true)) ? (
         // Render admin dashboard for admin users
         (() => {
           try {
