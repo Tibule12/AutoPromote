@@ -23,7 +23,6 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => (
       <div className="new-welcome-btn-row">
         <button className="new-welcome-btn primary" onClick={onGetStarted}>Get Started</button>
         <button className="new-welcome-btn" onClick={onSignIn}>Login</button>
-        <button className="new-welcome-btn" onClick={onGetStarted}>Register</button>
       </div>
       <div className="new-welcome-features">
         <div className="feature-card">
