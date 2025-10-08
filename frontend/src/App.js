@@ -456,6 +456,8 @@ function App() {
                   return <div style={{color:'red'}}>Upload form not found.</div>;
                 }
               })()}
+              {/* Add Logout button for users */}
+              <button onClick={handleLogout} style={{marginTop: '1em', padding: '0.5em 1em', background: '#1976d2', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer'}}>Logout</button>
             </div>
           )}
           {content.length === 0 ? (
