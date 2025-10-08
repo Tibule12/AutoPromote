@@ -29,6 +29,7 @@ function App() {
         setUser(null);
         setIsAdmin(false);
         localStorage.clear();
+        setContent([]); // Clear content on logout
         return;
       }
       try {
@@ -48,10 +49,13 @@ function App() {
         localStorage.setItem('user', JSON.stringify(userData));
         // Debug log for current UID
         console.log("Current UID:", firebaseUser.uid);
+        // Fetch content after user is set
+        fetchUserContent(token);
       } catch (error) {
         setUser(null);
         setIsAdmin(false);
         localStorage.clear();
+        setContent([]);
       }
     });
     if (window.location.pathname === '/admin-login') {
