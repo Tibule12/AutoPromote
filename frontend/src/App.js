@@ -432,35 +432,47 @@ function App() {
 
   return (
     <div>
-      <h2>My Platform Content</h2>
-      {/* Show upload form for all users except when logged out */}
-      {user && (
-        <div style={{marginBottom: '2em'}}>
-          {/* Dynamically import ContentUploadForm to avoid errors if not present */}
-          {(() => {
-            try {
-              const ContentUploadForm = require('./ContentUploadForm').default;
-              return <ContentUploadForm onUpload={handleContentUpload} />;
-            } catch (e) {
-              return <div style={{color:'red'}}>Upload form not found.</div>;
-            }
-          })()}
-        </div>
-      )}
-      {content.length === 0 ? (
-        <p>No content found.</p>
+      {user && isAdmin ? (
+        // Render admin dashboard for admin users
+        (() => {
+          try {
+            const AdminDashboard = require('./AdminDashboard').default;
+            return <AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />;
+          } catch (e) {
+            return <div style={{color:'red'}}>Admin dashboard not found.</div>;
+          }
+        })()
       ) : (
-        <ul>
-          {content.map((item, idx) => (
-            <li key={idx} style={{marginBottom: '1em'}}>
-              <strong>{item.title || item.type}</strong><br />
-              {item.description}<br />
-              {item.platform && <span>Platform: {item.platform}</span>}
-              {item.status && <span> | Status: {item.status}</span>}
-              {/* Add more fields as needed */}
-            </li>
-          ))}
-        </ul>
+        // Render regular dashboard/upload form for normal users
+        <div>
+          <h2>My Platform Content</h2>
+          {user && (
+            <div style={{marginBottom: '2em'}}>
+              {(() => {
+                try {
+                  const ContentUploadForm = require('./ContentUploadForm').default;
+                  return <ContentUploadForm onUpload={handleContentUpload} />;
+                } catch (e) {
+                  return <div style={{color:'red'}}>Upload form not found.</div>;
+                }
+              })()}
+            </div>
+          )}
+          {content.length === 0 ? (
+            <p>No content found.</p>
+          ) : (
+            <ul>
+              {content.map((item, idx) => (
+                <li key={idx} style={{marginBottom: '1em'}}>
+                  <strong>{item.title || item.type}</strong><br />
+                  {item.description}<br />
+                  {item.platform && <span>Platform: {item.platform}</span>}
+                  {item.status && <span> | Status: {item.status}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
     </div>
   );
