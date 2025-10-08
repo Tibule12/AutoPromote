@@ -246,6 +246,16 @@ function App() {
       setUser(updatedUserData);
       setIsAdmin(forceAdmin);
       setShowLogin(false);
+      // Patch Firestore user document to ensure role is correct
+      try {
+        const userDocRef = doc(db, 'users', updatedUserData.uid);
+        await fetchUserContent(); // Ensure token is fresh
+        await import('firebase/firestore').then(async ({ updateDoc }) => {
+          await updateDoc(userDocRef, { role: forceAdmin ? 'admin' : 'user', isAdmin: forceAdmin });
+        });
+      } catch (e) {
+        console.warn('Could not update Firestore user role:', e);
+      }
       if (forceAdmin) {
         await fetchAnalytics();
         navigate('/admin-dashboard');
