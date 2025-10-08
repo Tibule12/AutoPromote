@@ -434,17 +434,14 @@ function App() {
     <div>
       {/* If no user, show welcome/login page */}
       {!user ? (
-        <div className="WelcomeSection" style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '60vh',
-        }}>
-          <h1>Welcome to AutoPromote</h1>
-          <p>Please log in or register to continue.</p>
-          {/* Add login/register buttons or forms here as needed */}
-        </div>
+        (() => {
+          try {
+            const WelcomePage = require('./WelcomePage').default;
+            return <WelcomePage onGetStarted={() => setShowRegister(true)} onSignIn={() => setShowLogin(true)} />;
+          } catch (e) {
+            return <div style={{color:'red'}}>Welcome page not found.</div>;
+          }
+        })()
       ) : user && isAdmin ? (
         // Render admin dashboard for admin users
         (() => {
