@@ -473,38 +473,15 @@ function App() {
           }
         })()
       ) : (
-        // Render regular dashboard/upload form for normal users
-        <div>
-          <h2>My Platform Content</h2>
-          {user && (
-            <div style={{marginBottom: '2em'}}>
-              {(() => {
-                try {
-                  const ContentUploadForm = require('./ContentUploadForm').default;
-                  return <ContentUploadForm onUpload={handleContentUpload} />;
-                } catch (e) {
-                  return <div style={{color:'red'}}>Upload form not found.</div>;
-                }
-              })()}
-              {/* Add Logout button for users */}
-              <button onClick={handleLogout} style={{marginTop: '1em', padding: '0.5em 1em', background: '#1976d2', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer'}}>Logout</button>
-            </div>
-          )}
-          {content.length === 0 ? (
-            <p>No content found.</p>
-          ) : (
-            <ul>
-              {content.map((item, idx) => (
-                <li key={idx} style={{marginBottom: '1em'}}>
-                  <strong>{item.title || item.type}</strong><br />
-                  {item.description}<br />
-                  {item.platform && <span>Platform: {item.platform}</span>}
-                  {item.status && <span> | Status: {item.status}</span>}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        // Render full user dashboard for normal users
+        (() => {
+          try {
+            const UserDashboard = require('./UserDashboard_full').default;
+            return <UserDashboard user={user} content={content} userDefaults={userDefaults} onSaveDefaults={saveUserDefaults} onLogout={handleLogout} onUpload={handleContentUpload} mySchedules={mySchedules} onSchedulesChanged={refreshSchedules} />;
+          } catch (e) {
+            return <div style={{color:'red'}}>User dashboard not found.</div>;
+          }
+        })()
       )}
     </div>
   );
