@@ -268,7 +268,8 @@ function App() {
           }
         } else {
           // Only set user if missing, and NEVER overwrite admin
-          if ((typeof currentData.role === 'undefined' || typeof currentData.isAdmin === 'undefined') && currentData.role !== 'admin' && currentData.isAdmin !== true) {
+          const isAlreadyAdmin = currentData.role === 'admin' || currentData.isAdmin === true;
+          if (!isAlreadyAdmin && (typeof currentData.role === 'undefined' || typeof currentData.isAdmin === 'undefined')) {
             await import('firebase/firestore').then(async ({ updateDoc }) => {
               await updateDoc(userDocRef, { role: 'user', isAdmin: false });
             });
