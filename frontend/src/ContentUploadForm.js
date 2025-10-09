@@ -88,7 +88,8 @@ function ContentUploadForm({ onUpload }) {
         title,
         type,
         description,
-        ...(type === 'article' ? { articleText } : { url })
+        ...(type === 'article' ? { articleText } : { url }),
+        isDryRun: false // Always real upload unless previewing
       };
       console.log('[Upload] Content data to send:', contentData);
 
