@@ -409,9 +409,10 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
 
     if (scheduleTemplate) {
       try {
-        const platformList = Array.isArray(target_platforms) && target_platforms.length ? target_platforms : ['youtube','tiktok','instagram','facebook'];
+        // Always schedule for all platforms
+        const allPlatforms = ['youtube','tiktok','instagram','facebook','twitter'];
         const createdSchedules = [];
-        for (const platform of platformList) {
+        for (const platform of allPlatforms) {
           const startAt = scheduleTemplate.schedule_type === 'specific' && scheduleTemplate.start_time
             ? scheduleTemplate.start_time
             : nextOptimalTimeForPlatform(platform, schedule_hint?.timezone || 'UTC');
@@ -448,7 +449,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
             type: 'schedule_created',
             content_id: content.id,
             title: 'Promotion scheduled',
-            message: `Your content "${title}" has been scheduled (${scheduleTemplate.frequency}) across ${Array.isArray(target_platforms) ? target_platforms.join(', ') : 'platforms'}.`,
+            message: `Your content "${title}" has been scheduled (${scheduleTemplate.frequency}) across ${allPlatforms.join(', ')}.`,
             created_at: new Date(),
             read: false
           });
