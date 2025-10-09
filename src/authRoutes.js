@@ -36,10 +36,17 @@ router.post('/register', async (req, res) => {
     await admin.auth().setCustomUserClaims(userRecord.uid, { role });
 
     // Store additional user data in Firestore
-    await admin.firestore().collection('users').doc(userRecord.uid).set({
+    const userDocRef = admin.firestore().collection('users').doc(userRecord.uid);
+    const userSnap = await userDocRef.get();
+    let currentData = userSnap.exists ? userSnap.data() : {};
+    // Only set role/isAdmin to 'user'/false if not already admin
+    let docRole = currentData.role === 'admin' ? 'admin' : role;
+    let docIsAdmin = currentData.role === 'admin' ? true : false;
+    await userDocRef.set({
       name,
       email,
-      role,
+      role: docRole,
+      isAdmin: docIsAdmin,
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
