@@ -252,32 +252,7 @@ function App() {
       });
       setIsAdmin(forceAdmin);
       setShowLogin(false);
-      // Patch Firestore user document to ensure role is correct
-      try {
-        const userDocRef = doc(db, 'users', updatedUserData.uid);
-        // Read current Firestore user document
-        const userSnap = await import('firebase/firestore').then(async ({ getDoc }) => await getDoc(userDocRef));
-        let currentData = userSnap && userSnap.exists() ? userSnap.data() : {};
-        // Only update if role/isAdmin are missing (undefined)
-        if (forceAdmin) {
-          // Only set admin if missing, never overwrite existing admin
-          if ((typeof currentData.role === 'undefined' || typeof currentData.isAdmin === 'undefined') || (currentData.role !== 'admin' && currentData.isAdmin !== true)) {
-            await import('firebase/firestore').then(async ({ updateDoc }) => {
-              await updateDoc(userDocRef, { role: 'admin', isAdmin: true });
-            });
-          }
-        } else {
-          // Only set user if missing, and NEVER overwrite admin
-          const isAlreadyAdmin = currentData.role === 'admin' || currentData.isAdmin === true;
-          if (!isAlreadyAdmin && (typeof currentData.role === 'undefined' || typeof currentData.isAdmin === 'undefined')) {
-            await import('firebase/firestore').then(async ({ updateDoc }) => {
-              await updateDoc(userDocRef, { role: 'user', isAdmin: false });
-            });
-          }
-        }
-      } catch (e) {
-        console.warn('Could not update Firestore user role:', e);
-      }
+      // ...existing code... (Firestore update logic removed)
       if (forceAdmin) {
         await fetchAnalytics();
         navigate('/admin-dashboard');
