@@ -218,17 +218,8 @@ router.post('/login', async (req, res) => {
         name: decodedToken.name || decodedToken.email.split('@')[0],
         role: decodedToken.admin ? 'admin' : 'user'
       };
-      
-      // Create regular user document
-      admin.firestore().collection('users').doc(decodedToken.uid).set({
-        email: decodedToken.email,
-        name: decodedToken.name || decodedToken.email.split('@')[0],
-        role: 'user',
-        isAdmin: false,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      })
-        .then(() => console.log('Created user document in Firestore'))
-        .catch(err => console.error('Failed to create user document:', err));
+      // Do NOT create a new Firestore user document on login
+      // Only fetch existing data; registration is responsible for document creation
     }
 
     console.log('Sending response with user data:', {
@@ -316,9 +307,10 @@ router.post('/login', async (req, res) => {
     const response = {
       message: 'Login successful',
       user: {
-        uid: decodedToken.uid,
-        email: decodedToken.email,
-        name: userData.name || decodedToken.name || decodedToken.email.split('@')[0],
+        let role = 'user';
+        let isAdmin = false;
+        let fromCollection = 'users';
+        let adminStatusSource = null;
         role: role,
         isAdmin: isAdmin,
         fromCollection: fromCollection,
@@ -326,9 +318,10 @@ router.post('/login', async (req, res) => {
         needsEmailVerification: !emailVerified,
         grandfathered: isGrandfathered,
         grandfatherPolicyCutoff: grandfatherCutoff ? grandfatherCutoff.toISOString() : null
-      },
-      token: tokenToReturn,
-      tokenType: tokenType
+            role = 'admin';
+            isAdmin = true;
+            fromCollection = 'admins';
+            adminStatusSource = 'admins_collection';
     };
 
     // Add instructions for custom token usage
@@ -336,9 +329,9 @@ router.post('/login', async (req, res) => {
       response.tokenInstructions = {
         type: 'custom_token',
         message: 'This is a Firebase custom token. You must exchange it for an ID token before using it for authenticated requests.',
-        exchangeInstructions: 'Use Firebase Auth SDK: firebase.auth().signInWithCustomToken(token).then(() => firebase.auth().currentUser.getIdToken())',
-        note: 'Do not send custom tokens directly in Authorization headers. Always exchange them for ID tokens first.'
-      };
+              role = userData.role || 'user';
+              isAdmin = userData.isAdmin === true || userData.role === 'admin';
+              fromCollection = 'users';
     }
 
     res.json(response);
@@ -352,11 +345,26 @@ router.post('/login', async (req, res) => {
 router.post('/admin-login', async (req, res) => {
   try {
     console.log('Admin login request received:', req.body);
-    const { idToken, email } = req.body;
+            role: decodedToken.admin ? 'admin' : 'user'
 
     if (!idToken) {
       console.log('No idToken provided in admin login request');
       return res.status(401).json({ error: 'No ID token provided' });
+
+        // --- PATCH: Always respect admin status from either source ---
+        // If either the admins collection OR the token claims indicate admin, set admin status
+        const claimsSayAdmin = decodedToken.admin === true || decodedToken.role === 'admin';
+        const firestoreSaysAdmin = (role === 'admin' || isAdmin === true);
+        if (claimsSayAdmin || firestoreSaysAdmin) {
+          role = 'admin';
+          isAdmin = true;
+          adminStatusSource = claimsSayAdmin ? 'token_claims' : adminStatusSource;
+        } else {
+          role = 'user';
+          isAdmin = false;
+        }
+
+        // --- END PATCH ---
     }
 
     console.log('Verifying Firebase ID token for admin login...', idToken.substring(0, 20) + '...');
@@ -364,6 +372,7 @@ router.post('/admin-login', async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     console.log('Token verified, admin user:', decodedToken);
     
+          ,adminStatusSource
     // Variables to store user data
     let userData = null;
     let role = 'user';
