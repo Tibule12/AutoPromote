@@ -284,6 +284,40 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
 
     // ...existing code...
 
+    // Derive schedule template using explicit schedule_hint, user defaults, or scheduled_promotion_time
+    let effectiveScheduleHint = schedule_hint;
+    if (!effectiveScheduleHint) {
+      try {
+        const { fetchUserDefaults } = require('./services/userDefaultsCache');
+        const d = await fetchUserDefaults(req.userId);
+        if (d.postingWindow) {
+          const tz = d.postingWindow.timezone || d.timezone || 'UTC';
+          const today = new Date();
+          const [h,m] = (d.postingWindow.start||'15:00').split(':').map(x=>parseInt(x,10));
+          const candidate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), h||15, m||0,0,0));
+          if (candidate < today) candidate.setUTCDate(candidate.getUTCDate()+1);
+          effectiveScheduleHint = { when: candidate.toISOString(), frequency: 'once', timezone: tz };
+        }
+        if (d.variantStrategy && !contentData?.variant_strategy) {
+          if (typeof contentData === 'object') contentData.variant_strategy = d.variantStrategy;
+        }
+      } catch(defErr){ console.log('defaults lookup failed', defErr.message); }
+    }
+    const scheduleTemplate = (()=>{
+      const hint = effectiveScheduleHint;
+      if (hint && hint.when) {
+        return {
+          start_time: hint.when,
+          schedule_type: hint.frequency && hint.frequency !== 'once' ? 'recurring' : 'specific',
+          frequency: hint.frequency || 'once'
+        };
+      }
+      if (scheduled_promotion_time) {
+       return { start_time: scheduled_promotion_time, schedule_type: 'specific', frequency: 'once' };
+      }
+      return null;
+    })();
+
     // ENFORCE: If YouTube is a target platform, require promotion schedule
     if (!isDryRun && platforms.includes('youtube')) {
       // Check if a valid promotion schedule exists for YouTube
@@ -410,38 +444,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
     let promotionSchedule = null;
 
     // Derive schedule template using explicit schedule_hint, user defaults, or scheduled_promotion_time
-    let effectiveScheduleHint = schedule_hint;
-    if (!effectiveScheduleHint) {
-      try {
-        const { fetchUserDefaults } = require('./services/userDefaultsCache');
-        const d = await fetchUserDefaults(req.userId);
-        if (d.postingWindow) {
-          const tz = d.postingWindow.timezone || d.timezone || 'UTC';
-          const today = new Date();
-          const [h,m] = (d.postingWindow.start||'15:00').split(':').map(x=>parseInt(x,10));
-          const candidate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), h||15, m||0,0,0));
-          if (candidate < today) candidate.setUTCDate(candidate.getUTCDate()+1);
-          effectiveScheduleHint = { when: candidate.toISOString(), frequency: 'once', timezone: tz };
-        }
-        if (d.variantStrategy && !contentData.variant_strategy) {
-          contentData.variant_strategy = d.variantStrategy;
-        }
-      } catch(defErr){ console.log('defaults lookup failed', defErr.message); }
-    }
-    const scheduleTemplate = (()=>{
-      const hint = effectiveScheduleHint;
-      if (hint && hint.when) {
-        return {
-          start_time: hint.when,
-          schedule_type: hint.frequency && hint.frequency !== 'once' ? 'recurring' : 'specific',
-          frequency: hint.frequency || 'once'
-        };
-      }
-      if (scheduled_promotion_time) {
-       return { start_time: scheduled_promotion_time, schedule_type: 'specific', frequency: 'once' };
-      }
-      return null;
-    })();
+
     if (isDryRun) {
       // In dry run, return the schedule template preview only
       const recommendations = optimizationService.generateOptimizationRecommendations(content);
