@@ -200,6 +200,9 @@ router.post('/login', async (req, res) => {
         if (userDoc.exists) {
           userData = userDoc.data();
           console.log('User data from Firestore (users):', userData);
+          // Always use Firestore values for role and isAdmin if present
+          if (userData.role) role = userData.role;
+          if (typeof userData.isAdmin !== 'undefined') isAdmin = userData.isAdmin;
         }
       }
     } catch (firestoreError) {
