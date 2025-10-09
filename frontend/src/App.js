@@ -241,9 +241,15 @@ function App() {
         return;
       }
       const forceAdmin = userData.role === 'admin' || userData.isAdmin === true;
+      // Always preserve admin status, never downgrade
       const updatedUserData = { ...userData, role: forceAdmin ? 'admin' : userData.role, isAdmin: forceAdmin };
       localStorage.setItem('user', JSON.stringify(updatedUserData));
-      setUser(updatedUserData);
+      setUser(prev => {
+        if (prev && (prev.role === 'admin' || prev.isAdmin === true)) {
+          return { ...prev, ...updatedUserData, role: 'admin', isAdmin: true };
+        }
+        return updatedUserData;
+      });
       setIsAdmin(forceAdmin);
       setShowLogin(false);
       // Patch Firestore user document to ensure role is correct
@@ -255,7 +261,7 @@ function App() {
         // Only update if role/isAdmin are missing (undefined)
         if (forceAdmin) {
           // Only set admin if missing, never overwrite existing admin
-          if (typeof currentData.role === 'undefined' || typeof currentData.isAdmin === 'undefined') {
+          if ((typeof currentData.role === 'undefined' || typeof currentData.isAdmin === 'undefined') || (currentData.role !== 'admin' && currentData.isAdmin !== true)) {
             await import('firebase/firestore').then(async ({ updateDoc }) => {
               await updateDoc(userDocRef, { role: 'admin', isAdmin: true });
             });
