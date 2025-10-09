@@ -505,6 +505,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
             if (!videoUrl) {
               autoPromotionResults.youtube = { requested: true, skipped: true, reason: 'missing_videoUrl' };
             } else {
+              // Always pass contentId and platform
               const ytOutcome = await uploadVideo({
                 uid: req.userId,
                 title: autoPromote.youtube.title || title,
@@ -512,13 +513,14 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
                 fileUrl: videoUrl,
                 mimeType: autoPromote.youtube.mimeType || 'video/mp4',
                 contentId: content.id,
+                platform: 'youtube',
                 shortsMode: !!autoPromote.youtube.shortsMode,
                 optimizeMetadata: autoPromote.youtube.optimizeMetadata !== false,
                 forceReupload: !!autoPromote.youtube.forceReupload,
                 skipIfDuplicate: autoPromote.youtube.skipIfDuplicate !== false
               });
               autoPromotionResults.youtube = { requested: true, ...ytOutcome };
-              recordEvent('youtube_upload', { userId: req.userId, contentId: content.id, payload: { videoId: ytOutcome.videoId, duplicate: ytOutcome.duplicate } });
+              recordEvent('youtube_upload', { userId: req.userId, contentId: content.id, platform: 'youtube', payload: { videoId: ytOutcome.videoId, duplicate: ytOutcome.duplicate } });
             }
           }
         } catch (e) {
@@ -567,7 +569,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
                     postHash: null
                   });
                 } catch (persistErr) { /* non-fatal */ }
-                recordEvent('platform_post_immediate', { userId: req.userId, contentId: content.id, payload: { platform: 'twitter', success: directRes.success !== false } });
+                recordEvent('platform_post_immediate', { userId: req.userId, contentId: content.id, platform: 'twitter', payload: { platform: 'twitter', success: directRes.success !== false } });
               } catch (e) {
                 autoPromotionResults.twitter = { requested: true, immediate: true, posted: false, error: e.message };
               }
@@ -583,7 +585,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
                 forceRepost: !!autoPromote.twitter.forceRepost
               });
               autoPromotionResults.twitter = { requested: true, immediate: false, queued: !enqueueRes.skipped, ...enqueueRes, backgroundJobsEnabled };
-              recordEvent('platform_post_enqueued', { userId: req.userId, contentId: content.id, payload: { platform: 'twitter', queued: !enqueueRes.skipped, reason: 'post_upload' } });
+              recordEvent('platform_post_enqueued', { userId: req.userId, contentId: content.id, platform: 'twitter', payload: { platform: 'twitter', queued: !enqueueRes.skipped, reason: 'post_upload' } });
               // Inline processing fallback if background disabled
               if (!backgroundJobsEnabled && !enqueueRes.skipped && enqueueRes.id) {
                 try {
@@ -596,7 +598,7 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
                   }
                   if (processed.length) {
                     autoPromotionResults.twitter.inlineProcessed = true;
-                    recordEvent('platform_post_processed_inline', { userId: req.userId, contentId: content.id, payload: { platform: 'twitter', processed: processed.length } });
+                    recordEvent('platform_post_processed_inline', { userId: req.userId, contentId: content.id, platform: 'twitter', payload: { platform: 'twitter', processed: processed.length } });
                   }
                 } catch (inlineErr) {
                   autoPromotionResults.twitter.inlineProcessError = inlineErr.message;
