@@ -242,6 +242,20 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
     });
     // Insert content into Firestore
     console.log(isDryRun ? 'Preparing dry-run content preview...' : 'Preparing to save content to Firestore...');
+
+    // ENFORCE: If YouTube is a target platform, require promotion schedule
+    if (!isDryRun && platforms.includes('youtube')) {
+      // Check if a valid promotion schedule exists for YouTube
+      let hasYoutubePromotion = false;
+      if (scheduleTemplate) {
+        hasYoutubePromotion = true;
+      }
+      if (!hasYoutubePromotion) {
+        // Disconnect content from platform and abort upload
+        console.error('Promotion requirements for YouTube not met. Content will not be uploaded or connected.');
+        return res.status(400).json({ error: 'Promotion requirements for YouTube not met. Content will not be uploaded or connected to your platform.' });
+      }
+    }
   // Create boost chain for this content
   const squadUserIds = req.body.growth_squad_user_ids || [];
   const boostChain = createBoostChain('preview', req.userId, squadUserIds);
