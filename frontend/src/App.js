@@ -5,6 +5,7 @@ import './App.css';
 import { auth, db, storage } from './firebaseClient';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, signInWithCustomToken } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { API_ENDPOINTS } from './config';
 
 function App() {
@@ -357,7 +358,7 @@ function App() {
       }
       if (!isDryRun && type !== 'article' && file) {
         const path = `uploads/${user.uid}/${file.name}`;
-        const fileRef = storageRef(storage, path);
+        const fileRef = ref(storage, path);
         await uploadBytes(fileRef, file);
         payload.url = await getDownloadURL(fileRef);
       }
