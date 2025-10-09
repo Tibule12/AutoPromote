@@ -1,17 +1,31 @@
+const express = require('express');
 // Content Quality Check Endpoint
 router.post('/quality-check', authMiddleware, async (req, res) => {
   try {
     const { title, description, type, url } = req.body;
-    // Simple quality scoring logic (replace with advanced ML later)
     let score = 0;
     let feedback = [];
-    if (title && title.length >= 10) score += 30; else feedback.push('Title is too short.');
-    if (description && description.length >= 30) score += 30; else feedback.push('Description is too short.');
+    let enhanced = {};
+    // Title enhancement
+    if (!title || title.length < 10) {
+      feedback.push('Title is too short.');
+      enhanced.title = `Engaging ${type || 'content'}: ${title ? title : 'Untitled'}`;
+    } else {
+      score += 30;
+      enhanced.title = title;
+    }
+    // Description enhancement
+    if (!description || description.length < 30) {
+      feedback.push('Description is too short.');
+      enhanced.description = (description ? description : '') + ' This content provides valuable insights and is designed to engage viewers.';
+    } else {
+      score += 30;
+      enhanced.description = description;
+    }
     if (type) score += 20; else feedback.push('Content type missing.');
     if (url && url.startsWith('http')) score += 20; else feedback.push('Valid URL missing.');
-    // Normalize score to 0-100
     score = Math.min(100, Math.max(0, score));
-    res.json({ quality_score: score, quality_feedback: feedback });
+    res.json({ quality_score: score, quality_feedback: feedback, enhanced });
   } catch (err) {
     console.error('Quality check error:', err);
     res.status(500).json({ error: 'Internal server error' });

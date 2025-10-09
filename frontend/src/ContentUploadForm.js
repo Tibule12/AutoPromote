@@ -16,10 +16,12 @@ function ContentUploadForm({ onUpload }) {
   const [qualityScore, setQualityScore] = useState(null);
   const [qualityFeedback, setQualityFeedback] = useState([]);
   // Content Quality Check handler
+  const [enhancedSuggestions, setEnhancedSuggestions] = useState(null);
   const handleQualityCheck = async (e) => {
     e.preventDefault();
     setQualityScore(null);
     setQualityFeedback([]);
+    setEnhancedSuggestions(null);
     setError('');
     try {
       const response = await fetch('/api/content/quality-check', {
@@ -36,6 +38,9 @@ function ContentUploadForm({ onUpload }) {
       if (response.ok) {
         setQualityScore(result.quality_score);
         setQualityFeedback(result.quality_feedback);
+        if (result.enhanced && (result.quality_score < 70)) {
+          setEnhancedSuggestions(result.enhanced);
+        }
       } else {
         setError(result.error || 'Quality check failed.');
       }
@@ -259,6 +264,19 @@ function ContentUploadForm({ onUpload }) {
               <ul>
                 {qualityFeedback.map((fb,idx)=>(<li key={idx}>{fb}</li>))}
               </ul>
+            </div>
+          )}
+          {/* Show enhancement suggestions if available and score is low */}
+          {enhancedSuggestions && (
+            <div style={{marginTop:'1rem',background:'#fffbe6',padding:'1rem',borderRadius:6,border:'1px solid #ffe58f'}}>
+              <strong>Suggested Improvements:</strong>
+              <div><b>Title:</b> {enhancedSuggestions.title}</div>
+              <div><b>Description:</b> {enhancedSuggestions.description}</div>
+              <button type="button" style={{marginTop:'0.5rem'}} className="apply-enhancements-btn" onClick={() => {
+                setTitle(enhancedSuggestions.title);
+                setDescription(enhancedSuggestions.description);
+                setEnhancedSuggestions(null);
+              }}>Apply Suggestions</button>
             </div>
           )}
         </div>
