@@ -510,54 +510,90 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
       // 1. YouTube Immediate Upload (direct call, not queued)
       if (autoPromote.youtube && (autoPromote.youtube.enabled !== false)) {
         autoPromotionResults.youtube = { requested: true };
-        try {
-          const { getUserYouTubeConnection, uploadVideo } = require('./services/youtubeService');
-          const ytConn = await getUserYouTubeConnection(req.userId);
-          if (!ytConn) {
-            autoPromotionResults.youtube = { requested: true, skipped: true, reason: 'not_connected' };
-          } else {
-            const videoUrl = autoPromote.youtube.videoUrl || autoPromote.youtube.fileUrl || url; // fallback to content URL if supplied
-            if (!videoUrl) {
-              autoPromotionResults.youtube = { requested: true, skipped: true, reason: 'missing_videoUrl' };
-            } else {
-              // Always pass contentId and platform
-              const ytOutcome = await uploadVideo({
-                uid: req.userId,
-                title: autoPromote.youtube.title || title,
-                description: autoPromote.youtube.description || description || '',
-                fileUrl: videoUrl,
-                mimeType: autoPromote.youtube.mimeType || 'video/mp4',
-                contentId: content.id,
-                platform: 'youtube',
-                shortsMode: !!autoPromote.youtube.shortsMode,
-                optimizeMetadata: autoPromote.youtube.optimizeMetadata !== false,
-                forceReupload: !!autoPromote.youtube.forceReupload,
-                skipIfDuplicate: autoPromote.youtube.skipIfDuplicate !== false
-              });
-              autoPromotionResults.youtube = { requested: true, ...ytOutcome };
-              recordEvent('youtube_upload', { userId: req.userId, contentId: content.id, platform: 'youtube', payload: { videoId: ytOutcome.videoId, duplicate: ytOutcome.duplicate } });
-            }
-          }
-        } catch (e) {
-          autoPromotionResults.youtube = { requested: true, success: false, error: e.message };
-          // Log error and notify admin/user
-          console.error(`[Promotion][YouTube] Upload failed for contentId ${content.id}:`, e.message);
+        let promotionScheduled = false;
+        // Check if a valid promotion schedule exists for YouTube
+        const youtubePromotion = await db.collection('promotion_schedules')
+          .where('contentId', '==', content.id)
+          .where('platform', '==', 'youtube')
+          .where('isActive', '==', true)
+          .get();
+        if (!youtubePromotion.empty) {
+          promotionScheduled = true;
+        }
+        if (!promotionScheduled) {
+          autoPromotionResults.youtube = { requested: true, skipped: true, reason: 'promotion_not_scheduled' };
+          console.error('YouTube upload blocked: promotion not scheduled for contentId', content.id);
+          await db.collection('content').doc(content.id).update({ platform: null, status: 'disconnected' });
+          await db.collection('notifications').add({
+            user_id: req.userId,
+            type: 'promotion_error',
+            content_id: content.id,
+            platform: 'youtube',
+            title: 'YouTube Promotion Blocked',
+            message: 'Content was not uploaded because promotion was not scheduled.',
+            created_at: new Date(),
+            read: false
+          });
+        } else {
           try {
-            await db.collection('notifications').add({
-              user_id: req.userId,
-              type: 'promotion_error',
-              content_id: content.id,
-              platform: 'youtube',
-              title: 'YouTube Promotion Failed',
-              message: `YouTube upload failed: ${e.message}`,
-              created_at: new Date(),
-              read: false
-            });
-          } catch (notifyErr) {
-            console.error('[Promotion][YouTube] Failed to notify user:', notifyErr.message);
+            const { getUserYouTubeConnection, uploadVideo } = require('./services/youtubeService');
+            const ytConn = await getUserYouTubeConnection(req.userId);
+            if (!ytConn) {
+              autoPromotionResults.youtube = { requested: true, skipped: true, reason: 'not_connected' };
+            } else {
+              const videoUrl = autoPromote.youtube.videoUrl || autoPromote.youtube.fileUrl || url; // fallback to content URL if supplied
+              if (!videoUrl) {
+                autoPromotionResults.youtube = { requested: true, skipped: true, reason: 'missing_videoUrl' };
+              } else {
+                // Always pass contentId and platform
+                const ytOutcome = await uploadVideo({
+                  uid: req.userId,
+                  title: autoPromote.youtube.title || title,
+                  description: autoPromote.youtube.description || description || '',
+                  fileUrl: videoUrl,
+                  mimeType: autoPromote.youtube.mimeType || 'video/mp4',
+                  contentId: content.id,
+                  platform: 'youtube',
+                  shortsMode: !!autoPromote.youtube.shortsMode,
+                  optimizeMetadata: autoPromote.youtube.optimizeMetadata !== false,
+                  forceReupload: !!autoPromote.youtube.forceReupload,
+                  skipIfDuplicate: autoPromote.youtube.skipIfDuplicate !== false
+                });
+                autoPromotionResults.youtube = { requested: true, ...ytOutcome };
+                // Track promotion event and metrics
+                await db.collection('promotion_events').add({
+                  user_id: req.userId,
+                  content_id: content.id,
+                  platform: 'youtube',
+                  event: 'promotion_started',
+                  video_id: ytOutcome.videoId,
+                  timestamp: new Date(),
+                  metrics: ytOutcome.metrics || {}
+                });
+                recordEvent('youtube_upload', { userId: req.userId, contentId: content.id, platform: 'youtube', payload: { videoId: ytOutcome.videoId, duplicate: ytOutcome.duplicate } });
+              }
+            }
+          } catch (e) {
+            autoPromotionResults.youtube = { requested: true, success: false, error: e.message };
+            // Log error and notify admin/user
+            console.error(`[Promotion][YouTube] Upload failed for contentId ${content.id}:`, e.message);
+            try {
+              await db.collection('notifications').add({
+                user_id: req.userId,
+                type: 'promotion_error',
+                content_id: content.id,
+                platform: 'youtube',
+                title: 'YouTube Promotion Failed',
+                message: `YouTube upload failed: ${e.message}`,
+                created_at: new Date(),
+                read: false
+              });
+            } catch (notifyErr) {
+              console.error('[Promotion][YouTube] Failed to notify user:', notifyErr.message);
+            }
+          } finally {
+            await persistSummary();
           }
-        } finally {
-          await persistSummary();
         }
       }
 
