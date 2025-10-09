@@ -526,6 +526,22 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
           }
         } catch (e) {
           autoPromotionResults.youtube = { requested: true, success: false, error: e.message };
+          // Log error and notify admin/user
+          console.error(`[Promotion][YouTube] Upload failed for contentId ${content.id}:`, e.message);
+          try {
+            await db.collection('notifications').add({
+              user_id: req.userId,
+              type: 'promotion_error',
+              content_id: content.id,
+              platform: 'youtube',
+              title: 'YouTube Promotion Failed',
+              message: `YouTube upload failed: ${e.message}`,
+              created_at: new Date(),
+              read: false
+            });
+          } catch (notifyErr) {
+            console.error('[Promotion][YouTube] Failed to notify user:', notifyErr.message);
+          }
         } finally {
           await persistSummary();
         }
@@ -609,6 +625,22 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
           }
         } catch (e) {
           autoPromotionResults.twitter = { requested: true, queued: false, error: e.message };
+          // Log error and notify admin/user
+          console.error(`[Promotion][Twitter] Upload failed for contentId ${content.id}:`, e.message);
+          try {
+            await db.collection('notifications').add({
+              user_id: req.userId,
+              type: 'promotion_error',
+              content_id: content.id,
+              platform: 'twitter',
+              title: 'Twitter Promotion Failed',
+              message: `Twitter upload failed: ${e.message}`,
+              created_at: new Date(),
+              read: false
+            });
+          } catch (notifyErr) {
+            console.error('[Promotion][Twitter] Failed to notify user:', notifyErr.message);
+          }
         } finally {
           await persistSummary();
         }
