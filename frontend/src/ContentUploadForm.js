@@ -13,6 +13,36 @@ function ContentUploadForm({ onUpload }) {
   const [error, setError] = useState('');
   const [previews, setPreviews] = useState([]);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [qualityScore, setQualityScore] = useState(null);
+  const [qualityFeedback, setQualityFeedback] = useState([]);
+  // Content Quality Check handler
+  const handleQualityCheck = async (e) => {
+    e.preventDefault();
+    setQualityScore(null);
+    setQualityFeedback([]);
+    setError('');
+    try {
+      const response = await fetch('/api/content/quality-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description,
+          type,
+          url: file ? `preview://${file.name}` : ''
+        })
+      });
+      const result = await response.json();
+      if (response.ok) {
+        setQualityScore(result.quality_score);
+        setQualityFeedback(result.quality_feedback);
+      } else {
+        setError(result.error || 'Quality check failed.');
+      }
+    } catch (err) {
+      setError(err.message || 'Quality check failed.');
+    }
+  };
   // Preview handler
   const handlePreview = async (e) => {
     e.preventDefault();
@@ -197,6 +227,14 @@ function ContentUploadForm({ onUpload }) {
             )}
           </button>
           <button 
+            type="button"
+            disabled={isUploading}
+            className="quality-check-button"
+            onClick={handleQualityCheck}
+          >
+            Check Quality
+          </button>
+          <button 
             type="submit" 
             disabled={isUploading}
             className="submit-button"
@@ -211,6 +249,20 @@ function ContentUploadForm({ onUpload }) {
             )}
           </button>
         </div>
+      {/* Render quality check results */}
+      {qualityScore !== null && (
+        <div className="quality-check-results" style={{marginTop:'1rem',padding:'1rem',border:'1px solid #e0e0e0',borderRadius:8,background:'#f8f8fa'}}>
+          <strong>Quality Score:</strong> {qualityScore} / 100<br/>
+          {qualityFeedback.length > 0 && (
+            <div style={{marginTop:'0.5rem'}}>
+              <strong>Feedback:</strong>
+              <ul>
+                {qualityFeedback.map((fb,idx)=>(<li key={idx}>{fb}</li>))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
       </form>
       {/* Render previews if available */}
       {previews && previews.length > 0 && (

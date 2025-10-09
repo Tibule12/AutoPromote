@@ -1,3 +1,22 @@
+// Content Quality Check Endpoint
+router.post('/quality-check', authMiddleware, async (req, res) => {
+  try {
+    const { title, description, type, url } = req.body;
+    // Simple quality scoring logic (replace with advanced ML later)
+    let score = 0;
+    let feedback = [];
+    if (title && title.length >= 10) score += 30; else feedback.push('Title is too short.');
+    if (description && description.length >= 30) score += 30; else feedback.push('Description is too short.');
+    if (type) score += 20; else feedback.push('Content type missing.');
+    if (url && url.startsWith('http')) score += 20; else feedback.push('Valid URL missing.');
+    // Normalize score to 0-100
+    score = Math.min(100, Math.max(0, score));
+    res.json({ quality_score: score, quality_feedback: feedback });
+  } catch (err) {
+    console.error('Quality check error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // Integrate Content Idea Engine
 const { generateContentIdeas } = require('./services/contentIdeaEngine');
 // Integrate Cross-Post Engine
@@ -242,6 +261,8 @@ router.post('/upload', authMiddleware, rateLimit({ field: 'contentUpload', perMi
     });
     // Insert content into Firestore
     console.log(isDryRun ? 'Preparing dry-run content preview...' : 'Preparing to save content to Firestore...');
+
+    // ...existing code...
 
     // ENFORCE: If YouTube is a target platform, require promotion schedule
     if (!isDryRun && platforms.includes('youtube')) {
