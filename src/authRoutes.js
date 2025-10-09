@@ -176,25 +176,26 @@ router.post('/login', async (req, res) => {
     let isAdmin = false;
     let fromCollection = 'users';
     
-    // Check both 'users' and 'admins' collections for the UID
+    // Check admins collection first for admin logins
     try {
-      console.log('Checking users collection for user:', decodedToken.uid);
-      const userDoc = await admin.firestore().collection('users').doc(decodedToken.uid).get();
-      if (userDoc.exists) {
-        userData = userDoc.data();
-        role = userData.role || 'user';
-        isAdmin = userData.isAdmin === true || userData.role === 'admin';
-        console.log('User data from Firestore (users):', userData);
+      console.log('Checking admins collection for user:', decodedToken.uid);
+      const adminDoc = await admin.firestore().collection('admins').doc(decodedToken.uid).get();
+      if (adminDoc.exists) {
+        userData = adminDoc.data();
+        role = 'admin';
+        isAdmin = true;
+        fromCollection = 'admins';
+        console.log('User data from Firestore (admins):', userData);
       } else {
-        // If not found in users, check admins collection
-        console.log('Not found in users, checking admins collection for UID:', decodedToken.uid);
-        const adminDoc = await admin.firestore().collection('admins').doc(decodedToken.uid).get();
-        if (adminDoc.exists) {
-          userData = adminDoc.data();
-          role = userData.role || 'admin';
-          isAdmin = true;
-          fromCollection = 'admins';
-          console.log('User data from Firestore (admins):', userData);
+        // If not found in admins, check users collection
+        console.log('Not found in admins, checking users collection for UID:', decodedToken.uid);
+        const userDoc = await admin.firestore().collection('users').doc(decodedToken.uid).get();
+        if (userDoc.exists) {
+          userData = userDoc.data();
+          role = userData.role || 'user';
+          isAdmin = userData.isAdmin === true || userData.role === 'admin';
+          fromCollection = 'users';
+          console.log('User data from Firestore (users):', userData);
         }
       }
     } catch (firestoreError) {
