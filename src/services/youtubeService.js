@@ -90,6 +90,7 @@ async function uploadVideo({ uid, title, description = '', fileUrl, mimeType = '
   if (!uid) throw new Error('uid required');
   if (!title) throw new Error('title required');
   if (!fileUrl) throw new Error('fileUrl required');
+  if (!contentId || typeof contentId !== 'string' || !contentId.trim()) throw new Error('contentId required and must be a non-empty string');
   const connection = await getUserYouTubeConnection(uid);
   if (!connection) throw new Error('YouTube not connected');
   if (!hasRequiredScopes(connection.scope || '')) {
@@ -202,7 +203,7 @@ async function uploadVideo({ uid, title, description = '', fileUrl, mimeType = '
     await uploadDoc.create({
       videoId,
       uid,
-      contentId: contentId || null,
+      contentId,
       fileUrl,
       originalTitle: title,
       originalDescription: description,
