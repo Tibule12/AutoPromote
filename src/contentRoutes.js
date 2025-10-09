@@ -1,4 +1,18 @@
+const { db } = require('./firebaseAdmin');
+const authMiddleware = require('./authMiddleware');
+const {
+  validateContentData,
+  validateAnalyticsData,
+  validatePromotionData,
+  validateRateLimit,
+  sanitizeInput
+} = require('./validationMiddleware');
+const promotionService = require('./promotionService');
+const optimizationService = require('./optimizationService');
+const { rateLimit } = require('./middleware/rateLimit');
+const { validateBody } = require('./middleware/validate');
 const express = require('express');
+const router = express.Router();
 // Content Quality Check Endpoint
 router.post('/quality-check', authMiddleware, async (req, res) => {
   try {
@@ -80,21 +94,13 @@ const { showRadicalTransparency, instantViralBoost, aiContentRescue, gamifiedGro
 //   await batch.commit();
 // });
 
-const express = require('express');
-const { db } = require('./firebaseAdmin');
-const authMiddleware = require('./authMiddleware');
-const {
-  validateContentData,
-  validateAnalyticsData,
-  validatePromotionData,
-  validateRateLimit,
-  sanitizeInput
-} = require('./validationMiddleware');
-const promotionService = require('./promotionService');
-const optimizationService = require('./optimizationService');
-const router = express.Router();
-const { rateLimit } = require('./middleware/rateLimit');
-const { validateBody } = require('./middleware/validate');
+
+
+
+
+
+
+
 
 // Enforce max 10 uploads per user per calendar day (UTC)
 const getStartOfDayUTC = (date = new Date()) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0));
