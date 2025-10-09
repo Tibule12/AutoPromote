@@ -199,9 +199,6 @@ router.post('/login', async (req, res) => {
         const userDoc = await admin.firestore().collection('users').doc(decodedToken.uid).get();
         if (userDoc.exists) {
           userData = userDoc.data();
-          role = userData.role || 'user';
-          isAdmin = userData.isAdmin === true || userData.role === 'admin';
-          fromCollection = 'users';
           console.log('User data from Firestore (users):', userData);
         }
       }
@@ -307,10 +304,9 @@ router.post('/login', async (req, res) => {
     const response = {
       message: 'Login successful',
       user: {
-        let role = 'user';
-        let isAdmin = false;
-        let fromCollection = 'users';
-        let adminStatusSource = null;
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        name: userData.name || decodedToken.name || decodedToken.email.split('@')[0],
         role: role,
         isAdmin: isAdmin,
         fromCollection: fromCollection,
@@ -318,10 +314,7 @@ router.post('/login', async (req, res) => {
         needsEmailVerification: !emailVerified,
         grandfathered: isGrandfathered,
         grandfatherPolicyCutoff: grandfatherCutoff ? grandfatherCutoff.toISOString() : null
-            role = 'admin';
-            isAdmin = true;
-            fromCollection = 'admins';
-            adminStatusSource = 'admins_collection';
+      }
     };
 
     // Add instructions for custom token usage
@@ -329,9 +322,9 @@ router.post('/login', async (req, res) => {
       response.tokenInstructions = {
         type: 'custom_token',
         message: 'This is a Firebase custom token. You must exchange it for an ID token before using it for authenticated requests.',
-              role = userData.role || 'user';
-              isAdmin = userData.isAdmin === true || userData.role === 'admin';
-              fromCollection = 'users';
+        exchangeInstructions: 'Use Firebase Auth SDK: firebase.auth().signInWithCustomToken(token).then(() => firebase.auth().currentUser.getIdToken())',
+        note: 'Do not send custom tokens directly in Authorization headers. Always exchange them for ID tokens first.'
+      };
     }
 
     res.json(response);
@@ -372,7 +365,6 @@ router.post('/admin-login', async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     console.log('Token verified, admin user:', decodedToken);
     
-          ,adminStatusSource
     // Variables to store user data
     let userData = null;
     let role = 'user';
