@@ -64,14 +64,23 @@ const getUserProfile = async (req, res) => {
 // @access  Private
 const updateUserProfile = async (req, res) => {
   try {
-    const updateData = {
+    const userRef = db.collection('users').doc(req.user.uid);
+    const currentSnap = await userRef.get();
+    const currentData = currentSnap.exists ? currentSnap.data() : {};
+    let updateData = {
       name: req.body.name,
       email: req.body.email,
-      role: req.body.role,
       updated_at: new Date().toISOString()
       // ...rest of code...
     };
-    await db.collection('users').doc(req.user.uid).update(updateData);
+    // Prevent downgrading admin role or isAdmin
+    if (currentData.role === 'admin' || currentData.isAdmin === true) {
+      updateData.role = 'admin';
+      updateData.isAdmin = true;
+    } else if (req.body.role) {
+      updateData.role = req.body.role;
+    }
+    await userRef.update(updateData);
     res.json({ message: 'Profile updated' });
   } catch (error) {
     res.status(500).json({ message: error.message });

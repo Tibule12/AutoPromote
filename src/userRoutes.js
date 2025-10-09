@@ -37,22 +37,30 @@ router.put('/me', authMiddleware, async (req, res) => {
   try {
     const { name, timezone, schedulingDefaults, notifications, defaultPlatforms, defaultFrequency } = req.body;
     const ref = db.collection('users').doc(req.userId);
-    const updates = {
-      ...(name !== undefined ? { name } : {}),
-      ...(timezone ? { timezone } : {}),
-      ...(schedulingDefaults ? { schedulingDefaults } : {}),
-      ...(notifications ? { notifications } : {}),
-      updatedAt: new Date()
-    };
-    // For backward compatibility fields
-    if (defaultPlatforms || defaultFrequency) {
-      updates.schedulingDefaults = updates.schedulingDefaults || {};
-      if (defaultPlatforms) updates.schedulingDefaults.platforms = defaultPlatforms;
-      if (defaultFrequency) updates.schedulingDefaults.frequency = defaultFrequency;
-    }
-    await ref.set(updates, { merge: true });
-    const snap = await ref.get();
-    res.json({ user: { id: snap.id, ...snap.data() } });
+      // Get current user data to check admin status
+      const currentSnap = await ref.get();
+      const currentData = currentSnap.exists ? currentSnap.data() : {};
+      let updates = {
+        ...(name !== undefined ? { name } : {}),
+        ...(timezone ? { timezone } : {}),
+        ...(schedulingDefaults ? { schedulingDefaults } : {}),
+        ...(notifications ? { notifications } : {}),
+        updatedAt: new Date()
+      };
+      // For backward compatibility fields
+      if (defaultPlatforms || defaultFrequency) {
+        updates.schedulingDefaults = updates.schedulingDefaults || {};
+        if (defaultPlatforms) updates.schedulingDefaults.platforms = defaultPlatforms;
+        if (defaultFrequency) updates.schedulingDefaults.frequency = defaultFrequency;
+      }
+      // Prevent downgrading admin role or isAdmin
+      if (currentData.role === 'admin' || currentData.isAdmin === true) {
+        updates.role = 'admin';
+        updates.isAdmin = true;
+      }
+      await ref.set(updates, { merge: true });
+      const snap = await ref.get();
+      res.json({ user: { id: snap.id, ...snap.data() } });
   } catch (err) {
     console.error('Error updating /me:', err);
     res.status(500).json({ error: 'Internal server error' });
