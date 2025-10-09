@@ -1290,12 +1290,27 @@ function AdminDashboard({ analytics, user, onLogout }) {
         {dashboardData && dashboardData.allContent && dashboardData.allContent.length > 0 ? (
           <ul>
             {dashboardData.allContent.map((item, idx) => (
-              <li key={item.id || idx} style={{marginBottom: '1em'}}>
+              <li key={item.id || idx} style={{marginBottom: '1em', border: '1px solid #eee', borderRadius: '8px', padding: '12px', background: '#fff'}}>
                 <strong>{item.title || item.type}</strong><br />
                 {item.description}<br />
                 {item.platform && <span>Platform: {item.platform}</span>}
                 {item.status && <span> | Status: {item.status}</span>}
-                {/* Add more fields as needed */}
+                {item.promotionStatus && <span> | Promotion: <b>{item.promotionStatus}</b></span>}
+                {item.metrics && (
+                  <span>
+                    {' | Views: ' + (item.metrics.views || 0)}
+                    {' | Clicks: ' + (item.metrics.clicks || 0)}
+                    {' | Engagement: ' + ((item.metrics.engagementRate || 0) * 100).toFixed(1) + '%'}
+                  </span>
+                )}
+                {item.errors && item.errors.length > 0 && (
+                  <div style={{color: '#d32f2f', marginTop: '6px'}}>
+                    <b>Errors:</b>
+                    <ul>
+                      {item.errors.map((err, i) => <li key={i}>{err}</li>)}
+                    </ul>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
