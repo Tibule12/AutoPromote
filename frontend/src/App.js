@@ -252,17 +252,17 @@ function App() {
         // Read current Firestore user document
         const userSnap = await import('firebase/firestore').then(async ({ getDoc }) => await getDoc(userDocRef));
         let currentData = userSnap && userSnap.exists() ? userSnap.data() : {};
-        // Only update if role/isAdmin is missing or incorrect
+        // Only update if role/isAdmin are missing (undefined)
         if (forceAdmin) {
-          // Only update if not already admin
-          if (currentData.role !== 'admin' || currentData.isAdmin !== true) {
+          // Only set admin if missing, never overwrite existing admin
+          if (typeof currentData.role === 'undefined' || typeof currentData.isAdmin === 'undefined') {
             await import('firebase/firestore').then(async ({ updateDoc }) => {
               await updateDoc(userDocRef, { role: 'admin', isAdmin: true });
             });
           }
         } else {
-          // Only update if not already user, but NEVER downgrade admin to user
-          if ((currentData.role !== 'user' || currentData.isAdmin !== false) && currentData.role !== 'admin' && currentData.isAdmin !== true) {
+          // Only set user if missing, but NEVER downgrade admin to user
+          if ((typeof currentData.role === 'undefined' || typeof currentData.isAdmin === 'undefined') && currentData.role !== 'admin' && currentData.isAdmin !== true) {
             await import('firebase/firestore').then(async ({ updateDoc }) => {
               await updateDoc(userDocRef, { role: 'user', isAdmin: false });
             });
