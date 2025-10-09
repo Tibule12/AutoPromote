@@ -295,4 +295,16 @@ router.get('/analytics', authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
+
+// Get variant anomalies (placeholder implementation)
+router.get('/variants/anomalies', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    // TODO: Replace with actual anomaly detection logic
+    res.json({ anomalies: [], message: 'Variant anomalies endpoint is live. No anomalies detected.' });
+  } catch (error) {
+    console.error('Error fetching variant anomalies:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
