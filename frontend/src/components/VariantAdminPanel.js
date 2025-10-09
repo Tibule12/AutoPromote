@@ -7,10 +7,12 @@ export default function VariantAdminPanel() {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
 
+  // Always use main backend URL for API calls
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://autopromote.onrender.com';
   async function authedFetch(path, options={}) {
     const user = auth.currentUser; if (!user) throw new Error('Not authenticated');
     const token = await user.getIdToken(true);
-    const res = await fetch(`${process.env.REACT_APP_API_BASE || ''}${path}`, {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
