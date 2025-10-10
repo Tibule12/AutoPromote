@@ -350,8 +350,7 @@ function App() {
         ...(finalUrl ? { url: finalUrl } : {}),
         description: description || '',
         target_platforms: platforms && platforms.length ? platforms : (userDefaults.defaultPlatforms || ['youtube','tiktok','instagram']),
-        schedule_hint,
-        isDryRun: !!isDryRun
+        schedule_hint
       };
       const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
         method: 'POST',
