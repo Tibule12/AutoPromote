@@ -333,11 +333,19 @@ function App() {
   const handleContentUpload = async (params) => {
     try {
       // Destructure all possible fields from params
-      const { file, platforms, title, description, type, schedule, articleText, isDryRun, url } = params;
+      const { file, platforms, title, description, type, schedule, isDryRun } = params;
       const token = await auth.currentUser.getIdToken(true);
-      let finalUrl = url || '';
-      if (type !== 'text' && file && !url) {
-        finalUrl = isDryRun ? `preview://${file.name}` : undefined;
+      let finalUrl = '';
+      // Always upload file for video/image and get url
+      if ((type === 'video' || type === 'image') && file) {
+        const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, filePath);
+        await uploadBytes(storageRef, file);
+        finalUrl = await getDownloadURL(storageRef);
+      }
+      // For preview/dry run, use preview url
+      if (isDryRun && file) {
+        finalUrl = `preview://${file.name}`;
       }
       const schedule_hint = {
         ...schedule,
@@ -347,7 +355,7 @@ function App() {
       const payload = {
         title: title || (file ? file.name : ''),
         type: type || 'video',
-        ...(finalUrl ? { url: finalUrl } : {}),
+        url: finalUrl,
         description: description || '',
         target_platforms: platforms && platforms.length ? platforms : (userDefaults.defaultPlatforms || ['youtube','tiktok','instagram']),
         schedule_hint
