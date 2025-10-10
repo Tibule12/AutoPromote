@@ -88,6 +88,7 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
     // Schedule promotion
     const scheduleData = {
       contentId: contentRef.id,
+      user_id: userId,
       platform: 'all',
       scheduleType: 'specific',
       startTime: scheduled_promotion_time || new Date().toISOString(),
@@ -125,6 +126,26 @@ router.get('/my-content', authMiddleware, async (req, res) => {
     res.json({ content });
   } catch (error) {
     console.error('[GET /my-content] Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /my-promotion-schedules - Get user's own promotion schedules
+router.get('/my-promotion-schedules', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const schedulesRef = db.collection('promotion_schedules').where('user_id', '==', userId).orderBy('startTime', 'desc');
+    const snapshot = await schedulesRef.get();
+    const schedules = [];
+    snapshot.forEach(doc => {
+      schedules.push({ id: doc.id, ...doc.data() });
+    });
+    res.json({ schedules });
+  } catch (error) {
+    console.error('[GET /my-promotion-schedules] Error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
