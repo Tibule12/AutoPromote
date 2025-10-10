@@ -405,7 +405,7 @@ function App() {
             const r = await fetch(API_ENDPOINTS.YOUTUBE_UPLOAD, {
               method: 'POST',
               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              body: JSON.stringify({ contentId, fileUrl, title: title || (file ? file.name : ''), description: description || '' })
+              body: JSON.stringify({ contentId, videoUrl: payload.url, title: title || (file ? file.name : ''), description: description || '' })
             });
             if (!r.ok) console.warn('YouTube upload failed');
           } catch (_) {}
