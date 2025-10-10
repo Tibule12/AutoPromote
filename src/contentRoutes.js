@@ -11,7 +11,7 @@ function cleanObject(obj) {
 
 // Content upload schema
 const contentUploadSchema = Joi.object({
-  title: Joi.string().min(3).max(100).required(),
+  title: Joi.string().required(),
   type: Joi.string().valid('video', 'image').required(),
   url: Joi.string().uri().required(),
   description: Joi.string().max(500).allow(''),
