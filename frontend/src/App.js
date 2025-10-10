@@ -347,7 +347,7 @@ function App() {
       const payload = {
         title: title || (file ? file.name : ''),
         type: type || 'video',
-        url: finalUrl || undefined,
+        ...(finalUrl ? { url: finalUrl } : {}),
         description: description || '',
         target_platforms: platforms && platforms.length ? platforms : (userDefaults.defaultPlatforms || ['youtube','tiktok','instagram']),
         schedule_hint,
