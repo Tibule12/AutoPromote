@@ -387,9 +387,15 @@ function App() {
             let contentId = result?.contentId;
             // Fallback: try to get from Firestore content list if available
             if (!contentId && Array.isArray(content)) {
-              const last = content[content.length - 1];
-              if (last && last.id) contentId = last.id;
+              // Try to find a matching content item with the same url
+              const match = content.find(c => c.url === payload.url);
+              if (match && match.id) contentId = match.id;
+              else {
+                const last = content[content.length - 1];
+                if (last && last.id) contentId = last.id;
+              }
             }
+            console.log('YouTube upload: contentId', contentId, 'fileUrl', payload.url, 'result', result);
             const fileUrl = payload.url;
             if (!contentId || !fileUrl) {
               console.warn('Missing contentId or fileUrl for YouTube upload');
