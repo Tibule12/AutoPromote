@@ -383,12 +383,8 @@ function App() {
           try {
             // Ensure contentId and fileUrl are sent as required by backend
             // Try all possible keys for contentId from upload response
-            let contentId = result?.contentId || result?.id || result?.content_id || result?.data?.contentId || result?.data?.id || result?.data?._id;
-            // If still missing, try to get from payload or response
-            if (!contentId && result && typeof result === 'object') {
-              // Sometimes backend returns the created Firestore doc id as 'name' or similar
-              contentId = result.name || result.docId || result.documentId;
-            }
+            // Backend returns { contentId: '...' } on successful upload
+            let contentId = result?.contentId;
             // Fallback: try to get from Firestore content list if available
             if (!contentId && Array.isArray(content)) {
               const last = content[content.length - 1];
