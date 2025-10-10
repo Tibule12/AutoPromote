@@ -384,7 +384,8 @@ function App() {
             // Ensure contentId and fileUrl are sent as required by backend
             // Try all possible keys for contentId from upload response
             // Backend returns { contentId: '...' } on successful upload
-            let contentId = result?.contentId;
+            // Try to extract contentId from backend response structure
+            let contentId = result?.contentId || result?.promotion_schedule?.contentId;
             // Fallback: try to get from Firestore content list if available
             if (!contentId && Array.isArray(content)) {
               // Try to find a matching content item with the same url
