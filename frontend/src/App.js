@@ -381,10 +381,17 @@ function App() {
         const postYouTube = async () => {
           if (!chosen.includes('youtube')) return;
           try {
+            // Ensure contentId and fileUrl are sent as required by backend
+            const contentId = result?.contentId || result?.id || result?.content_id;
+            const fileUrl = payload.url;
+            if (!contentId || !fileUrl) {
+              console.warn('Missing contentId or fileUrl for YouTube upload');
+              return;
+            }
             const r = await fetch(API_ENDPOINTS.YOUTUBE_UPLOAD, {
               method: 'POST',
               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              body: JSON.stringify({ title: title || (file ? file.name : ''), description: description || '', videoUrl: payload.url })
+              body: JSON.stringify({ contentId, fileUrl, title: title || (file ? file.name : ''), description: description || '' })
             });
             if (!r.ok) console.warn('YouTube upload failed');
           } catch (_) {}
