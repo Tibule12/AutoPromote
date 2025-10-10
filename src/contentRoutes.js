@@ -109,6 +109,26 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
   }
 });
 
+// GET /my-content - Get user's own content
+router.get('/my-content', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const contentRef = db.collection('content').where('user_id', '==', userId).orderBy('created_at', 'desc');
+    const snapshot = await contentRef.get();
+    const content = [];
+    snapshot.forEach(doc => {
+      content.push({ id: doc.id, ...doc.data() });
+    });
+    res.json({ content });
+  } catch (error) {
+    console.error('[GET /my-content] Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET / - Get all content (stub)
 router.get('/', async (req, res) => {
   try {
