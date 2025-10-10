@@ -12,13 +12,8 @@ function cleanObject(obj) {
 // Content upload schema
 const contentUploadSchema = Joi.object({
   title: Joi.string().min(3).max(100).required(),
-  type: Joi.string().valid('video', 'image', 'text').required(),
-  url: Joi.when('type', {
-    is: 'text',
-    then: Joi.string().optional().allow(null, ''),
-    otherwise: Joi.string().uri().required()
-  }),
-  articleText: Joi.string().max(5000).allow('').optional(),
+  type: Joi.string().valid('video', 'image').required(),
+  url: Joi.string().uri().required(),
   description: Joi.string().max(500).allow(''),
   target_platforms: Joi.array().items(Joi.string()).optional(),
   scheduled_promotion_time: Joi.string().isoDate().optional(),
@@ -69,11 +64,11 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-    const { title, type, url, articleText, description, target_platforms, scheduled_promotion_time, promotion_frequency, schedule_hint, auto_promote, quality_score, quality_feedback, quality_enhanced } = req.body;
+    const { title, type, url, description, target_platforms, scheduled_promotion_time, promotion_frequency, schedule_hint, auto_promote, quality_score, quality_feedback, quality_enhanced } = req.body;
     const contentData = {
       title,
       type,
-      ...(type === 'text' ? { articleText } : { url }),
+      url,
       description,
       target_platforms,
       scheduled_promotion_time,
