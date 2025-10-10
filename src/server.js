@@ -1,3 +1,4 @@
+// ...existing code...
 
 const express = require('express');
 const cors = require('cors');
@@ -118,9 +119,13 @@ function printMissingEnvOnce() {
   if (!process.env.JWT_AUDIENCE) missing.push('JWT_AUDIENCE');
   if (!process.env.JWT_ISSUER) missing.push('JWT_ISSUER');
   if (!process.env.RATE_LIMIT_GLOBAL_MAX) missing.push('RATE_LIMIT_GLOBAL_MAX');
+  if (!process.env.FIREBASE_PROJECT_ID) missing.push('FIREBASE_PROJECT_ID');
+  if (!process.env.FIREBASE_CLIENT_EMAIL) missing.push('FIREBASE_CLIENT_EMAIL');
+  if (!process.env.FIREBASE_PRIVATE_KEY) missing.push('FIREBASE_PRIVATE_KEY');
   if (missing.length) {
-    console.warn('[startup] Missing recommended env vars:', missing.join(', '));
-    console.warn('  Add them in Render dashboard → Environment, then redeploy.');
+    console.error('[startup] Missing required env vars:', missing.join(', '));
+    console.error('  Backend cannot start without these. Set them in your environment and redeploy.');
+    process.exit(1);
   }
   const enabledFlag = process.env.ENABLE_BACKGROUND_JOBS === 'true';
   const typoFlag = process.env.ENABLE_BACKROUND_JOBS === 'true';
@@ -947,17 +952,19 @@ express.response.send = function(body) {
   return originalSend.call(this, body);
 };
 
-const server = app.listen(PORT, () => {
-  console.log(`🚀 AutoPromote Server is running on port ${PORT}`);
-  console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
-  console.log(`🔗 API endpoints available at: http://localhost:${PORT}/api/`);
-}).on('error', (err) => {
-  console.log('❌ Server startup error:', err.message);
-  if (err.code === 'EADDRINUSE') {
-    console.log(`Port ${PORT} is already in use by another application.`);
-    console.log('Try changing the PORT environment variable or closing the other application.');
-  }
-});
+if (require.main === module) {
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 AutoPromote Server is running on port ${PORT}`);
+    console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
+    console.log(`🔗 API endpoints available at: http://localhost:${PORT}/api/`);
+  }).on('error', (err) => {
+    console.log('❌ Server startup error:', err.message);
+    if (err.code === 'EADDRINUSE') {
+      console.log(`Port ${PORT} is already in use by another application.`);
+      console.log('Try changing the PORT environment variable or closing the other application.');
+    }
+  });
+}
 
 // -------------------------------------------------
 // Background Workers (Phase B - Automatic Scheduling)
@@ -1243,4 +1250,7 @@ if (ENABLE_BACKGROUND) {
 module.exports.getLatencyStats = getLatencyStats;
 module.exports.runWarmup = runWarmup;
 module.exports.__warmupState = () => (__warmupState);
+
+// Export Express app for integration tests
+module.exports = app;
 } catch (e) { console.error(e); }
