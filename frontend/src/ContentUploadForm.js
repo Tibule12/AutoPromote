@@ -91,11 +91,11 @@ function ContentUploadForm({ onUpload }) {
     console.log('[Upload] Starting upload process');
     try {
       console.log('[Upload] Content type:', type);
-      if (type === 'article' && !articleText.trim()) {
+      if (type === 'text' && !articleText.trim()) {
         console.error('[Upload] No article text provided');
         throw new Error('Please enter article text.');
       }
-      if (type !== 'article' && !file) {
+      if (type !== 'text' && !file) {
         console.error('[Upload] No file selected');
         throw new Error('Please select a file to upload.');
       }
@@ -123,7 +123,7 @@ function ContentUploadForm({ onUpload }) {
         title,
         type,
         description,
-        ...(type === 'article' ? { articleText } : { url }),
+        ...(type === 'text' ? { articleText } : { url }),
         isDryRun: false // Always real upload unless previewing
       };
       console.log('[Upload] Content data to send:', contentData);
@@ -168,12 +168,12 @@ function ContentUploadForm({ onUpload }) {
         </div>
         <div className="form-group">
           <label>Content Type</label>
-          <select 
-            value={type} 
+          <select
+            value={type}
             onChange={e => setType(e.target.value)}
             className="form-select"
           >
-            <option value="article">Article</option>
+            <option value="text">Article</option>
             <option value="video">Video</option>
             <option value="image">Image</option>
             <option value="audio">Audio</option>
@@ -191,8 +191,8 @@ function ContentUploadForm({ onUpload }) {
           />
         </div>
         <div className="form-group">
-          <label>{type === 'article' ? 'Content' : 'File'}</label>
-          {type === 'article' ? (
+          <label>{type === 'text' ? 'Content' : 'File'}</label>
+          {type === 'text' ? (
             <textarea
               placeholder="Enter your article text"
               value={articleText}

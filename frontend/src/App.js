@@ -333,11 +333,11 @@ function App() {
   const handleContentUpload = async (params) => {
     try {
       // Destructure all possible fields from params
-      const { file, platforms, title, description, type, schedule, articleText, isDryRun } = params;
+      const { file, platforms, title, description, type, schedule, articleText, isDryRun, url } = params;
       const token = await auth.currentUser.getIdToken(true);
-      let url = '';
-      if (type !== 'article' && file) {
-        url = isDryRun ? `preview://${file.name}` : undefined;
+      let finalUrl = url || '';
+      if (type !== 'text' && file && !url) {
+        finalUrl = isDryRun ? `preview://${file.name}` : undefined;
       }
       const schedule_hint = {
         ...schedule,
@@ -347,20 +347,14 @@ function App() {
       const payload = {
         title: title || (file ? file.name : ''),
         type: type || 'video',
-        url: url || undefined,
+        url: finalUrl || undefined,
         description: description || '',
         target_platforms: platforms && platforms.length ? platforms : (userDefaults.defaultPlatforms || ['youtube','tiktok','instagram']),
         schedule_hint,
         isDryRun: !!isDryRun
       };
-      if (type === 'article' && articleText) {
+      if (type === 'text' && articleText) {
         payload.articleText = articleText;
-      }
-      if (!isDryRun && type !== 'article' && file) {
-        const path = `uploads/${user.uid}/${file.name}`;
-        const fileRef = ref(storage, path);
-        await uploadBytes(fileRef, file);
-        payload.url = await getDownloadURL(fileRef);
       }
       const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
         method: 'POST',
