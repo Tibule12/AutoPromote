@@ -15,7 +15,7 @@ const contentUploadSchema = Joi.object({
   type: Joi.string().valid('video', 'image', 'text').required(),
   url: Joi.when('type', {
     is: 'text',
-    then: Joi.string().uri().optional().allow(''),
+    then: Joi.string().optional().allow(null, ''),
     otherwise: Joi.string().uri().required()
   }),
   articleText: Joi.string().max(5000).allow('').optional(),
