@@ -117,8 +117,7 @@ function ContentUploadForm({ onUpload }) {
         title: finalTitle,
         type,
         description,
-        url,
-        isDryRun: false // Always real upload unless previewing
+        url
       };
       console.log('[Upload] Content data to send:', contentData);
 
