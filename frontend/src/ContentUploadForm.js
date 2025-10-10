@@ -112,8 +112,9 @@ function ContentUploadForm({ onUpload }) {
         throw uploadErr;
       }
 
+      const finalTitle = title || file.name;
       const contentData = {
-        title,
+        title: finalTitle,
         type,
         description,
         url,
