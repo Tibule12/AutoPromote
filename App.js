@@ -28,10 +28,11 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      setIsAdmin(user.role === 'admin');
+      // Only set isAdmin true if backend says admin, never downgrade
+      setIsAdmin(user.role === 'admin' || user.isAdmin === true);
       fetchUserProfile();
       fetchUserContent();
-      if (user.role === 'admin') {
+      if (user.role === 'admin' || user.isAdmin === true) {
         fetchAnalytics();
       }
     }
@@ -124,7 +125,8 @@ function App() {
 
         if (res.ok) {
           const data = await res.json();
-          setUser({ ...data.user, token: idToken }); // Always use ID token
+          // Always preserve admin status from backend
+          setUser({ ...data.user, token: idToken });
           setShowLogin(false);
           return;
         }
@@ -148,7 +150,7 @@ function App() {
             const userCredential = await signInWithCustomToken(auth, data.token);
             const user = userCredential.user;
             const idToken = await user.getIdToken();
-            setUser({ ...data.user, token: idToken }); // Always use ID token
+            setUser({ ...data.user, token: idToken });
           } catch (tokenExchangeError) {
             console.error('Failed to exchange custom token:', tokenExchangeError);
             alert('Login failed: Could not exchange custom token for ID token.');
@@ -170,7 +172,13 @@ function App() {
   };
 
   const handleLogin = (userData) => {
-    setUser(userData);
+    // Never downgrade admin to user
+    setUser(prev => {
+      if (prev && (prev.role === 'admin' || prev.isAdmin === true)) {
+        return { ...prev, ...userData, role: 'admin', isAdmin: true };
+      }
+      return userData;
+    });
     setShowLogin(false);
   };
 

@@ -353,9 +353,6 @@ function App() {
         schedule_hint,
         isDryRun: !!isDryRun
       };
-      if (type === 'text' && articleText) {
-        payload.articleText = articleText;
-      }
       const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
         method: 'POST',
         headers: {

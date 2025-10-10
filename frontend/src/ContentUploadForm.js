@@ -5,10 +5,9 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 function ContentUploadForm({ onUpload }) {
   const [title, setTitle] = useState('');
-  const [type, setType] = useState('article');
+  const [type, setType] = useState('video');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState(null);
-  const [articleText, setArticleText] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
   const [previews, setPreviews] = useState([]);
@@ -56,7 +55,7 @@ function ContentUploadForm({ onUpload }) {
     setPreviews([]);
     try {
       let url = '';
-      if (type !== 'article' && file) {
+      if (file) {
         // Simulate upload to get preview URL (skip actual upload for preview)
         url = `preview://${file.name}`;
       }
@@ -64,7 +63,7 @@ function ContentUploadForm({ onUpload }) {
         title,
         type,
         description,
-        ...(type === 'article' ? { articleText } : { url }),
+        url,
         isDryRun: true
       };
       // Call backend preview (reuse onUpload with dry run)
@@ -91,39 +90,33 @@ function ContentUploadForm({ onUpload }) {
     console.log('[Upload] Starting upload process');
     try {
       console.log('[Upload] Content type:', type);
-      if (type === 'text' && !articleText.trim()) {
-        console.error('[Upload] No article text provided');
-        throw new Error('Please enter article text.');
-      }
-      if (type !== 'text' && !file) {
+      if (!file) {
         console.error('[Upload] No file selected');
         throw new Error('Please select a file to upload.');
       }
 
       let url = '';
-      if (type !== 'article' && file) {
-        console.log('[Upload] File selected:', file);
-        // Upload file to Firebase Storage
-        const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
-        console.log('[Upload] Firebase Storage filePath:', filePath);
-        const storageRef = ref(storage, filePath);
-        console.log('[Upload] Storage ref created:', storageRef);
-        try {
-          const uploadResult = await uploadBytes(storageRef, file);
-          console.log('[Upload] uploadBytes result:', uploadResult);
-          url = await getDownloadURL(storageRef);
-          console.log('[Upload] File available at URL:', url);
-        } catch (uploadErr) {
-          console.error('[Upload] Error uploading to Firebase Storage:', uploadErr);
-          throw uploadErr;
-        }
+      console.log('[Upload] File selected:', file);
+      // Upload file to Firebase Storage
+      const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
+      console.log('[Upload] Firebase Storage filePath:', filePath);
+      const storageRef = ref(storage, filePath);
+      console.log('[Upload] Storage ref created:', storageRef);
+      try {
+        const uploadResult = await uploadBytes(storageRef, file);
+        console.log('[Upload] uploadBytes result:', uploadResult);
+        url = await getDownloadURL(storageRef);
+        console.log('[Upload] File available at URL:', url);
+      } catch (uploadErr) {
+        console.error('[Upload] Error uploading to Firebase Storage:', uploadErr);
+        throw uploadErr;
       }
 
       const contentData = {
         title,
         type,
         description,
-        ...(type === 'text' ? { articleText } : { url }),
+        url,
         isDryRun: false // Always real upload unless previewing
       };
       console.log('[Upload] Content data to send:', contentData);
@@ -135,7 +128,6 @@ function ContentUploadForm({ onUpload }) {
       setTitle('');
       setDescription('');
       setFile(null);
-      setArticleText('');
       console.log('[Upload] Form cleared after successful upload');
     } catch (err) {
       console.error('[Upload] Upload error:', err);
@@ -173,10 +165,8 @@ function ContentUploadForm({ onUpload }) {
             onChange={e => setType(e.target.value)}
             className="form-select"
           >
-            <option value="text">Article</option>
             <option value="video">Video</option>
             <option value="image">Image</option>
-            <option value="audio">Audio</option>
           </select>
         </div>
         <div className="form-group">
@@ -191,32 +181,21 @@ function ContentUploadForm({ onUpload }) {
           />
         </div>
         <div className="form-group">
-          <label>{type === 'text' ? 'Content' : 'File'}</label>
-          {type === 'text' ? (
-            <textarea
-              placeholder="Enter your article text"
-              value={articleText}
-              onChange={e => setArticleText(e.target.value)}
-              rows={6}
+          <label>File</label>
+          <div className="file-upload">
+            <input
+              type="file"
+              accept={type === 'video' ? 'video/*' : 'image/*'}
+              onChange={e => setFile(e.target.files[0])}
               required
-              className="form-textarea"
+              className="form-file-input"
             />
-          ) : (
-            <div className="file-upload">
-              <input
-                type="file"
-                accept={type === 'video' ? 'video/*' : type === 'image' ? 'image/*' : type === 'audio' ? 'audio/*' : '*'}
-                onChange={e => setFile(e.target.files[0])}
-                required
-                className="form-file-input"
-              />
-              {file && (
-                <div className="file-info">
-                  Selected file: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                </div>
-              )}
-            </div>
-          )}
+            {file && (
+              <div className="file-info">
+                Selected file: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+              </div>
+            )}
+          </div>
         </div>
         <div style={{display:'flex', gap:'.5rem', marginTop:'.5rem'}}>
           <button 
