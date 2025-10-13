@@ -97,10 +97,45 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
     };
     const scheduleRef = await db.collection('promotion_schedules').add(cleanObject(scheduleData));
     const promotion_schedule = { id: scheduleRef.id, ...scheduleData };
-    console.log(`[UPLOAD] Content uploaded and promotion scheduled:`, { contentId: contentRef.id, scheduleId: scheduleRef.id });
+    // Auto-enqueue promotion tasks for each platform
+    const { enqueueYouTubeUploadTask, enqueuePlatformPostTask } = require('./services/promotionTaskQueue');
+    const platformTasks = [];
+    if (Array.isArray(target_platforms)) {
+      for (const platform of target_platforms) {
+        try {
+          if (platform === 'youtube') {
+            // Enqueue YouTube upload task
+            const ytTask = await enqueueYouTubeUploadTask({
+              contentId: contentRef.id,
+              uid: userId,
+              title,
+              description,
+              fileUrl: url,
+              shortsMode: false // or infer from content if available
+            });
+            platformTasks.push({ platform: 'youtube', task: ytTask });
+          } else {
+            // Enqueue generic platform post task
+            const postTask = await enqueuePlatformPostTask({
+              contentId: contentRef.id,
+              uid: userId,
+              platform,
+              reason: 'auto',
+              payload: { url, title, description },
+              skipIfDuplicate: true
+            });
+            platformTasks.push({ platform, task: postTask });
+          }
+        } catch (err) {
+          platformTasks.push({ platform, error: err.message });
+        }
+      }
+    }
+    console.log(`[UPLOAD] Content uploaded, promotion scheduled, and platform tasks enqueued:`, { contentId: contentRef.id, scheduleId: scheduleRef.id, platformTasks });
     res.status(201).json({
       content,
       promotion_schedule,
+      platform_tasks: platformTasks,
       growth_guarantee_badge: { enabled: true },
       auto_promotion: auto_promote || {}
     });
