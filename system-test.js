@@ -15,7 +15,7 @@ if (!admin.apps.length) {
     const serviceAccount = require('./serviceAccountKey.json');
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      databaseURL: "https://autopromote-464de.firebaseio.com"
+  databaseURL: "https://autopromote-cc6d3.firebaseio.com"
     });
     console.log('✅ Firebase Admin initialized for testing');
   } catch (error) {

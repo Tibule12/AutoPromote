@@ -33,7 +33,7 @@ async function testFirebaseConnection() {
 
         console.log('\n⚠️ Note: To use Firestore, you need to:');
         console.log('1. Go to Firebase Console (https://console.firebase.google.com)');
-        console.log('2. Select project "autopromote-464de"');
+    console.log('2. Select project "autopromote-cc6d3"');
         console.log('3. Click on "Firestore Database" in the left sidebar');
         console.log('4. Click "Create Database"');
         console.log('5. Choose your preferred location and start in production mode');
