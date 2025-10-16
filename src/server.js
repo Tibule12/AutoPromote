@@ -468,11 +468,12 @@ try { app.use(ensureWarmup); } catch(_) { /* ignore */ }
 // Micro-cache for status endpoints
 app.use(microCache);
 
-// CORS configuration - allow all origins for debugging (tighten in prod)
+// CORS configuration - allow only frontend domain and support credentials
 app.use(cors({
-  origin: '*',
+  origin: ['https://autopromote-1.onrender.com'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin'],
+  credentials: true
 }));
 // Apply compression if installed
 if (compression) app.use(compression());
