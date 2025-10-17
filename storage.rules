@@ -1,24 +1,46 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isServiceAccount() {
+      return request.auth != null &&
+        request.auth.token.firebase != null &&
+        request.auth.token.firebase.sign_in_provider == 'service_account';
+    }
+
+    function isBackend() {
+      return request.auth == null;
+    }
+
     // Allow all authenticated users to read and write files
     match /{allPaths=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null 
+      allow read: if request.auth != null || isBackend();
+      allow write: if (request.auth != null || isBackend())
         && request.resource.size < 50 * 1024 * 1024; // 50MB limit
     }
 
     // Allow public read access to published content
     match /content/{userId}/published/{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == userId
+      allow write: if (request.auth != null && request.auth.uid == userId) || isBackend()
         && request.resource.size < 50 * 1024 * 1024; // 50MB limit
     }
 
     // Allow users to read public assets
     match /public/{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.role == 'admin';
+      allow write: if isAdmin() || isServiceAccount() || isBackend();
+    }
+
+    // Allow backend to write landing pages and public to read them
+    match /landing-pages/{allPaths=**} {
+      allow read: if true;
+      allow write: if isBackend();
     }
   }
 }
