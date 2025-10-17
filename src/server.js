@@ -216,6 +216,10 @@ const contentRoutes = require('./contentRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const adminRoutes = require('./adminRoutes');
 const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
+const viralGrowthRoutes = require('./routes/viralGrowthRoutes');
+const engagementRoutes = require('./routes/engagementRoutes');
+const monetizationRoutes = require('./routes/monetizationRoutes');
+const repostRoutes = require('./routes/repostRoutes');
 let promotionTaskRoutes;
 let metricsRoutes;
 let tiktokRoutes;
@@ -511,6 +515,9 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/security', adminSecurityRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
+app.use('/api/engagement', engagementRoutes);
+app.use('/api/monetization', monetizationRoutes);
+app.use('/api/repost', repostRoutes);
 try { app.use('/api/admin/metrics', require('./routes/adminMetricsRoutes')); } catch(e) { console.warn('adminMetricsRoutes mount failed:', e.message); }
 // Aggregate status (composed) routes
 try { app.use('/api/status', require('./routes/aggregateStatusRoutes')); } catch(e) { console.warn('aggregateStatusRoutes mount failed:', e.message); }

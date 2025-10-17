@@ -4,6 +4,19 @@ const { db } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
 const Joi = require('joi');
 
+// Import Phase 2 viral growth services
+const hashtagEngine = require('./services/hashtagEngine');
+const smartDistributionEngine = require('./services/smartDistributionEngine');
+const viralImpactEngine = require('./services/viralImpactEngine');
+const algorithmExploitationEngine = require('./services/algorithmExploitationEngine');
+const engagementBoostingService = require('./services/engagementBoostingService');
+const growthAssuranceTracker = require('./services/growthAssuranceTracker');
+const contentQualityEnhancer = require('./services/contentQualityEnhancer');
+const repostDrivenEngine = require('./services/repostDrivenEngine');
+const referralGrowthEngine = require('./services/referralGrowthEngine');
+const monetizationService = require('./services/monetizationService');
+const userSegmentation = require('./services/userSegmentation');
+
 // Helper function to remove undefined fields from objects
 function cleanObject(obj) {
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
@@ -64,7 +77,14 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-    const { title, type, url, description, target_platforms, scheduled_promotion_time, promotion_frequency, schedule_hint, auto_promote, quality_score, quality_feedback, quality_enhanced } = req.body;
+    const { title, type, url, description, target_platforms, scheduled_promotion_time, promotion_frequency, schedule_hint, auto_promote, quality_score, quality_feedback, quality_enhanced, custom_hashtags, growth_guarantee, viral_boost } = req.body;
+
+    // Initialize viral engines
+    const hashtagEngine = require('./services/hashtagEngine');
+    const smartDistributionEngine = require('./services/smartDistributionEngine');
+    const viralImpactEngine = require('./services/viralImpactEngine');
+    const algorithmExploitationEngine = require('./services/algorithmExploitationEngine');
+
     const contentData = {
       title,
       type,
@@ -78,66 +98,193 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
       quality_score,
       quality_feedback,
       quality_enhanced,
+      custom_hashtags,
+      growth_guarantee,
+      viral_boost,
       user_id: userId,
       created_at: new Date(),
       status: 'pending',
+      viral_optimized: true
     };
     const contentRef = await db.collection('content').add(cleanObject(contentData));
     const contentDoc = await contentRef.get();
     const content = { id: contentRef.id, ...contentDoc.data() };
-    // Schedule promotion
+
+    // 🚀 VIRAL OPTIMIZATION PHASE 1: Hashtag Generation
+    console.log('🔥 [VIRAL] Generating algorithm-breaking hashtags...');
+    const hashtagOptimization = await hashtagEngine.generateCustomHashtags({
+      content,
+      platform: target_platforms?.[0] || 'tiktok',
+      customTags: custom_hashtags || [],
+      growthGuarantee: growth_guarantee !== false
+    });
+
+    // 🚀 VIRAL OPTIMIZATION PHASE 2: Smart Distribution Strategy
+    console.log('🎯 [VIRAL] Creating smart distribution strategy...');
+    const distributionStrategy = await smartDistributionEngine.generateDistributionStrategy(
+      content,
+      target_platforms || ['tiktok', 'instagram'],
+      { timezone: 'UTC', growthGuarantee: growth_guarantee !== false }
+    );
+
+    // 🚀 VIRAL OPTIMIZATION PHASE 3: Algorithm Exploitation
+    console.log('⚡ [VIRAL] Applying algorithm exploitation...');
+    const algorithmOptimization = algorithmExploitationEngine.optimizeForAlgorithm(
+      content,
+      target_platforms?.[0] || 'tiktok'
+    );
+
+    // 🚀 VIRAL OPTIMIZATION PHASE 4: Viral Impact Seeding
+    console.log('🌊 [VIRAL] Seeding content to visibility zones...');
+    const viralSeeding = await viralImpactEngine.seedContentToVisibilityZones(
+      content,
+      target_platforms?.[0] || 'tiktok',
+      { forceAll: viral_boost?.force_seeding || false }
+    );
+
+    // 🚀 VIRAL OPTIMIZATION PHASE 5: Boost Chain Creation
+    console.log('🔗 [VIRAL] Creating boost chain for viral spread...');
+    const boostChain = await viralImpactEngine.orchestrateBoostChain(
+      content,
+      target_platforms || ['tiktok'],
+      { userId, squadUserIds: viral_boost?.squad_user_ids || [] }
+    );
+
+    // Update content with viral optimization data
+    await contentRef.update({
+      viral_optimization: {
+        hashtags: hashtagOptimization,
+        distribution: distributionStrategy,
+        algorithm: algorithmOptimization,
+        seeding: viralSeeding,
+        boost_chain: boostChain,
+        optimized_at: new Date().toISOString()
+      },
+      viral_velocity: { current: 0, category: 'new', status: 'optimizing' },
+      growth_guarantee_badge: {
+        enabled: true,
+        message: 'AutoPromote Boosted: Guaranteed to Grow or Retried Free',
+        viral_score: algorithmOptimization.optimizationScore || 0
+      }
+    });
+
+    // Schedule promotion with viral timing
+    const optimalTiming = distributionStrategy.platforms?.[0]?.timing?.optimalTime ||
+                          scheduled_promotion_time ||
+                          new Date().toISOString();
+
     const scheduleData = {
       contentId: contentRef.id,
       user_id: userId,
-      platform: 'all',
-      scheduleType: 'specific',
-      startTime: scheduled_promotion_time || new Date().toISOString(),
+      platform: target_platforms?.join(',') || 'all',
+      scheduleType: 'viral_optimized',
+      startTime: optimalTiming,
       frequency: promotion_frequency || 'once',
       isActive: true,
+      viral_optimization: {
+        peak_time_score: distributionStrategy.platforms?.[0]?.timing?.score || 0,
+        hashtag_count: hashtagOptimization.hashtags?.length || 0,
+        algorithm_score: algorithmOptimization.optimizationScore || 0
+      }
     };
     const scheduleRef = await db.collection('promotion_schedules').add(cleanObject(scheduleData));
     const promotion_schedule = { id: scheduleRef.id, ...scheduleData };
-    // Auto-enqueue promotion tasks for each platform
+    // Auto-enqueue promotion tasks with viral optimization
     const { enqueueYouTubeUploadTask, enqueuePlatformPostTask } = require('./services/promotionTaskQueue');
     const platformTasks = [];
+
     if (Array.isArray(target_platforms)) {
       for (const platform of target_platforms) {
         try {
+          // Get platform-specific viral data
+          const platformStrategy = distributionStrategy.platforms.find(p => p.platform === platform);
+          const viralCaption = platformStrategy?.caption?.caption || description;
+          const viralHashtags = platformStrategy?.caption?.hashtags || hashtagOptimization.hashtags;
+
           if (platform === 'youtube') {
-            // Enqueue YouTube upload task
+            // Enqueue YouTube upload task with viral optimization
             const ytTask = await enqueueYouTubeUploadTask({
               contentId: contentRef.id,
               uid: userId,
-              title,
-              description,
+              title: algorithmOptimization.hook ? `${algorithmOptimization.hook} - ${title}` : title,
+              description: `${viralCaption}\n\n${viralHashtags.join(' ')}`,
               fileUrl: url,
-              shortsMode: false // or infer from content if available
+              shortsMode: type === 'video' && (content.duration || 0) < 60,
+              viralOptimization: {
+                hashtags: viralHashtags,
+                hook: algorithmOptimization.hook,
+                optimalTime: platformStrategy?.timing?.optimalTime
+              }
             });
-            platformTasks.push({ platform: 'youtube', task: ytTask });
+            platformTasks.push({ platform: 'youtube', task: ytTask, viral_optimized: true });
           } else {
-            // Enqueue generic platform post task
+            // Enqueue generic platform post task with viral data
             const postTask = await enqueuePlatformPostTask({
               contentId: contentRef.id,
               uid: userId,
               platform,
-              reason: 'auto',
-              payload: { url, title, description },
+              reason: 'viral_optimized',
+              payload: {
+                url,
+                title: algorithmOptimization.hook ? `${algorithmOptimization.hook} - ${title}` : title,
+                description: viralCaption,
+                hashtags: viralHashtags,
+                viralOptimization: {
+                  hook: algorithmOptimization.hook,
+                  engagementBait: algorithmOptimization.engagementBait,
+                  optimalTime: platformStrategy?.timing?.optimalTime
+                }
+              },
               skipIfDuplicate: true
             });
-            platformTasks.push({ platform, task: postTask });
+            platformTasks.push({ platform, task: postTask, viral_optimized: true });
           }
         } catch (err) {
-          platformTasks.push({ platform, error: err.message });
+          platformTasks.push({ platform, error: err.message, viral_optimized: false });
         }
       }
     }
-    console.log(`[UPLOAD] Content uploaded, promotion scheduled, and platform tasks enqueued:`, { contentId: contentRef.id, scheduleId: scheduleRef.id, platformTasks });
+    console.log(`🚀 [VIRAL UPLOAD] Content uploaded with complete viral optimization:`, {
+      contentId: contentRef.id,
+      scheduleId: scheduleRef.id,
+      platformTasks: platformTasks.length,
+      viralScore: algorithmOptimization.optimizationScore,
+      hashtagCount: hashtagOptimization.hashtags?.length,
+      boostChainId: boostChain.chainId
+    });
+
     res.status(201).json({
-      content,
+      content: {
+        ...content,
+        viral_optimization: {
+          hashtags: hashtagOptimization,
+          distribution: distributionStrategy,
+          algorithm: algorithmOptimization,
+          seeding: viralSeeding,
+          boost_chain: boostChain
+        }
+      },
       promotion_schedule,
       platform_tasks: platformTasks,
-      growth_guarantee_badge: { enabled: true },
-      auto_promotion: auto_promote || {}
+      viral_metrics: {
+        optimization_score: algorithmOptimization.optimizationScore,
+        hashtag_count: hashtagOptimization.hashtags?.length,
+        peak_time_score: distributionStrategy.platforms?.[0]?.timing?.score,
+        seeding_zones: viralSeeding.seedingResults?.length,
+        boost_chain_members: boostChain.squadSize
+      },
+      growth_guarantee_badge: {
+        enabled: true,
+        message: 'AutoPromote Boosted: Guaranteed to Grow or Retried Free',
+        viral_score: algorithmOptimization.optimizationScore,
+        expected_views: distributionStrategy.platforms?.[0]?.expected_views || 0
+      },
+      auto_promotion: {
+        ...auto_promote,
+        viral_optimized: true,
+        expected_viral_velocity: 'explosive',
+        overnight_viral_plan: viralImpactEngine.generateOvernightViralPlan(content, target_platforms || ['tiktok'])
+      }
     });
   } catch (error) {
     console.error('[UPLOAD] Error:', error);
