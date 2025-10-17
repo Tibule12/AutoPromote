@@ -1,104 +1,52 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if user is admin
-      function isAdmin() {
-        return request.auth != null &&
-          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-          (
-            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
-          );
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // User can read their own document and admins can read all
+    function isServiceAccount() {
+      return request.auth != null &&
+        request.auth.token.firebase != null &&
+        request.auth.token.firebase.sign_in_provider == 'service_account';
+    }
+
+    function isBackend() {
+      return request.auth == null;
+    }
+
+    // Users can read/write their own user document
     match /users/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow delete: if false;  // Only allow deletes through admin SDK
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend() || request.auth.uid == userId;
     }
 
-    // All authenticated users can read/write content for admin dashboard functionality
+    // Users can read/write their own content
     match /content/{contentId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null &&
-        (resource.data.userId == request.auth.uid || isAdmin());
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend() ||
+        (request.auth != null &&
+          (
+            (request.method == 'create' && request.resource.data.userId == request.auth.uid) ||
+            (resource.data.userId == request.auth.uid)
+          )
+        );
     }
 
-    // All authenticated users can read/write analytics for admin dashboard
-    match /analytics/{analyticsId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null;
-      allow delete: if request.auth != null;
-
-      // Allow reads on all subcollections under analytics
-      match /{subCollection=**} {
-        allow read: if request.auth != null;
-      }
+    // Only admins, service account, or backend can access analytics, promotions, activities
+    match /analytics/{docId} {
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
+    }
+    match /promotions/{docId} {
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
+    }
+    match /activities/{docId} {
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
     }
 
-    // All authenticated users can read promotions for admin dashboard
-    match /promotions/{promotionId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      allow update: if false;  // Only allow updates through admin SDK
-    }
-
-    // All authenticated users can read promotion schedules for admin dashboard
-    match /promotion_schedules/{scheduleId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null;
-      allow delete: if request.auth != null;
-    }
-
-    // Allow reading/writing activities for admin dashboard
-    match /activities/{activityId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null;
-      allow delete: if request.auth != null;
-    }
-
-    // Allow reading/writing transactions for revenue tracking
-    match /transactions/{transactionId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null;
-      allow delete: if request.auth != null;
-    }
-
-    // Allow reading/writing admins for admin management
-    match /admins/{adminId} {
-      allow read, write: if isAdmin();
-    }
-
-    // Allow reading/writing payouts for revenue tracking
-    match /payouts/{payoutId} {
-      allow read, write: if request.auth != null && isAdmin();
-    }
-
-    // Allow reading/writing promotion executions for scheduling
-    match /promotion_executions/{execId} {
-      allow read, write: if request.auth != null && isAdmin();
-    }
-
-    // Allow reading/writing admins for admin management
-    match /admins/{adminId} {
-      allow read, write: if isAdmin();
-    }
-
-    // Allow reading/writing payouts for revenue tracking
-    match /payouts/{payoutId} {
-      allow read, write: if request.auth != null && isAdmin();
-    }
-
-    // Allow reading/writing promotion executions for scheduling
-    match /promotion_executions/{execId} {
-      allow read, write: if request.auth != null && isAdmin();
+    // All other collections: only admins, service account, or backend
+    match /{document=**} {
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
     }
   }
 }

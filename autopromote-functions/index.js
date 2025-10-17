@@ -125,8 +125,8 @@ exports.createPromotionOnContentCreate = functions.region(region).firestore
 exports.handleLandingPageIntent = functions.region(region).firestore
   .document('content/{contentId}')
   .onUpdate(async (change, context) => {
-    const before = change.before.exists ? change.before.data() : null;
-    const after = change.after.exists ? change.after.data() : null;
+  const before = change.before.exists ? (change.before.data() || {}) : {};
+  const after = change.after.exists ? (change.after.data() || {}) : {};
     const contentId = context.params.contentId;
     try {
       if (!before || !after) {
@@ -134,8 +134,18 @@ exports.handleLandingPageIntent = functions.region(region).firestore
         return null;
       }
       // Guard: proceed only when intent is newly set and url not present
-      const intentNewlySet = !before.landingPageRequestedAt && !!after.landingPageRequestedAt;
-      if (!intentNewlySet || after.landingPageUrl) return null;
+      const beforeIntent = before.landingPageRequestedAt;
+      const afterIntent = after.landingPageRequestedAt;
+      const intentNewlySet = (!beforeIntent && !!afterIntent) || (beforeIntent === undefined && afterIntent !== undefined);
+      console.log('LandingPageIntent - before:', beforeIntent, 'after:', afterIntent, 'intentNewlySet:', intentNewlySet);
+      if (!intentNewlySet) {
+        console.log('LandingPageIntent: intent not newly set, skipping.');
+        return null;
+      }
+      if (after.landingPageUrl) {
+        console.log('LandingPageIntent: landingPageUrl already exists, skipping.');
+        return null;
+      }
 
       // Build simple HTML landing page (free-tier)
       const title = after.title || 'Promoted Content';
@@ -148,7 +158,7 @@ exports.handleLandingPageIntent = functions.region(region).firestore
       await file.save(html, { contentType: 'text/html' });
       const [signedUrl] = await file.getSignedUrl({ action: 'read', expires: Date.now() + 1000 * 60 * 60 * 24 * 30 });
 
-      await change.after.ref.update({
+      await admin.firestore().doc(change.after.ref.path).update({
         landingPageUrl: signedUrl,
         landingPageGeneratedAt: admin.firestore.FieldValue.serverTimestamp()
       });
@@ -164,8 +174,8 @@ exports.handleLandingPageIntent = functions.region(region).firestore
 exports.handleSmartLinkIntent = functions.region(region).firestore
   .document('content/{contentId}')
   .onUpdate(async (change, context) => {
-      const before = change.before.exists ? change.before.data() : null;
-      const after = change.after.exists ? change.after.data() : null;
+  const before = change.before.exists ? (change.before.data() || {}) : {};
+  const after = change.after.exists ? (change.after.data() || {}) : {};
       const contentId = context.params.contentId;
       try {
         if (!before || !after) {
@@ -173,13 +183,22 @@ exports.handleSmartLinkIntent = functions.region(region).firestore
           return null;
         }
         // Guard: only proceed when intent is newly set and smartLink not present
-        if (typeof before.smartLinkRequestedAt === 'undefined' && typeof after.smartLinkRequestedAt === 'undefined') {
-          console.error('handleSmartLinkIntent: smartLinkRequestedAt missing in both before and after');
+        const beforeIntent = before.smartLinkRequestedAt;
+        const afterIntent = after.smartLinkRequestedAt;
+        const intentNewlySet = (!beforeIntent && !!afterIntent) || (beforeIntent === undefined && afterIntent !== undefined);
+        console.log('SmartLinkIntent - before:', beforeIntent, 'after:', afterIntent, 'intentNewlySet:', intentNewlySet);
+        if (!intentNewlySet) {
+          console.log('SmartLinkIntent: intent not newly set, skipping.');
           return null;
         }
-        const intentNewlySet = !before.smartLinkRequestedAt && !!after.smartLinkRequestedAt;
-        if (!intentNewlySet || after.smartLink) return null;
-        if (!after.landingPageUrl) return null; // need landing page first
+        if (after.smartLink) {
+          console.log('SmartLinkIntent: smartLink already exists, skipping.');
+          return null;
+        }
+        if (!after.landingPageUrl) {
+          console.log('SmartLinkIntent: landingPageUrl missing, skipping.');
+          return null;
+        }
 
         const shortId = uuidv4().slice(0, 8);
         const redirectUrl = `${after.landingPageUrl}?source=autopromote&contentId=${encodeURIComponent(contentId)}&userId=${encodeURIComponent(after.user_id || '')}`;
