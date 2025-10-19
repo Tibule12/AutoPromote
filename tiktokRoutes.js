@@ -42,7 +42,11 @@ function ensureTikTokEnv(res, cfg, opts = { requireSecret: true }) {
 function constructAuthUrl(cfg, state, scope) {
   const key = String(cfg.key || '').trim();
   const redirect = String(cfg.redirect || '').trim();
-  return `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}`;
+  // Use TikTok sandbox domain for sandbox mode (recommended by TikTok docs)
+  const base = (TIKTOK_ENV === 'production')
+    ? 'https://www.tiktok.com/v2/auth/authorize/'
+    : 'https://sandbox.tiktok.com/platform/oauth/authorize';
+  return `${base}?client_key=${encodeURIComponent(key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}`;
 }
 
 // Diagnostics: quick config visibility with sandbox/production breakdown
