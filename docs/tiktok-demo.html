@@ -53,6 +53,19 @@
       </script>
     </section>
 
+    <!-- Recorder UI: allows a reviewer or you to record the screen while following the demo -->
+    <section class="card" id="recorder-card">
+      <h2>Quick recorder (optional)</h2>
+      <p class="small">You can record this demo directly from your browser. Click <strong>Start recording</strong>, choose the screen or window to capture, then perform the demo steps. When finished click <strong>Stop recording</strong> and download the WebM file.</p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button id="rec-start" style="padding:8px 12px;border-radius:6px;background:#0b66ff;color:#fff;border:0;cursor:pointer">Start recording</button>
+        <button id="rec-stop" disabled style="padding:8px 12px;border-radius:6px;background:#d9534f;color:#fff;border:0;cursor:pointer">Stop recording</button>
+        <button id="rec-download" disabled style="padding:8px 12px;border-radius:6px;background:#28a745;color:#fff;border:0;cursor:pointer">Download</button>
+        <span id="rec-status" style="margin-left:8px;color:#555;font-size:13px">Idle</span>
+      </div>
+      <p class="small" style="margin-top:8px">Notes: Browsers require you to choose which screen or tab to share. The recorder will capture what you select. The output is a WebM file which you can convert to MP4 if desired.</p>
+    </section>
+
     <section class="card">
       <h2>Demo video script & timestamps</h2>
       <p class="small">Follow this script when recording. Keep the video short and clear (2–4 minutes recommended).</p>
@@ -104,3 +117,51 @@ Thank you for the review. We updated the Website URL to https://autopromote.onre
   </footer>
 </body>
 </html>
+<script>
+  // In-page screen recorder using MediaRecorder
+  (function(){
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) return;
+    let mediaRecorder, recordedChunks = [];
+    const startBtn = document.getElementById('rec-start');
+    const stopBtn = document.getElementById('rec-stop');
+    const dlBtn = document.getElementById('rec-download');
+    const status = document.getElementById('rec-status');
+
+    startBtn && startBtn.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: { cursor: 'always' }, audio: true });
+        recordedChunks = [];
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
+        mediaRecorder.ondataavailable = e => { if (e.data && e.data.size) recordedChunks.push(e.data); };
+        mediaRecorder.onstop = () => {
+          status.textContent = 'Recording stopped';
+          dlBtn.disabled = false;
+          // Stop all tracks of the stream to release screen capture
+          try { stream.getTracks().forEach(t => t.stop()); } catch(e){}
+        };
+        mediaRecorder.start(1000);
+        startBtn.disabled = true; stopBtn.disabled = false; dlBtn.disabled = true;
+        status.textContent = 'Recording...';
+      } catch (e) {
+        status.textContent = 'Permission denied or capture failed';
+      }
+    });
+
+    stopBtn && stopBtn.addEventListener('click', () => {
+      try {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+      } catch (e) {}
+      startBtn.disabled = false; stopBtn.disabled = true;
+    });
+
+    dlBtn && dlBtn.addEventListener('click', () => {
+      if (!recordedChunks || !recordedChunks.length) return;
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none'; a.href = url; a.download = 'autopromote-tiktok-demo.webm';
+      document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+      dlBtn.disabled = true; status.textContent = 'Downloaded';
+    });
+  })();
+</script>
