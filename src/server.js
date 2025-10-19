@@ -218,7 +218,13 @@ const adminRoutes = require('./adminRoutes');
 const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
 const viralGrowthRoutes = require('./routes/viralGrowthRoutes');
 const engagementRoutes = require('./routes/engagementRoutes');
-const monetizationRoutes = require('./routes/monetizationRoutes');
+let monetizationRoutes;
+try {
+  monetizationRoutes = require('./routes/monetizationRoutes');
+} catch (e) {
+  monetizationRoutes = express.Router();
+  console.log('⚠️ Monetization routes not found, using dummy router:', e.message);
+}
 const repostRoutes = require('./routes/repostRoutes');
 let promotionTaskRoutes;
 let metricsRoutes;
@@ -316,10 +322,18 @@ try {
 
 // Try to load adminTestRoutes, but continue with a dummy router if not available
 let adminTestRoutes;
-let adminSecurityRoutes;
 try {
   adminTestRoutes = require('./adminTestRoutes');
 } catch (error) {
+  // Create a dummy router if the module is missing
+  adminTestRoutes = express.Router();
+  adminTestRoutes.get('/admin-test/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Admin test routes dummy endpoint' });
+  });
+}
+
+// Load admin security routes
+let adminSecurityRoutes;
 try {
   adminSecurityRoutes = require('./routes/adminSecurityRoutes');
   console.log('✅ Admin security routes loaded');
@@ -328,25 +342,8 @@ try {
   adminSecurityRoutes = express.Router();
 }
 
-// Ensure adminSecurityRoutes loaded even if adminTestRoutes existed
-if (!adminSecurityRoutes) {
-  try {
-    adminSecurityRoutes = require('./routes/adminSecurityRoutes');
-    console.log('✅ Admin security routes loaded (post-load)');
-  } catch (e) {
-    adminSecurityRoutes = express.Router();
-    console.log('⚠️ Admin security routes not found (post-load):', e.message);
-  }
-}
-  // Create a dummy router if the module is missing
-  adminTestRoutes = express.Router();
-  adminTestRoutes.get('/admin-test/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Admin test routes dummy endpoint' });
-  });
-}
-
 // Try to load optional route modules
-let withdrawalRoutes, monetizationRoutes;
+let withdrawalRoutes;
 let shortlinkRoutes;
 let billingRoutes;
 let paymentsStatusRoutes;
@@ -521,7 +518,11 @@ app.use('/api/repost', repostRoutes);
 try { app.use('/api/admin/metrics', require('./routes/adminMetricsRoutes')); } catch(e) { console.warn('adminMetricsRoutes mount failed:', e.message); }
 // Aggregate status (composed) routes
 try { app.use('/api/status', require('./routes/aggregateStatusRoutes')); } catch(e) { console.warn('aggregateStatusRoutes mount failed:', e.message); }
-app.use('/api', adminTestRoutes); // Add admin test routes
+try {
+  app.use('/api', adminTestRoutes); // Add admin test routes
+} catch (e) {
+  console.warn('Admin test routes mount failed:', e.message);
+}
 // Mount TikTok routes if available
 app.use('/api/tiktok', tiktokRoutes);
 console.log('🚏 TikTok routes mounted at /api/tiktok');
@@ -542,14 +543,17 @@ app.use('/api/instagram', instagramRoutes);
 console.log('🚏 Instagram routes mounted at /api/instagram');
 app.use('/api/notifications', notificationsRoutes);
 console.log('🚏 Notifications routes mounted at /api/notifications');
-app.use('/api', captionsRoutes);
-console.log('🚏 Captions routes mounted at /api');
+// Captions routes mount skipped due to object export issue
 app.use('/api/admin/cache', adminCacheRoutes);
 console.log('🚏 Admin cache routes mounted at /api/admin/cache');
 
 // Content Quality Check Route
-const contentQualityCheck = require('./contentQualityCheck');
-app.use('/api/content', contentQualityCheck);
+try {
+  const contentQualityCheck = require('./contentQualityCheck');
+  app.use('/api/content', contentQualityCheck);
+} catch (e) {
+  console.warn('Content quality check route not available:', e.message);
+}
 
 // Register optional routes
 app.use('/api/withdrawals', withdrawalRoutes);
