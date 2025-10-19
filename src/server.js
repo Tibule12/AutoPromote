@@ -572,6 +572,16 @@ app.use('/.well-known', express.static(path.join(__dirname, '../public/.well-kno
 // 2) Fallback to /docs/.well-known (used for GitHub Pages and documentation hosting)
 app.use('/.well-known', express.static(path.join(__dirname, '../docs/.well-known')));
 
+// Public demo page for TikTok reviewers
+try {
+  app.get('/tiktok-demo', (req, res) => {
+    res.sendFile(path.join(__dirname, '../docs/tiktok-demo.html'));
+  });
+  console.log('✅ Demo page available at /tiktok-demo');
+} catch (e) {
+  console.warn('⚠️ /tiktok-demo route not available:', e.message);
+}
+
 // Explicit root-level routes for TikTok verification variations
 function sendFirstExisting(res, candidates) {
   const fs = require('fs');
