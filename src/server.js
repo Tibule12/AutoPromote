@@ -598,11 +598,12 @@ function sendFirstExisting(res, candidates) {
   for (const p of candidates) {
     try {
       if (fs.existsSync(p)) {
-        return res.sendFile(p);
+        res.sendFile(p);
+        return true;
       }
     } catch (_) { /* ignore */ }
   }
-  return res.status(404).send('Not found');
+  return false;
 }
 
 app.get(['/tiktok-developers-site-verification.txt', '/tiktok-site-verification.txt'], (req, res) => {
@@ -613,7 +614,15 @@ app.get(['/tiktok-developers-site-verification.txt', '/tiktok-site-verification.
     path.join(__dirname, '../public/.well-known/', targetFile),
     path.join(__dirname, '../docs/.well-known/', targetFile)
   ];
-  return sendFirstExisting(res, candidates);
+  // If static files missing, fall back to environment-provided verification token
+  const sent = sendFirstExisting(res, candidates);
+  if (sent) return sent;
+  const token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION || process.env.TIKTOK_VERIFICATION_TOKEN || '';
+  if (token) {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.send(`tiktok-developers-site-verification=${token}`);
+  }
+  return res.status(404).send('Not found');
 });
 
 // Wildcard for TikTok URL prefix verification files e.g. /tiktokXYZ123.txt
@@ -623,7 +632,19 @@ app.get(/^\/tiktok.*\.txt$/, (req, res) => {
     path.join(__dirname, '../public/.well-known/', filename),
     path.join(__dirname, '../docs/.well-known/', filename)
   ];
-  return sendFirstExisting(res, candidates);
+  const sent = sendFirstExisting(res, candidates);
+  if (sent) return sent;
+  // Handle pattern like /tiktok<TOKEN>.txt by checking env var or exact filename mapping
+  const envToken = process.env.TIKTOK_VERIFICATION_TOKEN || process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
+  if (envToken) {
+    // If the request matches the pattern /tiktok<TOKEN>.txt where <TOKEN> equals envToken, return it
+    const expectedName = `tiktok${envToken}.txt`;
+    if (filename === expectedName || filename === `tiktok${envToken}.txt`) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      return res.send(`tiktok-developers-site-verification=${envToken}`);
+    }
+  }
+  return res.status(404).send('Not found');
 });
 
 // Legal policy pages served from docs on the same domain
