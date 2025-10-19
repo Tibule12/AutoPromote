@@ -33,7 +33,24 @@
         <li>Reading analytics for the sandbox content (analytics scope).</li>
       </ul>
       <p class="small">Sandbox Client ID shown below is injected from the deployment environment.</p>
-      <pre style="background:#fff;border:1px dashed #ddd;padding:8px;border-radius:6px">Sandbox Client ID: {{TIKTOK_SANDBOX_CLIENT_KEY}}</pre>
+      <pre id="sandbox-client" style="background:#fff;border:1px dashed #ddd;padding:8px;border-radius:6px">Sandbox Client ID: {{TIKTOK_SANDBOX_CLIENT_KEY}}</pre>
+      <script>
+        // If server injected an empty client key, make it obvious for reviewers
+        (function(){
+          try {
+            const el = document.getElementById('sandbox-client');
+            if (!el) return;
+            const text = el.textContent || '';
+            if (text.indexOf(':') !== -1) {
+              const parts = text.split(':');
+              const value = parts.slice(1).join(':').trim();
+              if (!value) {
+                el.innerHTML = 'Sandbox Client ID: <strong style="color:#c00">NOT SET</strong>\n\n(This server-side env var TIKTOK_SANDBOX_CLIENT_KEY is not configured on this instance)';
+              }
+            }
+          } catch (e) { /* ignore */ }
+        })();
+      </script>
     </section>
 
     <section class="card">
