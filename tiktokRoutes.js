@@ -12,14 +12,14 @@ const TIKTOK_ENV = (process.env.TIKTOK_ENV || 'sandbox').toLowerCase() === 'prod
 
 // Gather both sandbox & production env sets (prefixed) plus legacy fallbacks
 const sandboxConfig = {
-  key: process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || null,
-  secret: process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || null,
-  redirect: process.env.TIKTOK_SANDBOX_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || null,
+  key: (process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || '').toString().trim() || null,
+  secret: (process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || '').toString().trim() || null,
+  redirect: (process.env.TIKTOK_SANDBOX_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || '').toString().trim() || null,
 };
 const productionConfig = {
-  key: process.env.TIKTOK_PROD_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || null,
-  secret: process.env.TIKTOK_PROD_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || null,
-  redirect: process.env.TIKTOK_PROD_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || null,
+  key: (process.env.TIKTOK_PROD_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || '').toString().trim() || null,
+  secret: (process.env.TIKTOK_PROD_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || '').toString().trim() || null,
+  redirect: (process.env.TIKTOK_PROD_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || '').toString().trim() || null,
 };
 
 function activeConfig() {
@@ -40,7 +40,9 @@ function ensureTikTokEnv(res, cfg, opts = { requireSecret: true }) {
 }
 
 function constructAuthUrl(cfg, state, scope) {
-  return `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(cfg.key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(cfg.redirect)}&state=${encodeURIComponent(state)}`;
+  const key = String(cfg.key || '').trim();
+  const redirect = String(cfg.redirect || '').trim();
+  return `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}`;
 }
 
 // Diagnostics: quick config visibility with sandbox/production breakdown
