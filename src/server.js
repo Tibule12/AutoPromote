@@ -362,13 +362,6 @@ try {
   withdrawalRoutes = express.Router();
 }
 
-try {
-  monetizationRoutes = require('./routes/monetizationRoutes');
-  console.log('✅ Monetization routes loaded successfully');
-} catch (error) {
-  console.log('⚠️ Monetization routes not found, using dummy router:', error.message);
-  monetizationRoutes = express.Router();
-}
 
 try {
   // Stripe integration removed
