@@ -575,7 +575,17 @@ app.use('/.well-known', express.static(path.join(__dirname, '../docs/.well-known
 // Public demo page for TikTok reviewers
 try {
   app.get('/tiktok-demo', (req, res) => {
-    res.sendFile(path.join(__dirname, '../docs/tiktok-demo.html'));
+    try {
+      const fs = require('fs');
+      const demoPath = path.join(__dirname, '../docs/tiktok-demo.html');
+      let html = fs.readFileSync(demoPath, 'utf8');
+      const clientKey = process.env.TIKTOK_SANDBOX_CLIENT_KEY || '';
+      html = html.replace(/{{TIKTOK_SANDBOX_CLIENT_KEY}}/g, clientKey);
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.send(html);
+    } catch (e) {
+      return res.sendFile(path.join(__dirname, '../docs/tiktok-demo.html'));
+    }
   });
   console.log('✅ Demo page available at /tiktok-demo');
 } catch (e) {
