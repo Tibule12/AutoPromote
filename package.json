@@ -25,6 +25,7 @@
     "test:admin-cache": "node test/admin-cache-routes.test.js",
     "test:env-validator": "node test/env-validator.test.js",
     "preflight": "node scripts/preflight-critical-files.js",
+  "record:demo": "node scripts/record-demo.playwright.js",
     "ci": "npm run preflight && npm run test:unit && npm run test:routes && npm run test:captions && npm run test:captions-download && npm run test:paypal-webhook && npm run test:paypal-webhook-verify && npm run test:admin-cache && npm run test:env-validator",
     "security:audit": "node scripts/securityAudit.js",
     "deadletter:replay": "node scripts/replayDeadLetterTasks.js",
@@ -57,6 +58,7 @@
     "jest": "^30.2.0",
     "nodemon": "^2.0.16",
     "rimraf": "^6.0.1",
-    "supertest": "^7.1.4"
+    "supertest": "^7.1.4",
+    "playwright": "^1.40.0"
   }
 }
