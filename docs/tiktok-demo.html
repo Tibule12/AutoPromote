@@ -33,18 +33,29 @@
         <li>Reading analytics for the sandbox content (analytics scope).</li>
       </ul>
       <p class="small">Sandbox Client ID shown below is injected from the deployment environment.</p>
-      <pre id="sandbox-client" style="background:#fff;border:1px dashed #ddd;padding:8px;border-radius:6px">Sandbox Client ID: {{TIKTOK_SANDBOX_CLIENT_KEY}}</pre>
+  <pre id="sandbox-client" style="background:#fff;border:1px dashed #ddd;padding:8px;border-radius:6px">Sandbox Client ID: {{TIKTOK_SANDBOX_CLIENT_KEY}}</pre>
+  <div id="exchange-result" style="margin-top:12px;display:none;background:#f1f1f1;padding:8px;border-radius:6px;font-family:monospace;white-space:pre-wrap"></div>
       <script>
-        // If server injected an empty client key, make it obvious for reviewers
+        // Show sandbox client id. Priority:
+        // 1) query param `key` or `client_key` (for local recordings)
+        // 2) server-injected placeholder ({{TIKTOK_SANDBOX_CLIENT_KEY}})
+        // 3) show NOT SET message
         (function(){
           try {
             const el = document.getElementById('sandbox-client');
             if (!el) return;
+            const params = new URLSearchParams(window.location.search);
+            const qKey = (params.get('key') || params.get('client_key') || '').trim();
+            if (qKey) {
+              el.textContent = 'Sandbox Client ID: ' + qKey;
+              return;
+            }
+            // fallback to server-injected value if present
             const text = el.textContent || '';
             if (text.indexOf(':') !== -1) {
               const parts = text.split(':');
               const value = parts.slice(1).join(':').trim();
-              if (!value) {
+              if (!value || value === '{{TIKTOK_SANDBOX_CLIENT_KEY}}') {
                 el.innerHTML = 'Sandbox Client ID: <strong style="color:#c00">NOT SET</strong>\n\n(This server-side env var TIKTOK_SANDBOX_CLIENT_KEY is not configured on this instance)';
               }
             }
@@ -61,10 +72,33 @@
         <button id="rec-start" style="padding:8px 12px;border-radius:6px;background:#0b66ff;color:#fff;border:0;cursor:pointer">Start recording</button>
         <button id="rec-stop" disabled style="padding:8px 12px;border-radius:6px;background:#d9534f;color:#fff;border:0;cursor:pointer">Stop recording</button>
         <button id="rec-download" disabled style="padding:8px 12px;border-radius:6px;background:#28a745;color:#fff;border:0;cursor:pointer">Download</button>
+        <button id="connect-mock" style="padding:8px 12px;border-radius:6px;background:#6f42c1;color:#fff;border:0;cursor:pointer">Connect (Mock)</button>
         <span id="rec-status" style="margin-left:8px;color:#555;font-size:13px">Idle</span>
       </div>
       <p class="small" style="margin-top:8px">Notes: Browsers require you to choose which screen or tab to share. The recorder will capture what you select. The output is a WebM file which you can convert to MP4 if desired.</p>
     </section>
+
+    <script>
+      // If the page was opened with a code query param, perform a mock exchange and show the result
+      (async function(){
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const code = params.get('code');
+          const clientKey = params.get('client_key') || params.get('key');
+          if (code) {
+            const resultEl = document.getElementById('exchange-result');
+            resultEl.style.display = 'block';
+            resultEl.textContent = 'Exchanging code...';
+            const resp = await fetch('http://localhost:8082/oauth/exchange', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ code: code, client_key: clientKey || 'X', client_secret: 'Y', redirect_uri: window.location.origin + window.location.pathname })
+            });
+            const json = await resp.json();
+            resultEl.textContent = JSON.stringify(json, null, 2);
+          }
+        } catch(e) { console.error('exchange failed', e); }
+      })();
+    </script>
 
     <section class="card">
       <h2>Demo video script & timestamps</h2>
@@ -163,5 +197,13 @@ Thank you for the review. We updated the Website URL to https://autopromote.onre
       document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
       dlBtn.disabled = true; status.textContent = 'Downloaded';
     });
+    // Open the local mock OAuth page for demos where sandbox.tiktok.com is unreachable
+    const connectMockBtn = document.getElementById('connect-mock');
+    if (connectMockBtn) {
+      connectMockBtn.addEventListener('click', ()=>{
+        // open the mock OAuth frontend served from docs/mock
+        window.open('/mock/tiktok_oauth_frontend.html', '_blank');
+      });
+    }
   })();
 </script>
