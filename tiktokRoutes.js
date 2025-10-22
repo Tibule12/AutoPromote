@@ -7,9 +7,6 @@ const authMiddleware = require('./authMiddleware');
 const { admin, db } = require('./firebaseAdmin');
 const DEBUG_TIKTOK_OAUTH = process.env.DEBUG_TIKTOK_OAUTH === 'true';
 
-// Mode selection: defaults to sandbox unless explicitly set to 'production'
-const TIKTOK_ENV = (process.env.TIKTOK_ENV || 'sandbox').toLowerCase() === 'production' ? 'production' : 'sandbox';
-
 // Gather both sandbox & production env sets (prefixed) plus legacy fallbacks
 const sandboxConfig = {
   key: (process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || '').toString().trim() || null,
@@ -21,6 +18,21 @@ const productionConfig = {
   secret: (process.env.TIKTOK_PROD_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || '').toString().trim() || null,
   redirect: (process.env.TIKTOK_PROD_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || '').toString().trim() || null,
 };
+
+// Mode selection: prefer explicit TIKTOK_ENV; if not provided, automatically
+// prefer production when production config appears to be present. This is a
+// temporary code-side override to help while deployment env vars are being
+// fixed. IMPORTANT: revert this change once Render env is configured and
+// TIKTOK_ENV is explicitly set by the deployment environment.
+let TIKTOK_ENV;
+if (process.env.TIKTOK_ENV) {
+  TIKTOK_ENV = process.env.TIKTOK_ENV.toLowerCase() === 'production' ? 'production' : 'sandbox';
+} else if (productionConfig.key && productionConfig.redirect) {
+  // Prefer production if production credentials + redirect exist
+  TIKTOK_ENV = 'production';
+} else {
+  TIKTOK_ENV = 'sandbox';
+}
 
 function activeConfig() {
   return TIKTOK_ENV === 'production' ? productionConfig : sandboxConfig;
