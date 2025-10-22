@@ -53,6 +53,10 @@ export const API_ENDPOINTS = {
   TWITTER_TWEET_TEST: `${API_BASE_URL}/api/twitter/tweet/test`,
   TWITTER_TWEET_IMMEDIATE: `${API_BASE_URL}/api/twitter/tweet/immediate`,
 
+  // Snapchat endpoints
+  SNAPCHAT_AUTH_PREPARE: `${API_BASE_URL}/api/snapchat/oauth/prepare`,
+  SNAPCHAT_STATUS: `${API_BASE_URL}/api/snapchat/status`,
+
   // Schedule actions (construct with ID)
   SCHEDULE_PAUSE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/pause`,
   SCHEDULE_RESUME: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/resume`,
