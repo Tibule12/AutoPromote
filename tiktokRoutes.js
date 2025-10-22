@@ -152,7 +152,20 @@ router.get('/auth', authMiddleware, async (req, res) => {
     // Request minimal scope for initial approval; can expand later (video.upload requires program access)
     const scope = 'user.info.basic';
   const authUrl = constructAuthUrl(cfg, state, scope);
-    res.redirect(authUrl);
+    // Instead of redirecting immediately, render a small HTML page with a button
+    // so the user must click to continue. This ensures any deep-linking the
+    // provider attempts will be initiated by a user gesture and not blocked by
+    // the browser.
+    res.set('Content-Type', 'text/html');
+    return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title></head><body style="font-family: system-ui, Arial, sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+      <div style="text-align:center;max-width:520px;padding:20px;">
+        <h2>Connect your TikTok account</h2>
+        <p>Click the button below to continue to TikTok and approve the connection.</p>
+        <button id="continue" style="font-size:16px;padding:10px 18px;border-radius:6px;cursor:pointer;">Continue to TikTok</button>
+        <p style="margin-top:12px;color:#666;font-size:13px;">If nothing happens, copy-paste this URL into your browser:<br><a href="${authUrl}">${authUrl}</a></p>
+      </div>
+      <script>document.getElementById('continue').addEventListener('click',function(){ window.location.href = ${JSON.stringify(authUrl)}; });</script>
+    </body></html>`);
   } catch (e) {
     res.status(500).json({ error: 'Failed to start TikTok OAuth', details: e.message });
   }
@@ -178,7 +191,17 @@ router.get('/auth/start', async (req, res) => {
     }, { merge: true });
     const scope = 'user.info.basic';
     const authUrl = constructAuthUrl(cfg, state, scope);
-    return res.redirect(authUrl);
+    // Render a click-to-continue page instead of redirecting immediately.
+    res.set('Content-Type', 'text/html');
+    return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title></head><body style="font-family: system-ui, Arial, sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+      <div style="text-align:center;max-width:520px;padding:20px;">
+        <h2>Connect your TikTok account</h2>
+        <p>Click the button below to continue to TikTok and approve the connection.</p>
+        <button id="continue" style="font-size:16px;padding:10px 18px;border-radius:6px;cursor:pointer;">Continue to TikTok</button>
+        <p style="margin-top:12px;color:#666;font-size:13px;">If nothing happens, copy-paste this URL into your browser:<br><a href="${authUrl}">${authUrl}</a></p>
+      </div>
+      <script>document.getElementById('continue').addEventListener('click',function(){ window.location.href = ${JSON.stringify(authUrl)}; });</script>
+    </body></html>`);
   } catch (e) {
     return res.status(500).send('Failed to start TikTok OAuth');
   }
