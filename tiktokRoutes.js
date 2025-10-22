@@ -164,7 +164,25 @@ router.get('/auth', authMiddleware, async (req, res) => {
         <button id="continue" style="font-size:16px;padding:10px 18px;border-radius:6px;cursor:pointer;">Continue to TikTok</button>
         <p style="margin-top:12px;color:#666;font-size:13px;">If nothing happens, copy-paste this URL into your browser:<br><a href="${authUrl}">${authUrl}</a></p>
       </div>
-      <script>document.getElementById('continue').addEventListener('click',function(){ window.location.href = ${JSON.stringify(authUrl)}; });</script>
+      <script>
+        // Handle potential TikTok SDK errors gracefully
+        try {
+          window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('read only property')) {
+              console.warn('TikTok SDK compatibility issue detected, continuing...');
+              e.preventDefault();
+            }
+          });
+        } catch(e) {}
+        document.getElementById('continue').addEventListener('click',function(){
+          try {
+            window.location.href = ${JSON.stringify(authUrl)};
+          } catch(e) {
+            console.warn('Navigation failed, trying alternative method');
+            window.open(${JSON.stringify(authUrl)}, '_self');
+          }
+        });
+      </script>
     </body></html>`);
   } catch (e) {
     res.status(500).json({ error: 'Failed to start TikTok OAuth', details: e.message });
@@ -200,7 +218,25 @@ router.get('/auth/start', async (req, res) => {
         <button id="continue" style="font-size:16px;padding:10px 18px;border-radius:6px;cursor:pointer;">Continue to TikTok</button>
         <p style="margin-top:12px;color:#666;font-size:13px;">If nothing happens, copy-paste this URL into your browser:<br><a href="${authUrl}">${authUrl}</a></p>
       </div>
-      <script>document.getElementById('continue').addEventListener('click',function(){ window.location.href = ${JSON.stringify(authUrl)}; });</script>
+      <script>
+        // Handle potential TikTok SDK errors gracefully
+        try {
+          window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('read only property')) {
+              console.warn('TikTok SDK compatibility issue detected, continuing...');
+              e.preventDefault();
+            }
+          });
+        } catch(e) {}
+        document.getElementById('continue').addEventListener('click',function(){
+          try {
+            window.location.href = ${JSON.stringify(authUrl)};
+          } catch(e) {
+            console.warn('Navigation failed, trying alternative method');
+            window.open(${JSON.stringify(authUrl)}, '_self');
+          }
+        });
+      </script>
     </body></html>`);
   } catch (e) {
     return res.status(500).send('Failed to start TikTok OAuth');
