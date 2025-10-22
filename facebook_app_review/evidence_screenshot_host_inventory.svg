@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="280" viewBox="0 0 1000 280">
+  <style>
+    .bg { fill: #ffffff; }
+    .title { font: 700 20px/1.2 'Segoe UI', Arial, sans-serif; fill: #111827; }
+    .sub { font: 400 13px/1.2 'Segoe UI', Arial, sans-serif; fill: #374151; }
+    .table { font: 400 12px/1.2 'Consolas', 'Courier New', monospace; fill: #111827; }
+    .cell { fill: none; stroke: #e5e7eb; }
+    .kbd { fill: #f3f4f6; stroke: #e5e7eb; }
+  </style>
+  <rect class="bg" width="100%" height="100%"/>
+  <text x="24" y="36" class="title">Host inventory (example) — facebook_app_review/host_inventory_example.csv</text>
+  <text x="24" y="60" class="sub">Redact any IPs or usernames before uploading. This is a sample image for reviewer evidence.</text>
+
+  <!-- Table header -->
+  <g transform="translate(24,88)">
+    <rect x="0" y="0" width="952" height="28" class="kbd" rx="4"/>
+    <text x="12" y="20" class="table">Host, Role, OS, OS_Version, Last_Patched, Notes</text>
+  </g>
+
+  <!-- Rows -->
+  <g transform="translate(24,126)">
+    <rect x="0" y="0" width="952" height="36" class="cell"/>
+    <text x="12" y="22" class="table">dev-workstation-01, Developer workstation, Windows, 10.0.19045, 2025-10-15, Auto-updates enabled</text>
+  </g>
+  <g transform="translate(24,172)">
+    <rect x="0" y="0" width="952" height="36" class="cell"/>
+    <text x="12" y="22" class="table">ci-runner-01, CI runner, Ubuntu, 22.04, 2025-10-18, Patched via automated playbook</text>
+  </g>
+  <g transform="translate(24,218)">
+    <rect x="0" y="0" width="952" height="36" class="cell"/>
+    <text x="12" y="22" class="table">prod-web-01, Web server, Ubuntu, 22.04, 2025-10-18, Managed by terraform/ansible</text>
+  </g>
+
+  <text x="24" y="266" class="sub">Note: replace sample hostnames and dates with your real inventory when uploading.</text>
+</svg>

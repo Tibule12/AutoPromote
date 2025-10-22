@@ -1,0 +1,5 @@
+Host,Role,OS,OS_Version,Last_Patched,Notes
+dev-workstation-01,Developer workstation,Windows,10.0.19045,2025-10-15,Auto-updates enabled
+ci-runner-01,CI runner,Ubuntu,22.04,2025-10-18,Patched via automated playbook
+prod-server-01,Application server,Ubuntu,22.04,2025-10-18,Security-only updates applied nightly
+ops-workstation-01,Operations workstation,macOS,13.6,2025-10-10,Auto-updates enabled

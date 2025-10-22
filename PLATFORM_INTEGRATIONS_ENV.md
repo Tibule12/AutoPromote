@@ -30,6 +30,19 @@ Limitations:
 ## TikTok
 Still placeholder; add developer app + upload endpoints later.
 
+## Snapchat
+```
+SNAPCHAT_CLIENT_ID=your_snapchat_client_id
+SNAPCHAT_CLIENT_SECRET=your_snapchat_client_secret
+SNAPCHAT_REDIRECT_URI=https://yourdomain.com/snapchat/callback
+```
+
+### Important Notes for Snapchat
+- **Snapchat does not have a sandbox environment** - all development/testing happens in production
+- Be extremely careful with API calls as they affect real Snapchat accounts
+- Test with minimal data and monitor API usage closely
+- Consider using Snapchat's test accounts for development
+
 ## Optional Background Job Flags
 ```
 ENABLE_BACKGROUND_JOBS=true

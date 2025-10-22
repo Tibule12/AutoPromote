@@ -1,37 +1,31 @@
 // runTests.js
 // A Node.js script to test database and admin dashboard integration
 
-// Import required Firebase modules
-const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, getDocs, query, limit, where, Timestamp } = require('firebase/firestore');
+// Use Firebase Admin SDK for backend integration tests
+const admin = require('firebase-admin');
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyASTUuMkz821PoHRopZ8yy1dW5COrAQPZY",
-  authDomain: "autopromote-464de.firebaseapp.com",
-  projectId: "autopromote-464de",
-  storageBucket: "autopromote-464de.appspot.com",
-  messagingSenderId: "317746682241",
-  appId: "1:317746682241:web:f363e099d55ffd1af1b080",
-  measurementId: "G-8QDQXF0FPQ"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// Initialize Firebase Admin SDK
+try {
+  admin.app();
+} catch (error) {
+  const serviceAccount = require('./service-account.json');
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: 'https://autopromote-cc6d3.firebaseio.com'
+  });
+}
+const db = admin.firestore();
 
 /**
  * Test connection to Firestore and verify collections
  */
 async function testFirestoreConnection() {
-  console.log('🔍 Testing Firestore connection...');
-  
+  console.log('🔍 Testing Firestore connection (Admin SDK)...');
   try {
     // Test connection by trying to get a document from users collection
-    const usersSnapshot = await getDocs(query(collection(db, 'users'), limit(1)));
+    const usersSnapshot = await db.collection('users').limit(1).get();
     console.log('✅ Firestore connection successful');
     console.log(`📊 Users collection ${usersSnapshot.empty ? 'is empty' : 'contains data'}`);
-    
     return true;
   } catch (error) {
     console.error('❌ Firestore connection failed:', error);
@@ -50,7 +44,7 @@ async function testRequiredCollections() {
   
   for (const collectionName of requiredCollections) {
     try {
-      const snapshot = await getDocs(query(collection(db, collectionName), limit(1)));
+      const snapshot = await db.collection(collectionName).limit(1).get();
       results[collectionName] = {
         exists: true,
         hasData: !snapshot.empty
@@ -75,29 +69,20 @@ async function testAdminDashboardQueries() {
   console.log('🔍 Testing admin dashboard queries...');
   
   try {
-    // Get current date for today's metrics
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayTimestamp = Timestamp.fromDate(today);
-    
     // Test users query
-    const usersSnapshot = await getDocs(collection(db, 'users'));
+    const usersSnapshot = await db.collection('users').get();
     console.log(`✅ Users query returned ${usersSnapshot.size} results`);
     
     // Test content query
-    const contentSnapshot = await getDocs(collection(db, 'content'));
+    const contentSnapshot = await db.collection('content').get();
     console.log(`✅ Content query returned ${contentSnapshot.size} results`);
     
     // Test promotions query
-    const promotionsSnapshot = await getDocs(collection(db, 'promotions'));
+    const promotionsSnapshot = await db.collection('promotions').get();
     console.log(`✅ Promotions query returned ${promotionsSnapshot.size} results`);
     
     // Test activities query
-    const recentActivitiesQuery = query(
-      collection(db, 'activities'),
-      limit(10)
-    );
-    const recentActivitiesSnapshot = await getDocs(recentActivitiesQuery);
+    const recentActivitiesSnapshot = await db.collection('activities').limit(10).get();
     console.log(`✅ Recent activities query returned ${recentActivitiesSnapshot.size} results`);
     
     return true;
