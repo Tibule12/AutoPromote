@@ -1,0 +1,68 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Arial;}}
+\f0\fs22
+\b AutoPromote - Data Protection & Third-Party Software Patch Policy\b0\par
+\par
+Date: 2025-10-21\par
+Project: AutoPromote\par
+Contact: tmtshwelo21@gmail.com | 0621349570\par
+Prepared by: Thulani Mtshwelo\par
+\par
+1. Purpose\par
+This policy describes how AutoPromote identifies, prioritizes, applies, and verifies patches for third-party software and platform components used to build, test, and operate our application. It covers libraries and SDKs (npm, PyPI, mobile SDKs), operating systems, browsers, antivirus, and other endpoint software.\par
+\par
+2. Scope\par
+Applies to all production and development systems, CI runners, developer workstations, and any client software we publish (web or mobile). For mobile apps, this policy applies to SDKs embedded in published mobile clients. (Note: AutoPromote currently does not publish mobile apps; all Platform Data handling occurs on backend servers or web clients.)\par
+\par
+3. Identification\par
+- Dependency manifests: We maintain and version control dependency manifests (e.g., package.json and package-lock.json) for each project.\par
+- Automated scans: We run automated vulnerability scans (for example npm audit) in CI and locally to identify known vulnerabilities.\par
+- Inventory: We keep an inventory of critical hosts and CI runners with OS/version and last patched dates.\par
+\par
+4. Prioritization\par
+We triage vulnerabilities using CVSS scores and vendor advisories where available. Priority and target remediation windows:\par
+- Critical (CVSS \u8805 9.0): patch within 24	672 hours.\par
+- High (CVSS 7.0	68.9): patch within 7 calendar days.\par
+- Medium (CVSS 4.0	66.9): patch within 30 calendar days.\par
+- Low (CVSS < 4.0): address during the next scheduled maintenance window.\par
+\par
+5. Patching Process\par
+- Developers create pull requests to update direct dependencies and document:\par
+  - dependency name and versions (old \u8594 new)\par
+  - source of advisory (CVE, vendor advisory, npm advisory)\par
+  - CVSS/severity and risk rationale\par
+  - verification steps and test results\par
+- CI runs automated test suites and smoke tests on update PRs. PRs are only merged after CI passes and a reviewer approves.\par
+- For servers and CI runners, patches are applied via automated playbooks/configuration management. Critical server patches are applied immediately and followed by smoke tests.\par
+- Workstations and endpoints are configured to receive automatic updates where feasible; manual update windows are scheduled otherwise.\par
+\par
+6. Verification & Audit\par
+- After applying patches, we verify functionality with automated and manual smoke tests and record outcomes.\par
+- We maintain a changelog or internal record of security updates with dates, affected components, and references to PRs or patch logs.\par
+- Periodic (monthly) reviews of dependencies and host patch status are performed.\par
+\par
+7. Roles & Responsibilities\par
+- Developers: propose dependency updates, validate fixes, and ensure tests pass.\par
+- Release/Operations lead: review and coordinate urgent security patches and merges.\par
+- Project owner: ensures policy adherence and maintains the inventory and review cadence.\par
+\par
+8. Evidence of Compliance (examples)\par
+- Version-controlled manifests (package.json, package-lock.json) and dependency update PRs with dates.\par
+- CI logs showing automated scans and passing tests for update PRs.\par
+- npm audit output or other scan exports with timestamps.\par
+- Host inventory snapshot with last-patched dates.\par
+- Server/CI patch logs and screenshots of endpoint update settings (e.g., Windows Update, antivirus dashboard, browser About pages).\par
+\par
+9. Exceptions & Emergency Response\par
+- Exceptions to standard windows must be approved by the Release/Operations lead and documented.\par
+- For active exploits, an emergency response process is used to triage, patch, and, if necessary, roll back changes.\par
+\par
+10. Contact & Review\par
+- Policy owner: Thulani Mtshwelo\par
+- Security contact: tmtshwelo21@gmail.com | 0621349570\par
+- Policy review cadence: at least annually, or after major security incidents.\par
+\par
+Signature:\par
+Project Owner / Responsible Engineer: Thulani Mtshwelo\par
+Date: 2025-10-21\par
+}

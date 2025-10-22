@@ -24,12 +24,13 @@
     "test:paypal-webhook-verify": "node test/paypal-webhook-verification.test.js",
     "test:admin-cache": "node test/admin-cache-routes.test.js",
     "test:env-validator": "node test/env-validator.test.js",
-  "preflight": "node scripts/preflight-critical-files.js",
+    "preflight": "node scripts/preflight-critical-files.js",
     "ci": "npm run preflight && npm run test:unit && npm run test:routes && npm run test:captions && npm run test:captions-download && npm run test:paypal-webhook && npm run test:paypal-webhook-verify && npm run test:admin-cache && npm run test:env-validator",
     "security:audit": "node scripts/securityAudit.js",
     "deadletter:replay": "node scripts/replayDeadLetterTasks.js",
     "simulate:variants": "node test/simulateVariantSelection.js",
-    "generate:secret": "node scripts/generateSecret.js 96"
+    "generate:secret": "node scripts/generateSecret.js 96",
+    "demo": "node scripts/start-demo.js"
   },
   "private": true,
   "dependencies": {
@@ -49,6 +50,7 @@
     "multer": "^2.0.2",
     "node-fetch": "^2.7.0",
     "react-router-dom": "^7.8.2",
+    "sharp": "^0.32.4",
     "streamifier": "^0.1.1",
     "uuid": "^13.0.0"
   },
