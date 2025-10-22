@@ -25,6 +25,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [facebookStatus, setFacebookStatus] = useState({ connected: false });
   const [youtubeStatus, setYouTubeStatus] = useState({ connected: false });
   const [twitterStatus, setTwitterStatus] = useState({ connected: false });
+  const [snapchatStatus, setSnapchatStatus] = useState({ connected: false });
   const [earnings, setEarnings] = useState({ pendingEarnings: 0, totalEarnings: 0, payoutEligible: false, minPayoutAmount: 0 });
   const [payouts, setPayouts] = useState([]);
   const [progress, setProgress] = useState({ contentCount: 0, requiredForRevenue: 0, remaining: 0, revenueEligible: false });
@@ -103,11 +104,27 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     }
   };
 
+  // Load Snapchat connection status
+  const loadSnapchatStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setSnapchatStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.SNAPCHAT_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setSnapchatStatus({ connected: false });
+      const data = await res.json();
+      setSnapchatStatus({ connected: !!data.connected, profile: data.profile || null });
+    } catch (_) {
+      setSnapchatStatus({ connected: false });
+    }
+  };
+
   useEffect(() => {
     loadTikTokStatus();
     loadFacebookStatus();
     loadYouTubeStatus();
-  loadTwitterStatus();
+    loadTwitterStatus();
+    loadSnapchatStatus();
     // Earnings & progress & platform summary
     (async () => {
       try {
@@ -153,6 +170,12 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
       window.history.replaceState({}, '', url);
     }
+    if (params.get('snapchat')) {
+      loadSnapchatStatus();
+      params.delete('snapchat');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
   }, [user?.uid]);
 
   const togglePlatform = (name) => {
@@ -169,6 +192,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       instagram: [[11, 0], [13, 0]], // we'll also consider evening implicitly by overlap with tiktok
       facebook: [[9, 0], [11, 0]],
       twitter: [[8, 0], [10, 0]],
+      snapchat: [[20, 0], [22, 0]], // evening/night time for Snapchat
     };
     const now = new Date();
     let candidates = [];
@@ -306,6 +330,23 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       window.location.href = data.authUrl;
     } catch (e) {
       alert(e.message || 'Unable to start Twitter connect');
+    }
+  };
+
+  const handleConnectSnapchat = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      const prep = await fetch(API_ENDPOINTS.SNAPCHAT_AUTH_PREPARE, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${idToken}` }
+      });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Snapchat OAuth');
+      window.location.href = data.authUrl;
+    } catch (e) {
+      alert(e.message || 'Unable to start Snapchat connect');
     }
   };
 
@@ -507,6 +548,22 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
                   </>
                 )}
               </div>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center', marginTop: '.5rem'}}>
+                {snapchatStatus.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>Snapchat connected</span>
+                    {snapchatStatus.profile?.display_name && (
+                      <span style={{color:'#9aa4b2'}}>{snapchatStatus.profile.display_name}</span>
+                    )}
+                    <button className="check-quality" onClick={handleConnectSnapchat}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectSnapchat}>Connect Snapchat</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to enable Snap posting & analytics.</span>
+                  </>
+                )}
+              </div>
             </div>
             <div className="profile-defaults" style={{marginTop:'1rem'}}>
               <h4>Profile Defaults</h4>
@@ -521,6 +578,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
                   <label><input type="checkbox" checked={defaultsPlatforms.includes('instagram')} onChange={() => toggleDefaultPlatform('instagram')} /> Instagram</label>
                   <label><input type="checkbox" checked={defaultsPlatforms.includes('twitter')} onChange={() => toggleDefaultPlatform('twitter')} /> Twitter</label>
                   <label><input type="checkbox" checked={defaultsPlatforms.includes('facebook')} onChange={() => toggleDefaultPlatform('facebook')} /> Facebook</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('snapchat')} onChange={() => toggleDefaultPlatform('snapchat')} /> Snapchat</label>
                 </div>
                 <label style={{color:'#9aa4b2'}}>Default Frequency
                   <select value={defaultsFrequency} onChange={(e)=>setDefaultsFrequency(e.target.value)} style={{display:'block', width:'100%', marginTop:'.25rem', background:'rgba(255,255,255,0.05)', color:'#eef2ff', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'8px', padding:'.3rem .5rem'}}>
@@ -575,6 +633,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
               <label><input type="checkbox" checked={selectedPlatforms.includes('instagram')} onChange={() => togglePlatform('instagram')} /> Instagram</label>
               <label><input type="checkbox" checked={selectedPlatforms.includes('twitter')} onChange={() => togglePlatform('twitter')} /> Twitter</label>
               <label><input type="checkbox" checked={selectedPlatforms.includes('facebook')} onChange={() => togglePlatform('facebook')} /> Facebook</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('snapchat')} onChange={() => togglePlatform('snapchat')} /> Snapchat</label>
             </div>
             <div style={{display:'grid', gap:'.5rem', marginTop:'.5rem'}}>
               <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
