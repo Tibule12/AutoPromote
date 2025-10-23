@@ -196,7 +196,10 @@ router.get('/auth', authMiddleware, async (req, res) => {
                      str.includes('collect.js') ||
                      str.includes('slardar') ||
                      str.includes('monitor_web') ||
-                     str.includes('browser-settings');
+                     str.includes('browser-settings') ||
+                     str.includes('8237.1fc60c50.js') ||
+                     str.includes('30709 @ 8237.1fc60c50.js') ||
+                     str.includes('27287 @ 8237.1fc60c50.js');
             });
           }
 
@@ -238,7 +241,9 @@ router.get('/auth', authMiddleware, async (req, res) => {
                   msg.includes('collect.js') ||
                   msg.includes('slardar') ||
                   msg.includes('monitor_web') ||
-                  msg.includes('browser-settings')) {
+                  msg.includes('browser-settings') ||
+                  msg.includes('8237.1fc60c50.js') ||
+                  source && source.includes('8237.1fc60c50.js')) {
                 return true; // Suppress the error
               }
             }
@@ -270,7 +275,8 @@ router.get('/auth', authMiddleware, async (req, res) => {
                   reason.includes('collect.js') ||
                   reason.includes('slardar') ||
                   reason.includes('monitor_web') ||
-                  reason.includes('browser-settings')) {
+                  reason.includes('browser-settings') ||
+                  reason.includes('8237.1fc60c50.js')) {
                 event.preventDefault();
                 return true;
               }
@@ -306,7 +312,8 @@ router.get('/auth', authMiddleware, async (req, res) => {
                       msg.includes('collect.js') ||
                       msg.includes('slardar') ||
                       msg.includes('monitor_web') ||
-                      msg.includes('browser-settings')) {
+                      msg.includes('browser-settings') ||
+                      msg.includes('8237.1fc60c50.js')) {
                     event.preventDefault();
                     event.stopImmediatePropagation();
                     return false;
