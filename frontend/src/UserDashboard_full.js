@@ -278,7 +278,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
       // Secure prepare: request authUrl, then open in popup to isolate SDK errors
-      const prep = await fetch(`${API_ENDPOINTS.TIKTOK_AUTH_START.replace('/auth/start','/auth/prepare')}`, {
+      const prep = await fetch(`${API_ENDPOINTS.TIKTOK_AUTH_START.replace('/auth/start','/auth/prepare')}?popup=true`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${idToken}` }
       });
@@ -287,7 +287,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       // Open in popup window to isolate TikTok SDK errors from main console
       const popup = window.open(data.authUrl, 'tiktok_oauth', 'width=600,height=700,scrollbars=yes,resizable=yes');
       if (!popup) {
-        alert('Popup blocked. Please allow popups for this site.');
+        alert('Popup blocked. Please allow popups for this site and try again.');
         return;
       }
       // Monitor popup for closure and refresh status
@@ -297,6 +297,17 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
           loadTikTokStatus(); // Refresh status after popup closes
         }
       }, 1000);
+      // Also listen for messages from popup (in case it redirects back)
+      const handleMessage = (event) => {
+        // Only accept messages from our domain
+        if (event.origin !== window.location.origin) return;
+        if (event.data === 'tiktok_oauth_complete') {
+          popup.close();
+          loadTikTokStatus();
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+      window.addEventListener('message', handleMessage);
     } catch (e) {
       alert(e.message || 'Unable to start TikTok connect');
     }
