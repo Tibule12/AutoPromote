@@ -61,7 +61,8 @@ router.post('/oauth/prepare', authMiddleware, async (req, res) => {
 
   try {
     const scope = 'snapchat-marketing-api,ads-api';
-    const state = require('crypto').randomUUID();
+    const { v4: uuidv4 } = require('../lib/uuid-compat');
+    const state = uuidv4();
     const userId = req.userId || 'anonymous';
 
     // Store state temporarily in Firestore
@@ -293,7 +294,7 @@ if (DEBUG_SNAPCHAT_OAUTH) {
       const cfg = activeConfig();
       ensureSnapchatEnv(res, cfg, { requireSecret: false });
       if (res.headersSent) return;
-      const state = req.query.state || require('crypto').randomUUID();
+      const state = req.query.state || require('../lib/uuid-compat').v4();
       const scope = 'snapchat-marketing-api,ads-api';
       const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
       const r = await fetch(authUrl, { method: 'GET' });
