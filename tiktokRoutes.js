@@ -157,7 +157,89 @@ router.get('/auth', authMiddleware, async (req, res) => {
     // provider attempts will be initiated by a user gesture and not blocked by
     // the browser.
     res.set('Content-Type', 'text/html');
-    return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title></head><body style="font-family: system-ui, Arial, sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+    return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title>
+      <script>
+        // Global TikTok SDK error suppression - runs before any other scripts
+        (function() {
+          // Override console methods immediately
+          const originalWarn = console.warn;
+          const originalError = console.error;
+          const originalLog = console.log;
+
+          console.warn = function(...args) {
+            if (args.some(arg => typeof arg === 'string' &&
+                (arg.includes('Break Change') ||
+                 arg.includes('read only property') ||
+                 arg.includes('bytedance://dispatch_message') ||
+                 arg.includes('scheme does not have a registered handler')))) {
+              return; // Suppress TikTok SDK warnings
+            }
+            return originalWarn.apply(console, args);
+          };
+
+          console.error = function(...args) {
+            if (args.some(arg => typeof arg === 'string' &&
+                (arg.includes('Break Change') ||
+                 arg.includes('read only property') ||
+                 arg.includes('Cannot assign to read only property') ||
+                 arg.includes('bytedance://dispatch_message') ||
+                 arg.includes('scheme does not have a registered handler')))) {
+              return; // Suppress TikTok SDK errors
+            }
+            return originalError.apply(console, args);
+          };
+
+          console.log = function(...args) {
+            if (args.some(arg => typeof arg === 'string' &&
+                (arg.includes('[Bridge] This version has Break Change') ||
+                 arg.includes('bytedance://dispatch_message')))) {
+              return; // Suppress TikTok SDK bridge messages
+            }
+            return originalLog.apply(console, args);
+          };
+
+          // Global error handler
+          window.addEventListener('error', function(e) {
+            if (e.message && (
+                e.message.includes('Break Change') ||
+                e.message.includes('read only property') ||
+                e.message.includes('Cannot assign to read only property') ||
+                e.message.includes('bytedance://dispatch_message') ||
+                e.message.includes('scheme does not have a registered handler')
+            )) {
+              e.preventDefault();
+              return false;
+            }
+          });
+
+          // Unhandled promise rejection handler
+          window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && typeof e.reason === 'string' && (
+                e.reason.includes('Break Change') ||
+                e.reason.includes('read only property') ||
+                e.reason.includes('bytedance://dispatch_message')
+            )) {
+              e.preventDefault();
+              return false;
+            }
+          });
+
+          // Override Object.defineProperty to prevent TikTok SDK issues
+          const originalDefineProperty = Object.defineProperty;
+          Object.defineProperty = function(obj, prop, descriptor) {
+            try {
+              return originalDefineProperty.call(this, obj, prop, descriptor);
+            } catch (e) {
+              if (e.message && e.message.includes('Cannot assign to read only property')) {
+                // Silently ignore this specific error
+                return obj;
+              }
+              throw e;
+            }
+          };
+        })();
+      </script>
+    </head><body style="font-family: system-ui, Arial, sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
       <div style="text-align:center;max-width:520px;padding:20px;">
         <h2>Connect your TikTok account</h2>
         <p>Click the button below to continue to TikTok and approve the connection.</p>
@@ -165,39 +247,6 @@ router.get('/auth', authMiddleware, async (req, res) => {
         <p style="margin-top:12px;color:#666;font-size:13px;">If nothing happens, copy-paste this URL into your browser:<br><a href="${authUrl}">${authUrl}</a></p>
       </div>
       <script>
-        // Handle potential TikTok SDK errors gracefully
-        try {
-          // Override console methods to suppress TikTok SDK warnings
-          const originalWarn = console.warn;
-          const originalError = console.error;
-          console.warn = function(...args) {
-            if (args.some(arg => typeof arg === 'string' && (arg.includes('Break Change') || arg.includes('read only property')))) {
-              return; // Suppress these specific warnings
-            }
-            originalWarn.apply(console, args);
-          };
-          console.error = function(...args) {
-            if (args.some(arg => typeof arg === 'string' && (arg.includes('Break Change') || arg.includes('read only property') || arg.includes('Cannot assign to read only property')))) {
-              return; // Suppress these specific errors
-            }
-            originalError.apply(console, args);
-          };
-
-          window.addEventListener('error', function(e) {
-            if (e.message && (e.message.includes('read only property') || e.message.includes('Break Change') || e.message.includes('Cannot assign to read only property'))) {
-              console.warn('TikTok SDK compatibility issue detected, continuing...');
-              e.preventDefault();
-              return true;
-            }
-          });
-
-          window.addEventListener('unhandledrejection', function(e) {
-            if (e.reason && typeof e.reason === 'string' && (e.reason.includes('Break Change') || e.reason.includes('read only property'))) {
-              e.preventDefault();
-              return true;
-            }
-          });
-        } catch(e) {}
         document.getElementById('continue').addEventListener('click',function(){
           try {
             window.location.href = ${JSON.stringify(authUrl)};
