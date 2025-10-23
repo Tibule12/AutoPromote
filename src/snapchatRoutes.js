@@ -241,7 +241,8 @@ router.get('/status', authMiddleware, async (req, res) => {
       connected: !isExpired,
       profile: data.profile,
       expiresAt: data.expiresAt,
-      connectedAt: data.connectedAt
+      connectedAt: data.connectedAt,
+      message: isExpired ? 'Token expired - please reconnect' : 'Connected to Snapchat'
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to get Snapchat status', details: err.message });
