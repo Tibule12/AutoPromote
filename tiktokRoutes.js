@@ -51,6 +51,66 @@ function ensureTikTokEnv(res, cfg, opts = { requireSecret: true }) {
   }
 }
 
+// Client-side suppression snippet (safe, non-invasive). Insert into the
+// HTML pages that initiate OAuth. This avoids attempting to override
+// fundamental built-ins (e.g. Function.prototype.call) while still
+// reducing noisy vendor warnings for demo/debug pages.
+const SUPPRESSION_SNIPPET = `
+<script>(function(){'use strict';
+  try {
+    const oWarn = console.warn.bind(console);
+    const oError = console.error.bind(console);
+    const oLog = console.log.bind(console);
+
+    function shouldSuppress(text){
+      if(!text) return false;
+      const s = String(text).toLowerCase();
+      return s.includes('break change') ||
+             s.includes('read only property') ||
+             s.includes('cannot assign to read only property') ||
+             s.includes('bytedance://dispatch_message') ||
+             s.includes('not allowed to launch') ||
+             s.includes('user gesture is required') ||
+             s.includes('8237.1fc60c50.js') ||
+             s.includes('collect.js') ||
+             s.includes('slardar');
+    }
+
+    console.warn = function(...args){
+      if(args.some(a => typeof a === 'string' && shouldSuppress(a))) return;
+      return oWarn(...args);
+    };
+    console.error = function(...args){
+      if(args.some(a => typeof a === 'string' && shouldSuppress(a))) return;
+      return oError(...args);
+    };
+    console.log = function(...args){
+      if(args.some(a => typeof a === 'string' && shouldSuppress(a))) return;
+      return oLog(...args);
+    };
+
+    const origOnError = window.onerror;
+    window.onerror = function(message, source, lineno, colno, err){
+      if(typeof message === 'string' && shouldSuppress(message)) return true;
+      if(origOnError) return origOnError.call(this, message, source, lineno, colno, err);
+      return false;
+    };
+
+    const origUnhandled = window.onunhandledrejection;
+    window.onunhandledrejection = function(ev){
+      try{
+        const reason = ev && (typeof ev.reason === 'string' ? ev.reason : (ev.reason && ev.reason.message) || '');
+        if(shouldSuppress(reason)){
+          ev && typeof ev.preventDefault === 'function' && ev.preventDefault();
+          return true;
+        }
+      }catch(e){}
+      if(origUnhandled) return origUnhandled.call(this, ev);
+      return false;
+    };
+  } catch(e) { /* Don't let suppression throw */ }
+})();</script>`;
+
 function constructAuthUrl(cfg, state, scope) {
   const key = String(cfg.key || '').trim();
   const redirect = String(cfg.redirect || '').trim();
@@ -160,211 +220,31 @@ router.get('/auth', authMiddleware, async (req, res) => {
     // the browser.
     res.set('Content-Type', 'text/html');
     return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title>
-      <script>
-        // Enhanced TikTok SDK error suppression - runs immediately and comprehensively
-        (function() {
-          'use strict';
-
-          // Override console methods before anything else
-          const originalWarn = console.warn;
-          const originalError = console.error;
-          const originalLog = console.log;
-
-          function shouldSuppress(args) {
-            return args.some(arg => {
-              if (typeof arg !== 'string') return false;
-              const str = arg.toLowerCase();
-              return str.includes('break change') ||
-                     str.includes('read only property') ||
-                     str.includes('cannot assign to read only property') ||
-                     str.includes('bytedance://dispatch_message') ||
-                     str.includes('scheme does not have a registered handler') ||
-                     str.includes('[bridge] this version has break change') ||
-                     str.includes('https://zjsms.com/') ||
-                     str.includes('jxkorkc') ||
-                     str.includes('tiktok sdk') ||
-                     str.includes('compatibility issue') ||
-                     str.includes('deprecated') ||
-                     str.includes('not allowed to launch') ||
-                     str.includes('user gesture is required') ||
-                     str.includes('c.o.r.s') ||
-                     str.includes('cors') ||
-                     str.includes('access-control-allow-credentials') ||
-                     str.includes('preflight request') ||
-                     str.includes('net::err_failed') ||
-                     str.includes('failed to launch') ||
-                     str.includes('collect.js') ||
-                     str.includes('slardar') ||
-                     str.includes('monitor_web') ||
-                     str.includes('browser-settings') ||
-                     str.includes('8237.1fc60c50.js') ||
-                     str.includes('30709 @ 8237.1fc60c50.js') ||
-                     str.includes('27287 @ 8237.1fc60c50.js');
-            });
-          }
-
-          console.warn = function(...args) {
-            if (shouldSuppress(args)) return;
-            return originalWarn.apply(console, args);
-          };
-
-          console.error = function(...args) {
-            if (shouldSuppress(args)) return;
-            return originalError.apply(console, args);
-          };
-
-          console.log = function(...args) {
-            if (shouldSuppress(args)) return;
-            return originalLog.apply(console, args);
-          };
-
-          // Override global error handlers immediately
-          const originalOnError = window.onerror;
-          window.onerror = function(message, source, lineno, colno, error) {
-            if (typeof message === 'string') {
-              const msg = message.toLowerCase();
-              if (msg.includes('break change') ||
-                  msg.includes('read only property') ||
-                  msg.includes('cannot assign to read only property') ||
-                  msg.includes('bytedance://dispatch_message') ||
-                  msg.includes('scheme does not have a registered handler') ||
-                  msg.includes('tiktok sdk') ||
-                  msg.includes('compatibility issue') ||
-                  msg.includes('not allowed to launch') ||
-                  msg.includes('user gesture is required') ||
-                  msg.includes('c.o.r.s') ||
-                  msg.includes('cors') ||
-                  msg.includes('access-control-allow-credentials') ||
-                  msg.includes('preflight request') ||
-                  msg.includes('net::err_failed') ||
-                  msg.includes('failed to launch') ||
-                  msg.includes('collect.js') ||
-                  msg.includes('slardar') ||
-                  msg.includes('monitor_web') ||
-                  msg.includes('browser-settings') ||
-                  msg.includes('8237.1fc60c50.js') ||
-                  source && source.includes('8237.1fc60c50.js')) {
-                return true; // Suppress the error
-              }
-            }
-            if (originalOnError) {
-              return originalOnError.call(this, message, source, lineno, colno, error);
-            }
-            return false;
-          };
-
-          // Override unhandled rejection handler
-          const originalOnUnhandledRejection = window.onunhandledrejection;
-          window.onunhandledrejection = function(event) {
-            if (event.reason) {
-              const reason = typeof event.reason === 'string' ? event.reason.toLowerCase() :
-                           (event.reason && event.reason.message ? event.reason.message.toLowerCase() : '');
-              if (reason.includes('break change') ||
-                  reason.includes('read only property') ||
-                  reason.includes('bytedance://dispatch_message') ||
-                  reason.includes('tiktok sdk') ||
-                  reason.includes('compatibility issue') ||
-                  reason.includes('not allowed to launch') ||
-                  reason.includes('user gesture is required') ||
-                  reason.includes('c.o.r.s') ||
-                  reason.includes('cors') ||
-                  reason.includes('access-control-allow-credentials') ||
-                  reason.includes('preflight request') ||
-                  reason.includes('net::err_failed') ||
-                  reason.includes('failed to launch') ||
-                  reason.includes('collect.js') ||
-                  reason.includes('slardar') ||
-                  reason.includes('monitor_web') ||
-                  reason.includes('browser-settings') ||
-                  reason.includes('8237.1fc60c50.js')) {
-                event.preventDefault();
-                return true;
-              }
-            }
-            if (originalOnUnhandledRejection) {
-              return originalOnUnhandledRejection.call(this, event);
-            }
-            return false;
-          };
-
-          // Override addEventListener to intercept error events
-          const originalAddEventListener = window.addEventListener;
-          window.addEventListener = function(type, listener, options) {
-            if (type === 'error') {
-              const wrappedListener = function(event) {
-                if (event.message) {
-                  const msg = event.message.toLowerCase();
-                  if (msg.includes('break change') ||
-                      msg.includes('read only property') ||
-                      msg.includes('cannot assign to read only property') ||
-                      msg.includes('bytedance://dispatch_message') ||
-                      msg.includes('scheme does not have a registered handler') ||
-                      msg.includes('tiktok sdk') ||
-                      msg.includes('compatibility issue') ||
-                      msg.includes('not allowed to launch') ||
-                      msg.includes('user gesture is required') ||
-                      msg.includes('c.o.r.s') ||
-                      msg.includes('cors') ||
-                      msg.includes('access-control-allow-credentials') ||
-                      msg.includes('preflight request') ||
-                      msg.includes('net::err_failed') ||
-                      msg.includes('failed to launch') ||
-                      msg.includes('collect.js') ||
-                      msg.includes('slardar') ||
-                      msg.includes('monitor_web') ||
-                      msg.includes('browser-settings') ||
-                      msg.includes('8237.1fc60c50.js')) {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    return false;
-                  }
-                }
-                return listener.call(this, event);
-              };
-              return originalAddEventListener.call(this, type, wrappedListener, options);
-            }
-            return originalAddEventListener.call(this, type, listener, options);
-          };
-
-          // NOTE: Previously this script attempted to override
-          // Object.defineProperty and Function.prototype.call to "silently"
-          // ignore certain SDK compatibility errors. Overriding these
-          // fundamental built-ins causes TypeErrors in modern browsers
-          // (e.g. "Cannot assign to read only property 'call'") and can
-          // break other libraries. To avoid introducing a hard failure
-          // we no longer replace these globals. The remaining error
-          // suppression logic focuses on console/handler wrappers only.
-
-          // NOTE: The previous implementation attempted to replace several
-          // browser globals (fetch, XMLHttpRequest, navigator.sendBeacon,
-          // Image) to suppress specific provider errors. Replacing these
-          // built-ins is unsafe: it can trigger browser exceptions and
-          // interfere with other SDKs or browser APIs. Instead of
-          // overriding them, we allow the browser/provider behavior to
-          // proceed and keep only non-invasive suppression (console +
-          // global error handlers) above. If a provider endpoint is
-          // noisy or misconfigured (CORS or native-scheme issues), the
-          // correct long-term fix is server-side proxying or provider
-          // configuration, not replacing core browser APIs.
-
-        })();
-      </script>
-    </head><body style="font-family: system-ui, Arial, sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
-      <div style="text-align:center;max-width:520px;padding:20px;">
-        <h2>Connect your TikTok account</h2>
-        <p>Click the button below to continue to TikTok and approve the connection.</p>
-        <button id="continue" style="font-size:16px;padding:10px 18px;border-radius:6px;cursor:pointer;">Continue to TikTok</button>
-        <p style="margin-top:12px;color:#666;font-size:13px;">If nothing happens, copy-paste this URL into your browser:<br><a href="${authUrl}">${authUrl}</a></p>
+      ${SUPPRESSION_SNIPPET}
+      <style>body{font-family:system-ui,Arial,sans-serif} .card{max-width:720px;padding:20px;border-radius:8px;text-align:left} .muted{color:#666;font-size:13px}</style>
+    </head><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+      <div class="card" style="background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.06)">
+        <h2 style="margin-top:0">Connect your TikTok account</h2>
+        <p class="muted">Click the button below to continue to TikTok and approve the connection. If your browser blocks the provider deep-link, use the copy button to paste the URL into your browser.</p>
+        <div style="display:flex;gap:8px;align-items:center;margin:12px 0;">
+          <button id="continue" style="font-size:16px;padding:10px 18px;border-radius:6px;cursor:pointer;">Continue to TikTok</button>
+          <button id="copy" style="font-size:14px;padding:8px 12px;border-radius:6px;cursor:pointer;">Copy URL</button>
+        </div>
+        <label class="muted">OAuth URL (shown for diagnostics):</label>
+        <input id="authUrl" type="text" readonly value=${JSON.stringify(authUrl)} style="width:100%;padding:8px;margin-top:6px;border:1px solid #ddd;border-radius:6px;font-size:13px"/>
+        <p class="muted" style="margin-top:12px">If nothing happens after clicking continue, copy the URL above and paste it into a new browser window. Attach HAR and screenshots when submitting for review.</p>
       </div>
       <script>
-        document.getElementById('continue').addEventListener('click',function(){
-          try {
-            window.location.href = ${JSON.stringify(authUrl)};
-          } catch(e) {
-            console.warn('Navigation failed, trying alternative method');
-            window.open(${JSON.stringify(authUrl)}, '_self');
-          }
-        });
+        (function(){
+          const auth = ${JSON.stringify(authUrl)};
+          document.getElementById('continue').addEventListener('click',function(){
+            try { window.location.href = auth; } catch(e) { window.open(auth, '_self'); }
+          });
+          document.getElementById('copy').addEventListener('click', async function(){
+            try { await navigator.clipboard.writeText(auth); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy URL',1500); }
+            catch(e){ const inp=document.getElementById('authUrl'); inp.select(); document.execCommand('copy'); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy URL',1500); }
+          });
+        })();
       </script>
     </body></html>`);
   } catch (e) {
@@ -414,57 +294,31 @@ router.get('/auth/start', async (req, res) => {
     }, { merge: true });
     const scope = 'user.info.basic';
     const authUrl = constructAuthUrl(cfg, state, scope);
-    // Render a click-to-continue page instead of redirecting immediately.
-    res.set('Content-Type', 'text/html');
-    return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title></head><body style="font-family: system-ui, Arial, sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
-      <div style="text-align:center;max-width:520px;padding:20px;">
-        <h2>Connect your TikTok account</h2>
-        <p>Click the button below to continue to TikTok and approve the connection.</p>
-        <button id="continue" style="font-size:16px;padding:10px 18px;border-radius:6px;cursor:pointer;">Continue to TikTok</button>
-        <p style="margin-top:12px;color:#666;font-size:13px;">If nothing happens, copy-paste this URL into your browser:<br><a href="${authUrl}">${authUrl}</a></p>
+  // Render a click-to-continue page instead of redirecting immediately.
+  res.set('Content-Type', 'text/html');
+  return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title>${SUPPRESSION_SNIPPET}<style>body{font-family:system-ui,Arial,sans-serif} .card{max-width:720px;padding:20px;border-radius:8px;text-align:left} .muted{color:#666;font-size:13px}</style></head><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+      <div class="card" style="background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.06)">
+        <h2 style="margin-top:0">Connect your TikTok account</h2>
+        <p class="muted">Click the button below to continue to TikTok and approve the connection. If your browser blocks the provider deep-link, use the copy button to paste the URL into your browser.</p>
+        <div style="display:flex;gap:8px;align-items:center;margin:12px 0;">
+          <button id="continue" style="font-size:16px;padding:10px 18px;border-radius:6px;cursor:pointer;">Continue to TikTok</button>
+          <button id="copy" style="font-size:14px;padding:8px 12px;border-radius:6px;cursor:pointer;">Copy URL</button>
+        </div>
+        <label class="muted">OAuth URL (shown for diagnostics):</label>
+        <input id="authUrl" type="text" readonly value=${JSON.stringify(authUrl)} style="width:100%;padding:8px;margin-top:6px;border:1px solid #ddd;border-radius:6px;font-size:13px"/>
+        <p class="muted" style="margin-top:12px">If nothing happens after clicking continue, copy the URL above and paste it into a new browser window. Attach HAR and screenshots when submitting for review.</p>
       </div>
       <script>
-        // Handle potential TikTok SDK errors gracefully
-        try {
-          // Override console methods to suppress TikTok SDK warnings
-          const originalWarn = console.warn;
-          const originalError = console.error;
-          console.warn = function(...args) {
-            if (args.some(arg => typeof arg === 'string' && (arg.includes('Break Change') || arg.includes('read only property')))) {
-              return; // Suppress these specific warnings
-            }
-            originalWarn.apply(console, args);
-          };
-          console.error = function(...args) {
-            if (args.some(arg => typeof arg === 'string' && (arg.includes('Break Change') || arg.includes('read only property') || arg.includes('Cannot assign to read only property')))) {
-              return; // Suppress these specific errors
-            }
-            originalError.apply(console, args);
-          };
-
-          window.addEventListener('error', function(e) {
-            if (e.message && (e.message.includes('read only property') || e.message.includes('Break Change') || e.message.includes('Cannot assign to read only property'))) {
-              console.warn('TikTok SDK compatibility issue detected, continuing...');
-              e.preventDefault();
-              return true;
-            }
+        (function(){
+          const auth = ${JSON.stringify(authUrl)};
+          document.getElementById('continue').addEventListener('click',function(){
+            try { window.location.href = auth; } catch(e) { window.open(auth, '_self'); }
           });
-
-          window.addEventListener('unhandledrejection', function(e) {
-            if (e.reason && typeof e.reason === 'string' && (e.reason.includes('Break Change') || e.reason.includes('read only property'))) {
-              e.preventDefault();
-              return true;
-            }
+          document.getElementById('copy').addEventListener('click', async function(){
+            try { await navigator.clipboard.writeText(auth); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy URL',1500); }
+            catch(e){ const inp=document.getElementById('authUrl'); inp.select(); document.execCommand('copy'); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy URL',1500); }
           });
-        } catch(e) {}
-        document.getElementById('continue').addEventListener('click',function(){
-          try {
-            window.location.href = ${JSON.stringify(authUrl)};
-          } catch(e) {
-            console.warn('Navigation failed, trying alternative method');
-            window.open(${JSON.stringify(authUrl)}, '_self');
-          }
-        });
+        })();
       </script>
     </body></html>`);
   } catch (e) {
