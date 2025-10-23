@@ -36,7 +36,7 @@ function ensureSnapchatEnv(res, cfg, opts = { requireSecret: true }) {
   }
 }
 
-// 1. Get Snapchat OAuth authorization URL
+// 1. Get Snapchat OAuth authorization URL (redirect)
 router.get('/auth', (req, res) => {
   const cfg = activeConfig();
   ensureSnapchatEnv(res, cfg);
@@ -51,6 +51,38 @@ router.get('/auth', (req, res) => {
   }
 
   res.json({ authUrl });
+});
+
+// 2. Prepare Snapchat OAuth (returns JSON authUrl for frontend)
+router.post('/oauth/prepare', authMiddleware, async (req, res) => {
+  const cfg = activeConfig();
+  ensureSnapchatEnv(res, cfg);
+  if (res.headersSent) return;
+
+  try {
+    const scope = 'snapchat-marketing-api,ads-api';
+    const state = require('crypto').randomUUID();
+    const userId = req.userId || 'anonymous';
+
+    // Store state temporarily in Firestore
+    await db.collection('oauth_states').doc(state).set({
+      uid: userId,
+      platform: 'snapchat',
+      createdAt: new Date().toISOString(),
+      expiresAt: Date.now() + (10 * 60 * 1000) // 10 minutes
+    });
+
+    const authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
+
+    if (DEBUG_SNAPCHAT_OAUTH) {
+      console.log('Snapchat OAuth prepare URL:', authUrl);
+    }
+
+    res.json({ authUrl, state });
+  } catch (err) {
+    console.error('Snapchat OAuth prepare error:', err);
+    res.status(500).json({ error: 'OAuth prepare failed', details: err.message });
+  }
 });
 
 // 2. Handle Snapchat OAuth callback and exchange code for access token
