@@ -533,6 +533,9 @@ app.use('/api/youtube', youtubeRoutes);
 console.log('🚏 YouTube routes mounted at /api/youtube');
 app.use('/api/twitter', twitterAuthRoutes);
 console.log('🚏 Twitter routes mounted at /api/twitter');
+// Mount Snapchat routes
+app.use('/api/snapchat', snapchatRoutes);
+console.log('🚏 Snapchat routes mounted at /api/snapchat');
 app.use('/api/platform', platformConnectionsRoutes);
 console.log('🚏 Platform connections routes mounted at /api/platform');
 app.use('/api/promotion-tasks', promotionTaskRoutes);
