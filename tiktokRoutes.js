@@ -323,6 +323,28 @@ router.get('/auth', authMiddleware, async (req, res) => {
   }
 });
 
+// Debug-only: return the same HTML page served by /auth so we can inspect
+// the script content without requiring an authenticated session. Enabled
+// when TIKTOK_DEBUG_ALLOW=true in environment. This is useful to confirm
+// the injected script no longer contains unsafe overrides.
+if (process.env.TIKTOK_DEBUG_ALLOW === 'true') {
+  router.get('/_debug/page', async (req, res) => {
+    try {
+      const cfg = activeConfig();
+      if (ensureTikTokEnv(res, cfg, { requireSecret: false })) return;
+      const uid = req.query.uid || 'debug-uid';
+      const nonce = 'debug-nonce';
+      const state = `${uid}.${nonce}`;
+      const scope = 'user.info.basic';
+      const authUrl = constructAuthUrl(cfg, state, scope);
+      res.set('Content-Type', 'text/html');
+      return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok (debug)</title><script>/* debug-only page */</script></head><body><a href="${authUrl}">${authUrl}</a></body></html>`);
+    } catch (e) {
+      return res.status(500).send('debug unavailable');
+    }
+  });
+}
+
 // Alternative start endpoint that accepts an ID token via query when headers aren't available (for link redirects)
 router.get('/auth/start', async (req, res) => {
   const cfg = activeConfig();
