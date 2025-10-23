@@ -44,7 +44,7 @@ router.get('/auth', (req, res) => {
 
   const scope = 'snapchat-marketing-api,ads-api';
   const state = encodeURIComponent(req.query.state || 'snapchat_oauth_state');
-  const authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
+  const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
 
   if (DEBUG_SNAPCHAT_OAUTH) {
     console.log('Snapchat OAuth URL:', authUrl);
@@ -72,7 +72,7 @@ router.post('/oauth/prepare', authMiddleware, async (req, res) => {
       expiresAt: Date.now() + (10 * 60 * 1000) // 10 minutes
     });
 
-    const authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
+    const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
 
     if (DEBUG_SNAPCHAT_OAUTH) {
       console.log('Snapchat OAuth prepare URL:', authUrl);
@@ -295,7 +295,7 @@ if (DEBUG_SNAPCHAT_OAUTH) {
       if (res.headersSent) return;
       const state = req.query.state || require('crypto').randomUUID();
       const scope = 'snapchat-marketing-api,ads-api';
-      const authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
+      const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
       const r = await fetch(authUrl, { method: 'GET' });
       const text = await r.text().catch(() => '');
       return res.json({ ok: true, url: authUrl, status: r.status, snippet: text.slice(0, 2000) });
