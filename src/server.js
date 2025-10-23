@@ -247,7 +247,7 @@ try {
 }
 
 // Load social routers
-let facebookRoutes, youtubeRoutes, instagramRoutes, twitterAuthRoutes;
+let facebookRoutes, youtubeRoutes, instagramRoutes, twitterAuthRoutes, snapchatRoutes;
 let platformConnectionsRoutes;
 try {
   facebookRoutes = require('./routes/facebookRoutes');
@@ -269,6 +269,13 @@ try {
 } catch (e) {
   console.log('⚠️ Twitter auth routes not found:', e.message);
   twitterAuthRoutes = express.Router();
+}
+try {
+  snapchatRoutes = require('./snapchatRoutes');
+  console.log('✅ Snapchat routes loaded');
+} catch (e) {
+  console.log('⚠️ Snapchat routes not found:', e.message);
+  snapchatRoutes = express.Router();
 }
 try {
   platformConnectionsRoutes = require('./routes/platformConnectionsRoutes');
