@@ -277,37 +277,13 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       const currentUser = auth.currentUser;
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
-      // Secure prepare: request authUrl, then open in popup to isolate SDK errors
-      const prep = await fetch(`${API_ENDPOINTS.TIKTOK_AUTH_START.replace('/auth/start','/auth/prepare')}?popup=true`, {
+      const prep = await fetch(API_ENDPOINTS.TIKTOK_AUTH_START, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${idToken}` }
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare TikTok OAuth');
-      // Open in popup window to isolate TikTok SDK errors from main console
-      const popup = window.open(data.authUrl, 'tiktok_oauth', 'width=600,height=700,scrollbars=yes,resizable=yes');
-      if (!popup) {
-        alert('Popup blocked. Please allow popups for this site and try again.');
-        return;
-      }
-      // Monitor popup for closure and refresh status
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          loadTikTokStatus(); // Refresh status after popup closes
-        }
-      }, 1000);
-      // Also listen for messages from popup (in case it redirects back)
-      const handleMessage = (event) => {
-        // Only accept messages from our domain
-        if (event.origin !== window.location.origin) return;
-        if (event.data === 'tiktok_oauth_complete') {
-          popup.close();
-          loadTikTokStatus();
-          window.removeEventListener('message', handleMessage);
-        }
-      };
-      window.addEventListener('message', handleMessage);
+      window.location.href = data.authUrl;
     } catch (e) {
       alert(e.message || 'Unable to start TikTok connect');
     }
@@ -368,16 +344,6 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     try {
       const currentUser = auth.currentUser;
       if (!currentUser) throw new Error('Please sign in first');
-
-      // First, try to open a placeholder popup immediately to test if popups are allowed
-      const testPopup = window.open('', 'snapchat_oauth_test', 'width=1,height=1');
-      if (!testPopup) {
-        alert('Popup blocked. Please allow popups for this site and try again.');
-        return;
-      }
-      testPopup.close(); // Close the test popup
-
-      // Now proceed with the actual OAuth flow
       const idToken = await currentUser.getIdToken(true);
       const prep = await fetch(API_ENDPOINTS.SNAPCHAT_AUTH_PREPARE, {
         method: 'POST',
@@ -385,33 +351,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Snapchat OAuth');
-
-      // Open the actual OAuth popup
-      const popup = window.open(data.authUrl, 'snapchat_oauth', 'width=600,height=700,scrollbars=yes,resizable=yes');
-      if (!popup) {
-        alert('Popup blocked. Please allow popups for this site and try again.');
-        return;
-      }
-
-      // Monitor popup for closure and refresh status
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          loadSnapchatStatus(); // Refresh status after popup closes
-        }
-      }, 1000);
-
-      // Also listen for messages from popup (in case it redirects back)
-      const handleMessage = (event) => {
-        // Only accept messages from our domain
-        if (event.origin !== window.location.origin) return;
-        if (event.data === 'snapchat_oauth_complete') {
-          popup.close();
-          loadSnapchatStatus();
-          window.removeEventListener('message', handleMessage);
-        }
-      };
-      window.addEventListener('message', handleMessage);
+      window.location.href = data.authUrl;
     } catch (e) {
       alert(e.message || 'Unable to start Snapchat connect');
     }
