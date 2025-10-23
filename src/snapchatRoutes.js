@@ -76,7 +76,33 @@ router.post('/oauth/prepare', authMiddleware, async (req, res) => {
       expiresAt: Date.now() + (10 * 60 * 1000) // 10 minutes
     });
 
-  const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
+  let authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
+
+    // Perform a quick server-side probe of the auth URL. Some providers
+    // return 5xx for certain scope combinations or misconfigurations; when
+    // that happens try a reduced scope fallback automatically so the
+    // frontend receives a working auth URL instead of immediately failing.
+    try {
+      const probe = await fetch(authUrl, { method: 'GET', redirect: 'manual' });
+      // Treat 5xx as provider error; 2xx or 3xx are acceptable (redirect to UI)
+      if (probe.status >= 500) {
+        const fallbackScope = 'snapchat-marketing-api';
+        const fallbackUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(fallbackScope)}&state=${encodeURIComponent(state)}`;
+        const probe2 = await fetch(fallbackUrl, { method: 'GET', redirect: 'manual' });
+        if (probe2.status < 500) {
+          if (DEBUG_SNAPCHAT_OAUTH) console.log('snapchat: primary auth URL returned', probe.status, 'using fallback scope; probe2=', probe2.status);
+          authUrl = fallbackUrl;
+        } else {
+          if (DEBUG_SNAPCHAT_OAUTH) console.warn('snapchat: both primary and fallback auth URLs returned 5xx', probe.status, probe2.status);
+          // leave authUrl as primary; frontend will receive it and can show provider error
+        }
+      } else {
+        if (DEBUG_SNAPCHAT_OAUTH) console.log('snapchat: auth URL probe OK status=', probe.status);
+      }
+    } catch (probeErr) {
+      // Network/probe error — don't block the flow, return the constructed URL
+      if (DEBUG_SNAPCHAT_OAUTH) console.warn('snapchat: auth URL probe failed', probeErr.message);
+    }
 
     if (DEBUG_SNAPCHAT_OAUTH) {
       console.log('Snapchat OAuth prepare URL:', authUrl);
