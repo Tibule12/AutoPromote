@@ -308,3 +308,25 @@ if (DEBUG_SNAPCHAT_OAUTH) {
     }
   });
 }
+
+// Public debug probe (guarded by environment) to inspect provider responses
+// Set SNAPCHAT_DEBUG_ALLOW=true in the environment to enable.
+if (process.env.SNAPCHAT_DEBUG_ALLOW === 'true') {
+  router.get('/_debug/authorize_probe_public', async (req, res) => {
+    try {
+      const cfg = activeConfig();
+      ensureSnapchatEnv(res, cfg, { requireSecret: false });
+      if (res.headersSent) return;
+      const state = req.query.state || require('../lib/uuid-compat').v4();
+      const scope = 'snapchat-marketing-api ads-api';
+      const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
+      const r = await fetch(authUrl, { method: 'GET', redirect: 'manual' });
+      const headers = {};
+      r.headers.forEach((v, k) => { headers[k] = v; });
+      const text = await r.text().catch(() => '');
+      return res.json({ ok: true, url: authUrl, status: r.status, headers, snippet: text.slice(0, 5000) });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+}
