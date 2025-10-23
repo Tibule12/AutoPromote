@@ -172,6 +172,10 @@ router.get('/auth', authMiddleware, async (req, res) => {
               console.warn('TikTok SDK compatibility issue detected, continuing...');
               e.preventDefault();
             }
+            if (e.message && e.message.includes('Break Change')) {
+              console.warn('TikTok SDK version compatibility issue detected, continuing...');
+              e.preventDefault();
+            }
           });
         } catch(e) {}
         document.getElementById('continue').addEventListener('click',function(){
@@ -224,6 +228,10 @@ router.get('/auth/start', async (req, res) => {
           window.addEventListener('error', function(e) {
             if (e.message && e.message.includes('read only property')) {
               console.warn('TikTok SDK compatibility issue detected, continuing...');
+              e.preventDefault();
+            }
+            if (e.message && e.message.includes('Break Change')) {
+              console.warn('TikTok SDK version compatibility issue detected, continuing...');
               e.preventDefault();
             }
           });
