@@ -19,7 +19,7 @@ function activeConfig() {
 }
 
 // For dashboard redirect
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote.onrender.com';
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote-1.onrender.com';
 
 function ensureSnapchatEnv(res, cfg, opts = { requireSecret: true }) {
   const missing = [];
