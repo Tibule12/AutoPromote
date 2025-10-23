@@ -277,14 +277,26 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       const currentUser = auth.currentUser;
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
-      // Secure prepare: request authUrl, then redirect without exposing tokens in URL
+      // Secure prepare: request authUrl, then open in popup to isolate SDK errors
       const prep = await fetch(`${API_ENDPOINTS.TIKTOK_AUTH_START.replace('/auth/start','/auth/prepare')}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${idToken}` }
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare TikTok OAuth');
-      window.location.href = data.authUrl;
+      // Open in popup window to isolate TikTok SDK errors from main console
+      const popup = window.open(data.authUrl, 'tiktok_oauth', 'width=600,height=700,scrollbars=yes,resizable=yes');
+      if (!popup) {
+        alert('Popup blocked. Please allow popups for this site.');
+        return;
+      }
+      // Monitor popup for closure and refresh status
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          loadTikTokStatus(); // Refresh status after popup closes
+        }
+      }, 1000);
     } catch (e) {
       alert(e.message || 'Unable to start TikTok connect');
     }

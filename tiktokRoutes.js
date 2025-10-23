@@ -159,7 +159,7 @@ router.get('/auth', authMiddleware, async (req, res) => {
     res.set('Content-Type', 'text/html');
     return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title>
       <script>
-        // Aggressive TikTok SDK error suppression - runs immediately
+        // Enhanced TikTok SDK error suppression - runs immediately and comprehensively
         (function() {
           'use strict';
 
@@ -184,7 +184,17 @@ router.get('/auth', authMiddleware, async (req, res) => {
                      str.includes('compatibility issue') ||
                      str.includes('deprecated') ||
                      str.includes('not allowed to launch') ||
-                     str.includes('user gesture is required');
+                     str.includes('user gesture is required') ||
+                     str.includes('c.o.r.s') ||
+                     str.includes('cors') ||
+                     str.includes('access-control-allow-credentials') ||
+                     str.includes('preflight request') ||
+                     str.includes('net::err_failed') ||
+                     str.includes('failed to launch') ||
+                     str.includes('collect.js') ||
+                     str.includes('slardar') ||
+                     str.includes('monitor_web') ||
+                     str.includes('browser-settings');
             });
           }
 
@@ -216,7 +226,17 @@ router.get('/auth', authMiddleware, async (req, res) => {
                   msg.includes('tiktok sdk') ||
                   msg.includes('compatibility issue') ||
                   msg.includes('not allowed to launch') ||
-                  msg.includes('user gesture is required')) {
+                  msg.includes('user gesture is required') ||
+                  msg.includes('c.o.r.s') ||
+                  msg.includes('cors') ||
+                  msg.includes('access-control-allow-credentials') ||
+                  msg.includes('preflight request') ||
+                  msg.includes('net::err_failed') ||
+                  msg.includes('failed to launch') ||
+                  msg.includes('collect.js') ||
+                  msg.includes('slardar') ||
+                  msg.includes('monitor_web') ||
+                  msg.includes('browser-settings')) {
                 return true; // Suppress the error
               }
             }
@@ -238,7 +258,17 @@ router.get('/auth', authMiddleware, async (req, res) => {
                   reason.includes('tiktok sdk') ||
                   reason.includes('compatibility issue') ||
                   reason.includes('not allowed to launch') ||
-                  reason.includes('user gesture is required')) {
+                  reason.includes('user gesture is required') ||
+                  reason.includes('c.o.r.s') ||
+                  reason.includes('cors') ||
+                  reason.includes('access-control-allow-credentials') ||
+                  reason.includes('preflight request') ||
+                  reason.includes('net::err_failed') ||
+                  reason.includes('failed to launch') ||
+                  reason.includes('collect.js') ||
+                  reason.includes('slardar') ||
+                  reason.includes('monitor_web') ||
+                  reason.includes('browser-settings')) {
                 event.preventDefault();
                 return true;
               }
@@ -264,7 +294,17 @@ router.get('/auth', authMiddleware, async (req, res) => {
                       msg.includes('tiktok sdk') ||
                       msg.includes('compatibility issue') ||
                       msg.includes('not allowed to launch') ||
-                      msg.includes('user gesture is required')) {
+                      msg.includes('user gesture is required') ||
+                      msg.includes('c.o.r.s') ||
+                      msg.includes('cors') ||
+                      msg.includes('access-control-allow-credentials') ||
+                      msg.includes('preflight request') ||
+                      msg.includes('net::err_failed') ||
+                      msg.includes('failed to launch') ||
+                      msg.includes('collect.js') ||
+                      msg.includes('slardar') ||
+                      msg.includes('monitor_web') ||
+                      msg.includes('browser-settings')) {
                     event.preventDefault();
                     event.stopImmediatePropagation();
                     return false;
