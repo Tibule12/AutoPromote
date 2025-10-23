@@ -167,14 +167,34 @@ router.get('/auth', authMiddleware, async (req, res) => {
       <script>
         // Handle potential TikTok SDK errors gracefully
         try {
+          // Override console methods to suppress TikTok SDK warnings
+          const originalWarn = console.warn;
+          const originalError = console.error;
+          console.warn = function(...args) {
+            if (args.some(arg => typeof arg === 'string' && (arg.includes('Break Change') || arg.includes('read only property')))) {
+              return; // Suppress these specific warnings
+            }
+            originalWarn.apply(console, args);
+          };
+          console.error = function(...args) {
+            if (args.some(arg => typeof arg === 'string' && (arg.includes('Break Change') || arg.includes('read only property') || arg.includes('Cannot assign to read only property')))) {
+              return; // Suppress these specific errors
+            }
+            originalError.apply(console, args);
+          };
+
           window.addEventListener('error', function(e) {
-            if (e.message && e.message.includes('read only property')) {
+            if (e.message && (e.message.includes('read only property') || e.message.includes('Break Change') || e.message.includes('Cannot assign to read only property'))) {
               console.warn('TikTok SDK compatibility issue detected, continuing...');
               e.preventDefault();
+              return true;
             }
-            if (e.message && e.message.includes('Break Change')) {
-              console.warn('TikTok SDK version compatibility issue detected, continuing...');
+          });
+
+          window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && typeof e.reason === 'string' && (e.reason.includes('Break Change') || e.reason.includes('read only property'))) {
               e.preventDefault();
+              return true;
             }
           });
         } catch(e) {}
@@ -225,14 +245,34 @@ router.get('/auth/start', async (req, res) => {
       <script>
         // Handle potential TikTok SDK errors gracefully
         try {
+          // Override console methods to suppress TikTok SDK warnings
+          const originalWarn = console.warn;
+          const originalError = console.error;
+          console.warn = function(...args) {
+            if (args.some(arg => typeof arg === 'string' && (arg.includes('Break Change') || arg.includes('read only property')))) {
+              return; // Suppress these specific warnings
+            }
+            originalWarn.apply(console, args);
+          };
+          console.error = function(...args) {
+            if (args.some(arg => typeof arg === 'string' && (arg.includes('Break Change') || arg.includes('read only property') || arg.includes('Cannot assign to read only property')))) {
+              return; // Suppress these specific errors
+            }
+            originalError.apply(console, args);
+          };
+
           window.addEventListener('error', function(e) {
-            if (e.message && e.message.includes('read only property')) {
+            if (e.message && (e.message.includes('read only property') || e.message.includes('Break Change') || e.message.includes('Cannot assign to read only property'))) {
               console.warn('TikTok SDK compatibility issue detected, continuing...');
               e.preventDefault();
+              return true;
             }
-            if (e.message && e.message.includes('Break Change')) {
-              console.warn('TikTok SDK version compatibility issue detected, continuing...');
+          });
+
+          window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && typeof e.reason === 'string' && (e.reason.includes('Break Change') || e.reason.includes('read only property'))) {
               e.preventDefault();
+              return true;
             }
           });
         } catch(e) {}
