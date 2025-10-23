@@ -284,3 +284,23 @@ router.get('/analytics/:creativeId', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
+// Debug probe (only when DEBUG_SNAPCHAT_OAUTH=true)
+// Performs a server-side GET to the Snapchat authorize endpoint to capture status and a short body
+if (DEBUG_SNAPCHAT_OAUTH) {
+  router.get('/_debug/authorize_probe', async (req, res) => {
+    try {
+      const cfg = activeConfig();
+      ensureSnapchatEnv(res, cfg, { requireSecret: false });
+      if (res.headersSent) return;
+      const state = req.query.state || require('crypto').randomUUID();
+      const scope = 'snapchat-marketing-api,ads-api';
+      const authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
+      const r = await fetch(authUrl, { method: 'GET' });
+      const text = await r.text().catch(() => '');
+      return res.json({ ok: true, url: authUrl, status: r.status, snippet: text.slice(0, 2000) });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+}
