@@ -86,8 +86,11 @@ router.post('/oauth/prepare', authMiddleware, async (req, res) => {
 });
 
 // 2. Handle Snapchat OAuth callback and exchange code for access token
-router.post('/auth/callback', async (req, res) => {
-  const { code, state } = req.body;
+// Support both GET (redirect from provider) and POST (programmatic exchange)
+router.all('/auth/callback', async (req, res) => {
+  // Accept code/state from query (GET) or body (POST)
+  const code = (req.method === 'GET') ? req.query.code : req.body.code;
+  const state = (req.method === 'GET') ? req.query.state : req.body.state;
   if (!code) {
     return res.status(400).json({ error: 'Authorization code required' });
   }
@@ -97,6 +100,24 @@ router.post('/auth/callback', async (req, res) => {
   if (res.headersSent) return;
 
   try {
+    // Look up the oauth state document to recover the original uid (if any)
+    let userId = (req.userId || null);
+    if (state) {
+      try {
+        const st = await db.collection('oauth_states').doc(state).get();
+        if (st.exists) {
+          const v = st.data() || {};
+          if (v.uid) userId = v.uid;
+          // Clean up state after use
+          try { await db.collection('oauth_states').doc(state).delete(); } catch(_){}
+        }
+      } catch (e) {
+        // ignore state lookup errors - proceed with available userId
+        console.warn('snapchat: oauth state lookup failed:', e.message);
+      }
+    }
+    if (!userId) userId = 'anonymous';
+
     // Exchange code for access token
     const tokenRes = await fetch('https://accounts.snapchat.com/login/oauth2/access_token', {
       method: 'POST',
@@ -113,6 +134,8 @@ router.post('/auth/callback', async (req, res) => {
 
     const tokenData = await tokenRes.json();
     if (!tokenRes.ok) {
+      // If provider returned an error, include it for debugging
+      console.error('snapchat: token exchange failed', tokenData);
       return res.status(400).json({ error: 'Failed to exchange code for token', details: tokenData });
     }
 
@@ -125,11 +148,11 @@ router.post('/auth/callback', async (req, res) => {
 
     const profileData = await profileRes.json();
     if (!profileRes.ok) {
+      console.error('snapchat: profile fetch failed', profileData);
       return res.status(400).json({ error: 'Failed to get user profile', details: profileData });
     }
 
-    // Store connection in Firestore
-    const userId = req.userId || 'anonymous'; // Assuming authMiddleware sets req.userId
+    // Store connection in Firestore under the resolved userId
     await db.collection('users').doc(userId).collection('connections').doc('snapchat').set({
       accessToken: tokenData.access_token,
       refreshToken: tokenData.refresh_token,
@@ -138,14 +161,21 @@ router.post('/auth/callback', async (req, res) => {
       connectedAt: new Date().toISOString()
     });
 
-    res.json({
-      success: true,
-      message: 'Snapchat connected successfully',
-      profile: profileData
-    });
+    // If this was a browser redirect (GET), redirect back to the dashboard
+    if (req.method === 'GET') {
+      const successUrl = `${DASHBOARD_URL}?snapchat=connected`;
+      return res.redirect(successUrl);
+    }
+
+    // Otherwise return JSON for programmatic callers
+    return res.json({ success: true, message: 'Snapchat connected successfully', profile: profileData });
   } catch (err) {
     console.error('Snapchat OAuth callback error:', err);
-    res.status(500).json({ error: 'OAuth callback failed', details: err.message });
+    if (req.method === 'GET') {
+      // Redirect to dashboard with error on GET flows
+      return res.redirect(`${DASHBOARD_URL}?snapchat=error&message=${encodeURIComponent(err.message || 'oauth_failed')}`);
+    }
+    return res.status(500).json({ error: 'OAuth callback failed', details: err.message });
   }
 });
 
