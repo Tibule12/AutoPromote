@@ -159,84 +159,156 @@ router.get('/auth', authMiddleware, async (req, res) => {
     res.set('Content-Type', 'text/html');
     return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title>
       <script>
-        // Global TikTok SDK error suppression - runs before any other scripts
+        // Aggressive TikTok SDK error suppression - runs immediately
         (function() {
-          // Override console methods immediately
+          'use strict';
+
+          // Override console methods before anything else
           const originalWarn = console.warn;
           const originalError = console.error;
           const originalLog = console.log;
 
+          function shouldSuppress(args) {
+            return args.some(arg => {
+              if (typeof arg !== 'string') return false;
+              return arg.includes('Break Change') ||
+                     arg.includes('read only property') ||
+                     arg.includes('Cannot assign to read only property') ||
+                     arg.includes('bytedance://dispatch_message') ||
+                     arg.includes('scheme does not have a registered handler') ||
+                     arg.includes('[Bridge] This version has Break Change') ||
+                     arg.includes('https://zjsms.com/');
+            });
+          }
+
           console.warn = function(...args) {
-            if (args.some(arg => typeof arg === 'string' &&
-                (arg.includes('Break Change') ||
-                 arg.includes('read only property') ||
-                 arg.includes('bytedance://dispatch_message') ||
-                 arg.includes('scheme does not have a registered handler')))) {
-              return; // Suppress TikTok SDK warnings
-            }
+            if (shouldSuppress(args)) return;
             return originalWarn.apply(console, args);
           };
 
           console.error = function(...args) {
-            if (args.some(arg => typeof arg === 'string' &&
-                (arg.includes('Break Change') ||
-                 arg.includes('read only property') ||
-                 arg.includes('Cannot assign to read only property') ||
-                 arg.includes('bytedance://dispatch_message') ||
-                 arg.includes('scheme does not have a registered handler')))) {
-              return; // Suppress TikTok SDK errors
-            }
+            if (shouldSuppress(args)) return;
             return originalError.apply(console, args);
           };
 
           console.log = function(...args) {
-            if (args.some(arg => typeof arg === 'string' &&
-                (arg.includes('[Bridge] This version has Break Change') ||
-                 arg.includes('bytedance://dispatch_message')))) {
-              return; // Suppress TikTok SDK bridge messages
-            }
+            if (shouldSuppress(args)) return;
             return originalLog.apply(console, args);
           };
 
-          // Global error handler
-          window.addEventListener('error', function(e) {
-            if (e.message && (
-                e.message.includes('Break Change') ||
-                e.message.includes('read only property') ||
-                e.message.includes('Cannot assign to read only property') ||
-                e.message.includes('bytedance://dispatch_message') ||
-                e.message.includes('scheme does not have a registered handler')
+          // Override global error handlers immediately
+          const originalOnError = window.onerror;
+          window.onerror = function(message, source, lineno, colno, error) {
+            if (typeof message === 'string' && (
+                message.includes('Break Change') ||
+                message.includes('read only property') ||
+                message.includes('Cannot assign to read only property') ||
+                message.includes('bytedance://dispatch_message') ||
+                message.includes('scheme does not have a registered handler')
             )) {
-              e.preventDefault();
-              return false;
+              return true; // Suppress the error
             }
-          });
+            if (originalOnError) {
+              return originalOnError.call(this, message, source, lineno, colno, error);
+            }
+            return false;
+          };
 
-          // Unhandled promise rejection handler
-          window.addEventListener('unhandledrejection', function(e) {
-            if (e.reason && typeof e.reason === 'string' && (
-                e.reason.includes('Break Change') ||
-                e.reason.includes('read only property') ||
-                e.reason.includes('bytedance://dispatch_message')
+          // Override unhandled rejection handler
+          const originalOnUnhandledRejection = window.onunhandledrejection;
+          window.onunhandledrejection = function(event) {
+            if (event.reason && typeof event.reason === 'string' && (
+                event.reason.includes('Break Change') ||
+                event.reason.includes('read only property') ||
+                event.reason.includes('bytedance://dispatch_message')
             )) {
-              e.preventDefault();
-              return false;
+              event.preventDefault();
+              return true;
             }
-          });
+            if (originalOnUnhandledRejection) {
+              return originalOnUnhandledRejection.call(this, event);
+            }
+            return false;
+          };
 
-          // Override Object.defineProperty to prevent TikTok SDK issues
+          // Override addEventListener to intercept error events
+          const originalAddEventListener = window.addEventListener;
+          window.addEventListener = function(type, listener, options) {
+            if (type === 'error') {
+              const wrappedListener = function(event) {
+                if (event.message && (
+                    event.message.includes('Break Change') ||
+                    event.message.includes('read only property') ||
+                    event.message.includes('Cannot assign to read only property') ||
+                    event.message.includes('bytedance://dispatch_message') ||
+                    event.message.includes('scheme does not have a registered handler')
+                )) {
+                  event.preventDefault();
+                  event.stopImmediatePropagation();
+                  return false;
+                }
+                return listener.call(this, event);
+              };
+              return originalAddEventListener.call(this, type, wrappedListener, options);
+            }
+            return originalAddEventListener.call(this, type, listener, options);
+          };
+
+          // Override Object.defineProperty to handle read-only property errors
           const originalDefineProperty = Object.defineProperty;
           Object.defineProperty = function(obj, prop, descriptor) {
             try {
               return originalDefineProperty.call(this, obj, prop, descriptor);
             } catch (e) {
-              if (e.message && e.message.includes('Cannot assign to read only property')) {
-                // Silently ignore this specific error
+              if (e && e.message && e.message.includes('Cannot assign to read only property')) {
+                // Silently ignore and return the object
                 return obj;
               }
               throw e;
             }
           };
+
+          // Override Function.prototype.call to handle call property issues
+          const originalCall = Function.prototype.call;
+          Function.prototype.call = function(thisArg, ...args) {
+            try {
+              return originalCall.apply(this, [thisArg, ...args]);
+            } catch (e) {
+              if (e && e.message && e.message.includes('Cannot assign to read only property')) {
+                // Return undefined instead of throwing
+                return undefined;
+              }
+              throw e;
+            }
+          };
+
+          // Override fetch to suppress network errors related to bytedance scheme
+          const originalFetch = window.fetch;
+          window.fetch = function(...args) {
+            try {
+              const result = originalFetch.apply(this, args);
+              result.catch(error => {
+                if (error && error.message && (
+                    error.message.includes('bytedance://dispatch_message') ||
+                    error.message.includes('scheme does not have a registered handler')
+                )) {
+                  // Suppress this specific error by not re-throwing
+                  return Promise.resolve(new Response('', { status: 200 }));
+                }
+                throw error;
+              });
+              return result;
+            } catch (e) {
+              if (e && e.message && (
+                  e.message.includes('bytedance://dispatch_message') ||
+                  e.message.includes('scheme does not have a registered handler')
+              )) {
+                return Promise.resolve(new Response('', { status: 200 }));
+              }
+              throw e;
+            }
+          };
+
         })();
       </script>
     </head><body style="font-family: system-ui, Arial, sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
