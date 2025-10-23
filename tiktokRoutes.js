@@ -115,18 +115,20 @@ router.post('/auth/prepare', async (req, res) => {
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
     const nonce = Math.random().toString(36).slice(2);
     const state = `${uid}.${nonce}`;
+    const isPopup = req.query.popup === 'true';
     await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
       state,
       nonce,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      mode: TIKTOK_ENV
+      mode: TIKTOK_ENV,
+      isPopup
     }, { merge: true });
     const scope = 'user.info.basic';
-  const authUrl = constructAuthUrl(cfg, state, scope);
+    const authUrl = constructAuthUrl(cfg, state, scope);
     // Store authUrl for debugging (non-sensitive)
     await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({ lastAuthUrl: authUrl }, { merge: true });
     if (DEBUG_TIKTOK_OAUTH) {
-      console.log('[TikTok][prepare] uid=%s mode=%s state=%s authUrl=%s', uid, TIKTOK_ENV, state, authUrl);
+      console.log('[TikTok][prepare] uid=%s mode=%s state=%s authUrl=%s popup=%s', uid, TIKTOK_ENV, state, authUrl, isPopup);
     }
     return res.json({ authUrl, mode: TIKTOK_ENV });
   } catch (e) {
@@ -504,9 +506,9 @@ router.get('/callback', async (req, res) => {
   try {
     const [uid, nonce] = String(state).split('.');
     if (!uid || !nonce) return res.status(400).send('Invalid state');
-    const stateDoc = await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').get();
-    const stateData = stateDoc.exists ? stateDoc.data() : null;
-    if (!stateData || stateData.state !== state) {
+    const stateDocRef = await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').get();
+    const stateDataRef = stateDocRef.exists ? stateDocRef.data() : null;
+    if (!stateDataRef || stateDataRef.state !== state) {
       return res.status(400).send('State mismatch');
     }
     // Exchange code
@@ -542,7 +544,24 @@ router.get('/callback', async (req, res) => {
     // redirect back to dashboard with success
     const url = new URL(DASHBOARD_URL);
     url.searchParams.set('tiktok', 'connected');
-    res.redirect(url.toString());
+    // Check if this was initiated as a popup flow
+    const isPopup = stateDataRef?.isPopup === true;
+
+    if (isPopup) {
+      res.set('Content-Type', 'text/html');
+      return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>TikTok Connected</title></head><body>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage('tiktok_oauth_complete', '${DASHBOARD_URL}');
+            window.close();
+          } else {
+            window.location.href = '${url.toString()}';
+          }
+        </script>
+      </body></html>`);
+    } else {
+      res.redirect(url.toString());
+    }
   } catch (err) {
     if (DEBUG_TIKTOK_OAUTH) console.error('[TikTok][callback][error]', err);
     try {
