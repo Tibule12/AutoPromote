@@ -463,6 +463,33 @@ const PORT = process.env.PORT || 5000; // Default to port 5000, Render will over
 
 // Attach request context (if available) then slow request logger
 try { app.use(require('./middlewares/requestContext')); } catch(_) { /* optional */ }
+// Access log middleware - logs a single line per request with useful correlation fields
+app.use((req, res, next) => {
+  try {
+    const start = Date.now();
+    const originalSend = res.send.bind(res);
+    let bytes = 0;
+    // wrap send to capture response size (best-effort)
+    res.send = function (body) {
+      try {
+        if (typeof body === 'string') bytes = Buffer.byteLength(body, 'utf8');
+        else if (Buffer.isBuffer(body)) bytes = body.length;
+        else bytes = Buffer.byteLength(JSON.stringify(body || ''), 'utf8');
+      } catch (_) { bytes = 0; }
+      return originalSend(body);
+    };
+    res.once('finish', () => {
+      try {
+        const duration = Date.now() - start;
+        const ip = req.headers['x-forwarded-for'] || req.ip || (req.connection && req.connection.remoteAddress) || '';
+        const ua = req.headers['user-agent'] || '';
+        console.log(`[ACCESS] ${req.method} ${req.originalUrl} status=${res.statusCode} requestID="${req.requestId || ''}" clientIP="${ip}" responseTimeMS=${duration} responseBytes=${bytes} userAgent="${ua.replace(/\"/g,'') }"`);
+      } catch (_) {}
+    });
+  } catch (_) {}
+  next();
+});
+
 app.use(slowRequestLogger);
 // Lazy warmup trigger (will start warmup if not already and early request hits)
 try { app.use(ensureWarmup); } catch(_) { /* ignore */ }
