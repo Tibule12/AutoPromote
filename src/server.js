@@ -1337,3 +1337,20 @@ module.exports.__warmupState = () => (__warmupState);
 // Export Express app for integration tests
 module.exports = app;
 } catch (e) { console.error(e); }
+
+// Global process-level error handlers to surface crashes in logs and allow process managers to restart
+process.on('uncaughtException', (err) => {
+  try {
+    console.error('[fatal] Uncaught exception:', err && err.stack ? err.stack : err);
+  } catch (_) { console.error('[fatal] Uncaught exception (failed to stringify)'); }
+  // give logs a moment to flush then exit to allow a restart
+  setTimeout(() => process.exit(1), 500);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  try {
+    console.error('[fatal] Unhandled rejection at:', promise, 'reason:', reason && reason.stack ? reason.stack : reason);
+  } catch (_) { console.error('[fatal] Unhandled rejection (failed to stringify)'); }
+  // give logs a moment to flush then exit to allow a restart
+  setTimeout(() => process.exit(1), 500);
+});
