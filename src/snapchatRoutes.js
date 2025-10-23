@@ -11,7 +11,7 @@ const DEBUG_SNAPCHAT_OAUTH = process.env.DEBUG_SNAPCHAT_OAUTH === 'true';
 const config = {
   key: (process.env.SNAPCHAT_CLIENT_ID || '').toString().trim() || null,
   secret: (process.env.SNAPCHAT_CLIENT_SECRET || '').toString().trim() || null,
-  redirect: (process.env.SNAPCHAT_REDIRECT_URI || '').toString().trim() || null,
+  redirect: (process.env.SNAPCHAT_REDIRECT_URI || `${DASHBOARD_URL}/api/snapchat/auth/callback`).toString().trim(),
 };
 
 function activeConfig() {
@@ -19,7 +19,7 @@ function activeConfig() {
 }
 
 // For dashboard redirect
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote-1.onrender.com';
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote.onrender.com';
 
 function ensureSnapchatEnv(res, cfg, opts = { requireSecret: true }) {
   const missing = [];

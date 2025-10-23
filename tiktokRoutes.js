@@ -39,7 +39,7 @@ function activeConfig() {
 }
 
 // For dashboard redirect
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote-1.onrender.com';
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote.onrender.com';
 
 function ensureTikTokEnv(res, cfg, opts = { requireSecret: true }) {
   const missing = [];
