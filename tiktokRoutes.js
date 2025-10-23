@@ -286,98 +286,17 @@ router.get('/auth', authMiddleware, async (req, res) => {
           // we no longer replace these globals. The remaining error
           // suppression logic focuses on console/handler wrappers only.
 
-          // Override fetch to suppress network errors related to bytedance scheme
-          const originalFetch = window.fetch;
-          window.fetch = function(...args) {
-            try {
-              const result = originalFetch.apply(this, args);
-              result.catch(error => {
-                if (error && error.message && (
-                    error.message.includes('bytedance://dispatch_message') ||
-                    error.message.includes('scheme does not have a registered handler') ||
-                    error.message.includes('not allowed to launch') ||
-                    error.message.includes('user gesture is required')
-                )) {
-                  // Suppress this specific error by not re-throwing
-                  return Promise.resolve(new Response('', { status: 200 }));
-                }
-                throw error;
-              });
-              return result;
-            } catch (e) {
-              if (e && e.message && (
-                  e.message.includes('bytedance://dispatch_message') ||
-                  e.message.includes('scheme does not have a registered handler') ||
-                  e.message.includes('not allowed to launch') ||
-                  e.message.includes('user gesture is required')
-              )) {
-                return Promise.resolve(new Response('', { status: 200 }));
-              }
-              throw e;
-            }
-          };
-
-          // Override XMLHttpRequest to suppress network errors
-          const originalXMLHttpRequest = window.XMLHttpRequest;
-          window.XMLHttpRequest = function() {
-            const xhr = new originalXMLHttpRequest();
-            const originalOpen = xhr.open;
-            xhr.open = function(method, url, ...args) {
-              if (url && typeof url === 'string' && (
-                  url.includes('bytedance://') ||
-                  url.includes('zjsms.com')
-              )) {
-                // Override send to prevent actual requests
-                xhr.send = function() {
-                  setTimeout(() => {
-                    if (xhr.onreadystatechange) {
-                      xhr.readyState = 4;
-                      xhr.status = 200;
-                      xhr.responseText = '';
-                      xhr.onreadystatechange();
-                    }
-                  }, 0);
-                };
-                return;
-              }
-              return originalOpen.call(this, method, url, ...args);
-            };
-            return xhr;
-          };
-
-          // Override navigator.sendBeacon to suppress tracking errors
-          const originalSendBeacon = navigator.sendBeacon;
-          navigator.sendBeacon = function(url, data) {
-            if (url && typeof url === 'string' && (
-                url.includes('bytedance://') ||
-                url.includes('zjsms.com') ||
-                url.includes('collect.js')
-            )) {
-              return true; // Pretend it succeeded
-            }
-            return originalSendBeacon.call(this, url, data);
-          };
-
-          // Override Image constructor to suppress tracking pixel errors
-          const originalImage = window.Image;
-          window.Image = function() {
-            const img = new originalImage();
-            const originalSrc = Object.getOwnPropertyDescriptor(originalImage.prototype, 'src');
-            Object.defineProperty(img, 'src', {
-              get: originalSrc.get,
-              set: function(value) {
-                if (value && typeof value === 'string' && (
-                    value.includes('bytedance://') ||
-                    value.includes('zjsms.com')
-                )) {
-                  // Don't set the src for problematic URLs
-                  return;
-                }
-                return originalSrc.set.call(this, value);
-              }
-            });
-            return img;
-          };
+          // NOTE: The previous implementation attempted to replace several
+          // browser globals (fetch, XMLHttpRequest, navigator.sendBeacon,
+          // Image) to suppress specific provider errors. Replacing these
+          // built-ins is unsafe: it can trigger browser exceptions and
+          // interfere with other SDKs or browser APIs. Instead of
+          // overriding them, we allow the browser/provider behavior to
+          // proceed and keep only non-invasive suppression (console +
+          // global error handlers) above. If a provider endpoint is
+          // noisy or misconfigured (CORS or native-scheme issues), the
+          // correct long-term fix is server-side proxying or provider
+          // configuration, not replacing core browser APIs.
 
         })();
       </script>
