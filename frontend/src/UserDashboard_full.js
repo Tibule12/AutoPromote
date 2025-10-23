@@ -30,6 +30,8 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [payouts, setPayouts] = useState([]);
   const [progress, setProgress] = useState({ contentCount: 0, requiredForRevenue: 0, remaining: 0, revenueEligible: false });
   const [platformSummary, setPlatformSummary] = useState({ platforms: {} });
+  // Snap connect banner state from URL
+  const [connectBanner, setConnectBanner] = useState(null); // { type: 'success'|'error', message: string }
 
   // Ensure content is an array to simplify rendering
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
@@ -120,6 +122,12 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   };
 
   useEffect(() => {
+    try {
+      const qp = new URLSearchParams(window.location.search);
+      const sc = qp.get('snapchat');
+      if (sc === 'connected') setConnectBanner({ type: 'success', message: 'Snapchat connected successfully.' });
+      else if (sc === 'error') setConnectBanner({ type: 'error', message: qp.get('message') ? decodeURIComponent(qp.get('message')) : 'Snapchat connection failed.' });
+    } catch (_) {}
     loadTikTokStatus();
     loadFacebookStatus();
     loadYouTubeStatus();
@@ -403,6 +411,13 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
 
   return (
     <div className="dashboard-root">
+      {/* OAuth connect banner */}
+      {connectBanner && (
+        <div className={`connect-banner ${connectBanner.type === 'success' ? 'connect-success' : 'connect-error'}`} role="status">
+          <div className="connect-message">{connectBanner.message}</div>
+          <button className="connect-close" onClick={() => setConnectBanner(null)} aria-label="Dismiss">×</button>
+        </div>
+      )}
       {/* Topbar with mobile hamburger */}
       <header className="dashboard-topbar" aria-label="Top navigation">
         <button
