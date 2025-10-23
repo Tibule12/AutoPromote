@@ -171,13 +171,20 @@ router.get('/auth', authMiddleware, async (req, res) => {
           function shouldSuppress(args) {
             return args.some(arg => {
               if (typeof arg !== 'string') return false;
-              return arg.includes('Break Change') ||
-                     arg.includes('read only property') ||
-                     arg.includes('Cannot assign to read only property') ||
-                     arg.includes('bytedance://dispatch_message') ||
-                     arg.includes('scheme does not have a registered handler') ||
-                     arg.includes('[Bridge] This version has Break Change') ||
-                     arg.includes('https://zjsms.com/');
+              const str = arg.toLowerCase();
+              return str.includes('break change') ||
+                     str.includes('read only property') ||
+                     str.includes('cannot assign to read only property') ||
+                     str.includes('bytedance://dispatch_message') ||
+                     str.includes('scheme does not have a registered handler') ||
+                     str.includes('[bridge] this version has break change') ||
+                     str.includes('https://zjsms.com/') ||
+                     str.includes('jxkorkc') ||
+                     str.includes('tiktok sdk') ||
+                     str.includes('compatibility issue') ||
+                     str.includes('deprecated') ||
+                     str.includes('not allowed to launch') ||
+                     str.includes('user gesture is required');
             });
           }
 
@@ -199,14 +206,19 @@ router.get('/auth', authMiddleware, async (req, res) => {
           // Override global error handlers immediately
           const originalOnError = window.onerror;
           window.onerror = function(message, source, lineno, colno, error) {
-            if (typeof message === 'string' && (
-                message.includes('Break Change') ||
-                message.includes('read only property') ||
-                message.includes('Cannot assign to read only property') ||
-                message.includes('bytedance://dispatch_message') ||
-                message.includes('scheme does not have a registered handler')
-            )) {
-              return true; // Suppress the error
+            if (typeof message === 'string') {
+              const msg = message.toLowerCase();
+              if (msg.includes('break change') ||
+                  msg.includes('read only property') ||
+                  msg.includes('cannot assign to read only property') ||
+                  msg.includes('bytedance://dispatch_message') ||
+                  msg.includes('scheme does not have a registered handler') ||
+                  msg.includes('tiktok sdk') ||
+                  msg.includes('compatibility issue') ||
+                  msg.includes('not allowed to launch') ||
+                  msg.includes('user gesture is required')) {
+                return true; // Suppress the error
+              }
             }
             if (originalOnError) {
               return originalOnError.call(this, message, source, lineno, colno, error);
@@ -217,13 +229,19 @@ router.get('/auth', authMiddleware, async (req, res) => {
           // Override unhandled rejection handler
           const originalOnUnhandledRejection = window.onunhandledrejection;
           window.onunhandledrejection = function(event) {
-            if (event.reason && typeof event.reason === 'string' && (
-                event.reason.includes('Break Change') ||
-                event.reason.includes('read only property') ||
-                event.reason.includes('bytedance://dispatch_message')
-            )) {
-              event.preventDefault();
-              return true;
+            if (event.reason) {
+              const reason = typeof event.reason === 'string' ? event.reason.toLowerCase() :
+                           (event.reason && event.reason.message ? event.reason.message.toLowerCase() : '');
+              if (reason.includes('break change') ||
+                  reason.includes('read only property') ||
+                  reason.includes('bytedance://dispatch_message') ||
+                  reason.includes('tiktok sdk') ||
+                  reason.includes('compatibility issue') ||
+                  reason.includes('not allowed to launch') ||
+                  reason.includes('user gesture is required')) {
+                event.preventDefault();
+                return true;
+              }
             }
             if (originalOnUnhandledRejection) {
               return originalOnUnhandledRejection.call(this, event);
@@ -236,16 +254,21 @@ router.get('/auth', authMiddleware, async (req, res) => {
           window.addEventListener = function(type, listener, options) {
             if (type === 'error') {
               const wrappedListener = function(event) {
-                if (event.message && (
-                    event.message.includes('Break Change') ||
-                    event.message.includes('read only property') ||
-                    event.message.includes('Cannot assign to read only property') ||
-                    event.message.includes('bytedance://dispatch_message') ||
-                    event.message.includes('scheme does not have a registered handler')
-                )) {
-                  event.preventDefault();
-                  event.stopImmediatePropagation();
-                  return false;
+                if (event.message) {
+                  const msg = event.message.toLowerCase();
+                  if (msg.includes('break change') ||
+                      msg.includes('read only property') ||
+                      msg.includes('cannot assign to read only property') ||
+                      msg.includes('bytedance://dispatch_message') ||
+                      msg.includes('scheme does not have a registered handler') ||
+                      msg.includes('tiktok sdk') ||
+                      msg.includes('compatibility issue') ||
+                      msg.includes('not allowed to launch') ||
+                      msg.includes('user gesture is required')) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    return false;
+                  }
                 }
                 return listener.call(this, event);
               };
@@ -290,7 +313,9 @@ router.get('/auth', authMiddleware, async (req, res) => {
               result.catch(error => {
                 if (error && error.message && (
                     error.message.includes('bytedance://dispatch_message') ||
-                    error.message.includes('scheme does not have a registered handler')
+                    error.message.includes('scheme does not have a registered handler') ||
+                    error.message.includes('not allowed to launch') ||
+                    error.message.includes('user gesture is required')
                 )) {
                   // Suppress this specific error by not re-throwing
                   return Promise.resolve(new Response('', { status: 200 }));
@@ -301,12 +326,76 @@ router.get('/auth', authMiddleware, async (req, res) => {
             } catch (e) {
               if (e && e.message && (
                   e.message.includes('bytedance://dispatch_message') ||
-                  e.message.includes('scheme does not have a registered handler')
+                  e.message.includes('scheme does not have a registered handler') ||
+                  e.message.includes('not allowed to launch') ||
+                  e.message.includes('user gesture is required')
               )) {
                 return Promise.resolve(new Response('', { status: 200 }));
               }
               throw e;
             }
+          };
+
+          // Override XMLHttpRequest to suppress network errors
+          const originalXMLHttpRequest = window.XMLHttpRequest;
+          window.XMLHttpRequest = function() {
+            const xhr = new originalXMLHttpRequest();
+            const originalOpen = xhr.open;
+            xhr.open = function(method, url, ...args) {
+              if (url && typeof url === 'string' && (
+                  url.includes('bytedance://') ||
+                  url.includes('zjsms.com')
+              )) {
+                // Override send to prevent actual requests
+                xhr.send = function() {
+                  setTimeout(() => {
+                    if (xhr.onreadystatechange) {
+                      xhr.readyState = 4;
+                      xhr.status = 200;
+                      xhr.responseText = '';
+                      xhr.onreadystatechange();
+                    }
+                  }, 0);
+                };
+                return;
+              }
+              return originalOpen.call(this, method, url, ...args);
+            };
+            return xhr;
+          };
+
+          // Override navigator.sendBeacon to suppress tracking errors
+          const originalSendBeacon = navigator.sendBeacon;
+          navigator.sendBeacon = function(url, data) {
+            if (url && typeof url === 'string' && (
+                url.includes('bytedance://') ||
+                url.includes('zjsms.com') ||
+                url.includes('collect.js')
+            )) {
+              return true; // Pretend it succeeded
+            }
+            return originalSendBeacon.call(this, url, data);
+          };
+
+          // Override Image constructor to suppress tracking pixel errors
+          const originalImage = window.Image;
+          window.Image = function() {
+            const img = new originalImage();
+            const originalSrc = Object.getOwnPropertyDescriptor(originalImage.prototype, 'src');
+            Object.defineProperty(img, 'src', {
+              get: originalSrc.get,
+              set: function(value) {
+                if (value && typeof value === 'string' && (
+                    value.includes('bytedance://') ||
+                    value.includes('zjsms.com')
+                )) {
+                  // Don't set the src for problematic URLs
+                  return;
+                }
+                return originalSrc.set.call(this, value);
+              }
+            });
+            return img;
           };
 
         })();
