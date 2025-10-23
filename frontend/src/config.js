@@ -6,7 +6,7 @@
  */
 
 // API Base URL - change this to your actual backend URL
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://autopromote-1.onrender.com';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://autopromote.onrender.com';
 
 // API Endpoints
 export const API_ENDPOINTS = {
