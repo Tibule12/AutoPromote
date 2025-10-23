@@ -277,33 +277,14 @@ router.get('/auth', authMiddleware, async (req, res) => {
             return originalAddEventListener.call(this, type, listener, options);
           };
 
-          // Override Object.defineProperty to handle read-only property errors
-          const originalDefineProperty = Object.defineProperty;
-          Object.defineProperty = function(obj, prop, descriptor) {
-            try {
-              return originalDefineProperty.call(this, obj, prop, descriptor);
-            } catch (e) {
-              if (e && e.message && e.message.includes('Cannot assign to read only property')) {
-                // Silently ignore and return the object
-                return obj;
-              }
-              throw e;
-            }
-          };
-
-          // Override Function.prototype.call to handle call property issues
-          const originalCall = Function.prototype.call;
-          Function.prototype.call = function(thisArg, ...args) {
-            try {
-              return originalCall.apply(this, [thisArg, ...args]);
-            } catch (e) {
-              if (e && e.message && e.message.includes('Cannot assign to read only property')) {
-                // Return undefined instead of throwing
-                return undefined;
-              }
-              throw e;
-            }
-          };
+          // NOTE: Previously this script attempted to override
+          // Object.defineProperty and Function.prototype.call to "silently"
+          // ignore certain SDK compatibility errors. Overriding these
+          // fundamental built-ins causes TypeErrors in modern browsers
+          // (e.g. "Cannot assign to read only property 'call'") and can
+          // break other libraries. To avoid introducing a hard failure
+          // we no longer replace these globals. The remaining error
+          // suppression logic focuses on console/handler wrappers only.
 
           // Override fetch to suppress network errors related to bytedance scheme
           const originalFetch = window.fetch;
