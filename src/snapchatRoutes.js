@@ -44,7 +44,7 @@ router.get('/auth', (req, res) => {
 
   // Snapchat expects scopes to be space-separated. Using commas can produce
   // an invalid request for some OAuth endpoints and lead to 500/invalid errors.
-  const scope = 'snapchat-marketing-api ads-api';
+  const scope = 'snapchat-marketing-api';
   const stateRaw = req.query.state || 'snapchat_oauth_state';
   const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(stateRaw)}`;
 
@@ -63,7 +63,7 @@ router.post('/oauth/prepare', authMiddleware, async (req, res) => {
 
   try {
   // Use space separated scopes per Snapchat OAuth requirements
-  const scope = 'snapchat-marketing-api ads-api';
+  const scope = 'snapchat-marketing-api';
     const { v4: uuidv4 } = require('../lib/uuid-compat');
     const state = uuidv4();
     const userId = req.userId || 'anonymous';
@@ -324,7 +324,7 @@ if (DEBUG_SNAPCHAT_OAUTH) {
       ensureSnapchatEnv(res, cfg, { requireSecret: false });
       if (res.headersSent) return;
   const state = req.query.state || require('../lib/uuid-compat').v4();
-  const scope = 'snapchat-marketing-api ads-api';
+  const scope = 'snapchat-marketing-api';
   const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
       const r = await fetch(authUrl, { method: 'GET' });
       const text = await r.text().catch(() => '');
@@ -344,7 +344,7 @@ if (process.env.SNAPCHAT_DEBUG_ALLOW === 'true') {
       ensureSnapchatEnv(res, cfg, { requireSecret: false });
       if (res.headersSent) return;
       const state = req.query.state || require('../lib/uuid-compat').v4();
-      const scope = 'snapchat-marketing-api ads-api';
+      const scope = 'snapchat-marketing-api';
       const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
       const r = await fetch(authUrl, { method: 'GET', redirect: 'manual' });
       const headers = {};
