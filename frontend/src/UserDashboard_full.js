@@ -375,7 +375,30 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Snapchat OAuth');
-      window.location.href = data.authUrl;
+      // Open in popup window to isolate Snapchat SDK errors from main console
+      const popup = window.open(data.authUrl, 'snapchat_oauth', 'width=600,height=700,scrollbars=yes,resizable=yes');
+      if (!popup) {
+        alert('Popup blocked. Please allow popups for this site and try again.');
+        return;
+      }
+      // Monitor popup for closure and refresh status
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          loadSnapchatStatus(); // Refresh status after popup closes
+        }
+      }, 1000);
+      // Also listen for messages from popup (in case it redirects back)
+      const handleMessage = (event) => {
+        // Only accept messages from our domain
+        if (event.origin !== window.location.origin) return;
+        if (event.data === 'snapchat_oauth_complete') {
+          popup.close();
+          loadSnapchatStatus();
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+      window.addEventListener('message', handleMessage);
     } catch (e) {
       alert(e.message || 'Unable to start Snapchat connect');
     }

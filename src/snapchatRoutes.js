@@ -193,8 +193,27 @@ router.all('/auth/callback', async (req, res) => {
 
     // If this was a browser redirect (GET), redirect back to the dashboard
     if (req.method === 'GET') {
-      const successUrl = `${DASHBOARD_URL}?snapchat=connected`;
-      return res.redirect(successUrl);
+      // Check if this was initiated as a popup flow
+      const stateDocRef = await db.collection('oauth_states').doc(state).get();
+      const stateDataRef = stateDocRef.exists ? stateDocRef.data() : null;
+      const isPopup = stateDataRef?.platform === 'snapchat' && stateDataRef?.uid; // Assume popup if we have state data
+
+      if (isPopup) {
+        res.set('Content-Type', 'text/html');
+        return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Snapchat Connected</title></head><body>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage('snapchat_oauth_complete', '${DASHBOARD_URL}');
+              window.close();
+            } else {
+              window.location.href = '${DASHBOARD_URL}?snapchat=connected';
+            }
+          </script>
+        </body></html>`);
+      } else {
+        const successUrl = `${DASHBOARD_URL}?snapchat=connected`;
+        return res.redirect(successUrl);
+      }
     }
 
     // Otherwise return JSON for programmatic callers
