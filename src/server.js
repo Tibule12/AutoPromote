@@ -209,13 +209,50 @@ global.__getRouteMetrics = () => {
 global.__instrumentWrapper = (routeId, fn) => instrumentHandler(fn, routeId);
 
 
-// Load core routes
-const authRoutes = require('./authRoutes');
-const userRoutes = require('./userRoutes');
-const contentRoutes = require('./contentRoutes');
-const analyticsRoutes = require('./analyticsRoutes');
-const adminRoutes = require('./adminRoutes');
-const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
+// Load core routes with error handling
+let authRoutes, userRoutes, contentRoutes, analyticsRoutes, adminRoutes, adminAnalyticsRoutes;
+try {
+  authRoutes = require('./authRoutes');
+  console.log('✅ Auth routes loaded');
+} catch (e) {
+  authRoutes = express.Router();
+  console.log('⚠️ Auth routes not found, using dummy router:', e.message);
+}
+try {
+  userRoutes = require('./userRoutes');
+  console.log('✅ User routes loaded');
+} catch (e) {
+  userRoutes = express.Router();
+  console.log('⚠️ User routes not found, using dummy router:', e.message);
+}
+try {
+  contentRoutes = require('./contentRoutes');
+  console.log('✅ Content routes loaded');
+} catch (e) {
+  contentRoutes = express.Router();
+  console.log('⚠️ Content routes not found, using dummy router:', e.message);
+}
+try {
+  analyticsRoutes = require('./analyticsRoutes');
+  console.log('✅ Analytics routes loaded');
+} catch (e) {
+  analyticsRoutes = express.Router();
+  console.log('⚠️ Analytics routes not found, using dummy router:', e.message);
+}
+try {
+  adminRoutes = require('./adminRoutes');
+  console.log('✅ Admin routes loaded');
+} catch (e) {
+  adminRoutes = express.Router();
+  console.log('⚠️ Admin routes not found, using dummy router:', e.message);
+}
+try {
+  adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
+  console.log('✅ Admin analytics routes loaded');
+} catch (e) {
+  adminAnalyticsRoutes = express.Router();
+  console.log('⚠️ Admin analytics routes not found, using dummy router:', e.message);
+}
 const viralGrowthRoutes = require('./routes/viralGrowthRoutes');
 const engagementRoutes = require('./routes/engagementRoutes');
 let monetizationRoutes;
