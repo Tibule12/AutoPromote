@@ -365,6 +365,14 @@ try {
   console.log('⚠️ Instagram routes not found:', e.message);
   instagramRoutes = express.Router();
 }
+// Load platform connections routes (may be optional)
+try {
+  platformConnectionsRoutes = require('./routes/platformConnectionsRoutes');
+  console.log('✅ Platform connections routes loaded');
+} catch (e) {
+  console.log('⚠️ Platform connections routes not found:', e.message);
+  platformConnectionsRoutes = express.Router();
+}
 
 // Try to load adminTestRoutes, but continue with a dummy router if not available
 let adminTestRoutes;
