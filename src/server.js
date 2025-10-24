@@ -278,13 +278,13 @@ try {
   snapchatRoutes = express.Router();
 }
  // Generic platform routes (status/auth placeholders for spotify, reddit, discord, linkedin, telegram, pinterest)
- let platformRoutes;
+ let platformRoutes = express.Router(); // default fallback
  try {
    platformRoutes = require('./routes/platformRoutes');
    console.log('✅ Generic platform routes loaded');
  } catch (e) {
    console.log('⚠️ Generic platform routes not found:', e.message);
-   platformRoutes = express.Router();
+   // keep the default express.Router()
  }
 try {
   promotionTaskRoutes = require('./routes/promotionTaskRoutes');
