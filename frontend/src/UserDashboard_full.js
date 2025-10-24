@@ -26,6 +26,12 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [youtubeStatus, setYouTubeStatus] = useState({ connected: false });
   const [twitterStatus, setTwitterStatus] = useState({ connected: false });
   const [snapchatStatus, setSnapchatStatus] = useState({ connected: false });
+  const [spotifyStatus, setSpotifyStatus] = useState({ connected: false });
+  const [redditStatus, setRedditStatus] = useState({ connected: false });
+  const [discordStatus, setDiscordStatus] = useState({ connected: false });
+  const [linkedinStatus, setLinkedinStatus] = useState({ connected: false });
+  const [telegramStatus, setTelegramStatus] = useState({ connected: false });
+  const [pinterestStatus, setPinterestStatus] = useState({ connected: false });
   const [earnings, setEarnings] = useState({ pendingEarnings: 0, totalEarnings: 0, payoutEligible: false, minPayoutAmount: 0 });
   const [payouts, setPayouts] = useState([]);
   const [progress, setProgress] = useState({ contentCount: 0, requiredForRevenue: 0, remaining: 0, revenueEligible: false });
@@ -121,6 +127,96 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     }
   };
 
+  // Load Spotify connection status
+  const loadSpotifyStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setSpotifyStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.SPOTIFY_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setSpotifyStatus({ connected: false });
+      const data = await res.json();
+      setSpotifyStatus({ connected: !!data.connected, meta: data.meta || null });
+    } catch (_) {
+      setSpotifyStatus({ connected: false });
+    }
+  };
+
+  // Load Reddit connection status
+  const loadRedditStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setRedditStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.REDDIT_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setRedditStatus({ connected: false });
+      const data = await res.json();
+      setRedditStatus({ connected: !!data.connected, meta: data.meta || null });
+    } catch (_) {
+      setRedditStatus({ connected: false });
+    }
+  };
+
+  // Load Discord connection status
+  const loadDiscordStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setDiscordStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.DISCORD_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setDiscordStatus({ connected: false });
+      const data = await res.json();
+      setDiscordStatus({ connected: !!data.connected, meta: data.meta || null });
+    } catch (_) {
+      setDiscordStatus({ connected: false });
+    }
+  };
+
+  // Load LinkedIn connection status
+  const loadLinkedinStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setLinkedinStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.LINKEDIN_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setLinkedinStatus({ connected: false });
+      const data = await res.json();
+      setLinkedinStatus({ connected: !!data.connected, meta: data.meta || null });
+    } catch (_) {
+      setLinkedinStatus({ connected: false });
+    }
+  };
+
+  // Load Telegram connection status
+  const loadTelegramStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setTelegramStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.TELEGRAM_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setTelegramStatus({ connected: false });
+      const data = await res.json();
+      setTelegramStatus({ connected: !!data.connected, meta: data.meta || null });
+    } catch (_) {
+      setTelegramStatus({ connected: false });
+    }
+  };
+
+  // Load Pinterest connection status
+  const loadPinterestStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setPinterestStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.PINTEREST_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setPinterestStatus({ connected: false });
+      const data = await res.json();
+      setPinterestStatus({ connected: !!data.connected, meta: data.meta || null });
+    } catch (_) {
+      setPinterestStatus({ connected: false });
+    }
+  };
+
   useEffect(() => {
     try {
       const qp = new URLSearchParams(window.location.search);
@@ -132,7 +228,14 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     loadFacebookStatus();
     loadYouTubeStatus();
     loadTwitterStatus();
-    loadSnapchatStatus();
+  loadSnapchatStatus();
+  // New platforms
+  loadSpotifyStatus();
+  loadRedditStatus();
+  loadDiscordStatus();
+  loadLinkedinStatus();
+  loadTelegramStatus();
+  loadPinterestStatus();
     // Earnings & progress & platform summary
     (async () => {
       try {
@@ -181,6 +284,42 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     if (params.get('snapchat')) {
       loadSnapchatStatus();
       params.delete('snapchat');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+    if (params.get('spotify')) {
+      loadSpotifyStatus();
+      params.delete('spotify');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+    if (params.get('reddit')) {
+      loadRedditStatus();
+      params.delete('reddit');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+    if (params.get('discord')) {
+      loadDiscordStatus();
+      params.delete('discord');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+    if (params.get('linkedin')) {
+      loadLinkedinStatus();
+      params.delete('linkedin');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+    if (params.get('telegram')) {
+      loadTelegramStatus();
+      params.delete('telegram');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+    if (params.get('pinterest')) {
+      loadPinterestStatus();
+      params.delete('pinterest');
       const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
       window.history.replaceState({}, '', url);
     }
@@ -354,6 +493,224 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       window.location.href = data.authUrl;
     } catch (e) {
       alert(e.message || 'Unable to start Snapchat connect');
+    }
+  };
+
+  // Generic connect handlers for newly added platforms
+  const handleConnectSpotify = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      const prepUrl = API_ENDPOINTS.SPOTIFY_AUTH_START.replace('/auth/start', '/auth/prepare');
+      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json' } });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Spotify OAuth');
+      // open popup and poll status
+      const popup = window.open(data.authUrl, 'spotify_connect', 'width=900,height=700');
+      const poll = async () => {
+        for (let i = 0; i < 80; i++) {
+          await new Promise(r => setTimeout(r, 1500));
+          if (popup && popup.closed) break;
+          try {
+            const s = await currentUser.getIdToken(true);
+            const st = await fetch(API_ENDPOINTS.SPOTIFY_STATUS, { headers: { Authorization: `Bearer ${s}`, Accept: 'application/json' } });
+            if (st.ok) {
+              const sd = await st.json();
+              if (sd.connected) {
+                if (popup && !popup.closed) popup.close();
+                loadSpotifyStatus();
+                return;
+              }
+            }
+          } catch (_) {}
+        }
+        if (popup && !popup.closed) popup.close();
+        alert('Connection timed out or was closed. If you connected, try refreshing.');
+      };
+      poll();
+    } catch (e) {
+      alert(e.message || 'Unable to start Spotify connect');
+    }
+  };
+
+  const handleConnectReddit = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      const prepUrl = API_ENDPOINTS.REDDIT_AUTH_START.replace('/auth/start', '/auth/prepare');
+      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json' } });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Reddit OAuth');
+      const popup = window.open(data.authUrl, 'reddit_connect', 'width=900,height=700');
+      const poll = async () => {
+        for (let i = 0; i < 80; i++) {
+          await new Promise(r => setTimeout(r, 1500));
+          if (popup && popup.closed) break;
+          try {
+            const s = await currentUser.getIdToken(true);
+            const st = await fetch(API_ENDPOINTS.REDDIT_STATUS, { headers: { Authorization: `Bearer ${s}`, Accept: 'application/json' } });
+            if (st.ok) {
+              const sd = await st.json();
+              if (sd.connected) {
+                if (popup && !popup.closed) popup.close();
+                loadRedditStatus();
+                return;
+              }
+            }
+          } catch (_) {}
+        }
+        if (popup && !popup.closed) popup.close();
+        alert('Connection timed out or was closed. If you connected, try refreshing.');
+      };
+      poll();
+    } catch (e) {
+      alert(e.message || 'Unable to start Reddit connect');
+    }
+  };
+
+  const handleConnectDiscord = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      const prepUrl = API_ENDPOINTS.DISCORD_AUTH_START.replace('/auth/start', '/auth/prepare');
+      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json' } });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Discord OAuth');
+      const popup = window.open(data.authUrl, 'discord_connect', 'width=900,height=700');
+      const poll = async () => {
+        for (let i = 0; i < 80; i++) {
+          await new Promise(r => setTimeout(r, 1500));
+          if (popup && popup.closed) break;
+          try {
+            const s = await currentUser.getIdToken(true);
+            const st = await fetch(API_ENDPOINTS.DISCORD_STATUS, { headers: { Authorization: `Bearer ${s}`, Accept: 'application/json' } });
+            if (st.ok) {
+              const sd = await st.json();
+              if (sd.connected) {
+                if (popup && !popup.closed) popup.close();
+                loadDiscordStatus();
+                return;
+              }
+            }
+          } catch (_) {}
+        }
+        if (popup && !popup.closed) popup.close();
+        alert('Connection timed out or was closed. If you connected, try refreshing.');
+      };
+      poll();
+    } catch (e) {
+      alert(e.message || 'Unable to start Discord connect');
+    }
+  };
+
+  const handleConnectLinkedin = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      const prepUrl = API_ENDPOINTS.LINKEDIN_AUTH_START.replace('/auth/start', '/auth/prepare');
+      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json' } });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare LinkedIn OAuth');
+      const popup = window.open(data.authUrl, 'linkedin_connect', 'width=900,height=700');
+      const poll = async () => {
+        for (let i = 0; i < 80; i++) {
+          await new Promise(r => setTimeout(r, 1500));
+          if (popup && popup.closed) break;
+          try {
+            const s = await currentUser.getIdToken(true);
+            const st = await fetch(API_ENDPOINTS.LINKEDIN_STATUS, { headers: { Authorization: `Bearer ${s}`, Accept: 'application/json' } });
+            if (st.ok) {
+              const sd = await st.json();
+              if (sd.connected) {
+                if (popup && !popup.closed) popup.close();
+                loadLinkedinStatus();
+                return;
+              }
+            }
+          } catch (_) {}
+        }
+        if (popup && !popup.closed) popup.close();
+        alert('Connection timed out or was closed. If you connected, try refreshing.');
+      };
+      poll();
+    } catch (e) {
+      alert(e.message || 'Unable to start LinkedIn connect');
+    }
+  };
+
+  const handleConnectTelegram = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      const prepUrl = API_ENDPOINTS.TELEGRAM_AUTH_START.replace('/auth/start', '/auth/prepare');
+      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json' } });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Telegram connect');
+      const popup = window.open(data.authUrl, 'telegram_connect', 'width=900,height=700');
+      const poll = async () => {
+        for (let i = 0; i < 80; i++) {
+          await new Promise(r => setTimeout(r, 1500));
+          if (popup && popup.closed) break;
+          try {
+            const s = await currentUser.getIdToken(true);
+            const st = await fetch(API_ENDPOINTS.TELEGRAM_STATUS, { headers: { Authorization: `Bearer ${s}`, Accept: 'application/json' } });
+            if (st.ok) {
+              const sd = await st.json();
+              if (sd.connected) {
+                if (popup && !popup.closed) popup.close();
+                loadTelegramStatus();
+                return;
+              }
+            }
+          } catch (_) {}
+        }
+        if (popup && !popup.closed) popup.close();
+        alert('Connection timed out or was closed. If you connected, try refreshing.');
+      };
+      poll();
+    } catch (e) {
+      alert(e.message || 'Unable to start Telegram connect');
+    }
+  };
+
+  const handleConnectPinterest = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const idToken = await currentUser.getIdToken(true);
+      const prepUrl = API_ENDPOINTS.PINTEREST_AUTH_START.replace('/auth/start', '/auth/prepare');
+      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json' } });
+      const data = await prep.json();
+      if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Pinterest OAuth');
+      const popup = window.open(data.authUrl, 'pinterest_connect', 'width=900,height=700');
+      const poll = async () => {
+        for (let i = 0; i < 80; i++) {
+          await new Promise(r => setTimeout(r, 1500));
+          if (popup && popup.closed) break;
+          try {
+            const s = await currentUser.getIdToken(true);
+            const st = await fetch(API_ENDPOINTS.PINTEREST_STATUS, { headers: { Authorization: `Bearer ${s}`, Accept: 'application/json' } });
+            if (st.ok) {
+              const sd = await st.json();
+              if (sd.connected) {
+                if (popup && !popup.closed) popup.close();
+                loadPinterestStatus();
+                return;
+              }
+            }
+          } catch (_) {}
+        }
+        if (popup && !popup.closed) popup.close();
+        alert('Connection timed out or was closed. If you connected, try refreshing.');
+      };
+      poll();
+    } catch (e) {
+      alert(e.message || 'Unable to start Pinterest connect');
     }
   };
 
@@ -575,6 +932,103 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
                   <>
                     <button className="check-quality" onClick={handleConnectSnapchat}>Connect Snapchat</button>
                     <span style={{color:'#9aa4b2'}}>Connect to enable Snap posting & analytics.</span>
+                  </>
+                )}
+              </div>
+              {/* New platform connections */}
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center', marginTop: '.5rem'}}>
+                {spotifyStatus.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>Spotify connected</span>
+                    {spotifyStatus.meta?.display_name && (
+                      <span style={{color:'#9aa4b2'}}>{spotifyStatus.meta.display_name}</span>
+                    )}
+                    <button className="check-quality" onClick={handleConnectSpotify}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectSpotify}>Connect Spotify</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to enable playlist sharing and analytics.</span>
+                  </>
+                )}
+              </div>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center', marginTop: '.5rem'}}>
+                {redditStatus.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>Reddit connected</span>
+                    {redditStatus.meta?.username && (
+                      <span style={{color:'#9aa4b2'}}>u/{redditStatus.meta.username}</span>
+                    )}
+                    <button className="check-quality" onClick={handleConnectReddit}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectReddit}>Connect Reddit</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to cross-post to your subreddit or profile.</span>
+                  </>
+                )}
+              </div>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center', marginTop: '.5rem'}}>
+                {discordStatus.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>Discord connected</span>
+                    {discordStatus.meta?.guilds && (
+                      <span style={{color:'#9aa4b2'}}>Servers: {discordStatus.meta.guilds.length}</span>
+                    )}
+                    <button className="check-quality" onClick={handleConnectDiscord}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectDiscord}>Connect Discord</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to post to channels or get analytics.</span>
+                  </>
+                )}
+              </div>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center', marginTop: '.5rem'}}>
+                {linkedinStatus.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>LinkedIn connected</span>
+                    {linkedinStatus.meta?.profile && (
+                      <span style={{color:'#9aa4b2'}}>{linkedinStatus.meta.profile.localizedFirstName || ''} {linkedinStatus.meta.profile.localizedLastName || ''}</span>
+                    )}
+                    <button className="check-quality" onClick={handleConnectLinkedin}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectLinkedin}>Connect LinkedIn</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to share posts and company pages.</span>
+                  </>
+                )}
+              </div>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center', marginTop: '.5rem'}}>
+                {telegramStatus.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>Telegram connected</span>
+                    {telegramStatus.meta?.chat && (
+                      <span style={{color:'#9aa4b2'}}>{telegramStatus.meta.chat.title || 'Chat'}</span>
+                    )}
+                    <button className="check-quality" onClick={handleConnectTelegram}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectTelegram}>Connect Telegram</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to post to channels or groups.</span>
+                  </>
+                )}
+              </div>
+              <div style={{display:'flex', gap:'.75rem', alignItems:'center', marginTop: '.5rem'}}>
+                {pinterestStatus.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>Pinterest connected</span>
+                    {pinterestStatus.meta?.boards && (
+                      <span style={{color:'#9aa4b2'}}>Boards: {pinterestStatus.meta.boards.length}</span>
+                    )}
+                    <button className="check-quality" onClick={handleConnectPinterest}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handleConnectPinterest}>Connect Pinterest</button>
+                    <span style={{color:'#9aa4b2'}}>Connect to pin content and manage boards.</span>
                   </>
                 )}
               </div>

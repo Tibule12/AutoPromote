@@ -50,7 +50,7 @@ const validateContentData = (req, res, next) => {
     if (!Array.isArray(target_platforms)) {
       errors.push('Target platforms must be an array');
     } else {
-      const validPlatforms = ['youtube', 'tiktok', 'instagram', 'facebook', 'twitter', 'linkedin', 'pinterest'];
+  const validPlatforms = ['youtube', 'tiktok', 'instagram', 'facebook', 'twitter', 'linkedin', 'pinterest', 'spotify', 'reddit', 'discord', 'telegram'];
       const invalidPlatforms = target_platforms.filter(platform => !validPlatforms.includes(platform));
       if (invalidPlatforms.length > 0) {
         errors.push(`Invalid platforms: ${invalidPlatforms.join(', ')}`);
@@ -198,7 +198,7 @@ const validatePromotionData = (req, res, next) => {
   if (!platform || typeof platform !== 'string') {
     errors.push('Platform is required and must be a string');
   } else {
-    const validPlatforms = ['youtube', 'tiktok', 'instagram', 'facebook', 'twitter', 'linkedin', 'pinterest', 'all'];
+  const validPlatforms = ['youtube', 'tiktok', 'instagram', 'facebook', 'twitter', 'linkedin', 'pinterest', 'spotify', 'reddit', 'discord', 'telegram', 'all'];
     if (!validPlatforms.includes(platform)) {
       errors.push(`Invalid platform. Must be one of: ${validPlatforms.join(', ')}`);
     }

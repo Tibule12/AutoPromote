@@ -33,19 +33,32 @@ router.get('/status', authMiddleware, require('../statusInstrument')('platformCo
   const cacheKey = `platform_connections_status_${uid}`;
   const cached = getCache(cacheKey);
   if (cached) return res.json({ ...cached, _cached: true });
-  const [twitter, youtube, facebook, tiktok] = await Promise.all([
+  // include additional platforms so frontend can query a single status endpoint
+  const [twitter, youtube, facebook, tiktok, spotify, reddit, discord, linkedin, telegram, pinterest] = await Promise.all([
     getConn(uid, 'twitter'),
     getConn(uid, 'youtube'),
     getConn(uid, 'facebook'),
-    getConn(uid, 'tiktok')
+    getConn(uid, 'tiktok'),
+    getConn(uid, 'spotify'),
+    getConn(uid, 'reddit'),
+    getConn(uid, 'discord'),
+    getConn(uid, 'linkedin'),
+    getConn(uid, 'telegram'),
+    getConn(uid, 'pinterest')
   ]);
   const summary = {
     twitter: { connected: twitter.connected, username: twitter.identity?.username },
     youtube: { connected: youtube.connected, channelTitle: youtube.channel?.snippet?.title },
     facebook: { connected: facebook.connected, pages: Array.isArray(facebook.pages) ? facebook.pages.map(p=>p.name).slice(0,3) : [] },
-    tiktok: { connected: tiktok.connected, display_name: tiktok.display_name }
+    tiktok: { connected: tiktok.connected, display_name: tiktok.display_name },
+    spotify: { connected: spotify.connected },
+    reddit: { connected: reddit.connected },
+    discord: { connected: discord.connected },
+    linkedin: { connected: linkedin.connected },
+    telegram: { connected: telegram.connected },
+    pinterest: { connected: pinterest.connected }
   };
-  const payload = { ok: true, summary, raw: { twitter, youtube, facebook, tiktok } };
+  const payload = { ok: true, summary, raw: { twitter, youtube, facebook, tiktok, spotify, reddit, discord, linkedin, telegram, pinterest } };
   setCache(cacheKey, payload, 7000);
   res.json(payload);
 }));

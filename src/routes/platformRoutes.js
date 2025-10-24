@@ -3,6 +3,22 @@ const router = express.Router();
 const authMiddleware = require('../authMiddleware');
 const { SUPPORTED_PLATFORMS } = require('../validationMiddleware');
 const { db } = require('../firebaseAdmin');
+// Engines to warm-up/connect on new platform connections
+const smartDistributionEngine = require('../services/smartDistributionEngine');
+const admin = require('../firebaseAdmin').admin;
+const engagementBoostingService = require('../services/engagementBoostingService');
+const { enqueuePlatformPostTask } = require('../services/promotionTaskQueue');
+
+// Try to use global fetch (Node 18+). Fall back to node-fetch if available.
+let fetchFn = global.fetch;
+if (!fetchFn) {
+  try {
+    // eslint-disable-next-line global-require
+    fetchFn = require('node-fetch');
+  } catch (e) {
+    fetchFn = null;
+  }
+}
 
 function normalize(name){ return String(name||'').toLowerCase(); }
 
@@ -28,24 +44,363 @@ router.get('/:platform/status', authMiddleware, async (req, res) => {
   }
 });
 
-// GET /api/:platform/auth/start
+// POST /api/:platform/auth/prepare
+// Auth required endpoint that returns an OAuth start URL (authUrl) for the frontend to open.
+// Stores a random state token in Firestore at `oauth_states/{state}` mapping to uid/platform for later validation.
+router.post('/:platform/auth/prepare', authMiddleware, async (req, res) => {
+  const platform = normalize(req.params.platform);
+  if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
+  try {
+    const host = `${req.protocol}://${req.get('host')}`;
+    const uid = req.userId || req.user?.uid || null;
+    const crypto = require('crypto');
+    const state = crypto.randomBytes(18).toString('base64url');
+    const now = Date.now();
+    const expiresAt = new Date(now + (5 * 60 * 1000)).toISOString(); // 5 minutes
+
+    // persist state mapping (best-effort)
+    try {
+      await db.collection('oauth_states').doc(state).set({ uid: uid || null, platform, createdAt: new Date(now).toISOString(), expiresAt }, { merge: false });
+    } catch (e) {
+      console.warn('[oauth] failed to persist state mapping', e && e.message);
+      // continue — we still return a state token but callbacks will fallback to legacy parsing
+    }
+
+    if (platform === 'reddit') {
+      const clientId = process.env.REDDIT_CLIENT_ID;
+      const redirectUri = `${host}/api/reddit/auth/callback`;
+      // Scopes: adjust as needed
+      const scope = encodeURIComponent('identity read submit save');
+      const url = `https://www.reddit.com/api/v1/authorize?client_id=${clientId}&response_type=code&state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}&duration=permanent&scope=${scope}`;
+      return res.json({ ok: true, platform, authUrl: url, state });
+    }
+    if (platform === 'discord') {
+      const clientId = process.env.DISCORD_CLIENT_ID;
+      const redirectUri = `${host}/api/discord/auth/callback`;
+      const scope = encodeURIComponent('identify guilds');
+      const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}`;
+      return res.json({ ok: true, platform, authUrl: url, state });
+    }
+
+    if (platform === 'spotify') {
+      const clientId = process.env.SPOTIFY_CLIENT_ID;
+      const redirectUri = `${host}/api/spotify/auth/callback`;
+      // scopes: adjust later as needed when you register the app
+      const scope = encodeURIComponent('user-read-email playlist-modify-public playlist-modify-private');
+      const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&show_dialog=true`;
+      return res.json({ ok: true, platform, authUrl: url, state });
+    }
+
+    // Default: return placeholder callback URL so frontend can open something
+    const callbackUrl = `${req.protocol}://${req.get('host')}/api/${platform}/auth/callback`;
+    return res.json({ ok: true, platform, authUrl: callbackUrl, state, note: 'placeholder_auth_start' });
+  } catch (e) {
+    return res.status(500).json({ ok: false, platform, error: e.message });
+  }
+});
+
+// GET /api/:platform/auth/start (public) - returns a URL the frontend can open.
 router.get('/:platform/auth/start', async (req, res) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
-  // Placeholder: return a client-side redirect URL or an OAuth start url when implemented.
-  // For now, return a lightweight JSON payload the frontend can use to open a popup.
+  // Return the prepare URL (client should POST to prepare when authenticated), or a callback placeholder.
+  const prepareUrl = `${req.protocol}://${req.get('host')}/api/${platform}/auth/prepare`;
   const callbackUrl = `${req.protocol}://${req.get('host')}/api/${platform}/auth/callback`;
-  return res.json({ ok: true, platform, url: callbackUrl, note: 'placeholder_auth_start' });
+  return res.json({ ok: true, platform, prepareUrl, callbackUrl, note: 'use_prepare_post_with_auth' });
 });
 
-// GET /api/:platform/auth/callback
+// POST /api/:platform/auth/simulate - create a fake connected document for testing (auth required)
+router.post('/:platform/auth/simulate', authMiddleware, async (req, res) => {
+  const platform = normalize(req.params.platform);
+  if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
+  try {
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(400).json({ ok: false, error: 'missing_user' });
+    const userRef = db.collection('users').doc(uid);
+    const now = new Date().toISOString();
+    const fakeMeta = Object.assign({ display_name: `${platform} test user`, simulated: true }, req.body.meta || {});
+    await userRef.collection('connections').doc(platform).set({ connected: true, meta: fakeMeta, simulated: true, updatedAt: now }, { merge: true });
+
+    // Post-connection hooks: create event, update user's connectedPlatforms list and write lightweight recommendations
+    try {
+      await db.collection('events').add({ type: 'platform_connected', uid, platform, simulated: true, at: new Date().toISOString() });
+      // add platform to user's connectedPlatforms array
+      try {
+        if (admin && admin.firestore && admin.firestore.FieldValue && admin.firestore.FieldValue.arrayUnion) {
+          await userRef.set({ connectedPlatforms: admin.firestore.FieldValue.arrayUnion(platform) }, { merge: true });
+        } else {
+          // fallback: best-effort append (may create duplicates)
+          const existing = (await userRef.get()).data() || {};
+          const arr = Array.isArray(existing.connectedPlatforms) ? existing.connectedPlatforms : [];
+          if (!arr.includes(platform)) arr.push(platform);
+          await userRef.set({ connectedPlatforms: arr }, { merge: true });
+        }
+      } catch(_){ }
+      // Generate a recommended posting time and a sample caption to help the user get started
+      try {
+        const rec = smartDistributionEngine.calculateOptimalPostingTime(platform, /* timezone */ (fakeMeta.timezone || 'UTC'));
+        const captionExample = engagementBoostingService.generateViralCaption({ title: 'My first post', description: '' }, platform, {});
+        await userRef.collection('connections').doc(platform).set({ recommendations: { posting: rec, captionExample }, updatedAt: new Date().toISOString() }, { merge: true });
+      } catch (e) {
+        // non-fatal
+        console.warn('[platform][simulate] recommendation generation failed', e && e.message);
+      }
+    } catch (e) {
+      console.warn('[platform][simulate] post-connection hooks failed', e && e.message);
+    }
+
+    return res.json({ ok: true, platform, simulated: true });
+  } catch (e) {
+    return res.status(500).json({ ok: false, platform, error: e.message });
+  }
+});
+
+// OAuth callbacks - handle code exchange for supported platforms
+// GET /api/reddit/auth/callback
+router.get('/reddit/auth/callback', async (req, res) => {
+  const platform = 'reddit';
+  const code = req.query.code;
+  const state = req.query.state;
+  if (!code) return res.status(400).send('Missing code');
+  try {
+    if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
+    const clientId = process.env.REDDIT_CLIENT_ID;
+    const clientSecret = process.env.REDDIT_CLIENT_SECRET;
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/reddit/auth/callback`;
+    const tokenUrl = 'https://www.reddit.com/api/v1/access_token';
+    const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri });
+    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const tokenRes = await fetchFn(tokenUrl, { method: 'POST', headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+    const tokenJson = await tokenRes.json();
+    // Resolve user from stored state mapping (Firestore) where possible, fallback to legacy parsing
+    let uid = null;
+    try {
+      if (state) {
+        const sd = await db.collection('oauth_states').doc(state).get();
+        if (sd.exists) {
+          const s = sd.data();
+          if (!s.expiresAt || new Date(s.expiresAt) > new Date()) {
+            uid = s.uid || null;
+          }
+          try { await db.collection('oauth_states').doc(state).delete(); } catch(_){}
+        }
+      }
+    } catch (e) {
+      console.warn('[oauth][reddit] state lookup failed', e && e.message);
+    }
+    if (!uid && state && state.split && state.split(':')[0]) uid = state.split(':')[0];
+    if (uid && uid !== 'anon') {
+      const userRef = db.collection('users').doc(uid);
+      const now = new Date().toISOString();
+      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, updatedAt: now }, { merge: true });
+      // Post-connection hooks: queue light-weight recommendations and event for downstream engines
+      try {
+        await db.collection('events').add({ type: 'platform_connected', uid, platform, at: new Date().toISOString() });
+        try {
+          const rec = smartDistributionEngine.calculateOptimalPostingTime(platform, 'UTC');
+          const captionExample = engagementBoostingService.generateViralCaption({ title: 'Welcome post', description: '' }, platform, {});
+          await userRef.collection('connections').doc(platform).set({ recommendations: { posting: rec, captionExample }, updatedAt: new Date().toISOString() }, { merge: true });
+        } catch (e) { console.warn('[platform][reddit] recommendation generation failed', e && e.message); }
+        try {
+          if (admin && admin.firestore && admin.firestore.FieldValue && admin.firestore.FieldValue.arrayUnion) {
+            await userRef.set({ connectedPlatforms: admin.firestore.FieldValue.arrayUnion(platform) }, { merge: true });
+          } else {
+            const existing = (await userRef.get()).data() || {};
+            const arr = Array.isArray(existing.connectedPlatforms) ? existing.connectedPlatforms : [];
+            if (!arr.includes(platform)) arr.push(platform);
+            await userRef.set({ connectedPlatforms: arr }, { merge: true });
+          }
+        } catch(_){ }
+      } catch (e) {
+        console.warn('[platform][reddit] post-connection hooks failed', e && e.message);
+      }
+    }
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.send('Reddit OAuth callback received. You can close this window.');
+  } catch (e) {
+    return res.status(500).send('Reddit callback error: ' + e.message);
+  }
+});
+
+// GET /api/discord/auth/callback
+router.get('/discord/auth/callback', async (req, res) => {
+  const platform = 'discord';
+  const code = req.query.code;
+  const state = req.query.state;
+  if (!code) return res.status(400).send('Missing code');
+  try {
+    if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
+    const clientId = process.env.DISCORD_CLIENT_ID;
+    const clientSecret = process.env.DISCORD_CLIENT_SECRET;
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/discord/auth/callback`;
+    const tokenUrl = 'https://discord.com/api/oauth2/token';
+    const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri, client_id: clientId, client_secret: clientSecret });
+    const tokenRes = await fetchFn(tokenUrl, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+    const tokenJson = await tokenRes.json();
+    // Fetch user identity to store helpful meta
+    let meta = {};
+    if (tokenJson.access_token) {
+      const identityRes = await fetchFn('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${tokenJson.access_token}` } });
+      if (identityRes.ok) meta = await identityRes.json();
+    }
+    // Resolve user from stored state mapping (Firestore) where possible, fallback to legacy parsing
+    let uid = null;
+    try {
+      if (state) {
+        const sd = await db.collection('oauth_states').doc(state).get();
+        if (sd.exists) {
+          const s = sd.data();
+          if (!s.expiresAt || new Date(s.expiresAt) > new Date()) {
+            uid = s.uid || null;
+          }
+          try { await db.collection('oauth_states').doc(state).delete(); } catch(_){}
+        }
+      }
+    } catch (e) {
+      console.warn('[oauth][discord] state lookup failed', e && e.message);
+    }
+    if (!uid && state && state.split && state.split(':')[0]) uid = state.split(':')[0];
+    if (uid && uid !== 'anon') {
+      const userRef = db.collection('users').doc(uid);
+      const now = new Date().toISOString();
+      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, meta, updatedAt: now }, { merge: true });
+      // Post-connection hooks: create event, add recommendations
+      try {
+        await db.collection('events').add({ type: 'platform_connected', uid, platform, at: new Date().toISOString() });
+        try {
+          const rec = smartDistributionEngine.calculateOptimalPostingTime(platform, 'UTC');
+          const captionExample = engagementBoostingService.generateViralCaption({ title: 'Welcome post', description: '' }, platform, {});
+          await userRef.collection('connections').doc(platform).set({ recommendations: { posting: rec, captionExample }, updatedAt: new Date().toISOString() }, { merge: true });
+        } catch (e) { console.warn('[platform][discord] recommendation generation failed', e && e.message); }
+        try {
+          if (admin && admin.firestore && admin.firestore.FieldValue && admin.firestore.FieldValue.arrayUnion) {
+            await userRef.set({ connectedPlatforms: admin.firestore.FieldValue.arrayUnion(platform) }, { merge: true });
+          } else {
+            const existing = (await userRef.get()).data() || {};
+            const arr = Array.isArray(existing.connectedPlatforms) ? existing.connectedPlatforms : [];
+            if (!arr.includes(platform)) arr.push(platform);
+            await userRef.set({ connectedPlatforms: arr }, { merge: true });
+          }
+        } catch(_){ }
+      } catch (e) {
+        console.warn('[platform][discord] post-connection hooks failed', e && e.message);
+      }
+    }
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.send('Discord OAuth callback received. You can close this window.');
+  } catch (e) {
+    return res.status(500).send('Discord callback error: ' + e.message);
+  }
+});
+
+// GET /api/spotify/auth/callback
+router.get('/spotify/auth/callback', async (req, res) => {
+  const platform = 'spotify';
+  const code = req.query.code;
+  const state = req.query.state;
+  if (!code) return res.status(400).send('Missing code');
+  try {
+    if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/spotify/auth/callback`;
+    const tokenUrl = 'https://accounts.spotify.com/api/token';
+    const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri });
+    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const tokenRes = await fetchFn(tokenUrl, { method: 'POST', headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+    const tokenJson = await tokenRes.json();
+
+    // Fetch user profile if we have an access token
+    let meta = {};
+    if (tokenJson.access_token) {
+      try {
+        const profileRes = await fetchFn('https://api.spotify.com/v1/me', { headers: { Authorization: `Bearer ${tokenJson.access_token}` } });
+        if (profileRes.ok) meta = await profileRes.json();
+      } catch (_) { /* non-fatal */ }
+    }
+
+    // Resolve user from stored state mapping (Firestore) where possible, fallback to legacy parsing
+    let uid = null;
+    try {
+      if (state) {
+        const sd = await db.collection('oauth_states').doc(state).get();
+        if (sd.exists) {
+          const s = sd.data();
+          if (!s.expiresAt || new Date(s.expiresAt) > new Date()) {
+            uid = s.uid || null;
+          }
+          try { await db.collection('oauth_states').doc(state).delete(); } catch(_){ }
+        }
+      }
+    } catch (e) {
+      console.warn('[oauth][spotify] state lookup failed', e && e.message);
+    }
+    if (!uid && state && state.split && state.split(':')[0]) uid = state.split(':')[0];
+
+    if (uid && uid !== 'anon') {
+      const userRef = db.collection('users').doc(uid);
+      const now = new Date().toISOString();
+      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, meta, updatedAt: now }, { merge: true });
+      // Post-connection hooks: event, recs, add to connectedPlatforms
+      try {
+        await db.collection('events').add({ type: 'platform_connected', uid, platform, at: new Date().toISOString() });
+        try {
+          const rec = smartDistributionEngine.calculateOptimalPostingTime(platform, 'UTC');
+          const captionExample = engagementBoostingService.generateViralCaption({ title: 'Welcome post', description: '' }, platform, {});
+          await userRef.collection('connections').doc(platform).set({ recommendations: { posting: rec, captionExample }, updatedAt: new Date().toISOString() }, { merge: true });
+        } catch (e) { console.warn('[platform][spotify] recommendation generation failed', e && e.message); }
+        try {
+          if (admin && admin.firestore && admin.firestore.FieldValue && admin.firestore.FieldValue.arrayUnion) {
+            await userRef.set({ connectedPlatforms: admin.firestore.FieldValue.arrayUnion(platform) }, { merge: true });
+          } else {
+            const existing = (await userRef.get()).data() || {};
+            const arr = Array.isArray(existing.connectedPlatforms) ? existing.connectedPlatforms : [];
+            if (!arr.includes(platform)) arr.push(platform);
+            await userRef.set({ connectedPlatforms: arr }, { merge: true });
+          }
+        } catch(_){ }
+      } catch (e) {
+        console.warn('[platform][spotify] post-connection hooks failed', e && e.message);
+      }
+    }
+
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.send('Spotify OAuth callback received. You can close this window.');
+  } catch (e) {
+    return res.status(500).send('Spotify callback error: ' + e.message);
+  }
+});
+
+// Generic placeholder callback for other platforms
 router.get('/:platform/auth/callback', async (req, res) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).send('Unsupported platform');
-  // Placeholder callback handler. Real implementations should exchange codes/tokens
-  // and persist user connection metadata in users/{uid}/connections/{platform}.
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   return res.send('Callback placeholder - implement OAuth exchange for ' + platform);
+});
+
+// POST /api/:platform/sample-promote - enqueue a sample platform_post for testing (auth required)
+router.post('/:platform/sample-promote', authMiddleware, async (req, res) => {
+  const platform = normalize(req.params.platform);
+  if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
+  try {
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+    let { contentId } = req.body || {};
+    // If no contentId provided, attempt to pick the latest content for the user
+    if (!contentId) {
+      try {
+        const snap = await db.collection('content').where('user_id','==', uid).orderBy('created_at','desc').limit(1).get();
+        if (!snap.empty) contentId = snap.docs[0].id;
+      } catch(_){}
+    }
+    if (!contentId) return res.status(400).json({ ok: false, error: 'content_required' });
+    const payload = req.body.payload || { message: 'Sample promotion', link: null };
+    const result = await enqueuePlatformPostTask({ contentId, uid, platform, reason: 'sample_promote', payload, skipIfDuplicate: false, forceRepost: true });
+    return res.json({ ok: true, enqueued: !!result.id, result });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
 });
 
 module.exports = router;
