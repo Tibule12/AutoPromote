@@ -5,6 +5,13 @@
 
 const fetch = require('node-fetch');
 const { db } = require('../firebaseAdmin');
+// New platform service stubs
+const { postToSpotify } = require('./spotifyService');
+const { postToReddit } = require('./redditService');
+const { postToDiscord } = require('./discordService');
+const { postToLinkedIn } = require('./linkedinService');
+const { postToTelegram } = require('./telegramService');
+const { postToPinterest } = require('./pinterestService');
 
 // Utility: safe JSON
 async function safeJson(res) {
@@ -121,6 +128,13 @@ const handlers = {
   twitter: postToTwitter,
   instagram: postToInstagram,
   tiktok: postToTikTok
+  ,
+  linkedin: postToLinkedIn,
+  pinterest: postToPinterest,
+  spotify: postToSpotify,
+  reddit: postToReddit,
+  discord: postToDiscord,
+  telegram: postToTelegram
 };
 
 async function dispatchPlatformPost({ platform, contentId, payload, reason, uid }) {

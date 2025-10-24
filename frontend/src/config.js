@@ -66,6 +66,25 @@ export const API_ENDPOINTS = {
   // Health check
   HEALTH: `${API_BASE_URL}/api/health`,
 
+  // New platform endpoints (placeholders)
+  SPOTIFY_AUTH_START: `${API_BASE_URL}/api/spotify/auth/start`,
+  SPOTIFY_STATUS: `${API_BASE_URL}/api/spotify/status`,
+
+  REDDIT_AUTH_START: `${API_BASE_URL}/api/reddit/auth/start`,
+  REDDIT_STATUS: `${API_BASE_URL}/api/reddit/status`,
+
+  DISCORD_AUTH_START: `${API_BASE_URL}/api/discord/auth/start`,
+  DISCORD_STATUS: `${API_BASE_URL}/api/discord/status`,
+
+  LINKEDIN_AUTH_START: `${API_BASE_URL}/api/linkedin/auth/start`,
+  LINKEDIN_STATUS: `${API_BASE_URL}/api/linkedin/status`,
+
+  TELEGRAM_AUTH_START: `${API_BASE_URL}/api/telegram/auth/start`,
+  TELEGRAM_STATUS: `${API_BASE_URL}/api/telegram/status`,
+
+  PINTEREST_AUTH_START: `${API_BASE_URL}/api/pinterest/auth/start`,
+  PINTEREST_STATUS: `${API_BASE_URL}/api/pinterest/status`,
+
   // Monetization / Earnings
   EARNINGS_SUMMARY: `${API_BASE_URL}/api/monetization/earnings/summary`,
   EARNINGS_PAYOUT_SELF: `${API_BASE_URL}/api/monetization/earnings/payout/self`,
