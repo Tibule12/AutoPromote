@@ -277,13 +277,15 @@ try {
   console.log('⚠️ Snapchat routes not found:', e.message);
   snapchatRoutes = express.Router();
 }
-try {
-  platformConnectionsRoutes = require('./routes/platformConnectionsRoutes');
-  console.log('✅ Platform connections routes loaded');
-} catch (e) {
-  console.log('⚠️ Platform connections routes not found:', e.message);
-  platformConnectionsRoutes = express.Router();
-}
+ // Generic platform routes (status/auth placeholders for spotify, reddit, discord, linkedin, telegram, pinterest)
+ let platformRoutes;
+ try {
+   platformRoutes = require('./routes/platformRoutes');
+   console.log('✅ Generic platform routes loaded');
+ } catch (e) {
+   console.log('⚠️ Generic platform routes not found:', e.message);
+   platformRoutes = express.Router();
+ }
 try {
   promotionTaskRoutes = require('./routes/promotionTaskRoutes');
   console.log('✅ Promotion task routes loaded');
@@ -565,6 +567,14 @@ app.use('/api/snapchat', snapchatRoutes);
 console.log('🚏 Snapchat routes mounted at /api/snapchat');
 app.use('/api/platform', platformConnectionsRoutes);
 console.log('🚏 Platform connections routes mounted at /api/platform');
+// Mount generic platform routes under /api so frontend placeholder endpoints like
+// /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
+try {
+  app.use('/api', platformRoutes);
+  console.log('🚏 Generic platform routes mounted at /api/:platform/*');
+} catch (e) {
+  console.log('⚠️ Failed to mount generic platform routes:', e.message);
+}
 app.use('/api/promotion-tasks', promotionTaskRoutes);
 console.log('🚏 Promotion task routes mounted at /api/promotion-tasks');
 app.use('/api/metrics', metricsRoutes);
