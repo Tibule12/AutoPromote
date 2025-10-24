@@ -6,7 +6,7 @@
  */
 
 // API Base URL - change this to your actual backend URL
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://autopromote.onrender.com';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://autopromote-1.onrender.com';
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -29,7 +29,7 @@ export const API_ENDPOINTS = {
   ADMIN_ANALYTICS: `${API_BASE_URL}/api/admin/analytics/overview`,
   
   // TikTok endpoints
-  TIKTOK_AUTH_START: `${API_BASE_URL}/api/tiktok/auth/start`,
+  TIKTOK_AUTH_START: `${API_BASE_URL}/api/tiktok/auth/prepare`,
   TIKTOK_STATUS: `${API_BASE_URL}/api/tiktok/status`,
 
   // Facebook endpoints
@@ -53,6 +53,10 @@ export const API_ENDPOINTS = {
   TWITTER_TWEET_TEST: `${API_BASE_URL}/api/twitter/tweet/test`,
   TWITTER_TWEET_IMMEDIATE: `${API_BASE_URL}/api/twitter/tweet/immediate`,
 
+  // Snapchat endpoints
+  SNAPCHAT_AUTH_PREPARE: `${API_BASE_URL}/api/snapchat/oauth/prepare`,
+  SNAPCHAT_STATUS: `${API_BASE_URL}/api/snapchat/status`,
+
   // Schedule actions (construct with ID)
   SCHEDULE_PAUSE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/pause`,
   SCHEDULE_RESUME: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/resume`,
@@ -61,6 +65,25 @@ export const API_ENDPOINTS = {
 
   // Health check
   HEALTH: `${API_BASE_URL}/api/health`,
+
+  // New platform endpoints (placeholders)
+  SPOTIFY_AUTH_START: `${API_BASE_URL}/api/spotify/auth/start`,
+  SPOTIFY_STATUS: `${API_BASE_URL}/api/spotify/status`,
+
+  REDDIT_AUTH_START: `${API_BASE_URL}/api/reddit/auth/start`,
+  REDDIT_STATUS: `${API_BASE_URL}/api/reddit/status`,
+
+  DISCORD_AUTH_START: `${API_BASE_URL}/api/discord/auth/start`,
+  DISCORD_STATUS: `${API_BASE_URL}/api/discord/status`,
+
+  LINKEDIN_AUTH_START: `${API_BASE_URL}/api/linkedin/auth/start`,
+  LINKEDIN_STATUS: `${API_BASE_URL}/api/linkedin/status`,
+
+  TELEGRAM_AUTH_START: `${API_BASE_URL}/api/telegram/auth/start`,
+  TELEGRAM_STATUS: `${API_BASE_URL}/api/telegram/status`,
+
+  PINTEREST_AUTH_START: `${API_BASE_URL}/api/pinterest/auth/start`,
+  PINTEREST_STATUS: `${API_BASE_URL}/api/pinterest/status`,
 
   // Monetization / Earnings
   EARNINGS_SUMMARY: `${API_BASE_URL}/api/monetization/earnings/summary`,

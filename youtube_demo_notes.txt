@@ -1,0 +1,29 @@
+YouTube demo notes - App Review guidance
+
+Question: Can I record the demo with my phone while showing a YouTube video (since YouTube is already connected) and demonstrate the flow to Facebook?
+
+Short answer:
+  Yes — a phone-recorded demonstration that shows the exact user flow is acceptable to Facebook reviewers, as long as the recording clearly shows the user actions (permission dialog, button presses) and the API evidence (me_videos.json and/or debug_token.json) you attach. Reviewers primarily need to see the user experience and the associated API outputs that demonstrate the permission was requested and used correctly.
+
+What to record and include (recommended):
+  1. Start the phone camera in landscape and clearly show your screen where you open AutoPromote.
+  2. Show connecting the YouTube video (if you're importing from YouTube) or selecting the local file (video_landscape.mp4) in the app.
+  3. Show the Facebook permission dialog and tap to grant the permission (so the reviewer can see the grant). Zoom or lean in if the dialog text is small.
+  4. Show the upload progress and completion in the app.
+  5. Switch to the Graph API Explorer (on desktop or mobile browser) and run GET /me/videos with the same test user token — show the request and the JSON response (or read it aloud while pointing the camera). Save and attach the JSON response as `me_videos.json`.
+  6. (Optional but recommended) Run the debug_token call and show the response briefly (save as `debug_token.json`) so reviewers can confirm the token scopes include `user_videos`.
+  7. If Facebook shows the banner "All videos you post on Facebook are now reels", make sure to include that in the recording (point to it) and narrate it.
+
+File checklist to attach to App Review:
+  - screen_recording_trimmed.mp4 (or your phone-recorded video file)
+  - me_videos.json
+  - debug_token.json (if you run debug_token)
+  - facebook_app_review_user_videos_README.txt and facebook_app_review_api_commands.txt
+
+Notes and tips:
+  - Keep the phone steady and ensure text on screen is readable; use zoom if necessary.
+  - Record in landscape orientation for easier viewing.
+  - Do not include secrets in the public upload; blur or pause the camera when copying secrets. Save the JSON outputs and attach them; do not speak or show raw app secrets on camera.
+  - If the Graph API response doesn't list the profile upload due to Reels conversion, the recording plus debug_token.json is acceptable evidence. You can also show a Page upload flow as a fallback.
+
+If you want, I can add a short script to the repo that will generate a small on-screen overlay (timestamp + short narration text) to make phone-recorded demos easier to follow. Ask me to add it if you'd like that.

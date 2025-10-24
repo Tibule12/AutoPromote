@@ -109,7 +109,7 @@ async function testContentFlowSimple() {
     console.log('   - Cleanup: ✅');
 
     console.log('\n📝 Note: For advanced queries (filter + sort), create composite indexes:');
-    console.log('   https://console.firebase.google.com/project/autopromote-464de/firestore/indexes');
+  console.log('   https://console.firebase.google.com/project/autopromote-cc6d3/firestore/indexes');
 
   } catch (error) {
     console.error('❌ Test failed:', error.message);

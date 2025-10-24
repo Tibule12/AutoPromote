@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300">
+  <style>
+    .bg { fill: #ffffff; }
+    .title { font: 700 20px/1.2 'Segoe UI', Arial, sans-serif; fill: #111827; }
+    .sub { font: 400 13px/1.2 'Segoe UI', Arial, sans-serif; fill: #374151; }
+    .mono { font: 12px/1.4 'Consolas', 'Courier New', monospace; fill: #0f172a; }
+    .line { stroke: #e6edf3; }
+    .box { fill: #f8fafc; stroke: #e5e7eb; }
+  </style>
+  <rect class="bg" width="100%" height="100%"/>
+  <text x="24" y="36" class="title">Server patch log (example) — facebook_app_review/server_patch_log_example.txt</text>
+  <text x="24" y="60" class="sub">Redact any internal hostnames/IPs. Keep timestamps and commands visible.</text>
+
+  <g transform="translate(24,84)">
+    <rect class="box" x="0" y="0" width="952" height="196" rx="6"/>
+  <text x="12" y="22" class="mono">2025-10-18 02:10:12 UTC - apt-get update &amp;&amp; apt-get -y upgrade</text>
+    <text x="12" y="46" class="mono">2025-10-18 02:10:45 UTC - Installed linux-image-5.15.0-88-generic</text>
+    <text x="12" y="70" class="mono">2025-10-18 02:10:55 UTC - Ran CI smoke tests: all tests passed</text>
+  <text x="12" y="94" class="mono">2025-09-20 03:05:01 UTC - apt-get update &amp;&amp; apt-get -y upgrade</text>
+    <text x="12" y="118" class="mono">2025-09-20 03:05:45 UTC - Rebooted web server to apply kernel updates</text>
+    <text x="12" y="142" class="mono">2025-08-10 11:10:09 UTC - Applied security patch for openssl</text>
+    <text x="12" y="166" class="mono">Note: This is a small sample of the patch log. Provide more lines if needed.</text>
+  </g>
+
+  <text x="24" y="292" class="sub">If you use a different package manager (yum, dnf) show same style of entries.</text>
+</svg>

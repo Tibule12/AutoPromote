@@ -8,9 +8,9 @@ const { getAuth, signInWithEmailAndPassword, signOut } = require('firebase/auth'
 // Firebase configuration with correct API key
 const firebaseConfig = {
   apiKey: "AIzaSyASTUuMkz821PoHRopZ8yy1dW5COrAQPZY",
-  authDomain: "autopromote-464de.firebaseapp.com",
-  projectId: "autopromote-464de",
-  storageBucket: "autopromote-464de.firebasestorage.app",
+  authDomain: "autopromote-cc6d3.firebaseapp.com",
+  projectId: "autopromote-cc6d3",
+  storageBucket: "autopromote-cc6d3.firebasestorage.app",
   messagingSenderId: "317746682241",
   appId: "1:317746682241:web:f363e099d55ffd1af1b080",
   measurementId: "G-8QDQXF0FPQ"

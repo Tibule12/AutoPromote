@@ -1,10 +1,22 @@
-# TODO: Fix Upload Button Not Uploading Content
+# Snapchat Platform Integration Implementation
 
-## Completed Steps
-- [x] Update backend schema in src/contentRoutes.js: make url conditional (required for video/image, optional for text), add articleText field.
-- [x] Change frontend type 'article' to 'text' in ContentUploadForm.js.
-- [x] Update all conditions in ContentUploadForm.js from 'article' to 'text'.
-- [x] Fix App.js handleContentUpload: add url to destructuring, rename variable to finalUrl, remove duplicate upload logic, use finalUrl for payload.url.
+## Phase 1: Backend Implementation
+- [ ] Create snapchatRoutes.js with OAuth endpoints
+- [ ] Add Snapchat environment variables to PLATFORM_INTEGRATIONS_ENV.md
+- [ ] Update promotionService.js with Snapchat platform multiplier and optimization settings
+- [ ] Update platformAutomation.js to handle Snapchat promotions
+- [ ] Add Snapchat routes to main server.js
 
-## Next Steps
-- [ ] Test upload functionality: critical-path testing (verify POST /api/content/upload returns 201 for text and video types, content appears in /api/content/my-content).
+## Phase 2: Frontend Integration
+- [ ] Add Snapchat as platform option in frontend UI
+- [ ] Create Snapchat OAuth frontend mock page
+- [ ] Update platform selection components
+
+## Phase 3: Testing & Validation
+- [ ] Test Snapchat OAuth flow simulation
+- [ ] Test promotion execution with Snapchat platform
+- [ ] Validate metrics calculation and revenue attribution
+- [ ] Update documentation
+
+## Current Status
+- Starting with snapchatRoutes.js creation

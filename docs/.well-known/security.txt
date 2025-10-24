@@ -1,0 +1,7 @@
+Contact: mailto:tmtshwelo21@gmail.com
+Preferred-Languages: en
+Acknowledgements: https://yourdomain.example/security
+Policy: https://yourdomain.example/security
+Expires: 2026-10-21
+
+# Replace the example Policy/Acknowledgements URLs with your publicly hosted security page URL before publishing.

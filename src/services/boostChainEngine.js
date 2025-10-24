@@ -2,7 +2,7 @@
 // AutoPromote Boost Chains & Viral Loops Logic
 // Spreads content virally via user-to-user chains, squads, and referral rewards
 
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('../../lib/uuid-compat');
 
 function createBoostChain(contentId, initiatorId, squadUserIds = []) {
   // Create a boost chain record

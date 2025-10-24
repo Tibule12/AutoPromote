@@ -209,13 +209,60 @@ global.__getRouteMetrics = () => {
 global.__instrumentWrapper = (routeId, fn) => instrumentHandler(fn, routeId);
 
 
-// Load core routes
-const authRoutes = require('./authRoutes');
-const userRoutes = require('./userRoutes');
-const contentRoutes = require('./contentRoutes');
-const analyticsRoutes = require('./analyticsRoutes');
-const adminRoutes = require('./adminRoutes');
-const adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
+// Load core routes with error handling
+let authRoutes, userRoutes, contentRoutes, analyticsRoutes, adminRoutes, adminAnalyticsRoutes;
+try {
+  authRoutes = require('./authRoutes');
+  console.log('✅ Auth routes loaded');
+} catch (e) {
+  authRoutes = express.Router();
+  console.log('⚠️ Auth routes not found, using dummy router:', e.message);
+}
+try {
+  userRoutes = require('./userRoutes');
+  console.log('✅ User routes loaded');
+} catch (e) {
+  userRoutes = express.Router();
+  console.log('⚠️ User routes not found, using dummy router:', e.message);
+}
+try {
+  contentRoutes = require('./contentRoutes');
+  console.log('✅ Content routes loaded');
+} catch (e) {
+  contentRoutes = express.Router();
+  console.log('⚠️ Content routes not found, using dummy router:', e.message);
+}
+try {
+  analyticsRoutes = require('./analyticsRoutes');
+  console.log('✅ Analytics routes loaded');
+} catch (e) {
+  analyticsRoutes = express.Router();
+  console.log('⚠️ Analytics routes not found, using dummy router:', e.message);
+}
+try {
+  adminRoutes = require('./adminRoutes');
+  console.log('✅ Admin routes loaded');
+} catch (e) {
+  adminRoutes = express.Router();
+  console.log('⚠️ Admin routes not found, using dummy router:', e.message);
+}
+try {
+  adminAnalyticsRoutes = require('./adminAnalyticsRoutes');
+  console.log('✅ Admin analytics routes loaded');
+} catch (e) {
+  adminAnalyticsRoutes = express.Router();
+  console.log('⚠️ Admin analytics routes not found, using dummy router:', e.message);
+}
+const viralGrowthRoutes = require('./routes/viralGrowthRoutes');
+const engagementRoutes = require('./routes/engagementRoutes');
+let monetizationRoutes;
+try {
+  monetizationRoutes = require('./routes/monetizationRoutes');
+} catch (e) {
+  monetizationRoutes = express.Router();
+  console.log('⚠️ Monetization routes not found, using dummy router:', e.message);
+}
+const repostRoutes = require('./routes/repostRoutes');
 let promotionTaskRoutes;
 let metricsRoutes;
 let tiktokRoutes;
@@ -237,7 +284,7 @@ try {
 }
 
 // Load social routers
-let facebookRoutes, youtubeRoutes, instagramRoutes, twitterAuthRoutes;
+let facebookRoutes, youtubeRoutes, instagramRoutes, twitterAuthRoutes, snapchatRoutes;
 let platformConnectionsRoutes;
 try {
   facebookRoutes = require('./routes/facebookRoutes');
@@ -261,12 +308,21 @@ try {
   twitterAuthRoutes = express.Router();
 }
 try {
-  platformConnectionsRoutes = require('./routes/platformConnectionsRoutes');
-  console.log('✅ Platform connections routes loaded');
+  snapchatRoutes = require('./snapchatRoutes');
+  console.log('✅ Snapchat routes loaded');
 } catch (e) {
-  console.log('⚠️ Platform connections routes not found:', e.message);
-  platformConnectionsRoutes = express.Router();
+  console.log('⚠️ Snapchat routes not found:', e.message);
+  snapchatRoutes = express.Router();
 }
+ // Generic platform routes (status/auth placeholders for spotify, reddit, discord, linkedin, telegram, pinterest)
+ let platformRoutes = express.Router(); // default fallback
+ try {
+   platformRoutes = require('./routes/platformRoutes');
+   console.log('✅ Generic platform routes loaded');
+ } catch (e) {
+   console.log('⚠️ Generic platform routes not found:', e.message);
+   // keep the default express.Router()
+ }
 try {
   promotionTaskRoutes = require('./routes/promotionTaskRoutes');
   console.log('✅ Promotion task routes loaded');
@@ -309,13 +365,29 @@ try {
   console.log('⚠️ Instagram routes not found:', e.message);
   instagramRoutes = express.Router();
 }
+// Load platform connections routes (may be optional)
+try {
+  platformConnectionsRoutes = require('./routes/platformConnectionsRoutes');
+  console.log('✅ Platform connections routes loaded');
+} catch (e) {
+  console.log('⚠️ Platform connections routes not found:', e.message);
+  platformConnectionsRoutes = express.Router();
+}
 
 // Try to load adminTestRoutes, but continue with a dummy router if not available
 let adminTestRoutes;
-let adminSecurityRoutes;
 try {
   adminTestRoutes = require('./adminTestRoutes');
 } catch (error) {
+  // Create a dummy router if the module is missing
+  adminTestRoutes = express.Router();
+  adminTestRoutes.get('/admin-test/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Admin test routes dummy endpoint' });
+  });
+}
+
+// Load admin security routes
+let adminSecurityRoutes;
 try {
   adminSecurityRoutes = require('./routes/adminSecurityRoutes');
   console.log('✅ Admin security routes loaded');
@@ -324,25 +396,8 @@ try {
   adminSecurityRoutes = express.Router();
 }
 
-// Ensure adminSecurityRoutes loaded even if adminTestRoutes existed
-if (!adminSecurityRoutes) {
-  try {
-    adminSecurityRoutes = require('./routes/adminSecurityRoutes');
-    console.log('✅ Admin security routes loaded (post-load)');
-  } catch (e) {
-    adminSecurityRoutes = express.Router();
-    console.log('⚠️ Admin security routes not found (post-load):', e.message);
-  }
-}
-  // Create a dummy router if the module is missing
-  adminTestRoutes = express.Router();
-  adminTestRoutes.get('/admin-test/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Admin test routes dummy endpoint' });
-  });
-}
-
 // Try to load optional route modules
-let withdrawalRoutes, monetizationRoutes;
+let withdrawalRoutes;
 let shortlinkRoutes;
 let billingRoutes;
 let paymentsStatusRoutes;
@@ -361,13 +416,6 @@ try {
   withdrawalRoutes = express.Router();
 }
 
-try {
-  monetizationRoutes = require('./routes/monetizationRoutes');
-  console.log('✅ Monetization routes loaded successfully');
-} catch (error) {
-  console.log('⚠️ Monetization routes not found, using dummy router:', error.message);
-  monetizationRoutes = express.Router();
-}
 
 try {
   // Stripe integration removed
@@ -462,6 +510,33 @@ const PORT = process.env.PORT || 5000; // Default to port 5000, Render will over
 
 // Attach request context (if available) then slow request logger
 try { app.use(require('./middlewares/requestContext')); } catch(_) { /* optional */ }
+// Access log middleware - logs a single line per request with useful correlation fields
+app.use((req, res, next) => {
+  try {
+    const start = Date.now();
+    const originalSend = res.send.bind(res);
+    let bytes = 0;
+    // wrap send to capture response size (best-effort)
+    res.send = function (body) {
+      try {
+        if (typeof body === 'string') bytes = Buffer.byteLength(body, 'utf8');
+        else if (Buffer.isBuffer(body)) bytes = body.length;
+        else bytes = Buffer.byteLength(JSON.stringify(body || ''), 'utf8');
+      } catch (_) { bytes = 0; }
+      return originalSend(body);
+    };
+    res.once('finish', () => {
+      try {
+        const duration = Date.now() - start;
+        const ip = req.headers['x-forwarded-for'] || req.ip || (req.connection && req.connection.remoteAddress) || '';
+        const ua = req.headers['user-agent'] || '';
+        console.log(`[ACCESS] ${req.method} ${req.originalUrl} status=${res.statusCode} requestID="${req.requestId || ''}" clientIP="${ip}" responseTimeMS=${duration} responseBytes=${bytes} userAgent="${ua.replace(/\"/g,'') }"`);
+      } catch (_) {}
+    });
+  } catch (_) {}
+  next();
+});
+
 app.use(slowRequestLogger);
 // Lazy warmup trigger (will start warmup if not already and early request hits)
 try { app.use(ensureWarmup); } catch(_) { /* ignore */ }
@@ -511,10 +586,17 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/security', adminSecurityRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
+app.use('/api/engagement', engagementRoutes);
+app.use('/api/monetization', monetizationRoutes);
+app.use('/api/repost', repostRoutes);
 try { app.use('/api/admin/metrics', require('./routes/adminMetricsRoutes')); } catch(e) { console.warn('adminMetricsRoutes mount failed:', e.message); }
 // Aggregate status (composed) routes
 try { app.use('/api/status', require('./routes/aggregateStatusRoutes')); } catch(e) { console.warn('aggregateStatusRoutes mount failed:', e.message); }
-app.use('/api', adminTestRoutes); // Add admin test routes
+try {
+  app.use('/api', adminTestRoutes); // Add admin test routes
+} catch (e) {
+  console.warn('Admin test routes mount failed:', e.message);
+}
 // Mount TikTok routes if available
 app.use('/api/tiktok', tiktokRoutes);
 console.log('🚏 TikTok routes mounted at /api/tiktok');
@@ -525,8 +607,19 @@ app.use('/api/youtube', youtubeRoutes);
 console.log('🚏 YouTube routes mounted at /api/youtube');
 app.use('/api/twitter', twitterAuthRoutes);
 console.log('🚏 Twitter routes mounted at /api/twitter');
+// Mount Snapchat routes
+app.use('/api/snapchat', snapchatRoutes);
+console.log('🚏 Snapchat routes mounted at /api/snapchat');
 app.use('/api/platform', platformConnectionsRoutes);
 console.log('🚏 Platform connections routes mounted at /api/platform');
+// Mount generic platform routes under /api so frontend placeholder endpoints like
+// /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
+try {
+  app.use('/api', platformRoutes);
+  console.log('🚏 Generic platform routes mounted at /api/:platform/*');
+} catch (e) {
+  console.log('⚠️ Failed to mount generic platform routes:', e.message);
+}
 app.use('/api/promotion-tasks', promotionTaskRoutes);
 console.log('🚏 Promotion task routes mounted at /api/promotion-tasks');
 app.use('/api/metrics', metricsRoutes);
@@ -535,14 +628,17 @@ app.use('/api/instagram', instagramRoutes);
 console.log('🚏 Instagram routes mounted at /api/instagram');
 app.use('/api/notifications', notificationsRoutes);
 console.log('🚏 Notifications routes mounted at /api/notifications');
-app.use('/api', captionsRoutes);
-console.log('🚏 Captions routes mounted at /api');
+// Captions routes mount skipped due to object export issue
 app.use('/api/admin/cache', adminCacheRoutes);
 console.log('🚏 Admin cache routes mounted at /api/admin/cache');
 
 // Content Quality Check Route
-const contentQualityCheck = require('./contentQualityCheck');
-app.use('/api/content', contentQualityCheck);
+try {
+  const contentQualityCheck = require('./contentQualityCheck');
+  app.use('/api/content', contentQualityCheck);
+} catch (e) {
+  console.warn('Content quality check route not available:', e.message);
+}
 
 // Register optional routes
 app.use('/api/withdrawals', withdrawalRoutes);
@@ -568,17 +664,38 @@ app.use('/.well-known', express.static(path.join(__dirname, '../public/.well-kno
 // 2) Fallback to /docs/.well-known (used for GitHub Pages and documentation hosting)
 app.use('/.well-known', express.static(path.join(__dirname, '../docs/.well-known')));
 
+// Public demo page for TikTok reviewers
+try {
+  app.get('/tiktok-demo', (req, res) => {
+    try {
+      const fs = require('fs');
+      const demoPath = path.join(__dirname, '../docs/tiktok-demo.html');
+      let html = fs.readFileSync(demoPath, 'utf8');
+      const clientKey = process.env.TIKTOK_SANDBOX_CLIENT_KEY || '';
+      html = html.replace(/{{TIKTOK_SANDBOX_CLIENT_KEY}}/g, clientKey);
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.send(html);
+    } catch (e) {
+      return res.sendFile(path.join(__dirname, '../docs/tiktok-demo.html'));
+    }
+  });
+  console.log('✅ Demo page available at /tiktok-demo');
+} catch (e) {
+  console.warn('⚠️ /tiktok-demo route not available:', e.message);
+}
+
 // Explicit root-level routes for TikTok verification variations
 function sendFirstExisting(res, candidates) {
   const fs = require('fs');
   for (const p of candidates) {
     try {
       if (fs.existsSync(p)) {
-        return res.sendFile(p);
+        res.sendFile(p);
+        return true;
       }
     } catch (_) { /* ignore */ }
   }
-  return res.status(404).send('Not found');
+  return false;
 }
 
 app.get(['/tiktok-developers-site-verification.txt', '/tiktok-site-verification.txt'], (req, res) => {
@@ -589,7 +706,15 @@ app.get(['/tiktok-developers-site-verification.txt', '/tiktok-site-verification.
     path.join(__dirname, '../public/.well-known/', targetFile),
     path.join(__dirname, '../docs/.well-known/', targetFile)
   ];
-  return sendFirstExisting(res, candidates);
+  // If static files missing, fall back to environment-provided verification token
+  const sent = sendFirstExisting(res, candidates);
+  if (sent) return sent;
+  const token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION || process.env.TIKTOK_VERIFICATION_TOKEN || '';
+  if (token) {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.send(`tiktok-developers-site-verification=${token}`);
+  }
+  return res.status(404).send('Not found');
 });
 
 // Wildcard for TikTok URL prefix verification files e.g. /tiktokXYZ123.txt
@@ -599,7 +724,19 @@ app.get(/^\/tiktok.*\.txt$/, (req, res) => {
     path.join(__dirname, '../public/.well-known/', filename),
     path.join(__dirname, '../docs/.well-known/', filename)
   ];
-  return sendFirstExisting(res, candidates);
+  const sent = sendFirstExisting(res, candidates);
+  if (sent) return sent;
+  // Handle pattern like /tiktok<TOKEN>.txt by checking env var or exact filename mapping
+  const envToken = process.env.TIKTOK_VERIFICATION_TOKEN || process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
+  if (envToken) {
+    // If the request matches the pattern /tiktok<TOKEN>.txt where <TOKEN> equals envToken, return it
+    const expectedName = `tiktok${envToken}.txt`;
+    if (filename === expectedName || filename === `tiktok${envToken}.txt`) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      return res.send(`tiktok-developers-site-verification=${envToken}`);
+    }
+  }
+  return res.status(404).send('Not found');
 });
 
 // Legal policy pages served from docs on the same domain
@@ -1255,3 +1392,20 @@ module.exports.__warmupState = () => (__warmupState);
 // Export Express app for integration tests
 module.exports = app;
 } catch (e) { console.error(e); }
+
+// Global process-level error handlers to surface crashes in logs and allow process managers to restart
+process.on('uncaughtException', (err) => {
+  try {
+    console.error('[fatal] Uncaught exception:', err && err.stack ? err.stack : err);
+  } catch (_) { console.error('[fatal] Uncaught exception (failed to stringify)'); }
+  // give logs a moment to flush then exit to allow a restart
+  setTimeout(() => process.exit(1), 500);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  try {
+    console.error('[fatal] Unhandled rejection at:', promise, 'reason:', reason && reason.stack ? reason.stack : reason);
+  } catch (_) { console.error('[fatal] Unhandled rejection (failed to stringify)'); }
+  // give logs a moment to flush then exit to allow a restart
+  setTimeout(() => process.exit(1), 500);
+});

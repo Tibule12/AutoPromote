@@ -1,200 +1,373 @@
+// monetizationRoutes.js
+// API routes for monetization features
+
 const express = require('express');
 const router = express.Router();
-const { db, admin } = require('../firebaseAdmin');
-const { getCache, setCache } = require('../utils/simpleCache');
 const authMiddleware = require('../authMiddleware');
-const adminOnly = require('../middlewares/adminOnly');
-const { rateLimit } = require('../middleware/rateLimit');
-const { validateBody } = require('../middleware/validate');
+const monetizationService = require('../services/monetizationService');
+const referralGrowthEngine = require('../services/referralGrowthEngine');
 
-// Revenue analytics endpoint
-router.get('/revenue-analytics', authMiddleware, async (req, res) => {
+// POST /subscription/subscribe - Subscribe to premium tier
+router.post('/subscription/subscribe', authMiddleware, async (req, res) => {
   try {
-    // Only allow admins
-    if (!req.user || !(req.user.role === 'admin' || req.user.isAdmin === true)) {
-      return res.status(403).json({ error: 'Admin access required' });
+    const userId = req.userId;
+    const { tier, paymentMethod } = req.body;
+
+    if (!tier) {
+      return res.status(400).json({ error: 'Tier is required' });
     }
 
-    // Fetch all content documents
-    const contentSnapshot = await db.collection('content').get();
-    const content = [];
-    contentSnapshot.forEach(doc => content.push(doc.data()));
-
-    // Calculate revenue analytics
-    const totalRevenue = content.reduce((sum, item) => sum + (item.revenue || 0), 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const revenueToday = content.filter(item => {
-      if (!item.created_at) return false;
-      const created = new Date(item.created_at._seconds ? item.created_at._seconds * 1000 : item.created_at);
-      return created >= today;
-    }).reduce((sum, item) => sum + (item.revenue || 0), 0);
-    const avgRevenuePerContent = content.length > 0 ? totalRevenue / content.length : 0;
-    // For demo: avg revenue per user is 0 (unless you want to fetch users)
-    const avgRevenuePerUser = 0;
-    const projectedMonthlyRevenue = totalRevenue * 1.2;
-    // Simple daily breakdown for the last 7 days
-    const dailyBreakdown = Array.from({ length: 7 }).map((_, i) => {
-      const day = new Date();
-      day.setDate(day.getDate() - i);
-      day.setHours(0, 0, 0, 0);
-      const dayRevenue = content.filter(item => {
-        if (!item.created_at) return false;
-        const created = new Date(item.created_at._seconds ? item.created_at._seconds * 1000 : item.created_at);
-        return created >= day && created < new Date(day.getTime() + 24 * 60 * 60 * 1000);
-      }).reduce((sum, item) => sum + (item.revenue || 0), 0);
-      return { date: day.toISOString().split('T')[0], revenue: dayRevenue };
-    }).reverse();
+    const subscription = await monetizationService.subscribeToTier(
+      userId,
+      tier,
+      paymentMethod || 'stripe'
+    );
 
     res.json({
-      totalRevenue,
-      revenueToday,
-      avgRevenuePerContent,
-      avgRevenuePerUser,
-      projectedMonthlyRevenue,
-      dailyBreakdown
+      success: true,
+      subscription,
+      subscribedAt: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Revenue analytics error:', error);
-    res.status(500).json({ error: 'Failed to fetch revenue analytics' });
+    console.error('Error subscribing to tier:', error);
+    res.status(500).json({ error: 'Failed to subscribe to tier' });
   }
 });
 
-// Earnings event ingestion (admin only for now)
-router.post('/earnings/event', authMiddleware, adminOnly, validateBody({
-  userId: { type: 'string', required: true },
-  contentId: { type: 'string', required: false },
-  amount: { type: 'number', required: true },
-  source: { type: 'string', required: true, maxLength: 64 }
-}), async (req, res) => {
+// GET /subscription/status - Get subscription status and limits
+router.get('/subscription/status', authMiddleware, async (req, res) => {
   try {
-    const { userId, contentId, amount, source } = req.body;
-    if (amount <= 0) return res.status(400).json({ error: 'amount_positive_required' });
-    const doc = await db.collection('earnings_events').add({
+    const userId = req.userId;
+    const { action } = req.query;
+
+    const status = await monetizationService.checkSubscriptionLimits(
       userId,
-      contentId: contentId || null,
-      amount,
-      source,
-      createdAt: new Date().toISOString(),
-      processed: false
+      action || 'upload'
+    );
+
+    res.json({
+      success: true,
+      status,
+      checkedAt: new Date().toISOString()
     });
-    return res.json({ ok: true, id: doc.id });
-  } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+  } catch (error) {
+    console.error('Error getting subscription status:', error);
+    res.status(500).json({ error: 'Failed to get subscription status' });
   }
 });
 
-// Aggregate unprocessed earnings events into user pendingEarnings (atomic increments)
-router.post('/earnings/aggregate', authMiddleware, adminOnly, async (_req, res) => {
+// POST /boost/create - Create paid boost
+router.post('/boost/create', authMiddleware, async (req, res) => {
   try {
-    const { aggregateUnprocessed } = require('../services/earningsService');
-    const result = await aggregateUnprocessed({ batchSize: 500 });
-    return res.json({ ok: true, ...result });
-  } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
-  }
-});
+    const userId = req.userId;
+    const { contentId, platform, targetViews, duration, budget } = req.body;
 
-// User earnings summary (self)
-router.get('/earnings/summary', authMiddleware, rateLimit({ field: 'earningsSummary', perMinute: 10 }), require('../statusInstrument')('earningsSummary', async (req, res) => {
-  const cacheKey = `earnings_summary_${req.userId}`;
-  const cached = getCache(cacheKey);
-  if (cached) return res.json({ ...cached, _cached: true });
-  const userRef = await db.collection('users').doc(req.userId).get();
-  if (!userRef.exists) return res.status(404).json({ ok: false, error: 'user_not_found' });
-  const u = userRef.data();
-  const minPayout = parseFloat(process.env.MIN_PAYOUT_AMOUNT || '0');
-  const pending = u.pendingEarnings || 0;
-  const payload = {
-    ok: true,
-    pendingEarnings: pending,
-    totalEarnings: u.totalEarnings || 0,
-    revenueEligible: u.revenueEligible || false,
-    contentCount: u.contentCount || 0,
-    minPayoutAmount: minPayout,
-    payoutEligible: (u.revenueEligible || false) && pending >= minPayout
-  };
-  setCache(cacheKey, payload, 7000); // ~7s TTL
-  return res.json(payload);
-}));
+    if (!contentId || !platform || !targetViews) {
+      return res.status(400).json({ error: 'ContentId, platform, and targetViews are required' });
+    }
 
-// Self payout route: moves all pendingEarnings to totalEarnings and creates a payout record
-router.post('/earnings/payout/self', authMiddleware, async (req, res) => {
-  try {
-    const MIN_PAYOUT = parseFloat(process.env.MIN_PAYOUT_AMOUNT || '0');
-    const userRef = db.collection('users').doc(req.userId);
-    let payoutAmount = 0;
-    await db.runTransaction(async (tx) => {
-      const snap = await tx.get(userRef);
-      if (!snap.exists) throw new Error('user_not_found');
-      const data = snap.data();
-      const pending = Number(data.pendingEarnings || 0);
-      if (!data.revenueEligible) throw new Error('not_revenue_eligible');
-      if (pending <= 0) throw new Error('nothing_to_payout');
-      if (pending < MIN_PAYOUT) throw new Error('below_min_payout');
-      payoutAmount = pending;
-      tx.update(userRef, {
-        pendingEarnings: admin.firestore.FieldValue.increment(-pending),
-        totalEarnings: admin.firestore.FieldValue.increment(pending),
-        lastPayoutAt: new Date().toISOString()
-      });
+    const boost = await monetizationService.createPaidBoost(userId, {
+      platform,
+      targetViews: parseInt(targetViews),
+      duration: parseInt(duration) || 24,
+      budget: budget ? parseFloat(budget) : undefined
     });
-    // Record payout document (best-effort; failure here does not rollback transaction)
-    try {
-      await db.collection('earnings_payouts').add({
-        userId: req.userId,
-        amount: payoutAmount,
-        createdAt: new Date().toISOString(),
-        status: 'completed'
-      });
-      // Notification (best-effort)
-      await db.collection('notifications').add({
-        user_id: req.userId,
-        type: 'payout_completed',
-        title: 'Payout Completed',
-        amount: payoutAmount,
-        message: `A payout of ${payoutAmount} has been recorded.`,
-        created_at: new Date(),
-        read: false
-      });
-    } catch (e) {
-      console.warn('[payout] could not record payout doc:', e.message);
-    }
-    return res.json({ ok: true, amount: payoutAmount });
-  } catch (e) {
-    return res.status(400).json({ ok: false, error: e.message });
+
+    res.json({
+      success: true,
+      boost,
+      createdAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error creating paid boost:', error);
+    res.status(500).json({ error: 'Failed to create paid boost' });
   }
 });
 
-// List recent payout history (self)
-router.get('/earnings/payouts', authMiddleware, async (req, res) => {
+// GET /influencer/marketplace - Get influencer marketplace
+router.get('/influencer/marketplace', authMiddleware, async (req, res) => {
   try {
-    const cacheKey = `earnings_payouts_${req.userId}`;
-    const cached = getCache(cacheKey);
-    if (cached) return res.json({ ...cached, _cached: true });
-    let snap;
-    try {
-      snap = await db.collection('earnings_payouts')
-        .where('userId','==', req.userId)
-        .orderBy('createdAt','desc')
-        .limit(25)
-        .get();
-    } catch (e) {
-      // Fallback if composite index missing
-      if (/needs to create an index/i.test(e.message) || /FAILED_PRECONDITION/i.test(e.message)) {
-        snap = await db.collection('earnings_payouts')
-          .where('userId','==', req.userId)
-          .limit(25)
-          .get();
-      } else throw e;
+    const userId = req.userId;
+    const { platform, niche, budget } = req.query;
+
+    if (!platform || !niche || !budget) {
+      return res.status(400).json({ error: 'Platform, niche, and budget are required' });
     }
-    const payouts = [];
-    snap.forEach(d => payouts.push({ id: d.id, ...d.data() }));
-    const payload = { ok: true, payouts };
-    setCache(cacheKey, payload, 7000);
-    return res.json(payload);
-  } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+
+    const marketplace = await monetizationService.getInfluencerMarketplace(
+      platform,
+      niche,
+      parseFloat(budget)
+    );
+
+    res.json({
+      success: true,
+      marketplace,
+      retrievedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error getting influencer marketplace:', error);
+    res.status(500).json({ error: 'Failed to get influencer marketplace' });
+  }
+});
+
+// POST /influencer/book - Book influencer repost
+router.post('/influencer/book', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { influencerId, contentId, platform } = req.body;
+
+    if (!influencerId || !contentId || !platform) {
+      return res.status(400).json({ error: 'InfluencerId, contentId, and platform are required' });
+    }
+
+    const booking = await monetizationService.bookInfluencerRepost(
+      userId,
+      influencerId,
+      contentId,
+      platform
+    );
+
+    res.json({
+      success: true,
+      booking,
+      bookedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error booking influencer repost:', error);
+    res.status(500).json({ error: 'Failed to book influencer repost' });
+  }
+});
+
+// GET /roi/:contentId - Calculate ROI for content
+router.get('/roi/:contentId', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { contentId } = req.params;
+
+    const roi = await monetizationService.calculateROI(contentId);
+
+    res.json({
+      success: true,
+      roi,
+      calculatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error calculating ROI:', error);
+    res.status(500).json({ error: 'Failed to calculate ROI' });
+  }
+});
+
+// GET /dashboard - Get monetization dashboard
+router.get('/dashboard', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const dashboard = await monetizationService.getMonetizationDashboard(userId);
+
+    res.json({
+      success: true,
+      dashboard,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error getting monetization dashboard:', error);
+    res.status(500).json({ error: 'Failed to get monetization dashboard' });
+  }
+});
+
+// POST /referral/invite - Create referral invitation
+router.post('/referral/invite', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { email, message } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const invitation = await referralGrowthEngine.createReferralInvitation(
+      userId,
+      email,
+      message
+    );
+
+    res.json({
+      success: true,
+      invitation,
+      createdAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error creating referral invitation:', error);
+    res.status(500).json({ error: 'Failed to create referral invitation' });
+  }
+});
+
+// POST /referral/signup - Process referral signup
+router.post('/referral/signup', async (req, res) => {
+  try {
+    const { referralCode, newUserId } = req.body;
+
+    if (!referralCode || !newUserId) {
+      return res.status(400).json({ error: 'Referral code and new user ID are required' });
+    }
+
+    const result = await referralGrowthEngine.processReferralSignup(
+      referralCode,
+      newUserId
+    );
+
+    res.json({
+      success: true,
+      result,
+      processedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error processing referral signup:', error);
+    res.status(500).json({ error: 'Failed to process referral signup' });
+  }
+});
+
+// GET /referral/leaderboard - Get referral leaderboard
+router.get('/referral/leaderboard', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const leaderboard = await referralGrowthEngine.getReferralLeaderboard(userId);
+
+    res.json({
+      success: true,
+      leaderboard,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error getting referral leaderboard:', error);
+    res.status(500).json({ error: 'Failed to get referral leaderboard' });
+  }
+});
+
+// GET /credits/balance - Get user's credit balance
+router.get('/credits/balance', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const balance = await referralGrowthEngine.getCreditBalance(userId);
+
+    res.json({
+      success: true,
+      balance,
+      retrievedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error getting credit balance:', error);
+    res.status(500).json({ error: 'Failed to get credit balance' });
+  }
+});
+
+// POST /squad/create - Create growth squad
+router.post('/squad/create', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { name, description, maxMembers, contentFocus } = req.body;
+
+    const squad = await referralGrowthEngine.createGrowthSquad(userId, {
+      name,
+      description,
+      maxMembers: maxMembers || 10,
+      contentFocus
+    });
+
+    res.json({
+      success: true,
+      squad,
+      createdAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error creating growth squad:', error);
+    res.status(500).json({ error: 'Failed to create growth squad' });
+  }
+});
+
+// POST /squad/join/:squadId - Join growth squad
+router.post('/squad/join/:squadId', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { squadId } = req.params;
+
+    const result = await referralGrowthEngine.joinGrowthSquad(userId, squadId);
+
+    res.json({
+      success: true,
+      result,
+      joinedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error joining growth squad:', error);
+    res.status(500).json({ error: 'Failed to join growth squad' });
+  }
+});
+
+// POST /squad/share/:squadId - Share content with squad
+router.post('/squad/share/:squadId', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { squadId } = req.params;
+    const { contentId } = req.body;
+
+    if (!contentId) {
+      return res.status(400).json({ error: 'ContentId is required' });
+    }
+
+    const result = await referralGrowthEngine.shareWithGrowthSquad(
+      userId,
+      contentId,
+      squadId
+    );
+
+    res.json({
+      success: true,
+      result,
+      sharedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error sharing with growth squad:', error);
+    res.status(500).json({ error: 'Failed to share with growth squad' });
+  }
+});
+
+// GET /squad/activity - Get user's squad activity
+router.get('/squad/activity', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const activity = await referralGrowthEngine.getGrowthSquadActivity(userId);
+
+    res.json({
+      success: true,
+      activity,
+      retrievedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error getting squad activity:', error);
+    res.status(500).json({ error: 'Failed to get squad activity' });
+  }
+});
+
+// POST /viral-bonuses/award - Award viral loop bonuses
+router.post('/viral-bonuses/award', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const result = await referralGrowthEngine.awardViralLoopBonuses(userId);
+
+    res.json({
+      success: true,
+      result,
+      awardedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error awarding viral bonuses:', error);
+    res.status(500).json({ error: 'Failed to award viral bonuses' });
   }
 });
 

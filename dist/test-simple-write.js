@@ -38,7 +38,7 @@ async function testSimpleWrite() {
 
     if (error.code === 'PERMISSION_DENIED') {
       console.log('\n📋 SOLUTION: Firestore rules are blocking access');
-      console.log('Go to: https://console.firebase.google.com/project/autopromote-464de/firestore/rules');
+  console.log('Go to: https://console.firebase.google.com/project/autopromote-cc6d3/firestore/rules');
       console.log('Make sure rules are:');
       console.log('```');
       console.log('rules_version = \'2\';');

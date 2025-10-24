@@ -7,27 +7,39 @@ const authMiddleware = require('./authMiddleware');
 const { admin, db } = require('./firebaseAdmin');
 const DEBUG_TIKTOK_OAUTH = process.env.DEBUG_TIKTOK_OAUTH === 'true';
 
-// Mode selection: defaults to sandbox unless explicitly set to 'production'
-const TIKTOK_ENV = (process.env.TIKTOK_ENV || 'sandbox').toLowerCase() === 'production' ? 'production' : 'sandbox';
-
 // Gather both sandbox & production env sets (prefixed) plus legacy fallbacks
 const sandboxConfig = {
-  key: process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || null,
-  secret: process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || null,
-  redirect: process.env.TIKTOK_SANDBOX_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || null,
+  key: (process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || '').toString().trim() || null,
+  secret: (process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || '').toString().trim() || null,
+  redirect: (process.env.TIKTOK_SANDBOX_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || '').toString().trim() || null,
 };
 const productionConfig = {
-  key: process.env.TIKTOK_PROD_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || null,
-  secret: process.env.TIKTOK_PROD_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || null,
-  redirect: process.env.TIKTOK_PROD_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || null,
+  key: (process.env.TIKTOK_PROD_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || '').toString().trim() || null,
+  secret: (process.env.TIKTOK_PROD_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET || '').toString().trim() || null,
+  redirect: (process.env.TIKTOK_PROD_REDIRECT_URI || process.env.TIKTOK_REDIRECT_URI || '').toString().trim() || null,
 };
+
+// Mode selection: prefer explicit TIKTOK_ENV; if not provided, automatically
+// prefer production when production config appears to be present. This is a
+// temporary code-side override to help while deployment env vars are being
+// fixed. IMPORTANT: revert this change once Render env is configured and
+// TIKTOK_ENV is explicitly set by the deployment environment.
+let TIKTOK_ENV;
+if (process.env.TIKTOK_ENV) {
+  TIKTOK_ENV = process.env.TIKTOK_ENV.toLowerCase() === 'production' ? 'production' : 'sandbox';
+} else if (productionConfig.key && productionConfig.redirect) {
+  // Prefer production if production credentials + redirect exist
+  TIKTOK_ENV = 'production';
+} else {
+  TIKTOK_ENV = 'sandbox';
+}
 
 function activeConfig() {
   return TIKTOK_ENV === 'production' ? productionConfig : sandboxConfig;
 }
 
 // For dashboard redirect
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote-1.onrender.com';
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote.onrender.com';
 
 function ensureTikTokEnv(res, cfg, opts = { requireSecret: true }) {
   const missing = [];
@@ -39,8 +51,74 @@ function ensureTikTokEnv(res, cfg, opts = { requireSecret: true }) {
   }
 }
 
+// Client-side suppression snippet (safe, non-invasive). Insert into the
+// HTML pages that initiate OAuth. This avoids attempting to override
+// fundamental built-ins (e.g. Function.prototype.call) while still
+// reducing noisy vendor warnings for demo/debug pages.
+const SUPPRESSION_SNIPPET = `
+<script>(function(){'use strict';
+  try {
+    const oWarn = console.warn.bind(console);
+    const oError = console.error.bind(console);
+    const oLog = console.log.bind(console);
+
+    function shouldSuppress(text){
+      if(!text) return false;
+      const s = String(text).toLowerCase();
+      return s.includes('break change') ||
+             s.includes('read only property') ||
+             s.includes('cannot assign to read only property') ||
+             s.includes('bytedance://dispatch_message') ||
+             s.includes('not allowed to launch') ||
+             s.includes('user gesture is required') ||
+             s.includes('8237.1fc60c50.js') ||
+             s.includes('collect.js') ||
+             s.includes('slardar');
+    }
+
+    console.warn = function(...args){
+      if(args.some(a => typeof a === 'string' && shouldSuppress(a))) return;
+      return oWarn(...args);
+    };
+    console.error = function(...args){
+      if(args.some(a => typeof a === 'string' && shouldSuppress(a))) return;
+      return oError(...args);
+    };
+    console.log = function(...args){
+      if(args.some(a => typeof a === 'string' && shouldSuppress(a))) return;
+      return oLog(...args);
+    };
+
+    const origOnError = window.onerror;
+    window.onerror = function(message, source, lineno, colno, err){
+      if(typeof message === 'string' && shouldSuppress(message)) return true;
+      if(origOnError) return origOnError.call(this, message, source, lineno, colno, err);
+      return false;
+    };
+
+    const origUnhandled = window.onunhandledrejection;
+    window.onunhandledrejection = function(ev){
+      try{
+        const reason = ev && (typeof ev.reason === 'string' ? ev.reason : (ev.reason && ev.reason.message) || '');
+        if(shouldSuppress(reason)){
+          ev && typeof ev.preventDefault === 'function' && ev.preventDefault();
+          return true;
+        }
+      }catch(e){}
+      if(origUnhandled) return origUnhandled.call(this, ev);
+      return false;
+    };
+  } catch(e) { /* Don't let suppression throw */ }
+})();</script>`;
+
 function constructAuthUrl(cfg, state, scope) {
-  return `https://www.tiktok.com/v2/auth/authorize/?client_key=${encodeURIComponent(cfg.key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(cfg.redirect)}&state=${encodeURIComponent(state)}`;
+  const key = String(cfg.key || '').trim();
+  const redirect = String(cfg.redirect || '').trim();
+  // Use TikTok sandbox domain for sandbox mode (recommended by TikTok docs)
+  const base = (TIKTOK_ENV === 'production')
+    ? 'https://www.tiktok.com/v2/auth/authorize/'
+    : 'https://sandbox.tiktok.com/platform/oauth/authorize';
+  return `${base}?client_key=${encodeURIComponent(key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}`;
 }
 
 // Diagnostics: quick config visibility with sandbox/production breakdown
@@ -97,18 +175,20 @@ router.post('/auth/prepare', async (req, res) => {
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
     const nonce = Math.random().toString(36).slice(2);
     const state = `${uid}.${nonce}`;
+    const isPopup = req.query.popup === 'true';
     await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
       state,
       nonce,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      mode: TIKTOK_ENV
+      mode: TIKTOK_ENV,
+      isPopup
     }, { merge: true });
     const scope = 'user.info.basic';
-  const authUrl = constructAuthUrl(cfg, state, scope);
+    const authUrl = constructAuthUrl(cfg, state, scope);
     // Store authUrl for debugging (non-sensitive)
     await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({ lastAuthUrl: authUrl }, { merge: true });
     if (DEBUG_TIKTOK_OAUTH) {
-      console.log('[TikTok][prepare] uid=%s mode=%s state=%s authUrl=%s', uid, TIKTOK_ENV, state, authUrl);
+      console.log('[TikTok][prepare] uid=%s mode=%s state=%s authUrl=%s popup=%s', uid, TIKTOK_ENV, state, authUrl, isPopup);
     }
     return res.json({ authUrl, mode: TIKTOK_ENV });
   } catch (e) {
@@ -134,11 +214,65 @@ router.get('/auth', authMiddleware, async (req, res) => {
     // Request minimal scope for initial approval; can expand later (video.upload requires program access)
     const scope = 'user.info.basic';
   const authUrl = constructAuthUrl(cfg, state, scope);
-    res.redirect(authUrl);
+    // Instead of redirecting immediately, render a small HTML page with a button
+    // so the user must click to continue. This ensures any deep-linking the
+    // provider attempts will be initiated by a user gesture and not blocked by
+    // the browser.
+    res.set('Content-Type', 'text/html');
+    return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title>
+      ${SUPPRESSION_SNIPPET}
+      <style>body{font-family:system-ui,Arial,sans-serif} .card{max-width:720px;padding:20px;border-radius:8px;text-align:left} .muted{color:#666;font-size:13px}</style>
+    </head><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+      <div class="card" style="background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.06)">
+        <h2 style="margin-top:0">Connect your TikTok account</h2>
+        <p class="muted">Click the button below to continue to TikTok and approve the connection. If your browser blocks the provider deep-link, use the copy button to paste the URL into your browser.</p>
+        <div style="display:flex;gap:8px;align-items:center;margin:12px 0;">
+          <button id="continue" style="font-size:16px;padding:10px 18px;border-radius:6px;cursor:pointer;">Continue to TikTok</button>
+          <button id="copy" style="font-size:14px;padding:8px 12px;border-radius:6px;cursor:pointer;">Copy URL</button>
+        </div>
+        <label class="muted">OAuth URL (shown for diagnostics):</label>
+        <input id="authUrl" type="text" readonly value=${JSON.stringify(authUrl)} style="width:100%;padding:8px;margin-top:6px;border:1px solid #ddd;border-radius:6px;font-size:13px"/>
+        <p class="muted" style="margin-top:12px">If nothing happens after clicking continue, copy the URL above and paste it into a new browser window. Attach HAR and screenshots when submitting for review.</p>
+      </div>
+      <script>
+        (function(){
+          const auth = ${JSON.stringify(authUrl)};
+          document.getElementById('continue').addEventListener('click',function(){
+            try { window.location.href = auth; } catch(e) { window.open(auth, '_self'); }
+          });
+          document.getElementById('copy').addEventListener('click', async function(){
+            try { await navigator.clipboard.writeText(auth); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy URL',1500); }
+            catch(e){ const inp=document.getElementById('authUrl'); inp.select(); document.execCommand('copy'); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy URL',1500); }
+          });
+        })();
+      </script>
+    </body></html>`);
   } catch (e) {
     res.status(500).json({ error: 'Failed to start TikTok OAuth', details: e.message });
   }
 });
+
+// Debug-only: return the same HTML page served by /auth so we can inspect
+// the script content without requiring an authenticated session. Enabled
+// when TIKTOK_DEBUG_ALLOW=true in environment. This is useful to confirm
+// the injected script no longer contains unsafe overrides.
+if (process.env.TIKTOK_DEBUG_ALLOW === 'true') {
+  router.get('/_debug/page', async (req, res) => {
+    try {
+      const cfg = activeConfig();
+      if (ensureTikTokEnv(res, cfg, { requireSecret: false })) return;
+      const uid = req.query.uid || 'debug-uid';
+      const nonce = 'debug-nonce';
+      const state = `${uid}.${nonce}`;
+      const scope = 'user.info.basic';
+      const authUrl = constructAuthUrl(cfg, state, scope);
+      res.set('Content-Type', 'text/html');
+      return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok (debug)</title><script>/* debug-only page */</script></head><body><a href="${authUrl}">${authUrl}</a></body></html>`);
+    } catch (e) {
+      return res.status(500).send('debug unavailable');
+    }
+  });
+}
 
 // Alternative start endpoint that accepts an ID token via query when headers aren't available (for link redirects)
 router.get('/auth/start', async (req, res) => {
@@ -160,7 +294,33 @@ router.get('/auth/start', async (req, res) => {
     }, { merge: true });
     const scope = 'user.info.basic';
     const authUrl = constructAuthUrl(cfg, state, scope);
-    return res.redirect(authUrl);
+  // Render a click-to-continue page instead of redirecting immediately.
+  res.set('Content-Type', 'text/html');
+  return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title>${SUPPRESSION_SNIPPET}<style>body{font-family:system-ui,Arial,sans-serif} .card{max-width:720px;padding:20px;border-radius:8px;text-align:left} .muted{color:#666;font-size:13px}</style></head><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+      <div class="card" style="background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.06)">
+        <h2 style="margin-top:0">Connect your TikTok account</h2>
+        <p class="muted">Click the button below to continue to TikTok and approve the connection. If your browser blocks the provider deep-link, use the copy button to paste the URL into your browser.</p>
+        <div style="display:flex;gap:8px;align-items:center;margin:12px 0;">
+          <button id="continue" style="font-size:16px;padding:10px 18px;border-radius:6px;cursor:pointer;">Continue to TikTok</button>
+          <button id="copy" style="font-size:14px;padding:8px 12px;border-radius:6px;cursor:pointer;">Copy URL</button>
+        </div>
+        <label class="muted">OAuth URL (shown for diagnostics):</label>
+        <input id="authUrl" type="text" readonly value=${JSON.stringify(authUrl)} style="width:100%;padding:8px;margin-top:6px;border:1px solid #ddd;border-radius:6px;font-size:13px"/>
+        <p class="muted" style="margin-top:12px">If nothing happens after clicking continue, copy the URL above and paste it into a new browser window. Attach HAR and screenshots when submitting for review.</p>
+      </div>
+      <script>
+        (function(){
+          const auth = ${JSON.stringify(authUrl)};
+          document.getElementById('continue').addEventListener('click',function(){
+            try { window.location.href = auth; } catch(e) { window.open(auth, '_self'); }
+          });
+          document.getElementById('copy').addEventListener('click', async function(){
+            try { await navigator.clipboard.writeText(auth); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy URL',1500); }
+            catch(e){ const inp=document.getElementById('authUrl'); inp.select(); document.execCommand('copy'); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy URL',1500); }
+          });
+        })();
+      </script>
+    </body></html>`);
   } catch (e) {
     return res.status(500).send('Failed to start TikTok OAuth');
   }
@@ -207,9 +367,9 @@ router.get('/callback', async (req, res) => {
   try {
     const [uid, nonce] = String(state).split('.');
     if (!uid || !nonce) return res.status(400).send('Invalid state');
-    const stateDoc = await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').get();
-    const stateData = stateDoc.exists ? stateDoc.data() : null;
-    if (!stateData || stateData.state !== state) {
+    const stateDocRef = await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').get();
+    const stateDataRef = stateDocRef.exists ? stateDocRef.data() : null;
+    if (!stateDataRef || stateDataRef.state !== state) {
       return res.status(400).send('State mismatch');
     }
     // Exchange code
@@ -245,7 +405,24 @@ router.get('/callback', async (req, res) => {
     // redirect back to dashboard with success
     const url = new URL(DASHBOARD_URL);
     url.searchParams.set('tiktok', 'connected');
-    res.redirect(url.toString());
+    // Check if this was initiated as a popup flow
+    const isPopup = stateDataRef?.isPopup === true;
+
+    if (isPopup) {
+      res.set('Content-Type', 'text/html');
+      return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>TikTok Connected</title></head><body>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage('tiktok_oauth_complete', '${DASHBOARD_URL}');
+            window.close();
+          } else {
+            window.location.href = '${url.toString()}';
+          }
+        </script>
+      </body></html>`);
+    } else {
+      res.redirect(url.toString());
+    }
   } catch (err) {
     if (DEBUG_TIKTOK_OAUTH) console.error('[TikTok][callback][error]', err);
     try {

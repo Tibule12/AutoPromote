@@ -2,7 +2,7 @@
 const functions = require("firebase-functions/v1");
 // The Firebase Admin SDK to access Cloud Firestore, Realtime Database and Cloud Storage.
 const admin = require("firebase-admin");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('../lib/uuid-compat');
 admin.initializeApp();
 
 // Simple test function to verify deployment

@@ -2,7 +2,7 @@
 // Firestore-based lightweight lease for background workers to avoid duplicate processing on multi-instance deployments.
 
 const { db } = require('../firebaseAdmin');
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('../../lib/uuid-compat');
 
 const INSTANCE_ID = process.env.INSTANCE_ID || uuidv4();
 

@@ -1,5 +1,5 @@
 const { admin, db } = require('./firebaseAdmin');
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('./lib/uuid-compat');
 
 // Simulate the generateMonetizedLandingPage function
 async function simulateGenerateMonetizedLandingPage(data, context) {
