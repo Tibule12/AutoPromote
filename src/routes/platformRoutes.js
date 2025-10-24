@@ -524,4 +524,26 @@ router.post('/telegram/webhook', async (req, res) => {
   }
 });
 
+// Admin/test endpoint: send a one-off Telegram message to a chatId or uid
+// POST /api/telegram/admin/send-test
+// Body: { uid?: string, chatId?: string|number, text: string }
+router.post('/telegram/admin/send-test', authMiddleware, async (req, res) => {
+  try {
+    const body = req.body || {};
+    const text = body.text || body.message || 'Test message from AutoPromote';
+    let chatId = body.chatId || null;
+    const uid = body.uid || null;
+    // If uid provided but no chatId, try to read it from Firestore
+    if (!chatId && uid) {
+      try { const snap = await db.collection('users').doc(uid).collection('connections').doc('telegram').get(); if (snap.exists) { const d = snap.data()||{}; chatId = d.chatId || (d.meta && d.meta.chatId) || null; } } catch(_){}
+    }
+    if (!chatId) return res.status(400).json({ ok: false, error: 'missing_chatId_or_uid' });
+    // Use postToTelegram which supports payload.chatId override
+    const result = await postToTelegram({ uid: uid || null, payload: { text, chatId } });
+    return res.json({ ok: true, result });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 module.exports = router;

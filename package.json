@@ -31,6 +31,7 @@
     "simulate:variants": "node test/simulateVariantSelection.js",
     "generate:secret": "node scripts/generateSecret.js 96",
     "demo": "node scripts/start-demo.js"
+    ,"postdeploy:set-telegram-webhook": "node scripts/set-telegram-webhook.js"
   },
   "private": true,
   "dependencies": {
