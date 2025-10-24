@@ -8,6 +8,7 @@ const smartDistributionEngine = require('../services/smartDistributionEngine');
 const admin = require('../firebaseAdmin').admin;
 const engagementBoostingService = require('../services/engagementBoostingService');
 const { enqueuePlatformPostTask } = require('../services/promotionTaskQueue');
+const { postToTelegram } = require('../services/telegramService');
 
 // Try to use global fetch (Node 18+). Fall back to node-fetch if available.
 let fetchFn = global.fetch;
@@ -88,6 +89,15 @@ router.post('/:platform/auth/prepare', authMiddleware, async (req, res) => {
       // scopes: adjust later as needed when you register the app
       const scope = encodeURIComponent('user-read-email playlist-modify-public playlist-modify-private');
       const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&show_dialog=true`;
+      return res.json({ ok: true, platform, authUrl: url, state });
+    }
+
+    if (platform === 'telegram') {
+      // For Telegram we use the t.me/<bot>?start=<state> pattern.
+      // The frontend will open this URL and the user must press Start in the bot.
+      const botUser = process.env.TELEGRAM_BOT_USERNAME || process.env.TELEGRAM_BOT_NAME;
+      if (!botUser) return res.status(500).json({ ok: false, error: 'telegram_bot_not_configured' });
+      const url = `https://t.me/${botUser}?start=${encodeURIComponent(state)}`;
       return res.json({ ok: true, platform, authUrl: url, state });
     }
 
@@ -400,6 +410,100 @@ router.post('/:platform/sample-promote', authMiddleware, async (req, res) => {
     return res.json({ ok: true, enqueued: !!result.id, result });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// POST /api/telegram/webhook
+// Telegram will POST updates here when the bot receives messages. We handle the
+// `/start <state>` deep-linking flow: resolve the state to a uid (via oauth_states)
+// and persist the user's chatId to users/{uid}/connections/telegram so we can send
+// messages to them later.
+router.post('/telegram/webhook', async (req, res) => {
+  try {
+    const update = req.body || {};
+    const message = update.message || update.edited_message || (update.callback_query && update.callback_query.message) || null;
+    if (!message) return res.status(200).send('ok');
+
+    const chat = message.chat || {};
+    const chatId = chat.id;
+    const text = (message.text || '').trim();
+    let state = null;
+    if (text) {
+      const parts = text.split(/\s+/);
+      if (parts[0] === '/start' && parts[1]) state = parts.slice(1).join(' ');
+      else if (parts[0].startsWith('/start')) {
+        const tail = parts[0].slice('/start'.length);
+        if (tail) state = tail;
+      }
+    }
+
+    // Attempt to resolve state -> uid
+    let uid = null;
+    try {
+      if (state) {
+        const sd = await db.collection('oauth_states').doc(state).get();
+        if (sd.exists) {
+          const s = sd.data() || {};
+          if (!s.expiresAt || new Date(s.expiresAt) > new Date()) {
+            uid = s.uid || null;
+          }
+          try { await db.collection('oauth_states').doc(state).delete(); } catch(_){ }
+        }
+      }
+    } catch (e) {
+      console.warn('[telegram][webhook] state lookup failed', e && e.message);
+    }
+    // legacy: allow uid encoded as prefix in state (used by other callbacks)
+    if (!uid && state && state.split && state.split(':')[0]) uid = state.split(':')[0];
+
+    if (!uid || uid === 'anon') {
+      // Nothing to persist - reply with a helpful message if possible
+      try {
+        await postToTelegram({ payload: { text: 'Thanks for messaging the AutoPromote bot — please connect via the app to link your account.' }, uid: null });
+      } catch (_) { }
+      return res.status(200).send('ok');
+    }
+
+    // Persist connection info for the user
+    try {
+      const userRef = db.collection('users').doc(uid);
+      const now = new Date().toISOString();
+      const meta = {
+        chatId,
+        username: (message.from && message.from.username) || null,
+        firstName: (message.from && message.from.first_name) || null,
+        lastName: (message.from && message.from.last_name) || null,
+        platform: 'telegram'
+      };
+      await userRef.collection('connections').doc('telegram').set({ connected: true, chatId, meta, updatedAt: now }, { merge: true });
+
+      // Add to connectedPlatforms array on user doc
+      try {
+        if (admin && admin.firestore && admin.firestore.FieldValue && admin.firestore.FieldValue.arrayUnion) {
+          await userRef.set({ connectedPlatforms: admin.firestore.FieldValue.arrayUnion('telegram') }, { merge: true });
+        } else {
+          const existing = (await userRef.get()).data() || {};
+          const arr = Array.isArray(existing.connectedPlatforms) ? existing.connectedPlatforms : [];
+          if (!arr.includes('telegram')) arr.push('telegram');
+          await userRef.set({ connectedPlatforms: arr }, { merge: true });
+        }
+      } catch (_){ }
+
+      // Fire an event for downstream engines
+      try { await db.collection('events').add({ type: 'platform_connected', uid, platform: 'telegram', at: now }); } catch (_){ }
+
+      // Confirm connection via bot message if possible
+      try {
+        await postToTelegram({ uid, payload: { text: 'AutoPromote: your Telegram account is now connected. You will receive notifications here.' } });
+      } catch (_) { }
+    } catch (e) {
+      console.warn('[telegram][webhook] persist failed', e && e.message);
+    }
+
+    return res.status(200).send('ok');
+  } catch (e) {
+    console.warn('[telegram][webhook] unexpected error', e && e.message);
+    return res.status(200).send('ok');
   }
 });
 
