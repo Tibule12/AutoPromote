@@ -414,12 +414,25 @@ router.post('/:platform/sample-promote', authMiddleware, async (req, res) => {
 });
 
 // POST /api/telegram/webhook
-// Telegram will POST updates here when the bot receives messages. We handle the
-// `/start <state>` deep-linking flow: resolve the state to a uid (via oauth_states)
-// and persist the user's chatId to users/{uid}/connections/telegram so we can send
-// messages to them later.
+// Telegram will POST updates here when the bot receives messages. We support
+// validating an optional secret token (set via TELEGRAM_WEBHOOK_SECRET). When
+// a user opens the bot via t.me/<bot>?start=<state> we resolve the state to a
+// uid and persist users/{uid}/connections/telegram so the app can message them.
 router.post('/telegram/webhook', async (req, res) => {
   try {
+    // Optional secret header check. When you call setWebhook you can provide
+    // a `secret_token` which Telegram will include as the
+    // 'X-Telegram-Bot-Api-Secret-Token' header on each delivery. Configure
+    // TELEGRAM_WEBHOOK_SECRET in Render/ENV to enable this protection.
+    const configuredSecret = process.env.TELEGRAM_WEBHOOK_SECRET || null;
+    if (configuredSecret) {
+      const incoming = req.get('X-Telegram-Bot-Api-Secret-Token') || req.get('x-telegram-bot-api-secret-token') || req.get('x-telegram-secret-token');
+      if (!incoming || String(incoming) !== String(configuredSecret)) {
+        console.warn('[telegram][webhook] invalid or missing secret token');
+        return res.status(401).send('invalid_secret');
+      }
+    }
+
     const update = req.body || {};
     const message = update.message || update.edited_message || (update.callback_query && update.callback_query.message) || null;
     if (!message) return res.status(200).send('ok');
@@ -456,10 +469,14 @@ router.post('/telegram/webhook', async (req, res) => {
     // legacy: allow uid encoded as prefix in state (used by other callbacks)
     if (!uid && state && state.split && state.split(':')[0]) uid = state.split(':')[0];
 
+    // If we can't resolve a uid, reply with guidance but do not persist
     if (!uid || uid === 'anon') {
-      // Nothing to persist - reply with a helpful message if possible
       try {
-        await postToTelegram({ payload: { text: 'Thanks for messaging the AutoPromote bot — please connect via the app to link your account.' }, uid: null });
+        // send guidance message back to user (best-effort) if bot token configured
+        const botToken = process.env.TELEGRAM_BOT_TOKEN;
+        if (botToken) {
+          await postToTelegram({ payload: { text: 'Thanks for contacting AutoPromote. Please connect your account from the app so we can link your Telegram.' }, chatId });
+        }
       } catch (_) { }
       return res.status(200).send('ok');
     }
