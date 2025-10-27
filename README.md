@@ -1,5 +1,7 @@
 # AutoPromote
 
+Latest security update: Added comprehensive rate limiting and security enhancements.
+
 AutoPromote is a free, automated content promotion platform that helps creators distribute content across major platforms, drive traffic to monetized landing pages, and generate daily revenue. Phase 1 is built entirely with free and open‑source tools; premium features (VFX‑style enhancements, auto‑tune, realistic background replacement) will be phased in later as the platform scales.
 
 ## Vision
