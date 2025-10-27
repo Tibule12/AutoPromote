@@ -562,18 +562,29 @@ if (helmet) app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Allow React inline scripts
-      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles
+      scriptSrc: ["'self'", "'unsafe-inline'"], // Remove 'unsafe-eval' for security
+      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for React
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'", "https://*.firebase.com", "https://*.googleapis.com", "https://*.paypal.com", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com"],
       frameSrc: ["'self'", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
     },
   },
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
+  noSniff: true,
+  xssFilter: true,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
 try { app.use(require('./middlewares/securityHeaders')()); } catch(_){ }
 // Apply helmet (relaxed CSP off for React inline styles) & compression if available
-if (helmet) app.use(helmet({ contentSecurityPolicy: false }));
+// Note: Second helmet call removed to avoid conflicts with the first comprehensive configuration
 if (compression) app.use(compression());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
