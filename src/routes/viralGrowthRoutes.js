@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('../firebaseAdmin');
 const authMiddleware = require('../authMiddleware');
+const rateLimit = require('../middlewares/simpleRateLimit');
 
 // Import viral engines
 const hashtagEngine = require('../services/hashtagEngine');
@@ -19,7 +20,7 @@ function cleanObject(obj) {
 }
 
 // POST /api/viral/generate-hashtags - Generate custom hashtags for content
-router.post('/generate-hashtags', authMiddleware, async (req, res) => {
+router.post('/generate-hashtags', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -61,7 +62,7 @@ router.post('/generate-hashtags', authMiddleware, async (req, res) => {
 });
 
 // POST /api/viral/optimize-content - Full viral optimization for content
-router.post('/optimize-content', authMiddleware, async (req, res) => {
+router.post('/optimize-content', authMiddleware, rateLimit({ max: 5, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -208,10 +209,11 @@ router.get('/viral-velocity/:contentId', authMiddleware, async (req, res) => {
     const content = { id: contentDoc.id, ...contentDoc.data() };
 
     // Get current metrics (mock for now - integrate with real analytics)
+    const crypto = require('crypto');
     const currentMetrics = {
-      views: content.views || Math.floor(Math.random() * 10000),
-      engagements: content.engagements || Math.floor(Math.random() * 1000),
-      shares: content.shares || Math.floor(Math.random() * 100)
+      views: content.views || crypto.randomBytes(4).readUInt32LE(0) % 10000,
+      engagements: content.engagements || crypto.randomBytes(4).readUInt32LE(0) % 1000,
+      shares: content.shares || crypto.randomBytes(4).readUInt32LE(0) % 100
     };
 
     // Calculate viral velocity

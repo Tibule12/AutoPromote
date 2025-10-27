@@ -9,6 +9,7 @@ const admin = require('../firebaseAdmin').admin;
 const engagementBoostingService = require('../services/engagementBoostingService');
 const { enqueuePlatformPostTask } = require('../services/promotionTaskQueue');
 const { postToTelegram } = require('../services/telegramService');
+const rateLimit = require('../middlewares/simpleRateLimit');
 
 // Try to use global fetch (Node 18+). Fall back to node-fetch if available.
 let fetchFn = global.fetch;
@@ -24,7 +25,7 @@ if (!fetchFn) {
 function normalize(name){ return String(name||'').toLowerCase(); }
 
 // GET /api/:platform/status
-router.get('/:platform/status', authMiddleware, async (req, res) => {
+router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   const uid = req.userId || req.user?.uid;

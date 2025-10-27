@@ -7,6 +7,7 @@ const { audit } = require('../services/auditLogger');
 let paypalSdk;
 try { paypalSdk = require('@paypal/paypal-server-sdk'); } catch(_) { /* optional */ }
 const authMiddleware = require('../authMiddleware');
+const rateLimit = require('../middlewares/simpleRateLimit');
 
 // Polyfill / select fetch implementation (Render may run Node < 18 in some cases)
 let fetchFn = (typeof fetch === 'function') ? fetch : null;
@@ -164,7 +165,7 @@ function verifyRSASignature({ signature, sigBase, certPem, algorithm }) {
 function rawBodyBuffer(req, _res, buf) { req.rawBody = buf; }
 
 // Middleware: parse JSON but retain raw body
-router.post('/webhook', express.json({ limit:'1mb', verify: rawBodyBuffer }), async (req,res) => {
+router.post('/webhook', express.json({ limit:'1mb', verify: rawBodyBuffer }), rateLimit({ max: 100, windowMs: 60000, key: r => r.ip }), async (req,res) => {
   const transmissionId = req.get('paypal-transmission-id');
   const transmissionTime = req.get('paypal-transmission-time');
   const certUrl = req.get('paypal-cert-url');

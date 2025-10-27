@@ -5,15 +5,31 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../authMiddleware');
 const repostDrivenEngine = require('../services/repostDrivenEngine');
+const rateLimit = require('../middlewares/simpleRateLimit');
 
 // POST /track - Track manual repost with markers
-router.post('/track', authMiddleware, async (req, res) => {
+router.post('/track', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   try {
     const userId = req.userId;
     const { contentId, platform, repostUrl, markers } = req.body;
 
     if (!contentId || !platform || !repostUrl) {
       return res.status(400).json({ error: 'ContentId, platform, and repostUrl are required' });
+    }
+
+    // Validate repostUrl to prevent SSRF
+    try {
+      const url = new URL(repostUrl);
+      if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+        return res.status(400).json({ error: 'Invalid URL protocol' });
+      }
+      // Disallow internal/private IPs
+      const hostname = url.hostname;
+      if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.startsWith('172.')) {
+        return res.status(400).json({ error: 'Invalid URL hostname' });
+      }
+    } catch (e) {
+      return res.status(400).json({ error: 'Invalid repostUrl' });
     }
 
     const tracking = await repostDrivenEngine.trackManualRepost(contentId, {

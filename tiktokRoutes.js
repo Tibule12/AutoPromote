@@ -6,6 +6,7 @@ const router = express.Router();
 const authMiddleware = require('./authMiddleware');
 const { admin, db } = require('./firebaseAdmin');
 const DEBUG_TIKTOK_OAUTH = process.env.DEBUG_TIKTOK_OAUTH === 'true';
+const rateLimit = require('./src/middlewares/simpleRateLimit');
 
 // Gather both sandbox & production env sets (prefixed) plus legacy fallbacks
 const sandboxConfig = {
@@ -167,13 +168,14 @@ async function getUidFromAuthHeader(req) {
 
 // POST /auth/prepare – preferred secure flow used by frontend (returns JSON { authUrl })
 // Frontend calls this with Authorization header; server stores state and returns the TikTok OAuth URL
-router.post('/auth/prepare', async (req, res) => {
+router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
     const uid = await getUidFromAuthHeader(req);
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
-    const nonce = Math.random().toString(36).slice(2);
+    const crypto = require('crypto');
+    const nonce = crypto.randomBytes(8).toString('hex');
     const state = `${uid}.${nonce}`;
     const isPopup = req.query.popup === 'true';
     await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
