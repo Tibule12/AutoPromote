@@ -253,6 +253,11 @@ try {
   adminAnalyticsRoutes = express.Router();
   console.log('⚠️ Admin analytics routes not found, using dummy router:', e.message);
 }
+// Require acceptance middleware factory and auth middleware
+let requireAcceptedTerms;
+try { requireAcceptedTerms = require('./middlewares/requireAcceptedTerms'); } catch (e) { requireAcceptedTerms = null; }
+let authMiddleware;
+try { authMiddleware = require('./authMiddleware'); } catch (e) { authMiddleware = (req,res,next)=>next(); }
 const viralGrowthRoutes = require('./routes/viralGrowthRoutes');
 const engagementRoutes = require('./routes/engagementRoutes');
 let monetizationRoutes;
@@ -552,14 +557,26 @@ app.use(cors({
 }));
 // Apply compression if installed
 if (compression) app.use(compression());
-// Apply security headers (disable CSP by default to avoid blocking React build assets)
-if (helmet) app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+// Apply security headers with CSP
+if (helmet) app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Allow React inline scripts
+      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://*.firebase.com", "https://*.googleapis.com", "https://*.paypal.com", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com"],
+      frameSrc: ["'self'", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com"],
+    },
+  },
+  crossOriginEmbedderPolicy: false
+}));
 try { app.use(require('./middlewares/securityHeaders')()); } catch(_){ }
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Apply helmet (relaxed CSP off for React inline styles) & compression if available
 if (helmet) app.use(helmet({ contentSecurityPolicy: false }));
 if (compression) app.use(compression());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Correlation ID middleware (K)
 app.use((req, res, next) => {
@@ -581,7 +598,12 @@ try {
 }
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/content', contentRoutes);
+// Require latest terms before allowing access to content routes
+if (requireAcceptedTerms) {
+  app.use('/api/content', authMiddleware, requireAcceptedTerms({ version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0' }), contentRoutes);
+} else {
+  app.use('/api/content', contentRoutes);
+}
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/security', adminSecurityRoutes);
@@ -645,7 +667,12 @@ app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/monetization', monetizationRoutes);
 // Stripe integration removed
 app.use('/s', shortlinkRoutes);
-app.use('/api/billing', billingRoutes);
+// Require latest terms before allowing access to billing routes
+if (requireAcceptedTerms) {
+  app.use('/api/billing', authMiddleware, requireAcceptedTerms({ version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0' }), billingRoutes);
+} else {
+  app.use('/api/billing', billingRoutes);
+}
 app.use('/api/payments', paymentsStatusRoutes);
 app.use('/api/payments', paymentsExtendedRoutes);
 app.use('/api/paypal', paypalWebhookRoutes);
