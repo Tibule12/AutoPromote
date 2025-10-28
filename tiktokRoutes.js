@@ -205,7 +205,10 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 });
 
 // 1) Begin OAuth (requires user auth) — keeps scopes minimal for review
+fix/dependabot/webpack-dev-server-override
 router.get('/auth', authMiddleware, ttWriteLimiter, async (req, res) => {
+router.get('/auth', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), authMiddleware, async (req, res) => {
+ main
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
