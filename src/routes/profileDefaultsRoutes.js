@@ -2,7 +2,11 @@ const express = require('express');
 const { db } = require('../firebaseAdmin');
 let authMiddleware; try { authMiddleware = require('../authMiddleware'); } catch(_) { authMiddleware = (req,res,next)=> next(); }
 const { audit } = require('../services/auditLogger');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
 const router = express.Router();
+
+const profilePublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PROFILE_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'profile_public' });
+const profileWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PROFILE_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'profile_writes' });
 
 function validateDefaults(input) {
   const errors = [];
@@ -21,7 +25,7 @@ function validateDefaults(input) {
 }
 
 // GET /api/profile/defaults - fetch current user's scheduling/profile defaults
-router.get('/defaults', authMiddleware, async (req,res)=>{
+router.get('/defaults', authMiddleware, profilePublicLimiter, async (req,res)=>{
   try {
     if (!req.userId) return res.status(401).json({ ok:false, error:'auth_required' });
     if (process.env.TEST_OFFLINE === 'true') return res.json({ ok:true, defaults:{ mock:true }});
@@ -31,7 +35,7 @@ router.get('/defaults', authMiddleware, async (req,res)=>{
 });
 
 // POST /api/profile/defaults - set or merge defaults
-router.post('/defaults', authMiddleware, async (req,res)=>{
+router.post('/defaults', authMiddleware, profileWriteLimiter, async (req,res)=>{
   try {
     if (!req.userId) return res.status(401).json({ ok:false, error:'auth_required' });
     const allowed = ['timezone','preferredPlatforms','postingWindow','maxDailyUploads','variantStrategy'];
@@ -52,7 +56,7 @@ router.post('/defaults', authMiddleware, async (req,res)=>{
 
 module.exports = router;
 // Append schedule preview route (mounted separately if needed)
-router.post('/preview-schedule', authMiddleware, async (req,res)=>{
+router.post('/preview-schedule', authMiddleware, profilePublicLimiter, async (req,res)=>{
   try {
     if (!req.userId) return res.status(401).json({ ok:false, error:'auth_required' });
     const defaultsSnap = await db.collection('user_defaults').doc(req.userId).get();

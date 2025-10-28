@@ -3,9 +3,13 @@ const router = express.Router();
 const { db } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
 const optimizationService = require('./optimizationService');
+const { rateLimiter } = require('./middlewares/globalRateLimiter');
+
+// Admin-level limiter: moderate capacity, higher refill to allow admin activity but prevent abuse.
+const adminLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_ADMIN_MAX || '200', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_ADMIN_REFILL || '10'), windowHint: 'admin' });
 
 // Get comprehensive admin analytics overview with advanced metrics
-router.get('/overview', authMiddleware, async (req, res) => {
+router.get('/overview', adminLimiter, authMiddleware, async (req, res) => {
   try {
     // Debug token and user info
     console.log('Admin analytics request received');
@@ -305,7 +309,7 @@ router.get('/overview', authMiddleware, async (req, res) => {
 });
 
 // Get all users for admin
-router.get('/users', authMiddleware, async (req, res) => {
+router.get('/users', adminLimiter, authMiddleware, async (req, res) => {
   try {
     // Check if user is admin (check both admin collection and legacy methods)
     if (!req.user || 
@@ -357,7 +361,7 @@ router.get('/users', authMiddleware, async (req, res) => {
 });
 
 // Get all content for admin
-router.get('/content', authMiddleware, async (req, res) => {
+router.get('/content', adminLimiter, authMiddleware, async (req, res) => {
   try {
     // Check if user is admin (check both admin collection and legacy methods)
     if (!req.user || 
@@ -410,7 +414,7 @@ router.get('/content', authMiddleware, async (req, res) => {
 });
 
 // Get platform performance analytics
-router.get('/platform-performance', authMiddleware, async (req, res) => {
+router.get('/platform-performance', adminLimiter, authMiddleware, async (req, res) => {
   try {
     // Check if user is admin (check both admin collection and legacy methods)
     if (!req.user || 
@@ -484,7 +488,7 @@ router.get('/platform-performance', authMiddleware, async (req, res) => {
 });
 
 // Get revenue trends over time
-router.get('/revenue-trends', authMiddleware, async (req, res) => {
+router.get('/revenue-trends', adminLimiter, authMiddleware, async (req, res) => {
   try {
     // Check if user is admin (check both admin collection and legacy methods)
     if (!req.user || 
@@ -534,7 +538,7 @@ router.get('/revenue-trends', authMiddleware, async (req, res) => {
 });
 
 // Get optimization recommendations for platform
-router.get('/optimization-recommendations', authMiddleware, async (req, res) => {
+router.get('/optimization-recommendations', adminLimiter, authMiddleware, async (req, res) => {
   try {
     // Check if user is admin (check both admin collection and legacy methods)
     if (!req.user || 
@@ -577,7 +581,7 @@ router.get('/optimization-recommendations', authMiddleware, async (req, res) => 
 });
 
 // Get promotion performance analytics
-router.get('/promotion-performance', authMiddleware, async (req, res) => {
+router.get('/promotion-performance', adminLimiter, authMiddleware, async (req, res) => {
   try {
     // Check if user is admin (check both admin collection and legacy methods)
     if (!req.user || 

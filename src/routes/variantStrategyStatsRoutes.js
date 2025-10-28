@@ -2,10 +2,13 @@ const express = require('express');
 const { db } = require('../firebaseAdmin');
 let authMiddleware; try { authMiddleware = require('../authMiddleware'); } catch(_) { authMiddleware = (req,res,next)=> next(); }
 const adminOnly = require('../middlewares/adminOnly');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
 const router = express.Router();
 
+const variantAdminLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_VARIANT_ADMIN || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'variant_admin' });
+
 // GET /api/admin/variants/strategy-stats
-router.get('/strategy-stats', authMiddleware, adminOnly, async (_req,res)=>{
+router.get('/strategy-stats', authMiddleware, adminOnly, variantAdminLimiter, async (_req,res)=>{
   try {
     const snap = await db.collection('content').orderBy('created_at','desc').limit(1000).get();
     const counts = { rotation:0, bandit:0, unspecified:0 };
@@ -18,7 +21,7 @@ router.get('/strategy-stats', authMiddleware, adminOnly, async (_req,res)=>{
 });
 
 // GET /api/admin/variants/stats/:contentId - detailed variant performance (materialized)
-router.get('/stats/:contentId', authMiddleware, adminOnly, async (req,res)=>{
+router.get('/stats/:contentId', authMiddleware, adminOnly, variantAdminLimiter, async (req,res)=>{
   try {
     const { contentId } = req.params;
     const { getVariantStats } = require('../services/variantStatsService');
@@ -29,7 +32,7 @@ router.get('/stats/:contentId', authMiddleware, adminOnly, async (req,res)=>{
 });
 
 // GET /api/admin/variants/exploration-ratio?days=7
-router.get('/exploration-ratio', authMiddleware, adminOnly, async (req,res)=>{
+router.get('/exploration-ratio', authMiddleware, adminOnly, variantAdminLimiter, async (req,res)=>{
   try {
     const days = parseInt(req.query.days || '7',10);
     const since = Date.now() - days*86400000;
@@ -45,7 +48,7 @@ router.get('/exploration-ratio', authMiddleware, adminOnly, async (req,res)=>{
 });
 
 // GET /api/admin/variants/optimization/:contentId?platform=twitter
-router.get('/optimization/:contentId', authMiddleware, adminOnly, async (req,res)=>{
+router.get('/optimization/:contentId', authMiddleware, adminOnly, variantAdminLimiter, async (req,res)=>{
   try {
     const { contentId } = req.params; const platform = req.query.platform || 'generic';
     const uid = req.userId || null;

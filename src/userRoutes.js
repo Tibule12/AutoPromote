@@ -1,10 +1,16 @@
 const express = require('express');
 const { db } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
+const { rateLimiter } = require('./middlewares/globalRateLimiter');
 const router = express.Router();
 
+// Lightweight per-route limiters to address missing-rate-limiting findings.
+// These use the in-memory fallback. For production, replace with a shared store (Redis).
+const writeLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_USER_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'user_writes' });
+const publicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'public' });
+
 // Get current user (profile defaults)
-router.get('/me', authMiddleware, async (req, res) => {
+router.get('/me', authMiddleware, writeLimiter, async (req, res) => {
   try {
     const ref = db.collection('users').doc(req.userId);
     const snap = await ref.get();
@@ -33,7 +39,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 // Update current user (profile defaults)
-router.put('/me', authMiddleware, async (req, res) => {
+router.put('/me', authMiddleware, writeLimiter, async (req, res) => {
   try {
     const { name, timezone, schedulingDefaults, notifications, defaultPlatforms, defaultFrequency } = req.body;
     const ref = db.collection('users').doc(req.userId);
@@ -68,7 +74,7 @@ router.put('/me', authMiddleware, async (req, res) => {
 });
 
 // Get user profile
-router.get('/profile', authMiddleware, async (req, res) => {
+router.get('/profile', authMiddleware, publicLimiter, async (req, res) => {
   try {
     // Try to get user from users collection
     const userDoc = await db.collection('users').doc(req.userId).get();
@@ -103,7 +109,7 @@ router.get('/profile', authMiddleware, async (req, res) => {
 });
 
 // Update user profile
-router.put('/profile', authMiddleware, async (req, res) => {
+router.put('/profile', authMiddleware, writeLimiter, async (req, res) => {
   try {
     const { name, email } = req.body;
     
@@ -131,7 +137,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
 });
 
 // Get user statistics
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', authMiddleware, publicLimiter, async (req, res) => {
   try {
     // Get content data
     const contentSnapshot = await db.collection('content')
@@ -161,7 +167,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
 });
 
 // Revenue / growth progress (content count vs eligibility threshold)
-router.get('/progress', authMiddleware, async (req, res) => {
+router.get('/progress', authMiddleware, publicLimiter, async (req, res) => {
   try {
     const MIN_CONTENT_FOR_REVENUE = parseInt(process.env.MIN_CONTENT_FOR_REVENUE || '100', 10);
     // Use cached contentCount on user doc if present, else compute lightweight count query
@@ -183,7 +189,7 @@ router.get('/progress', authMiddleware, async (req, res) => {
 });
 
 // Get recent notifications for current user
-router.get('/notifications', authMiddleware, async (req, res) => {
+router.get('/notifications', authMiddleware, publicLimiter, async (req, res) => {
   try {
     const snapshot = await db.collection('notifications')
       .where('user_id', '==', req.userId)
@@ -199,7 +205,7 @@ router.get('/notifications', authMiddleware, async (req, res) => {
 });
 
 // Get all users (admin only)
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, writeLimiter, async (req, res) => {
   try {
     if (req.userRole !== 'admin') {
       return res.status(403).json({ error: 'Access denied. Admin only.' });

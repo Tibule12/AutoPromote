@@ -5,8 +5,10 @@ const fetch = require('node-fetch');
 const router = express.Router();
 const authMiddleware = require('./authMiddleware');
 const { admin, db } = require('./firebaseAdmin');
+const { rateLimiter } = require('./src/middlewares/globalRateLimiter');
 const DEBUG_TIKTOK_OAUTH = process.env.DEBUG_TIKTOK_OAUTH === 'true';
 const rateLimit = require('./src/middlewares/simpleRateLimit');
+const { validateUrl, safeFetch } = require('./src/utils/ssrfGuard');
 
 // Gather both sandbox & production env sets (prefixed) plus legacy fallbacks
 const sandboxConfig = {
@@ -148,7 +150,10 @@ router.get('/config', (req, res) => {
 });
 
 // Health endpoint to verify mount
-router.get('/health', (req, res) => {
+// Attach a light public limiter to health to reduce noisy scans
+const ttPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TT_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'tiktok_public' });
+const ttWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TT_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'tiktok_writes' });
+router.get('/health', ttPublicLimiter, (req, res) => {
   const cfg = activeConfig();
   res.json({ ok: true, mode: TIKTOK_ENV, hasClientKey: !!cfg.key, hasRedirect: !!cfg.redirect });
 });
@@ -175,7 +180,7 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
     const uid = await getUidFromAuthHeader(req);
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
     const crypto = require('crypto');
-    const nonce = crypto.randomBytes(8).toString('hex');
+    const nonce = crypto.randomBytes(16).toString('hex'); // Increased to 16 bytes for better security
     const state = `${uid}.${nonce}`;
     const isPopup = req.query.popup === 'true';
     await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
@@ -200,13 +205,17 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 });
 
 // 1) Begin OAuth (requires user auth) — keeps scopes minimal for review
+fix/dependabot/webpack-dev-server-override
+router.get('/auth', authMiddleware, ttWriteLimiter, async (req, res) => {
 router.get('/auth', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), authMiddleware, async (req, res) => {
+ main
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
     const uid = req.userId || req.user?.uid;
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
-    const nonce = Math.random().toString(36).slice(2);
+    const crypto = require('crypto');
+    const nonce = crypto.randomBytes(16).toString('hex'); // Use cryptographically secure random
     const state = `${uid}.${nonce}`;
     await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
       state,
@@ -259,7 +268,7 @@ router.get('/auth', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || 
 // when TIKTOK_DEBUG_ALLOW=true in environment. This is useful to confirm
 // the injected script no longer contains unsafe overrides.
 if (process.env.TIKTOK_DEBUG_ALLOW === 'true') {
-  router.get('/_debug/page', async (req, res) => {
+  router.get('/_debug/page', ttPublicLimiter, async (req, res) => {
     try {
       const cfg = activeConfig();
       if (ensureTikTokEnv(res, cfg, { requireSecret: false })) return;
@@ -277,7 +286,7 @@ if (process.env.TIKTOK_DEBUG_ALLOW === 'true') {
 }
 
 // Alternative start endpoint that accepts an ID token via query when headers aren't available (for link redirects)
-router.get('/auth/start', async (req, res) => {
+router.get('/auth/start', ttWriteLimiter, async (req, res) => {
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
@@ -287,7 +296,8 @@ router.get('/auth/start', async (req, res) => {
     const decoded = await admin.auth().verifyIdToken(String(idToken));
     const uid = decoded.uid;
     if (!uid) return res.status(401).send('Unauthorized');
-    const nonce = Math.random().toString(36).slice(2);
+    const crypto = require('crypto');
+    const nonce = crypto.randomBytes(16).toString('hex'); // Use cryptographically secure random
     const state = `${uid}.${nonce}`;
     await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
       state,
@@ -329,10 +339,11 @@ router.get('/auth/start', async (req, res) => {
 });
 
 // Preflight diagnostics (does NOT store state) to help debug client_key rejections
-router.get('/auth/preflight', authMiddleware, async (req, res) => {
+router.get('/auth/preflight', authMiddleware, ttPublicLimiter, async (req, res) => {
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
-  const fakeState = 'preflight.' + Math.random().toString(36).slice(2,10);
+  const crypto = require('crypto');
+  const fakeState = 'preflight.' + crypto.randomBytes(8).toString('hex'); // Use cryptographically secure random
   const scope = 'user.info.basic';
   const url = constructAuthUrl(cfg, fakeState, scope);
   const issues = [];
@@ -355,7 +366,7 @@ router.get('/auth/preflight', authMiddleware, async (req, res) => {
 });
 
 // 2) OAuth callback — verify state, exchange code, store tokens under users/{uid}/connections/tiktok
-router.get('/callback', async (req, res) => {
+router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }), async (req, res) => {
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   const { code, state } = req.query;
@@ -366,16 +377,29 @@ router.get('/callback', async (req, res) => {
     if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] Missing code/state. query=%o url=%s', req.query, req.originalUrl);
     return res.status(400).send('Missing code or state');
   }
+
+  // Validate inputs to prevent injection
+  if (typeof code !== 'string' || typeof state !== 'string') {
+    return res.status(400).send('Invalid input types');
+  }
+
+  // Validate state format to prevent injection
+  if (!/^[a-zA-Z0-9_.]+$/.test(state)) {
+    return res.status(400).send('Invalid state format');
+  }
+
   try {
     const [uid, nonce] = String(state).split('.');
-    if (!uid || !nonce) return res.status(400).send('Invalid state');
+    if (!uid || !nonce || !/^[a-f0-9]+$/.test(nonce)) return res.status(400).send('Invalid state');
     const stateDocRef = await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').get();
-    const stateDataRef = stateDocRef.exists ? stateDocRef.data() : null;
-    if (!stateDataRef || stateDataRef.state !== state) {
-      return res.status(400).send('State mismatch');
+    const stateData = stateDocRef && stateDocRef.exists ? stateDocRef.data() : null;
+    // Verify stored nonce matches the state to prevent CSRF/forgery
+    if (!stateData || stateData.nonce !== nonce) {
+      if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] state mismatch or missing stored state', { uid, expectedNonce: stateData && stateData.nonce, nonce });
+      return res.status(400).send('Invalid or expired state');
     }
     // Exchange code
-    const tokenRes = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+    const tokenRes = await safeFetch('https://open.tiktokapis.com/v2/oauth/token/', fetch, { fetchOptions: {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -385,7 +409,7 @@ router.get('/callback', async (req, res) => {
         grant_type: 'authorization_code',
         redirect_uri: cfg.redirect
       })
-    });
+    }, allowHosts: ['open.tiktokapis.com'] });
     const tokenData = await tokenRes.json();
     if (!tokenRes.ok || !tokenData.access_token) {
       if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] token exchange failed status=%s body=%o', tokenRes.status, tokenData);
@@ -507,11 +531,29 @@ router.get('/debug/state', authMiddleware, async (req, res) => {
 
 // 3. Upload video to TikTok
 // Expects: { access_token, open_id, video_url, title }
-router.post('/upload', async (req, res) => {
+router.post('/upload', rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }), async (req, res) => {
   const { access_token, open_id, video_url, title } = req.body;
   if (!access_token || !open_id || !video_url) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
+
+  // Validate video_url to prevent SSRF
+  try {
+    const url = new URL(video_url);
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return res.status(400).json({ error: 'Invalid video URL protocol' });
+    }
+    // Prevent access to internal/private networks
+    const hostname = url.hostname.toLowerCase();
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') ||
+        hostname.startsWith('10.') || hostname.startsWith('172.') ||
+        hostname.includes('internal') || hostname.includes('local')) {
+      return res.status(400).json({ error: 'Access to internal/private URLs not allowed' });
+    }
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid video URL format' });
+  }
+
   try {
     // Step 1: Get upload URL from TikTok
     const uploadRes = await fetch('https://open.tiktokapis.com/v2/video/upload/', {
@@ -527,7 +569,12 @@ router.post('/upload', async (req, res) => {
       return res.status(400).json({ error: 'Failed to get TikTok upload URL', details: uploadData });
     }
     // Step 2: Upload video file to TikTok (video_url must be a direct link to the file)
-    const videoFileRes = await fetch(video_url);
+    // Use safeFetch to validate that video_url is not pointing to private IPs or local addresses
+    await validateUrl(video_url, { requireHttps: false });
+    const videoFileRes = await safeFetch(video_url, fetch, { fetchOptions: { timeout: 30000, headers: { 'User-Agent': 'AutoPromote/1.0' } } });
+    if (!videoFileRes.ok) {
+      return res.status(400).json({ error: 'Failed to fetch video from provided URL' });
+    }
     const videoBuffer = await videoFileRes.arrayBuffer();
     const uploadToTikTokRes = await fetch(uploadData.data.upload_url, {
       method: 'PUT',
@@ -562,17 +609,29 @@ router.post('/upload', async (req, res) => {
 
 // 4. Fetch TikTok video analytics
 // Expects: { access_token, open_id, video_id }
-router.post('/analytics', async (req, res) => {
+router.post('/analytics', rateLimit({ max: 20, windowMs: 3600000, key: r => r.ip }), async (req, res) => {
   const { access_token, open_id, video_id } = req.body;
   if (!access_token || !open_id || !video_id) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
+
+  // Validate inputs to prevent injection
+  if (typeof access_token !== 'string' || typeof open_id !== 'string' || typeof video_id !== 'string') {
+    return res.status(400).json({ error: 'Invalid input types' });
+  }
+
+  // Basic validation for video_id format (should be alphanumeric)
+  if (!/^[a-zA-Z0-9_-]+$/.test(video_id)) {
+    return res.status(400).json({ error: 'Invalid video_id format' });
+  }
+
   try {
-    const analyticsRes = await fetch(`https://open.tiktokapis.com/v2/video/data/?open_id=${open_id}&video_id=${video_id}`, {
+    const analyticsRes = await fetch(`https://open.tiktokapis.com/v2/video/data/?open_id=${encodeURIComponent(open_id)}&video_id=${encodeURIComponent(video_id)}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${access_token}`
-      }
+      },
+      timeout: 10000 // 10 second timeout
     });
     const analyticsData = await analyticsRes.json();
     if (!analyticsData.data) {

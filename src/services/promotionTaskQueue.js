@@ -5,6 +5,7 @@ const { db } = require('../firebaseAdmin');
 const { recordTaskCompletion, recordRateLimitEvent } = require('./aggregationService');
 const { getCooldown, noteRateLimit } = require('./rateLimitTracker');
 const { uploadVideo } = require('./youtubeService');
+const crypto = require('crypto');
 
 const MAX_ATTEMPTS = parseInt(process.env.TASK_MAX_ATTEMPTS || '5', 10);
 const BASE_BACKOFF_MS = parseInt(process.env.TASK_BASE_BACKOFF_MS || '60000', 10); // 1 min default
@@ -45,7 +46,7 @@ function computeNextAttempt(attempts, classification) {
   // Exponential backoff with jitter, classification-based modifier
   const base = BASE_BACKOFF_MS * Math.pow(2, Math.min(attempts, 6));
   const classFactor = classification === 'rate_limit' ? 2 : classification === 'auth' ? 3 : 1;
-  const jitter = Math.floor(Math.random() * (base * 0.3));
+  const jitter = Math.floor(crypto.randomInt(0, Math.max(1, Math.floor(base * 0.3))));
   return Date.now() + (base * classFactor) + jitter;
 }
 
@@ -214,7 +215,6 @@ async function enqueuePlatformPostTask({ contentId, uid, platform, reason = 'man
     // On error, proceed without blocking; mark unknown
     payload.__revenueEligible = null;
   }
-  const crypto = require('crypto');
   // Canonical subset of payload for hashing (avoid volatile fields)
   const canonical = {
     message: payload.message || '',
@@ -329,7 +329,7 @@ async function processNextPlatformTask() {
         priority += likeRate * 200; // amplify quality
       }
     } catch(_){}
-    priority += Math.random();
+  priority += (crypto.randomInt(0, 1000) / 1000);
     if (priority > bestScore) { bestScore = priority; selectedDoc = d; selectedData = data; }
   }
   if (!selectedDoc) return null;

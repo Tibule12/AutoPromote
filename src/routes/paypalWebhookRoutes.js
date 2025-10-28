@@ -2,6 +2,9 @@ const express = require('express');
 const crypto = require('crypto');
 const https = require('https');
 const router = express.Router();
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+const paypalPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PAYPAL_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'paypal_public' });
+const paypalWebhookLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PAYPAL_WEBHOOK || '300', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '50'), windowHint: 'paypal_webhook' });
 const { db } = require('../firebaseAdmin');
 const { audit } = require('../services/auditLogger');
 let paypalSdk;
@@ -78,7 +81,7 @@ async function captureOrder(orderId){
 }
 
 // Route: Create PayPal order
-router.post('/create-order', authMiddleware, express.json(), async (req,res) => {
+router.post('/create-order', authMiddleware, paypalPublicLimiter, express.json(), async (req,res) => {
   const started = Date.now();
   try {
     const { amount, currency } = req.body || {};
@@ -94,7 +97,7 @@ router.post('/create-order', authMiddleware, express.json(), async (req,res) => 
 });
 
 // Route: Capture PayPal order (server-side)
-router.post('/capture-order/:id', authMiddleware, async (req,res) => {
+router.post('/capture-order/:id', authMiddleware, paypalPublicLimiter, async (req,res) => {
   const started = Date.now();
   try {
     const orderId = req.params.id;
@@ -108,7 +111,7 @@ router.post('/capture-order/:id', authMiddleware, async (req,res) => {
 });
 
 // Lightweight debug endpoint to introspect PayPal integration health
-router.get('/debug/status', authMiddleware, async (req,res) => {
+router.get('/debug/status', authMiddleware, paypalPublicLimiter, async (req,res) => {
   const hasClientId = !!process.env.PAYPAL_CLIENT_ID;
   const hasSecret = !!process.env.PAYPAL_CLIENT_SECRET;
   const mode = process.env.PAYPAL_MODE || 'sandbox(default)';
@@ -165,7 +168,7 @@ function verifyRSASignature({ signature, sigBase, certPem, algorithm }) {
 function rawBodyBuffer(req, _res, buf) { req.rawBody = buf; }
 
 // Middleware: parse JSON but retain raw body
-router.post('/webhook', express.json({ limit:'1mb', verify: rawBodyBuffer }), rateLimit({ max: 100, windowMs: 60000, key: r => r.ip }), async (req,res) => {
+router.post('/webhook', express.json({ limit:'1mb', verify: rawBodyBuffer }), paypalWebhookLimiter, rateLimit({ max: 100, windowMs: 60000, key: r => r.ip }), async (req,res) => {
   const transmissionId = req.get('paypal-transmission-id');
   const transmissionTime = req.get('paypal-transmission-time');
   const certUrl = req.get('paypal-cert-url');
