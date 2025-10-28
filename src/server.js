@@ -3,6 +3,9 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+
+// Rate limiter for sensitive routes
+const rateLimit = require('express-rate-limit');
 // Security & performance middlewares (declare once)
 let helmet, compression;
 try { compression = require('compression'); } catch(_) { /* optional */ }
@@ -679,10 +682,18 @@ app.use('/api/monetization', monetizationRoutes);
 // Stripe integration removed
 app.use('/s', shortlinkRoutes);
 // Require latest terms before allowing access to billing routes
+// Define rate limiter for billing route (e.g., 10 requests per minute)
+const billingRateLimiter = rateLimit({
+  windowMs: 60 * 1000,  // 1 minute window
+  max: 10,               // limit each IP to 10 requests per windowMs
+  standardHeaders: true, // Return rate limit info in the headers
+  legacyHeaders: false,  // Disable the `X-RateLimit-*` headers
+});
+
 if (requireAcceptedTerms) {
-  app.use('/api/billing', authMiddleware, requireAcceptedTerms({ version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0' }), billingRoutes);
+  app.use('/api/billing', billingRateLimiter, authMiddleware, requireAcceptedTerms({ version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0' }), billingRoutes);
 } else {
-  app.use('/api/billing', billingRoutes);
+  app.use('/api/billing', billingRateLimiter, billingRoutes);
 }
 app.use('/api/payments', paymentsStatusRoutes);
 app.use('/api/payments', paymentsExtendedRoutes);
