@@ -2,6 +2,7 @@ const express = require('express');
 const admin = require('firebase-admin');
 const router = express.Router();
 const { sendVerificationEmail, sendPasswordResetEmail } = require('./services/emailService');
+const { URL } = require('url');
 
 // Middleware to verify Firebase token
 const verifyFirebaseToken = async (req, res, next) => {
@@ -113,7 +114,17 @@ router.post('/request-password-reset', async (req,res)=>{
     // Detect obvious placeholder configuration so user knows why mail might not arrive
     if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.startsWith('SG.xxxx')) diagnostics.placeholderApiKey = true;
     if ((process.env.EMAIL_FROM || '').includes('yourdomain.com')) diagnostics.placeholderFrom = true;
-    if ((process.env.PASSWORD_RESET_REDIRECT_URL || '').includes('yourapp.com')) diagnostics.placeholderRedirect = true;
+    try {
+      // Check if the URL has host exactly 'yourapp.com'
+      const urlToCheck = process.env.PASSWORD_RESET_REDIRECT_URL || '';
+      if (urlToCheck) {
+        const parsedUrl = new URL(urlToCheck);
+        if (parsedUrl.host === 'yourapp.com') diagnostics.placeholderRedirect = true;
+      }
+    } catch (e) {
+      // if URL is malformed, also flag as placeholder
+      diagnostics.placeholderRedirect = true;
+    }
     diagnostics.provider = process.env.EMAIL_PROVIDER || 'console';
     diagnostics.mode = process.env.EMAIL_SENDER_MODE || 'unknown';
     diagnostics.delivery = resp && resp.provider ? resp.provider : (resp.disabled ? 'disabled' : 'unknown');
