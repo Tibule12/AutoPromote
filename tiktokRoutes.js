@@ -512,6 +512,36 @@ router.post('/upload', async (req, res) => {
   if (!access_token || !open_id || !video_url) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
+
+  // ---- SSRF prevention: Only allow fetching from known/trusted domains ----
+  const TRUSTED_VIDEO_HOSTNAMES = [
+    // Add allowed hostnames/domains here (examples below, customize as needed)
+    'storage.googleapis.com',
+    's3.amazonaws.com',
+    'cdn.tiktok.com',
+    // ...add other trusted video hosts...
+  ];
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(video_url);
+  } catch (err) {
+    return res.status(400).json({ error: 'Invalid video_url provided' });
+  }
+  if (!['https:', 'http:'].includes(parsedUrl.protocol)) {
+    return res.status(400).json({ error: 'video_url must use http or https' });
+  }
+  // Hostname allow-list check (case-insensitive, handle subdomains)
+  const hostnameAllowed = TRUSTED_VIDEO_HOSTNAMES.some((allowedHost) => {
+    // Ensures full match or subdomains
+    return (
+      parsedUrl.hostname === allowedHost ||
+      parsedUrl.hostname.endsWith('.' + allowedHost)
+    );
+  });
+  if (!hostnameAllowed) {
+    return res.status(400).json({ error: 'video_url domain not allowed' });
+  }
+
   try {
     // Step 1: Get upload URL from TikTok
     const uploadRes = await fetch('https://open.tiktokapis.com/v2/video/upload/', {
