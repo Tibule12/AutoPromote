@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../firebaseAdmin');
+const crypto = require('crypto');
 const authMiddleware = require('../authMiddleware');
 const rateLimit = require('../middlewares/simpleRateLimit');
 
@@ -17,6 +18,19 @@ const algorithmExploitationEngine = require('../services/algorithmExploitationEn
 // Helper function to clean objects
 function cleanObject(obj) {
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
+}
+
+// Helper to generate unbiased cryptographically secure random integer in [0, maxExclusive)
+function secureRandomInt(maxExclusive) {
+  if (maxExclusive <= 0 || maxExclusive > 0xFFFFFFFF) throw new RangeError("maxExclusive out of range");
+  const maxUint32 = 0xFFFFFFFF;
+  const maxUnbiased = Math.floor((maxUint32 + 1) / maxExclusive) * maxExclusive;
+  while (true) {
+    const rand = crypto.randomBytes(4).readUInt32LE(0);
+    if (rand < maxUnbiased) {
+      return rand % maxExclusive;
+    }
+  }
 }
 
 // POST /api/viral/generate-hashtags - Generate custom hashtags for content
@@ -209,11 +223,10 @@ router.get('/viral-velocity/:contentId', authMiddleware, async (req, res) => {
     const content = { id: contentDoc.id, ...contentDoc.data() };
 
     // Get current metrics (mock for now - integrate with real analytics)
-    const crypto = require('crypto');
     const currentMetrics = {
-      views: content.views || crypto.randomBytes(4).readUInt32LE(0) % 10000,
-      engagements: content.engagements || crypto.randomBytes(4).readUInt32LE(0) % 1000,
-      shares: content.shares || crypto.randomBytes(4).readUInt32LE(0) % 100
+      views: content.views || secureRandomInt(10000),
+      engagements: content.engagements || secureRandomInt(1000),
+      shares: content.shares || secureRandomInt(100)
     };
 
     // Calculate viral velocity
