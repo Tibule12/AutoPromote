@@ -5,6 +5,7 @@ const fetch = require('node-fetch');
 const router = express.Router();
 const authMiddleware = require('./authMiddleware');
 const { admin, db } = require('./firebaseAdmin');
+const { rateLimiter } = require('./src/middlewares/globalRateLimiter');
 const DEBUG_TIKTOK_OAUTH = process.env.DEBUG_TIKTOK_OAUTH === 'true';
 const rateLimit = require('./src/middlewares/simpleRateLimit');
 const { validateUrl, safeFetch } = require('./src/utils/ssrfGuard');
@@ -149,7 +150,10 @@ router.get('/config', (req, res) => {
 });
 
 // Health endpoint to verify mount
-router.get('/health', (req, res) => {
+// Attach a light public limiter to health to reduce noisy scans
+const ttPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TT_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'tiktok_public' });
+const ttWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TT_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'tiktok_writes' });
+router.get('/health', ttPublicLimiter, (req, res) => {
   const cfg = activeConfig();
   res.json({ ok: true, mode: TIKTOK_ENV, hasClientKey: !!cfg.key, hasRedirect: !!cfg.redirect });
 });
@@ -201,7 +205,7 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 });
 
 // 1) Begin OAuth (requires user auth) — keeps scopes minimal for review
-router.get('/auth', authMiddleware, async (req, res) => {
+router.get('/auth', authMiddleware, ttWriteLimiter, async (req, res) => {
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
@@ -261,7 +265,7 @@ router.get('/auth', authMiddleware, async (req, res) => {
 // when TIKTOK_DEBUG_ALLOW=true in environment. This is useful to confirm
 // the injected script no longer contains unsafe overrides.
 if (process.env.TIKTOK_DEBUG_ALLOW === 'true') {
-  router.get('/_debug/page', async (req, res) => {
+  router.get('/_debug/page', ttPublicLimiter, async (req, res) => {
     try {
       const cfg = activeConfig();
       if (ensureTikTokEnv(res, cfg, { requireSecret: false })) return;
@@ -279,7 +283,7 @@ if (process.env.TIKTOK_DEBUG_ALLOW === 'true') {
 }
 
 // Alternative start endpoint that accepts an ID token via query when headers aren't available (for link redirects)
-router.get('/auth/start', async (req, res) => {
+router.get('/auth/start', ttWriteLimiter, async (req, res) => {
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
@@ -332,7 +336,7 @@ router.get('/auth/start', async (req, res) => {
 });
 
 // Preflight diagnostics (does NOT store state) to help debug client_key rejections
-router.get('/auth/preflight', authMiddleware, async (req, res) => {
+router.get('/auth/preflight', authMiddleware, ttPublicLimiter, async (req, res) => {
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   const crypto = require('crypto');

@@ -1,0 +1,5 @@
+timestamp,event_type,actor,resource,details
+2025-10-15T12:05:23Z,admin_login_failed,admin:REDACTED,user-service,Failed login attempt from IP REDACTED
+2025-10-15T12:06:01Z,admin_role_granted,admin:REDACTED,auth-service,Granted role 'manager' to user REDACTED
+2025-10-18T09:12:45Z,admin_deleted_user,admin:REDACTED,user-service,Deleted user record ID REDACTED
+2025-10-20T08:00:02Z,audit_log_rotated,system,log-service,Audit logs archived to storage with filename REDACTED

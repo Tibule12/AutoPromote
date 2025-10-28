@@ -6,6 +6,16 @@ let dailyRollup; try { dailyRollup = require('./src/services/dailyRollupService'
 let balanceService; try { balanceService = require('./src/services/payments/balanceService'); } catch(_) {}
 let poller; try { poller = require('./src/services/youtubeStatsPoller'); } catch(_) { poller = null; }
 const { setStatus } = require('./src/services/statusRecorder');
+const crypto = require('crypto');
+const { safeFetch } = require('./src/utils/ssrfGuard');
+
+function randChance(p) {
+  // p is probability between 0 and 1
+  if (!p || p <= 0) return false;
+  if (p >= 1) return true;
+  const max = 100000;
+  return crypto.randomInt(0, max) < Math.floor(p * max);
+}
 let audit; try { ({ audit } = require('./src/services/auditLogger')); } catch(_) { audit = { log: ()=>{} }; }
 let engagementIngestion; try { engagementIngestion = require('./src/services/engagementIngestionService'); } catch(_) { }
 let twitterMetrics; try { twitterMetrics = require('./src/services/twitterMetricsService'); } catch(_) {}
@@ -55,27 +65,27 @@ async function loop() {
       }
     }
     // Engagement ingestion (lightweight) every other stats cycle
-    if (engagementIngestion && Math.random() < 0.3) {
+  if (engagementIngestion && randChance(0.3)) {
       try {
         const eg = await engagementIngestion.ingestBatch({ limit: 20 });
         if (eg.processed) await setStatus('engagement_ingest', { ts: Date.now(), processed: eg.processed });
       } catch(e){ console.warn('[worker] engagement_ingest error:', e.message); }
     }
-    if (twitterMetrics && Math.random() < 0.25) {
+  if (twitterMetrics && randChance(0.25)) {
       try {
         const tw = await twitterMetrics.ingestRecentTwitterMetrics({ limit: 40 });
         if (tw.processed) await setStatus('twitter_metrics', { ts: Date.now(), processed: tw.processed });
       } catch(e){ console.warn('[worker] twitter_metrics error:', e.message); }
     }
     // Repost scheduling (low frequency)
-    if (repostScheduler && Math.random() < 0.10) {
+  if (repostScheduler && randChance(0.10)) {
       try {
         const rep = await repostScheduler.analyzeAndScheduleReposts({ limit: 5 });
         if (rep.scheduled) await setStatus('reposts', { ts: Date.now(), scheduled: rep.scheduled });
       } catch(e){ console.warn('[worker] repost_scheduler error:', e.message); }
     }
     // Overage billing automation: sample users approaching/exceeding quota and record overage usage lines once per loop slice probabilistically
-  if (usageLedger && Math.random() < 0.15) {
+  if (usageLedger && randChance(0.15)) {
       try {
         const planService = require('./src/services/planService');
         const { countUsageRecords } = require('./src/services/usageLedgerService');
@@ -107,7 +117,7 @@ async function loop() {
       } catch(e){ console.warn('[worker] overage_auto error:', e.message); }
     }
     // Periodic earnings snapshot (simulate accrual) - dev placeholder: store latest provisional balance summary every ~loop with low probability
-  if (balanceService && Math.random() < 0.05) {
+  if (balanceService && randChance(0.05)) {
       try {
         const userSampleSnap = await require('./src/firebaseAdmin').db.collection('users').limit(10).get();
         for (const doc of userSampleSnap.docs) {
@@ -118,7 +128,7 @@ async function loop() {
       } catch(e){ console.warn('[worker] balance snapshot error:', e.message); }
     }
     // Periodic variant pruning (probabilistic trigger)
-    if (Math.random() < 0.05) {
+  if (randChance(0.05)) {
       try {
         // Sample a high-velocity content doc and prune variants
         const highSnap = await require('./src/firebaseAdmin').db.collection('content')
@@ -129,7 +139,10 @@ async function loop() {
             const fetch = require('node-fetch');
             const base = process.env.WORKER_SELF_BASE_URL || '';
             if (base) {
-              await fetch(base + '/api/metrics/variants/prune', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contentId: c.id, keepTop:2, minPosts:2 }) });
+              const pruneUrl = base + '/api/metrics/variants/prune';
+              try {
+                await safeFetch(pruneUrl, fetch, { requireHttps: pruneUrl.startsWith('https:'), fetchOptions: { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contentId: c.id, keepTop:2, minPosts:2 }) } });
+              } catch(e) { console.warn('[worker] variant_prune safeFetch failed', e.message); }
             }
         }
       } catch (e) { console.warn('[worker] variant_prune error:', e.message); }

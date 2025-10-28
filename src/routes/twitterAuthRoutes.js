@@ -6,6 +6,9 @@ const { db, admin } = require('../firebaseAdmin');
 const { enqueuePlatformPostTask } = require('../services/promotionTaskQueue');
 
 const router = express.Router();
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+const twitterPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TWITTER_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'twitter_public' });
+const twitterWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TWITTER_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'twitter_writes' });
 
 // Helper to resolve Twitter env config with fallbacks (covers common typos / alt names)
 function resolveTwitterConfig() {
@@ -45,7 +48,7 @@ let oauthPrepareCount = 0;
 let oauthPreflightCount = 0;
 
 // GET /oauth/preflight - does NOT create state; surfaces config + sample (non-usable) auth URL for diagnostics
-router.get('/oauth/preflight', (req, res) => {
+router.get('/oauth/preflight', twitterPublicLimiter, (req, res) => {
   try {
     oauthPreflightCount++;
     const { clientId, redirectUri, clientSecret } = resolveTwitterConfig();
@@ -77,7 +80,7 @@ router.get('/oauth/preflight', (req, res) => {
 });
 
 // Start OAuth (PKCE) - redirects user agent
-router.get('/oauth/start', authMiddleware, async (req, res) => {
+router.get('/oauth/start', authMiddleware, twitterWriteLimiter, async (req, res) => {
   try {
     oauthStartCount++;
     const { clientId, redirectUri } = resolveTwitterConfig();
@@ -97,7 +100,7 @@ router.get('/oauth/start', authMiddleware, async (req, res) => {
 });
 
 // Prepare OAuth (returns JSON authUrl to allow frontend fetch + redirect with auth header)
-router.post('/oauth/prepare', authMiddleware, async (req, res) => {
+router.post('/oauth/prepare', authMiddleware, twitterWriteLimiter, async (req, res) => {
   try {
     oauthPrepareCount++;
     const { clientId, redirectUri } = resolveTwitterConfig();
@@ -117,7 +120,7 @@ router.post('/oauth/prepare', authMiddleware, async (req, res) => {
 });
 
 // OAuth callback
-router.get('/oauth/callback', async (req, res) => {
+router.get('/oauth/callback', twitterPublicLimiter, async (req, res) => {
   const { state, code, error } = req.query;
   if (error) {
     debugLog('callback error param', error);
@@ -157,7 +160,7 @@ module.exports = router;
 // -------------------------------------------------------
 
 // Connection status (instrumented + in-flight dedupe)
-router.get('/connection/status', authMiddleware, require('../statusInstrument')('twitterStatus', async (req, res) => {
+router.get('/connection/status', authMiddleware, twitterPublicLimiter, require('../statusInstrument')('twitterStatus', async (req, res) => {
   try {
     const { getCache, setCache } = require('../utils/simpleCache');
     const { dedupe } = require('../utils/inFlight');
@@ -203,7 +206,7 @@ router.get('/connection/status', authMiddleware, require('../statusInstrument')(
 }));
 
 // Disconnect (revoke local tokens; note: full revocation via Twitter API not implemented here)
-router.post('/connection/disconnect', authMiddleware, async (req, res) => {
+router.post('/connection/disconnect', authMiddleware, twitterWriteLimiter, async (req, res) => {
   try {
     const ref = db.collection('users').doc(req.userId).collection('connections').doc('twitter');
     await ref.delete();
@@ -215,7 +218,7 @@ router.post('/connection/disconnect', authMiddleware, async (req, res) => {
 
 // Enqueue a test tweet via promotion task queue
 // Body: { message?: string, contentId?: string }
-router.post('/tweet/test', authMiddleware, async (req, res) => {
+router.post('/tweet/test', authMiddleware, twitterWriteLimiter, async (req, res) => {
   try {
     // Ensure connection exists (attempt token retrieval)
     const token = await getValidAccessToken(req.userId).catch(()=>null);
@@ -237,7 +240,7 @@ router.post('/tweet/test', authMiddleware, async (req, res) => {
 });
 
 // Immediate tweet (bypasses queue) - admin / testing convenience
-router.post('/tweet/immediate', authMiddleware, async (req, res) => {
+router.post('/tweet/immediate', authMiddleware, twitterWriteLimiter, async (req, res) => {
   try {
     const token = await getValidAccessToken(req.userId).catch(()=>null);
     if (!token) return res.status(400).json({ error: 'not_connected' });

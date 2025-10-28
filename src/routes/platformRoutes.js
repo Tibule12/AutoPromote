@@ -10,6 +10,11 @@ const engagementBoostingService = require('../services/engagementBoostingService
 const { enqueuePlatformPostTask } = require('../services/promotionTaskQueue');
 const { postToTelegram } = require('../services/telegramService');
 const rateLimit = require('../middlewares/simpleRateLimit');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+
+const platformPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'platform_public' });
+const platformWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'platform_writes' });
+const platformWebhookLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_WEBHOOK || '300', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '50'), windowHint: 'platform_webhook' });
 
 // Try to use global fetch (Node 18+). Fall back to node-fetch if available.
 let fetchFn = global.fetch;
@@ -49,7 +54,7 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
 // POST /api/:platform/auth/prepare
 // Auth required endpoint that returns an OAuth start URL (authUrl) for the frontend to open.
 // Stores a random state token in Firestore at `oauth_states/{state}` mapping to uid/platform for later validation.
-router.post('/:platform/auth/prepare', authMiddleware, async (req, res) => {
+router.post('/:platform/auth/prepare', authMiddleware, platformWriteLimiter, async (req, res) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   try {
@@ -111,7 +116,7 @@ router.post('/:platform/auth/prepare', authMiddleware, async (req, res) => {
 });
 
 // GET /api/:platform/auth/start (public) - returns a URL the frontend can open.
-router.get('/:platform/auth/start', async (req, res) => {
+router.get('/:platform/auth/start', platformPublicLimiter, async (req, res) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   // Return the prepare URL (client should POST to prepare when authenticated), or a callback placeholder.
@@ -121,7 +126,7 @@ router.get('/:platform/auth/start', async (req, res) => {
 });
 
 // POST /api/:platform/auth/simulate - create a fake connected document for testing (auth required)
-router.post('/:platform/auth/simulate', authMiddleware, async (req, res) => {
+router.post('/:platform/auth/simulate', authMiddleware, platformWriteLimiter, async (req, res) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   try {
@@ -391,7 +396,7 @@ router.get('/:platform/auth/callback', async (req, res) => {
 });
 
 // POST /api/:platform/sample-promote - enqueue a sample platform_post for testing (auth required)
-router.post('/:platform/sample-promote', authMiddleware, async (req, res) => {
+router.post('/:platform/sample-promote', authMiddleware, platformWriteLimiter, async (req, res) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   try {
@@ -419,7 +424,7 @@ router.post('/:platform/sample-promote', authMiddleware, async (req, res) => {
 // validating an optional secret token (set via TELEGRAM_WEBHOOK_SECRET). When
 // a user opens the bot via t.me/<bot>?start=<state> we resolve the state to a
 // uid and persist users/{uid}/connections/telegram so the app can message them.
-router.post('/telegram/webhook', async (req, res) => {
+router.post('/telegram/webhook', platformWebhookLimiter, async (req, res) => {
   try {
     // Optional secret header check. When you call setWebhook you can provide
     // a `secret_token` which Telegram will include as the
@@ -528,7 +533,7 @@ router.post('/telegram/webhook', async (req, res) => {
 // Admin/test endpoint: send a one-off Telegram message to a chatId or uid
 // POST /api/telegram/admin/send-test
 // Body: { uid?: string, chatId?: string|number, text: string }
-router.post('/telegram/admin/send-test', authMiddleware, async (req, res) => {
+router.post('/telegram/admin/send-test', authMiddleware, platformWriteLimiter, async (req, res) => {
   try {
     const body = req.body || {};
     const text = body.text || body.message || 'Test message from AutoPromote';

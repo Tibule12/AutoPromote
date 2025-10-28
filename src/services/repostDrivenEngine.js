@@ -4,6 +4,7 @@
 
 const { db } = require('../firebaseAdmin');
 const fetch = require('node-fetch');
+const crypto = require('crypto');
 
 class RepostDrivenEngine {
   // Track manual repost with embedded markers
@@ -49,7 +50,7 @@ class RepostDrivenEngine {
   // Generate unique tracking markers
   generateTrackingMarkers(contentId, platform) {
     const timestamp = Date.now();
-    const random = Math.random().toString(36).substr(2, 9);
+    const random = crypto.randomBytes(6).toString('hex').substr(0,9);
 
     return {
       hashtag: `#AutoPromote${contentId.slice(-6)}${random}`,
@@ -151,8 +152,8 @@ class RepostDrivenEngine {
   async scrapeTikTokMetrics(url) {
     // In production, this would use TikTok's API or scraping service
     // For now, simulate realistic metrics
-    const baseViews = Math.floor(Math.random() * 50000) + 10000;
-    const engagementRate = 0.05 + Math.random() * 0.15; // 5-20%
+  const baseViews = crypto.randomInt(10000, 50000 + 10000);
+  const engagementRate = 0.05 + (crypto.randomInt(0,100000)/100000) * 0.15; // 5-20%
 
     return {
       views: baseViews,
@@ -167,8 +168,8 @@ class RepostDrivenEngine {
 
   // Scrape Instagram metrics
   async scrapeInstagramMetrics(url) {
-    const baseViews = Math.floor(Math.random() * 30000) + 5000;
-    const engagementRate = 0.03 + Math.random() * 0.12;
+  const baseViews = crypto.randomInt(5000, 30000 + 5000);
+  const engagementRate = 0.03 + (crypto.randomInt(0,100000)/100000) * 0.12;
 
     return {
       views: baseViews,
@@ -183,8 +184,8 @@ class RepostDrivenEngine {
 
   // Scrape YouTube metrics
   async scrapeYouTubeMetrics(url) {
-    const baseViews = Math.floor(Math.random() * 100000) + 10000;
-    const engagementRate = 0.02 + Math.random() * 0.08;
+  const baseViews = crypto.randomInt(10000, 100000 + 10000);
+  const engagementRate = 0.02 + (crypto.randomInt(0,100000)/100000) * 0.08;
 
     return {
       views: baseViews,
@@ -198,8 +199,8 @@ class RepostDrivenEngine {
 
   // Scrape Twitter metrics
   async scrapeTwitterMetrics(url) {
-    const baseViews = Math.floor(Math.random() * 20000) + 2000;
-    const engagementRate = 0.01 + Math.random() * 0.06;
+  const baseViews = crypto.randomInt(2000, 20000 + 2000);
+  const engagementRate = 0.01 + (crypto.randomInt(0,100000)/100000) * 0.06;
 
     return {
       views: baseViews,
@@ -469,7 +470,6 @@ class RepostDrivenEngine {
 
   // Get content fingerprint for tracking
   generateContentFingerprint(contentId) {
-    const crypto = require('crypto');
     return crypto.createHash('md5')
       .update(contentId + Date.now().toString())
       .digest('hex')

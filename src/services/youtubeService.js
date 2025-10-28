@@ -4,6 +4,7 @@ const { google } = require('googleapis');
 const { admin, db } = require('../firebaseAdmin');
 const crypto = require('crypto');
 const { recordVelocityTrigger, recordUploadDuplicate } = require('./aggregationService');
+const { safeFetch } = require('../utils/ssrfGuard');
 
 // Central YouTube service (Phase 1)
 // Responsibilities:
@@ -74,9 +75,19 @@ async function ensureFreshTokens(oauth2Client, tokens, uid) {
 }
 
 async function downloadVideoBuffer(fileUrl) {
-  const res = await fetch(fileUrl);
-  if (!res.ok) throw new Error('Failed to download video asset');
-  return await res.buffer();
+  // Protect against SSRF by validating the URL before fetching.
+  // Also enforce a sane maximum download size (configurable via env).
+  const MAX_BYTES = parseInt(process.env.YT_MAX_VIDEO_BYTES || '52428800', 10); // 50MB default
+  const res = await safeFetch(fileUrl, fetch, { requireHttps: true });
+  if (!res || !res.ok) throw new Error('Failed to download video asset');
+  const lenHeader = res.headers && (res.headers.get && res.headers.get('content-length'));
+  if (lenHeader) {
+    const len = parseInt(lenHeader, 10);
+    if (!Number.isNaN(len) && len > MAX_BYTES) throw new Error('Remote video exceeds maximum allowed size');
+  }
+  const buf = await res.buffer();
+  if (buf && buf.length > MAX_BYTES) throw new Error('Downloaded video exceeds maximum allowed size');
+  return buf;
 }
 
 function deriveShortsMetadata(base) {

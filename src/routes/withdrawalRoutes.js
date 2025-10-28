@@ -2,6 +2,9 @@ const express = require('express');
 // Use canonical src firebaseAdmin shim (which re-exports root firebaseAdmin) instead of legacy backend path
 const { db } = require('../firebaseAdmin');
 const router = express.Router();
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+const withdrawWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_WITHDRAW_WRITES || '20', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '2'), windowHint: 'withdraw_writes' });
+const withdrawPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_WITHDRAW_PUBLIC || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'withdraw_public' });
 // Use consolidated authMiddleware & monetizationService in src
 const authMiddleware = require('../authMiddleware');
 const monetizationService = require('../monetizationService');
@@ -10,7 +13,7 @@ const monetizationService = require('../monetizationService');
 
 // POST /api/withdrawals/request - User requests a withdrawal
 // User requests a withdrawal (Wise or PayPal)
-router.post('/request', authMiddleware, async (req, res) => {
+router.post('/request', authMiddleware, withdrawWriteLimiter, async (req, res) => {
   try {
     const { amount, currency, method, payout_details } = req.body; // method: 'wise' or 'paypal'
     const userId = req.user.uid;
@@ -63,7 +66,7 @@ router.post('/request', authMiddleware, async (req, res) => {
 });
 
 // Admin triggers payout (stub for Wise/PayPal integration)
-router.post('/process/:id', authMiddleware, async (req, res) => {
+router.post('/process/:id', authMiddleware, withdrawWriteLimiter, async (req, res) => {
   // TODO: Check admin role in production
   try {
     const withdrawalId = req.params.id;
@@ -118,7 +121,7 @@ router.post('/process/:id', authMiddleware, async (req, res) => {
 });
 
 // GET /api/withdrawals/history - User views withdrawal history
-router.get('/history', authMiddleware, async (req, res) => {
+router.get('/history', authMiddleware, withdrawPublicLimiter, async (req, res) => {
   try {
     const userId = req.user.uid;
     

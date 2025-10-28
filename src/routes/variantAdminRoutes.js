@@ -3,7 +3,10 @@ const router = express.Router();
 const { db } = require('../firebaseAdmin');
 let authMiddleware; try { authMiddleware = require('../authMiddleware'); } catch(_) { authMiddleware = (req,res,next)=> next(); }
 const adminOnly = require('../middlewares/adminOnly');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
 const { addImpressions } = require('../services/variantStatsService');
+
+const variantAdminLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_VARIANT_ADMIN || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'variant_admin' });
 
 // Helper to run a transactional mutation on a variant
 async function mutateVariant({ contentId, platform, variant, mutator }) {
@@ -19,7 +22,7 @@ async function mutateVariant({ contentId, platform, variant, mutator }) {
 }
 
 // GET /api/admin/variants/anomalies - list recent anomalous variants
-router.get('/anomalies', authMiddleware, adminOnly, async (req,res)=>{
+router.get('/anomalies', authMiddleware, adminOnly, variantAdminLimiter, async (req,res)=>{
   try {
     const limit = Math.min(parseInt(req.query.limit || '300',10), 800);
     const snap = await db.collection('variant_stats').orderBy('updatedAt','desc').limit(limit).get();
@@ -42,7 +45,7 @@ router.get('/anomalies', authMiddleware, adminOnly, async (req,res)=>{
 });
 
 // POST /api/admin/variants/clear-anomaly { contentId, platform, variant }
-router.post('/clear-anomaly', authMiddleware, adminOnly, async (req,res)=>{
+router.post('/clear-anomaly', authMiddleware, adminOnly, variantAdminLimiter, async (req,res)=>{
   try {
     const { contentId, platform, variant } = req.body || {};
     if (!contentId || !platform || !variant) return res.status(400).json({ ok:false, error:'missing_params' });
@@ -52,7 +55,7 @@ router.post('/clear-anomaly', authMiddleware, adminOnly, async (req,res)=>{
 });
 
 // POST /api/admin/variants/unsuppress { contentId, platform, variant }
-router.post('/unsuppress', authMiddleware, adminOnly, async (req,res)=>{
+router.post('/unsuppress', authMiddleware, adminOnly, variantAdminLimiter, async (req,res)=>{
   try {
     const { contentId, platform, variant } = req.body || {};
     if (!contentId || !platform || !variant) return res.status(400).json({ ok:false, error:'missing_params' });
@@ -62,7 +65,7 @@ router.post('/unsuppress', authMiddleware, adminOnly, async (req,res)=>{
 });
 
 // POST /api/admin/variants/impressions { contentId, platform, variant, impressions }
-router.post('/impressions', authMiddleware, adminOnly, async (req,res)=>{
+router.post('/impressions', authMiddleware, adminOnly, variantAdminLimiter, async (req,res)=>{
   try {
     const { contentId, platform, variant, impressions } = req.body || {};
     const n = parseInt(impressions,10);
