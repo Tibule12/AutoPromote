@@ -200,7 +200,7 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 });
 
 // 1) Begin OAuth (requires user auth) — keeps scopes minimal for review
-router.get('/auth', authMiddleware, async (req, res) => {
+router.get('/auth', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), authMiddleware, async (req, res) => {
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
