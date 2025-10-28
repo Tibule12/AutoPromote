@@ -2,6 +2,8 @@ const express = require('express');
 const authMiddleware = require('../authMiddleware');
 const { db } = require('../firebaseAdmin');
 const router = express.Router();
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+const platformConnectionsPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_CONNECTIONS_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'platform_connections_public' });
 
 // Helper to fetch connection doc if exists
 async function getConn(uid, name) {
@@ -27,7 +29,7 @@ async function getConn(uid, name) {
   } catch (_) { return { connected: false, error: 'lookup_failed' }; }
 }
 
-router.get('/status', authMiddleware, require('../statusInstrument')('platformConnectionsStatus', async (req, res) => {
+router.get('/status', authMiddleware, platformConnectionsPublicLimiter, require('../statusInstrument')('platformConnectionsStatus', async (req, res) => {
   const { getCache, setCache } = require('../utils/simpleCache');
   const uid = req.userId || req.user?.uid;
   const cacheKey = `platform_connections_status_${uid}`;

@@ -1,4 +1,5 @@
 const { db, storage } = require('./firebaseAdmin');
+const crypto = require('crypto');
 
 class ContentAnalysisService {
     async analyzeContent(contentId) {
@@ -126,8 +127,8 @@ class ContentAnalysisService {
     }
 
     calculateViralPotential(contentData) {
-        // Implement viral potential calculation
-        return Math.random() * 100; // Placeholder
+            // Implement viral potential calculation (placeholder uses secure RNG)
+            return crypto.randomInt(0, 100);
     }
 
     generateRecommendations(metrics) {

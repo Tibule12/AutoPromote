@@ -1,9 +1,13 @@
 // communityEngine.js
 // Growth squads, leaderboards, viral challenges logic
 
+const crypto = require('crypto');
+
+function randomId(len = 9) { return crypto.randomBytes(Math.ceil(len/2)).toString('hex').substr(0,len); }
+
 function createGrowthSquad(userIds) {
   return {
-    squadId: Math.random().toString(36).substr(2, 9),
+    squadId: randomId(9),
     members: userIds,
     createdAt: new Date(),
     status: 'active'
@@ -12,16 +16,17 @@ function createGrowthSquad(userIds) {
 
 function getLeaderboard() {
   // Stub: Simulate leaderboard
-  return Array.from({ length: 10 }, (_, i) => ({
+  const out = Array.from({ length: 10 }, (_, i) => ({
     userId: `user${i+1}`,
-    views: Math.floor(Math.random() * 100000),
-    viralScore: Math.random().toFixed(2)
+    views: Math.floor(crypto.randomInt(0, 100000)),
+    viralScore: (crypto.randomInt(0,10000)/100).toFixed(2)
   }));
+  return out;
 }
 
 function createViralChallenge(name, reward) {
   return {
-    challengeId: Math.random().toString(36).substr(2, 9),
+    challengeId: randomId(9),
     name,
     reward,
     createdAt: new Date(),

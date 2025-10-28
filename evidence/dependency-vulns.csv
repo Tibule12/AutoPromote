@@ -1,0 +1,6 @@
+﻿"package","severity","range","fixAvailable","advisories"
+"axios","high","1.0.0 - 1.11.0","True","Axios is vulnerable to DoS attack through lack of data size check | https://github.com/advisories/GHSA-4hjh-wcwx-xvwj"
+"nodemon","high","2.0.19 - 2.0.22","True",""
+"semver","high","7.0.0 - 7.5.1","True","semver vulnerable to Regular Expression Denial of Service | https://github.com/advisories/GHSA-c2qf-rxjj-qqgw"
+"sharp","high","<0.32.6","True","sharp vulnerability in libwebp dependency CVE-2023-4863 | https://github.com/advisories/GHSA-54xq-cgqr-rpm3"
+"simple-update-notifier","high","1.0.7 - 1.1.0","True",""

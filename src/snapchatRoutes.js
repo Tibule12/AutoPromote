@@ -5,6 +5,8 @@ const fetch = require('node-fetch');
 const router = express.Router();
 const authMiddleware = require('./authMiddleware');
 const { admin, db } = require('./firebaseAdmin');
+const { safeFetch } = require('./utils/ssrfGuard');
+const { rateLimiter } = require('./middlewares/globalRateLimiter');
 const DEBUG_SNAPCHAT_OAUTH = process.env.DEBUG_SNAPCHAT_OAUTH === 'true';
 
 // Snapchat only supports production environment
@@ -56,7 +58,9 @@ router.get('/auth', (req, res) => {
 });
 
 // 2. Prepare Snapchat OAuth (returns JSON authUrl for frontend)
-router.post('/oauth/prepare', authMiddleware, async (req, res) => {
+// Apply a modest per-user rate limit to OAuth prepare to mitigate abuse
+const oauthPrepareLimiter = rateLimiter({ capacity: parseInt(process.env.SNAPCHAT_OAUTH_PREPARE_CAP || '60', 10), refillPerSec: 5, windowHint: 'snapchat_oauth_prepare' });
+router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, res) => {
   const cfg = activeConfig();
   ensureSnapchatEnv(res, cfg);
   if (res.headersSent) return;
@@ -83,12 +87,13 @@ router.post('/oauth/prepare', authMiddleware, async (req, res) => {
     // that happens try a reduced scope fallback automatically so the
     // frontend receives a working auth URL instead of immediately failing.
     try {
-      const probe = await fetch(authUrl, { method: 'GET', redirect: 'manual' });
+      // Probe the provider URL, but validate destination first to avoid SSRF.
+      const probe = await safeFetch(authUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
       // Treat 5xx as provider error; 2xx or 3xx are acceptable (redirect to UI)
       if (probe.status >= 500) {
         const fallbackScope = 'snapchat-marketing-api';
         const fallbackUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(fallbackScope)}&state=${encodeURIComponent(state)}`;
-        const probe2 = await fetch(fallbackUrl, { method: 'GET', redirect: 'manual' });
+        const probe2 = await safeFetch(fallbackUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
         if (probe2.status < 500) {
           if (DEBUG_SNAPCHAT_OAUTH) console.log('snapchat: primary auth URL returned', probe.status, 'using fallback scope; probe2=', probe2.status);
           authUrl = fallbackUrl;
@@ -117,7 +122,9 @@ router.post('/oauth/prepare', authMiddleware, async (req, res) => {
 
 // 2. Handle Snapchat OAuth callback and exchange code for access token
 // Support both GET (redirect from provider) and POST (programmatic exchange)
-router.all('/auth/callback', async (req, res) => {
+// Public callback from Snapchat - rate limit to mitigate abuse/forgery
+const callbackLimiter = rateLimiter({ capacity: parseInt(process.env.SNAPCHAT_CALLBACK_CAP || '300', 10), refillPerSec: 10, windowHint: 'snapchat_callback' });
+router.all('/auth/callback', callbackLimiter, async (req, res) => {
   // Accept code/state from query (GET) or body (POST)
   const code = (req.method === 'GET') ? req.query.code : req.body.code;
   const state = (req.method === 'GET') ? req.query.state : req.body.state;
@@ -148,18 +155,22 @@ router.all('/auth/callback', async (req, res) => {
     }
     if (!userId) userId = 'anonymous';
 
-    // Exchange code for access token
-    const tokenRes = await fetch('https://accounts.snapchat.com/login/oauth2/access_token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${cfg.key}:${cfg.secret}`).toString('base64')}`
-      },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: cfg.redirect
-      })
+    // Exchange code for access token (validated host)
+    const tokenRes = await safeFetch('https://accounts.snapchat.com/login/oauth2/access_token', fetch, {
+      allowHosts: ['accounts.snapchat.com'],
+      requireHttps: true,
+      fetchOptions: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${Buffer.from(`${cfg.key}:${cfg.secret}`).toString('base64')}`
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          code: code,
+          redirect_uri: cfg.redirect
+        })
+      }
     });
 
     const tokenData = await tokenRes.json();
@@ -170,9 +181,14 @@ router.all('/auth/callback', async (req, res) => {
     }
 
     // Get user profile information
-    const profileRes = await fetch('https://adsapi.snapchat.com/v1/me', {
-      headers: {
-        'Authorization': `Bearer ${tokenData.access_token}`
+    // Fetch profile from Snapchat Ads API (validate host)
+    const profileRes = await safeFetch('https://adsapi.snapchat.com/v1/me', fetch, {
+      allowHosts: ['adsapi.snapchat.com'],
+      requireHttps: true,
+      fetchOptions: {
+        headers: {
+          'Authorization': `Bearer ${tokenData.access_token}`
+        }
       }
     });
 
@@ -229,7 +245,7 @@ router.all('/auth/callback', async (req, res) => {
 });
 
 // 3. Get Snapchat connection status
-router.get('/status', authMiddleware, async (req, res) => {
+router.get('/status', authMiddleware, rateLimiter({ capacity: parseInt(process.env.SNAPCHAT_STATUS_CAP || '300', 10), refillPerSec: 20, windowHint: 'snapchat_status' }), async (req, res) => {
   try {
     const snap = await db.collection('users').doc(req.userId).collection('connections').doc('snapchat').get();
     if (!snap.exists) return res.json({ connected: false });
@@ -250,7 +266,8 @@ router.get('/status', authMiddleware, async (req, res) => {
 });
 
 // 4. Create Snapchat ad creative (placeholder - Snapchat Creative Kit API)
-router.post('/creative', authMiddleware, async (req, res) => {
+const apiActionLimiter = rateLimiter({ capacity: parseInt(process.env.SNAPCHAT_API_ACTION_CAP || '120', 10), refillPerSec: 10, windowHint: 'snapchat_api' });
+router.post('/creative', authMiddleware, apiActionLimiter, async (req, res) => {
   try {
     const { title, description, media_url, campaign_id } = req.body;
     if (!title || !media_url) {
@@ -268,24 +285,28 @@ router.post('/creative', authMiddleware, async (req, res) => {
       return res.status(401).json({ error: 'Snapchat token expired' });
     }
 
-    // Create creative via Snapchat Marketing API
-    const creativeRes = await fetch('https://adsapi.snapchat.com/v1/adaccounts/{ad_account_id}/creatives', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${connection.accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: title,
-        type: 'SNAP_AD',
-        headline: title,
-        description: description,
-        media: {
-          type: 'IMAGE',
-          url: media_url
+    // Create creative via Snapchat Marketing API (validate host)
+    const creativeRes = await safeFetch('https://adsapi.snapchat.com/v1/adaccounts/{ad_account_id}/creatives', fetch, {
+      allowHosts: ['adsapi.snapchat.com'],
+      requireHttps: true,
+      fetchOptions: {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${connection.accessToken}`,
+          'Content-Type': 'application/json'
         },
-        campaign_id: campaign_id
-      })
+        body: JSON.stringify({
+          name: title,
+          type: 'SNAP_AD',
+          headline: title,
+          description: description,
+          media: {
+            type: 'IMAGE',
+            url: media_url
+          },
+          campaign_id: campaign_id
+        })
+      }
     });
 
     const creativeData = await creativeRes.json();
@@ -300,7 +321,7 @@ router.post('/creative', authMiddleware, async (req, res) => {
 });
 
 // 5. Get Snapchat ad performance metrics
-router.get('/analytics/:creativeId', authMiddleware, async (req, res) => {
+router.get('/analytics/:creativeId', authMiddleware, apiActionLimiter, async (req, res) => {
   try {
     const { creativeId } = req.params;
 
@@ -315,10 +336,12 @@ router.get('/analytics/:creativeId', authMiddleware, async (req, res) => {
       return res.status(401).json({ error: 'Snapchat token expired' });
     }
 
-    // Get analytics data
-    const analyticsRes = await fetch(`https://adsapi.snapchat.com/v1/creatives/${creativeId}/stats`, {
-      headers: {
-        'Authorization': `Bearer ${connection.accessToken}`
+    // Get analytics data (validate host)
+    const analyticsRes = await safeFetch(`https://adsapi.snapchat.com/v1/creatives/${creativeId}/stats`, fetch, {
+      allowHosts: ['adsapi.snapchat.com'],
+      requireHttps: true,
+      fetchOptions: {
+        headers: { 'Authorization': `Bearer ${connection.accessToken}` }
       }
     });
 
@@ -346,9 +369,9 @@ if (DEBUG_SNAPCHAT_OAUTH) {
   const state = req.query.state || require('../lib/uuid-compat').v4();
   const scope = 'snapchat-marketing-api';
   const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
-      const r = await fetch(authUrl, { method: 'GET' });
+      const r = await safeFetch(authUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET' } });
       const text = await r.text().catch(() => '');
-      return res.json({ ok: true, url: authUrl, status: r.status, snippet: text.slice(0, 2000) });
+      return res.json({ ok: true, url: authUrl, status: r.status, snippet: text.slice(0, 1000) });
     } catch (e) {
       return res.status(500).json({ ok: false, error: e.message });
     }
@@ -366,11 +389,11 @@ if (process.env.SNAPCHAT_DEBUG_ALLOW === 'true') {
       const state = req.query.state || require('../lib/uuid-compat').v4();
       const scope = 'snapchat-marketing-api';
       const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
-      const r = await fetch(authUrl, { method: 'GET', redirect: 'manual' });
+      const r = await safeFetch(authUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
       const headers = {};
       r.headers.forEach((v, k) => { headers[k] = v; });
       const text = await r.text().catch(() => '');
-      return res.json({ ok: true, url: authUrl, status: r.status, headers, snippet: text.slice(0, 5000) });
+      return res.json({ ok: true, url: authUrl, status: r.status, headers, snippet: text.slice(0, 1000) });
     } catch (e) {
       return res.status(500).json({ ok: false, error: e.message });
     }

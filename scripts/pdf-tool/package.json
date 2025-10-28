@@ -1,0 +1,9 @@
+{
+  "name": "autopromote-pdf-tool",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Small helper to convert evidence text files into highlighted PDFs for reviewer upload.",
+  "dependencies": {
+    "pdfkit": "^0.13.0"
+  }
+}
