@@ -4,8 +4,14 @@ const { google } = require('googleapis');
 const streamifier = require('streamifier');
 const { admin, db } = require('../../firebaseAdmin');
 const authMiddleware = require('../../authMiddleware');
+const crypto = require('crypto');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
 
 const router = express.Router();
+
+// Small per-route limiters to address missing-rate-limiting findings
+const ytWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_YT_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'youtube_writes' });
+const ytPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_YT_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'youtube_public' });
 
 const YT_CLIENT_ID = process.env.YT_CLIENT_ID;
 const YT_CLIENT_SECRET = process.env.YT_CLIENT_SECRET;
@@ -53,7 +59,7 @@ router.post('/auth/prepare', async (req, res) => {
       const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
       console.log('[YouTube][prepare] Using client/redirect', { clientId: mask(YT_CLIENT_ID), redirect: YT_REDIRECT_URI });
     } catch (_) {}
-    const nonce = Math.random().toString(36).slice(2);
+  const nonce = crypto.randomBytes(8).toString('hex');
     const state = `${uid}.${nonce}`;
     await db.collection('users').doc(uid).collection('oauth_state').doc('youtube').set({
       state,
@@ -68,7 +74,7 @@ router.post('/auth/prepare', async (req, res) => {
   }
 });
 
-router.get('/auth/start', async (req, res) => {
+router.get('/auth/start', ytWriteLimiter, async (req, res) => {
   if (ensureEnv(res)) return;
   try {
     // Prefer Authorization header; id_token query is deprecated
@@ -80,7 +86,7 @@ router.get('/auth/start', async (req, res) => {
       uid = decoded.uid;
     }
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
-    const nonce = Math.random().toString(36).slice(2);
+  const nonce = crypto.randomBytes(8).toString('hex');
     const state = `${uid}.${nonce}`;
     await db.collection('users').doc(uid).collection('oauth_state').doc('youtube').set({
       state,
@@ -95,7 +101,7 @@ router.get('/auth/start', async (req, res) => {
   }
 });
 
-router.get('/callback', async (req, res) => {
+router.get('/callback', ytPublicLimiter, async (req, res) => {
   if (ensureEnv(res)) return;
   const { code, state } = req.query;
   if (!code) return res.status(400).json({ error: 'Missing code' });
@@ -186,7 +192,7 @@ router.get('/callback', async (req, res) => {
   }
 });
 
-router.get('/status', authMiddleware, require('../statusInstrument')('youtubeStatus', async (req, res) => {
+router.get('/status', authMiddleware, ytPublicLimiter, require('../statusInstrument')('youtubeStatus', async (req, res) => {
   const { getCache, setCache } = require('../utils/simpleCache');
   const { dedupe } = require('../utils/inFlight');
   const { instrument } = require('../utils/queryMetrics');
@@ -210,7 +216,7 @@ router.get('/status', authMiddleware, require('../statusInstrument')('youtubeSta
 }));
 
 // Fetch live stats for one video (requires contentId or explicit videoId)
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', authMiddleware, ytPublicLimiter, async (req, res) => {
   try {
     const uid = req.userId || req.user?.uid;
     const { contentId, videoId } = req.query;
@@ -232,7 +238,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
 });
 
 // Batch poll (manual trigger) for stale stats & velocity update
-router.post('/stats/poll', authMiddleware, async (req, res) => {
+router.post('/stats/poll', authMiddleware, ytWriteLimiter, async (req, res) => {
   try {
     const uid = req.userId || req.user?.uid;
     const { velocityThreshold, batchSize } = req.body || {};
@@ -245,7 +251,7 @@ router.post('/stats/poll', authMiddleware, async (req, res) => {
 });
 
 // Upload a video to YouTube given a file URL (Phase 1 unified service)
-router.post('/upload', authMiddleware, async (req, res) => {
+router.post('/upload', authMiddleware, ytWriteLimiter, async (req, res) => {
   try {
   const { title, description, videoUrl, mimeType, contentId, shortsMode, optimizeMetadata = true, forceReupload = false, skipIfDuplicate = true } = req.body || {};
     if (!title || !videoUrl) return res.status(400).json({ error: 'title and videoUrl are required' });

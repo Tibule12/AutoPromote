@@ -1,0 +1,14 @@
+Title: Suspicious failed login bursts detected
+Date: 2025-10-15T12:05:00Z
+Severity: Medium
+
+Summary:
+Automated monitoring flagged 15 failed admin login attempts for admin account REDACTED within a 5-minute window from IP REDACTED.
+
+Action taken:
+- Account locked for 30 minutes
+- Investigated source IP (REDACTED) — appears to be a known malicious scanner
+- Created ticket: SECURITY-1234
+
+Notes:
+Logs preserved and exported. No data exfiltration detected. Follow-up: rotate credentials for affected admin account.

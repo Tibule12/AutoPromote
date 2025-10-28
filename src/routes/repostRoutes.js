@@ -6,6 +6,10 @@ const router = express.Router();
 const authMiddleware = require('../authMiddleware');
 const repostDrivenEngine = require('../services/repostDrivenEngine');
 const rateLimit = require('../middlewares/simpleRateLimit');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+
+const repostPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_REPOST_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'repost_public' });
+const repostWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_REPOST_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'repost_writes' });
 
 // POST /track - Track manual repost with markers
 router.post('/track', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
@@ -51,7 +55,7 @@ router.post('/track', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key:
 });
 
 // GET /performance/:contentId - Get repost performance summary
-router.get('/performance/:contentId', authMiddleware, async (req, res) => {
+router.get('/performance/:contentId', authMiddleware, repostPublicLimiter, async (req, res) => {
   try {
     const userId = req.userId;
     const { contentId } = req.params;
@@ -70,7 +74,7 @@ router.get('/performance/:contentId', authMiddleware, async (req, res) => {
 });
 
 // GET /timing/:contentId/:platform - Suggest optimal repost timing
-router.get('/timing/:contentId/:platform', authMiddleware, async (req, res) => {
+router.get('/timing/:contentId/:platform', authMiddleware, repostPublicLimiter, async (req, res) => {
   try {
     const userId = req.userId;
     const { contentId, platform } = req.params;
@@ -94,7 +98,7 @@ router.get('/timing/:contentId/:platform', authMiddleware, async (req, res) => {
 });
 
 // POST /scrape/:repostId - Manually trigger metric scraping
-router.post('/scrape/:repostId', authMiddleware, async (req, res) => {
+router.post('/scrape/:repostId', authMiddleware, repostWriteLimiter, async (req, res) => {
   try {
     const userId = req.userId;
     const { repostId } = req.params;
@@ -134,7 +138,7 @@ router.post('/scrape/:repostId', authMiddleware, async (req, res) => {
 });
 
 // POST /actions/trigger/:contentId - Trigger growth actions based on performance
-router.post('/actions/trigger/:contentId', authMiddleware, async (req, res) => {
+router.post('/actions/trigger/:contentId', authMiddleware, repostWriteLimiter, async (req, res) => {
   try {
     const userId = req.userId;
     const { contentId } = req.params;
@@ -161,7 +165,7 @@ router.post('/actions/trigger/:contentId', authMiddleware, async (req, res) => {
 });
 
 // GET /fingerprint/:contentId - Get content fingerprint for tracking
-router.get('/fingerprint/:contentId', authMiddleware, async (req, res) => {
+router.get('/fingerprint/:contentId', authMiddleware, repostPublicLimiter, async (req, res) => {
   try {
     const userId = req.userId;
     const { contentId } = req.params;
@@ -181,7 +185,7 @@ router.get('/fingerprint/:contentId', authMiddleware, async (req, res) => {
 });
 
 // POST /markers/generate/:contentId/:platform - Generate tracking markers
-router.post('/markers/generate/:contentId/:platform', authMiddleware, async (req, res) => {
+router.post('/markers/generate/:contentId/:platform', authMiddleware, repostWriteLimiter, async (req, res) => {
   try {
     const userId = req.userId;
     const { contentId, platform } = req.params;

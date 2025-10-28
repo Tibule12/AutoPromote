@@ -12,6 +12,9 @@ if (process.env.STRIPE_SECRET_KEY) {
 }
 
 const router = express.Router();
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+const stripePublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_STRIPE_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'stripe_public' });
+const stripeWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_STRIPE_WRITES || '30', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '3'), windowHint: 'stripe_writes' });
 // Prefer local src middleware if available; fallback to backend copy for legacy structure
 let authMiddleware;
 try { authMiddleware = require('../authMiddleware'); } catch(_) { try { authMiddleware = require('../../authMiddleware'); } catch(e) { authMiddleware = (req,_res,next)=> next(); } }
@@ -19,7 +22,7 @@ let rateLimit; try { rateLimit = require('../middlewares/simpleRateLimit'); } ca
 const { audit } = require('../services/auditLogger');
 
 // POST /api/withdrawals/onboard - Start Stripe Connect onboarding for user
-router.post('/onboard', authMiddleware, rateLimit({ max:5, windowMs:3600000, key: r=> r.userId||r.ip }), async (req, res) => {
+router.post('/onboard', authMiddleware, stripeWriteLimiter, rateLimit({ max:5, windowMs:3600000, key: r=> r.userId||r.ip }), async (req, res) => {
   try {
     const userId = req.user.uid;
     // Create or retrieve Stripe account for user
@@ -66,7 +69,7 @@ router.post('/onboard', authMiddleware, rateLimit({ max:5, windowMs:3600000, key
 });
 
 // GET /api/stripe/account/status - retrieve Stripe Connect account status & outstanding requirements
-router.get('/account/status', authMiddleware, async (req, res) => {
+router.get('/account/status', authMiddleware, stripePublicLimiter, async (req, res) => {
   try {
     if (!stripe) return res.status(400).json({ ok:false, error: 'stripe_not_configured' });
     const userId = req.user.uid;
@@ -113,7 +116,7 @@ router.get('/account/status', authMiddleware, async (req, res) => {
 });
 
 // POST /api/stripe/account/login-link - generate a fresh Express dashboard link (helpful while waiting for manual review)
-router.post('/account/login-link', authMiddleware, rateLimit({ max:10, windowMs:3600000, key: r=> r.userId||r.ip }), async (req, res) => {
+router.post('/account/login-link', authMiddleware, stripeWriteLimiter, rateLimit({ max:10, windowMs:3600000, key: r=> r.userId||r.ip }), async (req, res) => {
   try {
     if (!stripe) return res.status(400).json({ ok:false, error: 'stripe_not_configured' });
     const userId = req.user.uid;

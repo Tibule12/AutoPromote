@@ -17,26 +17,29 @@ try {
 }
 
 const db = admin.firestore();
+const crypto = require('crypto');
 const batch = db.batch();
 
 // Helper to generate random dates within a range
+function randomFraction() { return crypto.randomInt(0, 1000000) / 1000000; }
+
 function randomDate(start, end) {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  return new Date(start.getTime() + randomFraction() * (end.getTime() - start.getTime()));
 }
 
-// Helper to generate random numbers
+// Helper to generate random numbers (inclusive)
 function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  return crypto.randomInt(min, max + 1);
 }
 
 // Helper to generate random boolean
 function randomBool() {
-  return Math.random() > 0.5;
+  return crypto.randomInt(0,2) === 1;
 }
 
 // Helper to choose random element from array
 function randomChoice(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+  return arr[crypto.randomInt(0, arr.length)];
 }
 
 // Generate sample users
@@ -121,10 +124,10 @@ async function generateContent(count = 30) {
       shares: randomInt(1, engagement / 2),
       comments: randomInt(0, engagement / 3),
       promotionCount: randomInt(0, 5),
-      metrics: {
-        clickThroughRate: Math.random() * 0.15,
-        conversionRate: Math.random() * 0.05,
-        bounceRate: Math.random() * 0.6 + 0.2,
+        metrics: {
+        clickThroughRate: randomFraction() * 0.15,
+        conversionRate: randomFraction() * 0.05,
+        bounceRate: randomFraction() * 0.6 + 0.2,
         averageTimeOnPage: randomInt(30, 300)
       },
       tags: Array.from({ length: randomInt(1, 5) }, () => 

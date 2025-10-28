@@ -1,0 +1,32 @@
+<!-- Pre-login Terms acceptance snippet for AUTOPROMOTE - place on login page before showing login form -->
+<!-- Replace links and values with your production URLs and ensure server-side verification of acceptance -->
+<div style="max-width:700px;padding:16px;border:1px solid #ddd;border-radius:8px;">
+  <h3>Before you continue</h3>
+  <p>Please take a moment to read AUTOPROMOTE's <a href="/terms" target="_blank">Terms &amp; Conditions</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.</p>
+  <div style="background:#f9f9f9;padding:12px;border-radius:6px;margin-bottom:12px;">
+    <strong>Quick summary:</strong>
+    <ul>
+      <li>By logging in you accept the Terms &amp; Privacy Policy.</li>
+      <li>You’re responsible for what you post and for your account security.</li>
+      <li>We may remove content that violates rules and limits apply to our liability.</li>
+    </ul>
+  </div>
+  <label style="display:flex;align-items:center;gap:8px;">
+  <input type="checkbox" id="acceptTerms" />
+  I have read and accept AUTOPROMOTE's <a href="/terms" target="_blank">Terms &amp; Conditions</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.
+  </label>
+  <div style="margin-top:12px;">
+    <button id="loginButton" disabled style="padding:8px 12px;">Continue to Login</button>
+  </div>
+</div>
+
+<script>
+  // Client-side: enable/disable. Server-side enforcement required — do not rely only on this.
+  const cb = document.getElementById('acceptTerms');
+  const btn = document.getElementById('loginButton');
+  cb.addEventListener('change', () => btn.disabled = !cb.checked);
+
+  // When logging in, include an acceptance payload to your auth API, for example:
+  // { acceptedTermsVersion: 'AUTOPROMOTE-v1.0', acceptedAt: new Date().toISOString() }
+  // Server should record IP and user-agent and user id later on login.
+</script>

@@ -7,6 +7,10 @@ const router = express.Router();
 const { db } = require('../firebaseAdmin');
 const authMiddleware = require('../authMiddleware');
 const rateLimit = require('../middlewares/simpleRateLimit');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+
+const viralPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_VIRAL_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'viral_public' });
+const viralWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_VIRAL_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'viral_writes' });
 
 // Import viral engines
 const hashtagEngine = require('../services/hashtagEngine');
@@ -20,7 +24,7 @@ function cleanObject(obj) {
 }
 
 // POST /api/viral/generate-hashtags - Generate custom hashtags for content
-router.post('/generate-hashtags', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+router.post('/generate-hashtags', authMiddleware, viralWriteLimiter, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -62,7 +66,7 @@ router.post('/generate-hashtags', authMiddleware, rateLimit({ max: 10, windowMs:
 });
 
 // POST /api/viral/optimize-content - Full viral optimization for content
-router.post('/optimize-content', authMiddleware, rateLimit({ max: 5, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+router.post('/optimize-content', authMiddleware, viralWriteLimiter, rateLimit({ max: 5, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -150,7 +154,7 @@ router.post('/optimize-content', authMiddleware, rateLimit({ max: 5, windowMs: 6
 });
 
 // POST /api/viral/create-boost-chain - Create viral boost chain
-router.post('/create-boost-chain', authMiddleware, async (req, res) => {
+router.post('/create-boost-chain', authMiddleware, viralWriteLimiter, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -191,7 +195,7 @@ router.post('/create-boost-chain', authMiddleware, async (req, res) => {
 });
 
 // GET /api/viral/viral-velocity/:contentId - Get viral velocity for content
-router.get('/viral-velocity/:contentId', authMiddleware, async (req, res) => {
+router.get('/viral-velocity/:contentId', authMiddleware, viralPublicLimiter, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -239,7 +243,7 @@ router.get('/viral-velocity/:contentId', authMiddleware, async (req, res) => {
 });
 
 // GET /api/viral/growth-report/:contentId - Generate growth report
-router.get('/growth-report/:contentId', authMiddleware, async (req, res) => {
+router.get('/growth-report/:contentId', authMiddleware, viralPublicLimiter, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -305,7 +309,7 @@ router.get('/growth-report/:contentId', authMiddleware, async (req, res) => {
 });
 
 // POST /api/viral/track-repost - Track manual repost for growth tracking
-router.post('/track-repost', authMiddleware, async (req, res) => {
+router.post('/track-repost', authMiddleware, viralWriteLimiter, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -365,7 +369,7 @@ router.post('/track-repost', authMiddleware, async (req, res) => {
 });
 
 // GET /api/viral/trending-sounds/:platform - Get trending sounds for platform
-router.get('/trending-sounds/:platform', authMiddleware, async (req, res) => {
+router.get('/trending-sounds/:platform', authMiddleware, viralPublicLimiter, async (req, res) => {
   try {
     const platform = req.params.platform;
     const category = req.query.category || 'general';
@@ -389,7 +393,7 @@ router.get('/trending-sounds/:platform', authMiddleware, async (req, res) => {
 });
 
 // POST /api/viral/ab-test - Create A/B test for content variations
-router.post('/ab-test', authMiddleware, async (req, res) => {
+router.post('/ab-test', authMiddleware, viralWriteLimiter, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -431,7 +435,7 @@ router.post('/ab-test', authMiddleware, async (req, res) => {
 });
 
 // GET /api/viral/referral-stats - Get user's referral and viral growth stats
-router.get('/referral-stats', authMiddleware, async (req, res) => {
+router.get('/referral-stats', authMiddleware, viralPublicLimiter, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -498,7 +502,7 @@ router.get('/referral-stats', authMiddleware, async (req, res) => {
 });
 
 // POST /api/viral/join-growth-squad - Join or create growth squad
-router.post('/join-growth-squad', authMiddleware, async (req, res) => {
+router.post('/join-growth-squad', authMiddleware, viralWriteLimiter, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {

@@ -8,9 +8,12 @@ const { rateLimit } = require('../middleware/rateLimit');
 const { validateBody } = require('../middleware/validate');
 
 const router = express.Router();
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+const promotionWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PROMO_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'promo_writes' });
+const promotionPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PROMO_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'promo_public' });
 
 // Enqueue a YouTube upload task for a content item
-router.post('/youtube/enqueue', authMiddleware, rateLimit({ field: 'ytEnqueue', perMinute: 30 }), validateBody({
+router.post('/youtube/enqueue', authMiddleware, promotionWriteLimiter, rateLimit({ field: 'ytEnqueue', perMinute: 30 }), validateBody({
   contentId: { type: 'string', required: true },
   fileUrl: { type: 'string', required: true },
   title: { type: 'string', required: false, maxLength: 140 },
@@ -42,7 +45,7 @@ router.post('/youtube/enqueue', authMiddleware, rateLimit({ field: 'ytEnqueue', 
 });
 
 // Manual processor trigger (temporary until a scheduler is added)
-router.post('/youtube/process-once', async (req, res) => {
+router.post('/youtube/process-once', promotionWriteLimiter, async (req, res) => {
   try {
     const result = await processNextYouTubeTask();
     return res.json({ processed: !!result, result });
@@ -53,7 +56,7 @@ router.post('/youtube/process-once', async (req, res) => {
 
 module.exports = router;
 // List dead-letter tasks (simple sample)
-router.get('/dead-letter', authMiddleware, adminOnly, async (req, res) => {
+router.get('/dead-letter', authMiddleware, adminOnly, promotionWriteLimiter, async (req, res) => {
   try {
     const snap = await require('../firebaseAdmin').db.collection('dead_letter_tasks').orderBy('failed.failedAt','desc').limit(50).get();
     const out = [];
@@ -63,7 +66,7 @@ router.get('/dead-letter', authMiddleware, adminOnly, async (req, res) => {
 });
 
 // Retry a dead-letter task by re-queuing (clone minimal fields)
-router.post('/dead-letter/requeue/:id', authMiddleware, adminOnly, async (req, res) => {
+router.post('/dead-letter/requeue/:id', authMiddleware, adminOnly, promotionWriteLimiter, async (req, res) => {
   try {
     const { id } = req.params;
     const ref = await require('../firebaseAdmin').db.collection('dead_letter_tasks').doc(id).get();
@@ -82,7 +85,7 @@ router.post('/dead-letter/requeue/:id', authMiddleware, adminOnly, async (req, r
 });
 
 // Force reset attempts for a queued task (I)
-router.post('/reset-attempts/:id', authMiddleware, adminOnly, async (req, res) => {
+router.post('/reset-attempts/:id', authMiddleware, adminOnly, promotionWriteLimiter, async (req, res) => {
   try {
     const { id } = req.params;
     const docRef = require('../firebaseAdmin').db.collection('promotion_tasks').doc(id);
@@ -93,7 +96,7 @@ router.post('/reset-attempts/:id', authMiddleware, adminOnly, async (req, res) =
   } catch (e) { return res.status(500).json({ error: e.message }); }
 });
 // Requeue a failed (non-dead-letter) task by id
-router.post('/requeue/:id', authMiddleware, adminOnly, async (req, res) => {
+router.post('/requeue/:id', authMiddleware, adminOnly, promotionWriteLimiter, async (req, res) => {
   try {
     const { id } = req.params;
     const ref = require('../firebaseAdmin').db.collection('promotion_tasks').doc(id);
@@ -106,7 +109,7 @@ router.post('/requeue/:id', authMiddleware, adminOnly, async (req, res) => {
   } catch (e) { return res.status(500).json({ error: e.message }); }
 });
 // Enqueue cross-platform post (generic)
-router.post('/platform/enqueue', authMiddleware, rateLimit({ field: 'platformEnqueue', perMinute: 60, weight: 2 }), validateBody({
+router.post('/platform/enqueue', authMiddleware, promotionWriteLimiter, rateLimit({ field: 'platformEnqueue', perMinute: 60, weight: 2 }), validateBody({
   contentId: { type: 'string', required: true },
   platform: { type: 'string', required: true, enum: ['twitter','facebook','instagram','tiktok','youtube'] },
   reason: { type: 'string', required: false, maxLength: 120 },
@@ -124,7 +127,7 @@ router.post('/platform/enqueue', authMiddleware, rateLimit({ field: 'platformEnq
 });
 
 // Process one platform post task
-router.post('/platform/process-once', async (req, res) => {
+router.post('/platform/process-once', promotionWriteLimiter, async (req, res) => {
   try {
     const result = await processNextPlatformTask();
     return res.json({ processed: !!result, result });
