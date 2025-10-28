@@ -558,30 +558,36 @@ app.use(cors({
 // Apply compression if installed
 if (compression) app.use(compression());
 // Apply security headers with CSP
-if (helmet) app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"], // Remove 'unsafe-eval' for security
-      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for React
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://*.firebase.com", "https://*.googleapis.com", "https://*.paypal.com", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com"],
-      frameSrc: ["'self'", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com"],
-      objectSrc: ["'none'"],
-      baseUri: ["'self'"],
-      formAction: ["'self'"],
+if (helmet) {
+  // In production we disallow 'unsafe-inline' for scripts/styles to improve CSP security.
+  const allowUnsafeInline = process.env.NODE_ENV !== 'production';
+  const scriptSrc = allowUnsafeInline ? ["'self'", "'unsafe-inline'"] : ["'self'"];
+  const styleSrc = allowUnsafeInline ? ["'self'", "'unsafe-inline'"] : ["'self'"];
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc,
+        styleSrc,
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'", "https://*.firebase.com", "https://*.googleapis.com", "https://*.paypal.com", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com"],
+        frameSrc: ["'self'", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
     },
-  },
-  crossOriginEmbedderPolicy: false,
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true
-  },
-  noSniff: true,
-  xssFilter: true,
-  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
-}));
+    crossOriginEmbedderPolicy: false,
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true
+    },
+    noSniff: true,
+    xssFilter: true,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" }
+  }));
+}
 try { app.use(require('./middlewares/securityHeaders')()); } catch(_){ }
 // Apply helmet (relaxed CSP off for React inline styles) & compression if available
 // Note: Second helmet call removed to avoid conflicts with the first comprehensive configuration
@@ -725,14 +731,20 @@ try {
 // Explicit root-level routes for TikTok verification variations
 function sendFirstExisting(res, candidates) {
   const fs = require('fs');
-  for (const p of candidates) {
-    try {
-      if (fs.existsSync(p)) {
-        res.sendFile(p);
+  try {
+    const allowedBases = [path.join(__dirname, '../public/.well-known/'), path.join(__dirname, '../docs/.well-known/')];
+    for (const p of candidates) {
+      try {
+        if (!fs.existsSync(p)) continue;
+        const resolved = path.resolve(p);
+        // Ensure the resolved path is inside one of the allowed base directories
+        const ok = allowedBases.some(base => resolved.startsWith(path.resolve(base)));
+        if (!ok) continue;
+        res.sendFile(resolved);
         return true;
-      }
-    } catch (_) { /* ignore */ }
-  }
+      } catch (_) { /* ignore */ }
+    }
+  } catch (_) { /* ignore whole helper failures */ }
   return false;
 }
 
@@ -1233,8 +1245,8 @@ if (ENABLE_BACKGROUND) {
       if (!ok) return; // another instance owns lock
       statsRunning = true;
       try {
-        const jitter = Math.random() * 250;
-        if (jitter) await new Promise(r=>setTimeout(r,jitter));
+  const jitter = require('crypto').randomInt(0, 250);
+  if (jitter) await new Promise(r=>setTimeout(r,jitter));
         // Poll stats with a conservative batch size
         const uidHint = process.env.DEFAULT_STATS_UID || null; // optional: if certain actions require a user context
         const result = await pollYouTubeStatsBatch({ uid: uidHint, velocityThreshold: parseInt(process.env.VELOCITY_THRESHOLD || '800', 10), batchSize: 5 });
@@ -1257,8 +1269,8 @@ if (ENABLE_BACKGROUND) {
       if (!ok) return;
       taskRunning = true;
       try {
-        const jitter = Math.random() * 250;
-        if (jitter) await new Promise(r=>setTimeout(r,jitter));
+  const jitter = require('crypto').randomInt(0, 250);
+  if (jitter) await new Promise(r=>setTimeout(r,jitter));
         let processed = 0;
         // Process up to N tasks per interval (interleave types)
         const MAX_BATCH = 5;
@@ -1328,7 +1340,7 @@ if (ENABLE_BACKGROUND) {
         try {
           const locked = await acquireLock('earningsAggregator', EARNINGS_AGG_INTERVAL_MS * 2).catch(()=>false);
           if (!locked) return; // another instance aggregating
-          const jitter = Math.random() * 250;
+          const jitter = require('crypto').randomInt(0, 250);
           if (jitter) await new Promise(r=>setTimeout(r,jitter));
           const r = await aggregateUnprocessed({ batchSize: 300 });
           if (r.processedEvents) console.log(`[BG][earnings] aggregated ${r.processedEvents} events for ${r.usersUpdated} users`);
