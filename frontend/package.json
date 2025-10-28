@@ -33,4 +33,7 @@
     "cpy": "^12.0.1",
     "gh-pages": "^6.3.0"
   }
+  ,"overrides": {
+    "webpack-dev-server": "5.2.1"
+  }
 }
