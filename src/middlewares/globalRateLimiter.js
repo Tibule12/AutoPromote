@@ -1,21 +1,3 @@
-const rateLimit = require('express-rate-limit');
-const MemoryStore = require('express-rate-limit/lib/memory-store');
-
-function rateLimiter(options = {}) {
-  const windowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS || options.windowMs || '60000', 10); // 1 minute default
-  const max = parseInt(process.env.RATE_LIMIT_GLOBAL_MAX || options.max || '100', 10); // 100 req per window default
-  const message = options.message || { error: 'too_many_requests', message: 'Rate limit exceeded' };
-  return rateLimit({
-    windowMs,
-    max,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message,
-    store: new MemoryStore()
-  });
-}
-
-module.exports = { rateLimiter };
 // globalRateLimiter - pluggable distributed-ready rate limiter facade.
 // Default: in-memory token bucket. Replace storage layer with Redis / Firestore as needed.
 
