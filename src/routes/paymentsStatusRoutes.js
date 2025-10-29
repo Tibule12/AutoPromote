@@ -4,11 +4,15 @@ let authMiddleware; try { authMiddleware = require('../authMiddleware'); } catch
 const { composeStatus } = require('../services/payments');
 const { audit } = require('../services/auditLogger');
 let rateLimit; try { rateLimit = require('../middlewares/simpleRateLimit'); } catch(_) { rateLimit = ()=> (req,res,next)=> next(); }
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+
+// Protect payments status endpoints with a light public limiter
+const paymentsPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PAYMENTS_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'payments_public' });
 
 const router = express.Router();
 
 // GET /api/payments/status - combined provider readiness
-router.get('/status', authMiddleware, async (req, res) => {
+router.get('/status', authMiddleware, paymentsPublicLimiter, async (req, res) => {
   try {
     let userDoc = null;
     if (req.userId) {

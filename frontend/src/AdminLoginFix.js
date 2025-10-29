@@ -9,9 +9,10 @@ import { getFirebaseErrorMessage, logFirebaseError } from './firebaseErrorHandle
 import { API_ENDPOINTS } from './config';
 
 function AdminLoginFix() {
+  // Do not hard-code admin credentials in source. Start with empty fields.
   const [credentials, setCredentials] = useState({
-    email: 'admin123@gmail.com',
-    password: 'AutoAdmin123'
+    email: '',
+    password: ''
   });
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
@@ -59,13 +60,11 @@ function AdminLoginFix() {
           const data = await response.json();
           setAdminData(data.user);
           
-          // Step 4: Store in localStorage
-          localStorage.setItem('user', JSON.stringify({
-            ...data.user,
-            token: idToken,
-            isAdmin: true,
-            role: 'admin'
-          }));
+          // Step 4: Persist non-sensitive admin metadata only.
+          // Do NOT store the ID token in localStorage. The token stays in memory via Firebase
+          // and should be re-requested from auth.currentUser.getIdToken() when needed.
+          const safeUser = { ...data.user, isAdmin: true, role: 'admin' };
+          localStorage.setItem('user', JSON.stringify(safeUser));
           
           setStatus('Admin login successful! Redirecting to dashboard...');
           
@@ -93,11 +92,10 @@ function AdminLoginFix() {
         name: user.displayName || 'Admin User',
         isAdmin: true,
         role: 'admin',
-        token: idToken,
         lastLogin: new Date().toISOString()
       };
-      
-      // Store in localStorage
+
+      // Persist non-sensitive admin metadata only; do NOT store ID tokens in localStorage.
       localStorage.setItem('user', JSON.stringify(basicAdminUser));
       setAdminData(basicAdminUser);
       
@@ -145,11 +143,12 @@ function AdminLoginFix() {
         if (userData.isAdmin || userData.role === 'admin') {
           // Check if we have a token and it's not expired
           if (userData.token) {
-            // Set the admin data from localStorage
-            setAdminData(userData);
+            // Set the admin data from localStorage (no tokens included)
+              setAdminData(userData);
             setStatus('Already logged in as admin');
             
-            // Optionally verify the token in the background
+              // We don't persist tokens to localStorage; if background verification is needed
+              // verify using the backend or Firebase SDK instead.
             checkTokenValidity(userData.token).then(isValid => {
               if (!isValid) {
                 console.log('Admin token is no longer valid, but proceeding with cached data');

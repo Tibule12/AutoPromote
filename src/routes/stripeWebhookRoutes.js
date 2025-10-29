@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { audit } = require('../services/auditLogger');
 const { db } = require('../firebaseAdmin');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+
+// Rate limiter for Stripe webhook deliveries (protects against replay/abuse)
+const stripeWebhookLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_STRIPE_WEBHOOK || '300', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '50'), windowHint: 'stripe_webhook' });
 
 let stripe = null;
 if (process.env.STRIPE_SECRET_KEY) {
@@ -11,7 +15,8 @@ if (process.env.STRIPE_SECRET_KEY) {
 // We need raw body for Stripe signature verification
 function rawBodySaver(req, _res, buf) { req.rawBody = buf; }
 
-router.post('/webhook', express.json({ limit:'2mb', verify: rawBodySaver }), async (req,res) => {
+// Keep the raw body parser but apply a lightweight webhook limiter first
+router.post('/webhook', stripeWebhookLimiter, express.json({ limit:'2mb', verify: rawBodySaver }), async (req,res) => {
   if (!stripe) return res.status(500).json({ ok:false, error:'stripe_not_configured' });
   const sig = req.headers['stripe-signature'];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;

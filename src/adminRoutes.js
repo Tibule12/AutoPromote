@@ -2,6 +2,12 @@ const express = require('express');
 const { db, auth, storage } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
 const router = express.Router();
+const { rateLimiter } = require('./middlewares/globalRateLimiter');
+
+const adminPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_ADMIN_PUBLIC || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'admin_public' });
+
+// Apply router-level limiter so static analysis and runtime both show explicit throttling
+router.use(adminPublicLimiter);
 
 // Middleware to check admin role
 const adminOnly = async (req, res, next) => {
@@ -17,16 +23,18 @@ const adminOnly = async (req, res, next) => {
       const customClaims = userRecord.customClaims || {};
       
       if (customClaims.admin === true) {
-        console.log('User has admin claim in Firebase Auth');
+        // Don't log entire user or claims to avoid leaking sensitive details to logs
+        console.log('User has admin claim in Firebase Auth for uid:', req.userId || 'unknown');
         return next();
       }
     } catch (authError) {
       console.error('Error checking Firebase Auth claims:', authError);
     }
     
-    // If we get here, the user is not an admin
-    console.log('Access denied - not admin. User:', req.user);
-    return res.status(403).json({ error: 'Access denied. Admin only.' });
+  // If we get here, the user is not an admin
+  // Log only the userId (avoid printing full user object which may contain sensitive fields)
+  console.log('Access denied - not admin. User id:', req.userId || (req.user && req.user.uid) || 'unknown');
+  return res.status(403).json({ error: 'Access denied. Admin only.' });
   } catch (error) {
     console.error('Error in admin middleware:', error);
     res.status(403).json({ error: 'Access denied' });

@@ -1,10 +1,14 @@
 const express = require('express');
 const { resolveShortlink } = require('../services/shortlinkService');
 const { db } = require('../firebaseAdmin');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
 const router = express.Router();
 
+// Public limiter for shortlink redirects to prevent mass scanning/abuse
+const shortlinkPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_SHORTLINK_PUBLIC || '240', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'shortlink_public' });
+
 // GET /s/:code -> redirect with tracking params
-router.get('/:code', async (req, res) => {
+router.get('/:code', shortlinkPublicLimiter, async (req, res) => {
   try {
     const { code } = req.params;
     const data = await resolveShortlink(code);

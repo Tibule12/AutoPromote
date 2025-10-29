@@ -38,17 +38,19 @@ function App() {
         const token = await firebaseUser.getIdToken(true);
         const idTokenResult = await firebaseUser.getIdTokenResult(true);
         const hasAdminClaim = idTokenResult.claims.admin === true || idTokenResult.claims.role === 'admin';
-        const userData = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          name: firebaseUser.displayName,
-          token,
-          isAdmin: hasAdminClaim,
-          role: hasAdminClaim ? 'admin' : 'user',
-        };
-        setUser(userData);
-        setIsAdmin(hasAdminClaim);
-        localStorage.setItem('user', JSON.stringify(userData));
+          const userData = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            name: firebaseUser.displayName,
+            // Keep tokens in memory via Firebase auth.currentUser.getIdToken()
+            isAdmin: hasAdminClaim,
+            role: hasAdminClaim ? 'admin' : 'user',
+          };
+          setUser({ ...userData, token }); // keep token in memory in React state only
+          setIsAdmin(hasAdminClaim);
+          // Persist only non-sensitive metadata to localStorage. Do NOT store tokens.
+          const safeUserForStorage = { ...userData };
+          localStorage.setItem('user', JSON.stringify(safeUserForStorage));
         // Debug log for current UID
         console.log("Current UID:", firebaseUser.uid);
         // Fetch content after user is set
@@ -243,8 +245,10 @@ function App() {
       }
       const forceAdmin = userData.role === 'admin' || userData.isAdmin === true;
       // Always preserve admin status, never downgrade
-      const updatedUserData = { ...userData, role: forceAdmin ? 'admin' : userData.role, isAdmin: forceAdmin };
-      localStorage.setItem('user', JSON.stringify(updatedUserData));
+        const updatedUserData = { ...userData, role: forceAdmin ? 'admin' : userData.role, isAdmin: forceAdmin };
+        // Persist only non-sensitive metadata. Remove token before storing.
+        const { token: _token, ...safeUpdated } = updatedUserData;
+        localStorage.setItem('user', JSON.stringify(safeUpdated));
       setUser(prev => {
         if (prev && (prev.role === 'admin' || prev.isAdmin === true)) {
           return { ...prev, ...updatedUserData, role: 'admin', isAdmin: true };

@@ -3,6 +3,12 @@ const router = express.Router();
 const { updateConfig, getConfig } = require('../services/configService');
 let authMiddleware; try { authMiddleware = require('../authMiddleware'); } catch(_){ authMiddleware = (req,res,next)=>next(); }
 const adminOnly = require('../middlewares/adminOnly');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+
+const adminPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_ADMIN_PUBLIC || '60',10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'admin_config' });
+
+// Apply router-level limiter for admin config endpoints
+router.use(adminPublicLimiter);
 const { db } = require('../firebaseAdmin');
 const { validateEnv } = require('../utils/envValidator');
 const SENSITIVE_PREFIXES = ['PAYPAL_', 'SESSION_SECRET', 'JWT_', 'DOC_SIGNING_SECRET'];

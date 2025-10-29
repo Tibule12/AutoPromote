@@ -11,6 +11,18 @@ const rateLimit = require('./src/middlewares/simpleRateLimit');
 // Import SSRF protection
 const { validateUrl, safeFetch } = require('./src/utils/ssrfGuard');
 
+// Rate limiters for TikTok routes (router-level).
+// `rateLimiter` is a facade that uses a distributed limiter when available,
+// or a noop fallback during local/dev. Defining these early ensures the
+// middleware is applied before any routes (and satisfies static analysis).
+const ttPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TT_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'tiktok_public' });
+const ttWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TT_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'tiktok_writes' });
+
+// Apply a light public limiter at the router level to ensure every route
+// has an explicit rate limiter. More restrictive per-route write limits
+// remain in place for sensitive endpoints.
+router.use((req, res, next) => ttPublicLimiter(req, res, next));
+
 // Gather both sandbox & production env sets (prefixed) plus legacy fallbacks
 const sandboxConfig = {
   key: (process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || '').toString().trim() || null,
@@ -126,7 +138,7 @@ function constructAuthUrl(cfg, state, scope) {
 }
 
 // Diagnostics: quick config visibility with sandbox/production breakdown
-router.get('/config', (req, res) => {
+router.get('/config', ttPublicLimiter, (req, res) => {
   const cfg = activeConfig();
   const mask = (val) => (val && val.length > 8) ? `${val.slice(0,4)}***${val.slice(-4)}` : (val ? '***' : null);
   const response = {
@@ -150,10 +162,6 @@ router.get('/config', (req, res) => {
   res.json(response);
 });
 
-// Health endpoint to verify mount
-// Attach a light public limiter to health to reduce noisy scans
-const ttPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TT_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'tiktok_public' });
-const ttWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TT_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'tiktok_writes' });
 router.get('/health', ttPublicLimiter, (req, res) => {
   const cfg = activeConfig();
   res.json({ ok: true, mode: TIKTOK_ENV, hasClientKey: !!cfg.key, hasRedirect: !!cfg.redirect });
@@ -460,7 +468,7 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 });
 
 // 2.1) Connection status — returns whether TikTok is connected and basic profile info (cached ~7s)
-router.get('/status', authMiddleware, require('./src/statusInstrument')('tiktokStatus', async (req, res) => {
+router.get('/status', authMiddleware, ttPublicLimiter, require('./src/statusInstrument')('tiktokStatus', async (req, res) => {
   const started = Date.now();
   try {
     const cfg = activeConfig();
@@ -520,7 +528,7 @@ router.get('/status', authMiddleware, require('./src/statusInstrument')('tiktokS
 }));
 
 // Debug endpoint: show last prepared state and auth URL (auth required)
-router.get('/debug/state', authMiddleware, async (req, res) => {
+router.get('/debug/state', authMiddleware, ttPublicLimiter, async (req, res) => {
   if (!DEBUG_TIKTOK_OAUTH) return res.status(404).json({ error: 'debug_disabled' });
   try {
     const uid = req.userId || req.user?.uid;
