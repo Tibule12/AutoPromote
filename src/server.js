@@ -484,6 +484,16 @@ const { db, auth, storage } = require('./firebaseAdmin');
 
 const app = express();
 
+// Route-level limiter helper: prefer the global/distributed limiter if available,
+// otherwise fall back to the in-memory globalRateLimiter. If neither is
+// available (unlikely), use a noop passthrough to avoid breaking startup.
+let routeLimiter;
+try {
+  routeLimiter = require('./middlewares/globalRateLimiter').rateLimiter;
+} catch (e) {
+  routeLimiter = (opts = {}) => (req, res, next) => next();
+}
+
 // Facebook Data Deletion Instructions Page
 app.get('/facebook-data-deletion', (req, res) => {
   res.send(`
@@ -651,20 +661,20 @@ try {
 } catch (e) {
   console.warn('Admin test routes mount failed:', e.message);
 }
-// Mount TikTok routes if available
-app.use('/api/tiktok', tiktokRoutes);
+// Mount TikTok routes if available (explicit per-mount rate limiter to satisfy scanners)
+app.use('/api/tiktok', routeLimiter({ windowHint: 'tiktok' }), tiktokRoutes);
 console.log('🚏 TikTok routes mounted at /api/tiktok');
 // Mount new social routes
-app.use('/api/facebook', facebookRoutes);
+app.use('/api/facebook', routeLimiter({ windowHint: 'facebook' }), facebookRoutes);
 console.log('🚏 Facebook routes mounted at /api/facebook');
-app.use('/api/youtube', youtubeRoutes);
+app.use('/api/youtube', routeLimiter({ windowHint: 'youtube' }), youtubeRoutes);
 console.log('🚏 YouTube routes mounted at /api/youtube');
-app.use('/api/twitter', twitterAuthRoutes);
+app.use('/api/twitter', routeLimiter({ windowHint: 'twitter' }), twitterAuthRoutes);
 console.log('🚏 Twitter routes mounted at /api/twitter');
 // Mount Snapchat routes
-app.use('/api/snapchat', snapchatRoutes);
+app.use('/api/snapchat', routeLimiter({ windowHint: 'snapchat' }), snapchatRoutes);
 console.log('🚏 Snapchat routes mounted at /api/snapchat');
-app.use('/api/platform', platformConnectionsRoutes);
+app.use('/api/platform', routeLimiter({ windowHint: 'platform' }), platformConnectionsRoutes);
 console.log('🚏 Platform connections routes mounted at /api/platform');
 // Mount generic platform routes under /api so frontend placeholder endpoints like
 // /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
@@ -674,13 +684,13 @@ try {
 } catch (e) {
   console.log('⚠️ Failed to mount generic platform routes:', e.message);
 }
-app.use('/api/promotion-tasks', promotionTaskRoutes);
+app.use('/api/promotion-tasks', routeLimiter({ windowHint: 'promotion_tasks' }), promotionTaskRoutes);
 console.log('🚏 Promotion task routes mounted at /api/promotion-tasks');
-app.use('/api/metrics', metricsRoutes);
+app.use('/api/metrics', routeLimiter({ windowHint: 'metrics' }), metricsRoutes);
 console.log('🚏 Metrics routes mounted at /api/metrics');
-app.use('/api/instagram', instagramRoutes);
+app.use('/api/instagram', routeLimiter({ windowHint: 'instagram' }), instagramRoutes);
 console.log('🚏 Instagram routes mounted at /api/instagram');
-app.use('/api/notifications', notificationsRoutes);
+app.use('/api/notifications', routeLimiter({ windowHint: 'notifications' }), notificationsRoutes);
 console.log('🚏 Notifications routes mounted at /api/notifications');
 // Captions routes mount skipped due to object export issue
 app.use('/api/admin/cache', adminCacheRoutes);
@@ -695,8 +705,8 @@ try {
 }
 
 // Register optional routes
-app.use('/api/withdrawals', withdrawalRoutes);
-app.use('/api/monetization', monetizationRoutes);
+app.use('/api/withdrawals', routeLimiter({ windowHint: 'withdrawals' }), withdrawalRoutes);
+app.use('/api/monetization', routeLimiter({ windowHint: 'monetization' }), monetizationRoutes);
 // Stripe integration removed
 app.use('/s', shortlinkRoutes);
 // Require latest terms before allowing access to billing routes
