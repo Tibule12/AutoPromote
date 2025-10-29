@@ -10,7 +10,7 @@
     "test": "npm run test:unit",
     "deploy": "firebase deploy",
     "build": "npm run clean && npm run compile",
-    "postinstall": "npm install --prefix frontend && npm run build --prefix frontend",
+    "build-frontend": "npm install --prefix frontend && npm run build --prefix frontend",
     "clean": "rimraf dist",
     "compile": "mkdir dist && copy *.js dist\\ && copy *.json dist\\",
     "test:integration": "node runTests.js",
