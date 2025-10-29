@@ -19,7 +19,16 @@ router.get('/aggregate', authMiddleware, require('../statusInstrument')('aggrega
     // Helper fetch function with graceful failure (never throws)
     async function fetchJson(url) {
       try {
-        const r = await fetch(url, { headers: { Authorization: req.headers.authorization || '' }, timeout: 4000 });
+        // Use safeFetch for SSRF protection
+        const { safeFetch } = require('../utils/ssrfGuard');
+        const r = await safeFetch(url, fetch, {
+          fetchOptions: {
+            headers: { Authorization: req.headers.authorization || '' },
+            timeout: 4000
+          },
+          requireHttps: true,
+          allowHosts: ['autopromote.onrender.com', 'autopromote-1.onrender.com', 'localhost']
+        });
         if (!r.ok) return { error: 'status_' + r.status };
         return r.json();
       } catch (e) { return { error: 'fetch_failed' }; }

@@ -24,7 +24,7 @@ function cleanObject(obj) {
 }
 
 // POST /api/viral/generate-hashtags - Generate custom hashtags for content
-router.post('/generate-hashtags', authMiddleware, viralWriteLimiter, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+router.post('/generate-hashtags', authMiddleware, viralWriteLimiter, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {
@@ -215,9 +215,9 @@ router.get('/viral-velocity/:contentId', authMiddleware, viralPublicLimiter, asy
     // Get current metrics (mock for now - integrate with real analytics)
     const crypto = require('crypto');
     const currentMetrics = {
-      views: content.views || crypto.randomBytes(4).readUInt32LE(0) % 10000,
-      engagements: content.engagements || crypto.randomBytes(4).readUInt32LE(0) % 1000,
-      shares: content.shares || crypto.randomBytes(4).readUInt32LE(0) % 100
+      views: content.views || crypto.randomInt(0, 10000),
+      engagements: content.engagements || crypto.randomInt(0, 1000),
+      shares: content.shares || crypto.randomInt(0, 100)
     };
 
     // Calculate viral velocity
@@ -502,7 +502,7 @@ router.get('/referral-stats', authMiddleware, viralPublicLimiter, async (req, re
 });
 
 // POST /api/viral/join-growth-squad - Join or create growth squad
-router.post('/join-growth-squad', authMiddleware, viralWriteLimiter, async (req, res) => {
+router.post('/join-growth-squad', authMiddleware, viralWriteLimiter, rateLimit({ max: 5, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) {

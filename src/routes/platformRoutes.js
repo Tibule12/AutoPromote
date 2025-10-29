@@ -27,7 +27,13 @@ if (!fetchFn) {
   }
 }
 
-function normalize(name){ return String(name||'').toLowerCase(); }
+function normalize(name){
+  // Validate input to prevent injection
+  if (typeof name !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(name)) {
+    return '';
+  }
+  return String(name||'').toLowerCase();
+}
 
 // GET /api/:platform/status
 router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {

@@ -8,6 +8,15 @@ const platformConnectionsPublicLimiter = rateLimiter({ capacity: parseInt(proces
 // Helper to fetch connection doc if exists
 async function getConn(uid, name) {
   try {
+    // Validate uid to prevent injection
+    if (typeof uid !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(uid)) {
+      return { connected: false, error: 'invalid_uid' };
+    }
+    // Validate name to prevent injection
+    if (typeof name !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(name)) {
+      return { connected: false, error: 'invalid_name' };
+    }
+
     const userRef = db.collection('users').doc(uid);
     const snap = await userRef.collection('connections').doc(name).get();
     if (snap.exists) {

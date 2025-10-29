@@ -53,8 +53,14 @@ async function postToFacebook({ contentId, payload, reason }) {
       }
     }
   }
+  // Use safeFetch for SSRF protection
+  const { safeFetch } = require('../utils/ssrfGuard');
   const body = new URLSearchParams({ message: link ? `${messageBase}\n${link}` : messageBase, access_token: PAGE_TOKEN });
-  const res = await fetch(`https://graph.facebook.com/${PAGE_ID}/feed`, { method: 'POST', body });
+  const res = await safeFetch(`https://graph.facebook.com/${PAGE_ID}/feed`, fetch, {
+    fetchOptions: { method: 'POST', body },
+    requireHttps: true,
+    allowHosts: ['graph.facebook.com']
+  });
   const json = await safeJson(res);
   if (!res.ok) {
     return { platform: 'facebook', success: false, error: json.error?.message || JSON.stringify(json) };
@@ -86,11 +92,17 @@ async function postToTwitter({ contentId, payload, reason, uid }) {
       }
     }
   }
+  // Use safeFetch for SSRF protection
+  const { safeFetch } = require('../utils/ssrfGuard');
   const text = (payload?.message || ctx.title || 'New content').slice(0, 270) + (link ? `\n${link}` : '');
-  const res = await fetch('https://api.twitter.com/2/tweets', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${bearer}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text })
+  const res = await safeFetch('https://api.twitter.com/2/tweets', fetch, {
+    fetchOptions: {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${bearer}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    },
+    requireHttps: true,
+    allowHosts: ['api.twitter.com']
   });
   const json = await safeJson(res);
   if (!res.ok) {

@@ -63,7 +63,13 @@ async function exchangeCode({ code, code_verifier, redirectUri, clientId }) {
   if (clientSecret) {
     headers['Authorization'] = 'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
   }
-  const res = await fetch(TOKEN_URL, { method: 'POST', headers, body });
+  // Use safeFetch for SSRF protection
+  const { safeFetch } = require('../utils/ssrfGuard');
+  const res = await safeFetch(TOKEN_URL, fetch, {
+    fetchOptions: { method: 'POST', headers, body },
+    requireHttps: true,
+    allowHosts: ['api.twitter.com']
+  });
   const txt = await res.text();
   let json; try { json = JSON.parse(txt); } catch { json = { raw: txt }; }
   if (process.env.DEBUG_TWITTER_OAUTH) {
@@ -84,7 +90,13 @@ async function refreshToken({ refresh_token, clientId }) {
   if (clientSecret) {
     headers['Authorization'] = 'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
   }
-  const res = await fetch(TOKEN_URL, { method: 'POST', headers, body });
+  // Use safeFetch for SSRF protection
+  const { safeFetch } = require('../utils/ssrfGuard');
+  const res = await safeFetch(TOKEN_URL, fetch, {
+    fetchOptions: { method: 'POST', headers, body },
+    requireHttps: true,
+    allowHosts: ['api.twitter.com']
+  });
   const txt = await res.text();
   let json; try { json = JSON.parse(txt); } catch { json = { raw: txt }; }
   if (process.env.DEBUG_TWITTER_OAUTH) {

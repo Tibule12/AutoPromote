@@ -50,7 +50,7 @@ class RepostDrivenEngine {
   // Generate unique tracking markers
   generateTrackingMarkers(contentId, platform) {
     const timestamp = Date.now();
-    const random = crypto.randomBytes(6).toString('hex').substr(0,9);
+    const random = crypto.randomInt(0, 1000000).toString().padStart(6, '0');
 
     return {
       hashtag: `#AutoPromote${contentId.slice(-6)}${random}`,
@@ -63,9 +63,9 @@ class RepostDrivenEngine {
 
   // Generate content fingerprint for tracking
   generateContentFingerprint(contentId) {
-    // Simple fingerprint based on content ID and timestamp
-    const hash = require('crypto').createHash('md5');
-    hash.update(contentId + Date.now().toString());
+    // Simple fingerprint based on content ID and timestamp - use safe string formatting
+    const hash = crypto.createHash('md5');
+    hash.update(`${contentId}${Date.now()}`);
     return hash.digest('hex').substring(0, 16);
   }
 

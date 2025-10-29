@@ -8,6 +8,7 @@ const { admin, db } = require('./firebaseAdmin');
 const { rateLimiter } = require('./src/middlewares/globalRateLimiter');
 const DEBUG_TIKTOK_OAUTH = process.env.DEBUG_TIKTOK_OAUTH === 'true';
 const rateLimit = require('./src/middlewares/simpleRateLimit');
+// Import SSRF protection
 const { validateUrl, safeFetch } = require('./src/utils/ssrfGuard');
 
 // Gather both sandbox & production env sets (prefixed) plus legacy fallbacks
@@ -205,10 +206,7 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 });
 
 // 1) Begin OAuth (requires user auth) — keeps scopes minimal for review
-fix/dependabot/webpack-dev-server-override
-router.get('/auth', authMiddleware, ttWriteLimiter, async (req, res) => {
-router.get('/auth', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), authMiddleware, async (req, res) => {
- main
+router.get('/auth', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), authMiddleware, ttWriteLimiter, async (req, res) => {
   const cfg = activeConfig();
   if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
   try {
@@ -224,7 +222,7 @@ router.get('/auth', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || 
     }, { merge: true });
     // Request minimal scope for initial approval; can expand later (video.upload requires program access)
     const scope = 'user.info.basic';
-  const authUrl = constructAuthUrl(cfg, state, scope);
+    const authUrl = constructAuthUrl(cfg, state, scope);
     // Instead of redirecting immediately, render a small HTML page with a button
     // so the user must click to continue. This ensures any deep-linking the
     // provider attempts will be initiated by a user gesture and not blocked by
@@ -306,7 +304,7 @@ router.get('/auth/start', ttWriteLimiter, async (req, res) => {
     }, { merge: true });
     const scope = 'user.info.basic';
     const authUrl = constructAuthUrl(cfg, state, scope);
-  // Render a click-to-continue page instead of redirecting immediately.
+    // Render a click-to-continue page instead of redirecting immediately.
   res.set('Content-Type', 'text/html');
   return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok</title>${SUPPRESSION_SNIPPET}<style>body{font-family:system-ui,Arial,sans-serif} .card{max-width:720px;padding:20px;border-radius:8px;text-align:left} .muted{color:#666;font-size:13px}</style></head><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
       <div class="card" style="background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.06)">
@@ -432,7 +430,7 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
     const url = new URL(DASHBOARD_URL);
     url.searchParams.set('tiktok', 'connected');
     // Check if this was initiated as a popup flow
-    const isPopup = stateDataRef?.isPopup === true;
+    const isPopup = stateData?.isPopup === true;
 
     if (isPopup) {
       res.set('Content-Type', 'text/html');
@@ -492,8 +490,15 @@ router.get('/status', authMiddleware, require('./src/statusInstrument')('tiktokS
       if (data.access_token && String(data.scope || '').includes('user.info.basic')) {
         try {
           const info = await instrument('tiktokIdentityFetch', async () => {
-            const infoRes = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url', {
-              method: 'GET', headers: { 'Authorization': `Bearer ${data.access_token}` }, timeout: 3500
+            // Use safeFetch for SSRF protection
+            const infoRes = await safeFetch('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url', fetch, {
+              fetchOptions: {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${data.access_token}` },
+                timeout: 3500
+              },
+              requireHttps: true,
+              allowHosts: ['open.tiktokapis.com']
             });
             if (infoRes.ok) return infoRes.json();
             return null;
@@ -556,13 +561,18 @@ router.post('/upload', rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }),
 
   try {
     // Step 1: Get upload URL from TikTok
-    const uploadRes = await fetch('https://open.tiktokapis.com/v2/video/upload/', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${access_token}`,
-        'Content-Type': 'application/json'
+    // Use safeFetch for SSRF protection
+    const uploadRes = await safeFetch('https://open.tiktokapis.com/v2/video/upload/', fetch, {
+      fetchOptions: {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ open_id })
       },
-      body: JSON.stringify({ open_id })
+      requireHttps: true,
+      allowHosts: ['open.tiktokapis.com']
     });
     const uploadData = await uploadRes.json();
     if (!uploadData.data || !uploadData.data.upload_url) {
@@ -576,26 +586,36 @@ router.post('/upload', rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }),
       return res.status(400).json({ error: 'Failed to fetch video from provided URL' });
     }
     const videoBuffer = await videoFileRes.arrayBuffer();
-    const uploadToTikTokRes = await fetch(uploadData.data.upload_url, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'video/mp4' },
-      body: Buffer.from(videoBuffer)
+    // Use safeFetch for SSRF protection on upload URL
+    const uploadToTikTokRes = await safeFetch(uploadData.data.upload_url, fetch, {
+      fetchOptions: {
+        method: 'PUT',
+        headers: { 'Content-Type': 'video/mp4' },
+        body: Buffer.from(videoBuffer)
+      },
+      requireHttps: true,
+      allowHosts: ['open.tiktokapis.com', 'sandbox.tiktokapis.com']
     });
     if (!uploadToTikTokRes.ok) {
       return res.status(400).json({ error: 'Failed to upload video to TikTok', details: await uploadToTikTokRes.text() });
     }
     // Step 3: Create video post on TikTok
-    const createRes = await fetch('https://open.tiktokapis.com/v2/video/publish/', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${access_token}`,
-        'Content-Type': 'application/json'
+    // Use safeFetch for SSRF protection
+    const createRes = await safeFetch('https://open.tiktokapis.com/v2/video/publish/', fetch, {
+      fetchOptions: {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          open_id,
+          video_id: uploadData.data.video_id,
+          title: title || 'AutoPromote Video'
+        })
       },
-      body: JSON.stringify({
-        open_id,
-        video_id: uploadData.data.video_id,
-        title: title || 'AutoPromote Video'
-      })
+      requireHttps: true,
+      allowHosts: ['open.tiktokapis.com']
     });
     const createData = await createRes.json();
     if (!createData.data || !createData.data.video_id) {
@@ -626,12 +646,17 @@ router.post('/analytics', rateLimit({ max: 20, windowMs: 3600000, key: r => r.ip
   }
 
   try {
-    const analyticsRes = await fetch(`https://open.tiktokapis.com/v2/video/data/?open_id=${encodeURIComponent(open_id)}&video_id=${encodeURIComponent(video_id)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${access_token}`
+    // Use safeFetch for SSRF protection
+    const analyticsRes = await safeFetch(`https://open.tiktokapis.com/v2/video/data/?open_id=${encodeURIComponent(open_id)}&video_id=${encodeURIComponent(video_id)}`, fetch, {
+      fetchOptions: {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${access_token}`
+        },
+        timeout: 10000 // 10 second timeout
       },
-      timeout: 10000 // 10 second timeout
+      requireHttps: true,
+      allowHosts: ['open.tiktokapis.com']
     });
     const analyticsData = await analyticsRes.json();
     if (!analyticsData.data) {

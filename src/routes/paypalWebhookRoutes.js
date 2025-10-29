@@ -29,10 +29,16 @@ async function getAccessToken(){
   const basic = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
   const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
   if (!fetchFn) throw new Error('fetch_unavailable');
-  const res = await fetchFn(base + '/v1/oauth2/token', {
-    method:'POST',
-    headers:{ 'Authorization': `Basic ${basic}`, 'Content-Type':'application/x-www-form-urlencoded' },
-    body:'grant_type=client_credentials'
+  // Use safeFetch for SSRF protection
+  const { safeFetch } = require('../utils/ssrfGuard');
+  const res = await safeFetch(base + '/v1/oauth2/token', fetchFn, {
+    fetchOptions: {
+      method:'POST',
+      headers:{ 'Authorization': `Basic ${basic}`, 'Content-Type':'application/x-www-form-urlencoded' },
+      body:'grant_type=client_credentials'
+    },
+    requireHttps: true,
+    allowHosts: ['api-m.paypal.com', 'api-m.sandbox.paypal.com']
   });
   if (!res.ok) throw new Error('token_http_'+res.status);
   const json = await res.json();
@@ -49,8 +55,12 @@ async function createOrder({ amount, currency='USD', internalId, userId }){
     application_context:{ shipping_preference:'NO_SHIPPING', user_action:'PAY_NOW' }
   };
   if (!fetchFn) throw new Error('fetch_unavailable');
-  const res = await fetchFn(base + '/v2/checkout/orders', {
-    method:'POST', headers:{ 'Authorization':`Bearer ${access}`,'Content-Type':'application/json' }, body: JSON.stringify(body)
+  const res = await safeFetch(base + '/v2/checkout/orders', fetchFn, {
+    fetchOptions: {
+      method:'POST', headers:{ 'Authorization':`Bearer ${access}`,'Content-Type':'application/json' }, body: JSON.stringify(body)
+    },
+    requireHttps: true,
+    allowHosts: ['api-m.paypal.com', 'api-m.sandbox.paypal.com']
   });
   const json = await res.json();
   if (res.status >=400) throw new Error(json.message || 'order_create_failed');
@@ -68,8 +78,12 @@ async function captureOrder(orderId){
   const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
   const access = await getAccessToken();
   if (!fetchFn) throw new Error('fetch_unavailable');
-  const res = await fetchFn(base + `/v2/checkout/orders/${orderId}/capture`, {
-    method:'POST', headers:{ 'Authorization':`Bearer ${access}`,'Content-Type':'application/json' }
+  const res = await safeFetch(base + `/v2/checkout/orders/${orderId}/capture`, fetchFn, {
+    fetchOptions: {
+      method:'POST', headers:{ 'Authorization':`Bearer ${access}`,'Content-Type':'application/json' }
+    },
+    requireHttps: true,
+    allowHosts: ['api-m.paypal.com', 'api-m.sandbox.paypal.com']
   });
   const json = await res.json();
   if (res.status >=400) throw new Error(json.message || 'capture_failed');
