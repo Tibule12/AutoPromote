@@ -6,6 +6,11 @@ const router = express.Router();
 const authMiddleware = require('../authMiddleware');
 const monetizationService = require('../services/monetizationService');
 const referralGrowthEngine = require('../services/referralGrowthEngine');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+
+// Apply a light router-level limiter for monetization endpoints
+const monetizationPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_MONETIZATION_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'monetization_public' });
+router.use((req, res, next) => monetizationPublicLimiter(req, res, next));
 
 // POST /subscription/subscribe - Subscribe to premium tier
 router.post('/subscription/subscribe', authMiddleware, async (req, res) => {

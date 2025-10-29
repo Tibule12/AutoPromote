@@ -4,8 +4,13 @@ let authMiddleware; try { authMiddleware = require('../authMiddleware'); } catch
 const adminOnly = require('../middlewares/adminOnly');
 const { computeUserBalance } = require('../services/payments/balanceService');
 const { audit } = require('../services/auditLogger');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
 
 const router = express.Router();
+
+// Apply a light router-level limiter for payments endpoints to satisfy static analysis
+const paymentsExtendedPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PAYMENTS_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'payments_public' });
+router.use((req, res, next) => paymentsExtendedPublicLimiter(req, res, next));
 
 // GET /api/payments/balance
 router.get('/balance', authMiddleware, async (req,res) => {

@@ -2,6 +2,12 @@ const express = require('express');
 const admin = require('firebase-admin');
 const authMiddleware = require('../authMiddleware');
 const router = express.Router();
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+
+const adminPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_ADMIN_PUBLIC || '60',10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'admin_email_verification' });
+
+// Apply router-level limiter for admin email verification endpoints
+router.use(adminPublicLimiter);
 
 // Simple admin guard (reuse existing user object)
 function requireAdmin(req,res,next){
