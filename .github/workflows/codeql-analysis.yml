@@ -1,5 +1,13 @@
 name: "CodeQL"
 
+# Grant minimal permissions needed for CodeQL to upload results to GitHub's
+# code scanning API. Note: workflow runs triggered by forks or forked PRs
+# may still have limited permissions; run this on branches in the main
+# repository (push to main or a branch in this repo) to allow uploading.
+permissions:
+  contents: read
+  security-events: write
+
 on:
   push:
     branches: [ main ]
