@@ -548,9 +548,24 @@ try { app.use(ensureWarmup); } catch(_) { /* ignore */ }
 // Micro-cache for status endpoints
 app.use(microCache);
 
-// CORS configuration - allow only frontend domain and support credentials
+// CORS configuration - restrict origins to specific domains for security
+const allowedOrigins = [
+  'https://autopromote-1.onrender.com',
+  'https://autopromote.onrender.com',
+  process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : null
+].filter(Boolean);
+
 app.use(cors({
-  origin: ['https://autopromote-1.onrender.com'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin'],
   credentials: true
@@ -1016,6 +1031,14 @@ app.get('/api/health/ready', async (req, res) => {
     out.error = e.message;
   }
   return res.status(out.ok ? 200 : 503).json(out);
+});
+
+// Error handler for CORS
+app.use((err, req, res, next) => {
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ error: 'CORS policy violation' });
+  }
+  next(err);
 });
 
 // -------------------------------------------------

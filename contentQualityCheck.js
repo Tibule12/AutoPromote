@@ -9,7 +9,11 @@ const upload = multer({ dest: 'uploads/' });
 router.post('/api/content/quality-check', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
+  // Validate file path to prevent path injection
   const filePath = req.file.path;
+  if (typeof filePath !== 'string' || filePath.includes('..') || !filePath.startsWith('uploads/')) {
+    return res.status(400).json({ error: 'Invalid file path' });
+  }
   ffmpeg.ffprobe(filePath, (err, metadata) => {
     if (err) {
       console.error('FFmpeg analysis failed:', err);

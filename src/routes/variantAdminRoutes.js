@@ -49,6 +49,11 @@ router.post('/clear-anomaly', authMiddleware, adminOnly, variantAdminLimiter, as
   try {
     const { contentId, platform, variant } = req.body || {};
     if (!contentId || !platform || !variant) return res.status(400).json({ ok:false, error:'missing_params' });
+
+    // Prevent prototype pollution
+    if (variant === '__proto__' || variant === 'constructor' || variant === 'prototype') {
+      return res.status(400).json({ ok:false, error:'invalid_variant' });
+    }
     await mutateVariant({ contentId, platform, variant, mutator: row => { row.anomaly = false; } });
     return res.json({ ok:true });
   } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
@@ -59,6 +64,11 @@ router.post('/unsuppress', authMiddleware, adminOnly, variantAdminLimiter, async
   try {
     const { contentId, platform, variant } = req.body || {};
     if (!contentId || !platform || !variant) return res.status(400).json({ ok:false, error:'missing_params' });
+
+    // Prevent prototype pollution
+    if (variant === '__proto__' || variant === 'constructor' || variant === 'prototype') {
+      return res.status(400).json({ ok:false, error:'invalid_variant' });
+    }
     await mutateVariant({ contentId, platform, variant, mutator: row => { row.suppressed = false; row.suppressedAt = null; } });
     return res.json({ ok:true });
   } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
@@ -70,6 +80,11 @@ router.post('/impressions', authMiddleware, adminOnly, variantAdminLimiter, asyn
     const { contentId, platform, variant, impressions } = req.body || {};
     const n = parseInt(impressions,10);
     if (!contentId || !platform || !variant || !n || n <= 0) return res.status(400).json({ ok:false, error:'invalid_params' });
+
+    // Prevent prototype pollution
+    if (variant === '__proto__' || variant === 'constructor' || variant === 'prototype') {
+      return res.status(400).json({ ok:false, error:'invalid_variant' });
+    }
     await addImpressions({ contentId, platform, variant, impressions: n });
     return res.json({ ok:true, added: n });
   } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
@@ -80,6 +95,11 @@ module.exports = router;
 router.post('/unquarantine', authMiddleware, adminOnly, async (req,res)=>{
   try {
     const { contentId, platform, variant } = req.body || {}; if(!contentId||!platform||!variant) return res.status(400).json({ ok:false, error:'missing_params' });
+
+    // Prevent prototype pollution
+    if (variant === '__proto__' || variant === 'constructor' || variant === 'prototype') {
+      return res.status(400).json({ ok:false, error:'invalid_variant' });
+    }
     await mutateVariant({ contentId, platform, variant, mutator: row => { row.quarantined = false; } });
     return res.json({ ok:true });
   } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }
@@ -89,6 +109,11 @@ router.post('/unquarantine', authMiddleware, adminOnly, async (req,res)=>{
 router.post('/quarantine', authMiddleware, adminOnly, async (req,res)=>{
   try {
     const { contentId, platform, variant } = req.body || {}; if(!contentId||!platform||!variant) return res.status(400).json({ ok:false, error:'missing_params' });
+
+    // Prevent prototype pollution
+    if (variant === '__proto__' || variant === 'constructor' || variant === 'prototype') {
+      return res.status(400).json({ ok:false, error:'invalid_variant' });
+    }
     await mutateVariant({ contentId, platform, variant, mutator: row => { row.quarantined = true; } });
     return res.json({ ok:true });
   } catch(e){ return res.status(500).json({ ok:false, error:e.message }); }

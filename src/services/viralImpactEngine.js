@@ -273,10 +273,11 @@ function checkZoneRequirements(content, requirements) {
 function generateSeedingStrategy(content, platform, zone) {
   const strategies = ALGORITHM_STRATEGIES[platform] || {};
   const applicableStrategies = [];
-  
-  // Select strategies based on zone and content
+
+  // Select strategies based on zone and content - fix biased random
+  const crypto = require('crypto');
   for (const [key, strategy] of Object.entries(strategies)) {
-    if (strategy.impact === 'high' || Math.random() > 0.5) {
+    if (strategy.impact === 'high' || crypto.randomInt(0, 100) > 50) {
       applicableStrategies.push({
         name: strategy.name,
         impact: strategy.impact,
@@ -285,7 +286,7 @@ function generateSeedingStrategy(content, platform, zone) {
       });
     }
   }
-  
+
   return {
     zone: zone.name,
     reach: zone.reach,

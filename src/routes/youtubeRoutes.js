@@ -116,16 +116,22 @@ router.get('/callback', ytPublicLimiter, async (req, res) => {
       const [uid] = state.split('.');
       uidFromState = uid;
     }
-    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        code,
-        client_id: YT_CLIENT_ID,
-        client_secret: YT_CLIENT_SECRET,
-        redirect_uri: YT_REDIRECT_URI,
-        grant_type: 'authorization_code'
-      })
+    // Use safeFetch for SSRF protection
+    const { safeFetch } = require('../utils/ssrfGuard');
+    const tokenRes = await safeFetch('https://oauth2.googleapis.com/token', fetch, {
+      fetchOptions: {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          code,
+          client_id: YT_CLIENT_ID,
+          client_secret: YT_CLIENT_SECRET,
+          redirect_uri: YT_REDIRECT_URI,
+          grant_type: 'authorization_code'
+        })
+      },
+      requireHttps: true,
+      allowHosts: ['oauth2.googleapis.com']
     });
     const tokenData = await tokenRes.json();
     if (!tokenData.access_token) {
@@ -143,8 +149,13 @@ router.get('/callback', ytPublicLimiter, async (req, res) => {
     // Optional: fetch channel info
     let channel = null;
     try {
-      const channelRes = await fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true', {
-        headers: { Authorization: `Bearer ${tokenData.access_token}` }
+      // Use safeFetch for SSRF protection
+      const channelRes = await safeFetch('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true', fetch, {
+        fetchOptions: {
+          headers: { Authorization: `Bearer ${tokenData.access_token}` }
+        },
+        requireHttps: true,
+        allowHosts: ['www.googleapis.com']
       });
       const channelData = await channelRes.json();
       channel = channelData.items ? channelData.items[0] : null;

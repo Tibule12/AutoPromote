@@ -57,7 +57,7 @@
     "uuid": "^13.0.0"
   },
   "overrides": {
-    "semver": "^7.3.8"
+    "semver": "^7.6.0"
   },
   "devDependencies": {
     "firebase-tools": "^14.15.1",
