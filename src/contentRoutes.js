@@ -296,6 +296,19 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
 router.get('/my-content', authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
+    // Debugging aid: optionally log sanitized user info when diagnosing 403 issues
+    if (process.env.DEBUG_CONTENT === 'true') {
+      try {
+        console.log('[DEBUG][/api/content/my-content] userId=', userId);
+        console.log('[DEBUG][/api/content/my-content] req.user=', JSON.stringify({
+          uid: req.user?.uid,
+          email: req.user?.email,
+          role: req.user?.role,
+          isAdmin: req.user?.isAdmin,
+          fromCollection: req.user?.fromCollection
+        }));
+      } catch (e) { /* ignore logging failures */ }
+    }
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
