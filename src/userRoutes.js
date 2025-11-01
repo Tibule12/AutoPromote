@@ -204,6 +204,21 @@ router.get('/notifications', authMiddleware, publicLimiter, async (req, res) => 
   }
 });
 
+// POST /me/accept-terms - record that the current user accepted required terms
+router.post('/me/accept-terms', authMiddleware, writeLimiter, async (req, res) => {
+  try {
+    const { acceptedTermsVersion } = req.body || {};
+    const version = acceptedTermsVersion || process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0';
+    if (!version) return res.status(400).json({ error: 'acceptedTermsVersion required' });
+    const ref = db.collection('users').doc(req.userId);
+    await ref.set({ lastAcceptedTerms: { version, acceptedAt: new Date().toISOString() } }, { merge: true });
+    return res.json({ ok: true, accepted: { version } });
+  } catch (e) {
+    console.error('Error accepting terms:', e);
+    return res.status(500).json({ error: 'internal_error' });
+  }
+});
+
 // Get all users (admin only)
 router.get('/', authMiddleware, writeLimiter, async (req, res) => {
   try {
