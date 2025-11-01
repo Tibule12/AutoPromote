@@ -753,6 +753,16 @@ try {
   console.warn('⚠️ /tiktok-demo route not available:', e.message);
 }
 
+// Mock TikTok OAuth frontend for testing
+try {
+  app.get('/mock/tiktok_oauth_frontend.html', (req, res) => {
+    return res.sendFile(path.join(__dirname, '../docs/mock/tiktok_oauth_frontend.html'));
+  });
+  console.log('✅ Mock TikTok OAuth frontend available at /mock/tiktok_oauth_frontend.html');
+} catch (e) {
+  console.warn('⚠️ Mock TikTok OAuth frontend route not available:', e.message);
+}
+
 // Explicit root-level routes for TikTok verification variations
 function sendFirstExisting(res, candidates) {
   const fs = require('fs');

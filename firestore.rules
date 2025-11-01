@@ -27,8 +27,8 @@ service cloud.firestore {
       allow read, write: if isAdmin() || isServiceAccount() || isBackend() ||
         (request.auth != null &&
           (
-            (request.method == 'create' && request.resource.data.userId == request.auth.uid) ||
-            (resource.data.userId == request.auth.uid)
+            (request.method == 'create' && request.resource.data.user_id == request.auth.uid) ||
+            (resource.data.user_id == request.auth.uid)
           )
         );
     }
