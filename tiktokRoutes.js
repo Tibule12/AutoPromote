@@ -130,6 +130,12 @@ const SUPPRESSION_SNIPPET = `
 function constructAuthUrl(cfg, state, scope) {
   const key = String(cfg.key || '').trim();
   const redirect = String(cfg.redirect || '').trim();
+  // If running in mock mode, return a local mock page so reviewers can
+  // complete the flow even when sandbox.tiktok.com is unreachable from
+  // their network. Enable by setting TIKTOK_USE_MOCK=true in the env.
+  if (process.env.TIKTOK_USE_MOCK === 'true') {
+    return `/mock/tiktok_oauth_frontend.html?client_key=${encodeURIComponent(key)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auto=1`;
+  }
   // Use TikTok sandbox domain for sandbox mode (recommended by TikTok docs)
   const base = (TIKTOK_ENV === 'production')
     ? 'https://www.tiktok.com/v2/auth/authorize/'
