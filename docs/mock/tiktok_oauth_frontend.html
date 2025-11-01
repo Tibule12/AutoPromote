@@ -34,6 +34,17 @@
         if (qKey) document.getElementById('clientId').value = qKey;
         const qRedirect = params.get('redirect_uri') || params.get('redirect') || '';
         if (qRedirect) document.getElementById('redirectUri').value = qRedirect;
+        // If auto=1 is present, immediately simulate consent and redirect back
+        if (params.get('auto') === '1') {
+          // Slight delay to allow the page to finish loading
+          setTimeout(() => {
+            try {
+              simulateRedirect();
+            } catch (e) {
+              const log = document.getElementById('log'); log.style.display='block'; log.textContent = 'Auto-simulate failed: ' + e;
+            }
+          }, 250);
+        }
       } catch(e){}
     })();
 
@@ -50,15 +61,19 @@
     });
 
     // Simulate consent and redirect back to the app with a fake code
+    function simulateRedirect(){
+      const clientId = encodeURIComponent(document.getElementById('clientId').value.trim());
+      const redirect = document.getElementById('redirectUri').value.trim();
+      const state = 'demo_state_123';
+      const fakeCode = 'MOCK_CODE_ABC123';
+      const sep = redirect.indexOf('?') === -1 ? '?' : '&';
+      const redirectUrl = redirect + sep + 'code=' + encodeURIComponent(fakeCode) + '&state=' + encodeURIComponent(state) + '&client_key=' + clientId;
+      window.location = redirectUrl;
+    }
+
     simulateBtn.addEventListener('click', ()=>{
       try {
-        const clientId = encodeURIComponent(document.getElementById('clientId').value.trim());
-        const redirect = document.getElementById('redirectUri').value.trim();
-        const state = 'demo_state_123';
-        const fakeCode = 'MOCK_CODE_ABC123';
-        const sep = redirect.indexOf('?') === -1 ? '?' : '&';
-        const redirectUrl = redirect + sep + 'code=' + encodeURIComponent(fakeCode) + '&state=' + encodeURIComponent(state) + '&client_key=' + clientId;
-        window.location = redirectUrl;
+        simulateRedirect();
       } catch(e){
         const log = document.getElementById('log'); log.style.display='block'; log.textContent = 'Failed to simulate redirect: ' + e;
       }
