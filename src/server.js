@@ -1192,11 +1192,16 @@ if (require.main === module) {
 // -------------------------------------------------
 // Controlled via env flags so we can disable on serverless / multi-instance deployments
 // Support common typo ENABLE_BACKROUND_JOBS (missing 'g') as a fallback
-let ENABLE_BACKGROUND = process.env.ENABLE_BACKGROUND_JOBS === 'true';
-if (!ENABLE_BACKGROUND && process.env.ENABLE_BACKROUND_JOBS === 'true') {
-  ENABLE_BACKGROUND = true;
-  console.warn("[startup] Detected ENABLE_BACKROUND_JOBS (typo). Please rename to ENABLE_BACKGROUND_JOBS to avoid future issues.");
+// Normalize env var: support the common typo ENABLE_BACKROUND_JOBS (missing 'g')
+// by mapping it to the correct ENABLE_BACKGROUND_JOBS so the rest of the
+// code can rely on a single canonical env var. We log an informational
+// message for visibility but avoid spamming repeated warnings.
+if (!process.env.ENABLE_BACKGROUND_JOBS && process.env.ENABLE_BACKROUND_JOBS) {
+  // copy the value so downstream checks see the correct name
+  process.env.ENABLE_BACKGROUND_JOBS = process.env.ENABLE_BACKROUND_JOBS;
+  console.log('[startup] Detected ENABLE_BACKROUND_JOBS (typo). Mapped to ENABLE_BACKGROUND_JOBS for compatibility.');
 }
+let ENABLE_BACKGROUND = process.env.ENABLE_BACKGROUND_JOBS === 'true';
 const STATS_POLL_INTERVAL_MS = parseInt(process.env.STATS_POLL_INTERVAL_MS || '180000', 10); // 3 minutes default
 const TASK_PROCESS_INTERVAL_MS = parseInt(process.env.TASK_PROCESS_INTERVAL_MS || '60000', 10); // 1 minute default
 const PLATFORM_STATS_POLL_INTERVAL_MS = parseInt(process.env.PLATFORM_STATS_POLL_INTERVAL_MS || '300000', 10); // 5 minutes default
