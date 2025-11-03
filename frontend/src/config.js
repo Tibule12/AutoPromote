@@ -5,8 +5,9 @@
  * Use these constants instead of hardcoding URLs or settings.
  */
 
-// API Base URL - change this to your actual backend URL
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://autopromote-1.onrender.com';
+// API Base URL - point to the backend service (Render backend)
+// Prefer env var from Render; fallback to the deployed backend domain.
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://autopromote.onrender.com';
 
 // API Endpoints
 export const API_ENDPOINTS = {
