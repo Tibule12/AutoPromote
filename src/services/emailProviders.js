@@ -1,5 +1,6 @@
 // emailProviders.js - provider registry & factory
-// Supports: console (default), sendgrid (API key), mailgun (API key + domain)
+// Supports: console (default), sendgrid (API key), mailgun (API key + domain),
+//           resend (API key), mailtrap (SMTP)
 
 const providers = {
   console: () => ({
@@ -26,6 +27,57 @@ const providers = {
         } catch(e){
           console.warn('[email][sendgrid] error', e.message);
           return { ok:false, error:e.message, provider:'sendgrid' };
+        }
+      }
+    };
+  },
+  resend: () => {
+    const key = process.env.RESEND_API_KEY;
+    if (!key) throw new Error('missing RESEND_API_KEY');
+    let Resend;
+    try { ({ Resend } = require('resend')); } catch(e){ throw new Error('resend package not installed'); }
+    const client = new Resend(key);
+    return {
+      name: 'resend',
+      async send({ to, subject, html, text, headers }) {
+        try {
+          const from = process.env.EMAIL_FROM || 'AutoPromote <no-reply@autopromote.dev>';
+          await client.emails.send({ from, to, subject, html, text, headers });
+          return { ok:true, provider:'resend' };
+        } catch(e){
+          console.warn('[email][resend] error', e.message);
+          return { ok:false, error:e.message, provider:'resend' };
+        }
+      }
+    };
+  },
+  mailtrap: () => {
+    const user = process.env.MAILTRAP_USER;
+    const pass = process.env.MAILTRAP_PASS;
+    if (!user || !pass) throw new Error('missing MAILTRAP_USER/MAILTRAP_PASS');
+    let nodemailer;
+    try { nodemailer = require('nodemailer'); } catch(e){ throw new Error('nodemailer package not installed'); }
+    const transporter = nodemailer.createTransport({
+      host: process.env.MAILTRAP_HOST || 'sandbox.smtp.mailtrap.io',
+      port: parseInt(process.env.MAILTRAP_PORT || '2525', 10),
+      auth: { user, pass }
+    });
+    return {
+      name: 'mailtrap',
+      async send({ to, subject, html, text, headers }) {
+        try {
+          await transporter.sendMail({
+            from: process.env.EMAIL_FROM || 'AutoPromote <no-reply@mailtrap.autopromote.dev>',
+            to,
+            subject,
+            html,
+            text,
+            headers
+          });
+          return { ok:true, provider:'mailtrap' };
+        } catch(e){
+          console.warn('[email][mailtrap] error', e.message);
+          return { ok:false, error:e.message, provider:'mailtrap' };
         }
       }
     };
