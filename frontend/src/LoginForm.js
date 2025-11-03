@@ -1,10 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import './Auth.css';
+import { API_BASE_URL } from './config';
 
 const LoginForm = ({ onLogin, onClose }) => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -15,6 +17,10 @@ const LoginForm = ({ onLogin, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    if (!agreed) {
+      setError('Please agree to the Terms of Service before continuing.');
+      return;
+    }
     setIsLoading(true);
 
     try {
@@ -101,6 +107,19 @@ const LoginForm = ({ onLogin, onClose }) => {
           />
         </div>
 
+        <div className="form-group" style={{marginTop:6, display:'flex', alignItems:'flex-start', gap:8}}>
+          <input
+            id="agreeTerms"
+            type="checkbox"
+            checked={agreed}
+            onChange={(e)=>setAgreed(e.target.checked)}
+            style={{marginTop:4}}
+          />
+          <label htmlFor="agreeTerms" className="form-label" style={{fontWeight:400}}>
+            I agree to the <a href={`${API_BASE_URL}/terms`} target="_blank" rel="noreferrer">Terms of Service</a>
+          </label>
+        </div>
+
         <div className="form-group">
           <label className="form-label">Password</label>
           <input
@@ -132,7 +151,7 @@ const LoginForm = ({ onLogin, onClose }) => {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || !agreed}
           className="auth-button"
         >
           {isLoading ? (
