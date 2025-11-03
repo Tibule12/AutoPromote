@@ -34,6 +34,9 @@
     "postdeploy:set-telegram-webhook": "node scripts/set-telegram-webhook.js"
   },
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@paypal/paypal-server-sdk": "^0.6.0",
   "axios": "^1.12.2",
