@@ -6,7 +6,7 @@ import { auth, db, storage } from './firebaseClient';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, signInWithCustomToken } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { API_ENDPOINTS } from './config';
+import { API_ENDPOINTS, API_BASE_URL } from './config';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -23,6 +23,8 @@ function App() {
     defaultFrequency: 'once'
   });
   const [justLoggedOut, setJustLoggedOut] = useState(false);
+  const [termsRequired, setTermsRequired] = useState(false);
+  const [requiredTermsVersion, setRequiredTermsVersion] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -93,9 +95,17 @@ function App() {
         mode: 'cors'
       });
       if (!res.ok) {
+        // Try to read response body for error details
+        let body = null;
+        try { body = await res.json(); } catch (_) { body = null; }
         if (res.status === 401 && auth.currentUser) {
           const freshToken = await auth.currentUser.getIdToken(true);
           return fetchUserContent(freshToken);
+        }
+        if (res.status === 403 && body && body.error === 'terms_not_accepted') {
+          setTermsRequired(true);
+          setRequiredTermsVersion(body.requiredVersion || null);
+          return;
         }
         return;
       }
@@ -164,9 +174,15 @@ function App() {
         }
       });
       if (!res.ok) {
+        let body = null; try { body = await res.json(); } catch(_) { body = null; }
         if (res.status === 401 && auth.currentUser) {
           const freshToken = await auth.currentUser.getIdToken(true);
           return fetchAnalytics(freshToken);
+        }
+        if (res.status === 403 && body && body.error === 'terms_not_accepted') {
+          setTermsRequired(true);
+          setRequiredTermsVersion(body.requiredVersion || null);
+          return;
         }
         setIsAdmin(false);
         return;
@@ -322,7 +338,36 @@ function App() {
       setShowAdminLogin(false);
       localStorage.clear();
       setJustLoggedOut(true);
+      setTermsRequired(false);
+      setRequiredTermsVersion(null);
     } catch (error) { console.error('Logout error:', error); }
+  };
+
+  // Accept Terms action: posts acceptance and retries data fetches
+  const acceptTerms = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      const token = await currentUser.getIdToken(true);
+      const url = `${API_BASE_URL}/api/users/me/accept-terms`;
+      const payload = requiredTermsVersion ? { acceptedTermsVersion: requiredTermsVersion } : {};
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const body = await res.json().catch(()=>({}));
+      if (!res.ok) {
+        alert('Failed to accept terms: ' + (body.error || res.status));
+        return;
+      }
+      setTermsRequired(false);
+      setRequiredTermsVersion(null);
+      await fetchUserContent();
+      if (isAdmin) await fetchAnalytics();
+    } catch (e) {
+      alert('Could not accept terms. Please try again.');
+    }
   };
 
   // Redirect after logout
@@ -464,6 +509,20 @@ function App() {
 
   return (
     <div>
+      {user && termsRequired && (
+        <div style={{
+          background: '#fff3cd', color: '#856404', border: '1px solid #ffeeba',
+          borderRadius: 8, padding: 16, margin: '12px'
+        }}>
+          <strong>Action required:</strong> Please accept the latest Terms of Service{requiredTermsVersion ? ` (${requiredTermsVersion})` : ''} to continue.
+          <div style={{ marginTop: 12 }}>
+            <button onClick={acceptTerms} style={{ background: '#856404', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 6, cursor: 'pointer' }}>
+              Accept Terms
+            </button>
+            <a href={`${API_BASE_URL}/terms`} target="_blank" rel="noreferrer" style={{ marginLeft: 12 }}>View Terms</a>
+          </div>
+        </div>
+      )}
       {/* If no user, show welcome/login page */}
       {!user ? (
         <>
