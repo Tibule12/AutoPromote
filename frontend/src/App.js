@@ -25,6 +25,8 @@ function App() {
   const [justLoggedOut, setJustLoggedOut] = useState(false);
   const [termsRequired, setTermsRequired] = useState(false);
   const [requiredTermsVersion, setRequiredTermsVersion] = useState(null);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [pendingLogin, setPendingLogin] = useState(null); // { userData, token }
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,23 +42,27 @@ function App() {
         const token = await firebaseUser.getIdToken(true);
         const idTokenResult = await firebaseUser.getIdTokenResult(true);
         const hasAdminClaim = idTokenResult.claims.admin === true || idTokenResult.claims.role === 'admin';
-          const userData = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            name: firebaseUser.displayName,
-            // Keep tokens in memory via Firebase auth.currentUser.getIdToken()
-            isAdmin: hasAdminClaim,
-            role: hasAdminClaim ? 'admin' : 'user',
-          };
-          setUser({ ...userData, token }); // keep token in memory in React state only
-          setIsAdmin(hasAdminClaim);
-          // Persist only non-sensitive metadata to localStorage. Do NOT store tokens.
-          const safeUserForStorage = { ...userData };
-          localStorage.setItem('user', JSON.stringify(safeUserForStorage));
-        // Debug log for current UID
+        const userData = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: firebaseUser.displayName,
+          // Keep tokens in memory via Firebase auth.currentUser.getIdToken()
+          isAdmin: hasAdminClaim,
+          role: hasAdminClaim ? 'admin' : 'user',
+        };
+        // Before allowing the app to enter the dashboard, ensure terms are accepted.
+        const ok = await ensureTermsAccepted(token, userData, 'authState');
+        if (!ok) {
+          // Block login UI transition until the user accepts. Keep user null for now.
+          return;
+        }
+        // Proceed to set user and prefetch content once terms are satisfied.
+        setUser({ ...userData, token }); // keep token in memory in React state only
+        setIsAdmin(hasAdminClaim);
+        const safeUserForStorage = { ...userData };
+        localStorage.setItem('user', JSON.stringify(safeUserForStorage));
         console.log("Current UID:", firebaseUser.uid);
-        // Fetch content after user is set
-        fetchUserContent(token);
+        await fetchUserContent(token);
       } catch (error) {
         setUser(null);
         setIsAdmin(false);
@@ -103,8 +109,10 @@ function App() {
           return fetchUserContent(freshToken);
         }
         if (res.status === 403 && body && body.error === 'terms_not_accepted') {
+          // Show a full-screen modal rather than an in-dashboard banner
           setTermsRequired(true);
           setRequiredTermsVersion(body.requiredVersion || null);
+          setShowTermsModal(true);
           return;
         }
         return;
@@ -210,9 +218,14 @@ function App() {
           // Sign in with custom token (modular API)
           const customUserCredential = await signInWithCustomToken(auth, data.customToken);
           const customIdToken = await customUserCredential.user.getIdToken();
-          handleLogin({ ...data.user, token: customIdToken });
+          // Before proceeding, ensure ToS accepted (pre-dashboard)
+          const userData = { ...data.user, token: customIdToken };
+          const ok = await ensureTermsAccepted(customIdToken, userData, 'login');
+          if (ok) handleLogin(userData);
         } else {
-          handleLogin({ ...data.user, token: idToken });
+          const userData = { ...data.user, token: idToken };
+          const ok = await ensureTermsAccepted(idToken, userData, 'login');
+          if (ok) handleLogin(userData);
         }
       } else {
         const error = await res.json();
@@ -220,6 +233,28 @@ function App() {
       }
     } catch (error) {
       alert(error.message || 'Login failed');
+    }
+  };
+
+  // Ensure terms are accepted; if not, show modal and defer login
+  const ensureTermsAccepted = async (token, userData, source) => {
+    try {
+      const res = await fetch(API_ENDPOINTS.MY_CONTENT, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+      });
+      if (res.ok) return true; // already accepted
+      let body = null; try { body = await res.json(); } catch(_) {}
+      if (res.status === 403 && body && body.error === 'terms_not_accepted') {
+        setRequiredTermsVersion(body.requiredVersion || null);
+        setTermsRequired(true);
+        setPendingLogin({ userData, token });
+        setShowTermsModal(true);
+        return false;
+      }
+      return true; // treat other failures as non-blocking for login
+    } catch (_) {
+      return true;
     }
   };
 
@@ -343,12 +378,16 @@ function App() {
     } catch (error) { console.error('Logout error:', error); }
   };
 
-  // Accept Terms action: posts acceptance and retries data fetches
+  // Accept Terms action: posts acceptance and continues pending login if any
   const acceptTerms = async () => {
     try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
-      const token = await currentUser.getIdToken(true);
+      // Prefer the token from a pending login (pre-dashboard), else current user
+      let token = pendingLogin?.token || null;
+      if (!token) {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
+        token = await currentUser.getIdToken(true);
+      }
       const url = `${API_BASE_URL}/api/users/me/accept-terms`;
       const payload = requiredTermsVersion ? { acceptedTermsVersion: requiredTermsVersion } : {};
       const res = await fetch(url, {
@@ -363,8 +402,16 @@ function App() {
       }
       setTermsRequired(false);
       setRequiredTermsVersion(null);
-      await fetchUserContent();
-      if (isAdmin) await fetchAnalytics();
+      setShowTermsModal(false);
+      if (pendingLogin && pendingLogin.userData) {
+        // Complete the deferred login now that terms are accepted
+        const u = pendingLogin.userData;
+        setPendingLogin(null);
+        handleLogin(u);
+      } else {
+        await fetchUserContent();
+        if (isAdmin) await fetchAnalytics();
+      }
     } catch (e) {
       alert('Could not accept terms. Please try again.');
     }
@@ -509,17 +556,17 @@ function App() {
 
   return (
     <div>
-      {user && termsRequired && (
-        <div style={{
-          background: '#fff3cd', color: '#856404', border: '1px solid #ffeeba',
-          borderRadius: 8, padding: 16, margin: '12px'
-        }}>
-          <strong>Action required:</strong> Please accept the latest Terms of Service{requiredTermsVersion ? ` (${requiredTermsVersion})` : ''} to continue.
-          <div style={{ marginTop: 12 }}>
-            <button onClick={acceptTerms} style={{ background: '#856404', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 6, cursor: 'pointer' }}>
-              Accept Terms
-            </button>
-            <a href={`${API_BASE_URL}/terms`} target="_blank" rel="noreferrer" style={{ marginLeft: 12 }}>View Terms</a>
+      {showTermsModal && (
+        <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.5)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div style={{background:'#fff',borderRadius:16,boxShadow:'0 12px 36px rgba(0,0,0,0.2)',padding:'24px 22px',maxWidth:560,width:'90%'}}>
+            <h3 style={{marginTop:0,marginBottom:8}}>Accept Terms of Service</h3>
+            <p style={{marginTop:0,color:'#444'}}>Please accept the latest Terms of Service{requiredTermsVersion ? ` (${requiredTermsVersion})` : ''} to continue.</p>
+            <div style={{display:'flex',gap:12,marginTop:16,alignItems:'center'}}>
+              <button onClick={acceptTerms} style={{ background: '#111827', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: 8, cursor: 'pointer' }}>
+                Accept and Continue
+              </button>
+              <a href={`${API_BASE_URL}/terms`} target="_blank" rel="noreferrer">View Terms</a>
+            </div>
           </div>
         </div>
       )}
