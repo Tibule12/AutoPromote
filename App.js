@@ -25,6 +25,8 @@ function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [analytics, setAnalytics] = useState(null);
+  const [termsRequired, setTermsRequired] = useState(false);
+  const [requiredTermsVersion, setRequiredTermsVersion] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -73,6 +75,17 @@ function App() {
         return;
       }
       if (!res.ok) {
+        try {
+          const body = await res.json();
+          // If terms not accepted, surface a UI to accept and then retry
+          if (res.status === 403 && body?.error === 'terms_not_accepted') {
+            setTermsRequired(true);
+            setRequiredTermsVersion(body.requiredVersion || null);
+            return;
+          }
+        } catch (_) {
+          /* ignore parse errors */
+        }
         console.error('Failed to fetch content: HTTP', res.status);
         return;
       }
@@ -97,6 +110,14 @@ function App() {
         return;
       }
       if (!res.ok) {
+        try {
+          const body = await res.json();
+          if (res.status === 403 && body?.error === 'terms_not_accepted') {
+            setTermsRequired(true);
+            setRequiredTermsVersion(body.requiredVersion || null);
+            return;
+          }
+        } catch (_) {}
         console.error('Failed to fetch analytics: HTTP', res.status);
         return;
       }
@@ -192,6 +213,38 @@ function App() {
     setContent([]);
     setAnalytics(null);
     setIsAdmin(false);
+    setTermsRequired(false);
+    setRequiredTermsVersion(null);
+  };
+
+  // Accept Terms helper: posts to /api/users/me/accept-terms and retries fetches
+  const acceptTerms = async () => {
+    try {
+      if (!auth.currentUser) return;
+      const idToken = await auth.currentUser.getIdToken(true);
+      const payload = requiredTermsVersion ? { acceptedTermsVersion: requiredTermsVersion } : {};
+      const res = await fetch(apiUrl('/api/users/me/accept-terms'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(()=>({}));
+        alert('Failed to accept terms: ' + (body.error || res.status));
+        return;
+      }
+      // Hide banner and retry data fetches
+      setTermsRequired(false);
+      setRequiredTermsVersion(null);
+      await fetchUserContent();
+      if (isAdmin) await fetchAnalytics();
+    } catch (e) {
+      console.error('acceptTerms error:', e);
+      alert('Could not record terms acceptance. Please try again.');
+    }
   };
 
   // Firebase-powered upload
@@ -270,6 +323,24 @@ function App() {
       </header>
 
       <main>
+        {user && termsRequired && (
+          <div style={{
+            background: '#fff3cd',
+            color: '#856404',
+            border: '1px solid #ffeeba',
+            borderRadius: 8,
+            padding: 16,
+            marginBottom: 16
+          }}>
+            <strong>Action required:</strong> Please accept the latest Terms of Service{requiredTermsVersion ? ` (${requiredTermsVersion})` : ''} to continue.
+            <div style={{ marginTop: 12 }}>
+              <button onClick={acceptTerms} style={{
+                background: '#856404', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 6, cursor: 'pointer'
+              }}>Accept Terms</button>
+              <a href={apiUrl('/terms')} target="_blank" rel="noreferrer" style={{ marginLeft: 12 }}>View Terms</a>
+            </div>
+          </div>
+        )}
         {showLogin && <LoginForm onLogin={handleLogin} loginUser={loginUser} />}
         {showRegister && <RegisterForm onRegister={handleRegister} />}
 
