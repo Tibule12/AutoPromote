@@ -8,6 +8,7 @@ const { db } = require('../firebaseAdmin');
 const authMiddleware = require('../authMiddleware');
 const rateLimit = require('../middlewares/simpleRateLimit');
 const { rateLimiter } = require('../middlewares/globalRateLimiter');
+const codeqlLimiter = require('../middlewares/codeqlRateLimit');
 
 const viralPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_VIRAL_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'viral_public' });
 const viralWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_VIRAL_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'viral_writes' });
@@ -22,6 +23,9 @@ const algorithmExploitationEngine = require('../services/algorithmExploitationEn
 function cleanObject(obj) {
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
 }
+
+// Apply CodeQL-detectable write limiter at router level
+router.use(codeqlLimiter.writes);
 
 // POST /api/viral/generate-hashtags - Generate custom hashtags for content
 router.post('/generate-hashtags', authMiddleware, viralWriteLimiter, async (req, res) => {

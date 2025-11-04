@@ -20,7 +20,8 @@ module.exports = function requireAcceptedTerms(options = {}) {
         return next();
       }
 
-      // Not accepted or version mismatch
+      // Not accepted or version mismatch: include required version and hint header
+      try { res.setHeader('x-required-terms-version', requiredVersion); } catch(_) {}
       return res.status(403).json({ error: 'terms_not_accepted', requiredVersion });
     } catch (err) {
       console.error('requireAcceptedTerms error:', err);

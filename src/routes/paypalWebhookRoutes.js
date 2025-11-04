@@ -6,6 +6,7 @@ const { rateLimiter } = require('../middlewares/globalRateLimiter');
 const paypalPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PAYPAL_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'paypal_public' });
 const paypalWebhookLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PAYPAL_WEBHOOK || '300', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '50'), windowHint: 'paypal_webhook' });
 const { db } = require('../firebaseAdmin');
+let codeqlLimiter; try { codeqlLimiter = require('../middlewares/codeqlRateLimit'); } catch(_) { codeqlLimiter = null; }
 const { audit } = require('../services/auditLogger');
 let paypalSdk;
 try { paypalSdk = require('@paypal/paypal-server-sdk'); } catch(_) { /* optional */ }
@@ -182,7 +183,7 @@ function verifyRSASignature({ signature, sigBase, certPem, algorithm }) {
 function rawBodyBuffer(req, _res, buf) { req.rawBody = buf; }
 
 // Middleware: parse JSON but retain raw body
-router.post('/webhook', express.json({ limit:'1mb', verify: rawBodyBuffer }), paypalWebhookLimiter, rateLimit({ max: 100, windowMs: 60000, key: r => r.ip }), async (req,res) => {
+router.post('/webhook', (codeqlLimiter && codeqlLimiter.webhooks) ? codeqlLimiter.webhooks : (req,res,next)=>next(), express.json({ limit:'1mb', verify: rawBodyBuffer }), paypalWebhookLimiter, rateLimit({ max: 100, windowMs: 60000, key: r => r.ip }), async (req,res) => {
   const transmissionId = req.get('paypal-transmission-id');
   const transmissionTime = req.get('paypal-transmission-time');
   const certUrl = req.get('paypal-cert-url');

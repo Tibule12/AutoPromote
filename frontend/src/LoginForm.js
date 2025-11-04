@@ -26,6 +26,8 @@ const LoginForm = ({ onLogin, onClose }) => {
     try {
       const { email, password } = formData;
       console.log('Attempting login with:', email);
+      // Persist a short-lived hint that user agreed to ToS so App can auto-accept server-side
+      try { localStorage.setItem('tosAgreed', 'true'); } catch(_) {}
       
   // Use the onLogin function passed from App.js
   await onLogin(email, password);

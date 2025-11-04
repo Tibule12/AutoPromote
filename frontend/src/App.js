@@ -218,11 +218,27 @@ function App() {
           // Sign in with custom token (modular API)
           const customUserCredential = await signInWithCustomToken(auth, data.customToken);
           const customIdToken = await customUserCredential.user.getIdToken();
+          // If user agreed at login screen, proactively accept terms on server before proceeding
+          try {
+            if (localStorage.getItem('tosAgreed') === 'true') {
+              const url = `${API_BASE_URL}/api/users/me/accept-terms`;
+              await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${customIdToken}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({}) }).catch(()=>{});
+              localStorage.removeItem('tosAgreed');
+            }
+          } catch(_) {}
           // Before proceeding, ensure ToS accepted (pre-dashboard)
           const userData = { ...data.user, token: customIdToken };
           const ok = await ensureTermsAccepted(customIdToken, userData, 'login');
           if (ok) handleLogin(userData);
         } else {
+          // If user agreed at login screen, proactively accept terms on server before proceeding
+          try {
+            if (localStorage.getItem('tosAgreed') === 'true') {
+              const url = `${API_BASE_URL}/api/users/me/accept-terms`;
+              await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({}) }).catch(()=>{});
+              localStorage.removeItem('tosAgreed');
+            }
+          } catch(_) {}
           const userData = { ...data.user, token: idToken };
           const ok = await ensureTermsAccepted(idToken, userData, 'login');
           if (ok) handleLogin(userData);
