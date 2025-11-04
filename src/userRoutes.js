@@ -3,6 +3,8 @@ const { db } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
 const { rateLimiter } = require('./middlewares/globalRateLimiter');
 const router = express.Router();
+let codeqlLimiter; try { codeqlLimiter = require('./middlewares/codeqlRateLimit'); } catch(_) { codeqlLimiter = null; }
+if (codeqlLimiter && codeqlLimiter.writes) { router.use(codeqlLimiter.writes); }
 
 // Lightweight per-route limiters to address missing-rate-limiting findings.
 // These use the in-memory fallback. For production, replace with a shared store (Redis).

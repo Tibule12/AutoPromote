@@ -7,6 +7,7 @@ const { admin, db } = require('../firebaseAdmin');
 const { rateLimiter } = require('../middlewares/globalRateLimiter');
 const DEBUG_TIKTOK_OAUTH = process.env.DEBUG_TIKTOK_OAUTH === 'true';
 const rateLimit = require('../middlewares/simpleRateLimit');
+let codeqlLimiter; try { codeqlLimiter = require('../middlewares/codeqlRateLimit'); } catch(_) { codeqlLimiter = null; }
 // Import SSRF protection
 const { validateUrl, safeFetch } = require('../utils/ssrfGuard');
 
@@ -21,6 +22,10 @@ const ttWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_T
 // has an explicit rate limiter. More restrictive per-route write limits
 // remain in place for sensitive endpoints.
 router.use((req, res, next) => ttPublicLimiter(req, res, next));
+// Apply express-rate-limit as well for static analyzer compliance
+if (codeqlLimiter && codeqlLimiter.writes) {
+	router.use(codeqlLimiter.writes);
+}
 
 // Gather both sandbox & production env sets (prefixed) plus legacy fallbacks
 const sandboxConfig = {

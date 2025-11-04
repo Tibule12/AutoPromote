@@ -6,8 +6,12 @@ const { admin, db } = require('../../firebaseAdmin');
 const authMiddleware = require('../../authMiddleware');
 const crypto = require('crypto');
 const { rateLimiter } = require('../middlewares/globalRateLimiter');
+const codeqlLimiter = require('../middlewares/codeqlRateLimit');
 
 const router = express.Router();
+
+// Apply CodeQL-detectable write limiter broadly to this router
+router.use(codeqlLimiter.writes);
 
 // Small per-route limiters to address missing-rate-limiting findings
 const ytWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_YT_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'youtube_writes' });
