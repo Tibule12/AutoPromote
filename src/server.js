@@ -516,7 +516,7 @@ app.get('/facebook-data-deletion', (req, res) => {
           <h1>Facebook Data Deletion Request</h1>
           <p>If you wish to delete your Facebook-related data from AutoPromote, please follow these steps:</p>
           <ol>
-            <li>Send an email to <b>support@autopromote.onrender.com</b> with the subject "Facebook Data Deletion Request".</li>
+            <li>Send an email to <b>support@autopromote.org</b> with the subject "Facebook Data Deletion Request".</li>
             <li>Include your Facebook user ID and any relevant details in your message.</li>
             <li>We will process your request and delete your data as soon as possible, typically within 30 days.</li>
           </ol>
@@ -550,7 +550,21 @@ app.use((req, res, next) => {
         const duration = Date.now() - start;
         const ip = req.headers['x-forwarded-for'] || req.ip || (req.connection && req.connection.remoteAddress) || '';
         const ua = req.headers['user-agent'] || '';
-        console.log(`[ACCESS] ${req.method} ${req.originalUrl} status=${res.statusCode} requestID="${req.requestId || ''}" clientIP="${ip}" responseTimeMS=${duration} responseBytes=${bytes} userAgent="${ua.replace(/\"/g,'') }"`);
+        const ts = new Date().toISOString();
+        const line = `[ACCESS] ts=${ts} ${req.method} ${req.originalUrl} status=${res.statusCode} requestID="${req.requestId || ''}" clientIP="${ip}" responseTimeMS=${duration} responseBytes=${bytes} userAgent="${ua.replace(/\"/g,'') }"`;
+        console.log(line);
+        // Optional: write access log line to a daily file for security evidence (enable with LOG_EVENTS_TO_FILE=true)
+        try {
+          if (process.env.LOG_EVENTS_TO_FILE === 'true') {
+            const fs = require('fs');
+            const p = require('path');
+            const dir = p.join(__dirname, '../logs');
+            try { fs.mkdirSync(dir, { recursive: true }); } catch(_) { /* ignore */ }
+            const day = ts.slice(0, 10); // YYYY-MM-DD
+            const file = p.join(dir, `access-${day}.log`);
+            fs.appendFile(file, line + '\n', () => {});
+          }
+        } catch (_) { /* ignore file logging errors */ }
       } catch (_) {}
     });
   } catch (_) {}
@@ -566,6 +580,10 @@ app.use(microCache);
 // CORS configuration - restrict origins to specific domains for security
 // Support env override via CORS_ALLOWED_ORIGINS (comma-separated) and CORS_ALLOW_ALL
 const defaultAllowedOrigins = [
+  // Canonical custom domain (www + apex)
+  'https://www.autopromote.org',
+  'https://autopromote.org',
+  // Legacy/onrender domains kept for backward compatibility during transition
   'https://autopromote-1.onrender.com',
   'https://autopromote.onrender.com',
   process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : null
@@ -597,6 +615,21 @@ const corsOptions = {
 app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+// Optional: enforce canonical host redirect to avoid duplicate origins (controlled via env)
+// Set ENFORCE_CANONICAL_HOST=true and CANONICAL_HOST=www.autopromote.org to enable
+if (process.env.ENFORCE_CANONICAL_HOST === 'true' && process.env.CANONICAL_HOST) {
+  const canonicalHost = process.env.CANONICAL_HOST;
+  app.use((req, res, next) => {
+    try {
+      const host = req.headers.host;
+      if (host && host !== canonicalHost) {
+        const target = `${req.protocol}://${canonicalHost}${req.originalUrl}`;
+        return res.redirect(308, target);
+      }
+    } catch (_) { /* ignore */ }
+    next();
+  });
+}
 // Apply compression if installed
 if (compression) app.use(compression());
 // Apply security headers with CSP
