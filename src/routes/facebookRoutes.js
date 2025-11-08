@@ -295,4 +295,58 @@ router.post('/upload', authMiddleware, async (req, res) => {
   }
 });
 
+// Deauthorize callback - Facebook calls this when user removes app
+router.post('/deauthorize', express.json(), async (req, res) => {
+  try {
+    const signedRequest = req.body.signed_request;
+    if (!signedRequest) {
+      console.warn('[Facebook] Deauthorize callback: missing signed_request');
+      return res.json({ success: true });
+    }
+    
+    // Parse signed_request (format: signature.payload)
+    const [encodedSig, encodedPayload] = signedRequest.split('.');
+    if (!encodedPayload) {
+      console.warn('[Facebook] Deauthorize callback: invalid signed_request format');
+      return res.json({ success: true });
+    }
+    
+    const payload = JSON.parse(Buffer.from(encodedPayload, 'base64').toString('utf8'));
+    const userId = payload.user_id; // Facebook user ID
+    
+    console.log('[Facebook] Deauthorize callback received for user:', userId);
+    
+    // Find and remove connection for this Facebook user
+    // Note: We store by our internal uid, not Facebook user_id, so we need to query
+    const connectionsSnap = await db.collectionGroup('connections')
+      .where('provider', '==', 'facebook')
+      .get();
+    
+    for (const doc of connectionsSnap.docs) {
+      const data = doc.data();
+      // Check if this connection matches the Facebook user ID (stored in pages data)
+      if (data.pages && data.pages.some(p => String(p.id) === String(userId))) {
+        await doc.ref.delete();
+        console.log('[Facebook] Removed connection for Facebook user:', userId);
+      }
+    }
+    
+    // Return confirmation URL as per Facebook requirements
+    const confirmationCode = `${userId}_${Date.now()}`;
+    return res.json({
+      url: `${DASHBOARD_URL}/facebook-data-deletion?confirmation_code=${confirmationCode}`,
+      confirmation_code: confirmationCode
+    });
+  } catch (e) {
+    console.error('[Facebook] Deauthorize callback error:', e);
+    return res.status(500).json({ error: 'Internal error' });
+  }
+});
+
+// Data deletion callback - same as deauthorize for our purposes
+router.post('/data-deletion', express.json(), async (req, res) => {
+  // Facebook uses same format as deauthorize
+  return router.handle({ ...req, method: 'POST', url: '/deauthorize' }, res);
+});
+
 module.exports = router;
