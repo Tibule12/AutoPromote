@@ -7,7 +7,8 @@
 
 // API Base URL - point to the backend service (Render backend)
 // Prefer env var from Render; fallback to the deployed backend domain.
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://autopromote.onrender.com';
+// Prefer custom domain by default; environment variable can override per-deploy
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://www.autopromote.org';
 
 // API Endpoints
 export const API_ENDPOINTS = {
