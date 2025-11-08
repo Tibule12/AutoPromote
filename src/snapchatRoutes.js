@@ -11,6 +11,7 @@ const DEBUG_SNAPCHAT_OAUTH = process.env.DEBUG_SNAPCHAT_OAUTH === 'true';
 
 // Normalize/canonicalize redirect URIs to our custom domain
 function canonicalizeRedirectUri(uri) {
+  const { CANONICAL_HOST } = require('./utils/redirectUri');
   try {
     const u = new URL((uri || '').toString().trim());
     const legacyHosts = new Set([
@@ -18,19 +19,16 @@ function canonicalizeRedirectUri(uri) {
       'autopromote-1.onrender.com',
       'autopromote-1.onrender.com:443'
     ]);
-    // Force our canonical host if legacy detected
-    if (legacyHosts.has(u.host)) {
+    if (legacyHosts.has(u.host) || u.host !== CANONICAL_HOST) {
       u.protocol = 'https:';
-      u.host = 'www.autopromote.org';
+      u.host = CANONICAL_HOST;
     }
-    // Force canonical path for Snapchat callback
     if (!u.pathname || !u.pathname.startsWith('/api/snapchat/auth/callback')) {
       u.pathname = '/api/snapchat/auth/callback';
     }
     return u.toString();
   } catch (_) {
-    // Fallback to the canonical value if parsing fails
-    return 'https://www.autopromote.org/api/snapchat/auth/callback';
+    return `https://${process.env.CANONICAL_OAUTH_HOST || process.env.CANONICAL_HOST || 'www.autopromote.org'}/api/snapchat/auth/callback`;
   }
 }
 
