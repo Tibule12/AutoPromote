@@ -5,9 +5,9 @@
 // Host precedence order:
 //   1. CANONICAL_OAUTH_HOST (specific for OAuth redirects)
 //   2. CANONICAL_HOST (general site host)
-//   3. www.autopromote.org (default fallback)
+//   3. api.autopromote.org (default fallback for API/OAuth endpoints)
 
-const CANONICAL_HOST = process.env.CANONICAL_OAUTH_HOST || process.env.CANONICAL_HOST || 'www.autopromote.org';
+const CANONICAL_HOST = process.env.CANONICAL_OAUTH_HOST || process.env.CANONICAL_HOST || 'api.autopromote.org';
 
 function canonicalizeRedirect(input, opts = {}) {
   const requiredPath = (opts && opts.requiredPath) || '/';
