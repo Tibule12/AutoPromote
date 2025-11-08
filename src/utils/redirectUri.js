@@ -1,9 +1,13 @@
 // Utility to canonicalize OAuth redirect URIs to the production domain and required callback path
-// - Forces https://www.autopromote.org as the host
+// - Forces https://<canonical host> as the host
 // - Enforces a required callback path per provider (e.g., /api/youtube/callback)
 // - If the provided URI is missing/invalid, constructs the canonical default
+// Host precedence order:
+//   1. CANONICAL_OAUTH_HOST (specific for OAuth redirects)
+//   2. CANONICAL_HOST (general site host)
+//   3. www.autopromote.org (default fallback)
 
-const CANONICAL_HOST = 'www.autopromote.org';
+const CANONICAL_HOST = process.env.CANONICAL_OAUTH_HOST || process.env.CANONICAL_HOST || 'www.autopromote.org';
 
 function canonicalizeRedirect(input, opts = {}) {
   const requiredPath = (opts && opts.requiredPath) || '/';
