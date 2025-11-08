@@ -14,9 +14,13 @@ const twitterWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LI
 function resolveTwitterConfig() {
   const clientId = process.env.TWITTER_CLIENT_ID || null;
   // Accept both canonical TWITTER_REDIRECT_URI and an alternate TWITTER_CLIENT_REDIRECT_URI (found in screenshot)
-  const redirectUri = process.env.TWITTER_REDIRECT_URI || process.env.TWITTER_CLIENT_REDIRECT_URI || null;
+  let redirectUri = process.env.TWITTER_REDIRECT_URI || process.env.TWITTER_CLIENT_REDIRECT_URI || null;
   // Secret not currently required for PKCE start, but detect both correct and common misspelling SECTRET
   const clientSecret = process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CLIENT_SECTRET || null;
+  try {
+    const { canonicalizeRedirect } = require('../utils/redirectUri');
+    redirectUri = canonicalizeRedirect(redirectUri, { requiredPath: '/api/twitter/oauth/callback' });
+  } catch (_) {}
   return { clientId, redirectUri, clientSecret };
 }
 

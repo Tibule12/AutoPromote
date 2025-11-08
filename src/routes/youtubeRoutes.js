@@ -19,8 +19,12 @@ const ytPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_
 
 const YT_CLIENT_ID = process.env.YT_CLIENT_ID;
 const YT_CLIENT_SECRET = process.env.YT_CLIENT_SECRET;
-const YT_REDIRECT_URI = process.env.YT_REDIRECT_URI; // e.g., https://autopromote.onrender.com/api/youtube/callback
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote-1.onrender.com';
+// Redirect URI configured in environment; example: https://www.autopromote.org/api/youtube/callback (legacy onrender also supported)
+const YT_REDIRECT_URI = process.env.YT_REDIRECT_URI;
+const { canonicalizeRedirect } = require('../utils/redirectUri');
+const YT_REDIRECT_CANON = canonicalizeRedirect(YT_REDIRECT_URI, { requiredPath: '/api/youtube/callback' });
+// Prefer custom domain dashboard; fall back to legacy onrender subdomain for backward compatibility
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://www.autopromote.org';
 
 function ensureEnv(res) {
   if (!YT_CLIENT_ID || !YT_CLIENT_SECRET || !YT_REDIRECT_URI) {
@@ -36,7 +40,7 @@ router.get('/health', (req, res) => {
     hasClientSecret: !!YT_CLIENT_SECRET,
     hasRedirect: !!YT_REDIRECT_URI,
     clientIdMasked: mask(YT_CLIENT_ID),
-    redirect: YT_REDIRECT_URI || null,
+    redirect: YT_REDIRECT_CANON || null,
   });
 });
 
@@ -61,7 +65,7 @@ router.post('/auth/prepare', async (req, res) => {
     // Light diagnostics (masked)
     try {
       const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
-      console.log('[YouTube][prepare] Using client/redirect', { clientId: mask(YT_CLIENT_ID), redirect: YT_REDIRECT_URI });
+  console.log('[YouTube][prepare] Using client/redirect', { clientId: mask(YT_CLIENT_ID), redirect: YT_REDIRECT_CANON });
     } catch (_) {}
   const nonce = crypto.randomBytes(8).toString('hex');
     const state = `${uid}.${nonce}`;
@@ -71,7 +75,7 @@ router.post('/auth/prepare', async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
     const scope = ['https://www.googleapis.com/auth/youtube.upload','https://www.googleapis.com/auth/youtube.readonly'].join(' ');
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(YT_CLIENT_ID)}&redirect_uri=${encodeURIComponent(YT_REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent&state=${encodeURIComponent(state)}`;
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(YT_CLIENT_ID)}&redirect_uri=${encodeURIComponent(YT_REDIRECT_CANON)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent&state=${encodeURIComponent(state)}`;
     return res.json({ authUrl });
   } catch (e) {
     return res.status(500).json({ error: 'Failed to prepare YouTube OAuth' });
@@ -113,7 +117,7 @@ router.get('/callback', ytPublicLimiter, async (req, res) => {
     // Light diagnostics (masked)
     try {
       const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
-      console.log('[YouTube][callback] Exchanging code with', { clientId: mask(YT_CLIENT_ID), redirect: YT_REDIRECT_URI });
+  console.log('[YouTube][callback] Exchanging code with', { clientId: mask(YT_CLIENT_ID), redirect: YT_REDIRECT_CANON });
     } catch (_) {}
     let uidFromState;
     if (state && typeof state === 'string' && state.includes('.')) {
@@ -130,7 +134,7 @@ router.get('/callback', ytPublicLimiter, async (req, res) => {
           code,
           client_id: YT_CLIENT_ID,
           client_secret: YT_CLIENT_SECRET,
-          redirect_uri: YT_REDIRECT_URI,
+          redirect_uri: YT_REDIRECT_CANON,
           grant_type: 'authorization_code'
         })
       },

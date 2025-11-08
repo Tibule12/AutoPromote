@@ -81,11 +81,12 @@ router.post('/:platform/auth/prepare', authMiddleware, platformWriteLimiter, asy
 
     if (platform === 'reddit') {
       const clientId = process.env.REDDIT_CLIENT_ID;
-      const redirectUri = `${host}/api/reddit/auth/callback`;
+      const { canonicalizeRedirect } = require('../utils/redirectUri');
+      const redirectUri = canonicalizeRedirect(`${host}/api/reddit/auth/callback`, { requiredPath: '/api/reddit/auth/callback' });
       // Scopes: adjust as needed
       const scope = encodeURIComponent('identity read submit save');
       const url = `https://www.reddit.com/api/v1/authorize?client_id=${clientId}&response_type=code&state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}&duration=permanent&scope=${scope}`;
-      return res.json({ ok: true, platform, authUrl: url, state });
+      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
     }
     if (platform === 'discord') {
       const clientId = process.env.DISCORD_CLIENT_ID;
@@ -97,11 +98,12 @@ router.post('/:platform/auth/prepare', authMiddleware, platformWriteLimiter, asy
 
     if (platform === 'spotify') {
       const clientId = process.env.SPOTIFY_CLIENT_ID;
-      const redirectUri = `${host}/api/spotify/auth/callback`;
+      const { canonicalizeRedirect } = require('../utils/redirectUri');
+      const redirectUri = canonicalizeRedirect(`${host}/api/spotify/auth/callback`, { requiredPath: '/api/spotify/auth/callback' });
       // scopes: adjust later as needed when you register the app
       const scope = encodeURIComponent('user-read-email playlist-modify-public playlist-modify-private');
       const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&show_dialog=true`;
-      return res.json({ ok: true, platform, authUrl: url, state });
+      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
     }
 
     if (platform === 'telegram') {
@@ -111,6 +113,16 @@ router.post('/:platform/auth/prepare', authMiddleware, platformWriteLimiter, asy
       if (!botUser) return res.status(500).json({ ok: false, error: 'telegram_bot_not_configured' });
       const url = `https://t.me/${botUser}?start=${encodeURIComponent(state)}`;
       return res.json({ ok: true, platform, authUrl: url, state });
+    }
+
+    if (platform === 'linkedin') {
+      const clientId = process.env.LINKEDIN_CLIENT_ID;
+      const { canonicalizeRedirect } = require('../utils/redirectUri');
+      const redirectUri = canonicalizeRedirect(`${host}/api/linkedin/auth/callback`, { requiredPath: '/api/linkedin/auth/callback' });
+      // Basic scopes for profile + email, expand as needed
+      const scope = encodeURIComponent('r_liteprofile r_emailaddress w_member_social');
+      const url = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=${scope}`;
+      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
     }
 
     // Default: return placeholder callback URL so frontend can open something
@@ -188,7 +200,9 @@ router.get('/reddit/auth/callback', async (req, res) => {
     if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
     const clientId = process.env.REDDIT_CLIENT_ID;
     const clientSecret = process.env.REDDIT_CLIENT_SECRET;
-    const redirectUri = `${req.protocol}://${req.get('host')}/api/reddit/auth/callback`;
+  const { canonicalizeRedirect } = require('../utils/redirectUri');
+  const host = `${req.protocol}://${req.get('host')}`;
+  const redirectUri = canonicalizeRedirect(`${host}/api/reddit/auth/callback`, { requiredPath: '/api/reddit/auth/callback' });
     const tokenUrl = 'https://www.reddit.com/api/v1/access_token';
     const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri });
     const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
@@ -325,7 +339,9 @@ router.get('/spotify/auth/callback', async (req, res) => {
     if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
     const clientId = process.env.SPOTIFY_CLIENT_ID;
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-    const redirectUri = `${req.protocol}://${req.get('host')}/api/spotify/auth/callback`;
+  const { canonicalizeRedirect } = require('../utils/redirectUri');
+  const host = `${req.protocol}://${req.get('host')}`;
+  const redirectUri = canonicalizeRedirect(`${host}/api/spotify/auth/callback`, { requiredPath: '/api/spotify/auth/callback' });
     const tokenUrl = 'https://accounts.spotify.com/api/token';
     const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri });
     const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
@@ -399,6 +415,79 @@ router.get('/:platform/auth/callback', async (req, res) => {
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).send('Unsupported platform');
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   return res.send('Callback placeholder - implement OAuth exchange for ' + platform);
+});
+
+// GET /api/linkedin/auth/callback
+router.get('/linkedin/auth/callback', async (req, res) => {
+  const platform = 'linkedin';
+  const code = req.query.code;
+  const state = req.query.state;
+  if (!code) return res.status(400).send('Missing code');
+  try {
+    if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
+    const clientId = process.env.LINKEDIN_CLIENT_ID;
+    const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
+    const host = `${req.protocol}://${req.get('host')}`;
+    const { canonicalizeRedirect } = require('../utils/redirectUri');
+    const redirectUri = canonicalizeRedirect(`${host}/api/linkedin/auth/callback`, { requiredPath: '/api/linkedin/auth/callback' });
+    // Exchange authorization code for access token
+    const tokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
+    const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri, client_id: clientId, client_secret: clientSecret });
+    const tokenRes = await fetchFn(tokenUrl, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+    const tokenJson = await tokenRes.json();
+    let meta = {};
+    // Fetch basic profile if access token acquired
+    if (tokenJson.access_token) {
+      try {
+        const profileRes = await fetchFn('https://api.linkedin.com/v2/me', { headers: { Authorization: `Bearer ${tokenJson.access_token}` } });
+        if (profileRes.ok) meta.profile = await profileRes.json();
+        const emailRes = await fetchFn('https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))', { headers: { Authorization: `Bearer ${tokenJson.access_token}` } });
+        if (emailRes.ok) meta.email = await emailRes.json();
+      } catch (_) { /* non-fatal */ }
+    }
+    // Resolve user from stored state mapping
+    let uid = null;
+    try {
+      if (state) {
+        const sd = await db.collection('oauth_states').doc(state).get();
+        if (sd.exists) {
+          const s = sd.data();
+          if (!s.expiresAt || new Date(s.expiresAt) > new Date()) uid = s.uid || null;
+          try { await db.collection('oauth_states').doc(state).delete(); } catch(_){ }
+        }
+      }
+    } catch (e) { console.warn('[oauth][linkedin] state lookup failed', e && e.message); }
+    if (!uid && state && state.split && state.split(':')[0]) uid = state.split(':')[0];
+    if (uid && uid !== 'anon') {
+      const userRef = db.collection('users').doc(uid);
+      const now = new Date().toISOString();
+      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, meta, updatedAt: now }, { merge: true });
+      try {
+        await db.collection('events').add({ type: 'platform_connected', uid, platform, at: new Date().toISOString() });
+        try {
+          const rec = smartDistributionEngine.calculateOptimalPostingTime(platform, 'UTC');
+          const captionExample = engagementBoostingService.generateViralCaption({ title: 'Welcome post', description: '' }, platform, {});
+          await userRef.collection('connections').doc(platform).set({ recommendations: { posting: rec, captionExample }, updatedAt: new Date().toISOString() }, { merge: true });
+        } catch (e) { console.warn('[platform][linkedin] recommendation generation failed', e && e.message); }
+        try {
+          if (admin && admin.firestore && admin.firestore.FieldValue && admin.firestore.FieldValue.arrayUnion) {
+            await userRef.set({ connectedPlatforms: admin.firestore.FieldValue.arrayUnion(platform) }, { merge: true });
+          } else {
+            const existing = (await userRef.get()).data() || {};
+            const arr = Array.isArray(existing.connectedPlatforms) ? existing.connectedPlatforms : [];
+            if (!arr.includes(platform)) arr.push(platform);
+            await userRef.set({ connectedPlatforms: arr }, { merge: true });
+          }
+        } catch(_){ }
+      } catch (e) {
+        console.warn('[platform][linkedin] post-connection hooks failed', e && e.message);
+      }
+    }
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.send('LinkedIn OAuth callback received. You can close this window.');
+  } catch (e) {
+    return res.status(500).send('LinkedIn callback error: ' + e.message);
+  }
 });
 
 // POST /api/:platform/sample-promote - enqueue a sample platform_post for testing (auth required)

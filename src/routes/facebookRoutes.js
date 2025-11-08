@@ -7,8 +7,10 @@ const router = express.Router();
 
 const FB_CLIENT_ID = process.env.FB_CLIENT_ID;
 const FB_CLIENT_SECRET = process.env.FB_CLIENT_SECRET;
-const FB_REDIRECT_URI = process.env.FB_REDIRECT_URI; // e.g., https://autopromote.onrender.com/api/facebook/callback
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote-1.onrender.com';
+const FB_REDIRECT_URI = process.env.FB_REDIRECT_URI; // e.g., https://www.autopromote.org/api/facebook/callback (legacy onrender accepted)
+const { canonicalizeRedirect } = require('../utils/redirectUri');
+const FB_REDIRECT_CANON = canonicalizeRedirect(FB_REDIRECT_URI, { requiredPath: '/api/facebook/callback' });
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://www.autopromote.org';
 
 function ensureEnv(res) {
   if (!FB_CLIENT_ID || !FB_CLIENT_SECRET || !FB_REDIRECT_URI) {
@@ -34,7 +36,7 @@ router.get('/health', (req, res) => {
     hasClientSecret: !!FB_CLIENT_SECRET,
     hasRedirect: !!FB_REDIRECT_URI,
     clientIdMasked: mask(FB_CLIENT_ID),
-    redirect: FB_REDIRECT_URI || null,
+    redirect: FB_REDIRECT_CANON || null,
   });
 });
 
@@ -71,7 +73,7 @@ router.post('/auth/prepare', async (req, res) => {
     // Light diagnostics (masked)
     try {
       const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
-      console.log('[Facebook][prepare] Using client/redirect', { clientId: mask(FB_CLIENT_ID), redirect: FB_REDIRECT_URI });
+      console.log('[Facebook][prepare] Using client/redirect', { clientId: mask(FB_CLIENT_ID), redirect: FB_REDIRECT_CANON });
     } catch (_) {}
     const nonce = Math.random().toString(36).slice(2);
     const state = `${uid}.${nonce}`;
@@ -81,7 +83,7 @@ router.post('/auth/prepare', async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
     const scope = REQUESTED_SCOPES.join(',');
-    const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_URI)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auth_type=rerequest`;
+  const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_CANON)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auth_type=rerequest`;
     return res.json({ authUrl });
   } catch (e) {
     return res.status(500).json({ error: 'Failed to prepare Facebook OAuth' });
@@ -109,7 +111,7 @@ router.get('/auth/start', async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
     const scope = REQUESTED_SCOPES.join(',');
-    const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_URI)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auth_type=rerequest`;
+  const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_CANON)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auth_type=rerequest`;
     return res.redirect(authUrl);
   } catch (e) {
     return res.status(500).json({ error: 'Failed to start Facebook OAuth' });
@@ -140,14 +142,14 @@ router.get('/callback', async (req, res) => {
     // Light diagnostics (masked)
     try {
       const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
-      console.log('[Facebook][callback] Exchanging code with', { clientId: mask(FB_CLIENT_ID), redirect: FB_REDIRECT_URI });
+  console.log('[Facebook][callback] Exchanging code with', { clientId: mask(FB_CLIENT_ID), redirect: FB_REDIRECT_CANON });
     } catch (_) {}
     let uidFromState;
     if (state && typeof state === 'string' && state.includes('.')) {
       const [uid] = state.split('.');
       uidFromState = uid;
     }
-    const tokenRes = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_URI)}&client_secret=${encodeURIComponent(FB_CLIENT_SECRET)}&code=${encodeURIComponent(code)}`);
+  const tokenRes = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_CANON)}&client_secret=${encodeURIComponent(FB_CLIENT_SECRET)}&code=${encodeURIComponent(code)}`);
     const tokenData = await tokenRes.json();
     if (!tokenData.access_token) {
       // Redirect back to dashboard with an error flag so the UI can surface it cleanly
