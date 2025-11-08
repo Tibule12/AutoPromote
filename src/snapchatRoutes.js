@@ -9,11 +9,42 @@ const { safeFetch } = require('./utils/ssrfGuard');
 const { rateLimiter } = require('./middlewares/globalRateLimiter');
 const DEBUG_SNAPCHAT_OAUTH = process.env.DEBUG_SNAPCHAT_OAUTH === 'true';
 
+// Normalize/canonicalize redirect URIs to our custom domain
+function canonicalizeRedirectUri(uri) {
+  try {
+    const u = new URL((uri || '').toString().trim());
+    const legacyHosts = new Set([
+      'autopromote.onrender.com',
+      'autopromote-1.onrender.com',
+      'autopromote-1.onrender.com:443'
+    ]);
+    // Force our canonical host if legacy detected
+    if (legacyHosts.has(u.host)) {
+      u.protocol = 'https:';
+      u.host = 'www.autopromote.org';
+    }
+    // Force canonical path for Snapchat callback
+    if (!u.pathname || !u.pathname.startsWith('/api/snapchat/auth/callback')) {
+      u.pathname = '/api/snapchat/auth/callback';
+    }
+    return u.toString();
+  } catch (_) {
+    // Fallback to the canonical value if parsing fails
+    return 'https://www.autopromote.org/api/snapchat/auth/callback';
+  }
+}
+
 // Snapchat only supports production environment
+const _rawRedirectEnv = (process.env.SNAPCHAT_REDIRECT_URI || '').toString().trim();
+const _effectiveRedirect = canonicalizeRedirectUri(_rawRedirectEnv || `https://www.autopromote.org/api/snapchat/auth/callback`);
+if (_rawRedirectEnv && _effectiveRedirect !== _rawRedirectEnv) {
+  console.warn('snapchat: SNAPCHAT_REDIRECT_URI points to legacy/non-canonical host or path; auto-upgraded to', _effectiveRedirect);
+}
 const config = {
   key: (process.env.SNAPCHAT_CLIENT_ID || '').toString().trim() || null,
   secret: (process.env.SNAPCHAT_CLIENT_SECRET || '').toString().trim() || null,
-  redirect: (process.env.SNAPCHAT_REDIRECT_URI || `https://autopromote.onrender.com/api/snapchat/auth/callback`).toString().trim(),
+  // Prefer custom domain; retain legacy env but auto-upgrade to canonical host
+  redirect: _effectiveRedirect,
 };
 
 function activeConfig() {
@@ -21,7 +52,7 @@ function activeConfig() {
 }
 
 // For dashboard redirect
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote-1.onrender.com';
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://www.autopromote.org';
 
 function ensureSnapchatEnv(res, cfg, opts = { requireSecret: true }) {
   const missing = [];
@@ -37,6 +68,23 @@ function ensureSnapchatEnv(res, cfg, opts = { requireSecret: true }) {
     });
   }
 }
+
+// Lightweight health for diagnostics
+router.get('/health', (req, res) => {
+  try {
+    const cfg = activeConfig();
+    const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : null);
+    return res.json({
+      ok: !!(cfg.key && (cfg.secret || process.env.ALLOW_NO_SECRET === 'true') && cfg.redirect),
+      hasClientId: !!cfg.key,
+      hasClientSecret: !!cfg.secret,
+      redirect: cfg.redirect,
+      clientIdMasked: mask(cfg.key)
+    });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
 
 // 1. Get Snapchat OAuth authorization URL (redirect)
 router.get('/auth', (req, res) => {
@@ -117,6 +165,29 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
   } catch (err) {
     console.error('Snapchat OAuth prepare error:', err);
     res.status(500).json({ error: 'OAuth prepare failed', details: err.message });
+  }
+});
+
+// Public preflight (no auth): report constructed auth URL and provider status (no secrets leaked)
+router.get('/oauth/preflight', rateLimiter({ capacity: 60, refillPerSec: 10, windowHint: 'snapchat_preflight' }), async (req, res) => {
+  const cfg = activeConfig();
+  ensureSnapchatEnv(res, cfg, { requireSecret: false });
+  if (res.headersSent) return;
+  try {
+    const state = require('../lib/uuid-compat').v4();
+    const scope = 'snapchat-marketing-api';
+    const url = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
+    let status = null; let location = null;
+    try {
+      const r = await safeFetch(url, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
+      status = r.status;
+      location = r.headers.get ? r.headers.get('location') : null;
+    } catch (e) {
+      status = 'probe_error';
+    }
+    res.json({ ok: true, authUrl: url, probeStatus: status, location });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
   }
 });
 
