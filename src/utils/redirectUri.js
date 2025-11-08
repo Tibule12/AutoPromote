@@ -7,7 +7,7 @@
 //   2. CANONICAL_HOST (general site host)
 //   3. www.autopromote.org (default fallback)
 
-const CANONICAL_HOST = process.env.CANONICAL_OAUTH_HOST || process.env.CANONICAL_HOST || 'autopromote.org';
+const CANONICAL_HOST = process.env.CANONICAL_OAUTH_HOST || process.env.CANONICAL_HOST || 'api.autopromote.org';
 
 function canonicalizeRedirect(input, opts = {}) {
   const requiredPath = (opts && opts.requiredPath) || '/';
