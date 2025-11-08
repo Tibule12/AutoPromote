@@ -59,7 +59,8 @@ function activeConfig() {
 }
 
 // For dashboard redirect
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://autopromote.onrender.com';
+// Updated fallback to custom domain (post-migration). Override with DASHBOARD_URL env if needed.
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://www.autopromote.org';
 
 function ensureTikTokEnv(res, cfg, opts = { requireSecret: true }) {
 	const missing = [];

@@ -7,7 +7,7 @@ const EnvChecker = () => {
     console.log('Environment Variables Check:');
     
     // Fixed API URL logging
-    const apiUrl = process.env.REACT_APP_API_URL || 'https://autopromote.onrender.com';
+  const apiUrl = process.env.REACT_APP_API_URL || 'https://www.autopromote.org';
     console.log('REACT_APP_API_URL:', apiUrl);
     console.log('Using URL:', apiUrl);
 

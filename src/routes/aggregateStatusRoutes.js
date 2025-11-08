@@ -27,7 +27,13 @@ router.get('/aggregate', authMiddleware, require('../statusInstrument')('aggrega
             timeout: 4000
           },
           requireHttps: true,
-          allowHosts: ['autopromote.onrender.com', 'autopromote-1.onrender.com', 'localhost']
+          allowHosts: [
+            // Custom domain (preferred)
+            'www.autopromote.org', 'autopromote.org',
+            // Legacy/onrender domains
+            'autopromote.onrender.com', 'autopromote-1.onrender.com',
+            'localhost'
+          ]
         });
         if (!r.ok) return { error: 'status_' + r.status };
         return r.json();
