@@ -10,7 +10,7 @@ In Google Cloud Console (APIs & Services → Credentials):
 - Application type: Web application
 - Name: AutoPromote (prod)
 - Authorized redirect URIs: add exactly
-  - https://autopromote.onrender.com/api/youtube/callback
+  - https://www.autopromote.org/api/youtube/callback
 
 You do NOT need JavaScript origins for this server flow.
 
@@ -35,12 +35,12 @@ APIs & Services → OAuth consent screen:
 
 ## 4) Set Render environment variables (exact names)
 
-On your Render service (backend):
+On your backend service (Render or your hosting provider):
 
 - YT_CLIENT_ID = <client_id from step 1>
 - YT_CLIENT_SECRET = <client_secret from step 1>
-- YT_REDIRECT_URI = https://autopromote.onrender.com/api/youtube/callback
-- DASHBOARD_URL = https://autopromote-1.onrender.com
+- YT_REDIRECT_URI = https://www.autopromote.org/api/youtube/callback
+- DASHBOARD_URL = https://www.autopromote.org
 
 Avoid leading/trailing spaces. After updating, redeploy the service.
 
@@ -48,11 +48,11 @@ Avoid leading/trailing spaces. After updating, redeploy the service.
 
 Health check (should be true/true/true):
 
-- https://autopromote.onrender.com/api/youtube/health → { ok:true, hasClientId:true, hasClientSecret:true, hasRedirect:true }
+- https://www.autopromote.org/api/youtube/health → { ok:true, hasClientId:true, hasClientSecret:true, hasRedirect:true }
 
 The server logs will also show masked values when you start auth:
 
-- [YouTube][prepare] Using client/redirect { clientId: '34149803….com', redirect: 'https://autopromote.onrender.com/api/youtube/callback' }
+- [YouTube][prepare] Using client/redirect { clientId: '34149803….com', redirect: 'https://www.autopromote.org/api/youtube/callback' }
 
 ## 6) Retry the flow
 
