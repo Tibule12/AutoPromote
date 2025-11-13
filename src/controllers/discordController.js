@@ -26,27 +26,79 @@ async function handleDiscordInteractions(req, res) {
     return res.status(404).send('Unknown interaction type');
 }
 
+const { verifyKey } = require('discord-interactions');
+const axios = require('axios');
+
+// ... (handleDiscordInteractions function remains the same) ...
+
 async function handleDiscordLinkedRoles(req, res) {
-    // This would be the full OAuth2 flow.
-    // For now, we'll just return a success message.
     const { code } = req.query;
-    if (code) {
-        // Here you would exchange the code for an access token
-        // and then fetch user data from Discord.
-        console.log(`Received Discord OAuth code: ${code}`);
-        return res.status(200).send('Successfully linked your Discord account!');
+
+    // 1. If there is no code, redirect the user to Discord's authorization URL.
+    if (!code) {
+        const clientId = process.env.DISCORD_CLIENT_ID;
+        const redirectUri = process.env.DISCORD_REDIRECT_URI;
+        if (clientId && redirectUri) {
+            const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20role_connections.write`;
+            return res.redirect(authUrl);
+        }
+        return res.status(500).send('Discord client ID or redirect URI is not configured.');
     }
 
-    // If no code, redirect to Discord's auth URL (example)
-    const clientId = process.env.DISCORD_CLIENT_ID;
-    const redirectUri = process.env.DISCORD_REDIRECT_URI;
-    if (clientId && redirectUri) {
-        const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20role_connections.write`;
-        return res.redirect(authUrl);
-    }
+    // 2. If a code is present, exchange it for an access token.
+    try {
+        const tokenResponse = await axios.post('https://discord.com/api/v10/oauth2/token', new URLSearchParams({
+            client_id: process.env.DISCORD_CLIENT_ID,
+            client_secret: process.env.DISCORD_CLIENT_SECRET,
+            grant_type: 'authorization_code',
+            code: code,
+            redirect_uri: process.env.DISCORD_REDIRECT_URI,
+        }), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
 
-    return res.status(200).send('Discord Linked Roles endpoint. Configuration needed.');
+        const { access_token } = tokenResponse.data;
+
+        // 3. Use the access token to update the user's metadata for the linked role.
+        // This is where you would set metadata based on your application's logic.
+        // For this example, we'll set a `verified` flag and the current date.
+        await axios.put(
+            `https://discord.com/api/v10/users/@me/applications/${process.env.DISCORD_CLIENT_ID}/role-connection`,
+            {
+                platform_name: 'AutoPromote',
+                platform_username: 'Your AutoPromote Username', // Replace with actual username from your DB
+                metadata: {
+                    verified: 1, // 1 for true, 0 for false
+                    last_updated: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
+                },
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        // 4. Respond to the user.
+        return res.status(200).send('Successfully linked your Discord account! You can now close this window.');
+
+    } catch (error) {
+        console.error('Error in Discord OAuth2 flow:', error.response ? error.response.data : error.message);
+        return res.status(500).send('An error occurred while linking your Discord account.');
+    }
 }
+
+// ... (verifyDiscordRequest function remains the same) ...
+
+module.exports = {
+    handleDiscordInteractions,
+    handleDiscordLinkedRoles,
+    verifyDiscordRequest,
+};
+
 
 function verifyDiscordRequest(clientKey) {
     return (req, res, next) => {
