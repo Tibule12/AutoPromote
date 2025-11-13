@@ -479,6 +479,24 @@ try {
   console.log('✅ Admin email verification routes loaded');
 } catch(e) { adminEmailVerificationRoutes = express.Router(); console.log('⚠️ Admin email verification routes not found'); }
 
+let discordRoutes;
+try {
+  discordRoutes = require('./routes/discordRoutes');
+  console.log('✅ Discord routes loaded');
+} catch (e) {
+  discordRoutes = express.Router();
+  console.log('⚠️ Discord routes not found:', e.message);
+}
+
+let staticRoutes;
+try {
+  staticRoutes = require('./routes/staticRoutes');
+  console.log('✅ Static routes loaded');
+} catch (e) {
+  staticRoutes = express.Router();
+  console.log('⚠️ Static routes not found:', e.message);
+}
+
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
 
@@ -794,6 +812,9 @@ app.use('/api/admin/bandit', adminBanditRoutes);
 app.use('/api/admin/alerts', adminAlertsRoutes);
 app.use('/api/admin/ops', adminOpsRoutes);
 app.use('/api/admin', adminEmailVerificationRoutes);
+
+app.use('/api/discord', discordRoutes);
+app.use('/', staticRoutes);
 
 // Serve site verification and other well-known files
 // 1) Try root-level /public/.well-known
