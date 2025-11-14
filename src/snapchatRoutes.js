@@ -245,7 +245,7 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
     const tokenData = await tokenRes.json();
     if (!tokenRes.ok) {
       // If provider returned an error, include it for debugging
-      console.error('snapchat: token exchange failed', tokenData);
+      console.error('snapchat: token exchange failed', { error: tokenData.error, error_description: tokenData.error_description });
       return res.status(400).json({ error: 'Failed to exchange code for token', details: tokenData });
     }
 

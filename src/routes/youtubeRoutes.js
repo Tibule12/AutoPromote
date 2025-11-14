@@ -78,6 +78,7 @@ router.post('/auth/prepare', async (req, res) => {
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(YT_CLIENT_ID)}&redirect_uri=${encodeURIComponent(YT_REDIRECT_CANON)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent&state=${encodeURIComponent(state)}`;
     return res.json({ authUrl });
   } catch (e) {
+    console.error('Failed to prepare YouTube OAuth', { error: e.message });
     return res.status(500).json({ error: 'Failed to prepare YouTube OAuth' });
   }
 });
@@ -150,7 +151,7 @@ router.get('/callback', ytPublicLimiter, async (req, res) => {
         if (tokenData && tokenData.error) url.searchParams.set('reason', String(tokenData.error));
         return res.redirect(url.toString());
       } catch (_) {
-        return res.status(400).json({ error: 'Failed to obtain YouTube access token', details: tokenData });
+        return res.status(400).json({ error: 'Failed to obtain YouTube access token', details: { error: tokenData.error } });
       }
     }
 
