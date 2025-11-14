@@ -924,7 +924,7 @@ app.use(express.static(path.join(__dirname, '../frontend/build')));
 app.get('/admin-test', routeLimiter({ windowHint: 'admin_static' }), (req, res) => {
   // Check if file exists before sending
   try {
-    res.sendFile(path.join(__dirname, 'public', 'admin-test.html'));
+    res.sendFile(path.join(__dirname, '../public', 'admin-test.html'));
   } catch (error) {
     res.send('<html><body><h1>Admin Test Page</h1><p>The actual test page is not available.</p></body></html>');
   }
@@ -934,7 +934,7 @@ app.get('/admin-test', routeLimiter({ windowHint: 'admin_static' }), (req, res) 
 app.get('/admin-login', routeLimiter({ windowHint: 'admin_static' }), (req, res) => {
   // Check if file exists before sending
   try {
-    res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
+    res.sendFile(path.join(__dirname, '../public', 'admin-login.html'));
   } catch (error) {
     res.send('<html><body><h1>Admin Login</h1><p>The actual login page is not available.</p></body></html>');
   }
