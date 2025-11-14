@@ -904,15 +904,15 @@ app.get(/^\/tiktok.*\.txt$/, (req, res) => {
 });
 
 // Legal policy pages
-app.get('/terms-of-service', (req, res) => {
+app.get('/terms-of-service', routeLimiter({ windowHint: 'legal' }), (req, res) => {
   res.sendFile(path.join(__dirname, '../public/legal/terms.html'));
 });
 
-app.get('/privacy-policy', (req, res) => {
+app.get('/privacy-policy', routeLimiter({ windowHint: 'legal' }), (req, res) => {
   res.sendFile(path.join(__dirname, '../public/legal/privacy.html'));
 });
 
-app.get('/data-deletion', (req, res) => {
+app.get('/data-deletion', routeLimiter({ windowHint: 'legal' }), (req, res) => {
   res.sendFile(path.join(__dirname, '../docs/data-deletion.html'));
 });
 
@@ -921,7 +921,7 @@ app.get('/data-deletion', (req, res) => {
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // Serve the admin test HTML file
-app.get('/admin-test', (req, res) => {
+app.get('/admin-test', routeLimiter({ windowHint: 'admin_static' }), (req, res) => {
   // Check if file exists before sending
   try {
     res.sendFile(path.join(__dirname, 'public', 'admin-test.html'));
@@ -931,7 +931,7 @@ app.get('/admin-test', (req, res) => {
 });
 
 // Serve the admin login page (only accessible by direct URL - not linked from UI)
-app.get('/admin-login', (req, res) => {
+app.get('/admin-login', routeLimiter({ windowHint: 'admin_static' }), (req, res) => {
   // Check if file exists before sending
   try {
     res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));

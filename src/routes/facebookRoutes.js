@@ -86,6 +86,7 @@ router.post('/auth/prepare', async (req, res) => {
   const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_CANON)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auth_type=rerequest`;
     return res.json({ authUrl });
   } catch (e) {
+    console.error('Failed to prepare Facebook OAuth', { error: e.message });
     return res.status(500).json({ error: 'Failed to prepare Facebook OAuth' });
   }
 });
@@ -159,7 +160,7 @@ router.get('/callback', async (req, res) => {
         if (tokenData && tokenData.error && tokenData.error.code) url.searchParams.set('reason', String(tokenData.error.code));
         return res.redirect(url.toString());
       } catch (_) {
-        return res.status(400).json({ error: 'Failed to obtain Facebook access token', details: tokenData });
+        return res.status(400).json({ error: 'Failed to obtain Facebook access token', details: { error: tokenData.error } });
       }
     }
     // Fetch managed pages
