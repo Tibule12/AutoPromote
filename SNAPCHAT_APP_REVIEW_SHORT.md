@@ -1,4 +1,4 @@
-AutoPromote integrates with Snapchat's Marketing API to enable cross-platform content distribution.
+AutoPromote integrates with Snapchat's Marketing API to enable cross-platform content distribution. The production OAuth redirect URI used is `https://www.autopromote.org/api/snapchat/auth/callback` (legacy Render domains auto-upgrade to the custom domain).
 
 ## How It Works
 

@@ -1,0 +1,98 @@
+AUTO-PROMOTE MFA & REMOTE ACCESS POLICY
+Generated: {ISO_TIMESTAMP}
+
+1. Overview
+We enforce Multi-Factor Authentication (MFA) and key-based access controls for every administrative path that could reach Meta Platform Data or deployment infrastructure. Direct server-level SSH access is intentionally disabled; privileged actions occur through providers (Render dashboard, Firebase console, GitHub) which require individual accounts with MFA enabled.
+
+2. Administrative Access Channels
+| Channel | Access Method | MFA Enforcement | Additional Controls |
+|---------|---------------|-----------------|---------------------|
+| Source Code (GitHub) | Web (2FA) / git over SSH | GitHub 2FA required on maintainer accounts | Protected branches; deploy key read-only; secrets excluded from repo |
+| Deployment (Render) | Web dashboard | Render account 2FA enabled | No inbound SSH; build & deploy only via Git pulls / dashboard actions |
+| Firebase / Firestore | Web console / Service Account | Google Account MFA (enforced) | Principle of least privilege service account; Firestore rules limit data paths |
+| Monitoring & Logs | Dashboard / CLI (authenticated) | Same as above | Access logs & admin audit logs stored separately; analyzer alerts reviewed |
+| Secrets Management | .env (not in repo) / provider config | Access gated by MFA at provider | Rotation on incident or quarterly |
+
+3. SSH & Direct Host Access
+- We do not expose port 22 publicly; remote shell access is disabled. Evidence screenshot shows connection attempts refused/timeout.
+- All maintenance occurs via build pipeline and provider consoles with authenticated sessions and MFA.
+
+4. MFA Enforcement Details
+- GitHub: All admin accounts have 2FA; repository settings require 2FA for organization membership (screen provided separately).
+- Render: 2FA enabled (TOTP); screenshot submitted with Meta review.
+- Google/Firebase: Enforced via Google Account security policy; administrative users added only after confirming MFA.
+- No shared accounts; each administrator has their own identity and revocation path.
+
+5. SSH Key & Git Controls
+- Deploy uses a read-only deploy key or HTTPS with a personal access token protected by 2FA/SSO.
+- SSH keys are generated with ed25519 + strong passphrase; compromised keys are revoked immediately.
+- Protected branches (main) require PR review; CI runs security/audit checks (npm audit, Snyk) before deploy.
+
+6. Audit Logging & Correlation
+- Administrative actions recorded in Firestore collection `admin_audit` (write-only for server code).
+- Each record includes: actorUid, action, target, timestamp (ISO), IP, correlationId, status.
+Sample (redacted):
+{
+  "at": "2025-11-07T16:35:12.351Z",
+  "actorUid": "admin_12345",
+  "action": "payout:approve",
+  "target": "user_67890",
+  "status": "success",
+  "ip": "203.0.113.7",
+  "correlationId": "7b2c7e7f-63f6-4d73-a5b4-6c0d2e7b2eaa"
+}
+
+7. Alerting & Incident Response
+- Log analyzer flags brute-force login attempts, admin probing, and 5xx spikes; alerts reviewed by on-call.
+- On suspected compromise: revoke tokens, rotate secrets, suspend affected admin account, review audit & access logs, notify security contact.
+- SLA: triage within 30 minutes of high-severity alert; remediation actions initiated within 2 hours.
+
+8. Onboarding / Offboarding Procedure
+Onboarding:
+  1. Verify candidate requires access (role justification).
+  2. Enable MFA on GitHub + Render + Google before granting repo/org or project access.
+  3. Provide principle-of-least-privilege role; log initial grant in admin audit.
+Offboarding:
+  1. Revoke GitHub org membership, Render team access, Firebase roles.
+  2. Rotate any keys/secrets created by the user if not ephemeral.
+  3. Verify recent admin audit entries for anomalies.
+
+9. Risk Statement
+The absence of direct SSH and universal MFA across provider boundaries significantly reduces risk of credential-based unauthorized access. Even if a password is compromised, second factor or key-based restriction prevents escalation. Admin actions are traceable and rate-limited.
+
+10. Compliance Assertion
+At generation time, all administrative channels require MFA; no password-only remote shell access exists; audit logging and alerting are active.
+
+Contact
+support@autopromote.org / tmtshwelo21@gmail.com — Security & Compliance
+AUTO-PROMOTE — Remote Access to Servers (MFA) Evidence
+Generated: {ISO_TIMESTAMP}
+
+Position
+- Production servers do not expose SSH (port 22) for remote logins. Remote shell access is disabled by policy; deployments occur via CI/CD only.
+- Because SSH is disabled, “remote access to servers” requires MFA at the upstream providers where console actions can occur (GitHub, Render/Firebase/Google Cloud). Those providers enforce user MFA and access policies; no path exists to bypass MFA to reach a shell.
+
+Controls
+1) Network: Inbound port 22 is blocked; hosts do not accept SSH connections. Attempts to ssh to the production domain are refused/timeout (see attached PNG evidence).
+2) Change management: All changes are delivered via Git commits and CI. Direct shell is not used. Admin credentials are not stored on developer machines.
+3) Provider MFA: Organization accounts require MFA. All collaborators must have MFA enabled to access repositories, deployment pipelines, or the cloud console.
+4) Principle of least privilege: CI deploy tokens are scoped; no broad shell permissions. Break-glass is documented but not enabled by default.
+
+User MFA Statement
+- All users who can impact servers (code, deploys, configuration) must have MFA enabled on their provider accounts. Access without MFA is not allowed.
+
+Procedural Steps (how we enforce)
+1) Disable SSH exposure at the platform layer (no public port 22; no bastion).
+2) Enforce MFA on provider accounts (GitHub: require 2FA; Cloud/Render/Firebase: require 2-step verification; SSO if available).
+3) Deploy via CI only; rotate tokens on join/leave; audit releases.
+4) Quarterly review of provider user lists and MFA enforcement status.
+
+Evidence Attachments
+- security_mfa_remote_access_*.png — Terminal capture demonstrating SSH is blocked on production domain (port 22 closed/no handshake).
+- meta_clarifications_response.pdf — Monitoring + remediation clarifications.
+
+Declaration
+- Remote SSH access is disabled. MFA is required for all privileged access that can impact servers via provider consoles or pipelines.
+
+Contact
+support@autopromote.org / tmtshwelo21@gmail.com — Security / Compliance

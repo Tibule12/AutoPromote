@@ -34,7 +34,7 @@ Still placeholder; add developer app + upload endpoints later.
 ```
 SNAPCHAT_CLIENT_ID=your_snapchat_client_id
 SNAPCHAT_CLIENT_SECRET=your_snapchat_client_secret
-SNAPCHAT_REDIRECT_URI=https://yourdomain.com/snapchat/callback
+SNAPCHAT_REDIRECT_URI=https://www.autopromote.org/api/snapchat/auth/callback
 ```
 
 ### Important Notes for Snapchat

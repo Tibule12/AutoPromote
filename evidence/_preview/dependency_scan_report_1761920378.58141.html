@@ -1,0 +1,21 @@
+﻿<html><head><meta charset='utf-8'><title>dependency_scan_report</title></head><body><pre>Dependency scan report
+Generated: 2025-10-24 17:29:00Z (UTC)
+Command: npm audit --json and npm ls --all --json
+
+Vulnerabilities summary: info=0 low=0 moderate=0 high=5 critical=0 total=5
+
+Advisories:
+- axios | severity=high | range=1.0.0 - 1.11.0 | fixAvailable=True
+  details: Axios is vulnerable to DoS attack through lack of data size check
+    advisory: Axios is vulnerable to DoS attack through lack of data size check -&gt; https://github.com/advisories/GHSA-4hjh-wcwx-xvwj
+- nodemon | severity=high | range=2.0.19 - 2.0.22 | fixAvailable=True
+  details: simple-update-notifier
+- semver | severity=high | range=7.0.0 - 7.5.1 | fixAvailable=True
+  details: semver vulnerable to Regular Expression Denial of Service
+    advisory: semver vulnerable to Regular Expression Denial of Service -&gt; https://github.com/advisories/GHSA-c2qf-rxjj-qqgw
+- sharp | severity=high | range=&lt;0.32.6 | fixAvailable=True
+  details: sharp vulnerability in libwebp dependency CVE-2023-4863
+    advisory: sharp vulnerability in libwebp dependency CVE-2023-4863 -&gt; https://github.com/advisories/GHSA-54xq-cgqr-rpm3
+- simple-update-notifier | severity=high | range=1.0.7 - 1.1.0 | fixAvailable=True
+  details: semver
+</pre></body></html>

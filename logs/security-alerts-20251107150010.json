@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2025-11-07T15:00:10.619Z",
+  "source": "access-2025-11-07.log",
+  "alerts": [
+    {
+      "type": "BRUTE_FORCE_401",
+      "severity": "medium",
+      "message": "Detected potential brute-force attempts from 1 IP(s)",
+      "details": [
+        {
+          "ip": "10.0.0.5",
+          "windowStart": "2025-11-07T14:40:00.000Z",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "type": "ADMIN_PROBING",
+      "severity": "high",
+      "message": "Unauthorized admin probing detected from 1 IP(s)",
+      "details": [
+        {
+          "ip": "10.0.0.9",
+          "windowStart": "2025-11-07T14:40:00.000Z",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "type": "SERVER_ERRORS_SPIKE",
+      "severity": "medium",
+      "message": "5xx errors: 3/14 (21.43%)",
+      "details": {
+        "totalRequests": 14,
+        "fivexx": 3
+      }
+    }
+  ],
+  "stats": {
+    "totalRequests": 14,
+    "fivexx": 3
+  }
+}

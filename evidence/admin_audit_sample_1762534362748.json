@@ -1,0 +1,130 @@
+{
+  "generated": "2025-11-07T16:52:42.749Z",
+  "entries": [
+    {
+      "actorUid": "admin-redacted-1",
+      "action": "ADMIN_LOGIN_ATTEMPT",
+      "outcome": "FAILURE",
+      "reason": "Invalid password",
+      "ip": "203.0.113.24",
+      "target": null,
+      "timestamp": "2025-11-07T13:22:42.741Z",
+      "correlationId": "corr-1001",
+      "metadata": {
+        "attempt": 1
+      }
+    },
+    {
+      "actorUid": "admin-redacted-1",
+      "action": "ADMIN_LOGIN_ATTEMPT",
+      "outcome": "SUCCESS",
+      "ip": "203.0.113.24",
+      "target": null,
+      "timestamp": "2025-11-07T13:23:42.746Z",
+      "correlationId": "corr-1002",
+      "metadata": {
+        "mfa": "totp"
+      }
+    },
+    {
+      "actorUid": "admin-redacted-1",
+      "action": "GRANT_PRIVILEGE",
+      "outcome": "SUCCESS",
+      "ip": "203.0.113.24",
+      "target": "user-5678",
+      "timestamp": "2025-11-07T13:42:42.746Z",
+      "correlationId": "corr-1010",
+      "metadata": {
+        "role": "content_mod"
+      }
+    },
+    {
+      "actorUid": "admin-redacted-2",
+      "action": "REVOKE_PRIVILEGE",
+      "outcome": "SUCCESS",
+      "ip": "198.51.100.77",
+      "target": "user-5678",
+      "timestamp": "2025-11-07T14:02:42.746Z",
+      "correlationId": "corr-1015",
+      "metadata": {
+        "role": "content_mod"
+      }
+    },
+    {
+      "actorUid": "admin-redacted-1",
+      "action": "EXPORT_DATA_INIT",
+      "outcome": "SUCCESS",
+      "ip": "203.0.113.24",
+      "target": "export-job-44",
+      "timestamp": "2025-11-07T14:12:42.746Z",
+      "correlationId": "corr-1020",
+      "metadata": {
+        "scope": "user_report",
+        "rows": 245
+      }
+    },
+    {
+      "actorUid": "admin-redacted-2",
+      "action": "ATTEMPT_AUDIT_LOG_DELETE",
+      "outcome": "BLOCKED",
+      "ip": "198.51.100.77",
+      "target": "admin_audit_collection",
+      "timestamp": "2025-11-07T14:17:42.746Z",
+      "correlationId": "corr-1025",
+      "metadata": {
+        "method": "DELETE"
+      }
+    },
+    {
+      "actorUid": "admin-redacted-3",
+      "action": "ADMIN_LOGIN_ATTEMPT",
+      "outcome": "FAILURE",
+      "reason": "Invalid password",
+      "ip": "203.0.113.90",
+      "target": null,
+      "timestamp": "2025-11-07T14:52:42.746Z",
+      "correlationId": "corr-1030",
+      "metadata": {
+        "attempt": 1
+      }
+    },
+    {
+      "actorUid": "admin-redacted-3",
+      "action": "ADMIN_LOGIN_ATTEMPT",
+      "outcome": "FAILURE",
+      "reason": "Invalid password",
+      "ip": "203.0.113.90",
+      "target": null,
+      "timestamp": "2025-11-07T14:53:42.746Z",
+      "correlationId": "corr-1031",
+      "metadata": {
+        "attempt": 2
+      }
+    },
+    {
+      "actorUid": "admin-redacted-3",
+      "action": "ADMIN_LOGIN_ATTEMPT",
+      "outcome": "FAILURE",
+      "reason": "Invalid password",
+      "ip": "203.0.113.90",
+      "target": null,
+      "timestamp": "2025-11-07T14:54:42.746Z",
+      "correlationId": "corr-1032",
+      "metadata": {
+        "attempt": 3
+      }
+    },
+    {
+      "actorUid": "admin-redacted-3",
+      "action": "ADMIN_LOGIN_ATTEMPT",
+      "outcome": "SUCCESS",
+      "ip": "203.0.113.90",
+      "target": null,
+      "timestamp": "2025-11-07T14:55:42.748Z",
+      "correlationId": "corr-1033",
+      "metadata": {
+        "mfa": "totp"
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+﻿{
+  "text": "Detected 1 suspicious audit events in auditLogs",
+  "ts": "2025-10-31T11:51:53.937Z",
+  "findings": [
+    {
+      "id": "bea31adb-f60d-4bdf-8f78-a3d9357228f7",
+      "time": "2025-10-31T11:36:59.061Z",
+      "reason": "admin-related event",
+      "type": "admin_test_event"
+    }
+  ]
+}

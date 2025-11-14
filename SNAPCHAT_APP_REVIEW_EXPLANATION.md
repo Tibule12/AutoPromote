@@ -2,7 +2,7 @@
 
 ## How Our Snapchat Integration Works
 
-AutoPromote integrates with Snapchat's Marketing API to enable cross-platform content distribution. Here's how the integration works:
+AutoPromote integrates with Snapchat's Marketing API to enable cross-platform content distribution. Production redirect URI: `https://www.autopromote.org/api/snapchat/auth/callback` (any legacy Render host is auto-canonicalized).
 
 ### 1. OAuth Authentication Flow
 
@@ -15,7 +15,7 @@ AutoPromote integrates with Snapchat's Marketing API to enable cross-platform co
 **Backend Implementation:**
 - Generates secure OAuth URL with proper parameters:
   - Client ID: Retrieved from environment variables
-  - Redirect URI: `https://autopromote.onrender.com/api/snapchat/auth/callback`
+  - Redirect URI: `https://www.autopromote.org/api/snapchat/auth/callback`
   - Scope: `snapchat-marketing-api`
   - State: UUID for CSRF protection
 
