@@ -6,7 +6,7 @@ const fetch = global.fetch || require('node-fetch');
 async function main(){
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
-  const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL || 'https://autopromote.onrender.com/api/telegram/webhook';
+  const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL || 'https://www.autopromote.org/api/telegram/webhook';
   if (!token) {
     console.error('[set-webhook] TELEGRAM_BOT_TOKEN not set. Skipping.');
     process.exit(1);

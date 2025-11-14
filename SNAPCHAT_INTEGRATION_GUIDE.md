@@ -48,7 +48,7 @@ The `/oauth/prepare` endpoint:
 
 ```javascript
 // Example auth URL generated:
-https://accounts.snapchat.com/accounts/oauth2/auth?client_id=19410df3-3b48-490f-83f2-6d6231c18086&redirect_uri=https%3A%2F%2Fautopromote.onrender.com%2Fapi%2Fsnapchat%2Fauth%2Fcallback&response_type=code&scope=snapchat-marketing-api&state=abc123
+https://accounts.snapchat.com/accounts/oauth2/auth?client_id=19410df3-3b48-490f-83f2-6d6231c18086&redirect_uri=https%3A%2F%2Fwww.autopromote.org%2Fapi%2Fsnapchat%2Fauth%2Fcallback&response_type=code&scope=snapchat-marketing-api&state=abc123
 ```
 
 ### 3. User Authorizes App

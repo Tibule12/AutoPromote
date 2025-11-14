@@ -488,15 +488,6 @@ try {
   console.log('⚠️ Discord routes not found:', e.message);
 }
 
-let staticRoutes;
-try {
-  staticRoutes = require('./routes/staticRoutes');
-  console.log('✅ Static routes loaded');
-} catch (e) {
-  staticRoutes = express.Router();
-  console.log('⚠️ Static routes not found:', e.message);
-}
-
 // Import initialized Firebase services
 const { db, auth, storage } = require('./firebaseAdmin');
 
@@ -814,7 +805,6 @@ app.use('/api/admin/ops', adminOpsRoutes);
 app.use('/api/admin', adminEmailVerificationRoutes);
 
 app.use('/api/discord', discordRoutes);
-app.use('/', staticRoutes);
 
 // Serve site verification and other well-known files
 // 1) Try root-level /public/.well-known
@@ -913,13 +903,13 @@ app.get(/^\/tiktok.*\.txt$/, (req, res) => {
   return res.status(404).send('Not found');
 });
 
-// Legal policy pages served from docs on the same domain
-app.get('/privacy', (req, res) => {
-  res.sendFile(path.join(__dirname, '../docs/privacy.html'));
+// Legal policy pages
+app.get('/terms-of-service', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/legal/terms.html'));
 });
 
-app.get('/terms', (req, res) => {
-  res.sendFile(path.join(__dirname, '../docs/terms.html'));
+app.get('/privacy-policy', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/legal/privacy.html'));
 });
 
 app.get('/data-deletion', (req, res) => {

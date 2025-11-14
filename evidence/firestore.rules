@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isServiceAccount() {
+      return request.auth != null &&
+        request.auth.token.firebase != null &&
+        request.auth.token.firebase.sign_in_provider == 'service_account';
+    }
+
+    function isBackend() {
+      return request.auth == null;
+    }
+
+    // Users can read/write their own user document
+    match /users/{userId} {
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend() || request.auth.uid == userId;
+    }
+
+    // Users can read/write their own content
+    match /content/{contentId} {
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend() ||
+        (request.auth != null &&
+          (
+            (request.method == 'create' && request.resource.data.user_id == request.auth.uid) ||
+            (resource.data.user_id == request.auth.uid)
+          )
+        );
+    }
+
+    // Only admins, service account, or backend can access analytics, promotions, activities
+    match /analytics/{docId} {
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
+    }
+    match /promotions/{docId} {
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
+    }
+    match /activities/{docId} {
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
+    }
+
+    // All other collections: only admins, service account, or backend
+    match /{document=**} {
+      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
+    }
+  }
+}

@@ -13,7 +13,8 @@ const getApiBaseUrl = () => {
   
   // For GitHub Pages deployment, always use the render.com backend
   if (isGitHubPages) {
-    return 'https://autopromote.onrender.com';
+    // Use canonical custom domain for API calls when served from GitHub Pages.
+    return 'https://www.autopromote.org';
   }
   
   // For local development, check if we're using localhost
@@ -30,14 +31,16 @@ const getApiBaseUrl = () => {
     const useProductionApi = process.env.REACT_APP_USE_PRODUCTION_API === 'true';
     
     if (useProductionApi) {
-      return 'https://autopromote.onrender.com';
+      // Force using production custom domain even in local dev.
+      return 'https://www.autopromote.org';
     }
     
     return `http://${window.location.hostname}:${localApiPort}`;
   }
   
   // Default to the production API URL for all other environments
-  return 'https://autopromote.onrender.com';
+  // Default to canonical custom domain.
+  return 'https://www.autopromote.org';
 };
 
 // The final API base URL to use for all API requests

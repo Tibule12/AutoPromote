@@ -1,0 +1,5 @@
+﻿Snyk scan summary
+Generated: 2025-10-31 14:51:50Z
+Project: autopromote-server
+Dependency count: 414
+Summary: No known vulnerabilities

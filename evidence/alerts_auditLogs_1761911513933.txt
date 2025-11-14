@@ -1,0 +1,19 @@
+Suspicious audit findings for collection auditLogs (since 2025-10-24T11:51:51.438Z)
+Found: 1 items
+Generated: 2025-10-31T11:51:53.934Z
+
+ID: bea31adb-f60d-4bdf-8f78-a3d9357228f7
+Time: 2025-10-31T11:36:59.061Z
+Reason: admin-related event
+Type: admin_test_event
+Sample: {
+  "id": "bea31adb-f60d-4bdf-8f78-a3d9357228f7",
+  "eventType": "admin_test_event",
+  "type": "admin_test_event",
+  "adminId": "test-admin-uid-123",
+  "adminEmail": "admin-redacted@example.com",
+  "status": "success",
+  "timestamp": "2025-10-31T11:36:59.061Z",
+  "at": "2025-10-31T11:36:59.061Z"
+}
+---
