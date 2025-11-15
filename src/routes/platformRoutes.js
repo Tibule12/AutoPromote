@@ -410,9 +410,10 @@ router.get('/spotify/auth/callback', async (req, res) => {
 });
 
 // Generic placeholder callback for other platforms
-router.get('/:platform/auth/callback', async (req, res) => {
+router.get('/:platform/auth/callback', async (req, res, next) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).send('Unsupported platform');
+  if (platform === 'linkedin') return next();
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   return res.send('Callback placeholder - implement OAuth exchange for ' + platform);
 });
