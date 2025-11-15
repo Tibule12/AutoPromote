@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import AuthAside from './AuthAside';
 import './Auth.css';
 
 const RegisterForm = ({ onRegister, onClose }) => {
@@ -40,8 +41,8 @@ const RegisterForm = ({ onRegister, onClose }) => {
     }
 
     try {
-  // Use the onRegister function passed from App.js
-  await onRegister(name, email, password);
+      // Use the onRegister function passed from App.js
+      await onRegister(name, email, password);
 
       setSuccess('Registration successful! Please check your email to verify your account before logging in.');
       setFormData({
@@ -51,11 +52,15 @@ const RegisterForm = ({ onRegister, onClose }) => {
         confirmPassword: ''
       });
       // After short delay, show login (consumer can reload / parent will swap component)
-      setTimeout(()=>{ try { if (typeof window !== 'undefined') window.location.href = '/'; } catch(_){} }, 4000);
+      setTimeout(() => {
+        try {
+          if (typeof window !== 'undefined') window.location.href = '/';
+        } catch (_) {}
+      }, 4000);
     } catch (error) {
       console.error('Registration error:', error);
       let errorMessage = 'Registration failed. ';
-      
+
       if (error.code) {
         switch (error.code) {
           case 'auth/email-already-in-use':
@@ -76,7 +81,7 @@ const RegisterForm = ({ onRegister, onClose }) => {
       } else {
         errorMessage += error.message || 'Unknown error occurred.';
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -84,90 +89,95 @@ const RegisterForm = ({ onRegister, onClose }) => {
   };
 
   return (
-    <div className="auth-container">
-      <form onSubmit={handleSubmit} className="auth-form">
-        <h2 className="auth-title">Create Account</h2>
-        {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">{success}</div>}
+    <div className="auth-page">
+      <div className="auth-shell">
+        <div className="auth-content">
+          <form onSubmit={handleSubmit} className="auth-form">
+            <h2 className="auth-title">Create Account</h2>
+            {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
 
-        <div className="form-group">
-          <label className="form-label">Full Name</label>
-          <input
-            type="text"
-            name="name"
-            className="form-input"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Enter your full name"
-            required
-            autoComplete="name"
-          />
+            <div className="form-group">
+              <label className="form-label">Full Name</label>
+              <input
+                type="text"
+                name="name"
+                className="form-input"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+                required
+                autoComplete="name"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                name="email"
+                className="form-input"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                required
+                autoComplete="email"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                name="password"
+                className="form-input"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Create a password"
+                required
+                autoComplete="new-password"
+              />
+              <p className="password-requirements">
+                Password must be at least 6 characters long
+              </p>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Confirm Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                className="form-input"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm your password"
+                required
+                autoComplete="new-password"
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="auth-button"
+            >
+              {isLoading ? (
+                <>
+                  <span className="loading-spinner"></span>
+                  Creating your account...
+                </>
+              ) : (
+                'Create Account'
+              )}
+            </button>
+            
+            <a href="#" onClick={(e) => { e.preventDefault(); if (onClose) onClose(); }} className="auth-link">
+              Already have an account? Sign in
+            </a>
+          </form>
         </div>
-
-        <div className="form-group">
-          <label className="form-label">Email</label>
-          <input
-            type="email"
-            name="email"
-            className="form-input"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter your email"
-            required
-            autoComplete="email"
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Password</label>
-          <input
-            type="password"
-            name="password"
-            className="form-input"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Create a password"
-            required
-            autoComplete="new-password"
-          />
-          <p className="password-requirements">
-            Password must be at least 6 characters long
-          </p>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Confirm Password</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            className="form-input"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            placeholder="Confirm your password"
-            required
-            autoComplete="new-password"
-          />
-        </div>
-
-        <button 
-          type="submit" 
-          disabled={isLoading}
-          className="auth-button"
-        >
-          {isLoading ? (
-            <>
-              <span className="loading-spinner"></span>
-              Creating your account...
-            </>
-          ) : (
-            'Create Account'
-          )}
-        </button>
-        
-        <a href="#" onClick={(e) => { e.preventDefault(); if (onClose) onClose(); }} className="auth-link">
-          Already have an account? Sign in
-        </a>
-      </form>
+        <AuthAside />
+      </div>
     </div>
   );
 };
