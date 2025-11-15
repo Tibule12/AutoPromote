@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import './Auth.css';
-import { API_BASE_URL } from './config';
 
 const LoginForm = ({ onLogin, onClose }) => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -18,7 +17,7 @@ const LoginForm = ({ onLogin, onClose }) => {
     e.preventDefault();
     setError('');
     if (!agreed) {
-      setError('Please agree to the Terms of Service before continuing.');
+      setError('Please agree to the Terms of Service and Privacy Policy before continuing.');
       return;
     }
     setIsLoading(true);
@@ -118,7 +117,7 @@ const LoginForm = ({ onLogin, onClose }) => {
             style={{marginTop:4}}
           />
           <label htmlFor="agreeTerms" className="form-label" style={{fontWeight:400}}>
-            I agree to the <a href={`${API_BASE_URL}/terms`} target="_blank" rel="noreferrer">Terms of Service</a>
+            I agree to the <a href="/terms" target="_blank" rel="noreferrer">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
           </label>
         </div>
 
