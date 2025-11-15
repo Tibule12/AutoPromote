@@ -45,6 +45,7 @@
   color: #4b5563;
   line-height: 1.4;
   margin-top: 0.35rem;
+  flex-wrap: wrap;
 }
 
 .terms-row input[type="checkbox"] {
@@ -60,6 +61,8 @@
 .terms-row .form-label {
   margin-bottom: 0;
   font-weight: 400;
+  flex: 1 1 240px;
+  display: inline;
 }
 
 .form-label {
