@@ -904,11 +904,15 @@ app.get(/^\/tiktok.*\.txt$/, (req, res) => {
 });
 
 // Legal policy pages
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/legal/privacy.html'));
+});
+
 app.get('/terms-of-service', routeLimiter({ windowHint: 'legal' }), (req, res) => {
   res.sendFile(path.join(__dirname, '../public/legal/terms.html'));
 });
 
-app.get(['/privacy-policy', '/privacy'], routeLimiter({ windowHint: 'legal' }), (req, res) => {
+app.get(['/privacy-policy'], routeLimiter({ windowHint: 'legal' }), (req, res) => {
   res.sendFile(path.join(__dirname, '../public/legal/privacy.html'));
 });
 
