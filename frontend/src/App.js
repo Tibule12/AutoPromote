@@ -602,8 +602,8 @@ function App() {
             try {
               const LoginForm = require('./LoginForm').default;
               return (
-                <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.45)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                  <div style={{background:'#fff',borderRadius:'18px',boxShadow:'0 8px 32px rgba(0,0,0,0.18)',padding:'2.5rem 2rem',minWidth:340,maxWidth:420}}>
+                <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.45)',zIndex:9999,overflowY:'auto'}}>
+                  <div style={{minHeight:'100%',display:'flex',justifyContent:'center',alignItems:'center',padding:'3.5rem 1.5rem'}}>
                     <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
                   </div>
                 </div>
@@ -617,8 +617,8 @@ function App() {
             try {
               const RegisterForm = require('./RegisterForm').default;
               return (
-                <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.45)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                  <div style={{background:'#fff',borderRadius:'18px',boxShadow:'0 8px 32px rgba(0,0,0,0.18)',padding:'2.5rem 2rem',minWidth:340,maxWidth:420}}>
+                <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.45)',zIndex:9999,overflowY:'auto'}}>
+                  <div style={{minHeight:'100%',display:'flex',justifyContent:'center',alignItems:'center',padding:'3.5rem 1.5rem'}}>
                     <RegisterForm onRegister={registerUser} onClose={() => setShowRegister(false)} />
                   </div>
                 </div>
