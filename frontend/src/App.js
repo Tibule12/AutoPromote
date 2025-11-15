@@ -589,7 +589,7 @@ function App() {
       {/* If no user, show welcome/login page */}
       {!user ? (
         <>
-          {(() => {
+          {!showLogin && !showRegister && (() => {
             try {
               const WelcomePage = require('./WelcomePage').default;
               return <WelcomePage onGetStarted={() => setShowRegister(true)} onSignIn={() => setShowLogin(true)} />;
@@ -602,8 +602,8 @@ function App() {
             try {
               const LoginForm = require('./LoginForm').default;
               return (
-                <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.45)',zIndex:9999,overflowY:'auto'}}>
-                  <div style={{minHeight:'100%',display:'flex',justifyContent:'center',alignItems:'center',padding:'3.5rem 1.5rem'}}>
+                <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',zIndex:9999,overflowY:'auto'}}>
+                  <div style={{minHeight:'100%',display:'flex',justifyContent:'center',alignItems:'flex-start',padding:'3rem 1.25rem'}}>
                     <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
                   </div>
                 </div>
@@ -617,8 +617,8 @@ function App() {
             try {
               const RegisterForm = require('./RegisterForm').default;
               return (
-                <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.45)',zIndex:9999,overflowY:'auto'}}>
-                  <div style={{minHeight:'100%',display:'flex',justifyContent:'center',alignItems:'center',padding:'3.5rem 1.5rem'}}>
+                <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',zIndex:9999,overflowY:'auto'}}>
+                  <div style={{minHeight:'100%',display:'flex',justifyContent:'center',alignItems:'flex-start',padding:'3rem 1.25rem'}}>
                     <RegisterForm onRegister={registerUser} onClose={() => setShowRegister(false)} />
                   </div>
                 </div>
