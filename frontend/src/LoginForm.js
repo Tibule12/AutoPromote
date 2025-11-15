@@ -125,15 +125,14 @@ const LoginForm = ({ onLogin, onClose }) => {
           />
         </div>
 
-        <div className="form-group" style={{ marginTop: 6, display: "flex", alignItems: "flex-start", gap: 8 }}>
+        <div className="form-group terms-row">
           <input
             id="agreeTerms"
             type="checkbox"
             checked={agreed}
             onChange={(event) => setAgreed(event.target.checked)}
-            style={{ marginTop: 4 }}
           />
-          <label htmlFor="agreeTerms" className="form-label" style={{ fontWeight: 400 }}>
+          <label htmlFor="agreeTerms" className="form-label">
             I agree to the <a href="/terms" target="_blank" rel="noreferrer">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
           </label>
         </div>
