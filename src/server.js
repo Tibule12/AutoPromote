@@ -492,6 +492,9 @@ try {
 const { db, auth, storage } = require('./firebaseAdmin');
 
 const app = express();
+// Honor X-Forwarded-* headers from Render/production proxies so req.protocol
+// reflects the original HTTPS scheme when we build OAuth redirect URLs.
+app.set('trust proxy', true);
 
 // CodeQL-recognizable rate limiters (express-rate-limit). These are additive to our
 // distributed limiter and provide a conservative global safety net to satisfy scanners.

@@ -119,10 +119,16 @@ router.post('/:platform/auth/prepare', authMiddleware, platformWriteLimiter, asy
       const clientId = process.env.LINKEDIN_CLIENT_ID;
       const { canonicalizeRedirect } = require('../utils/redirectUri');
       const redirectUri = canonicalizeRedirect(`${host}/api/linkedin/auth/callback`, { requiredPath: '/api/linkedin/auth/callback' });
-      // Basic scopes for profile + email, expand as needed
-      const scope = encodeURIComponent('r_liteprofile r_emailaddress w_member_social');
+      const rawScopes = process.env.LINKEDIN_SCOPES || process.env.LINKEDIN_SCOPE;
+      const defaultScopes = ['r_liteprofile', 'r_emailaddress'];
+      // Only request member social if explicitly enabled to avoid unauthorized_scope_error before approval
+      if (process.env.LINKEDIN_ENABLE_SHARING === 'true' || process.env.LINKEDIN_REQUIRE_W_MEMBER_SOCIAL === 'true') {
+        defaultScopes.push('w_member_social');
+      }
+      const scopes = rawScopes ? rawScopes.split(/\s+/).filter(Boolean) : defaultScopes;
+      const scope = encodeURIComponent(scopes.join(' '));
       const url = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=${scope}`;
-      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
+      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri, scopes });
     }
 
     // Default: return placeholder callback URL so frontend can open something
@@ -423,7 +429,14 @@ router.get('/linkedin/auth/callback', async (req, res) => {
   const platform = 'linkedin';
   const code = req.query.code;
   const state = req.query.state;
-  if (!code) return res.status(400).send('Missing code');
+  const oauthError = req.query.error;
+  const oauthErrorDescription = req.query.error_description;
+  if (oauthError) {
+    let message = oauthErrorDescription || oauthError;
+    try { message = decodeURIComponent(message); } catch (_) {}
+    return res.status(400).send(`LinkedIn authorization error: ${message}`);
+  }
+  if (!code) return res.status(400).send('Missing authorization code from LinkedIn');
   try {
     if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
     const clientId = process.env.LINKEDIN_CLIENT_ID;
