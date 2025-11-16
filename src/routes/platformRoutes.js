@@ -76,10 +76,13 @@ router.post('/:platform/auth/prepare', authMiddleware, platformWriteLimiter, asy
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   try {
-    const host = `${req.protocol}://${req.get('host')}`;
-    const uid = req.userId || req.user?.uid || null;
-    const crypto = require('crypto');
-    const state = crypto.randomBytes(18).toString('base64url');
+  const host = `${req.protocol}://${req.get('host')}`;
+  const uid = req.userId || req.user?.uid || null;
+  const crypto = require('crypto');
+  const baseState = crypto.randomBytes(18).toString('base64url');
+  // Support popup flows by appending a marker to the state when requested by the client.
+  const wantsPopup = !!(req.body && req.body.popup);
+  const state = wantsPopup ? `${baseState}:popup` : baseState;
     const now = Date.now();
     const expiresAt = new Date(now + (5 * 60 * 1000)).toISOString(); // 5 minutes
 
@@ -102,9 +105,10 @@ router.post('/:platform/auth/prepare', authMiddleware, platformWriteLimiter, asy
     }
     if (platform === 'discord') {
       const clientId = process.env.DISCORD_CLIENT_ID;
-      const redirectUri = `${host}/api/discord/auth/callback`;
+      // Prefer an explicit DISCORD_REDIRECT_URI env var when present (avoids host-guessing mismatches)
+      const redirectUri = process.env.DISCORD_REDIRECT_URI || `${host}/api/discord/auth/callback`;
       const scope = encodeURIComponent('identify guilds');
-      const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}`;
+      const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${encodeURIComponent(state)}`;
       return res.json({ ok: true, platform, authUrl: url, state });
     }
 
@@ -285,7 +289,7 @@ router.get('/discord/auth/callback', async (req, res) => {
     if (!fetchFn) return sendPlain(res, 500, 'Server missing fetch implementation');
     const clientId = process.env.DISCORD_CLIENT_ID;
     const clientSecret = process.env.DISCORD_CLIENT_SECRET;
-    const redirectUri = `${req.protocol}://${req.get('host')}/api/discord/auth/callback`;
+  const redirectUri = process.env.DISCORD_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/discord/auth/callback`;
     const tokenUrl = 'https://discord.com/api/oauth2/token';
     const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri, client_id: clientId, client_secret: clientSecret });
     const tokenRes = await fetchFn(tokenUrl, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
@@ -312,6 +316,7 @@ router.get('/discord/auth/callback', async (req, res) => {
     } catch (e) {
       console.warn('[oauth][discord] state lookup failed', e && e.message);
     }
+    // If state was stored with a :popup suffix, normalize it when doing legacy parsing
     if (!uid && state && state.split && state.split(':')[0]) uid = state.split(':')[0];
     if (uid && uid !== 'anon') {
       const userRef = db.collection('users').doc(uid);
@@ -339,7 +344,48 @@ router.get('/discord/auth/callback', async (req, res) => {
         console.warn('[platform][discord] post-connection hooks failed', e && e.message);
       }
     }
-    return sendPlain(res, 200, 'Discord OAuth callback received. You can close this window.');
+
+    // If the state indicates a popup flow (state ends with ':popup'), return a small HTML
+    // page that notifies the opener via postMessage and then closes itself.
+    const isPopup = typeof state === 'string' && state.endsWith(':popup');
+    if (isPopup) {
+      // The page posts a message to window.opener with platform/status to allow the parent window
+      // to know the flow completed without polling. Use FRONTEND_URL as the expected origin when possible.
+      const frontendOrigin = process.env.FRONTEND_URL ? new URL(process.env.FRONTEND_URL).origin : `${req.protocol}://${req.get('host').replace(/^api\./i, '')}`;
+      const html = `<!doctype html><html><head><meta charset="utf-8"><title>Discord Connect</title></head><body>
+<script>
+// Notify the opener (best-effort) and then close this popup. We try several
+// tactics because cross-origin restrictions may prevent some approaches in some browsers.
+try {
+  const payload = { platform: 'discord', status: 'success' };
+  // 1) Try targeted postMessage using the expected frontend origin
+  try { if (window.opener && !window.opener.closed) window.opener.postMessage(payload, '${frontendOrigin}'); } catch (e) {}
+  // 2) Fallback: permissive postMessage
+  try { if (window.opener && !window.opener.closed) window.opener.postMessage(payload, '*'); } catch (e) {}
+  // 3) Try to directly update the opener location (may throw cross-origin errors)
+  try { if (window.opener && !window.opener.closed) window.opener.location.href = '${frontendOrigin}/?oauth=discord&status=success'; } catch (e) {}
+} catch (e) {}
+// Give the parent a moment then close. If the browser blocks window.close for some reason
+// (shouldn't when opened by script), the user will still see the page text.
+setTimeout(() => { try { window.close(); } catch (e) { /* ignore */ } }, 400);
+</script>
+<p>Discord authorization complete. You can close this window.</p>
+</body></html>`;
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.status(200).send(html);
+    }
+
+    // Prefer redirecting back to the frontend app instead of showing a plain text page
+    // FRONTEND_URL should be set to your public frontend host (e.g. https://www.autopromote.org)
+    // Fallback: try to derive a frontend host by removing a leading "api." from the request host.
+    try {
+      const frontendBase = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host').replace(/^api\./i, '')}`;
+      const successUrl = `${frontendBase}/?oauth=discord&status=success`;
+      return res.redirect(successUrl);
+    } catch (e) {
+      // If redirect fails for any reason, fall back to the plain text response
+      return sendPlain(res, 200, 'Discord OAuth callback received. You can close this window.');
+    }
   } catch (e) {
     return sendPlain(res, 500, 'Discord callback error: ' + (e && e.message ? e.message : 'unknown error'));
   }
