@@ -305,6 +305,20 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
       window.history.replaceState({}, '', url);
     }
+    // New generic oauth redirect pattern: ?oauth=discord&status=success
+    if (params.get('oauth') === 'discord') {
+      const status = params.get('status');
+      if (status === 'success') {
+        setConnectBanner({ type: 'success', message: 'Discord connected successfully.' });
+        loadDiscordStatus();
+      } else {
+        setConnectBanner({ type: 'error', message: 'Discord connection failed.' });
+      }
+      params.delete('oauth');
+      params.delete('status');
+      const url = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
     if (params.get('linkedin')) {
       loadLinkedinStatus();
       params.delete('linkedin');
@@ -576,31 +590,54 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
       const prepUrl = API_ENDPOINTS.DISCORD_AUTH_START.replace('/auth/start', '/auth/prepare');
-      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json' } });
+      // Try to open a popup; if popup is allowed we'll request a popup-tailored state from the server.
+      const tryPopup = (() => {
+        try {
+          const w = window.open('', 'discord_connect_test');
+          if (!w || w.closed || typeof w.closed === 'undefined') return false;
+          w.close();
+          return true;
+        } catch (_) { return false; }
+      })();
+
+      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify({ popup: tryPopup }) });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Discord OAuth');
-      const popup = window.open(data.authUrl, 'discord_connect', 'width=900,height=700');
-      const poll = async () => {
-        for (let i = 0; i < 80; i++) {
-          await new Promise(r => setTimeout(r, 1500));
-          if (popup && popup.closed) break;
+      // If the server prepared the authUrl for popup flows, open a popup and wait for postMessage.
+      const authUrl = data.authUrl;
+      const popup = tryPopup ? window.open(authUrl, 'discord_connect', 'width=900,height=700') : null;
+
+      if (popup) {
+        // Listen for message from popup
+        const origin = new URL(window.location.href).origin;
+        let handled = false;
+        const listener = (ev) => {
           try {
-            const s = await currentUser.getIdToken(true);
-            const st = await fetch(API_ENDPOINTS.DISCORD_STATUS, { headers: { Authorization: `Bearer ${s}`, Accept: 'application/json' } });
-            if (st.ok) {
-              const sd = await st.json();
-              if (sd.connected) {
-                if (popup && !popup.closed) popup.close();
-                loadDiscordStatus();
-                return;
-              }
-            }
+            // Accept messages where the payload explicitly signals platform: 'discord'.
+            // For robustness allow any origin but ensure event.source matches the popup we opened.
+            if (!ev.data || ev.data.platform !== 'discord') return;
+            if (ev.source !== popup) return;
+            handled = true;
+            window.removeEventListener('message', listener);
+            try { if (popup && !popup.closed) popup.close(); } catch (_) {}
+            // Refresh status
+            loadDiscordStatus();
           } catch (_) {}
-        }
-        if (popup && !popup.closed) popup.close();
-        alert('Connection timed out or was closed. If you connected, try refreshing.');
-      };
-      poll();
+        };
+        window.addEventListener('message', listener);
+
+        // Timeout: if no message within 2 minutes, close popup and show alert
+        setTimeout(() => {
+          if (!handled) {
+            try { if (popup && !popup.closed) popup.close(); } catch (_) {}
+            window.removeEventListener('message', listener);
+            alert('Connection timed out or was closed. If you connected, try refreshing.');
+          }
+        }, 120000);
+      } else {
+        // Popup blocked or not available: navigate current tab to authUrl and rely on redirect back to frontend
+        window.location.href = authUrl;
+      }
     } catch (e) {
       alert(e.message || 'Unable to start Discord connect');
     }
