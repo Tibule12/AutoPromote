@@ -13,11 +13,7 @@ router.get('/linked-roles', handleDiscordLinkedRoles);
 
 // The interactions endpoint requires verification
 if (discordPublicKey) {
-    router.post('/interactions', express.json({
-        verify: (req, res, buf) => {
-            req.rawBody = buf;
-        }
-    }), verifyDiscordRequest(discordPublicKey), handleDiscordInteractions);
+    router.post('/interactions', verifyDiscordRequest(discordPublicKey), handleDiscordInteractions);
 } else {
     console.warn('⚠️ DISCORD_PUBLIC_KEY is not set. /api/discord/interactions endpoint is disabled.');
     router.post('/interactions', (req, res) => {
