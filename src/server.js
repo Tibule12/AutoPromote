@@ -511,6 +511,12 @@ try {
   routeLimiter = (opts = {}) => (req, res, next) => next();
 }
 
+const statusPublicLimiter = routeLimiter({
+  windowHint: 'status_public',
+  capacity: parseInt(process.env.RATE_LIMIT_STATUS_PUBLIC || '60', 10),
+  refillPerSec: parseFloat(process.env.RATE_LIMIT_STATUS_REFILL || '6')
+});
+
 // Facebook Data Deletion Instructions Page
 app.get('/facebook-data-deletion', (req, res) => {
   res.send(`
@@ -959,21 +965,21 @@ app.get('/admin-dashboard', (req, res) => {
 
 // Health check endpoint (supports verbose diagnostics via ?verbose=1 or header x-health-verbose=1)
 // Simple version endpoint (package version + commit hash if available)
-app.get('/api/version', (_req,res) => {
+app.get('/api/version', statusPublicLimiter, (_req,res) => {
   let pkgVersion = null; try { pkgVersion = require('../package.json').version; } catch(_){ }
   const commit = process.env.GIT_COMMIT || process.env.COMMIT_HASH || process.env.VERCEL_GIT_COMMIT_SHA || null;
   return res.json({ ok:true, version: pkgVersion, commit, generatedAt: new Date().toISOString() });
 });
 
 // Ultra-lightweight ping for uptime monitors (avoid heavy Firestore reads)
-app.get('/api/ping', (_req,res) => {
+app.get('/api/ping', statusPublicLimiter, (_req,res) => {
   res.setHeader('Cache-Control','no-store');
   return res.json({ ok:true, ts: Date.now() });
 });
 
 // Readiness endpoint (503 until warm-up completes unless disabled)
 const READINESS_REQUIRE_WARMUP = process.env.READINESS_REQUIRE_WARMUP !== 'false';
-app.get('/api/ready', (req,res) => {
+app.get('/api/ready', statusPublicLimiter, (req,res) => {
   const verbose = req.query.verbose === '1' || req.headers['x-ready-verbose'] === '1';
   if (!READINESS_REQUIRE_WARMUP) return res.json({ ready:true, disabled:true });
   if (!__warmupState.started) return res.status(503).json({ ready:false, state:'not_started' });
@@ -990,7 +996,7 @@ app.get('/api/ready', (req,res) => {
 // Cache extended diagnostics to avoid repeated heavy Firestore queries.
 let __healthCache = { ts:0, data:null };
 const HEALTH_CACHE_MS = parseInt(process.env.HEALTH_CACHE_MS || '15000',10); // 15s default
-app.get('/api/health', async (req, res) => {
+app.get('/api/health', statusPublicLimiter, async (req, res) => {
   const verbose = req.query.verbose === '1' || req.query.full === '1' || req.headers['x-health-verbose'] === '1';
   const base = {
     status: 'OK',

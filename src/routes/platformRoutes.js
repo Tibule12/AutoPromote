@@ -35,6 +35,18 @@ function normalize(name){
   return String(name||'').toLowerCase();
 }
 
+function sanitizeForText(message) {
+  return String(message || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function sendPlain(res, status, message) {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  return res.status(status).send(sanitizeForText(message));
+}
+
 // GET /api/:platform/status
 router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   const platform = normalize(req.params.platform);
@@ -201,9 +213,9 @@ router.get('/reddit/auth/callback', async (req, res) => {
   const platform = 'reddit';
   const code = req.query.code;
   const state = req.query.state;
-  if (!code) return res.status(400).send('Missing code');
+  if (!code) return sendPlain(res, 400, 'Missing code');
   try {
-    if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
+    if (!fetchFn) return sendPlain(res, 500, 'Server missing fetch implementation');
     const clientId = process.env.REDDIT_CLIENT_ID;
     const clientSecret = process.env.REDDIT_CLIENT_SECRET;
   const { canonicalizeRedirect } = require('../utils/redirectUri');
@@ -257,10 +269,9 @@ router.get('/reddit/auth/callback', async (req, res) => {
         console.warn('[platform][reddit] post-connection hooks failed', e && e.message);
       }
     }
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    return res.send('Reddit OAuth callback received. You can close this window.');
+    return sendPlain(res, 200, 'Reddit OAuth callback received. You can close this window.');
   } catch (e) {
-    return res.status(500).send('Reddit callback error: ' + e.message);
+    return sendPlain(res, 500, 'Reddit callback error: ' + (e && e.message ? e.message : 'unknown error'));
   }
 });
 
@@ -269,9 +280,9 @@ router.get('/discord/auth/callback', async (req, res) => {
   const platform = 'discord';
   const code = req.query.code;
   const state = req.query.state;
-  if (!code) return res.status(400).send('Missing code');
+  if (!code) return sendPlain(res, 400, 'Missing code');
   try {
-    if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
+    if (!fetchFn) return sendPlain(res, 500, 'Server missing fetch implementation');
     const clientId = process.env.DISCORD_CLIENT_ID;
     const clientSecret = process.env.DISCORD_CLIENT_SECRET;
     const redirectUri = `${req.protocol}://${req.get('host')}/api/discord/auth/callback`;
@@ -328,10 +339,9 @@ router.get('/discord/auth/callback', async (req, res) => {
         console.warn('[platform][discord] post-connection hooks failed', e && e.message);
       }
     }
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    return res.send('Discord OAuth callback received. You can close this window.');
+    return sendPlain(res, 200, 'Discord OAuth callback received. You can close this window.');
   } catch (e) {
-    return res.status(500).send('Discord callback error: ' + e.message);
+    return sendPlain(res, 500, 'Discord callback error: ' + (e && e.message ? e.message : 'unknown error'));
   }
 });
 
@@ -340,9 +350,9 @@ router.get('/spotify/auth/callback', async (req, res) => {
   const platform = 'spotify';
   const code = req.query.code;
   const state = req.query.state;
-  if (!code) return res.status(400).send('Missing code');
+  if (!code) return sendPlain(res, 400, 'Missing code');
   try {
-    if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
+    if (!fetchFn) return sendPlain(res, 500, 'Server missing fetch implementation');
     const clientId = process.env.SPOTIFY_CLIENT_ID;
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
   const { canonicalizeRedirect } = require('../utils/redirectUri');
@@ -408,10 +418,9 @@ router.get('/spotify/auth/callback', async (req, res) => {
       }
     }
 
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    return res.send('Spotify OAuth callback received. You can close this window.');
+    return sendPlain(res, 200, 'Spotify OAuth callback received. You can close this window.');
   } catch (e) {
-    return res.status(500).send('Spotify callback error: ' + e.message);
+    return sendPlain(res, 500, 'Spotify callback error: ' + (e && e.message ? e.message : 'unknown error'));
   }
 });
 
@@ -420,8 +429,7 @@ router.get('/:platform/auth/callback', async (req, res, next) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).send('Unsupported platform');
   if (platform === 'linkedin') return next();
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  return res.send('Callback placeholder - implement OAuth exchange for ' + platform);
+  return sendPlain(res, 200, 'Callback placeholder - implement OAuth exchange for ' + platform);
 });
 
 // GET /api/linkedin/auth/callback
@@ -434,11 +442,11 @@ router.get('/linkedin/auth/callback', async (req, res) => {
   if (oauthError) {
     let message = oauthErrorDescription || oauthError;
     try { message = decodeURIComponent(message); } catch (_) {}
-    return res.status(400).send(`LinkedIn authorization error: ${message}`);
+    return sendPlain(res, 400, `LinkedIn authorization error: ${message}`);
   }
-  if (!code) return res.status(400).send('Missing authorization code from LinkedIn');
+  if (!code) return sendPlain(res, 400, 'Missing authorization code from LinkedIn');
   try {
-    if (!fetchFn) return res.status(500).send('Server missing fetch implementation');
+  if (!fetchFn) return sendPlain(res, 500, 'Server missing fetch implementation');
     const clientId = process.env.LINKEDIN_CLIENT_ID;
     const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
     const host = `${req.protocol}://${req.get('host')}`;
@@ -497,10 +505,9 @@ router.get('/linkedin/auth/callback', async (req, res) => {
         console.warn('[platform][linkedin] post-connection hooks failed', e && e.message);
       }
     }
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    return res.send('LinkedIn OAuth callback received. You can close this window.');
+    return sendPlain(res, 200, 'LinkedIn OAuth callback received. You can close this window.');
   } catch (e) {
-    return res.status(500).send('LinkedIn callback error: ' + e.message);
+    return sendPlain(res, 500, 'LinkedIn callback error: ' + (e && e.message ? e.message : 'unknown error'));
   }
 });
 
