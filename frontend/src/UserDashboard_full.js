@@ -685,26 +685,44 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
       const prepUrl = API_ENDPOINTS.TELEGRAM_AUTH_START.replace('/auth/start', '/auth/prepare');
-      // Detect whether popups are allowed so we can open a popup and poll, or
-      // fall back to navigating the current tab when blocked (better UX).
-      const tryPopup = (() => {
-        try {
-          const w = window.open('', 'telegram_connect_test');
-          if (!w || w.closed || typeof w.closed === 'undefined') return false;
-          w.close();
-          return true;
-        } catch (_) { return false; }
-      })();
+      // Open a blank popup immediately on user click to preserve the user
+      // gesture (browsers only allow popups when initiated during a click).
+      // We'll navigate this popup after the prepare call returns. If the
+      // popup was blocked, fall back to same-tab navigation.
+      let popup = null;
+      try {
+        popup = window.open('', 'telegram_connect', 'width=900,height=700');
+        if (popup) {
+          try {
+            // Show minimal feedback while we prepare the URL
+            popup.document.title = 'Connecting to Telegram';
+            popup.document.body.innerHTML = '<p style="font-family:sans-serif;margin:24px">Opening Telegram... If nothing happens, please return to the app.</p>';
+          } catch (_) { /* ignore cross-origin after navigation */ }
+        }
+      } catch (_) { popup = null; }
 
-      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify({ popup: tryPopup }) });
+      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify({ popup: !!popup }) });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Telegram connect');
-      // If popups are allowed, open one and poll /api/telegram/status until
-      // the backend indicates the user is connected. If popups are blocked,
-      // navigate the current tab to the t.me link so the user can complete
-      // the flow there.
-      if (tryPopup) {
-        const popup = window.open(data.authUrl, 'telegram_connect', 'width=900,height=700');
+      // If we have a popup window, navigate it to the deep link (appUrl) or
+      // web t.me link. If popup was blocked, fall back to navigating the
+      // current tab (try native scheme first, then web fallback).
+      if (popup) {
+        const target = data.appUrl || data.authUrl;
+        try {
+          // Set a clickable fallback in the popup before navigating (in case
+          // the native scheme is blocked by the browser).
+          try {
+            const link = popup.document.getElementById('open-link');
+            if (link) link.href = target;
+          } catch (_) {}
+          popup.location.href = target;
+        } catch (e) {
+          // If navigation fails, open in a new tab as a last resort
+          try { window.open(target, '_blank'); } catch (_) { /* ignore */ }
+        }
+
+        // Start polling for connection status while popup is open
         const poll = async () => {
           for (let i = 0; i < 80; i++) {
             await new Promise(r => setTimeout(r, 1500));
@@ -729,17 +747,15 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       } else {
         // Popup blocked -> try native app deep link first, then fallback to web t.me
         const appUrl = data.appUrl || data.authUrl;
-        // Attempt to open native app. If it doesn't open within 1.5s, fallback to the web URL.
         try {
+          // Attempt to open native app in current tab
           window.location.href = appUrl;
           setTimeout(() => {
-            // If we used a native scheme, navigate to the web link as fallback
             if ((data.appUrl && data.appUrl.startsWith('tg://')) || !data.appUrl) {
               window.location.href = data.authUrl;
             }
           }, 1500);
         } catch (_) {
-          // If direct assignment failed, go to web URL
           window.location.href = data.authUrl;
         }
       }
