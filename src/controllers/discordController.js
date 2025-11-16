@@ -1,35 +1,27 @@
 const { verifyKey } = require('discord-interactions');
+const axios = require('axios');
 
-// Placeholder for Discord business logic
+// Handle slash commands and ping events from Discord
 async function handleDiscordInteractions(req, res) {
-    const { type, data } = req.body;
+    const { type, data } = req.body || {};
 
-    // PING-PONG for health check
-    if (type === 1) { // PING
-        return res.status(200).json({ type: 1 }); // PONG
+    if (type === 1) {
+        return res.status(200).json({ type: 1 });
     }
 
-    // Handle slash commands
-    if (type === 2) { // APPLICATION_COMMAND
+    if (type === 2 && data) {
         const { name } = data;
 
         if (name === 'hello') {
             return res.status(200).json({
-                type: 4, // CHANNEL_MESSAGE_WITH_SOURCE
-                data: {
-                    content: 'Hello from AutoPromote!',
-                },
+                type: 4,
+                data: { content: 'Hello from AutoPromote!' }
             });
         }
     }
 
     return res.status(404).send('Unknown interaction type');
 }
-
-const { verifyKey } = require('discord-interactions');
-const axios = require('axios');
-
-// ... (handleDiscordInteractions function remains the same) ...
 
 async function handleDiscordLinkedRoles(req, res) {
     const { code } = req.query;
@@ -91,15 +83,6 @@ async function handleDiscordLinkedRoles(req, res) {
     }
 }
 
-// ... (verifyDiscordRequest function remains the same) ...
-
-module.exports = {
-    handleDiscordInteractions,
-    handleDiscordLinkedRoles,
-    verifyDiscordRequest,
-};
-
-
 function verifyDiscordRequest(clientKey) {
     return (req, res, next) => {
         const signature = req.get('X-Signature-Ed25519');
@@ -118,7 +101,6 @@ function verifyDiscordRequest(clientKey) {
         next();
     };
 }
-
 
 module.exports = {
     handleDiscordInteractions,
