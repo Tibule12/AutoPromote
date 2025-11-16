@@ -127,8 +127,10 @@ router.post('/:platform/auth/prepare', authMiddleware, platformWriteLimiter, asy
       // The frontend will open this URL and the user must press Start in the bot.
       const botUser = process.env.TELEGRAM_BOT_USERNAME || process.env.TELEGRAM_BOT_NAME;
       if (!botUser) return res.status(500).json({ ok: false, error: 'telegram_bot_not_configured' });
-      const url = `https://t.me/${botUser}?start=${encodeURIComponent(state)}`;
-      return res.json({ ok: true, platform, authUrl: url, state });
+      const webUrl = `https://t.me/${botUser}?start=${encodeURIComponent(state)}`;
+      // Native app deep link (tg://) — useful to try opening the Telegram app directly
+      const appUrl = `tg://resolve?domain=${encodeURIComponent(botUser)}&start=${encodeURIComponent(state)}`;
+      return res.json({ ok: true, platform, authUrl: webUrl, appUrl, state });
     }
 
     if (platform === 'linkedin') {

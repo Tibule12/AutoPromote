@@ -727,8 +727,21 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
         };
         poll();
       } else {
-        // Popup blocked -> same-tab navigation
-        window.location.href = data.authUrl;
+        // Popup blocked -> try native app deep link first, then fallback to web t.me
+        const appUrl = data.appUrl || data.authUrl;
+        // Attempt to open native app. If it doesn't open within 1.5s, fallback to the web URL.
+        try {
+          window.location.href = appUrl;
+          setTimeout(() => {
+            // If we used a native scheme, navigate to the web link as fallback
+            if ((data.appUrl && data.appUrl.startsWith('tg://')) || !data.appUrl) {
+              window.location.href = data.authUrl;
+            }
+          }, 1500);
+        } catch (_) {
+          // If direct assignment failed, go to web URL
+          window.location.href = data.authUrl;
+        }
       }
     } catch (e) {
       alert(e.message || 'Unable to start Telegram connect');
