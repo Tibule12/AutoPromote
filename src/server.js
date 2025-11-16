@@ -685,6 +685,13 @@ try { app.use(require('./middlewares/securityHeaders')()); } catch(_){ }
 // Apply helmet (relaxed CSP off for React inline styles) & compression if available
 // Note: Second helmet call removed to avoid conflicts with the first comprehensive configuration
 if (compression) app.use(compression());
+// Discord interactions require the raw body for signature verification, so parse them before the global JSON middleware.
+app.use('/api/discord/interactions', express.json({
+  limit: '1mb',
+  verify: (req, _res, buf) => {
+    req.rawBody = Buffer.from(buf);
+  }
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
