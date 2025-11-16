@@ -685,31 +685,51 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
       const prepUrl = API_ENDPOINTS.TELEGRAM_AUTH_START.replace('/auth/start', '/auth/prepare');
-      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json' } });
+      // Detect whether popups are allowed so we can open a popup and poll, or
+      // fall back to navigating the current tab when blocked (better UX).
+      const tryPopup = (() => {
+        try {
+          const w = window.open('', 'telegram_connect_test');
+          if (!w || w.closed || typeof w.closed === 'undefined') return false;
+          w.close();
+          return true;
+        } catch (_) { return false; }
+      })();
+
+      const prep = await fetch(prepUrl, { method: 'POST', headers: { Authorization: `Bearer ${idToken}`, Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify({ popup: tryPopup }) });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Telegram connect');
-      const popup = window.open(data.authUrl, 'telegram_connect', 'width=900,height=700');
-      const poll = async () => {
-        for (let i = 0; i < 80; i++) {
-          await new Promise(r => setTimeout(r, 1500));
-          if (popup && popup.closed) break;
-          try {
-            const s = await currentUser.getIdToken(true);
-            const st = await fetch(API_ENDPOINTS.TELEGRAM_STATUS, { headers: { Authorization: `Bearer ${s}`, Accept: 'application/json' } });
-            if (st.ok) {
-              const sd = await st.json();
-              if (sd.connected) {
-                if (popup && !popup.closed) popup.close();
-                loadTelegramStatus();
-                return;
+      // If popups are allowed, open one and poll /api/telegram/status until
+      // the backend indicates the user is connected. If popups are blocked,
+      // navigate the current tab to the t.me link so the user can complete
+      // the flow there.
+      if (tryPopup) {
+        const popup = window.open(data.authUrl, 'telegram_connect', 'width=900,height=700');
+        const poll = async () => {
+          for (let i = 0; i < 80; i++) {
+            await new Promise(r => setTimeout(r, 1500));
+            if (popup && popup.closed) break;
+            try {
+              const s = await currentUser.getIdToken(true);
+              const st = await fetch(API_ENDPOINTS.TELEGRAM_STATUS, { headers: { Authorization: `Bearer ${s}`, Accept: 'application/json' } });
+              if (st.ok) {
+                const sd = await st.json();
+                if (sd.connected) {
+                  try { if (popup && !popup.closed) popup.close(); } catch (_) {}
+                  loadTelegramStatus();
+                  return;
+                }
               }
-            }
-          } catch (_) {}
-        }
-        if (popup && !popup.closed) popup.close();
-        alert('Connection timed out or was closed. If you connected, try refreshing.');
-      };
-      poll();
+            } catch (_) {}
+          }
+          try { if (popup && !popup.closed) popup.close(); } catch (_) {}
+          alert('Connection timed out or was closed. If you connected, try refreshing.');
+        };
+        poll();
+      } else {
+        // Popup blocked -> same-tab navigation
+        window.location.href = data.authUrl;
+      }
     } catch (e) {
       alert(e.message || 'Unable to start Telegram connect');
     }
