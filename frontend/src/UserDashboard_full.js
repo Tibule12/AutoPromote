@@ -779,17 +779,21 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (popup) {
         // Navigate the popup to a local interstitial page that provides
         // explicit 'Open in app' / 'Open in browser' buttons and instructions.
-        try {
-          const publicUrl = (process.env.PUBLIC_URL || '');
-          // Build an absolute URL to the interstitial so navigation works from about:blank
-          const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
-          const base = `${origin}${publicUrl || ''}/telegram-interstitial.html`;
-          const params = new URLSearchParams();
-          if (data.appUrl) params.set('appUrl', encodeURIComponent(data.appUrl));
-          if (data.authUrl) params.set('authUrl', encodeURIComponent(data.authUrl));
-          if (data.state) params.set('state', data.state);
-          if (data.bot) params.set('bot', data.bot);
-          const interstitial = `${base}?${params.toString()}`;
+          try {
+            // Build an absolute URL to the interstitial reliably.
+            // Use the origin and an absolute pathname so we don't accidentally
+            // pick up a malformed PUBLIC_URL or other build-time value that
+            // could turn into a path segment (which was causing URLs like
+            // `/tg%3A%2F%2F...` to be requested and return Not Found).
+            const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+            const baseUrl = new URL('/telegram-interstitial.html', origin).toString();
+            const params = new URLSearchParams();
+            // Let URLSearchParams handle encoding for us (don't double-encode)
+            if (data.appUrl) params.set('appUrl', data.appUrl);
+            if (data.authUrl) params.set('authUrl', data.authUrl);
+            if (data.state) params.set('state', data.state);
+            if (data.bot) params.set('bot', data.bot);
+            const interstitial = `${baseUrl}?${params.toString()}`;
           // Debug: log prepare response so we can inspect in browser devtools
           try { console.debug('Telegram prepare response', data, 'interstitial', interstitial); } catch (_) {}
           // Use window.open with the same window name to navigate the popup reliably
