@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Connect Telegram</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:#fff;color:#111;margin:0;padding:24px}
+    .wrap{max-width:720px;margin:32px auto;text-align:center}
+    h1{font-size:20px;margin-bottom:8px}
+    p{color:#444}
+    .btn{display:inline-block;margin:12px;padding:12px 18px;border-radius:8px;background:#0b89ff;color:#fff;text-decoration:none;font-weight:600}
+    .muted{color:#666;margin-top:8px}
+    .small{font-size:13px;color:#666}
+    .actions{margin-top:20px}
+    .note{margin-top:18px;color:#333;background:#f7f9fc;padding:12px;border-radius:8px;border:1px solid #eef2f8}
+    .copy{background:#e6eefc;color:#0b59b0;border-radius:6px;padding:6px 8px;cursor:pointer;margin-left:8px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Opening Telegram...</h1>
+    <p class="muted">If Telegram opened on your device, go to the bot chat and press <strong>Start</strong>. If nothing happened, use the buttons below.</p>
+
+    <div class="actions">
+      <a id="open-app" class="btn">Open in Telegram app</a>
+      <a id="open-web" class="btn" style="background:#222;margin-left:8px">Open in browser</a>
+    </div>
+
+    <div class="note" id="stateNote">Preparing...</div>
+
+    <div style="margin-top:12px" class="small">Tip: if you're on desktop and nothing happens, open Telegram, search for the bot username and press Start.</div>
+
+    <div style="margin-top:18px">
+      <button id="close" style="padding:8px 12px;border-radius:6px">Close</button>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const params = new URLSearchParams(window.location.search);
+      const appUrl = params.get('appUrl') || '';
+      const authUrl = params.get('authUrl') || '';
+      const state = params.get('state') || '';
+      const bot = params.get('bot') || '';
+      const openApp = document.getElementById('open-app');
+      const openWeb = document.getElementById('open-web');
+      const note = document.getElementById('stateNote');
+      const closeBtn = document.getElementById('close');
+
+      note.textContent = bot ? `Bot: ${bot} · State: ${state}` : `State: ${state}`;
+
+      openApp.href = appUrl || authUrl || '#';
+      openApp.onclick = function(e){
+        if (!appUrl) { return true; }
+        try { window.location.href = appUrl; } catch (err) { window.open(appUrl, '_self'); }
+        e.preventDefault();
+        return false;
+      };
+
+      openWeb.href = authUrl || appUrl || '#';
+      openWeb.onclick = function(){ return true; };
+
+      closeBtn.onclick = function(){ window.close(); };
+
+      // Auto-attempt native open on load (non-blocking)
+      if (appUrl) {
+        setTimeout(function(){
+          try { window.location.href = appUrl; } catch(_) { /* ignore */ }
+        }, 300);
+      }
+
+      // If the opener exists on same-origin, request it to check status periodically.
+      const origin = window.location.origin;
+      let interval = null;
+      function requestStatus(){
+        try{
+          if (window.opener && !window.opener.closed) {
+            window.opener.postMessage({ type: 'telegram:status:check', state }, origin);
+          }
+        }catch(_){}
+      }
+
+      // Listen for response from opener
+      window.addEventListener('message', (ev) => {
+        try {
+          if (ev.origin !== origin) return; // only accept same-origin replies
+          const d = ev.data || {};
+          if (d.type === 'telegram:status:response') {
+            if (d.connected) {
+              // Show confirmation then close
+              document.body.innerHTML = '<div style="padding:40px;text-align:center;font-family:system-ui;font-size:18px">Connected — closing…</div>';
+              setTimeout(() => { try { window.close(); } catch (_) {} }, 500);
+            }
+          }
+        } catch(_) {}
+      });
+
+      // Start asking opener to check status every 1.5s for up to 2 minutes
+      interval = setInterval(requestStatus, 1500);
+      setTimeout(() => { clearInterval(interval); interval = null; }, 120000);
+    })();
+  </script>
+</body>
+</html>

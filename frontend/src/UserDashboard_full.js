@@ -339,6 +339,48 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     }
   }, [user?.uid]);
 
+  // Listen for postMessage requests from popup interstitials asking the
+  // parent to check Telegram status. This allows the popup (same-origin)
+  // to ask the opener to perform the authenticated status check and
+  // reply with the result so the popup can close itself.
+  useEffect(() => {
+    const origin = window.location.origin;
+    const listener = (ev) => {
+      try {
+        if (ev.origin !== origin) return; // only accept same-origin
+        const data = ev.data || {};
+        if (data && data.type === 'telegram:status:check') {
+          (async () => {
+            try {
+              const currentUser = auth.currentUser;
+              if (!currentUser) {
+                ev.source.postMessage({ type: 'telegram:status:response', connected: false }, ev.origin);
+                return;
+              }
+              const token = await currentUser.getIdToken(true);
+              const st = await fetch(API_ENDPOINTS.TELEGRAM_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+              if (!st.ok) {
+                ev.source.postMessage({ type: 'telegram:status:response', connected: false }, ev.origin);
+                return;
+              }
+              const sd = await st.json();
+              const connected = !!sd.connected;
+              ev.source.postMessage({ type: 'telegram:status:response', connected }, ev.origin);
+              if (connected) {
+                // Refresh main UI status
+                loadTelegramStatus();
+              }
+            } catch (e) {
+              try { ev.source.postMessage({ type: 'telegram:status:response', connected: false }, ev.origin); } catch (_) {}
+            }
+          })();
+        }
+      } catch (_) {}
+    };
+    window.addEventListener('message', listener);
+    return () => window.removeEventListener('message', listener);
+  }, [user?.uid]);
+
   const togglePlatform = (name) => {
     setSelectedPlatforms((prev) =>
       prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]
@@ -708,17 +750,26 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       // web t.me link. If popup was blocked, fall back to navigating the
       // current tab (try native scheme first, then web fallback).
       if (popup) {
-        const target = data.appUrl || data.authUrl;
+        // Navigate the popup to a local interstitial page that provides
+        // explicit 'Open in app' / 'Open in browser' buttons and instructions.
         try {
-          // Set a clickable fallback in the popup before navigating (in case
-          // the native scheme is blocked by the browser).
+          const publicUrl = (process.env.PUBLIC_URL || '');
+          const base = `${publicUrl}/telegram-interstitial.html`;
+          const params = new URLSearchParams();
+          if (data.appUrl) params.set('appUrl', data.appUrl);
+          if (data.authUrl) params.set('authUrl', data.authUrl);
+          if (data.state) params.set('state', data.state);
+          if (data.bot) params.set('bot', data.bot);
+          const interstitial = `${base}?${params.toString()}`;
+          // Try to set a fallback link if the blank popup DOM is reachable
           try {
             const link = popup.document.getElementById('open-link');
-            if (link) link.href = target;
+            if (link) link.href = data.appUrl || data.authUrl || '';
           } catch (_) {}
-          popup.location.href = target;
+          popup.location.href = interstitial;
         } catch (e) {
-          // If navigation fails, open in a new tab as a last resort
+          // If navigation fails, open the target directly as a last resort
+          const target = data.appUrl || data.authUrl;
           try { window.open(target, '_blank'); } catch (_) { /* ignore */ }
         }
 
