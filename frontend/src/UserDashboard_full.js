@@ -217,6 +217,39 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     }
   };
 
+  // Short-lived in-memory cache + inflight guard for Telegram status checks.
+  // This prevents duplicate simultaneous fetches from popup + main page
+  // (which was causing many slow requests and occasional 429s).
+  const telegramStatusCacheRef = { current: { ts: 0, data: null } };
+  let telegramStatusInflightRef = false;
+  const fetchTelegramStatusCached = async () => {
+    const now = Date.now();
+    const cache = telegramStatusCacheRef.current;
+    if (cache.ts && (now - cache.ts) < 1000 && cache.data) return cache.data;
+    if (telegramStatusInflightRef) return cache.data || { connected: false };
+    telegramStatusInflightRef = true;
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        telegramStatusCacheRef.current = { ts: Date.now(), data: { connected: false } };
+        return telegramStatusCacheRef.current.data;
+      }
+      const token = await currentUser.getIdToken(true);
+      const st = await fetch(API_ENDPOINTS.TELEGRAM_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!st.ok) {
+        telegramStatusCacheRef.current = { ts: Date.now(), data: { connected: false } };
+        return telegramStatusCacheRef.current.data;
+      }
+      const sd = await st.json();
+      telegramStatusCacheRef.current = { ts: Date.now(), data: sd };
+      return sd;
+    } catch (e) {
+      return telegramStatusCacheRef.current.data || { connected: false };
+    } finally {
+      telegramStatusInflightRef = false;
+    }
+  };
+
   useEffect(() => {
     try {
       const qp = new URLSearchParams(window.location.search);
@@ -344,6 +377,9 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   // to ask the opener to perform the authenticated status check and
   // reply with the result so the popup can close itself.
   useEffect(() => {
+    // Use the shared cached fetch (defined above) to avoid duplicating
+    // cache/inflight logic here. This keeps a single source of truth and
+    // prevents multiple slightly-different implementations from diverging.
     const origin = window.location.origin;
     const listener = (ev) => {
       try {
@@ -352,20 +388,11 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
         if (data && data.type === 'telegram:status:check') {
           (async () => {
             try {
-              const currentUser = auth.currentUser;
-              if (!currentUser) {
-                ev.source.postMessage({ type: 'telegram:status:response', connected: false }, ev.origin);
-                return;
-              }
-              const token = await currentUser.getIdToken(true);
-              const st = await fetch(API_ENDPOINTS.TELEGRAM_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-              if (!st.ok) {
-                ev.source.postMessage({ type: 'telegram:status:response', connected: false }, ev.origin);
-                return;
-              }
-              const sd = await st.json();
+              // Delegate to shared cached fetch which handles auth, caching
+              // and inflight guarding.
+              const sd = await fetchTelegramStatusCached();
               const connected = !!sd.connected;
-              ev.source.postMessage({ type: 'telegram:status:response', connected }, ev.origin);
+              try { ev.source.postMessage({ type: 'telegram:status:response', connected }, ev.origin); } catch (_) {}
               if (connected) {
                 // Refresh main UI status
                 loadTelegramStatus();
