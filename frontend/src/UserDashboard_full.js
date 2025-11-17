@@ -754,19 +754,27 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
         // explicit 'Open in app' / 'Open in browser' buttons and instructions.
         try {
           const publicUrl = (process.env.PUBLIC_URL || '');
-          const base = `${publicUrl}/telegram-interstitial.html`;
+          // Build an absolute URL to the interstitial so navigation works from about:blank
+          const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+          const base = `${origin}${publicUrl || ''}/telegram-interstitial.html`;
           const params = new URLSearchParams();
-          if (data.appUrl) params.set('appUrl', data.appUrl);
-          if (data.authUrl) params.set('authUrl', data.authUrl);
+          if (data.appUrl) params.set('appUrl', encodeURIComponent(data.appUrl));
+          if (data.authUrl) params.set('authUrl', encodeURIComponent(data.authUrl));
           if (data.state) params.set('state', data.state);
           if (data.bot) params.set('bot', data.bot);
           const interstitial = `${base}?${params.toString()}`;
-          // Try to set a fallback link if the blank popup DOM is reachable
+          // Debug: log prepare response so we can inspect in browser devtools
+          try { console.debug('Telegram prepare response', data, 'interstitial', interstitial); } catch (_) {}
+          // Use window.open with the same window name to navigate the popup reliably
           try {
-            const link = popup.document.getElementById('open-link');
-            if (link) link.href = data.appUrl || data.authUrl || '';
-          } catch (_) {}
-          popup.location.href = interstitial;
+            window.open(interstitial, 'telegram_connect');
+          } catch (e) {
+            // If that fails, fallback to setting location on the popup
+            try { popup.location.href = interstitial; } catch (_) {
+              const target = data.appUrl || data.authUrl;
+              try { window.open(target, '_blank'); } catch (_) { /* ignore */ }
+            }
+          }
         } catch (e) {
           // If navigation fails, open the target directly as a last resort
           const target = data.appUrl || data.authUrl;
