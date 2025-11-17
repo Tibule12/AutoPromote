@@ -16,6 +16,14 @@ const platformPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_
 const platformWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'platform_writes' });
 const platformWebhookLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_WEBHOOK || '300', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '50'), windowHint: 'platform_webhook' });
 
+// Lightweight in-memory cache for platform status checks to reduce duplicate
+// Firestore reads when many clients poll /api/:platform/status frequently.
+// Keyed by `${uid}:${platform}` with a short TTL. This is process-local and
+// intended as a quick mitigation to prevent high request fan-out while we
+// consider a more robust central cache (Redis) if needed.
+const platformStatusCache = new Map();
+const PLATFORM_STATUS_TTL_MS = parseInt(process.env.PLATFORM_STATUS_TTL_MS || '3000', 10);
+
 // Try to use global fetch (Node 18+). Fall back to node-fetch if available.
 let fetchFn = global.fetch;
 if (!fetchFn) {
@@ -53,19 +61,53 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   const uid = req.userId || req.user?.uid;
   if (!uid) return res.json({ ok: true, platform, connected: false });
-  try {
-    const userRef = db.collection('users').doc(uid);
-    const snap = await userRef.collection('connections').doc(platform).get();
-    if (snap.exists) {
-      return res.json({ ok: true, platform, connected: true, meta: snap.data() });
+
+  const cacheKey = `${uid}:${platform}`;
+  const now = Date.now();
+  const cached = platformStatusCache.get(cacheKey);
+  if (cached && cached.data && (now - cached.ts) < PLATFORM_STATUS_TTL_MS) {
+    return res.json(cached.data);
+  }
+  if (cached && cached.inflight) {
+    try {
+      const d = await cached.inflight;
+      return res.json(d);
+    } catch (_) {
+      // fallthrough to attempt a fresh fetch
     }
-    // Fallback: try to infer from top-level user doc
-    const userSnap = await userRef.get();
-    const u = userSnap.exists ? userSnap.data() || {} : {};
-    const inferred = !!(u[`${platform}Token`] || u[`${platform}AccessToken`] || u[`${platform}Identity`] || u[`${platform}Profile`]);
-    return res.json({ ok: true, platform, connected: inferred, inferred });
+  }
+
+  // Create an inflight promise so concurrent callers share the same work
+  const inflight = (async () => {
+    try {
+      const userRef = db.collection('users').doc(uid);
+      const snap = await userRef.collection('connections').doc(platform).get();
+      if (snap.exists) {
+        return { ok: true, platform, connected: true, meta: snap.data() };
+      }
+      // Fallback: try to infer from top-level user doc
+      const userSnap = await userRef.get();
+      const u = userSnap.exists ? userSnap.data() || {} : {};
+      const inferred = !!(u[`${platform}Token`] || u[`${platform}AccessToken`] || u[`${platform}Identity`] || u[`${platform}Profile`]);
+      return { ok: true, platform, connected: inferred, inferred };
+    } catch (e) {
+      // Return an error-shaped object so callers get the message; avoid throwing to keep inflight promise stable
+      return { ok: false, platform, error: e && e.message ? e.message : 'unknown_error' };
+    }
+  })();
+
+  // Store inflight so others can await it
+  platformStatusCache.set(cacheKey, { ts: Date.now(), data: null, inflight });
+
+  try {
+    const result = await inflight;
+    // Cache the final result (even errors) for a short TTL to avoid tight retry loops
+    platformStatusCache.set(cacheKey, { ts: Date.now(), data: result, inflight: null });
+    if (result && result.ok === false && result.error) return res.status(500).json(result);
+    return res.json(result);
   } catch (e) {
-    return res.status(500).json({ ok: false, platform, error: e.message });
+    platformStatusCache.delete(cacheKey);
+    return res.status(500).json({ ok: false, platform, error: e && e.message ? e.message : 'unknown_error' });
   }
 });
 
