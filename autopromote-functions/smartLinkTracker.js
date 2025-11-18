@@ -1,6 +1,6 @@
 const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('./lib/uuid-compat');
 
 const region = 'us-central1';
 
