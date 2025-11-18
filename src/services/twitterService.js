@@ -5,9 +5,11 @@ const fetch = require('node-fetch');
 const crypto = require('crypto');
 const { db, admin } = require('../firebaseAdmin');
 const { encryptToken, decryptToken, hasEncryption } = require('./secretVault');
+const { safeFetch } = require('../utils/ssrfGuard');
 
 const TOKEN_URL = 'https://api.twitter.com/2/oauth2/token';
 const AUTH_BASE = 'https://twitter.com/i/oauth2/authorize';
+const TWEET_URL = 'https://api.twitter.com/2/tweets';
 const SCOPES = (process.env.TWITTER_SCOPES || 'tweet.read tweet.write users.read offline.access').split(/\s+/).filter(Boolean);
 
 function generatePkcePair() {
@@ -63,8 +65,6 @@ async function exchangeCode({ code, code_verifier, redirectUri, clientId }) {
   if (clientSecret) {
     headers['Authorization'] = 'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
   }
-  // Use safeFetch for SSRF protection
-  const { safeFetch } = require('../utils/ssrfGuard');
   const res = await safeFetch(TOKEN_URL, fetch, {
     fetchOptions: { method: 'POST', headers, body },
     requireHttps: true,
@@ -90,8 +90,6 @@ async function refreshToken({ refresh_token, clientId }) {
   if (clientSecret) {
     headers['Authorization'] = 'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
   }
-  // Use safeFetch for SSRF protection
-  const { safeFetch } = require('../utils/ssrfGuard');
   const res = await safeFetch(TOKEN_URL, fetch, {
     fetchOptions: { method: 'POST', headers, body },
     requireHttps: true,
@@ -174,6 +172,236 @@ async function cleanupOldStates(maxAgeMinutes = 30) {
   return query.docs.length;
 }
 
+/**
+ * Post a tweet to Twitter using user's OAuth token
+ * @param {Object} params - Tweet parameters
+ * @param {string} params.uid - User ID
+ * @param {string} params.text - Tweet text (required)
+ * @param {string} [params.contentId] - Content ID for tracking
+ * @param {Array<string>} [params.mediaIds] - Array of media IDs (from media upload)
+ * @param {string} [params.replyToTweetId] - Tweet ID to reply to
+ * @returns {Promise<Object>} Tweet creation result
+ */
+async function postTweet({ uid, text, contentId, mediaIds, replyToTweetId }) {
+  if (!uid) throw new Error('uid required');
+  if (!text || typeof text !== 'string') throw new Error('text required and must be a string');
+  if (text.length > 280) throw new Error('Tweet text exceeds 280 characters');
+
+  // Get valid access token (will refresh if needed)
+  const accessToken = await getValidAccessToken(uid);
+  if (!accessToken) throw new Error('No valid Twitter access token found');
+
+  // Build tweet payload
+  const tweetPayload = { text };
+  
+  // Add media if provided
+  if (mediaIds && Array.isArray(mediaIds) && mediaIds.length > 0) {
+    tweetPayload.media = { media_ids: mediaIds };
+  }
+  
+  // Add reply if provided
+  if (replyToTweetId) {
+    tweetPayload.reply = { in_reply_to_tweet_id: replyToTweetId };
+  }
+
+  // Post tweet using Twitter API v2
+  const response = await safeFetch(TWEET_URL, fetch, {
+    fetchOptions: {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(tweetPayload)
+    },
+    requireHttps: true,
+    allowHosts: ['api.twitter.com']
+  });
+
+  const responseText = await response.text();
+  let responseData;
+  try {
+    responseData = JSON.parse(responseText);
+  } catch (e) {
+    responseData = { raw: responseText };
+  }
+
+  if (!response.ok) {
+    const errorMsg = responseData.detail || responseData.title || responseData.error || 'Twitter API error';
+    throw new Error(`Twitter posting failed: ${errorMsg}`);
+  }
+
+  const tweetId = responseData.data?.id;
+  const tweetText = responseData.data?.text;
+
+  // Store tweet info in Firestore if contentId provided
+  if (contentId && tweetId) {
+    try {
+      const contentRef = db.collection('content').doc(contentId);
+      const existing = await contentRef.get();
+      const existingData = existing.exists ? existing.data().twitter || {} : {};
+      
+      await contentRef.set({
+        twitter: {
+          ...existingData,
+          tweetId,
+          text: tweetText || text,
+          postedAt: new Date().toISOString(),
+          createdAt: existingData.createdAt || admin.firestore.FieldValue.serverTimestamp(),
+          lastUpdatedAt: admin.firestore.FieldValue.serverTimestamp()
+        }
+      }, { merge: true });
+    } catch (e) {
+      console.warn('[Twitter] Failed to store tweet info in Firestore:', e.message);
+    }
+  }
+
+  return {
+    success: true,
+    platform: 'twitter',
+    tweetId,
+    text: tweetText || text,
+    url: tweetId ? `https://twitter.com/i/web/status/${tweetId}` : null,
+    raw: responseData
+  };
+}
+
+/**
+ * Upload media to Twitter for use in tweets
+ * @param {Object} params - Media upload parameters
+ * @param {string} params.uid - User ID
+ * @param {string} params.mediaUrl - URL of media to upload
+ * @param {string} [params.mediaType] - Media type (image/jpeg, image/png, video/mp4, etc.)
+ * @returns {Promise<string>} Media ID for use in tweet
+ */
+async function uploadMedia({ uid, mediaUrl, mediaType = 'image/jpeg' }) {
+  if (!uid) throw new Error('uid required');
+  if (!mediaUrl) throw new Error('mediaUrl required');
+
+  const accessToken = await getValidAccessToken(uid);
+  if (!accessToken) throw new Error('No valid Twitter access token found');
+
+  // Download media from URL
+  const mediaResponse = await safeFetch(mediaUrl, fetch, { requireHttps: true });
+  if (!mediaResponse.ok) throw new Error('Failed to download media from URL');
+  
+  const mediaBuffer = await mediaResponse.buffer();
+  const mediaSize = mediaBuffer.length;
+
+  // Twitter media upload uses v1.1 API with multipart/form-data
+  // This is a simplified implementation - for production, consider using a library like 'form-data'
+  const UPLOAD_URL = 'https://upload.twitter.com/1.1/media/upload.json';
+  
+  // INIT phase
+  const initResponse = await safeFetch(UPLOAD_URL, fetch, {
+    fetchOptions: {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        command: 'INIT',
+        total_bytes: mediaSize.toString(),
+        media_type: mediaType
+      })
+    },
+    requireHttps: true,
+    allowHosts: ['upload.twitter.com']
+  });
+
+  const initData = await initResponse.json();
+  if (!initResponse.ok) throw new Error('Twitter media upload INIT failed');
+  
+  const mediaId = initData.media_id_string;
+
+  // APPEND phase (simplified - in production, chunk large files)
+  const FormData = require('form-data');
+  const formData = new FormData();
+  formData.append('command', 'APPEND');
+  formData.append('media_id', mediaId);
+  formData.append('media', mediaBuffer, { filename: 'media', contentType: mediaType });
+  formData.append('segment_index', '0');
+
+  const appendResponse = await fetch(UPLOAD_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      ...formData.getHeaders()
+    },
+    body: formData
+  });
+
+  if (!appendResponse.ok) throw new Error('Twitter media upload APPEND failed');
+
+  // FINALIZE phase
+  const finalizeResponse = await safeFetch(UPLOAD_URL, fetch, {
+    fetchOptions: {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        command: 'FINALIZE',
+        media_id: mediaId
+      })
+    },
+    requireHttps: true,
+    allowHosts: ['upload.twitter.com']
+  });
+
+  const finalizeData = await finalizeResponse.json();
+  if (!finalizeResponse.ok) throw new Error('Twitter media upload FINALIZE failed');
+
+  // Check processing status if needed
+  if (finalizeData.processing_info) {
+    // For video/gif, may need to poll STATUS
+    // Simplified: just wait a bit
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+
+  return mediaId;
+}
+
+/**
+ * Get tweet statistics
+ * @param {Object} params - Parameters
+ * @param {string} params.uid - User ID
+ * @param {string} params.tweetId - Tweet ID
+ * @returns {Promise<Object>} Tweet stats
+ */
+async function getTweetStats({ uid, tweetId }) {
+  if (!uid) throw new Error('uid required');
+  if (!tweetId) throw new Error('tweetId required');
+
+  const accessToken = await getValidAccessToken(uid);
+  if (!accessToken) throw new Error('No valid Twitter access token found');
+
+  const url = `https://api.twitter.com/2/tweets/${tweetId}?tweet.fields=public_metrics,created_at`;
+  
+  const response = await safeFetch(url, fetch, {
+    fetchOptions: {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    },
+    requireHttps: true,
+    allowHosts: ['api.twitter.com']
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error('Failed to fetch tweet stats');
+
+  return {
+    tweetId,
+    metrics: data.data?.public_metrics || {},
+    createdAt: data.data?.created_at,
+    fetchedAt: new Date().toISOString()
+  };
+}
+
 module.exports = {
   generatePkcePair,
   createAuthStateDoc,
@@ -182,5 +410,8 @@ module.exports = {
   exchangeCode,
   storeUserTokens,
   getValidAccessToken,
-  cleanupOldStates
+  cleanupOldStates,
+  postTweet,
+  uploadMedia,
+  getTweetStats
 };
