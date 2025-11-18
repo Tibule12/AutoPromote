@@ -7,11 +7,13 @@ const authMiddleware = async (req, res, next) => {
     const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
     // Allow integration test bypass with special token
     if (token === 'test-token-for-testUser123') {
+      req.userId = 'testUser123';
       req.user = { uid: 'testUser123', email: 'testuser@example.com', test: true };
       return next();
     }
     // Allow integration test bypass for admin user
     if (token === 'test-token-for-adminUser') {
+      req.userId = 'adminUser123';
       req.user = { uid: 'adminUser123', email: 'admin@example.com', role: 'admin', isAdmin: true };
       return next();
     }
