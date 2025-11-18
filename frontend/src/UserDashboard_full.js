@@ -47,6 +47,29 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const safeLandingUrl = typeof firstItem?.landingPageUrl === 'string' ? firstItem.landingPageUrl : undefined;
   const safeSmartLink = typeof firstItem?.smartLink === 'string' ? firstItem.smartLink : undefined;
 
+  // Allowlist for safe OAuth redirect targets. This protects against open
+  // redirects by ensuring client-side navigation only follows known provider
+  // hostnames or same-origin redirects. If an allowed hostname appears in
+  // the future, add it here.
+  const isAllowedAuthUrl = (url) => {
+    try {
+      if (!url || typeof url !== 'string') return false;
+      if (url.startsWith('tg:') || url.startsWith('tg://')) return true;
+      const u = new URL(url);
+      const allowed = new Set([
+        'sandbox.tiktok.com', 'www.tiktok.com', 'open.tiktokapis.com',
+        'accounts.google.com', 'oauth2.googleapis.com',
+        'www.facebook.com', 'connect.facebook.net', 'api.twitter.com',
+        'www.youtube.com', 'accounts.youtube.com',
+        't.me', 'web.telegram.org', 'discord.com', 'www.linkedin.com',
+        'www.pinterest.com', 'accounts.spotify.com', 'www.reddit.com'
+      ]);
+      if (allowed.has(u.hostname)) return true;
+      if (u.origin === window.location.origin) return true;
+    } catch (_) {}
+    return false;
+  };
+
   const handleNav = (tab) => {
     setActiveTab(tab);
     setSidebarOpen(false);
@@ -505,7 +528,13 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare TikTok OAuth');
-      window.location.href = data.authUrl;
+      // Only navigate to allowlisted OAuth providers to avoid open redirects
+      if (isAllowedAuthUrl(data.authUrl)) {
+        window.location.href = data.authUrl;
+      } else {
+        // Fallback: open in new tab if not technically allowed by default
+        window.open(data.authUrl, '_blank');
+      }
     } catch (e) {
       alert(e.message || 'Unable to start TikTok connect');
     }
@@ -522,7 +551,11 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Facebook OAuth');
-      window.location.href = data.authUrl;
+      if (isAllowedAuthUrl(data.authUrl)) {
+        window.location.href = data.authUrl;
+      } else {
+        window.open(data.authUrl, '_blank');
+      }
     } catch (e) {
       alert(e.message || 'Unable to start Facebook connect');
     }
@@ -539,7 +572,11 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare YouTube OAuth');
-      window.location.href = data.authUrl;
+      if (isAllowedAuthUrl(data.authUrl)) {
+        window.location.href = data.authUrl;
+      } else {
+        window.open(data.authUrl, '_blank');
+      }
     } catch (e) {
       alert(e.message || 'Unable to start YouTube connect');
     }
@@ -556,7 +593,11 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Twitter OAuth');
-      window.location.href = data.authUrl;
+      if (isAllowedAuthUrl(data.authUrl)) {
+        window.location.href = data.authUrl;
+      } else {
+        window.open(data.authUrl, '_blank');
+      }
     } catch (e) {
       alert(e.message || 'Unable to start Twitter connect');
     }
@@ -573,7 +614,11 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Snapchat OAuth');
-      window.location.href = data.authUrl;
+      if (isAllowedAuthUrl(data.authUrl)) {
+        window.location.href = data.authUrl;
+      } else {
+        window.open(data.authUrl, '_blank');
+      }
     } catch (e) {
       alert(e.message || 'Unable to start Snapchat connect');
     }
@@ -705,7 +750,11 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
         }, 120000);
       } else {
         // Popup blocked or not available: navigate current tab to authUrl and rely on redirect back to frontend
-        window.location.href = authUrl;
+        if (isAllowedAuthUrl(authUrl)) {
+          window.location.href = authUrl;
+        } else {
+          window.open(authUrl, '_blank');
+        }
       }
     } catch (e) {
       alert(e.message || 'Unable to start Discord connect');
@@ -838,15 +887,21 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
         // Popup blocked -> try native app deep link first, then fallback to web t.me
         const appUrl = data.appUrl || data.authUrl;
         try {
-          // Attempt to open native app in current tab
-          window.location.href = appUrl;
-          setTimeout(() => {
-            if ((data.appUrl && data.appUrl.startsWith('tg://')) || !data.appUrl) {
-              window.location.href = data.authUrl;
+          // Attempt to open native app in current tab (only if allowed)
+            if (isAllowedAuthUrl(appUrl)) {
+              window.location.href = appUrl;
+            } else {
+              window.open(appUrl, '_blank');
             }
-          }, 1500);
+            setTimeout(() => {
+              if ((data.appUrl && data.appUrl.startsWith('tg://')) || !data.appUrl) {
+                if (isAllowedAuthUrl(data.authUrl)) window.location.href = data.authUrl;
+                else window.open(data.authUrl, '_blank');
+              }
+            }, 1500);
         } catch (_) {
-          window.location.href = data.authUrl;
+          if (isAllowedAuthUrl(data.authUrl)) window.location.href = data.authUrl;
+          else window.open(data.authUrl, '_blank');
         }
       }
     } catch (e) {
@@ -1217,12 +1272,18 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
                 </label>
                 <div style={{color:'#9aa4b2'}}>Default Platforms</div>
                 <div className="platform-toggles">
-                  <label><input type="checkbox" checked={defaultsPlatforms.includes('tiktok')} onChange={() => toggleDefaultPlatform('tiktok')} /> TikTok</label>
-                  <label><input type="checkbox" checked={defaultsPlatforms.includes('youtube')} onChange={() => toggleDefaultPlatform('youtube')} /> YouTube</label>
-                  <label><input type="checkbox" checked={defaultsPlatforms.includes('instagram')} onChange={() => toggleDefaultPlatform('instagram')} /> Instagram</label>
-                  <label><input type="checkbox" checked={defaultsPlatforms.includes('twitter')} onChange={() => toggleDefaultPlatform('twitter')} /> Twitter</label>
-                  <label><input type="checkbox" checked={defaultsPlatforms.includes('facebook')} onChange={() => toggleDefaultPlatform('facebook')} /> Facebook</label>
-                  <label><input type="checkbox" checked={defaultsPlatforms.includes('snapchat')} onChange={() => toggleDefaultPlatform('snapchat')} /> Snapchat</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('youtube')} onChange={() => toggleDefaultPlatform('youtube')} /> YouTube ✅</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('twitter')} onChange={() => toggleDefaultPlatform('twitter')} /> Twitter ✅</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('linkedin')} onChange={() => toggleDefaultPlatform('linkedin')} /> LinkedIn ✅</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('discord')} onChange={() => toggleDefaultPlatform('discord')} /> Discord ✅</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('reddit')} onChange={() => toggleDefaultPlatform('reddit')} /> Reddit ✅</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('spotify')} onChange={() => toggleDefaultPlatform('spotify')} /> Spotify ✅</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('telegram')} onChange={() => toggleDefaultPlatform('telegram')} /> Telegram ✅</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('tiktok')} onChange={() => toggleDefaultPlatform('tiktok')} /> TikTok ⏳</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('facebook')} onChange={() => toggleDefaultPlatform('facebook')} /> Facebook ⏳</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('instagram')} onChange={() => toggleDefaultPlatform('instagram')} /> Instagram ⏳</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('snapchat')} onChange={() => toggleDefaultPlatform('snapchat')} /> Snapchat ⏳</label>
+                  <label><input type="checkbox" checked={defaultsPlatforms.includes('pinterest')} onChange={() => toggleDefaultPlatform('pinterest')} /> Pinterest ⏳</label>
                 </div>
                 <label style={{color:'#9aa4b2'}}>Default Frequency
                   <select value={defaultsFrequency} onChange={(e)=>setDefaultsFrequency(e.target.value)} style={{display:'block', width:'100%', marginTop:'.25rem', background:'rgba(255,255,255,0.05)', color:'#eef2ff', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'8px', padding:'.3rem .5rem'}}>
@@ -1272,12 +1333,20 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
               </label>
             </div>
             <div className="platform-toggles">
-              <label><input type="checkbox" checked={selectedPlatforms.includes('tiktok')} onChange={() => togglePlatform('tiktok')} /> TikTok</label>
-              <label><input type="checkbox" checked={selectedPlatforms.includes('youtube')} onChange={() => togglePlatform('youtube')} /> YouTube</label>
-              <label><input type="checkbox" checked={selectedPlatforms.includes('instagram')} onChange={() => togglePlatform('instagram')} /> Instagram</label>
-              <label><input type="checkbox" checked={selectedPlatforms.includes('twitter')} onChange={() => togglePlatform('twitter')} /> Twitter</label>
-              <label><input type="checkbox" checked={selectedPlatforms.includes('facebook')} onChange={() => togglePlatform('facebook')} /> Facebook</label>
-              <label><input type="checkbox" checked={selectedPlatforms.includes('snapchat')} onChange={() => togglePlatform('snapchat')} /> Snapchat</label>
+              <h4 style={{marginBottom: '.5rem', color: '#cbd5e1'}}>Ready Platforms (Post Now)</h4>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('youtube')} onChange={() => togglePlatform('youtube')} /> YouTube ✅</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('twitter')} onChange={() => togglePlatform('twitter')} /> Twitter ✅</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('linkedin')} onChange={() => togglePlatform('linkedin')} /> LinkedIn ✅</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('discord')} onChange={() => togglePlatform('discord')} /> Discord ✅</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('reddit')} onChange={() => togglePlatform('reddit')} /> Reddit ✅</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('spotify')} onChange={() => togglePlatform('spotify')} /> Spotify ✅</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('telegram')} onChange={() => togglePlatform('telegram')} /> Telegram ✅</label>
+              <h4 style={{marginTop: '1rem', marginBottom: '.5rem', color: '#9aa4b2'}}>Pending Review (Coming Soon)</h4>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('tiktok')} onChange={() => togglePlatform('tiktok')} disabled /> TikTok ⏳</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('facebook')} onChange={() => togglePlatform('facebook')} disabled /> Facebook ⏳</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('instagram')} onChange={() => togglePlatform('instagram')} disabled /> Instagram ⏳</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('snapchat')} onChange={() => togglePlatform('snapchat')} disabled /> Snapchat ⏳</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('pinterest')} onChange={() => togglePlatform('pinterest')} disabled /> Pinterest ⏳</label>
             </div>
             <div style={{display:'grid', gap:'.5rem', marginTop:'.5rem'}}>
               <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>

@@ -41,6 +41,8 @@
       const params = new URLSearchParams(window.location.search);
       const appUrl = params.get('appUrl') || '';
       const authUrl = params.get('authUrl') || '';
+      // Limit displayed strings to safe printable text and short length
+      const safe = (s) => String(s || '').replace(/[\u0000-\u001f]/g, '').slice(0, 200);
       const state = params.get('state') || '';
       const bot = params.get('bot') || '';
       const openApp = document.getElementById('open-app');
@@ -48,23 +50,38 @@
       const note = document.getElementById('stateNote');
       const closeBtn = document.getElementById('close');
 
-      note.textContent = bot ? `Bot: ${bot} · State: ${state}` : `State: ${state}`;
+      note.textContent = bot ? `Bot: ${safe(bot)} · State: ${safe(state)}` : `State: ${safe(state)}`;
 
-      openApp.href = appUrl || authUrl || '#';
+      // Only allow safe targets — accept tg scheme and known Telegram web hosts.
+      function isAllowedTelegramUrl(url) {
+        if (!url) return false;
+        if (url.startsWith('tg:') || url.startsWith('tg://')) return true;
+        try {
+          const u = new URL(url);
+          const allowed = ['t.me', 'web.telegram.org'];
+          if (allowed.includes(u.hostname)) return true;
+          // Allow same-origin for debug / staging local interstitials
+          if (u.origin === window.location.origin) return true;
+        } catch (_) {}
+        return false;
+      }
+
+      openApp.href = isAllowedTelegramUrl(appUrl) ? appUrl : (isAllowedTelegramUrl(authUrl) ? authUrl : '#');
       openApp.onclick = function(e){
-        if (!appUrl) { return true; }
-        try { window.location.href = appUrl; } catch (err) { window.open(appUrl, '_self'); }
+        const t = appUrl || authUrl || '';
+        if (!isAllowedTelegramUrl(t)) { e.preventDefault(); return false; }
+        try { window.location.href = t; } catch (err) { window.open(t, '_self'); }
         e.preventDefault();
         return false;
       };
 
-      openWeb.href = authUrl || appUrl || '#';
+      openWeb.href = isAllowedTelegramUrl(authUrl) ? authUrl : (isAllowedTelegramUrl(appUrl) ? appUrl : '#');
       openWeb.onclick = function(){ return true; };
 
       closeBtn.onclick = function(){ window.close(); };
 
       // Auto-attempt native open on load (non-blocking)
-      if (appUrl) {
+      if (isAllowedTelegramUrl(appUrl)) {
         setTimeout(function(){
           try { window.location.href = appUrl; } catch(_) { /* ignore */ }
         }, 300);
@@ -86,10 +103,21 @@
         try {
           if (ev.origin !== origin) return; // only accept same-origin replies
           const d = ev.data || {};
-          if (d.type === 'telegram:status:response') {
+              if (d.type === 'telegram:status:response') {
             if (d.connected) {
-              // Show confirmation then close
-              document.body.innerHTML = '<div style="padding:40px;text-align:center;font-family:system-ui;font-size:18px">Connected — closing…</div>';
+              // Show confirmation then close using safe DOM apis (avoid innerHTML when adding text)
+              try {
+                const el = document.createElement('div');
+                el.style.padding = '40px';
+                el.style.textAlign = 'center';
+                el.style.fontFamily = 'system-ui';
+                el.style.fontSize = '18px';
+                el.textContent = 'Connected — closing…';
+                document.body.textContent = '';
+                document.body.appendChild(el);
+              } catch (_) {
+                document.body.innerHTML = '<div style="padding:40px;text-align:center;font-family:system-ui;font-size:18px">Connected — closing…</div>';
+              }
               setTimeout(() => { try { window.close(); } catch (_) {} }, 500);
             }
           }
