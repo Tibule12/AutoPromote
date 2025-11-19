@@ -61,6 +61,13 @@ const VIRAL_SOUND_LIBRARY = {
     { id: 'reel1', name: 'Trending Reels Sound', category: 'general', popularity: 90 },
     { id: 'reel2', name: 'Story Sound', category: 'story', popularity: 78 }
   ]
+  ,
+  linkedin: [
+    { id: 'li_001', name: 'Professional Voiceover', category: 'professional', popularity: 60 }
+  ],
+  reddit: [
+    { id: 'rd_001', name: 'Discussion Audio', category: 'discussion', popularity: 40 }
+  ]
 };
 
 class EngagementBoostingService {
@@ -141,6 +148,9 @@ class EngagementBoostingService {
       instagram: baits.filter(b => b.includes('save') || b.includes('tag') || b.includes('story')),
       youtube: baits.filter(b => b.includes('like') || b.includes('subscribe') || b.includes('comment')),
       twitter: baits.filter(b => b.includes('retweet') || b.includes('reply') || b.includes('like'))
+      ,
+      linkedin: baits.filter(b => b.includes('share') || b.toLowerCase().includes('share to') || b.includes('follow')),
+      reddit: ["Upvote if you agree", "Explain why in the comments", "This belongs in the community discussion"]
     };
 
     const relevantBaits = platformBaits[platform] || baits;
@@ -154,6 +164,9 @@ class EngagementBoostingService {
       instagram: `${hook}\n\n${body}\n\n${engagementBait}`,
       youtube: `${hook}\n\n${body}\n\n${engagementBait}\n\n#viral #trending`,
       twitter: `${hook} ${body} ${engagementBait}`
+      ,
+      linkedin: `${hook}\n\n${body}\n\n${engagementBait}`,
+      reddit: `${body}\n\n${engagementBait}`
     };
 
     return formats[platform] || `${hook}\n\n${body}\n\n${engagementBait}`;
@@ -168,8 +181,8 @@ class EngagementBoostingService {
     const branded = CAPTION_TEMPLATES.hashtags.branded;
 
     // Platform-specific hashtag limits
-    const limits = { tiktok: 5, instagram: 30, youtube: 15, twitter: 5 };
-    const limit = limits[platform] || 5;
+    const limits = { tiktok: 5, instagram: 30, youtube: 15, twitter: 5, linkedin: 5, reddit: 0 };
+    const limit = Object.prototype.hasOwnProperty.call(limits, platform) ? limits[platform] : 5;
 
     const allTags = [...trending, ...niche, ...branded];
     const selected = allTags.sort(() => 0.5 - Math.random()).slice(0, limit);
@@ -183,7 +196,7 @@ class EngagementBoostingService {
 
     // Length optimization
     const wordCount = caption.split(' ').length;
-    const optimalLengths = { tiktok: [10, 25], instagram: [15, 30], youtube: [20, 40], twitter: [5, 15] };
+    const optimalLengths = { tiktok: [10, 25], instagram: [15, 30], youtube: [20, 40], twitter: [5, 15], linkedin: [20, 60], reddit: [20, 400] };
     const [min, max] = optimalLengths[platform] || [10, 25];
     if (wordCount >= min && wordCount <= max) score += 20;
 
