@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './UserDashboard.css';
+import { isAllowedAuthUrl } from './utils/isAllowedAuthUrl';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS } from './config';
 
@@ -51,24 +52,12 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   // redirects by ensuring client-side navigation only follows known provider
   // hostnames or same-origin redirects. If an allowed hostname appears in
   // the future, add it here.
-  const isAllowedAuthUrl = (url) => {
-    try {
-      if (!url || typeof url !== 'string') return false;
-      if (url.startsWith('tg:') || url.startsWith('tg://')) return true;
-      const u = new URL(url);
-      const allowed = new Set([
-        'sandbox.tiktok.com', 'www.tiktok.com', 'open.tiktokapis.com',
-        'accounts.google.com', 'oauth2.googleapis.com',
-        'www.facebook.com', 'connect.facebook.net', 'api.twitter.com',
-        'www.youtube.com', 'accounts.youtube.com',
-        't.me', 'web.telegram.org', 'discord.com', 'www.linkedin.com',
-        'www.pinterest.com', 'accounts.spotify.com', 'www.reddit.com'
-      ]);
-      if (allowed.has(u.hostname)) return true;
-      if (u.origin === window.location.origin) return true;
-    } catch (_) {}
-    return false;
-  };
+  // `isAllowedAuthUrl` is implemented in `frontend/src/utils/isAllowedAuthUrl.js`
+  // and imported above. Keep the local variable binding so existing code can
+  // reference `isAllowedAuthUrl` unchanged.
+  // The above is allowed list is also exported for unit testing. Exporting as a
+  // named function in a separate module reduces duplication and makes testing
+  // easier. Keep a local reference for now so existing code is unaffected.
 
   const handleNav = (tab) => {
     setActiveTab(tab);
