@@ -124,7 +124,7 @@ function createEmbed({ title, description, url, color, imageUrl, thumbnailUrl, f
 /**
  * Main posting function for Discord
  */
-async function postToDiscord({ uid, content, title, description, url, imageUrl, contentId, webhookUrl, channelId }) {
+async function postToDiscord({ uid, content, title, description, url, imageUrl, contentId, webhookUrl, channelId, hashtags = [], hashtagString = '' }) {
   if (!uid && !webhookUrl) throw new Error('uid or webhookUrl required');
   if (!content && !title) throw new Error('content or title required');
   if (!fetchFn) throw new Error('Fetch not available');
@@ -164,7 +164,7 @@ async function postToDiscord({ uid, content, title, description, url, imageUrl, 
     try {
       result = await postViaWebhook({
         webhookUrl: userWebhookUrl,
-        content: content || null,
+        content: (content || '') + (hashtagString ? ` ${hashtagString}` : (hashtags && hashtags.length ? ` ${hashtags.join(' ')}` : '')),
         embeds: embeds.length > 0 ? embeds : null,
         username: 'AutoPromote',
         avatarUrl: null
@@ -184,7 +184,7 @@ async function postToDiscord({ uid, content, title, description, url, imageUrl, 
         result = await postViaBot({
           botToken,
           channelId: userChannelId,
-          content: content || null,
+          content: (content || '') + (hashtagString ? ` ${hashtagString}` : (hashtags && hashtags.length ? ` ${hashtags.join(' ')}` : '')),
           embeds: embeds.length > 0 ? embeds : null
         });
         messageId = result.messageId;
@@ -280,3 +280,14 @@ module.exports = {
   createEmbed,
   getMessage
 };
+
+// Helper: find hashtag string inside 'payload' like field
+function payloadHashtagString(payload) {
+  try {
+    if (!payload) return '';
+    if (typeof payload === 'string') return payload;
+    if (payload.hashtagString) return ' ' + payload.hashtagString;
+    if (payload.hashtags && Array.isArray(payload.hashtags)) return ' ' + payload.hashtags.join(' ');
+  } catch (_) {}
+  return '';
+}

@@ -5,6 +5,7 @@
 
 const fetch = require('node-fetch');
 const { db } = require('../firebaseAdmin');
+const hashtagEngine = require('./hashtagEngine');
 // New platform service stubs
 const { postToSpotify } = require('./spotifyService');
 const { postToReddit } = require('./redditService');
@@ -150,9 +151,26 @@ const handlers = {
 };
 
 async function dispatchPlatformPost({ platform, contentId, payload, reason, uid }) {
+  // If no hashtagString provided and we have a contentId, generate platform
+  // specific hashtags automatically so posting flows can include them.
+  if (!payload.hashtagString && !payload.hashtags && contentId) {
+    try {
+      const contentSnap = await db.collection('content').doc(contentId).get();
+      const content = contentSnap.exists ? contentSnap.data() : {};
+      const optimization = await hashtagEngine.generateCustomHashtags({ content, platform, customTags: payload.customTags || [] });
+      payload.hashtags = optimization.hashtags || [];
+      payload.hashtagString = optimization.hashtagString || '';
+    } catch (e) {
+      // non-fatal; continue without hashtags
+    }
+  }
+
   const handler = handlers[platform];
   if (!handler) return { platform, success: false, error: 'unsupported_platform' };
-  return handler({ contentId, payload, reason, uid });
+  // Spread `payload` into top-level for services that expect plain args
+  // (e.g., redditService expects title/text/url at top-level), while
+  // still providing `payload` for handlers that prefer the object.
+  return handler({ contentId, payload, reason, uid, ...(payload || {}) });
 }
 
 module.exports = { dispatchPlatformPost };
