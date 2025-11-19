@@ -96,7 +96,9 @@ const BRANDED_HASHTAGS = {
     instagram: ['#AutoPromoteIG', '#IGGrowth', '#InstaViral', '#InstaBoosted'],
     youtube: ['#AutoPromoteYT', '#YouTubeGrowth', '#YouTubeViral', '#YTBoosted'],
     twitter: ['#AutoPromoteTwitter', '#TwitterGrowth', '#TwitterViral', '#TwitterBoosted'],
-    facebook: ['#AutoPromoteFB', '#FacebookGrowth', '#FBViral', '#FBBoosted']
+    facebook: ['#AutoPromoteFB', '#FacebookGrowth', '#FBViral', '#FBBoosted'],
+       linkedin: ['#AutoPromoteLinkedIn', '#LinkedInGrowth', '#LinkedInViral'],
+       reddit: ['#AutoPromote', '#RedditGrowth', 'r/AutoPromote']
   },
   community: ['#AutoPromoteSquad', '#AutoPromoteCommunity', '#AutoPromoteFamily', '#AutoPromoteNation'],
   guarantee: ['#GuaranteedGrowth', '#GrowthGuarantee', '#ViralGuarantee', '#20KViews']
@@ -294,6 +296,12 @@ function formatHashtagsForPlatform(hashtags, platform) {
     case 'facebook':
       // Space-separated
       return hashtags.join(' ');
+    case 'linkedin':
+      // LinkedIn supports hashtags in text; keep them space-separated but limit to 5
+      return hashtags.slice(0, 5).join(' ');
+    case 'reddit':
+      // Reddit does not treat hashtags specially; send as comma-separated plain tags
+      return hashtags.map(tag => tag.replace(/^#/, '')).join(', ');
     default:
       return hashtags.join(' ');
   }
