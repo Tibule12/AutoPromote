@@ -107,7 +107,7 @@ async function refreshToken(uid, refreshToken) {
 /**
  * Submit a post to Reddit
  */
-async function postToReddit({ uid, subreddit, title, text, url, contentId, kind = 'self' }) {
+async function postToReddit({ uid, subreddit, title, text, url, contentId, kind = 'self', hashtags = [], hashtagString = '' }) {
   if (!uid) throw new Error('uid required');
   if (!subreddit) throw new Error('subreddit required');
   if (!title) throw new Error('title required');
@@ -129,8 +129,18 @@ async function postToReddit({ uid, subreddit, title, text, url, contentId, kind 
   
   if (kind === 'self') {
     payload.append('text', text);
+    // Append hashtags if any (format for reddit)
+    try {
+      if ((hashtags && hashtags.length > 0) || hashtagString) {
+        const { formatHashtagsForPlatform } = require('./hashtagEngine');
+        const hs = hashtagString || formatHashtagsForPlatform(hashtags, 'reddit');
+        if (hs) payload.append('text', '\n\n' + hs);
+      }
+    } catch (_) {}
   } else if (kind === 'link') {
     payload.append('url', url);
+    // Append hashtags to title for link posts
+    if (hashtagString) payload.append('title', `${title} ${hashtagString}`.substring(0, 300));
   }
   
   // Submit post

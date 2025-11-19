@@ -135,7 +135,7 @@ async function uploadImage({ uid, imageUrl }) {
 /**
  * Post to LinkedIn (text, image, or article)
  */
-async function postToLinkedIn({ uid, text, imageUrl, articleUrl, articleTitle, articleDescription, contentId }) {
+async function postToLinkedIn({ uid, text, imageUrl, articleUrl, articleTitle, articleDescription, contentId, hashtags = [], hashtagString = '' }) {
   if (!uid) throw new Error('uid required');
   if (!text && !articleUrl) throw new Error('text or articleUrl required');
   if (!fetchFn) throw new Error('Fetch not available');
@@ -152,7 +152,7 @@ async function postToLinkedIn({ uid, text, imageUrl, articleUrl, articleTitle, a
     specificContent: {
       'com.linkedin.ugc.ShareContent': {
         shareCommentary: {
-          text: text || ''
+            text: (text || '') + (hashtagString ? ` ${hashtagString}` : '')
         },
         shareMediaCategory: 'NONE'
       }
