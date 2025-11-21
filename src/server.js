@@ -937,9 +937,28 @@ app.get('/data-deletion', routeLimiter({ windowHint: 'legal' }), (req, res) => {
 });
 
 
-// Redirect legacy or root requests for a PNG favicon to the SVG we ship
-// This prevents 404s when browsers (or external services) request `/favicon.png`.
+// Serve/redirect common favicon paths so clients can find the logo without
+// requiring a fresh frontend build. Prefer an explicit file serve for SVG
+// then redirect common legacy names to it.
+app.get('/favicon.svg', (req, res) => {
+  return res.sendFile(path.join(__dirname, '../frontend/public/favicon.svg'));
+});
 app.get('/favicon.png', (req, res) => {
+  try {
+    const logoPath = path.join(__dirname, '../frontend/public', 'WhatsApp Image 2025-10-03 at 10.19.41.jpeg');
+    res.setHeader('Content-Type', 'image/jpeg');
+    return res.sendFile(logoPath, (err) => {
+      if (err) {
+        console.error('[favicon] sendFile error:', err && err.message ? err.message : err);
+        return res.status(404).end();
+      }
+    });
+  } catch (e) {
+    console.error('[favicon] unexpected error:', e && e.message ? e.message : e);
+    return res.status(500).end();
+  }
+});
+app.get('/favicon.ico', (req, res) => {
   return res.redirect(302, '/favicon.svg');
 });
 
