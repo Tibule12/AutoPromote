@@ -937,6 +937,12 @@ app.get('/data-deletion', routeLimiter({ windowHint: 'legal' }), (req, res) => {
 });
 
 
+// Redirect legacy or root requests for a PNG favicon to the SVG we ship
+// This prevents 404s when browsers (or external services) request `/favicon.png`.
+app.get('/favicon.png', (req, res) => {
+  return res.redirect(302, '/favicon.svg');
+});
+
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
