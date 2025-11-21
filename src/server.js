@@ -961,6 +961,23 @@ app.get('/favicon.png', (req, res) => {
 app.get('/favicon.ico', (req, res) => {
   return res.redirect(302, '/favicon.svg');
 });
+// Serve the uploaded JPEG directly at its original filename so requests
+// like `/WhatsApp%20Image%202025-10-03%20at%2010.19.41.jpeg` succeed.
+app.get('/WhatsApp Image 2025-10-03 at 10.19.41.jpeg', (req, res) => {
+  try {
+    const p = path.join(__dirname, '../frontend/public', 'WhatsApp Image 2025-10-03 at 10.19.41.jpeg');
+    res.setHeader('Content-Type', 'image/jpeg');
+    return res.sendFile(p, (err) => {
+      if (err) {
+        console.error('[static-fallback] sendFile error for uploaded logo:', err && err.message ? err.message : err);
+        return res.status(404).end();
+      }
+    });
+  } catch (e) {
+    console.error('[static-fallback] unexpected error:', e && e.message ? e.message : e);
+    return res.status(500).end();
+  }
+});
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, '../frontend/build')));
