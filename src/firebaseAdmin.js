@@ -12,7 +12,21 @@ try {
 const bypass = process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1';
 let admin, db;
 if (bypass) {
-    admin = { apps: ['stub'], firestore: () => ({ collection: () => ({ doc: () => ({ set: async()=>{}, get: async()=>({ exists:false, data:()=>({}) }) }), limit:()=>({ get: async()=>({ empty:true, forEach:()=>{} }) }), where:()=>({ limit:()=>({ get: async()=>({ empty:true, size:0, forEach:()=>{} }) }) }), orderBy:()=>({ limit:()=>({ get: async()=>({ empty:true, forEach:()=>{} }) }) }) }) }) };
+    const firestoreStub = () => ({
+        collection: () => ({
+            doc: () => ({
+                set: async () => {},
+                get: async () => ({ exists: false, data: () => ({}) })
+            }),
+            limit: () => ({ get: async () => ({ empty: true, forEach: () => {} }) }),
+            where: () => ({ limit: () => ({ get: async () => ({ empty: true, size: 0, forEach: () => {} }) }) }),
+            orderBy: () => ({ limit: () => ({ get: async () => ({ empty: true, forEach: () => {} }) }) })
+        })
+    });
+    // Minimal Timestamp/FieldValue shims used by routes in tests
+    firestoreStub.FieldValue = { serverTimestamp: () => new Date() };
+    firestoreStub.Timestamp = { fromDate: (d) => d instanceof Date ? d : new Date(d) };
+    admin = { apps: ['stub'], firestore: firestoreStub };
     db = admin.firestore();
 } else {
     admin = require('firebase-admin');

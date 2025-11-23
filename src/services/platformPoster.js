@@ -13,6 +13,7 @@ const { postToDiscord } = require('./discordService');
 const { postToLinkedIn } = require('./linkedinService');
 const { postToTelegram } = require('./telegramService');
 const { postToPinterest } = require('./pinterestService');
+const { postToSnapchat } = require('./snapchatService');
 
 // Utility: safe JSON
 async function safeJson(res) {
@@ -144,6 +145,7 @@ const handlers = {
   ,
   linkedin: postToLinkedIn,
   pinterest: postToPinterest,
+  snapchat: postToSnapchat,
   spotify: postToSpotify,
   reddit: postToReddit,
   discord: postToDiscord,
@@ -170,7 +172,17 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
   // Spread `payload` into top-level for services that expect plain args
   // (e.g., redditService expects title/text/url at top-level), while
   // still providing `payload` for handlers that prefer the object.
-  return handler({ contentId, payload, reason, uid, ...(payload || {}) });
+  const baseArgs = { contentId, payload, reason, uid, ...(payload || {}) };
+  // Merge any `platformOptions` into top-level args to meet service expectations
+  try {
+    const opts = payload && payload.platformOptions && typeof payload.platformOptions === 'object' ? payload.platformOptions : null;
+    if (opts) {
+      Object.assign(baseArgs, opts);
+      // Also merge into payload so services that read payload.* find the fields
+      baseArgs.payload = { ...(baseArgs.payload || {}), ...(opts || {}) };
+    }
+  } catch (_) { /* ignore */ }
+  return handler(baseArgs);
 }
 
 module.exports = { dispatchPlatformPost };

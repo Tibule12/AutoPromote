@@ -29,6 +29,8 @@ const contentUploadSchema = Joi.object({
   url: Joi.string().uri().required(),
   description: Joi.string().max(500).allow(''),
   target_platforms: Joi.array().items(Joi.string()).optional(),
+  // Per-platform options map: { <platform>: { <key>: <value>, ... } }
+  platform_options: Joi.object().pattern(Joi.string(), Joi.object()).optional(),
   scheduled_promotion_time: Joi.string().isoDate().optional(),
   promotion_frequency: Joi.string().valid('once', 'hourly', 'daily', 'weekly').optional(),
   schedule_hint: Joi.object().optional(),
@@ -77,7 +79,7 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-    const { title, type, url, description, target_platforms, scheduled_promotion_time, promotion_frequency, schedule_hint, auto_promote, quality_score, quality_feedback, quality_enhanced, custom_hashtags, growth_guarantee, viral_boost } = req.body;
+    const { title, type, url, description, target_platforms, platform_options, scheduled_promotion_time, promotion_frequency, schedule_hint, auto_promote, quality_score, quality_feedback, quality_enhanced, custom_hashtags, growth_guarantee, viral_boost } = req.body;
 
     // Initialize viral engines
     const hashtagEngine = require('./services/hashtagEngine');
@@ -110,45 +112,44 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
     const contentDoc = await contentRef.get();
     const content = { id: contentRef.id, ...contentDoc.data() };
 
-    // 🚀 VIRAL OPTIMIZATION PHASE 1: Hashtag Generation
-    console.log('🔥 [VIRAL] Generating algorithm-breaking hashtags...');
-    const hashtagOptimization = await hashtagEngine.generateCustomHashtags({
-      content,
-      platform: target_platforms?.[0] || 'tiktok',
-      customTags: custom_hashtags || [],
-      growthGuarantee: growth_guarantee !== false
-    });
-
-    // 🚀 VIRAL OPTIMIZATION PHASE 2: Smart Distribution Strategy
-    console.log('🎯 [VIRAL] Creating smart distribution strategy...');
-    const distributionStrategy = await smartDistributionEngine.generateDistributionStrategy(
-      content,
-      target_platforms || ['tiktok', 'instagram'],
-      { timezone: 'UTC', growthGuarantee: growth_guarantee !== false }
-    );
-
-    // 🚀 VIRAL OPTIMIZATION PHASE 3: Algorithm Exploitation
-    console.log('⚡ [VIRAL] Applying algorithm exploitation...');
-    const algorithmOptimization = algorithmExploitationEngine.optimizeForAlgorithm(
-      content,
-      target_platforms?.[0] || 'tiktok'
-    );
-
-    // 🚀 VIRAL OPTIMIZATION PHASE 4: Viral Impact Seeding
-    console.log('🌊 [VIRAL] Seeding content to visibility zones...');
-    const viralSeeding = await viralImpactEngine.seedContentToVisibilityZones(
-      content,
-      target_platforms?.[0] || 'tiktok',
-      { forceAll: viral_boost?.force_seeding || false }
-    );
-
-    // 🚀 VIRAL OPTIMIZATION PHASE 5: Boost Chain Creation
-    console.log('🔗 [VIRAL] Creating boost chain for viral spread...');
-    const boostChain = await viralImpactEngine.orchestrateBoostChain(
-      content,
-      target_platforms || ['tiktok'],
-      { userId, squadUserIds: viral_boost?.squad_user_ids || [] }
-    );
+    // VIRAL OPTIMIZATION: optionally disabled for test/debug via environment
+    let hashtagOptimization = { hashtags: [] };
+    let distributionStrategy = { platforms: [] };
+    let algorithmOptimization = { optimizationScore: 0 };
+    let viralSeeding = { seedingResults: [] };
+    let boostChain = { chainId: null, squadSize: 0 };
+    if (!process.env.NO_VIRAL_OPTIMIZATION) {
+      console.log('🔥 [VIRAL] Generating algorithm-breaking hashtags...');
+      hashtagOptimization = await hashtagEngine.generateCustomHashtags({
+        content,
+        platform: target_platforms?.[0] || 'tiktok',
+        customTags: custom_hashtags || [],
+        growthGuarantee: growth_guarantee !== false
+      });
+      console.log('🎯 [VIRAL] Creating smart distribution strategy...');
+      distributionStrategy = await smartDistributionEngine.generateDistributionStrategy(
+        content,
+        target_platforms || ['tiktok', 'instagram'],
+        { timezone: 'UTC', growthGuarantee: growth_guarantee !== false }
+      );
+      console.log('⚡ [VIRAL] Applying algorithm exploitation...');
+      algorithmOptimization = algorithmExploitationEngine.optimizeForAlgorithm(
+        content,
+        target_platforms?.[0] || 'tiktok'
+      );
+      console.log('🌊 [VIRAL] Seeding content to visibility zones...');
+      viralSeeding = await viralImpactEngine.seedContentToVisibilityZones(
+        content,
+        target_platforms?.[0] || 'tiktok',
+        { forceAll: viral_boost?.force_seeding || false }
+      );
+      console.log('🔗 [VIRAL] Creating boost chain for viral spread...');
+      boostChain = await viralImpactEngine.orchestrateBoostChain(
+        content,
+        target_platforms || ['tiktok'],
+        { userId, squadUserIds: viral_boost?.squad_user_ids || [] }
+      );
+    }
 
     // Update content with viral optimization data
     await contentRef.update({
@@ -196,6 +197,28 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
     if (Array.isArray(target_platforms)) {
       for (const platform of target_platforms) {
         try {
+          const optionsForPlatform = (platform_options && platform_options[platform]) ? platform_options[platform] : {};
+          // Basic required per-platform options validation
+          switch (platform) {
+            case 'discord':
+              if (!optionsForPlatform.channelId) throw new Error('discord.channelId required');
+              break;
+            case 'telegram':
+              if (!optionsForPlatform.chatId) throw new Error('telegram.chatId required');
+              break;
+            case 'reddit':
+              if (!optionsForPlatform.subreddit) throw new Error('reddit.subreddit required');
+              break;
+            case 'linkedin':
+              // LinkedIn can default to the user (personId resolved from access token).
+              // If companyId provided, it will post as organization; no validation required here.
+              break;
+            case 'spotify':
+              if (!optionsForPlatform.name) throw new Error('spotify.name required (playlist name)');
+              break;
+            default:
+              break;
+          }
           // Get platform-specific viral data
           const platformStrategy = distributionStrategy.platforms.find(p => p.platform === platform);
           const viralCaption = platformStrategy?.caption?.caption || description;
@@ -209,7 +232,7 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
               title: algorithmOptimization.hook ? `${algorithmOptimization.hook} - ${title}` : title,
               description: `${viralCaption}\n\n${viralHashtags.join(' ')}`,
               fileUrl: url,
-              shortsMode: type === 'video' && (content.duration || 0) < 60,
+              shortsMode: optionsForPlatform.shortsMode || (type === 'video' && (content.duration || 0) < 60),
               viralOptimization: {
                 hashtags: viralHashtags,
                 hook: algorithmOptimization.hook,
@@ -228,6 +251,7 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
                 url,
                 title: algorithmOptimization.hook ? `${algorithmOptimization.hook} - ${title}` : title,
                 description: viralCaption,
+                platformOptions: optionsForPlatform,
                 hashtags: viralHashtags,
                 viralOptimization: {
                   hook: algorithmOptimization.hook,
@@ -237,7 +261,11 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
               },
               skipIfDuplicate: true
             });
-            platformTasks.push({ platform, task: postTask, viral_optimized: true });
+            // When an enqueue call is skipped (e.g., due to quota or duplicate), the returned object
+            // may not include the original payload. For consistency in API responses, include the
+            // intended payload in the returned task object so consumers can still inspect platformOptions.
+            const returnedTask = (postTask && postTask.skipped) ? { ...postTask, payload: { ...(postTask.payload || {}), platformOptions: optionsForPlatform } } : postTask;
+            platformTasks.push({ platform, task: returnedTask, viral_optimized: true });
           }
         } catch (err) {
           platformTasks.push({ platform, error: err.message, viral_optimized: false });

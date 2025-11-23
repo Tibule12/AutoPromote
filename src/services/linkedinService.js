@@ -135,7 +135,7 @@ async function uploadImage({ uid, imageUrl }) {
 /**
  * Post to LinkedIn (text, image, or article)
  */
-async function postToLinkedIn({ uid, text, imageUrl, articleUrl, articleTitle, articleDescription, contentId, hashtags = [], hashtagString = '' }) {
+async function postToLinkedIn({ uid, text, imageUrl, articleUrl, articleTitle, articleDescription, contentId, hashtags = [], hashtagString = '', companyId = null, personId: personIdParam = null }) {
   if (!uid) throw new Error('uid required');
   if (!text && !articleUrl) throw new Error('text or articleUrl required');
   if (!fetchFn) throw new Error('Fetch not available');
@@ -143,11 +143,13 @@ async function postToLinkedIn({ uid, text, imageUrl, articleUrl, articleTitle, a
   const accessToken = await getValidAccessToken(uid);
   if (!accessToken) throw new Error('No valid LinkedIn access token');
   
-  const personId = await getUserProfile(accessToken);
+  // If a companyId is provided, use org posting rules; otherwise get person ID
+  const resolvedPersonId = personIdParam || await getUserProfile(accessToken);
+  const authorUrn = companyId ? `urn:li:organization:${companyId}` : `urn:li:person:${resolvedPersonId}`;
   
   // Build share payload
   const sharePayload = {
-    author: `urn:li:person:${personId}`,
+    author: authorUrn,
     lifecycleState: 'PUBLISHED',
     specificContent: {
       'com.linkedin.ugc.ShareContent': {

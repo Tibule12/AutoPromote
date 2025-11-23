@@ -62,12 +62,12 @@ router.get('/status', authMiddleware, platformConnectionsPublicLimiter, require(
     youtube: { connected: youtube.connected, channelTitle: youtube.channel?.snippet?.title },
     facebook: { connected: facebook.connected, pages: Array.isArray(facebook.pages) ? facebook.pages.map(p=>p.name).slice(0,3) : [] },
     tiktok: { connected: tiktok.connected, display_name: tiktok.display_name },
-    spotify: { connected: spotify.connected },
-    reddit: { connected: reddit.connected },
-    discord: { connected: discord.connected },
-    linkedin: { connected: linkedin.connected },
-    telegram: { connected: telegram.connected },
-    pinterest: { connected: pinterest.connected }
+    spotify: { connected: spotify.connected, display_name: spotify.meta?.display_name, playlistsCount: Array.isArray(spotify.meta?.playlists) ? spotify.meta.playlists.length : undefined },
+    reddit: { connected: reddit.connected, name: reddit.meta?.username },
+    discord: { connected: discord.connected, servers: Array.isArray(discord.meta?.guilds) ? discord.meta.guilds.map(g => g.name).slice(0,3) : [] },
+    linkedin: { connected: linkedin.connected, organizations: Array.isArray(linkedin.meta?.organizations) ? linkedin.meta.organizations.map(o=>o.name).slice(0,3) : [] },
+    telegram: { connected: telegram.connected, chatId: telegram.meta?.chatId },
+    pinterest: { connected: pinterest.connected, boards: pinterest.meta?.boards?.length }
   };
   const payload = { ok: true, summary, raw: { twitter, youtube, facebook, tiktok, spotify, reddit, discord, linkedin, telegram, pinterest } };
   setCache(cacheKey, payload, 7000);

@@ -3,13 +3,17 @@
 // It performs basic checks and rejects unsupported platforms early.
 
 const SUPPORTED_PLATFORMS = [
-  'tiktok',
+  'linkedin',
+  'twitter',
   'spotify',
+  'youtube',
+  'tiktok',
+  'facebook',
   'reddit',
   'discord',
-  'linkedin',
   'telegram',
-  'pinterest'
+  'pinterest',
+  'snapchat'
 ];
 
 function sendBadRequest(res, message) {
@@ -58,17 +62,23 @@ module.exports = {
     // e.g., Discord may require `channelId`, LinkedIn may require `companyId`, etc.
     switch (platform) {
       case 'discord':
-        if (!body.channelId) return sendBadRequest(res, '`channelId` is required for Discord promotions.');
+        if (!body.channelId && !(body.platform_options && body.platform_options.discord && body.platform_options.discord.channelId)) return sendBadRequest(res, '`channelId` is required for Discord promotions.');
         break;
       case 'linkedin':
-        // either companyId or personId
-        if (!body.companyId && !body.personId) return sendBadRequest(res, '`companyId` or `personId` is required for LinkedIn promotions.');
+        // either companyId or personId (allow passing via platform_options)
+        if (!body.companyId && !body.personId && !(body.platform_options && body.platform_options.linkedin && (body.platform_options.linkedin.companyId || body.platform_options.linkedin.personId))) return sendBadRequest(res, '`companyId` or `personId` is required for LinkedIn promotions.');
         break;
       case 'telegram':
-        if (!body.chatId) return sendBadRequest(res, '`chatId` is required for Telegram promotions.');
+        if (!body.chatId && !(body.platform_options && body.platform_options.telegram && body.platform_options.telegram.chatId)) return sendBadRequest(res, '`chatId` is required for Telegram promotions.');
         break;
       case 'pinterest':
-        if (!body.boardId) return sendBadRequest(res, '`boardId` is recommended for Pinterest promotions.');
+        if (!body.boardId && !(body.platform_options && body.platform_options.pinterest && body.platform_options.pinterest.boardId)) return sendBadRequest(res, '`boardId` is recommended for Pinterest promotions.');
+        break;
+      case 'reddit':
+        if (!body.subreddit && !(body.platform_options && body.platform_options.reddit && body.platform_options.reddit.subreddit)) return sendBadRequest(res, '`subreddit` is required for Reddit promotions.');
+        break;
+      case 'spotify':
+        if (!body.name && !(body.platform_options && body.platform_options.spotify && body.platform_options.spotify.name)) return sendBadRequest(res, '`name` is required for Spotify playlist promotions.');
         break;
       // spotify, reddit, tiktok: keep flexible for now
       default:
