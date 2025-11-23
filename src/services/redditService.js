@@ -14,10 +14,15 @@ if (!fetchFn) {
 /**
  * Get user's Reddit connection tokens
  */
+const { tokensFromDoc } = require('./connectionTokenUtils');
+
 async function getUserRedditConnection(uid) {
   const snap = await db.collection('users').doc(uid).collection('connections').doc('reddit').get();
   if (!snap.exists) return null;
-  return snap.data();
+  const d = snap.data();
+  const tokens = tokensFromDoc(d);
+  if (tokens) d.tokens = tokens;
+  return d;
 }
 
 /**
@@ -93,13 +98,16 @@ async function refreshToken(uid, refreshToken) {
   
   // Store refreshed tokens
   const ref = db.collection('users').doc(uid).collection('connections').doc('reddit');
-  await ref.set({
-    tokens: {
-      ...tokens,
-      refresh_token: refreshToken // Reddit doesn't return new refresh token
-    },
-    updatedAt: admin.firestore.FieldValue.serverTimestamp()
-  }, { merge: true });
+  try {
+    const { encryptToken, hasEncryption } = require('./secretVault');
+    if (hasEncryption()) {
+      await ref.set({ tokens: encryptToken(JSON.stringify({ ...tokens, refresh_token: refreshToken })), hasEncryption: true, updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    } else {
+      await ref.set({ tokens: { ...tokens, refresh_token: refreshToken }, updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    }
+  } catch (e) {
+    await ref.set({ tokens: { ...tokens, refresh_token: refreshToken }, updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+  }
   
   return tokens;
 }

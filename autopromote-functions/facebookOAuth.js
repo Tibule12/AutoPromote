@@ -48,13 +48,14 @@ exports.facebookOAuthCallback = functions.region(region).https.onRequest(async (
     const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${tokenData.access_token}`);
     const pagesData = await pagesRes.json();
     // Store tokens in Firestore (or return to user for manual storage)
+    const { encryptToken } = require('./secretVault');
     await admin.firestore().collection('facebook_tokens').add({
-      access_token: tokenData.access_token,
+      tokenJson: encryptToken(JSON.stringify({ access_token: tokenData.access_token })),
       pages: pagesData.data || [],
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       state
     });
-    res.status(200).json({ success: true, access_token: tokenData.access_token, pages: pagesData.data });
+    res.status(200).json({ success: true, pages: pagesData.data });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

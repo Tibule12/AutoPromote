@@ -98,8 +98,12 @@ async function runWarmup(trigger='auto'){
   }
 }
 
-// Immediate warmup (non-blocking). Previously delayed by 1.5s.
-runWarmup().catch(e=>console.log('[warmup] immediate failed', e.message));
+// Immediate warmup (non-blocking). Avoid running the immediate warmup when
+// the server is imported as a module inside a Cloud Functions environment
+// (indicated by FUNCTIONS_* env vars), which can cause deployment timeouts.
+if (require.main === module) {
+  runWarmup().catch(e=>console.log('[warmup] immediate failed', e.message));
+}
 
 // Lazy trigger middleware: if a qualifying request arrives before warmup started, start it.
 function ensureWarmup(req,_res,next){
@@ -136,7 +140,13 @@ function printMissingEnvOnce() {
   }
   __printedStartupMissing = true;
 }
-setTimeout(printMissingEnvOnce, 1200);
+// Only perform the strict missing-env check when running the server as the
+// main module (i.e. node src/server.js). When required as a module (for
+// example, imported by a Cloud Functions wrapper), avoid exiting the process
+// so the importing process can control behavior and errors.
+if (require.main === module) {
+  setTimeout(printMissingEnvOnce, 1200);
+}
 
 // Middleware: slow request profiler
 // Attach as early as possible (after requestContext if present)
@@ -728,12 +738,12 @@ if (codeqlLimiter && codeqlLimiter.writes) {
 }
 // Require latest terms before allowing access to content routes
 if (requireAcceptedTerms) {
-  app.use('/api/content', authMiddleware, requireAcceptedTerms({ version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0' }), contentRoutes);
+  app.use('/api/content', routeLimiter({ windowHint: 'content' }), authMiddleware, requireAcceptedTerms({ version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0' }), contentRoutes);
 } else {
-  app.use('/api/content', contentRoutes);
+  app.use('/api/content', routeLimiter({ windowHint: 'content' }), contentRoutes);
 }
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/analytics', routeLimiter({ windowHint: 'analytics' }), analyticsRoutes);
+app.use('/api/admin', routeLimiter({ windowHint: 'admin' }), adminRoutes);
 app.use('/api/admin/security', adminSecurityRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api/engagement', engagementRoutes);
@@ -1618,7 +1628,9 @@ if (ENABLE_BACKGROUND) {
 } else {
   console.log('ℹ️ Background job runner disabled (set ENABLE_BACKGROUND_JOBS=true to enable).');
   // Kick off warmup asynchronously after server start
-  setTimeout(runWarmup, 50);
+  if (require.main === module) {
+    setTimeout(runWarmup, 50);
+  }
 
 }
 

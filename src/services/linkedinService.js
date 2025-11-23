@@ -14,10 +14,15 @@ if (!fetchFn) {
 /**
  * Get user's LinkedIn connection tokens
  */
+const { tokensFromDoc } = require('./connectionTokenUtils');
+
 async function getUserLinkedInConnection(uid) {
   const snap = await db.collection('users').doc(uid).collection('connections').doc('linkedin').get();
   if (!snap.exists) return null;
-  return snap.data();
+  const d = snap.data();
+  const tokens = tokensFromDoc(d);
+  if (tokens) d.tokens = tokens;
+  return d;
 }
 
 /**

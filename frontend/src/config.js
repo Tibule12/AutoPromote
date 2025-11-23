@@ -71,21 +71,27 @@ export const API_ENDPOINTS = {
   // New platform endpoints (placeholders)
   SPOTIFY_AUTH_START: `${API_BASE_URL}/api/spotify/auth/start`,
   SPOTIFY_STATUS: `${API_BASE_URL}/api/spotify/status`,
+  SPOTIFY_METADATA: `${API_BASE_URL}/api/spotify/metadata`,
 
   REDDIT_AUTH_START: `${API_BASE_URL}/api/reddit/auth/start`,
   REDDIT_STATUS: `${API_BASE_URL}/api/reddit/status`,
 
   DISCORD_AUTH_START: `${API_BASE_URL}/api/discord/auth/start`,
   DISCORD_STATUS: `${API_BASE_URL}/api/discord/status`,
+  DISCORD_METADATA: `${API_BASE_URL}/api/discord/metadata`,
 
   LINKEDIN_AUTH_START: `${API_BASE_URL}/api/linkedin/auth/start`,
   LINKEDIN_STATUS: `${API_BASE_URL}/api/linkedin/status`,
+  LINKEDIN_METADATA: `${API_BASE_URL}/api/linkedin/metadata`,
 
   TELEGRAM_AUTH_START: `${API_BASE_URL}/api/telegram/auth/start`,
   TELEGRAM_STATUS: `${API_BASE_URL}/api/telegram/status`,
+  TELEGRAM_METADATA: `${API_BASE_URL}/api/telegram/metadata`,
 
   PINTEREST_AUTH_START: `${API_BASE_URL}/api/pinterest/auth/start`,
   PINTEREST_STATUS: `${API_BASE_URL}/api/pinterest/status`,
+  PINTEREST_METADATA: `${API_BASE_URL}/api/pinterest/metadata`,
+  PINTEREST_BOARDS: `${API_BASE_URL}/api/pinterest/boards`,
 
   // Monetization / Earnings
   EARNINGS_SUMMARY: `${API_BASE_URL}/api/monetization/earnings/summary`,

@@ -22,6 +22,9 @@ function App() {
     defaultPlatforms: [],
     defaultFrequency: 'once'
   });
+  // Feature flag: when true (default unless REACT_APP_DISABLE_IMMEDIATE_POSTS is 'false'),
+  // disable direct client-side platform posts and rely on backend queued tasks.
+  const DISABLE_IMMEDIATE_POSTS = (process.env.REACT_APP_DISABLE_IMMEDIATE_POSTS === undefined) || process.env.REACT_APP_DISABLE_IMMEDIATE_POSTS !== 'false';
   const [justLoggedOut, setJustLoggedOut] = useState(false);
   const [termsRequired, setTermsRequired] = useState(false);
   const [requiredTermsVersion, setRequiredTermsVersion] = useState(null);
@@ -470,6 +473,7 @@ function App() {
         url: finalUrl,
         description: description || '',
         target_platforms: platforms && platforms.length ? platforms : (userDefaults.defaultPlatforms || ['youtube','tiktok','instagram']),
+        platform_options: params.platformOptions || {},
         schedule_hint
       };
       const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
@@ -488,10 +492,11 @@ function App() {
       if (isDryRun) {
         return result;
       }
-      try {
-        const chosen = Array.isArray(platforms) ? platforms : [];
-        const postYouTube = async () => {
-          if (!chosen.includes('youtube')) return;
+        try {
+          const chosen = Array.isArray(platforms) ? platforms : [];
+          const postYouTube = async () => {
+            if (DISABLE_IMMEDIATE_POSTS) { console.log('[Upload] Skipping immediate YouTube post (disabled via flag)'); return; }
+            if (!chosen.includes('youtube')) return;
           try {
             // Ensure contentId and fileUrl are sent as required by backend
             // Try all possible keys for contentId from upload response
@@ -517,7 +522,7 @@ function App() {
             const r = await fetch(API_ENDPOINTS.YOUTUBE_UPLOAD, {
               method: 'POST',
               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              body: JSON.stringify({ contentId, videoUrl: payload.url, title: title || (file ? file.name : ''), description: description || '' })
+              body: JSON.stringify({ contentId, videoUrl: payload.url, title: title || (file ? file.name : ''), description: description || '', shortsMode: payload.platform_options?.youtube?.shortsMode })
             });
             if (!r.ok) console.warn('YouTube upload failed');
           } catch (_) {}
@@ -557,9 +562,14 @@ function App() {
             if (!r.ok) console.warn('Instagram upload failed');
           } catch (_) {}
         };
-        await postYouTube();
-        await postFacebook();
-        await postInstagram();
+        // Use queued server-side posts for consistency, unless immediate posting is explicitly enabled
+        if (!DISABLE_IMMEDIATE_POSTS) {
+          await postYouTube();
+          await postFacebook();
+          await postInstagram();
+        } else {
+          console.log('[Upload] Immediate platform posts disabled; posts will be processed by backend queued tasks');
+        }
       } catch (e) {
         console.warn('Auto-post skipped or partial:', e?.message);
       }

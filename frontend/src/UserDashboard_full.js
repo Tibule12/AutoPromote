@@ -12,6 +12,8 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  // Per-platform custom options passed to backend (e.g., discord.channelId, reddit.subreddit)
+  const [platformOptions, setPlatformOptions] = useState({});
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState('video');
@@ -37,6 +39,10 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [payouts, setPayouts] = useState([]);
   const [progress, setProgress] = useState({ contentCount: 0, requiredForRevenue: 0, remaining: 0, revenueEligible: false });
   const [platformSummary, setPlatformSummary] = useState({ platforms: {} });
+  const [platformMetadata, setPlatformMetadata] = useState({});
+  const [pinterestCreateVisible, setPinterestCreateVisible] = useState(false);
+  const [pinterestCreateName, setPinterestCreateName] = useState('');
+  const [pinterestCreateDesc, setPinterestCreateDesc] = useState('');
   // Snap connect banner state from URL
   const [connectBanner, setConnectBanner] = useState(null); // { type: 'success'|'error', message: string }
 
@@ -149,9 +155,23 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (!res.ok) return setSpotifyStatus({ connected: false });
       const data = await res.json();
       setSpotifyStatus({ connected: !!data.connected, meta: data.meta || null });
+      // Also load metadata such as playlists if connected
+      if (data.connected) loadSpotifyMetadata();
     } catch (_) {
       setSpotifyStatus({ connected: false });
     }
+  };
+
+  const loadSpotifyMetadata = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.SPOTIFY_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return;
+      const data = await res.json();
+      setPlatformMetadata(prev => ({ ...(prev || {}), spotify: data.meta || {} }));
+    } catch (_) {}
   };
 
   // Load Reddit connection status
@@ -179,9 +199,22 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (!res.ok) return setDiscordStatus({ connected: false });
       const data = await res.json();
       setDiscordStatus({ connected: !!data.connected, meta: data.meta || null });
+      if (data.connected) loadDiscordMetadata();
     } catch (_) {
       setDiscordStatus({ connected: false });
     }
+  };
+
+  const loadDiscordMetadata = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.DISCORD_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return;
+      const data = await res.json();
+      setPlatformMetadata(prev => ({ ...(prev || {}), discord: data.meta || {} }));
+    } catch (_) {}
   };
 
   // Load LinkedIn connection status
@@ -194,9 +227,22 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (!res.ok) return setLinkedinStatus({ connected: false });
       const data = await res.json();
       setLinkedinStatus({ connected: !!data.connected, meta: data.meta || null });
+      if (data.connected) loadLinkedinMetadata();
     } catch (_) {
       setLinkedinStatus({ connected: false });
     }
+  };
+
+  const loadLinkedinMetadata = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.LINKEDIN_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return;
+      const data = await res.json();
+      setPlatformMetadata(prev => ({ ...(prev || {}), linkedin: data.meta || {} }));
+    } catch (_) {}
   };
 
   // Load Telegram connection status
@@ -209,9 +255,26 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (!res.ok) return setTelegramStatus({ connected: false });
       const data = await res.json();
       setTelegramStatus({ connected: !!data.connected, meta: data.meta || null });
+      if (data.connected) loadTelegramMetadata();
     } catch (_) {
       setTelegramStatus({ connected: false });
     }
+  };
+
+  const loadTelegramMetadata = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.TELEGRAM_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return;
+      const data = await res.json();
+      setPlatformMetadata(prev => ({ ...(prev || {}), telegram: data.meta || {} }));
+      // If telegram metadata contains a chatId and the user has not provided one, set default
+      if (data.meta && data.meta.chatId && !platformOptions.telegram?.chatId) {
+        setPlatformOption('telegram', 'chatId', data.meta.chatId);
+      }
+    } catch (_) {}
   };
 
   // Load Pinterest connection status
@@ -224,9 +287,65 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (!res.ok) return setPinterestStatus({ connected: false });
       const data = await res.json();
       setPinterestStatus({ connected: !!data.connected, meta: data.meta || null });
+      if (data.connected) loadPinterestMetadata();
     } catch (_) {
       setPinterestStatus({ connected: false });
     }
+  };
+
+  const loadPinterestMetadata = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.PINTEREST_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return;
+      const data = await res.json();
+      setPlatformMetadata(prev => ({ ...(prev || {}), pinterest: data.meta || {} }));
+    } catch (_) {}
+  };
+
+  const handleCreatePinterestBoard = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const token = await currentUser.getIdToken(true);
+      const payload = { name: pinterestCreateName, description: pinterestCreateDesc };
+      const res = await fetch(API_ENDPOINTS.PINTEREST_BOARDS, { method: 'POST', headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        alert('Failed to create board: ' + (data.error || JSON.stringify(data)));
+        return;
+      }
+      setPinterestCreateVisible(false);
+      setPinterestCreateName('');
+      setPinterestCreateDesc('');
+      // Refresh metadata to include the new board
+      loadPinterestMetadata();
+      alert('Board created successfully');
+    } catch (e) {
+      alert('Error creating board: ' + (e.message || e));
+    }
+  };
+
+  // Small, inline modal to create boards
+  const PinterestCreateModal = ({ visible, onClose, onCreate }) => {
+    if (!visible) return null;
+    return (
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.45)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ background: '#fff', color: '#111', padding: '1.25rem', borderRadius: 12, width: 'min(600px, 96%)' }}>
+          <h3 style={{ marginTop: 0 }}>Create Pinterest Board</h3>
+          <div style={{ display: 'grid', gap: '.5rem' }}>
+            <input placeholder="Board name" value={pinterestCreateName} onChange={(e) => setPinterestCreateName(e.target.value)} style={{ padding: '.5rem', borderRadius: 8, border: '1px solid #ddd' }} />
+            <textarea placeholder="Description (optional)" value={pinterestCreateDesc} onChange={(e) => setPinterestCreateDesc(e.target.value)} style={{ padding: '.5rem', borderRadius: 8, border: '1px solid #ddd' }} />
+            <div style={{ display: 'flex', gap: '.5rem', justifyContent: 'flex-end' }}>
+              <button className="logout-btn" onClick={() => { setPinterestCreateVisible(false); setPinterestCreateName(''); setPinterestCreateDesc(''); onClose && onClose(); }}>Cancel</button>
+              <button className="check-quality" onClick={() => { onCreate && onCreate(); }}>Create</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Short-lived in-memory cache + inflight guard for Telegram status checks.
@@ -426,6 +545,10 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     );
   };
 
+  const setPlatformOption = (platform, key, value) => {
+    setPlatformOptions(prev => ({ ...(prev||{}), [platform]: { ...((prev||{})[platform]||{}), [key]: value } }));
+  };
+
   const suggestNextTime = () => {
     // Very simple heuristic windows in local time
     const windows = {
@@ -458,12 +581,23 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
 
   const handleUploadSubmit = async () => {
     if (!onUpload) return;
+    // Basic client-side validation for per-platform required fields
+    const missing = [];
+    if (selectedPlatforms.includes('discord') && !(platformOptions.discord && platformOptions.discord.channelId)) missing.push('Discord Channel ID');
+    if (selectedPlatforms.includes('telegram') && !(platformOptions.telegram && platformOptions.telegram.chatId)) missing.push('Telegram Chat ID');
+    if (selectedPlatforms.includes('reddit') && !(platformOptions.reddit && platformOptions.reddit.subreddit)) missing.push('Reddit subreddit');
+    if (selectedPlatforms.includes('spotify') && !(platformOptions.spotify && platformOptions.spotify.name)) missing.push('Spotify playlist name');
+    if (missing.length) {
+      alert('Please provide required platform options: ' + missing.join(', '));
+      return;
+    }
     const whenIso = scheduleMode === 'manual' && manualWhen
       ? new Date(manualWhen).toISOString()
       : suggestNextTime();
     await onUpload({
       file: selectedFile,
       platforms: selectedPlatforms,
+      platformOptions: platformOptions,
       title,
       description,
       type,
@@ -471,6 +605,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     });
     setSelectedFile(null);
     setSelectedPlatforms([]);
+    setPlatformOptions({});
     setTitle('');
     setDescription('');
     setType('video');
@@ -1322,6 +1457,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
               </label>
             </div>
             <div className="platform-toggles">
+              <div style={{color:'#9aa4b2', marginBottom: '.5rem'}}>Note: Immediate platform posts are disabled (queued server-side delivery is used). You can enable immediate posting by setting REACT_APP_DISABLE_IMMEDIATE_POSTS=false during build.</div>
               <h4 style={{marginBottom: '.5rem', color: '#cbd5e1'}}>Ready Platforms (Post Now)</h4>
               <label><input type="checkbox" checked={selectedPlatforms.includes('youtube')} onChange={() => togglePlatform('youtube')} /> YouTube ✅</label>
               <label><input type="checkbox" checked={selectedPlatforms.includes('twitter')} onChange={() => togglePlatform('twitter')} /> Twitter ✅</label>
@@ -1335,7 +1471,93 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
               <label><input type="checkbox" checked={selectedPlatforms.includes('facebook')} onChange={() => togglePlatform('facebook')} disabled /> Facebook ⏳</label>
               <label><input type="checkbox" checked={selectedPlatforms.includes('instagram')} onChange={() => togglePlatform('instagram')} disabled /> Instagram ⏳</label>
               <label><input type="checkbox" checked={selectedPlatforms.includes('snapchat')} onChange={() => togglePlatform('snapchat')} disabled /> Snapchat ⏳</label>
-              <label><input type="checkbox" checked={selectedPlatforms.includes('pinterest')} onChange={() => togglePlatform('pinterest')} disabled /> Pinterest ⏳</label>
+              <label><input type="checkbox" checked={selectedPlatforms.includes('pinterest')} onChange={() => togglePlatform('pinterest')} /> Pinterest ✅</label>
+            </div>
+            {/* Per-platform options for selected platforms */}
+            <div style={{marginTop: '.5rem'}}>
+              {selectedPlatforms.includes('discord') && (
+                <div style={{display:'grid', gap:'.25rem', maxWidth:520}}>
+                  <label style={{color:'#9aa4b2'}}>Discord Server (select a server to see recommended channel IDs or enter a channel ID manually)
+                    {platformMetadata.discord && platformMetadata.discord.guilds && Array.isArray(platformMetadata.discord.guilds) && platformMetadata.discord.guilds.length > 0 ? (
+                      <select value={platformOptions.discord?.guildId || ''} onChange={(e) => setPlatformOption('discord', 'guildId', e.target.value)} style={{display:'block', width:'100%', marginTop:'.25rem'}}>
+                        <option value="">Select a server</option>
+                        {platformMetadata.discord.guilds.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                      </select>
+                    ) : (
+                      <input type="text" value={platformOptions.discord?.guildId || ''} onChange={(e) => setPlatformOption('discord', 'guildId', e.target.value)} placeholder="server id (optional)" style={{display:'block', width:'100%', marginTop:'.25rem'}} />
+                    )}
+                    <div style={{marginTop:'.25rem'}}>Channel ID (required for posting to a specific channel)</div>
+                    <input type="text" value={platformOptions.discord?.channelId || ''} onChange={(e) => setPlatformOption('discord', 'channelId', e.target.value)} placeholder="channel ID" style={{display:'block', width:'100%', marginTop:'.25rem'}} />
+                  </label>
+                  <div style={{display:'flex', gap:'.5rem', marginTop:'.5rem'}}>
+                    <button className="secondary" onClick={() => setPinterestCreateVisible(true)}>Create board</button>
+                  </div>
+                </div>
+              )}
+              {selectedPlatforms.includes('telegram') && (
+                <div style={{display:'grid', gap:'.25rem', maxWidth:520}}>
+                  <label style={{color:'#9aa4b2'}}>Telegram Chat ID
+                    <input type="text" value={platformOptions.telegram?.chatId || ''} onChange={(e) => setPlatformOption('telegram', 'chatId', e.target.value)} placeholder="chat ID" style={{display:'block', width:'100%', marginTop:'.25rem'}} />
+                  </label>
+                </div>
+              )}
+              {selectedPlatforms.includes('reddit') && (
+                <div style={{display:'grid', gap:'.25rem', maxWidth:520}}>
+                  <label style={{color:'#9aa4b2'}}>Subreddit
+                    <input type="text" value={platformOptions.reddit?.subreddit || ''} onChange={(e) => setPlatformOption('reddit', 'subreddit', e.target.value)} placeholder="subreddit (e.g. r/javascript)" style={{display:'block', width:'100%', marginTop:'.25rem'}} />
+                  </label>
+                </div>
+              )}
+              {selectedPlatforms.includes('spotify') && (
+                <div style={{display:'grid', gap:'.25rem', maxWidth:520}}>
+                  <label style={{color:'#9aa4b2'}}>Playlist Name
+                    {platformMetadata.spotify && platformMetadata.spotify.playlists && platformMetadata.spotify.playlists.length > 0 ? (
+                      <select value={platformOptions.spotify?.name || ''} onChange={(e) => setPlatformOption('spotify', 'name', e.target.value)} style={{display:'block', width:'100%', marginTop:'.25rem'}}>
+                        <option value="">Select a playlist</option>
+                        {platformMetadata.spotify.playlists.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
+                      </select>
+                    ) : (
+                      <input type="text" value={platformOptions.spotify?.name || ''} onChange={(e) => setPlatformOption('spotify', 'name', e.target.value)} placeholder="Playlist Name" style={{display:'block', width:'100%', marginTop:'.25rem'}} />
+                    )}
+                  </label>
+                </div>
+              )}
+              {selectedPlatforms.includes('linkedin') && (
+                <div style={{display:'grid', gap:'.25rem', maxWidth:520}}>
+                  <label style={{color:'#9aa4b2'}}>LinkedIn Organization
+                    {platformMetadata.linkedin && platformMetadata.linkedin.organizations && Array.isArray(platformMetadata.linkedin.organizations) && platformMetadata.linkedin.organizations.length > 0 ? (
+                      <select value={platformOptions.linkedin?.companyId || ''} onChange={(e) => setPlatformOption('linkedin', 'companyId', e.target.value)} style={{display:'block', width:'100%', marginTop:'.25rem'}}>
+                        <option value="">Select an organization</option>
+                        {platformMetadata.linkedin.organizations.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+                      </select>
+                    ) : (
+                      <input type="text" value={platformOptions.linkedin?.companyId || ''} onChange={(e) => setPlatformOption('linkedin', 'companyId', e.target.value)} placeholder="organization id (optional)" style={{display:'block', width:'100%', marginTop:'.25rem'}} />
+                    )}
+                  </label>
+                  <label style={{color:'#9aa4b2'}}>LinkedIn Person ID (optional)
+                    <input type="text" value={platformOptions.linkedin?.personId || ''} onChange={(e) => setPlatformOption('linkedin', 'personId', e.target.value)} placeholder="person id" style={{display:'block', width:'100%', marginTop:'.25rem'}} />
+                  </label>
+                </div>
+              )}
+              {selectedPlatforms.includes('pinterest') && (
+                <div style={{display:'grid', gap:'.25rem', maxWidth:520}}>
+                  <label style={{color:'#9aa4b2'}}>Pinterest Board
+                    {platformMetadata.pinterest && platformMetadata.pinterest.boards && platformMetadata.pinterest.boards.length > 0 ? (
+                      <select value={platformOptions.pinterest?.boardId || ''} onChange={(e) => setPlatformOption('pinterest', 'boardId', e.target.value)} style={{display:'block', width:'100%', marginTop:'.25rem'}}>
+                        <option value="">Select a board</option>
+                        {platformMetadata.pinterest.boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                      </select>
+                    ) : (
+                      <input type="text" value={platformOptions.pinterest?.boardId || ''} onChange={(e) => setPlatformOption('pinterest', 'boardId', e.target.value)} placeholder="Board ID" style={{display:'block', width:'100%', marginTop:'.25rem'}} />
+                    )}
+                  </label>
+                </div>
+              )}
+              {selectedPlatforms.includes('youtube') && (
+                <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
+                  <label style={{color:'#9aa4b2'}}><input type="checkbox" checked={platformOptions.youtube?.shortsMode || false} onChange={(e) => setPlatformOption('youtube', 'shortsMode', e.target.checked)} /> Upload as YouTube Shorts</label>
+                </div>
+              )}
             </div>
             <div style={{display:'grid', gap:'.5rem', marginTop:'.5rem'}}>
               <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
@@ -1361,7 +1583,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
             </div>
             <div style={{display: 'flex', gap: '.5rem'}}>
               <button className="check-quality" onClick={handleUploadSubmit} disabled={!selectedFile || selectedPlatforms.length === 0}>Upload</button>
-              <button className="logout-btn" onClick={() => { setSelectedFile(null); setSelectedPlatforms([]); }}>Reset</button>
+              <button className="logout-btn" onClick={() => { setSelectedFile(null); setSelectedPlatforms([]); setPlatformOptions({}); }}>Reset</button>
             </div>
             <div className="upload-history">
               <h4>Upload History</h4>
@@ -1504,6 +1726,8 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
             <pre style={{background:'rgba(255,255,255,0.05)', padding:'.75rem', borderRadius:8, maxHeight:300, overflow:'auto'}}>{JSON.stringify(platformSummary, null, 2)}</pre>
           </section>
         )}
+        {/* Render modal outside of section flow */}
+        <PinterestCreateModal visible={pinterestCreateVisible} onClose={() => setPinterestCreateVisible(false)} onCreate={() => { handleCreatePinterestBoard(); }} />
       </main>
     </div>
   );

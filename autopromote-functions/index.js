@@ -5,6 +5,59 @@ const admin = require("firebase-admin");
 const { v4: uuidv4 } = require('./lib/uuid-compat');
 admin.initializeApp();
 
+// Diagnostic: print module paths and local directory content to assist runtime debugging
+try {
+  console.log('[index] module.paths:', module.paths);
+  const fs = require('fs');
+  const files = fs.readdirSync(__dirname).slice(0, 40);
+  console.log('[index] functions directory listing (slice):', files.join(', '));
+  if (fs.existsSync(path.join(__dirname, '_server'))) {
+    const serverFiles = fs.readdirSync(path.join(__dirname, '_server')).slice(0, 40);
+    console.log('[index] _server directory listing (slice):', serverFiles.join(', '));
+  } else {
+    console.log('[index] _server not found at', path.join(__dirname, '_server'));
+  }
+} catch (e) {
+  console.warn('[index] diagnostic listing failed:', e && e.message);
+}
+
+// Expose the main Express server as `api` function for Firebase Hosting rewrites
+// We'll lazy-load the server on the first request so module import-time
+// won't fail in the Cloud Functions load step (avoid timeouts / require errors).
+// The root package `autopromote-server` exports the Express `app` safely;
+// if that isn't installed we will fall back to the local _server copy.
+let _serverApp = null;
+let _serverAppMissing = false;
+function getServerApp() {
+  if (_serverApp) return _serverApp;
+  try {
+    // Prefer installed package
+    _serverApp = require('autopromote-server');
+    console.log('[index] Loaded autopromote-server package');
+  } catch (e) {
+    console.warn('[index] Could not require autopromote-server package:', e.message);
+    try {
+      // Fallback to local copy copied during pre-deploy
+      _serverApp = require('./_server/src/server.js');
+      console.log('[index] Loaded local _server copy for api function');
+    } catch (err2) {
+      console.error('[index] Could not require local _server copy:', err2.stack || err2.message || err2);
+      // Mark missing and provide a minimal fallback express handler so function can respond gracefully
+      _serverAppMissing = true;
+      try {
+        const express = require('express');
+        const fallbackApp = express();
+        fallbackApp.use((req, res) => res.status(503).send('Service initializing'));
+        _serverApp = fallbackApp;
+      } catch (expressErr) {
+        console.error('[index] Could not create fallback express app:', expressErr && expressErr.message);
+        throw err2; // fallback unavailable - rethrow original error
+      }
+    }
+  }
+  return _serverApp;
+}
+
 // Simple test function to verify deployment
 exports.helloWorld = functions.https.onRequest((req, res) => {
   res.send("Hello from Firebase Functions!");
@@ -13,14 +66,32 @@ exports.helloWorld = functions.https.onRequest((req, res) => {
 // Export YouTube video upload function
 exports.uploadVideoToYouTube = require('./youtubeUploader').uploadVideoToYouTube;
 // Export TikTok OAuth utilities
-// exports.getTikTokAuthUrl = require('./tiktokOAuth').getTikTokAuthUrl;
-// exports.tiktokOAuthCallback = require('./tiktokOAuth').tiktokOAuthCallback;
+exports.getTikTokAuthUrl = require('./tiktokOAuth').getTikTokAuthUrl;
+exports.tiktokOAuthCallback = require('./tiktokOAuth').tiktokOAuthCallback;
 // Export Facebook OAuth utilities
 exports.getFacebookAuthUrl = require('./facebookOAuth').getFacebookAuthUrl;
 exports.facebookOAuthCallback = require('./facebookOAuth').facebookOAuthCallback;
 // Export YouTube OAuth utilities
 exports.getYouTubeAuthUrl = require('./youtubeOAuth').getYouTubeAuthUrl;
 exports.youtubeOAuthCallback = require('./youtubeOAuth').youtubeOAuthCallback;
+// New (additional platforms)
+exports.getPinterestAuthUrl = require('./pinterestOAuth').getPinterestAuthUrl;
+exports.pinterestOAuthCallback = require('./pinterestOAuth').pinterestOAuthCallback;
+exports.getDiscordAuthUrl = require('./discordOAuth').getDiscordAuthUrl;
+exports.discordOAuthCallback = require('./discordOAuth').discordOAuthCallback;
+exports.getSpotifyAuthUrl = require('./spotifyOAuth').getSpotifyAuthUrl;
+exports.spotifyOAuthCallback = require('./spotifyOAuth').spotifyOAuthCallback;
+exports.getLinkedInAuthUrl = require('./linkedinOAuth').getLinkedInAuthUrl;
+exports.linkedinOAuthCallback = require('./linkedinOAuth').linkedinOAuthCallback;
+exports.getRedditAuthUrl = require('./redditOAuth').getRedditAuthUrl;
+exports.redditOAuthCallback = require('./redditOAuth').redditOAuthCallback;
+exports.getTwitterAuthUrl = require('./twitterOAuth').getTwitterAuthUrl;
+exports.twitterOAuthCallback = require('./twitterOAuth').twitterOAuthCallback;
+exports.telegramWebhook = require('./telegramWebhook').telegramWebhook;
+exports.getInstagramAuthUrl = require('./instagramOAuth').getInstagramAuthUrl;
+exports.instagramOAuthCallback = require('./instagramOAuth').instagramOAuthCallback;
+exports.getSnapchatAuthUrl = require('./snapchatOAuth').getSnapchatAuthUrl;
+exports.snapchatOAuthCallback = require('./snapchatOAuth').snapchatOAuthCallback;
 // Export Creator Attribution & Referral System
 exports.addReferrerToContent = require('./referralSystem').addReferrerToContent;
 exports.getReferralStats = require('./referralSystem').getReferralStats;
@@ -38,6 +109,10 @@ exports.generateSmartLink = require('./smartLinkTracker').generateSmartLink;
 exports.smartLinkRedirect = require('./smartLinkTracker').smartLinkRedirect;
 
 const region = 'us-central1';
+
+// Lazy wrapper for API so the function can be deployed even if
+// the underlying server isn't present during package-level require.
+exports.api = functions.region(region).https.onRequest((req, res) => { try { return getServerApp()(req, res); } catch (e) { console.error('api error during request:', e && e.message); return res.status(500).send('Server error'); } });
 
 exports.createPromotionOnApproval = functions.region(region).firestore
   .document("content/{contentId}")

@@ -3,6 +3,8 @@ const router = express.Router();
 const authMiddleware = require('../authMiddleware');
 const { SUPPORTED_PLATFORMS } = require('../validationMiddleware');
 const { db } = require('../firebaseAdmin');
+const { encryptToken } = require('../services/secretVault');
+const { tokensFromDoc } = require('../services/connectionTokenUtils');
 const { safeFetch } = require('../utils/ssrfGuard');
 // Engines to warm-up/connect on new platform connections
 const smartDistributionEngine = require('../services/smartDistributionEngine');
@@ -56,6 +58,30 @@ function sendPlain(res, status, message) {
   return res.status(status).send(sanitizeForText(message));
 }
 
+// Helper: remove sensitive fields from a connection Firestore document before returning
+function sanitizeConnectionForApi(doc) {
+  if (!doc || typeof doc !== 'object') return {};
+  const clone = Object.assign({}, doc);
+  // Remove token fields entirely
+  delete clone.tokens;
+  delete clone.access_token;
+  delete clone.accessToken;
+  delete clone.refresh_token;
+  delete clone.refreshToken;
+  delete clone.client_secret;
+  delete clone.clientSecret;
+  delete clone.private_key;
+  delete clone.secret;
+  if (clone.meta && typeof clone.meta === 'object') {
+    const metaClone = Object.assign({}, clone.meta);
+    delete metaClone.tokens;
+    delete metaClone.access_token;
+    delete metaClone.refresh_token;
+    clone.meta = metaClone;
+  }
+  return clone;
+}
+
 // GET /api/:platform/status
 router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   const platform = normalize(req.params.platform);
@@ -84,7 +110,9 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
       const userRef = db.collection('users').doc(uid);
       const snap = await userRef.collection('connections').doc(platform).get();
       if (snap.exists) {
-        return { ok: true, platform, connected: true, meta: snap.data() };
+        // Sanitize the connection object to avoid leaking tokens or secrets
+        const connDoc = snap.data() || {};
+        return { ok: true, platform, connected: true, meta: sanitizeConnectionForApi(connDoc) };
       }
       // Fallback: try to infer from top-level user doc
       const userSnap = await userRef.get();
@@ -124,10 +152,15 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
     const conn = connSnap.data() || {};
     // If we already have helpful meta stored, return it
     if (conn.meta && Object.keys(conn.meta || {}).length) {
-      return res.json({ ok: true, platform, connected: true, meta: conn.meta });
+      // Ensure the returned meta doesn't contain tokens
+      const sanitizedMeta = Object.assign({}, conn.meta || {});
+      delete sanitizedMeta.tokens;
+      delete sanitizedMeta.access_token;
+      delete sanitizedMeta.refresh_token;
+      return res.json({ ok: true, platform, connected: true, meta: sanitizedMeta });
     }
     // Otherwise, try to fetch some metadata from provider using stored tokens (best-effort)
-    const tokens = conn.tokens || conn.tokens || (conn.meta && conn.meta.tokens) || null;
+    const tokens = tokensFromDoc(conn) || (conn.meta && conn.meta.tokens) || null;
     const result = { ok: true, platform, connected: true, meta: {} };
     if (!tokens || !tokens.access_token) {
       // Best-effort fallback: return empty meta and let the UI use the session values
@@ -194,17 +227,21 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
       try {
         const userRef = db.collection('users').doc(uid);
         const snap = await userRef.collection('connections').doc('pinterest').get();
-        if (snap.exists && snap.data().tokens && snap.data().tokens.access_token) {
-          const accessToken = snap.data().tokens.access_token;
+        if (snap.exists) {
+          const sdata = snap.data() || {};
+          const tokens = tokensFromDoc(sdata) || (sdata.meta && sdata.meta.tokens) || null;
+          if (tokens && tokens.access_token) {
+            const accessToken = tokens.access_token;
           const url = 'https://api.pinterest.com/v5/boards?limit=50';
           try {
             const r = await safeFetch(url, fetchFn, { fetchOptions: { headers: { Authorization: `Bearer ${accessToken}` } }, requireHttps: true, allowHosts: ['api.pinterest.com'] });
             if (r.ok) {
               const j = await r.json();
               result.meta.boards = (j.items || []).map(b => ({ id: b.id, name: b.name }));
-              await userRef.collection('connections').doc('pinterest').set({ meta: { ...(snap.data().meta || {}), boards: result.meta.boards }, updatedAt: new Date().toISOString() }, { merge: true });
+              await userRef.collection('connections').doc('pinterest').set({ meta: { ...(sdata.meta || {}), boards: result.meta.boards }, updatedAt: new Date().toISOString() }, { merge: true });
             }
           } catch (_) {}
+          }
         }
       } catch (_) {}
     }
@@ -405,7 +442,7 @@ router.get('/reddit/auth/callback', async (req, res) => {
     if (uid && uid !== 'anon') {
       const userRef = db.collection('users').doc(uid);
       const now = new Date().toISOString();
-      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, updatedAt: now }, { merge: true });
+      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: encryptToken(JSON.stringify(tokenJson)), hasEncryption: true, updatedAt: now }, { merge: true });
       // Post-connection hooks: queue light-weight recommendations and event for downstream engines
       try {
         await db.collection('events').add({ type: 'platform_connected', uid, platform, at: new Date().toISOString() });
@@ -476,7 +513,7 @@ router.get('/discord/auth/callback', async (req, res) => {
     if (uid && uid !== 'anon') {
       const userRef = db.collection('users').doc(uid);
       const now = new Date().toISOString();
-      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, meta, updatedAt: now }, { merge: true });
+      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: encryptToken(JSON.stringify(tokenJson)), hasEncryption: true, meta, updatedAt: now }, { merge: true });
       // Persist extra metadata where possible (LinkedIn orgs)
       try {
         if (tokenJson.access_token) {
@@ -644,7 +681,7 @@ router.get('/spotify/auth/callback', async (req, res) => {
     if (uid && uid !== 'anon') {
       const userRef = db.collection('users').doc(uid);
       const now = new Date().toISOString();
-      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, meta, updatedAt: now }, { merge: true });
+      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: encryptToken(JSON.stringify(tokenJson)), hasEncryption: true, meta, updatedAt: now }, { merge: true });
       // Post-connection hooks: event, recs, add to connectedPlatforms
       try {
         await db.collection('events').add({ type: 'platform_connected', uid, platform, at: new Date().toISOString() });
@@ -675,12 +712,9 @@ router.get('/spotify/auth/callback', async (req, res) => {
 });
 
 // Generic placeholder callback for other platforms
-router.get('/:platform/auth/callback', async (req, res, next) => {
-  const platform = normalize(req.params.platform);
-  if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).send('Unsupported platform');
-  if (platform === 'linkedin') return next();
-  return sendPlain(res, 200, 'Callback placeholder - implement OAuth exchange for ' + platform);
-});
+// NOTE: this handler intentionally sits after platform-specific handlers
+// below so specific OAuth exchanges (e.g. Spotify, Discord, Pinterest)
+// are not intercepted by the placeholder.
 
 // GET /api/linkedin/auth/callback
 router.get('/linkedin/auth/callback', async (req, res) => {
@@ -733,7 +767,7 @@ router.get('/linkedin/auth/callback', async (req, res) => {
     if (uid && uid !== 'anon') {
       const userRef = db.collection('users').doc(uid);
       const now = new Date().toISOString();
-      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, meta, updatedAt: now }, { merge: true });
+      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: encryptToken(JSON.stringify(tokenJson)), hasEncryption: true, meta, updatedAt: now }, { merge: true });
       try {
         await db.collection('events').add({ type: 'platform_connected', uid, platform, at: new Date().toISOString() });
         try {
@@ -809,7 +843,7 @@ router.get('/pinterest/auth/callback', async (req, res) => {
     if (uid && uid !== 'anon') {
       const userRef = db.collection('users').doc(uid);
       const now = new Date().toISOString();
-      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, meta, updatedAt: now }, { merge: true });
+      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: encryptToken(JSON.stringify(tokenJson)), hasEncryption: true, meta, updatedAt: now }, { merge: true });
       try { await db.collection('events').add({ type: 'platform_connected', uid, platform, at: new Date().toISOString() }); } catch(_){ }
       try { if (admin && admin.firestore && admin.firestore.FieldValue && admin.firestore.FieldValue.arrayUnion) { await userRef.set({ connectedPlatforms: admin.firestore.FieldValue.arrayUnion(platform) }, { merge: true }); } } catch(_){ }
     }
@@ -817,6 +851,15 @@ router.get('/pinterest/auth/callback', async (req, res) => {
   } catch (e) {
     return sendPlain(res, 500, 'Pinterest callback error: ' + (e && e.message ? e.message : 'unknown error'));
   }
+});
+
+// Generic placeholder callback for other platforms — keep as a fallback
+// and ensure it's defined after specific platform callback handlers so it
+// doesn't intercept platforms that have a proper implementation.
+router.get('/:platform/auth/callback', async (req, res, next) => {
+  const platform = normalize(req.params.platform);
+  if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).send('Unsupported platform');
+  return sendPlain(res, 200, 'Callback placeholder - implement OAuth exchange for ' + platform);
 });
 
 // POST /api/:platform/sample-promote - enqueue a sample platform_post for testing (auth required)
@@ -858,11 +901,12 @@ router.post('/:platform/sample-promote', authMiddleware, platformWriteLimiter, a
         const userRef = db.collection('users').doc(uid);
         const connSnap = await userRef.collection('connections').doc('pinterest').get();
         const conn = connSnap.exists ? connSnap.data() || {} : {};
-        const hasAccessToken = conn.tokens && conn.tokens.access_token;
+        const tokens = tokensFromDoc(conn) || (conn.meta && conn.meta.tokens) || null;
+        const hasAccessToken = tokens && tokens.access_token;
         // If user has a token, try to create board using Pinterest API v5
         if (hasAccessToken) {
           try {
-            const accessToken = conn.tokens.access_token;
+            const accessToken = tokens.access_token;
             const postBody = { name };
             if (description) postBody.description = description;
             // Use service helper to create board to centralize logic & testing
@@ -1027,3 +1071,5 @@ router.post('/telegram/admin/send-test', authMiddleware, platformWriteLimiter, a
 });
 
 module.exports = router;
+// Export helper for tests
+module.exports.sanitizeConnectionForApi = sanitizeConnectionForApi;

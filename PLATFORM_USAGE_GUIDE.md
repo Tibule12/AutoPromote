@@ -436,3 +436,39 @@ console.log('Spotify:', data.spotify?.playlistId);
 ---
 
 **All platforms are now ready for production use!**
+
+---
+
+## Per-Platform Upload Metadata (platform_options)
+
+When the upload UI sends content to the backend, it uses a `platform_options` map to include per-platform metadata and options. Example payload:
+
+```json
+{
+  "title": "My Content",
+  "type": "video",
+  "url": "https://...",
+  "target_platforms": ["youtube","discord","spotify"],
+  "platform_options": {
+    "discord": { "channelId": "123456789", "guildId": "987654321" },
+    "spotify": { "name": "My Playlist" },
+    "youtube": { "shortsMode": true }
+  }
+}
+```
+
+Common platform options:
+- `discord.channelId` (required when posting to a specific channel)
+- `discord.guildId` (optional, used to indicate the server)
+- `telegram.chatId` (required for Telegram messages)
+- `reddit.subreddit` (required when posting to a subreddit)
+- `spotify.name` (required for playlist creation)
+- `linkedin.companyId` (optional — post as organization)
+- `linkedin.personId` (optional — post as person)
+- `youtube.shortsMode` (boolean — short videos / #shorts)
+
+Use the dropdown/helpers in the dashboard to prefill these values when your platform connection supports metadata (Spotify playlists, Discord guilds, LinkedIn organizations, Telegram chatId). The dashboard calls `/api/:platform/metadata` to fetch available options.
+
+---
+
+For more advanced options or for adding more platforms, use the `platform_options` map and the queued posting system to ensure consistent delivery and reliable retries.

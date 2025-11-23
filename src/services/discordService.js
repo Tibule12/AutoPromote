@@ -14,10 +14,15 @@ if (!fetchFn) {
 /**
  * Get user's Discord connection
  */
+const { tokensFromDoc } = require('./connectionTokenUtils');
+
 async function getUserDiscordConnection(uid) {
   const snap = await db.collection('users').doc(uid).collection('connections').doc('discord').get();
   if (!snap.exists) return null;
-  return snap.data();
+  const d = snap.data();
+  const tokens = tokensFromDoc(d);
+  if (tokens) d.tokens = tokens;
+  return d;
 }
 
 /**

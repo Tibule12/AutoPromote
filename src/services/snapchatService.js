@@ -8,6 +8,8 @@ if (!fetchFn) {
   try { fetchFn = require('node-fetch'); } catch (_) { fetchFn = null; }
 }
 
+const { tokensFromDoc } = require('./connectionTokenUtils');
+
 async function postToSnapchat({ contentId, payload, reason, uid }) {
   // For now, Snapchat posting is ad/creative oriented. We simulate a creative creation
   // if no ad account or access token exists for the user.
@@ -16,7 +18,12 @@ async function postToSnapchat({ contentId, payload, reason, uid }) {
     const snap = await db.collection('users').doc(uid).collection('connections').doc('snapchat').get();
     if (snap.exists) conn = snap.data() || {};
   } catch (_) {}
-  const hasAccessToken = conn && conn.accessToken;
+  // If tokens stored encrypted or in separate fields, normalize into conn.tokens
+  if (conn) {
+    const tokens = tokensFromDoc(conn);
+    if (tokens) conn.tokens = tokens;
+  }
+  const hasAccessToken = (conn && (conn.accessToken || (conn.tokens && conn.tokens.access_token)));
   if (!hasAccessToken) return { platform: 'snapchat', simulated: true, reason: 'missing_credentials' };
   // Expect payload to include `media_url` or `creative` fields
   const creativePayload = {
@@ -29,7 +36,7 @@ async function postToSnapchat({ contentId, payload, reason, uid }) {
     const res = await safeFetch('https://adsapi.snapchat.com/v1/adaccounts/{ad_account_id}/creatives', fetchFn, {
       fetchOptions: {
         method: 'POST',
-        headers: { Authorization: `Bearer ${conn.accessToken}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${conn.accessToken || (conn.tokens && conn.tokens.access_token)}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...creativePayload })
       },
       allowHosts: ['adsapi.snapchat.com'],
