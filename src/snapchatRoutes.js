@@ -246,7 +246,8 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
     if (!tokenRes.ok) {
       // If provider returned an error, include it for debugging
       console.error('snapchat: token exchange failed', { error: tokenData.error, error_description: tokenData.error_description });
-      return res.status(400).json({ error: 'Failed to exchange code for token', details: tokenData });
+      // Avoid returning token/secret details; only return minimal error info
+      return res.status(400).json({ error: 'Failed to exchange code for token', details: { error: tokenData.error, error_description: tokenData.error_description } });
     }
 
     // Get user profile information
@@ -267,10 +268,11 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
       return res.status(400).json({ error: 'Failed to get user profile', details: profileData });
     }
 
-    // Store connection in Firestore under the resolved userId
+    const { encryptToken } = require('./services/secretVault');
+    // Store connection in Firestore under the resolved userId (encrypt tokens)
     await db.collection('users').doc(userId).collection('connections').doc('snapchat').set({
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token,
+      tokens: encryptToken(JSON.stringify({ access_token: tokenData.access_token, refresh_token: tokenData.refresh_token, expires_in: tokenData.expires_in })),
+      hasEncryption: true,
       expiresAt: Date.now() + (tokenData.expires_in * 1000),
       profile: profileData,
       connectedAt: new Date().toISOString()
@@ -350,6 +352,9 @@ router.post('/creative', authMiddleware, apiActionLimiter, async (req, res) => {
     }
 
     const connection = snap.data();
+    const { tokensFromDoc } = require('./services/connectionTokenUtils');
+    const tokens = tokensFromDoc(connection) || (connection.tokens || null);
+    const accessToken = tokens && tokens.access_token;
     if (connection.expiresAt < Date.now()) {
       return res.status(401).json({ error: 'Snapchat token expired' });
     }
@@ -361,7 +366,7 @@ router.post('/creative', authMiddleware, apiActionLimiter, async (req, res) => {
       fetchOptions: {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${connection.accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -401,6 +406,9 @@ router.get('/analytics/:creativeId', authMiddleware, apiActionLimiter, async (re
     }
 
     const connection = snap.data();
+    const { tokensFromDoc } = require('./services/connectionTokenUtils');
+    const tokens = tokensFromDoc(connection) || (connection.tokens || null);
+    const accessToken = tokens && tokens.access_token;
     if (connection.expiresAt < Date.now()) {
       return res.status(401).json({ error: 'Snapchat token expired' });
     }
@@ -410,7 +418,7 @@ router.get('/analytics/:creativeId', authMiddleware, apiActionLimiter, async (re
       allowHosts: ['adsapi.snapchat.com'],
       requireHttps: true,
       fetchOptions: {
-        headers: { 'Authorization': `Bearer ${connection.accessToken}` }
+        headers: { 'Authorization': `Bearer ${accessToken}` }
       }
     });
 

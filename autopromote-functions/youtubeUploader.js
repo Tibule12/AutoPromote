@@ -9,10 +9,18 @@ const region = 'us-central1';
 
 // Helper: Get YouTube OAuth token from Firestore
 async function getYouTubeToken(channelId) {
+  const { decryptToken } = require('./secretVault');
   const snapshot = await admin.firestore().collection('youtube_tokens')
     .where('channel.id', '==', channelId).limit(1).get();
   if (snapshot.empty) throw new Error('No YouTube token found for channel');
-  return snapshot.docs[0].data();
+  const data = snapshot.docs[0].data();
+  if (data && data.tokenJson && typeof data.tokenJson === 'string') {
+    try {
+      const decrypted = decryptToken(data.tokenJson);
+      if (decrypted) return JSON.parse(decrypted);
+    } catch (_) { /* fallback */ }
+  }
+  return data;
 }
 
 // Helper: Upload video to YouTube

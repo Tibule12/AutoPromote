@@ -88,8 +88,68 @@ module.exports = {
     return next();
   },
 
-  // Basic rate-limit placeholder (no-op). Integrate real limiter as needed.
-  validateRateLimit: (req, res, next) => next(),
+  // Basic rate-limit middleware: enforce conservative per-user write limits
+  // This function attempts a Firestore lookup to count recent operations from
+  // the same user and prevents abuse by returning HTTP 429 when limits are
+  // exceeded. It's intentionally conservative (only enforced for authenticated
+  // users) and is used as a last-defense when route-level rate-limiting may not
+  // be present. We map HTTP methods to an operation key to allow collection
+  // specific limits (create vs update/delete).
+  validateRateLimit: async (req, res, next) => {
+    try {
+      const { db } = require('../firebaseAdmin');
+      const userId = req.userId || (req.user && req.user.uid) || null;
+      if (!userId) return next(); // don't rate-limit unauthenticated callers here
+
+      // Create a map from HTTP method -> operation type
+      const method = String(req.method || '').toLowerCase();
+      const methodToOp = { post: 'create', put: 'write', patch: 'write', delete: 'write', get: 'read' };
+      const operation = methodToOp[method] || 'write';
+
+      // Extract collection name from the base url, e.g. /api/content -> content
+      const collectionName = (req.baseUrl || '').split('/').filter(Boolean).pop() || null;
+      if (!collectionName) return next();
+
+      // Define conservative rate limits per collection and operation
+      const rateLimits = {
+        content: { create: { max: parseInt(process.env.RATE_LIMIT_CONTENT_CREATE || '1', 10), windowMs: 21 * 24 * 60 * 60 * 1000 } },
+        analytics: { create: { max: parseInt(process.env.RATE_LIMIT_ANALYTICS_CREATE || '100', 10), windowMs: 60 * 1000 } },
+        promotion_tasks: { create: { max: parseInt(process.env.RATE_LIMIT_PROMO_CREATE || '10', 10), windowMs: 24 * 60 * 60 * 1000 } },
+        promotions: { create: { max: parseInt(process.env.RATE_LIMIT_PROMO_CREATE || '10', 10), windowMs: 24 * 60 * 60 * 1000 } },
+      };
+
+      const limit = (rateLimits[collectionName] || {})[operation];
+      if (!limit) return next();
+
+      const cutoff = Date.now() - (limit.windowMs || 0);
+      // Use known timestamp field names when present (`created_at` or `createdAt`)
+      const query = db.collection(collectionName)
+        .where('user_id', '==', userId)
+        .where('created_at', '>=', new Date(cutoff).toISOString())
+        .limit(limit.max + 1);
+
+      // If the collection doesn't store created_at, try createdAt as a fallback
+      let recent = null;
+      try { recent = await query.get(); } catch (_e) {
+        try {
+          recent = await db.collection(collectionName)
+            .where('user_id', '==', userId)
+            .where('createdAt', '>=', new Date(cutoff).toISOString())
+            .limit(limit.max + 1)
+            .get();
+        } catch (e) { /* ignore and allow */ }
+      }
+
+      if (recent && recent.size >= limit.max) {
+        return res.status(429).json({ error: 'rate_limit_exceeded', message: `Too many ${operation} operations on ${collectionName}. Try again later.` });
+      }
+      return next();
+    } catch (e) {
+      // If rate-limiting fails for any reason, allow the request to proceed
+      console.warn('[rateLimit] validation failed:', e && e.message ? e.message : e);
+      return next();
+    }
+  },
 
   // Simple sanitization: trim strings in the body (shallow)
   sanitizeInput: (req, res, next) => {
