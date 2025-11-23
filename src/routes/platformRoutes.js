@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../authMiddleware');
 const { SUPPORTED_PLATFORMS } = require('../validationMiddleware');
 const { db } = require('../firebaseAdmin');
+const { safeFetch } = require('../utils/ssrfGuard');
 // Engines to warm-up/connect on new platform connections
 const smartDistributionEngine = require('../services/smartDistributionEngine');
 const admin = require('../firebaseAdmin').admin;
@@ -108,6 +109,116 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
   } catch (e) {
     platformStatusCache.delete(cacheKey);
     return res.status(500).json({ ok: false, platform, error: e && e.message ? e.message : 'unknown_error' });
+  }
+});
+
+// GET /api/:platform/metadata - return helpful metadata for the connected user (playlist lists, org pages, guilds)
+router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+  const platform = normalize(req.params.platform);
+  if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
+  const uid = req.userId || req.user?.uid;
+  if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+  try {
+    const connSnap = await db.collection('users').doc(uid).collection('connections').doc(platform).get();
+    if (!connSnap.exists) return res.json({ ok: true, platform, connected: false });
+    const conn = connSnap.data() || {};
+    // If we already have helpful meta stored, return it
+    if (conn.meta && Object.keys(conn.meta || {}).length) {
+      return res.json({ ok: true, platform, connected: true, meta: conn.meta });
+    }
+    // Otherwise, try to fetch some metadata from provider using stored tokens (best-effort)
+    const tokens = conn.tokens || conn.tokens || (conn.meta && conn.meta.tokens) || null;
+    const result = { ok: true, platform, connected: true, meta: {} };
+    if (!tokens || !tokens.access_token) {
+      // Best-effort fallback: return empty meta and let the UI use the session values
+      return res.json(result);
+    }
+    const accessToken = tokens.access_token;
+    if (platform === 'spotify') {
+      // Get user playlists
+      try {
+        const url = `https://api.spotify.com/v1/me/playlists?limit=50`;
+        const r = await safeFetch(url, fetchFn, { fetchOptions: { headers: { Authorization: `Bearer ${accessToken}` } }, requireHttps: true, allowHosts: ['api.spotify.com'] });
+        if (r.ok) {
+          const j = await r.json();
+          result.meta.playlists = (j.items || []).map(p => ({ id: p.id, name: p.name, public: !!p.public }));
+          await db.collection('users').doc(uid).collection('connections').doc('spotify').set({ meta: { playlists: result.meta.playlists }, updatedAt: new Date().toISOString() }, { merge: true });
+        }
+      } catch (e) { /* non-fatal */ }
+    } else if (platform === 'discord') {
+      // Try to get guilds the user is a member of
+      try {
+        const url = `https://discord.com/api/users/@me/guilds`;
+        const r = await safeFetch(url, fetchFn, { fetchOptions: { headers: { Authorization: `Bearer ${accessToken}` } }, requireHttps: true, allowHosts: ['discord.com', 'discordapp.com'] });
+        if (r.ok) {
+          const j = await r.json();
+          result.meta.guilds = (j || []).map(g => ({ id: g.id, name: g.name, owner: !!g.owner }));
+          await db.collection('users').doc(uid).collection('connections').doc('discord').set({ meta: { guilds: result.meta.guilds }, updatedAt: new Date().toISOString() }, { merge: true });
+        }
+      } catch (e) { /* non-fatal */ }
+    } else if (platform === 'linkedin') {
+      // Attempt to fetch organizations where the user has admin rights
+      try {
+        const aclUrl = `https://api.linkedin.com/v2/organizationAcls?q=roleAssignee&role=ADMINISTRATOR`;
+        const r = await safeFetch(aclUrl, fetchFn, { fetchOptions: { headers: { Authorization: `Bearer ${accessToken}`, 'X-Restli-Protocol-Version': '2.0.0' } }, requireHttps: true, allowHosts: ['api.linkedin.com'] });
+        if (r.ok) {
+          const j = await r.json();
+          const orgIds = (j.elements || []).map(el => (el && el.organizationalTarget && el.organizationalTarget.split(':').pop())).filter(Boolean);
+          const orgs = [];
+          for (const id of orgIds) {
+            try {
+              const orgReq = await safeFetch(`https://api.linkedin.com/v2/organizations/${id}?projection=(localizedName)`, fetchFn, { fetchOptions: { headers: { Authorization: `Bearer ${accessToken}`, 'X-Restli-Protocol-Version': '2.0.0' } }, requireHttps: true, allowHosts: ['api.linkedin.com'] });
+              if (orgReq.ok) {
+                const orgData = await orgReq.json();
+                orgs.push({ id, name: orgData.localizedName || orgData.name || 'Organization' });
+              }
+            } catch (_) { /* ignore failing org fetch */ }
+          }
+          result.meta.organizations = orgs;
+          await db.collection('users').doc(uid).collection('connections').doc('linkedin').set({ meta: { organizations: orgs }, updatedAt: new Date().toISOString() }, { merge: true });
+        }
+      } catch (e) { /* non-fatal */ }
+    } else if (platform === 'telegram') {
+      // Telegram webhook callback persists a chatId; include that if present
+      try {
+        const userRef = db.collection('users').doc(uid);
+        const snap = await userRef.collection('connections').doc('telegram').get();
+        if (snap.exists) {
+          const d = snap.data() || {};
+          if (d.chatId) result.meta.chatId = d.chatId;
+          if (d.meta) result.meta = { ...result.meta, ...d.meta };
+        }
+      } catch (_) { /* ignore */ }
+    }
+    else if (platform === 'pinterest') {
+      try {
+        const userRef = db.collection('users').doc(uid);
+        const snap = await userRef.collection('connections').doc('pinterest').get();
+        if (snap.exists && snap.data().tokens && snap.data().tokens.access_token) {
+          const accessToken = snap.data().tokens.access_token;
+          const url = 'https://api.pinterest.com/v5/boards?limit=50';
+          try {
+            const r = await safeFetch(url, fetchFn, { fetchOptions: { headers: { Authorization: `Bearer ${accessToken}` } }, requireHttps: true, allowHosts: ['api.pinterest.com'] });
+            if (r.ok) {
+              const j = await r.json();
+              result.meta.boards = (j.items || []).map(b => ({ id: b.id, name: b.name }));
+              await userRef.collection('connections').doc('pinterest').set({ meta: { ...(snap.data().meta || {}), boards: result.meta.boards }, updatedAt: new Date().toISOString() }, { merge: true });
+            }
+          } catch (_) {}
+        }
+      } catch (_) {}
+    }
+
+    if (platform === 'pinterest') {
+      const clientId = process.env.PINTEREST_CLIENT_ID;
+      const redirectUri = `${host}/api/pinterest/auth/callback`;
+      const scope = encodeURIComponent((process.env.PINTEREST_SCOPES || 'pins:read,pins:write,boards:read').split(',').join(','));
+      const url = `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}&scope=${scope}&state=${state}`;
+      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
+    }
+    return res.json(result);
+  } catch (e) {
+    return res.status(500).json({ ok: false, platform, error: e.message || 'unknown_error' });
   }
 });
 
@@ -366,6 +477,55 @@ router.get('/discord/auth/callback', async (req, res) => {
       const userRef = db.collection('users').doc(uid);
       const now = new Date().toISOString();
       await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, meta, updatedAt: now }, { merge: true });
+      // Persist extra metadata where possible (LinkedIn orgs)
+      try {
+        if (tokenJson.access_token) {
+          const aclUrl = `https://api.linkedin.com/v2/organizationAcls?q=roleAssignee&role=ADMINISTRATOR`;
+          const aclRes = await fetchFn(aclUrl, { headers: { Authorization: `Bearer ${tokenJson.access_token}`, 'X-Restli-Protocol-Version': '2.0.0' } });
+          if (aclRes.ok) {
+            const aclData = await aclRes.json();
+            const orgIds = (aclData.elements || []).map(el => (el && el.organizationalTarget && el.organizationalTarget.split(':').pop())).filter(Boolean);
+            const orgs = [];
+            for (const id of orgIds) {
+              try {
+                const orgReq = await fetchFn(`https://api.linkedin.com/v2/organizations/${id}?projection=(localizedName)`, { headers: { Authorization: `Bearer ${tokenJson.access_token}`, 'X-Restli-Protocol-Version': '2.0.0' } });
+                if (orgReq.ok) {
+                  const orgData = await orgReq.json();
+                  orgs.push({ id, name: orgData.localizedName || orgData.name || 'Organization' });
+                }
+              } catch (_) { /* ignore */ }
+            }
+            if (orgs.length > 0) {
+              await userRef.collection('connections').doc(platform).set({ meta: { ...(meta||{}), organizations: orgs } }, { merge: true });
+            }
+          }
+        }
+      } catch (e) { /* best-effort */ }
+      // Persist extra metadata where possible (guilds for Discord)
+      try {
+        if (tokenJson.access_token) {
+          const guildUrl = 'https://discord.com/api/users/@me/guilds';
+          const gRes = await fetchFn(guildUrl, { headers: { Authorization: `Bearer ${tokenJson.access_token}` } });
+          if (gRes.ok) {
+            const gData = await gRes.json();
+            const guilds = (gData || []).map(g => ({ id: g.id, name: g.name, owner: !!g.owner }));
+            await userRef.collection('connections').doc(platform).set({ meta: { ...(meta||{}), guilds } }, { merge: true });
+          }
+        }
+      } catch (e) { /* best-effort */ }
+      // Persist extra metadata where possible (e.g., playlists)
+      try {
+        if (tokenJson.access_token) {
+          // Fetch playlists and augment meta
+          const playlistsUrl = 'https://api.spotify.com/v1/me/playlists?limit=50';
+          const pRes = await fetchFn(playlistsUrl, { headers: { Authorization: `Bearer ${tokenJson.access_token}` } });
+          if (pRes.ok) {
+            const pData = await pRes.json();
+            const playlists = (pData.items || []).map(p=>({ id: p.id, name: p.name, public: !!p.public }));
+            await userRef.collection('connections').doc(platform).set({ meta: { ...(meta||{}), playlists } }, { merge: true });
+          }
+        }
+      } catch (e) { /* best-effort */ }
       // Post-connection hooks: create event, add recommendations
       try {
         await db.collection('events').add({ type: 'platform_connected', uid, platform, at: new Date().toISOString() });
@@ -601,6 +761,64 @@ router.get('/linkedin/auth/callback', async (req, res) => {
   }
 });
 
+// GET /api/pinterest/auth/callback - Pinterest OAuth v5 code exchange
+router.get('/pinterest/auth/callback', async (req, res) => {
+  const platform = 'pinterest';
+  const code = req.query.code;
+  const state = req.query.state;
+  const oauthError = req.query.error;
+  if (oauthError) return sendPlain(res, 400, `Pinterest error: ${req.query.error_description || oauthError}`);
+  if (!code) return sendPlain(res, 400, 'Missing authorization code from Pinterest');
+  try {
+    if (!fetchFn) return sendPlain(res, 500, 'Server missing fetch implementation');
+    const clientId = process.env.PINTEREST_CLIENT_ID;
+    const clientSecret = process.env.PINTEREST_CLIENT_SECRET;
+    const host = `${req.protocol}://${req.get('host')}`;
+    const redirectUri = `${host}/api/pinterest/auth/callback`;
+    const tokenUrl = 'https://api.pinterest.com/v5/oauth/token';
+    const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri });
+    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const tokenRes = await fetchFn(tokenUrl, { method: 'POST', headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+    const tokenJson = await tokenRes.json();
+    let meta = {};
+    if (tokenJson.access_token) {
+      try {
+        // fetch user account and boards
+        const accRes = await fetchFn('https://api.pinterest.com/v5/user_account', { headers: { Authorization: `Bearer ${tokenJson.access_token}` } });
+        if (accRes.ok) meta.profile = await accRes.json();
+        const boardsRes = await fetchFn('https://api.pinterest.com/v5/boards?limit=50', { headers: { Authorization: `Bearer ${tokenJson.access_token}` } });
+        if (boardsRes.ok) {
+          const bd = await boardsRes.json();
+          meta.boards = (bd.items || []).map(b => ({ id: b.id, name: b.name }));
+        }
+      } catch (_) {}
+    }
+    // Resolve user from stored state mapping
+    let uid = null;
+    try {
+      if (state) {
+        const sd = await db.collection('oauth_states').doc(state).get();
+        if (sd.exists) {
+          const s = sd.data();
+          if (!s.expiresAt || new Date(s.expiresAt) > new Date()) uid = s.uid || null;
+          try { await db.collection('oauth_states').doc(state).delete(); } catch(_){ }
+        }
+      }
+    } catch (e) { console.warn('[oauth][pinterest] state lookup failed', e && e.message); }
+    if (!uid && state && state.split && state.split(':')[0]) uid = state.split(':')[0];
+    if (uid && uid !== 'anon') {
+      const userRef = db.collection('users').doc(uid);
+      const now = new Date().toISOString();
+      await userRef.collection('connections').doc(platform).set({ connected: true, tokens: tokenJson, meta, updatedAt: now }, { merge: true });
+      try { await db.collection('events').add({ type: 'platform_connected', uid, platform, at: new Date().toISOString() }); } catch(_){ }
+      try { if (admin && admin.firestore && admin.firestore.FieldValue && admin.firestore.FieldValue.arrayUnion) { await userRef.set({ connectedPlatforms: admin.firestore.FieldValue.arrayUnion(platform) }, { merge: true }); } } catch(_){ }
+    }
+    return sendPlain(res, 200, 'Pinterest OAuth callback received. You can close this window.');
+  } catch (e) {
+    return sendPlain(res, 500, 'Pinterest callback error: ' + (e && e.message ? e.message : 'unknown error'));
+  }
+});
+
 // POST /api/:platform/sample-promote - enqueue a sample platform_post for testing (auth required)
 router.post('/:platform/sample-promote', authMiddleware, platformWriteLimiter, async (req, res) => {
   const platform = normalize(req.params.platform);
@@ -624,6 +842,56 @@ router.post('/:platform/sample-promote', authMiddleware, platformWriteLimiter, a
     return res.status(500).json({ ok: false, error: e.message });
   }
 });
+
+    // POST /api/:platform/boards - create a board for the given platform (Pinterest only)
+    router.post('/:platform/boards', authMiddleware, platformWriteLimiter, async (req, res) => {
+      const platform = normalize(req.params.platform);
+      if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
+      try {
+        const uid = req.userId || req.user?.uid;
+        if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+        if (platform !== 'pinterest') return res.status(400).json({ ok: false, error: 'unsupported_platform_for_boards' });
+        const body = req.body || {};
+        const name = String(body.name || '').trim();
+        const description = String(body.description || body.desc || '') || null;
+        if (!name || name.length < 1) return res.status(400).json({ ok: false, error: 'name_required' });
+        const userRef = db.collection('users').doc(uid);
+        const connSnap = await userRef.collection('connections').doc('pinterest').get();
+        const conn = connSnap.exists ? connSnap.data() || {} : {};
+        const hasAccessToken = conn.tokens && conn.tokens.access_token;
+        // If user has a token, try to create board using Pinterest API v5
+        if (hasAccessToken) {
+          try {
+            const accessToken = conn.tokens.access_token;
+            const postBody = { name };
+            if (description) postBody.description = description;
+            // Use service helper to create board to centralize logic & testing
+            try {
+              const { createBoard } = require('../services/pinterestService');
+              const result = await createBoard({ name, description, uid });
+              if (!result.ok) return res.status(502).json({ ok: false, error: result.error || 'pinterest_api_error' });
+              return res.json({ ok: true, board: result.board, simulated: result.simulated || false });
+            } catch (e) {
+              return res.status(500).json({ ok: false, error: e && e.message ? e.message : 'pinterest_create_failed' });
+            }
+          } catch (e) {
+            return res.status(500).json({ ok: false, error: e.message || 'pinterest_create_failed' });
+          }
+        }
+        // Otherwise, support simulated create (e.g., during tests or dev without token)
+        // Simulated creation: use service helper which handles both real & simulated creation
+        try {
+          const { createBoard } = require('../services/pinterestService');
+          const result = await createBoard({ name, description, uid });
+          if (!result.ok) return res.status(500).json({ ok: false, error: result.error || 'create_simulated_board_failed' });
+          return res.json({ ok: true, board: result.board, simulated: result.simulated || false });
+        } catch (e) {
+          return res.status(500).json({ ok: false, error: e && e.message ? e.message : 'create_simulated_board_failed' });
+        }
+      } catch (e) {
+        return res.status(500).json({ ok: false, error: e.message || 'unknown_error' });
+      }
+    });
 
 // POST /api/telegram/webhook
 // Telegram will POST updates here when the bot receives messages. We support
