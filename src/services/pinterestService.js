@@ -9,10 +9,14 @@ if (!fetchFn) {
 
 async function postToPinterest({ contentId, payload, reason, uid }) {
   let userTokens = null;
+  const { tokensFromDoc } = require('./connectionTokenUtils');
   if (uid) {
     try {
       const snap = await db.collection('users').doc(uid).collection('connections').doc('pinterest').get();
-      if (snap.exists && snap.data().tokens) userTokens = snap.data().tokens;
+      if (snap.exists) {
+        const d = snap.data() || {};
+        userTokens = tokensFromDoc(d) || null;
+      }
     } catch (_) {}
   }
   const hasCreds = userTokens || (process.env.PINTEREST_CLIENT_ID && process.env.PINTEREST_CLIENT_SECRET);
@@ -68,7 +72,7 @@ async function createBoard({ name, description, uid }) {
   try {
     const snap = await userRef.collection('connections').doc('pinterest').get();
     const conn = snap.exists ? snap.data() || {} : {};
-    const tokens = conn.tokens || null;
+    const tokens = tokensFromDoc(conn) || null;
     const hasAccessToken = tokens && tokens.access_token;
     if (hasAccessToken) {
       const accessToken = tokens.access_token;

@@ -21,6 +21,12 @@ async function getConn(uid, name) {
     const snap = await userRef.collection('connections').doc(name).get();
     if (snap.exists) {
       const data = snap.data();
+      // Avoid exposing sensitive fields such as tokens
+      if (data && typeof data === 'object') {
+        const safe = Object.assign({}, data);
+        delete safe.tokens; delete safe.access_token; delete safe.refresh_token; delete safe.client_secret; delete safe.secret;
+        return { connected: true, ...safe, source: 'subcollection' };
+      }
       return { connected: true, ...data, source: 'subcollection' };
     }
     // Heuristic fallback: inspect top-level user doc for token/identity hints
@@ -69,7 +75,11 @@ router.get('/status', authMiddleware, platformConnectionsPublicLimiter, require(
     telegram: { connected: telegram.connected, chatId: telegram.meta?.chatId },
     pinterest: { connected: pinterest.connected, boards: pinterest.meta?.boards?.length }
   };
-  const payload = { ok: true, summary, raw: { twitter, youtube, facebook, tiktok, spotify, reddit, discord, linkedin, telegram, pinterest } };
+  // Minimize token exposure in raw connections; ensure tokens are removed
+  const makeSafe = (d) => { const s = Object.assign({}, d||{}); if (s) { delete s.tokens; delete s.access_token; delete s.refresh_token; delete s.client_secret; delete s.secret; } return s; };
+  const payload = { ok: true, summary, raw: {
+    twitter: makeSafe(twitter), youtube: makeSafe(youtube), facebook: makeSafe(facebook), tiktok: makeSafe(tiktok), spotify: makeSafe(spotify), reddit: makeSafe(reddit), discord: makeSafe(discord), linkedin: makeSafe(linkedin), telegram: makeSafe(telegram), pinterest: makeSafe(pinterest)
+  } };
   setCache(cacheKey, payload, 7000);
   res.json(payload);
 }));

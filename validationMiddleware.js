@@ -252,45 +252,45 @@ const validatePromotionData = (req, res, next) => {
 // Rate limiting validation
 const validateRateLimit = async (req, res, next) => {
   try {
-    const userId = req.userId;
-    const collectionName = req.baseUrl.split('/').pop(); // Extract collection from URL
-    const operation = req.method.toLowerCase();
+    const userId = req.userId || (req.user && req.user.uid) || null;
+    if (!userId) return next();
 
-    // TEMPORARILY DISABLED: Rate limiting for testing
-    // TODO: Re-enable after testing is complete
-    console.log('Rate limiting validation temporarily disabled for testing');
-    /*
-    // Define rate limits (customize as needed)
+    const method = String(req.method || '').toLowerCase();
+    const methodToOp = { post: 'create', put: 'write', patch: 'write', delete: 'write', get: 'read' };
+    const operation = methodToOp[method] || 'write';
+    const collectionName = (req.baseUrl || '').split('/').filter(Boolean).pop();
+    if (!collectionName) return next();
+
     const rateLimits = {
-      content: { create: { max: 1, window: 21 * 24 * 60 * 60 * 1000 } }, // 1 per 3 weeks
-      analytics: { create: { max: 100, window: 60 * 1000 } }, // 100 per minute
-      promotions: { create: { max: 10, window: 24 * 60 * 60 * 1000 } } // 10 per day
+      content: { create: { max: parseInt(process.env.RATE_LIMIT_CONTENT_CREATE || '1', 10), windowMs: 21 * 24 * 60 * 60 * 1000 } },
+      analytics: { create: { max: parseInt(process.env.RATE_LIMIT_ANALYTICS_CREATE || '100', 10), windowMs: 60 * 1000 } },
+      promotion_tasks: { create: { max: parseInt(process.env.RATE_LIMIT_PROMO_CREATE || '10', 10), windowMs: 24 * 60 * 60 * 1000 } },
+      promotions: { create: { max: parseInt(process.env.RATE_LIMIT_PROMO_CREATE || '10', 10), windowMs: 24 * 60 * 60 * 1000 } },
     };
-
-    const limit = rateLimits[collectionName]?.[operation];
-    if (!limit) {
-      return next(); // No rate limit for this operation
-    }
-
-    const cutoffDate = new Date(Date.now() - limit.window);
-    const recentOperations = await db.collection(collectionName)
+    const limit = (rateLimits[collectionName] || {})[operation];
+    if (!limit) return next();
+    const cutoff = Date.now() - (limit.windowMs || 0);
+    const query = db.collection(collectionName)
       .where('user_id', '==', userId)
-      .where('created_at', '>=', cutoffDate)
-      .get();
-
-    if (recentOperations.size >= limit.max) {
-      return res.status(429).json({
-        error: 'Rate limit exceeded',
-        message: `Maximum ${limit.max} ${operation} operations per ${Math.floor(limit.window / (24 * 60 * 60 * 1000))} days`,
-        retry_after: Math.ceil((cutoffDate.getTime() + limit.window - Date.now()) / 1000)
-      });
+      .where('created_at', '>=', new Date(cutoff).toISOString())
+      .limit(limit.max + 1);
+    let recent = null;
+    try { recent = await query.get(); } catch (_e) {
+      try {
+        recent = await db.collection(collectionName)
+          .where('user_id', '==', userId)
+          .where('createdAt', '>=', new Date(cutoff).toISOString())
+          .limit(limit.max + 1)
+          .get();
+      } catch (e) { /* ignore and allow */ }
     }
-    */
-
-    next();
+    if (recent && recent.size >= limit.max) {
+      return res.status(429).json({ error: 'rate_limit_exceeded', message: `Too many ${operation} operations on ${collectionName}. Try again later.` });
+    }
+    return next();
   } catch (error) {
     console.error('Rate limiting error:', error);
-    next(); // Allow operation if rate limiting fails
+    return next();
   }
 };
 

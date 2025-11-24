@@ -448,16 +448,39 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 		}
 		// Store tokens securely under user
 		const connRef = db.collection('users').doc(uid).collection('connections').doc('tiktok');
-		await connRef.set({
-			provider: 'tiktok',
-			open_id: tokenData.open_id,
-			scope: tokenData.scope,
-			access_token: tokenData.access_token,
-			refresh_token: tokenData.refresh_token,
-			expires_in: tokenData.expires_in,
-			mode: TIKTOK_ENV,
-			obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
-		}, { merge: true });
+		try {
+			const { encryptToken, hasEncryption } = require('../services/secretVault');
+			const stored = {
+				provider: 'tiktok',
+				open_id: tokenData.open_id,
+				scope: tokenData.scope,
+				expires_in: tokenData.expires_in,
+				mode: TIKTOK_ENV,
+				obtainedAt: admin.firestore.FieldValue.serverTimestamp()
+			};
+			if (hasEncryption()) {
+				const tokenJson = JSON.stringify({ access_token: tokenData.access_token, refresh_token: tokenData.refresh_token, expires_in: tokenData.expires_in });
+				stored.tokens = encryptToken(tokenJson);
+				stored.hasEncryption = true;
+			} else {
+				stored.access_token = tokenData.access_token;
+				stored.refresh_token = tokenData.refresh_token;
+				stored.hasEncryption = false;
+			}
+			await connRef.set(stored, { merge: true });
+		} catch (e) {
+			// Fallback: if encryption library errors, write plain fields (legacy)
+			await connRef.set({
+				provider: 'tiktok',
+				open_id: tokenData.open_id,
+				scope: tokenData.scope,
+				access_token: tokenData.access_token,
+				refresh_token: tokenData.refresh_token,
+				expires_in: tokenData.expires_in,
+				mode: TIKTOK_ENV,
+				obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
+			}, { merge: true });
+		}
 		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s open_id=%s scope=%s', uid, tokenData.open_id, tokenData.scope);
 		// redirect back to dashboard with success
 		const url = new URL(DASHBOARD_URL);

@@ -58,13 +58,14 @@ exports.youtubeOAuthCallback = functions.region(region).https.onRequest(async (r
     });
     const channelData = await channelRes.json();
     // Store tokens in Firestore (or return to user for manual storage)
+    const { encryptToken } = require('./secretVault');
     await admin.firestore().collection('youtube_tokens').add({
-      ...tokenData,
+      tokenJson: encryptToken(JSON.stringify(tokenData)),
       channel: channelData.items ? channelData.items[0] : null,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       state
     });
-    res.status(200).json({ success: true, ...tokenData, channel: channelData.items ? channelData.items[0] : null });
+    res.status(200).json({ success: true, channel: channelData.items ? channelData.items[0] : null });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

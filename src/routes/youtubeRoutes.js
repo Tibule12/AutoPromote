@@ -200,7 +200,8 @@ router.get('/callback', ytPublicLimiter, async (req, res) => {
       url.searchParams.set('youtube', 'connected');
       return res.redirect(url.toString());
     }
-    return res.json({ success: true, ...tokenData, channel });
+    // Do not include raw token data in responses; keep public response minimal
+    return res.json({ success: true, channel });
   } catch (err) {
     try {
       const url = new URL(DASHBOARD_URL);
