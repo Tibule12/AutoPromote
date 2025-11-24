@@ -24,10 +24,16 @@ function hasRequiredScopes(scopeString) {
   return REQUIRED_SCOPES.every(s => scopes.includes(s));
 }
 
+const { tokensFromDoc } = require('./connectionTokenUtils');
+
 async function getUserYouTubeConnection(uid) {
   const snap = await db.collection('users').doc(uid).collection('connections').doc('youtube').get();
   if (!snap.exists) return null;
-  return snap.data();
+  const d = snap.data();
+  // ensure tokens exist for OAuth client build
+  const tokens = tokensFromDoc(d);
+  if (tokens) d.tokens = tokens;
+  return d;
 }
 
 function buildOAuthClient(tokens) {
@@ -62,11 +68,22 @@ async function ensureFreshTokens(oauth2Client, tokens, uid) {
   if (!tokens.refresh_token) return oauth2Client; // nothing to refresh with
   try {
     const { credentials } = await oauth2Client.refreshAccessToken();
-    await db.collection('users').doc(uid).collection('connections').doc('youtube').set({
-      ...tokens,
-      ...credentials,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
+    try {
+      const { encryptToken, hasEncryption } = require('./secretVault');
+      const ref = db.collection('users').doc(uid).collection('connections').doc('youtube');
+      const tokenObj = { ...tokens, ...credentials };
+      if (hasEncryption()) {
+        await ref.set({ tokens: encryptToken(JSON.stringify(tokenObj)), hasEncryption: true, updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      } else {
+        await ref.set({ ...tokenObj, updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      }
+    } catch (e) {
+      await db.collection('users').doc(uid).collection('connections').doc('youtube').set({
+        ...tokens,
+        ...credentials,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
     oauth2Client.setCredentials(credentials);
   } catch (err) {
     console.warn('[YouTube] Refresh token failed:', err.message);

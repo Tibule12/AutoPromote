@@ -205,7 +205,9 @@ router.get('/callback', async (req, res) => {
       url.searchParams.set('facebook', 'connected');
       return res.redirect(url.toString());
     }
-    return res.json({ success: true, access_token: tokenData.access_token, pages });
+    // Avoid returning full page objects (which may contain page.access_token)
+    const safePages = (pages || []).map(p => ({ id: p.id, name: p.name || p?.name || null }));
+    return res.json({ success: true, pages: safePages });
   } catch (err) {
     try {
       const url = new URL(DASHBOARD_URL);

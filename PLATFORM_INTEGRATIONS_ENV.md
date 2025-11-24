@@ -51,6 +51,19 @@ TASK_PROCESS_INTERVAL_MS=60000
 VELOCITY_THRESHOLD=800
 ```
 
+## Pinterest
+```
+PINTEREST_CLIENT_ID=your_pinterest_client_id
+PINTEREST_CLIENT_SECRET=your_pinterest_client_secret
+PINTEREST_SCOPES=pins:read,pins:write,boards:read
+PINTEREST_REDIRECT_URI=https://www.autopromote.org/api/pinterest/auth/callback
+```
+
+Notes:
+- Add `PINTEREST_REDIRECT_URI` and any other allowed redirect URIs to your Pinterest developer app settings.
+- Ensure your domain (e.g., autopromote.org) is registered in Pinterest's app settings and your Cloudflare DNS or Zoho email verification doesn't block redirects.
+- Pinterest may require app review for write scopes depending on the counts & endpoints you plan to use.
+
 ## Safety Notes
 - Do NOT commit real access tokens.
 - Rotate tokens periodically.

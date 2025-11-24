@@ -19,11 +19,14 @@ const productionConfig = {
 function activeConfig() { return TIKTOK_ENV === 'production' ? productionConfig : sandboxConfig; }
 const { key: TIKTOK_CLIENT_KEY, secret: TIKTOK_CLIENT_SECRET, redirect: TIKTOK_REDIRECT_URI } = activeConfig();
 
-if (!TIKTOK_CLIENT_KEY || !TIKTOK_CLIENT_SECRET || !TIKTOK_REDIRECT_URI) {
-  throw new Error(`TikTok OAuth environment variables not set for mode ${TIKTOK_ENV}. Expected ${TIKTOK_ENV === 'production' ? 'TIKTOK_PROD_CLIENT_KEY/SECRET/REDIRECT_URI' : 'TIKTOK_SANDBOX_CLIENT_KEY/SECRET/REDIRECT_URI'} (or fallback TIKTOK_CLIENT_KEY/SECRET/REDIRECT_URI).`);
+function isTikTokConfigValid() {
+  return !!(TIKTOK_CLIENT_KEY && TIKTOK_CLIENT_SECRET && TIKTOK_REDIRECT_URI);
 }
 // 1. Generate TikTok OAuth URL
 exports.getTikTokAuthUrl = functions.region(region).https.onCall(async (data, context) => {
+  if (!isTikTokConfigValid()) {
+    throw new functions.https.HttpsError('failed-precondition', `TikTok OAuth environment variables not set for mode ${TIKTOK_ENV}.`);
+  }
   const state = data.state || Math.random().toString(36).substring(2);
   // Keep function scope broad here; frontend route uses narrower initial scope
   const scope = 'user.info.basic';
@@ -33,6 +36,9 @@ exports.getTikTokAuthUrl = functions.region(region).https.onCall(async (data, co
 
 // 2. Handle TikTok OAuth callback and exchange code for access token
 exports.tiktokOAuthCallback = functions.region(region).https.onRequest(async (req, res) => {
+  if (!isTikTokConfigValid()) {
+    return res.status(500).send(`TikTok OAuth environment variables not set for mode ${TIKTOK_ENV}.`);
+  }
   const { code, state } = req.query;
   if (!code) return res.status(400).send('Missing code');
   try {
@@ -50,13 +56,10 @@ exports.tiktokOAuthCallback = functions.region(region).https.onRequest(async (re
     const tokenData = await tokenRes.json();
     if (!tokenData.access_token) throw new Error(tokenData.message || 'No access token');
     // Store access token in Firestore (or your preferred store)
+    const { encryptToken } = require('./secretVault');
     await admin.firestore().collection('tiktok_tokens').doc('default').set({
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
-      expires_in: tokenData.expires_in,
-      obtained_at: Date.now(),
-      scope: tokenData.scope,
-      open_id: tokenData.open_id
+      tokenJson: encryptToken(JSON.stringify({ access_token: tokenData.access_token, refresh_token: tokenData.refresh_token, expires_in: tokenData.expires_in, scope: tokenData.scope, open_id: tokenData.open_id })),
+      obtained_at: Date.now()
     });
     return res.status(200).send('TikTok authentication successful! You can close this window.');
   } catch (error) {

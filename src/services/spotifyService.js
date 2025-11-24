@@ -14,10 +14,15 @@ if (!fetchFn) {
 /**
  * Get user's Spotify connection tokens
  */
+const { tokensFromDoc } = require('./connectionTokenUtils');
+
 async function getUserSpotifyConnection(uid) {
   const snap = await db.collection('users').doc(uid).collection('connections').doc('spotify').get();
   if (!snap.exists) return null;
-  return snap.data();
+  const d = snap.data();
+  const tokens = tokensFromDoc(d);
+  if (tokens) d.tokens = tokens;
+  return d;
 }
 
 /**
@@ -92,13 +97,17 @@ async function refreshToken(uid, refreshToken) {
   
   // Store refreshed tokens
   const ref = db.collection('users').doc(uid).collection('connections').doc('spotify');
-  await ref.set({
-    tokens: {
-      ...tokens,
-      refresh_token: refreshToken // Spotify doesn't always return new refresh token
-    },
-    updatedAt: admin.firestore.FieldValue.serverTimestamp()
-  }, { merge: true });
+  try {
+    const { encryptToken, hasEncryption } = require('./secretVault');
+    if (hasEncryption()) {
+      await ref.set({ tokens: encryptToken(JSON.stringify({ ...tokens, refresh_token: refreshToken })), hasEncryption: true, updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    } else {
+      await ref.set({ tokens: { ...tokens, refresh_token: refreshToken }, updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    }
+  } catch (e) {
+    // fallback to plain storage if something goes wrong
+    await ref.set({ tokens: { ...tokens, refresh_token: refreshToken }, updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+  }
   
   return tokens;
 }

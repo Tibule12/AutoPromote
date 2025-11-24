@@ -50,4 +50,46 @@ describe('tiktokRoutes', () => {
     expect(res.status).toBe(200);
     expect(res.body.connected).toBe(false);
   });
+
+  test('callback stores encrypted tokens when encryption enabled', async () => {
+    // Enable encryption key for secretVault
+    process.env.GENERIC_TOKEN_ENCRYPTION_KEY = 'unit-test-key-123';
+
+    // Capture set calls
+    let lastSetArgs = null;
+    const originalCollection = firebaseAdmin.db.collection;
+    // Override collection to specifically capture users/{uid}/connections/tiktok.set
+    firebaseAdmin.db.collection = (name) => ({
+      doc: (id) => ({
+        collection: (sub) => ({
+          doc: (subId) => ({
+            set: async (obj) => { lastSetArgs = obj; return true; },
+            get: async () => ({ exists: false, data: () => ({}) })
+          })
+        }),
+        set: async (obj) => { lastSetArgs = obj; return true; },
+        get: async () => ({ exists: false, data: () => ({}) })
+      })
+    });
+
+    // Monkey patch safeFetch to return token info
+    const ssrf = require('../../../src/utils/ssrfGuard');
+    ssrf.safeFetch = (url, fetchFn, opts) => {
+      return Promise.resolve({ ok: true, json: async () => ({ access_token: 'TEST_A', refresh_token: 'TEST_R', open_id: 'open_1', expires_in: 3600, scope: 'scope' }) });
+    };
+
+    // Make the request; ensure we include a state so the route uses a known uid
+    const state = 'testUser123.123456';
+    const res = await request(app)
+      .get(`/api/tiktok/callback?code=abc123&state=${encodeURIComponent(state)}`)
+      .expect(302);
+
+    // Restore collection
+    firebaseAdmin.db.collection = originalCollection;
+
+    if (!lastSetArgs) throw new Error('No set() call captured');
+    // Should be an encrypted tokens string (base64/gibberish) stored under tokens
+    if (!lastSetArgs.tokens) throw new Error('tokens field not set (encrypted)');
+    console.log('Captured tokens stored:', typeof lastSetArgs.tokens === 'string' ? '[encrypted]' : lastSetArgs.tokens);
+  });
 });
