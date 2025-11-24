@@ -1,5 +1,9 @@
 {
   "name": "autopromote-server",
   "main": "src/server.js",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "scripts": {
+    "preflight": "node ./scripts/preflight-critical-files.js && node ./scripts/check-encryption-env.js && node ./autopromote-functions/validate-imports.js",
+    "validate-imports": "node ./autopromote-functions/validate-imports.js"
+  }
 }
