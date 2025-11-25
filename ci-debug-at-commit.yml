@@ -67,7 +67,7 @@ jobs:
         run: |
           npm ls @grpc/grpc-js --json > grpc-list.json || true
           node -e "const fs=require('fs'); const o=JSON.parse(fs.readFileSync('grpc-list.json','utf8')); const versions=new Set(); function scan(n){ if(!n || !n.dependencies) return; for(const k of Object.keys(n.dependencies)){ const d=n.dependencies[k]; if(k==='@grpc/grpc-js'){ versions.add(d.version); } scan(d); } } scan(o); if(versions.size===0){ console.log('No @grpc/grpc-js found'); } else if(versions.size===1){ console.log('Unified @grpc/grpc-js version:', [...versions][0]); } else { console.error('Multiple @grpc/grpc-js versions found:', [...versions].join(', ')); process.exit(1); }"
-      - name: CI debug: Node & grpc install info
+      - name: "CI debug: Node & grpc install info"
         run: |
           set -o pipefail
           echo "CI debug: Node/NPM versions"
@@ -90,7 +90,7 @@ jobs:
           if [ -z "${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}" ]; then echo "GENERIC: MISSING"; else echo "GENERIC: PRESENT"; fi
           if [ -z "${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}" ]; then echo "FUNCTIONS: MISSING"; else echo "FUNCTIONS: PRESENT"; fi
           if [ -z "${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}" ]; then echo "TWITTER: MISSING"; else echo "TWITTER: PRESENT"; fi
-      - name: Preflight & Unit Tests
+      - name: "Preflight & Unit Tests"
         if: ${{ github.event.inputs.run_preflight == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         run: |
           npm run preflight
