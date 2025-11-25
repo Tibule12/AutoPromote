@@ -38,16 +38,36 @@ async function main() {
       await fsp.writeFile(path.join(destPkgDir, 'package.json'), JSON.stringify(destPkgJson, null, 2), 'utf8');
     }
     // Copy src directory recursively
-      if (fs.existsSync(sourceDir)) {
-        await copyRecursive(sourceDir, path.join(destPkgDir, 'src'));
-        console.log('[copy-server] Copied server src into functions/_server');
+    if (fs.existsSync(sourceDir)) {
+      await copyRecursive(sourceDir, path.join(destPkgDir, 'src'));
+      console.log('[copy-server] Copied server src into functions/_server');
     } else {
       console.warn('[copy-server] No server src found at', sourceDir);
+    }
+
+    // Copy a few root-level files that src modules expect to import from project root
+    // e.g., src/firebaseAdmin.js expects to require('../firebaseAdmin') which would
+    // look for a file at functions/_server/firebaseAdmin.js
+    const rootFilesToCopy = ['firebaseAdmin.js', 'firebaseClient.js', 'firebaseConfig.server.js'];
+    for (const fname of rootFilesToCopy) {
+      const srcPath = path.join(repoRoot, fname);
+      const destPath = path.join(destPkgDir, fname);
+      if (fs.existsSync(srcPath)) {
+        await copyRecursive(srcPath, destPath);
+        console.log(`[copy-server] Copied ${fname} into functions/_server`);
+      }
     }
   } catch (err) {
     console.error('[copy-server] Error copying server package into functions:', err.message || err);
     process.exit(1);
   }
+
+    // Copy the `lib` directory if present (some modules import from ../../lib/*)
+    const libDir = path.join(repoRoot, 'lib');
+    if (fs.existsSync(libDir)) {
+      await copyRecursive(libDir, path.join(destPkgDir, 'lib'));
+      console.log('[copy-server] Copied lib/ into functions/_server/lib');
+    }
 }
 
 main();

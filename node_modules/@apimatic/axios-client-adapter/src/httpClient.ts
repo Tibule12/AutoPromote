@@ -12,10 +12,12 @@ import FormData from 'form-data';
 import {
   CONTENT_TYPE_HEADER,
   FORM_URLENCODED_CONTENT_TYPE,
+  lookupCaseInsensitive,
 } from '@apimatic/http-headers';
 import {
   HttpRequest,
   HttpResponse,
+  isFormDataWrapper,
   RetryConfiguration,
 } from '@apimatic/core-interfaces';
 import { urlEncodeKeyValuePairs } from '@apimatic/http-query';
@@ -107,7 +109,16 @@ export class HttpClient {
             });
           }
 
-          form.append(iter.key, fileData, iter.value.options);
+          form.append(iter.key, fileData, {
+            ...createFormDataOptions(iter.value.options?.headers || {}),
+            filename: iter.value.options?.filename,
+          });
+        } else if (isFormDataWrapper(iter.value)) {
+          form.append(
+            iter.key,
+            iter.value.data,
+            createFormDataOptions(iter.value.headers || {})
+          );
         } else {
           form.append(iter.key, iter.value);
         }
@@ -150,7 +161,6 @@ export class HttpClient {
     newRequest.headers = headers;
 
     this.setProxyAgent(newRequest);
-
     return newRequest;
   }
 
@@ -275,4 +285,22 @@ export function isBlob(value: unknown): value is Blob {
     value instanceof Blob ||
     Object.prototype.toString.call(value) === '[object Blob]'
   );
+}
+
+export function createFormDataOptions(
+  headers: Record<string, string>
+): FormData.AppendOptions {
+  const headerKey = lookupCaseInsensitive(headers, 'content-type');
+  if (!headerKey) {
+    return {
+      header: headers,
+    };
+  }
+
+  const contentType = headers[headerKey];
+  delete headers[headerKey];
+  return {
+    contentType,
+    header: headers,
+  };
 }
