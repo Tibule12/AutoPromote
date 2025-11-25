@@ -26,6 +26,10 @@ jobs:
       - name: Install root deps
         run: |
           npm install
+      - name: Install functions deps
+        run: |
+          cd autopromote-functions
+          npm ci
       - name: Secrets presence diagnostic
         run: |
           echo "GENERIC: $(if [ -z \"${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}\" ]; then echo MISSING; else echo PRESENT; fi)"
