@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch: # Allow manual runs for debugging and CI rechecks
   push:
     branches: [ main ]
   pull_request:
