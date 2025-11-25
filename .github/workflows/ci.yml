@@ -84,9 +84,9 @@ jobs:
           if [ -f node_modules/@grpc/grpc-js/build/src/single-subchannel-channel.js ]; then echo 'single-subchannel-channel: PRESENT'; else echo 'single-subchannel-channel: MISSING'; fi
           # Run our safety check script to surface missing internal file (non-fatal)
           node ./scripts/check-grpc-install.js || true
-        - name: Check installed grpc internals (root)
-          run: |
-            npm run check:grpc-install || true
+      - name: Check installed grpc internals (root)
+        run: |
+          npm run check:grpc-install || true
       - name: Secrets presence diagnostic
         run: |
           if [ -z "${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}" ]; then echo "GENERIC: MISSING"; else echo "GENERIC: PRESENT"; fi
