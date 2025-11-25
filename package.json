@@ -10,7 +10,9 @@
     "start:dev": "NODE_ENV=development nodemon src/server.js",
     "test:unit": "node test/basic-sanity.js",
     "test:routes": "node test/route-imports.test.js",
-    "test": "npm run test:unit"
+    "test": "npm run test:unit",
+    "check:grpc-versions": "node -e \"const fs=require('fs'); const out=JSON.parse(require('child_process').execSync('npm ls @grpc/grpc-js --json').toString()||'{}'); const versions=new Set(); function scan(n){ if(!n||!n.dependencies) return; Object.keys(n.dependencies).forEach(k=>{ const d=n.dependencies[k]; if(k==='@grpc/grpc-js'){ versions.add(d.version); } scan(d); }); } scan(out); console.log('grpc versions:', [...versions].join(', ')); if(versions.size>1){ console.error('Multiple versions found'); process.exit(1);} \"",
+    "check:grpc-install": "node ./scripts/check-grpc-install.js"
   },
   "engines": {
     "node": ">=20"
