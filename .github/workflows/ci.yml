@@ -90,8 +90,7 @@ jobs:
       
       - name: Preflight & Unit Tests
         # Only run preflight for PRs that originate from this repository (not forks), or non-PR events.
-        # Also ensure required encryption secrets are present before running preflight in PRs from the same repository.
-        if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && secrets.GENERIC_TOKEN_ENCRYPTION_KEY != '' && secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY != '') }}
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
           npm run preflight
           npm run test:unit
