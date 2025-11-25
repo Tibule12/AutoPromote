@@ -47,6 +47,20 @@ Other helpful environment variables:
 - `FRONTEND_URL`: URL of your frontend app (for CORS)
 - `JWT_SECRET`: Secret for JWT token generation
 
+### Use deterministic installs on Render
+
+Ensure Render uses `npm ci` (not `npm install`) when installing dependencies so the `package-lock.json` is enforced and `overrides` are respected. If Render uses a cached node_modules or `npm install`, you may encounter transitive dependency version mismatches (e.g., `@grpc/grpc-js` conflicting versions).
+
+If you see runtime errors similar to "Cannot find module './single-subchannel-channel'", try the following on Render:
+
+- Clear the build cache on Render and trigger a fresh redeploy
+- Ensure your build command includes `npm ci`
+- Verify Render environment uses the repo's `package-lock.json` rather than resolving on each build
+
+### Debugging tip: Dependency verification endpoint
+If you are still seeing gRPC or Firestore errors after redeploy, you can enable a temporary debug endpoint in the deployed server to inspect installed versions. Set `DEBUG_DEPS_TOKEN` env var to a secret value in Render and request `/api/debug/deps` with header `x-debug-token: <token>` to obtain a JSON payload describing installed `google-gax` and `@grpc/grpc-js` versions and whether the `single-subchannel-channel.js` file exists on disk.
+
+
 ## Troubleshooting
 
 If you encounter issues:
@@ -55,3 +69,4 @@ If you encounter issues:
 2. Verify that your environment variables are correctly set
 3. Confirm that your Firebase project has the necessary services enabled
 4. Make sure that the service account has the required permissions
+5. If you suspect `@grpc/grpc-js` version mismatch, add a build step in Render to run `node ./scripts/check-grpc-install.js` after install to ensure the installed package includes the expected files. This script exits non-zero if the internal `single-subchannel-channel.js` file is missing, preventing a deployment scarred by runtime errors.

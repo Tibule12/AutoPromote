@@ -1,4 +1,5 @@
 import { FileWrapper } from '@apimatic/file-wrapper';
+import { FormDataWrapper } from './formDataWrapper';
 /**
  * Represents an HTTP request
  */
@@ -50,7 +51,10 @@ export interface HttpRequestUrlEncodedFormBody {
 
 export interface HttpRequestMultipartFormBody {
   type: 'form-data';
-  content: Array<{ key: string; value: string | FileWrapper }>;
+  content: Array<{
+    key: string;
+    value: string | FileWrapper | FormDataWrapper;
+  }>;
 }
 
 export interface HttpRequestStreamBody {

@@ -8,6 +8,17 @@ export class FileWrapper {
   ) {
     this.file = file;
   }
+
+  /**
+   * Updates the current FileWrapper instance with merged options.
+   *
+   * @param newOptions Options to merge with existing options
+   * @returns The current FileWrapper instance with updated options
+   */
+  public withOptions(newOptions: FileWrapperOptions): this {
+    this.options = { ...this.options, ...newOptions };
+    return this;
+  }
 }
 
 /** File upload options such as filename and mime-type */

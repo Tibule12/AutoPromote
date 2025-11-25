@@ -1,4 +1,40 @@
 const admin = require('firebase-admin');
+// Diagnostic: log google-gax and @grpc/grpc-js versions/paths and whether 'single-subchannel-channel.js' exists
+try {
+    const fs = require('fs');
+    const path = require('path');
+    try {
+        const gaxPkg = require('google-gax/package.json');
+        const gaxResolved = require.resolve('google-gax');
+        let grpcInfo = 'not installed';
+        try {
+            const grpcPkgPath = require.resolve('@grpc/grpc-js/package.json');
+            const grpcPkg = require('@grpc/grpc-js/package.json');
+            // Try to find single-subchannel-channel.js based on known build structure
+            let singleSubExists = false;
+            try {
+                // Look for known file locations across versions
+                const potentialPaths = [
+                    path.join(path.dirname(require.resolve('@grpc/grpc-js/package.json')), 'build', 'src', 'single-subchannel-channel.js'),
+                    path.join(path.dirname(require.resolve('@grpc/grpc-js/package.json')), 'build', 'src', 'single_subchannel_channel.js'),
+                    path.join(path.dirname(require.resolve('@grpc/grpc-js/package.json')), 'src', 'single-subchannel-channel.js')
+                ];
+                for (const p of potentialPaths) {
+                    if (fs.existsSync(p)) { singleSubExists = true; break; }
+                }
+            } catch (_) { singleSubExists = false; }
+            grpcInfo = `@grpc/grpc-js@${grpcPkg.version} at ${grpcPkgPath} (has single-subchannel-channel: ${singleSubExists})`;
+        } catch (e) {
+            grpcInfo = `@grpc/grpc-js missing (${e && e.message})`;
+        }
+        console.log(`[diagnostic] google-gax@${gaxPkg.version} at ${gaxResolved}; ${grpcInfo}`);
+    } catch (e) {
+        console.warn('[diagnostic] google-gax not found:', e && e.message);
+    }
+} catch (e) {
+    // Do not block startup on diagnostics
+    console.warn('[diagnostic] internal check failed:', e && e.message);
+}
 let adminConfig = null;
 try { adminConfig = require('./firebaseConfig.server'); } catch (_) { adminConfig = null; }
 
