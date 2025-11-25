@@ -90,7 +90,7 @@ jobs:
       
       - name: Preflight & Unit Tests
         # Only run preflight for PRs that originate from this repository (not forks), or non-PR events.
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           npm run preflight
           npm run test:unit
