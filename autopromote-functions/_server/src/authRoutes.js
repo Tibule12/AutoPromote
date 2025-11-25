@@ -136,7 +136,7 @@ router.post('/reset-password', async (req,res)=>{
 // Login endpoint
 router.post('/login', async (req, res) => {
   try {
-    console.log('Login request received:', req.body);
+    console.log('Login request received; idTokenPresent=%s emailPresent=%s', !!(req.body && req.body.idToken), !!(req.body && req.body.email));
     const { idToken, email, password } = req.body;
 
     // There are two authentication methods:
@@ -149,7 +149,7 @@ router.post('/login', async (req, res) => {
       console.log('Verifying Firebase ID token...');
       // Verify the Firebase ID token
       decodedToken = await admin.auth().verifyIdToken(idToken);
-      console.log('Token verified, user:', decodedToken);
+      console.log('Token verified for uid=%s', decodedToken.uid);
     } else if (email && password) {
       console.log('Using email/password authentication...');
       // This is a more risky approach as we're handling credentials directly
@@ -167,7 +167,7 @@ router.post('/login', async (req, res) => {
           email: userRecord.email,
           name: userRecord.displayName || email.split('@')[0]
         };
-        console.log('Email/password auth successful, user:', decodedToken);
+        console.log('Email/password auth successful for uid=%s', decodedToken.uid);
       } catch (error) {
         console.error('Email/password authentication failed:', error);
         return res.status(401).json({ error: 'Invalid email or password' });
@@ -185,33 +185,33 @@ router.post('/login', async (req, res) => {
     
     // Check admins collection first for admin logins
     try {
-      console.log('Checking admins collection for user:', decodedToken.uid);
+      console.log('Checking admins collection for user: uid=%s', decodedToken.uid);
       const adminDoc = await admin.firestore().collection('admins').doc(decodedToken.uid).get();
       if (adminDoc.exists) {
         userData = adminDoc.data();
         role = 'admin';
         isAdmin = true;
         fromCollection = 'admins';
-        console.log('User data from Firestore (admins):', userData);
+        console.log('User data from Firestore (admins): email=%s uid=%s', userData && userData.email, decodedToken.uid);
       } else {
         // If not found in admins, check users collection
-        console.log('Not found in admins, checking users collection for UID:', decodedToken.uid);
+        console.log('Not found in admins, checking users collection for UID: uid=%s', decodedToken.uid);
         const userDoc = await admin.firestore().collection('users').doc(decodedToken.uid).get();
         if (userDoc.exists) {
           userData = userDoc.data();
-          console.log('User data from Firestore (users):', userData);
+          console.log('User data from Firestore (users): email=%s uid=%s', userData && userData.email, decodedToken.uid);
           // Always use Firestore values for role and isAdmin if present
           if (userData.role) role = userData.role;
           if (typeof userData.isAdmin !== 'undefined') isAdmin = userData.isAdmin;
         }
       }
     } catch (firestoreError) {
-      console.log('Error fetching from Firestore:', firestoreError);
+      console.log('Error fetching from Firestore: %s', firestoreError && firestoreError.message);
       // Continue with Auth data if Firestore fails
     }
     
     if (!userData) {
-      console.log('No Firestore data, using claims from token');
+      console.log('No Firestore data, using claims from token for uid=%s', decodedToken.uid);
       // Use custom claims from the token if no Firestore data
       userData = {
         email: decodedToken.email,
@@ -340,7 +340,7 @@ router.post('/login', async (req, res) => {
 // Admin-specific login endpoint
 router.post('/admin-login', async (req, res) => {
   try {
-    console.log('Admin login request received:', req.body);
+    console.log('Admin login request received; idTokenPresent=%s emailPresent=%s', !!(req.body && req.body.idToken), !!(req.body && req.body.email));
             role: decodedToken.admin ? 'admin' : 'user'
 
     if (!idToken) {
@@ -363,10 +363,10 @@ router.post('/admin-login', async (req, res) => {
         // --- END PATCH ---
     }
 
-    console.log('Verifying Firebase ID token for admin login...', idToken.substring(0, 20) + '...');
+    console.log('Verifying Firebase ID token for admin login... (truncated token)');
     // Verify the Firebase ID token
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    console.log('Token verified, admin user:', decodedToken);
+    console.log('Admin token verified for uid=%s', decodedToken.uid);
     
     // Variables to store user data
     let userData = null;
@@ -376,8 +376,8 @@ router.post('/admin-login', async (req, res) => {
     
     // For admin login, check admin claims in token first, then try admins collection
     try {
-      console.log('Checking admin claims in token:', decodedToken.admin, decodedToken.role);
-      console.log('Admin email from token:', decodedToken.email);
+      console.log('Checking admin claims in token: admin=%s role=%s', decodedToken.admin, decodedToken.role);
+      console.log('Admin email present in token=%s', !!decodedToken.email);
 
       // Check if user has admin claims in the token
       if (decodedToken.admin === true || decodedToken.role === 'admin') {
@@ -388,7 +388,7 @@ router.post('/admin-login', async (req, res) => {
           const adminDoc = await admin.firestore().collection('admins').doc(decodedToken.uid).get();
 
           if (adminDoc.exists) {
-            console.log('User found in admins collection');
+            console.log('User found in admins collection for uid=%s', decodedToken.uid);
             userData = adminDoc.data();
             fromCollection = 'admins';
 
@@ -397,7 +397,7 @@ router.post('/admin-login', async (req, res) => {
               lastLogin: admin.firestore.FieldValue.serverTimestamp()
             });
           } else {
-            console.log('Admin not in admins collection, using token claims');
+            console.log('Admin not in admins collection, using token claims for uid=%s', decodedToken.uid);
             // Create admin document if it doesn't exist
             userData = {
               email: decodedToken.email,
@@ -417,9 +417,9 @@ router.post('/admin-login', async (req, res) => {
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 lastLogin: admin.firestore.FieldValue.serverTimestamp()
               });
-              console.log('Created admin document in Firestore');
+              console.log('Created admin document in Firestore for uid=%s', decodedToken.uid);
             } catch (createError) {
-              console.log('Could not create admin document (Firestore may not be available):', createError.message);
+              console.log('Could not create admin document (Firestore may not be available): %s', createError.message);
             }
           }
 
@@ -436,7 +436,7 @@ router.post('/admin-login', async (req, res) => {
               ipAddress: req.ip || 'unknown'
             });
           } catch (logError) {
-            console.log('Could not log admin login (Firestore may not be available):', logError.message);
+            console.log('Could not log admin login (Firestore may not be available): %s', logError.message);
           }
 
         } catch (firestoreError) {
@@ -454,7 +454,7 @@ router.post('/admin-login', async (req, res) => {
         }
       } else {
         // User does not have admin claims
-        console.log('User does not have admin claims in token');
+          console.log('User does not have admin claims in token for uid=%s', decodedToken.uid);
         return res.status(403).json({ error: 'Not authorized as admin' });
       }
     } catch (error) {

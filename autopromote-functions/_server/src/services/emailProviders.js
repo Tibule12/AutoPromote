@@ -2,11 +2,12 @@
 // Supports: console (default), sendgrid (API key), mailgun (API key + domain),
 //           resend (API key), mailtrap (SMTP)
 
+const { maskEmail } = require('../utils/logSanitizer');
 const providers = {
   console: () => ({
     name: 'console',
     async send({ to, subject, html, text, headers }) {
-      console.log('\n[email][console] to=%s subject=%s', to, subject);
+    console.log('\n[email][console] to=%s subject=%s', maskEmail(to), subject);
       if (text) console.log('[email][text]', text.slice(0,800));
       if (html) console.log('[email][html]', html.slice(0,800));
       return { ok:true, provider: 'console' };
