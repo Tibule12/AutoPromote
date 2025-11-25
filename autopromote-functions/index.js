@@ -3,6 +3,7 @@ const functions = require("firebase-functions/v1");
 // The Firebase Admin SDK to access Cloud Firestore, Realtime Database and Cloud Storage.
 const admin = require("firebase-admin");
 const { v4: uuidv4 } = require('./lib/uuid-compat');
+const path = require('path');
 admin.initializeApp();
 
 // Diagnostic: print module paths and local directory content to assist runtime debugging
@@ -64,34 +65,38 @@ exports.helloWorld = functions.https.onRequest((req, res) => {
 });
 
 // Export YouTube video upload function
-exports.uploadVideoToYouTube = require('./youtubeUploader').uploadVideoToYouTube;
+function safeExport(modulePath, exportsList) {
+  try {
+    const mod = require(modulePath);
+    if (!mod) return;
+    exportsList.forEach(e => {
+      if (typeof mod[e] !== "undefined") {
+        exports[e] = mod[e];
+      }
+    });
+  } catch (err) {
+    console.warn('[index] safeExport: module ' + modulePath + ' not available:', err && err.message);
+  }
+}
+
+// Export YouTube video upload function
+safeExport('./youtubeUploader', ['uploadVideoToYouTube']);
 // Export TikTok OAuth utilities
-exports.getTikTokAuthUrl = require('./tiktokOAuth').getTikTokAuthUrl;
-exports.tiktokOAuthCallback = require('./tiktokOAuth').tiktokOAuthCallback;
+safeExport('./tiktokOAuth', ['getTikTokAuthUrl','tiktokOAuthCallback']);
 // Export Facebook OAuth utilities
-exports.getFacebookAuthUrl = require('./facebookOAuth').getFacebookAuthUrl;
-exports.facebookOAuthCallback = require('./facebookOAuth').facebookOAuthCallback;
+safeExport('./facebookOAuth', ['getFacebookAuthUrl','facebookOAuthCallback']);
 // Export YouTube OAuth utilities
-exports.getYouTubeAuthUrl = require('./youtubeOAuth').getYouTubeAuthUrl;
-exports.youtubeOAuthCallback = require('./youtubeOAuth').youtubeOAuthCallback;
+safeExport('./youtubeOAuth', ['getYouTubeAuthUrl','youtubeOAuthCallback']);
 // New (additional platforms)
-exports.getPinterestAuthUrl = require('./pinterestOAuth').getPinterestAuthUrl;
-exports.pinterestOAuthCallback = require('./pinterestOAuth').pinterestOAuthCallback;
-exports.getDiscordAuthUrl = require('./discordOAuth').getDiscordAuthUrl;
-exports.discordOAuthCallback = require('./discordOAuth').discordOAuthCallback;
-exports.getSpotifyAuthUrl = require('./spotifyOAuth').getSpotifyAuthUrl;
-exports.spotifyOAuthCallback = require('./spotifyOAuth').spotifyOAuthCallback;
-exports.getLinkedInAuthUrl = require('./linkedinOAuth').getLinkedInAuthUrl;
-exports.linkedinOAuthCallback = require('./linkedinOAuth').linkedinOAuthCallback;
-exports.getRedditAuthUrl = require('./redditOAuth').getRedditAuthUrl;
-exports.redditOAuthCallback = require('./redditOAuth').redditOAuthCallback;
-exports.getTwitterAuthUrl = require('./twitterOAuth').getTwitterAuthUrl;
-exports.twitterOAuthCallback = require('./twitterOAuth').twitterOAuthCallback;
-exports.telegramWebhook = require('./telegramWebhook').telegramWebhook;
-exports.getInstagramAuthUrl = require('./instagramOAuth').getInstagramAuthUrl;
-exports.instagramOAuthCallback = require('./instagramOAuth').instagramOAuthCallback;
-exports.getSnapchatAuthUrl = require('./snapchatOAuth').getSnapchatAuthUrl;
-exports.snapchatOAuthCallback = require('./snapchatOAuth').snapchatOAuthCallback;
+safeExport('./pinterestOAuth', ['getPinterestAuthUrl','pinterestOAuthCallback']);
+safeExport('./discordOAuth', ['getDiscordAuthUrl','discordOAuthCallback']);
+safeExport('./spotifyOAuth', ['getSpotifyAuthUrl','spotifyOAuthCallback']);
+safeExport('./linkedinOAuth', ['getLinkedInAuthUrl','linkedinOAuthCallback']);
+safeExport('./redditOAuth', ['getRedditAuthUrl','redditOAuthCallback']);
+safeExport('./twitterOAuth', ['getTwitterAuthUrl','twitterOAuthCallback']);
+safeExport('./telegramWebhook', ['telegramWebhook']);
+safeExport('./instagramOAuth', ['getInstagramAuthUrl','instagramOAuthCallback']);
+safeExport('./snapchatOAuth', ['getSnapchatAuthUrl','snapchatOAuthCallback']);
 // Export Creator Attribution & Referral System
 exports.addReferrerToContent = require('./referralSystem').addReferrerToContent;
 exports.getReferralStats = require('./referralSystem').getReferralStats;
