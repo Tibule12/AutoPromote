@@ -1,5 +1,6 @@
 const express = require('express');
 const fetch = require('node-fetch');
+const crypto = require('crypto');
 const { admin, db } = require('../../firebaseAdmin');
 const authMiddleware = require('../../authMiddleware');
 
@@ -62,6 +63,13 @@ async function getUidFromAuthHeader(req) {
     }
   } catch (_) {}
   return null;
+}
+
+function appsecretProofFor(token) {
+  try {
+    if (!FB_CLIENT_SECRET || !token) return null;
+    return crypto.createHmac('sha256', String(FB_CLIENT_SECRET)).update(String(token)).digest('hex');
+  } catch (e) { return null; }
 }
 
 // Preferred: prepare OAuth URL without exposing id_token in query
@@ -164,7 +172,8 @@ router.get('/callback', async (req, res) => {
       }
     }
     // Fetch managed pages
-    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${encodeURIComponent(tokenData.access_token)}`);
+    const proof = appsecretProofFor(tokenData.access_token);
+    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${encodeURIComponent(tokenData.access_token)}${proof ? `&appsecret_proof=${proof}` : ''}`);
     const pagesData = await pagesRes.json();
     const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
     // Try to get Instagram business account from first page (best-effort)
@@ -172,7 +181,8 @@ router.get('/callback', async (req, res) => {
     if (pages.length > 0) {
       try {
         const pageId = pages[0].id;
-        const igRes = await fetch(`https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account&access_token=${encodeURIComponent(pages[0].access_token)}`);
+        const proofP = appsecretProofFor(pages[0].access_token);
+        const igRes = await fetch(`https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account&access_token=${encodeURIComponent(pages[0].access_token)}${proofP ? `&appsecret_proof=${proofP}` : ''}`);
         const igData = await igRes.json();
         igBusinessAccountId = igData?.instagram_business_account?.id || null;
       } catch (_) {}
@@ -285,7 +295,10 @@ router.post('/upload', authMiddleware, async (req, res) => {
       body.message = `${content.title || ''}\n${content.description || ''}`.trim();
       if (content.url && !body.message.includes(content.url)) body.message += `\n${content.url}`;
     }
-    const fbRes = await fetch(endpoint, {
+    // Add appsecret_proof for page access token safety (if we have secret)
+    const proofP = appsecretProofFor(page.access_token);
+    const finalEndpoint = proofP ? `${endpoint}${endpoint.includes('?') ? '&' : '?'}appsecret_proof=${proofP}` : endpoint;
+    const fbRes = await fetch(finalEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
