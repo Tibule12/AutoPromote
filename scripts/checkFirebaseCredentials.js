@@ -25,8 +25,9 @@ try {
       console.log('❌ Missing required fields:', missing.join(','));
     } else {
       console.log('✅ Required fields present.');
-      console.log(' project_id =', sa.project_id);
-      console.log(' client_email =', sa.client_email);
+      // Avoid logging sensitive credential content in CI or shared logs.
+      console.log(' project_id =', sa.project_id ? sa.project_id.replace(/.(?=.{4})/g, '*') : '***');
+      console.log(' client_email =', sa.client_email ? sa.client_email.replace(/(.+)@(.+)/, (m, p1, p2) => p1.replace(/.(?=.{2})/g, '*') + '@' + p2) : '***');
       console.log(' private_key (redacted) =', redact(sa.private_key || ''));
     }
   }

@@ -3,6 +3,7 @@
 // Premium tiers, paid boosts, influencer marketplace, ROI tracking
 
 const { db } = require('../firebaseAdmin');
+const crypto = require('crypto');
 
 class MonetizationService {
   // Premium tier definitions
@@ -128,11 +129,12 @@ class MonetizationService {
     console.log(`💳 Processing payment for user ${userId}: $${amount} via ${method}`);
 
     // Simulate payment processing
-    const success = Math.random() > 0.05; // 95% success rate
+      // Use crypto.randomInt to avoid insecure randomness reported by static analyzers
+      const success = (crypto.randomInt(100) >= 5); // 95% success rate
 
     return {
       success,
-      paymentId: success ? `pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` : null,
+      paymentId: success ? `pay_${Date.now()}_${crypto.randomBytes(6).toString('hex')}` : null,
       amount,
       method,
       processedAt: new Date().toISOString()

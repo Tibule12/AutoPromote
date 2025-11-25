@@ -42,6 +42,19 @@ router.post('/quality-check', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
   const filePath = req.file.path;
+  // Sanity check: ensure the resolved file path is inside the configured uploads directory
+  try {
+    const uploadsBase = require('path').resolve(process.cwd(), 'uploads');
+    const resolved = require('path').resolve(filePath);
+    if (!resolved.startsWith(uploadsBase)) {
+      safeUnlink(resolved);
+      return res.status(400).json({ error: 'invalid_file_path' });
+    }
+  } catch (_) {
+    // If path checks fail for any reason, avoid continuing with the operation
+    try { safeUnlink(filePath); } catch(_){};
+    return res.status(400).json({ error: 'invalid_file_path' });
+  }
   try {
     // Analyze original file
     const metadata = await new Promise((resolve, reject) => {

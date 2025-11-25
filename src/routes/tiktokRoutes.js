@@ -10,6 +10,7 @@ const rateLimit = require('../middlewares/simpleRateLimit');
 let codeqlLimiter; try { codeqlLimiter = require('../middlewares/codeqlRateLimit'); } catch(_) { codeqlLimiter = null; }
 // Import SSRF protection
 const { validateUrl, safeFetch } = require('../utils/ssrfGuard');
+const { tokenInfo, objSummary } = require('../utils/logSanitizer');
 
 // Rate limiters for TikTok routes (router-level).
 // `rateLimiter` is a facade that uses a distributed limiter when available,
@@ -217,8 +218,8 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 		// Store authUrl for debugging (non-sensitive)
 		await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({ lastAuthUrl: authUrl }, { merge: true });
 		if (DEBUG_TIKTOK_OAUTH) {
-			console.log('[TikTok][prepare] uid=%s mode=%s state=%s authUrl=%s popup=%s', uid, TIKTOK_ENV, state, authUrl, isPopup);
-		}
+			console.log('[TikTok][prepare] uid=%s mode=%s statePresent=%s authUrlPresent=%s popup=%s', uid, TIKTOK_ENV, !!state, !!authUrl, isPopup);
+		  }
 		return res.json({ authUrl, mode: TIKTOK_ENV });
 	} catch (e) {
 		if (DEBUG_TIKTOK_OAUTH) console.error('[TikTok][prepare][error]', e);
@@ -402,10 +403,10 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 	if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
 	const { code, state } = req.query;
 	if (DEBUG_TIKTOK_OAUTH) {
-		console.log('[TikTok][callback] rawQuery', req.query);
+		console.log('[TikTok][callback] rawQueryKeys', Object.keys(req.query || {}));
 	}
 	if (!code || !state) {
-		if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] Missing code/state. query=%o url=%s', req.query, req.originalUrl);
+		if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] Missing code/state. queryKeys=%s url=%s', Object.keys(req.query || {}).length, req.originalUrl);
 		return res.status(400).send('Missing code or state');
 	}
 
@@ -443,7 +444,7 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 		}, allowHosts: ['open.tiktokapis.com'] });
 		const tokenData = await tokenRes.json();
 		if (!tokenRes.ok || !tokenData.access_token) {
-			if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] token exchange failed status=%s body=%o', tokenRes.status, tokenData);
+			if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] token exchange failed status=%s accessTokenPresent=%s tokenSummary=%o', tokenRes.status, tokenInfo(tokenData && tokenData.access_token).present, objSummary(tokenData));
 			return res.status(400).send('Failed to get TikTok access token');
 		}
 		// Store tokens securely under user
@@ -481,7 +482,7 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 				obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
 			}, { merge: true });
 		}
-		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s open_id=%s scope=%s', uid, tokenData.open_id, tokenData.scope);
+		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s open_id=%s scope=%s accessTokenPresent=%s', uid, tokenData.open_id, tokenData.scope, tokenInfo(tokenData && tokenData.access_token).present);
 		// redirect back to dashboard with success
 		const url = new URL(DASHBOARD_URL);
 		url.searchParams.set('tiktok', 'connected');

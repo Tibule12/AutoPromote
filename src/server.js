@@ -1060,7 +1060,7 @@ app.get('/admin-login', routeLimiter({ windowHint: 'admin_static' }), (req, res)
 });
 
 // Serve the admin dashboard (protected in frontend by auth check)
-app.get('/admin-dashboard', (req, res) => {
+app.get('/admin-dashboard', routeLimiter({ windowHint: 'admin_static' }), (req, res) => {
   // Check if file exists before sending
   try {
     res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));

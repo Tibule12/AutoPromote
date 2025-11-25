@@ -25,11 +25,6 @@ jobs:
         
     - name: Install backend dependencies
       run: npm ci
-    - name: Secrets presence diagnostic
-      run: |
-        echo "GENERIC: $(if [ -z \"${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}\" ]; then echo MISSING; else echo PRESENT; fi)"
-        echo "FUNCTIONS: $(if [ -z \"${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}\" ]; then echo MISSING; else echo PRESENT; fi)"
-        echo "TWITTER: $(if [ -z \"${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}\" ]; then echo MISSING; else echo PRESENT; fi)"
       
     - name: Run backend tests
       run: node simple-test.js
@@ -57,17 +52,5 @@ jobs:
     - name: Install backend dependencies
       run: npm ci
       
-    - name: Deploy backend to Vercel (recommended for Node.js)
-      run: |
-        echo "Vercel deployment setup would go here"
-        echo "Install Vercel CLI: npm i -g vercel"
-        echo "Run: vercel --prod --token=$VERCEL_TOKEN"
-      env:
-        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        
-    - name: Alternative - Deploy to Railway
-      run: |
-        echo "Railway deployment setup would go here"
-        echo "Install Railway CLI and deploy"
-      env:
-        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    - name: Deploy to Render
+      run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}

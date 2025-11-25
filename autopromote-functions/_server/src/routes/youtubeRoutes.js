@@ -65,7 +65,7 @@ router.post('/auth/prepare', async (req, res) => {
     // Light diagnostics (masked)
     try {
       const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
-  console.log('[YouTube][prepare] Using client/redirect', { clientId: mask(YT_CLIENT_ID), redirect: YT_REDIRECT_CANON });
+  console.log('[YouTube][prepare] Using client/redirect', { clientId: mask(YT_CLIENT_ID), redirectPresent: !!YT_REDIRECT_CANON });
     } catch (_) {}
   const nonce = crypto.randomBytes(8).toString('hex');
     const state = `${uid}.${nonce}`;
@@ -118,7 +118,7 @@ router.get('/callback', ytPublicLimiter, async (req, res) => {
     // Light diagnostics (masked)
     try {
       const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
-  console.log('[YouTube][callback] Exchanging code with', { clientId: mask(YT_CLIENT_ID), redirect: YT_REDIRECT_CANON });
+  console.log('[YouTube][callback] Exchanging code with', { clientId: mask(YT_CLIENT_ID), redirectPresent: !!YT_REDIRECT_CANON });
     } catch (_) {}
     let uidFromState;
     if (state && typeof state === 'string' && state.includes('.')) {
