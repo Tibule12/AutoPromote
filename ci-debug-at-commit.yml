@@ -1,11 +1,12 @@
-name: CI
+﻿name: CI Debug
 
 on:
-  workflow_dispatch: # Allow manual runs for debugging and CI rechecks
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      run_preflight:
+        description: "Set true to run preflight & unit tests (requires repo secrets)"
+        required: false
+        default: 'false'
 
 jobs:
   ci_debug_info:
@@ -40,11 +41,9 @@ jobs:
           else
             echo "@grpc/grpc-js not installed in repo workspace yet"
           fi
-    if: always()
+
   build-and-test:
     runs-on: ubuntu-latest
-    # Make required encryption keys available to the job from repository secrets.
-    # Note: secrets are NOT provided to workflows triggered by forked PRs for security.
     env:
       GENERIC_TOKEN_ENCRYPTION_KEY: ${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}
       FUNCTIONS_TOKEN_ENCRYPTION_KEY: ${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}
@@ -82,7 +81,6 @@ jobs:
           ls -la node_modules/@grpc/grpc-js/build/src || true
           echo "Check for presence of single-subchannel-channel.js"
           if [ -f node_modules/@grpc/grpc-js/build/src/single-subchannel-channel.js ]; then echo 'single-subchannel-channel: PRESENT'; else echo 'single-subchannel-channel: MISSING'; fi
-          # Run our safety check script to surface missing internal file (non-fatal)
           node ./scripts/check-grpc-install.js || true
       - name: Check installed grpc internals (root)
         run: |
@@ -93,9 +91,7 @@ jobs:
           if [ -z "${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}" ]; then echo "FUNCTIONS: MISSING"; else echo "FUNCTIONS: PRESENT"; fi
           if [ -z "${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}" ]; then echo "TWITTER: MISSING"; else echo "TWITTER: PRESENT"; fi
       - name: Preflight & Unit Tests
-        # Only run preflight for PRs that originate from this repository (not forks), or non-PR events.
-        # Also ensure required encryption secrets are present before running preflight in PRs from the same repository.
-        if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && secrets.GENERIC_TOKEN_ENCRYPTION_KEY != '' && secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY != '') }}
+        if: ${{ github.event.inputs.run_preflight == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         run: |
           npm run preflight
           npm run test:unit

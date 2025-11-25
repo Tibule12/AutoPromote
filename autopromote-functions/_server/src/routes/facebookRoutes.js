@@ -73,7 +73,7 @@ router.post('/auth/prepare', async (req, res) => {
     // Light diagnostics (masked)
     try {
       const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
-      console.log('[Facebook][prepare] Using client/redirect', { clientId: mask(FB_CLIENT_ID), redirect: FB_REDIRECT_CANON });
+      console.log('[Facebook][prepare] Using client/redirect', { clientId: mask(FB_CLIENT_ID), redirectPresent: !!FB_REDIRECT_CANON });
     } catch (_) {}
     const nonce = Math.random().toString(36).slice(2);
     const state = `${uid}.${nonce}`;
@@ -143,7 +143,7 @@ router.get('/callback', async (req, res) => {
     // Light diagnostics (masked)
     try {
       const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
-  console.log('[Facebook][callback] Exchanging code with', { clientId: mask(FB_CLIENT_ID), redirect: FB_REDIRECT_CANON });
+  console.log('[Facebook][callback] Exchanging code with', { clientId: mask(FB_CLIENT_ID), redirectPresent: !!FB_REDIRECT_CANON });
     } catch (_) {}
     let uidFromState;
     if (state && typeof state === 'string' && state.includes('.')) {
