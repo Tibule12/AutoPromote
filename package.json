@@ -7,7 +7,10 @@
     "preflight:local": "node ./scripts/preflight-critical-files.js && node ./autopromote-functions/validate-imports.js",
     "validate-imports": "node ./autopromote-functions/validate-imports.js",
     "start": "node src/server.js",
-    "start:dev": "NODE_ENV=development nodemon src/server.js"
+    "start:dev": "NODE_ENV=development nodemon src/server.js",
+    "test:unit": "node test/basic-sanity.js",
+    "test:routes": "node test/route-imports.test.js",
+    "test": "npm run test:unit"
   },
   "engines": {
     "node": ">=20"
