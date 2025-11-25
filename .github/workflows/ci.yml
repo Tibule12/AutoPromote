@@ -92,8 +92,9 @@ jobs:
           if [ -z "${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}" ]; then echo "FUNCTIONS: MISSING"; else echo "FUNCTIONS: PRESENT"; fi
           if [ -z "${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}" ]; then echo "TWITTER: MISSING"; else echo "TWITTER: PRESENT"; fi
       - name: Preflight & Unit Tests
-        # Only run preflight for PRs that originate from this repository (not forks), or non-PR events
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        # Only run preflight for PRs that originate from this repository (not forks), or non-PR events.
+        # Also ensure required encryption secrets are present before running preflight in PRs from the same repository.
+        if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && secrets.GENERIC_TOKEN_ENCRYPTION_KEY != '' && secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY != '') }}
         run: |
           npm run preflight
           npm run test:unit
