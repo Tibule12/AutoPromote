@@ -1,0 +1,100 @@
+name: CI Debug
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_preflight:
+        description: "Set true to run preflight & unit tests (requires repo secrets)"
+        required: false
+        default: 'false'
+
+jobs:
+  ci_debug_info:
+    name: CI debug info
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Print environment info
+        run: |
+          echo "CI Debug Info"
+          echo "----------------"
+          echo "Event: $GITHUB_EVENT_NAME"
+          echo "Ref: $GITHUB_REF"
+          echo "SHA: $GITHUB_SHA"
+          echo "Actor: $GITHUB_ACTOR"
+          echo "Repo: $GITHUB_REPOSITORY"
+          node -v || true
+          npm -v || true
+      - name: List npm cache and lockfile
+        run: |
+          echo "Working dir: $(pwd)"
+          echo "Files:"
+          ls -la | head -n 50
+          echo "Show package.json top lines"
+          head -n 50 package.json || true
+      - name: Show grpc package info in repo (if installed)
+        run: |
+          if [ -d node_modules/@grpc/grpc-js ]; then
+            ls -la node_modules/@grpc/grpc-js | head -n 50 || true
+            node -e "try { const pkg=require('@grpc/grpc-js/package.json'); console.log('installed', pkg.version); } catch(e) { console.error('not installed', e.message); }" || true
+          else
+            echo "@grpc/grpc-js not installed in repo workspace yet"
+          fi
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      GENERIC_TOKEN_ENCRYPTION_KEY: ${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}
+      FUNCTIONS_TOKEN_ENCRYPTION_KEY: ${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}
+      TWITTER_TOKEN_ENCRYPTION_KEY: ${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install root deps
+        run: |
+          npm ci
+      - name: Install functions deps
+        run: |
+          cd autopromote-functions
+          npm ci
+      - name: Validate @grpc/grpc-js version unification
+        run: |
+          npm ls @grpc/grpc-js --json > grpc-list.json || true
+          node -e "const fs=require('fs'); const o=JSON.parse(fs.readFileSync('grpc-list.json','utf8')); const versions=new Set(); function scan(n){ if(!n || !n.dependencies) return; for(const k of Object.keys(n.dependencies)){ const d=n.dependencies[k]; if(k==='@grpc/grpc-js'){ versions.add(d.version); } scan(d); } } scan(o); if(versions.size===0){ console.log('No @grpc/grpc-js found'); } else if(versions.size===1){ console.log('Unified @grpc/grpc-js version:', [...versions][0]); } else { console.error('Multiple @grpc/grpc-js versions found:', [...versions].join(', ')); process.exit(1); }"
+      - name: CI debug: Node & grpc install info
+        run: |
+          set -o pipefail
+          echo "CI debug: Node/NPM versions"
+          node -v || true
+          npm -v || true
+          echo "Listing @grpc/grpc-js info (npm ls)"
+          npm ls @grpc/grpc-js --long || true
+          echo "Print @grpc/grpc-js package.json if resolvable"
+          node -e "try{ const pkg = require('@grpc/grpc-js/package.json'); console.log('@grpc/grpc-js@' + pkg.version + ' at ' + require.resolve('@grpc/grpc-js')) } catch(e){ console.warn('not-installed: ' + (e && e.message)) }"
+          echo "List build/src paths for @grpc/grpc-js"
+          ls -la node_modules/@grpc/grpc-js/build/src || true
+          echo "Check for presence of single-subchannel-channel.js"
+          if [ -f node_modules/@grpc/grpc-js/build/src/single-subchannel-channel.js ]; then echo 'single-subchannel-channel: PRESENT'; else echo 'single-subchannel-channel: MISSING'; fi
+          node ./scripts/check-grpc-install.js || true
+      - name: Check installed grpc internals (root)
+        run: |
+          npm run check:grpc-install || true
+      - name: Secrets presence diagnostic
+        run: |
+          if [ -z "${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}" ]; then echo "GENERIC: MISSING"; else echo "GENERIC: PRESENT"; fi
+          if [ -z "${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}" ]; then echo "FUNCTIONS: MISSING"; else echo "FUNCTIONS: PRESENT"; fi
+          if [ -z "${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}" ]; then echo "TWITTER: MISSING"; else echo "TWITTER: PRESENT"; fi
+      - name: Preflight & Unit Tests
+        if: ${{ github.event.inputs.run_preflight == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        run: |
+          npm run preflight
+          npm run test:unit
+      - name: Route Import Tests
+        run: |
+          CI_ROUTE_IMPORTS=1 npm run test:routes
