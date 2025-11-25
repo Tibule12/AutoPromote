@@ -9,6 +9,10 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
+    env:
+      GENERIC_TOKEN_ENCRYPTION_KEY: ${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}
+      FUNCTIONS_TOKEN_ENCRYPTION_KEY: ${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}
+      TWITTER_TOKEN_ENCRYPTION_KEY: ${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}
     steps:
     - uses: actions/checkout@v4
     
@@ -21,6 +25,11 @@ jobs:
         
     - name: Install backend dependencies
       run: npm ci
+    - name: Secrets presence diagnostic
+      run: |
+        echo "GENERIC: $(if [ -z \"${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}\" ]; then echo MISSING; else echo PRESENT; fi)"
+        echo "FUNCTIONS: $(if [ -z \"${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}\" ]; then echo MISSING; else echo PRESENT; fi)"
+        echo "TWITTER: $(if [ -z \"${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}\" ]; then echo MISSING; else echo PRESENT; fi)"
       
     - name: Run backend tests
       run: node simple-test.js
