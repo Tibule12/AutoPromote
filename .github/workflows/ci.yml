@@ -34,6 +34,22 @@ jobs:
         run: |
           npm ls @grpc/grpc-js --json > grpc-list.json || true
           node -e "const fs=require('fs'); const o=JSON.parse(fs.readFileSync('grpc-list.json','utf8')); const versions=new Set(); function scan(n){ if(!n || !n.dependencies) return; for(const k of Object.keys(n.dependencies)){ const d=n.dependencies[k]; if(k==='@grpc/grpc-js'){ versions.add(d.version); } scan(d); } } scan(o); if(versions.size===0){ console.log('No @grpc/grpc-js found'); } else if(versions.size===1){ console.log('Unified @grpc/grpc-js version:', [...versions][0]); } else { console.error('Multiple @grpc/grpc-js versions found:', [...versions].join(', ')); process.exit(1); }"
+      - name: CI debug: Node & grpc install info
+        run: |
+          set -o pipefail
+          echo "CI debug: Node/NPM versions"
+          node -v || true
+          npm -v || true
+          echo "Listing @grpc/grpc-js info (npm ls)"
+          npm ls @grpc/grpc-js --long || true
+          echo "Print @grpc/grpc-js package.json if resolvable"
+          node -e "try{ const pkg = require('@grpc/grpc-js/package.json'); console.log('@grpc/grpc-js@' + pkg.version + ' at ' + require.resolve('@grpc/grpc-js')) } catch(e){ console.warn('not-installed: ' + (e && e.message)) }"
+          echo "List build/src paths for @grpc/grpc-js"
+          ls -la node_modules/@grpc/grpc-js/build/src || true
+          echo "Check for presence of single-subchannel-channel.js"
+          if [ -f node_modules/@grpc/grpc-js/build/src/single-subchannel-channel.js ]; then echo 'single-subchannel-channel: PRESENT'; else echo 'single-subchannel-channel: MISSING'; fi
+          # Run our safety check script to surface missing internal file (non-fatal)
+          node ./scripts/check-grpc-install.js || true
         - name: Check installed grpc internals (root)
           run: |
             npm run check:grpc-install || true
