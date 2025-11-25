@@ -248,9 +248,11 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
 
     if (platform === 'pinterest') {
       const clientId = process.env.PINTEREST_CLIENT_ID;
-      const redirectUri = `${host}/api/pinterest/auth/callback`;
+      const { canonicalizeRedirect } = require('../utils/redirectUri');
+      const redirectUri = canonicalizeRedirect(process.env.PINTEREST_REDIRECT_URI || `${host}/api/pinterest/auth/callback`, { requiredPath: '/api/pinterest/auth/callback' });
       const scope = encodeURIComponent((process.env.PINTEREST_SCOPES || 'pins:read,pins:write,boards:read').split(',').join(','));
       const url = `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}&scope=${scope}&state=${state}`;
+      try { console.log('[oauth][prepare][pinterest] authUrl', url, 'redirect', redirectUri, 'state', state); } catch (_) {}
       return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
     }
     return res.json(result);
@@ -300,6 +302,15 @@ router.post('/:platform/auth/prepare', authMiddleware, platformWriteLimiter, asy
       const scope = encodeURIComponent('identify guilds');
       const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${encodeURIComponent(state)}`;
       return res.json({ ok: true, platform, authUrl: url, state });
+    }
+
+    if (platform === 'pinterest') {
+      const clientId = process.env.PINTEREST_CLIENT_ID;
+      const { canonicalizeRedirect } = require('../utils/redirectUri');
+      const redirectUri = canonicalizeRedirect(process.env.PINTEREST_REDIRECT_URI || `${host}/api/pinterest/auth/callback`, { requiredPath: '/api/pinterest/auth/callback' });
+      const scope = encodeURIComponent((process.env.PINTEREST_SCOPES || 'pins:read,pins:write,boards:read').split(',').join(','));
+      const url = `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}&scope=${scope}&state=${state}`;
+      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
     }
 
     if (platform === 'spotify') {
@@ -802,13 +813,18 @@ router.get('/pinterest/auth/callback', async (req, res) => {
   const state = req.query.state;
   const oauthError = req.query.error;
   if (oauthError) return sendPlain(res, 400, `Pinterest error: ${req.query.error_description || oauthError}`);
-  if (!code) return sendPlain(res, 400, 'Missing authorization code from Pinterest');
+    if (!code) {
+      try { console.warn('[oauth][pinterest] Missing code in callback. Query:', req.query, 'host:', req.get('host')); } catch(_){}
+      return sendPlain(res, 400, 'Missing authorization code from Pinterest');
+    }
   try {
     if (!fetchFn) return sendPlain(res, 500, 'Server missing fetch implementation');
     const clientId = process.env.PINTEREST_CLIENT_ID;
     const clientSecret = process.env.PINTEREST_CLIENT_SECRET;
     const host = `${req.protocol}://${req.get('host')}`;
-    const redirectUri = `${host}/api/pinterest/auth/callback`;
+    const { canonicalizeRedirect } = require('../utils/redirectUri');
+    const redirectUri = canonicalizeRedirect(process.env.PINTEREST_REDIRECT_URI || `${host}/api/pinterest/auth/callback`, { requiredPath: '/api/pinterest/auth/callback' });
+    try { console.log('[oauth][pinterest] callback redirectUri:', redirectUri, 'query:', req.query, 'state:', state); } catch(_){}
     const tokenUrl = 'https://api.pinterest.com/v5/oauth/token';
     const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri });
     const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');

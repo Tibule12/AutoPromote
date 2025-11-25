@@ -25,11 +25,18 @@ jobs:
           cache: 'npm'
       - name: Install root deps
         run: |
-          npm install
+          npm ci
       - name: Install functions deps
         run: |
           cd autopromote-functions
           npm ci
+      - name: Validate @grpc/grpc-js version unification
+        run: |
+          npm ls @grpc/grpc-js --json > grpc-list.json || true
+          node -e "const fs=require('fs'); const o=JSON.parse(fs.readFileSync('grpc-list.json','utf8')); const versions=new Set(); function scan(n){ if(!n || !n.dependencies) return; for(const k of Object.keys(n.dependencies)){ const d=n.dependencies[k]; if(k==='@grpc/grpc-js'){ versions.add(d.version); } scan(d); } } scan(o); if(versions.size===0){ console.log('No @grpc/grpc-js found'); } else if(versions.size===1){ console.log('Unified @grpc/grpc-js version:', [...versions][0]); } else { console.error('Multiple @grpc/grpc-js versions found:', [...versions].join(', ')); process.exit(1); }"
+        - name: Check installed grpc internals (root)
+          run: |
+            npm run check:grpc-install || true
       - name: Secrets presence diagnostic
         run: |
           echo "GENERIC: $(if [ -z \"${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}\" ]; then echo MISSING; else echo PRESENT; fi)"

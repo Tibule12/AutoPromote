@@ -3,13 +3,14 @@ import {
   isFileWrapper,
   cloneFileWrapper,
 } from '@apimatic/file-wrapper';
+import { isFormDataWrapper, FormDataWrapper } from '@apimatic/core-interfaces';
 
 /**
  * Type for Key-value pair for form-urlencoded serialization
  */
 export interface FormKeyValuePair {
   key: string;
-  value: string | FileWrapper;
+  value: string | FileWrapper | FormDataWrapper;
 }
 
 /**
@@ -131,7 +132,6 @@ export function formDataEncodeObject(
   prefixFormat: ArrayPrefixFunction = indexedPrefix
 ): FormKeyValuePairList {
   const result: FormKeyValuePairList = [];
-
   for (const key of Object.keys(obj)) {
     const value = obj[key];
     if (value === null || value === undefined) {
@@ -145,6 +145,8 @@ export function formDataEncodeObject(
       result.push({ key, value: value.toString() });
     } else if (isFileWrapper(value)) {
       result.push({ key, value: cloneFileWrapper(value) });
+    } else if (isFormDataWrapper(value)) {
+      result.push({ key, value });
     } else if (Array.isArray(value)) {
       prefixFormat(key, value, result);
     } else if (typeof value === 'object') {

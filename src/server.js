@@ -1,5 +1,35 @@
 // ...existing code...
 
+// Diagnostic: Log google-gax and @grpc/grpc-js versions if present to help debug runtime dependency mismatches
+try {
+  const fs = require('fs');
+  const path = require('path');
+  try {
+    const gaxPkg = require('google-gax/package.json');
+    const gaxResolved = require.resolve('google-gax');
+    let grpcInfo = 'not installed';
+    try {
+      const grpcPkgPath = require.resolve('@grpc/grpc-js/package.json');
+      const grpcPkg = require('@grpc/grpc-js/package.json');
+      let singleSubExists = false;
+      try {
+        const potentialPaths = [
+          path.join(path.dirname(require.resolve('@grpc/grpc-js/package.json')), 'build', 'src', 'single-subchannel-channel.js'),
+          path.join(path.dirname(require.resolve('@grpc/grpc-js/package.json')), 'build', 'src', 'single_subchannel_channel.js'),
+          path.join(path.dirname(require.resolve('@grpc/grpc-js/package.json')), 'src', 'single-subchannel-channel.js')
+        ];
+        for (const p of potentialPaths) { if (fs.existsSync(p)) { singleSubExists = true; break; } }
+      } catch (_) { singleSubExists = false; }
+      grpcInfo = `@grpc/grpc-js@${grpcPkg.version} at ${grpcPkgPath} (has single-subchannel-channel: ${singleSubExists})`;
+    } catch (e) {
+      grpcInfo = `@grpc/grpc-js missing (${e && e.message})`;
+    }
+    console.log(`[diagnostic] google-gax@${gaxPkg.version} at ${gaxResolved}; ${grpcInfo}`);
+  } catch (e) {
+    console.warn('[diagnostic] google-gax not found:', e && e.message);
+  }
+} catch (e) { console.warn('[diagnostic] internal check failed:', e && e.message); }
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -831,6 +861,23 @@ app.use('/api/admin/ops', adminOpsRoutes);
 app.use('/api/admin', adminEmailVerificationRoutes);
 
 app.use('/api/discord', discordRoutes);
+
+// Debugging endpoint to expose installed dependency versions for investigation.
+// Disabled by default. To enable, set DEBUG_DEPS_TOKEN in env and call with header `x-debug-token: <token>`.
+if (process.env.DEBUG_DEPS_TOKEN) {
+  app.get('/api/debug/deps', async (req, res) => {
+    try {
+      const token = req.headers['x-debug-token'] || '';
+      if (!token || token !== process.env.DEBUG_DEPS_TOKEN) return res.status(403).json({ error: 'forbidden' });
+      const fs = require('fs');
+      const path = require('path');
+      const out = { found: {} };
+      try { const gaxPkg = require('google-gax/package.json'); out.found['google-gax'] = { version: gaxPkg.version, path: require.resolve('google-gax') }; } catch(e) { out.found['google-gax'] = { error: e.message }; }
+      try { const grpcPkg = require('@grpc/grpc-js/package.json'); const grpcPath = require.resolve('@grpc/grpc-js'); let single = false; try { const p = path.join(path.dirname(require.resolve('@grpc/grpc-js/package.json')), 'build', 'src', 'single-subchannel-channel.js'); single = fs.existsSync(p); } catch (ee) { single = false; } out.found['@grpc/grpc-js'] = { version: grpcPkg.version, path: grpcPath, hasSingleSubchannel: single }; } catch(e) { out.found['@grpc/grpc-js'] = { error: e.message }; }
+      return res.json(out);
+    } catch (e) { return res.status(500).json({ error: e.message }); }
+  });
+}
 
 // Serve site verification and other well-known files
 // 1) Try root-level /public/.well-known
