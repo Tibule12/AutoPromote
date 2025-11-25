@@ -252,7 +252,7 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
       const redirectUri = canonicalizeRedirect(process.env.PINTEREST_REDIRECT_URI || `${host}/api/pinterest/auth/callback`, { requiredPath: '/api/pinterest/auth/callback' });
       const scope = encodeURIComponent((process.env.PINTEREST_SCOPES || 'pins:read,pins:write,boards:read').split(',').join(','));
       const url = `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}&scope=${scope}&state=${state}`;
-      try { console.log('[oauth][prepare][pinterest] authUrl', url, 'redirect', redirectUri, 'state', state); } catch (_) {}
+      try { console.log('[oauth][prepare][pinterest] authUrlPresent=%s redirectPresent=%s statePresent=%s', !!url, !!redirectUri, !!state); } catch (_) {}
       return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
     }
     return res.json(result);
@@ -814,7 +814,7 @@ router.get('/pinterest/auth/callback', async (req, res) => {
   const oauthError = req.query.error;
   if (oauthError) return sendPlain(res, 400, `Pinterest error: ${req.query.error_description || oauthError}`);
     if (!code) {
-      try { console.warn('[oauth][pinterest] Missing code in callback. Query:', req.query, 'host:', req.get('host')); } catch(_){}
+      try { console.warn('[oauth][pinterest] Missing code in callback; queryKeys=%s hostPresent=%s', Object.keys(req.query || {}).length, !!req.get('host')); } catch(_){ }
       return sendPlain(res, 400, 'Missing authorization code from Pinterest');
     }
   try {
@@ -824,7 +824,9 @@ router.get('/pinterest/auth/callback', async (req, res) => {
     const host = `${req.protocol}://${req.get('host')}`;
     const { canonicalizeRedirect } = require('../utils/redirectUri');
     const redirectUri = canonicalizeRedirect(process.env.PINTEREST_REDIRECT_URI || `${host}/api/pinterest/auth/callback`, { requiredPath: '/api/pinterest/auth/callback' });
-    try { console.log('[oauth][pinterest] callback redirectUri:', redirectUri, 'query:', req.query, 'state:', state); } catch(_){}
+    // Avoid logging sensitive OAuth callback parameters; redact full values and only log presence/length info
+    try { console.log('[oauth][pinterest] callback redirectUriPresent=%s queryKeys=%s statePresent=%s', !!redirectUri, Object.keys(req.query || {}).length, !!state); } catch(_){ }
+        // try { console.log('[oauth][pinterest] callback redirectUri:', redirectUri, 'query:', req.query, 'state:', state); } catch(_){}
     const tokenUrl = 'https://api.pinterest.com/v5/oauth/token';
     const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri });
     const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');

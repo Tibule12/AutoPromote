@@ -111,7 +111,7 @@ router.post('/auth/login-test', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    console.log('Testing admin login with:', email);
+    console.log('Testing admin login with emailPresent=%s', !!email);
     
     // Get client Auth instance
     const clientAuth = getAuth(app);
@@ -120,7 +120,7 @@ router.post('/auth/login-test', async (req, res) => {
     const userCredential = await signInWithEmailAndPassword(clientAuth, email, password);
     const user = userCredential.user;
     
-    console.log('Firebase Auth login successful for:', user.email);
+    console.log('Firebase Auth login successful for uid=%s emailPresent=%s', user.uid, !!user.email);
     
     // Get ID token
     const idToken = await user.getIdToken(true);
@@ -144,7 +144,7 @@ router.post('/auth/login-test', async (req, res) => {
         lastLogin: new Date().toISOString()
       });
       
-      console.log('Admin found in admins collection');
+      console.log('Admin found in admins collection for uid=%s', decodedToken.uid);
     } else {
       // Check regular users collection
       const userDoc = await db.collection('users').doc(decodedToken.uid).get();
@@ -152,9 +152,9 @@ router.post('/auth/login-test', async (req, res) => {
       if (userDoc.exists) {
         userData = userDoc.data();
         fromCollection = 'users';
-        console.log('User found in users collection');
+        console.log('User found in users collection for uid=%s', decodedToken.uid);
       } else {
-        console.log('User not found in any collection');
+        console.log('User not found in any collection for uid=%s', decodedToken.uid);
       }
     }
     

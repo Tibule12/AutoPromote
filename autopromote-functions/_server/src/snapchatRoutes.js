@@ -36,7 +36,12 @@ function canonicalizeRedirectUri(uri) {
 const _rawRedirectEnv = (process.env.SNAPCHAT_REDIRECT_URI || '').toString().trim();
 const _effectiveRedirect = canonicalizeRedirectUri(_rawRedirectEnv || `https://www.autopromote.org/api/snapchat/auth/callback`);
 if (_rawRedirectEnv && _effectiveRedirect !== _rawRedirectEnv) {
-  console.warn('snapchat: SNAPCHAT_REDIRECT_URI points to legacy/non-canonical host or path; auto-upgraded to', _effectiveRedirect);
+  try {
+    const _u = new URL(_effectiveRedirect);
+    console.warn('snapchat: SNAPCHAT_REDIRECT_URI points to legacy/non-canonical host or path; auto-upgraded to host=%s path=%s', _u.host, _u.pathname);
+  } catch(_) {
+    console.warn('snapchat: SNAPCHAT_REDIRECT_URI points to legacy/non-canonical host or path; auto-upgraded');
+  }
 }
 const config = {
   key: (process.env.SNAPCHAT_CLIENT_ID || '').toString().trim() || null,
@@ -97,7 +102,7 @@ router.get('/auth', (req, res) => {
   const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(stateRaw)}`;
 
   if (DEBUG_SNAPCHAT_OAUTH) {
-    console.log('Snapchat OAuth URL:', authUrl);
+    console.log('Snapchat OAuth URL present=%s', !!authUrl);
   }
 
   res.json({ authUrl });
@@ -156,7 +161,7 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
     }
 
     if (DEBUG_SNAPCHAT_OAUTH) {
-      console.log('Snapchat OAuth prepare URL:', authUrl);
+      console.log('Snapchat OAuth prepare URL present=%s', !!authUrl);
     }
 
     res.json({ authUrl, state });
