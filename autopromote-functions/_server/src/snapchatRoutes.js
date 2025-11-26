@@ -43,8 +43,13 @@ if (_rawRedirectEnv && _effectiveRedirect !== _rawRedirectEnv) {
     console.warn('snapchat: SNAPCHAT_REDIRECT_URI points to legacy/non-canonical host or path; auto-upgraded');
   }
 }
+// Support explicit env vars to avoid mixing Public vs Confidential IDs.
+// - `SNAPCHAT_PUBLIC_CLIENT_ID` is used for building the authorize URL (browser step).
+// - `SNAPCHAT_CONFIDENTIAL_CLIENT_ID` + `SNAPCHAT_CLIENT_SECRET` are used for the server-side token exchange.
+// For backwards compatibility, `SNAPCHAT_CLIENT_ID` will be used as a fallback for both roles.
 const config = {
-  key: (process.env.SNAPCHAT_CLIENT_ID || '').toString().trim() || null,
+  publicClientId: (process.env.SNAPCHAT_PUBLIC_CLIENT_ID || process.env.SNAPCHAT_CLIENT_ID || '').toString().trim() || null,
+  confidentialClientId: (process.env.SNAPCHAT_CONFIDENTIAL_CLIENT_ID || process.env.SNAPCHAT_CLIENT_ID || '').toString().trim() || null,
   secret: (process.env.SNAPCHAT_CLIENT_SECRET || '').toString().trim() || null,
   // Prefer custom domain; retain legacy env but auto-upgrade to canonical host
   redirect: _effectiveRedirect,
@@ -59,7 +64,7 @@ const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://www.autopromote.org'
 
 function ensureSnapchatEnv(res, cfg, opts = { requireSecret: true }) {
   const missing = [];
-  if (!cfg.key) missing.push('SNAPCHAT_CLIENT_ID');
+  if (!cfg.publicClientId && !cfg.confidentialClientId) missing.push('SNAPCHAT_PUBLIC_CLIENT_ID or SNAPCHAT_CLIENT_ID');
   if (opts.requireSecret && !cfg.secret) missing.push('SNAPCHAT_CLIENT_SECRET');
   if (!cfg.redirect) missing.push('SNAPCHAT_REDIRECT_URI');
 
@@ -78,11 +83,13 @@ router.get('/health', (req, res) => {
     const cfg = activeConfig();
     const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : null);
     return res.json({
-      ok: !!(cfg.key && (cfg.secret || process.env.ALLOW_NO_SECRET === 'true') && cfg.redirect),
-      hasClientId: !!cfg.key,
+      ok: !!((cfg.publicClientId || cfg.confidentialClientId) && (cfg.secret || process.env.ALLOW_NO_SECRET === 'true') && cfg.redirect),
+      hasPublicClientId: !!cfg.publicClientId,
+      hasConfidentialClientId: !!cfg.confidentialClientId,
       hasClientSecret: !!cfg.secret,
       redirect: cfg.redirect,
-      clientIdMasked: mask(cfg.key)
+      publicClientIdMasked: mask(cfg.publicClientId),
+      confidentialClientIdMasked: mask(cfg.confidentialClientId)
     });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
@@ -99,7 +106,8 @@ router.get('/auth', (req, res) => {
   // an invalid request for some OAuth endpoints and lead to 500/invalid errors.
   const scope = 'snapchat-marketing-api';
   const stateRaw = req.query.state || 'snapchat_oauth_state';
-  const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(stateRaw)}`;
+  const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
+  const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(stateRaw)}`;
 
   if (DEBUG_SNAPCHAT_OAUTH) {
     console.log('Snapchat OAuth URL present=%s', !!authUrl);
@@ -131,7 +139,8 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
       expiresAt: Date.now() + (10 * 60 * 1000) // 10 minutes
     });
 
-  let authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
+  const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
+  let authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
 
     // Perform a quick server-side probe of the auth URL. Some providers
     // return 5xx for certain scope combinations or misconfigurations; when
@@ -143,7 +152,7 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
       // Treat 5xx as provider error; 2xx or 3xx are acceptable (redirect to UI)
       if (probe.status >= 500) {
         const fallbackScope = 'snapchat-marketing-api';
-        const fallbackUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(fallbackScope)}&state=${encodeURIComponent(state)}`;
+        const fallbackUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(fallbackScope)}&state=${encodeURIComponent(state)}`;
         const probe2 = await safeFetch(fallbackUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
         if (probe2.status < 500) {
           if (DEBUG_SNAPCHAT_OAUTH) console.log('snapchat: primary auth URL returned', probe.status, 'using fallback scope; probe2=', probe2.status);
@@ -179,7 +188,8 @@ router.get('/oauth/preflight', rateLimiter({ capacity: 60, refillPerSec: 10, win
   try {
     const state = require('../lib/uuid-compat').v4();
     const scope = 'snapchat-marketing-api';
-    const url = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
+    const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
+    const url = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
     let status = null; let location = null;
     try {
       const r = await safeFetch(url, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
@@ -237,7 +247,7 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${Buffer.from(`${cfg.key}:${cfg.secret}`).toString('base64')}`
+          'Authorization': `Basic ${Buffer.from(`${cfg.confidentialClientId}:${cfg.secret}`).toString('base64')}`
         },
         body: new URLSearchParams({
           grant_type: 'authorization_code',
@@ -450,7 +460,8 @@ if (DEBUG_SNAPCHAT_OAUTH) {
       if (res.headersSent) return;
   const state = req.query.state || require('../lib/uuid-compat').v4();
   const scope = 'snapchat-marketing-api';
-  const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
+  const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
+  const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
       const r = await safeFetch(authUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET' } });
       const text = await r.text().catch(() => '');
       return res.json({ ok: true, url: authUrl, status: r.status, snippet: text.slice(0, 1000) });
@@ -470,7 +481,8 @@ if (process.env.SNAPCHAT_DEBUG_ALLOW === 'true') {
       if (res.headersSent) return;
       const state = req.query.state || require('../lib/uuid-compat').v4();
       const scope = 'snapchat-marketing-api';
-      const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${cfg.key}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
+      const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
+      const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
       const r = await safeFetch(authUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
       const headers = {};
       r.headers.forEach((v, k) => { headers[k] = v; });
