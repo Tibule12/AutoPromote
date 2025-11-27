@@ -2,13 +2,31 @@ const fs = require('fs');
 const fsp = require('fs').promises;
 const path = require('path');
 
-async function copyRecursive(src, dest) {
-  const stat = await fsp.stat(src);
+async function copyRecursive(src, dest, repoRoot) {
+  // Resolve and ensure we don't accidentally follow a symlink that points
+  // outside the repository root or walk protected system directories.
+  const resolvedSrc = path.resolve(src);
+  if (repoRoot && !resolvedSrc.startsWith(repoRoot)) {
+    // Skip paths that are outside the repository root, which can happen
+    // if a symlink accidentally points to system directories like /lib
+    console.warn('[copy-server] Skipping path outside repo root:', resolvedSrc);
+    return;
+  }
+  const stat = await fsp.lstat(src);
+  if (stat.isSymbolicLink()) {
+    // Skip symlinks to avoid following system paths that we cannot access
+    console.warn('[copy-server] Skipping symbolic link:', src);
+    return;
+  }
   if (stat.isDirectory()) {
     await fsp.mkdir(dest, { recursive: true });
     const entries = await fsp.readdir(src);
     for (const e of entries) {
-      await copyRecursive(path.join(src, e), path.join(dest, e));
+      try {
+        await copyRecursive(path.join(src, e), path.join(dest, e), repoRoot);
+      } catch (e) {
+        console.warn('[copy-server] skip entry due to error:', e && e.message);
+      }
     }
   } else {
     // Ensure dest dir exists
@@ -39,7 +57,7 @@ async function main() {
     }
     // Copy src directory recursively
     if (fs.existsSync(sourceDir)) {
-      await copyRecursive(sourceDir, path.join(destPkgDir, 'src'));
+      await copyRecursive(sourceDir, path.join(destPkgDir, 'src'), repoRoot);
       console.log('[copy-server] Copied server src into functions/_server');
     } else {
       console.warn('[copy-server] No server src found at', sourceDir);
@@ -53,7 +71,7 @@ async function main() {
       const srcPath = path.join(repoRoot, fname);
       const destPath = path.join(destPkgDir, fname);
       if (fs.existsSync(srcPath)) {
-        await copyRecursive(srcPath, destPath);
+        await copyRecursive(srcPath, destPath, repoRoot);
         console.log(`[copy-server] Copied ${fname} into functions/_server`);
       }
     }
@@ -65,7 +83,7 @@ async function main() {
     // Copy the `lib` directory if present (some modules import from ../../lib/*)
     const libDir = path.join(repoRoot, 'lib');
     if (fs.existsSync(libDir)) {
-      await copyRecursive(libDir, path.join(destPkgDir, 'lib'));
+      await copyRecursive(libDir, path.join(destPkgDir, 'lib'), repoRoot);
       console.log('[copy-server] Copied lib/ into functions/_server/lib');
     }
 }

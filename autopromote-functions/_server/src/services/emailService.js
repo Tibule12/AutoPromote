@@ -1,6 +1,7 @@
 // emailService.js - provider-based email abstraction with simple template tokens.
 const { getEmailProvider } = require('./emailProviders');
 const ENABLE_EMAIL = process.env.EMAIL_SENDER_MODE !== 'disabled';
+const { maskEmail } = require('../utils/logSanitizer');
 
 function renderTemplate(tpl, vars) {
   return tpl.replace(/\{{2}\s*([a-zA-Z0-9_]+)\s*\}{2}/g, (_,k)=> vars[k] != null ? String(vars[k]) : '');
@@ -8,7 +9,7 @@ function renderTemplate(tpl, vars) {
 
 async function sendEmail({ to, subject, html, text, headers }) {
   if (!ENABLE_EMAIL) {
-    console.log(`[emailService] disabled -> ${subject} to ${to}`);
+    console.log(`[emailService] disabled -> ${subject} to ${maskEmail(to)}`);
     return { ok:false, disabled:true };
   }
   const provider = getEmailProvider();

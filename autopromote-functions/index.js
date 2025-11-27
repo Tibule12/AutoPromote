@@ -65,55 +65,91 @@ exports.helloWorld = functions.https.onRequest((req, res) => {
 });
 
 // Export YouTube video upload function
-function safeExport(modulePath, exportsList) {
-  try {
+// NOTE: to avoid heavy require-time imports we implement lazy wrappers
+// for common Cloud Functions trigger types. This ensures the heavy
+// provider SDKs are only required when the function is invoked.
+const region = 'us-central1';
+
+function lazyOnCall(modulePath, exportName) {
+  exports[exportName] = functions.region(region).https.onCall(async (data, context) => {
+    try {
+      const mod = require(modulePath);
+      if (!mod || typeof mod[exportName] !== 'function') throw new Error('handler not found');
+      return await mod[exportName](data, context);
+    } catch (err) {
+      console.error('[index][lazyOnCall] failed to load', modulePath, exportName, err && err.message);
+      throw new functions.https.HttpsError('internal', 'Handler initialization failed');
+    }
+  });
+}
+
+function lazyOnRequest(modulePath, exportName) {
+  exports[exportName] = functions.region(region).https.onRequest((req, res) => {
+    try {
+      const mod = require(modulePath);
+      if (!mod || typeof mod[exportName] !== 'function') return res.status(500).send('handler_missing');
+      return mod[exportName](req, res);
+    } catch (err) {
+      console.error('[index][lazyOnRequest] failed to load', modulePath, exportName, err && err.message);
+      return res.status(500).send('handler_initialization_failed');
+    }
+  });
+}
+
+function lazyNoopExport(modulePath, exportName) {
+  // Fallback: export a simple wrapper that loads & invokes the handler if it's a plain function.
+  exports[exportName] = (...args) => {
     const mod = require(modulePath);
-    if (!mod) return;
-    exportsList.forEach(e => {
-      if (typeof mod[e] !== "undefined") {
-        exports[e] = mod[e];
-      }
-    });
-  } catch (err) {
-    console.warn('[index] safeExport: module ' + modulePath + ' not available:', err && err.message);
-  }
+    if (mod && typeof mod[exportName] === 'function') return mod[exportName](...args);
+    throw new Error('handler_missing');
+  };
 }
 
 // Export YouTube video upload function
-safeExport('./youtubeUploader', ['uploadVideoToYouTube']);
-// Export TikTok OAuth utilities
-safeExport('./tiktokOAuth', ['getTikTokAuthUrl','tiktokOAuthCallback']);
-// Export Facebook OAuth utilities
-safeExport('./facebookOAuth', ['getFacebookAuthUrl','facebookOAuthCallback']);
-// Export YouTube OAuth utilities
-safeExport('./youtubeOAuth', ['getYouTubeAuthUrl','youtubeOAuthCallback']);
-// New (additional platforms)
-safeExport('./pinterestOAuth', ['getPinterestAuthUrl','pinterestOAuthCallback']);
-safeExport('./discordOAuth', ['getDiscordAuthUrl','discordOAuthCallback']);
-safeExport('./spotifyOAuth', ['getSpotifyAuthUrl','spotifyOAuthCallback']);
-safeExport('./linkedinOAuth', ['getLinkedInAuthUrl','linkedinOAuthCallback']);
-safeExport('./redditOAuth', ['getRedditAuthUrl','redditOAuthCallback']);
-safeExport('./twitterOAuth', ['getTwitterAuthUrl','twitterOAuthCallback']);
-safeExport('./telegramWebhook', ['telegramWebhook']);
-safeExport('./instagramOAuth', ['getInstagramAuthUrl','instagramOAuthCallback']);
-safeExport('./snapchatOAuth', ['getSnapchatAuthUrl','snapchatOAuthCallback']);
-// Export Creator Attribution & Referral System
-// Lazy export referral system functions
-safeExport('./referralSystem', ['addReferrerToContent', 'getReferralStats']);
-// Export Promotion Templates
-// Lazy export promotion templates functions
-safeExport('./promotionTemplates', ['createPromotionTemplate', 'listPromotionTemplates', 'attachTemplateToContent']);
-// Export Revenue Attribution System
-// Lazy export revenue attribution functions
-safeExport('./revenueAttribution', ['logMonetizationEvent', 'getRevenueSummary']);
-// Export Social Media Auto-Promotion Engine
-// Lazy export social auto-promotion function
-safeExport('./socialAutoPromotion', ['autoPromoteContent']);
-// Export Smart Link Tracker
-// Lazy export smart link tracker functions
-safeExport('./smartLinkTracker', ['generateSmartLink', 'smartLinkRedirect']);
+// The following wrappers intentionally defer requiring the heavy modules
+// until the cloud function is actually invoked. We use onCall/onRequest
+// wrappers depending on the handler being expected to be invoked as
+// a firebase https callable function or an https request handler.
+lazyOnCall('./youtubeUploader', 'uploadVideoToYouTube');
+// OAuth utilities (https.onCall and https.onRequest handlers)
+lazyOnCall('./tiktokOAuth', 'getTikTokAuthUrl');
+lazyOnRequest('./tiktokOAuth', 'tiktokOAuthCallback');
+lazyOnCall('./facebookOAuth', 'getFacebookAuthUrl');
+lazyOnRequest('./facebookOAuth', 'facebookOAuthCallback');
+lazyOnCall('./youtubeOAuth', 'getYouTubeAuthUrl');
+lazyOnRequest('./youtubeOAuth', 'youtubeOAuthCallback');
+lazyOnCall('./pinterestOAuth', 'getPinterestAuthUrl');
+lazyOnRequest('./pinterestOAuth', 'pinterestOAuthCallback');
+lazyOnCall('./discordOAuth', 'getDiscordAuthUrl');
+lazyOnRequest('./discordOAuth', 'discordOAuthCallback');
+lazyOnCall('./spotifyOAuth', 'getSpotifyAuthUrl');
+lazyOnRequest('./spotifyOAuth', 'spotifyOAuthCallback');
+lazyOnCall('./linkedinOAuth', 'getLinkedInAuthUrl');
+lazyOnRequest('./linkedinOAuth', 'linkedinOAuthCallback');
+lazyOnCall('./redditOAuth', 'getRedditAuthUrl');
+lazyOnRequest('./redditOAuth', 'redditOAuthCallback');
+lazyOnCall('./twitterOAuth', 'getTwitterAuthUrl');
+lazyOnRequest('./twitterOAuth', 'twitterOAuthCallback');
+lazyOnRequest('./telegramWebhook', 'telegramWebhook');
+lazyOnCall('./instagramOAuth', 'getInstagramAuthUrl');
+lazyOnRequest('./instagramOAuth', 'instagramOAuthCallback');
+lazyOnCall('./snapchatOAuth', 'getSnapchatAuthUrl');
+lazyOnRequest('./snapchatOAuth', 'snapchatOAuthCallback');
+// Referral system and other onCall helpers
+lazyNoopExport('./referralSystem', 'addReferrerToContent');
+lazyNoopExport('./referralSystem', 'getReferralStats');
+lazyOnCall('./promotionTemplates', 'createPromotionTemplate');
+lazyOnCall('./promotionTemplates', 'listPromotionTemplates');
+lazyOnCall('./promotionTemplates', 'attachTemplateToContent');
+lazyNoopExport('./revenueAttribution', 'logMonetizationEvent');
+lazyNoopExport('./revenueAttribution', 'getRevenueSummary');
+lazyOnCall('./socialAutoPromotion', 'autoPromoteContent');
+lazyOnCall('./smartLinkTracker', 'generateSmartLink');
+// smartLinkRedirect may be an https request, so we lazy export as onRequest
+lazyOnRequest('./smartLinkTracker', 'smartLinkRedirect');
+lazyOnCall('./monetizedLandingPage', 'generateMonetizedLandingPage');
 
-const region = 'us-central1';
+// (region already defined above)
 
 // Lazy wrapper for API so the function can be deployed even if
 // the underlying server isn't present during package-level require.
@@ -158,7 +194,6 @@ exports.createPromotionOnApproval = functions.region(region).firestore
 
 // Export Monetized Landing Page Generator
 // Lazy export monetized landing page generator
-safeExport('./monetizedLandingPage', ['generateMonetizedLandingPage']);
 
 exports.createPromotionOnContentCreate = functions.region(region).firestore
   .document("content/{contentId}")

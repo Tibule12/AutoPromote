@@ -217,9 +217,9 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 		const authUrl = constructAuthUrl(cfg, state, scope);
 		// Store authUrl for debugging (non-sensitive)
 		await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({ lastAuthUrl: authUrl }, { merge: true });
-				if (DEBUG_TIKTOK_OAUTH) {
-						console.log('[TikTok][prepare] uid=%s mode=%s statePresent=%s authUrlPresent=%s popup=%s', uid, TIKTOK_ENV, !!state, !!authUrl, isPopup);
-					}
+		if (DEBUG_TIKTOK_OAUTH) {
+			console.log('[TikTok][prepare] uid=%s mode=%s statePresent=%s authUrlPresent=%s popup=%s', uid, TIKTOK_ENV, !!state, !!authUrl, isPopup);
+		  }
 		return res.json({ authUrl, mode: TIKTOK_ENV });
 	} catch (e) {
 		if (DEBUG_TIKTOK_OAUTH) console.error('[TikTok][prepare][error]', e);
@@ -397,13 +397,45 @@ router.get('/auth/preflight', authMiddleware, ttPublicLimiter, async (req, res) 
 	});
 });
 
+// Public preflight: a safe, unauthenticated construct-only preflight useful for app review and automated checks.
+// Does not expose secrets, only a constructed authUrl and minimal masked info.
+router.get('/auth/preflight/public', ttPublicLimiter, async (req, res) => {
+	try {
+		const cfg = activeConfig();
+		if (ensureTikTokEnv(res, cfg, { requireSecret: false })) return;
+		const crypto = require('crypto');
+		const fakeState = 'preflight.public.' + crypto.randomBytes(8).toString('hex');
+		const scope = 'user.info.basic';
+		const url = constructAuthUrl(cfg, fakeState, scope);
+		const issues = [];
+		if (/\s/.test(cfg.key || '')) issues.push('client_key_contains_whitespace');
+		if (cfg.key && cfg.key.length < 10) issues.push('client_key_suspicious_length');
+		if (!/^https:\/\//.test(cfg.redirect || '')) issues.push('redirect_not_https');
+		if (cfg.redirect && /\/$/.test(cfg.redirect)) issues.push('redirect_trailing_slash');
+		if (!scope.includes('user.info.basic')) issues.push('scope_missing_user.info.basic');
+		if (cfg.key && /[^a-zA-Z0-9]/.test(cfg.key)) issues.push('client_key_non_alphanumeric_chars');
+		res.json({
+			mode: TIKTOK_ENV,
+			constructedAuthUrl: url,
+			redirect: cfg.redirect,
+			keyMask: cfg.key ? (cfg.key.length > 8 ? `${cfg.key.slice(0,4)}***${cfg.key.slice(-4)}` : '***') : null,
+			scope,
+			issues,
+			note: 'This is a public, read-only preflight. It will not store state or perform authenticated actions.'
+		});
+	} catch (e) {
+		console.error('TikTok public preflight error:', e);
+		res.status(500).json({ error: 'Public preflight failed', details: e.message });
+	}
+});
+
 // 2) OAuth callback — verify state, exchange code, store tokens under users/{uid}/connections/tiktok
 router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }), async (req, res) => {
 	const cfg = activeConfig();
 	if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
 	const { code, state } = req.query;
 	if (DEBUG_TIKTOK_OAUTH) {
-		console.log('[TikTok][callback] rawQueryKeys=%s', Object.keys(req.query || {}).length);
+		console.log('[TikTok][callback] rawQueryKeys', Object.keys(req.query || {}));
 	}
 	if (!code || !state) {
 		if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] Missing code/state. queryKeys=%s url=%s', Object.keys(req.query || {}).length, req.originalUrl);
