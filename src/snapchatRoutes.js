@@ -174,7 +174,10 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
     }
 
     if (DEBUG_SNAPCHAT_OAUTH) {
+      // Mask client id for safe logging (show first & last 4 chars)
+      const mask = (s) => { try { if (!s) return null; const st = String(s); return st.length > 8 ? `${st.slice(0,8)}…${st.slice(-4)}` : st; } catch (_) { return null; } };
       console.log('Snapchat OAuth prepare URL present=%s', !!authUrl);
+      console.log('snapchat: auth prepare clientId=%s redirect=%s authUrlSnippet=%s', mask(clientIdForAuthorize), cfg.redirect, authUrl.slice(0, 200));
     }
 
     res.json({ authUrl, state });
@@ -201,6 +204,10 @@ router.get('/oauth/preflight', rateLimiter({ capacity: 60, refillPerSec: 10, win
       location = r.headers.get ? r.headers.get('location') : null;
     } catch (e) {
       status = 'probe_error';
+    }
+    if (DEBUG_SNAPCHAT_OAUTH) {
+      const mask = (s) => { try { if (!s) return null; const st = String(s); return st.length > 8 ? `${st.slice(0,8)}…${st.slice(-4)}` : st; } catch (_) { return null; } };
+      console.log('snapchat: preflight authUrl clientId=%s redirect=%s probe=%s', mask(clientIdForAuthorize), cfg.redirect, status);
     }
     res.json({ ok: true, authUrl: url, probeStatus: status, location });
   } catch (e) {
