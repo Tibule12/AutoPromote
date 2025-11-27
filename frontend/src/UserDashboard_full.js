@@ -732,9 +732,11 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       const currentUser = auth.currentUser;
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
-      // Try to open a popup immediately to preserve the user gesture. If popup
-      // was blocked, we'll fall back to same-tab navigation.
-      const tryPopup = (() => {
+      // Detect mobile devices and choose same-tab navigation (mobile browsers
+      // often block popups or make them behave poorly). If not mobile, try to
+      // open a popup and fall back to same-tab if blocked.
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+      const tryPopup = isMobile ? false : (() => {
         try {
           const w = window.open('', 'snapchat_connect_test');
           if (!w || w.closed || typeof w.closed === 'undefined') return false;
@@ -750,6 +752,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Snapchat OAuth');
       const authUrl = data.authUrl;
+      console.debug('snapchat: handleConnectSnapchat tryPopup=%o isMobile=%o authUrlPresent=%o', tryPopup, isMobile, !!authUrl);
       // If popup was opened, navigate it to the constructed auth URL and
       // poll for status; otherwise do same-tab navigation (better UX on mobile)
       if (tryPopup) {
@@ -778,6 +781,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
         poll();
       } else {
         if (isAllowedAuthUrl(authUrl)) {
+          // For mobile or blocked popups, prefer same-tab navigation
           window.location.href = authUrl;
         } else {
           window.open(authUrl, '_blank');
