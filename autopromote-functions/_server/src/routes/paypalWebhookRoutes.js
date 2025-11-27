@@ -146,7 +146,12 @@ const CERT_TTL_MS = parseInt(process.env.PAYPAL_CERT_TTL_MS || '3600000', 10); /
 
 function fetchCert(certUrl) {
   return new Promise((resolve, reject) => {
-    if (!/^https:\/\//i.test(certUrl)) return reject(new Error('invalid_cert_url'));
+    try {
+      if (!/^https:\/\//i.test(certUrl)) return reject(new Error('invalid_cert_url'));
+      const u = new URL(certUrl);
+      const allowedHosts = ['api-m.paypal.com', 'api-m.sandbox.paypal.com', 'www.paypal.com', 'payments.paypal.com'];
+      if (!allowedHosts.includes(u.hostname)) return reject(new Error('invalid_cert_host'));
+    } catch (e) { return reject(new Error('invalid_cert_url')); }
     const cached = certCache.get(certUrl);
     const now = Date.now();
     if (cached && cached.expiresAt > now) return resolve(cached.pem);
@@ -225,9 +230,9 @@ router.post('/webhook', (codeqlLimiter && codeqlLimiter.webhooks) ? codeqlLimite
     return res.status(400).json({ ok:false, error:'sig_compute_failed', detail:e.message });
   }
 
-  // Persist log regardless (auditable trail)
+    // Persist minimal log regardless (auditable trail), avoid logging secrets in plain text
   try {
-    await db.collection('webhook_logs').add({ provider:'paypal', eventType: event.event_type, verified, verificationMode, headers: { transmissionId, transmissionTime, authAlgo, certUrl }, receivedAt: new Date().toISOString() });
+      await db.collection('webhook_logs').add({ provider:'paypal', eventType: event.event_type, verified, verificationMode, headers: { transmissionId, transmissionTime, authAlgo, certUrl: certUrl ? 'REDACTED' : null }, receivedAt: new Date().toISOString() });
   } catch(_){ }
   audit.log('paypal.webhook.received', { eventType: event.event_type, verified, verificationMode });
 

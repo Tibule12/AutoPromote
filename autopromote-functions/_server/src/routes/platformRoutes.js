@@ -18,7 +18,9 @@ const { rateLimiter } = require('../middlewares/globalRateLimiter');
 const platformPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'platform_public' });
 const platformWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'platform_writes' });
 const platformWebhookLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_WEBHOOK || '300', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '50'), windowHint: 'platform_webhook' });
-const TELEGRAM_WEBHOOK_WARN_THROTTLE_MS = parseInt(process.env.TELEGRAM_WEBHOOK_WARN_THROTTLE_MS || '300000', 10);
+// Throttle repeated warning logs for Telegram webhook invalid/missing secret,
+// to avoid noisy logs in production when bots or scanners hit the webhook.
+const TELEGRAM_WEBHOOK_WARN_THROTTLE_MS = parseInt(process.env.TELEGRAM_WEBHOOK_WARN_THROTTLE_MS || '300000', 10); // 5 minutes default
 const _telegramWebhookWarnCache = new Map();
 
 // Lightweight in-memory cache for platform status checks to reduce duplicate
@@ -250,9 +252,11 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
 
     if (platform === 'pinterest') {
       const clientId = process.env.PINTEREST_CLIENT_ID;
-      const redirectUri = `${host}/api/pinterest/auth/callback`;
+      const { canonicalizeRedirect } = require('../utils/redirectUri');
+      const redirectUri = canonicalizeRedirect(process.env.PINTEREST_REDIRECT_URI || `${host}/api/pinterest/auth/callback`, { requiredPath: '/api/pinterest/auth/callback' });
       const scope = encodeURIComponent((process.env.PINTEREST_SCOPES || 'pins:read,pins:write,boards:read').split(',').join(','));
       const url = `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}&scope=${scope}&state=${state}`;
+      try { console.log('[oauth][prepare][pinterest] authUrlPresent=%s redirectPresent=%s statePresent=%s', !!url, !!redirectUri, !!state); } catch (_) {}
       return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
     }
     return res.json(result);
@@ -302,6 +306,15 @@ router.post('/:platform/auth/prepare', authMiddleware, platformWriteLimiter, asy
       const scope = encodeURIComponent('identify guilds');
       const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${encodeURIComponent(state)}`;
       return res.json({ ok: true, platform, authUrl: url, state });
+    }
+
+    if (platform === 'pinterest') {
+      const clientId = process.env.PINTEREST_CLIENT_ID;
+      const { canonicalizeRedirect } = require('../utils/redirectUri');
+      const redirectUri = canonicalizeRedirect(process.env.PINTEREST_REDIRECT_URI || `${host}/api/pinterest/auth/callback`, { requiredPath: '/api/pinterest/auth/callback' });
+      const scope = encodeURIComponent((process.env.PINTEREST_SCOPES || 'pins:read,pins:write,boards:read').split(',').join(','));
+      const url = `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}&scope=${scope}&state=${state}`;
+      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
     }
 
     if (platform === 'spotify') {
@@ -804,13 +817,20 @@ router.get('/pinterest/auth/callback', async (req, res) => {
   const state = req.query.state;
   const oauthError = req.query.error;
   if (oauthError) return sendPlain(res, 400, `Pinterest error: ${req.query.error_description || oauthError}`);
-  if (!code) return sendPlain(res, 400, 'Missing authorization code from Pinterest');
+    if (!code) {
+      try { console.warn('[oauth][pinterest] Missing code in callback; queryKeys=%s hostPresent=%s', Object.keys(req.query || {}).length, !!req.get('host')); } catch(_){ }
+      return sendPlain(res, 400, 'Missing authorization code from Pinterest');
+    }
   try {
     if (!fetchFn) return sendPlain(res, 500, 'Server missing fetch implementation');
     const clientId = process.env.PINTEREST_CLIENT_ID;
     const clientSecret = process.env.PINTEREST_CLIENT_SECRET;
     const host = `${req.protocol}://${req.get('host')}`;
-    const redirectUri = `${host}/api/pinterest/auth/callback`;
+    const { canonicalizeRedirect } = require('../utils/redirectUri');
+    const redirectUri = canonicalizeRedirect(process.env.PINTEREST_REDIRECT_URI || `${host}/api/pinterest/auth/callback`, { requiredPath: '/api/pinterest/auth/callback' });
+    // Avoid logging sensitive OAuth callback parameters; redact full values and only log presence/length info
+    try { console.log('[oauth][pinterest] callback redirectUriPresent=%s queryKeys=%s statePresent=%s', !!redirectUri, Object.keys(req.query || {}).length, !!state); } catch(_){ }
+        // try { console.log('[oauth][pinterest] callback redirectUri:', redirectUri, 'query:', req.query, 'state:', state); } catch(_){}
     const tokenUrl = 'https://api.pinterest.com/v5/oauth/token';
     const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri });
     const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
@@ -954,18 +974,23 @@ router.post('/telegram/webhook', platformWebhookLimiter, async (req, res) => {
     if (configuredSecret) {
       const incoming = req.get('X-Telegram-Bot-Api-Secret-Token') || req.get('x-telegram-bot-api-secret-token') || req.get('x-telegram-secret-token');
       if (!incoming || String(incoming) !== String(configuredSecret)) {
-        // Silent reject if configured to reduce logs (will return 200 OK)
+        // If silent reject is enabled, return 200 OK without logging details to suppress probes
         if (process.env.TELEGRAM_WEBHOOK_SILENT_REJECT === 'true') return res.status(200).send('ok');
+        // Throttle warning logs per requesting IP to avoid flood in logs.
         try {
           const remote = (req.ip || req.get('x-forwarded-for') || 'unknown').toString();
+          // Normalize to a simple key
           const key = `tg:webhook:bad_secret:${remote}`;
           const now = Date.now();
           const last = _telegramWebhookWarnCache.get(key) || 0;
           if (now - last > TELEGRAM_WEBHOOK_WARN_THROTTLE_MS) {
+            // Log minimally to keep diagnostics available without flooding
             console.warn('[telegram][webhook] invalid or missing secret token (throttled) ip=%s', remote);
             _telegramWebhookWarnCache.set(key, now);
           }
-        } catch (_) {}
+        } catch (_) {
+          // If logging throttle errors, skip and continue to return 401
+        }
         return res.status(401).send('invalid_secret');
       }
     }

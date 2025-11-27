@@ -150,8 +150,9 @@ router.get('/oauth/callback', twitterPublicLimiter, async (req, res) => {
     debugLog('callback success for uid', stored.uid);
     return res.send('<html><body><h2>Twitter connected successfully.</h2><p>You can close this window.</p></body></html>');
   } catch (e) {
+    // Avoid reflecting error messages into HTML to prevent reflected XSS.
     debugLog('callback exchange error', e.message);
-    return res.status(500).send('Exchange failed: ' + e.message);
+    return res.status(500).send('Exchange failed');
   }
 });
 
