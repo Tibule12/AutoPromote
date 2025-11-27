@@ -974,6 +974,8 @@ router.post('/telegram/webhook', platformWebhookLimiter, async (req, res) => {
     if (configuredSecret) {
       const incoming = req.get('X-Telegram-Bot-Api-Secret-Token') || req.get('x-telegram-bot-api-secret-token') || req.get('x-telegram-secret-token');
       if (!incoming || String(incoming) !== String(configuredSecret)) {
+        // If silent reject is enabled, return 200 OK without logging details to suppress probes
+        if (process.env.TELEGRAM_WEBHOOK_SILENT_REJECT === 'true') return res.status(200).send('ok');
         // Throttle warning logs per requesting IP to avoid flood in logs.
         try {
           const remote = (req.ip || req.get('x-forwarded-for') || 'unknown').toString();
