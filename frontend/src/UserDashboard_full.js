@@ -503,6 +503,21 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     }
   }, [user?.uid]);
 
+  // Listen for popup completion messages for Snapchat (and refresh status)
+  useEffect(() => {
+    const origin = window.location.origin;
+    const listener = (ev) => {
+      try {
+        if (ev.origin !== origin) return;
+        if (ev.data === 'snapchat_oauth_complete') {
+          loadSnapchatStatus();
+        }
+      } catch (_) {}
+    };
+    window.addEventListener('message', listener);
+    return () => window.removeEventListener('message', listener);
+  }, [user?.uid]);
+
   // Listen for postMessage requests from popup interstitials asking the
   // parent to check Telegram status. This allows the popup (same-origin)
   // to ask the opener to perform the authenticated status check and
@@ -651,6 +666,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
         headers: { 'Authorization': `Bearer ${idToken}` }
       });
       const data = await prep.json();
+      console.debug('snapchat: prepare response', data);
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare TikTok OAuth');
       // Only navigate to allowlisted OAuth providers to avoid open redirects
       if (isAllowedAuthUrl(data.authUrl)) {
@@ -744,15 +760,19 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
           return true;
         } catch (_) { return false; }
       })();
+      const params = new URLSearchParams(window.location.search);
+      const test_scope_param = params.get('snapchat_test_scope');
+      const bodyPayload = { popup: tryPopup };
+      if (test_scope_param) bodyPayload.test_scope = test_scope_param;
       const prep = await fetch(API_ENDPOINTS.SNAPCHAT_AUTH_PREPARE, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${idToken}`, 'Accept': 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ popup: tryPopup })
+        body: JSON.stringify(bodyPayload)
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Snapchat OAuth');
       const authUrl = data.authUrl;
-      console.debug('snapchat: handleConnectSnapchat tryPopup=%o isMobile=%o authUrlPresent=%o', tryPopup, isMobile, !!authUrl);
+      console.debug('snapchat: handleConnectSnapchat tryPopup=%o isMobile=%o authUrlPresent=%o scope=%o', tryPopup, isMobile, !!authUrl, data.scope || null);
       // If popup was opened, navigate it to the constructed auth URL and
       // poll for status; otherwise do same-tab navigation (better UX on mobile)
       if (tryPopup) {
@@ -780,9 +800,18 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
         };
         poll();
       } else {
+        // For mobile or blocked popups, prefer same-tab navigation
         if (isAllowedAuthUrl(authUrl)) {
-          // For mobile or blocked popups, prefer same-tab navigation
-          window.location.href = authUrl;
+          try {
+            window.location.href = authUrl;
+            // As a safety net, also schedule another fallback attempt in case the browser
+            // prevents immediate navigation (some browsers block programmatic navigations
+            // in certain contexts). We will try to open in the same tab again after 300ms.
+            setTimeout(() => { try { window.location.href = authUrl; } catch (_){} }, 300);
+          } catch (e) {
+            // If navigation throws for some reason, open in new tab as a last resort
+            window.open(authUrl, '_blank');
+          }
         } else {
           window.open(authUrl, '_blank');
         }

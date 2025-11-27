@@ -18,6 +18,10 @@ const { rateLimiter } = require('../middlewares/globalRateLimiter');
 const platformPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'platform_public' });
 const platformWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'platform_writes' });
 const platformWebhookLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_PLATFORM_WEBHOOK || '300', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '50'), windowHint: 'platform_webhook' });
+// Throttle repeated warning logs for Telegram webhook invalid/missing secret,
+// to avoid noisy logs in production when bots or scanners hit the webhook.
+const TELEGRAM_WEBHOOK_WARN_THROTTLE_MS = parseInt(process.env.TELEGRAM_WEBHOOK_WARN_THROTTLE_MS || '300000', 10); // 5 minutes default
+const _telegramWebhookWarnCache = new Map();
 
 // Lightweight in-memory cache for platform status checks to reduce duplicate
 // Firestore reads when many clients poll /api/:platform/status frequently.
@@ -970,7 +974,21 @@ router.post('/telegram/webhook', platformWebhookLimiter, async (req, res) => {
     if (configuredSecret) {
       const incoming = req.get('X-Telegram-Bot-Api-Secret-Token') || req.get('x-telegram-bot-api-secret-token') || req.get('x-telegram-secret-token');
       if (!incoming || String(incoming) !== String(configuredSecret)) {
-        console.warn('[telegram][webhook] invalid or missing secret token');
+        // Throttle warning logs per requesting IP to avoid flood in logs.
+        try {
+          const remote = (req.ip || req.get('x-forwarded-for') || 'unknown').toString();
+          // Normalize to a simple key
+          const key = `tg:webhook:bad_secret:${remote}`;
+          const now = Date.now();
+          const last = _telegramWebhookWarnCache.get(key) || 0;
+          if (now - last > TELEGRAM_WEBHOOK_WARN_THROTTLE_MS) {
+            // Log minimally to keep diagnostics available without flooding
+            console.warn('[telegram][webhook] invalid or missing secret token (throttled) ip=%s', remote);
+            _telegramWebhookWarnCache.set(key, now);
+          }
+        } catch (_) {
+          // If logging throttle errors, skip and continue to return 401
+        }
         return res.status(401).send('invalid_secret');
       }
     }

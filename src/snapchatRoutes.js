@@ -130,7 +130,11 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
 
   try {
   // Use space separated scopes per Snapchat OAuth requirements
-  const scope = 'snapchat-marketing-api';
+    // Use space separated scopes per Snapchat OAuth requirements
+    // Allow a `test_scope` body param for quick debugging (e.g. 'display_name')
+    const requestedScope = (req.body && req.body.test_scope) || null;
+    const allowedScopes = new Set(['snapchat-marketing-api', 'display_name']);
+    const scope = allowedScopes.has(String(requestedScope)) ? String(requestedScope) : 'snapchat-marketing-api';
     const { v4: uuidv4 } = require('../lib/uuid-compat');
     const state = uuidv4();
     const userId = req.userId || 'anonymous';
@@ -141,6 +145,7 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
       uid: userId,
       platform: 'snapchat',
       popup: popupRequested,
+        scope,
       createdAt: new Date().toISOString(),
       expiresAt: Date.now() + (10 * 60 * 1000) // 10 minutes
     });
@@ -152,14 +157,17 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
     // return 5xx for certain scope combinations or misconfigurations; when
     // that happens try a reduced scope fallback automatically so the
     // frontend receives a working auth URL instead of immediately failing.
+    let probeStatusVar = null;
     try {
       // Probe the provider URL, but validate destination first to avoid SSRF.
       const probe = await safeFetch(authUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
       // Treat 5xx as provider error; 2xx or 3xx are acceptable (redirect to UI)
+      probeStatusVar = probe.status;
       if (probe.status >= 500) {
         const fallbackScope = 'display_name';
         const fallbackUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(fallbackScope)}&state=${encodeURIComponent(state)}`;
         const probe2 = await safeFetch(fallbackUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
+        probeStatusVar = probe2.status;
         if (probe2.status < 500) {
           if (DEBUG_SNAPCHAT_OAUTH) console.log('snapchat: primary auth URL returned', probe.status, 'using fallback scope; probe2=', probe2.status);
           authUrl = fallbackUrl;
@@ -179,10 +187,11 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
       // Mask client id for safe logging (show first & last 4 chars)
       const mask = (s) => { try { if (!s) return null; const st = String(s); return st.length > 8 ? `${st.slice(0,8)}…${st.slice(-4)}` : st; } catch (_) { return null; } };
       console.log('Snapchat OAuth prepare URL present=%s', !!authUrl);
-      console.log('snapchat: auth prepare clientId=%s redirect=%s authUrlSnippet=%s', mask(clientIdForAuthorize), cfg.redirect, authUrl.slice(0, 200));
+      console.log('snapchat: auth prepare clientId=%s redirect=%s scope=%s authUrlSnippet=%s', mask(clientIdForAuthorize), cfg.redirect, scope, authUrl.slice(0, 200));
     }
 
-    res.json({ authUrl, state, popup: popupRequested });
+      // Return the scope and a probeStatus to help client diagnostics
+      res.json({ authUrl, state, popup: popupRequested, scope, probeStatus: probeStatusVar });
   } catch (err) {
     console.error('Snapchat OAuth prepare error:', err);
     res.status(500).json({ error: 'OAuth prepare failed', details: err.message });
@@ -196,7 +205,7 @@ router.get('/oauth/preflight', rateLimiter({ capacity: 60, refillPerSec: 10, win
   if (res.headersSent) return;
   try {
     const state = require('../lib/uuid-compat').v4();
-    const scope = 'snapchat-marketing-api';
+    const scope = (req.query && req.query.test_scope && ['snapchat-marketing-api','display_name'].includes(req.query.test_scope)) ? req.query.test_scope : 'snapchat-marketing-api';
     const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
     const url = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
     let status = null; let location = null;
@@ -211,7 +220,7 @@ router.get('/oauth/preflight', rateLimiter({ capacity: 60, refillPerSec: 10, win
       const mask = (s) => { try { if (!s) return null; const st = String(s); return st.length > 8 ? `${st.slice(0,8)}…${st.slice(-4)}` : st; } catch (_) { return null; } };
       console.log('snapchat: preflight authUrl clientId=%s redirect=%s probe=%s', mask(clientIdForAuthorize), cfg.redirect, status);
     }
-    res.json({ ok: true, authUrl: url, probeStatus: status, location });
+    res.json({ ok: true, authUrl: url, probeStatus: status, location, scope });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
@@ -253,14 +262,18 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
   try {
     // Look up the oauth state document to recover the original uid (if any)
     let userId = (req.userId || null);
+    let isPopup = false; // default
+    let savedScope = null;
     if (state) {
       try {
         const st = await db.collection('oauth_states').doc(state).get();
         if (st.exists) {
           const v = st.data() || {};
           if (v.uid) userId = v.uid;
-          // Clean up state after use
-          try { await db.collection('oauth_states').doc(state).delete(); } catch(_){}
+          if (v.popup) isPopup = !!v.popup;
+          if (v.scope) savedScope = v.scope;
+          // Clean up state after we read it
+          try { await db.collection('oauth_states').doc(state).delete(); } catch (_){ }
         }
       } catch (e) {
         // ignore state lookup errors - proceed with available userId
@@ -270,6 +283,7 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
     if (!userId) userId = 'anonymous';
 
     // Exchange code for access token (validated host)
+    if (DEBUG_SNAPCHAT_OAUTH) console.log('snapchat: token exchange for state=%s user=%s scope=%s', state, userId, savedScope || null);
     const tokenRes = await safeFetch('https://accounts.snapchat.com/login/oauth2/access_token', fetch, {
       allowHosts: ['accounts.snapchat.com'],
       requireHttps: true,
@@ -293,7 +307,7 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
     const tokenData = await tokenRes.json();
     if (!tokenRes.ok) {
       // If provider returned an error, include it for debugging
-      console.error('snapchat: token exchange failed', { error: tokenData.error, error_description: tokenData.error_description });
+      console.error('snapchat: token exchange failed', { scope: savedScope || null, status: tokenRes.status, error: tokenData.error, error_description: tokenData.error_description });
       // Avoid returning token/secret details; only return minimal error info
       return res.status(400).json({ error: 'Failed to exchange code for token', details: { error: tokenData.error, error_description: tokenData.error_description } });
     }
@@ -328,10 +342,7 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
 
     // If this was a browser redirect (GET), redirect back to the dashboard
     if (req.method === 'GET') {
-      // Check if this was initiated as a popup flow
-      const stateDocRef = await db.collection('oauth_states').doc(state).get();
-      const stateDataRef = stateDocRef.exists ? stateDocRef.data() : null;
-      const isPopup = !!stateDataRef?.popup; // True only if a popup was requested when preparing
+      // Use the isPopup we recovered earlier from the state doc (if any)
 
       if (isPopup) {
         res.set('Content-Type', 'text/html');
@@ -492,7 +503,7 @@ if (DEBUG_SNAPCHAT_OAUTH) {
       ensureSnapchatEnv(res, cfg, { requireSecret: false });
       if (res.headersSent) return;
   const state = req.query.state || require('../lib/uuid-compat').v4();
-  const scope = 'snapchat-marketing-api';
+  const scope = (req.query && req.query.test_scope && ['snapchat-marketing-api', 'display_name'].includes(req.query.test_scope)) ? req.query.test_scope : 'snapchat-marketing-api';
   const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
   const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
       const r = await safeFetch(authUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET' } });
@@ -513,7 +524,7 @@ if (process.env.SNAPCHAT_DEBUG_ALLOW === 'true') {
       ensureSnapchatEnv(res, cfg, { requireSecret: false });
       if (res.headersSent) return;
       const state = req.query.state || require('../lib/uuid-compat').v4();
-      const scope = 'snapchat-marketing-api';
+      const scope = (req.query && req.query.test_scope && ['snapchat-marketing-api', 'display_name'].includes(req.query.test_scope)) ? req.query.test_scope : 'snapchat-marketing-api';
       const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
       const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
       const r = await safeFetch(authUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
