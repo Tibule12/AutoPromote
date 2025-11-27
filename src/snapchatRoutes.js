@@ -136,9 +136,11 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
     const userId = req.userId || 'anonymous';
 
     // Store state temporarily in Firestore
+    const popupRequested = !!(req.body && req.body.popup === true);
     await db.collection('oauth_states').doc(state).set({
       uid: userId,
       platform: 'snapchat',
+      popup: popupRequested,
       createdAt: new Date().toISOString(),
       expiresAt: Date.now() + (10 * 60 * 1000) // 10 minutes
     });
@@ -180,7 +182,7 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
       console.log('snapchat: auth prepare clientId=%s redirect=%s authUrlSnippet=%s', mask(clientIdForAuthorize), cfg.redirect, authUrl.slice(0, 200));
     }
 
-    res.json({ authUrl, state });
+    res.json({ authUrl, state, popup: popupRequested });
   } catch (err) {
     console.error('Snapchat OAuth prepare error:', err);
     res.status(500).json({ error: 'OAuth prepare failed', details: err.message });
@@ -329,7 +331,7 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
       // Check if this was initiated as a popup flow
       const stateDocRef = await db.collection('oauth_states').doc(state).get();
       const stateDataRef = stateDocRef.exists ? stateDocRef.data() : null;
-      const isPopup = stateDataRef?.platform === 'snapchat' && stateDataRef?.uid; // Assume popup if we have state data
+      const isPopup = !!stateDataRef?.popup; // True only if a popup was requested when preparing
 
       if (isPopup) {
         res.set('Content-Type', 'text/html');

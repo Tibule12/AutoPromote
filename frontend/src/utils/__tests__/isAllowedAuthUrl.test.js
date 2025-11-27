@@ -19,6 +19,8 @@ describe('isAllowedAuthUrl helper', () => {
     expect(isAllowedAuthUrl('https://api.twitter.com/oauth2/authorize')).toBe(true);
     expect(isAllowedAuthUrl('https://accounts.spotify.com/authorize')).toBe(true);
     expect(isAllowedAuthUrl('https://www.reddit.com/api/v1/authorize')).toBe(true);
+    // Snapchat auth URL should be allowed and navigated directly
+    expect(isAllowedAuthUrl('https://accounts.snapchat.com/accounts/oauth2/auth?client_id=abc&redirect_uri=https%3A%2F%2Fapi.example.com%2Fcallback')).toBe(true);
   });
 
   it('allows same-origin URLs', () => {
