@@ -223,6 +223,23 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
   // Accept code/state from query (GET) or body (POST)
   const code = (req.method === 'GET') ? req.query.code : req.body.code;
   const state = (req.method === 'GET') ? req.query.state : req.body.state;
+  if (DEBUG_SNAPCHAT_OAUTH) {
+    const mask = (s) => { try { if (!s) return null; const st = String(s); return st.length > 8 ? `${st.slice(0,8)}…${st.slice(-4)}` : st; } catch (_) { return null; } };
+    try {
+      console.log('snapchat: callback invoked method=%s remote=%s', req.method, req.ip || req.connection?.remoteAddress || 'unknown');
+      // Log query/body with masking for tokens
+      const q = Object.assign({}, req.query || {});
+      const b = Object.assign({}, req.body || {});
+      if (q.client_id) q.client_id = mask(q.client_id);
+      if (b.client_id) b.client_id = mask(b.client_id);
+      if (q.code) q.code = mask(q.code);
+      if (b.code) b.code = mask(b.code);
+      if (q.error) q.error = String(q.error).slice(0, 200);
+      if (b.error) b.error = String(b.error).slice(0, 200);
+      console.log('snapchat: callback query=%o', q);
+      console.log('snapchat: callback body=%o', b);
+    } catch (e) { console.warn('snapchat: callback debug log failed', e && e.message); }
+  }
   if (!code) {
     return res.status(400).json({ error: 'Authorization code required' });
   }
