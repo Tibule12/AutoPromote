@@ -157,7 +157,7 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
       const probe = await safeFetch(authUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
       // Treat 5xx as provider error; 2xx or 3xx are acceptable (redirect to UI)
       if (probe.status >= 500) {
-        const fallbackScope = 'snapchat-marketing-api';
+        const fallbackScope = 'display_name';
         const fallbackUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(fallbackScope)}&state=${encodeURIComponent(state)}`;
         const probe2 = await safeFetch(fallbackUrl, fetch, { allowHosts: ['accounts.snapchat.com'], requireHttps: true, fetchOptions: { method: 'GET', redirect: 'manual' } });
         if (probe2.status < 500) {
