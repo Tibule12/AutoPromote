@@ -98,20 +98,20 @@ safeExport('./telegramWebhook', ['telegramWebhook']);
 safeExport('./instagramOAuth', ['getInstagramAuthUrl','instagramOAuthCallback']);
 safeExport('./snapchatOAuth', ['getSnapchatAuthUrl','snapchatOAuthCallback']);
 // Export Creator Attribution & Referral System
-exports.addReferrerToContent = require('./referralSystem').addReferrerToContent;
-exports.getReferralStats = require('./referralSystem').getReferralStats;
+// Lazy export referral system functions
+safeExport('./referralSystem', ['addReferrerToContent', 'getReferralStats']);
 // Export Promotion Templates
-exports.createPromotionTemplate = require('./promotionTemplates').createPromotionTemplate;
-exports.listPromotionTemplates = require('./promotionTemplates').listPromotionTemplates;
-exports.attachTemplateToContent = require('./promotionTemplates').attachTemplateToContent;
+// Lazy export promotion templates functions
+safeExport('./promotionTemplates', ['createPromotionTemplate', 'listPromotionTemplates', 'attachTemplateToContent']);
 // Export Revenue Attribution System
-exports.logMonetizationEvent = require('./revenueAttribution').logMonetizationEvent;
-exports.getRevenueSummary = require('./revenueAttribution').getRevenueSummary;
+// Lazy export revenue attribution functions
+safeExport('./revenueAttribution', ['logMonetizationEvent', 'getRevenueSummary']);
 // Export Social Media Auto-Promotion Engine
-exports.autoPromoteContent = require('./socialAutoPromotion').autoPromoteContent;
+// Lazy export social auto-promotion function
+safeExport('./socialAutoPromotion', ['autoPromoteContent']);
 // Export Smart Link Tracker
-exports.generateSmartLink = require('./smartLinkTracker').generateSmartLink;
-exports.smartLinkRedirect = require('./smartLinkTracker').smartLinkRedirect;
+// Lazy export smart link tracker functions
+safeExport('./smartLinkTracker', ['generateSmartLink', 'smartLinkRedirect']);
 
 const region = 'us-central1';
 
@@ -157,7 +157,8 @@ exports.createPromotionOnApproval = functions.region(region).firestore
   });
 
 // Export Monetized Landing Page Generator
-exports.generateMonetizedLandingPage = require('./monetizedLandingPage').generateMonetizedLandingPage;
+// Lazy export monetized landing page generator
+safeExport('./monetizedLandingPage', ['generateMonetizedLandingPage']);
 
 exports.createPromotionOnContentCreate = functions.region(region).firestore
   .document("content/{contentId}")
