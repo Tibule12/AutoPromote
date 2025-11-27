@@ -732,16 +732,56 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       const currentUser = auth.currentUser;
       if (!currentUser) throw new Error('Please sign in first');
       const idToken = await currentUser.getIdToken(true);
+      // Try to open a popup immediately to preserve the user gesture. If popup
+      // was blocked, we'll fall back to same-tab navigation.
+      const tryPopup = (() => {
+        try {
+          const w = window.open('', 'snapchat_connect_test');
+          if (!w || w.closed || typeof w.closed === 'undefined') return false;
+          w.close();
+          return true;
+        } catch (_) { return false; }
+      })();
       const prep = await fetch(API_ENDPOINTS.SNAPCHAT_AUTH_PREPARE, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${idToken}` }
+        headers: { 'Authorization': `Bearer ${idToken}`, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ popup: tryPopup })
       });
       const data = await prep.json();
       if (!prep.ok || !data.authUrl) throw new Error(data.error || 'Failed to prepare Snapchat OAuth');
-      if (isAllowedAuthUrl(data.authUrl)) {
-        window.location.href = data.authUrl;
+      const authUrl = data.authUrl;
+      // If popup was opened, navigate it to the constructed auth URL and
+      // poll for status; otherwise do same-tab navigation (better UX on mobile)
+      if (tryPopup) {
+        const popup = window.open(authUrl, 'snapchat_connect', 'width=900,height=700');
+        // Poll for connection status while popup is open
+        const poll = async () => {
+          for (let i = 0; i < 80; i++) {
+            await new Promise(r => setTimeout(r, 1500));
+            if (popup && popup.closed) break;
+            try {
+              const s = await currentUser.getIdToken(true);
+              const st = await fetch(API_ENDPOINTS.SNAPCHAT_STATUS, { headers: { Authorization: `Bearer ${s}`, Accept: 'application/json' } });
+              if (st.ok) {
+                const sd = await st.json();
+                if (sd.connected) {
+                  try { if (popup && !popup.closed) popup.close(); } catch (_) {}
+                  loadSnapchatStatus();
+                  return;
+                }
+              }
+            } catch (_) {}
+          }
+          try { if (popup && !popup.closed) popup.close(); } catch (_) {}
+          alert('Connection timed out or was closed. If you connected, try refreshing.');
+        };
+        poll();
       } else {
-        window.open(data.authUrl, '_blank');
+        if (isAllowedAuthUrl(authUrl)) {
+          window.location.href = authUrl;
+        } else {
+          window.open(authUrl, '_blank');
+        }
       }
     } catch (e) {
       alert(e.message || 'Unable to start Snapchat connect');
