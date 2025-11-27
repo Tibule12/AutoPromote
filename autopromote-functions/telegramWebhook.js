@@ -2,13 +2,25 @@ const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const region = 'us-central1';
 
+// Throttle repeated logs for invalid webhook secrets to avoid noisy logs
+const TELEGRAM_WEBHOOK_WARN_THROTTLE_MS = parseInt(process.env.TELEGRAM_WEBHOOK_WARN_THROTTLE_MS || '300000', 10);
+const _telegramWebhookWarnCache = new Map();
 exports.telegramWebhook = functions.region(region).https.onRequest(async (req, res) => {
   // Optional secret header check
   const configuredSecret = process.env.TELEGRAM_WEBHOOK_SECRET || null;
   if (configuredSecret) {
     const incoming = req.get('X-Telegram-Bot-Api-Secret-Token') || req.get('x-telegram-bot-api-secret-token') || req.get('x-telegram-secret-token');
     if (!incoming || String(incoming) !== String(configuredSecret)) {
-      console.warn('[telegram][webhook] invalid or missing secret token');
+      try {
+        const remote = (req.ip || req.get('x-forwarded-for') || 'unknown').toString();
+        const key = `tg:webhook:bad_secret:${remote}`;
+        const now = Date.now();
+        const last = _telegramWebhookWarnCache.get(key) || 0;
+        if (now - last > TELEGRAM_WEBHOOK_WARN_THROTTLE_MS) {
+          console.warn('[telegram][webhook] invalid or missing secret token (throttled) ip=%s', remote);
+          _telegramWebhookWarnCache.set(key, now);
+        }
+      } catch (_) {}
       return res.status(401).send('invalid_secret');
     }
   }
