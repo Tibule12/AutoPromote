@@ -655,9 +655,12 @@ const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+    // In development or when allowAll is set, also allow the explicit 'null' origin
+    if (origin === 'null' && (allowAll || process.env.NODE_ENV === 'development')) return callback(null, true);
     if (allowAll || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
+    try { console.warn('[cors.origin] -> blocked', origin); } catch(e) {}
     return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],

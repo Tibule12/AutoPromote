@@ -54,6 +54,58 @@
   color: #666;
 }
 
+.preview-area {
+  margin-top: 12px;
+}
+
+.preview-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e6e6e6;
+  padding: 12px;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.preview-video, .preview-image {
+  width: 100%;
+  max-width: 640px;
+  max-height: 360px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.preview-controls {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pinterest-options { display: grid; gap: .5rem; }
+.pinterest-options select, .pinterest-options input { padding: .5rem; border-radius: 8px; border: 1px solid #ddd; }
+
+.control-btn, .apply-template-btn {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.control-btn:hover, .apply-template-btn:hover { background: #f7f7f7; }
+
+.video-controls label { margin-right: 12px; font-size: 13px; }
+.range-row { display:flex; gap:6px; }
+.template-hint { font-size: 12px; margin-top: 6px; color: #666; }
+
+.platform-toggles { display:flex; flex-wrap:wrap; gap:8px; }
+.platform-toggles label { display:inline-flex; gap:6px; align-items:center; background: #f8f8f8; padding: 6px 10px; border-radius: 12px; border: 1px solid #eee; font-size: 13px; color: #333; }
+.platform-toggles input[type="checkbox"] { width: 16px; height: 16px; }
+.advanced-options input { padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
+
 .submit-button {
   background: #1976d2;
   color: white;

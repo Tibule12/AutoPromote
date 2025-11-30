@@ -8,9 +8,31 @@ const admin = require('firebase-admin');
 try {
   admin.app();
 } catch (error) {
-  const serviceAccount = require('./service-account.json');
+  // Prefer using explicitly provided env-based service account values instead of a tracked file.
+  const fs = require('fs');
+  const path = require('path');
+  let sa;
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    try { sa = require(path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS)); } catch (e) { sa = null; }
+  }
+  if (!sa && (process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT || process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64)) {
+    try {
+      const tmpPath = path.resolve(__dirname, 'tmp', 'service-account.json');
+      fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
+      const payload = process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT || Buffer.from(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
+      fs.writeFileSync(tmpPath, payload, { encoding: 'utf8', mode: 0o600 });
+      sa = JSON.parse(payload);
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
+    } catch (e) {
+      console.warn('⚠️ Could not materialize service account JSON for runTests:', e.message);
+    }
+  }
+  if (!sa) {
+    console.error('❌ No service account available as env. Please set FIREBASE_ADMIN_SERVICE_ACCOUNT (JSON) or FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64 (base64) or GOOGLE_APPLICATION_CREDENTIALS pointing to a service account file. Do NOT use a committed service account JSON.');
+    process.exit(1);
+  }
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(sa),
     databaseURL: 'https://autopromote-cc6d3.firebaseio.com'
   });
 }

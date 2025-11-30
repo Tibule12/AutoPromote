@@ -72,6 +72,8 @@ export const API_ENDPOINTS = {
   SPOTIFY_AUTH_START: `${API_BASE_URL}/api/spotify/auth/start`,
   SPOTIFY_STATUS: `${API_BASE_URL}/api/spotify/status`,
   SPOTIFY_METADATA: `${API_BASE_URL}/api/spotify/metadata`,
+  SPOTIFY_SEARCH: `${API_BASE_URL}/api/spotify/search`,
+  SPOTIFY_PLAYLISTS: `${API_BASE_URL}/api/spotify/playlists`,
 
   REDDIT_AUTH_START: `${API_BASE_URL}/api/reddit/auth/start`,
   REDDIT_STATUS: `${API_BASE_URL}/api/reddit/status`,

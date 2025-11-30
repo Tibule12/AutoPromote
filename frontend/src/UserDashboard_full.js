@@ -1,8 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import './UserDashboard.css';
+import ScheduleCard from './components/ScheduleCard';
 import { isAllowedAuthUrl } from './utils/isAllowedAuthUrl';
 import { auth } from './firebaseClient';
-import { API_ENDPOINTS } from './config';
+import { API_ENDPOINTS, API_BASE_URL } from './config';
+import SpotifyTrackSearch from './components/SpotifyTrackSearch';
 
 // Use PUBLIC_URL so assets resolve correctly on GitHub Pages and Render
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
@@ -11,6 +13,28 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [activeTab, setActiveTab] = useState('profile');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [rotate, setRotate] = useState(0);
+  const [flipH, setFlipH] = useState(false);
+  const [flipV, setFlipV] = useState(false);
+  const [template, setTemplate] = useState('none');
+  const [trimStart, setTrimStart] = useState(0);
+  const [trimEnd, setTrimEnd] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const selectedVideoRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        try { URL.revokeObjectURL(previewUrl); } catch (e) {}
+      }
+    };
+  }, [previewUrl]);
+  // Toggle a body-level class so we can scope CSS overrides to the dashboard
+  useEffect(() => {
+    document.body.classList.add('dashboard-mode');
+    return () => { document.body.classList.remove('dashboard-mode'); };
+  }, []);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   // Per-platform custom options passed to backend (e.g., discord.channelId, reddit.subreddit)
   const [platformOptions, setPlatformOptions] = useState({});
@@ -43,12 +67,14 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [pinterestCreateVisible, setPinterestCreateVisible] = useState(false);
   const [pinterestCreateName, setPinterestCreateName] = useState('');
   const [pinterestCreateDesc, setPinterestCreateDesc] = useState('');
+  const [spotifySelectedTracks, setSpotifySelectedTracks] = useState([]);
   // Snap connect banner state from URL
   const [connectBanner, setConnectBanner] = useState(null); // { type: 'success'|'error', message: string }
 
   // Ensure content is an array to simplify rendering
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
   const schedulesList = useMemo(() => (Array.isArray(mySchedules) ? mySchedules : []), [mySchedules]);
+  const [scheduleContentMap, setScheduleContentMap] = useState({});
   const firstItem = contentList[0] || {};
   const safeFirstThumb = firstItem?.thumbnailUrl || DEFAULT_IMAGE;
   const safeLandingUrl = typeof firstItem?.landingPageUrl === 'string' ? firstItem.landingPageUrl : undefined;
@@ -305,6 +331,26 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     } catch (_) {}
   };
 
+  // Fetch content details for scheduled items that are not in the current content list
+  useEffect(() => {
+    const missingIds = (schedulesList || []).map(s => s.contentId).filter(Boolean).filter(id => id && !contentList.find(c => c.id === id) && !scheduleContentMap[id]);
+    if (!missingIds.length) return;
+    (async () => {
+      try {
+        const currentUser = auth.currentUser; if (!currentUser) return;
+        const token = await currentUser.getIdToken(true);
+        for (const id of missingIds) {
+          try {
+            const res = await fetch(`${API_BASE_URL}/api/content/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+            if (!res.ok) continue;
+            const j = await res.json();
+            if (j && j.content) setScheduleContentMap(prev => ({ ...prev, [id]: j.content }));
+          } catch (e) { /* ignore */ }
+        }
+      } catch (e) { /* ignore */ }
+    })();
+  }, [schedulesList, contentList, scheduleContentMap]);
+
   const handleCreatePinterestBoard = async () => {
     try {
       const currentUser = auth.currentUser;
@@ -325,6 +371,51 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       alert('Board created successfully');
     } catch (e) {
       alert('Error creating board: ' + (e.message || e));
+    }
+  };
+
+  const handleCreateSpotifyPlaylist = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const token = await currentUser.getIdToken(true);
+      const name = window.prompt('Playlist name');
+      if (!name || !name.trim()) return;
+      const description = window.prompt('Description (optional)') || '';
+      const res = await fetch(API_ENDPOINTS.SPOTIFY_PLAYLISTS, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.trim(), description: description.trim() }) });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        alert('Failed to create playlist: ' + (data.error || JSON.stringify(data)));
+        return;
+      }
+      // Refresh metadata
+      await loadSpotifyMetadata();
+      alert('Playlist created successfully');
+    } catch (e) {
+      alert('Error creating playlist: ' + (e.message || e));
+    }
+  };
+
+  const handleAddTracksToPlaylist = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Please sign in first');
+      const token = await currentUser.getIdToken(true);
+      // Find selected playlist id from metadata mapping by name
+      const name = platformOptions.spotify?.name || '';
+      const playlist = (platformMetadata.spotify?.playlists || []).find(p => p.name === name || p.id === name);
+      if (!playlist || !playlist.id) {
+        alert('Please choose a playlist from the dropdown first.');
+        return;
+      }
+      const trackUris = spotifySelectedTracks.map(t => t.uri);
+      if (!trackUris.length) { alert('Please choose at least one track.'); return; }
+      const res = await fetch(`${API_ENDPOINTS.SPOTIFY_PLAYLISTS}/${playlist.id}/tracks`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ trackUris }) });
+      const data = await res.json();
+      if (!res.ok || !data.ok) { alert('Failed to add tracks: ' + (data.error || JSON.stringify(data))); return; }
+      alert('Tracks added to playlist');
+    } catch (e) {
+      alert('Error adding tracks to playlist: ' + (e.message || e));
     }
   };
 
@@ -609,13 +700,23 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     const whenIso = scheduleMode === 'manual' && manualWhen
       ? new Date(manualWhen).toISOString()
       : suggestNextTime();
+    const outgoingPlatformOptions = { ...(platformOptions || {}) };
+    if (selectedPlatforms.includes('spotify')) {
+      outgoingPlatformOptions.spotify = { ...(outgoingPlatformOptions.spotify || {}), trackUris: spotifySelectedTracks.map(t => t.uri || t.id || t.uri) };
+    }
     await onUpload({
       file: selectedFile,
       platforms: selectedPlatforms,
-      platformOptions: platformOptions,
+      platformOptions: outgoingPlatformOptions,
       title,
       description,
       type,
+      trimStart: type === 'video' ? trimStart : undefined,
+      trimEnd: type === 'video' ? trimEnd : undefined,
+      rotate: type === 'image' ? rotate : undefined,
+      flipH: type === 'image' ? flipH : undefined,
+      flipV: type === 'image' ? flipV : undefined,
+      template: template !== 'none' ? template : undefined,
       schedule: { mode: scheduleMode, when: whenIso, frequency }
     });
     setSelectedFile(null);
@@ -1503,9 +1604,57 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
             <div className="upload-drag-drop">
               <input
                 type="file"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  const f = e.target.files?.[0] || null;
+                  setSelectedFile(f);
+                  // Generate local preview
+                  setRotate(0); setFlipH(false); setFlipV(false); setTrimStart(0); setTrimEnd(0); setDuration(0);
+                  if (f) {
+                    try {
+                      const u = URL.createObjectURL(f);
+                      setPreviewUrl(u);
+                    } catch (err) { console.error('preview URL error', err); }
+                  } else {
+                    setPreviewUrl('');
+                  }
+                }}
               />
               {selectedFile && <div style={{marginTop: '.5rem', color: '#9aa4b2'}}>Selected: {selectedFile.name}</div>}
+              {selectedFile && (
+                <div style={{marginTop: '.75rem'}}>
+                  <label style={{color:'#9aa4b2'}}>Templates</label>
+                  <select value={template} onChange={(e)=>setTemplate(e.target.value)} style={{display:'block', marginTop:'.25rem', padding:'.4rem', borderRadius:'8px'}}>
+                    <option value="none">No Template</option>
+                    <option value="tiktok">TikTok (9:16)</option>
+                    <option value="instagram-story">Instagram Story (9:16)</option>
+                    <option value="facebook-feed">Facebook Feed (4:5)</option>
+                    <option value="youtube">YouTube (16:9)</option>
+                    <option value="thumbnail">Platform Thumbnail</option>
+                  </select>
+                  <div style={{marginTop:'.5rem', display:'grid', gap:'.5rem'}}>
+                    <div style={{display:'flex', gap:'.5rem'}}>
+                      <button className='check-quality' onClick={()=>{ setRotate((rotate+90)%360); }}>Rotate 90°</button>
+                      <button className='check-quality' onClick={()=>setFlipH(!flipH)}>Flip H</button>
+                      <button className='check-quality' onClick={()=>setFlipV(!flipV)}>Flip V</button>
+                    </div>
+                    {type === 'video' && (
+                      <div style={{display:'grid', gap:'.25rem'}}>
+                        <label style={{color:'#9aa4b2'}}>Trim Start (secs) <input type='number' value={trimStart} min={0} max={duration} step='0.1' onChange={(e)=>setTrimStart(parseFloat(e.target.value) || 0)} /></label>
+                        <label style={{color:'#9aa4b2'}}>Trim End (secs) <input type='number' value={trimEnd} min={0} max={duration} step='0.1' onChange={(e)=>setTrimEnd(parseFloat(e.target.value) || duration)} /></label>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{marginTop:'.5rem'}}>
+                    <div style={{border:'1px solid rgba(255,255,255,0.06)', borderRadius:8, padding:12, background:'rgba(255,255,255,0.02)'}}>
+                      { type === 'video' ? (
+                        <video ref={selectedVideoRef} src={previewUrl} controls style={{width:'100%', maxHeight: '360px', objectFit:'cover', transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`}} onLoadedMetadata={(e)=>{ const d = e.target.duration || 0; setDuration(d); setTrimEnd(d); }} />
+                      ) : (
+                        <img src={previewUrl} alt='preview' style={{width:'100%', maxHeight:'360px', objectFit:'cover', transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`}} />
+                      ) }
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <div style={{display: 'grid', gap: '.5rem', marginTop: '.5rem'}}>
               <input
@@ -1593,6 +1742,15 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
                       <input type="text" value={platformOptions.spotify?.name || ''} onChange={(e) => setPlatformOption('spotify', 'name', e.target.value)} placeholder="Playlist Name" style={{display:'block', width:'100%', marginTop:'.25rem'}} />
                     )}
                   </label>
+                  <div style={{marginTop:'.5rem'}}>
+                    <strong style={{color:'#9aa4b2'}}>Spotify Track Search & Selection</strong>
+                    <SpotifyTrackSearch selectedTracks={spotifySelectedTracks} onChangeTracks={setSpotifySelectedTracks} />
+                    <div style={{display:'flex', gap:'.5rem', marginTop:'.5rem'}}>
+                      <button className="check-quality" onClick={handleCreateSpotifyPlaylist}>Create Playlist</button>
+                      <button className="check-quality" onClick={handleAddTracksToPlaylist}>Add Tracks to Playlist</button>
+                    </div>
+                    {spotifySelectedTracks.length > 0 && <div style={{marginTop:'.5rem', color:'#9aa4b2'}}>Tracks selected: {spotifySelectedTracks.length}</div>}
+                  </div>
                 </div>
               )}
               {selectedPlatforms.includes('linkedin') && (
@@ -1682,36 +1840,18 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
             {schedulesList.length === 0 ? (
               <div style={{ color: '#9aa4b2' }}>No schedules yet. Create one by uploading content and selecting platforms.</div>
             ) : (
-              <div className="schedules-list" style={{ display: 'grid', gap: '.5rem' }}>
-                {schedulesList.map((sch, i) => {
+                  <div className="schedules-list" style={{ display: 'grid', gap: '.75rem', gridTemplateColumns: '1fr', alignItems: 'start' }}>
+                    {schedulesList.map((sch, i) => {
                   const titleText = typeof sch?.contentTitle === 'string' ? sch.contentTitle : (sch?.contentTitle ? JSON.stringify(sch.contentTitle) : 'Untitled');
-                  const platform = sch?.platform || (Array.isArray(sch?.platforms) ? sch.platforms.join(', ') : '—');
-                  const frequency = (sch?.frequency || sch?.scheduleType || 'once');
-                  const when = formatWhen(sch?.startTime || sch?.startAt || sch?.when);
-                  const isActive = sch?.isActive !== false; // default to true unless explicitly false
-                  const statusText = isActive ? 'active' : 'paused';
-                  const scheduleId = sch?.id || sch?.scheduleId || sch?.uid || sch?.docId;
-                  return (
-                    <div key={i} className="schedule-row" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr 0.8fr 1.6fr', gap: '.5rem', alignItems: 'center', padding: '.5rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                      <div title={titleText} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleText}</div>
-                      <div style={{ color: '#cbd5e1' }}>{platform}</div>
-                      <div style={{ color: '#cbd5e1', textTransform: 'capitalize' }}>{frequency}</div>
-                      <div style={{ color: '#e2e8f0' }}>{when}</div>
-                      <div>
-                        <span className={`status status-${statusText}`}>{statusText}</span>
-                      </div>
-                      <div style={{display:'flex', gap:'.35rem', justifyContent:'flex-end'}}>
-                        {isActive ? (
-                          <button className="logout-btn" onClick={() => scheduleId && doPause(scheduleId)}>Pause</button>
-                        ) : (
-                          <button className="check-quality" onClick={() => scheduleId && doResume(scheduleId)}>Resume</button>
-                        )}
-                        <button className="check-quality" onClick={() => scheduleId && doReschedule(scheduleId)}>Reschedule</button>
-                        <button className="logout-btn" onClick={() => scheduleId && doDelete(scheduleId)}>Delete</button>
-                      </div>
-                    </div>
-                  );
-                })}
+                      const scheduleId = sch?.id || sch?.scheduleId || sch?.uid || sch?.docId;
+                      // find content by id if present in app-level content state
+                      const contentItem = content.find(c => (c.id === sch.contentId) || (c.id === sch.contentId?.toString())) || scheduleContentMap[sch.contentId];
+                      return (
+                        <div key={i}>
+                          <ScheduleCard schedule={sch} content={contentItem} onPause={id=>doPause(id)} onResume={id=>doResume(id)} onReschedule={id=>doReschedule(id)} onDelete={id=>doDelete(id)} />
+                        </div>
+                      );
+                    })}
               </div>
             )}
           </section>

@@ -3,7 +3,7 @@ const { auth } = require('./firebaseAdmin');
 async function createTestUser() {
     try {
         const userEmail = 'test@example.com';
-        const userPassword = 'Test123!';
+        const userPassword = process.env.TEST_PASSWORD || 'Test123!';
 
         const userRecord = await auth.createUser({
             email: userEmail,
@@ -13,12 +13,12 @@ async function createTestUser() {
 
         console.log('✅ Test user created successfully:', userRecord.uid);
         console.log('Email:', userEmail);
-        console.log('Password:', userPassword);
+        console.log('Password: <REDACTED>');
     } catch (error) {
         if (error.code === 'auth/email-already-exists') {
             console.log('✅ Test user already exists');
             console.log('Email: test@example.com');
-            console.log('Password: Test123!');
+            console.log('Password: <REDACTED>');
         } else {
             console.error('❌ Error creating test user:', error);
         }

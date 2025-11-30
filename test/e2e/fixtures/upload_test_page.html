@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>AutoPromote E2E Upload Test</title>
+    <style>
+      body { font-family: Arial; padding: 2rem; }
+      label { display:block; margin-top: 0.5rem; }
+      input, textarea { width: 100%; padding: 0.5rem; }
+      button { margin-top: 1rem; padding: 0.5rem 1rem; }
+      #res { margin-top: 1rem; white-space: pre-wrap; border: 1px dashed #ccc; padding: 1rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Upload E2E Test Page</h1>
+    <label>Title <input id="title" /></label>
+    <label>Description <textarea id="description"></textarea></label>
+    <label>URL <input id="url" value="https://example.com/test.mp4" /></label>
+    <label>Type <select id="type"><option>video</option><option>image</option><option>audio</option></select></label>
+    <label><input type="checkbox" id="target_youtube" checked /> Publish to YouTube</label>
+    <label><input type="checkbox" id="target_spotify" /> Publish to Spotify</label>
+    <label>Schedule (ISO datetime) <input id="scheduled_time" /></label>
+    <button id="submit">Submit</button>
+    <div id="res"></div>
+
+    <script>
+      document.getElementById('submit').addEventListener('click', async () => {
+        const title = document.getElementById('title').value || 'E2E Test Content ' + Date.now();
+        const description = document.getElementById('description').value || 'E2E description';
+        const url = document.getElementById('url').value;
+        const type = document.getElementById('type').value;
+        const platforms = [];
+        if (document.getElementById('target_youtube').checked) platforms.push('youtube');
+        if (document.getElementById('target_spotify').checked) platforms.push('spotify');
+        const scheduled = document.getElementById('scheduled_time').value || new Date(Date.now() + 3600 * 1000).toISOString();
+
+        const payload = {
+          title,
+          description,
+          url,
+          type,
+          target_platforms: platforms,
+          scheduled_promotion_time: scheduled,
+          schedule_hint: { when: scheduled, frequency: 'once', timezone: 'UTC' },
+          auto_promote: {},
+          platform_options: {}
+        };
+
+        try {
+          const res = await fetch('/api/content/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer test-token-for-testUser123'
+            },
+            body: JSON.stringify(payload)
+          });
+          const json = await res.json();
+          document.getElementById('res').textContent = JSON.stringify({ status: res.status, body: json }, null, 2);
+        } catch (e) {
+          document.getElementById('res').textContent = JSON.stringify({ error: e.message }, null, 2);
+        }
+      });
+    </script>
+  </body>
+</html>

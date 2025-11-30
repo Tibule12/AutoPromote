@@ -1,2 +1,7 @@
 # Local ignores for generated debug outputs
 scripts/check_autopromote_response.txt
+# Local ignores for secrets and backups
+.env.backup*
+test/e2e/service-account.json
+test/e2e/tmp/
+service-account.json

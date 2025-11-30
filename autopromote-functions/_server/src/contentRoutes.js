@@ -93,6 +93,9 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
       url,
       description,
       target_platforms,
+      platform_options,
+      meta,
+      duration: (typeof (meta && meta.duration) === 'number') ? meta.duration : undefined,
       scheduled_promotion_time,
       promotion_frequency,
       schedule_hint,
@@ -214,7 +217,9 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
               // If companyId provided, it will post as organization; no validation required here.
               break;
             case 'spotify':
-              if (!optionsForPlatform.name) throw new Error('spotify.name required (playlist name)');
+              if (!optionsForPlatform.name && !optionsForPlatform.playlistId && !(optionsForPlatform.trackUris && optionsForPlatform.trackUris.length)) {
+                throw new Error('spotify.name or spotify.playlistId or spotify.trackUris required');
+              }
               break;
             default:
               break;
