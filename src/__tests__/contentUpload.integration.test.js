@@ -48,6 +48,7 @@ describe('Content Upload & Promotion Integration', () => {
       promotion_frequency: 'once',
       schedule_hint: { when: new Date(Date.now() + 3600000).toISOString(), frequency: 'once', timezone: 'UTC' },
       auto_promote: { youtube: { enabled: true }, twitter: { enabled: true } },
+      meta: { trimStart: 0, trimEnd: 10, template: 'youtube' },
       quality_score: 95,
       quality_feedback: [],
       quality_enhanced: true

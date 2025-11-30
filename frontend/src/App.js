@@ -448,11 +448,11 @@ function App() {
   const handleContentUpload = async (params) => {
     try {
       // Destructure all possible fields from params
-      const { file, platforms, title, description, type, schedule, isDryRun } = params;
+      const { file, platforms, title, description, type, schedule, isDryRun, trimStart, trimEnd, template, rotate, flipH, flipV } = params;
       const token = await auth.currentUser.getIdToken(true);
       let finalUrl = '';
       // Always upload file for video/image and get url
-      if ((type === 'video' || type === 'image') && file) {
+      if ((type === 'video' || type === 'image' || type === 'audio') && file) {
         const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
         const storageRef = ref(storage, filePath);
         await uploadBytes(storageRef, file);
@@ -473,8 +473,17 @@ function App() {
         url: finalUrl,
         description: description || '',
         target_platforms: platforms && platforms.length ? platforms : (userDefaults.defaultPlatforms || ['youtube','tiktok','instagram']),
-        platform_options: params.platformOptions || {},
-        schedule_hint
+        platform_options: params.platformOptions || params.platform_options || {},
+        schedule_hint,
+        meta: {
+          ...(params.meta || {}),
+          ...(typeof trimStart !== 'undefined' ? { trimStart } : {}),
+          ...(typeof trimEnd !== 'undefined' ? { trimEnd } : {}),
+          ...(typeof rotate !== 'undefined' ? { rotate } : {}),
+          ...(typeof flipH !== 'undefined' ? { flipH } : {}),
+          ...(typeof flipV !== 'undefined' ? { flipV } : {}),
+          ...(template ? { template } : {})
+        }
       };
       const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
         method: 'POST',

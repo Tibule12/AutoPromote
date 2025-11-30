@@ -11,6 +11,16 @@
   --border: rgba(255,255,255,0.08);
 }
 
+/* Prevent horizontal overflow and ensure body background doesn't show through on dashboard pages */
+/* Ensure dashboard pages have a black background behind any translucent elements, while allowing component-level horizontal scroll
+   so wide tables or card lists still scroll inside the dashboard without revealing the app's blue gradient. */
+html.dashboard-mode, body.dashboard-mode {
+  background: #000 !important; /* All black background */
+  background-image: none !important; /* Remove any previously defined gradient or image */
+  background-color: #000 !important;
+  color-scheme: dark;
+}
+
 /* Root */
 .dashboard-root {
   min-height: 100vh;
@@ -189,6 +199,14 @@
 .performance-summary { display: flex; gap: 1rem; color: var(--muted); margin-top: .5rem; }
 
 .upload-drag-drop { background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; text-align: center; }
+.upload-preview { margin-top: .6rem; border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; padding: 0.5rem; background: rgba(255,255,255,0.02); }
+.upload-preview img, .upload-preview video { width: 100%; max-height: 360px; border-radius: 8px; object-fit: cover; }
+.upload-controls { display:flex; gap:.5rem; margin-top:.5rem; }
+.upload-controls .control-btn { padding: .4rem .7rem; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); color: var(--text); cursor: pointer; }
+
+.spotify-search input { padding: .4rem; border-radius: 8px; border: 1px solid var(--border); width: 100%; }
+.spotify-search ul li { padding: .35rem; }
+.spotify-search .logout-btn { padding: .25rem .5rem; border-radius: 6px; }
 .platform-toggles { display: flex; flex-wrap: wrap; gap: .75rem; color: var(--muted); }
 .check-quality { padding: .5rem .9rem; border-radius: 10px; background: linear-gradient(90deg, var(--brand), var(--brand-2)); border: none; color: #fff; cursor: pointer; }
 
@@ -201,6 +219,11 @@
 .analytics-filters { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .75rem; color: var(--muted); }
 .analytics-filters input,
 .analytics-filters select { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: .4rem .6rem; border-radius: 8px; }
+
+/* Cute schedule cards layout */
+.schedules-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 0.75rem; }
+
+.schedule-row { display: none; } /* hide old row styles */
 
 /* Mobile adjustments */
 @media (max-width: 1023px) {

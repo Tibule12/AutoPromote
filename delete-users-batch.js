@@ -190,7 +190,7 @@ async function batchDelete() {
 // Function to recreate a specific admin user
 async function recreateAdminUser() {
   const adminEmail = 'admin123@gmail.com';
-  const adminPassword = 'Admin12345';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'Admin12345';
   const adminName = 'System Administrator';
   
   // First, try to delete the existing user
@@ -252,7 +252,7 @@ async function recreateAdminUser() {
     
     console.log(`\n✅ Admin user recreated successfully!`);
     console.log(`Email: ${adminEmail}`);
-    console.log(`Password: ${adminPassword}`);
+    console.log('Password: <REDACTED>');
     console.log(`UID: ${newUserRecord.uid}`);
     
     return true;

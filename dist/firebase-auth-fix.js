@@ -75,7 +75,7 @@ async function createTestUser() {
     // Generate a unique email based on timestamp
     const timestamp = new Date().getTime();
     const email = `test_${timestamp}@example.com`;
-    const password = 'TestPassword123!';
+    const password = process.env.TEST_PASSWORD || 'TestPassword123!';
     
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -147,7 +147,7 @@ async function createUserWithAdminSDK() {
     // Generate a unique email based on timestamp
     const timestamp = new Date().getTime();
     const email = `admin_test_${timestamp}@example.com`;
-    const password = 'AdminTest123!';
+    const password = process.env.ADMIN_PASSWORD || 'AdminTest123!';
     
     const userRecord = await admin.auth().createUser({
       email: email,

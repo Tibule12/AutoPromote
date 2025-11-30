@@ -75,13 +75,13 @@ async function createTestUser() {
     // Generate a unique email based on timestamp
     const timestamp = new Date().getTime();
     const email = `test_${timestamp}@example.com`;
-    const password = 'TestPassword123!';
+    const password = process.env.TEST_PASSWORD || 'TestPassword123!';
     
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log('✅ Test user created successfully!');
       console.log('Email:', email);
-      console.log('Password:', password);
+      console.log('Password: <REDACTED>');
       console.log('UID:', userCredential.user.uid);
       
       return {
@@ -147,7 +147,7 @@ async function createUserWithAdminSDK() {
     // Generate a unique email based on timestamp
     const timestamp = new Date().getTime();
     const email = `admin_test_${timestamp}@example.com`;
-    const password = 'AdminTest123!';
+    const password = process.env.ADMIN_PASSWORD || 'AdminTest123!';
     
     const userRecord = await admin.auth().createUser({
       email: email,
@@ -158,7 +158,7 @@ async function createUserWithAdminSDK() {
     
     console.log('✅ User created with Admin SDK!');
     console.log('Email:', email);
-    console.log('Password:', password);
+    console.log('Password: <REDACTED>');
     console.log('UID:', userRecord.uid);
     
     // Set custom claims
@@ -367,23 +367,23 @@ async function runAuthFix() {
     console.log('If you can now log in with any of the accounts, the issue has been fixed.');
     console.log('Please try logging in to your application again with these credentials:');
     console.log('\nADMIN USER:');
-    console.log('Email: admin123@gmail.com');
-    console.log('Password: Admin12345');
+    console.log('Email: admin123@gmail.com (check your environment variables or local config)');
+    console.log('Password: <REDACTED>');
     console.log('\nREGULAR USER:');
-    console.log('Email: test@example.com');
-    console.log('Password: Test123!');
+    console.log('Email: test@example.com (check your environment variables or local config)');
+    console.log('Password: <REDACTED>');
     console.log('\nYOUR USER:');
-    console.log('Email: tmtshwelo21@gmail.com');
-    console.log('Password: Thulani1205@');
+    console.log('Email: tmtshwelo21@gmail.com (not displayed for security)');
+    console.log('Password: <REDACTED>');
     console.log('\nNEW TEST USER:');
     if (testUser.success) {
       console.log('Email:', testUser.email);
-      console.log('Password:', testUser.password);
+      console.log('Password: <REDACTED>');
     }
     console.log('\nNEW ADMIN USER:');
     if (adminUser.success) {
       console.log('Email:', adminUser.email);
-      console.log('Password:', adminUser.password);
+      console.log('Password: <REDACTED>');
     }
   } catch (error) {
     console.error('Error in auth fix process:', error);

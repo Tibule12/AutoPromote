@@ -5,7 +5,7 @@ async function createTestUser() {
         console.log('Creating test user...');
         
         const email = 'test@example.com';
-        const password = 'Test123!';
+        const password = process.env.TEST_PASSWORD || 'Test123!';
 
         // Create user in Firebase Auth
         const userRecord = await auth.createUser({
@@ -25,12 +25,12 @@ async function createTestUser() {
 
         console.log('✅ Test user created successfully');
         console.log('Email:', email);
-        console.log('Password:', password);
+        console.log('Password: <REDACTED>');
         console.log('User ID:', userRecord.uid);
 
         // Create an admin user
         const adminEmail = 'admin@example.com';
-        const adminPassword = 'Admin123!';
+        const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123!';
 
         const adminRecord = await auth.createUser({
             email: adminEmail,
@@ -52,7 +52,7 @@ async function createTestUser() {
 
         console.log('\n✅ Admin user created successfully');
         console.log('Email:', adminEmail);
-        console.log('Password:', adminPassword);
+        console.log('Password: <REDACTED>');
         console.log('User ID:', adminRecord.uid);
 
     } catch (error) {

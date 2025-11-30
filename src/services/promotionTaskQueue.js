@@ -5,6 +5,7 @@ const { db } = require('../firebaseAdmin');
 const { recordTaskCompletion, recordRateLimitEvent } = require('./aggregationService');
 const { getCooldown, noteRateLimit } = require('./rateLimitTracker');
 const { uploadVideo } = require('./youtubeService');
+const { enqueueMediaTransformTask } = require('./mediaTransform');
 const crypto = require('crypto');
 
 const MAX_ATTEMPTS = parseInt(process.env.TASK_MAX_ATTEMPTS || '5', 10);
@@ -281,6 +282,12 @@ async function enqueuePlatformPostTask({ contentId, uid, platform, reason = 'man
   await ref.set(task);
   try { const { recordPlatformPostDuplicate } = require('./aggregationService'); recordPlatformPostDuplicate(false); } catch(_){ }
   return { id: ref.id, ...task };
+}
+
+async function enqueueMediaTransform({ contentId, uid, meta, sourceUrl }) {
+  if (!contentId || !uid || !meta) throw new Error('contentId, uid, meta required');
+  const task = await enqueueMediaTransformTask({ contentId, uid, meta, url: sourceUrl });
+  return task;
 }
 
 async function processNextPlatformTask() {
@@ -651,4 +658,4 @@ async function processNextPlatformTask() {
   }
 }
 
-module.exports = { enqueueYouTubeUploadTask, processNextYouTubeTask, enqueuePlatformPostTask, processNextPlatformTask };
+module.exports = { enqueueYouTubeUploadTask, processNextYouTubeTask, enqueuePlatformPostTask, processNextPlatformTask, enqueueMediaTransform };

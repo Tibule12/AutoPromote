@@ -37,7 +37,7 @@ async function createAndVerifyUsers() {
     
     // Test 1: Create a new user for testing
     const testEmail = 'newtest@example.com';
-    const testPassword = 'Test123!';
+      const testPassword = process.env.TEST_PASSWORD || 'Test123!';
     
     try {
       console.log(`\nTest 1: Creating new test user (${testEmail})...`);
@@ -61,7 +61,7 @@ async function createAndVerifyUsers() {
     
     // Test 2: Create admin user
     const adminEmail = 'newadmin@example.com';
-    const adminPassword = 'Admin123!';
+      const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123!';
     
     try {
       console.log(`\nTest 2: Creating new admin user (${adminEmail})...`);
@@ -120,11 +120,11 @@ async function createAndVerifyUsers() {
     console.log('Firebase authentication test completed');
     console.log('---------------------------------------');
     console.log('New test user credentials:');
-    console.log('Email:', testEmail);
-    console.log('Password:', testPassword);
+      console.log('Email:', testEmail);
+      console.log('Password: <REDACTED>');
     console.log('\nNew admin user credentials:');
-    console.log('Email:', adminEmail);
-    console.log('Password:', adminPassword);
+      console.log('Email:', adminEmail);
+      console.log('Password: <REDACTED>');
     console.log('---------------------------------------');
     
   } catch (error) {

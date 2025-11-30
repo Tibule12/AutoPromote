@@ -140,6 +140,21 @@ npm start
 3. Navigate to `/test-console`
 4. Click "Run All Tests" to perform browser-based testing
 
+### End-to-End (E2E) Tests
+
+E2E tests simulate a real user interacting with a minimal upload UI and assert that uploaded content is created server-side.
+
+Run the E2E test locally with:
+
+```powershell
+npm run test:e2e
+```
+
+Notes:
+- The E2E script uses Puppeteer and will open a headless browser to post an upload to `/api/content/upload`.
+- The test uses the integration bypass token `Bearer test-token-for-testUser123` to avoid needing a full OAuth flow.
+- Ensure Firestore/service account credentials are available in the environment for the test to validate DB writes.
+
 ### Visual Testing
 
 Perform visual inspection of the admin dashboard:

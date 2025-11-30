@@ -1,0 +1,6 @@
+# Ignore service account JSON and temporary test artifacts
+service-account.json
+tmp/
+
+# Keep example service account in repo, but ignore real ones
+# service-account.example.json should remain tracked as an example.

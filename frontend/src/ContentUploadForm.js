@@ -1,13 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './ContentUploadForm.css';
-import { storage } from './firebaseClient';
+import { storage, auth } from './firebaseClient';
+import { API_ENDPOINTS } from './config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import SpotifyTrackSearch from './components/SpotifyTrackSearch';
+import ImageCropper from './components/ImageCropper';
+import AudioWaveformTrimmer from './components/AudioWaveformTrimmer';
 
 function ContentUploadForm({ onUpload }) {
   const [title, setTitle] = useState('');
   const [type, setType] = useState('video');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [rotate, setRotate] = useState(0);
+  const [flipH, setFlipH] = useState(false);
+  const [flipV, setFlipV] = useState(false);
+  const [template, setTemplate] = useState('none');
+  const [trimStart, setTrimStart] = useState(0);
+  const [trimEnd, setTrimEnd] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const videoRef = useRef(null);
+  const [showCropper, setShowCropper] = useState(false);
+  const [cropMeta, setCropMeta] = useState(null);
+  const [spotifyTracks, setSpotifyTracks] = useState([]);
+
+  useEffect(()=>{
+    // Cleanup URL.createObjectURL to prevent mem leaks
+    return () => {
+      if (previewUrl) {
+        try { URL.revokeObjectURL(previewUrl); } catch (e) {}
+      }
+    };
+  }, [previewUrl]);
+
+  useEffect(()=>{
+    const loadBoards = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+        const token = await user.getIdToken(true);
+        const r = await fetch(API_ENDPOINTS.PINTEREST_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+        if (!r.ok) return;
+        const j = await r.json();
+        if (j && j.meta && Array.isArray(j.meta.boards)) setPinterestBoards(j.meta.boards);
+      } catch (_) {}
+    };
+    loadBoards();
+  }, []);
+  const [spotifyPlaylists, setSpotifyPlaylists] = useState([]);
+  const [spotifyPlaylistId, setSpotifyPlaylistId] = useState('');
+  const [spotifyPlaylistName, setSpotifyPlaylistName] = useState('');
+  useEffect(()=>{
+    const loadSpotify = async () => {
+      try {
+        const user = auth.currentUser; if (!user) return;
+        const token = await user.getIdToken(true);
+        const r = await fetch(API_ENDPOINTS.SPOTIFY_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+        if (!r.ok) return;
+        const j = await r.json();
+        if (j && j.meta && Array.isArray(j.meta.playlists)) setSpotifyPlaylists(j.meta.playlists);
+      } catch (_) {}
+    };
+    loadSpotify();
+  }, []);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
   const [previews, setPreviews] = useState([]);
@@ -16,6 +72,16 @@ function ContentUploadForm({ onUpload }) {
   const [qualityFeedback, setQualityFeedback] = useState([]);
   // Content Quality Check handler
   const [enhancedSuggestions, setEnhancedSuggestions] = useState(null);
+  const [pinterestBoard, setPinterestBoard] = useState('');
+  const [pinterestNote, setPinterestNote] = useState('');
+  const [pinterestBoards, setPinterestBoards] = useState([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [discordChannelId, setDiscordChannelId] = useState('');
+  const [telegramChatId, setTelegramChatId] = useState('');
+  const [redditSubreddit, setRedditSubreddit] = useState('');
+  const [linkedinCompanyId, setLinkedinCompanyId] = useState('');
+  const [twitterMessage, setTwitterMessage] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const handleQualityCheck = async (e) => {
     e.preventDefault();
     setQualityScore(null);
@@ -53,6 +119,15 @@ function ContentUploadForm({ onUpload }) {
     setError('');
     setIsPreviewing(true);
     setPreviews([]);
+    // If a local file is selected, generate a local preview to show immediately
+    if (file) {
+      try {
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+      } catch (err) {
+        console.error('[Preview] failed to generate local preview URL', err);
+      }
+    }
     try {
       let url = '';
       if (file) {
@@ -64,8 +139,29 @@ function ContentUploadForm({ onUpload }) {
         type,
         description,
         url,
-        isDryRun: true
+        isDryRun: true,
+        meta: {
+          trimStart: (type === 'video' || type === 'audio') ? trimStart : undefined,
+          trimEnd: (type === 'video' || type === 'audio') ? trimEnd : undefined,
+          rotate: type === 'image' ? rotate : undefined,
+          flipH: type === 'image' ? flipH : undefined,
+          flipV: type === 'image' ? flipV : undefined,
+          duration: duration || undefined,
+          crop: cropMeta || undefined,
+          template: template !== 'none' ? template : undefined
+        }
       };
+      // include platform options for preview (e.g., pinterest / spotify)
+      // Include platform options for preview
+      contentData.platform_options = {
+        pinterest: pinterestBoard || pinterestNote ? { boardId: pinterestBoard || undefined, note: pinterestNote || undefined } : undefined,
+        spotify: (spotifyTracks && spotifyTracks.length) || spotifyPlaylistId || spotifyPlaylistName ? { trackUris: spotifyTracks && spotifyTracks.length ? spotifyTracks.map(t=>t.uri) : undefined, playlistId: spotifyPlaylistId || undefined, name: spotifyPlaylistName || undefined } : undefined
+      };
+      if (selectedPlatforms.includes('discord')) contentData.platform_options.discord = { channelId: discordChannelId || undefined };
+      if (selectedPlatforms.includes('telegram')) contentData.platform_options.telegram = { chatId: telegramChatId || undefined };
+      if (selectedPlatforms.includes('reddit')) contentData.platform_options.reddit = { subreddit: redditSubreddit || undefined };
+      if (selectedPlatforms.includes('linkedin')) contentData.platform_options.linkedin = { companyId: linkedinCompanyId || undefined };
+      if (selectedPlatforms.includes('twitter')) contentData.platform_options.twitter = { message: twitterMessage || undefined };
       // Call backend preview (reuse onUpload with dry run)
       const result = await onUpload(contentData);
       if (result && result.previews) {
@@ -113,11 +209,40 @@ function ContentUploadForm({ onUpload }) {
       }
 
       const finalTitle = title || file.name;
+      // Basic platform-required validation
+      const missing = [];
+      if (selectedPlatforms.includes('discord') && !discordChannelId) missing.push('Discord Channel ID');
+      if (selectedPlatforms.includes('telegram') && !telegramChatId) missing.push('Telegram Chat ID');
+      if (selectedPlatforms.includes('reddit') && !redditSubreddit) missing.push('Reddit subreddit');
+      if (selectedPlatforms.includes('linkedin') && !linkedinCompanyId) missing.push('LinkedIn company id');
+      if (selectedPlatforms.includes('spotify') && !(spotifyTracks && spotifyTracks.length) && !spotifyPlaylistId && !spotifyPlaylistName) missing.push('Spotify playlist or track');
+      if (missing.length) throw new Error('Missing: ' + missing.join(', '));
+
       const contentData = {
         title: finalTitle,
         type,
         description,
-        url
+        url,
+        template: template !== 'none' ? template : undefined,
+        meta: {
+          trimStart: (type === 'video' || type === 'audio') ? trimStart : undefined,
+          trimEnd: (type === 'video' || type === 'audio') ? trimEnd : undefined,
+          rotate: type === 'image' ? rotate : undefined,
+          flipH: type === 'image' ? flipH : undefined,
+          flipV: type === 'image' ? flipV : undefined,
+          duration: duration || undefined,
+          crop: cropMeta || undefined,
+          template: template !== 'none' ? template : undefined
+        },
+        platform_options: {
+          pinterest: pinterestBoard || pinterestNote ? { boardId: pinterestBoard || undefined, note: pinterestNote || undefined } : undefined,
+          spotify: (spotifyTracks && spotifyTracks.length) || spotifyPlaylistId || spotifyPlaylistName ? { trackUris: spotifyTracks && spotifyTracks.length ? spotifyTracks.map(t=>t.uri) : undefined, playlistId: spotifyPlaylistId || undefined, name: spotifyPlaylistName || undefined } : undefined,
+          discord: selectedPlatforms.includes('discord') ? { channelId: discordChannelId || undefined } : undefined,
+          telegram: selectedPlatforms.includes('telegram') ? { chatId: telegramChatId || undefined } : undefined,
+          reddit: selectedPlatforms.includes('reddit') ? { subreddit: redditSubreddit || undefined } : undefined,
+          linkedin: selectedPlatforms.includes('linkedin') ? { companyId: linkedinCompanyId || undefined } : undefined,
+          twitter: selectedPlatforms.includes('twitter') ? { message: twitterMessage || undefined } : undefined
+        }
       };
       console.log('[Upload] Content data to send:', contentData);
 
@@ -136,6 +261,47 @@ function ContentUploadForm({ onUpload }) {
       setIsUploading(false);
       console.log('[Upload] Upload process finished');
     }
+  };
+
+  const handleFileChange = (selected) => {
+    setFile(selected);
+    setRotate(0);
+    setFlipH(false);
+    setFlipV(false);
+    setTrimStart(0);
+    setTrimEnd(0);
+    setDuration(0);
+    if (selected) {
+      try {
+        const url = URL.createObjectURL(selected);
+        setPreviewUrl(url);
+      } catch (err) {
+        console.error('[Preview] Error creating local preview:', err);
+      }
+    } else {
+      setPreviewUrl('');
+    }
+  };
+
+  const applyTemplate = (t) => {
+    if (!t || t === 'none') return;
+    // Lightweight template suggestions; these only change metadata
+    const suggestions = {
+      tiktok: { title: 'New TikTok Clip', description: 'Short entertaining content optimized for vertical feed #trending', hashtags: ['trending', 'viral'] },
+      'instagram-story': { title: 'Story Post', description: 'Share your moment - portrait format', hashtags: ['story', 'moments'] },
+      'facebook-feed': { title: 'Facebook Post', description: 'Great content for your feed', hashtags: ['social', 'promotion'] },
+      youtube: { title: 'YouTube Video', description: 'Full resolution horizontal video', hashtags: ['youtube', 'video'] },
+      thumbnail: { title: 'Thumbnail', description: 'Custom thumbnail for your link', hashtags: ['thumbnail'] }
+    };
+    const s = suggestions[t];
+    if (s) {
+      if (!title) setTitle(s.title);
+      if (!description) setDescription(s.description);
+    }
+  };
+
+  const togglePlatform = (platform) => {
+    setSelectedPlatforms(prev => prev.includes(platform) ? prev.filter(p => p !== platform) : [...prev, platform]);
   };
 
   return (
@@ -167,7 +333,52 @@ function ContentUploadForm({ onUpload }) {
           >
             <option value="video">Video</option>
             <option value="image">Image</option>
+            <option value="audio">Audio</option>
           </select>
+        </div>
+        <div className="form-group">
+          <label>Templates</label>
+          <select value={template} onChange={e => setTemplate(e.target.value)} className="form-select">
+            <option value="none">No Template</option>
+            <option value="tiktok">TikTok (9:16)</option>
+            <option value="instagram-story">Instagram Story (9:16)</option>
+            <option value="facebook-feed">Facebook Feed (4:5)</option>
+            <option value="youtube">YouTube (16:9)</option>
+            <option value="thumbnail">Platform Thumbnail</option>
+          </select>
+          {template !== 'none' && (
+            <div className="template-hint">Template <strong>{template}</strong> will prefill recommended aspect ratio and tags</div>
+          )}
+          {template !== 'none' && (
+            <button type="button" onClick={()=>applyTemplate(template)} className="apply-template-btn">Apply Template</button>
+          )}
+        </div>
+        <div className="form-group">
+          <label>Target Platforms</label>
+          <div className="platform-toggles">
+            <label><input type="checkbox" checked={selectedPlatforms.includes('youtube')} onChange={()=>togglePlatform('youtube')} /> YouTube</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('tiktok')} onChange={()=>togglePlatform('tiktok')} /> TikTok</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('instagram')} onChange={()=>togglePlatform('instagram')} /> Instagram</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('facebook')} onChange={()=>togglePlatform('facebook')} /> Facebook</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('twitter')} onChange={()=>togglePlatform('twitter')} /> Twitter</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('linkedin')} onChange={()=>togglePlatform('linkedin')} /> LinkedIn</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('reddit')} onChange={()=>togglePlatform('reddit')} /> Reddit</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('discord')} onChange={()=>togglePlatform('discord')} /> Discord</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('telegram')} onChange={()=>togglePlatform('telegram')} /> Telegram</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('pinterest')} onChange={()=>togglePlatform('pinterest')} /> Pinterest</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('spotify')} onChange={()=>togglePlatform('spotify')} /> Spotify</label>
+            <label><input type="checkbox" checked={selectedPlatforms.includes('snapchat')} onChange={()=>togglePlatform('snapchat')} /> Snapchat</label>
+          </div>
+        </div>
+        <div className="form-group">
+          <label>Advanced/Per-platform options</label>
+          <div style={{display:'grid', gap:8}}>
+            {selectedPlatforms.includes('discord') && <input placeholder="Discord channel ID" value={discordChannelId} onChange={(e)=>setDiscordChannelId(e.target.value)} />}
+            {selectedPlatforms.includes('telegram') && <input placeholder="Telegram chat ID" value={telegramChatId} onChange={(e)=>setTelegramChatId(e.target.value)} />}
+            {selectedPlatforms.includes('reddit') && <input placeholder="Reddit subreddit" value={redditSubreddit} onChange={(e)=>setRedditSubreddit(e.target.value)} />}
+            {selectedPlatforms.includes('linkedin') && <input placeholder="LinkedIn organization/company ID" value={linkedinCompanyId} onChange={(e)=>setLinkedinCompanyId(e.target.value)} />}
+            {selectedPlatforms.includes('twitter') && <input placeholder="Twitter message (optional)" value={twitterMessage} onChange={(e)=>setTwitterMessage(e.target.value)} />}
+          </div>
         </div>
         <div className="form-group">
           <label>Description</label>
@@ -185,8 +396,8 @@ function ContentUploadForm({ onUpload }) {
           <div className="file-upload">
             <input
               type="file"
-              accept={type === 'video' ? 'video/*' : 'image/*'}
-              onChange={e => setFile(e.target.files[0])}
+              accept={type === 'video' ? 'video/*' : (type === 'audio' ? 'audio/*' : 'image/*')}
+              onChange={e => handleFileChange(e.target.files[0])}
               required
               className="form-file-input"
             />
@@ -197,6 +408,94 @@ function ContentUploadForm({ onUpload }) {
             )}
           </div>
         </div>
+        {/* Pinterest options (board selection + note) */}
+        <div className="form-group">
+          <label>Pinterest Options (optional)</label>
+          <div style={{display:'grid', gap:'.5rem'}}>
+            {pinterestBoards && pinterestBoards.length > 0 ? (
+              <select value={pinterestBoard} onChange={(e)=>setPinterestBoard(e.target.value)} style={{padding:'.5rem', borderRadius:8}}>
+                <option value="">Select a board</option>
+                {pinterestBoards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            ) : (
+              <input placeholder="Pinterest board id (or leave blank)" value={pinterestBoard} onChange={(e)=>setPinterestBoard(e.target.value)} style={{padding:'.5rem', borderRadius:8}} />
+            )}
+            <input placeholder="Pin note (optional)" value={pinterestNote} onChange={(e)=>setPinterestNote(e.target.value)} style={{padding:'.5rem', borderRadius:8}} />
+          </div>
+        </div>
+        {/* Spotify track selection */}
+        <div className="form-group">
+          <label>Spotify Tracks to Add (optional)</label>
+          <SpotifyTrackSearch selectedTracks={spotifyTracks} onChangeTracks={(list)=>setSpotifyTracks(list)} />
+        </div>
+        <div className="form-group">
+          <label>Spotify Playlist (optional)</label>
+          <div style={{display:'grid', gap:8}}>
+            {spotifyPlaylists && spotifyPlaylists.length > 0 ? (
+              <select value={spotifyPlaylistId} onChange={(e)=>setSpotifyPlaylistId(e.target.value)} style={{padding:'.5rem', borderRadius:8}}>
+                <option value="">Select existing playlist</option>
+                {spotifyPlaylists.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            ) : (
+              <input placeholder="Existing playlist id (optional)" value={spotifyPlaylistId} onChange={(e)=>setSpotifyPlaylistId(e.target.value)} style={{padding:'.5rem', borderRadius:8}} />
+            )}
+            <input placeholder="Or create new playlist name (optional)" value={spotifyPlaylistName} onChange={(e)=>setSpotifyPlaylistName(e.target.value)} style={{padding:'.5rem', borderRadius:8}} />
+          </div>
+        </div>
+        {/* Live local file preview and basic editing controls */}
+        {file && (
+          <div className="form-group preview-area">
+            <label>Live Preview</label>
+            <div className="preview-wrapper">
+              {type === 'video' ? (
+                <video
+                  ref={videoRef}
+                  src={previewUrl}
+                  controls
+                  className="preview-video"
+                  onLoadedMetadata={(ev) => {
+                    const dur = ev.target.duration || 0;
+                    setDuration(dur);
+                    setTrimEnd(dur);
+                  }}
+                />
+              ) : type === 'audio' ? (
+                <div style={{width:'100%'}}>
+                  <audio src={previewUrl} controls style={{width:'100%'}} onLoadedMetadata={(ev)=>{const dur=ev.target.duration||0; setDuration(dur); setTrimEnd(dur);}} />
+                  <div style={{marginTop:8}}>
+                    <AudioWaveformTrimmer file={file} trimStart={trimStart} trimEnd={trimEnd} onChange={({trimStart: s, trimEnd: e})=>{ if (typeof s !== 'undefined') setTrimStart(s); if (typeof e !== 'undefined') setTrimEnd(e); }} />
+                  </div>
+                </div>
+              ) : (
+                <img
+                  className="preview-image"
+                  src={previewUrl}
+                  alt="Local preview"
+                  style={{transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`}}
+                />
+              )}
+            </div>
+            <div className="preview-controls">
+              {type === 'video' ? (
+                <div className="video-controls">
+                  <label>Trim Start: <input type="number" min={0} max={duration} step="0.1" value={trimStart} onChange={e=>setTrimStart(parseFloat(e.target.value) || 0)} /> secs</label>
+                  <label>Trim End: <input type="number" min={0} max={duration} step="0.1" value={trimEnd} onChange={e=>setTrimEnd(parseFloat(e.target.value) || duration)} /> secs</label>
+                  <div className="range-row">
+                    <input type="range" min="0" max={duration} step="0.05" value={trimStart} onChange={e=>setTrimStart(parseFloat(e.target.value))} />
+                    <input type="range" min="0" max={duration} step="0.05" value={trimEnd} onChange={e=>setTrimEnd(parseFloat(e.target.value))} />
+                  </div>
+                </div>
+              ) : (
+                <div className="image-controls">
+                  <button type="button" onClick={()=>setRotate((rotate+90)%360)} className="control-btn">Rotate 90°</button>
+                  <button type="button" onClick={()=>setFlipH(!flipH)} className="control-btn">Flip H</button>
+                  <button type="button" onClick={()=>setFlipV(!flipV)} className="control-btn">Flip V</button>
+                  <button type="button" onClick={()=>setShowCropper(true)} className="control-btn">Crop</button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         <div style={{display:'flex', gap:'.5rem', marginTop:'.5rem'}}>
           <button 
             type="button"
@@ -233,6 +532,9 @@ function ContentUploadForm({ onUpload }) {
             )}
           </button>
         </div>
+        {showCropper && previewUrl && (
+          <ImageCropper imageUrl={previewUrl} onChangeCrop={(rect)=>{ setCropMeta(rect); setShowCropper(false); }} onClose={()=>setShowCropper(false)} />
+        )}
       {/* Render quality check results */}
       {qualityScore !== null && (
         <div className="quality-check-results" style={{marginTop:'1rem',padding:'1rem',border:'1px solid #e0e0e0',borderRadius:8,background:'#f8f8fa'}}>

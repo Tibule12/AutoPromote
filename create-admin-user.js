@@ -15,9 +15,10 @@ async function createAdminUser() {
         } catch (error) {
             if (error.code === 'auth/user-not-found') {
                 // Create new admin user
+                const adminPassword = process.env.ADMIN_PASSWORD || 'AdminPass123!';
                 const userRecord = await auth.createUser({
                     email: email,
-                    password: 'AdminPass123!', // Change this immediately after creation
+                    password: adminPassword, // Change this immediately after creation or set ADMIN_PASSWORD in your env
                     emailVerified: true,
                     displayName: 'Admin User'
                 });
