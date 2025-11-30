@@ -3,6 +3,7 @@ const express = require('express');
 const fetch = require('node-fetch');
 const app = express();
 const PORT = 5002;
+const DEFAULT_ADMIN_EMAIL = process.env.TEST_ADMIN_EMAIL || '';
 
 // Basic middleware
 app.use(express.json());
@@ -15,11 +16,12 @@ app.get('/', (req, res) => {
       <h2>Step 1: Login</h2>
       <div>
         <label>Email: </label>
-        <input type="email" id="email" value="admin@autopromote.com" />
+        <input type="email" id="email" value="${DEFAULT_ADMIN_EMAIL}" placeholder="admin@example.com" />
       </div>
       <div>
         <label>Password: </label>
-        <input type="password" id="password" value="AdminPass123!" />
+        <!-- No default password to avoid embedding secrets in test UIs; leave blank and type or set TEST_ADMIN_PASSWORD in the environment -->
+        <input type="password" id="password" value="" />
       </div>
       <button type="submit">Login</button>
       <div id="loginResult"></div>
@@ -66,12 +68,12 @@ app.get('/', (req, res) => {
             resultDiv.style.color = 'green';
             document.getElementById('endpointTester').style.display = 'block';
           } else {
-            // Show a failure message safely
-            resultDiv.textContent = `Login failed: ${data.error || JSON.stringify(data)}`;
+            // Show a failure message safely without dumping full object (avoid printing tokens)
+            resultDiv.textContent = 'Login failed: ' + (data && data.error ? data.error : 'Unknown error');
             resultDiv.style.color = 'red';
           }
         } catch (error) {
-          resultDiv.textContent = `Error: ${error.message}`;
+          resultDiv.textContent = 'Error: ' + (error && error.message ? error.message : String(error));
           resultDiv.style.color = 'red';
         }
       });
@@ -90,12 +92,12 @@ app.get('/', (req, res) => {
           });
           
           const data = await response.json();
-          const isMockData = data.isMockData ? '<div style="color:orange">(Mock Data)</div>' : '';
+          const isMockData = data && data.isMockData;
           
           // Build a safe DOM result using createElement
           while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
           const statusEl = document.createElement('div');
-          statusEl.textContent = `Status: ${response.status}`;
+          statusEl.textContent = 'Status: ' + response.status;
           statusEl.style.color = response.ok ? 'green' : 'red';
           resultDiv.appendChild(statusEl);
           if (data.isMockData) {
@@ -104,11 +106,32 @@ app.get('/', (req, res) => {
             mockEl.style.color = 'orange';
             resultDiv.appendChild(mockEl);
           }
+          function redactSensitive(obj) {
+            if (!obj || typeof obj !== 'object') return obj;
+            // shallow copy to avoid mutating original
+            const out = Array.isArray(obj) ? [] : {};
+            const REDACT_KEYS = ['token', 'access_token', 'refresh_token', 'password', 'secret', 'private_key', 'privateKey', 'apiKey', 'firebase_private_key'];
+            for (const k of Object.keys(obj)) {
+              try {
+                const val = obj[k];
+                const lower = String(k).toLowerCase();
+                if (REDACT_KEYS.some(r => lower.includes(r))) {
+                  out[k] = '***REDACTED***';
+                } else if (typeof val === 'object' && val !== null) {
+                  out[k] = redactSensitive(val);
+                } else {
+                  out[k] = val;
+                }
+              } catch (e) { out[k] = '***REDACTED***'; }
+            }
+            return out;
+          }
+          const safeData = redactSensitive(data);
           const preEl = document.createElement('pre');
-          preEl.textContent = JSON.stringify(data, null, 2).substring(0, 1000) + '...';
+          preEl.textContent = JSON.stringify(safeData, null, 2).substring(0, 1000) + '...';
           resultDiv.appendChild(preEl);
         } catch (error) {
-          resultDiv.textContent = `Error: ${error.message}`;
+          resultDiv.textContent = 'Error: ' + (error && error.message ? error.message : String(error));
           resultDiv.style.color = 'red';
         }
       });
