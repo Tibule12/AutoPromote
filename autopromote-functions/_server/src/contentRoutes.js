@@ -25,12 +25,13 @@ function cleanObject(obj) {
 // Content upload schema
 const contentUploadSchema = Joi.object({
   title: Joi.string().required(),
-  type: Joi.string().valid('video', 'image').required(),
+  type: Joi.string().valid('video', 'image', 'audio').required(),
   url: Joi.string().uri().required(),
   description: Joi.string().max(500).allow(''),
   target_platforms: Joi.array().items(Joi.string()).optional(),
   // Per-platform options map: { <platform>: { <key>: <value>, ... } }
   platform_options: Joi.object().pattern(Joi.string(), Joi.object()).optional(),
+  meta: Joi.object().optional(),
   scheduled_promotion_time: Joi.string().isoDate().optional(),
   promotion_frequency: Joi.string().valid('once', 'hourly', 'daily', 'weekly').optional(),
   schedule_hint: Joi.object().optional(),
@@ -75,6 +76,7 @@ function rateLimitMiddleware(limit = 10, windowMs = 60000) {
 // POST /upload - Upload content and schedule promotion
 router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateBody(contentUploadSchema), async (req, res) => {
   try {
+    try { console.log('[upload] origin:', req.headers.origin, 'auth:', !!req.headers.authorization); } catch (e) {}
     const userId = req.userId || req.user?.uid;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -94,8 +96,6 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
       description,
       target_platforms,
       platform_options,
-      meta,
-      duration: (typeof (meta && meta.duration) === 'number') ? meta.duration : undefined,
       scheduled_promotion_time,
       promotion_frequency,
       schedule_hint,
@@ -106,6 +106,8 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
       custom_hashtags,
       growth_guarantee,
       viral_boost,
+      meta: req.body.meta,
+      duration: (typeof (req.body.meta && req.body.meta.duration) === 'number') ? req.body.meta.duration : undefined,
       user_id: userId,
       created_at: new Date(),
       status: 'pending',
@@ -194,6 +196,13 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
     const scheduleRef = await db.collection('promotion_schedules').add(cleanObject(scheduleData));
     const promotion_schedule = { id: scheduleRef.id, ...scheduleData };
     // Auto-enqueue promotion tasks with viral optimization
+    // If upload included edit metadata, enqueue a media transform task so a worker may process it
+    if (req.body.meta && (req.body.meta.trimStart || req.body.meta.trimEnd || req.body.meta.rotate || req.body.meta.flipH || req.body.meta.flipV)) {
+      try {
+        const { enqueueMediaTransform } = require('./services/promotionTaskQueue');
+        await enqueueMediaTransform({ contentId: contentRef.id, uid: userId, meta: req.body.meta, sourceUrl: url });
+      } catch (e) { console.warn('[transform] enqueue failed', e && e.message); }
+    }
     const { enqueueYouTubeUploadTask, enqueuePlatformPostTask } = require('./services/promotionTaskQueue');
     const platformTasks = [];
 
@@ -217,6 +226,7 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
               // If companyId provided, it will post as organization; no validation required here.
               break;
             case 'spotify':
+              // Spotify options may include: name (create playlist), playlistId (existing), trackUris (add tracks)
               if (!optionsForPlatform.name && !optionsForPlatform.playlistId && !(optionsForPlatform.trackUris && optionsForPlatform.trackUris.length)) {
                 throw new Error('spotify.name or spotify.playlistId or spotify.trackUris required');
               }

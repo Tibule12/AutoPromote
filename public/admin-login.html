@@ -171,7 +171,12 @@
       
       // Show loading state
       loginButton.disabled = true;
-      loginButton.innerHTML = '<span class="loading-spinner"></span> Signing in...';
+      // Use DOM APIs to avoid innerHTML assignment
+      while (loginButton.firstChild) loginButton.removeChild(loginButton.firstChild);
+      const spinner = document.createElement('span');
+      spinner.className = 'loading-spinner';
+      loginButton.appendChild(spinner);
+      loginButton.appendChild(document.createTextNode(' Signing in...'));
       
       try {
         // Sign in with Firebase
@@ -209,7 +214,9 @@
           errorContainer.textContent = data.error || 'Authentication failed';
           errorContainer.style.display = 'block';
           loginButton.disabled = false;
-          loginButton.textContent = 'Sign In';
+          // Clear button content and reset text
+          while (loginButton.firstChild) loginButton.removeChild(loginButton.firstChild);
+          loginButton.appendChild(document.createTextNode('Sign In'));
         }
       } catch (error) {
         // Show Firebase error
@@ -233,7 +240,8 @@
         errorContainer.textContent = errorMessage;
         errorContainer.style.display = 'block';
         loginButton.disabled = false;
-        loginButton.textContent = 'Sign In';
+        while (loginButton.firstChild) loginButton.removeChild(loginButton.firstChild);
+        loginButton.appendChild(document.createTextNode('Sign In'));
       }
     });
   </script>

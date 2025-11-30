@@ -33,6 +33,8 @@ async function buildContentContext(contentId) {
       title: data.title,
       description: data.description,
       landingPageUrl: data.landingPageUrl || data.smartLink || data.url,
+      processedUrl: data.processedUrl || null,
+      url: data.url || null,
       tags: data.tags || [],
       youtubeVideoId: data.youtube && data.youtube.videoId
     };
@@ -137,6 +139,26 @@ async function postToTikTok({ contentId, payload, reason }) {
   }
 }
 
+async function postToSpotifyHandler(args) {
+  const { uid, payload, contentId } = args || {};
+  try {
+    const { addTracksToPlaylist, postToSpotify } = require('./spotifyService');
+    // If playlistId and trackUris provided, add tracks to an existing playlist
+    if (payload && payload.playlistId && payload.trackUris && Array.isArray(payload.trackUris) && payload.trackUris.length) {
+      const res = await addTracksToPlaylist({ uid, playlistId: payload.playlistId, trackUris: payload.trackUris });
+      return { platform: 'spotify', success: true, snapshotId: res.snapshotId, added: res.tracksAdded };
+    }
+    // If a playlist name provided, create playlist and optionally add tracks
+    if (payload && payload.name) {
+      const res = await postToSpotify({ uid, name: payload.name, description: payload.description || '', trackUris: payload.trackUris || [], contentId });
+      return { platform: 'spotify', success: true, playlist: { id: res.playlistId, url: res.url, name: res.name } };
+    }
+    return { platform: 'spotify', success: false, error: 'no_action_specified' };
+  } catch (e) {
+    return { platform: 'spotify', success: false, error: e.message || 'spotify_post_failed' };
+  }
+}
+
 const handlers = {
   facebook: postToFacebook,
   twitter: postToTwitter,
@@ -146,7 +168,7 @@ const handlers = {
   linkedin: postToLinkedIn,
   pinterest: postToPinterest,
   snapchat: postToSnapchat,
-  spotify: postToSpotify,
+  spotify: postToSpotifyHandler,
   reddit: postToReddit,
   discord: postToDiscord,
   telegram: postToTelegram
@@ -169,6 +191,16 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
 
   const handler = handlers[platform];
   if (!handler) return { platform, success: false, error: 'unsupported_platform' };
+  // Ensure payload.mediaUrl is present (prefer processedUrl if available)
+  try {
+    if (contentId && !(payload && (payload.mediaUrl || payload.videoUrl || payload.imageUrl || payload.url))) {
+      const ctx = await buildContentContext(contentId);
+      const mediaUrl = ctx.processedUrl || ctx.url || ctx.landingPageUrl || null;
+      if (mediaUrl) {
+        payload = { ...(payload || {}), mediaUrl };
+      }
+    }
+  } catch (_) {}
   // Spread `payload` into top-level for services that expect plain args
   // (e.g., redditService expects title/text/url at top-level), while
   // still providing `payload` for handlers that prefer the object.

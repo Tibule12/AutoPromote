@@ -12,6 +12,7 @@ const admin = require('../firebaseAdmin').admin;
 const engagementBoostingService = require('../services/engagementBoostingService');
 const { enqueuePlatformPostTask } = require('../services/promotionTaskQueue');
 const { postToTelegram } = require('../services/telegramService');
+const { searchTracks, getPlaylist, createPlaylist, addTracksToPlaylist } = require('../services/spotifyService');
 const rateLimit = require('../middlewares/simpleRateLimit');
 const { rateLimiter } = require('../middlewares/globalRateLimiter');
 
@@ -99,6 +100,49 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
   if (cached && cached.data && (now - cached.ts) < PLATFORM_STATUS_TTL_MS) {
     return res.json(cached.data);
   }
+
+  // GET /api/spotify/metadata - returns playlists/metadata for connected Spotify user
+  router.get('/spotify/metadata', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+    try {
+      const uid = req.userId || req.user?.uid;
+      if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+      const userRef = db.collection('users').doc(uid);
+      const snap = await userRef.collection('connections').doc('spotify').get();
+      if (!snap.exists) return res.status(200).json({ ok: true, platform: 'spotify', connected: false, meta: {} });
+      const sdata = snap.data() || {};
+      const tokens = tokensFromDoc(sdata) || (sdata.meta && sdata.meta.tokens) || null;
+      const meta = { ...(sdata.meta || {}) };
+      if (tokens && tokens.access_token) {
+        try {
+          const url = `https://api.spotify.com/v1/me/playlists?limit=50`;
+          const r = await safeFetch(url, fetchFn, { fetchOptions: { headers: { Authorization: `Bearer ${tokens.access_token}` } }, requireHttps: true, allowHosts: ['api.spotify.com'] });
+          if (r.ok) {
+            const j = await r.json();
+            meta.playlists = (j.items || []).map(p => ({ id: p.id, name: p.name, public: !!p.public }));
+            await userRef.collection('connections').doc('spotify').set({ meta: { ...(sdata.meta || {}), playlists: meta.playlists }, updatedAt: new Date().toISOString() }, { merge: true });
+          }
+        } catch (_) {}
+      }
+      return res.json({ ok: true, platform: 'spotify', connected: !!sdata.connected, meta });
+    } catch (e) {
+      return res.status(500).json({ ok: false, platform: 'spotify', error: e.message || 'unknown_error' });
+    }
+  });
+
+  // GET /api/spotify/search - search tracks using Spotify API for the connected user
+  router.get('/spotify/search', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+    try {
+      const uid = req.userId || req.user?.uid;
+      if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+      const q = String(req.query.q || req.query.query || '').trim();
+      if (!q) return res.status(400).json({ ok: false, error: 'query_required' });
+      const limit = Math.min(parseInt(req.query.limit || '10', 10) || 10, 50);
+      const results = await searchTracks({ uid, query: q, limit });
+      return res.json({ ok: true, query: q, results: results.tracks || [] });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: e.message || 'spotify_search_failed' });
+    }
+  });
   if (cached && cached.inflight) {
     try {
       const d = await cached.inflight;
@@ -169,6 +213,33 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
     if (!tokens || !tokens.access_token) {
       // Best-effort fallback: return empty meta and let the UI use the session values
       return res.json(result);
+    }
+    // Add platform-specific metadata endpoints for Spotify
+    if (platform === 'spotify') {
+      // If connected, fetch playlists to return
+      try {
+        const uid = req.userId || req.user?.uid;
+        const userRef = db.collection('users').doc(uid);
+        const snap = await userRef.collection('connections').doc('spotify').get();
+        if (snap.exists) {
+          const sdata = snap.data() || {};
+          const tokens = tokensFromDoc(sdata) || (sdata.meta && sdata.meta.tokens) || null;
+          if (tokens && tokens.access_token) {
+            try {
+              const url = `https://api.spotify.com/v1/me/playlists?limit=50`;
+              const r = await safeFetch(url, fetchFn, { fetchOptions: { headers: { Authorization: `Bearer ${tokens.access_token}` } }, requireHttps: true, allowHosts: ['api.spotify.com'] });
+              if (r.ok) {
+                const j = await r.json();
+                result.meta.playlists = (j.items || []).map(p => ({ id: p.id, name: p.name, public: !!p.public }));
+                await userRef.collection('connections').doc('spotify').set({ meta: { ...(sdata.meta || {}), playlists: result.meta.playlists }, updatedAt: new Date().toISOString() }, { merge: true });
+              }
+            } catch (_) {}
+          }
+        }
+        return res.json(result);
+      } catch (e) {
+        return res.status(500).json({ ok: false, platform, error: e.message || 'unknown_error' });
+      }
     }
     const accessToken = tokens.access_token;
     if (platform === 'spotify') {
@@ -1083,6 +1154,39 @@ router.post('/telegram/webhook', platformWebhookLimiter, async (req, res) => {
   } catch (e) {
     console.warn('[telegram][webhook] unexpected error', e && e.message);
     return res.status(200).send('ok');
+  }
+});
+
+// POST /api/spotify/playlists - create a spotify playlist using user's Spotify connection
+router.post('/spotify/playlists', authMiddleware, platformWriteLimiter, async (req, res) => {
+  try {
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+    const name = String(req.body.name || '').trim();
+    const description = String(req.body.description || req.body.desc || '').trim() || null;
+    if (!name) return res.status(400).json({ ok: false, error: 'name_required' });
+    const result = await createPlaylist({ uid, name, description, contentId: req.body.contentId });
+    if (!result || !result.success) return res.status(502).json({ ok: false, error: result.error || 'spotify_create_playlist_failed' });
+    return res.json({ ok: true, playlist: { id: result.playlistId, name: result.name, url: result.url } });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message || 'spotify_create_failed' });
+  }
+});
+
+// POST /api/spotify/playlists/:id/tracks - add tracks to a Spotify playlist
+router.post('/spotify/playlists/:id/tracks', authMiddleware, platformWriteLimiter, async (req, res) => {
+  try {
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+    const playlistId = String(req.params.id || '').trim();
+    if (!playlistId) return res.status(400).json({ ok: false, error: 'playlistId_required' });
+    let trackUris = req.body.trackUris || req.body.tracks || null;
+    if (!Array.isArray(trackUris) || trackUris.length === 0) return res.status(400).json({ ok: false, error: 'trackUris_required' });
+    const result = await addTracksToPlaylist({ uid, playlistId, trackUris });
+    if (!result || !result.success) return res.status(502).json({ ok: false, error: result.error || 'spotify_add_tracks_failed' });
+    return res.json({ ok: true, snapshotId: result.snapshotId, added: result.tracksAdded });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message || 'spotify_add_tracks_failed' });
   }
 });
 

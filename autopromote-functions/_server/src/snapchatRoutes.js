@@ -247,8 +247,9 @@ router.all('/auth/callback', callbackLimiter, async (req, res) => {
       if (b.code) b.code = mask(b.code);
       if (q.error) q.error = String(q.error).slice(0, 200);
       if (b.error) b.error = String(b.error).slice(0, 200);
-      console.log('snapchat: callback query=%o', q);
-      console.log('snapchat: callback body=%o', b);
+      // Avoid logging potentially sensitive query/body values; only log the keys present
+      console.debug('snapchat: callback query keys=%o', Object.keys(q));
+      console.debug('snapchat: callback body keys=%o', Object.keys(b));
     } catch (e) { console.warn('snapchat: callback debug log failed', e && e.message); }
   }
   if (!code) {
