@@ -41,6 +41,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [redditStatus, setRedditStatus] = useState({ connected: false, meta: null });
   const [spotifyStatus, setSpotifyStatus] = useState({ connected: false, meta: null });
   const [connectBanner, setConnectBanner] = useState(null);
+  const [tiktokStatus, setTikTokStatus] = useState({ connected: false, meta: null });
 
   useEffect(() => {
     return () => {
@@ -166,6 +167,21 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       setRedditStatus({ connected: !!data.connected, meta: data.meta || null });
     } catch (_) {
       setRedditStatus({ connected: false });
+    }
+  };
+
+  // Load TikTok connection status
+  const loadTikTokStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setTikTokStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.TIKTOK_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setTikTokStatus({ connected: false });
+      const data = await res.json();
+      setTikTokStatus({ connected: !!data.connected, meta: data.meta || null });
+    } catch (_) {
+      setTikTokStatus({ connected: false });
     }
   };
 
