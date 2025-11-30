@@ -26,6 +26,19 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [type, setType] = useState('video');
+  const [scheduleMode, setScheduleMode] = useState('auto');
+  const [manualWhen, setManualWhen] = useState('');
+  const [frequency, setFrequency] = useState('once');
+  const [tz, setTz] = useState(userDefaults?.timezone || 'UTC');
+  const [defaultsPlatforms, setDefaultsPlatforms] = useState(Array.isArray(userDefaults?.defaultPlatforms) ? userDefaults.defaultPlatforms : []);
+  const [defaultsFrequency, setDefaultsFrequency] = useState(userDefaults?.defaultFrequency || 'once');
+  const handleNav = (tab) => {
+    setActiveTab(tab);
+    setSidebarOpen(false);
+  };
   const selectedVideoRef = useRef(null);
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
   const schedulesList = useMemo(() => (Array.isArray(mySchedules) ? mySchedules : []), [mySchedules]);
@@ -40,8 +53,21 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [pinterestStatus, setPinterestStatus] = useState({ connected: false, meta: null });
   const [redditStatus, setRedditStatus] = useState({ connected: false, meta: null });
   const [spotifyStatus, setSpotifyStatus] = useState({ connected: false, meta: null });
+  const [youtubeStatus, setYouTubeStatus] = useState({ connected: false, channel: null });
+  const [twitterStatus, setTwitterStatus] = useState({ connected: false, identity: null });
+  const [snapchatStatus, setSnapchatStatus] = useState({ connected: false, profile: null });
   const [connectBanner, setConnectBanner] = useState(null);
   const [tiktokStatus, setTikTokStatus] = useState({ connected: false, meta: null });
+  const [facebookStatus, setFacebookStatus] = useState({ connected: false, meta: null });
+  // Upload & earnings state
+  const [earnings, setEarnings] = useState({ pendingEarnings: 0, totalEarnings: 0, payoutEligible: false, minPayoutAmount: 0 });
+  const [payouts, setPayouts] = useState([]);
+  const [progress, setProgress] = useState({ contentCount: 0, requiredForRevenue: 0, remaining: 0, revenueEligible: false });
+  const [platformSummary, setPlatformSummary] = useState({ platforms: {} });
+  // Pinterest create modal state
+  const [pinterestCreateVisible, setPinterestCreateVisible] = useState(false);
+  const [pinterestCreateName, setPinterestCreateName] = useState('');
+  const [pinterestCreateDesc, setPinterestCreateDesc] = useState('');
 
   useEffect(() => {
     return () => {
@@ -185,6 +211,90 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
     }
   };
 
+  const loadFacebookStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setFacebookStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setFacebookStatus({ connected: false });
+      const data = await res.json();
+      setFacebookStatus({ connected: !!data.connected, meta: data.meta || null });
+    } catch (_) {
+      setFacebookStatus({ connected: false });
+    }
+  };
+
+  // Load YouTube connection status
+  const loadYouTubeStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setYouTubeStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.YOUTUBE_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setYouTubeStatus({ connected: false });
+      const data = await res.json();
+      setYouTubeStatus({ connected: !!data.connected, channel: data.channel || null });
+    } catch (_) {
+      setYouTubeStatus({ connected: false });
+    }
+  };
+
+  // Load Twitter connection status
+  const loadTwitterStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setTwitterStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.TWITTER_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setTwitterStatus({ connected: false });
+      const data = await res.json();
+      setTwitterStatus({ connected: !!data.connected, identity: data.identity || null });
+    } catch (_) {
+      setTwitterStatus({ connected: false });
+    }
+  };
+
+  // Load Snapchat connection status
+  const loadSnapchatStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setSnapchatStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.SNAPCHAT_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setSnapchatStatus({ connected: false });
+      const data = await res.json();
+      setSnapchatStatus({ connected: !!data.connected, profile: data.profile || null });
+    } catch (_) {
+      setSnapchatStatus({ connected: false });
+    }
+  };
+
+  // Load Spotify status (and metadata loader exists elsewhere)
+  const loadSpotifyStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setSpotifyStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.SPOTIFY_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setSpotifyStatus({ connected: false });
+      const data = await res.json();
+      setSpotifyStatus({ connected: !!data.connected, meta: data.meta || null });
+      if (data.connected) {
+        // Optionally load metadata into platformMetadata
+        try {
+          const mdRes = await fetch(API_ENDPOINTS.SPOTIFY_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }});
+          if (mdRes.ok) {
+            const md = await mdRes.json();
+            setPlatformMetadata(prev => ({ ...(prev || {}), spotify: md.meta || {} }));
+          }
+        } catch (_) {}
+      }
+    } catch (_) {
+      setSpotifyStatus({ connected: false });
+    }
+  };
+
   const loadPinterestMetadata = async () => {
     try {
       const currentUser = auth.currentUser;
@@ -194,6 +304,17 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (!res.ok) return;
       const data = await res.json();
       setPlatformMetadata(prev => ({ ...(prev || {}), pinterest: data.meta || {} }));
+    } catch (_) {}
+  };
+
+  const loadSpotifyMetadata = async () => {
+    try {
+      const currentUser = auth.currentUser; if (!currentUser) return;
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.SPOTIFY_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return;
+      const data = await res.json();
+      setPlatformMetadata(prev => ({ ...(prev || {}), spotify: data.meta || {} }));
     } catch (_) {}
   };
 
