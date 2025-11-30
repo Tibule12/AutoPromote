@@ -30,6 +30,10 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
   const schedulesList = useMemo(() => (Array.isArray(mySchedules) ? mySchedules : []), [mySchedules]);
   const [scheduleContentMap, setScheduleContentMap] = useState({});
+  const firstItem = contentList[0] || {};
+  const safeFirstThumb = firstItem?.thumbnailUrl || DEFAULT_IMAGE;
+  const safeLandingUrl = typeof firstItem?.landingPageUrl === 'string' ? firstItem.landingPageUrl : undefined;
+  const safeSmartLink = typeof firstItem?.smartLink === 'string' ? firstItem.smartLink : undefined;
   const [discordStatus, setDiscordStatus] = useState({ connected: false, meta: null });
   const [linkedinStatus, setLinkedinStatus] = useState({ connected: false, meta: null });
   const [telegramStatus, setTelegramStatus] = useState({ connected: false, meta: null });
