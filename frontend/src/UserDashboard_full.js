@@ -5,6 +5,7 @@ import { isAllowedAuthUrl } from './utils/isAllowedAuthUrl';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
 import SpotifyTrackSearch from './components/SpotifyTrackSearch';
+import ContentUploadForm from './ContentUploadForm';
 
 // Use PUBLIC_URL so assets resolve correctly on GitHub Pages and Render
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
@@ -13,6 +14,10 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [activeTab, setActiveTab] = useState('profile');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [platformOptions, setPlatformOptions] = useState({});
+  const [platformMetadata, setPlatformMetadata] = useState({});
+  const [spotifySelectedTracks, setSpotifySelectedTracks] = useState([]);
   const [previewUrl, setPreviewUrl] = useState('');
   const [rotate, setRotate] = useState(0);
   const [flipH, setFlipH] = useState(false);
@@ -22,6 +27,12 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [trimEnd, setTrimEnd] = useState(0);
   const [duration, setDuration] = useState(0);
   const selectedVideoRef = useRef(null);
+  const [discordStatus, setDiscordStatus] = useState({ connected: false, meta: null });
+  const [linkedinStatus, setLinkedinStatus] = useState({ connected: false, meta: null });
+  const [telegramStatus, setTelegramStatus] = useState({ connected: false, meta: null });
+  const [pinterestStatus, setPinterestStatus] = useState({ connected: false, meta: null });
+  const [redditStatus, setRedditStatus] = useState({ connected: false, meta: null });
+  const [spotifyStatus, setSpotifyStatus] = useState({ connected: false, meta: null });
 
   useEffect(() => {
     return () => {
@@ -30,190 +41,6 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       }
     };
   }, [previewUrl]);
-  // Toggle a body-level class so we can scope CSS overrides to the dashboard
-  useEffect(() => {
-    document.body.classList.add('dashboard-mode');
-    return () => { document.body.classList.remove('dashboard-mode'); };
-  }, []);
-  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
-  // Per-platform custom options passed to backend (e.g., discord.channelId, reddit.subreddit)
-  const [platformOptions, setPlatformOptions] = useState({});
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState('video');
-  const [scheduleMode, setScheduleMode] = useState('auto'); // 'auto' | 'manual'
-  const [manualWhen, setManualWhen] = useState(''); // yyyy-MM-ddTHH:mm
-  const [frequency, setFrequency] = useState('once'); // once | daily | weekly
-  // Profile defaults local state
-  const [tz, setTz] = useState(userDefaults?.timezone || 'UTC');
-  const [defaultsPlatforms, setDefaultsPlatforms] = useState(Array.isArray(userDefaults?.defaultPlatforms) ? userDefaults.defaultPlatforms : []);
-  const [defaultsFrequency, setDefaultsFrequency] = useState(userDefaults?.defaultFrequency || 'once');
-  const [tiktokStatus, setTikTokStatus] = useState({ connected: false });
-  const [facebookStatus, setFacebookStatus] = useState({ connected: false });
-  const [youtubeStatus, setYouTubeStatus] = useState({ connected: false });
-  const [twitterStatus, setTwitterStatus] = useState({ connected: false });
-  const [snapchatStatus, setSnapchatStatus] = useState({ connected: false });
-  const [spotifyStatus, setSpotifyStatus] = useState({ connected: false });
-  const [redditStatus, setRedditStatus] = useState({ connected: false });
-  const [discordStatus, setDiscordStatus] = useState({ connected: false });
-  const [linkedinStatus, setLinkedinStatus] = useState({ connected: false });
-  const [telegramStatus, setTelegramStatus] = useState({ connected: false });
-  const [pinterestStatus, setPinterestStatus] = useState({ connected: false });
-  const [earnings, setEarnings] = useState({ pendingEarnings: 0, totalEarnings: 0, payoutEligible: false, minPayoutAmount: 0 });
-  const [payouts, setPayouts] = useState([]);
-  const [progress, setProgress] = useState({ contentCount: 0, requiredForRevenue: 0, remaining: 0, revenueEligible: false });
-  const [platformSummary, setPlatformSummary] = useState({ platforms: {} });
-  const [platformMetadata, setPlatformMetadata] = useState({});
-  const [pinterestCreateVisible, setPinterestCreateVisible] = useState(false);
-  const [pinterestCreateName, setPinterestCreateName] = useState('');
-  const [pinterestCreateDesc, setPinterestCreateDesc] = useState('');
-  const [spotifySelectedTracks, setSpotifySelectedTracks] = useState([]);
-  // Snap connect banner state from URL
-  const [connectBanner, setConnectBanner] = useState(null); // { type: 'success'|'error', message: string }
-
-  // Ensure content is an array to simplify rendering
-  const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
-  const schedulesList = useMemo(() => (Array.isArray(mySchedules) ? mySchedules : []), [mySchedules]);
-  const [scheduleContentMap, setScheduleContentMap] = useState({});
-  const firstItem = contentList[0] || {};
-  const safeFirstThumb = firstItem?.thumbnailUrl || DEFAULT_IMAGE;
-  const safeLandingUrl = typeof firstItem?.landingPageUrl === 'string' ? firstItem.landingPageUrl : undefined;
-  const safeSmartLink = typeof firstItem?.smartLink === 'string' ? firstItem.smartLink : undefined;
-
-  // Allowlist for safe OAuth redirect targets. This protects against open
-  // redirects by ensuring client-side navigation only follows known provider
-  // hostnames or same-origin redirects. If an allowed hostname appears in
-  // the future, add it here.
-  // `isAllowedAuthUrl` is implemented in `frontend/src/utils/isAllowedAuthUrl.js`
-  // and imported above. Keep the local variable binding so existing code can
-  // reference `isAllowedAuthUrl` unchanged.
-  // The above is allowed list is also exported for unit testing. Exporting as a
-  // named function in a separate module reduces duplication and makes testing
-  // easier. Keep a local reference for now so existing code is unaffected.
-
-  const handleNav = (tab) => {
-    setActiveTab(tab);
-    setSidebarOpen(false);
-  };
-
-  // Load TikTok connection status
-  const loadTikTokStatus = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return setTikTokStatus({ connected: false });
-      const token = await currentUser.getIdToken(true);
-      const res = await fetch(API_ENDPOINTS.TIKTOK_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-      if (!res.ok) return setTikTokStatus({ connected: false });
-      const data = await res.json();
-      setTikTokStatus({ connected: !!data.connected, display_name: data.display_name, avatar_url: data.avatar_url, open_id: data.open_id });
-    } catch (_) {
-      setTikTokStatus({ connected: false });
-    }
-  };
-
-  // Load Facebook connection status
-  const loadFacebookStatus = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return setFacebookStatus({ connected: false });
-      const token = await currentUser.getIdToken(true);
-      const res = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-      if (!res.ok) return setFacebookStatus({ connected: false });
-      const data = await res.json();
-      setFacebookStatus({ connected: !!data.connected, pages: data.pages || [], ig_business_account_id: data.ig_business_account_id || null });
-    } catch (_) {
-      setFacebookStatus({ connected: false });
-    }
-  };
-
-  // Load YouTube connection status
-  const loadYouTubeStatus = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return setYouTubeStatus({ connected: false });
-      const token = await currentUser.getIdToken(true);
-      const res = await fetch(API_ENDPOINTS.YOUTUBE_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-      if (!res.ok) return setYouTubeStatus({ connected: false });
-      const data = await res.json();
-      setYouTubeStatus({ connected: !!data.connected, channel: data.channel || null });
-    } catch (_) {
-      setYouTubeStatus({ connected: false });
-    }
-  };
-
-  // Load Twitter connection status
-  const loadTwitterStatus = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return setTwitterStatus({ connected: false });
-      const token = await currentUser.getIdToken(true);
-      const res = await fetch(API_ENDPOINTS.TWITTER_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-      if (!res.ok) return setTwitterStatus({ connected: false });
-      const data = await res.json();
-      setTwitterStatus({ connected: !!data.connected, identity: data.identity || null });
-    } catch (_) {
-      setTwitterStatus({ connected: false });
-    }
-  };
-
-  // Load Snapchat connection status
-  const loadSnapchatStatus = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return setSnapchatStatus({ connected: false });
-      const token = await currentUser.getIdToken(true);
-      const res = await fetch(API_ENDPOINTS.SNAPCHAT_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-      if (!res.ok) return setSnapchatStatus({ connected: false });
-      const data = await res.json();
-      setSnapchatStatus({ connected: !!data.connected, profile: data.profile || null });
-    } catch (_) {
-      setSnapchatStatus({ connected: false });
-    }
-  };
-
-  // Load Spotify connection status
-  const loadSpotifyStatus = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return setSpotifyStatus({ connected: false });
-      const token = await currentUser.getIdToken(true);
-      const res = await fetch(API_ENDPOINTS.SPOTIFY_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-      if (!res.ok) return setSpotifyStatus({ connected: false });
-      const data = await res.json();
-      setSpotifyStatus({ connected: !!data.connected, meta: data.meta || null });
-      // Also load metadata such as playlists if connected
-      if (data.connected) loadSpotifyMetadata();
-    } catch (_) {
-      setSpotifyStatus({ connected: false });
-    }
-  };
-
-  const loadSpotifyMetadata = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
-      const token = await currentUser.getIdToken(true);
-      const res = await fetch(API_ENDPOINTS.SPOTIFY_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-      if (!res.ok) return;
-      const data = await res.json();
-      setPlatformMetadata(prev => ({ ...(prev || {}), spotify: data.meta || {} }));
-    } catch (_) {}
-  };
-
-  // Load Reddit connection status
-  const loadRedditStatus = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return setRedditStatus({ connected: false });
-      const token = await currentUser.getIdToken(true);
-      const res = await fetch(API_ENDPOINTS.REDDIT_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-      if (!res.ok) return setRedditStatus({ connected: false });
-      const data = await res.json();
-      setRedditStatus({ connected: !!data.connected, meta: data.meta || null });
-    } catch (_) {
-      setRedditStatus({ connected: false });
-    }
-  };
 
   // Load Discord connection status
   const loadDiscordStatus = async () => {
@@ -316,6 +143,21 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       if (data.connected) loadPinterestMetadata();
     } catch (_) {
       setPinterestStatus({ connected: false });
+    }
+  };
+
+  // Load Reddit connection status
+  const loadRedditStatus = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return setRedditStatus({ connected: false });
+      const token = await currentUser.getIdToken(true);
+      const res = await fetch(API_ENDPOINTS.REDDIT_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) return setRedditStatus({ connected: false });
+      const data = await res.json();
+      setRedditStatus({ connected: !!data.connected, meta: data.meta || null });
+    } catch (_) {
+      setRedditStatus({ connected: false });
     }
   };
 
