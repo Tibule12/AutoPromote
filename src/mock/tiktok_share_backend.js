@@ -9,7 +9,9 @@ app.use(bodyParser.json());
 // Mock: exchange code for access token (sandbox)
 app.post('/oauth/exchange', (req, res) => {
   const { code, client_key, client_secret, redirect_uri } = req.body || {};
-  console.log('Received exchange request for code=', code);
+  // Do not log the full code (may be sensitive); just indicate presence and a masked preview
+  const preview = code ? (String(code).length > 8 ? `${String(code).slice(0,4)}...${String(code).slice(-4)}` : '[masked]') : '[missing]';
+  console.log('Received exchange request for code present=%s preview=%s', !!code, preview);
   // Validate inputs (in real flow) then call TikTok token endpoint
   // Here we return a fake sandbox token
   return res.json({
@@ -24,7 +26,8 @@ app.post('/oauth/exchange', (req, res) => {
 app.post('/api/tiktok/share', (req, res) => {
   const auth = req.headers.authorization || ''; // Bearer token
   const body = req.body || {};
-  console.log('/api/tiktok/share called with auth=', auth, 'body=', body);
+  // Do not log full auth or body contents as they may include sensitive tokens.
+  console.log('/api/tiktok/share called, bodyKeys=%o', Object.keys(body || {}));
   // Show expected request structure for reviewers
   const expected = {
     method: 'POST',

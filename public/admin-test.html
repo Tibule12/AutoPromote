@@ -108,25 +108,35 @@
     // Setup admin collection
     document.getElementById('setupBtn').addEventListener('click', async () => {
       const resultDiv = document.getElementById('setupResult');
-      resultDiv.innerHTML = '<p>Setting up admin collection...</p>';
+        // Show progress text
+        resultDiv.textContent = 'Setting up admin collection...';
       
       try {
         const response = await fetch('/api/setup-admin', { method: 'POST' });
         const data = await response.json();
         
         if (response.ok) {
-          resultDiv.innerHTML = `
-            <p class="success">Admin collection setup successful!</p>
-            <pre>${JSON.stringify(data, null, 2)}</pre>
-          `;
+          // Show success using DOM APIs
+          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+          const successP = document.createElement('p');
+          successP.className = 'success';
+          successP.textContent = 'Admin collection setup successful!';
+          resultDiv.appendChild(successP);
+          const pre = document.createElement('pre');
+          pre.textContent = JSON.stringify(data, null, 2);
+          resultDiv.appendChild(pre);
         } else {
-          resultDiv.innerHTML = `
-            <p class="error">Admin collection setup failed</p>
-            <pre>${JSON.stringify(data, null, 2)}</pre>
-          `;
+          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+          const errP = document.createElement('p');
+          errP.className = 'error';
+          errP.textContent = 'Admin collection setup failed';
+          resultDiv.appendChild(errP);
+          const preErr = document.createElement('pre');
+          preErr.textContent = JSON.stringify(data, null, 2);
+          resultDiv.appendChild(preErr);
         }
       } catch (error) {
-        resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        resultDiv.textContent = `Error: ${error.message}`;
       }
     });
     
@@ -136,7 +146,8 @@
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       
-      resultDiv.innerHTML = '<p>Logging in...</p>';
+      resultDiv.textContent = 'Logging in...';
+      resultDiv.style.color = '';
       
       try {
         const loginResponse = await fetch('/api/auth/login-test', {
@@ -149,35 +160,58 @@
         
         if (loginResponse.ok && loginData.token) {
           token = loginData.token;
-          resultDiv.innerHTML = `
-            <p class="success">Login successful!</p>
-            <p>User: ${loginData.user.email}</p>
-            <p>Role: ${loginData.user.role}</p>
-            <p>From collection: ${loginData.user.fromCollection || 'unknown'}</p>
-            <p>Token: ${token.substring(0, 20)}...</p>
-          `;
+          // Build success content
+          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+          const suc = document.createElement('p');
+          suc.className = 'success';
+          suc.textContent = 'Login successful!';
+          resultDiv.appendChild(suc);
+          const uEmail = document.createElement('p');
+          uEmail.textContent = `User: ${loginData.user.email}`;
+          resultDiv.appendChild(uEmail);
+          const uRole = document.createElement('p');
+          uRole.textContent = `Role: ${loginData.user.role}`;
+          resultDiv.appendChild(uRole);
+          const from = document.createElement('p');
+          from.textContent = `From collection: ${loginData.user.fromCollection || 'unknown'}`;
+          resultDiv.appendChild(from);
+          const tokenP = document.createElement('p');
+          tokenP.textContent = `Token: ${token.substring(0, 20)}...`;
+          resultDiv.appendChild(tokenP);
           document.getElementById('apiBtn').disabled = false;
         } else {
-          resultDiv.innerHTML = `
-            <p class="error">Login failed</p>
-            <pre>${JSON.stringify(loginData, null, 2)}</pre>
-          `;
+          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+          const failP = document.createElement('p');
+          failP.className = 'error';
+          failP.textContent = 'Login failed';
+          resultDiv.appendChild(failP);
+          const failPre = document.createElement('pre');
+          failPre.textContent = JSON.stringify(loginData, null, 2);
+          resultDiv.appendChild(failPre);
         }
       } catch (error) {
-        resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        resultDiv.textContent = `Error: ${error.message}`;
       }
     });
     
     // Test admin API access
     document.getElementById('apiBtn').addEventListener('click', async () => {
-      if (!token) {
-        document.getElementById('apiResult').innerHTML = 
-          '<p class="error">Please login first to get a token</p>';
+        if (!token) {
+        const apiRes = document.getElementById('apiResult');
+        while (apiRes.firstChild) apiRes.removeChild(apiRes.firstChild);
+        const err = document.createElement('p');
+        err.className = 'error';
+        err.textContent = 'Please login first to get a token';
+        apiRes.appendChild(err);
         return;
       }
       
       const resultDiv = document.getElementById('apiResult');
-      resultDiv.innerHTML = '<p>Testing API access...</p>';
+      // Show progress
+      while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+      const testingP = document.createElement('p');
+      testingP.textContent = 'Testing API access...';
+      resultDiv.appendChild(testingP);
       
       try {
         const apiResponse = await fetch('/api/admin/analytics/overview', {
@@ -187,19 +221,29 @@
         const apiData = await apiResponse.json();
         
         if (apiResponse.ok) {
-          resultDiv.innerHTML = `
-            <p class="success">API access successful!</p>
-            <p>Is mock data: ${apiData.isMockData ? 'Yes' : 'No'}</p>
-            <pre>${JSON.stringify(apiData, null, 2).substring(0, 500)}...</pre>
-          `;
+          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+          const successP2 = document.createElement('p');
+          successP2.className = 'success';
+          successP2.textContent = 'API access successful!';
+          resultDiv.appendChild(successP2);
+          const mockP = document.createElement('p');
+          mockP.textContent = `Is mock data: ${apiData.isMockData ? 'Yes' : 'No'}`;
+          resultDiv.appendChild(mockP);
+          const pre2 = document.createElement('pre');
+          pre2.textContent = JSON.stringify(apiData, null, 2).substring(0, 500) + '...';
+          resultDiv.appendChild(pre2);
         } else {
-          resultDiv.innerHTML = `
-            <p class="error">API access failed</p>
-            <pre>${JSON.stringify(apiData, null, 2)}</pre>
-          `;
+          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+          const err2 = document.createElement('p');
+          err2.className = 'error';
+          err2.textContent = 'API access failed';
+          resultDiv.appendChild(err2);
+          const preErr2 = document.createElement('pre');
+          preErr2.textContent = JSON.stringify(apiData, null, 2);
+          resultDiv.appendChild(preErr2);
         }
       } catch (error) {
-        resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        resultDiv.textContent = `Error: ${error.message}`;
       }
     });
   </script>

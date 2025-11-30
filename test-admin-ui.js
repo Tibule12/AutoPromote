@@ -48,7 +48,7 @@ app.get('/', (req, res) => {
         const password = document.getElementById('password').value;
         const resultDiv = document.getElementById('loginResult');
         
-        resultDiv.innerHTML = 'Logging in...';
+        resultDiv.textContent = 'Logging in...';
         
         try {
           const response = await fetch('http://localhost:5001/api/auth/login', {
@@ -61,13 +61,18 @@ app.get('/', (req, res) => {
           
           if (data.token) {
             token = data.token;
-            resultDiv.innerHTML = '<div style="color:green">Login successful!</div>';
+            // Show a success message using DOM APIs to avoid innerHTML usage
+            resultDiv.textContent = 'Login successful!';
+            resultDiv.style.color = 'green';
             document.getElementById('endpointTester').style.display = 'block';
           } else {
-            resultDiv.innerHTML = '<div style="color:red">Login failed: ' + (data.error || JSON.stringify(data)) + '</div>';
+            // Show a failure message safely
+            resultDiv.textContent = `Login failed: ${data.error || JSON.stringify(data)}`;
+            resultDiv.style.color = 'red';
           }
         } catch (error) {
-          resultDiv.innerHTML = '<div style="color:red">Error: ' + error.message + '</div>';
+          resultDiv.textContent = `Error: ${error.message}`;
+          resultDiv.style.color = 'red';
         }
       });
       
@@ -75,7 +80,8 @@ app.get('/', (req, res) => {
         const endpoint = document.getElementById('endpoint').value;
         const resultDiv = document.getElementById('endpointResult');
         
-        resultDiv.innerHTML = 'Testing endpoint...';
+        resultDiv.textContent = 'Testing endpoint...';
+        resultDiv.style.color = '';
         
         try {
           const response = await fetch('http://localhost:5001' + endpoint, {
@@ -86,12 +92,24 @@ app.get('/', (req, res) => {
           const data = await response.json();
           const isMockData = data.isMockData ? '<div style="color:orange">(Mock Data)</div>' : '';
           
-          resultDiv.innerHTML = 
-            '<div style="color:' + (response.ok ? 'green' : 'red') + '">Status: ' + response.status + '</div>' + 
-            isMockData +
-            '<pre>' + JSON.stringify(data, null, 2).substring(0, 1000) + '...</pre>';
+          // Build a safe DOM result using createElement
+          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+          const statusEl = document.createElement('div');
+          statusEl.textContent = `Status: ${response.status}`;
+          statusEl.style.color = response.ok ? 'green' : 'red';
+          resultDiv.appendChild(statusEl);
+          if (data.isMockData) {
+            const mockEl = document.createElement('div');
+            mockEl.textContent = '(Mock Data)';
+            mockEl.style.color = 'orange';
+            resultDiv.appendChild(mockEl);
+          }
+          const preEl = document.createElement('pre');
+          preEl.textContent = JSON.stringify(data, null, 2).substring(0, 1000) + '...';
+          resultDiv.appendChild(preEl);
         } catch (error) {
-          resultDiv.innerHTML = '<div style="color:red">Error: ' + error.message + '</div>';
+          resultDiv.textContent = `Error: ${error.message}`;
+          resultDiv.style.color = 'red';
         }
       });
     </script>

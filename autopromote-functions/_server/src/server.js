@@ -653,14 +653,17 @@ const allowAll = process.env.CORS_ALLOW_ALL === 'true';
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    try { console.log('[cors.origin] origin:', origin, 'allowAll:', allowAll); } catch (e) {}
+    // Allow requests with no origin (like mobile apps or curl requests).
     if (!origin) return callback(null, true);
-    // In development or when allowAll is set, also allow the explicit 'null' origin
+    // In development or when allowAll is set, also treat the string 'null' as no-origin and allow it.
     if (origin === 'null' && (allowAll || process.env.NODE_ENV === 'development')) return callback(null, true);
     if (allowAll || allowedOrigins.includes(origin)) {
+      try { console.log('[cors.origin] -> allowed'); } catch(e) {}
       return callback(null, true);
     }
-    try { console.warn('[cors.origin] -> blocked', origin); } catch(e) {}
+    console.warn('[cors.origin] -> blocked', origin);
+    try { console.warn('[cors.origin] -> stack', new Error('origin-blocked').stack); } catch(e) {}
     return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
@@ -671,11 +674,42 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 204,
 };
+console.log('[diagnostic] CORS allowAll:', allowAll, 'allowedOrigins:', allowedOrigins.join(','));
 
 // Proactively set Vary header for caches and handle preflight explicitly
 app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
+// Debug: Log inbound upload related requests and headers (helps debug CORS/preflight)
+app.use((req,res,next)=>{
+  try {
+    if (req.path === '/api/content/upload' || (req.headers && req.headers.origin && req.headers.origin.includes('127.0.0.1'))) {
+      // Log a summarized set of headers for the upload route to help identify why requests are blocked by CORS
+      const sampleHeaders = { origin: req.headers.origin, host: req.headers.host, 'user-agent': req.headers['user-agent'], referer: req.headers.referer, 'content-type': req.headers['content-type'] };
+      console.log('[request.debug] method:', req.method, 'path:', req.path, 'headers:', sampleHeaders);
+    }
+  } catch(e){};
+  next();
+});
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+
+// Extra debug: For upload route, log incoming requests and ensure we capture any 403 responses
+app.use((req, res, next) => {
+  if (req.path === '/api/content/upload') {
+    res.once('finish', () => {
+      if (res.statusCode === 403) {
+        try { console.warn('[upload.403] request finished with 403; headers:', JSON.stringify({ origin: req.headers.origin, host: req.headers.host, ua: req.headers['user-agent'] })); } catch(e){}
+      }
+    });
+  }
+  next();
+});
+
+// Debug: optional header echo endpoint to inspect request headers for debugging
+if (process.env.DEBUG_HEADERS === 'true') {
+  app.get('/api/debug/headers', (req, res) => {
+    try { return res.json({ headers: req.headers }); } catch (e) { return res.status(500).json({ error: 'Failed to read headers' }); }
+  });
+}
 // Optional: enforce canonical host redirect to avoid duplicate origins (controlled via env)
 // Set ENFORCE_CANONICAL_HOST=true and CANONICAL_HOST=www.autopromote.org to enable
 if (process.env.ENFORCE_CANONICAL_HOST === 'true' && process.env.CANONICAL_HOST) {
@@ -1256,7 +1290,9 @@ app.get('/api/health/ready', async (req, res) => {
 
 // Error handler for CORS
 app.use((err, req, res, next) => {
-  if (err.message === 'Not allowed by CORS') {
+  if (err && err.message === 'Not allowed by CORS') {
+    try { console.error('[cors.error] request headers:', req.headers); } catch(e) {}
+    try { console.error('[cors.error] err.stack:', err && err.stack); } catch(e) {}
     return res.status(403).json({ error: 'CORS policy violation' });
   }
   next(err);
@@ -1479,7 +1515,7 @@ if (ENABLE_BACKGROUND) {
   try {
     const { pollYouTubeStatsBatch } = require('./services/youtubeStatsPoller');
     const { pollPlatformPostMetricsBatch } = require('./services/platformStatsPoller');
-    const { processNextYouTubeTask, processNextPlatformTask } = require('./services/promotionTaskQueue');
+    const { processNextYouTubeTask, processNextPlatformTask, enqueueMediaTransform } = require('./services/promotionTaskQueue');
     const { acquireLock, INSTANCE_ID } = require('./services/workerLockService');
     console.log('🔐 Worker instance id:', INSTANCE_ID);
 
@@ -1526,6 +1562,7 @@ if (ENABLE_BACKGROUND) {
         for (let i = 0; i < MAX_BATCH; i++) {
           const yt = await processNextYouTubeTask();
           const pf = await processNextPlatformTask();
+          const tf = await processNextMediaTransform && typeof processNextMediaTransform === 'function' ? await require('./services/mediaTransform').processNextMediaTransformTask() : null;
           if (!yt && !pf) break;
           processed += (yt ? 1 : 0) + (pf ? 1 : 0);
         }

@@ -1108,11 +1108,16 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
       let popup = null;
       try {
         popup = window.open('', 'telegram_connect', 'width=900,height=700');
-        if (popup) {
+            if (popup) {
           try {
             // Show minimal feedback while we prepare the URL
             popup.document.title = 'Connecting to Telegram';
-            popup.document.body.innerHTML = '<p style="font-family:sans-serif;margin:24px">Opening Telegram... If nothing happens, please return to the app.</p>';
+            // Avoid innerHTML usage - create element and set textContent instead
+            const p = popup.document.createElement('p');
+            p.style.fontFamily = 'sans-serif';
+            p.style.margin = '24px';
+            p.textContent = 'Opening Telegram... If nothing happens, please return to the app.';
+            popup.document.body.appendChild(p);
           } catch (_) { /* ignore cross-origin after navigation */ }
         }
       } catch (_) { popup = null; }

@@ -56,7 +56,17 @@
               const parts = text.split(':');
               const value = parts.slice(1).join(':').trim();
               if (!value || value === '{{TIKTOK_SANDBOX_CLIENT_KEY}}') {
-                el.innerHTML = 'Sandbox Client ID: <strong style="color:#c00">NOT SET</strong>\n\n(This server-side env var TIKTOK_SANDBOX_CLIENT_KEY is not configured on this instance)';
+                // Show NOT SET message using DOM APIs to avoid innerHTML
+                while (el.firstChild) el.removeChild(el.firstChild);
+                el.appendChild(document.createTextNode('Sandbox Client ID: '));
+                const strong = document.createElement('strong');
+                strong.style.color = '#c00';
+                strong.textContent = 'NOT SET';
+                el.appendChild(strong);
+                const note = document.createElement('div');
+                note.style.marginTop = '8px';
+                note.textContent = '(This server-side env var TIKTOK_SANDBOX_CLIENT_KEY is not configured on this instance)';
+                el.appendChild(note);
               }
             }
           } catch (e) { /* ignore */ }

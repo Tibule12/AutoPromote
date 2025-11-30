@@ -113,10 +113,19 @@
                 el.style.fontFamily = 'system-ui';
                 el.style.fontSize = '18px';
                 el.textContent = 'Connected — closing…';
-                document.body.textContent = '';
+                while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
                 document.body.appendChild(el);
               } catch (_) {
-                document.body.innerHTML = '<div style="padding:40px;text-align:center;font-family:system-ui;font-size:18px">Connected — closing…</div>';
+                // Fallback: attempt to create a simplified text-only node safely
+                try {
+                  while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
+                  const fallback = document.createElement('div');
+                  fallback.textContent = 'Connected — closing…';
+                  document.body.appendChild(fallback);
+                } catch (_) {
+                  // As a last resort, set body textContent
+                  document.body.textContent = 'Connected — closing…';
+                }
               }
               setTimeout(() => { try { window.close(); } catch (_) {} }, 500);
             }

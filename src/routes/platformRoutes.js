@@ -491,7 +491,7 @@ router.post('/:platform/auth/simulate', authMiddleware, platformWriteLimiter, as
 
 // OAuth callbacks - handle code exchange for supported platforms
 // GET /api/reddit/auth/callback
-router.get('/reddit/auth/callback', async (req, res) => {
+router.get('/reddit/auth/callback', platformPublicLimiter, async (req, res) => {
   const platform = 'reddit';
   const code = req.query.code;
   const state = req.query.state;
@@ -558,7 +558,7 @@ router.get('/reddit/auth/callback', async (req, res) => {
 });
 
 // GET /api/discord/auth/callback
-router.get('/discord/auth/callback', async (req, res) => {
+router.get('/discord/auth/callback', platformPublicLimiter, async (req, res) => {
   const platform = 'discord';
   const code = req.query.code;
   const state = req.query.state;
@@ -719,7 +719,7 @@ setTimeout(() => { try { window.close(); } catch (e) { /* ignore */ } }, 400);
 });
 
 // GET /api/spotify/auth/callback
-router.get('/spotify/auth/callback', async (req, res) => {
+router.get('/spotify/auth/callback', platformPublicLimiter, async (req, res) => {
   const platform = 'spotify';
   const code = req.query.code;
   const state = req.query.state;
@@ -803,7 +803,7 @@ router.get('/spotify/auth/callback', async (req, res) => {
 // are not intercepted by the placeholder.
 
 // GET /api/linkedin/auth/callback
-router.get('/linkedin/auth/callback', async (req, res) => {
+router.get('/linkedin/auth/callback', platformPublicLimiter, async (req, res) => {
   const platform = 'linkedin';
   const code = req.query.code;
   const state = req.query.state;
@@ -882,7 +882,7 @@ router.get('/linkedin/auth/callback', async (req, res) => {
 });
 
 // GET /api/pinterest/auth/callback - Pinterest OAuth v5 code exchange
-router.get('/pinterest/auth/callback', async (req, res) => {
+router.get('/pinterest/auth/callback', platformPublicLimiter, async (req, res) => {
   const platform = 'pinterest';
   const code = req.query.code;
   const state = req.query.state;
@@ -949,7 +949,7 @@ router.get('/pinterest/auth/callback', async (req, res) => {
 // Generic placeholder callback for other platforms — keep as a fallback
 // and ensure it's defined after specific platform callback handlers so it
 // doesn't intercept platforms that have a proper implementation.
-router.get('/:platform/auth/callback', async (req, res, next) => {
+router.get('/:platform/auth/callback', platformPublicLimiter, async (req, res, next) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).send('Unsupported platform');
   return sendPlain(res, 200, 'Callback placeholder - implement OAuth exchange for ' + platform);

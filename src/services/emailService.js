@@ -24,11 +24,15 @@ function buildLayout(innerHtml) {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>body{font-family:Arial,sans-serif;background:#fafafa;padding:24px;color:#222} .box{background:#fff;border:1px solid #eee;border-radius:8px;padding:24px;} h1{font-size:20px;margin:0 0 16px;} .footer{font-size:12px;color:#666;margin-top:24px}</style></head><body><div class="box">${innerHtml}<div class="footer">© ${new Date().getFullYear()} AutoPromote</div></div></body></html>`;
 }
 
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 async function sendVerificationEmail({ email, link }) {
   const subject = 'Verify your AutoPromote account';
   const vars = { link };
   const textTpl = 'Welcome to AutoPromote! Verify your email: {{link}}';
-  const htmlInner = `<h1>Welcome!</h1><p>Please verify your email by clicking below:</p><p><a href="${link}">Verify Email</a></p>`;
+  const htmlInner = `<h1>Welcome!</h1><p>Please verify your email by clicking below:</p><p><a href="${escapeHtml(link)}">Verify Email</a></p>`;
   return sendEmail({ to: email, subject, text: renderTemplate(textTpl, vars), html: buildLayout(htmlInner) });
 }
 
@@ -36,7 +40,7 @@ async function sendPasswordResetEmail({ email, link }) {
   const subject = 'Reset your AutoPromote password';
   const vars = { link };
   const textTpl = 'Password reset requested. Reset using: {{link}}';
-  const htmlInner = `<h1>Password Reset</h1><p>Click below to reset your password:</p><p><a href="${link}">Reset Password</a></p>`;
+  const htmlInner = `<h1>Password Reset</h1><p>Click below to reset your password:</p><p><a href="${escapeHtml(link)}">Reset Password</a></p>`;
   return sendEmail({ to: email, subject, text: renderTemplate(textTpl, vars), html: buildLayout(htmlInner) });
 }
 
