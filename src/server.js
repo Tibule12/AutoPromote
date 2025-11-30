@@ -1559,10 +1559,11 @@ if (ENABLE_BACKGROUND) {
         let processed = 0;
         // Process up to N tasks per interval (interleave types)
         const MAX_BATCH = 5;
+        const mt = require('./services/mediaTransform');
         for (let i = 0; i < MAX_BATCH; i++) {
           const yt = await processNextYouTubeTask();
           const pf = await processNextPlatformTask();
-          const tf = await processNextMediaTransform && typeof processNextMediaTransform === 'function' ? await require('./services/mediaTransform').processNextMediaTransformTask() : null;
+          const tf = (mt && typeof mt.processNextMediaTransformTask === 'function') ? await mt.processNextMediaTransformTask() : null;
           if (!yt && !pf) break;
           processed += (yt ? 1 : 0) + (pf ? 1 : 0);
         }

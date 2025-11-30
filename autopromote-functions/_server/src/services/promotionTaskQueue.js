@@ -4,8 +4,7 @@
 const { db } = require('../firebaseAdmin');
 const { recordTaskCompletion, recordRateLimitEvent } = require('./aggregationService');
 const { getCooldown, noteRateLimit } = require('./rateLimitTracker');
-const { uploadVideo } = require('./youtubeService');
-const { enqueueMediaTransformTask } = require('./mediaTransform');
+// Defer requiring youtubeService and mediaTransform until function call time to avoid circular import issues
 const crypto = require('crypto');
 
 const MAX_ATTEMPTS = parseInt(process.env.TASK_MAX_ATTEMPTS || '5', 10);
@@ -125,7 +124,8 @@ async function processNextYouTubeTask() {
   await taskRef.update({ status: 'processing', updatedAt: new Date().toISOString() });
 
   try {
-    const outcome = await uploadVideo({
+  const { uploadVideo } = require('./youtubeService');
+  const outcome = await uploadVideo({
       uid: task.uid,
       title: task.title,
       description: task.description,
@@ -286,6 +286,7 @@ async function enqueuePlatformPostTask({ contentId, uid, platform, reason = 'man
 
 async function enqueueMediaTransform({ contentId, uid, meta, sourceUrl }) {
   if (!contentId || !uid || !meta) throw new Error('contentId, uid, meta required');
+  const { enqueueMediaTransformTask } = require('./mediaTransform');
   const task = await enqueueMediaTransformTask({ contentId, uid, meta, url: sourceUrl });
   return task;
 }
