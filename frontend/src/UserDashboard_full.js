@@ -36,6 +36,7 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [pinterestStatus, setPinterestStatus] = useState({ connected: false, meta: null });
   const [redditStatus, setRedditStatus] = useState({ connected: false, meta: null });
   const [spotifyStatus, setSpotifyStatus] = useState({ connected: false, meta: null });
+  const [connectBanner, setConnectBanner] = useState(null);
 
   useEffect(() => {
     return () => {
