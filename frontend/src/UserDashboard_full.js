@@ -27,6 +27,9 @@ const UserDashboard = ({ user, content, stats, badges, notifications, userDefaul
   const [trimEnd, setTrimEnd] = useState(0);
   const [duration, setDuration] = useState(0);
   const selectedVideoRef = useRef(null);
+  const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
+  const schedulesList = useMemo(() => (Array.isArray(mySchedules) ? mySchedules : []), [mySchedules]);
+  const [scheduleContentMap, setScheduleContentMap] = useState({});
   const [discordStatus, setDiscordStatus] = useState({ connected: false, meta: null });
   const [linkedinStatus, setLinkedinStatus] = useState({ connected: false, meta: null });
   const [telegramStatus, setTelegramStatus] = useState({ connected: false, meta: null });
