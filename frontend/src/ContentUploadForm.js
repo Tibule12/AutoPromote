@@ -7,7 +7,7 @@ import SpotifyTrackSearch from './components/SpotifyTrackSearch';
 import ImageCropper from './components/ImageCropper';
 import AudioWaveformTrimmer from './components/AudioWaveformTrimmer';
 
-function ContentUploadForm({ onUpload }) {
+function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, platformOptions: extPlatformOptions, setPlatformOption: extSetPlatformOption, selectedPlatforms: extSelectedPlatforms, setSelectedPlatforms: extSetSelectedPlatforms, spotifySelectedTracks: extSpotifySelectedTracks, setSpotifySelectedTracks: extSetSpotifySelectedTracks }) {
   const [title, setTitle] = useState('');
   const [type, setType] = useState('video');
   const [description, setDescription] = useState('');
@@ -23,7 +23,7 @@ function ContentUploadForm({ onUpload }) {
   const videoRef = useRef(null);
   const [showCropper, setShowCropper] = useState(false);
   const [cropMeta, setCropMeta] = useState(null);
-  const [spotifyTracks, setSpotifyTracks] = useState([]);
+  const [spotifyTracks, setSpotifyTracks] = useState(extSpotifySelectedTracks || []);
 
   useEffect(()=>{
     // Cleanup URL.createObjectURL to prevent mem leaks
@@ -34,36 +34,25 @@ function ContentUploadForm({ onUpload }) {
     };
   }, [previewUrl]);
 
+  // Sync pinterest boards from parent-controlled metadata
   useEffect(()=>{
-    const loadBoards = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-        const token = await user.getIdToken(true);
-        const r = await fetch(API_ENDPOINTS.PINTEREST_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-        if (!r.ok) return;
-        const j = await r.json();
-        if (j && j.meta && Array.isArray(j.meta.boards)) setPinterestBoards(j.meta.boards);
-      } catch (_) {}
-    };
-    loadBoards();
-  }, []);
+    if (extPlatformMetadata && Array.isArray(extPlatformMetadata.pinterest?.boards)) {
+      setPinterestBoards(extPlatformMetadata.pinterest.boards);
+    } else {
+      setPinterestBoards([]);
+    }
+  }, [extPlatformMetadata]);
   const [spotifyPlaylists, setSpotifyPlaylists] = useState([]);
   const [spotifyPlaylistId, setSpotifyPlaylistId] = useState('');
   const [spotifyPlaylistName, setSpotifyPlaylistName] = useState('');
+  // Sync spotify playlists from parent-controlled metadata
   useEffect(()=>{
-    const loadSpotify = async () => {
-      try {
-        const user = auth.currentUser; if (!user) return;
-        const token = await user.getIdToken(true);
-        const r = await fetch(API_ENDPOINTS.SPOTIFY_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-        if (!r.ok) return;
-        const j = await r.json();
-        if (j && j.meta && Array.isArray(j.meta.playlists)) setSpotifyPlaylists(j.meta.playlists);
-      } catch (_) {}
-    };
-    loadSpotify();
-  }, []);
+    if (extPlatformMetadata && Array.isArray(extPlatformMetadata.spotify?.playlists)) {
+      setSpotifyPlaylists(extPlatformMetadata.spotify.playlists);
+    } else {
+      setSpotifyPlaylists([]);
+    }
+  }, [extPlatformMetadata]);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
   const [previews, setPreviews] = useState([]);
@@ -72,16 +61,32 @@ function ContentUploadForm({ onUpload }) {
   const [qualityFeedback, setQualityFeedback] = useState([]);
   // Content Quality Check handler
   const [enhancedSuggestions, setEnhancedSuggestions] = useState(null);
-  const [pinterestBoard, setPinterestBoard] = useState('');
-  const [pinterestNote, setPinterestNote] = useState('');
+  const [pinterestBoard, setPinterestBoard] = useState(extPlatformOptions?.pinterest?.boardId || '');
+  const [pinterestNote, setPinterestNote] = useState(extPlatformOptions?.pinterest?.note || '');
   const [pinterestBoards, setPinterestBoards] = useState([]);
-  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
-  const [discordChannelId, setDiscordChannelId] = useState('');
-  const [telegramChatId, setTelegramChatId] = useState('');
-  const [redditSubreddit, setRedditSubreddit] = useState('');
-  const [linkedinCompanyId, setLinkedinCompanyId] = useState('');
-  const [twitterMessage, setTwitterMessage] = useState('');
+  const [selectedPlatforms, setSelectedPlatforms] = useState(extSelectedPlatforms || []);
+  const selectedPlatformsVal = Array.isArray(extSelectedPlatforms) ? extSelectedPlatforms : selectedPlatforms;
+  useEffect(()=>{
+    if (Array.isArray(extSelectedPlatforms)) setSelectedPlatforms(extSelectedPlatforms || []);
+  }, [extSelectedPlatforms]);
+  const [discordChannelId, setDiscordChannelId] = useState(extPlatformOptions?.discord?.channelId || '');
+  const [telegramChatId, setTelegramChatId] = useState(extPlatformOptions?.telegram?.chatId || '');
+  const [redditSubreddit, setRedditSubreddit] = useState(extPlatformOptions?.reddit?.subreddit || '');
+  const [linkedinCompanyId, setLinkedinCompanyId] = useState(extPlatformOptions?.linkedin?.companyId || '');
+  const [twitterMessage, setTwitterMessage] = useState(extPlatformOptions?.twitter?.message || '');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  useEffect(()=>{
+    if (!extPlatformOptions) return;
+    setDiscordChannelId(extPlatformOptions?.discord?.channelId || '');
+    setTelegramChatId(extPlatformOptions?.telegram?.chatId || '');
+    setRedditSubreddit(extPlatformOptions?.reddit?.subreddit || '');
+    setLinkedinCompanyId(extPlatformOptions?.linkedin?.companyId || '');
+    setTwitterMessage(extPlatformOptions?.twitter?.message || '');
+    setPinterestBoard(extPlatformOptions?.pinterest?.boardId || '');
+    setPinterestNote(extPlatformOptions?.pinterest?.note || '');
+    setSpotifyPlaylistId(extPlatformOptions?.spotify?.playlistId || '');
+    setSpotifyPlaylistName(extPlatformOptions?.spotify?.name || '');
+  }, [extPlatformOptions]);
   const handleQualityCheck = async (e) => {
     e.preventDefault();
     setQualityScore(null);
@@ -139,6 +144,7 @@ function ContentUploadForm({ onUpload }) {
         type,
         description,
         url,
+        platforms: selectedPlatformsVal,
         isDryRun: true,
         meta: {
           trimStart: (type === 'video' || type === 'audio') ? trimStart : undefined,
@@ -157,11 +163,11 @@ function ContentUploadForm({ onUpload }) {
         pinterest: pinterestBoard || pinterestNote ? { boardId: pinterestBoard || undefined, note: pinterestNote || undefined } : undefined,
         spotify: (spotifyTracks && spotifyTracks.length) || spotifyPlaylistId || spotifyPlaylistName ? { trackUris: spotifyTracks && spotifyTracks.length ? spotifyTracks.map(t=>t.uri) : undefined, playlistId: spotifyPlaylistId || undefined, name: spotifyPlaylistName || undefined } : undefined
       };
-      if (selectedPlatforms.includes('discord')) contentData.platform_options.discord = { channelId: discordChannelId || undefined };
-      if (selectedPlatforms.includes('telegram')) contentData.platform_options.telegram = { chatId: telegramChatId || undefined };
-      if (selectedPlatforms.includes('reddit')) contentData.platform_options.reddit = { subreddit: redditSubreddit || undefined };
-      if (selectedPlatforms.includes('linkedin')) contentData.platform_options.linkedin = { companyId: linkedinCompanyId || undefined };
-      if (selectedPlatforms.includes('twitter')) contentData.platform_options.twitter = { message: twitterMessage || undefined };
+      if (selectedPlatformsVal.includes('discord')) contentData.platform_options.discord = { channelId: discordChannelId || undefined };
+      if (selectedPlatformsVal.includes('telegram')) contentData.platform_options.telegram = { chatId: telegramChatId || undefined };
+      if (selectedPlatformsVal.includes('reddit')) contentData.platform_options.reddit = { subreddit: redditSubreddit || undefined };
+      if (selectedPlatformsVal.includes('linkedin')) contentData.platform_options.linkedin = { companyId: linkedinCompanyId || undefined };
+      if (selectedPlatformsVal.includes('twitter')) contentData.platform_options.twitter = { message: twitterMessage || undefined };
       // Call backend preview (reuse onUpload with dry run)
       const result = await onUpload(contentData);
       if (result && result.previews) {
@@ -211,11 +217,11 @@ function ContentUploadForm({ onUpload }) {
       const finalTitle = title || file.name;
       // Basic platform-required validation
       const missing = [];
-      if (selectedPlatforms.includes('discord') && !discordChannelId) missing.push('Discord Channel ID');
-      if (selectedPlatforms.includes('telegram') && !telegramChatId) missing.push('Telegram Chat ID');
-      if (selectedPlatforms.includes('reddit') && !redditSubreddit) missing.push('Reddit subreddit');
-      if (selectedPlatforms.includes('linkedin') && !linkedinCompanyId) missing.push('LinkedIn company id');
-      if (selectedPlatforms.includes('spotify') && !(spotifyTracks && spotifyTracks.length) && !spotifyPlaylistId && !spotifyPlaylistName) missing.push('Spotify playlist or track');
+      if (selectedPlatformsVal.includes('discord') && !discordChannelId) missing.push('Discord Channel ID');
+      if (selectedPlatformsVal.includes('telegram') && !telegramChatId) missing.push('Telegram Chat ID');
+      if (selectedPlatformsVal.includes('reddit') && !redditSubreddit) missing.push('Reddit subreddit');
+      if (selectedPlatformsVal.includes('linkedin') && !linkedinCompanyId) missing.push('LinkedIn company id');
+      if (selectedPlatformsVal.includes('spotify') && !(spotifyTracks && spotifyTracks.length) && !spotifyPlaylistId && !spotifyPlaylistName) missing.push('Spotify playlist or track');
       if (missing.length) throw new Error('Missing: ' + missing.join(', '));
 
       const contentData = {
@@ -223,6 +229,7 @@ function ContentUploadForm({ onUpload }) {
         type,
         description,
         url,
+        platforms: selectedPlatformsVal,
         template: template !== 'none' ? template : undefined,
         meta: {
           trimStart: (type === 'video' || type === 'audio') ? trimStart : undefined,
@@ -237,11 +244,11 @@ function ContentUploadForm({ onUpload }) {
         platform_options: {
           pinterest: pinterestBoard || pinterestNote ? { boardId: pinterestBoard || undefined, note: pinterestNote || undefined } : undefined,
           spotify: (spotifyTracks && spotifyTracks.length) || spotifyPlaylistId || spotifyPlaylistName ? { trackUris: spotifyTracks && spotifyTracks.length ? spotifyTracks.map(t=>t.uri) : undefined, playlistId: spotifyPlaylistId || undefined, name: spotifyPlaylistName || undefined } : undefined,
-          discord: selectedPlatforms.includes('discord') ? { channelId: discordChannelId || undefined } : undefined,
-          telegram: selectedPlatforms.includes('telegram') ? { chatId: telegramChatId || undefined } : undefined,
-          reddit: selectedPlatforms.includes('reddit') ? { subreddit: redditSubreddit || undefined } : undefined,
-          linkedin: selectedPlatforms.includes('linkedin') ? { companyId: linkedinCompanyId || undefined } : undefined,
-          twitter: selectedPlatforms.includes('twitter') ? { message: twitterMessage || undefined } : undefined
+          discord: selectedPlatformsVal.includes('discord') ? { channelId: discordChannelId || undefined } : undefined,
+          telegram: selectedPlatformsVal.includes('telegram') ? { chatId: telegramChatId || undefined } : undefined,
+          reddit: selectedPlatformsVal.includes('reddit') ? { subreddit: redditSubreddit || undefined } : undefined,
+          linkedin: selectedPlatformsVal.includes('linkedin') ? { companyId: linkedinCompanyId || undefined } : undefined,
+          twitter: selectedPlatformsVal.includes('twitter') ? { message: twitterMessage || undefined } : undefined
         }
       };
       console.log('[Upload] Content data to send:', contentData);
@@ -301,7 +308,13 @@ function ContentUploadForm({ onUpload }) {
   };
 
   const togglePlatform = (platform) => {
-    setSelectedPlatforms(prev => prev.includes(platform) ? prev.filter(p => p !== platform) : [...prev, platform]);
+    const cur = Array.isArray(extSelectedPlatforms) ? extSelectedPlatforms : selectedPlatforms;
+    const updated = cur.includes(platform) ? cur.filter(p => p !== platform) : [...cur, platform];
+    if (typeof extSetSelectedPlatforms === 'function') {
+      extSetSelectedPlatforms(updated);
+    } else {
+      setSelectedPlatforms(updated);
+    }
   };
 
   return (
@@ -356,28 +369,28 @@ function ContentUploadForm({ onUpload }) {
         <div className="form-group">
           <label>Target Platforms</label>
           <div className="platform-toggles">
-            <label><input type="checkbox" checked={selectedPlatforms.includes('youtube')} onChange={()=>togglePlatform('youtube')} /> YouTube</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('tiktok')} onChange={()=>togglePlatform('tiktok')} /> TikTok</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('instagram')} onChange={()=>togglePlatform('instagram')} /> Instagram</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('facebook')} onChange={()=>togglePlatform('facebook')} /> Facebook</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('twitter')} onChange={()=>togglePlatform('twitter')} /> Twitter</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('linkedin')} onChange={()=>togglePlatform('linkedin')} /> LinkedIn</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('reddit')} onChange={()=>togglePlatform('reddit')} /> Reddit</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('discord')} onChange={()=>togglePlatform('discord')} /> Discord</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('telegram')} onChange={()=>togglePlatform('telegram')} /> Telegram</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('pinterest')} onChange={()=>togglePlatform('pinterest')} /> Pinterest</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('spotify')} onChange={()=>togglePlatform('spotify')} /> Spotify</label>
-            <label><input type="checkbox" checked={selectedPlatforms.includes('snapchat')} onChange={()=>togglePlatform('snapchat')} /> Snapchat</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('youtube')} onChange={()=>togglePlatform('youtube')} /> YouTube</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('tiktok')} onChange={()=>togglePlatform('tiktok')} /> TikTok</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('instagram')} onChange={()=>togglePlatform('instagram')} /> Instagram</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('facebook')} onChange={()=>togglePlatform('facebook')} /> Facebook</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('twitter')} onChange={()=>togglePlatform('twitter')} /> Twitter</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('linkedin')} onChange={()=>togglePlatform('linkedin')} /> LinkedIn</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('reddit')} onChange={()=>togglePlatform('reddit')} /> Reddit</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('discord')} onChange={()=>togglePlatform('discord')} /> Discord</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('telegram')} onChange={()=>togglePlatform('telegram')} /> Telegram</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('pinterest')} onChange={()=>togglePlatform('pinterest')} /> Pinterest</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('spotify')} onChange={()=>togglePlatform('spotify')} /> Spotify</label>
+            <label><input type="checkbox" checked={selectedPlatformsVal.includes('snapchat')} onChange={()=>togglePlatform('snapchat')} /> Snapchat</label>
           </div>
         </div>
         <div className="form-group">
           <label>Advanced/Per-platform options</label>
           <div style={{display:'grid', gap:8}}>
-            {selectedPlatforms.includes('discord') && <input placeholder="Discord channel ID" value={discordChannelId} onChange={(e)=>setDiscordChannelId(e.target.value)} />}
-            {selectedPlatforms.includes('telegram') && <input placeholder="Telegram chat ID" value={telegramChatId} onChange={(e)=>setTelegramChatId(e.target.value)} />}
-            {selectedPlatforms.includes('reddit') && <input placeholder="Reddit subreddit" value={redditSubreddit} onChange={(e)=>setRedditSubreddit(e.target.value)} />}
-            {selectedPlatforms.includes('linkedin') && <input placeholder="LinkedIn organization/company ID" value={linkedinCompanyId} onChange={(e)=>setLinkedinCompanyId(e.target.value)} />}
-            {selectedPlatforms.includes('twitter') && <input placeholder="Twitter message (optional)" value={twitterMessage} onChange={(e)=>setTwitterMessage(e.target.value)} />}
+            {selectedPlatformsVal.includes('discord') && <input placeholder="Discord channel ID" value={discordChannelId} onChange={(e)=>{ setDiscordChannelId(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('discord','channelId', e.target.value); }} />}
+            {selectedPlatformsVal.includes('telegram') && <input placeholder="Telegram chat ID" value={telegramChatId} onChange={(e)=>{ setTelegramChatId(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('telegram','chatId', e.target.value); }} />}
+            {selectedPlatformsVal.includes('reddit') && <input placeholder="Reddit subreddit" value={redditSubreddit} onChange={(e)=>{ setRedditSubreddit(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('reddit','subreddit', e.target.value); }} />}
+            {selectedPlatformsVal.includes('linkedin') && <input placeholder="LinkedIn organization/company ID" value={linkedinCompanyId} onChange={(e)=>{ setLinkedinCompanyId(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('linkedin','companyId', e.target.value); }} />}
+            {selectedPlatformsVal.includes('twitter') && <input placeholder="Twitter message (optional)" value={twitterMessage} onChange={(e)=>{ setTwitterMessage(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('twitter','message', e.target.value); }} />}
           </div>
         </div>
         <div className="form-group">
@@ -413,33 +426,33 @@ function ContentUploadForm({ onUpload }) {
           <label>Pinterest Options (optional)</label>
           <div style={{display:'grid', gap:'.5rem'}}>
             {pinterestBoards && pinterestBoards.length > 0 ? (
-              <select value={pinterestBoard} onChange={(e)=>setPinterestBoard(e.target.value)} style={{padding:'.5rem', borderRadius:8}}>
+              <select value={pinterestBoard} onChange={(e)=>{ setPinterestBoard(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('pinterest','boardId', e.target.value); }} style={{padding:'.5rem', borderRadius:8}}>
                 <option value="">Select a board</option>
                 {pinterestBoards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
             ) : (
-              <input placeholder="Pinterest board id (or leave blank)" value={pinterestBoard} onChange={(e)=>setPinterestBoard(e.target.value)} style={{padding:'.5rem', borderRadius:8}} />
+              <input placeholder="Pinterest board id (or leave blank)" value={pinterestBoard} onChange={(e)=>{ setPinterestBoard(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('pinterest','boardId', e.target.value); }} style={{padding:'.5rem', borderRadius:8}} />
             )}
-            <input placeholder="Pin note (optional)" value={pinterestNote} onChange={(e)=>setPinterestNote(e.target.value)} style={{padding:'.5rem', borderRadius:8}} />
+            <input placeholder="Pin note (optional)" value={pinterestNote} onChange={(e)=>{ setPinterestNote(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('pinterest','note', e.target.value); }} style={{padding:'.5rem', borderRadius:8}} />
           </div>
         </div>
         {/* Spotify track selection */}
         <div className="form-group">
           <label>Spotify Tracks to Add (optional)</label>
-          <SpotifyTrackSearch selectedTracks={spotifyTracks} onChangeTracks={(list)=>setSpotifyTracks(list)} />
+          <SpotifyTrackSearch selectedTracks={Array.isArray(extSpotifySelectedTracks) ? extSpotifySelectedTracks : spotifyTracks} onChangeTracks={(list)=>{ if (typeof extSetSpotifySelectedTracks === 'function') extSetSpotifySelectedTracks(list); else setSpotifyTracks(list); }} />
         </div>
         <div className="form-group">
           <label>Spotify Playlist (optional)</label>
           <div style={{display:'grid', gap:8}}>
             {spotifyPlaylists && spotifyPlaylists.length > 0 ? (
-              <select value={spotifyPlaylistId} onChange={(e)=>setSpotifyPlaylistId(e.target.value)} style={{padding:'.5rem', borderRadius:8}}>
+              <select value={spotifyPlaylistId} onChange={(e)=>{ setSpotifyPlaylistId(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('spotify','playlistId', e.target.value); }} style={{padding:'.5rem', borderRadius:8}}>
                 <option value="">Select existing playlist</option>
                 {spotifyPlaylists.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             ) : (
-              <input placeholder="Existing playlist id (optional)" value={spotifyPlaylistId} onChange={(e)=>setSpotifyPlaylistId(e.target.value)} style={{padding:'.5rem', borderRadius:8}} />
+              <input placeholder="Existing playlist id (optional)" value={spotifyPlaylistId} onChange={(e)=>{ setSpotifyPlaylistId(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('spotify','playlistId', e.target.value); }} style={{padding:'.5rem', borderRadius:8}} />
             )}
-            <input placeholder="Or create new playlist name (optional)" value={spotifyPlaylistName} onChange={(e)=>setSpotifyPlaylistName(e.target.value)} style={{padding:'.5rem', borderRadius:8}} />
+            <input placeholder="Or create new playlist name (optional)" value={spotifyPlaylistName} onChange={(e)=>{ setSpotifyPlaylistName(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('spotify','name', e.target.value); }} style={{padding:'.5rem', borderRadius:8}} />
           </div>
         </div>
         {/* Live local file preview and basic editing controls */}
