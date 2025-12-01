@@ -215,6 +215,31 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 	const handleConnectTelegram = async () => openProviderAuth(API_ENDPOINTS.TELEGRAM_AUTH_START);
 	const handleConnectPinterest = async () => openProviderAuth(API_ENDPOINTS.PINTEREST_AUTH_START);
 
+	const refreshAllStatus = async () => {
+		await Promise.all([
+			loadTikTokStatus(), loadFacebookStatus(), loadYouTubeStatus(), loadTwitterStatus(), loadSnapchatStatus(), loadSpotifyStatus(), loadRedditStatus(), loadDiscordStatus(), loadLinkedinStatus(), loadTelegramStatus(), loadPinterestStatus()
+		]);
+		// Reload summary
+		try {
+			const cur = auth.currentUser; if (!cur) return; const token = await cur.getIdToken(true); const platRes = await fetch(API_ENDPOINTS.PLATFORM_STATUS, { headers: { Authorization: `Bearer ${token}` }}); if (platRes.ok) { const d = await platRes.json(); setPlatformSummary(d); }
+		} catch (_) {}
+	};
+
+	const handleDisconnectPlatform = async (platform) => {
+		if (!window.confirm(`Disconnect ${platform}?`)) return;
+		await withAuth(async (token) => {
+			try {
+				const res = await fetch(API_ENDPOINTS.PLATFORM_DISCONNECT(platform), { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+				if (!res.ok) { const j = await res.json().catch(()=>({})); throw new Error(j.error || 'Failed to disconnect'); }
+				// Refresh statuses
+				await refreshAllStatus();
+				alert('Disconnected');
+			} catch (e) {
+				console.warn(e); alert(e.message || 'Failed to disconnect');
+			}
+		});
+	};
+
 	const markAllNotificationsRead = async () => { try { await withAuth(async (token) => { await fetch(API_ENDPOINTS.NOTIFICATIONS_MARK_READ, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({}) }); }); setNotifs([]); } catch (e) { console.warn(e); alert('Failed to mark notifications as read'); } };
 
 	const claimPayout = async () => { try { await withAuth(async (token) => { const res = await fetch(API_ENDPOINTS.EARNINGS_PAYOUT_SELF, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); if (!res.ok) throw new Error('Payout failed'); alert('Payout requested'); }); } catch (e) { console.warn(e); alert('Payout request failed'); } };
@@ -309,6 +334,7 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 					<ConnectionsPanel platformSummary={platformSummary}
 						discordStatus={discordStatus} spotifyStatus={spotifyStatus} redditStatus={redditStatus} youtubeStatus={youtubeStatus} twitterStatus={twitterStatus} tiktokStatus={tiktokStatus} facebookStatus={facebookStatus} linkedinStatus={linkedinStatus} snapchatStatus={snapchatStatus} telegramStatus={telegramStatus} pinterestStatus={pinterestStatus}
 						handleConnectSpotify={handleConnectSpotify} handleConnectDiscord={handleConnectDiscord} handleConnectReddit={handleConnectReddit} handleConnectYouTube={handleConnectYouTube} handleConnectTwitter={handleConnectTwitter} handleConnectSnapchat={handleConnectSnapchat} handleConnectLinkedin={handleConnectLinkedin} handleConnectTelegram={handleConnectTelegram} handleConnectPinterest={handleConnectPinterest} handleConnectTikTok={handleConnectTikTok} handleConnectFacebook={handleConnectFacebook}
+						handleDisconnectPlatform={handleDisconnectPlatform}
 					/>
 				)}
 			</main>

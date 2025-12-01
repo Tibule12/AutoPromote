@@ -9,6 +9,8 @@
   border-radius: 8px;
   padding: 24px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .content-upload-grid {
@@ -233,4 +235,14 @@
     grid-template-columns: 1fr;
   }
   .platform-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Dashboard page override: when the form is used inside the dashboard panel, allow it to span full width
+   so it doesn't remain centered within a narrow max-width container. This keeps the default behavior
+   for other pages while making dashboard upload forms full-width. */
+.upload-panel .content-upload-container {
+  max-width: none; /* allow it to expand to the parent's width */
+  margin: 0;        /* remove centering */
+  width: 100%;
+  padding: 0;       /* rely on the panel padding to manage spacing */
 }
