@@ -64,6 +64,16 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 	const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
 	const schedulesList = useMemo(() => (Array.isArray(mySchedules) ? mySchedules : []), [mySchedules]);
 
+		// Toggle dashboard-mode class on mount/unmount so global gradients don't show through dashboard pages
+		useEffect(() => {
+			document.documentElement?.classList?.add('dashboard-mode');
+			document.body?.classList?.add('dashboard-mode');
+			return () => {
+				document.documentElement?.classList?.remove('dashboard-mode');
+				document.body?.classList?.remove('dashboard-mode');
+			};
+		}, []);
+
 	const handleNav = (tab) => { setActiveTab(tab); setSidebarOpen(false); };
 	const triggerSchedulesRefresh = () => { onSchedulesChanged && onSchedulesChanged(); };
 
