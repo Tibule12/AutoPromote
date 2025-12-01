@@ -9,15 +9,28 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
       <h3>Connections</h3>
       <div style={{ display: 'grid', gap: '.75rem' }}>
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
-          {tiktokStatus?.connected ? (
+          {twitterStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>TikTok connected</span>
-              <button className="check-quality" onClick={handleConnectTikTok}>Reconnect</button>
+              <span style={{color:'#cbd5e1'}}>Twitter connected</span>
+              <button className="check-quality" onClick={handleConnectTwitter}>Reconnect</button>
             </>
           ) : (
             <>
-              <button className="check-quality" onClick={handleConnectTikTok}>Connect TikTok</button>
-              <span style={{color:'#9aa4b2'}}>Connect to link your TikTok account for future posting and analytics.</span>
+              <button className="check-quality" onClick={handleConnectTwitter}>Connect Twitter</button>
+              <span style={{color:'#9aa4b2'}}>Connect to post tweets and schedule posts.</span>
+            </>
+          )}
+        </div>
+        <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
+          {snapchatStatus?.connected ? (
+            <>
+              <span style={{color:'#cbd5e1'}}>Snapchat connected</span>
+              <button className="check-quality" onClick={handleConnectSnapchat}>Reconnect</button>
+            </>
+          ) : (
+            <>
+              <button className="check-quality" onClick={handleConnectSnapchat}>Connect Snapchat</button>
+              <span style={{color:'#9aa4b2'}}>Connect to post Snaps (if enabled).</span>
             </>
           )}
         </div>

@@ -29,47 +29,29 @@ const ProfilePanel = ({
 
       <div className="platform-connections" style={{marginTop:'1rem'}}>
         <h4>Platform Connections</h4>
-        {/* We'll render a subset of connection controls here; the full connections panel shows more details */}
+        {/* Render all supported connections dynamically */}
         <div style={{display:'grid', gap:'.5rem'}}>
-          <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
-            {tiktokStatus?.connected ? (
-              <>
-                <span style={{color:'#cbd5e1'}}>TikTok connected</span>
-                <button className="check-quality" onClick={handleConnectTikTok}>Reconnect</button>
-              </>
-            ) : (
-              <>
-                <button className="check-quality" onClick={handleConnectTikTok}>Connect TikTok</button>
-                <span style={{color:'#9aa4b2'}}>Connect to link your TikTok account for future posting and analytics.</span>
-              </>
-            )}
-          </div>
-          <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
-            {facebookStatus?.connected ? (
-              <>
-                <span style={{color:'#cbd5e1'}}>Facebook connected</span>
-                <button className="check-quality" onClick={handleConnectFacebook}>Reconnect</button>
-              </>
-            ) : (
-              <>
-                <button className="check-quality" onClick={handleConnectFacebook}>Connect Facebook</button>
-                <span style={{color:'#9aa4b2'}}>Connect to manage Pages and Instagram.</span>
-              </>
-            )}
-          </div>
-          <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
-            {youtubeStatus?.connected ? (
-              <>
-                <span style={{color:'#cbd5e1'}}>YouTube connected</span>
-                <button className="check-quality" onClick={handleConnectYouTube}>Reconnect</button>
-              </>
-            ) : (
-              <>
-                <button className="check-quality" onClick={handleConnectYouTube}>Connect YouTube</button>
-                <span style={{color:'#9aa4b2'}}>Connect to upload videos directly.</span>
-              </>
-            )}
-          </div>
+          {['tiktok','facebook','youtube','twitter','snapchat','spotify','reddit','discord','linkedin','telegram','pinterest'].map((p) => {
+            const status = ({ 'tiktok': tiktokStatus, 'facebook': facebookStatus, 'youtube': youtubeStatus, 'twitter': twitterStatus, 'snapchat': snapchatStatus, 'spotify': spotifyStatus, 'reddit': redditStatus, 'discord': discordStatus, 'linkedin': linkedinStatus, 'telegram': telegramStatus, 'pinterest': pinterestStatus })[p] || {};
+            const handler = ({ 'tiktok': handleConnectTikTok, 'facebook': handleConnectFacebook, 'youtube': handleConnectYouTube, 'twitter': handleConnectTwitter, 'snapchat': handleConnectSnapchat, 'spotify': handleConnectSpotify, 'reddit': handleConnectReddit, 'discord': handleConnectDiscord, 'linkedin': handleConnectLinkedin, 'telegram': handleConnectTelegram, 'pinterest': handleConnectPinterest })[p];
+            const label = p.charAt(0).toUpperCase() + p.slice(1);
+            const helper = ({ 'tiktok': 'Connect to link your TikTok account for future posting and analytics.', 'facebook': 'Connect to manage Pages and Instagram.', 'youtube': 'Connect to upload videos directly.', 'twitter': 'Connect to post tweets and schedule posts.', 'snapchat': 'Connect to post Snaps (if enabled).', 'spotify': 'Connect to manage Spotify tracks and playlists.', 'reddit': 'Connect to post to subreddits.', 'discord': 'Connect to manage Discord channels/webhooks.', 'linkedin': 'Connect to post to LinkedIn.', 'telegram': 'Connect to send messages to Telegram channels.', 'pinterest': 'Connect to create pins and boards.' })[p] || '';
+            return (
+              <div key={p} style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
+                {status?.connected ? (
+                  <>
+                    <span style={{color:'#cbd5e1'}}>{label} connected</span>
+                    <button className="check-quality" onClick={handler}>Reconnect</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="check-quality" onClick={handler}>Connect {label}</button>
+                    <span style={{color:'#9aa4b2'}}>{helper}</span>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
