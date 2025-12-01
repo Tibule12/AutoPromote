@@ -26,6 +26,12 @@ describe('ContentUploadForm payloads', () => {
     const discordChannel = screen.getByPlaceholderText(/Discord channel ID/i);
     fireEvent.change(discordChannel, { target: { value: '12345' } });
 
+    // Add overlay text, then click preview button
+    const overlayInput = screen.getByPlaceholderText(/Add overlay text/i);
+    fireEvent.change(overlayInput, { target: { value: 'Hello Overlay' } });
+    const overlayPos = screen.getByDisplayValue('bottom');
+    fireEvent.change(overlayPos, { target: { value: 'top' } });
+
     // Click preview button
     const previewBtn = screen.getByText(/Preview Content/i);
     fireEvent.click(previewBtn);
@@ -38,6 +44,10 @@ describe('ContentUploadForm payloads', () => {
     expect(payload.platforms).toContain('youtube');
     expect(payload.platform_options).toBeDefined();
     expect(payload.platform_options.discord.channelId).toBe('12345');
+    expect(payload.meta).toBeDefined();
+    expect(payload.meta.overlay).toBeDefined();
+    expect(payload.meta.overlay.text).toBe('Hello Overlay');
+    expect(payload.meta.overlay.position).toBe('top');
   });
 
   test('Submit payload includes platforms and platform_options', async () => {
@@ -59,6 +69,19 @@ describe('ContentUploadForm payloads', () => {
     const payload = onUpload.mock.calls[0][0];
     expect(Array.isArray(payload.platforms)).toBeTruthy();
     expect(payload.platforms).toContain('youtube');
+
+    // Overlay should also be present in submission payload if set
+    // Set overlay and submit again
+    const overlayInput = screen.getByPlaceholderText(/Add overlay text/i);
+    fireEvent.change(overlayInput, { target: { value: 'Submit Overlay' } });
+    // Submit the form
+    const uploadBtn2 = screen.getByText(/Upload Content/i);
+    fireEvent.click(uploadBtn2);
+    expect(onUpload).toHaveBeenCalled();
+    const payload2 = onUpload.mock.calls[onUpload.mock.calls.length - 1][0];
+    expect(payload2.meta).toBeDefined();
+    expect(payload2.meta.overlay).toBeDefined();
+    expect(payload2.meta.overlay.text).toBe('Submit Overlay');
   });
 });
 

@@ -6,10 +6,10 @@ describe('ContentUploadForm controlled mode', () => {
   test('toggles platform selection via external setter', () => {
     const setSelectedPlatforms = jest.fn();
     render(<ContentUploadForm onUpload={async ()=>{}} selectedPlatforms={['youtube']} setSelectedPlatforms={setSelectedPlatforms} />);
-    const youtubeCheckbox = screen.getByLabelText(/YouTube/i);
-    expect(youtubeCheckbox).toBeInTheDocument();
-    // Toggle off
-    fireEvent.click(youtubeCheckbox);
+    const youtubeTile = screen.getByLabelText(/YouTube/i);
+    expect(youtubeTile).toBeInTheDocument();
+    // Toggle off via keyboard
+    fireEvent.keyDown(youtubeTile, { key: ' ', code: 'Space', charCode: 32 });
     expect(setSelectedPlatforms).toHaveBeenCalled();
   });
 
@@ -19,6 +19,16 @@ describe('ContentUploadForm controlled mode', () => {
     const discordInput = screen.getByPlaceholderText(/Discord channel ID/i);
     fireEvent.change(discordInput, { target: { value: '12345' } });
     expect(setPlatformOption).toHaveBeenCalledWith('discord', 'channelId', '12345');
+  });
+
+  test('show dragging visual on drop-zone drag events', () => {
+    const { container } = render(<ContentUploadForm onUpload={async ()=>{}} />);
+    const drop = container.querySelector('.drop-zone');
+    expect(drop).toBeInTheDocument();
+    fireEvent.dragEnter(drop);
+    expect(drop.classList.contains('dragging')).toBeTruthy();
+    fireEvent.dragLeave(drop);
+    expect(drop.classList.contains('dragging')).toBeFalsy();
   });
 });
 
