@@ -58,6 +58,18 @@ html.dashboard-mode, body.dashboard-mode {
   color-scheme: dark;
 }
 
+/* Ensure OS/Browser scrollbars are dark across the entire page in dashboard mode */
+html.dashboard-mode, body.dashboard-mode, html.dashboard-mode *, body.dashboard-mode * {
+  scrollbar-width: thin;
+  scrollbar-color: #000000 rgba(255,255,255,0.03);
+}
+html.dashboard-mode ::-webkit-scrollbar, body.dashboard-mode ::-webkit-scrollbar {
+  width: 10px; height: 10px;
+}
+html.dashboard-mode ::-webkit-scrollbar-track, body.dashboard-mode ::-webkit-scrollbar-track { background: #000; }
+html.dashboard-mode ::-webkit-scrollbar-thumb, body.dashboard-mode ::-webkit-scrollbar-thumb { background-color: #000; border-radius: 10px; border: 2px solid transparent; }
+html.dashboard-mode ::-webkit-scrollbar-thumb:hover, body.dashboard-mode ::-webkit-scrollbar-thumb:hover { background-color: #111; }
+
 /* Root */
 .dashboard-root {
   min-height: 100vh;

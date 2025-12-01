@@ -107,6 +107,7 @@ export const API_ENDPOINTS = {
 
   // Platform aggregated status & user progress
   PLATFORM_STATUS: `${API_BASE_URL}/api/platform/status`,
+  PLATFORM_DISCONNECT: (platform) => `${API_BASE_URL}/api/platform/disconnect/${platform}`,
   USER_PROGRESS: `${API_BASE_URL}/api/users/progress`
 };
 
