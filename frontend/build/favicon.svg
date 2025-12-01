@@ -1,3 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AutoPromote favicon (SVG) - simple stylized rocket on purple circle -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="100%" height="100%" rx="20" fill="#0f0b2b" />
+  <g transform="translate(80,64) scale(0.66)">
+    <!-- purple circle background -->
+    <circle cx="256" cy="160" r="160" fill="#6d3cff" />
+    <!-- rocket body (white) -->
+    <g fill="#ffffff">
+      <path d="M256 96c-35 0-64 29-64 64 0 7 1 14 3 20l-68 84c-4 5-6 11-6 17 0 19 25 34 70 34 28 0 60-9 96-27 36 18 68 27 96 27 45 0 70-15 70-34 0-6-2-12-6-17l-68-84c2-6 3-13 3-20 0-35-29-64-64-64z"/>
+      <path d="M192 240c-8 0-14 6-14 14v30c0 8 6 14 14 14 37 0 126 5 196-39 0 0-24-9-48-23-49 28-124 18-162 4z" opacity="0.9"/>
+    </g>
+    <!-- window accent -->
+    <circle cx="256" cy="160" r="28" fill="#6d3cff" stroke="#ffffff" stroke-width="6"/>
+  </g>
+</svg>
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="8" fill="#1976d2"/>
   <text x="16" y="22" text-anchor="middle" font-size="18" fill="#fff" font-family="Arial">A</text>

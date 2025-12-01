@@ -11,6 +11,43 @@
   --border: rgba(255,255,255,0.08);
 }
 
+/*
+  Scrollbar, selection and overscroll styling
+  - Forces dark/black scrollbars inside dashboard so OS accent color (blue) doesn't show
+  - Adds overscroll-behavior to prevent glow/overscroll color on some platforms
+  - Adjusts selection color inside dashboard to dark to avoid the default blue highlight
+*/
+.dashboard-root {
+  /* ensure contained scrollable areas don't show the OS accent color */
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: contain;
+}
+
+/* Firefox */
+.dashboard-root, .dashboard-root * {
+  scrollbar-width: thin;
+  scrollbar-color: #000000 rgba(255,255,255,0.03);
+}
+
+/* WebKit (Chrome, Edge, Safari) */
+.dashboard-root ::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+.dashboard-root ::-webkit-scrollbar-track {
+  background: #000; /* pure black track */
+}
+.dashboard-root ::-webkit-scrollbar-thumb {
+  background-color: #000; /* black thumb */
+  border-radius: 10px;
+  border: 2px solid transparent; /* keeps the thumb from blending with the track */
+}
+.dashboard-root ::-webkit-scrollbar-thumb:hover { background-color: #222; }
+
+/* Avoid blue text selection highlight on the dashboard */
+.dashboard-root ::selection { background: #000; color: var(--text); }
+
+
 /* Prevent horizontal overflow and ensure body background doesn't show through on dashboard pages */
 /* Ensure dashboard pages have a black background behind any translucent elements, while allowing component-level horizontal scroll
    so wide tables or card lists still scroll inside the dashboard without revealing the app's blue gradient. */

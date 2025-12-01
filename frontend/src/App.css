@@ -12,6 +12,13 @@ body {
   color: #333;
 }
 
+/* modal overlay defaults (used by login/register modals) */
+.modal-overlay { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+
+/* When on dashboard, avoid showing purple/blue modal overlays and body background */
+html.dashboard-mode, body.dashboard-mode { background: #000 !important; background-image: none !important; }
+html.dashboard-mode .modal-overlay, body.dashboard-mode .modal-overlay { background: rgba(0,0,0,0.45) !important; background-image: none !important; }
+
 .App {
   min-height: 100vh;
   display: flex;
