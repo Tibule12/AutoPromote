@@ -24,6 +24,8 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
   const [showCropper, setShowCropper] = useState(false);
   const [cropMeta, setCropMeta] = useState(null);
   const [spotifyTracks, setSpotifyTracks] = useState(extSpotifySelectedTracks || []);
+  const [overlayText, setOverlayText] = useState('');
+  const [overlayPosition, setOverlayPosition] = useState('bottom');
 
   useEffect(()=>{
     // Cleanup URL.createObjectURL to prevent mem leaks
@@ -157,6 +159,10 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
           template: template !== 'none' ? template : undefined
         }
       };
+      // Add overlay metadata if provided
+      if (overlayText) {
+        contentData.meta.overlay = { text: overlayText, position: overlayPosition };
+      }
       // include platform options for preview (e.g., pinterest / spotify)
       // Include platform options for preview
       contentData.platform_options = {
@@ -251,6 +257,8 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
           twitter: selectedPlatformsVal.includes('twitter') ? { message: twitterMessage || undefined } : undefined
         }
       };
+      // Add overlay metadata to submit payload
+      if (overlayText) contentData.meta.overlay = { text: overlayText, position: overlayPosition };
       console.log('[Upload] Content data to send:', contentData);
 
       await onUpload(contentData);
@@ -290,6 +298,23 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
     }
   };
 
+  const handleDrop = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0]) {
+      handleFileChange(ev.dataTransfer.files[0]);
+    }
+  };
+
+  const handleDragOver = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+  };
+
+  const [isDropActive, setIsDropActive] = useState(false);
+  const handleDragEnter = (ev) => { ev.preventDefault(); ev.stopPropagation(); setIsDropActive(true); };
+  const handleDragLeave = (ev) => { ev.preventDefault(); ev.stopPropagation(); setIsDropActive(false); };
+
   const applyTemplate = (t) => {
     if (!t || t === 'none') return;
     // Lightweight template suggestions; these only change metadata
@@ -317,6 +342,42 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
     }
   };
 
+  // Return a lightweight icon (SVG) for a given platform name
+  const getPlatformIcon = (platform) => {
+    switch(platform) {
+      case 'youtube':
+        return (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="14" rx="4" fill="#FF0000"/><path d="M10 9l6 3-6 3V9z" fill="#fff"/></svg>
+        );
+      case 'tiktok':
+        return (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v10.5C11.33 12.5 10.5 12 9.5 12 7 12 5 14 5 16.5S7 21 9.5 21 14 19 14 16.5V7h3V4h-5z" fill="#000"/><path d="M18 2v6h-2V3.9c0 .1-2 .1-2 0V4l-2-.5" fill="#25F4EE"/></svg>
+        );
+      case 'instagram':
+        return (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="5" fill="#E1306C" /><circle cx="12" cy="12" r="4" fill="#fff" /></svg>);
+      case 'facebook':
+        return (<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" fill="#1877F2"/><path d="M14 7h-2c-.8 0-1 .4-1 1v2H14l-.5 2H11v6H9v-6H7v-2h2V8.5C9 6.6 10 5 12 5h2v2z" fill="#fff"/></svg>);
+      case 'twitter':
+        return (<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M23 3.5s-1 1.2-2 1.7c0 0-1.4-1-2 .4 0 0-.8 2 1 2.8 0 0-2.2-.2-3 1 0 0-1 1.8 1 3 0 0-3.4 0-4 1 0 0-1.2 2.4 2 3.2 0 0-4 .6-6-.5 0 0 .2 5 6.5 4.5 0 0 7 0 9-7 0 0 1.7-3.8-1.5-6.2z" fill="#1DA1F2"/></svg>);
+      case 'linkedin':
+        return (<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" fill="#0A66C2"/><path d="M8 10H6v8h2v-8zM7 8a1 1 0 110-2 1 1 0 010 2zM18 16c0-3-2-3.5-2-3.5s0 1 0 3.5h2zM12 9H10v9h2v-4c0-1.6 2-1.7 2 0v4h2v-5c0-3-2-3.8-4-3.8z" fill="#fff"/></svg>);
+      case 'discord':
+        return (<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#495B8C" d="M19 2A2 2 0 0121 4v13a2 2 0 01-2 2H5a2 2 0 01-2-2V4a2 2 0 012-2h14z"/></svg>);
+      case 'reddit':
+        return (<svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="11" r="8" fill="#FF4500"/></svg>);
+      case 'telegram':
+        return (<svg width="20" height="20" viewBox="0 0 24 24"><path d="M21 3L3 10l5 2 2 5 8-14z" fill="#37AEE2"/></svg>);
+      case 'pinterest':
+        return (<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#E60023" d="M12 2C6.5 2 2 6.5 2 12c0 3.8 2.4 7.1 5.9 8.4-.1-.7-.1-1.9 0-2.7.1-.6.6-3.8.6-3.8s-.2-.4-.2-1.1c0-1 .6-1.8 1.3-1.8.6 0 .9.4.9.9 0 .6-.4 1.5-.6 2.4-.2.7.4 1.3 1.1 1.3 1.3 0 2.5-1.3 3-2.1.8-1.2 1.2-2.7 1.2-4.1C17.1 5.3 14.1 3 10.4 3 7 3 4.2 5 4.2 8.1c0 1.6.7 2.7.7 2.7l-.2 1.1c0 .2-.2.6-.4.7C4 14 3.7 13.7 3.7 13.4 3.7 10 5 6.4 9.4 6.4c2.6 0 4.1 1.7 4.1 4 0 3.1-1.6 4.5-2.9 4.5-.9 0-1.4-.6-1 3.5 0 1.1-.1 1.9-.2 2.7 1.9.5 3.8-.2 4.8-1.9 1.5-2.5 1.8-6 1-8.4C18.6 6 17 3 13 3s-8 3-8 9c0 4.8 3.4 7.6 7 7.6 1.5 0 2.8-.1 4-.4.3-.8.5-1.8.5-2.9C17.9 15.1 16.6 14 16.6 14c-.8.9-1.8 1.4-2.9 1.4-1.6 0-2.6-1.4-2.6-3.2 0-1.5.9-2.4 1.9-2.4 1 0 1.8.7 1.8 1.7 0 1.1-.7 2.2-1.6 2.2-.4 0-.7-.2-.7-.6 0-.4.1-.9.3-1.2.3-.4 1.2-1.6 1.2-2.9 0-1.3-.9-2.6-3.1-2.6-3 0-5.1 3-5.1 6 0 1.5.3 2.6 1 3.5 1.1 1.5 3 1.2 3.8.6 1.4-1.1 2.2-4.3 2.2-6.6C18 6.8 15 4 12 4z"/></svg>);
+      case 'spotify':
+        return (<svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#1DB954"/></svg>);
+      case 'snapchat':
+        return (<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#FFFC00" d="M12 2s3.08.42 4 1.5C19 6.5 20 8 18 10s-6 4-6 4-3-1-6-4c-2-2 0-3.5 2-6.5C8.92 2.43 12 2 12 2z"/></svg>);
+      default:
+        return (<div style={{width:20,height:20,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:4,background:'#eee'}}>{platform.charAt(0).toUpperCase()}</div>);
+    }
+  };
+
   return (
     <div className="content-upload-container">
       <form onSubmit={handleSubmit} className="content-upload-form">
@@ -326,17 +387,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             {error}
           </div>
         )}
-        <div className="form-group">
-          <label>Title</label>
-          <input
-            type="text"
-            placeholder="Enter content title"
-            value={title}
-            required
-            onChange={e => setTitle(e.target.value)}
-            className="form-input"
-          />
-        </div>
+        
         <div className="form-group">
           <label>Content Type</label>
           <select
@@ -349,9 +400,91 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             <option value="audio">Audio</option>
           </select>
         </div>
-        <div className="form-group">
-          <label>Templates</label>
-          <select value={template} onChange={e => setTemplate(e.target.value)} className="form-select">
+        <div className="content-upload-grid">
+          <div className="left-column">
+            <div className="form-group">
+              <label htmlFor="content-file-input">File</label>
+              <div className={`file-upload drop-zone ${isDropActive ? 'dragging' : ''}`} onDrop={handleDrop} onDragOver={handleDragOver} onDragEnter={handleDragEnter} onDragLeave={handleDragLeave}>
+                <input
+                  type="file"
+                  id="content-file-input"
+                  accept={type === 'video' ? 'video/*' : (type === 'audio' ? 'audio/*' : 'image/*')}
+                  onChange={e => handleFileChange(e.target.files[0])}
+                  required
+                  className="form-file-input"
+                />
+                <div className="drop-help">Drop files here or click to browse</div>
+                {file && (
+                  <div className="file-info">
+                    Selected file: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Live local file preview and basic editing controls */}
+            {file && (
+              <div className="form-group preview-area">
+                <label>Live Preview</label>
+                <div className="preview-wrapper">
+                  {type === 'video' ? (
+                    <video
+                      ref={videoRef}
+                      src={previewUrl}
+                      controls
+                      className="preview-video"
+                      onLoadedMetadata={(ev) => {
+                        const dur = ev.target.duration || 0;
+                        setDuration(dur);
+                        setTrimEnd(dur);
+                      }}
+                    />
+                  ) : type === 'audio' ? (
+                    <div style={{width:'100%'}}>
+                      <audio src={previewUrl} controls style={{width:'100%'}} onLoadedMetadata={(ev)=>{const dur=ev.target.duration||0; setDuration(dur); setTrimEnd(dur);}} />
+                      <div style={{marginTop:8}}>
+                        <AudioWaveformTrimmer file={file} trimStart={trimStart} trimEnd={trimEnd} onChange={({trimStart: s, trimEnd: e})=>{ if (typeof s !== 'undefined') setTrimStart(s); if (typeof e !== 'undefined') setTrimEnd(e); }} />
+                      </div>
+                    </div>
+                  ) : (
+                    <img
+                      className="preview-image"
+                      src={previewUrl}
+                      alt="Local preview"
+                      style={{transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`}}
+                    />
+                  )}
+                </div>
+                {overlayText && (
+                  <div className={`preview-overlay ${overlayPosition}`}>
+                    <div className="overlay-text">{overlayText}</div>
+                  </div>
+                )}
+                <div className="preview-controls">
+                  {type === 'video' ? (
+                    <div className="video-controls">
+                      <label>Trim Start: <input type="number" min={0} max={duration} step="0.1" value={trimStart} onChange={e=>setTrimStart(parseFloat(e.target.value) || 0)} /> secs</label>
+                      <label>Trim End: <input type="number" min={0} max={duration} step="0.1" value={trimEnd} onChange={e=>setTrimEnd(parseFloat(e.target.value) || duration)} /> secs</label>
+                      <div className="range-row">
+                        <input type="range" min="0" max={duration} step="0.05" value={trimStart} onChange={e=>setTrimStart(parseFloat(e.target.value))} />
+                        <input type="range" min="0" max={duration} step="0.05" value={trimEnd} onChange={e=>setTrimEnd(parseFloat(e.target.value))} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="image-controls">
+                      <button type="button" onClick={()=>setRotate((rotate+90)%360)} className="control-btn">Rotate 90°</button>
+                      <button type="button" onClick={()=>setFlipH(!flipH)} className="control-btn">Flip H</button>
+                      <button type="button" onClick={()=>setFlipV(!flipV)} className="control-btn">Flip V</button>
+                      <button type="button" onClick={()=>setShowCropper(true)} className="control-btn">Crop</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="right-column">
+            <div className="form-group">
+              <label>Templates</label>
+              <select value={template} onChange={e => setTemplate(e.target.value)} className="form-select">
             <option value="none">No Template</option>
             <option value="tiktok">TikTok (9:16)</option>
             <option value="instagram-story">Instagram Story (9:16)</option>
@@ -366,34 +499,42 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             <button type="button" onClick={()=>applyTemplate(template)} className="apply-template-btn">Apply Template</button>
           )}
         </div>
-        <div className="form-group">
-          <label>Target Platforms</label>
-          <div className="platform-toggles">
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('youtube')} onChange={()=>togglePlatform('youtube')} /> YouTube</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('tiktok')} onChange={()=>togglePlatform('tiktok')} /> TikTok</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('instagram')} onChange={()=>togglePlatform('instagram')} /> Instagram</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('facebook')} onChange={()=>togglePlatform('facebook')} /> Facebook</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('twitter')} onChange={()=>togglePlatform('twitter')} /> Twitter</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('linkedin')} onChange={()=>togglePlatform('linkedin')} /> LinkedIn</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('reddit')} onChange={()=>togglePlatform('reddit')} /> Reddit</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('discord')} onChange={()=>togglePlatform('discord')} /> Discord</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('telegram')} onChange={()=>togglePlatform('telegram')} /> Telegram</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('pinterest')} onChange={()=>togglePlatform('pinterest')} /> Pinterest</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('spotify')} onChange={()=>togglePlatform('spotify')} /> Spotify</label>
-            <label><input type="checkbox" checked={selectedPlatformsVal.includes('snapchat')} onChange={()=>togglePlatform('snapchat')} /> Snapchat</label>
-          </div>
-        </div>
-        <div className="form-group">
-          <label>Advanced/Per-platform options</label>
-          <div style={{display:'grid', gap:8}}>
+            <div className="form-group">
+              <label>Target Platforms</label>
+              <div className="platform-grid">
+                {['youtube','tiktok','instagram','facebook','twitter','linkedin','reddit','discord','telegram','pinterest','spotify','snapchat'].map((p) => (
+                  <div key={p} role="button" tabIndex={0} aria-pressed={selectedPlatformsVal.includes(p)} aria-label={p.charAt(0).toUpperCase()+p.slice(1)} onKeyDown={(e)=>{ if (e.key==='Enter' || e.key===' ') { e.preventDefault(); togglePlatform(p); } }} className={`platform-tile ${selectedPlatformsVal.includes(p) ? 'selected' : ''}`} onClick={()=>togglePlatform(p)}>
+                    <input type="checkbox" className="sr-only" aria-hidden="true" checked={selectedPlatformsVal.includes(p)} readOnly />
+                    <div className="platform-icon" aria-hidden="true">{getPlatformIcon(p)}</div>
+                    <div className="platform-name">{p.charAt(0).toUpperCase()+p.slice(1)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Advanced/Per-platform options</label>
+              <div style={{display:'grid', gap:8}}>
             {selectedPlatformsVal.includes('discord') && <input placeholder="Discord channel ID" value={discordChannelId} onChange={(e)=>{ setDiscordChannelId(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('discord','channelId', e.target.value); }} />}
             {selectedPlatformsVal.includes('telegram') && <input placeholder="Telegram chat ID" value={telegramChatId} onChange={(e)=>{ setTelegramChatId(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('telegram','chatId', e.target.value); }} />}
             {selectedPlatformsVal.includes('reddit') && <input placeholder="Reddit subreddit" value={redditSubreddit} onChange={(e)=>{ setRedditSubreddit(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('reddit','subreddit', e.target.value); }} />}
             {selectedPlatformsVal.includes('linkedin') && <input placeholder="LinkedIn organization/company ID" value={linkedinCompanyId} onChange={(e)=>{ setLinkedinCompanyId(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('linkedin','companyId', e.target.value); }} />}
             {selectedPlatformsVal.includes('twitter') && <input placeholder="Twitter message (optional)" value={twitterMessage} onChange={(e)=>{ setTwitterMessage(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('twitter','message', e.target.value); }} />}
           </div>
+            </div>
+          </div>
         </div>
-        <div className="form-group">
+        <div className="form-group full-width">
+          <label>Title</label>
+          <input
+            type="text"
+            placeholder="Enter content title"
+            value={title}
+            required
+            onChange={e => setTitle(e.target.value)}
+            className="form-input"
+          />
+        </div>
+        <div className="form-group full-width">
           <label>Description</label>
           <input
             type="text"
@@ -405,22 +546,18 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
           />
         </div>
         <div className="form-group">
-          <label>File</label>
-          <div className="file-upload">
-            <input
-              type="file"
-              accept={type === 'video' ? 'video/*' : (type === 'audio' ? 'audio/*' : 'image/*')}
-              onChange={e => handleFileChange(e.target.files[0])}
-              required
-              className="form-file-input"
-            />
-            {file && (
-              <div className="file-info">
-                Selected file: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-              </div>
-            )}
+          <label>Overlay Text (optional)</label>
+          <input placeholder="Add overlay text (e.g., 'New Video')" value={overlayText} onChange={(e)=>setOverlayText(e.target.value)} className="form-input" />
+          <div style={{display:'flex', gap:8, marginTop:8}}>
+            <select value={overlayPosition} onChange={(e)=>setOverlayPosition(e.target.value)} className="form-select" style={{width: '40%'}}>
+              <option value="top">Top</option>
+              <option value="center">Center</option>
+              <option value="bottom">Bottom</option>
+            </select>
+            <button type="button" className="control-btn" onClick={()=>{ if (!overlayText) setOverlayText('New Content'); else setOverlayText(''); }}>Toggle Text</button>
           </div>
         </div>
+        
         {/* Pinterest options (board selection + note) */}
         <div className="form-group">
           <label>Pinterest Options (optional)</label>
@@ -455,60 +592,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             <input placeholder="Or create new playlist name (optional)" value={spotifyPlaylistName} onChange={(e)=>{ setSpotifyPlaylistName(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('spotify','name', e.target.value); }} style={{padding:'.5rem', borderRadius:8}} />
           </div>
         </div>
-        {/* Live local file preview and basic editing controls */}
-        {file && (
-          <div className="form-group preview-area">
-            <label>Live Preview</label>
-            <div className="preview-wrapper">
-              {type === 'video' ? (
-                <video
-                  ref={videoRef}
-                  src={previewUrl}
-                  controls
-                  className="preview-video"
-                  onLoadedMetadata={(ev) => {
-                    const dur = ev.target.duration || 0;
-                    setDuration(dur);
-                    setTrimEnd(dur);
-                  }}
-                />
-              ) : type === 'audio' ? (
-                <div style={{width:'100%'}}>
-                  <audio src={previewUrl} controls style={{width:'100%'}} onLoadedMetadata={(ev)=>{const dur=ev.target.duration||0; setDuration(dur); setTrimEnd(dur);}} />
-                  <div style={{marginTop:8}}>
-                    <AudioWaveformTrimmer file={file} trimStart={trimStart} trimEnd={trimEnd} onChange={({trimStart: s, trimEnd: e})=>{ if (typeof s !== 'undefined') setTrimStart(s); if (typeof e !== 'undefined') setTrimEnd(e); }} />
-                  </div>
-                </div>
-              ) : (
-                <img
-                  className="preview-image"
-                  src={previewUrl}
-                  alt="Local preview"
-                  style={{transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`}}
-                />
-              )}
-            </div>
-            <div className="preview-controls">
-              {type === 'video' ? (
-                <div className="video-controls">
-                  <label>Trim Start: <input type="number" min={0} max={duration} step="0.1" value={trimStart} onChange={e=>setTrimStart(parseFloat(e.target.value) || 0)} /> secs</label>
-                  <label>Trim End: <input type="number" min={0} max={duration} step="0.1" value={trimEnd} onChange={e=>setTrimEnd(parseFloat(e.target.value) || duration)} /> secs</label>
-                  <div className="range-row">
-                    <input type="range" min="0" max={duration} step="0.05" value={trimStart} onChange={e=>setTrimStart(parseFloat(e.target.value))} />
-                    <input type="range" min="0" max={duration} step="0.05" value={trimEnd} onChange={e=>setTrimEnd(parseFloat(e.target.value))} />
-                  </div>
-                </div>
-              ) : (
-                <div className="image-controls">
-                  <button type="button" onClick={()=>setRotate((rotate+90)%360)} className="control-btn">Rotate 90°</button>
-                  <button type="button" onClick={()=>setFlipH(!flipH)} className="control-btn">Flip H</button>
-                  <button type="button" onClick={()=>setFlipV(!flipV)} className="control-btn">Flip V</button>
-                  <button type="button" onClick={()=>setShowCropper(true)} className="control-btn">Crop</button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        
         <div style={{display:'flex', gap:'.5rem', marginTop:'.5rem'}}>
           <button 
             type="button"
