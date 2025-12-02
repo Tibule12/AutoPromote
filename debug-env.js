@@ -4,7 +4,7 @@ console.log('Testing environment variable validation...');
 dotenv.config();
 
 // Validate required environment variables
-const requiredEnvVars = ['JWT_SECRET', 'SUPABASE_URL', 'SUPABASE_ANON_KEY'];
+const requiredEnvVars = ['JWT_SECRET', 'FIREBASE_SERVICE_ACCOUNT'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 console.log('Required variables check:');

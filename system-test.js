@@ -323,7 +323,7 @@ async function testContentManagement(userToken, userId) {
     try {
       const contentToUpdate = userContent.find(c => c.id === contentId);
       if (contentToUpdate) {
-        // Create a document in Firestore to update directly since the patch endpoint may expect Supabase
+        // Update directly in Firestore because the patch endpoint may not reflect recent schema changes
         await admin.firestore().collection('content').doc(contentId).update({
           status: 'published',
           updated_at: new Date()

@@ -11,6 +11,7 @@ import EarningsPanel from './UserDashboardTabs/EarningsPanel';
 import ConnectionsPanel from './UserDashboardTabs/ConnectionsPanel';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
+import toast, { Toaster } from 'react-hot-toast';
 
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
 
@@ -79,27 +80,29 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 
 	const withAuth = async (cb) => {
 		const currentUser = auth?.currentUser;
-		if (!currentUser) { alert('Please sign in first'); return; }
+		if (!currentUser) { toast.error('Please sign in first'); return; }
 		const token = await currentUser.getIdToken(true);
 		return cb(token);
 	};
 
-	const doPause = async (id) => { await withAuth(async (token) => { try { await fetch(API_ENDPOINTS.SCHEDULE_PAUSE(id), { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); triggerSchedulesRefresh(); } catch (e) { console.warn(e); alert('Failed to pause schedule'); } }); };
-	const doResume = async (id) => { await withAuth(async (token) => { try { await fetch(API_ENDPOINTS.SCHEDULE_RESUME(id), { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); triggerSchedulesRefresh(); } catch (e) { console.warn(e); alert('Failed to resume schedule'); } }); };
-	const doReschedule = async (id, when) => { await withAuth(async (token) => { try { await fetch(API_ENDPOINTS.SCHEDULE_RESCHEDULE(id), { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ time: when }) }); triggerSchedulesRefresh(); } catch (e) { console.warn(e); alert('Failed to reschedule'); } }); };
-	const doDelete = async (id) => { if (!window.confirm('Delete this schedule?')) return; await withAuth(async (token) => { try { await fetch(API_ENDPOINTS.SCHEDULE_DELETE(id), { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); triggerSchedulesRefresh(); } catch (e) { console.warn(e); alert('Failed to delete schedule'); } }); };
+	const doPause = async (id) => { await withAuth(async (token) => { try { await fetch(API_ENDPOINTS.SCHEDULE_PAUSE(id), { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); triggerSchedulesRefresh(); toast.success('Schedule paused'); } catch (e) { console.warn(e); toast.error('Failed to pause schedule'); } }); };
+	const doResume = async (id) => { await withAuth(async (token) => { try { await fetch(API_ENDPOINTS.SCHEDULE_RESUME(id), { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); triggerSchedulesRefresh(); toast.success('Schedule resumed'); } catch (e) { console.warn(e); toast.error('Failed to resume schedule'); } }); };
+	const doReschedule = async (id, when) => { await withAuth(async (token) => { try { await fetch(API_ENDPOINTS.SCHEDULE_RESCHEDULE(id), { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ time: when }) }); triggerSchedulesRefresh(); toast.success('Schedule updated'); } catch (e) { console.warn(e); toast.error('Failed to reschedule'); } }); };
+	const doDelete = async (id) => { if (!window.confirm('Delete this schedule?')) return; await withAuth(async (token) => { try { await fetch(API_ENDPOINTS.SCHEDULE_DELETE(id), { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); triggerSchedulesRefresh(); toast.success('Schedule deleted'); } catch (e) { console.warn(e); toast.error('Failed to delete schedule'); } }); };
 
 	const createSchedule = async ({ contentId, time, frequency, platforms = [], platformOptions = {} }) => {
+		const toastId = toast.loading('Creating schedule...');
 		try {
 			await withAuth(async token => {
 				if (!contentId) throw new Error('Missing contentId');
 				const res = await fetch(`${API_BASE_URL}/api/content/${contentId}/promotion-schedules`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ time, frequency, platforms, platformOptions }) });
 				if (!res.ok) throw new Error('Failed to create schedule');
 				triggerSchedulesRefresh();
+				toast.success('Schedule created successfully!', { id: toastId });
 			});
 		} catch (e) {
 			console.warn(e);
-			alert('Failed to create schedule');
+			toast.error('Failed to create schedule', { id: toastId });
 		}
 	};
 
@@ -121,7 +124,20 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 	};
 
 	const loadYouTubeStatus = async () => {
-		try { const cur = auth.currentUser; if (!cur) return setYouTubeStatus({ connected: false }); const token = await cur.getIdToken(true); const res = await fetch(API_ENDPOINTS.YOUTUBE_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }); if (!res.ok) return setYouTubeStatus({ connected: false }); const d = await res.json(); setYouTubeStatus({ connected: !!d.connected, channel: d.channel || null }); } catch (_) { setYouTubeStatus({ connected: false }); }
+		try {
+			const cur = auth.currentUser; if (!cur) return setYouTubeStatus({ connected: false });
+			const token = await cur.getIdToken(true);
+			const res = await fetch(API_ENDPOINTS.YOUTUBE_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+			if (!res.ok) return setYouTubeStatus({ connected: false });
+			const d = await res.json();
+			setYouTubeStatus({ connected: !!d.connected, channel: d.channel || null });
+			if (d.connected) {
+				try {
+					const md = await fetch(API_ENDPOINTS.YOUTUBE_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+					if (md.ok) { const mdj = await md.json(); setPlatformMetadata(prev => ({ ...(prev||{}), youtube: mdj.meta || {} })); }
+				} catch (_) {}
+			}
+		} catch (_) { setYouTubeStatus({ connected: false }); }
 	};
 
 	const loadFacebookStatus = async () => { try { const cur = auth.currentUser; if (!cur) return setFacebookStatus({ connected: false }); const token = await cur.getIdToken(true); const res = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }); if (!res.ok) return setFacebookStatus({ connected: false }); const d = await res.json(); setFacebookStatus({ connected: !!d.connected, meta: d.meta || null }); } catch (_) { setFacebookStatus({ connected: false }); } };
@@ -131,7 +147,22 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 	const loadTwitterStatus = async () => { try { const cur = auth.currentUser; if (!cur) return setTwitterStatus({ connected: false }); const token = await cur.getIdToken(true); const res = await fetch(API_ENDPOINTS.TWITTER_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }); if (!res.ok) return setTwitterStatus({ connected: false }); const d = await res.json(); setTwitterStatus({ connected: !!d.connected, identity: d.identity || null }); } catch (_) { setTwitterStatus({ connected: false }); } };
 
 	const loadRedditStatus = async () => { try { const cur = auth.currentUser; if (!cur) return setRedditStatus({ connected: false }); const token = await cur.getIdToken(true); const res = await fetch(API_ENDPOINTS.REDDIT_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }); if (!res.ok) return setRedditStatus({ connected: false }); const d = await res.json(); setRedditStatus({ connected: !!d.connected, meta: d.meta || null }); } catch (_) { setRedditStatus({ connected: false }); } };
-	const loadDiscordStatus = async () => { try { const cur = auth.currentUser; if (!cur) return setDiscordStatus({ connected: false }); const token = await cur.getIdToken(true); const res = await fetch(API_ENDPOINTS.DISCORD_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }); if (!res.ok) return setDiscordStatus({ connected: false }); const d = await res.json(); setDiscordStatus({ connected: !!d.connected, meta: d.meta || null }); } catch (_) { setDiscordStatus({ connected: false }); } };
+	const loadDiscordStatus = async () => {
+		try {
+			const cur = auth.currentUser; if (!cur) return setDiscordStatus({ connected: false });
+			const token = await cur.getIdToken(true);
+			const res = await fetch(API_ENDPOINTS.DISCORD_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+			if (!res.ok) return setDiscordStatus({ connected: false });
+			const d = await res.json();
+			setDiscordStatus({ connected: !!d.connected, meta: d.meta || null });
+			if (d.connected) {
+				try {
+					const md = await fetch(API_ENDPOINTS.DISCORD_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+					if (md.ok) { const mdj = await md.json(); setPlatformMetadata(prev => ({ ...(prev||{}), discord: mdj.meta || {} })); }
+				} catch (_) {}
+			}
+		} catch (_) { setDiscordStatus({ connected: false }); }
+	};
 
 	const loadLinkedinStatus = async () => { try { const cur = auth.currentUser; if (!cur) return setLinkedinStatus({ connected: false }); const token = await cur.getIdToken(true); const res = await fetch(API_ENDPOINTS.LINKEDIN_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }); if (!res.ok) return setLinkedinStatus({ connected: false }); const d = await res.json(); setLinkedinStatus({ connected: !!d.connected, meta: d.meta || null }); } catch (_) { setLinkedinStatus({ connected: false }); } };
 
@@ -139,9 +170,50 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 
 	const loadPinterestStatus = async () => { try { const cur = auth.currentUser; if (!cur) return setPinterestStatus({ connected: false, meta: null }); const token = await cur.getIdToken(true); const res = await fetch(API_ENDPOINTS.PINTEREST_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }); if (!res.ok) return setPinterestStatus({ connected: false, meta: null }); const d = await res.json(); setPinterestStatus({ connected: !!d.connected, meta: d.meta || null }); if (d.connected) { try { const md = await fetch(API_ENDPOINTS.PINTEREST_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }); if (md.ok) { const mdj = await md.json(); setPlatformMetadata(prev => ({ ...(prev||{}), pinterest: mdj.meta || {} })); } } catch (_) {} } } catch (_) { setPinterestStatus({ connected: false, meta: null }); } };
 
-	const loadSnapchatStatus = async () => { try { const cur = auth.currentUser; if (!cur) return setSnapchatStatus({ connected: false }); const token = await cur.getIdToken(true); const res = await fetch(API_ENDPOINTS.SNAPCHAT_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }); if (!res.ok) return setSnapchatStatus({ connected: false }); const d = await res.json(); setSnapchatStatus({ connected: !!d.connected, profile: d.profile || null }); } catch (_) { setSnapchatStatus({ connected: false }); } };
+	const loadSnapchatStatus = async () => {
+		try {
+			const cur = auth.currentUser; if (!cur) return setSnapchatStatus({ connected: false });
+			const token = await cur.getIdToken(true);
+			const res = await fetch(API_ENDPOINTS.SNAPCHAT_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+			if (!res.ok) return setSnapchatStatus({ connected: false });
+			const d = await res.json();
+			setSnapchatStatus({ connected: !!d.connected, profile: d.profile || null });
+			if (d.connected) {
+				try {
+					const md = await fetch(API_ENDPOINTS.SNAPCHAT_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+					if (md.ok) { const mdj = await md.json(); setPlatformMetadata(prev => ({ ...(prev||{}), snapchat: mdj.meta || {} })); }
+				} catch (_) {}
+			}
+		} catch (_) { setSnapchatStatus({ connected: false }); }
+	};
 
 	useEffect(() => {
+		// Check URL params for OAuth callback success/error
+		const params = new URLSearchParams(window.location.search);
+		const oauthPlatform = params.get('oauth') || params.get('youtube') || params.get('tiktok') || params.get('facebook') || params.get('twitter') || params.get('spotify') || params.get('discord') || params.get('reddit') || params.get('linkedin') || params.get('pinterest') || params.get('telegram') || params.get('snapchat');
+		const oauthStatus = params.get('status');
+		
+		if (oauthPlatform) {
+			// Clear URL params without reload
+			const cleanUrl = window.location.pathname + window.location.hash;
+			window.history.replaceState({}, '', cleanUrl);
+			
+			// Show toast notification
+			if (oauthStatus === 'success' || params.get(oauthPlatform) === 'connected') {
+				setConnectBanner({ type: 'success', message: `${oauthPlatform.charAt(0).toUpperCase() + oauthPlatform.slice(1)} connected successfully!` });
+				toast.success(`${oauthPlatform.charAt(0).toUpperCase() + oauthPlatform.slice(1)} connected successfully!`);
+				// Auto-dismiss after 5 seconds
+				setTimeout(() => setConnectBanner(null), 5000);
+			} else if (oauthStatus === 'error' || params.get(oauthPlatform) === 'error') {
+				setConnectBanner({ type: 'error', message: `Failed to connect ${oauthPlatform}. Please try again.` });
+				toast.error(`Failed to connect ${oauthPlatform}. Please try again.`);
+				setTimeout(() => setConnectBanner(null), 5000);
+			}
+			
+			// Trigger refresh of all platform statuses
+			setTimeout(() => refreshAllStatus(), 500);
+		}
+
 		// If we need to load platform statuses at mount, we can kick off a fetch here
 		const loadInitial = async () => {
 			try {
@@ -174,7 +246,6 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 			loadLinkedinStatus();
 			loadTelegramStatus();
 			loadPinterestStatus();
-			// If coming back from OAuth, the URL may contain flags like ?tiktok=connected
 		const loadEarnings = async () => {
 			try { const currentUser = auth.currentUser; if (!currentUser) return; const token = await currentUser.getIdToken(true); const res = await fetch(API_ENDPOINTS.EARNINGS_SUMMARY, { headers: { Authorization: `Bearer ${token}` } }); if (res.ok) { const d = await res.json(); setEarnings(d); } } catch (e) { console.warn(e); }
 		};
@@ -198,8 +269,8 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 		if (!onSaveDefaults) return;
 		try {
 			await onSaveDefaults({ timezone: tz, defaultPlatforms: defaultsPlatforms, defaultFrequency: defaultsFrequency });
-			alert('Defaults saved');
-		} catch (e) { alert('Failed to save defaults'); }
+			toast.success('Defaults saved successfully!');
+		} catch (e) { toast.error('Failed to save defaults'); }
 	};
 
 	// Connect handlers; these call the generic openProviderAuth where appropriate
@@ -231,23 +302,46 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 			try {
 				const res = await fetch(API_ENDPOINTS.PLATFORM_DISCONNECT(platform), { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
 				if (!res.ok) { const j = await res.json().catch(()=>({})); throw new Error(j.error || 'Failed to disconnect'); }
-				// Refresh statuses
+				
+				// Show success banner
+				setConnectBanner({ type: 'success', message: `${platform.charAt(0).toUpperCase() + platform.slice(1)} disconnected successfully` });
+				setTimeout(() => setConnectBanner(null), 4000);
+				
+				// Immediately update local state to reflect disconnection
+				switch(platform) {
+					case 'tiktok': setTikTokStatus({ connected: false, meta: null }); break;
+					case 'facebook': setFacebookStatus({ connected: false, meta: null }); break;
+					case 'youtube': setYouTubeStatus({ connected: false, channel: null }); break;
+					case 'twitter': setTwitterStatus({ connected: false, identity: null }); break;
+					case 'snapchat': setSnapchatStatus({ connected: false, profile: null }); break;
+					case 'spotify': setSpotifyStatus({ connected: false, meta: null }); break;
+					case 'reddit': setRedditStatus({ connected: false, meta: null }); break;
+					case 'discord': setDiscordStatus({ connected: false, meta: null }); break;
+					case 'linkedin': setLinkedinStatus({ connected: false, meta: null }); break;
+					case 'telegram': setTelegramStatus({ connected: false, meta: null }); break;
+					case 'pinterest': setPinterestStatus({ connected: false, meta: null }); break;
+				}
+				
+				// Refresh statuses from server to confirm
 				await refreshAllStatus();
-				alert('Disconnected');
 			} catch (e) {
-				console.warn(e); alert(e.message || 'Failed to disconnect');
+				console.warn(e);
+				setConnectBanner({ type: 'error', message: e.message || 'Failed to disconnect' });
+				setTimeout(() => setConnectBanner(null), 4000);
+				toast.error(e.message || 'Failed to disconnect');
 			}
 		});
 	};
 
-	const markAllNotificationsRead = async () => { try { await withAuth(async (token) => { await fetch(API_ENDPOINTS.NOTIFICATIONS_MARK_READ, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({}) }); }); setNotifs([]); } catch (e) { console.warn(e); alert('Failed to mark notifications as read'); } };
+	const markAllNotificationsRead = async () => { try { await withAuth(async (token) => { await fetch(API_ENDPOINTS.NOTIFICATIONS_MARK_READ, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({}) }); }); setNotifs([]); toast.success('All notifications marked as read'); } catch (e) { console.warn(e); toast.error('Failed to mark notifications as read'); } };
 
-	const claimPayout = async () => { try { await withAuth(async (token) => { const res = await fetch(API_ENDPOINTS.EARNINGS_PAYOUT_SELF, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); if (!res.ok) throw new Error('Payout failed'); alert('Payout requested'); }); } catch (e) { console.warn(e); alert('Payout request failed'); } };
+	const claimPayout = async () => { const toastId = toast.loading('Requesting payout...'); try { await withAuth(async (token) => { const res = await fetch(API_ENDPOINTS.EARNINGS_PAYOUT_SELF, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); if (!res.ok) throw new Error('Payout failed'); toast.success('Payout requested successfully!', { id: toastId }); }); } catch (e) { console.warn(e); toast.error('Payout request failed', { id: toastId }); } };
 
-	const openProviderAuth = async (endpointUrl) => { try { const currentUser = auth.currentUser; if (!currentUser) { alert('Please sign in first'); return; } const token = await currentUser.getIdToken(true); const res = await fetch(endpointUrl, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }); const data = await res.json(); if (!res.ok || !data?.authUrl) throw new Error('Auth prepare failed'); const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || ''); if (isMobile) window.location.href = data.authUrl; else window.open(data.authUrl, '_blank'); } catch (e) { console.warn(e); alert(e.message || 'Failed to start auth'); } };
+	const openProviderAuth = async (endpointUrl) => { try { const currentUser = auth.currentUser; if (!currentUser) { toast.error('Please sign in first'); return; } const token = await currentUser.getIdToken(true); const res = await fetch(endpointUrl, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }); const data = await res.json(); if (!res.ok || !data?.authUrl) throw new Error('Auth prepare failed'); toast.success('Opening authentication window...'); const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || ''); if (isMobile) window.location.href = data.authUrl; else window.open(data.authUrl, '_blank'); } catch (e) { console.warn(e); toast.error(e.message || 'Failed to start auth'); } };
 
 	return (
 		<div className="dashboard-root">
+			<Toaster position="top-right" toastOptions={{ duration: 4000, style: { background: '#1a1a2e', color: '#fff' } }} />
 			<header className="dashboard-topbar" aria-label="Top navigation">
 				<button className="hamburger" aria-label={sidebarOpen ? 'Close menu' : 'Open menu'} aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(v => !v)}>
 					<span />
@@ -285,6 +379,28 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 			</aside>
 
 			<main className="dashboard-main">
+				{connectBanner && (
+					<div className={`connect-banner ${connectBanner.type}`} style={{
+						padding: '1rem',
+						marginBottom: '1rem',
+						borderRadius: '8px',
+						background: connectBanner.type === 'success' ? '#10b981' : '#ef4444',
+						color: '#fff',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'space-between'
+					}}>
+						<span>{connectBanner.message}</span>
+						<button onClick={() => setConnectBanner(null)} style={{
+							background: 'transparent',
+							border: 'none',
+							color: '#fff',
+							cursor: 'pointer',
+							fontSize: '1.2rem',
+							padding: '0 0.5rem'
+						}}>×</button>
+					</div>
+				)}
 				{activeTab === 'profile' && (
 					<ProfilePanel user={user} stats={stats}
 						tiktokStatus={tiktokStatus} facebookStatus={facebookStatus} youtubeStatus={youtubeStatus} twitterStatus={twitterStatus} snapchatStatus={snapchatStatus}

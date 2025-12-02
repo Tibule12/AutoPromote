@@ -1030,6 +1030,42 @@ router.post('/:platform/sample-promote', authMiddleware, platformWriteLimiter, a
       }
     });
 
+// POST /api/telegram/auth/verify
+// Verify Telegram Login Widget auth data and store connection
+router.post('/telegram/auth/verify', authMiddleware, platformWriteLimiter, async (req, res) => {
+  try {
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+    
+    const { storeTelegramAuth } = require('../services/telegramService');
+    const authData = req.body;
+    
+    if (!authData || !authData.id || !authData.hash) {
+      return res.status(400).json({ ok: false, error: 'invalid_auth_data' });
+    }
+    
+    const result = await storeTelegramAuth({ uid, authData });
+    
+    // Update user's connectedPlatforms
+    try {
+      const userRef = db.collection('users').doc(uid);
+      await userRef.set({
+        connectedPlatforms: admin.firestore.FieldValue.arrayUnion('telegram')
+      }, { merge: true });
+    } catch (_) {}
+    
+    return res.json({
+      ok: true,
+      platform: 'telegram',
+      userId: result.userId,
+      username: result.username,
+      chatId: result.chatId
+    });
+  } catch (e) {
+    return res.status(400).json({ ok: false, error: e.message || 'auth_verification_failed' });
+  }
+});
+
 // POST /api/telegram/webhook
 // Telegram will POST updates here when the bot receives messages. We support
 // validating an optional secret token (set via TELEGRAM_WEBHOOK_SECRET). When

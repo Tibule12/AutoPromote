@@ -1,68 +1,54 @@
-# Promotion Table Fix - TODO List
+# Promotion Schedule Collection Checklist
 
 ## Current Status
-- ✅ Users table exists
-- ✅ Content table exists  
-- ✅ Analytics table exists
-- ❌ Promotion_schedules table missing - causing server errors
+- ✅ `users` collection exists
+- ✅ `content` collection exists  
+- ✅ `analytics` collection exists
+- ⚠️ `promotion_schedules` collection must be provisioned in Firestore for scheduling to work
 
 ## Steps to Fix
 
-### 1. Manual Table Creation in Supabase
-Go to your Supabase dashboard and execute this SQL in the SQL Editor:
+### 1. Create the Collection in Firestore
+1. Open the Firebase console → Firestore Database → Data
+2. Add a new collection named `promotion_schedules`
+3. Insert a placeholder document (can be deleted later) with the following fields to bootstrap indexes:
+   - `contentId` (string)
+   - `platform` (string)
+   - `scheduleType` (string, e.g. `specific` or `recurring`)
+   - `startTime` (timestamp)
+   - `isActive` (boolean)
+   - `budget` (number)
+   - `targetMetrics` (map)
 
-```sql
--- Promotion schedules table
-CREATE TABLE IF NOT EXISTS public.promotion_schedules (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  content_id uuid REFERENCES public.content(id) ON DELETE CASCADE,
-  platform text NOT NULL,
-  schedule_type text NOT NULL DEFAULT 'specific', -- specific, recurring
-  start_time timestamp with time zone NOT NULL,
-  end_time timestamp with time zone,
-  frequency text, -- daily, weekly, monthly (for recurring schedules)
-  is_active boolean DEFAULT true,
-  budget numeric DEFAULT 0,
-  target_metrics jsonb DEFAULT '{}', -- Platform-specific target metrics
-  created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone
-);
-
--- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_promotion_schedules_content ON public.promotion_schedules(content_id);
-CREATE INDEX IF NOT EXISTS idx_promotion_schedules_active ON public.promotion_schedules(is_active);
-CREATE INDEX IF NOT EXISTS idx_promotion_schedules_time ON public.promotion_schedules(start_time);
-```
-
-### 2. Verification Steps
-After creating the table, run these tests:
+### 2. Deploy the Matching Indexes
+If you have not yet deployed Firestore indexes, run:
 
 ```bash
-# Test database connection and table access
-node test-db-connection.js
-
-# Test the server
-node start-server.js
+firebase deploy --only firestore:indexes
 ```
 
-### 3. Expected Results
-- ✅ `node test-db-connection.js` should show all tests passing
-- ✅ `node start-server.js` should start without promotion_schedules errors
-- ✅ Server should be accessible at http://localhost:5000
+Confirm that `firestore.indexes.json` contains composite indexes for `promotion_schedules` on `contentId`, `isActive`, and `startTime`. Add them if missing.
+
+### 3. Verification Steps
+```bash
+# Smoke test Firestore connectivity
+node validate-firebase-setup.js
+
+# Start the server and watch logs for scheduling errors
+npm start
+```
+
+Expected results:
+- ✅ Validation script confirms Firestore access
+- ✅ Server boots without `promotion_schedules` errors
+- ✅ Scheduling endpoints return data
 
 ### 4. Troubleshooting
-If you still encounter issues:
-1. Check that the table was created successfully in Supabase dashboard
-2. Verify your environment variables are correct
-3. Ensure you're using the service role key for proper permissions
-
-## Files Created for This Fix
-- `migrate-schema.js` - General schema migration script
-- `execute-schema-sql.js` - Manual SQL execution instructions
-- `create-tables-via-usage.js` - Table existence checker
-- `create-promotion-schedules-only.js` - Focused promotion table fix
+1. Confirm the service account in `.env` has read/write access to Firestore
+2. Ensure security rules allow the backend service account to access `promotion_schedules`
+3. If queries fail, review the Firestore profiler to confirm indexes are in place
 
 ## Next Steps After Fix
-1. Test promotion functionality
-2. Verify all API endpoints work
-3. Test the frontend integration
+1. Run promotion scheduling tests (`test/test-promotion-service.js`)
+2. Exercise the frontend scheduling UI
+3. Monitor Firestore for new documents created by automation

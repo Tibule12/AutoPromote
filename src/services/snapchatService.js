@@ -11,46 +11,144 @@ if (!fetchFn) {
 const { tokensFromDoc } = require('./connectionTokenUtils');
 
 async function postToSnapchat({ contentId, payload, reason, uid }) {
-  // For now, Snapchat posting is ad/creative oriented. We simulate a creative creation
-  // if no ad account or access token exists for the user.
+  // Snapchat posting creates ad creatives via Marketing API
   let conn = null;
   try {
     const snap = await db.collection('users').doc(uid).collection('connections').doc('snapchat').get();
     if (snap.exists) conn = snap.data() || {};
   } catch (_) {}
-  // If tokens stored encrypted or in separate fields, normalize into conn.tokens
+  
+  // Normalize tokens
   if (conn) {
     const tokens = tokensFromDoc(conn);
     if (tokens) conn.tokens = tokens;
   }
-  const hasAccessToken = (conn && (conn.accessToken || (conn.tokens && conn.tokens.access_token)));
-  if (!hasAccessToken) return { platform: 'snapchat', simulated: true, reason: 'missing_credentials' };
-  // Expect payload to include `media_url` or `creative` fields
+  
+  const accessToken = conn?.accessToken || conn?.tokens?.access_token;
+  if (!accessToken) {
+    return { platform: 'snapchat', success: false, error: 'missing_access_token' };
+  }
+  
+  // Check token expiration
+  if (conn.expiresAt && conn.expiresAt < Date.now()) {
+    return { platform: 'snapchat', success: false, error: 'token_expired' };
+  }
+  
+  // Get ad account ID from connection metadata or platform options
+  const adAccountId = conn.profile?.adAccountId || 
+                      conn.meta?.adAccountId || 
+                      payload.platformOptions?.snapchat?.adAccountId ||
+                      process.env.SNAPCHAT_AD_ACCOUNT_ID;
+  
+  if (!adAccountId) {
+    return { platform: 'snapchat', success: false, error: 'missing_ad_account_id' };
+  }
+  
+  // First, upload media to Snapchat if needed
+  let mediaId = null;
+  if (payload.url || payload.mediaUrl) {
+    try {
+      const mediaUrl = payload.url || payload.mediaUrl;
+      const mediaType = payload.type === 'video' ? 'VIDEO' : 'IMAGE';
+      
+      // Upload media to Snapchat
+      const mediaUploadRes = await safeFetch(`https://adsapi.snapchat.com/v1/adaccounts/${adAccountId}/media`, fetchFn, {
+        fetchOptions: {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: payload.title || 'AutoPromote Media',
+            type: mediaType,
+            media_url: mediaUrl
+          })
+        },
+        allowHosts: ['adsapi.snapchat.com'],
+        requireHttps: true
+      });
+      
+      if (mediaUploadRes.ok) {
+        const mediaData = await mediaUploadRes.json();
+        mediaId = mediaData.media?.id || mediaData.id;
+      }
+    } catch (e) {
+      console.warn('[Snapchat] Media upload failed:', e.message);
+    }
+  }
+  
+  // Build creative payload
   const creativePayload = {
-    title: payload.title || payload.message || `AutoPromote ${contentId}`,
-    description: payload.description || '',
-    media_url: payload.mediaUrl || payload.url || null,
-    campaign_id: payload.campaignId || (payload.platformOptions && payload.platformOptions.snapchat && payload.platformOptions.snapchat.campaignId) || null
+    name: payload.title || `AutoPromote ${contentId}`,
+    type: 'SNAP_AD',
+    headline: payload.title || payload.message,
+    brand_name: payload.brandName || 'AutoPromote',
+    shareable: true,
+    ad_product: 'SNAP_AD'
   };
+  
+  if (mediaId) {
+    creativePayload.top_snap_media_id = mediaId;
+  }
+  
+  // Add call-to-action if provided
+  if (payload.callToAction || payload.platformOptions?.snapchat?.callToAction) {
+    creativePayload.call_to_action = payload.callToAction || payload.platformOptions.snapchat.callToAction;
+  }
+  
+  // Add web URL if provided
+  if (payload.webUrl || payload.platformOptions?.snapchat?.webUrl) {
+    creativePayload.web_view_url = payload.webUrl || payload.platformOptions.snapchat.webUrl;
+  }
+  
   try {
-    const res = await safeFetch('https://adsapi.snapchat.com/v1/adaccounts/{ad_account_id}/creatives', fetchFn, {
+    const res = await safeFetch(`https://adsapi.snapchat.com/v1/adaccounts/${adAccountId}/creatives`, fetchFn, {
       fetchOptions: {
         method: 'POST',
-        headers: { Authorization: `Bearer ${conn.accessToken || (conn.tokens && conn.tokens.access_token)}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...creativePayload })
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(creativePayload)
       },
       allowHosts: ['adsapi.snapchat.com'],
       requireHttps: true
     });
-    const json = await (res.ok ? res.json() : res.text().then(t => ({ error: t })));
-    if (!res.ok) return { platform: 'snapchat', success: false, error: json.error || JSON.stringify(json) };
-    const creativeId = json.id || json.creative_id || null;
-    if (contentId && creativeId && uid) {
-      try { await db.collection('content').doc(contentId).set({ snapchat: { creativeId, createdAt: new Date().toISOString() } }, { merge: true }); } catch (_) {}
+    
+    const json = await (res.ok ? res.json() : res.text().then(t => {
+      try { return JSON.parse(t); } catch (_) { return { error: t }; }
+    }));
+    
+    if (!res.ok) {
+      const errorMsg = json.request_status?.message || json.error || JSON.stringify(json);
+      return { platform: 'snapchat', success: false, error: errorMsg, status: res.status };
     }
-    return { platform: 'snapchat', success: true, creativeId, raw: json };
+    
+    const creativeId = json.creative?.id || json.id;
+    
+    // Store creative ID in content document
+    if (contentId && creativeId && uid) {
+      try {
+        await db.collection('content').doc(contentId).set({
+          platforms: { snapchat: { creativeId, mediaId, createdAt: new Date().toISOString(), status: 'created' } }
+        }, { merge: true });
+      } catch (_) {}
+    }
+    
+    return {
+      platform: 'snapchat',
+      success: true,
+      creativeId,
+      mediaId,
+      data: json
+    };
   } catch (e) {
-    return { platform: 'snapchat', success: false, error: e.message || 'snapchat_api_failed' };
+    return {
+      platform: 'snapchat',
+      success: false,
+      error: e.message || 'snapchat_api_failed'
+    };
   }
 }
 

@@ -81,9 +81,9 @@
 
 7. Migrate Data (if needed):
    ```bash
-   # Export your Supabase data first
-   # Then run the migration script
-   node migrate-to-firebase.js
+   # Export data from your previous database first
+   # Then run the migration script you prepared for Firestore
+   node scripts/migrate-data.js
    ```
 
 ## Important Notes
@@ -94,12 +94,12 @@
    - Review and test security rules thoroughly
 
 2. Migration:
-   - Back up all Supabase data before migration
+   - Back up all legacy data before migration
    - Test migration with a small dataset first
    - Verify data integrity after migration
 
 3. Testing:
-   - Update all test files to use Firebase instead of Supabase
+   - Ensure all test files use Firebase helpers
    - Test authentication flows thoroughly
    - Verify file upload functionality
 
