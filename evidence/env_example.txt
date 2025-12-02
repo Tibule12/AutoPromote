@@ -1,5 +1,0 @@
-(Redacted copy of .env.example - safe placeholders only)
-
-(The full .env.example in repo contains guidance for Firebase service account usage via env vars, and demonstrates that secrets are expected to be provided via environment variables or provider secret stores.)
-
-See .env.example in repo for full details. Do NOT upload real .env with secrets.

@@ -41,7 +41,7 @@ function App() {
     // eslint-disable-next-line
   }, [user]);
 
-  // Fetch user profile from backend (which gets it from Supabase)
+  // Fetch user profile from backend (mirrors Firestore state)
   const fetchUserProfile = async () => {
     try {
       if (!auth.currentUser) return;

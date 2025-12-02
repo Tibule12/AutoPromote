@@ -4,14 +4,15 @@
 
 This commit fixes multiple deployment errors on Render:
 
-1. Missing Supabase dependency: `Error: Cannot find module '@supabase/supabase-js'`
+1. Legacy dependency reference: `Error: Cannot find module '<legacy-module>'`
 2. Missing service account file: `Error: Cannot find module '../serviceAccountKey.json'`
 3. Missing adminTestRoutes module: `Error: Cannot find module './adminTestRoutes'`
 
 ## Changes Made
 
-### 1. Supabase Fix
-- Created a Firebase-based compatibility layer in `supabaseClient.js` that handles any legacy code still referencing Supabase
+### 1. Firebase-Only Cleanup
+- Removed the unused legacy dependency and the compatibility layer that wrapped it
+- Verified all modules now import the shared Firebase admin instance instead
 
 ### 2. Firebase Service Account Fix
 - Updated the Firebase configuration to check for credentials in multiple locations:

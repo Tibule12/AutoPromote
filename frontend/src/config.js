@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
   // YouTube endpoints
   YOUTUBE_AUTH_START: `${API_BASE_URL}/api/youtube/auth/start`,
   YOUTUBE_STATUS: `${API_BASE_URL}/api/youtube/status`,
+  YOUTUBE_METADATA: `${API_BASE_URL}/api/youtube/metadata`,
   YOUTUBE_UPLOAD: `${API_BASE_URL}/api/youtube/upload`,
 
   // Instagram endpoints (via Facebook Graph)
@@ -58,6 +59,9 @@ export const API_ENDPOINTS = {
   // Snapchat endpoints
   SNAPCHAT_AUTH_PREPARE: `${API_BASE_URL}/api/snapchat/oauth/prepare`,
   SNAPCHAT_STATUS: `${API_BASE_URL}/api/snapchat/status`,
+  SNAPCHAT_METADATA: `${API_BASE_URL}/api/snapchat/metadata`,
+  SNAPCHAT_CREATIVE: `${API_BASE_URL}/api/snapchat/creative`,
+  SNAPCHAT_ANALYTICS: (creativeId) => `${API_BASE_URL}/api/snapchat/analytics/${creativeId}`,
 
   // Schedule actions (construct with ID)
   SCHEDULE_PAUSE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/pause`,

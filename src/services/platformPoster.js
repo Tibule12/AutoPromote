@@ -41,7 +41,21 @@ async function buildContentContext(contentId) {
   } catch (_) { return {}; }
 }
 
-async function postToFacebook({ contentId, payload, reason }) {
+async function postToFacebook({ contentId, payload, reason, uid }) {
+  // Try user-context posting first
+  if (uid) {
+    try {
+      const { postToFacebook: fbPost } = require('./facebookService');
+      const result = await fbPost({ contentId, payload, reason, uid });
+      if (result.success || result.error !== 'not_authenticated') {
+        return result;
+      }
+    } catch (e) {
+      console.warn('[Facebook] User-context post failed, falling back to page token:', e.message);
+    }
+  }
+  
+  // Fallback to server page token (legacy)
   const PAGE_ID = process.env.FACEBOOK_PAGE_ID;
   const PAGE_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
   if (!PAGE_ID || !PAGE_TOKEN) {
@@ -124,16 +138,10 @@ async function postToInstagram({ contentId, payload, reason }) {
   }
 }
 
-async function postToTikTok({ contentId, payload, reason }) {
-  const uploadUrl = payload?.videoUrl || null;
-  const hasCreds = process.env.TIKTOK_CLIENT_KEY && process.env.TIKTOK_CLIENT_SECRET && process.env.TIKTOK_ACCESS_TOKEN;
-  if (!hasCreds) {
-    return { platform: 'tiktok', simulated: true, reason: 'missing_credentials', videoUrl: uploadUrl };
-  }
+async function postToTikTok({ contentId, payload, reason, uid }) {
   try {
-    const { uploadTikTokVideo } = require('./tiktokService');
-    const res = await uploadTikTokVideo({ contentId, payload });
-    return { platform: 'tiktok', success: true, videoId: res.videoId, reason };
+    const { postToTikTok: tiktokPost } = require('./tiktokService');
+    return await tiktokPost({ contentId, payload, reason, uid });
   } catch (e) {
     return { platform: 'tiktok', success: false, error: e.message || 'tiktok_upload_failed', reason };
   }

@@ -5,7 +5,7 @@ const path = require('path');
 require('dotenv').config();
 
 // Check if required environment variables are set
-const requiredEnvVars = ['JWT_SECRET', 'SUPABASE_URL', 'SUPABASE_ANON_KEY'];
+const requiredEnvVars = ['JWT_SECRET', 'FIREBASE_SERVICE_ACCOUNT'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {

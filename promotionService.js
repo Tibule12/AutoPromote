@@ -110,49 +110,45 @@ class PromotionService {
   async createNextRecurrence(schedule) {
     try {
       const nextTime = this.calculateNextPromotionTime(
-        schedule.start_time, 
+        schedule.startTime,
         schedule.frequency,
-        schedule.recurrence_pattern
+        schedule.recurrencePattern
       );
 
       if (!nextTime) return null;
 
-      const nextSchedule = {
-        content_id: schedule.content_id,
-        platform: schedule.platform,
-        schedule_type: schedule.schedule_type,
-        start_time: nextTime,
-        frequency: schedule.frequency,
-        is_active: schedule.is_active,
-        budget: schedule.budget,
-        target_metrics: schedule.target_metrics,
-        platform_specific_settings: schedule.platform_specific_settings,
-        recurrence_pattern: schedule.recurrence_pattern,
-        parent_schedule_id: schedule.id,
-        timezone: schedule.timezone
-      };
-
-      // Check max occurrences
-      if (schedule.max_occurrences) {
+      // Check max occurrences before creating a new document
+      if (schedule.maxOccurrences) {
         const occurrenceCount = await this.getOccurrenceCount(schedule.id);
-        if (occurrenceCount >= schedule.max_occurrences) {
-          console.log(`⏹️ Max occurrences (${schedule.max_occurrences}) reached for schedule ${schedule.id}`);
+        if (occurrenceCount >= schedule.maxOccurrences) {
+          console.log(`⏹️ Max occurrences (${schedule.maxOccurrences}) reached for schedule ${schedule.id}`);
           return null;
         }
       }
 
-      const { data, error } = await supabase
-        .from('promotion_schedules')
-        .insert([nextSchedule])
-        .select();
+      const nextRef = db.collection('promotion_schedules').doc();
+      const nextSchedule = {
+        contentId: schedule.contentId,
+        platform: schedule.platform,
+        scheduleType: schedule.scheduleType,
+        startTime: nextTime,
+        endTime: schedule.endTime || null,
+        frequency: schedule.frequency,
+        isActive: schedule.isActive,
+        budget: schedule.budget,
+        targetMetrics: schedule.targetMetrics || {},
+        platformSpecificSettings: schedule.platformSpecificSettings || {},
+        recurrencePattern: schedule.recurrencePattern || null,
+        parentScheduleId: schedule.id,
+        timezone: schedule.timezone || 'UTC',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
 
-      if (error) {
-        console.error('Error creating next recurrence:', error);
-        return null;
-      }
-
-      console.log(`✅ Created next recurrence for schedule ${schedule.id}:`, data[0]);
-      return data[0];
+      await nextRef.set(nextSchedule);
+      const created = { id: nextRef.id, ...nextSchedule };
+      console.log(`✅ Created next recurrence for schedule ${schedule.id}:`, created);
+      return created;
     } catch (error) {
       console.error('Error in createNextRecurrence:', error);
       return null;
