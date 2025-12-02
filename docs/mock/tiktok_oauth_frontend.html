@@ -60,7 +60,7 @@
     startBtn.addEventListener('click', ()=>{
       const clientId = encodeURIComponent(document.getElementById('clientId').value.trim());
       const redirect = encodeURIComponent(document.getElementById('redirectUri').value.trim());
-      const scope = encodeURIComponent('user.info.basic video.upload analytics.read');
+      const scope = encodeURIComponent('user.info.profile video.upload video.publish video.data');
       const state = encodeURIComponent(urlState);
       const authUrl = `https://sandbox.tiktok.com/platform/oauth/authorize?client_key=${clientId}&response_type=code&scope=${scope}&redirect_uri=${redirect}&state=${state}`;
       const log = document.getElementById('log'); log.style.display='block'; log.textContent = 'Pretend redirect URL:\n' + authUrl + '\n\nYou can paste this URL into a browser tab (or show it in the recording) to illustrate the consent URL for reviewers.';

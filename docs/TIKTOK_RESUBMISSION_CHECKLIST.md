@@ -14,7 +14,7 @@ Before recording
 - App mode: Sandbox (for demo)
 - Website URL: https://www.autopromote.org
 - Redirect URI(s): https://www.autopromote.org/api/tiktok/callback (and any variations you use)
-- Scopes enabled: user.info.basic, video.upload, analytics.read (only include scopes demonstrated in the video)
+- Scopes enabled: user.info.profile, video.upload, video.publish, video.data (only include scopes demonstrated in the video)
 
 3. Mock backend (optional, for local recording)
 - If you want to simulate a token exchange or share responses locally, run the mock backend:
@@ -43,7 +43,7 @@ Follow the timestamps exactly, showing each step clearly. Narrate or annotate wh
 - If using the mock frontend, paste the generated authorize URL into the browser to display the consent screen.
 
 1:10-1:30 — TikTok consent screen
-- Show the TikTok consent UI with the requested scopes visible (user.info.basic, video.upload, analytics.read).
+- Show the TikTok consent UI with the requested scopes visible (user.info.profile, video.upload, video.publish, video.data).
 - Highlight the scopes in the screen recording.
 
 1:30-1:45 — Accept consent and capture auth code
@@ -66,7 +66,7 @@ Follow the timestamps exactly, showing each step clearly. Narrate or annotate wh
 Submission notes (copy/paste into TikTok review)
 
 Thank you for reviewing AutoPromote. We have configured Website URL and Redirect URI on the same domain (https://www.autopromote.org). This submission uses TikTok Sandbox for demonstration. The video shows:
-- OAuth consent screen listing requested scopes (user.info.basic, video.upload, analytics.read)
+- OAuth consent screen listing requested scopes (user.info.profile, video.upload, video.publish, video.data)
 - Code-to-token exchange and an example user profile call
 - Uploading a sandbox video and showing the sandbox video id
 - Fetching analytics for the sandbox video

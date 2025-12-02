@@ -20,7 +20,7 @@ Set these in your backend environment (Render, etc.):
 - TIKTOK_PROD_CLIENT_SECRET=...
 - TIKTOK_PROD_REDIRECT_URI=https://www.autopromote.org/api/tiktok/callback
 - DASHBOARD_URL=https://www.autopromote.org (optional; used for postMessage origin and redirects)
- - TIKTOK_OAUTH_SCOPES=user.info.profile user.info.stats video.list (optional) - set this to the exact space-separated scopes you selected in the TikTok Developer Portal to avoid "Scopes mismatch" during review
+- TIKTOK_OAUTH_SCOPES="user.info.profile video.upload video.publish video.data" (set to the exact space-separated scopes you selected in the TikTok Developer Portal; this default covers profile display, uploads, publishes, and analytics)
 
 Optional (for demo/testing):
 - TIKTOK_USE_MOCK=true (forces using /mock/tiktok_oauth_frontend.html for the authorize step)
@@ -46,7 +46,7 @@ Optional (for demo/testing):
 - Website URL: https://www.autopromote.org
 - Redirect URI(s): https://www.autopromote.org/api/tiktok/callback
   - TikTok requires exact match; add both if you use multiple variants.
- - Scopes: ensure the scopes listed in the TikTok Developer Portal exactly match the value of `TIKTOK_OAUTH_SCOPES` configured in your backend (or the default provided above). For example: `user.info.profile user.info.stats video.list`.
+- Scopes: ensure the scopes listed in the TikTok Developer Portal exactly match the value of `TIKTOK_OAUTH_SCOPES` configured in your backend (or the default provided above). For example: `user.info.profile video.upload video.publish video.data`.
 
 ## Validation checklist
 - [ ] /tiktok-demo renders at https://www.autopromote.org/tiktok-demo

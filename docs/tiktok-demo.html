@@ -121,9 +121,9 @@
 0:45–1:10  — Start AutoPromote -> Click "Sign in with TikTok" (show OAuth request URL or button)
 1:10–1:30  — Show TikTok consent screen with requested scopes listed
 1:30–1:45  — Accept consent -> show app receiving auth code or token
-1:45–2:10  — Call user profile endpoint (user.info scope) and show returned sample data
-2:10–2:40  — Upload or create a sandbox video (upload scope); show success response / sandbox ID
-2:40–2:50  — Fetch analytics for the sandbox video (analytics scope) and show sample metrics
+1:45–2:10  — Call user profile endpoint (user.info.profile scope) and show returned sample data
+2:10–2:40  — Upload or create a sandbox video (video.upload scope) and show success response / sandbox ID
+2:40–2:50  — Publish + fetch analytics for the sandbox video (video.publish + video.data scopes) and show sample metrics
 2:50–3:00  — Closing slide: contact info and confirmation that all scopes were demonstrated
       </pre>
     </section>
@@ -131,9 +131,10 @@
     <section class="card">
       <h2>Scopes requested</h2>
       <ul>
-        <li>user.info.basic — read user profile</li>
-        <li>video.upload — publish video to sandbox</li>
-        <li>analytics.read — read analytics for content</li>
+        <li>user.info.profile — read user profile</li>
+        <li>video.upload — upload media into TikTok</li>
+        <li>video.publish — finalize uploaded media so it appears on the account</li>
+        <li>video.data — read analytics for the videos posted via AutoPromote</li>
       </ul>
       <p class="small">Only scopes demonstrated in the video were requested. If a scope is not demonstrated, we removed it before submission.</p>
     </section>
