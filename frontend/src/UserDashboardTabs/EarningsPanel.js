@@ -22,11 +22,18 @@ const EarningsPanel = ({ earnings, onClaim }) => {
       });
       
       if (res.ok) {
-        const data = await res.json();
-        setPayoutHistory(data.payouts || []);
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await res.json();
+          setPayoutHistory(data.payouts || []);
+        } else {
+          console.warn('Payout history endpoint returned non-JSON response');
+          setPayoutHistory([]);
+        }
       }
     } catch (e) {
       console.warn('Failed to load payout history:', e);
+      setPayoutHistory([]);
     } finally {
       setLoading(false);
     }

@@ -73,4 +73,67 @@ router.get('/overview', authMiddleware, async (req, res) => {
   }
 });
 
+// Get user analytics with time range
+router.get('/user', authMiddleware, async (req, res) => {
+  try {
+    const range = req.query.range || '7d';
+    const uid = req.user?.uid || req.userId;
+    if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+
+    // Parse time range
+    const now = new Date();
+    let startDate = new Date();
+    if (range === '24h') startDate.setHours(now.getHours() - 24);
+    else if (range === '7d') startDate.setDate(now.getDate() - 7);
+    else if (range === '30d') startDate.setDate(now.getDate() - 30);
+    else if (range === '90d') startDate.setDate(now.getDate() - 90);
+    else startDate.setDate(now.getDate() - 7); // default to 7d
+
+    // Get user's content in time range
+    const contentRef = db.collection('content')
+      .where('userId', '==', uid)
+      .where('createdAt', '>=', startDate.toISOString())
+      .orderBy('createdAt', 'desc');
+    
+    const contentSnapshot = await contentRef.get();
+    
+    let totalViews = 0;
+    let totalLikes = 0;
+    let totalShares = 0;
+    let totalRevenue = 0;
+    const contentByPlatform = {};
+    
+    contentSnapshot.forEach(doc => {
+      const content = doc.data();
+      totalViews += content.views || 0;
+      totalLikes += content.likes || 0;
+      totalShares += content.shares || 0;
+      totalRevenue += content.revenue || 0;
+      
+      // Aggregate by platform
+      const platform = content.platform || 'unknown';
+      if (!contentByPlatform[platform]) {
+        contentByPlatform[platform] = { count: 0, views: 0, likes: 0, revenue: 0 };
+      }
+      contentByPlatform[platform].count++;
+      contentByPlatform[platform].views += content.views || 0;
+      contentByPlatform[platform].likes += content.likes || 0;
+      contentByPlatform[platform].revenue += content.revenue || 0;
+    });
+
+    res.json({
+      range,
+      totalContent: contentSnapshot.size,
+      totalViews,
+      totalLikes,
+      totalShares,
+      totalRevenue,
+      byPlatform: contentByPlatform
+    });
+  } catch (error) {
+    console.error('Error getting user analytics:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
