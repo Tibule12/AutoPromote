@@ -151,6 +151,10 @@ function constructAuthUrl(cfg, state, scope) {
 	return `${base}?client_key=${encodeURIComponent(key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}`;
 }
 
+// Make scopes configurable so we can easily match the TikTok dev portal
+// and avoid "Scopes mismatch" during review.
+const TIKTOK_OAUTH_SCOPES = (process.env.TIKTOK_OAUTH_SCOPES || 'user.info.profile user.info.stats video.list').trim();
+
 // Diagnostics: quick config visibility with sandbox/production breakdown
 router.get('/config', ttPublicLimiter, (req, res) => {
 	const cfg = activeConfig();
@@ -213,7 +217,7 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 			mode: TIKTOK_ENV,
 			isPopup
 		}, { merge: true });
-		const scope = 'user.info.basic';
+		const scope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
 		const authUrl = constructAuthUrl(cfg, state, scope);
 		// Store authUrl for debugging (non-sensitive)
 		await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({ lastAuthUrl: authUrl }, { merge: true });
@@ -243,7 +247,7 @@ router.get('/auth', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || 
 			createdAt: admin.firestore.FieldValue.serverTimestamp(),
 		}, { merge: true });
 		// Request minimal scope for initial approval; can expand later (video.upload requires program access)
-		const scope = 'user.info.basic';
+		const scope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
 		const authUrl = constructAuthUrl(cfg, state, scope);
 		// Instead of redirecting immediately, render a small HTML page with a button
 		// so the user must click to continue. This ensures any deep-linking the
@@ -302,7 +306,7 @@ if (process.env.TIKTOK_DEBUG_ALLOW === 'true') {
 			const uid = req.query.uid || 'debug-uid';
 			const nonce = 'debug-nonce';
 			const state = `${uid}.${nonce}`;
-			const scope = 'user.info.basic';
+			const scope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
 			const authUrl = constructAuthUrl(cfg, state, scope);
 			res.set('Content-Type', 'text/html');
 			return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok (debug)</title><script>/* debug-only page */</script></head><body><a href="${authUrl}">${authUrl}</a></body></html>`);
@@ -331,7 +335,7 @@ router.get('/auth/start', ttWriteLimiter, async (req, res) => {
 			nonce,
 			createdAt: admin.firestore.FieldValue.serverTimestamp(),
 		}, { merge: true });
-		const scope = 'user.info.basic';
+		const scope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
 		const authUrl = constructAuthUrl(cfg, state, scope);
 		// Render a click-to-continue page instead of redirecting immediately.
 	res.set('Content-Type', 'text/html');
@@ -385,6 +389,8 @@ router.get('/auth/preflight', authMiddleware, ttPublicLimiter, async (req, res) 
 	if (cfg.redirect && /\/$/.test(cfg.redirect)) issues.push('redirect_trailing_slash');
 	if (!scope.includes('user.info.basic')) issues.push('scope_missing_user.info.basic');
 	if (cfg.key && /[^a-zA-Z0-9]/.test(cfg.key)) issues.push('client_key_non_alphanumeric_chars');
+	const envScope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
+	if (scope !== envScope) issues.push('scope_mismatch_env');
 	res.json({
 		mode: TIKTOK_ENV,
 		constructedAuthUrl: url,
@@ -412,7 +418,7 @@ router.get('/auth/preflight/public', ttPublicLimiter, async (req, res) => {
 		if (cfg.key && cfg.key.length < 10) issues.push('client_key_suspicious_length');
 		if (!/^https:\/\//.test(cfg.redirect || '')) issues.push('redirect_not_https');
 		if (cfg.redirect && /\/$/.test(cfg.redirect)) issues.push('redirect_trailing_slash');
-		if (!scope.includes('user.info.basic')) issues.push('scope_missing_user.info.basic');
+		if (!scope.includes((process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES).split(' ')[0])) issues.push('scope_missing_expected');
 		if (cfg.key && /[^a-zA-Z0-9]/.test(cfg.key)) issues.push('client_key_non_alphanumeric_chars');
 		res.json({
 			mode: TIKTOK_ENV,
