@@ -29,7 +29,8 @@ exports.getTikTokAuthUrl = functions.region(region).https.onCall(async (data, co
   }
   const state = data.state || Math.random().toString(36).substring(2);
   // Keep function scope broad here; frontend route uses narrower initial scope
-  const scope = 'user.info.basic';
+  const TIKTOK_OAUTH_SCOPES = (process.env.TIKTOK_OAUTH_SCOPES || 'user.info.profile user.info.stats video.list').trim();
+  const scope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
   const url = `https://www.tiktok.com/v2/auth/authorize/?client_key=${TIKTOK_CLIENT_KEY}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(TIKTOK_REDIRECT_URI)}&state=${state}`;
   return { url, mode: TIKTOK_ENV };
 });
