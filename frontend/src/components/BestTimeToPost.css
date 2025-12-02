@@ -1,0 +1,80 @@
+.best-time-to-post {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.best-time-to-post.now {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.best-time-to-post.later {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+}
+
+.best-time-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.best-time-content {
+  flex: 1;
+}
+
+.best-time-message {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.best-time-details {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+@media (max-width: 640px) {
+  .best-time-to-post {
+    padding: 12px;
+  }
+  
+  .best-time-icon {
+    font-size: 28px;
+  }
+  
+  .best-time-message {
+    font-size: 14px;
+  }
+  
+  .best-time-details {
+    font-size: 12px;
+  }
+}
