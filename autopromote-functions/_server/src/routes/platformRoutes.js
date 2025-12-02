@@ -100,9 +100,10 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
   if (cached && cached.data && (now - cached.ts) < PLATFORM_STATUS_TTL_MS) {
     return res.json(cached.data);
   }
+});
 
-  // GET /api/spotify/metadata - returns playlists/metadata for connected Spotify user
-  router.get('/spotify/metadata', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+// GET /api/spotify/metadata - returns playlists/metadata for connected Spotify user
+router.get('/spotify/metadata', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
     try {
       const uid = req.userId || req.user?.uid;
       if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
@@ -127,10 +128,10 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
     } catch (e) {
       return res.status(500).json({ ok: false, platform: 'spotify', error: e.message || 'unknown_error' });
     }
-  });
+});
 
-  // GET /api/spotify/search - search tracks using Spotify API for the connected user
-  router.get('/spotify/search', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+// GET /api/spotify/search - search tracks using Spotify API for the connected user
+router.get('/spotify/search', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
     try {
       const uid = req.userId || req.user?.uid;
       if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });

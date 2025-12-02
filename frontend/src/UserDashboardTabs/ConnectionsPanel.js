@@ -10,27 +10,57 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
     const summary = platformSummary?.summary || {};
     switch(platform) {
       case 'twitter':
-        return twitterStatus?.identity?.username || summary.twitter?.username || twitterStatus?.identity?.name || null;
+        return twitterStatus?.identity?.username 
+          ? `@${twitterStatus.identity.username}` 
+          : (summary.twitter?.username ? `@${summary.twitter.username}` : (twitterStatus?.identity?.name || null));
       case 'tiktok':
-        return tiktokStatus?.meta?.display_name || summary.tiktok?.display_name || null;
+        return tiktokStatus?.profile?.username 
+          ? `@${tiktokStatus.profile.username}`
+          : (tiktokStatus?.meta?.display_name || summary.tiktok?.display_name || null);
       case 'facebook':
-        return facebookStatus?.meta?.pages?.[0]?.name || summary.facebook?.pages?.[0] || null;
+        return facebookStatus?.profile?.name 
+          || facebookStatus?.profile?.email
+          || (facebookStatus?.pages?.[0]?.name ? `Page: ${facebookStatus.pages[0].name}` : null)
+          || (facebookStatus?.meta?.pages?.[0]?.name ? `Page: ${facebookStatus.meta.pages[0].name}` : null)
+          || summary.facebook?.pages?.[0] 
+          || null;
       case 'youtube':
-        return youtubeStatus?.channel?.snippet?.title || summary.youtube?.channelTitle || null;
+        return youtubeStatus?.channel?.snippet?.title 
+          || summary.youtube?.channelTitle 
+          || null;
       case 'spotify':
-        return spotifyStatus?.meta?.display_name || summary.spotify?.display_name || null;
+        return spotifyStatus?.profile?.display_name 
+          || spotifyStatus?.meta?.display_name 
+          || summary.spotify?.display_name 
+          || null;
       case 'reddit':
-        return redditStatus?.meta?.username || summary.reddit?.name || null;
+        return redditStatus?.profile?.username 
+          ? `u/${redditStatus.profile.username}`
+          : (redditStatus?.meta?.username ? `u/${redditStatus.meta.username}` : (summary.reddit?.name ? `u/${summary.reddit.name}` : null));
       case 'discord':
-        return discordStatus?.meta?.username || summary.discord?.username || null;
+        return discordStatus?.profile?.username 
+          ? `${discordStatus.profile.username}${discordStatus.profile.discriminator ? '#' + discordStatus.profile.discriminator : ''}`
+          : (discordStatus?.meta?.username || summary.discord?.username || null);
       case 'linkedin':
-        return linkedinStatus?.meta?.organizations?.[0]?.name || summary.linkedin?.organizations?.[0] || null;
+        return linkedinStatus?.profile?.name
+          || linkedinStatus?.profile?.email
+          || (linkedinStatus?.meta?.organizations?.[0]?.name || summary.linkedin?.organizations?.[0] || null);
       case 'telegram':
-        return telegramStatus?.meta?.chatId || summary.telegram?.chatId || null;
+        return telegramStatus?.profile?.username 
+          ? `@${telegramStatus.profile.username}`
+          : (telegramStatus?.profile?.first_name 
+            ? `${telegramStatus.profile.first_name}${telegramStatus.profile.last_name ? ' ' + telegramStatus.profile.last_name : ''}`
+            : (telegramStatus?.meta?.chatId || summary.telegram?.chatId || null));
       case 'pinterest':
-        return pinterestStatus?.meta?.boards?.[0]?.name || summary.pinterest?.boards || null;
+        return pinterestStatus?.profile?.username
+          || (pinterestStatus?.meta?.boards?.[0]?.name ? `Board: ${pinterestStatus.meta.boards[0].name}` : null)
+          || summary.pinterest?.boards 
+          || null;
       case 'snapchat':
-        return snapchatStatus?.profile?.username || null;
+        return snapchatStatus?.profile?.displayName
+          || snapchatStatus?.profile?.username
+          || snapchatStatus?.profile?.externalId
+          || null;
       default:
         return null;
     }
@@ -42,7 +72,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {twitterStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>Twitter connected{getPlatformLabel('twitter') ? ` — ${getPlatformLabel('twitter')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('twitter') || 'Twitter connected'}</span>
               <button className="check-quality" onClick={handleConnectTwitter}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect Twitter" className="check-quality" onClick={()=>handleDisconnectPlatform('twitter')}>Disconnect</button>}
             </>
@@ -56,7 +86,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {tiktokStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>TikTok connected{getPlatformLabel('tiktok') ? ` — ${getPlatformLabel('tiktok')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('tiktok') || 'TikTok connected'}</span>
               <button className="check-quality" onClick={handleConnectTikTok}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect TikTok" className="check-quality" onClick={()=>handleDisconnectPlatform('tiktok')}>Disconnect</button>}
             </>
@@ -70,7 +100,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {facebookStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>Instagram connected{getPlatformLabel('facebook') ? ` — ${getPlatformLabel('facebook')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('facebook') || 'Instagram connected'}</span>
               <button className="check-quality" onClick={handleConnectFacebook}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect Facebook" className="check-quality" onClick={()=>handleDisconnectPlatform('facebook')}>Disconnect</button>}
             </>
@@ -84,7 +114,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {snapchatStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>Snapchat connected{getPlatformLabel('snapchat') ? ` — ${getPlatformLabel('snapchat')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('snapchat') || 'Snapchat connected'}</span>
               <button className="check-quality" onClick={handleConnectSnapchat}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect Snapchat" className="check-quality" onClick={()=>handleDisconnectPlatform('snapchat')}>Disconnect</button>}
             </>
@@ -98,7 +128,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {facebookStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>Facebook connected{getPlatformLabel('facebook') ? ` — ${getPlatformLabel('facebook')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('facebook') || 'Facebook connected'}</span>
               <button className="check-quality" onClick={handleConnectFacebook}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect Facebook" className="check-quality" onClick={()=>handleDisconnectPlatform('facebook')}>Disconnect</button>}
             </>
@@ -112,7 +142,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {youtubeStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>YouTube connected{getPlatformLabel('youtube') ? ` — ${getPlatformLabel('youtube')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('youtube') || 'YouTube connected'}</span>
               <button className="check-quality" onClick={handleConnectYouTube}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect YouTube" className="check-quality" onClick={()=>handleDisconnectPlatform('youtube')}>Disconnect</button>}
             </>
@@ -126,7 +156,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {spotifyStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>Spotify connected{getPlatformLabel('spotify') ? ` — ${getPlatformLabel('spotify')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('spotify') || 'Spotify connected'}</span>
               <button className="check-quality" onClick={handleConnectSpotify}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect Spotify" className="check-quality" onClick={()=>handleDisconnectPlatform('spotify')}>Disconnect</button>}
             </>
@@ -140,7 +170,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {redditStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>Reddit connected{getPlatformLabel('reddit') ? ` — ${getPlatformLabel('reddit')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('reddit') || 'Reddit connected'}</span>
               <button className="check-quality" onClick={handleConnectReddit}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect Reddit" className="check-quality" onClick={()=>handleDisconnectPlatform('reddit')}>Disconnect</button>}
             </>
@@ -154,7 +184,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {discordStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>Discord connected{getPlatformLabel('discord') ? ` — ${getPlatformLabel('discord')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('discord') || 'Discord connected'}</span>
               <button className="check-quality" onClick={handleConnectDiscord}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect Discord" className="check-quality" onClick={()=>handleDisconnectPlatform('discord')}>Disconnect</button>}
             </>
@@ -168,7 +198,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {linkedinStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>LinkedIn connected{getPlatformLabel('linkedin') ? ` — ${getPlatformLabel('linkedin')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('linkedin') || 'LinkedIn connected'}</span>
               <button className="check-quality" onClick={handleConnectLinkedin}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect LinkedIn" className="check-quality" onClick={()=>handleDisconnectPlatform('linkedin')}>Disconnect</button>}
             </>
@@ -182,7 +212,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {telegramStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>Telegram connected{getPlatformLabel('telegram') ? ` — ${getPlatformLabel('telegram')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('telegram') || 'Telegram connected'}</span>
               <button className="check-quality" onClick={handleConnectTelegram}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect Telegram" className="check-quality" onClick={()=>handleDisconnectPlatform('telegram')}>Disconnect</button>}
             </>
@@ -196,7 +226,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {pinterestStatus?.connected ? (
             <>
-              <span style={{color:'#cbd5e1'}}>Pinterest connected{getPlatformLabel('pinterest') ? ` — ${getPlatformLabel('pinterest')}` : ''}</span>
+              <span style={{color:'#cbd5e1'}}>{getPlatformLabel('pinterest') || 'Pinterest connected'}</span>
               <button className="check-quality" onClick={handleConnectPinterest}>Reconnect</button>
               {handleDisconnectPlatform && <button aria-label="Disconnect Pinterest" className="check-quality" onClick={()=>handleDisconnectPlatform('pinterest')}>Disconnect</button>}
             </>
