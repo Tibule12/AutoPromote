@@ -6,6 +6,19 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import SpotifyTrackSearch from './components/SpotifyTrackSearch';
 import ImageCropper from './components/ImageCropper';
 import AudioWaveformTrimmer from './components/AudioWaveformTrimmer';
+import EmojiPicker from './components/EmojiPicker';
+import FilterEffects from './components/FilterEffects';
+import HashtagSuggestions from './components/HashtagSuggestions';
+import DraftManager from './components/DraftManager';
+import ProgressIndicator from './components/ProgressIndicator';
+import BestTimeToPost from './components/BestTimeToPost';
+
+// Security: Escape HTML to prevent XSS attacks
+const escapeHtml = (text) => {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+};
 
 function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, platformOptions: extPlatformOptions, setPlatformOption: extSetPlatformOption, selectedPlatforms: extSelectedPlatforms, setSelectedPlatforms: extSetSelectedPlatforms, spotifySelectedTracks: extSpotifySelectedTracks, setSpotifySelectedTracks: extSetSpotifySelectedTracks }) {
   const [title, setTitle] = useState('');
@@ -26,6 +39,16 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
   const [spotifyTracks, setSpotifyTracks] = useState(extSpotifySelectedTracks || []);
   const [overlayText, setOverlayText] = useState('');
   const [overlayPosition, setOverlayPosition] = useState('bottom');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiTarget, setEmojiTarget] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState(null);
+  const [hashtags, setHashtags] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [showProgress, setShowProgress] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [textStyles, setTextStyles] = useState({ fontSize: 16, color: '#ffffff', fontWeight: 'bold', shadow: true });
+  const titleInputRef = useRef(null);
+  const descInputRef = useRef(null);
 
   useEffect(()=>{
     // Cleanup URL.createObjectURL to prevent mem leaks
@@ -35,6 +58,36 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
       }
     };
   }, [previewUrl]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Ctrl/Cmd + Enter to submit
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !isUploading) {
+        e.preventDefault();
+        handleSubmit(e);
+      }
+      // Ctrl/Cmd + P to preview
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p' && !isPreviewing) {
+        e.preventDefault();
+        handlePreview(e);
+      }
+      // Ctrl/Cmd + S to save draft
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        const draft = getCurrentDraft();
+        if (draft.title) {
+          const saved = JSON.parse(localStorage.getItem('contentDrafts') || '[]');
+          const newDraft = { ...draft, id: Date.now(), savedAt: new Date().toISOString() };
+          localStorage.setItem('contentDrafts', JSON.stringify([newDraft, ...saved].slice(0, 10)));
+          alert('✅ Draft saved!');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isUploading, isPreviewing, title, description]);
 
   // Sync pinterest boards from parent-controlled metadata
   useEffect(()=>{
@@ -194,6 +247,9 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
     e.preventDefault();
     setError('');
     setIsUploading(true);
+    setShowProgress(true);
+    setUploadProgress(0);
+    setUploadStatus('Preparing upload...');
 
     console.log('[Upload] Starting upload process');
     try {
@@ -205,16 +261,23 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
 
       let url = '';
       console.log('[Upload] File selected:', file);
+      setUploadProgress(10);
+      setUploadStatus('Uploading to cloud...');
+      
       // Upload file to Firebase Storage
       const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
       console.log('[Upload] Firebase Storage filePath:', filePath);
       const storageRef = ref(storage, filePath);
       console.log('[Upload] Storage ref created:', storageRef);
       try {
+        setUploadProgress(30);
         const uploadResult = await uploadBytes(storageRef, file);
         console.log('[Upload] uploadBytes result:', uploadResult);
+        setUploadProgress(60);
+        setUploadStatus('Processing file...');
         url = await getDownloadURL(storageRef);
         console.log('[Upload] File available at URL:', url);
+        setUploadProgress(80);
       } catch (uploadErr) {
         console.error('[Upload] Error uploading to Firebase Storage:', uploadErr);
         throw uploadErr;
@@ -261,22 +324,79 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
       if (overlayText) contentData.meta.overlay = { text: overlayText, position: overlayPosition };
       console.log('[Upload] Content data to send:', contentData);
 
+      setUploadStatus('Publishing to platforms...');
+      setUploadProgress(90);
       await onUpload(contentData);
       console.log('[Upload] onUpload callback completed');
 
+      setUploadProgress(100);
+      setUploadStatus('✓ Upload complete!');
+      
       // Clear form on successful upload
-      setTitle('');
-      setDescription('');
-      setFile(null);
-      console.log('[Upload] Form cleared after successful upload');
+      setTimeout(() => {
+        setTitle('');
+        setDescription('');
+        setFile(null);
+        setHashtags([]);
+        setOverlayText('');
+        setShowProgress(false);
+        console.log('[Upload] Form cleared after successful upload');
+      }, 1500);
     } catch (err) {
       console.error('[Upload] Upload error:', err);
       setError(err.message || 'Failed to upload content. Please try again.');
+      setShowProgress(false);
     } finally {
       setIsUploading(false);
       console.log('[Upload] Upload process finished');
     }
   };
+
+  const handleEmojiSelect = (emoji) => {
+    if (emojiTarget === 'title') {
+      setTitle(prev => prev + emoji);
+    } else if (emojiTarget === 'description') {
+      setDescription(prev => prev + emoji);
+    } else if (emojiTarget === 'overlay') {
+      setOverlayText(prev => prev + emoji);
+    }
+    setShowEmojiPicker(false);
+  };
+
+  const openEmojiPicker = (target) => {
+    setEmojiTarget(target);
+    setShowEmojiPicker(true);
+  };
+
+  const handleAddHashtag = (tag) => {
+    if (!hashtags.includes(tag)) {
+      setHashtags([...hashtags, tag]);
+      setDescription(prev => prev + (prev ? ' ' : '') + '#' + tag);
+    }
+  };
+
+  const removeHashtag = (tag) => {
+    setHashtags(hashtags.filter(t => t !== tag));
+    setDescription(prev => prev.replace(new RegExp('#' + tag + '\\s?', 'g'), '').trim());
+  };
+
+  const handleLoadDraft = (draft) => {
+    setTitle(draft.title || '');
+    setDescription(draft.description || '');
+    setType(draft.type || 'video');
+    setOverlayText(draft.overlayText || '');
+    if (draft.hashtags) setHashtags(draft.hashtags);
+    if (draft.selectedPlatforms) setSelectedPlatforms(draft.selectedPlatforms);
+  };
+
+  const getCurrentDraft = () => ({
+    title,
+    description,
+    type,
+    overlayText,
+    hashtags,
+    selectedPlatforms: selectedPlatformsVal
+  });
 
   const handleFileChange = (selected) => {
     setFile(selected);
@@ -286,6 +406,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
     setTrimStart(0);
     setTrimEnd(0);
     setDuration(0);
+    setSelectedFilter(null);
     if (selected) {
       try {
         const url = URL.createObjectURL(selected);
@@ -381,7 +502,13 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
   return (
     <div className="content-upload-container">
       <form onSubmit={handleSubmit} className="content-upload-form">
-        <h3>Upload Content</h3>
+        <h3>✨ Create Content</h3>
+        
+        <DraftManager 
+          onLoadDraft={handleLoadDraft}
+          currentDraft={getCurrentDraft()}
+        />
+        
         {error && (
           <div className="error-message">
             {error}
@@ -432,6 +559,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
                       src={previewUrl}
                       controls
                       className="preview-video"
+                      style={{filter: selectedFilter?.css || ''}}
                       onLoadedMetadata={(ev) => {
                         const dur = ev.target.duration || 0;
                         setDuration(dur);
@@ -450,13 +578,27 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
                       className="preview-image"
                       src={previewUrl}
                       alt="Local preview"
-                      style={{transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`}}
+                      style={{
+                        transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
+                        filter: selectedFilter?.css || ''
+                      }}
                     />
                   )}
                 </div>
                 {overlayText && (
                   <div className={`preview-overlay ${overlayPosition}`}>
-                    <div className="overlay-text">{overlayText}</div>
+                    <div 
+                      className="overlay-text"
+                      style={{
+                        fontSize: `${textStyles.fontSize}px`,
+                        color: textStyles.color,
+                        fontWeight: textStyles.fontWeight,
+                        textShadow: textStyles.shadow ? '2px 2px 4px rgba(0,0,0,0.8)' : 'none'
+                      }}
+                    >
+                      {/* Security: Text content is safely rendered as text node, not HTML */}
+                      {overlayText}
+                    </div>
                   </div>
                 )}
                 <div className="preview-controls">
@@ -499,8 +641,10 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             <button type="button" onClick={()=>applyTemplate(template)} className="apply-template-btn">Apply Template</button>
           )}
         </div>
+            <BestTimeToPost selectedPlatforms={selectedPlatformsVal} />
+            
             <div className="form-group">
-              <label>Target Platforms</label>
+              <label>🎯 Target Platforms</label>
               <div className="platform-grid">
                 {['youtube','tiktok','instagram','facebook','twitter','linkedin','reddit','discord','telegram','pinterest','spotify','snapchat'].map((p) => (
                   <div key={p} role="button" tabIndex={0} aria-pressed={selectedPlatformsVal.includes(p)} aria-label={p.charAt(0).toUpperCase()+p.slice(1)} onKeyDown={(e)=>{ if (e.key==='Enter' || e.key===' ') { e.preventDefault(); togglePlatform(p); } }} className={`platform-tile ${selectedPlatformsVal.includes(p) ? 'selected' : ''}`} onClick={()=>togglePlatform(p)}>
@@ -525,38 +669,136 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
         </div>
         <div className="form-group full-width">
           <label>Title</label>
-          <input
-            type="text"
-            placeholder="Enter content title"
-            value={title}
-            required
-            onChange={e => setTitle(e.target.value)}
-            className="form-input"
-          />
+          <div className="input-with-emoji">
+            <input
+              ref={titleInputRef}
+              type="text"
+              placeholder="✨ Enter catchy title..."
+              value={title}
+              required
+              onChange={e => {
+                // Security: Sanitize input to prevent script injection
+                const sanitized = e.target.value.replace(/<[^>]*>/g, '');
+                setTitle(sanitized);
+              }}
+              className="form-input"
+              maxLength={100}
+            />
+            <button 
+              type="button" 
+              className="emoji-btn"
+              onClick={() => openEmojiPicker('title')}
+            >
+              😊
+            </button>
+          </div>
+          <div className="char-count">{title.length}/100</div>
         </div>
+        
         <div className="form-group full-width">
           <label>Description</label>
-          <input
-            type="text"
-            placeholder="Enter content description"
-            value={description}
-            required
-            onChange={e => setDescription(e.target.value)}
-            className="form-input"
-          />
+          <div className="input-with-emoji">
+            <textarea
+              ref={descInputRef}
+              placeholder="📝 Describe your content..."
+              value={description}
+              required
+              onChange={e => {
+                // Security: Sanitize input to prevent script injection
+                const sanitized = e.target.value.replace(/<[^>]*>/g, '');
+                setDescription(sanitized);
+              }}
+              className="form-textarea"
+              rows={4}
+              maxLength={500}
+            />
+            <button 
+              type="button" 
+              className="emoji-btn"
+              onClick={() => openEmojiPicker('description')}
+            >
+              😊
+            </button>
+          </div>
+          <div className="char-count">{description.length}/500</div>
         </div>
+        
+        {hashtags.length > 0 && (
+          <div className="selected-hashtags">
+            {hashtags.map((tag, idx) => (
+              <span key={idx} className="hashtag-badge">
+                #{tag}
+                <button 
+                  type="button" 
+                  onClick={() => removeHashtag(tag)}
+                  className="remove-hashtag"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        
+        <HashtagSuggestions
+          contentType={type}
+          title={title}
+          description={description}
+          onAddHashtag={handleAddHashtag}
+        />
         <div className="form-group">
-          <label>Overlay Text (optional)</label>
-          <input placeholder="Add overlay text (e.g., 'New Video')" value={overlayText} onChange={(e)=>setOverlayText(e.target.value)} className="form-input" />
-          <div style={{display:'flex', gap:8, marginTop:8}}>
-            <select value={overlayPosition} onChange={(e)=>setOverlayPosition(e.target.value)} className="form-select" style={{width: '40%'}}>
-              <option value="top">Top</option>
-              <option value="center">Center</option>
-              <option value="bottom">Bottom</option>
+          <label>🎨 Text Overlay (optional)</label>
+          <div className="input-with-emoji">
+            <input 
+              placeholder="Add overlay text..." 
+              value={overlayText} 
+              onChange={(e)=>{
+                // Security: Sanitize input to prevent script injection
+                const sanitized = e.target.value.replace(/<[^>]*>/g, '');
+                setOverlayText(sanitized);
+              }} 
+              className="form-input" 
+            />
+            <button 
+              type="button" 
+              className="emoji-btn"
+              onClick={() => openEmojiPicker('overlay')}
+            >
+              😊
+            </button>
+          </div>
+          <div className="overlay-controls">
+            <select value={overlayPosition} onChange={(e)=>setOverlayPosition(e.target.value)} className="form-select-small">
+              <option value="top">⬆️ Top</option>
+              <option value="center">⏺️ Center</option>
+              <option value="bottom">⬇️ Bottom</option>
             </select>
-            <button type="button" className="control-btn" onClick={()=>{ if (!overlayText) setOverlayText('New Content'); else setOverlayText(''); }}>Toggle Text</button>
+            <input 
+              type="color" 
+              value={textStyles.color} 
+              onChange={(e)=>setTextStyles({...textStyles, color: e.target.value})} 
+              className="color-picker"
+              title="Text color"
+            />
+            <select 
+              value={textStyles.fontSize} 
+              onChange={(e)=>setTextStyles({...textStyles, fontSize: parseInt(e.target.value)})} 
+              className="form-select-small"
+            >
+              <option value={12}>Small</option>
+              <option value={16}>Medium</option>
+              <option value={24}>Large</option>
+              <option value={32}>XL</option>
+            </select>
           </div>
         </div>
+        
+        {file && type === 'image' && previewUrl && (
+          <FilterEffects
+            imageUrl={previewUrl}
+            onApplyFilter={(filter) => setSelectedFilter(filter)}
+          />
+        )}
         
         {/* Pinterest options (board selection + note) */}
         <div className="form-group">
@@ -593,17 +835,18 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
           </div>
         </div>
         
-        <div style={{display:'flex', gap:'.5rem', marginTop:'.5rem'}}>
+        <div style={{display:'flex', gap:'.5rem', marginTop:'.5rem', flexWrap: 'wrap'}}>
           <button 
             type="button"
             disabled={isUploading || isPreviewing}
             className="preview-button"
             onClick={handlePreview}
+            title="Preview (Ctrl+P)"
           >
             {isPreviewing ? (
               <><span className="loading-spinner"></span> Generating Preview...</>
             ) : (
-              'Preview Content'
+              <>⚡ Preview</>
             )}
           </button>
           <button 
@@ -611,13 +854,15 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             disabled={isUploading}
             className="quality-check-button"
             onClick={handleQualityCheck}
+            title="Check content quality"
           >
-            Check Quality
+            ✨ Quality Check
           </button>
           <button 
             type="submit" 
             disabled={isUploading}
             className="submit-button"
+            title="Upload (Ctrl+Enter)"
           >
             {isUploading ? (
               <>
@@ -625,12 +870,34 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
                 Uploading...
               </>
             ) : (
-              'Upload Content'
+              <>🚀 Upload</>
             )}
           </button>
         </div>
+        
+        <div className="keyboard-shortcuts">
+          <span>⌨️ Shortcuts:</span>
+          <span className="shortcut-item">Ctrl+Enter = Upload</span>
+          <span className="shortcut-item">Ctrl+P = Preview</span>
+          <span className="shortcut-item">Ctrl+S = Save Draft</span>
+        </div>
         {showCropper && previewUrl && (
           <ImageCropper imageUrl={previewUrl} onChangeCrop={(rect)=>{ setCropMeta(rect); setShowCropper(false); }} onClose={()=>setShowCropper(false)} />
+        )}
+        
+        {showEmojiPicker && (
+          <EmojiPicker
+            onSelect={handleEmojiSelect}
+            onClose={() => setShowEmojiPicker(false)}
+          />
+        )}
+        
+        {showProgress && (
+          <ProgressIndicator
+            progress={uploadProgress}
+            status={uploadStatus}
+            fileName={file?.name}
+          />
         )}
       {/* Render quality check results */}
       {qualityScore !== null && (
