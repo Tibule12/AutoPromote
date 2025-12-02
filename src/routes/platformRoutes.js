@@ -88,7 +88,7 @@ function sanitizeConnectionForApi(doc) {
 }
 
 // GET /api/:platform/status
-router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+router.get('/:platform/status', authMiddleware, rateLimit({ max: 50, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   const uid = req.userId || req.user?.uid;
@@ -101,48 +101,6 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
     return res.json(cached.data);
   }
 
-  // GET /api/spotify/metadata - returns playlists/metadata for connected Spotify user
-  router.get('/spotify/metadata', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
-    try {
-      const uid = req.userId || req.user?.uid;
-      if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
-      const userRef = db.collection('users').doc(uid);
-      const snap = await userRef.collection('connections').doc('spotify').get();
-      if (!snap.exists) return res.status(200).json({ ok: true, platform: 'spotify', connected: false, meta: {} });
-      const sdata = snap.data() || {};
-      const tokens = tokensFromDoc(sdata) || (sdata.meta && sdata.meta.tokens) || null;
-      const meta = { ...(sdata.meta || {}) };
-      if (tokens && tokens.access_token) {
-        try {
-          const url = `https://api.spotify.com/v1/me/playlists?limit=50`;
-          const r = await safeFetch(url, fetchFn, { fetchOptions: { headers: { Authorization: `Bearer ${tokens.access_token}` } }, requireHttps: true, allowHosts: ['api.spotify.com'] });
-          if (r.ok) {
-            const j = await r.json();
-            meta.playlists = (j.items || []).map(p => ({ id: p.id, name: p.name, public: !!p.public }));
-            await userRef.collection('connections').doc('spotify').set({ meta: { ...(sdata.meta || {}), playlists: meta.playlists }, updatedAt: new Date().toISOString() }, { merge: true });
-          }
-        } catch (_) {}
-      }
-      return res.json({ ok: true, platform: 'spotify', connected: !!sdata.connected, meta });
-    } catch (e) {
-      return res.status(500).json({ ok: false, platform: 'spotify', error: e.message || 'unknown_error' });
-    }
-  });
-
-  // GET /api/spotify/search - search tracks using Spotify API for the connected user
-  router.get('/spotify/search', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
-    try {
-      const uid = req.userId || req.user?.uid;
-      if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
-      const q = String(req.query.q || req.query.query || '').trim();
-      if (!q) return res.status(400).json({ ok: false, error: 'query_required' });
-      const limit = Math.min(parseInt(req.query.limit || '10', 10) || 10, 50);
-      const results = await searchTracks({ uid, query: q, limit });
-      return res.json({ ok: true, query: q, results: results.tracks || [] });
-    } catch (e) {
-      return res.status(500).json({ ok: false, error: e.message || 'spotify_search_failed' });
-    }
-  });
   if (cached && cached.inflight) {
     try {
       const d = await cached.inflight;
@@ -1245,6 +1203,21 @@ router.post('/telegram/admin/send-test', authMiddleware, platformWriteLimiter, a
     return res.json({ ok: true, result });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// GET /api/spotify/search - search tracks using Spotify API for the connected user
+router.get('/spotify/search', authMiddleware, rateLimit({ max: 50, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+  try {
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+    const q = String(req.query.q || req.query.query || '').trim();
+    if (!q) return res.status(400).json({ ok: false, error: 'query_required' });
+    const limit = Math.min(parseInt(req.query.limit || '10', 10) || 10, 50);
+    const results = await searchTracks({ uid, query: q, limit });
+    return res.json({ ok: true, query: q, results: results.tracks || [] });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message || 'spotify_search_failed' });
   }
 });
 

@@ -109,6 +109,9 @@ export const API_ENDPOINTS = {
   NOTIFICATIONS_LIST: `${API_BASE_URL}/api/notifications`,
   NOTIFICATIONS_MARK_READ: `${API_BASE_URL}/api/notifications/read`,
 
+  // Analytics endpoints
+  ANALYTICS_USER: `${API_BASE_URL}/api/analytics/user`,
+
   // Platform aggregated status & user progress
   PLATFORM_STATUS: `${API_BASE_URL}/api/platform/status`,
   PLATFORM_DISCONNECT: (platform) => `${API_BASE_URL}/api/platform/disconnect/${platform}`,
