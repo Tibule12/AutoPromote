@@ -135,7 +135,7 @@ const SUPPRESSION_SNIPPET = `
 	} catch(e) { /* Don't let suppression throw */ }
 })();</script>`;
 
-function constructAuthUrl(cfg, state, scope) {
+function constructAuthUrl(cfg, state, scope = configuredScopes()) {
 	const key = String(cfg.key || '').trim();
 	const redirect = String(cfg.redirect || '').trim();
 	// If running in mock mode, return absolute URL to backend's mock page so reviewers can
@@ -153,7 +153,24 @@ function constructAuthUrl(cfg, state, scope) {
 
 // Make scopes configurable so we can easily match the TikTok dev portal
 // and avoid "Scopes mismatch" during review.
-const TIKTOK_OAUTH_SCOPES = (process.env.TIKTOK_OAUTH_SCOPES || 'user.info.profile user.info.stats video.list').trim();
+const DEFAULT_TIKTOK_SCOPES = 'user.info.profile video.upload video.publish video.data';
+const REQUIRED_PROFILE_SCOPE = 'user.info.profile';
+
+function configuredScopes() {
+	return (process.env.TIKTOK_OAUTH_SCOPES || DEFAULT_TIKTOK_SCOPES).trim();
+}
+
+function configuredScopeList() {
+	return configuredScopes().split(/\s+/).filter(Boolean);
+}
+
+function scopeStringIncludes(scopeString, scope) {
+	return String(scopeString || '')
+		.split(/\s+/)
+		.map((s) => s.trim())
+		.filter(Boolean)
+		.includes(scope);
+}
 
 // Diagnostics: quick config visibility with sandbox/production breakdown
 router.get('/config', ttPublicLimiter, (req, res) => {
@@ -217,7 +234,7 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 			mode: TIKTOK_ENV,
 			isPopup
 		}, { merge: true });
-		const scope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
+		const scope = configuredScopes();
 		const authUrl = constructAuthUrl(cfg, state, scope);
 		// Store authUrl for debugging (non-sensitive)
 		await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({ lastAuthUrl: authUrl }, { merge: true });
@@ -246,8 +263,8 @@ router.get('/auth', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || 
 			nonce,
 			createdAt: admin.firestore.FieldValue.serverTimestamp(),
 		}, { merge: true });
-		// Request minimal scope for initial approval; can expand later (video.upload requires program access)
-		const scope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
+		// Request scopes configured for the deployment (upload + analytics by default).
+		const scope = configuredScopes();
 		const authUrl = constructAuthUrl(cfg, state, scope);
 		// Instead of redirecting immediately, render a small HTML page with a button
 		// so the user must click to continue. This ensures any deep-linking the
@@ -306,7 +323,7 @@ if (process.env.TIKTOK_DEBUG_ALLOW === 'true') {
 			const uid = req.query.uid || 'debug-uid';
 			const nonce = 'debug-nonce';
 			const state = `${uid}.${nonce}`;
-			const scope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
+			const scope = configuredScopes();
 			const authUrl = constructAuthUrl(cfg, state, scope);
 			res.set('Content-Type', 'text/html');
 			return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Continue to TikTok (debug)</title><script>/* debug-only page */</script></head><body><a href="${authUrl}">${authUrl}</a></body></html>`);
@@ -335,7 +352,7 @@ router.get('/auth/start', ttWriteLimiter, async (req, res) => {
 			nonce,
 			createdAt: admin.firestore.FieldValue.serverTimestamp(),
 		}, { merge: true });
-		const scope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
+		const scope = configuredScopes();
 		const authUrl = constructAuthUrl(cfg, state, scope);
 		// Render a click-to-continue page instead of redirecting immediately.
 	res.set('Content-Type', 'text/html');
@@ -380,16 +397,17 @@ router.get('/auth/preflight', authMiddleware, ttPublicLimiter, async (req, res) 
 	if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
 	const crypto = require('crypto');
 	const fakeState = 'preflight.' + crypto.randomBytes(8).toString('hex'); // Use cryptographically secure random
-	const scope = 'user.info.basic';
+	const scope = configuredScopes();
+	const scopeList = scope.split(/\s+/).filter(Boolean);
 	const url = constructAuthUrl(cfg, fakeState, scope);
 	const issues = [];
 	if (/\s/.test(cfg.key || '')) issues.push('client_key_contains_whitespace');
 	if (cfg.key && cfg.key.length < 10) issues.push('client_key_suspicious_length');
 	if (!/^https:\/\//.test(cfg.redirect || '')) issues.push('redirect_not_https');
 	if (cfg.redirect && /\/$/.test(cfg.redirect)) issues.push('redirect_trailing_slash');
-	if (!scope.includes('user.info.basic')) issues.push('scope_missing_user.info.basic');
+	if (!scopeList.includes(REQUIRED_PROFILE_SCOPE)) issues.push('scope_missing_profile_scope');
 	if (cfg.key && /[^a-zA-Z0-9]/.test(cfg.key)) issues.push('client_key_non_alphanumeric_chars');
-	const envScope = process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES;
+	const envScope = configuredScopes();
 	if (scope !== envScope) issues.push('scope_mismatch_env');
 	res.json({
 		mode: TIKTOK_ENV,
@@ -411,14 +429,15 @@ router.get('/auth/preflight/public', ttPublicLimiter, async (req, res) => {
 		if (ensureTikTokEnv(res, cfg, { requireSecret: false })) return;
 		const crypto = require('crypto');
 		const fakeState = 'preflight.public.' + crypto.randomBytes(8).toString('hex');
-		const scope = 'user.info.basic';
+		const scope = configuredScopes();
+		const scopeList = scope.split(/\s+/).filter(Boolean);
 		const url = constructAuthUrl(cfg, fakeState, scope);
 		const issues = [];
 		if (/\s/.test(cfg.key || '')) issues.push('client_key_contains_whitespace');
 		if (cfg.key && cfg.key.length < 10) issues.push('client_key_suspicious_length');
 		if (!/^https:\/\//.test(cfg.redirect || '')) issues.push('redirect_not_https');
 		if (cfg.redirect && /\/$/.test(cfg.redirect)) issues.push('redirect_trailing_slash');
-		if (!scope.includes((process.env.TIKTOK_OAUTH_SCOPES || TIKTOK_OAUTH_SCOPES).split(' ')[0])) issues.push('scope_missing_expected');
+		if (!scopeList.includes(REQUIRED_PROFILE_SCOPE)) issues.push('scope_missing_profile_scope');
 		if (cfg.key && /[^a-zA-Z0-9]/.test(cfg.key)) issues.push('client_key_non_alphanumeric_chars');
 		res.json({
 			mode: TIKTOK_ENV,
@@ -582,7 +601,7 @@ router.get('/status', authMiddleware, ttPublicLimiter, require('../statusInstrum
 				serverMode: TIKTOK_ENV,
 				reauthRequired: !!(data.mode && data.mode !== TIKTOK_ENV)
 			};
-			if (data.access_token && String(data.scope || '').includes('user.info.basic')) {
+			if (data.access_token && scopeStringIncludes(data.scope, REQUIRED_PROFILE_SCOPE)) {
 				try {
 					const info = await instrument('tiktokIdentityFetch', async () => {
 						// Use safeFetch for SSRF protection

@@ -26,7 +26,7 @@
       const clientId = encodeURIComponent(document.getElementById('clientId').value.trim());
       const redirect = encodeURIComponent(document.getElementById('redirectUri').value.trim());
       // Example TikTok sandbox authorize URL (mocked)
-      const scope = encodeURIComponent('user.info.basic video.upload analytics.read');
+      const scope = encodeURIComponent('user.info.profile video.upload video.publish video.data');
       const state = encodeURIComponent('demo_state_123');
       // For a real run use TikTok's sandbox authorize endpoint, e.g. https://sandbox.tiktok.com/platform/oauth/authorize?client_key=...&response_type=code&scope=...&redirect_uri=...
       const authUrl = `https://sandbox.tiktok.com/platform/oauth/authorize?client_key=${clientId}&response_type=code&scope=${scope}&redirect_uri=${redirect}&state=${state}`;
