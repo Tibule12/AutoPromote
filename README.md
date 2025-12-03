@@ -79,7 +79,8 @@ Use these values in the TikTok Developer Console (App > Basic Info / OAuth):
 - Data Deletion URL: https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
 - Platform: Web
 - Redirect URI: https://www.autopromote.org/api/tiktok/callback
-- Scopes (initial): user.info.profile video.upload video.publish video.data
+- **Approved Scopes (Dec 2025)**: user.info.profile, video.list
+- Note: video.upload and video.publish not yet approved - upload functionality disabled
 
 Server env required (Render):
 
@@ -87,7 +88,7 @@ Server env required (Render):
 TIKTOK_CLIENT_KEY=...
 TIKTOK_CLIENT_SECRET=...
 TIKTOK_REDIRECT_URI=https://www.autopromote.org/api/tiktok/callback
-TIKTOK_OAUTH_SCOPES="user.info.profile video.upload video.publish video.data"
+TIKTOK_OAUTH_SCOPES="user.info.profile video.list"
 2. Approve on TikTok, you’ll be redirected back to the dashboard with `?tiktok=connected`.
 3. Tokens are stored at Firestore: `users/{uid}/connections/tiktok`.
 

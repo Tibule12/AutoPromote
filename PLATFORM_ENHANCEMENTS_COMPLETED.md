@@ -46,9 +46,15 @@ TIKTOK_CLIENT_SECRET
 TIKTOK_REDIRECT_URI
 ```
 
-### Required TikTok Scopes:
+### TikTok Scopes Status (Dec 2025):
+**✅ APPROVED:**
 ```
-user.info.basic
+user.info.profile
+video.list
+```
+
+**❌ NOT APPROVED (upload disabled):**
+```
 video.upload
 video.publish
 video.data

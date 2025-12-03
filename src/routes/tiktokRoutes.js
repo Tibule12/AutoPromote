@@ -137,7 +137,8 @@ const SUPPRESSION_SNIPPET = `
 
 // Scopes: space-separated list. Make this configurable to match the TikTok
 // Developer Portal selection exactly (important for review / scope mismatch).
-const DEFAULT_TIKTOK_SCOPES = 'user.info.profile video.upload video.publish video.data';
+// APPROVED SCOPES: user.info.profile, video.list (as of Dec 2025)
+const DEFAULT_TIKTOK_SCOPES = 'user.info.profile video.list';
 const REQUIRED_PROFILE_SCOPE = 'user.info.profile';
 
 function configuredScopes() {
@@ -651,8 +652,19 @@ router.get('/debug/state', authMiddleware, ttPublicLimiter, async (req, res) => 
 });
 
 // 3. Upload video to TikTok
-// Expects: { access_token, open_id, video_url, title }
+// TikTok video upload endpoint
+// NOTE: Currently disabled - TikTok approved scopes (user.info.profile, video.list) 
+// do NOT include video.upload or video.publish permissions.
+// To enable: Request video.upload and video.publish scopes in TikTok Developer Portal
 router.post('/upload', rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }), async (req, res) => {
+	return res.status(403).json({ 
+		error: 'TikTok video upload not available',
+		reason: 'video.upload and video.publish scopes not approved',
+		approvedScopes: ['user.info.profile', 'video.list'],
+		message: 'Currently you can only view video lists. Upload functionality requires additional TikTok approval.'
+	});
+	
+	/* DISABLED CODE - Uncomment when video.upload/video.publish scopes are approved
 	const { access_token, open_id, video_url, title } = req.body;
 	if (!access_token || !open_id || !video_url) {
 		return res.status(400).json({ error: 'Missing required fields' });
@@ -740,6 +752,68 @@ router.post('/upload', rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }),
 		res.json({ success: true, video_id: createData.data.video_id });
 	} catch (err) {
 		res.status(500).json({ error: 'TikTok video upload failed', details: err.message });
+	}
+	END OF DISABLED CODE */
+});
+
+// Get user's TikTok video list (approved scope: video.list)
+router.get('/videos', authMiddleware, ttPublicLimiter, async (req, res) => {
+	try {
+		const uid = req.userId || req.user?.uid;
+		if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+
+		const userRef = db.collection('users').doc(uid);
+		const connSnap = await userRef.collection('connections').doc('tiktok').get();
+		
+		if (!connSnap.exists) {
+			return res.status(404).json({ error: 'TikTok not connected' });
+		}
+
+		const conn = connSnap.data();
+		const tokens = conn.tokens || conn.meta?.tokens;
+		
+		if (!tokens || !tokens.access_token) {
+			return res.status(401).json({ error: 'No TikTok access token found' });
+		}
+
+		const openId = conn.open_id || conn.meta?.open_id;
+		if (!openId) {
+			return res.status(400).json({ error: 'Missing open_id' });
+		}
+
+		// Fetch video list from TikTok API
+		const listUrl = `https://open.tiktokapis.com/v2/video/list/?fields=id,title,video_description,duration,cover_image_url,create_time,share_url`;
+		const response = await safeFetch(listUrl, fetch, {
+			fetchOptions: {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${tokens.access_token}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ max_count: 20 })
+			},
+			requireHttps: true,
+			allowHosts: ['open.tiktokapis.com']
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			return res.status(response.status).json({ 
+				error: 'Failed to fetch TikTok videos', 
+				details: errorText 
+			});
+		}
+
+		const data = await response.json();
+		res.json({ 
+			ok: true, 
+			videos: data.data?.videos || [], 
+			hasMore: data.data?.has_more || false,
+			cursor: data.data?.cursor || null
+		});
+	} catch (error) {
+		console.error('TikTok video list error:', error);
+		res.status(500).json({ error: 'Failed to fetch video list', details: error.message });
 	}
 });
 
