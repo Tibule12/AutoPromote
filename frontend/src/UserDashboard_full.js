@@ -10,6 +10,7 @@ import NotificationsPanel from './UserDashboardTabs/NotificationsPanel';
 import EarningsPanel from './UserDashboardTabs/EarningsPanel';
 import ConnectionsPanel from './UserDashboardTabs/ConnectionsPanel';
 import SecurityPanel from './UserDashboardTabs/SecurityPanel';
+import CommunityPanel from './UserDashboardTabs/CommunityPanel';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
 import toast, { Toaster } from 'react-hot-toast';
@@ -373,9 +374,10 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 						<li className={activeTab === 'rewards' ? 'active' : ''} onClick={() => handleNav('rewards')}>Rewards</li>
 						<li className={activeTab === 'notifications' ? 'active' : ''} onClick={() => handleNav('notifications')}>Notifications</li>
 						<li className={activeTab === 'earnings' ? 'active' : ''} onClick={() => handleNav('earnings')}>Earnings</li>
-						<li className={activeTab === 'connections' ? 'active' : ''} onClick={() => handleNav('connections')}>Connections</li>
-						<li className={activeTab === 'security' ? 'active' : ''} onClick={() => handleNav('security')}>Security</li>
-					</ul>
+					<li className={activeTab === 'connections' ? 'active' : ''} onClick={() => handleNav('connections')}>Connections</li>
+					<li className={activeTab === 'security' ? 'active' : ''} onClick={() => handleNav('security')}>Security</li>
+					<li className={activeTab === 'community' ? 'active' : ''} onClick={() => handleNav('community')}>Community</li>
+				</ul>
 				</nav>
 				<button className="logout-btn" onClick={onLogout}>Logout</button>
 			</aside>
@@ -458,6 +460,10 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 
 				{activeTab === 'security' && (
 					<SecurityPanel user={user} />
+				)}
+
+				{activeTab === 'community' && (
+					<CommunityPanel />
 				)}
 			</main>
 		</div>
