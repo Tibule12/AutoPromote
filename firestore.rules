@@ -54,6 +54,20 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
 
+    // AI Clip analyses - users can read/write their own analyses
+    match /clip_analyses/{analysisId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Generated clips - users can read/write their own clips
+    match /generated_clips/{clipId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
     // All other collections: only admins, service account, or backend
     match /{document=**} {
       allow read, write: if isAdmin() || isServiceAccount() || isBackend();
