@@ -14,15 +14,18 @@ import ProgressIndicator from './components/ProgressIndicator';
 import BestTimeToPost from './components/BestTimeToPost';
 
 // Security: Comprehensive sanitization to prevent XSS attacks
-// Uses whitelist approach - only allows safe characters
+// Uses direct string replacement - no DOM manipulation
 const sanitizeInput = (input) => {
   if (!input) return '';
   
-  // Convert to string and escape all HTML special characters
-  const str = String(input);
-  const div = document.createElement('div');
-  div.textContent = str;
-  let escaped = div.innerHTML;
+  // Convert to string and escape all HTML special characters using direct replacement
+  let escaped = String(input)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
   
   // Additional protection: block dangerous patterns
   escaped = escaped
