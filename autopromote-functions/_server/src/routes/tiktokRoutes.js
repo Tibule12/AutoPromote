@@ -488,22 +488,39 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 			if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] state mismatch or missing stored state', { uid, expectedNonce: stateData && stateData.nonce, nonce });
 			return res.status(400).send('Invalid or expired state');
 		}
-		// Exchange code
-		const tokenRes = await safeFetch('https://open.tiktokapis.com/v2/oauth/token/', fetch, { fetchOptions: {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-			body: new URLSearchParams({
-				client_key: cfg.key,
-				client_secret: cfg.secret,
-				code,
-				grant_type: 'authorization_code',
-				redirect_uri: cfg.redirect
-			})
-		}, allowHosts: ['open.tiktokapis.com'] });
-		const tokenData = await tokenRes.json();
-		if (!tokenRes.ok || !tokenData.access_token) {
-			if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] token exchange failed status=%s accessTokenPresent=%s tokenSummary=%o', tokenRes.status, tokenInfo(tokenData && tokenData.access_token).present, objSummary(tokenData));
-			return res.status(400).send('Failed to get TikTok access token');
+		
+		// Exchange code (use mock data if TIKTOK_USE_MOCK=true and code is from mock OAuth)
+		let tokenData;
+		if (process.env.TIKTOK_USE_MOCK === 'true' && String(code).startsWith('MOCK_CODE_')) {
+			// Mock token exchange for testing when TikTok sandbox is unreachable
+			const crypto = require('crypto');
+			tokenData = {
+				access_token: 'mock_access_' + crypto.randomBytes(16).toString('hex'),
+				refresh_token: 'mock_refresh_' + crypto.randomBytes(16).toString('hex'),
+				open_id: 'mock_open_id_' + uid,
+				scope: configuredScopes(),
+				expires_in: 86400,
+				token_type: 'Bearer'
+			};
+			if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] Using mock token exchange for code=%s', code);
+		} else {
+			// Real token exchange with TikTok API
+			const tokenRes = await safeFetch('https://open.tiktokapis.com/v2/oauth/token/', fetch, { fetchOptions: {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({
+					client_key: cfg.key,
+					client_secret: cfg.secret,
+					code,
+					grant_type: 'authorization_code',
+					redirect_uri: cfg.redirect
+				})
+			}, allowHosts: ['open.tiktokapis.com'] });
+			tokenData = await tokenRes.json();
+			if (!tokenRes.ok || !tokenData.access_token) {
+				if (DEBUG_TIKTOK_OAUTH) console.warn('[TikTok][callback] token exchange failed status=%s accessTokenPresent=%s tokenSummary=%o', tokenRes.status, tokenInfo(tokenData && tokenData.access_token).present, objSummary(tokenData));
+				return res.status(400).send('Failed to get TikTok access token');
+			}
 		}
 		// Store tokens securely under user
 		const connRef = db.collection('users').doc(uid).collection('connections').doc('tiktok');
