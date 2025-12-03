@@ -13,6 +13,48 @@ import DraftManager from './components/DraftManager';
 import ProgressIndicator from './components/ProgressIndicator';
 import BestTimeToPost from './components/BestTimeToPost';
 
+// Security: Comprehensive sanitization to prevent XSS attacks
+const sanitizeInput = (input) => {
+  if (!input) return '';
+  
+  // Remove all potentially dangerous patterns
+  let sanitized = String(input)
+    // Remove HTML tags
+    .replace(/<[^>]*>/g, '')
+    // Remove dangerous URL schemes
+    .replace(/javascript:/gi, '')
+    .replace(/data:/gi, '')
+    .replace(/vbscript:/gi, '')
+    .replace(/file:/gi, '')
+    // Remove event handlers
+    .replace(/on\w+\s*=/gi, '')
+    // Remove HTML entities that could be used for obfuscation
+    .replace(/&#/g, '')
+    .replace(/&lt;/gi, '')
+    .replace(/&gt;/gi, '')
+    .replace(/&quot;/gi, '')
+    .replace(/&apos;/gi, '')
+    .replace(/&amp;/gi, '');
+  
+  return sanitized;
+};
+
+// Security: Sanitize CSS values to prevent CSS injection
+const sanitizeCSS = (css) => {
+  if (!css) return '';
+  
+  return String(css)
+    // Remove dangerous characters
+    .replace(/[<>"'`();\\]/g, '')
+    // Remove url() and expression() functions
+    .replace(/url\s*\(/gi, '')
+    .replace(/expression\s*\(/gi, '')
+    .replace(/import/gi, '')
+    .replace(/@/g, '')
+    // Limit to safe CSS filter values only
+    .replace(/[^a-z0-9\s%().,#-]/gi, '');
+};
+
 // Security: Escape HTML to prevent XSS attacks
 const escapeHtml = (text) => {
   const div = document.createElement('div');
@@ -559,7 +601,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
                       src={previewUrl}
                       controls
                       className="preview-video"
-                      style={{filter: selectedFilter?.css ? String(selectedFilter.css).replace(/[<>"'`();\\]/g, '').replace(/url\s*\(/gi, '').replace(/expression\s*\(/gi, '') : ''}}
+                      style={{filter: selectedFilter?.css ? sanitizeCSS(selectedFilter.css) : ''}}
                       onLoadedMetadata={(ev) => {
                         const dur = ev.target.duration || 0;
                         setDuration(dur);
@@ -568,7 +610,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
                     />
                   ) : type === 'audio' ? (
                     <div style={{width:'100%'}}>
-                      <audio src={previewUrl} controls style={{width:'100%', filter: selectedFilter?.css ? String(selectedFilter.css).replace(/[<>"'`();\\]/g, '').replace(/url\s*\(/gi, '').replace(/expression\s*\(/gi, '') : ''}} onLoadedMetadata={(ev)=>{const dur=ev.target.duration||0; setDuration(dur); setTrimEnd(dur);}} />
+                      <audio src={previewUrl} controls style={{width:'100%', filter: selectedFilter?.css ? sanitizeCSS(selectedFilter.css) : ''}} onLoadedMetadata={(ev)=>{const dur=ev.target.duration||0; setDuration(dur); setTrimEnd(dur);}} />
                       <div style={{marginTop:8}}>
                         <AudioWaveformTrimmer file={file} trimStart={trimStart} trimEnd={trimEnd} onChange={({trimStart: s, trimEnd: e})=>{ if (typeof s !== 'undefined') setTrimStart(s); if (typeof e !== 'undefined') setTrimEnd(e); }} />
                       </div>
@@ -580,7 +622,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
                       alt="Content preview"
                       style={{
                         transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
-                        filter: selectedFilter?.css ? String(selectedFilter.css).replace(/[<>"'`();\\]/g, '').replace(/url\s*\(/gi, '') : ''
+                        filter: selectedFilter?.css ? sanitizeCSS(selectedFilter.css) : ''
                       }}
                     />
                   )}
@@ -677,17 +719,8 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
               value={title}
               required
               onChange={e => {
-                // Security: Comprehensive sanitization to prevent XSS attacks
-                const sanitized = e.target.value
-                  .replace(/[<>]/g, '')
-                  .replace(/javascript:/gi, '')
-                  .replace(/data:/gi, '')
-                  .replace(/vbscript:/gi, '')
-                  .replace(/file:/gi, '')
-                  .replace(/on\w+\s*=/gi, '')
-                  .replace(/&lt;/gi, '')
-                  .replace(/&gt;/gi, '');
-                setTitle(sanitized);
+                // Security: Use centralized sanitization function
+                setTitle(sanitizeInput(e.target.value));
               }}
               className="form-input"
               maxLength={100}
@@ -712,17 +745,8 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
               value={description}
               required
               onChange={e => {
-                // Security: Comprehensive sanitization to prevent XSS attacks
-                const sanitized = e.target.value
-                  .replace(/[<>]/g, '')
-                  .replace(/javascript:/gi, '')
-                  .replace(/data:/gi, '')
-                  .replace(/vbscript:/gi, '')
-                  .replace(/file:/gi, '')
-                  .replace(/on\w+\s*=/gi, '')
-                  .replace(/&lt;/gi, '')
-                  .replace(/&gt;/gi, '');
-                setDescription(sanitized);
+                // Security: Use centralized sanitization function
+                setDescription(sanitizeInput(e.target.value));
               }}
               className="form-textarea"
               rows={4}
@@ -769,17 +793,8 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
               placeholder="Add overlay text..." 
               value={overlayText} 
               onChange={(e)=>{
-                // Security: Comprehensive sanitization to prevent XSS attacks
-                const sanitized = e.target.value
-                  .replace(/[<>]/g, '')
-                  .replace(/javascript:/gi, '')
-                  .replace(/data:/gi, '')
-                  .replace(/vbscript:/gi, '')
-                  .replace(/file:/gi, '')
-                  .replace(/on\w+\s*=/gi, '')
-                  .replace(/&lt;/gi, '')
-                  .replace(/&gt;/gi, '');
-                setOverlayText(sanitized);
+                // Security: Use centralized sanitization function
+                setOverlayText(sanitizeInput(e.target.value));
               }} 
               className="form-input" 
             />
