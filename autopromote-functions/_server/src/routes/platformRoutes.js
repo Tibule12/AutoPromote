@@ -52,6 +52,7 @@ function normalize(name){
 }
 
 function sanitizeForText(message) {
+  if (!message) return '';
   return String(message || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -92,7 +93,9 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   const uid = req.userId || req.user?.uid;
-  if (!uid) return res.json({ ok: true, platform, connected: false });
+  // Sanitize platform name before including in response
+  const safePlatform = sanitizeForText(platform);
+  if (!uid) return res.json({ ok: true, platform: safePlatform, connected: false });
 
   const cacheKey = `${uid}:${platform}`;
   const now = Date.now();
@@ -175,8 +178,6 @@ router.get('/spotify/search', authMiddleware, rateLimit({ max: 20, windowMs: 600
   })();
 
   // Store inflight so others can await it
-  platformStatusCache.set(cacheKey, { ts: Date.now(), data: null, inflight });
-
   try {
     const result = await inflight;
     // Cache the final result (even errors) for a short TTL to avoid tight retry loops
@@ -185,7 +186,9 @@ router.get('/spotify/search', authMiddleware, rateLimit({ max: 20, windowMs: 600
     return res.json(result);
   } catch (e) {
     platformStatusCache.delete(cacheKey);
-    return res.status(500).json({ ok: false, platform, error: e && e.message ? e.message : 'unknown_error' });
+    return res.status(500).json({ ok: false, platform: safePlatform, error: e && e.message ? e.message : 'unknown_error' });
+  }
+}); return res.status(500).json({ ok: false, platform, error: e && e.message ? e.message : 'unknown_error' });
   }
 });
 
@@ -194,10 +197,11 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   const uid = req.userId || req.user?.uid;
+  const safePlatform = sanitizeForText(platform);
   if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
   try {
     const connSnap = await db.collection('users').doc(uid).collection('connections').doc(platform).get();
-    if (!connSnap.exists) return res.json({ ok: true, platform, connected: false });
+    if (!connSnap.exists) return res.json({ ok: true, platform: safePlatform, connected: false });
     const conn = connSnap.data() || {};
     // If we already have helpful meta stored, return it
     if (conn.meta && Object.keys(conn.meta || {}).length) {
@@ -206,11 +210,11 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
       delete sanitizedMeta.tokens;
       delete sanitizedMeta.access_token;
       delete sanitizedMeta.refresh_token;
-      return res.json({ ok: true, platform, connected: true, meta: sanitizedMeta });
+      return res.json({ ok: true, platform: safePlatform, connected: true, meta: sanitizedMeta });
     }
     // Otherwise, try to fetch some metadata from provider using stored tokens (best-effort)
     const tokens = tokensFromDoc(conn) || (conn.meta && conn.meta.tokens) || null;
-    const result = { ok: true, platform, connected: true, meta: {} };
+    const result = { ok: true, platform: safePlatform, connected: true, meta: {} };
     if (!tokens || !tokens.access_token) {
       // Best-effort fallback: return empty meta and let the UI use the session values
       return res.json(result);
