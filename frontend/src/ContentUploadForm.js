@@ -108,6 +108,13 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
   const [showProgress, setShowProgress] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
   const [textStyles, setTextStyles] = useState({ fontSize: 16, color: '#ffffff', fontWeight: 'bold', shadow: true });
+  const [isUploading, setIsUploading] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
+  const [error, setError] = useState('');
+  const [previews, setPreviews] = useState([]);
+  const [qualityScore, setQualityScore] = useState(null);
+  const [qualityFeedback, setQualityFeedback] = useState([]);
+  const [enhancedSuggestions, setEnhancedSuggestions] = useState(null);
   const titleInputRef = useRef(null);
   const descInputRef = useRef(null);
 
@@ -169,14 +176,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
       setSpotifyPlaylists([]);
     }
   }, [extPlatformMetadata]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState('');
-  const [previews, setPreviews] = useState([]);
-  const [isPreviewing, setIsPreviewing] = useState(false);
-  const [qualityScore, setQualityScore] = useState(null);
-  const [qualityFeedback, setQualityFeedback] = useState([]);
   // Content Quality Check handler
-  const [enhancedSuggestions, setEnhancedSuggestions] = useState(null);
   const [pinterestBoard, setPinterestBoard] = useState(extPlatformOptions?.pinterest?.boardId || '');
   const [pinterestNote, setPinterestNote] = useState(extPlatformOptions?.pinterest?.note || '');
   const [pinterestBoards, setPinterestBoards] = useState([]);

@@ -75,22 +75,29 @@ const SecurityPanel = ({ user }) => {
     if (!user || !user.uid) return;
     setLoadingPlatforms(true);
     try {
-      const connectionsRef = collection(db, 'users', user.uid, 'connections');
-      const snapshot = await getDocs(connectionsRef);
-      const platforms = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        platforms.push({
-          id: doc.id,
-          provider: data.provider || doc.id,
-          connectedAt: data.obtainedAt?.toDate?.() || data.createdAt?.toDate?.() || new Date(),
-          scope: data.scope || 'Unknown',
-          status: data.mode || 'active'
-        });
+      // Use backend API instead of direct Firestore access to avoid permission issues
+      const token = await user.getIdToken();
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'https://api.autopromote.org'}/api/user/connections`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
-      setConnectedPlatforms(platforms);
+      
+      if (response.ok) {
+        const data = await response.json();
+        const platforms = Object.entries(data.connections || {}).map(([key, value]) => ({
+          id: key,
+          provider: value.provider || key,
+          connectedAt: value.obtainedAt ? new Date(value.obtainedAt) : new Date(),
+          scope: value.scope || 'Unknown',
+          status: value.mode || 'active'
+        }));
+        setConnectedPlatforms(platforms);
+      }
     } catch (error) {
       console.error('Error loading connected platforms:', error);
+      // Fallback to empty array instead of failing
+      setConnectedPlatforms([]);
     } finally {
       setLoadingPlatforms(false);
     }
