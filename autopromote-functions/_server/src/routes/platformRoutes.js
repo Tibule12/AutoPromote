@@ -103,6 +103,50 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
   if (cached && cached.data && (now - cached.ts) < PLATFORM_STATUS_TTL_MS) {
     return res.json(cached.data);
   }
+  
+  if (cached && cached.inflight) {
+    try {
+      const d = await cached.inflight;
+      return res.json(d);
+    } catch (_) {
+      // fallthrough to attempt a fresh fetch
+    }
+  }
+
+  // Create an inflight promise so concurrent callers share the same work
+  const inflight = (async () => {
+    try {
+      const userRef = db.collection('users').doc(uid);
+      const snap = await userRef.collection('connections').doc(platform).get();
+      if (snap.exists) {
+        // Sanitize the connection object to avoid leaking tokens or secrets
+        const connDoc = snap.data() || {};
+        return { ok: true, platform: safePlatform, connected: true, meta: sanitizeConnectionForApi(connDoc) };
+      }
+      // Fallback: try to infer from top-level user doc
+      const userSnap = await userRef.get();
+      const u = userSnap.exists ? userSnap.data() || {} : {};
+      const inferred = !!(u[`${platform}Token`] || u[`${platform}AccessToken`] || u[`${platform}Identity`] || u[`${platform}Profile`]);
+      return { ok: true, platform: safePlatform, connected: inferred, inferred };
+    } catch (e) {
+      // Return an error-shaped object so callers get the message; avoid throwing to keep inflight promise stable
+      return { ok: false, platform: safePlatform, error: e && e.message ? e.message : 'unknown_error' };
+    }
+  })();
+
+  // Store inflight so others can await it
+  platformStatusCache.set(cacheKey, { ts: now, data: null, inflight });
+  
+  try {
+    const result = await inflight;
+    // Cache the final result (even errors) for a short TTL to avoid tight retry loops
+    platformStatusCache.set(cacheKey, { ts: Date.now(), data: result, inflight: null });
+    if (result && result.ok === false && result.error) return res.status(500).json(result);
+    return res.json(result);
+  } catch (e) {
+    platformStatusCache.delete(cacheKey);
+    return res.status(500).json({ ok: false, platform: safePlatform, error: e && e.message ? e.message : 'unknown_error' });
+  }
 });
 
 // GET /api/spotify/metadata - returns playlists/metadata for connected Spotify user
@@ -146,50 +190,6 @@ router.get('/spotify/search', authMiddleware, rateLimit({ max: 20, windowMs: 600
     } catch (e) {
       return res.status(500).json({ ok: false, error: e.message || 'spotify_search_failed' });
     }
-  });
-  if (cached && cached.inflight) {
-    try {
-      const d = await cached.inflight;
-      return res.json(d);
-    } catch (_) {
-      // fallthrough to attempt a fresh fetch
-    }
-  }
-
-  // Create an inflight promise so concurrent callers share the same work
-  const inflight = (async () => {
-    try {
-      const userRef = db.collection('users').doc(uid);
-      const snap = await userRef.collection('connections').doc(platform).get();
-      if (snap.exists) {
-        // Sanitize the connection object to avoid leaking tokens or secrets
-        const connDoc = snap.data() || {};
-        return { ok: true, platform, connected: true, meta: sanitizeConnectionForApi(connDoc) };
-      }
-      // Fallback: try to infer from top-level user doc
-      const userSnap = await userRef.get();
-      const u = userSnap.exists ? userSnap.data() || {} : {};
-      const inferred = !!(u[`${platform}Token`] || u[`${platform}AccessToken`] || u[`${platform}Identity`] || u[`${platform}Profile`]);
-      return { ok: true, platform, connected: inferred, inferred };
-    } catch (e) {
-      // Return an error-shaped object so callers get the message; avoid throwing to keep inflight promise stable
-      return { ok: false, platform, error: e && e.message ? e.message : 'unknown_error' };
-    }
-  })();
-
-  // Store inflight so others can await it
-  try {
-    const result = await inflight;
-    // Cache the final result (even errors) for a short TTL to avoid tight retry loops
-    platformStatusCache.set(cacheKey, { ts: Date.now(), data: result, inflight: null });
-    if (result && result.ok === false && result.error) return res.status(500).json(result);
-    return res.json(result);
-  } catch (e) {
-    platformStatusCache.delete(cacheKey);
-    return res.status(500).json({ ok: false, platform: safePlatform, error: e && e.message ? e.message : 'unknown_error' });
-  }
-}); return res.status(500).json({ ok: false, platform, error: e && e.message ? e.message : 'unknown_error' });
-  }
 });
 
 // GET /api/:platform/metadata - return helpful metadata for the connected user (playlist lists, org pages, guilds)
