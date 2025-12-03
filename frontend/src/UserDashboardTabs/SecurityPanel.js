@@ -76,7 +76,13 @@ const SecurityPanel = ({ user }) => {
     setLoadingPlatforms(true);
     try {
       // Use backend API instead of direct Firestore access to avoid permission issues
-      const token = await user.getIdToken();
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        setConnectedPlatforms([]);
+        setLoadingPlatforms(false);
+        return;
+      }
+      const token = await currentUser.getIdToken();
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'https://api.autopromote.org'}/api/user/connections`, {
         headers: {
           'Authorization': `Bearer ${token}`
