@@ -559,7 +559,8 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 				obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
 			}, { merge: true });
 		}
-		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s scope=%s', uid, tokenData.scope);
+		// Secure logging - never log tokens
+		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s scope=%s hasToken=%s', uid, tokenData.scope, !!tokenData.access_token);
 		// redirect back to dashboard with success
 		const url = new URL(DASHBOARD_URL);
 		url.searchParams.set('tiktok', 'connected');
@@ -568,13 +569,17 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 
 		if (isPopup) {
 			res.set('Content-Type', 'text/html');
+			// Sanitize and validate URLs to prevent XSS
+			const dashboardOrigin = new URL(DASHBOARD_URL).origin;
+			const safeRedirectUrl = url.toString().replace(/[<>"']/g, '');
 			return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>TikTok Connected</title></head><body>
 				<script>
+					const DASHBOARD_ORIGIN = ${JSON.stringify(dashboardOrigin)};
 					if (window.opener) {
-						window.opener.postMessage('tiktok_oauth_complete', '${DASHBOARD_URL}');
-						window.close();
+						window.opener.postMessage('tiktok_oauth_complete', DASHBOARD_ORIGIN);
+						setTimeout(function() { window.close(); }, 500);
 					} else {
-						window.location.href = '${url.toString()}';
+						window.location.href = ${JSON.stringify(safeRedirectUrl)};
 					}
 				</script>
 			</body></html>`);
