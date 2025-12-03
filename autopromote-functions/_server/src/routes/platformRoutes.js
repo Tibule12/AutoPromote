@@ -103,7 +103,6 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
   if (cached && cached.data && (now - cached.ts) < PLATFORM_STATUS_TTL_MS) {
     return res.json(cached.data);
   }
-});
 
 // GET /api/spotify/metadata - returns playlists/metadata for connected Spotify user
 router.get('/spotify/metadata', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
@@ -187,8 +186,6 @@ router.get('/spotify/search', authMiddleware, rateLimit({ max: 20, windowMs: 600
   } catch (e) {
     platformStatusCache.delete(cacheKey);
     return res.status(500).json({ ok: false, platform: safePlatform, error: e && e.message ? e.message : 'unknown_error' });
-  }
-}); return res.status(500).json({ ok: false, platform, error: e && e.message ? e.message : 'unknown_error' });
   }
 });
 
