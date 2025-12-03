@@ -7,6 +7,7 @@ import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndP
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
+import ChatWidget from './ChatWidget';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -668,6 +669,8 @@ function App() {
           }
         })()
       )}
+      {/* AI Chat Widget - only show when user is logged in */}
+      {user && <ChatWidget />}
     </div>
   );
 }
