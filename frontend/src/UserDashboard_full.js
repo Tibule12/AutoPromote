@@ -15,6 +15,7 @@ import ClipStudioPanel from './UserDashboardTabs/ClipStudioPanel';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
 import toast, { Toaster } from 'react-hot-toast';
+import { cachedFetch, batchWithDelay } from './utils/requestCache';
 
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
 
@@ -115,20 +116,25 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 		}
 	};
 
-	// Platform status loaders
+	// Platform status loaders (with caching)
 	const loadSpotifyStatus = async () => {
 		try {
 			const cur = auth.currentUser; if (!cur) return setSpotifyStatus({ connected: false });
 			const token = await cur.getIdToken(true);
-			const res = await fetch(API_ENDPOINTS.SPOTIFY_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-			if (!res.ok) return setSpotifyStatus({ connected: false });
-			const j = await res.json(); setSpotifyStatus({ connected: !!j.connected, meta: j.meta || null });
-			if (j.connected) {
-				try {
-					const md = await fetch(API_ENDPOINTS.SPOTIFY_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-					if (md.ok) { const mdj = await md.json(); setPlatformMetadata(prev => ({ ...(prev||{}), spotify: mdj.meta || {} })); }
-				} catch (_) {}
-			}
+			const data = await cachedFetch('spotify-status', async () => {
+				const res = await fetch(API_ENDPOINTS.SPOTIFY_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+				if (!res.ok) return { connected: false };
+				const j = await res.json();
+				if (j.connected) {
+					try {
+						const md = await fetch(API_ENDPOINTS.SPOTIFY_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+						if (md.ok) { const mdj = await md.json(); return { ...j, metadata: mdj.meta || {} }; }
+					} catch (_) {}
+				}
+				return j;
+			}, 30000);
+			setSpotifyStatus({ connected: !!data.connected, meta: data.meta || null });
+			if (data.metadata) setPlatformMetadata(prev => ({ ...(prev||{}), spotify: data.metadata }));
 		} catch (_) { setSpotifyStatus({ connected: false }); }
 	};
 
@@ -136,16 +142,20 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 		try {
 			const cur = auth.currentUser; if (!cur) return setYouTubeStatus({ connected: false });
 			const token = await cur.getIdToken(true);
-			const res = await fetch(API_ENDPOINTS.YOUTUBE_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-			if (!res.ok) return setYouTubeStatus({ connected: false });
-			const d = await res.json();
-			setYouTubeStatus({ connected: !!d.connected, channel: d.channel || null });
-			if (d.connected) {
-				try {
-					const md = await fetch(API_ENDPOINTS.YOUTUBE_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-					if (md.ok) { const mdj = await md.json(); setPlatformMetadata(prev => ({ ...(prev||{}), youtube: mdj.meta || {} })); }
-				} catch (_) {}
-			}
+			const data = await cachedFetch('youtube-status', async () => {
+				const res = await fetch(API_ENDPOINTS.YOUTUBE_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+				if (!res.ok) return { connected: false };
+				const d = await res.json();
+				if (d.connected) {
+					try {
+						const md = await fetch(API_ENDPOINTS.YOUTUBE_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+						if (md.ok) { const mdj = await md.json(); return { ...d, metadata: mdj.meta || {} }; }
+					} catch (_) {}
+				}
+				return d;
+			}, 30000);
+			setYouTubeStatus({ connected: !!data.connected, channel: data.channel || null });
+			if (data.metadata) setPlatformMetadata(prev => ({ ...(prev||{}), youtube: data.metadata }));
 		} catch (_) { setYouTubeStatus({ connected: false }); }
 	};
 
@@ -160,16 +170,20 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 		try {
 			const cur = auth.currentUser; if (!cur) return setDiscordStatus({ connected: false });
 			const token = await cur.getIdToken(true);
-			const res = await fetch(API_ENDPOINTS.DISCORD_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-			if (!res.ok) return setDiscordStatus({ connected: false });
-			const d = await res.json();
-			setDiscordStatus({ connected: !!d.connected, meta: d.meta || null });
-			if (d.connected) {
-				try {
-					const md = await fetch(API_ENDPOINTS.DISCORD_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-					if (md.ok) { const mdj = await md.json(); setPlatformMetadata(prev => ({ ...(prev||{}), discord: mdj.meta || {} })); }
-				} catch (_) {}
-			}
+			const data = await cachedFetch('discord-status', async () => {
+				const res = await fetch(API_ENDPOINTS.DISCORD_STATUS, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+				if (!res.ok) return { connected: false };
+				const d = await res.json();
+				if (d.connected) {
+					try {
+						const md = await fetch(API_ENDPOINTS.DISCORD_METADATA, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+						if (md.ok) { const mdj = await md.json(); return { ...d, metadata: mdj.meta || {} }; }
+					} catch (_) {}
+				}
+				return d;
+			}, 30000);
+			setDiscordStatus({ connected: !!data.connected, meta: data.meta || null });
+			if (data.metadata) setPlatformMetadata(prev => ({ ...(prev||{}), discord: data.metadata }));
 		} catch (_) { setDiscordStatus({ connected: false }); }
 	};
 
@@ -223,38 +237,51 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 			setTimeout(() => refreshAllStatus(), 500);
 		}
 
-		// If we need to load platform statuses at mount, we can kick off a fetch here
+		// Load initial data with caching and rate limit protection
 		const loadInitial = async () => {
 			try {
 				const currentUser = auth.currentUser;
 				if (!currentUser) return;
-				// Platform summary + earnings are loaded here
 				const token = await currentUser.getIdToken(true);
-				const [earnRes, payRes, progRes, platRes] = await Promise.all([
-					fetch(API_ENDPOINTS.EARNINGS_SUMMARY, { headers: { Authorization: `Bearer ${token}` }}),
-					fetch(API_ENDPOINTS.EARNINGS_PAYOUTS, { headers: { Authorization: `Bearer ${token}` }}),
-					fetch(API_ENDPOINTS.USER_PROGRESS, { headers: { Authorization: `Bearer ${token}` }}),
-					fetch(API_ENDPOINTS.PLATFORM_STATUS, { headers: { Authorization: `Bearer ${token}` }})
-				]);
-				if (earnRes.ok) { const d = await earnRes.json(); setEarnings(d); }
-				if (payRes.ok) { const d = await payRes.json(); setPayouts(d.payouts || []); }
-				if (progRes.ok) { const d = await progRes.json(); setProgress(d); }
-				if (platRes.ok) { const d = await platRes.json(); setPlatformSummary(d); }
+				
+				// Load critical data first (with caching)
+				await cachedFetch('initial-data', async () => {
+					const [earnRes, payRes, progRes, platRes] = await Promise.all([
+						fetch(API_ENDPOINTS.EARNINGS_SUMMARY, { headers: { Authorization: `Bearer ${token}` }}).catch(() => null),
+						fetch(API_ENDPOINTS.EARNINGS_PAYOUTS, { headers: { Authorization: `Bearer ${token}` }}).catch(() => null),
+						fetch(API_ENDPOINTS.USER_PROGRESS, { headers: { Authorization: `Bearer ${token}` }}).catch(() => null),
+						fetch(API_ENDPOINTS.PLATFORM_STATUS, { headers: { Authorization: `Bearer ${token}` }}).catch(() => null)
+					]);
+					if (earnRes?.ok) { const d = await earnRes.json(); setEarnings(d); }
+					if (payRes?.ok) { const d = await payRes.json(); setPayouts(d.payouts || []); }
+					if (progRes?.ok) { const d = await progRes.json(); setProgress(d); }
+					if (platRes?.ok) { const d = await platRes.json(); setPlatformSummary(d); }
+					return true;
+				}, 60000); // 60s cache
+				
+				// Load platform statuses with 200ms delay between each to avoid rate limit
+				await batchWithDelay([
+					loadSpotifyStatus,
+					loadYouTubeStatus,
+					loadDiscordStatus
+				], 200);
+				
+				// Load remaining platforms with additional delay
+				setTimeout(() => {
+					batchWithDelay([
+						loadTikTokStatus,
+						loadFacebookStatus,
+						loadTwitterStatus,
+						loadSnapchatStatus,
+						loadRedditStatus,
+						loadLinkedinStatus,
+						loadTelegramStatus,
+						loadPinterestStatus
+					], 200);
+				}, 1000); // Wait 1s before loading secondary platforms
 			} catch (e) { /* ignore */ }
 		};
 			loadInitial();
-			// Load platform statuses
-			loadTikTokStatus();
-			loadFacebookStatus();
-			loadYouTubeStatus();
-			loadTwitterStatus();
-			loadSnapchatStatus();
-			loadSpotifyStatus();
-			loadRedditStatus();
-			loadDiscordStatus();
-			loadLinkedinStatus();
-			loadTelegramStatus();
-			loadPinterestStatus();
 		const loadEarnings = async () => {
 			try { const currentUser = auth.currentUser; if (!currentUser) return; const token = await currentUser.getIdToken(true); const res = await fetch(API_ENDPOINTS.EARNINGS_SUMMARY, { headers: { Authorization: `Bearer ${token}` } }); if (res.ok) { const d = await res.json(); setEarnings(d); } } catch (e) { console.warn(e); }
 		};
