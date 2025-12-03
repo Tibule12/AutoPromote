@@ -244,6 +244,22 @@ router.get('/', authMiddleware, writeLimiter, async (req, res) => {
   }
 });
 
+// Get user's connected platforms
+router.get('/connections', authMiddleware, publicLimiter, async (req, res) => {
+  try {
+    const connectionsRef = db.collection('users').doc(req.userId).collection('connections');
+    const snapshot = await connectionsRef.get();
+    const connections = {};
+    snapshot.forEach(doc => {
+      connections[doc.id] = doc.data();
+    });
+    return res.json({ ok: true, connections });
+  } catch (e) {
+    console.error('Error fetching connections:', e);
+    return res.status(500).json({ ok: false, error: 'Failed to fetch connections' });
+  }
+});
+
 module.exports = router;
 
 // Plan endpoints (after exports intentionally for clarity if imported earlier)
