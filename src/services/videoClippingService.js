@@ -90,9 +90,48 @@ class VideoClippingService {
 
   /**
    * Download video from URL to local file
+   * Protected against SSRF attacks
    */
   async downloadVideo(url, destPath) {
-    const response = await axios.get(url, { responseType: 'stream' });
+    // Validate URL to prevent SSRF attacks
+    const parsedUrl = new URL(url);
+    
+    // Only allow HTTPS protocol
+    if (parsedUrl.protocol !== 'https:') {
+      throw new Error('Only HTTPS URLs are allowed');
+    }
+    
+    // Block private/internal IP ranges
+    const hostname = parsedUrl.hostname;
+    const blockedHosts = [
+      'localhost', '127.0.0.1', '0.0.0.0',
+      /^10\..*/, /^172\.(1[6-9]|2[0-9]|3[01])\..*/, /^192\.168\..*/,
+      /^169\.254\..*/, /^::1$/, /^fc00:.*/, /^fe80:.*/
+    ];
+    
+    if (blockedHosts.some(blocked => 
+      typeof blocked === 'string' ? hostname === blocked : blocked.test(hostname)
+    )) {
+      throw new Error('Access to private networks is not allowed');
+    }
+    
+    // Only allow Firebase Storage and trusted CDN domains
+    const allowedDomains = [
+      'firebasestorage.googleapis.com',
+      'storage.googleapis.com',
+      'cloudinary.com',
+      'cloudfront.net'
+    ];
+    
+    if (!allowedDomains.some(domain => hostname.endsWith(domain))) {
+      throw new Error('Only trusted storage domains are allowed');
+    }
+    
+    const response = await axios.get(url, { 
+      responseType: 'stream',
+      timeout: 60000, // 60s timeout
+      maxRedirects: 5
+    });
     const writer = require('fs').createWriteStream(destPath);
     
     response.data.pipe(writer);
