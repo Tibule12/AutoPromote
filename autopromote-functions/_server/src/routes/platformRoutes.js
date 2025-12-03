@@ -103,7 +103,7 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
   if (cached && cached.data && (now - cached.ts) < PLATFORM_STATUS_TTL_MS) {
     return res.json(cached.data);
   }
-  
+
   if (cached && cached.inflight) {
     try {
       const d = await cached.inflight;
@@ -136,7 +136,7 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
 
   // Store inflight so others can await it
   platformStatusCache.set(cacheKey, { ts: now, data: null, inflight });
-  
+
   try {
     const result = await inflight;
     // Cache the final result (even errors) for a short TTL to avoid tight retry loops
