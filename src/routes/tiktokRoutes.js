@@ -653,10 +653,26 @@ router.get('/debug/state', authMiddleware, ttPublicLimiter, async (req, res) => 
 
 // 3. Upload video to TikTok
 // TikTok video upload endpoint
-// NOTE: Currently disabled - TikTok approved scopes (user.info.profile, video.list) 
-// do NOT include video.upload or video.publish permissions.
-// To enable: Request video.upload and video.publish scopes in TikTok Developer Portal
+// NOTE: DEMO MODE - For TikTok API approval demonstration
+// Once video.upload and video.publish scopes are approved, this will use real API
 router.post('/upload', rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }), async (req, res) => {
+	// DEMO MODE: Return success response to demonstrate UX flow for TikTok approval
+	// This allows screen recording of the complete user flow as required by TikTok
+	const DEMO_MODE = process.env.TIKTOK_DEMO_MODE === 'true';
+	
+	if (DEMO_MODE) {
+		console.log('[TikTok Upload] DEMO MODE - Simulating successful upload');
+		return res.status(200).json({
+			ok: true,
+			demo: true,
+			message: 'Demo upload successful - awaiting video.upload scope approval',
+			videoId: 'demo_' + Date.now(),
+			shareUrl: 'https://www.tiktok.com/@demo/video/123456789',
+			note: 'This is a demonstration response. Real uploads require video.upload and video.publish scopes.'
+		});
+	}
+	
+	// Production mode: Return 403 until scopes are approved
 	return res.status(403).json({ 
 		error: 'TikTok video upload not available',
 		reason: 'video.upload and video.publish scopes not approved',
