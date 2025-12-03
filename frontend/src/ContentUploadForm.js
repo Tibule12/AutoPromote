@@ -559,7 +559,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
                       src={previewUrl}
                       controls
                       className="preview-video"
-                      style={{filter: selectedFilter?.css || ''}}
+                      style={{filter: selectedFilter?.css ? String(selectedFilter.css).replace(/[<>"'`]/g, '') : ''}}
                       onLoadedMetadata={(ev) => {
                         const dur = ev.target.duration || 0;
                         setDuration(dur);
@@ -568,7 +568,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
                     />
                   ) : type === 'audio' ? (
                     <div style={{width:'100%'}}>
-                      <audio src={previewUrl} controls style={{width:'100%'}} onLoadedMetadata={(ev)=>{const dur=ev.target.duration||0; setDuration(dur); setTrimEnd(dur);}} />
+                      <audio src={previewUrl} controls style={{width:'100%', filter: selectedFilter?.css ? String(selectedFilter.css).replace(/[<>"'`]/g, '') : ''}} onLoadedMetadata={(ev)=>{const dur=ev.target.duration||0; setDuration(dur); setTrimEnd(dur);}} />
                       <div style={{marginTop:8}}>
                         <AudioWaveformTrimmer file={file} trimStart={trimStart} trimEnd={trimEnd} onChange={({trimStart: s, trimEnd: e})=>{ if (typeof s !== 'undefined') setTrimStart(s); if (typeof e !== 'undefined') setTrimEnd(e); }} />
                       </div>
@@ -580,7 +580,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
                       alt="Local preview"
                       style={{
                         transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
-                        filter: selectedFilter?.css || ''
+                        filter: selectedFilter?.css ? String(selectedFilter.css).replace(/[<>"'`]/g, '') : ''
                       }}
                     />
                   )}
@@ -677,8 +677,11 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
               value={title}
               required
               onChange={e => {
-                // Security: Sanitize input to prevent script injection
-                const sanitized = e.target.value.replace(/<[^>]*>/g, '');
+                // Security: Sanitize input to prevent script injection (remove < > and script-like patterns)
+                const sanitized = e.target.value
+                  .replace(/[<>]/g, '')
+                  .replace(/javascript:/gi, '')
+                  .replace(/on\w+\s*=/gi, '');
                 setTitle(sanitized);
               }}
               className="form-input"
@@ -704,8 +707,11 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
               value={description}
               required
               onChange={e => {
-                // Security: Sanitize input to prevent script injection
-                const sanitized = e.target.value.replace(/<[^>]*>/g, '');
+                // Security: Sanitize input to prevent script injection (remove < > and script-like patterns)
+                const sanitized = e.target.value
+                  .replace(/[<>]/g, '')
+                  .replace(/javascript:/gi, '')
+                  .replace(/on\w+\s*=/gi, '');
                 setDescription(sanitized);
               }}
               className="form-textarea"
@@ -753,8 +759,11 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
               placeholder="Add overlay text..." 
               value={overlayText} 
               onChange={(e)=>{
-                // Security: Sanitize input to prevent script injection
-                const sanitized = e.target.value.replace(/<[^>]*>/g, '');
+                // Security: Sanitize input to prevent script injection (remove < > and script-like patterns)
+                const sanitized = e.target.value
+                  .replace(/[<>]/g, '')
+                  .replace(/javascript:/gi, '')
+                  .replace(/on\w+\s*=/gi, '');
                 setOverlayText(sanitized);
               }} 
               className="form-input" 
