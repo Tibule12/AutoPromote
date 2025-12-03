@@ -10,7 +10,7 @@ const EarningsPanel = ({ earnings, onClaim }) => {
     loadPayoutHistory();
   }, []);
 
-  const loadPayoutHistory = async () => {
+  const loadPayoutHistory = async (retryCount = 0) => {
     setLoading(true);
     try {
       const currentUser = auth.currentUser;
@@ -33,6 +33,11 @@ const EarningsPanel = ({ earnings, onClaim }) => {
           // Non-JSON response, silently use empty array
           setPayoutHistory([]);
         }
+      } else if (res.status === 429 && retryCount < 2) {
+        // Rate limited - retry after delay with exponential backoff
+        const delay = Math.pow(2, retryCount) * 2000; // 2s, 4s
+        setTimeout(() => loadPayoutHistory(retryCount + 1), delay);
+        return;
       } else {
         // Endpoint error, silently use empty array
         setPayoutHistory([]);
@@ -41,7 +46,7 @@ const EarningsPanel = ({ earnings, onClaim }) => {
       // Silently handle errors
       setPayoutHistory([]);
     } finally {
-      setLoading(false);
+      if (retryCount === 0) setLoading(false);
     }
   };
 

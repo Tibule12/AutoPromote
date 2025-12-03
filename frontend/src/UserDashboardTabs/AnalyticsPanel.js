@@ -11,7 +11,7 @@ const AnalyticsPanel = () => {
     loadAnalytics();
   }, [timeRange]);
 
-  const loadAnalytics = async () => {
+  const loadAnalytics = async (retryCount = 0) => {
     setLoading(true);
     try {
       const currentUser = auth.currentUser;
@@ -29,6 +29,11 @@ const AnalyticsPanel = () => {
       if (res.ok) {
         const data = await res.json();
         setAnalytics(data);
+      } else if (res.status === 429 && retryCount < 2) {
+        // Rate limited - retry after delay with exponential backoff
+        const delay = Math.pow(2, retryCount) * 2000; // 2s, 4s
+        setTimeout(() => loadAnalytics(retryCount + 1), delay);
+        return;
       } else if (res.status === 500 || res.status === 404) {
         // Backend error or endpoint not ready, use default data
         setAnalytics(null);
@@ -37,7 +42,7 @@ const AnalyticsPanel = () => {
       // Silently handle errors
       setAnalytics(null);
     } finally {
-      setLoading(false);
+      if (retryCount === 0) setLoading(false);
     }
   };
 
