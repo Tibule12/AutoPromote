@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { auth } from '../firebaseClient';
-import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { auth, db } from '../firebaseClient';
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, multiFactor, PhoneAuthProvider, PhoneMultiFactorGenerator, RecaptchaVerifier } from 'firebase/auth';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import './SecurityPanel.css';
 
 const SecurityPanel = ({ user }) => {
@@ -21,6 +22,19 @@ const SecurityPanel = ({ user }) => {
     emailNotifications: true,
     dataSharing: false
   });
+
+  // 2FA States
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [enrolling2FA, setEnrolling2FA] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationId, setVerificationId] = useState('');
+  const [twoFactorError, setTwoFactorError] = useState('');
+  const [twoFactorSuccess, setTwoFactorSuccess] = useState('');
+
+  // Connected Platforms States
+  const [connectedPlatforms, setConnectedPlatforms] = useState([]);
+  const [loadingPlatforms, setLoadingPlatforms] = useState(false);
 
   // Current session info
   const currentSession = {
@@ -45,7 +59,42 @@ const SecurityPanel = ({ user }) => {
     if (savedSettings) {
       setPrivacySettings(JSON.parse(savedSettings));
     }
+
+    // Check if 2FA is already enabled
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const enrolledFactors = multiFactor(currentUser).enrolledFactors;
+      setTwoFactorEnabled(enrolledFactors.length > 0);
+    }
+
+    // Load connected platforms
+    loadConnectedPlatforms();
   }, []);
+
+  const loadConnectedPlatforms = async () => {
+    if (!user || !user.uid) return;
+    setLoadingPlatforms(true);
+    try {
+      const connectionsRef = collection(db, 'users', user.uid, 'connections');
+      const snapshot = await getDocs(connectionsRef);
+      const platforms = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        platforms.push({
+          id: doc.id,
+          provider: data.provider || doc.id,
+          connectedAt: data.obtainedAt?.toDate?.() || data.createdAt?.toDate?.() || new Date(),
+          scope: data.scope || 'Unknown',
+          status: data.mode || 'active'
+        });
+      });
+      setConnectedPlatforms(platforms);
+    } catch (error) {
+      console.error('Error loading connected platforms:', error);
+    } finally {
+      setLoadingPlatforms(false);
+    }
+  };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -113,6 +162,115 @@ const SecurityPanel = ({ user }) => {
       // In a real implementation, this would invalidate all tokens
       alert('This feature requires backend support. Currently logs out current session only.');
       window.location.href = '/';
+    }
+  };
+
+  const handleEnable2FA = async () => {
+    setTwoFactorError('');
+    setTwoFactorSuccess('');
+    
+    if (!phoneNumber || !phoneNumber.match(/^\+[1-9]\d{1,14}$/)) {
+      setTwoFactorError('Please enter a valid phone number with country code (e.g., +1234567890)');
+      return;
+    }
+
+    setEnrolling2FA(true);
+
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('No authenticated user');
+
+      // Setup reCAPTCHA
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible'
+        });
+      }
+
+      const multiFactorSession = await multiFactor(currentUser).getSession();
+      const phoneInfoOptions = {
+        phoneNumber,
+        session: multiFactorSession
+      };
+
+      const phoneAuthProvider = new PhoneAuthProvider(auth);
+      const verificationId = await phoneAuthProvider.verifyPhoneNumber(
+        phoneInfoOptions,
+        window.recaptchaVerifier
+      );
+
+      setVerificationId(verificationId);
+      setTwoFactorSuccess('Verification code sent to your phone!');
+    } catch (error) {
+      console.error('2FA enrollment error:', error);
+      setTwoFactorError(error.message || 'Failed to send verification code');
+    } finally {
+      setEnrolling2FA(false);
+    }
+  };
+
+  const handleVerify2FA = async () => {
+    setTwoFactorError('');
+    setTwoFactorSuccess('');
+
+    if (!verificationCode || verificationCode.length !== 6) {
+      setTwoFactorError('Please enter a 6-digit verification code');
+      return;
+    }
+
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('No authenticated user');
+
+      const cred = PhoneAuthProvider.credential(verificationId, verificationCode);
+      const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(cred);
+      
+      await multiFactor(currentUser).enroll(multiFactorAssertion, 'Primary Phone');
+      
+      setTwoFactorEnabled(true);
+      setTwoFactorSuccess('Two-factor authentication enabled successfully!');
+      setPhoneNumber('');
+      setVerificationCode('');
+      setVerificationId('');
+    } catch (error) {
+      console.error('2FA verification error:', error);
+      setTwoFactorError(error.message || 'Failed to verify code');
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    if (!window.confirm('Are you sure you want to disable two-factor authentication? This will make your account less secure.')) {
+      return;
+    }
+
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('No authenticated user');
+
+      const enrolledFactors = multiFactor(currentUser).enrolledFactors;
+      if (enrolledFactors.length > 0) {
+        await multiFactor(currentUser).unenroll(enrolledFactors[0]);
+        setTwoFactorEnabled(false);
+        setTwoFactorSuccess('Two-factor authentication disabled');
+      }
+    } catch (error) {
+      console.error('2FA disable error:', error);
+      setTwoFactorError(error.message || 'Failed to disable 2FA');
+    }
+  };
+
+  const handleDisconnectPlatform = async (platformId) => {
+    if (!window.confirm(`Disconnect ${platformId}? You'll need to reconnect to post content to this platform.`)) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'connections', platformId));
+      setConnectedPlatforms(prev => prev.filter(p => p.id !== platformId));
+      setTwoFactorSuccess(`${platformId} disconnected successfully`);
+    } catch (error) {
+      console.error('Disconnect platform error:', error);
+      setTwoFactorError(`Failed to disconnect ${platformId}`);
     }
   };
 
@@ -242,13 +400,110 @@ const SecurityPanel = ({ user }) => {
         </div>
       </div>
 
-      {/* Two-Factor Authentication (Coming Soon) */}
-      <div className="security-card coming-soon">
+      {/* Two-Factor Authentication */}
+      <div className="security-card">
         <h3>🔐 Two-Factor Authentication</h3>
-        <p>Add an extra layer of security to your account</p>
-        <button className="btn-secondary" disabled>
-          Enable 2FA (Coming Soon)
-        </button>
+        <p>Add an extra layer of security to your account with SMS verification</p>
+        
+        {twoFactorEnabled ? (
+          <div className="twofa-enabled">
+            <div className="success-badge">✓ 2FA Enabled</div>
+            <p>Your account is protected with two-factor authentication</p>
+            <button className="btn-danger" onClick={handleDisable2FA}>
+              Disable 2FA
+            </button>
+          </div>
+        ) : (
+          <div className="twofa-setup">
+            {!verificationId ? (
+              <div className="form-group">
+                <label>Phone Number (with country code)</label>
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="+1234567890"
+                  className="phone-input"
+                />
+                <small className="input-hint">Format: +[country code][number] (e.g., +12025551234)</small>
+                <div id="recaptcha-container"></div>
+                <button 
+                  className="btn-primary" 
+                  onClick={handleEnable2FA}
+                  disabled={enrolling2FA}
+                  style={{marginTop: '12px'}}
+                >
+                  {enrolling2FA ? 'Sending Code...' : 'Send Verification Code'}
+                </button>
+              </div>
+            ) : (
+              <div className="form-group">
+                <label>Verification Code</label>
+                <input
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  placeholder="123456"
+                  maxLength="6"
+                  className="code-input"
+                />
+                <small className="input-hint">Enter the 6-digit code sent to your phone</small>
+                <button 
+                  className="btn-primary" 
+                  onClick={handleVerify2FA}
+                  style={{marginTop: '12px'}}
+                >
+                  Verify & Enable 2FA
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {twoFactorError && <div className="error-message">{twoFactorError}</div>}
+        {twoFactorSuccess && <div className="success-message">{twoFactorSuccess}</div>}
+      </div>
+
+      {/* Connected Platforms */}
+      <div className="security-card">
+        <h3>🔗 Connected Platforms</h3>
+        <p>Manage platforms connected to your AutoPromote account</p>
+        
+        {loadingPlatforms ? (
+          <div className="loading-platforms">Loading platforms...</div>
+        ) : connectedPlatforms.length > 0 ? (
+          <div className="connected-platforms-list">
+            {connectedPlatforms.map((platform) => (
+              <div key={platform.id} className="platform-item">
+                <div className="platform-info">
+                  <div className="platform-icon">
+                    {platform.provider === 'youtube' && '▶️'}
+                    {platform.provider === 'tiktok' && '🎵'}
+                    {platform.provider === 'instagram' && '📷'}
+                    {platform.provider === 'facebook' && '👤'}
+                    {!['youtube', 'tiktok', 'instagram', 'facebook'].includes(platform.provider) && '🔗'}
+                  </div>
+                  <div className="platform-details">
+                    <strong>{platform.provider.charAt(0).toUpperCase() + platform.provider.slice(1)}</strong>
+                    <small>Connected {platform.connectedAt.toLocaleDateString()}</small>
+                    <span className="platform-scope">{platform.scope}</span>
+                  </div>
+                </div>
+                <button 
+                  className="btn-disconnect"
+                  onClick={() => handleDisconnectPlatform(platform.id)}
+                >
+                  Disconnect
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="no-platforms">
+            <p>No platforms connected yet</p>
+            <small>Go to Connections tab to link your social media accounts</small>
+          </div>
+        )}
       </div>
 
       {/* Account Security Score */}
@@ -256,15 +511,27 @@ const SecurityPanel = ({ user }) => {
         <h3>🎯 Account Security Score</h3>
         <div className="security-score">
           <div className="score-circle">
-            <span className="score-value">75%</span>
+            <span className="score-value">
+              {(() => {
+                let score = 50; // Base score
+                if (twoFactorEnabled) score += 25;
+                if (connectedPlatforms.length > 0) score += 15;
+                if (user?.emailVerified) score += 10;
+                return score;
+              })()}%
+            </span>
           </div>
           <div className="score-recommendations">
             <h4>Recommendations:</h4>
             <ul>
               <li className="completed">✓ Password strength: Strong</li>
               <li className="completed">✓ Email verified</li>
-              <li className="pending">⚠ Enable two-factor authentication</li>
-              <li className="pending">⚠ Review connected platforms</li>
+              <li className={twoFactorEnabled ? 'completed' : 'pending'}>
+                {twoFactorEnabled ? '✓' : '⚠'} Two-factor authentication {twoFactorEnabled ? 'enabled' : 'not enabled'}
+              </li>
+              <li className={connectedPlatforms.length > 0 ? 'completed' : 'pending'}>
+                {connectedPlatforms.length > 0 ? '✓' : '⚠'} {connectedPlatforms.length} platform(s) connected
+              </li>
             </ul>
           </div>
         </div>

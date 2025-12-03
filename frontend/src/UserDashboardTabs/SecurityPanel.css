@@ -304,6 +304,142 @@
   color: #ffc107;
 }
 
+/* Two-Factor Authentication */
+.twofa-enabled {
+  text-align: center;
+  padding: 20px;
+}
+
+.success-badge {
+  display: inline-block;
+  background: #28a745;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.twofa-setup .phone-input,
+.twofa-setup .code-input {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.twofa-setup .input-hint {
+  display: block;
+  color: #666;
+  font-size: 13px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+#recaptcha-container {
+  margin: 12px 0;
+}
+
+/* Connected Platforms */
+.connected-platforms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.platform-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+.platform-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.platform-icon {
+  font-size: 32px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 8px;
+}
+
+.platform-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.platform-details strong {
+  font-size: 16px;
+  color: #333;
+}
+
+.platform-details small {
+  font-size: 13px;
+  color: #666;
+}
+
+.platform-scope {
+  font-size: 12px;
+  color: #888;
+  padding: 2px 8px;
+  background: #e8e8e8;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.btn-disconnect {
+  padding: 8px 16px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-disconnect:hover {
+  background: #c82333;
+}
+
+.no-platforms {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+}
+
+.no-platforms p {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.no-platforms small {
+  font-size: 14px;
+  color: #999;
+}
+
+.loading-platforms {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .security-panel {
@@ -327,5 +463,15 @@
   .security-score {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .platform-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .btn-disconnect {
+    width: 100%;
   }
 }
