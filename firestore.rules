@@ -44,6 +44,16 @@ service cloud.firestore {
       allow read, write: if isAdmin() || isServiceAccount() || isBackend();
     }
 
+    // Community posts - authenticated users can read all, create their own, and update their own
+    match /community_posts/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.authorId == request.auth.uid;
+      allow update: if request.auth != null && 
+        (resource.data.authorId == request.auth.uid || 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['replies', 'likes', 'helpful', 'views']));
+      allow delete: if request.auth != null && resource.data.authorId == request.auth.uid;
+    }
+
     // All other collections: only admins, service account, or backend
     match /{document=**} {
       allow read, write: if isAdmin() || isServiceAccount() || isBackend();
