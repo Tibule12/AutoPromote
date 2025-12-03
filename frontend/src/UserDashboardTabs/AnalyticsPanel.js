@@ -15,7 +15,10 @@ const AnalyticsPanel = () => {
     setLoading(true);
     try {
       const currentUser = auth.currentUser;
-      if (!currentUser) return;
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
       const token = await currentUser.getIdToken(true);
       
       // Fetch user analytics
@@ -26,9 +29,13 @@ const AnalyticsPanel = () => {
       if (res.ok) {
         const data = await res.json();
         setAnalytics(data);
+      } else if (res.status === 500 || res.status === 404) {
+        // Backend error or endpoint not ready, use default data
+        setAnalytics(null);
       }
     } catch (e) {
-      console.warn('Failed to load analytics:', e);
+      // Silently handle errors
+      setAnalytics(null);
     } finally {
       setLoading(false);
     }
