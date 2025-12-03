@@ -84,8 +84,14 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 	const withAuth = async (cb) => {
 		const currentUser = auth?.currentUser;
 		if (!currentUser) { toast.error('Please sign in first'); return; }
-		const token = await currentUser.getIdToken(true);
-		return cb(token);
+		try {
+			const token = await currentUser.getIdToken(true);
+			return cb(token);
+		} catch (error) {
+			// Silently handle token refresh errors
+			console.warn('Token refresh failed:', error.message);
+			return null;
+		}
 	};
 
 	const doPause = async (id) => { await withAuth(async (token) => { try { await fetch(API_ENDPOINTS.SCHEDULE_PAUSE(id), { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); triggerSchedulesRefresh(); toast.success('Schedule paused'); } catch (e) { console.warn(e); toast.error('Failed to pause schedule'); } }); };

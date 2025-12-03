@@ -41,9 +41,13 @@ const ClipStudioPanel = ({ content = [] }) => {
       if (response.ok) {
         const data = await response.json();
         setGeneratedClips(data.clips || []);
+      } else if (response.status === 404) {
+        // Endpoint not implemented yet, silently ignore
+        setGeneratedClips([]);
       }
     } catch (error) {
-      console.error('Failed to load clips:', error);
+      // Silently handle - clips feature may not be deployed yet
+      setGeneratedClips([]);
     }
   };
 

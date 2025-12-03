@@ -14,7 +14,10 @@ const EarningsPanel = ({ earnings, onClaim }) => {
     setLoading(true);
     try {
       const currentUser = auth.currentUser;
-      if (!currentUser) return;
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
       const token = await currentUser.getIdToken(true);
       
       const res = await fetch(API_ENDPOINTS.EARNINGS_PAYOUTS, {
@@ -27,12 +30,15 @@ const EarningsPanel = ({ earnings, onClaim }) => {
           const data = await res.json();
           setPayoutHistory(data.payouts || []);
         } else {
-          console.warn('Payout history endpoint returned non-JSON response');
+          // Non-JSON response, silently use empty array
           setPayoutHistory([]);
         }
+      } else {
+        // Endpoint error, silently use empty array
+        setPayoutHistory([]);
       }
     } catch (e) {
-      console.warn('Failed to load payout history:', e);
+      // Silently handle errors
       setPayoutHistory([]);
     } finally {
       setLoading(false);
