@@ -18,14 +18,21 @@ import BestTimeToPost from './components/BestTimeToPost';
 const sanitizeInput = (input) => {
   if (!input) return '';
   
-  // Convert to string and use whitelist: only allow letters, numbers, spaces, and safe punctuation
-  // This prevents ALL script injection vectors by only allowing known-safe characters
-  return String(input)
-    .replace(/[^\w\s.,!?@#$%^&*()\-+=[\]{}|:;"'<>\/\\`~]/g, '')
-    .replace(/<script[^>]*>.*?<\/script>/gi, '')
-    .replace(/<[^>]+>/g, '')
+  // Convert to string and escape all HTML special characters
+  const str = String(input);
+  const div = document.createElement('div');
+  div.textContent = str;
+  let escaped = div.innerHTML;
+  
+  // Additional protection: block dangerous patterns
+  escaped = escaped
     .replace(/javascript:/gi, '')
+    .replace(/data:/gi, '')
+    .replace(/vbscript:/gi, '')
+    .replace(/file:/gi, '')
     .replace(/on\w+\s*=/gi, '');
+  
+  return escaped;
 };
 
 // Security: Sanitize CSS values to prevent CSS injection
@@ -35,9 +42,12 @@ const sanitizeCSS = (css) => {
   
   const str = String(css).trim();
   
+  // Block any CSS that could be dangerous
+  if (/url\s*\(/i.test(str) || /expression\s*\(/i.test(str) || /@import/i.test(str)) {
+    return '';
+  }
+  
   // Whitelist: only allow safe CSS filter functions
-  // Match: blur(#px), brightness(#), contrast(#), grayscale(#), hue-rotate(#deg), 
-  //        invert(#), opacity(#), saturate(#), sepia(#)
   const allowedFunctions = ['blur', 'brightness', 'contrast', 'grayscale', 'hue-rotate', 'invert', 'opacity', 'saturate', 'sepia'];
   
   // Split by spaces and validate each filter function
@@ -46,7 +56,8 @@ const sanitizeCSS = (css) => {
   
   for (const part of parts) {
     // Check if part matches: functionName(number + optional unit)
-    const match = part.match(/^([a-z-]+)\(([\d.]+)(px|deg|%|)?\)$/i);
+    // Use more restrictive regex that requires closing parenthesis
+    const match = part.match(/^([a-z-]+)\(([\d.]+)(px|deg|%)?\)$/i);
     if (match && allowedFunctions.includes(match[1].toLowerCase())) {
       safeParts.push(part);
     }
@@ -57,9 +68,14 @@ const sanitizeCSS = (css) => {
 
 // Security: Escape HTML to prevent XSS attacks
 const escapeHtml = (text) => {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
 };
 
 function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, platformOptions: extPlatformOptions, setPlatformOption: extSetPlatformOption, selectedPlatforms: extSelectedPlatforms, setSelectedPlatforms: extSetSelectedPlatforms, spotifySelectedTracks: extSpotifySelectedTracks, setSpotifySelectedTracks: extSetSpotifySelectedTracks }) {
