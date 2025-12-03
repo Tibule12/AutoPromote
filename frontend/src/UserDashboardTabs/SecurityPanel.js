@@ -83,7 +83,7 @@ const SecurityPanel = ({ user }) => {
         return;
       }
       const token = await currentUser.getIdToken();
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'https://api.autopromote.org'}/api/user/connections`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'https://api.autopromote.org'}/api/users/connections`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
