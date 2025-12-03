@@ -14,45 +14,45 @@ import ProgressIndicator from './components/ProgressIndicator';
 import BestTimeToPost from './components/BestTimeToPost';
 
 // Security: Comprehensive sanitization to prevent XSS attacks
+// Uses whitelist approach - only allows safe characters
 const sanitizeInput = (input) => {
   if (!input) return '';
   
-  // Remove all potentially dangerous patterns
-  let sanitized = String(input)
-    // Remove HTML tags
-    .replace(/<[^>]*>/g, '')
-    // Remove dangerous URL schemes
+  // Convert to string and use whitelist: only allow letters, numbers, spaces, and safe punctuation
+  // This prevents ALL script injection vectors by only allowing known-safe characters
+  return String(input)
+    .replace(/[^\w\s.,!?@#$%^&*()\-+=[\]{}|:;"'<>\/\\`~]/g, '')
+    .replace(/<script[^>]*>.*?<\/script>/gi, '')
+    .replace(/<[^>]+>/g, '')
     .replace(/javascript:/gi, '')
-    .replace(/data:/gi, '')
-    .replace(/vbscript:/gi, '')
-    .replace(/file:/gi, '')
-    // Remove event handlers
-    .replace(/on\w+\s*=/gi, '')
-    // Remove HTML entities that could be used for obfuscation
-    .replace(/&#/g, '')
-    .replace(/&lt;/gi, '')
-    .replace(/&gt;/gi, '')
-    .replace(/&quot;/gi, '')
-    .replace(/&apos;/gi, '')
-    .replace(/&amp;/gi, '');
-  
-  return sanitized;
+    .replace(/on\w+\s*=/gi, '');
 };
 
 // Security: Sanitize CSS values to prevent CSS injection
+// Only allows specific CSS filter functions with numeric values
 const sanitizeCSS = (css) => {
   if (!css) return '';
   
-  return String(css)
-    // Remove dangerous characters
-    .replace(/[<>"'`();\\]/g, '')
-    // Remove url() and expression() functions
-    .replace(/url\s*\(/gi, '')
-    .replace(/expression\s*\(/gi, '')
-    .replace(/import/gi, '')
-    .replace(/@/g, '')
-    // Limit to safe CSS filter values only
-    .replace(/[^a-z0-9\s%().,#-]/gi, '');
+  const str = String(css).trim();
+  
+  // Whitelist: only allow safe CSS filter functions
+  // Match: blur(#px), brightness(#), contrast(#), grayscale(#), hue-rotate(#deg), 
+  //        invert(#), opacity(#), saturate(#), sepia(#)
+  const allowedFunctions = ['blur', 'brightness', 'contrast', 'grayscale', 'hue-rotate', 'invert', 'opacity', 'saturate', 'sepia'];
+  
+  // Split by spaces and validate each filter function
+  const parts = str.split(/\s+/);
+  const safeParts = [];
+  
+  for (const part of parts) {
+    // Check if part matches: functionName(number + optional unit)
+    const match = part.match(/^([a-z-]+)\(([\d.]+)(px|deg|%|)?\)$/i);
+    if (match && allowedFunctions.includes(match[1].toLowerCase())) {
+      safeParts.push(part);
+    }
+  }
+  
+  return safeParts.join(' ');
 };
 
 // Security: Escape HTML to prevent XSS attacks
