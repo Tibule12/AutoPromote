@@ -854,6 +854,14 @@ try {
 } catch (e) {
   console.log('⚠️ Clip routes mount failed:', e.message);
 }
+// AI Chat routes
+try {
+  const chatRoutes = require('./routes/chatRoutes');
+  app.use('/api/chat', routeLimiter({ windowHint: 'chat' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), chatRoutes);
+  console.log('🚏 AI Chat routes mounted at /api/chat');
+} catch (e) {
+  console.log('⚠️ Chat routes mount failed:', e.message);
+}
 // Mount generic platform routes under /api so frontend placeholder endpoints like
 // /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
 try {
