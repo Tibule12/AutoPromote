@@ -846,6 +846,14 @@ try {
 } catch (e) {
   console.log('⚠️ Viral growth routes mount failed:', e.message);
 }
+// AI Clip generation routes
+try {
+  const clipRoutes = require('./routes/clipRoutes');
+  app.use('/api/clips', routeLimiter({ windowHint: 'clips' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), clipRoutes);
+  console.log('🚏 AI Clip generation routes mounted at /api/clips');
+} catch (e) {
+  console.log('⚠️ Clip routes mount failed:', e.message);
+}
 // Mount generic platform routes under /api so frontend placeholder endpoints like
 // /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
 try {
