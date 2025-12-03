@@ -9,6 +9,7 @@ import RewardsPanel from './UserDashboardTabs/RewardsPanel';
 import NotificationsPanel from './UserDashboardTabs/NotificationsPanel';
 import EarningsPanel from './UserDashboardTabs/EarningsPanel';
 import ConnectionsPanel from './UserDashboardTabs/ConnectionsPanel';
+import SecurityPanel from './UserDashboardTabs/SecurityPanel';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
 import toast, { Toaster } from 'react-hot-toast';
@@ -373,6 +374,7 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 						<li className={activeTab === 'notifications' ? 'active' : ''} onClick={() => handleNav('notifications')}>Notifications</li>
 						<li className={activeTab === 'earnings' ? 'active' : ''} onClick={() => handleNav('earnings')}>Earnings</li>
 						<li className={activeTab === 'connections' ? 'active' : ''} onClick={() => handleNav('connections')}>Connections</li>
+						<li className={activeTab === 'security' ? 'active' : ''} onClick={() => handleNav('security')}>Security</li>
 					</ul>
 				</nav>
 				<button className="logout-btn" onClick={onLogout}>Logout</button>
@@ -452,6 +454,10 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 						handleConnectSpotify={handleConnectSpotify} handleConnectDiscord={handleConnectDiscord} handleConnectReddit={handleConnectReddit} handleConnectYouTube={handleConnectYouTube} handleConnectTwitter={handleConnectTwitter} handleConnectSnapchat={handleConnectSnapchat} handleConnectLinkedin={handleConnectLinkedin} handleConnectTelegram={handleConnectTelegram} handleConnectPinterest={handleConnectPinterest} handleConnectTikTok={handleConnectTikTok} handleConnectFacebook={handleConnectFacebook}
 						handleDisconnectPlatform={handleDisconnectPlatform}
 					/>
+				)}
+
+				{activeTab === 'security' && (
+					<SecurityPanel user={user} />
 				)}
 			</main>
 		</div>
