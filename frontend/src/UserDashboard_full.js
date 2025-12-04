@@ -15,7 +15,7 @@ import ClipStudioPanel from './UserDashboardTabs/ClipStudioPanel';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
 import toast, { Toaster } from 'react-hot-toast';
-import { cachedFetch, batchWithDelay } from './utils/requestCache';
+import { cachedFetch, batchWithDelay, clearCache } from './utils/requestCache';
 
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ''}/image.png`;
 
@@ -221,6 +221,9 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 			const cleanUrl = window.location.pathname + window.location.hash;
 			window.history.replaceState({}, '', cleanUrl);
 			
+			// Clear ALL platform status caches to force fresh data
+			clearCache();
+			
 			// Show toast notification
 			if (oauthStatus === 'success' || params.get(oauthPlatform) === 'connected') {
 				setConnectBanner({ type: 'success', message: `${oauthPlatform.charAt(0).toUpperCase() + oauthPlatform.slice(1)} connected successfully!` });
@@ -233,7 +236,7 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 				setTimeout(() => setConnectBanner(null), 5000);
 			}
 			
-			// Trigger refresh of all platform statuses
+			// Trigger refresh of all platform statuses with cleared cache
 			setTimeout(() => refreshAllStatus(), 500);
 		}
 
