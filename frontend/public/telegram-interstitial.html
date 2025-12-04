@@ -52,38 +52,54 @@
 
       note.textContent = bot ? `Bot: ${safe(bot)} · State: ${safe(state)}` : `State: ${safe(state)}`;
 
-      // Only allow safe targets — accept tg scheme and known Telegram web hosts.
+      // Only allow safe targets — strict validation for tg:// and HTTPS Telegram domains
       function isAllowedTelegramUrl(url) {
-        if (!url) return false;
-        if (url.startsWith('tg:') || url.startsWith('tg://')) return true;
+        if (!url || typeof url !== 'string') return false;
+        url = url.trim();
+        
+        // Validate tg:// protocol with strict pattern
+        if (url.startsWith('tg://')) {
+          return /^tg:\/\/[a-zA-Z0-9_\-\/\?=&]+$/.test(url);
+        }
+        
+        // Only allow HTTPS URLs from whitelisted Telegram domains
         try {
           const u = new URL(url);
+          if (u.protocol !== 'https:') return false;
           const allowed = ['t.me', 'web.telegram.org'];
-          if (allowed.includes(u.hostname)) return true;
-          // Allow same-origin for debug / staging local interstitials
-          if (u.origin === window.location.origin) return true;
+          return allowed.includes(u.hostname);
         } catch (_) {}
         return false;
       }
 
-      openApp.href = isAllowedTelegramUrl(appUrl) ? appUrl : (isAllowedTelegramUrl(authUrl) ? authUrl : '#');
+      // Validate and sanitize URLs before use
+      const validAppUrl = isAllowedTelegramUrl(appUrl) ? appUrl : '';
+      const validAuthUrl = isAllowedTelegramUrl(authUrl) ? authUrl : '';
+      
+      openApp.href = validAppUrl || validAuthUrl || '#';
       openApp.onclick = function(e){
-        const t = appUrl || authUrl || '';
-        if (!isAllowedTelegramUrl(t)) { e.preventDefault(); return false; }
-        try { window.location.href = t; } catch (err) { window.open(t, '_self'); }
         e.preventDefault();
+        const targetUrl = validAppUrl || validAuthUrl;
+        if (!targetUrl || !isAllowedTelegramUrl(targetUrl)) return false;
+        try { window.location.href = targetUrl; } catch (_) { /* ignore */ }
         return false;
       };
 
-      openWeb.href = isAllowedTelegramUrl(authUrl) ? authUrl : (isAllowedTelegramUrl(appUrl) ? appUrl : '#');
-      openWeb.onclick = function(){ return true; };
+      openWeb.href = validAuthUrl || validAppUrl || '#';
+      openWeb.onclick = function(e){ 
+        if (!openWeb.href || openWeb.href === '#' || !openWeb.href.startsWith('https://')) {
+          e.preventDefault();
+          return false;
+        }
+        return true; 
+      };
 
       closeBtn.onclick = function(){ window.close(); };
 
-      // Auto-attempt native open on load (non-blocking)
-      if (isAllowedTelegramUrl(appUrl)) {
+      // Auto-attempt native open on load (non-blocking) - only if validated
+      if (validAppUrl) {
         setTimeout(function(){
-          try { window.location.href = appUrl; } catch(_) { /* ignore */ }
+          try { window.location.href = validAppUrl; } catch(_) { /* ignore */ }
         }, 300);
       }
 
