@@ -15,6 +15,16 @@ class VideoClippingService {
     this.transcriptionProvider = process.env.TRANSCRIPTION_PROVIDER || 'openai'; // 'openai' or 'google'
     this.openaiApiKey = process.env.OPENAI_API_KEY;
     this.googleCloudKey = process.env.GOOGLE_CLOUD_API_KEY;
+    
+    // Log provider status
+    if (this.transcriptionProvider === 'openai' && !this.openaiApiKey) {
+      console.warn('[VideoClipping] ⚠️ OPENAI_API_KEY not configured. Falling back to Google Cloud.');
+      this.transcriptionProvider = 'google';
+    }
+    if (this.transcriptionProvider === 'google' && !this.googleCloudKey) {
+      console.warn('[VideoClipping] ⚠️ GOOGLE_CLOUD_API_KEY not configured.');
+      console.warn('[VideoClipping] 💡 Add OPENAI_API_KEY or GOOGLE_CLOUD_API_KEY for transcription.');
+    }
   }
 
   /**

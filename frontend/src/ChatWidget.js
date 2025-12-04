@@ -18,15 +18,41 @@ const ChatWidget = () => {
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
+      checkChatbotStatus();
       loadSuggestions();
-      // Send welcome message
+    }
+  }, [isOpen]);
+
+  const checkChatbotStatus = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat/health`);
+      const data = await response.json();
+      
+      if (data.configured) {
+        // Send welcome message
+        setMessages([{
+          role: 'assistant',
+          content: '👋 Hi! I\'m your AutoPromote AI Assistant. I speak all 11 South African languages! How can I help you today?\n\nSawubona! (Zulu) | Molo! (Xhosa) | Hallo! (Afrikaans)',
+          timestamp: new Date().toISOString()
+        }]);
+      } else {
+        // Show not configured message
+        setMessages([{
+          role: 'assistant',
+          content: '⚠️ AI Chatbot is currently being configured. Please check back soon or contact support for assistance.',
+          timestamp: new Date().toISOString()
+        }]);
+      }
+    } catch (error) {
+      console.error('Failed to check chatbot status:', error);
+      // Default welcome message on error
       setMessages([{
         role: 'assistant',
-        content: '👋 Hi! I\'m your AutoPromote AI Assistant. I speak all 11 South African languages! How can I help you today?\n\nSawubona! (Zulu) | Molo! (Xhosa) | Hallo! (Afrikaans)',
+        content: '👋 Hi! I\'m your AutoPromote AI Assistant. How can I help you today?',
         timestamp: new Date().toISOString()
       }]);
     }
-  }, [isOpen]);
+  };
 
   useEffect(() => {
     scrollToBottom();
