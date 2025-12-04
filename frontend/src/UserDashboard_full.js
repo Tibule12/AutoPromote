@@ -12,6 +12,7 @@ import ConnectionsPanel from './UserDashboardTabs/ConnectionsPanel';
 import SecurityPanel from './UserDashboardTabs/SecurityPanel';
 import CommunityPanel from './UserDashboardTabs/CommunityPanel';
 import ClipStudioPanel from './UserDashboardTabs/ClipStudioPanel';
+import UsageLimitBanner from './components/UsageLimitBanner';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
 import toast, { Toaster } from 'react-hot-toast';
@@ -458,6 +459,7 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 			</aside>
 
 			<main className="dashboard-main">
+				<UsageLimitBanner />
 				{connectBanner && (
 					<div className={`connect-banner ${connectBanner.type}`} style={{
 						padding: '1rem',

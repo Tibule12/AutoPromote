@@ -164,6 +164,96 @@ const EarningsPanel = ({ earnings, onClaim }) => {
               </div>
             )}
           </div>
+
+          <div className="reward-tiers-section" style={{
+            background: 'var(--card)',
+            padding: '1.5rem',
+            borderRadius: '12px',
+            border: '1px solid var(--border)',
+            marginTop: '1.5rem'
+          }}>
+            <h4 style={{ marginTop: 0, marginBottom: '1rem' }}>📊 Performance Reward Tiers</h4>
+            <p style={{ fontSize: '0.875rem', color: 'var(--muted)', marginBottom: '1.5rem' }}>
+              Earn automatic rewards when your content hits these milestones!
+            </p>
+            
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '1rem'
+            }}>
+              <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-2)', borderRadius: '8px' }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👍</div>
+                <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Good</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>1K+ views, 1%+ engagement</div>
+                <div style={{ color: '#10b981', fontWeight: 'bold' }}>$1.00</div>
+              </div>
+              
+              <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-2)', borderRadius: '8px' }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🌟</div>
+                <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Rising</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>5K+ views, 2%+ engagement</div>
+                <div style={{ color: '#10b981', fontWeight: 'bold' }}>$5.00</div>
+              </div>
+              
+              <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-2)', borderRadius: '8px' }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⭐</div>
+                <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Popular</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>10K+ views, 3%+ engagement</div>
+                <div style={{ color: '#10b981', fontWeight: 'bold' }}>$10.00</div>
+              </div>
+              
+              <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-2)', borderRadius: '8px' }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📈</div>
+                <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Trending</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>50K+ views, 4%+ engagement</div>
+                <div style={{ color: '#10b981', fontWeight: 'bold' }}>$25.00</div>
+              </div>
+              
+              <div style={{ textAlign: 'center', padding: '1rem', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '8px', color: 'white' }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🔥</div>
+                <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Viral</div>
+                <div style={{ fontSize: '0.75rem', marginBottom: '0.5rem', opacity: 0.9 }}>100K+ views, 5%+ engagement</div>
+                <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>$50.00</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="milestone-bonuses-section" style={{
+            background: 'var(--card)',
+            padding: '1.5rem',
+            borderRadius: '12px',
+            border: '1px solid var(--border)',
+            marginTop: '1.5rem'
+          }}>
+            <h4 style={{ marginTop: 0, marginBottom: '1rem' }}>🎯 View Milestone Bonuses</h4>
+            <p style={{ fontSize: '0.875rem', color: 'var(--muted)', marginBottom: '1.5rem' }}>
+              Extra rewards when your content reaches these view counts!
+            </p>
+            
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div style={{ flex: '1 1 120px', padding: '0.75rem', background: 'var(--bg-2)', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.875rem', color: 'var(--muted)', marginBottom: '0.25rem' }}>10K views</div>
+                <div style={{ color: '#10b981', fontWeight: 'bold' }}>+$5</div>
+              </div>
+              <div style={{ flex: '1 1 120px', padding: '0.75rem', background: 'var(--bg-2)', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.875rem', color: 'var(--muted)', marginBottom: '0.25rem' }}>50K views</div>
+                <div style={{ color: '#10b981', fontWeight: 'bold' }}>+$20</div>
+              </div>
+              <div style={{ flex: '1 1 120px', padding: '0.75rem', background: 'var(--bg-2)', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.875rem', color: 'var(--muted)', marginBottom: '0.25rem' }}>100K views</div>
+                <div style={{ color: '#10b981', fontWeight: 'bold' }}>+$50</div>
+              </div>
+              <div style={{ flex: '1 1 120px', padding: '0.75rem', background: 'var(--bg-2)', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.875rem', color: 'var(--muted)', marginBottom: '0.25rem' }}>500K views</div>
+                <div style={{ color: '#10b981', fontWeight: 'bold' }}>+$200</div>
+              </div>
+              <div style={{ flex: '1 1 120px', padding: '0.75rem', background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', borderRadius: '8px', textAlign: 'center', color: 'white' }}>
+                <div style={{ fontSize: '0.875rem', marginBottom: '0.25rem', opacity: 0.9 }}>1M views</div>
+                <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>+$500</div>
+              </div>
+            </div>
+          </div>
         </>
       ) : (
         <div style={{ color: '#9aa4b2' }}>Loading earnings...</div>

@@ -1,0 +1,187 @@
+// usageLimitMiddleware.js
+// Enforce monthly content upload limits for free users
+
+const { db } = require('./firebaseAdmin');
+
+/**
+ * Check if user has exceeded their monthly upload limit
+ * Free tier: 10 uploads per month
+ * Paid tier: Unlimited
+ * 
+ * @param {Object} options - Configuration options
+ * @param {number} options.freeLimit - Upload limit for free users (default: 10)
+ * @param {string} options.limitType - Type of limit to check (default: 'upload')
+ */
+function usageLimitMiddleware(options = {}) {
+  const freeLimit = options.freeLimit || 10;
+  const limitType = options.limitType || 'upload';
+
+  return async (req, res, next) => {
+    try {
+      const userId = req.userId || req.user?.uid;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      // Check if user has paid subscription
+      const userDoc = await db.collection('users').doc(userId).get();
+      const userData = userDoc.data() || {};
+      
+      // Check subscription status
+      const hasPaidSubscription = userData.subscriptionTier === 'premium' || 
+                                  userData.subscriptionTier === 'pro' ||
+                                  userData.isPaid === true ||
+                                  userData.unlimited === true;
+
+      if (hasPaidSubscription) {
+        // Paid users get unlimited uploads
+        req.userUsage = { 
+          limit: Infinity, 
+          used: 0, 
+          remaining: Infinity,
+          isPaid: true 
+        };
+        return next();
+      }
+
+      // For free users, check monthly usage
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      // Get usage for current month
+      const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      
+      const usageSnap = await db.collection('usage_ledger')
+        .where('userId', '==', userId)
+        .where('type', '==', limitType)
+        .where('monthKey', '==', monthKey)
+        .get();
+
+      let usageCount = 0;
+      usageSnap.forEach(doc => {
+        const data = doc.data();
+        usageCount += data.count || 1;
+      });
+
+      const remaining = freeLimit - usageCount;
+
+      // Attach usage info to request for logging
+      req.userUsage = {
+        limit: freeLimit,
+        used: usageCount,
+        remaining: remaining,
+        isPaid: false,
+        monthKey: monthKey
+      };
+
+      if (usageCount >= freeLimit) {
+        return res.status(403).json({ 
+          error: 'Monthly upload limit reached',
+          message: `You've reached your free tier limit of ${freeLimit} uploads per month. Upgrade to premium for unlimited uploads.`,
+          limit: freeLimit,
+          used: usageCount,
+          remaining: 0,
+          upgradeUrl: '/pricing',
+          canUpgrade: true
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error('[usageLimitMiddleware] Error checking usage limits:', error);
+      // On error, allow the request but log it
+      next();
+    }
+  };
+}
+
+/**
+ * Track usage after successful upload
+ * Call this AFTER the upload succeeds
+ */
+async function trackUsage(userId, type = 'upload', metadata = {}) {
+  try {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+
+    await db.collection('usage_ledger').add({
+      userId,
+      type,
+      count: 1,
+      monthKey,
+      timestamp: now.toISOString(),
+      metadata: metadata || {}
+    });
+
+    console.log(`[trackUsage] Tracked ${type} for user ${userId} in month ${monthKey}`);
+  } catch (error) {
+    console.error('[trackUsage] Error tracking usage:', error);
+    // Don't throw - tracking failure shouldn't block the upload
+  }
+}
+
+/**
+ * Get user's current usage stats
+ */
+async function getUserUsageStats(userId) {
+  try {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+
+    // Check subscription status
+    const userDoc = await db.collection('users').doc(userId).get();
+    const userData = userDoc.data() || {};
+    
+    const hasPaidSubscription = userData.subscriptionTier === 'premium' || 
+                                userData.subscriptionTier === 'pro' ||
+                                userData.isPaid === true ||
+                                userData.unlimited === true;
+
+    if (hasPaidSubscription) {
+      return {
+        isPaid: true,
+        limit: Infinity,
+        used: 0,
+        remaining: Infinity,
+        monthKey
+      };
+    }
+
+    // Get upload count for current month
+    const usageSnap = await db.collection('usage_ledger')
+      .where('userId', '==', userId)
+      .where('type', '==', 'upload')
+      .where('monthKey', '==', monthKey)
+      .get();
+
+    let usageCount = 0;
+    usageSnap.forEach(doc => {
+      const data = doc.data();
+      usageCount += data.count || 1;
+    });
+
+    const freeLimit = 10;
+    return {
+      isPaid: false,
+      limit: freeLimit,
+      used: usageCount,
+      remaining: Math.max(0, freeLimit - usageCount),
+      monthKey
+    };
+  } catch (error) {
+    console.error('[getUserUsageStats] Error:', error);
+    throw error;
+  }
+}
+
+module.exports = {
+  usageLimitMiddleware,
+  trackUsage,
+  getUserUsageStats
+};
