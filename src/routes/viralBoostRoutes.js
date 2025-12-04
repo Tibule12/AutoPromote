@@ -19,31 +19,78 @@ const boostLimiter = rateLimiter({
 
 router.use(boostLimiter);
 
-// Boost packages configuration
+// Boost packages configuration - THE PEOPLE'S PLATFORM
+// Free tier gets INSANE value to prove the platform works
+// Users will BEG to upgrade after seeing real results
 const BOOST_PACKAGES = {
-  starter: {
-    id: 'starter',
-    name: 'Starter Boost',
-    views: 1000,
-    duration: 24, // hours
-    price: 4.99,
-    features: ['1K guaranteed views', '24h promotion', 'Trending tab placement']
+  free: {
+    id: 'free',
+    name: 'Free Viral Boost',
+    views: 10000, // 10K guaranteed - PROVE IT WORKS
+    duration: 48, // 2 days
+    price: 0,
+    requiredTier: 'free',
+    features: [
+      '10K guaranteed views',
+      '48h viral promotion',
+      'Community feed featured',
+      'Basic analytics dashboard',
+      'Taste the power 🚀'
+    ]
   },
-  growth: {
-    id: 'growth',
-    name: 'Growth Boost',
-    views: 10000,
-    duration: 48,
-    price: 29.99,
-    features: ['10K guaranteed views', '48h promotion', 'Featured placement', 'Analytics report']
+  premium: {
+    id: 'premium',
+    name: 'Premium Viral Boost',
+    views: 80000, // 80K guaranteed - NOW THEY'RE HOOKED
+    duration: 96, // 4 days
+    price: 19.99, // Accessible pricing
+    requiredTier: 'premium',
+    features: [
+      '80K guaranteed views',
+      '4 days viral promotion',
+      'Trending + Featured placement',
+      'Advanced analytics + heatmaps',
+      'Priority queue processing',
+      'Multi-platform cross-promotion'
+    ]
   },
-  viral: {
-    id: 'viral',
-    name: 'Viral Boost',
-    views: 100000,
+  pro: {
+    id: 'pro',
+    name: 'Pro Mega Boost',
+    views: 250000, // 250K guaranteed - SERIOUS GROWTH
     duration: 168, // 7 days
-    price: 249.99,
-    features: ['100K guaranteed views', '7 days promotion', 'Homepage featured', 'Priority support', 'Detailed analytics']
+    price: 49.99,
+    requiredTier: 'pro',
+    features: [
+      '250K guaranteed views',
+      '7 days mega promotion',
+      'Homepage hero featured',
+      'AI-powered optimization',
+      'Real-time performance tracking',
+      'Dedicated growth consultant',
+      'Multi-platform amplification',
+      'Influencer network exposure'
+    ]
+  },
+  enterprise: {
+    id: 'enterprise',
+    name: 'Enterprise Unlimited',
+    views: Infinity, // UNLIMITED - THE SKY'S THE LIMIT
+    duration: 336, // 14 days
+    price: 199.99,
+    requiredTier: 'enterprise',
+    features: [
+      '♾️ UNLIMITED views guarantee',
+      '14 days continuous promotion',
+      'Platform-wide mega featured',
+      'AI mega-optimization suite',
+      'White-glove concierge service',
+      'Custom viral strategy session',
+      'Press release distribution',
+      'Celebrity influencer network',
+      'Cross-platform domination',
+      'Guaranteed viral trajectory'
+    ]
   }
 };
 
@@ -81,6 +128,22 @@ router.post('/purchase', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Invalid package' });
     }
 
+    // Validate user has required subscription tier
+    if (boostPackage.requiredTier) {
+      const tierHierarchy = { free: 0, premium: 1, pro: 2, enterprise: 3 };
+      const userTierLevel = tierHierarchy[subscription] || 0;
+      const requiredTierLevel = tierHierarchy[boostPackage.requiredTier] || 0;
+      
+      if (userTierLevel < requiredTierLevel) {
+        return res.status(403).json({ 
+          error: 'Subscription tier required',
+          message: `Upgrade to ${boostPackage.requiredTier} tier to unlock ${boostPackage.name}`,
+          requiredTier: boostPackage.requiredTier,
+          currentTier: subscription
+        });
+      }
+    }
+
     // Check if content exists
     const contentDoc = await db.collection('community_posts').doc(contentId).get();
     if (!contentDoc.exists) {
@@ -111,14 +174,17 @@ router.post('/purchase', authMiddleware, async (req, res) => {
     const freeBoostsUsed = boostsSnap.docs.filter(doc => doc.data().paymentType === 'subscription').length;
 
     // Check if user has free boosts available
-    const freeBoostLimits = {
-      free: 0,
-      premium: 1,
-      pro: 5,
-      enterprise: Infinity
-    };
-
-    const freeBoostsAvailable = (freeBoostLimits[subscription] || 0) - freeBoostsUsed;
+  // Free boost allowances per billing period
+  // Free tier: 1 free boost to TASTE THE POWER
+  // Premium: 3 boosts - feel the growth addiction
+  // Pro: 10 boosts - scaling to the moon
+  // Enterprise: UNLIMITED - absolute domination
+  const freeBoostLimits = {
+    free: 1, // Changed from 0 to 1 - let them taste success!
+    premium: 3, // Changed from 1 to 3 - feel the addiction
+    pro: 10, // Changed from 5 to 10 - serious growth
+    enterprise: Infinity // Unlimited domination
+  };    const freeBoostsAvailable = (freeBoostLimits[subscription] || 0) - freeBoostsUsed;
 
     // If free boost available, use it
     if (freeBoostsAvailable > 0) {
