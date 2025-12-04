@@ -9,6 +9,7 @@ import CommunityModerationPanel from './components/CommunityModerationPanel';
 import SystemHealthPanel from './components/SystemHealthPanel';
 import ContentApprovalPanel from './components/ContentApprovalPanel';
 import AdvancedAnalyticsPanel from './components/AdvancedAnalyticsPanel';
+import PayPalSubscriptionPanel from './components/PayPalSubscriptionPanel';
 import './AdminDashboard.css';
 
 function AdminDashboard({ analytics, user, onLogout }) {
@@ -2332,7 +2333,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
         return <ModerationPanel dashboardData={dashboardData} />;
 
       case 'subscriptions':
-        return <SubscriptionManagementPanel dashboardData={dashboardData} />;
+        return <PayPalSubscriptionPanel />;
 
       case 'openai':
         return <OpenAIUsagePanel dashboardData={dashboardData} openAIUsage={openAIUsage} />;
