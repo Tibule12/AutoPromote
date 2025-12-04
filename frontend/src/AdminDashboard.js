@@ -7,6 +7,8 @@ import mockAnalyticsData from './mockAnalyticsData';
 import VariantAdminPanel from './components/VariantAdminPanel';
 import CommunityModerationPanel from './components/CommunityModerationPanel';
 import SystemHealthPanel from './components/SystemHealthPanel';
+import ContentApprovalPanel from './components/ContentApprovalPanel';
+import AdvancedAnalyticsPanel from './components/AdvancedAnalyticsPanel';
 import './AdminDashboard.css';
 
 function AdminDashboard({ analytics, user, onLogout }) {
@@ -2311,6 +2313,12 @@ function AdminDashboard({ analytics, user, onLogout }) {
       case 'community':
         return <CommunityModerationPanel />;
 
+      case 'approval':
+        return <ContentApprovalPanel />;
+
+      case 'analytics':
+        return <AdvancedAnalyticsPanel />;
+
       case 'system':
         return <SystemHealthPanel />;
 
@@ -2445,6 +2453,8 @@ function AdminDashboard({ analytics, user, onLogout }) {
         <TabButton name="content" label="Content" icon="📄" />
         <TabButton name="revenue" label="Revenue" icon="💰" />
         <TabButton name="community" label="Community" icon="🎭" />
+        <TabButton name="approval" label="Content Approval" icon="✅" />
+        <TabButton name="analytics" label="Advanced Analytics" icon="📈" />
         <TabButton name="system" label="System Health" icon="⚡" />
         <TabButton name="audit" label="Audit Logs" icon="📜" />
         <TabButton name="support" label="Support" icon="🎧" />
