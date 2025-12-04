@@ -335,3 +335,46 @@ exports.handleSmartLinkIntent = functions.region(region).firestore
         return null;
       }
   });
+
+// Auto-reward creators when content metrics are updated
+exports.autoRewardCreators = functions.region(region)
+  .firestore.document('content/{contentId}')
+  .onUpdate(async (change, context) => {
+    try {
+      const before = change.before.data();
+      const after = change.after.data();
+      const contentId = context.params.contentId;
+      const userId = after.user_id || after.userId;
+      
+      if (!userId) return null;
+      
+      // Check if views increased significantly (at least 100 new views)
+      const viewsBefore = before.views || 0;
+      const viewsAfter = after.views || 0;
+      const viewsIncrease = viewsAfter - viewsBefore;
+      
+      if (viewsIncrease < 100) return null; // Only check rewards when views increase substantially
+      
+      // Check if already rewarded recently (prevent spam)
+      const rewardedAt = after.rewardedAt ? new Date(after.rewardedAt) : null;
+      if (rewardedAt) {
+        const hoursSinceReward = (Date.now() - rewardedAt.getTime()) / (1000 * 60 * 60);
+        if (hoursSinceReward < 24) return null; // Only check once per day
+      }
+      
+      console.log(`Checking rewards for content ${contentId}, views increased by ${viewsIncrease}`);
+      
+      // Lazy load rewards service
+      const creatorRewards = require('./_server/src/services/creatorRewardsService');
+      const result = await creatorRewards.calculateContentRewards(contentId, userId);
+      
+      if (result.success) {
+        console.log(`Rewarded user ${userId} for content ${contentId}: $${result.totalEarned} (${result.tier})`);
+      }
+      
+      return null;
+    } catch (err) {
+      console.error('Error in autoRewardCreators:', err);
+      return null;
+    }
+  });

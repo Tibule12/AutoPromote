@@ -815,6 +815,7 @@ app.use('/api/admin/security', adminSecurityRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api/engagement', engagementRoutes);
 app.use('/api/monetization', monetizationRoutes);
+try { app.use('/api/usage', routeLimiter({ windowHint: 'usage' }), require('./routes/usageRoutes')); } catch(e) { console.warn('usageRoutes mount failed:', e.message); }
 app.use('/api/repost', repostRoutes);
 try { app.use('/api/admin/metrics', require('./routes/adminMetricsRoutes')); } catch(e) { console.warn('adminMetricsRoutes mount failed:', e.message); }
 // Aggregate status (composed) routes

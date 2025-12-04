@@ -112,6 +112,11 @@ export const API_ENDPOINTS = {
   // Analytics endpoints
   ANALYTICS_USER: `${API_BASE_URL}/api/analytics/user`,
 
+  // Usage & Limits
+  USAGE_STATS: `${API_BASE_URL}/api/usage/stats`,
+  USAGE_UPGRADE: `${API_BASE_URL}/api/usage/upgrade`,
+  USAGE_PRICING: `${API_BASE_URL}/api/usage/pricing`,
+
   // Platform aggregated status & user progress
   PLATFORM_STATUS: `${API_BASE_URL}/api/platform/status`,
   PLATFORM_DISCONNECT: (platform) => `${API_BASE_URL}/api/platform/disconnect/${platform}`,
