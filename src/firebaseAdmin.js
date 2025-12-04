@@ -31,7 +31,7 @@ if (bypass) {
         console.warn('[firebaseAdmin shim] Root firebaseAdmin.js not found or failed to initialize:', e.message);
     }
     admin = require('firebase-admin');
-    const adminConfig = require('./firebaseConfig.server.js');
+    const adminConfig = require('../firebaseConfig.server.js');
     if (admin.apps.length === 0) {
         // Validate minimal required fields before attempting init to produce more actionable error.
         const required = ['project_id','private_key','client_email'];
