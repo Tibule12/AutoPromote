@@ -1,7 +1,7 @@
 // usageLimitMiddleware.js
 // Enforce monthly content upload limits for free users
 
-const { db } = require('./firebaseAdmin');
+const { db } = require('../firebaseAdmin');
 
 /**
  * Check if user has exceeded their monthly upload limit

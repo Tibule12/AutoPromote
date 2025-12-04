@@ -1,8 +1,7 @@
 // creatorRewardsService.js
 // Automatic creator rewards based on content performance
 
-const admin = require('firebase-admin');
-const db = admin.firestore();
+const { admin, db } = require('../firebaseAdmin');
 
 // Reward thresholds and payouts
 const PERFORMANCE_TIERS = {
