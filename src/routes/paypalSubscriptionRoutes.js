@@ -25,59 +25,70 @@ router.use(paypalLimiter);
 const SUBSCRIPTION_PLANS = {
   free: {
     id: 'free',
-    name: 'Free',
+    name: 'Free - Taste The Power',
     price: 0,
     features: {
-      uploads: 10,
-      communityPosts: 5,
-      aiClips: false,
+      uploads: 50, // Changed from 10 to 50 - be generous!
+      communityPosts: 20, // Changed from 5 to 20 - let them post!
+      aiClips: true, // Changed from false - GIVE THEM THE TOOLS
       analytics: 'basic',
       support: 'community',
-      watermark: true,
-      viralBoost: false,
-      priorityModeration: false
+      watermark: false, // Changed from true - no watermark even on free!
+      viralBoost: 1, // Changed from false - 1 FREE boost to prove it works!
+      viralBoostViews: '10K', // Show what they get
+      priorityModeration: false,
+      creatorTipping: false
     }
   },
   premium: {
     id: 'premium',
-    name: 'Premium',
+    name: 'Premium - Feel The Growth',
     price: 9.99,
     paypalPlanId: process.env.PAYPAL_PREMIUM_PLAN_ID,
     features: {
       uploads: 'unlimited',
-      communityPosts: 50,
+      communityPosts: 'unlimited', // Changed from 50 - no limits!
       aiClips: true,
       analytics: 'advanced',
       support: 'priority',
       watermark: false,
-      viralBoost: 1, // 1 per month
-      priorityModeration: false,
-      creatorTipping: true
+      viralBoost: 3, // Changed from 1 to 3 - feed the addiction!
+      viralBoostViews: '80K each', // Show the power
+      priorityModeration: true, // Changed from false - they deserve it
+      creatorTipping: true,
+      advancedAI: true, // Better AI generation
+      crossPlatformAuto: true // Auto-post to all platforms
     }
   },
   pro: {
     id: 'pro',
-    name: 'Pro',
+    name: 'Pro - Scale To The Moon',
     price: 29.99,
     paypalPlanId: process.env.PAYPAL_PRO_PLAN_ID,
     features: {
       uploads: 'unlimited',
       communityPosts: 'unlimited',
       aiClips: true,
-      analytics: 'advanced',
+      analytics: 'enterprise', // Upgraded analytics
       support: 'priority',
       watermark: false,
-      viralBoost: 5, // 5 per month
+      viralBoost: 10, // Changed from 5 to 10 - serious scaling
+      viralBoostViews: '250K each', // Show the mega power
       priorityModeration: true,
       creatorTipping: true,
-      sponsoredPosts: 2,
-      apiAccess: false,
-      teamSeats: 3
+      sponsoredPosts: 10, // Changed from 2 to 10 - monetize hard
+      apiAccess: true, // Changed from false - give them API power
+      teamSeats: 10, // Changed from 3 to 10 - build teams
+      dedicatedManager: false,
+      customBranding: true,
+      advancedAI: true,
+      aiVideoEditing: true, // Advanced video AI
+      growthConsultant: true // Monthly strategy calls
     }
   },
   enterprise: {
     id: 'enterprise',
-    name: 'Enterprise',
+    name: 'Enterprise - Absolute Domination',
     price: 99.99,
     paypalPlanId: process.env.PAYPAL_ENTERPRISE_PLAN_ID,
     features: {
@@ -88,12 +99,20 @@ const SUBSCRIPTION_PLANS = {
       support: 'dedicated',
       watermark: false,
       viralBoost: 'unlimited',
+      viralBoostViews: '♾️ UNLIMITED per boost', // Show the infinite power
       priorityModeration: true,
       creatorTipping: true,
       sponsoredPosts: 'unlimited',
       apiAccess: true,
       teamSeats: 'unlimited',
-      whiteLabel: true
+      whiteLabel: true,
+      dedicatedManager: true, // Personal account manager
+      customIntegrations: true,
+      pressReleaseDistribution: true, // Media exposure
+      influencerNetwork: true, // Connect with influencers
+      customAIModels: true, // Train custom AI on their content
+      priorityFeatureRequests: true, // Direct product influence
+      monthlyStrategySession: true // High-touch consulting
     }
   }
 };
