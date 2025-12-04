@@ -488,6 +488,22 @@ try {
   paypalWebhookRoutes = require('./routes/paypalWebhookRoutes');
   console.log('✅ PayPal webhook routes loaded');
 } catch (e) { paypalWebhookRoutes = express.Router(); }
+let paypalSubscriptionRoutes;
+try {
+  paypalSubscriptionRoutes = require('./routes/paypalSubscriptionRoutes');
+  console.log('✅ PayPal subscription routes loaded');
+} catch (e) { 
+  paypalSubscriptionRoutes = express.Router(); 
+  console.log('⚠️ PayPal subscription routes not found');
+}
+let viralBoostRoutes;
+try {
+  viralBoostRoutes = require('./routes/viralBoostRoutes');
+  console.log('✅ Viral boost routes loaded');
+} catch (e) { 
+  viralBoostRoutes = express.Router(); 
+  console.log('⚠️ Viral boost routes not found');
+}
 try {
   // Stripe integration removed
 // (removed empty try block)
@@ -913,6 +929,8 @@ if (requireAcceptedTerms) {
 app.use('/api/payments', routeLimiter({ windowHint: 'payments' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), paymentsStatusRoutes);
 app.use('/api/payments', routeLimiter({ windowHint: 'payments' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), paymentsExtendedRoutes);
 app.use('/api/paypal', paypalWebhookRoutes);
+app.use('/api/paypal-subscriptions', routeLimiter({ windowHint: 'paypal_subscriptions' }), paypalSubscriptionRoutes);
+app.use('/api/viral-boost', routeLimiter({ windowHint: 'viral_boost' }), viralBoostRoutes);
 // Stripe integration removed
 app.use('/api/admin/variants', variantAdminRoutes);
 app.use('/api/admin/config', adminConfigRoutes);

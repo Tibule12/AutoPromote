@@ -1,0 +1,543 @@
+// paypalSubscriptionRoutes.js
+// PayPal subscription management for community monetization
+
+const express = require('express');
+const router = express.Router();
+const authMiddleware = require('../authMiddleware');
+const { db } = require('../firebaseAdmin');
+const { audit } = require('../services/auditLogger');
+const { rateLimiter } = require('../middlewares/globalRateLimiter');
+
+// PayPal SDK
+const paypalClient = require('../paypalClient');
+const paypal = require('@paypal/paypal-server-sdk');
+
+// Apply rate limiting
+const paypalLimiter = rateLimiter({ 
+  capacity: parseInt(process.env.RATE_LIMIT_PAYMENTS || '100', 10), 
+  refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), 
+  windowHint: 'paypal_subscriptions' 
+});
+
+router.use(paypalLimiter);
+
+// Subscription plans configuration
+const SUBSCRIPTION_PLANS = {
+  free: {
+    id: 'free',
+    name: 'Free',
+    price: 0,
+    features: {
+      uploads: 10,
+      communityPosts: 5,
+      aiClips: false,
+      analytics: 'basic',
+      support: 'community',
+      watermark: true,
+      viralBoost: false,
+      priorityModeration: false
+    }
+  },
+  premium: {
+    id: 'premium',
+    name: 'Premium',
+    price: 9.99,
+    paypalPlanId: process.env.PAYPAL_PREMIUM_PLAN_ID,
+    features: {
+      uploads: 'unlimited',
+      communityPosts: 50,
+      aiClips: true,
+      analytics: 'advanced',
+      support: 'priority',
+      watermark: false,
+      viralBoost: 1, // 1 per month
+      priorityModeration: false,
+      creatorTipping: true
+    }
+  },
+  pro: {
+    id: 'pro',
+    name: 'Pro',
+    price: 29.99,
+    paypalPlanId: process.env.PAYPAL_PRO_PLAN_ID,
+    features: {
+      uploads: 'unlimited',
+      communityPosts: 'unlimited',
+      aiClips: true,
+      analytics: 'advanced',
+      support: 'priority',
+      watermark: false,
+      viralBoost: 5, // 5 per month
+      priorityModeration: true,
+      creatorTipping: true,
+      sponsoredPosts: 2,
+      apiAccess: false,
+      teamSeats: 3
+    }
+  },
+  enterprise: {
+    id: 'enterprise',
+    name: 'Enterprise',
+    price: 99.99,
+    paypalPlanId: process.env.PAYPAL_ENTERPRISE_PLAN_ID,
+    features: {
+      uploads: 'unlimited',
+      communityPosts: 'unlimited',
+      aiClips: true,
+      analytics: 'enterprise',
+      support: 'dedicated',
+      watermark: false,
+      viralBoost: 'unlimited',
+      priorityModeration: true,
+      creatorTipping: true,
+      sponsoredPosts: 'unlimited',
+      apiAccess: true,
+      teamSeats: 'unlimited',
+      whiteLabel: true
+    }
+  }
+};
+
+/**
+ * GET /api/paypal-subscriptions/plans
+ * Get available subscription plans
+ */
+router.get('/plans', async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      plans: Object.values(SUBSCRIPTION_PLANS),
+      currency: 'USD'
+    });
+  } catch (error) {
+    console.error('[PayPal] Get plans error:', error);
+    res.status(500).json({ error: 'Failed to fetch plans' });
+  }
+});
+
+/**
+ * POST /api/paypal-subscriptions/create-subscription
+ * Create a PayPal subscription
+ */
+router.post('/create-subscription', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    const { planId, returnUrl, cancelUrl } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const plan = SUBSCRIPTION_PLANS[planId];
+    if (!plan || planId === 'free') {
+      return res.status(400).json({ error: 'Invalid plan selection' });
+    }
+
+    if (!plan.paypalPlanId) {
+      return res.status(500).json({ 
+        error: 'PayPal plan not configured',
+        message: 'Please contact support to set up this plan'
+      });
+    }
+
+    // Get user data
+    const userDoc = await db.collection('users').doc(userId).get();
+    const userData = userDoc.data() || {};
+
+    // Create PayPal subscription
+    const request = new paypal.subscriptions.SubscriptionsCreateRequest();
+    request.requestBody({
+      plan_id: plan.paypalPlanId,
+      subscriber: {
+        name: {
+          given_name: userData.displayName?.split(' ')[0] || 'User',
+          surname: userData.displayName?.split(' ')[1] || ''
+        },
+        email_address: userData.email || req.user?.email
+      },
+      application_context: {
+        brand_name: 'AutoPromote',
+        locale: 'en-US',
+        shipping_preference: 'NO_SHIPPING',
+        user_action: 'SUBSCRIBE_NOW',
+        payment_method: {
+          payer_selected: 'PAYPAL',
+          payee_preferred: 'IMMEDIATE_PAYMENT_REQUIRED'
+        },
+        return_url: returnUrl || `${process.env.FRONTEND_URL}/dashboard?payment=success`,
+        cancel_url: cancelUrl || `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`
+      },
+      custom_id: userId
+    });
+
+    const client = paypalClient.client();
+    const subscription = await client.execute(request);
+
+    // Store subscription intent in Firestore
+    await db.collection('subscription_intents').doc(subscription.result.id).set({
+      userId,
+      planId,
+      paypalSubscriptionId: subscription.result.id,
+      status: 'pending',
+      amount: plan.price,
+      createdAt: new Date().toISOString()
+    });
+
+    audit.log('paypal.subscription.created', { 
+      userId, 
+      planId, 
+      subscriptionId: subscription.result.id 
+    });
+
+    // Get approval URL
+    const approvalLink = subscription.result.links.find(link => link.rel === 'approve');
+
+    res.json({
+      success: true,
+      subscriptionId: subscription.result.id,
+      approvalUrl: approvalLink?.href,
+      planId,
+      amount: plan.price
+    });
+
+  } catch (error) {
+    console.error('[PayPal] Create subscription error:', error);
+    audit.log('paypal.subscription.error', { 
+      userId: req.userId, 
+      error: error.message 
+    });
+    res.status(500).json({ error: 'Failed to create subscription' });
+  }
+});
+
+/**
+ * POST /api/paypal-subscriptions/activate
+ * Activate subscription after PayPal approval
+ */
+router.post('/activate', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    const { subscriptionId } = req.body;
+
+    if (!userId || !subscriptionId) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Get subscription intent
+    const intentDoc = await db.collection('subscription_intents').doc(subscriptionId).get();
+    if (!intentDoc.exists) {
+      return res.status(404).json({ error: 'Subscription not found' });
+    }
+
+    const intent = intentDoc.data();
+    if (intent.userId !== userId) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    // Get subscription details from PayPal
+    const client = paypalClient.client();
+    const request = new paypal.subscriptions.SubscriptionsGetRequest(subscriptionId);
+    const subscription = await client.execute(request);
+
+    const paypalSub = subscription.result;
+    
+    if (paypalSub.status !== 'ACTIVE' && paypalSub.status !== 'APPROVED') {
+      return res.status(400).json({ 
+        error: 'Subscription not active',
+        status: paypalSub.status
+      });
+    }
+
+    const plan = SUBSCRIPTION_PLANS[intent.planId];
+
+    // Update user subscription in Firestore
+    await db.collection('users').doc(userId).update({
+      subscriptionTier: intent.planId,
+      subscriptionStatus: 'active',
+      paypalSubscriptionId: subscriptionId,
+      subscriptionStartedAt: new Date().toISOString(),
+      subscriptionPeriodStart: new Date().toISOString(),
+      subscriptionPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      isPaid: true,
+      unlimited: plan.features.uploads === 'unlimited',
+      features: plan.features,
+      updatedAt: new Date().toISOString()
+    });
+
+    // Create subscription record
+    await db.collection('user_subscriptions').doc(userId).set({
+      userId,
+      planId: intent.planId,
+      planName: plan.name,
+      paypalSubscriptionId: subscriptionId,
+      status: 'active',
+      amount: plan.price,
+      currency: 'USD',
+      billingCycle: 'monthly',
+      startDate: new Date().toISOString(),
+      nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      features: plan.features,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    // Update intent status
+    await db.collection('subscription_intents').doc(subscriptionId).update({
+      status: 'activated',
+      activatedAt: new Date().toISOString()
+    });
+
+    // Log subscription event
+    await db.collection('subscription_events').add({
+      userId,
+      type: 'subscription_activated',
+      planId: intent.planId,
+      paypalSubscriptionId: subscriptionId,
+      amount: plan.price,
+      timestamp: new Date().toISOString()
+    });
+
+    audit.log('paypal.subscription.activated', { 
+      userId, 
+      planId: intent.planId, 
+      subscriptionId 
+    });
+
+    res.json({
+      success: true,
+      message: `Successfully subscribed to ${plan.name}`,
+      subscription: {
+        planId: intent.planId,
+        planName: plan.name,
+        status: 'active',
+        features: plan.features
+      }
+    });
+
+  } catch (error) {
+    console.error('[PayPal] Activate subscription error:', error);
+    res.status(500).json({ error: 'Failed to activate subscription' });
+  }
+});
+
+/**
+ * POST /api/paypal-subscriptions/cancel
+ * Cancel PayPal subscription
+ */
+router.post('/cancel', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    const { reason } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Get current subscription
+    const userDoc = await db.collection('users').doc(userId).get();
+    const userData = userDoc.data();
+
+    if (!userData?.paypalSubscriptionId) {
+      return res.status(404).json({ error: 'No active subscription found' });
+    }
+
+    // Cancel in PayPal
+    const client = paypalClient.client();
+    const request = new paypal.subscriptions.SubscriptionsCancelRequest(userData.paypalSubscriptionId);
+    request.requestBody({
+      reason: reason || 'User requested cancellation'
+    });
+
+    await client.execute(request);
+
+    // Update user record
+    await db.collection('users').doc(userId).update({
+      subscriptionStatus: 'cancelled',
+      subscriptionCancelledAt: new Date().toISOString(),
+      // Keep features until period end
+      subscriptionExpiresAt: userData.subscriptionPeriodEnd,
+      updatedAt: new Date().toISOString()
+    });
+
+    // Update subscription record
+    await db.collection('user_subscriptions').doc(userId).update({
+      status: 'cancelled',
+      cancelledAt: new Date().toISOString(),
+      cancelReason: reason,
+      expiresAt: userData.subscriptionPeriodEnd,
+      updatedAt: new Date().toISOString()
+    });
+
+    // Log cancellation
+    await db.collection('subscription_events').add({
+      userId,
+      type: 'subscription_cancelled',
+      planId: userData.subscriptionTier,
+      paypalSubscriptionId: userData.paypalSubscriptionId,
+      reason,
+      timestamp: new Date().toISOString()
+    });
+
+    audit.log('paypal.subscription.cancelled', { 
+      userId, 
+      subscriptionId: userData.paypalSubscriptionId,
+      reason 
+    });
+
+    res.json({
+      success: true,
+      message: 'Subscription cancelled. You\'ll retain access until the end of your billing period.',
+      expiresAt: userData.subscriptionPeriodEnd
+    });
+
+  } catch (error) {
+    console.error('[PayPal] Cancel subscription error:', error);
+    res.status(500).json({ error: 'Failed to cancel subscription' });
+  }
+});
+
+/**
+ * GET /api/paypal-subscriptions/status
+ * Get current subscription status
+ */
+router.get('/status', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Get user subscription
+    const subDoc = await db.collection('user_subscriptions').doc(userId).get();
+    
+    if (!subDoc.exists) {
+      return res.json({
+        success: true,
+        subscription: {
+          planId: 'free',
+          planName: 'Free',
+          status: 'active',
+          features: SUBSCRIPTION_PLANS.free.features
+        }
+      });
+    }
+
+    const subscription = subDoc.data();
+
+    // Sync with PayPal if active
+    if (subscription.paypalSubscriptionId && subscription.status === 'active') {
+      try {
+        const client = paypalClient.client();
+        const request = new paypal.subscriptions.SubscriptionsGetRequest(subscription.paypalSubscriptionId);
+        const paypalSub = await client.execute(request);
+        
+        // Update status if changed
+        if (paypalSub.result.status !== subscription.status.toUpperCase()) {
+          await db.collection('user_subscriptions').doc(userId).update({
+            status: paypalSub.result.status.toLowerCase(),
+            updatedAt: new Date().toISOString()
+          });
+          subscription.status = paypalSub.result.status.toLowerCase();
+        }
+      } catch (syncError) {
+        console.error('[PayPal] Status sync error:', syncError);
+        // Continue with local data
+      }
+    }
+
+    res.json({
+      success: true,
+      subscription: {
+        planId: subscription.planId,
+        planName: subscription.planName,
+        status: subscription.status,
+        amount: subscription.amount,
+        currency: subscription.currency,
+        nextBillingDate: subscription.nextBillingDate,
+        features: subscription.features,
+        cancelledAt: subscription.cancelledAt,
+        expiresAt: subscription.expiresAt
+      }
+    });
+
+  } catch (error) {
+    console.error('[PayPal] Get status error:', error);
+    res.status(500).json({ error: 'Failed to fetch subscription status' });
+  }
+});
+
+/**
+ * GET /api/paypal-subscriptions/usage
+ * Get usage stats for current billing period
+ */
+router.get('/usage', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Get user data
+    const userDoc = await db.collection('users').doc(userId).get();
+    const userData = userDoc.data() || {};
+    
+    const tier = userData.subscriptionTier || 'free';
+    const plan = SUBSCRIPTION_PLANS[tier];
+
+    // Calculate period start
+    const periodStart = userData.subscriptionPeriodStart 
+      ? new Date(userData.subscriptionPeriodStart) 
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    // Get usage counts
+    const uploadsSnap = await db.collection('content')
+      .where('userId', '==', userId)
+      .where('createdAt', '>=', periodStart.toISOString())
+      .get();
+
+    const postsSnap = await db.collection('community_posts')
+      .where('userId', '==', userId)
+      .where('createdAt', '>=', periodStart.toISOString())
+      .get();
+
+    const boostsSnap = await db.collection('viral_boosts')
+      .where('userId', '==', userId)
+      .where('createdAt', '>=', periodStart.toISOString())
+      .get();
+
+    const usage = {
+      uploads: {
+        used: uploadsSnap.size,
+        limit: plan.features.uploads === 'unlimited' ? null : plan.features.uploads,
+        unlimited: plan.features.uploads === 'unlimited'
+      },
+      communityPosts: {
+        used: postsSnap.size,
+        limit: plan.features.communityPosts === 'unlimited' ? null : plan.features.communityPosts,
+        unlimited: plan.features.communityPosts === 'unlimited'
+      },
+      viralBoosts: {
+        used: boostsSnap.size,
+        limit: plan.features.viralBoost === 'unlimited' ? null : plan.features.viralBoost,
+        unlimited: plan.features.viralBoost === 'unlimited'
+      },
+      periodStart: periodStart.toISOString(),
+      periodEnd: userData.subscriptionPeriodEnd
+    };
+
+    res.json({
+      success: true,
+      tier,
+      usage,
+      features: plan.features
+    });
+
+  } catch (error) {
+    console.error('[PayPal] Get usage error:', error);
+    res.status(500).json({ error: 'Failed to fetch usage stats' });
+  }
+});
+
+module.exports = router;
