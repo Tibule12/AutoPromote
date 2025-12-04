@@ -36,13 +36,13 @@ const ClipStudioPanel = ({ content = [] }) => {
 
       const response = await fetch(`${API_BASE_URL}/api/clips/user`, {
         headers: { Authorization: `Bearer ${token}` }
-      });
+      }).catch(() => ({ ok: false, status: 500 }));
 
       if (response.ok) {
         const data = await response.json();
         setGeneratedClips(data.clips || []);
-      } else if (response.status === 404) {
-        // Endpoint not implemented yet, silently ignore
+      } else {
+        // Endpoint not ready or error - silently ignore
         setGeneratedClips([]);
       }
     } catch (error) {
