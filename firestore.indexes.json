@@ -54,6 +54,21 @@
       { "fieldPath": "user_id", "order": "ASCENDING" },
       { "fieldPath": "startTime", "order": "DESCENDING" }
     ] }
+    ,{ "collectionGroup": "generated_clips", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "userId", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "content", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "userId", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "notifications", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "user_id", "order": "ASCENDING" },
+      { "fieldPath": "created_at", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "events", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "at", "order": "ASCENDING" }
+    ] }
   ],
   "fieldOverrides": []
 }
