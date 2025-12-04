@@ -378,3 +378,102 @@ exports.autoRewardCreators = functions.region(region)
       return null;
     }
   });
+
+// -----------------------------
+// Community Feed Triggers
+// -----------------------------
+
+// Update post engagement stats when likes/comments/shares change
+exports.updatePostEngagement = functions.region(region)
+  .firestore.document('community_posts/{postId}')
+  .onUpdate(async (change, context) => {
+    try {
+      const before = change.before.data();
+      const after = change.after.data();
+      const postId = context.params.postId;
+      
+      const likesCount = after.likesCount || 0;
+      const commentsCount = after.commentsCount || 0;
+      const sharesCount = after.sharesCount || 0;
+      
+      // Calculate performance score (0-100)
+      const engagementScore = likesCount + (commentsCount * 2) + (sharesCount * 3);
+      const performanceScore = Math.min(100, Math.floor(engagementScore / 10));
+      
+      // Only update if score changed significantly
+      if (Math.abs((before.performanceScore || 0) - performanceScore) >= 5) {
+        await change.after.ref.update({
+          performanceScore,
+          lastEngagementUpdate: admin.firestore.FieldValue.serverTimestamp()
+        });
+        console.log(`Updated performance score for post ${postId}: ${performanceScore}`);
+      }
+      
+      return null;
+    } catch (err) {
+      console.error('Error in updatePostEngagement:', err);
+      return null;
+    }
+  });
+
+// Update user stats when they create a new post
+exports.updateUserStatsOnPost = functions.region(region)
+  .firestore.document('community_posts/{postId}')
+  .onCreate(async (snap, context) => {
+    try {
+      const data = snap.data();
+      const userId = data.userId;
+      
+      if (!userId) return null;
+      
+      // Increment user's post count
+      await admin.firestore().collection('community_user_stats').doc(userId).set({
+        postsCount: admin.firestore.FieldValue.increment(1),
+        lastPostAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      
+      console.log(`Updated post count for user ${userId}`);
+      return null;
+    } catch (err) {
+      console.error('Error in updateUserStatsOnPost:', err);
+      return null;
+    }
+  });
+
+// Send notification when someone follows you
+exports.notifyOnFollow = functions.region(region)
+  .firestore.document('community_following/{followId}')
+  .onCreate(async (snap, context) => {
+    try {
+      const data = snap.data();
+      const followerId = data.followerId;
+      const followingId = data.followingId;
+      
+      if (!followerId || !followingId) return null;
+      
+      // Get follower info
+      const followerDoc = await admin.firestore().collection('users').doc(followerId).get();
+      const followerData = followerDoc.exists ? followerDoc.data() : {};
+      const followerName = followerData.name || followerData.displayName || 'Someone';
+      
+      // Create notification
+      await admin.firestore().collection('notifications').add({
+        user_id: followingId,
+        type: 'new_follower',
+        title: 'New Follower',
+        message: `${followerName} started following you!`,
+        data: {
+          followerId,
+          followerName
+        },
+        read: false,
+        created_at: admin.firestore.FieldValue.serverTimestamp()
+      });
+      
+      console.log(`Notification sent to ${followingId} for new follower ${followerId}`);
+      return null;
+    } catch (err) {
+      console.error('Error in notifyOnFollow:', err);
+      return null;
+    }
+  });
