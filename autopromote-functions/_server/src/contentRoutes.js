@@ -3,6 +3,7 @@ const router = express.Router();
 const { db } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
 const Joi = require('joi');
+const { usageLimitMiddleware, trackUsage } = require('./middlewares/usageLimitMiddleware');
 
 // Import Phase 2 viral growth services
 const hashtagEngine = require('./services/hashtagEngine');
@@ -74,7 +75,7 @@ function rateLimitMiddleware(limit = 10, windowMs = 60000) {
 }
 
 // POST /upload - Upload content and schedule promotion
-router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateBody(contentUploadSchema), async (req, res) => {
+router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), rateLimitMiddleware(10, 60000), validateBody(contentUploadSchema), async (req, res) => {
   try {
     try { console.log('[upload] origin:', req.headers.origin, 'auth:', !!req.headers.authorization); } catch (e) {}
     const userId = req.userId || req.user?.uid;
@@ -294,6 +295,14 @@ router.post('/upload', authMiddleware, rateLimitMiddleware(10, 60000), validateB
       viralScore: algorithmOptimization.optimizationScore,
       hashtagCount: hashtagOptimization.hashtags?.length,
       boostChainId: boostChain.chainId
+    });
+
+    // Track usage for free tier limits
+    await trackUsage(userId, 'upload', {
+      contentId: contentRef.id,
+      type: type,
+      platforms: target_platforms || [],
+      viral_optimized: true
     });
 
     res.status(201).json({

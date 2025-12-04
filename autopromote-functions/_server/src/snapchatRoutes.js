@@ -396,13 +396,99 @@ router.get('/status', authMiddleware, rateLimiter({ capacity: parseInt(process.e
   }
 });
 
-// 4. Create Snapchat ad creative (placeholder - Snapchat Creative Kit API)
+// 3b. Get Snapchat metadata (ad accounts, organizations)
+router.get('/metadata', authMiddleware, rateLimiter({ capacity: parseInt(process.env.SNAPCHAT_STATUS_CAP || '300', 10), refillPerSec: 20, windowHint: 'snapchat_metadata' }), async (req, res) => {
+  try {
+    const snap = await db.collection('users').doc(req.userId).collection('connections').doc('snapchat').get();
+    if (!snap.exists) {
+      return res.status(401).json({ error: 'Snapchat not connected' });
+    }
+
+    const connection = snap.data();
+    const { tokensFromDoc } = require('./services/connectionTokenUtils');
+    const tokens = tokensFromDoc(connection) || (connection.tokens || null);
+    const accessToken = tokens?.access_token;
+    
+    if (!accessToken) {
+      return res.status(401).json({ error: 'No access token found' });
+    }
+    
+    if (connection.expiresAt && connection.expiresAt < Date.now()) {
+      return res.status(401).json({ error: 'Snapchat token expired - please reconnect' });
+    }
+
+    // Fetch organizations (which contain ad accounts)
+    const orgsRes = await safeFetch('https://adsapi.snapchat.com/v1/me/organizations', fetch, {
+      allowHosts: ['adsapi.snapchat.com'],
+      requireHttps: true,
+      fetchOptions: {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    });
+
+    if (!orgsRes.ok) {
+      const errorData = await orgsRes.json();
+      return res.status(orgsRes.status).json({
+        error: 'Failed to fetch Snapchat organizations',
+        details: errorData.request_status?.message || errorData.error
+      });
+    }
+
+    const orgsData = await orgsRes.json();
+    const organizations = orgsData.organizations || [];
+
+    // Fetch ad accounts for each organization
+    const adAccountsPromises = organizations.map(async (org) => {
+      try {
+        const adAccountsRes = await safeFetch(`https://adsapi.snapchat.com/v1/organizations/${org.organization.id}/adaccounts`, fetch, {
+          allowHosts: ['adsapi.snapchat.com'],
+          requireHttps: true,
+          fetchOptions: {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        });
+
+        if (adAccountsRes.ok) {
+          const adAccountsData = await adAccountsRes.json();
+          return {
+            organization: org.organization,
+            adAccounts: adAccountsData.adaccounts || []
+          };
+        }
+        return { organization: org.organization, adAccounts: [] };
+      } catch (e) {
+        return { organization: org.organization, adAccounts: [] };
+      }
+    });
+
+    const orgWithAdAccounts = await Promise.all(adAccountsPromises);
+
+    res.json({
+      success: true,
+      meta: {
+        organizations: orgWithAdAccounts
+      }
+    });
+  } catch (err) {
+    console.error('[Snapchat] Metadata fetch error:', err);
+    res.status(500).json({ error: 'Failed to fetch Snapchat metadata', details: err.message });
+  }
+});
+
+// 4. Create Snapchat ad creative
 const apiActionLimiter = rateLimiter({ capacity: parseInt(process.env.SNAPCHAT_API_ACTION_CAP || '120', 10), refillPerSec: 10, windowHint: 'snapchat_api' });
 router.post('/creative', authMiddleware, apiActionLimiter, async (req, res) => {
   try {
-    const { title, description, media_url, campaign_id } = req.body;
-    if (!title || !media_url) {
-      return res.status(400).json({ error: 'Title and media_url are required' });
+    const { title, description, media_url, type, ad_account_id, call_to_action, web_url } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
     }
 
     // Get Snapchat connection
@@ -414,13 +500,88 @@ router.post('/creative', authMiddleware, apiActionLimiter, async (req, res) => {
     const connection = snap.data();
     const { tokensFromDoc } = require('./services/connectionTokenUtils');
     const tokens = tokensFromDoc(connection) || (connection.tokens || null);
-    const accessToken = tokens && tokens.access_token;
-    if (connection.expiresAt < Date.now()) {
-      return res.status(401).json({ error: 'Snapchat token expired' });
+    const accessToken = tokens?.access_token;
+    
+    if (!accessToken) {
+      return res.status(401).json({ error: 'No access token found' });
+    }
+    
+    if (connection.expiresAt && connection.expiresAt < Date.now()) {
+      return res.status(401).json({ error: 'Snapchat token expired - please reconnect' });
     }
 
-    // Create creative via Snapchat Marketing API (validate host)
-    const creativeRes = await safeFetch('https://adsapi.snapchat.com/v1/adaccounts/{ad_account_id}/creatives', fetch, {
+    // Determine ad account ID
+    const adAccountId = ad_account_id || 
+                        connection.profile?.adAccountId || 
+                        connection.meta?.adAccountId || 
+                        process.env.SNAPCHAT_AD_ACCOUNT_ID;
+    
+    if (!adAccountId) {
+      return res.status(400).json({ error: 'Ad account ID is required. Please provide ad_account_id or configure SNAPCHAT_AD_ACCOUNT_ID' });
+    }
+
+    // Upload media if media_url provided
+    let mediaId = null;
+    if (media_url) {
+      try {
+        const mediaType = type === 'video' ? 'VIDEO' : 'IMAGE';
+        const mediaRes = await safeFetch(`https://adsapi.snapchat.com/v1/adaccounts/${adAccountId}/media`, fetch, {
+          allowHosts: ['adsapi.snapchat.com'],
+          requireHttps: true,
+          fetchOptions: {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: title,
+              type: mediaType,
+              media_url: media_url
+            })
+          }
+        });
+
+        if (mediaRes.ok) {
+          const mediaData = await mediaRes.json();
+          mediaId = mediaData.media?.id || mediaData.id;
+        } else {
+          const errorData = await mediaRes.json();
+          console.warn('[Snapchat] Media upload warning:', errorData);
+        }
+      } catch (e) {
+        console.warn('[Snapchat] Media upload error:', e.message);
+      }
+    }
+
+    // Build creative payload
+    const creativePayload = {
+      name: title,
+      type: 'SNAP_AD',
+      headline: title,
+      brand_name: req.body.brand_name || 'AutoPromote',
+      shareable: true,
+      ad_product: 'SNAP_AD'
+    };
+
+    if (description) {
+      creativePayload.description = description;
+    }
+
+    if (mediaId) {
+      creativePayload.top_snap_media_id = mediaId;
+    }
+
+    if (call_to_action) {
+      creativePayload.call_to_action = call_to_action;
+    }
+
+    if (web_url) {
+      creativePayload.web_view_url = web_url;
+    }
+
+    // Create creative via Snapchat Marketing API
+    const creativeRes = await safeFetch(`https://adsapi.snapchat.com/v1/adaccounts/${adAccountId}/creatives`, fetch, {
       allowHosts: ['adsapi.snapchat.com'],
       requireHttps: true,
       fetchOptions: {
@@ -429,27 +590,31 @@ router.post('/creative', authMiddleware, apiActionLimiter, async (req, res) => {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          name: title,
-          type: 'SNAP_AD',
-          headline: title,
-          description: description,
-          media: {
-            type: 'IMAGE',
-            url: media_url
-          },
-          campaign_id: campaign_id
-        })
+        body: JSON.stringify(creativePayload)
       }
     });
 
     const creativeData = await creativeRes.json();
+    
     if (!creativeRes.ok) {
-      return res.status(400).json({ error: 'Failed to create Snapchat creative', details: creativeData });
+      const errorMsg = creativeData.request_status?.message || creativeData.error || 'Unknown error';
+      return res.status(creativeRes.status).json({
+        error: 'Failed to create Snapchat creative',
+        details: errorMsg,
+        raw: creativeData
+      });
     }
 
-    res.json({ success: true, creative: creativeData });
+    const creativeId = creativeData.creative?.id || creativeData.id;
+
+    res.json({
+      success: true,
+      creative_id: creativeId,
+      media_id: mediaId,
+      data: creativeData
+    });
   } catch (err) {
+    console.error('[Snapchat] Creative creation error:', err);
     res.status(500).json({ error: 'Snapchat creative creation failed', details: err.message });
   }
 });
@@ -458,6 +623,7 @@ router.post('/creative', authMiddleware, apiActionLimiter, async (req, res) => {
 router.get('/analytics/:creativeId', authMiddleware, apiActionLimiter, async (req, res) => {
   try {
     const { creativeId } = req.params;
+    const { start_time, end_time, granularity } = req.query;
 
     // Get Snapchat connection
     const snap = await db.collection('users').doc(req.userId).collection('connections').doc('snapchat').get();
@@ -468,27 +634,82 @@ router.get('/analytics/:creativeId', authMiddleware, apiActionLimiter, async (re
     const connection = snap.data();
     const { tokensFromDoc } = require('./services/connectionTokenUtils');
     const tokens = tokensFromDoc(connection) || (connection.tokens || null);
-    const accessToken = tokens && tokens.access_token;
-    if (connection.expiresAt < Date.now()) {
-      return res.status(401).json({ error: 'Snapchat token expired' });
+    const accessToken = tokens?.access_token;
+    
+    if (!accessToken) {
+      return res.status(401).json({ error: 'No access token found' });
+    }
+    
+    if (connection.expiresAt && connection.expiresAt < Date.now()) {
+      return res.status(401).json({ error: 'Snapchat token expired - please reconnect' });
     }
 
-    // Get analytics data (validate host)
-    const analyticsRes = await safeFetch(`https://adsapi.snapchat.com/v1/creatives/${creativeId}/stats`, fetch, {
+    // Build query params for analytics
+    const queryParams = new URLSearchParams({
+      fields: 'impressions,swipes,quartile_1,quartile_2,quartile_3,view_completion,spend,conversion_purchases,conversion_save',
+      granularity: granularity || 'DAY'
+    });
+
+    // Add time range if provided (defaults to last 7 days)
+    if (start_time) {
+      queryParams.append('start_time', start_time);
+    } else {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      queryParams.append('start_time', sevenDaysAgo.toISOString());
+    }
+
+    if (end_time) {
+      queryParams.append('end_time', end_time);
+    } else {
+      queryParams.append('end_time', new Date().toISOString());
+    }
+
+    // Get analytics data from Snapchat
+    const analyticsRes = await safeFetch(`https://adsapi.snapchat.com/v1/creatives/${creativeId}/stats?${queryParams.toString()}`, fetch, {
       allowHosts: ['adsapi.snapchat.com'],
       requireHttps: true,
       fetchOptions: {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
       }
     });
 
     const analyticsData = await analyticsRes.json();
+    
     if (!analyticsRes.ok) {
-      return res.status(400).json({ error: 'Failed to fetch Snapchat analytics', details: analyticsData });
+      const errorMsg = analyticsData.request_status?.message || analyticsData.error || 'Unknown error';
+      return res.status(analyticsRes.status).json({
+        error: 'Failed to fetch Snapchat analytics',
+        details: errorMsg,
+        raw: analyticsData
+      });
     }
 
-    res.json({ analytics: analyticsData });
+    // Format analytics data for easier consumption
+    const stats = analyticsData.timeseries_stats?.[0]?.timeseries_stat || analyticsData;
+    const formatted = {
+      creative_id: creativeId,
+      impressions: stats.impressions || 0,
+      swipes: stats.swipes || 0,
+      spend: stats.spend || 0,
+      quartile_1: stats.quartile_1 || 0,
+      quartile_2: stats.quartile_2 || 0,
+      quartile_3: stats.quartile_3 || 0,
+      view_completion: stats.view_completion || 0,
+      conversion_purchases: stats.conversion_purchases || 0,
+      conversion_save: stats.conversion_save || 0,
+      raw: analyticsData
+    };
+
+    res.json({
+      success: true,
+      analytics: formatted
+    });
   } catch (err) {
+    console.error('[Snapchat] Analytics fetch error:', err);
     res.status(500).json({ error: 'Snapchat analytics fetch failed', details: err.message });
   }
 });

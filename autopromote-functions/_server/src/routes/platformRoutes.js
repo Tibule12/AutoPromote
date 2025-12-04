@@ -52,7 +52,6 @@ function normalize(name){
 }
 
 function sanitizeForText(message) {
-  if (!message) return '';
   return String(message || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -89,13 +88,11 @@ function sanitizeConnectionForApi(doc) {
 }
 
 // GET /api/:platform/status
-router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+router.get('/:platform/status', authMiddleware, rateLimit({ max: 50, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   const uid = req.userId || req.user?.uid;
-  // Sanitize platform name before including in response
-  const safePlatform = sanitizeForText(platform);
-  if (!uid) return res.json({ ok: true, platform: safePlatform, connected: false });
+  if (!uid) return res.json({ ok: true, platform, connected: false });
 
   const cacheKey = `${uid}:${platform}`;
   const now = Date.now();
@@ -121,21 +118,21 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
       if (snap.exists) {
         // Sanitize the connection object to avoid leaking tokens or secrets
         const connDoc = snap.data() || {};
-        return { ok: true, platform: safePlatform, connected: true, meta: sanitizeConnectionForApi(connDoc) };
+        return { ok: true, platform, connected: true, meta: sanitizeConnectionForApi(connDoc) };
       }
       // Fallback: try to infer from top-level user doc
       const userSnap = await userRef.get();
       const u = userSnap.exists ? userSnap.data() || {} : {};
       const inferred = !!(u[`${platform}Token`] || u[`${platform}AccessToken`] || u[`${platform}Identity`] || u[`${platform}Profile`]);
-      return { ok: true, platform: safePlatform, connected: inferred, inferred };
+      return { ok: true, platform, connected: inferred, inferred };
     } catch (e) {
       // Return an error-shaped object so callers get the message; avoid throwing to keep inflight promise stable
-      return { ok: false, platform: safePlatform, error: e && e.message ? e.message : 'unknown_error' };
+      return { ok: false, platform, error: e && e.message ? e.message : 'unknown_error' };
     }
   })();
 
   // Store inflight so others can await it
-  platformStatusCache.set(cacheKey, { ts: now, data: null, inflight });
+  platformStatusCache.set(cacheKey, { ts: Date.now(), data: null, inflight });
 
   try {
     const result = await inflight;
@@ -145,51 +142,8 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 20, windowMs: 6
     return res.json(result);
   } catch (e) {
     platformStatusCache.delete(cacheKey);
-    return res.status(500).json({ ok: false, platform: safePlatform, error: e && e.message ? e.message : 'unknown_error' });
+    return res.status(500).json({ ok: false, platform, error: e && e.message ? e.message : 'unknown_error' });
   }
-});
-
-// GET /api/spotify/metadata - returns playlists/metadata for connected Spotify user
-router.get('/spotify/metadata', authMiddleware, rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
-    try {
-      const uid = req.userId || req.user?.uid;
-      if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
-      const userRef = db.collection('users').doc(uid);
-      const snap = await userRef.collection('connections').doc('spotify').get();
-      if (!snap.exists) return res.status(200).json({ ok: true, platform: 'spotify', connected: false, meta: {} });
-      const sdata = snap.data() || {};
-      const tokens = tokensFromDoc(sdata) || (sdata.meta && sdata.meta.tokens) || null;
-      const meta = { ...(sdata.meta || {}) };
-      if (tokens && tokens.access_token) {
-        try {
-          const url = `https://api.spotify.com/v1/me/playlists?limit=50`;
-          const r = await safeFetch(url, fetchFn, { fetchOptions: { headers: { Authorization: `Bearer ${tokens.access_token}` } }, requireHttps: true, allowHosts: ['api.spotify.com'] });
-          if (r.ok) {
-            const j = await r.json();
-            meta.playlists = (j.items || []).map(p => ({ id: p.id, name: p.name, public: !!p.public }));
-            await userRef.collection('connections').doc('spotify').set({ meta: { ...(sdata.meta || {}), playlists: meta.playlists }, updatedAt: new Date().toISOString() }, { merge: true });
-          }
-        } catch (_) {}
-      }
-      return res.json({ ok: true, platform: 'spotify', connected: !!sdata.connected, meta });
-    } catch (e) {
-      return res.status(500).json({ ok: false, platform: 'spotify', error: e.message || 'unknown_error' });
-    }
-});
-
-// GET /api/spotify/search - search tracks using Spotify API for the connected user
-router.get('/spotify/search', authMiddleware, rateLimit({ max: 20, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
-    try {
-      const uid = req.userId || req.user?.uid;
-      if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
-      const q = String(req.query.q || req.query.query || '').trim();
-      if (!q) return res.status(400).json({ ok: false, error: 'query_required' });
-      const limit = Math.min(parseInt(req.query.limit || '10', 10) || 10, 50);
-      const results = await searchTracks({ uid, query: q, limit });
-      return res.json({ ok: true, query: q, results: results.tracks || [] });
-    } catch (e) {
-      return res.status(500).json({ ok: false, error: e.message || 'spotify_search_failed' });
-    }
 });
 
 // GET /api/:platform/metadata - return helpful metadata for the connected user (playlist lists, org pages, guilds)
@@ -197,11 +151,10 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   const uid = req.userId || req.user?.uid;
-  const safePlatform = sanitizeForText(platform);
   if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
   try {
     const connSnap = await db.collection('users').doc(uid).collection('connections').doc(platform).get();
-    if (!connSnap.exists) return res.json({ ok: true, platform: safePlatform, connected: false });
+    if (!connSnap.exists) return res.json({ ok: true, platform, connected: false });
     const conn = connSnap.data() || {};
     // If we already have helpful meta stored, return it
     if (conn.meta && Object.keys(conn.meta || {}).length) {
@@ -210,11 +163,11 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
       delete sanitizedMeta.tokens;
       delete sanitizedMeta.access_token;
       delete sanitizedMeta.refresh_token;
-      return res.json({ ok: true, platform: safePlatform, connected: true, meta: sanitizedMeta });
+      return res.json({ ok: true, platform, connected: true, meta: sanitizedMeta });
     }
     // Otherwise, try to fetch some metadata from provider using stored tokens (best-effort)
     const tokens = tokensFromDoc(conn) || (conn.meta && conn.meta.tokens) || null;
-    const result = { ok: true, platform: safePlatform, connected: true, meta: {} };
+    const result = { ok: true, platform, connected: true, meta: {} };
     if (!tokens || !tokens.access_token) {
       // Best-effort fallback: return empty meta and let the UI use the session values
       return res.json(result);
@@ -496,7 +449,7 @@ router.post('/:platform/auth/simulate', authMiddleware, platformWriteLimiter, as
 
 // OAuth callbacks - handle code exchange for supported platforms
 // GET /api/reddit/auth/callback
-router.get('/reddit/auth/callback', async (req, res) => {
+router.get('/reddit/auth/callback', platformPublicLimiter, async (req, res) => {
   const platform = 'reddit';
   const code = req.query.code;
   const state = req.query.state;
@@ -563,7 +516,7 @@ router.get('/reddit/auth/callback', async (req, res) => {
 });
 
 // GET /api/discord/auth/callback
-router.get('/discord/auth/callback', async (req, res) => {
+router.get('/discord/auth/callback', platformPublicLimiter, async (req, res) => {
   const platform = 'discord';
   const code = req.query.code;
   const state = req.query.state;
@@ -724,7 +677,7 @@ setTimeout(() => { try { window.close(); } catch (e) { /* ignore */ } }, 400);
 });
 
 // GET /api/spotify/auth/callback
-router.get('/spotify/auth/callback', async (req, res) => {
+router.get('/spotify/auth/callback', platformPublicLimiter, async (req, res) => {
   const platform = 'spotify';
   const code = req.query.code;
   const state = req.query.state;
@@ -808,7 +761,7 @@ router.get('/spotify/auth/callback', async (req, res) => {
 // are not intercepted by the placeholder.
 
 // GET /api/linkedin/auth/callback
-router.get('/linkedin/auth/callback', async (req, res) => {
+router.get('/linkedin/auth/callback', platformPublicLimiter, async (req, res) => {
   const platform = 'linkedin';
   const code = req.query.code;
   const state = req.query.state;
@@ -887,7 +840,7 @@ router.get('/linkedin/auth/callback', async (req, res) => {
 });
 
 // GET /api/pinterest/auth/callback - Pinterest OAuth v5 code exchange
-router.get('/pinterest/auth/callback', async (req, res) => {
+router.get('/pinterest/auth/callback', platformPublicLimiter, async (req, res) => {
   const platform = 'pinterest';
   const code = req.query.code;
   const state = req.query.state;
@@ -954,7 +907,7 @@ router.get('/pinterest/auth/callback', async (req, res) => {
 // Generic placeholder callback for other platforms — keep as a fallback
 // and ensure it's defined after specific platform callback handlers so it
 // doesn't intercept platforms that have a proper implementation.
-router.get('/:platform/auth/callback', async (req, res, next) => {
+router.get('/:platform/auth/callback', platformPublicLimiter, async (req, res, next) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).send('Unsupported platform');
   return sendPlain(res, 200, 'Callback placeholder - implement OAuth exchange for ' + platform);
@@ -1034,6 +987,42 @@ router.post('/:platform/sample-promote', authMiddleware, platformWriteLimiter, a
         return res.status(500).json({ ok: false, error: e.message || 'unknown_error' });
       }
     });
+
+// POST /api/telegram/auth/verify
+// Verify Telegram Login Widget auth data and store connection
+router.post('/telegram/auth/verify', authMiddleware, platformWriteLimiter, async (req, res) => {
+  try {
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+    
+    const { storeTelegramAuth } = require('../services/telegramService');
+    const authData = req.body;
+    
+    if (!authData || !authData.id || !authData.hash) {
+      return res.status(400).json({ ok: false, error: 'invalid_auth_data' });
+    }
+    
+    const result = await storeTelegramAuth({ uid, authData });
+    
+    // Update user's connectedPlatforms
+    try {
+      const userRef = db.collection('users').doc(uid);
+      await userRef.set({
+        connectedPlatforms: admin.firestore.FieldValue.arrayUnion('telegram')
+      }, { merge: true });
+    } catch (_) {}
+    
+    return res.json({
+      ok: true,
+      platform: 'telegram',
+      userId: result.userId,
+      username: result.username,
+      chatId: result.chatId
+    });
+  } catch (e) {
+    return res.status(400).json({ ok: false, error: e.message || 'auth_verification_failed' });
+  }
+});
 
 // POST /api/telegram/webhook
 // Telegram will POST updates here when the bot receives messages. We support
@@ -1214,6 +1203,21 @@ router.post('/telegram/admin/send-test', authMiddleware, platformWriteLimiter, a
     return res.json({ ok: true, result });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// GET /api/spotify/search - search tracks using Spotify API for the connected user
+router.get('/spotify/search', authMiddleware, rateLimit({ max: 50, windowMs: 60000, key: r => r.userId || r.ip }), async (req, res) => {
+  try {
+    const uid = req.userId || req.user?.uid;
+    if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
+    const q = String(req.query.q || req.query.query || '').trim();
+    if (!q) return res.status(400).json({ ok: false, error: 'query_required' });
+    const limit = Math.min(parseInt(req.query.limit || '10', 10) || 10, 50);
+    const results = await searchTracks({ uid, query: q, limit });
+    return res.json({ ok: true, query: q, results: results.tracks || [] });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message || 'spotify_search_failed' });
   }
 });
 

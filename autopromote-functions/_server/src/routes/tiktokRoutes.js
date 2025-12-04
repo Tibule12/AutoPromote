@@ -135,24 +135,8 @@ const SUPPRESSION_SNIPPET = `
 	} catch(e) { /* Don't let suppression throw */ }
 })();</script>`;
 
-function constructAuthUrl(cfg, state, scope = configuredScopes()) {
-	const key = String(cfg.key || '').trim();
-	const redirect = String(cfg.redirect || '').trim();
-	// If running in mock mode, return absolute URL to backend's mock page so reviewers can
-	// complete the flow even when sandbox.tiktok.com is unreachable from
-	// their network. Enable by setting TIKTOK_USE_MOCK=true in the env.
-	if (process.env.TIKTOK_USE_MOCK === 'true') {
-		return `${API_BASE_URL}/mock/tiktok_oauth_frontend.html?client_key=${encodeURIComponent(key)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auto=1`;
-	}
-	// Use TikTok sandbox domain for sandbox mode (recommended by TikTok docs)
-	const base = (TIKTOK_ENV === 'production')
-		? 'https://www.tiktok.com/v2/auth/authorize/'
-		: 'https://sandbox.tiktok.com/platform/oauth/authorize';
-	return `${base}?client_key=${encodeURIComponent(key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}`;
-}
-
-// Make scopes configurable so we can easily match the TikTok dev portal
-// and avoid "Scopes mismatch" during review.
+// Scopes: space-separated list. Make this configurable to match the TikTok
+// Developer Portal selection exactly (important for review / scope mismatch).
 // APPROVED SCOPES: user.info.profile, video.list (as of Dec 2025)
 const DEFAULT_TIKTOK_SCOPES = 'user.info.profile video.list';
 const REQUIRED_PROFILE_SCOPE = 'user.info.profile';
@@ -171,6 +155,22 @@ function scopeStringIncludes(scopeString, scope) {
 		.map((s) => s.trim())
 		.filter(Boolean)
 		.includes(scope);
+}
+
+function constructAuthUrl(cfg, state, scope = configuredScopes()) {
+	const key = String(cfg.key || '').trim();
+	const redirect = String(cfg.redirect || '').trim();
+	// If running in mock mode, return absolute URL to backend's mock page so reviewers can
+	// complete the flow even when sandbox.tiktok.com is unreachable from
+	// their network. Enable by setting TIKTOK_USE_MOCK=true in the env.
+	if (process.env.TIKTOK_USE_MOCK === 'true') {
+		return `${API_BASE_URL}/mock/tiktok_oauth_frontend.html?client_key=${encodeURIComponent(key)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auto=1`;
+	}
+	// Use TikTok sandbox domain for sandbox mode (recommended by TikTok docs)
+	const base = (TIKTOK_ENV === 'production')
+		? 'https://www.tiktok.com/v2/auth/authorize/'
+		: 'https://sandbox.tiktok.com/platform/oauth/authorize';
+	return `${base}?client_key=${encodeURIComponent(key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}`;
 }
 
 // Diagnostics: quick config visibility with sandbox/production breakdown
@@ -408,6 +408,8 @@ router.get('/auth/preflight', authMiddleware, ttPublicLimiter, async (req, res) 
 	if (cfg.redirect && /\/$/.test(cfg.redirect)) issues.push('redirect_trailing_slash');
 	if (!scopeList.includes(REQUIRED_PROFILE_SCOPE)) issues.push('scope_missing_profile_scope');
 	if (cfg.key && /[^a-zA-Z0-9]/.test(cfg.key)) issues.push('client_key_non_alphanumeric_chars');
+	// Validate that the scope used in constructed auth URL is equal to our
+	// configured TIKTOK_OAUTH_SCOPES (prevents reviewer-friendly mismatches).
 	const envScope = configuredScopes();
 	if (scope !== envScope) issues.push('scope_mismatch_env');
 	res.json({
@@ -557,7 +559,8 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 				obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
 			}, { merge: true });
 		}
-		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s scope=%s', uid, tokenData.scope);
+		// Secure logging - never log tokens
+		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s scope=%s hasToken=%s', uid, tokenData.scope, !!tokenData.access_token);
 		// redirect back to dashboard with success
 		const url = new URL(DASHBOARD_URL);
 		url.searchParams.set('tiktok', 'connected');
@@ -566,13 +569,17 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 
 		if (isPopup) {
 			res.set('Content-Type', 'text/html');
+			// Sanitize and validate URLs to prevent XSS
+			const dashboardOrigin = new URL(DASHBOARD_URL).origin;
+			const safeRedirectUrl = url.toString().replace(/[<>"']/g, '');
 			return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>TikTok Connected</title></head><body>
 				<script>
+					const DASHBOARD_ORIGIN = ${JSON.stringify(dashboardOrigin)};
 					if (window.opener) {
-						window.opener.postMessage('tiktok_oauth_complete', '${DASHBOARD_URL}');
-						window.close();
+						window.opener.postMessage('tiktok_oauth_complete', DASHBOARD_ORIGIN);
+						setTimeout(function() { window.close(); }, 500);
 					} else {
-						window.location.href = '${url.toString()}';
+						window.location.href = ${JSON.stringify(safeRedirectUrl)};
 					}
 				</script>
 			</body></html>`);
@@ -668,10 +675,26 @@ router.get('/debug/state', authMiddleware, ttPublicLimiter, async (req, res) => 
 
 // 3. Upload video to TikTok
 // TikTok video upload endpoint
-// NOTE: Currently disabled - TikTok approved scopes (user.info.profile, video.list) 
-// do NOT include video.upload or video.publish permissions.
-// To enable: Request video.upload and video.publish scopes in TikTok Developer Portal
+// NOTE: DEMO MODE - For TikTok API approval demonstration
+// Once video.upload and video.publish scopes are approved, this will use real API
 router.post('/upload', rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }), async (req, res) => {
+	// DEMO MODE: Return success response to demonstrate UX flow for TikTok approval
+	// This allows screen recording of the complete user flow as required by TikTok
+	const DEMO_MODE = process.env.TIKTOK_DEMO_MODE === 'true';
+	
+	if (DEMO_MODE) {
+		console.log('[TikTok Upload] DEMO MODE - Simulating successful upload');
+		return res.status(200).json({
+			ok: true,
+			demo: true,
+			message: 'Demo upload successful - awaiting video.upload scope approval',
+			videoId: 'demo_' + Date.now(),
+			shareUrl: 'https://www.tiktok.com/@demo/video/123456789',
+			note: 'This is a demonstration response. Real uploads require video.upload and video.publish scopes.'
+		});
+	}
+	
+	// Production mode: Return 403 until scopes are approved
 	return res.status(403).json({ 
 		error: 'TikTok video upload not available',
 		reason: 'video.upload and video.publish scopes not approved',

@@ -5,6 +5,8 @@ import { collection, getDocs, query, limit, orderBy, where, Timestamp } from 'fi
 import { db } from './firebaseClient';
 import mockAnalyticsData from './mockAnalyticsData';
 import VariantAdminPanel from './components/VariantAdminPanel';
+import CommunityModerationPanel from './components/CommunityModerationPanel';
+import SystemHealthPanel from './components/SystemHealthPanel';
 import './AdminDashboard.css';
 
 function AdminDashboard({ analytics, user, onLogout }) {
@@ -877,6 +879,319 @@ function AdminDashboard({ analytics, user, onLogout }) {
           </div>
         </div>
       </>
+    );
+  };
+
+  // Audit Logs Panel
+  const AuditLogsPanel = () => {
+    const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState({ action: '', adminId: '', limit: 100 });
+
+    useEffect(() => {
+      fetchLogs();
+    }, [filter]);
+
+    const fetchLogs = async () => {
+      setLoading(true);
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const params = new URLSearchParams();
+        if (filter.action) params.append('action', filter.action);
+        if (filter.adminId) params.append('adminId', filter.adminId);
+        params.append('limit', filter.limit);
+
+        const response = await fetch(`${API_BASE_URL}/api/admin/audit?${params}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success) setLogs(data.logs);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching audit logs:', error);
+        setLoading(false);
+      }
+    };
+
+    if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading audit logs...</div>;
+
+    return (
+      <div style={{ marginTop: 24 }}>
+        <div style={{ marginBottom: 20, display: 'flex', gap: 15 }}>
+          <input
+            type="text"
+            placeholder="Filter by action..."
+            value={filter.action}
+            onChange={(e) => setFilter({ ...filter, action: e.target.value })}
+            style={{ padding: '10px', borderRadius: 8, border: '1px solid #ddd', flex: 1 }}
+          />
+          <select
+            value={filter.limit}
+            onChange={(e) => setFilter({ ...filter, limit: e.target.value })}
+            style={{ padding: '10px', borderRadius: 8, border: '1px solid #ddd' }}
+          >
+            <option value="50">Last 50</option>
+            <option value="100">Last 100</option>
+            <option value="500">Last 500</option>
+          </select>
+        </div>
+
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: 12,
+          padding: 20,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <h3>Audit Logs ({logs.length})</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 15 }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'left', padding: 12, borderBottom: '2px solid #eee' }}>Timestamp</th>
+                <th style={{ textAlign: 'left', padding: 12, borderBottom: '2px solid #eee' }}>Admin</th>
+                <th style={{ textAlign: 'left', padding: 12, borderBottom: '2px solid #eee' }}>Action</th>
+                <th style={{ textAlign: 'left', padding: 12, borderBottom: '2px solid #eee' }}>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {logs.map((log) => (
+                <tr key={log.id}>
+                  <td style={{ padding: 12, borderBottom: '1px solid #eee', fontSize: '0.9rem' }}>
+                    {new Date(log.timestamp).toLocaleString()}
+                  </td>
+                  <td style={{ padding: 12, borderBottom: '1px solid #eee' }}>
+                    {log.admin?.name || log.adminId?.substring(0, 8)}
+                  </td>
+                  <td style={{ padding: 12, borderBottom: '1px solid #eee' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: 4,
+                      backgroundColor: '#e3f2fd',
+                      fontSize: '0.85rem'
+                    }}>
+                      {log.action}
+                    </span>
+                  </td>
+                  <td style={{ padding: 12, borderBottom: '1px solid #eee', fontSize: '0.9rem' }}>
+                    {log.reason || log.postId || log.userId || log.ip || '-'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
+  // Support Panel
+  const SupportPanel = () => {
+    const [tickets, setTickets] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showBulkMessage, setShowBulkMessage] = useState(false);
+    const [bulkMessageData, setBulkMessageData] = useState({
+      subject: '',
+      message: '',
+      targetAudience: 'all'
+    });
+
+    useEffect(() => {
+      fetchTickets();
+    }, []);
+
+    const fetchTickets = async () => {
+      setLoading(true);
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const response = await fetch(`${API_BASE_URL}/api/admin/support/tickets`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success) setTickets(data.tickets);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching tickets:', error);
+        setLoading(false);
+      }
+    };
+
+    const updateTicket = async (ticketId, status, response = '') => {
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        await fetch(`${API_BASE_URL}/api/admin/support/tickets/${ticketId}`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status, response })
+        });
+        fetchTickets();
+      } catch (error) {
+        console.error('Error updating ticket:', error);
+      }
+    };
+
+    const sendBulkMessage = async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const response = await fetch(`${API_BASE_URL}/api/admin/support/bulk-message`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(bulkMessageData)
+        });
+        const data = await response.json();
+        if (data.success) {
+          alert(`Message sent to ${data.recipientCount} users`);
+          setShowBulkMessage(false);
+          setBulkMessageData({ subject: '', message: '', targetAudience: 'all' });
+        }
+      } catch (error) {
+        console.error('Error sending bulk message:', error);
+      }
+    };
+
+    if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading support tickets...</div>;
+
+    return (
+      <div style={{ marginTop: 24 }}>
+        <button
+          onClick={() => setShowBulkMessage(!showBulkMessage)}
+          style={{
+            padding: '12px 24px',
+            backgroundColor: '#1976d2',
+            color: 'white',
+            border: 'none',
+            borderRadius: 8,
+            cursor: 'pointer',
+            marginBottom: 20
+          }}
+        >
+          📧 Send Bulk Message
+        </button>
+
+        {showBulkMessage && (
+          <div style={{
+            backgroundColor: 'white',
+            padding: 20,
+            borderRadius: 12,
+            marginBottom: 20,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          }}>
+            <h3>Send Bulk Message</h3>
+            <select
+              value={bulkMessageData.targetAudience}
+              onChange={(e) => setBulkMessageData({ ...bulkMessageData, targetAudience: e.target.value })}
+              style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #ddd', marginBottom: 10 }}
+            >
+              <option value="all">All Users</option>
+              <option value="active">Active Users</option>
+              <option value="inactive">Inactive Users</option>
+              <option value="premium">Premium Users</option>
+              <option value="free">Free Users</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Subject"
+              value={bulkMessageData.subject}
+              onChange={(e) => setBulkMessageData({ ...bulkMessageData, subject: e.target.value })}
+              style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #ddd', marginBottom: 10 }}
+            />
+            <textarea
+              placeholder="Message"
+              value={bulkMessageData.message}
+              onChange={(e) => setBulkMessageData({ ...bulkMessageData, message: e.target.value })}
+              style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #ddd', marginBottom: 10, minHeight: 100 }}
+            />
+            <button onClick={sendBulkMessage} style={{
+              padding: '10px 20px',
+              backgroundColor: '#2e7d32',
+              color: 'white',
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer'
+            }}>
+              Send Message
+            </button>
+          </div>
+        )}
+
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: 12,
+          padding: 20,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <h3>Support Tickets ({tickets.length})</h3>
+          {tickets.map((ticket) => (
+            <div key={ticket.id} style={{
+              padding: 15,
+              borderLeft: '4px solid ' + (ticket.status === 'open' ? '#ed6c02' : '#2e7d32'),
+              backgroundColor: '#f9f9f9',
+              marginBottom: 15,
+              borderRadius: 4
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div>
+                  <strong>{ticket.subject}</strong>
+                  <div style={{ fontSize: '0.9rem', color: '#666' }}>
+                    {ticket.user?.name} ({ticket.user?.email})
+                  </div>
+                </div>
+                <span style={{
+                  padding: '4px 12px',
+                  borderRadius: 6,
+                  fontSize: '0.85rem',
+                  backgroundColor: ticket.status === 'open' ? '#fff3e0' : '#e8f5e9',
+                  color: ticket.status === 'open' ? '#ed6c02' : '#2e7d32'
+                }}>
+                  {ticket.status}
+                </span>
+              </div>
+              <p style={{ margin: '10px 0' }}>{ticket.description}</p>
+              <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                {ticket.status === 'open' && (
+                  <>
+                    <button
+                      onClick={() => {
+                        const response = prompt('Enter response:');
+                        if (response) updateTicket(ticket.id, 'in_progress', response);
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: '#1976d2',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      Respond
+                    </button>
+                    <button
+                      onClick={() => updateTicket(ticket.id, 'resolved')}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: '#2e7d32',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      Resolve
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     );
   };
 
@@ -1993,6 +2308,18 @@ function AdminDashboard({ analytics, user, onLogout }) {
           </>
         );
 
+      case 'community':
+        return <CommunityModerationPanel />;
+
+      case 'system':
+        return <SystemHealthPanel />;
+
+      case 'audit':
+        return <AuditLogsPanel />;
+
+      case 'support':
+        return <SupportPanel />;
+
       case 'moderation':
         return <ModerationPanel dashboardData={dashboardData} />;
 
@@ -2117,6 +2444,10 @@ function AdminDashboard({ analytics, user, onLogout }) {
         <TabButton name="users" label="Users" icon="👥" />
         <TabButton name="content" label="Content" icon="📄" />
         <TabButton name="revenue" label="Revenue" icon="💰" />
+        <TabButton name="community" label="Community" icon="🎭" />
+        <TabButton name="system" label="System Health" icon="⚡" />
+        <TabButton name="audit" label="Audit Logs" icon="📜" />
+        <TabButton name="support" label="Support" icon="🎧" />
         <TabButton name="moderation" label="Moderation" icon="🛡️" />
         <TabButton name="subscriptions" label="Subscriptions" icon="💳" />
         <TabButton name="openai" label="AI Usage" icon="🤖" />

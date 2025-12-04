@@ -815,6 +815,7 @@ app.use('/api/admin/security', adminSecurityRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api/engagement', engagementRoutes);
 app.use('/api/monetization', monetizationRoutes);
+try { app.use('/api/usage', routeLimiter({ windowHint: 'usage' }), require('./routes/usageRoutes')); } catch(e) { console.warn('usageRoutes mount failed:', e.message); }
 app.use('/api/repost', repostRoutes);
 try { app.use('/api/admin/metrics', require('./routes/adminMetricsRoutes')); } catch(e) { console.warn('adminMetricsRoutes mount failed:', e.message); }
 // Aggregate status (composed) routes
@@ -839,12 +840,36 @@ app.use('/api/snapchat', routeLimiter({ windowHint: 'snapchat' }), codeqlLimiter
 console.log('🚏 Snapchat routes mounted at /api/snapchat');
 app.use('/api/platform', routeLimiter({ windowHint: 'platform' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), platformConnectionsRoutes);
 console.log('🚏 Platform connections routes mounted at /api/platform');
+// Community social feed routes
+try {
+  const communityRoutes = require('./routes/communityRoutes');
+  app.use('/api/community', routeLimiter({ windowHint: 'community' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), communityRoutes);
+  console.log('🚏 Community feed routes mounted at /api/community');
+} catch (e) {
+  console.log('⚠️ Community routes mount failed:', e.message);
+}
 // Viral growth routes
 try {
   app.use('/api/viral', routeLimiter({ windowHint: 'viral' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), viralGrowthRoutes);
   console.log('🚏 Viral growth routes mounted at /api/viral');
 } catch (e) {
   console.log('⚠️ Viral growth routes mount failed:', e.message);
+}
+// AI Clip generation routes
+try {
+  const clipRoutes = require('./routes/clipRoutes');
+  app.use('/api/clips', routeLimiter({ windowHint: 'clips' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), clipRoutes);
+  console.log('🚏 AI Clip generation routes mounted at /api/clips');
+} catch (e) {
+  console.log('⚠️ Clip routes mount failed:', e.message);
+}
+// AI Chat routes
+try {
+  const chatRoutes = require('./routes/chatRoutes');
+  app.use('/api/chat', routeLimiter({ windowHint: 'chat' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), chatRoutes);
+  console.log('🚏 AI Chat routes mounted at /api/chat');
+} catch (e) {
+  console.log('⚠️ Chat routes mount failed:', e.message);
 }
 // Mount generic platform routes under /api so frontend placeholder endpoints like
 // /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
@@ -1199,6 +1224,14 @@ app.get('/api/health', statusPublicLimiter, async (req, res) => {
     // Commit / version info (best-effort)
     extended.diagnostics.version = process.env.GIT_COMMIT || process.env.COMMIT_HASH || process.env.VERCEL_GIT_COMMIT_SHA || null;
     extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === 'true';
+    
+    // OpenAI configuration status
+    extended.diagnostics.openai = {
+      configured: !!process.env.OPENAI_API_KEY,
+      chatbot: !!process.env.OPENAI_API_KEY,
+      videoClipping: !!process.env.OPENAI_API_KEY || !!process.env.GOOGLE_CLOUD_API_KEY,
+      transcriptionProvider: process.env.TRANSCRIPTION_PROVIDER || 'openai'
+    };
   } catch (e) {
     extended.diagnosticsError = e.message;
   }

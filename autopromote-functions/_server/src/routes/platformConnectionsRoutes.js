@@ -84,4 +84,21 @@ router.get('/status', authMiddleware, platformConnectionsPublicLimiter, require(
   res.json(payload);
 }));
 
+// Disconnect a platform (remove connection doc) - POST /api/platform/disconnect/:platform
+router.post('/disconnect/:platform', authMiddleware, platformConnectionsPublicLimiter, async (req, res) => {
+  try {
+    const uid = req.userId || req.user?.uid;
+    const { platform } = req.params || {};
+    const allowed = ['twitter', 'youtube', 'facebook', 'tiktok', 'spotify', 'reddit', 'discord', 'linkedin', 'telegram', 'pinterest', 'snapchat'];
+    if (!platform || !allowed.includes(platform)) return res.status(400).json({ error: 'invalid_platform' });
+    const userRef = db.collection('users').doc(uid);
+    const connRef = userRef.collection('connections').doc(platform);
+    await connRef.delete();
+    return res.json({ disconnected: true, platform });
+  } catch (e) {
+    console.error('[platformConnectionsRoutes] disconnect error', e);
+    return res.status(500).json({ error: 'Failed to disconnect' });
+  }
+});
+
 module.exports = router;
