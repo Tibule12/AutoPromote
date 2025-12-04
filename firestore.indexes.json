@@ -66,9 +66,6 @@
       { "fieldPath": "user_id", "order": "ASCENDING" },
       { "fieldPath": "created_at", "order": "DESCENDING" }
     ] }
-    ,{ "collectionGroup": "events", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "at", "order": "ASCENDING" }
-    ] }
   ],
   "fieldOverrides": []
 }
