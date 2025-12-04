@@ -66,6 +66,51 @@
       { "fieldPath": "user_id", "order": "ASCENDING" },
       { "fieldPath": "created_at", "order": "DESCENDING" }
     ] }
+    ,{ "collectionGroup": "community_posts", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "community_posts", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "userId", "order": "ASCENDING" },
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "community_posts", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "type", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "community_posts", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "isAIGenerated", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "community_following", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "followerId", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "community_following", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "followingId", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "community_comments", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "postId", "order": "ASCENDING" },
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "community_comments", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "postId", "order": "ASCENDING" },
+      { "fieldPath": "parentCommentId", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "ASCENDING" }
+    ] }
+    ,{ "collectionGroup": "community_likes", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "postId", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
+    ,{ "collectionGroup": "community_shares", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "postId", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] }
   ],
   "fieldOverrides": []
 }
