@@ -286,7 +286,7 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 		};
 			loadInitial();
 		const loadEarnings = async () => {
-			try { const currentUser = auth.currentUser; if (!currentUser) return; const token = await currentUser.getIdToken(true); const res = await fetch(API_ENDPOINTS.EARNINGS_SUMMARY, { headers: { Authorization: `Bearer ${token}` } }); if (res.ok) { const d = await res.json(); setEarnings(d); } } catch (e) { console.warn(e); }
+			try { const currentUser = auth.currentUser; if (!currentUser) return; const token = await currentUser.getIdToken(true); const res = await fetch(API_ENDPOINTS.EARNINGS_SUMMARY, { headers: { Authorization: `Bearer ${token}` } }).catch(() => ({ ok: false })); if (res.ok) { const d = await res.json().catch(() => null); if (d) setEarnings(d); } } catch (e) { /* silently ignore */ }
 		};
 		if (activeTab === 'earnings') loadEarnings();
 	}, [activeTab]);

@@ -24,7 +24,7 @@ const AnalyticsPanel = () => {
       // Fetch user analytics
       const res = await fetch(`${API_ENDPOINTS.ANALYTICS_USER}?range=${timeRange}`, {
         headers: { Authorization: `Bearer ${token}` }
-      });
+      }).catch(() => ({ ok: false, status: 500 }));
       
       if (res.ok) {
         const data = await res.json();
@@ -34,7 +34,7 @@ const AnalyticsPanel = () => {
         const delay = Math.pow(2, retryCount) * 2000; // 2s, 4s
         setTimeout(() => loadAnalytics(retryCount + 1), delay);
         return;
-      } else if (res.status === 500 || res.status === 404) {
+      } else {
         // Backend error or endpoint not ready, use default data
         setAnalytics(null);
       }
