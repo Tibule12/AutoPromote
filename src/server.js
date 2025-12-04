@@ -504,6 +504,14 @@ try {
   viralBoostRoutes = express.Router(); 
   console.log('⚠️ Viral boost routes not found');
 }
+let rewardsRoutes;
+try {
+  rewardsRoutes = require('./routes/rewardsRoutes');
+  console.log('✅ Rewards routes loaded');
+} catch (e) { 
+  rewardsRoutes = express.Router(); 
+  console.log('⚠️ Rewards routes not found');
+}
 try {
   // Stripe integration removed
 // (removed empty try block)
@@ -931,6 +939,7 @@ app.use('/api/payments', routeLimiter({ windowHint: 'payments' }), codeqlLimiter
 app.use('/api/paypal', paypalWebhookRoutes);
 app.use('/api/paypal-subscriptions', routeLimiter({ windowHint: 'paypal_subscriptions' }), paypalSubscriptionRoutes);
 app.use('/api/viral-boost', routeLimiter({ windowHint: 'viral_boost' }), viralBoostRoutes);
+app.use('/api/rewards', routeLimiter({ windowHint: 'rewards' }), rewardsRoutes);
 // Stripe integration removed
 app.use('/api/admin/variants', variantAdminRoutes);
 app.use('/api/admin/config', adminConfigRoutes);
