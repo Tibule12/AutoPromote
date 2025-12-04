@@ -11,6 +11,7 @@ import EarningsPanel from './UserDashboardTabs/EarningsPanel';
 import ConnectionsPanel from './UserDashboardTabs/ConnectionsPanel';
 import SecurityPanel from './UserDashboardTabs/SecurityPanel';
 import CommunityPanel from './UserDashboardTabs/CommunityPanel';
+import CommunityFeed from './CommunityFeed';
 import ClipStudioPanel from './UserDashboardTabs/ClipStudioPanel';
 import UsageLimitBanner from './components/UsageLimitBanner';
 import { auth } from './firebaseClient';
@@ -451,7 +452,8 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 						<li className={activeTab === 'earnings' ? 'active' : ''} onClick={() => handleNav('earnings')}>Earnings</li>
 					<li className={activeTab === 'connections' ? 'active' : ''} onClick={() => handleNav('connections')}>Connections</li>
 					<li className={activeTab === 'security' ? 'active' : ''} onClick={() => handleNav('security')}>Security</li>
-					<li className={activeTab === 'community' ? 'active' : ''} onClick={() => handleNav('community')}>Community</li>
+					<li className={activeTab === 'feed' ? 'active' : ''} onClick={() => handleNav('feed')}>🎥 Feed</li>
+					<li className={activeTab === 'community' ? 'active' : ''} onClick={() => handleNav('community')}>💬 Forum</li>
 					<li className={activeTab === 'clips' ? 'active' : ''} onClick={() => handleNav('clips')}>AI Clips</li>
 				</ul>
 				</nav>
@@ -537,6 +539,10 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 
 				{activeTab === 'security' && (
 					<SecurityPanel user={user} />
+				)}
+
+				{activeTab === 'feed' && (
+					<CommunityFeed />
 				)}
 
 				{activeTab === 'community' && (
