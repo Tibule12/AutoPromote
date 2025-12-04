@@ -927,6 +927,8 @@ try { app.use('/api/admin/community', require('./routes/adminCommunityRoutes'));
 try { app.use('/api/admin/system', require('./routes/adminSystemRoutes')); } catch(e) { console.warn('adminSystemRoutes mount failed:', e.message); }
 try { app.use('/api/admin/audit', require('./routes/adminAuditRoutes')); } catch(e) { console.warn('adminAuditRoutes mount failed:', e.message); }
 try { app.use('/api/admin/support', require('./routes/adminSupportRoutes')); } catch(e) { console.warn('adminSupportRoutes mount failed:', e.message); }
+try { app.use('/api/admin/approval', require('./routes/adminContentApprovalRoutes')); } catch(e) { console.warn('adminContentApprovalRoutes mount failed:', e.message); }
+try { app.use('/api/admin/analytics', require('./routes/adminAnalyticsRoutes')); } catch(e) { console.warn('adminAnalyticsRoutes mount failed:', e.message); }
 
 app.use('/api/discord', discordRoutes);
 
