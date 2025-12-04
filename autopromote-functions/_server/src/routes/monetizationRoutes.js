@@ -376,4 +376,80 @@ router.post('/viral-bonuses/award', authMiddleware, async (req, res) => {
   }
 });
 
+// Creator Rewards Endpoints
+const creatorRewards = require('../services/creatorRewardsService');
+
+// GET /earnings/summary - Get user's earnings summary
+router.get('/earnings/summary', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const earnings = await creatorRewards.getUserEarnings(userId);
+    
+    if (earnings.error) {
+      return res.status(500).json({ error: earnings.error });
+    }
+    
+    res.json(earnings);
+  } catch (error) {
+    console.error('Error fetching earnings:', error);
+    res.status(500).json({ error: 'Failed to fetch earnings' });
+  }
+});
+
+// POST /earnings/payout/self - Request payout
+router.post('/earnings/payout/self', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { paymentMethod } = req.body;
+    
+    const result = await creatorRewards.requestPayout(userId, paymentMethod || 'stripe');
+    
+    if (result.error) {
+      return res.status(400).json({ error: result.error });
+    }
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Error requesting payout:', error);
+    res.status(500).json({ error: 'Failed to request payout' });
+  }
+});
+
+// GET /earnings/leaderboard - Get top earning creators
+router.get('/earnings/leaderboard', async (req, res) => {
+  try {
+    const timeRange = req.query.range || '30d';
+    const leaderboard = await creatorRewards.getTopCreators(timeRange);
+    
+    res.json({
+      timeRange,
+      leaderboard,
+      tiers: creatorRewards.PERFORMANCE_TIERS,
+      milestones: creatorRewards.MILESTONE_BONUSES
+    });
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
+});
+
+// POST /content/:contentId/calculate-rewards - Calculate rewards for specific content
+router.post('/content/:contentId/calculate-rewards', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { contentId } = req.params;
+    
+    const result = await creatorRewards.calculateContentRewards(contentId, userId);
+    
+    if (result.error) {
+      return res.status(400).json({ error: result.error });
+    }
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Error calculating rewards:', error);
+    res.status(500).json({ error: 'Failed to calculate rewards' });
+  }
+});
+
 module.exports = router;

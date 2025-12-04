@@ -922,6 +922,12 @@ app.use('/api/admin/alerts', adminAlertsRoutes);
 app.use('/api/admin/ops', adminOpsRoutes);
 app.use('/api/admin', adminEmailVerificationRoutes);
 
+// New admin routes
+try { app.use('/api/admin/community', require('./routes/adminCommunityRoutes')); } catch(e) { console.warn('adminCommunityRoutes mount failed:', e.message); }
+try { app.use('/api/admin/system', require('./routes/adminSystemRoutes')); } catch(e) { console.warn('adminSystemRoutes mount failed:', e.message); }
+try { app.use('/api/admin/audit', require('./routes/adminAuditRoutes')); } catch(e) { console.warn('adminAuditRoutes mount failed:', e.message); }
+try { app.use('/api/admin/support', require('./routes/adminSupportRoutes')); } catch(e) { console.warn('adminSupportRoutes mount failed:', e.message); }
+
 app.use('/api/discord', discordRoutes);
 
 // Debugging endpoint to expose installed dependency versions for investigation.
