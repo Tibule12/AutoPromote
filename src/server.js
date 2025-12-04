@@ -840,6 +840,14 @@ app.use('/api/snapchat', routeLimiter({ windowHint: 'snapchat' }), codeqlLimiter
 console.log('🚏 Snapchat routes mounted at /api/snapchat');
 app.use('/api/platform', routeLimiter({ windowHint: 'platform' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), platformConnectionsRoutes);
 console.log('🚏 Platform connections routes mounted at /api/platform');
+// Community social feed routes
+try {
+  const communityRoutes = require('./routes/communityRoutes');
+  app.use('/api/community', routeLimiter({ windowHint: 'community' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), communityRoutes);
+  console.log('🚏 Community feed routes mounted at /api/community');
+} catch (e) {
+  console.log('⚠️ Community routes mount failed:', e.message);
+}
 // Viral growth routes
 try {
   app.use('/api/viral', routeLimiter({ windowHint: 'viral' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), viralGrowthRoutes);
