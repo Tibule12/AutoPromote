@@ -1216,6 +1216,14 @@ app.get('/api/health', statusPublicLimiter, async (req, res) => {
     // Commit / version info (best-effort)
     extended.diagnostics.version = process.env.GIT_COMMIT || process.env.COMMIT_HASH || process.env.VERCEL_GIT_COMMIT_SHA || null;
     extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === 'true';
+    
+    // OpenAI configuration status
+    extended.diagnostics.openai = {
+      configured: !!process.env.OPENAI_API_KEY,
+      chatbot: !!process.env.OPENAI_API_KEY,
+      videoClipping: !!process.env.OPENAI_API_KEY || !!process.env.GOOGLE_CLOUD_API_KEY,
+      transcriptionProvider: process.env.TRANSCRIPTION_PROVIDER || 'openai'
+    };
   } catch (e) {
     extended.diagnosticsError = e.message;
   }

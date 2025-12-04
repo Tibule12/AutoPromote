@@ -7,6 +7,28 @@ const chatbotService = require('../services/chatbotService');
 const authMiddleware = require('../authMiddleware');
 const { db } = require('../firebaseAdmin');
 
+/**
+ * GET /api/chat/health
+ * Check if OpenAI chatbot is properly configured
+ */
+router.get('/health', (req, res) => {
+  const isConfigured = !!process.env.OPENAI_API_KEY;
+  
+  res.json({
+    status: isConfigured ? 'operational' : 'not_configured',
+    configured: isConfigured,
+    model: 'gpt-4o',
+    features: {
+      multilingual: true,
+      languages: 11,
+      conversationHistory: true
+    },
+    message: isConfigured 
+      ? 'AI Chatbot is ready' 
+      : 'AI Chatbot requires OPENAI_API_KEY environment variable'
+  });
+});
+
 // Rate limiting for chat
 const chatRateLimitMap = new Map();
 function chatRateLimit(req, res, next) {

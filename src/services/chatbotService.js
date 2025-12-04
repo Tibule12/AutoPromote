@@ -10,6 +10,13 @@ class ChatbotService {
     this.openaiApiKey = process.env.OPENAI_API_KEY;
     this.model = 'gpt-4o'; // Best for multilingual support
     this.systemPrompt = this.buildSystemPrompt();
+    
+    // Validate API key is configured
+    if (!this.openaiApiKey) {
+      console.warn('[Chatbot] ⚠️ OPENAI_API_KEY not configured. Chatbot will not work.');
+      console.warn('[Chatbot] 💡 Add OPENAI_API_KEY to your environment variables.');
+      console.warn('[Chatbot] 📖 See OPENAI_SETUP_GUIDE.md for setup instructions.');
+    }
   }
 
   /**
@@ -68,6 +75,11 @@ IMPORTANT:
    */
   async sendMessage(userId, conversationId, message, userContext = {}) {
     try {
+      // Check if API key is configured
+      if (!this.openaiApiKey) {
+        throw new Error('AI Chatbot is not configured. Please contact support.');
+      }
+      
       // Get conversation history
       const history = await this.getConversationHistory(conversationId);
 
