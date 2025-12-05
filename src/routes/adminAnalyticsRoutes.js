@@ -350,4 +350,86 @@ router.get('/segments', authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
+// Get conversion funnel data
+router.get('/funnel', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { timeframe = '30d' } = req.query;
+    
+    // Calculate date range
+    const days = parseInt(timeframe.replace('d', ''));
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    
+    // Mock funnel data (replace with actual analytics)
+    const funnelData = {
+      timeframe,
+      stages: [
+        { stage: 'Visit', users: 1000, percentage: 100 },
+        { stage: 'Sign Up', users: 250, percentage: 25 },
+        { stage: 'Upload Content', users: 150, percentage: 15 },
+        { stage: 'Connect Platform', users: 100, percentage: 10 },
+        { stage: 'Publish', users: 75, percentage: 7.5 },
+        { stage: 'Subscribe', users: 25, percentage: 2.5 }
+      ],
+      conversionRate: 2.5,
+      dropOffPoints: [
+        { from: 'Visit', to: 'Sign Up', dropOff: 75 },
+        { from: 'Sign Up', to: 'Upload Content', dropOff: 40 },
+        { from: 'Upload Content', to: 'Connect Platform', dropOff: 33 }
+      ]
+    };
+    
+    res.json({ success: true, funnel: funnelData });
+  } catch (error) {
+    console.error('Error fetching funnel data:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get content approval pending items
+router.get('/approval/pending', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    // Query for pending content (if collection exists)
+    let pendingContent = [];
+    try {
+      const snapshot = await db.collection('content')
+        .where('approvalStatus', '==', 'pending')
+        .limit(50)
+        .get();
+      
+      pendingContent = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (queryError) {
+      console.log('No pending content or collection missing:', queryError.message);
+    }
+    
+    res.json({ success: true, pending: pendingContent, count: pendingContent.length });
+  } catch (error) {
+    console.error('Error fetching pending approvals:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get approval stats
+router.get('/approval/stats', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    // Mock stats (replace with actual data)
+    const stats = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      avgApprovalTime: 0,
+      todayApproved: 0,
+      todayRejected: 0
+    };
+    
+    res.json({ success: true, stats });
+  } catch (error) {
+    console.error('Error fetching approval stats:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
