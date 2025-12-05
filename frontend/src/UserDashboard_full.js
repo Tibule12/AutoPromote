@@ -212,6 +212,67 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 		} catch (_) { setSnapchatStatus({ connected: false }); }
 	};
 
+	// Load all platform statuses from the unified endpoint
+	const loadAllPlatformStatusesUnified = async () => {
+		try {
+			const cur = auth.currentUser;
+			if (!cur) return;
+			const token = await cur.getIdToken(true);
+			
+			const res = await fetch(API_ENDPOINTS.PLATFORM_STATUS, { 
+				headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } 
+			});
+			
+			if (!res.ok) {
+				console.error('Failed to load unified platform status');
+				return;
+			}
+			
+			const data = await res.json();
+			const platforms = data.platforms || {};
+			
+			// Update all individual status states from the unified response
+			if (platforms.youtube) {
+				setYouTubeStatus({ connected: !!platforms.youtube.connected, channel: platforms.youtube.channel || null });
+			}
+			if (platforms.twitter) {
+				setTwitterStatus({ connected: !!platforms.twitter.connected, identity: platforms.twitter.identity || null });
+			}
+			if (platforms.tiktok) {
+				setTikTokStatus({ connected: !!platforms.tiktok.connected, meta: platforms.tiktok.meta || null, profile: platforms.tiktok.profile || null });
+			}
+			if (platforms.facebook) {
+				setFacebookStatus({ connected: !!platforms.facebook.connected, meta: platforms.facebook.meta || null, pages: platforms.facebook.pages || null, profile: platforms.facebook.profile || null });
+			}
+			if (platforms.spotify) {
+				setSpotifyStatus({ connected: !!platforms.spotify.connected, meta: platforms.spotify.meta || null });
+			}
+			if (platforms.reddit) {
+				setRedditStatus({ connected: !!platforms.reddit.connected, meta: platforms.reddit.meta || null, profile: platforms.reddit.profile || null });
+			}
+			if (platforms.discord) {
+				setDiscordStatus({ connected: !!platforms.discord.connected, meta: platforms.discord.meta || null, profile: platforms.discord.profile || null });
+			}
+			if (platforms.linkedin) {
+				setLinkedinStatus({ connected: !!platforms.linkedin.connected, meta: platforms.linkedin.meta || null, profile: platforms.linkedin.profile || null });
+			}
+			if (platforms.telegram) {
+				setTelegramStatus({ connected: !!platforms.telegram.connected, meta: platforms.telegram.meta || null, profile: platforms.telegram.profile || null });
+			}
+			if (platforms.pinterest) {
+				setPinterestStatus({ connected: !!platforms.pinterest.connected, meta: platforms.pinterest.meta || null, profile: platforms.pinterest.profile || null });
+			}
+			if (platforms.snapchat) {
+				setSnapchatStatus({ connected: !!platforms.snapchat.connected, profile: platforms.snapchat.profile || null });
+			}
+			
+			// Also update the platformSummary state
+			setPlatformSummary(data);
+		} catch (err) {
+			console.error('Error loading unified platform statuses:', err);
+		}
+	};
+
 	useEffect(() => {
 		// Check URL params for OAuth callback success/error
 		const params = new URLSearchParams(window.location.search);
@@ -251,39 +312,19 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 				
 				// Load critical data first (with caching)
 				await cachedFetch('initial-data', async () => {
-					const [earnRes, payRes, progRes, platRes] = await Promise.all([
+					const [earnRes, payRes, progRes] = await Promise.all([
 						fetch(API_ENDPOINTS.EARNINGS_SUMMARY, { headers: { Authorization: `Bearer ${token}` }}).catch(() => null),
 						fetch(API_ENDPOINTS.EARNINGS_PAYOUTS, { headers: { Authorization: `Bearer ${token}` }}).catch(() => null),
-						fetch(API_ENDPOINTS.USER_PROGRESS, { headers: { Authorization: `Bearer ${token}` }}).catch(() => null),
-						fetch(API_ENDPOINTS.PLATFORM_STATUS, { headers: { Authorization: `Bearer ${token}` }}).catch(() => null)
+						fetch(API_ENDPOINTS.USER_PROGRESS, { headers: { Authorization: `Bearer ${token}` }}).catch(() => null)
 					]);
 					if (earnRes?.ok) { const d = await earnRes.json(); setEarnings(d); }
 					if (payRes?.ok) { const d = await payRes.json(); setPayouts(d.payouts || []); }
 					if (progRes?.ok) { const d = await progRes.json(); setProgress(d); }
-					if (platRes?.ok) { const d = await platRes.json(); setPlatformSummary(d); }
 					return true;
 				}, 60000); // 60s cache
 				
-				// Load platform statuses with 200ms delay between each to avoid rate limit
-				await batchWithDelay([
-					loadSpotifyStatus,
-					loadYouTubeStatus,
-					loadDiscordStatus
-				], 200);
-				
-				// Load remaining platforms with additional delay
-				setTimeout(() => {
-					batchWithDelay([
-						loadTikTokStatus,
-						loadFacebookStatus,
-						loadTwitterStatus,
-						loadSnapchatStatus,
-						loadRedditStatus,
-						loadLinkedinStatus,
-						loadTelegramStatus,
-						loadPinterestStatus
-					], 200);
-				}, 1000); // Wait 1s before loading secondary platforms
+				// Load all platform statuses from the unified endpoint
+				await loadAllPlatformStatusesUnified();
 			} catch (e) { /* ignore */ }
 		};
 			loadInitial();
@@ -328,13 +369,8 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 	const handleConnectPinterest = async () => openProviderAuth(API_ENDPOINTS.PINTEREST_AUTH_START);
 
 	const refreshAllStatus = async () => {
-		await Promise.all([
-			loadTikTokStatus(), loadFacebookStatus(), loadYouTubeStatus(), loadTwitterStatus(), loadSnapchatStatus(), loadSpotifyStatus(), loadRedditStatus(), loadDiscordStatus(), loadLinkedinStatus(), loadTelegramStatus(), loadPinterestStatus()
-		]);
-		// Reload summary
-		try {
-			const cur = auth.currentUser; if (!cur) return; const token = await cur.getIdToken(true); const platRes = await fetch(API_ENDPOINTS.PLATFORM_STATUS, { headers: { Authorization: `Bearer ${token}` }}); if (platRes.ok) { const d = await platRes.json(); setPlatformSummary(d); }
-		} catch (_) {}
+		// Use the unified loader instead of calling individual endpoints
+		await loadAllPlatformStatusesUnified();
 	};
 
 	const handleDisconnectPlatform = async (platform) => {
