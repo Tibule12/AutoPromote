@@ -209,19 +209,28 @@ async function checkDatabaseCollections() {
  */
 function checkPlatformCredentials() {
   const platforms = {
-    youtube: ['YOUTUBE_CLIENT_ID', 'YOUTUBE_CLIENT_SECRET'],
-    twitter: ['TWITTER_API_KEY', 'TWITTER_API_SECRET'],
+    youtube: ['YT_CLIENT_ID', 'YT_CLIENT_SECRET'],
+    twitter: ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'],
     facebook: ['FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET'],
-    tiktok: ['TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET'],
+    tiktok: ['TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET', 'TIKTOK_PROD_CLIENT_KEY', 'TIKTOK_PROD_CLIENT_SECRET', 'TIKTOK_SANDBOX_CLIENT_KEY', 'TIKTOK_SANDBOX_CLIENT_SECRET'],
     telegram: ['TELEGRAM_BOT_TOKEN'],
-    snapchat: ['SNAPCHAT_CLIENT_ID', 'SNAPCHAT_CLIENT_SECRET'],
+    snapchat: ['SNAPCHAT_CLIENT_ID', 'SNAPCHAT_CLIENT_SECRET', 'SNAPCHAT_PUBLIC_CLIENT_ID', 'SNAPCHAT_CONFIDENTIAL_CLIENT_ID'],
     linkedin: ['LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET'],
     pinterest: ['PINTEREST_CLIENT_ID', 'PINTEREST_CLIENT_SECRET'],
     reddit: ['REDDIT_CLIENT_ID', 'REDDIT_CLIENT_SECRET'],
     discord: ['DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET'],
-    instagram: ['FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET'],
+    instagram: ['INSTAGRAM_APP_ID', 'INSTAGRAM_APP_SECRET'],
     spotify: ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET']
   };
+
+  // Debug: log all detected environment variables
+  console.log('---[DIAGNOSTICS ENV DEBUG]---');
+  Object.keys(process.env).forEach(k => {
+    if (k.includes('CLIENT') || k.includes('SECRET') || k.includes('TOKEN')) {
+      console.log(`${k}: ${process.env[k] ? '[SET]' : '[NOT SET]'}`);
+    }
+  });
+  console.log('-----------------------------');
 
   const results = {};
   let configuredCount = 0;
@@ -229,12 +238,10 @@ function checkPlatformCredentials() {
   Object.entries(platforms).forEach(([platform, requiredVars]) => {
     const missing = requiredVars.filter(v => !process.env[v]);
     const configured = missing.length === 0;
-    
     results[platform] = {
       configured,
       missing_variables: missing
     };
-
     if (configured) configuredCount++;
   });
 
