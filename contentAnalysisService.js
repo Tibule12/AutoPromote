@@ -1,7 +1,17 @@
-const { db, storage } = require('./firebaseAdmin');
+const { db, storage } = require('./src/firebaseAdmin');
 const crypto = require('crypto');
+const axios = require('axios');
 
 class ContentAnalysisService {
+    constructor() {
+        this.openaiApiKey = process.env.OPENAI_API_KEY;
+        this.useAI = !!this.openaiApiKey;
+        
+        if (!this.openaiApiKey) {
+            console.warn('[ContentAnalysis] ⚠️ OPENAI_API_KEY not set. Using basic heuristic analysis.');
+        }
+    }
+
     async analyzeContent(contentId) {
         try {
             // Get content details
@@ -38,14 +48,27 @@ class ContentAnalysisService {
                     break;
             }
 
-            // Generate recommendations
-            analysis.recommendations = this.generateRecommendations(analysis.metrics);
-            
-            // Calculate optimization score
-            analysis.optimizationScore = this.calculateOptimizationScore(analysis.metrics);
-            
-            // Identify target audience
-            analysis.targetAudience = this.identifyTargetAudience(analysis.metrics);
+            // AI-powered deep analysis if available
+            if (this.useAI) {
+                try {
+                    const aiAnalysis = await this.analyzeWithAI(contentData);
+                    analysis.aiInsights = aiAnalysis;
+                    analysis.optimizationScore = aiAnalysis.viralScore || this.calculateOptimizationScore(analysis.metrics);
+                    analysis.recommendations = aiAnalysis.recommendations || this.generateRecommendations(analysis.metrics);
+                    analysis.targetAudience = aiAnalysis.targetAudience || this.identifyTargetAudience(analysis.metrics);
+                    analysis.hashtags = aiAnalysis.hashtags || [];
+                } catch (aiError) {
+                    console.warn('[ContentAnalysis] AI analysis failed, using fallback:', aiError.message);
+                    analysis.recommendations = this.generateRecommendations(analysis.metrics);
+                    analysis.optimizationScore = this.calculateOptimizationScore(analysis.metrics);
+                    analysis.targetAudience = this.identifyTargetAudience(analysis.metrics);
+                }
+            } else {
+                // Fallback to basic analysis
+                analysis.recommendations = this.generateRecommendations(analysis.metrics);
+                analysis.optimizationScore = this.calculateOptimizationScore(analysis.metrics);
+                analysis.targetAudience = this.identifyTargetAudience(analysis.metrics);
+            }
 
             // Store analysis results
             await contentRef.update({
@@ -56,6 +79,66 @@ class ContentAnalysisService {
             return analysis;
         } catch (error) {
             console.error('Error in content analysis:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * AI-powered content analysis using OpenAI
+     */
+    async analyzeWithAI(contentData) {
+        try {
+            const prompt = `Analyze this content for viral potential and provide optimization recommendations:
+
+Title: ${contentData.title || 'No title'}
+Description: ${contentData.description || 'No description'}
+Tags: ${contentData.tags ? contentData.tags.join(', ') : 'No tags'}
+Type: ${contentData.type || 'unknown'}
+
+Provide analysis in JSON format with:
+{
+  "viralScore": (0-100),
+  "strengths": ["strength1", "strength2"],
+  "weaknesses": ["weakness1", "weakness2"],
+  "recommendations": ["recommendation1", "recommendation2"],
+  "targetAudience": ["demographic1", "demographic2"],
+  "bestPlatforms": ["platform1", "platform2"],
+  "hashtags": ["#hashtag1", "#hashtag2"],
+  "postingStrategy": "best time and frequency advice"
+}`;
+
+            const response = await axios.post(
+                'https://api.openai.com/v1/chat/completions',
+                {
+                    model: 'gpt-4o',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are a viral content strategist and social media expert. Analyze content and provide actionable optimization insights.'
+                        },
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ],
+                    response_format: { type: 'json_object' },
+                    temperature: 0.7,
+                    max_tokens: 800
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${this.openaiApiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 30000
+                }
+            );
+
+            const result = JSON.parse(response.data.choices[0].message.content);
+            return result;
+
+        } catch (error) {
+            console.error('[ContentAnalysis] AI analysis error:', error.message);
             throw error;
         }
     }

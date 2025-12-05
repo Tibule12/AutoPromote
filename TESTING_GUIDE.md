@@ -1,17 +1,97 @@
-# AutoPromote Testing Guide
+# 🧪 AutoPromote Testing Guide
 
-## Table of Contents
-1. [Overview](#overview)
-2. [Test Environment Setup](#test-environment-setup)
-3. [Database Integration Testing](#database-integration-testing)
-4. [Admin Dashboard Testing](#admin-dashboard-testing)
-5. [Running Tests](#running-tests)
-6. [Test Automation](#test-automation)
-7. [Troubleshooting](#troubleshooting)
+Complete guide for testing PayPal integration and production readiness before December 15 launch.
 
-## Overview
+---
 
-This guide provides comprehensive instructions for testing the AutoPromote application, with a focus on database integration and admin dashboard functionality. The testing approach includes both manual and automated methods to ensure the application is fully functional.
+## 📋 Test Scripts Overview
+
+### 1. `test-paypal-webhook-local.js`
+**Purpose:** Verify PayPal webhook configuration locally  
+**Tests:**
+- Environment variables (CLIENT_ID, SECRET, WEBHOOK_ID)
+- PayPal SDK initialization
+- Webhook signature components
+- Database connection
+
+**Run:** `node test-paypal-webhook-local.js`
+
+---
+
+### 2. `test-paypal-integration.js`
+**Purpose:** Comprehensive PayPal integration testing  
+**Tests:**
+- Environment variables validation
+- Backend health check
+- Payment status endpoint
+- PayPal webhook endpoint
+- Subscription plans
+- PayPal SDK configuration
+- Database operations
+- Order creation (with auth token)
+
+**Run:** `node test-paypal-integration.js`  
+**With Auth:** `node test-paypal-integration.js --token YOUR_FIREBASE_TOKEN`
+
+---
+
+### 3. `test-production-flow.js`
+**Purpose:** End-to-end production readiness test  
+**Tests:**
+- Frontend accessibility
+- Backend API health
+- All payment endpoints
+- All 11 platform integration endpoints
+- Critical API routes
+- Legal/compliance pages
+
+**Run:** `node test-production-flow.js`
+
+---
+
+### 4. `run-tests.bat` (Windows)
+**Purpose:** Run all tests in sequence  
+**Runs:**
+1. Local webhook configuration test
+2. PayPal integration tests
+3. Production readiness tests
+4. Shows summary of results
+
+**Run:** Double-click `run-tests.bat` or run `.\run-tests.bat` in PowerShell
+
+---
+
+## 🚀 Quick Start Testing
+
+### Step 1: Setup Environment
+```bash
+# Make sure you have .env file or environment variables set
+# Required variables:
+PAYPAL_CLIENT_ID=your_client_id
+PAYPAL_CLIENT_SECRET=your_client_secret
+PAYPAL_MODE=live
+PAYPAL_WEBHOOK_ID=your_webhook_id
+PAYMENTS_ENABLED=true
+PAYOUTS_ENABLED=true
+ALLOW_LIVE_PAYMENTS=true
+NODE_ENV=production
+```
+
+### Step 2: Install Dependencies
+```bash
+npm install
+```
+
+### Step 3: Run Test Suite
+```bash
+# Windows:
+.\run-tests.bat
+
+# Or run individually:
+node test-paypal-webhook-local.js
+node test-paypal-integration.js
+node test-production-flow.js
+```
 
 ## Test Environment Setup
 
@@ -39,15 +119,378 @@ REACT_APP_FIREBASE_APP_ID=your_app_id
 
 2. For running backend tests, ensure that service account credentials are properly configured.
 
-### Sample Data Generation
+---
 
-To test with sample data:
+## 📊 Understanding Test Results
 
-```powershell
-node generateSampleData.js
+### ✅ All Green (100% Pass)
+**Meaning:** Platform is production-ready  
+**Action:** Deploy with confidence!
+
+### ⚠️ 80-99% Pass
+**Meaning:** Minor issues present  
+**Action:** Review failed tests, fix non-critical issues, soft launch OK
+
+### ❌ Below 80% Pass
+**Meaning:** Critical issues present  
+**Action:** Fix issues before launching
+
+---
+
+## 🔍 Common Test Failures & Fixes
+
+### Test: "PAYPAL_MODE is not 'live'"
+**Problem:** Still in sandbox mode  
+**Fix:** Set `PAYPAL_MODE=live` in Render environment
+
+### Test: "PAYMENTS_ENABLED must be true"
+**Problem:** Payments disabled  
+**Fix:** Set `PAYMENTS_ENABLED=true` in Render
+
+### Test: "Live calls are BLOCKED"
+**Problem:** `ALLOW_LIVE_PAYMENTS` not set  
+**Fix:** Set `ALLOW_LIVE_PAYMENTS=true` and `NODE_ENV=production`
+
+### Test: "Missing PayPal Plan ID"
+**Problem:** Subscription plans not configured  
+**Fix:** Create plans in PayPal dashboard, set IDs in environment:
+```bash
+PAYPAL_PREMIUM_PLAN_ID=P-xxx
+PAYPAL_UNLIMITED_PLAN_ID=P-yyy
 ```
 
-This script will:
+### Test: "Webhook endpoint not found"
+**Problem:** Route not mounted or deployed  
+**Fix:** Verify `paypalWebhookRoutes` is loaded in `server.js`, redeploy
+
+### Test: "Backend health check failed"
+**Problem:** Backend not running or crashed  
+**Fix:** Check Render logs, verify deployment succeeded
+
+---
+
+## 🧪 Manual Testing Checklist
+
+After automated tests pass, perform these manual tests:
+
+### Test 1: User Registration
+1. Go to https://www.autopromote.org
+2. Click "Sign Up"
+3. Register with email/password
+4. Check email for verification link
+5. Click verification link
+6. Should redirect to dashboard
+7. Accept terms modal should appear
+
+**Expected:** ✅ Registration complete, email verified, terms accepted
+
+---
+
+### Test 2: PayPal Subscription
+1. Login to dashboard
+2. Click user menu → "Upgrade"
+3. Select "Premium" plan ($9.99/month)
+4. Click "Subscribe with PayPal"
+5. Complete PayPal authorization
+6. Should redirect back to dashboard
+7. User menu should show "Premium Member"
+
+**Expected:** ✅ Subscription created, payment successful, plan activated
+
+**Verify in:**
+- Firestore: `users/{uid}/subscription` document exists
+- PayPal Dashboard: Subscription shows "Active"
+- Render Logs: Webhook event received
+
+---
+
+### Test 3: Platform Connection (YouTube)
+1. Click "Connections" tab
+2. Click "Connect YouTube"
+3. Sign in to Google account
+4. Authorize AutoPromote
+5. Should redirect back with success message
+6. YouTube should show as "Connected" with channel name
+
+**Expected:** ✅ OAuth successful, tokens stored, channel name displayed
+
+**Verify in:**
+- Firestore: `users/{uid}/connections/youtube` document exists
+- Dashboard: YouTube shows connected
+
+---
+
+### Test 4: Content Upload & Schedule
+1. Click "Upload" tab
+2. Upload a video file (MP4)
+3. Enter title and description
+4. Select platforms: YouTube, Twitter, TikTok
+5. Choose "Schedule for later"
+6. Select date/time (tomorrow)
+7. Click "Schedule"
+
+**Expected:** ✅ Upload successful, schedule created
+
+**Verify in:**
+- Firestore: `content/{id}` document exists
+- Firestore: `promotion_schedules/{id}` document exists
+- Dashboard: Schedule appears in "Schedules" tab
+
+---
+
+### Test 5: Platform Posting (Live Test)
+1. Create a schedule for 5 minutes from now
+2. Wait for scheduled time
+3. Check platform (Twitter/YouTube)
+4. Post should appear on platform
+
+**Expected:** ✅ Content posted automatically to selected platforms
+
+**Verify in:**
+- Twitter: Tweet appears on your timeline
+- YouTube: Video appears in channel (if YouTube selected)
+- Firestore: `promotion_executions/{id}` status = "completed"
+
+---
+
+### Test 6: Webhook Verification
+1. Make a PayPal payment (subscription or test payment)
+2. Check Render logs for webhook event
+3. Check Firestore `payments` collection
+4. Should see payment recorded
+
+**Expected:** ✅ Webhook received, signature verified, payment recorded
+
+**Verify in:**
+- Render Logs: "Webhook received" message
+- Firestore: `payments/{orderId}` status = "captured"
+- Admin Dashboard: Payment shows in revenue
+
+---
+
+### Test 7: Email Notifications
+1. Register new user
+2. Check email for verification
+3. Trigger password reset
+4. Check email for reset link
+5. Complete payment
+6. Check email for receipt (if enabled)
+
+**Expected:** ✅ All emails received within 2 minutes
+
+**Verify:**
+- Welcome email arrives
+- Verification email arrives
+- Password reset email arrives
+
+---
+
+## 🛠️ Debugging Test Failures
+
+### Enable Verbose Logging
+```bash
+# In your .env or Render environment:
+DEBUG=true
+LOG_LEVEL=debug
+```
+
+### Check Render Logs
+```bash
+# View live logs:
+1. Go to Render Dashboard
+2. Click on your Backend service
+3. Click "Logs" tab
+4. Filter for ERROR or WARN
+```
+
+### Test Individual Components
+
+#### Test PayPal Token Generation:
+```javascript
+// test-token.js
+require('dotenv').config();
+const https = require('https');
+
+const basic = Buffer.from(
+  `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
+).toString('base64');
+
+const options = {
+  hostname: process.env.PAYPAL_MODE === 'live' 
+    ? 'api-m.paypal.com' 
+    : 'api-m.sandbox.paypal.com',
+  path: '/v1/oauth2/token',
+  method: 'POST',
+  headers: {
+    'Authorization': `Basic ${basic}`,
+    'Content-Type': 'application/x-www-form-urlencoded'
+  }
+};
+
+const req = https.request(options, (res) => {
+  let data = '';
+  res.on('data', chunk => data += chunk);
+  res.on('end', () => {
+    console.log('Status:', res.statusCode);
+    console.log('Response:', JSON.parse(data));
+  });
+});
+
+req.write('grant_type=client_credentials');
+req.end();
+```
+
+Run: `node test-token.js`
+
+---
+
+#### Test Firestore Connection:
+```javascript
+// test-firestore.js
+require('dotenv').config();
+const { db } = require('./src/firebaseAdmin');
+
+async function test() {
+  try {
+    const testRef = db.collection('_test').doc('health');
+    await testRef.set({ tested: new Date().toISOString() });
+    console.log('✅ Write successful');
+    
+    const doc = await testRef.get();
+    console.log('✅ Read successful:', doc.data());
+    
+    await testRef.delete();
+    console.log('✅ Delete successful');
+  } catch (err) {
+    console.error('❌ Error:', err.message);
+  }
+}
+
+test();
+```
+
+Run: `node test-firestore.js`
+
+---
+
+## 📈 Performance Testing
+
+### Load Test Payment Endpoint
+```bash
+# Using Apache Bench (install: choco install apache-bench)
+ab -n 100 -c 10 https://api.autopromote.org/api/payments/status
+
+# Expected:
+# - 100% success rate
+# - Average response time < 500ms
+# - No 500 errors
+```
+
+### Monitor During Testing
+```bash
+# Watch Render metrics:
+1. Go to Render Dashboard
+2. Click "Metrics" tab
+3. Monitor:
+   - Response time
+   - Error rate
+   - Memory usage
+   - CPU usage
+```
+
+---
+
+## ✅ Pre-Launch Testing Checklist
+
+### December 12 (D-3)
+- [ ] Run `node test-paypal-webhook-local.js` → 100% pass
+- [ ] Run `node test-paypal-integration.js` → 100% pass
+- [ ] Run `node test-production-flow.js` → 95%+ pass
+- [ ] Verify all environment variables set in Render
+- [ ] Test PayPal payment yourself (buy Premium)
+- [ ] Verify webhook received in Render logs
+
+### December 13 (D-2)
+- [ ] Complete all 7 manual tests above
+- [ ] Test on mobile device (iOS or Android)
+- [ ] Test on different browser (Chrome, Firefox, Safari)
+- [ ] Invite 3 beta users to test
+- [ ] Fix any issues found
+
+### December 14 (D-1)
+- [ ] Re-run all automated tests
+- [ ] Verify beta user feedback addressed
+- [ ] Check Firestore backup exists
+- [ ] Prepare launch announcement
+- [ ] Set up monitoring alerts
+- [ ] Standby for hotfixes
+
+### December 15 (Launch Day)
+- [ ] Final smoke test (quick manual test)
+- [ ] Monitor logs continuously
+- [ ] Track first 10 signups
+- [ ] Track first PayPal payment
+- [ ] 🎉 Celebrate launch!
+
+---
+
+## 🚨 Emergency Rollback Procedure
+
+If critical issues arise post-launch:
+
+1. **Disable Payments** (quick fix):
+   ```bash
+   # In Render environment:
+   PAYMENTS_ENABLED=false
+   ALLOW_LIVE_PAYMENTS=false
+   ```
+   Redeploy → Payments will be disabled, platform still works
+
+2. **Rollback Deployment**:
+   ```bash
+   # In Render:
+   1. Go to "Deploys" tab
+   2. Find previous successful deploy
+   3. Click "Rollback to this deploy"
+   ```
+
+3. **Emergency Contact**:
+   - Render Support: https://render.com/support
+   - PayPal Developer Support: https://developer.paypal.com/support
+
+---
+
+## 📞 Support & Resources
+
+**Documentation:**
+- [PayPal Developer Docs](https://developer.paypal.com/docs/)
+- [Render Documentation](https://render.com/docs)
+- [Firebase Documentation](https://firebase.google.com/docs)
+
+**Community:**
+- AutoPromote Discord: [link]
+- GitHub Issues: https://github.com/Tibule12/AutoPromote/issues
+
+**Emergency Contacts:**
+- Tech Lead: [your email]
+- DevOps: [devops email]
+- Support: support@autopromote.org
+
+---
+
+## 🎯 Success Criteria
+
+**Platform is ready to launch when:**
+- ✅ All automated tests pass (95%+)
+- ✅ All 7 manual tests complete successfully
+- ✅ PayPal payment flow works end-to-end
+- ✅ At least 3 platform integrations tested
+- ✅ Webhook events received and processed
+- ✅ Email verification working
+- ✅ No critical errors in logs
+- ✅ Performance metrics acceptable
+
+**You're ready! 🚀 Let's launch on December 15!**
 - Create 20 sample users (including 2 admin users)
 - Generate 30 content items
 - Create 25 promotions

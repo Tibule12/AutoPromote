@@ -922,7 +922,14 @@ app.use('/api/instagram', routeLimiter({ windowHint: 'instagram' }), codeqlLimit
 console.log('🚏 Instagram routes mounted at /api/instagram');
 app.use('/api/notifications', routeLimiter({ windowHint: 'notifications' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), notificationsRoutes);
 console.log('🚏 Notifications routes mounted at /api/notifications');
-// Captions routes mount skipped due to object export issue
+// AI Caption Generation routes
+try {
+  const captionRoutes = require('./routes/captionRoutes');
+  app.use('/api/captions', routeLimiter({ windowHint: 'captions' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), captionRoutes);
+  console.log('🚏 AI Caption generation routes mounted at /api/captions');
+} catch (e) {
+  console.log('⚠️ Caption routes mount failed:', e.message);
+}
 app.use('/api/admin/cache', adminCacheRoutes);
 console.log('🚏 Admin cache routes mounted at /api/admin/cache');
 
