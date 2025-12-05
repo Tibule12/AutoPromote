@@ -1,8 +1,108 @@
 // add-test-connections.js
 // Script to add test platform connections to Firestore
+// Run this from browser console instead
 
-const { admin, db } = require('./src/firebaseAdmin');
+console.log(`
+════════════════════════════════════════════════════════════════
+📋 COPY AND PASTE THIS INTO YOUR BROWSER CONSOLE:
+════════════════════════════════════════════════════════════════
 
+const userId = "${process.argv[2] || 'YOUR_USER_ID'}";
+const apiUrl = "https://autopromote.onrender.com";
+
+async function addTestConnections() {
+  try {
+    const token = await firebase.auth().currentUser.getIdToken();
+    
+    console.log("Adding test platform connections...");
+    
+    const connections = {
+      facebook: {
+        provider: 'facebook',
+        connected: true,
+        obtainedAt: new Date().toISOString(),
+        mode: 'active',
+        scope: 'pages_manage_posts,pages_read_engagement',
+        pages: [{ id: 'test_page_123', name: 'My Test Page' }],
+        identity: { id: 'fb_user_123', name: 'Test User' }
+      },
+      youtube: {
+        provider: 'youtube',
+        connected: true,
+        obtainedAt: new Date().toISOString(),
+        mode: 'active',
+        scope: 'youtube.upload,youtube.readonly',
+        channel: { id: 'test_channel_123', snippet: { title: 'My YouTube Channel' }},
+        identity: { id: 'yt_user_123', email: 'test@youtube.com' }
+      },
+      twitter: {
+        provider: 'twitter',
+        connected: true,
+        obtainedAt: new Date().toISOString(),
+        mode: 'active',
+        scope: 'tweet.read,tweet.write,users.read',
+        identity: { id: 'twitter_123', username: 'testuser', name: 'Test User' }
+      },
+      tiktok: {
+        provider: 'tiktok',
+        connected: true,
+        obtainedAt: new Date().toISOString(),
+        mode: 'active',
+        scope: 'video.upload,user.info.basic',
+        display_name: '@testuser',
+        identity: { open_id: 'tiktok_123', display_name: 'Test TikTok User' }
+      },
+      instagram: {
+        provider: 'instagram',
+        connected: true,
+        obtainedAt: new Date().toISOString(),
+        mode: 'active',
+        scope: 'instagram_basic,instagram_content_publish',
+        identity: { id: 'ig_123', username: 'testuser' }
+      },
+      linkedin: {
+        provider: 'linkedin',
+        connected: true,
+        obtainedAt: new Date().toISOString(),
+        mode: 'active',
+        scope: 'w_member_social,r_liteprofile',
+        meta: { organizations: [{ id: 'org_123', name: 'Test Company' }]},
+        identity: { id: 'li_123', firstName: 'Test', lastName: 'User' }
+      }
+    };
+
+    // Use Firestore API to add connections
+    for (const [platform, data] of Object.entries(connections)) {
+      const response = await fetch(\`\${apiUrl}/api/platform/connect/\${platform}\`, {
+        method: 'POST',
+        headers: {
+          'Authorization': \`Bearer \${token}\`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (response.ok) {
+        console.log(\`✅ Added \${platform} connection\`);
+      } else {
+        console.error(\`❌ Failed to add \${platform}:\`, await response.text());
+      }
+    }
+    
+    console.log("\\n🎉 All test connections added! Refresh your dashboard.");
+  } catch (error) {
+    console.error("❌ Error:", error);
+  }
+}
+
+addTestConnections();
+
+════════════════════════════════════════════════════════════════
+`);
+
+process.exit(0);
+
+// Old Node.js version (keeping for reference)
 async function addTestConnections(userId) {
   try {
     console.log(`Adding test platform connections for user: ${userId}`);
