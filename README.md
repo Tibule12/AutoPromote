@@ -20,6 +20,16 @@ AutoPromote is a free, automated content promotion platform that helps creators 
 	- [x] Upload API with schedule_hint support and safe URL handling (`src/contentRoutes.js`)
 	- [x] Dry‑run preview to see derived schedule without saving
 	- [x] FFmpeg‑based content quality check with auto‑enhance fallback (`src/contentQualityCheck.js`)
+	- [x] AI-powered content analysis with OpenAI GPT-4o (`contentAnalysisService.js`)
+
+- AI Content Optimization (NEW! 🤖)
+	- [x] Smart caption generation for all platforms (`src/services/captionGenerationService.js`)
+	- [x] Intelligent hashtag generation with trending/niche mix (`src/services/hashtagService.js`)
+	- [x] A/B testing variations for captions
+	- [x] Platform-specific optimization (Instagram, TikTok, YouTube, LinkedIn, etc.)
+	- [x] Viral potential scoring and recommendations
+	- [x] Multilingual support via GPT-4o
+	- [x] Rate-limited API endpoints at `/api/captions/*`
 
 - Scheduling & Promotion
 	- [x] Schedule derivation from `schedule_hint` or explicit time
