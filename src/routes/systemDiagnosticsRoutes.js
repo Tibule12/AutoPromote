@@ -86,6 +86,30 @@ router.get('/health', authMiddleware, async (req, res) => {
 });
 
 /**
+ * GET /api/diagnostics/env
+ * Returns the presence (not values) of known environment variables for quick admin debugging
+ */
+router.get('/env', authMiddleware, async (req, res) => {
+  try {
+    const keys = [
+      'YT_CLIENT_ID','YT_CLIENT_SECRET','YT_REDIRECT_URI',
+      'TWITTER_CLIENT_ID','TWITTER_CLIENT_SECRET','TWITTER_CLIENT_REDIRECT_URI',
+      'PINTEREST_CLIENT_ID','PINTEREST_CLIENT_SECRET',
+      'TIKTOK_CLIENT_KEY','TIKTOK_CLIENT_SECRET','TIKTOK_PROD_CLIENT_KEY','TIKTOK_PROD_CLIENT_SECRET','TIKTOK_SANDBOX_CLIENT_KEY','TIKTOK_SANDBOX_CLIENT_SECRET',
+      'SNAPCHAT_CLIENT_ID','SNAPCHAT_CLIENT_SECRET','SNAPCHAT_PUBLIC_CLIENT_ID','SNAPCHAT_CONFIDENTIAL_CLIENT_ID',
+      'INSTAGRAM_APP_ID','INSTAGRAM_APP_SECRET','INSTAGRAM_CLIENT_ID','INSTAGRAM_CLIENT_SECRET'
+    ];
+    const map = {};
+    keys.forEach(k => { map[k] = !!process.env[k]; });
+    // Also return a per-platform summary using existing checkPlatformCredentials logic
+    const platforms = checkPlatformCredentials();
+    res.json({ env: map, platforms });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * Check Environment Variables
  */
 function checkEnvironmentVariables() {
