@@ -91,6 +91,9 @@
         if (!url || !isAllowedTelegramUrl(url)) return false;
         const sanitized = sanitizeUrl(url);
         if (sanitized === '#') return false;
+        // Final validation: ensure sanitized URL is still safe
+        if (!sanitized.startsWith('telegram://') && !sanitized.startsWith('https://')) return false;
+        if (!isAllowedTelegramUrl(sanitized)) return false;
         try { window.location.href = sanitized; return true; } catch (_) { return false; }
       };
       
