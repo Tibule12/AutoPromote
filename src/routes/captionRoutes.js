@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 const captionService = require('../services/captionGenerationService');
 const hashtagService = require('../services/hashtagService');
-const { authMiddleware } = require('../authMiddleware');
+const authMiddleware = require('../authMiddleware');
 const rateLimit = require('express-rate-limit');
 
 // Rate limiters
