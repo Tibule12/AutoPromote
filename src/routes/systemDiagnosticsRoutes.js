@@ -236,8 +236,20 @@ function checkPlatformCredentials() {
   let configuredCount = 0;
 
   Object.entries(platforms).forEach(([platform, requiredVars]) => {
-    const missing = requiredVars.filter(v => !process.env[v]);
-    const configured = missing.length === 0;
+    let missing;
+    let configured;
+    // Special handling for Instagram: it may use _APP_ or _CLIENT_ name variants
+    if (platform === 'instagram') {
+      const appPair = process.env.INSTAGRAM_APP_ID && process.env.INSTAGRAM_APP_SECRET;
+      const clientPair = process.env.INSTAGRAM_CLIENT_ID && process.env.INSTAGRAM_CLIENT_SECRET;
+      configured = !!(appPair || clientPair);
+      missing = [];
+      if (!configured) missing = ['INSTAGRAM_APP_ID/INSTAGRAM_APP_SECRET or INSTAGRAM_CLIENT_ID/INSTAGRAM_CLIENT_SECRET'];
+    } else {
+      missing = requiredVars.filter(v => !process.env[v]);
+      configured = missing.length === 0;
+    }
+
     results[platform] = {
       configured,
       missing_variables: missing
