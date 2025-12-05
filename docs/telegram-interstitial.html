@@ -81,33 +81,44 @@
         if (!u) return '#';
         // Only allow telegram:// or https:// schemes
         if (!u.startsWith('telegram://') && !u.startsWith('https://')) return '#';
+        // Additional validation: ensure it passes allowlist check
+        if (!isAllowedTelegramUrl(u)) return '#';
         return u.replace(/[<>"'`]/g, '');
+      };
+      
+      // Strict redirect function that double-checks validation
+      const safeRedirect = function(url) {
+        if (!url || !isAllowedTelegramUrl(url)) return false;
+        const sanitized = sanitizeUrl(url);
+        if (sanitized === '#') return false;
+        try { window.location.href = sanitized; return true; } catch (_) { return false; }
       };
       
       openApp.href = sanitizeUrl(validAppUrl) || sanitizeUrl(validAuthUrl) || '#';
       openApp.onclick = function(e){
         e.preventDefault();
         const targetUrl = validAppUrl || validAuthUrl;
-        if (!targetUrl || !isAllowedTelegramUrl(targetUrl)) return false;
-        try { window.location.href = sanitizeUrl(targetUrl); } catch (_) { /* ignore */ }
+        safeRedirect(targetUrl);
         return false;
       };
 
       openWeb.href = sanitizeUrl(validAuthUrl) || sanitizeUrl(validAppUrl) || '#';
       openWeb.onclick = function(e){ 
-        if (!openWeb.href || openWeb.href === '#' || !openWeb.href.startsWith('https://')) {
+        const href = openWeb.href;
+        if (!href || href === '#' || !href.startsWith('https://') || !isAllowedTelegramUrl(href)) {
           e.preventDefault();
           return false;
         }
+        // Allow navigation only to validated URLs
         return true; 
       };
 
       closeBtn.onclick = function(){ window.close(); };
 
-      // Auto-attempt native open on load (non-blocking) - only if validated
+      // Auto-attempt native open on load (non-blocking) - only if strictly validated
       if (validAppUrl && isAllowedTelegramUrl(validAppUrl)) {
         setTimeout(function(){
-          try { window.location.href = sanitizeUrl(validAppUrl); } catch(_) { /* ignore */ }
+          safeRedirect(validAppUrl);
         }, 300);
       }
 

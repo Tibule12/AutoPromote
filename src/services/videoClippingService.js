@@ -137,13 +137,31 @@ class VideoClippingService {
       throw new Error('Only trusted storage domains are allowed');
     }
     
-    // SSRF protection: URL is already validated against allowedDomains
-    // Using axios with strict domain checking above
+    // SSRF protection: Validate URL protocol to prevent SSRF attacks
+    const urlProtocol = parsedUrl.protocol;
+    if (urlProtocol !== 'https:' && urlProtocol !== 'http:') {
+      throw new Error('Only HTTP/HTTPS protocols are allowed');
+    }
+    
+    // Additional SSRF protection: prevent private IP ranges
+    const privateIpPattern = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|169\.254\.|::1|fc00:|fe80:)/;
+    if (privateIpPattern.test(hostname)) {
+      throw new Error('Private IP addresses are not allowed');
+    }
+    
+    // Using axios with strict domain and protocol checking
     const response = await axios.get(url, { 
       responseType: 'stream',
       timeout: 60000, // 60s timeout
       maxRedirects: 5,
-      validateStatus: (status) => status >= 200 && status < 300
+      validateStatus: (status) => status >= 200 && status < 300,
+      // Prevent redirects to private IPs
+      beforeRedirect: (options) => {
+        const redirectHost = new URL(options.href).hostname;
+        if (privateIpPattern.test(redirectHost)) {
+          throw new Error('Redirect to private IP blocked');
+        }
+      }
     });
     const writer = require('fs').createWriteStream(destPath);
     
