@@ -185,22 +185,29 @@ class StartupDiagnostics {
     
     const platforms = {
       youtube: ['YT_CLIENT_ID', 'YT_CLIENT_SECRET'],
-      twitter: ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'],
+      twitter: ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET', 'TWITTER_API_KEY', 'TWITTER_API_SECRET'],
       facebook: ['FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET'],
-      tiktok: ['TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET'],
+      tiktok: ['TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET', 'TIKTOK_PROD_CLIENT_KEY', 'TIKTOK_PROD_CLIENT_SECRET', 'TIKTOK_SANDBOX_CLIENT_KEY', 'TIKTOK_SANDBOX_CLIENT_SECRET'],
       telegram: ['TELEGRAM_BOT_TOKEN'],
-      snapchat: ['SNAPCHAT_CLIENT_ID', 'SNAPCHAT_CLIENT_SECRET'],
+      snapchat: ['SNAPCHAT_CLIENT_ID', 'SNAPCHAT_CLIENT_SECRET', 'SNAPCHAT_PUBLIC_CLIENT_ID', 'SNAPCHAT_CONFIDENTIAL_CLIENT_ID'],
       linkedin: ['LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET'],
       pinterest: ['PINTEREST_CLIENT_ID', 'PINTEREST_CLIENT_SECRET'],
       reddit: ['REDDIT_CLIENT_ID', 'REDDIT_CLIENT_SECRET'],
       discord: ['DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET'],
-      instagram: ['INSTAGRAM_APP_ID', 'INSTAGRAM_APP_SECRET'],
+      instagram: ['INSTAGRAM_APP_ID', 'INSTAGRAM_APP_SECRET', 'INSTAGRAM_CLIENT_ID', 'INSTAGRAM_CLIENT_SECRET'],
       spotify: ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET']
     };
 
     let configuredCount = 0;
     for (const [platform, vars] of Object.entries(platforms)) {
-      // Special-case Instagram: accept either APP_* or CLIENT_* env var patterns
+      // Debug log for detected env keys per platform
+      const present = vars.filter(v => !!process.env[v]);
+      if (present.length > 0) {
+        console.log(`[DIAGNOSTICS][PLATFORM] ${platform.toUpperCase()} detected envs: ${present.join(', ')}`);
+      } else {
+        console.log(`[DIAGNOSTICS][PLATFORM] ${platform.toUpperCase()} no env vars detected`);
+      }
+      // Platform-specific variant checks
       if (platform === 'instagram') {
         const hasApp = process.env.INSTAGRAM_APP_ID && process.env.INSTAGRAM_APP_SECRET;
         const hasClient = process.env.INSTAGRAM_CLIENT_ID && process.env.INSTAGRAM_CLIENT_SECRET;
@@ -210,6 +217,52 @@ class StartupDiagnostics {
         } else {
           this.log('warning', 'platforms', `${platform.toUpperCase()} not fully configured`, {
             missing_variables: ['INSTAGRAM_APP_ID/INSTAGRAM_APP_SECRET or INSTAGRAM_CLIENT_ID/INSTAGRAM_CLIENT_SECRET'],
+            action_required: 'Add platform credentials to enable integration',
+            impact: `${platform} integration will not work`
+          });
+        }
+        continue;
+      }
+      if (platform === 'tiktok') {
+        const prod = process.env.TIKTOK_PROD_CLIENT_KEY && process.env.TIKTOK_PROD_CLIENT_SECRET;
+        const sandbox = process.env.TIKTOK_SANDBOX_CLIENT_KEY && process.env.TIKTOK_SANDBOX_CLIENT_SECRET;
+        const legacy = process.env.TIKTOK_CLIENT_KEY && process.env.TIKTOK_CLIENT_SECRET;
+        if (prod || sandbox || legacy) {
+          this.log('success', 'platforms', `${platform.toUpperCase()} credentials configured`);
+          configuredCount++;
+        } else {
+          this.log('warning', 'platforms', `${platform.toUpperCase()} not fully configured`, {
+            missing_variables: ['TIKTOK_PROD_CLIENT_KEY/SECRET or TIKTOK_SANDBOX_CLIENT_KEY/SECRET or TIKTOK_CLIENT_KEY/SECRET'],
+            action_required: 'Add platform credentials to enable integration',
+            impact: `${platform} integration will not work`
+          });
+        }
+        continue;
+      }
+      if (platform === 'snapchat') {
+        const legacy = process.env.SNAPCHAT_CLIENT_ID && process.env.SNAPCHAT_CLIENT_SECRET;
+        const publicConf = (process.env.SNAPCHAT_PUBLIC_CLIENT_ID || process.env.SNAPCHAT_CONFIDENTIAL_CLIENT_ID) && process.env.SNAPCHAT_CLIENT_SECRET;
+        if (legacy || publicConf) {
+          this.log('success', 'platforms', `${platform.toUpperCase()} credentials configured`);
+          configuredCount++;
+        } else {
+          this.log('warning', 'platforms', `${platform.toUpperCase()} not fully configured`, {
+            missing_variables: ['SNAPCHAT_CLIENT_ID/SECRET or SNAPCHAT_PUBLIC_CLIENT_ID + SNAPCHAT_CLIENT_SECRET or SNAPCHAT_CONFIDENTIAL_CLIENT_ID + SNAPCHAT_CLIENT_SECRET'],
+            action_required: 'Add platform credentials to enable integration',
+            impact: `${platform} integration will not work`
+          });
+        }
+        continue;
+      }
+      if (platform === 'twitter') {
+        const clientPair = process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET;
+        const apiPair = process.env.TWITTER_API_KEY && process.env.TWITTER_API_SECRET;
+        if (clientPair || apiPair) {
+          this.log('success', 'platforms', `${platform.toUpperCase()} credentials configured`);
+          configuredCount++;
+        } else {
+          this.log('warning', 'platforms', `${platform.toUpperCase()} not fully configured`, {
+            missing_variables: ['TWITTER_CLIENT_ID/SECRET or TWITTER_API_KEY/SECRET'],
             action_required: 'Add platform credentials to enable integration',
             impact: `${platform} integration will not work`
           });

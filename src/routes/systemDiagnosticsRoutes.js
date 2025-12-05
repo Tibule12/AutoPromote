@@ -260,24 +260,36 @@ function checkPlatformCredentials() {
   let configuredCount = 0;
 
   Object.entries(platforms).forEach(([platform, requiredVars]) => {
-    let missing;
-    let configured;
-    // Special handling for Instagram: it may use _APP_ or _CLIENT_ name variants
+    let missing = [];
+    let configured = false;
+    // Special-case checks per platform for variant env names
     if (platform === 'instagram') {
       const appPair = process.env.INSTAGRAM_APP_ID && process.env.INSTAGRAM_APP_SECRET;
       const clientPair = process.env.INSTAGRAM_CLIENT_ID && process.env.INSTAGRAM_CLIENT_SECRET;
       configured = !!(appPair || clientPair);
-      missing = [];
       if (!configured) missing = ['INSTAGRAM_APP_ID/INSTAGRAM_APP_SECRET or INSTAGRAM_CLIENT_ID/INSTAGRAM_CLIENT_SECRET'];
+    } else if (platform === 'tiktok') {
+      const prod = process.env.TIKTOK_PROD_CLIENT_KEY && process.env.TIKTOK_PROD_CLIENT_SECRET;
+      const sandbox = process.env.TIKTOK_SANDBOX_CLIENT_KEY && process.env.TIKTOK_SANDBOX_CLIENT_SECRET;
+      const legacy = process.env.TIKTOK_CLIENT_KEY && process.env.TIKTOK_CLIENT_SECRET;
+      configured = !!(prod || sandbox || legacy);
+      if (!configured) missing = ['TIKTOK_PROD_CLIENT_KEY/SECRET or TIKTOK_SANDBOX_CLIENT_KEY/SECRET or TIKTOK_CLIENT_KEY/SECRET'];
+    } else if (platform === 'snapchat') {
+      const legacy = process.env.SNAPCHAT_CLIENT_ID && process.env.SNAPCHAT_CLIENT_SECRET;
+      const publicConfidential = (process.env.SNAPCHAT_PUBLIC_CLIENT_ID || process.env.SNAPCHAT_CONFIDENTIAL_CLIENT_ID) && process.env.SNAPCHAT_CLIENT_SECRET;
+      configured = !!(legacy || publicConfidential);
+      if (!configured) missing = ['SNAPCHAT_CLIENT_ID + SNAPCHAT_CLIENT_SECRET or SNAPCHAT_PUBLIC_CLIENT_ID + SNAPCHAT_CLIENT_SECRET or SNAPCHAT_CONFIDENTIAL_CLIENT_ID + SNAPCHAT_CLIENT_SECRET'];
+    } else if (platform === 'twitter') {
+      const clientPair = process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET;
+      const apiPair = process.env.TWITTER_API_KEY && process.env.TWITTER_API_SECRET;
+      configured = !!(clientPair || apiPair);
+      if (!configured) missing = ['TWITTER_CLIENT_ID/SECRET or TWITTER_API_KEY/SECRET'];
     } else {
       missing = requiredVars.filter(v => !process.env[v]);
       configured = missing.length === 0;
     }
 
-    results[platform] = {
-      configured,
-      missing_variables: missing
-    };
+    results[platform] = { configured, missing_variables: missing };
     if (configured) configuredCount++;
   });
 
