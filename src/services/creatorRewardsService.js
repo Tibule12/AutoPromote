@@ -182,12 +182,29 @@ async function getUserEarnings(userId) {
     const userDoc = await db.collection('users').doc(userId).get();
     const userData = userDoc.exists ? userDoc.data() : {};
     
-    // Get earnings events
-    const earningsSnap = await db.collection('earnings_events')
-      .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
-      .limit(100)
-      .get();
+    // Get earnings events (without orderBy to avoid index requirement)
+    let earningsSnap;
+    try {
+      earningsSnap = await db.collection('earnings_events')
+        .where('userId', '==', userId)
+        .limit(100)
+        .get();
+    } catch (queryError) {
+      console.log('Earnings events query failed, returning default values:', queryError.message);
+      // Return default earnings if collection doesn't exist or query fails
+      return {
+        totalEarnings: userData.totalEarnings || 0,
+        pendingEarnings: userData.pendingEarnings || 0,
+        paidOut: (userData.totalEarnings || 0) - (userData.pendingEarnings || 0),
+        canPayout: (userData.pendingEarnings || 0) >= MIN_PAYOUT_THRESHOLD,
+        minThreshold: MIN_PAYOUT_THRESHOLD,
+        breakdown: {
+          performance: 0,
+          milestones: 0
+        },
+        recentEvents: []
+      };
+    }
     
     const events = [];
     let totalPerformance = 0;
@@ -202,6 +219,13 @@ async function getUserEarnings(userId) {
       } else if (event.type === 'milestone_bonus') {
         totalMilestone += event.amount || 0;
       }
+    });
+    
+    // Sort events by createdAt in memory
+    events.sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0);
+      const dateB = new Date(b.createdAt || 0);
+      return dateB - dateA;
     });
     
     return {
