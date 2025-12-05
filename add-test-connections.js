@@ -1,17 +1,7 @@
 // add-test-connections.js
 // Script to add test platform connections to Firestore
 
-const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccountKey.json');
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-}
-
-const db = admin.firestore();
+const { admin, db } = require('./src/firebaseAdmin');
 
 async function addTestConnections(userId) {
   try {
