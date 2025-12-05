@@ -200,6 +200,22 @@ class StartupDiagnostics {
 
     let configuredCount = 0;
     for (const [platform, vars] of Object.entries(platforms)) {
+      // Special-case Instagram: accept either APP_* or CLIENT_* env var patterns
+      if (platform === 'instagram') {
+        const hasApp = process.env.INSTAGRAM_APP_ID && process.env.INSTAGRAM_APP_SECRET;
+        const hasClient = process.env.INSTAGRAM_CLIENT_ID && process.env.INSTAGRAM_CLIENT_SECRET;
+        if (hasApp || hasClient) {
+          this.log('success', 'platforms', `${platform.toUpperCase()} credentials configured`);
+          configuredCount++;
+        } else {
+          this.log('warning', 'platforms', `${platform.toUpperCase()} not fully configured`, {
+            missing_variables: ['INSTAGRAM_APP_ID/INSTAGRAM_APP_SECRET or INSTAGRAM_CLIENT_ID/INSTAGRAM_CLIENT_SECRET'],
+            action_required: 'Add platform credentials to enable integration',
+            impact: `${platform} integration will not work`
+          });
+        }
+        continue;
+      }
       const allConfigured = vars.every(v => process.env[v]);
       if (allConfigured) {
         this.log('success', 'platforms', `${platform.toUpperCase()} credentials configured`);
