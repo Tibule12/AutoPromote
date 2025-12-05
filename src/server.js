@@ -930,6 +930,14 @@ try {
 } catch (e) {
   console.log('⚠️ Caption routes mount failed:', e.message);
 }
+// System Diagnostics routes
+try {
+  const systemDiagnosticsRoutes = require('./routes/systemDiagnosticsRoutes');
+  app.use('/api/diagnostics', systemDiagnosticsRoutes);
+  console.log('🔍 System diagnostics routes mounted at /api/diagnostics');
+} catch (e) {
+  console.log('⚠️ Diagnostics routes mount failed:', e.message);
+}
 app.use('/api/admin/cache', adminCacheRoutes);
 console.log('🚏 Admin cache routes mounted at /api/admin/cache');
 

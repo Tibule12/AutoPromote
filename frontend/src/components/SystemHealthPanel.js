@@ -4,11 +4,13 @@ import { auth } from '../firebaseClient';
 
 function SystemHealthPanel() {
   const [health, setHealth] = useState(null);
+  const [diagnostics, setDiagnostics] = useState(null);
   const [errors, setErrors] = useState([]);
   const [apiMetrics, setApiMetrics] = useState(null);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({});
 
   useEffect(() => {
     fetchAllData();
@@ -23,8 +25,11 @@ function SystemHealthPanel() {
     try {
       const token = await auth.currentUser?.getIdToken();
       
-      const [healthRes, errorsRes, metricsRes, activityRes] = await Promise.all([
+      const [healthRes, diagnosticsRes, errorsRes, metricsRes, activityRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/admin/system/health`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch(`${API_BASE_URL}/api/diagnostics/health`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
         fetch(`${API_BASE_URL}/api/admin/system/errors?limit=20`, {
@@ -38,14 +43,16 @@ function SystemHealthPanel() {
         })
       ]);
 
-      const [healthData, errorsData, metricsData, activityData] = await Promise.all([
+      const [healthData, diagnosticsData, errorsData, metricsData, activityData] = await Promise.all([
         healthRes.json(),
+        diagnosticsRes.json(),
         errorsRes.json(),
         metricsRes.json(),
         activityRes.json()
       ]);
 
       if (healthData.success) setHealth(healthData.health);
+      setDiagnostics(diagnosticsData);
       if (errorsData.success) setErrors(errorsData.errors);
       if (metricsData.success) setApiMetrics(metricsData.metrics);
       if (activityData.success) setActivities(activityData.activities);
@@ -117,6 +124,202 @@ function SystemHealthPanel() {
                 of {health.system.totalMemory.toFixed(1)} GB
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comprehensive System Diagnostics */}
+      {diagnostics && (
+        <div style={{ ...containerStyle, marginTop: 20 }}>
+          <h3>Platform Diagnostics</h3>
+          <div style={{ display: 'flex', gap: 20, marginBottom: 20, flexWrap: 'wrap' }}>
+            <div style={metricBoxStyle}>
+              <div style={metricLabelStyle}>Overall Status</div>
+              <div style={{ 
+                ...metricValueStyle, 
+                color: diagnostics.overall_status === 'healthy' ? '#2e7d32' : 
+                       diagnostics.overall_status === 'warning' ? '#ed6c02' : '#d32f2f' 
+              }}>
+                {diagnostics.overall_status === 'healthy' ? '✅' : 
+                 diagnostics.overall_status === 'warning' ? '⚠️' : '❌'} {diagnostics.overall_status.toUpperCase()}
+              </div>
+            </div>
+            <div style={metricBoxStyle}>
+              <div style={metricLabelStyle}>Checks Passed</div>
+              <div style={{ ...metricValueStyle, color: '#2e7d32' }}>
+                {diagnostics.summary.passed} / {diagnostics.summary.total_checks}
+              </div>
+            </div>
+            <div style={metricBoxStyle}>
+              <div style={metricLabelStyle}>Warnings</div>
+              <div style={{ ...metricValueStyle, color: '#ed6c02' }}>
+                {diagnostics.summary.warnings}
+              </div>
+            </div>
+            <div style={metricBoxStyle}>
+              <div style={metricLabelStyle}>Errors</div>
+              <div style={{ ...metricValueStyle, color: '#d32f2f' }}>
+                {diagnostics.summary.errors}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 20 }}>
+            {Object.entries(diagnostics.checks).map(([key, check]) => {
+              const isExpanded = expandedSections[key];
+              const statusIcon = check.status === 'passed' ? '✅' : 
+                                check.status === 'warning' ? '⚠️' : '❌';
+              const statusColor = check.status === 'passed' ? '#2e7d32' : 
+                                 check.status === 'warning' ? '#ed6c02' : '#d32f2f';
+
+              return (
+                <div key={key} style={{ 
+                  ...errorCardStyle, 
+                  borderLeft: `4px solid ${statusColor}`,
+                  marginBottom: 10 
+                }}>
+                  <div 
+                    style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }))}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: '1.2rem' }}>{statusIcon}</span>
+                      <strong>{key.replace(/_/g, ' ').toUpperCase()}</strong>
+                    </div>
+                    <span style={{ fontSize: '1.2rem' }}>{isExpanded ? '▼' : '▶'}</span>
+                  </div>
+                  
+                  {isExpanded && (
+                    <div style={{ marginTop: 15 }}>
+                      <p style={{ marginBottom: 10 }}>{check.message}</p>
+                      
+                      {check.issues && check.issues.length > 0 && (
+                        <div style={{ marginTop: 10, padding: 10, backgroundColor: '#ffebee', borderRadius: 4 }}>
+                          <strong style={{ color: '#d32f2f' }}>Issues:</strong>
+                          <ul style={{ marginTop: 5, marginLeft: 20 }}>
+                            {check.issues.map((issue, idx) => (
+                              <li key={idx} style={{ color: '#d32f2f', marginTop: 5 }}>{issue}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {check.warnings && check.warnings.length > 0 && (
+                        <div style={{ marginTop: 10, padding: 10, backgroundColor: '#fff3e0', borderRadius: 4 }}>
+                          <strong style={{ color: '#ed6c02' }}>Warnings:</strong>
+                          <ul style={{ marginTop: 5, marginLeft: 20 }}>
+                            {check.warnings.map((warning, idx) => (
+                              <li key={idx} style={{ color: '#ed6c02', marginTop: 5 }}>{warning}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {key === 'platform_credentials' && check.platforms && (
+                        <div style={{ marginTop: 15 }}>
+                          <strong>Platform Status:</strong>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10, marginTop: 10 }}>
+                            {Object.entries(check.platforms).map(([platform, data]) => (
+                              <div key={platform} style={{
+                                padding: 10,
+                                backgroundColor: data.configured ? '#e8f5e9' : '#ffebee',
+                                borderRadius: 4,
+                                border: `1px solid ${data.configured ? '#2e7d32' : '#d32f2f'}`
+                              }}>
+                                <div style={{ fontWeight: 'bold', marginBottom: 5 }}>
+                                  {platform.toUpperCase()}
+                                </div>
+                                <div style={{ color: data.configured ? '#2e7d32' : '#d32f2f' }}>
+                                  {data.configured ? '✓ Configured' : '✗ Not Configured'}
+                                </div>
+                                {!data.configured && data.missing_variables && (
+                                  <div style={{ fontSize: '0.85rem', marginTop: 5, color: '#666' }}>
+                                    Missing: {data.missing_variables.join(', ')}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {key === 'database_collections' && check.collections && (
+                        <div style={{ marginTop: 15 }}>
+                          <strong>Database Collections:</strong>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10, marginTop: 10 }}>
+                            {Object.entries(check.collections).map(([collection, status]) => (
+                              <div key={collection} style={{
+                                padding: 8,
+                                backgroundColor: status === 'accessible' ? '#e8f5e9' : '#ffebee',
+                                borderRadius: 4,
+                                textAlign: 'center'
+                              }}>
+                                <div style={{ fontSize: '0.9rem' }}>{collection}</div>
+                                <div style={{ 
+                                  fontSize: '0.85rem', 
+                                  color: status === 'accessible' ? '#2e7d32' : '#d32f2f',
+                                  marginTop: 3
+                                }}>
+                                  {status}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {key === 'ai_services' && check.services && (
+                        <div style={{ marginTop: 15 }}>
+                          <strong>AI Services:</strong>
+                          <div style={{ marginTop: 10 }}>
+                            {Object.entries(check.services).map(([service, enabled]) => (
+                              <div key={service} style={{
+                                padding: 8,
+                                marginBottom: 5,
+                                backgroundColor: enabled ? '#e8f5e9' : '#f5f5f5',
+                                borderRadius: 4,
+                                display: 'flex',
+                                justifyContent: 'space-between'
+                              }}>
+                                <span>{service.replace(/_/g, ' ')}</span>
+                                <span style={{ color: enabled ? '#2e7d32' : '#999' }}>
+                                  {enabled ? '✓ Enabled' : '✗ Disabled'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {check.details && (
+                        <div style={{ marginTop: 15 }}>
+                          <details>
+                            <summary style={{ cursor: 'pointer', color: '#1976d2', fontWeight: '500' }}>
+                              View Details
+                            </summary>
+                            <pre style={{
+                              marginTop: 10,
+                              padding: 10,
+                              backgroundColor: '#f5f5f5',
+                              borderRadius: 4,
+                              overflow: 'auto',
+                              fontSize: '0.85rem'
+                            }}>
+                              {JSON.stringify(check.details, null, 2)}
+                            </pre>
+                          </details>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
