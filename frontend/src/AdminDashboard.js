@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from './config';
+import { parseJsonSafe } from './utils/parseJsonSafe';
 import { auth } from './firebaseClient';
 import { collection, getDocs, query, limit, orderBy, where, Timestamp } from 'firebase/firestore';
 import { db } from './firebaseClient';
@@ -133,8 +134,11 @@ function AdminDashboard({ analytics, user, onLogout }) {
       `${API_BASE_URL}/api/monetization/revenue-analytics?timeframe=month`,
       idToken ? { headers: { Authorization: `Bearer ${idToken}` } } : undefined
     );
-    if (revenueResponse.ok) {
-      revenueApiData = await revenueResponse.json();
+    const parsed = await parseJsonSafe(revenueResponse);
+    if (parsed.ok && parsed.json) {
+      revenueApiData = parsed.json;
+    } else if (!parsed.ok) {
+      console.warn('Could not fetch revenue analytics: non-JSON or error response', { status: parsed.status, preview: parsed.textPreview || parsed.error });
     }
   } catch (err) {
     console.warn('Could not fetch revenue analytics:', err);
@@ -253,8 +257,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
           `${API_BASE_URL}/api/monetization/revenue-analytics?timeframe=month`,
           idToken ? { headers: { Authorization: `Bearer ${idToken}` } } : undefined
         );
-        if (revenueResponse.ok) {
-          const revenueAnalytics = await revenueResponse.json();
+        const parsed = await parseJsonSafe(revenueResponse);
+        if (parsed.ok && parsed.json) {
+          const revenueAnalytics = parsed.json;
           revenueData = {
             totalRevenue: revenueAnalytics.totalRevenue || 0,
             revenueToday: revenueAnalytics.dailyBreakdown?.[revenueAnalytics.dailyBreakdown.length - 1]?.revenue || 0,
@@ -907,8 +912,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
         const response = await fetch(`${API_BASE_URL}/api/admin/audit?${params}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const data = await response.json();
-        if (data.success) setLogs(data.logs);
+        const parsed = await parseJsonSafe(response);
+        if (parsed.ok && parsed.json && parsed.json.success) setLogs(parsed.json.logs || []);
+        else console.warn('Audit logs fetch returned non-JSON or error', { status: parsed.status, preview: parsed.textPreview || parsed.error });
         setLoading(false);
       } catch (error) {
         console.error('Error fetching audit logs:', error);
@@ -1008,8 +1014,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
         const response = await fetch(`${API_BASE_URL}/api/admin/support/tickets`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const data = await response.json();
-        if (data.success) setTickets(data.tickets);
+        const parsed = await parseJsonSafe(response);
+        if (parsed.ok && parsed.json && parsed.json.success) setTickets(parsed.json.tickets || []);
+        else console.warn('Tickets fetch returned non-JSON or error', { status: parsed.status, preview: parsed.textPreview || parsed.error });
         setLoading(false);
       } catch (error) {
         console.error('Error fetching tickets:', error);
@@ -1045,8 +1052,8 @@ function AdminDashboard({ analytics, user, onLogout }) {
           },
           body: JSON.stringify(bulkMessageData)
         });
-        const data = await response.json();
-        if (data.success) {
+        const parsed = await parseJsonSafe(response);
+        if (parsed.ok && parsed.json && parsed.json.success) {
           alert(`Message sent to ${data.recipientCount} users`);
           setShowBulkMessage(false);
           setBulkMessageData({ subject: '', message: '', targetAudience: 'all' });
@@ -1214,9 +1221,11 @@ function AdminDashboard({ analytics, user, onLogout }) {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          setSubscriptions(data.subscriptions || []);
+        const parsed = await parseJsonSafe(response);
+        if (parsed.ok && parsed.json) {
+          setSubscriptions(parsed.json.subscriptions || []);
+        } else {
+          console.warn('Subscriptions fetch returned non-JSON or error', { status: parsed.status, preview: parsed.textPreview || parsed.error });
         }
         setLoading(false);
       } catch (error) {
@@ -1381,10 +1390,11 @@ function AdminDashboard({ analytics, user, onLogout }) {
         const response = await fetch(`${API_BASE_URL}/api/admin/openai/usage`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setUsage(data);
+        const parsed = await parseJsonSafe(response);
+        if (parsed.ok && parsed.json) {
+          setUsage(parsed.json);
+        } else if (!parsed.ok) {
+          console.warn('OpenAI usage API returned non-JSON or error', { status: parsed.status, preview: parsed.textPreview || parsed.error });
         }
         setLoading(false);
       } catch (error) {
@@ -2821,7 +2831,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
             {refreshing ? 'Refreshing...' : 'Refresh Data'}
           </button>
           <button
-            onClick={() => { if (onLogout) { console.log('Admin logout button clicked'); onLogout(); } }}
+            onClick={() => { if (onLogout) { onLogout(); } }}
             style={{
               backgroundColor: '#d32f2f',
               color: 'white',

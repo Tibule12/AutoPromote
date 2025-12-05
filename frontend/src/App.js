@@ -65,7 +65,7 @@ function App() {
         setIsAdmin(hasAdminClaim);
         const safeUserForStorage = { ...userData };
         localStorage.setItem('user', JSON.stringify(safeUserForStorage));
-        console.log("Current UID:", firebaseUser.uid);
+        // User signed in (UID suppressed in logs)
         await fetchUserContent(token);
       } catch (error) {
         setUser(null);
@@ -209,7 +209,7 @@ function App() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const { user: firebaseUser } = userCredential;
       const idToken = await firebaseUser.getIdToken();
-      console.log('LOGIN API ENDPOINT:', API_ENDPOINTS.LOGIN);
+      // Performing login against configured endpoint
       const res = await fetch(API_ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -383,7 +383,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      console.log('handleLogout called');
+      // User logged out
       await signOut(auth);
       setUser(null);
       setContent([]);
