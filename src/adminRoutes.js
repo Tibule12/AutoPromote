@@ -315,4 +315,237 @@ router.get('/variants/anomalies', authMiddleware, adminOnly, async (req, res) =>
   }
 });
 
+// ==================== ADS MANAGEMENT ENDPOINTS ====================
+
+// Update ad status (admin only)
+router.patch('/ads/:adId/status', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { adId } = req.params;
+    const { status } = req.body;
+
+    // Validate status
+    const validStatuses = ['draft', 'active', 'paused', 'completed', 'rejected'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        ok: false, 
+        message: 'Invalid status. Must be one of: draft, active, paused, completed, rejected' 
+      });
+    }
+
+    const adRef = db.collection('ads').doc(adId);
+    const adDoc = await adRef.get();
+
+    if (!adDoc.exists) {
+      return res.status(404).json({ 
+        ok: false, 
+        message: 'Ad not found' 
+      });
+    }
+
+    await adRef.update({
+      status,
+      updatedAt: new Date().toISOString(),
+      lastModifiedBy: req.userId
+    });
+
+    // Log admin action
+    await db.collection('admin_audit').add({
+      adminId: req.userId,
+      action: 'ad_status_update',
+      targetType: 'ad',
+      targetId: adId,
+      details: { oldStatus: adDoc.data().status, newStatus: status },
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ 
+      ok: true, 
+      message: 'Ad status updated successfully',
+      adId,
+      newStatus: status
+    });
+  } catch (error) {
+    console.error('Error updating ad status:', error);
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Failed to update ad status' 
+    });
+  }
+});
+
+// Delete ad (admin only)
+router.delete('/ads/:adId', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { adId } = req.params;
+
+    const adRef = db.collection('ads').doc(adId);
+    const adDoc = await adRef.get();
+
+    if (!adDoc.exists) {
+      return res.status(404).json({ 
+        ok: false, 
+        message: 'Ad not found' 
+      });
+    }
+
+    const adData = adDoc.data();
+
+    // Delete the ad
+    await adRef.delete();
+
+    // Delete associated analytics
+    const analyticsRef = db.collection('ad_analytics').doc(adId);
+    const analyticsDoc = await analyticsRef.get();
+    if (analyticsDoc.exists) {
+      await analyticsRef.delete();
+    }
+
+    // Log admin action
+    await db.collection('admin_audit').add({
+      adminId: req.userId,
+      action: 'ad_deleted',
+      targetType: 'ad',
+      targetId: adId,
+      details: { 
+        title: adData.title, 
+        userId: adData.userId,
+        type: adData.type,
+        status: adData.status
+      },
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ 
+      ok: true, 
+      message: 'Ad deleted successfully',
+      adId
+    });
+  } catch (error) {
+    console.error('Error deleting ad:', error);
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Failed to delete ad' 
+    });
+  }
+});
+
+// Get all ads (admin only - for dashboard)
+router.get('/ads', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { type, status, platform, limit = 1000 } = req.query;
+
+    let query = db.collection('ads');
+
+    // Apply filters
+    if (type && type !== 'all') {
+      query = query.where('type', '==', type);
+    }
+    if (status && status !== 'all') {
+      query = query.where('status', '==', status);
+    }
+    if (platform && platform !== 'all') {
+      query = query.where('externalPlatform', '==', platform);
+    }
+
+    const snapshot = await query.orderBy('createdAt', 'desc').limit(parseInt(limit)).get();
+
+    const ads = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Calculate statistics
+    const totalAds = ads.length;
+    const activeAds = ads.filter(ad => ad.status === 'active').length;
+    const totalImpressions = ads.reduce((sum, ad) => sum + (ad.impressions || 0), 0);
+    const totalClicks = ads.reduce((sum, ad) => sum + (ad.clicks || 0), 0);
+    const totalSpent = ads.reduce((sum, ad) => sum + (ad.spent || 0), 0);
+
+    res.json({ 
+      ok: true, 
+      ads,
+      stats: {
+        totalAds,
+        activeAds,
+        totalImpressions,
+        totalClicks,
+        totalSpent,
+        avgCTR: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching all ads:', error);
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Failed to fetch ads' 
+    });
+  }
+});
+
+// Get ad performance report (admin only)
+router.get('/ads/report', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    let query = db.collection('ads');
+
+    if (startDate) {
+      query = query.where('createdAt', '>=', startDate);
+    }
+    if (endDate) {
+      query = query.where('createdAt', '<=', endDate);
+    }
+
+    const snapshot = await query.get();
+    const ads = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Aggregate data by platform
+    const platformStats = {};
+    ads.forEach(ad => {
+      const platform = ad.type === 'external' ? ad.externalPlatform : 'platform';
+      if (!platformStats[platform]) {
+        platformStats[platform] = {
+          count: 0,
+          impressions: 0,
+          clicks: 0,
+          spent: 0,
+          conversions: 0
+        };
+      }
+      platformStats[platform].count++;
+      platformStats[platform].impressions += ad.impressions || 0;
+      platformStats[platform].clicks += ad.clicks || 0;
+      platformStats[platform].spent += ad.spent || 0;
+      platformStats[platform].conversions += ad.conversions || 0;
+    });
+
+    res.json({
+      ok: true,
+      totalAds: ads.length,
+      dateRange: { startDate, endDate },
+      platformStats,
+      topPerformingAds: ads
+        .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
+        .slice(0, 10)
+        .map(ad => ({
+          id: ad.id,
+          title: ad.title,
+          type: ad.type,
+          platform: ad.externalPlatform || 'platform',
+          impressions: ad.impressions || 0,
+          clicks: ad.clicks || 0,
+          ctr: ad.impressions > 0 ? ((ad.clicks / ad.impressions) * 100).toFixed(2) : 0
+        }))
+    });
+  } catch (error) {
+    console.error('Error generating ad report:', error);
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Failed to generate report' 
+    });
+  }
+});
+
 module.exports = router;

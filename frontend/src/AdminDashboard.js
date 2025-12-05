@@ -1518,6 +1518,398 @@ function AdminDashboard({ analytics, user, onLogout }) {
     );
   };
 
+  // Ads Management Panel
+  const AdsManagementPanel = ({ dashboardData }) => {
+    const [ads, setAds] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState({ type: 'all', status: 'all', platform: 'all' });
+
+    useEffect(() => {
+      fetchAllAds();
+    }, [filter]);
+
+    const fetchAllAds = async () => {
+      setLoading(true);
+      try {
+        const adsSnapshot = await getDocs(collection(db, 'ads'));
+        let adsData = adsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        // Apply filters
+        if (filter.type !== 'all') {
+          adsData = adsData.filter(ad => ad.type === filter.type);
+        }
+        if (filter.status !== 'all') {
+          adsData = adsData.filter(ad => ad.status === filter.status);
+        }
+        if (filter.platform !== 'all') {
+          adsData = adsData.filter(ad => ad.externalPlatform === filter.platform);
+        }
+
+        setAds(adsData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching ads:', error);
+        setLoading(false);
+      }
+    };
+
+    const handleUpdateAdStatus = async (adId, newStatus) => {
+      if (!window.confirm(`Change ad status to ${newStatus}?`)) return;
+      
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const response = await fetch(`${API_BASE_URL}/api/admin/ads/${adId}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status: newStatus })
+        });
+
+        if (response.ok) {
+          alert('Ad status updated successfully');
+          fetchAllAds();
+        } else {
+          alert('Failed to update ad status');
+        }
+      } catch (error) {
+        console.error('Error updating ad status:', error);
+        alert('Error updating ad status');
+      }
+    };
+
+    const handleDeleteAd = async (adId) => {
+      if (!window.confirm('Are you sure you want to delete this ad? This action cannot be undone.')) return;
+      
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const response = await fetch(`${API_BASE_URL}/api/admin/ads/${adId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          alert('Ad deleted successfully');
+          fetchAllAds();
+        } else {
+          alert('Failed to delete ad');
+        }
+      } catch (error) {
+        console.error('Error deleting ad:', error);
+        alert('Error deleting ad');
+      }
+    };
+
+    const totalAds = ads.length;
+    const activeAds = ads.filter(ad => ad.status === 'active').length;
+    const draftAds = ads.filter(ad => ad.status === 'draft').length;
+    const pausedAds = ads.filter(ad => ad.status === 'paused').length;
+    const totalImpressions = ads.reduce((sum, ad) => sum + (ad.impressions || 0), 0);
+    const totalClicks = ads.reduce((sum, ad) => sum + (ad.clicks || 0), 0);
+    const totalSpent = ads.reduce((sum, ad) => sum + (ad.spent || 0), 0);
+    const avgCTR = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0;
+
+    return (
+      <>
+        <div style={{ marginTop: 24 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-10px' }}>
+            <StatCard
+              title="Total Ads"
+              value={totalAds}
+              subtitle={`${activeAds} active, ${draftAds} draft`}
+              color="#1976d2"
+              icon="📢"
+            />
+            <StatCard
+              title="Active Ads"
+              value={activeAds}
+              subtitle={`${pausedAds} paused`}
+              color="#2e7d32"
+              icon="▶️"
+            />
+            <StatCard
+              title="Total Impressions"
+              value={totalImpressions.toLocaleString()}
+              subtitle={`${totalClicks.toLocaleString()} clicks`}
+              color="#5e35b1"
+              icon="👁️"
+            />
+            <StatCard
+              title="Average CTR"
+              value={`${avgCTR}%`}
+              subtitle={`$${totalSpent.toFixed(2)} spent`}
+              color="#ed6c02"
+              icon="📊"
+            />
+          </div>
+        </div>
+
+        <div style={{ marginTop: 30 }}>
+          <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
+            <select
+              value={filter.type}
+              onChange={(e) => setFilter({ ...filter, type: e.target.value })}
+              style={{
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid #ddd',
+                fontSize: '0.95rem'
+              }}
+            >
+              <option value="all">All Types</option>
+              <option value="platform">Platform Ads</option>
+              <option value="external">External Ads</option>
+            </select>
+
+            <select
+              value={filter.status}
+              onChange={(e) => setFilter({ ...filter, status: e.target.value })}
+              style={{
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid #ddd',
+                fontSize: '0.95rem'
+              }}
+            >
+              <option value="all">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="completed">Completed</option>
+            </select>
+
+            <select
+              value={filter.platform}
+              onChange={(e) => setFilter({ ...filter, platform: e.target.value })}
+              style={{
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid #ddd',
+                fontSize: '0.95rem'
+              }}
+            >
+              <option value="all">All Platforms</option>
+              <option value="facebook">Facebook</option>
+              <option value="instagram">Instagram</option>
+              <option value="google">Google</option>
+              <option value="youtube">YouTube</option>
+              <option value="tiktok">TikTok</option>
+              <option value="twitter">Twitter</option>
+              <option value="linkedin">LinkedIn</option>
+              <option value="snapchat">Snapchat</option>
+            </select>
+          </div>
+
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '20px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: '20px' }}>All Ads ({ads.length})</h3>
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '40px' }}>Loading ads...</div>
+            ) : ads.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>No ads found with current filters</div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Ad</th>
+                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Type</th>
+                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Platform</th>
+                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Status</th>
+                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Budget</th>
+                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Impressions</th>
+                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Clicks</th>
+                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>CTR</th>
+                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Created</th>
+                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ads.map((ad) => (
+                      <tr key={ad.id} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: '12px' }}>
+                          <div style={{ fontWeight: '500' }}>{ad.title}</div>
+                          <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                            {ad.description ? ad.description.substring(0, 50) + '...' : ''}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: '#999', marginTop: '4px' }}>
+                            User: {ad.userId?.substring(0, 8)}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '0.85rem',
+                            backgroundColor: ad.type === 'platform' ? '#e3f2fd' : '#f3e5f5',
+                            color: ad.type === 'platform' ? '#1976d2' : '#7b1fa2'
+                          }}>
+                            {ad.type}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          {ad.type === 'external' && ad.externalPlatform ? (
+                            <span style={{ textTransform: 'capitalize' }}>{ad.externalPlatform}</span>
+                          ) : (
+                            <span style={{ color: '#999' }}>AutoPromote</span>
+                          )}
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '0.85rem',
+                            backgroundColor: 
+                              ad.status === 'active' ? '#e8f5e9' :
+                              ad.status === 'paused' ? '#fff3e0' :
+                              ad.status === 'draft' ? '#f5f5f5' : '#e3f2fd',
+                            color: 
+                              ad.status === 'active' ? '#2e7d32' :
+                              ad.status === 'paused' ? '#ed6c02' :
+                              ad.status === 'draft' ? '#666' : '#1976d2'
+                          }}>
+                            {ad.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px', fontWeight: '500' }}>
+                          ${ad.budget || 0}
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          {(ad.impressions || 0).toLocaleString()}
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          {(ad.clicks || 0).toLocaleString()}
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          {ad.impressions > 0 ? ((ad.clicks / ad.impressions) * 100).toFixed(2) : '0.00'}%
+                        </td>
+                        <td style={{ padding: '12px', fontSize: '0.9rem' }}>
+                          {ad.createdAt ? new Date(ad.createdAt).toLocaleDateString() : 'N/A'}
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            {ad.status === 'active' && (
+                              <button
+                                onClick={() => handleUpdateAdStatus(ad.id, 'paused')}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  backgroundColor: '#ed6c02',
+                                  color: 'white',
+                                  fontSize: '0.85rem',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Pause
+                              </button>
+                            )}
+                            {ad.status === 'paused' && (
+                              <button
+                                onClick={() => handleUpdateAdStatus(ad.id, 'active')}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  backgroundColor: '#2e7d32',
+                                  color: 'white',
+                                  fontSize: '0.85rem',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Resume
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeleteAd(ad.id)}
+                              style={{
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                border: 'none',
+                                backgroundColor: '#d32f2f',
+                                color: 'white',
+                                fontSize: '0.85rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Platform Distribution */}
+        <div style={{ marginTop: 30, display: 'flex', gap: '20px' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '20px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+            }}>
+              <h3 style={{ marginTop: 0, marginBottom: '20px' }}>Ad Distribution</h3>
+              <ProgressBar
+                label="Platform Ads"
+                value={Math.round((ads.filter(ad => ad.type === 'platform').length / totalAds) * 100) || 0}
+                max={100}
+                color="#1976d2"
+              />
+              <ProgressBar
+                label="External Ads"
+                value={Math.round((ads.filter(ad => ad.type === 'external').length / totalAds) * 100) || 0}
+                max={100}
+                color="#7b1fa2"
+              />
+            </div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '20px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+            }}>
+              <h3 style={{ marginTop: 0, marginBottom: '20px' }}>Ad Status Breakdown</h3>
+              <ProgressBar
+                label="Active"
+                value={Math.round((activeAds / totalAds) * 100) || 0}
+                max={100}
+                color="#2e7d32"
+              />
+              <ProgressBar
+                label="Draft"
+                value={Math.round((draftAds / totalAds) * 100) || 0}
+                max={100}
+                color="#666"
+              />
+              <ProgressBar
+                label="Paused"
+                value={Math.round((pausedAds / totalAds) * 100) || 0}
+                max={100}
+                color="#ed6c02"
+              />
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  };
+
   // Notification Management Panel
   const NotificationManagementPanel = ({ dashboardData }) => {
     const [emailTemplates, setEmailTemplates] = useState([
@@ -2341,6 +2733,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
       case 'notifications':
         return <NotificationManagementPanel dashboardData={dashboardData} />;
 
+      case 'ads':
+        return <AdsManagementPanel dashboardData={dashboardData} />;
+
       default:
         return <div>Tab not found</div>;
     }
@@ -2453,6 +2848,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
         <TabButton name="users" label="Users" icon="👥" />
         <TabButton name="content" label="Content" icon="📄" />
         <TabButton name="revenue" label="Revenue" icon="💰" />
+        <TabButton name="ads" label="Ads" icon="📢" />
         <TabButton name="community" label="Community" icon="🎭" />
         <TabButton name="approval" label="Content Approval" icon="✅" />
         <TabButton name="analytics" label="Advanced Analytics" icon="📈" />
