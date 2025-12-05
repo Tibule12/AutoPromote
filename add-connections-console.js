@@ -7,22 +7,39 @@ async function addTestConnections() {
   try {
     console.log("🚀 Adding test platform connections...");
     
-    // Get the auth token - try multiple possible keys
-    let token = localStorage.getItem('authToken') || 
-                localStorage.getItem('token') || 
-                localStorage.getItem('firebaseToken');
+    // Get the auth token - try multiple approaches
+    let token;
     
-    // If still no token, try to get from Firebase directly
-    if (!token) {
-      // Access auth from window if available
-      if (window.auth && window.auth.currentUser) {
-        token = await window.auth.currentUser.getIdToken();
-      } else {
-        console.error("❌ No auth token found. Please make sure you're logged in.");
-        console.log("Available localStorage keys:", Object.keys(localStorage));
-        return;
+    // Try getting from user object in localStorage
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const userData = JSON.parse(userStr);
+        token = userData.stsTokenManager?.accessToken || userData.accessToken;
+      } catch (e) {
+        console.log("Could not parse user data");
       }
     }
+    
+    // Fallback to other keys
+    if (!token) {
+      token = localStorage.getItem('authToken') || 
+              localStorage.getItem('token') || 
+              localStorage.getItem('firebaseToken');
+    }
+    
+    // Last resort: try window.auth
+    if (!token && window.auth && window.auth.currentUser) {
+      token = await window.auth.currentUser.getIdToken();
+    }
+    
+    if (!token) {
+      console.error("❌ No auth token found. Please make sure you're logged in.");
+      console.log("Available localStorage keys:", Object.keys(localStorage));
+      return;
+    }
+    
+    console.log("✅ Got auth token!");
     const apiUrl = "https://autopromote.onrender.com";
     
     const connections = [
