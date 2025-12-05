@@ -85,6 +85,77 @@ async function addTestConnections() {
           meta: { organizations: [{ id: 'org_123', name: 'Test Company' }]},
           identity: { id: 'li_123', firstName: 'Test', lastName: 'User' }
         }
+      },
+      {
+        platform: 'spotify',
+        data: {
+          provider: 'spotify',
+          connected: true,
+          obtainedAt: new Date().toISOString(),
+          mode: 'active',
+          scope: 'playlist-modify-public,user-read-email',
+          meta: { display_name: 'Test Spotify User', playlists: [{ id: 'playlist_123', name: 'My Playlist' }]},
+          identity: { id: 'spotify_123', display_name: 'Test Spotify User' }
+        }
+      },
+      {
+        platform: 'reddit',
+        data: {
+          provider: 'reddit',
+          connected: true,
+          obtainedAt: new Date().toISOString(),
+          mode: 'active',
+          scope: 'submit,read,identity',
+          meta: { username: 'testreddituser' },
+          identity: { id: 'reddit_123', name: 'testreddituser' }
+        }
+      },
+      {
+        platform: 'discord',
+        data: {
+          provider: 'discord',
+          connected: true,
+          obtainedAt: new Date().toISOString(),
+          mode: 'active',
+          scope: 'bot,messages.write',
+          meta: { guilds: [{ id: 'guild_123', name: 'My Discord Server' }]},
+          identity: { id: 'discord_123', username: 'testuser#1234' }
+        }
+      },
+      {
+        platform: 'telegram',
+        data: {
+          provider: 'telegram',
+          connected: true,
+          obtainedAt: new Date().toISOString(),
+          mode: 'active',
+          scope: 'bot',
+          meta: { chatId: '123456789' },
+          identity: { id: 'tg_123', first_name: 'Test', username: 'testuser' }
+        }
+      },
+      {
+        platform: 'pinterest',
+        data: {
+          provider: 'pinterest',
+          connected: true,
+          obtainedAt: new Date().toISOString(),
+          mode: 'active',
+          scope: 'boards:read,pins:write',
+          meta: { boards: [{ id: 'board_123', name: 'My Board' }]},
+          identity: { id: 'pin_123', username: 'testuser' }
+        }
+      },
+      {
+        platform: 'snapchat',
+        data: {
+          provider: 'snapchat',
+          connected: true,
+          obtainedAt: new Date().toISOString(),
+          mode: 'active',
+          scope: 'snapchat-marketing-api',
+          identity: { id: 'snap_123', display_name: 'Test Snapchat User' }
+        }
       }
     ];
     
