@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../firebaseClient';
-import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, multiFactor, PhoneAuthProvider, PhoneMultiFactorGenerator, RecaptchaVerifier } from 'firebase/auth';
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, multiFactor, PhoneAuthProvider, PhoneMultiFactorGenerator, RecaptchaVerifier, TotpMultiFactorGenerator, TotpSecret } from 'firebase/auth';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import './SecurityPanel.css';
 
@@ -26,9 +26,12 @@ const SecurityPanel = ({ user }) => {
   // 2FA States
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [enrolling2FA, setEnrolling2FA] = useState(false);
+  const [mfaMethod, setMfaMethod] = useState('totp'); // 'totp' or 'sms'
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationId, setVerificationId] = useState('');
+  const [totpSecret, setTotpSecret] = useState(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [twoFactorError, setTwoFactorError] = useState('');
   const [twoFactorSuccess, setTwoFactorSuccess] = useState('');
 
@@ -187,43 +190,69 @@ const SecurityPanel = ({ user }) => {
     setTwoFactorError('');
     setTwoFactorSuccess('');
     
-    if (!phoneNumber || !phoneNumber.match(/^\+[1-9]\d{1,14}$/)) {
-      setTwoFactorError('Please enter a valid phone number with country code (e.g., +1234567890)');
-      return;
-    }
+    if (mfaMethod === 'totp') {
+      // TOTP (Authenticator App) flow
+      setEnrolling2FA(true);
+      try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) throw new Error('No authenticated user');
 
-    setEnrolling2FA(true);
+        const multiFactorSession = await multiFactor(currentUser).getSession();
+        const totpSecret = await TotpSecret.generate();
+        setTotpSecret(totpSecret);
 
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) throw new Error('No authenticated user');
+        // Generate QR code URL for authenticator apps
+        const issuer = 'AutoPromote';
+        const accountName = currentUser.email || currentUser.uid;
+        const otpauthUrl = totpSecret.generateQrCodeUrl(accountName, issuer);
+        setQrCodeUrl(otpauthUrl);
 
-      // Setup reCAPTCHA
-      if (!window.recaptchaVerifier) {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible'
-        });
+        setTwoFactorSuccess('Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)');
+      } catch (error) {
+        console.error('2FA TOTP enrollment error:', error);
+        setTwoFactorError(error.message || 'Failed to generate authenticator code');
+        setEnrolling2FA(false);
+      }
+    } else {
+      // SMS flow (requires Firebase Console SMS MFA to be enabled)
+      if (!phoneNumber || !phoneNumber.match(/^\+[1-9]\d{1,14}$/)) {
+        setTwoFactorError('Please enter a valid phone number with country code (e.g., +1234567890)');
+        return;
       }
 
-      const multiFactorSession = await multiFactor(currentUser).getSession();
-      const phoneInfoOptions = {
-        phoneNumber,
-        session: multiFactorSession
-      };
+      setEnrolling2FA(true);
 
-      const phoneAuthProvider = new PhoneAuthProvider(auth);
-      const verificationId = await phoneAuthProvider.verifyPhoneNumber(
-        phoneInfoOptions,
-        window.recaptchaVerifier
-      );
+      try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) throw new Error('No authenticated user');
 
-      setVerificationId(verificationId);
-      setTwoFactorSuccess('Verification code sent to your phone!');
-    } catch (error) {
-      console.error('2FA enrollment error:', error);
-      setTwoFactorError(error.message || 'Failed to send verification code');
-    } finally {
-      setEnrolling2FA(false);
+        // Setup reCAPTCHA
+        if (!window.recaptchaVerifier) {
+          window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            size: 'invisible'
+          });
+        }
+
+        const multiFactorSession = await multiFactor(currentUser).getSession();
+        const phoneInfoOptions = {
+          phoneNumber,
+          session: multiFactorSession
+        };
+
+        const phoneAuthProvider = new PhoneAuthProvider(auth);
+        const verificationId = await phoneAuthProvider.verifyPhoneNumber(
+          phoneInfoOptions,
+          window.recaptchaVerifier
+        );
+
+        setVerificationId(verificationId);
+        setTwoFactorSuccess('Verification code sent to your phone!');
+      } catch (error) {
+        console.error('2FA SMS enrollment error:', error);
+        setTwoFactorError(error.message || 'Failed to send verification code. SMS MFA may not be enabled in Firebase Console.');
+      } finally {
+        setEnrolling2FA(false);
+      }
     }
   };
 
@@ -240,16 +269,37 @@ const SecurityPanel = ({ user }) => {
       const currentUser = auth.currentUser;
       if (!currentUser) throw new Error('No authenticated user');
 
-      const cred = PhoneAuthProvider.credential(verificationId, verificationCode);
-      const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(cred);
-      
-      await multiFactor(currentUser).enroll(multiFactorAssertion, 'Primary Phone');
-      
-      setTwoFactorEnabled(true);
-      setTwoFactorSuccess('Two-factor authentication enabled successfully!');
-      setPhoneNumber('');
-      setVerificationCode('');
-      setVerificationId('');
+      if (mfaMethod === 'totp') {
+        // TOTP verification
+        if (!totpSecret) throw new Error('No TOTP secret found');
+        
+        const multiFactorSession = await multiFactor(currentUser).getSession();
+        const multiFactorAssertion = TotpMultiFactorGenerator.assertionForEnrollment(
+          totpSecret,
+          verificationCode
+        );
+        
+        await multiFactor(currentUser).enroll(multiFactorAssertion, 'Authenticator App');
+        
+        setTwoFactorEnabled(true);
+        setTwoFactorSuccess('Two-factor authentication enabled successfully!');
+        setVerificationCode('');
+        setTotpSecret(null);
+        setQrCodeUrl('');
+        setEnrolling2FA(false);
+      } else {
+        // SMS verification
+        const cred = PhoneAuthProvider.credential(verificationId, verificationCode);
+        const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(cred);
+        
+        await multiFactor(currentUser).enroll(multiFactorAssertion, 'Primary Phone');
+        
+        setTwoFactorEnabled(true);
+        setTwoFactorSuccess('Two-factor authentication enabled successfully!');
+        setPhoneNumber('');
+        setVerificationCode('');
+        setVerificationId('');
+      }
     } catch (error) {
       console.error('2FA verification error:', error);
       setTwoFactorError(error.message || 'Failed to verify code');
@@ -421,7 +471,7 @@ const SecurityPanel = ({ user }) => {
       {/* Two-Factor Authentication */}
       <div className="security-card">
         <h3>🔐 Two-Factor Authentication</h3>
-        <p>Add an extra layer of security to your account with SMS verification</p>
+        <p>Add an extra layer of security to your account</p>
         
         {twoFactorEnabled ? (
           <div className="twofa-enabled">
@@ -433,28 +483,107 @@ const SecurityPanel = ({ user }) => {
           </div>
         ) : (
           <div className="twofa-setup">
-            {!verificationId ? (
+            {!enrolling2FA && !qrCodeUrl && !verificationId ? (
               <div className="form-group">
-                <label>Phone Number (with country code)</label>
+                <label>Choose MFA Method</label>
+                <div style={{display: 'flex', gap: '1rem', marginBottom: '1rem'}}>
+                  <button
+                    className={mfaMethod === 'totp' ? 'btn-primary' : 'btn-secondary'}
+                    onClick={() => setMfaMethod('totp')}
+                    style={{flex: 1}}
+                  >
+                    📱 Authenticator App (Recommended)
+                  </button>
+                  <button
+                    className={mfaMethod === 'sms' ? 'btn-primary' : 'btn-secondary'}
+                    onClick={() => setMfaMethod('sms')}
+                    style={{flex: 1}}
+                  >
+                    💬 SMS
+                  </button>
+                </div>
+
+                {mfaMethod === 'totp' ? (
+                  <div>
+                    <p style={{fontSize: '0.9rem', color: '#9ca3af', marginBottom: '1rem'}}>
+                      Use an authenticator app like Google Authenticator, Authy, or Microsoft Authenticator
+                    </p>
+                    <button 
+                      className="btn-primary" 
+                      onClick={handleEnable2FA}
+                      disabled={enrolling2FA}
+                    >
+                      {enrolling2FA ? 'Generating...' : 'Generate QR Code'}
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <label>Phone Number (with country code)</label>
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="+1234567890"
+                      className="phone-input"
+                    />
+                    <small className="input-hint">Format: +[country code][number] (e.g., +12025551234)</small>
+                    <div id="recaptcha-container"></div>
+                    <button 
+                      className="btn-primary" 
+                      onClick={handleEnable2FA}
+                      disabled={enrolling2FA}
+                      style={{marginTop: '12px'}}
+                    >
+                      {enrolling2FA ? 'Sending Code...' : 'Send Verification Code'}
+                    </button>
+                    <p style={{fontSize: '0.85rem', color: '#f59e0b', marginTop: '0.5rem'}}>
+                      ⚠️ Note: SMS MFA requires Firebase Console configuration
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : qrCodeUrl ? (
+              <div className="form-group">
+                <h4>Scan QR Code</h4>
+                <div style={{background: 'white', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center'}}>
+                  <img src={qrCodeUrl} alt="QR Code" style={{maxWidth: '200px'}} />
+                </div>
+                <p style={{fontSize: '0.9rem', color: '#9ca3af', marginBottom: '0.5rem'}}>
+                  Or manually enter this code in your authenticator app:
+                </p>
+                <code style={{background: '#1e293b', padding: '0.5rem', borderRadius: '4px', display: 'block', wordBreak: 'break-all', marginBottom: '1rem'}}>
+                  {totpSecret?.secretKey || ''}
+                </code>
+                <label>Enter the 6-digit code from your authenticator app</label>
                 <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="+1234567890"
-                  className="phone-input"
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  placeholder="123456"
+                  maxLength="6"
+                  className="code-input"
                 />
-                <small className="input-hint">Format: +[country code][number] (e.g., +12025551234)</small>
-                <div id="recaptcha-container"></div>
                 <button 
                   className="btn-primary" 
-                  onClick={handleEnable2FA}
-                  disabled={enrolling2FA}
+                  onClick={handleVerify2FA}
                   style={{marginTop: '12px'}}
                 >
-                  {enrolling2FA ? 'Sending Code...' : 'Send Verification Code'}
+                  Verify & Enable 2FA
+                </button>
+                <button 
+                  className="btn-secondary" 
+                  onClick={() => {
+                    setQrCodeUrl('');
+                    setTotpSecret(null);
+                    setVerificationCode('');
+                    setEnrolling2FA(false);
+                  }}
+                  style={{marginTop: '12px', marginLeft: '8px'}}
+                >
+                  Cancel
                 </button>
               </div>
-            ) : (
+            ) : verificationId ? (
               <div className="form-group">
                 <label>Verification Code</label>
                 <input
@@ -474,7 +603,7 @@ const SecurityPanel = ({ user }) => {
                   Verify & Enable 2FA
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
         )}
 
