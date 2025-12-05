@@ -229,45 +229,44 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 				return;
 			}
 			
-			const data = await res.json();
-			const platforms = data.platforms || {};
-			
-			// Update all individual status states from the unified response
-			if (platforms.youtube) {
-				setYouTubeStatus({ connected: !!platforms.youtube.connected, channel: platforms.youtube.channel || null });
-			}
-			if (platforms.twitter) {
-				setTwitterStatus({ connected: !!platforms.twitter.connected, identity: platforms.twitter.identity || null });
-			}
-			if (platforms.tiktok) {
-				setTikTokStatus({ connected: !!platforms.tiktok.connected, meta: platforms.tiktok.meta || null, profile: platforms.tiktok.profile || null });
-			}
-			if (platforms.facebook) {
-				setFacebookStatus({ connected: !!platforms.facebook.connected, meta: platforms.facebook.meta || null, pages: platforms.facebook.pages || null, profile: platforms.facebook.profile || null });
-			}
-			if (platforms.spotify) {
-				setSpotifyStatus({ connected: !!platforms.spotify.connected, meta: platforms.spotify.meta || null });
-			}
-			if (platforms.reddit) {
-				setRedditStatus({ connected: !!platforms.reddit.connected, meta: platforms.reddit.meta || null, profile: platforms.reddit.profile || null });
-			}
-			if (platforms.discord) {
-				setDiscordStatus({ connected: !!platforms.discord.connected, meta: platforms.discord.meta || null, profile: platforms.discord.profile || null });
-			}
-			if (platforms.linkedin) {
-				setLinkedinStatus({ connected: !!platforms.linkedin.connected, meta: platforms.linkedin.meta || null, profile: platforms.linkedin.profile || null });
-			}
-			if (platforms.telegram) {
-				setTelegramStatus({ connected: !!platforms.telegram.connected, meta: platforms.telegram.meta || null, profile: platforms.telegram.profile || null });
-			}
-			if (platforms.pinterest) {
-				setPinterestStatus({ connected: !!platforms.pinterest.connected, meta: platforms.pinterest.meta || null, profile: platforms.pinterest.profile || null });
-			}
-			if (platforms.snapchat) {
-				setSnapchatStatus({ connected: !!platforms.snapchat.connected, profile: platforms.snapchat.profile || null });
-			}
-			
-			// Also update the platformSummary state
+		const data = await res.json();
+		// Use 'raw' which contains the full connection data from Firestore
+		const platforms = data.raw || {};
+		
+		// Update all individual status states from the unified response
+		if (platforms.youtube) {
+			setYouTubeStatus({ connected: !!platforms.youtube.connected, channel: platforms.youtube.channel || null });
+		}
+		if (platforms.twitter) {
+			setTwitterStatus({ connected: !!platforms.twitter.connected, identity: platforms.twitter.identity || null });
+		}
+		if (platforms.tiktok) {
+			setTikTokStatus({ connected: !!platforms.tiktok.connected, meta: platforms.tiktok.meta || null, profile: platforms.tiktok.profile || null, display_name: platforms.tiktok.display_name || null });
+		}
+		if (platforms.facebook) {
+			setFacebookStatus({ connected: !!platforms.facebook.connected, meta: platforms.facebook.meta || null, pages: platforms.facebook.pages || null, profile: platforms.facebook.profile || null });
+		}
+		if (platforms.spotify) {
+			setSpotifyStatus({ connected: !!platforms.spotify.connected, meta: platforms.spotify.meta || null });
+		}
+		if (platforms.reddit) {
+			setRedditStatus({ connected: !!platforms.reddit.connected, meta: platforms.reddit.meta || null, profile: platforms.reddit.profile || null });
+		}
+		if (platforms.discord) {
+			setDiscordStatus({ connected: !!platforms.discord.connected, meta: platforms.discord.meta || null, profile: platforms.discord.profile || null });
+		}
+		if (platforms.linkedin) {
+			setLinkedinStatus({ connected: !!platforms.linkedin.connected, meta: platforms.linkedin.meta || null, profile: platforms.linkedin.profile || null });
+		}
+		if (platforms.telegram) {
+			setTelegramStatus({ connected: !!platforms.telegram.connected, meta: platforms.telegram.meta || null, profile: platforms.telegram.profile || null, userId: platforms.telegram.userId || null, username: platforms.telegram.username || null });
+		}
+		if (platforms.pinterest) {
+			setPinterestStatus({ connected: !!platforms.pinterest.connected, meta: platforms.pinterest.meta || null, profile: platforms.pinterest.profile || null });
+		}
+		if (platforms.snapchat) {
+			setSnapchatStatus({ connected: !!platforms.snapchat.connected, profile: platforms.snapchat.profile || null });
+		}			// Also update the platformSummary state
 			setPlatformSummary(data);
 		} catch (err) {
 			console.error('Error loading unified platform statuses:', err);

@@ -202,7 +202,7 @@ function microCache(req,res,next){
   if (MICRO_CACHE_TTL_MS <= 0) return next();
   if (req.method !== 'GET') return next();
   // only cache explicit allowlist
-  const allow = ['/api/platform/status','/api/facebook/status','/api/youtube/status','/api/twitter/connection/status','/api/tiktok/status','/api/instagram/status','/api/monetization/earnings/summary','/api/status/aggregate'];
+  const allow = ['/api/platform/status','/api/facebook/status','/api/youtube/status','/api/twitter/connection/status','/api/tiktok/status','/api/telegram/status','/api/instagram/status','/api/monetization/earnings/summary','/api/status/aggregate'];
   if (!allow.includes(req.path)) return next();
   const entry = __microCache.get(req.path);
   if (entry && entry.expiry > Date.now()) {
@@ -311,6 +311,7 @@ const repostRoutes = require('./routes/repostRoutes');
 let promotionTaskRoutes;
 let metricsRoutes;
 let tiktokRoutes;
+let telegramRoutes;
 let notificationsRoutes;
 let captionsRoutes;
 let adminCacheRoutes;
@@ -326,6 +327,13 @@ try {
     tiktokRoutes = express.Router();
     console.log('⚠️ TikTok routes not found; using empty router');
   }
+}
+try {
+  telegramRoutes = require('./routes/telegramRoutes');
+  console.log('✅ Telegram routes loaded');
+} catch (e) {
+  telegramRoutes = express.Router();
+  console.log('⚠️ Telegram routes not found:', e.message);
 }
 
 // Load social routers
@@ -764,8 +772,8 @@ if (helmet) {
         scriptSrc,
         styleSrc,
         imgSrc: ["'self'", "data:", "https:"],
-  connectSrc: ["'self'", "https://*.firebase.com", "https://*.googleapis.com", "https://*.paypal.com", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com", "https://*.linkedin.com", "https://api.linkedin.com"],
-  frameSrc: ["'self'", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com", "https://*.linkedin.com"],
+  connectSrc: ["'self'", "https://*.firebase.com", "https://*.googleapis.com", "https://*.paypal.com", "https://*.tiktok.com", "https://*.telegram.org", "https://api.telegram.org", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com", "https://*.linkedin.com", "https://api.linkedin.com"],
+  frameSrc: ["'self'", "https://*.tiktok.com", "https://*.telegram.org", "https://oauth.telegram.org", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com", "https://*.linkedin.com"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
@@ -852,6 +860,9 @@ try {
 // Mount TikTok routes if available (explicit per-mount rate limiter to satisfy scanners)
 app.use('/api/tiktok', routeLimiter({ windowHint: 'tiktok' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), tiktokRoutes);
 console.log('🚏 TikTok routes mounted at /api/tiktok');
+// Mount Telegram routes
+app.use('/api/telegram', routeLimiter({ windowHint: 'telegram' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), telegramRoutes);
+console.log('🚏 Telegram routes mounted at /api/telegram');
 // Mount new social routes
 app.use('/api/facebook', routeLimiter({ windowHint: 'facebook' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), facebookRoutes);
 console.log('🚏 Facebook routes mounted at /api/facebook');
