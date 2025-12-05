@@ -7,11 +7,21 @@ async function addTestConnections() {
   try {
     console.log("🚀 Adding test platform connections...");
     
-    // Get the auth token from localStorage (already available)
-    const token = localStorage.getItem('authToken');
+    // Get the auth token - try multiple possible keys
+    let token = localStorage.getItem('authToken') || 
+                localStorage.getItem('token') || 
+                localStorage.getItem('firebaseToken');
+    
+    // If still no token, try to get from Firebase directly
     if (!token) {
-      console.error("❌ No auth token found. Please make sure you're logged in.");
-      return;
+      // Access auth from window if available
+      if (window.auth && window.auth.currentUser) {
+        token = await window.auth.currentUser.getIdToken();
+      } else {
+        console.error("❌ No auth token found. Please make sure you're logged in.");
+        console.log("Available localStorage keys:", Object.keys(localStorage));
+        return;
+      }
     }
     const apiUrl = "https://autopromote.onrender.com";
     
