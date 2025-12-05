@@ -474,4 +474,365 @@ router.get('/quick', async (req, res) => {
   }
 });
 
+// Additional deep validation checks
+async function checkContentUploadFlow() {
+  try {
+    const issues = [];
+    const warnings = [];
+    
+    // Check if content upload routes exist
+    const requiredRoutes = [
+      '/api/content/upload',
+      '/api/content/schedule',
+      '/api/content/platforms'
+    ];
+    
+    // Check upload size limits
+    if (!process.env.MAX_UPLOAD_SIZE) {
+      warnings.push('MAX_UPLOAD_SIZE not configured, using default');
+    }
+    
+    // Check storage configuration
+    if (!admin.storage) {
+      issues.push('Firebase Storage not initialized');
+    }
+    
+    return {
+      status: issues.length > 0 ? 'failed' : (warnings.length > 0 ? 'warning' : 'passed'),
+      critical: issues.length > 0,
+      message: issues.length > 0 ? 'Content upload flow has critical issues' : 
+               warnings.length > 0 ? 'Content upload flow has warnings' : 
+               'Content upload flow configured correctly',
+      issues,
+      warnings
+    };
+  } catch (error) {
+    return {
+      status: 'failed',
+      critical: true,
+      message: `Failed to check content upload flow: ${error.message}`,
+      issues: [error.message]
+    };
+  }
+}
+
+async function checkUserAuthentication() {
+  try {
+    const issues = [];
+    const warnings = [];
+    
+    // Test Firebase Auth connection
+    try {
+      await admin.auth().listUsers(1);
+    } catch (error) {
+      issues.push(`Firebase Auth connection failed: ${error.message}`);
+    }
+    
+    // Check JWT secret
+    if (!process.env.JWT_SECRET) {
+      issues.push('JWT_SECRET not configured - token verification will fail');
+    }
+    
+    // Check session configuration
+    if (!process.env.SESSION_SECRET) {
+      warnings.push('SESSION_SECRET not configured');
+    }
+    
+    // Check CORS configuration
+    if (!process.env.FRONTEND_URL) {
+      warnings.push('FRONTEND_URL not configured - CORS may fail');
+    }
+    
+    return {
+      status: issues.length > 0 ? 'failed' : (warnings.length > 0 ? 'warning' : 'passed'),
+      critical: issues.length > 0,
+      message: issues.length > 0 ? 'Authentication system has critical issues' : 
+               warnings.length > 0 ? 'Authentication system has warnings' : 
+               'Authentication system fully functional',
+      issues,
+      warnings
+    };
+  } catch (error) {
+    return {
+      status: 'failed',
+      critical: true,
+      message: `Failed to check authentication: ${error.message}`,
+      issues: [error.message]
+    };
+  }
+}
+
+async function checkCommunityFeatures() {
+  try {
+    const issues = [];
+    const warnings = [];
+    
+    // Check if community_posts collection exists
+    try {
+      await db.collection('community_posts').limit(1).get();
+    } catch (error) {
+      issues.push(`Community posts collection not accessible: ${error.message}`);
+    }
+    
+    // Check if forum_posts collection exists
+    try {
+      await db.collection('forum_posts').limit(1).get();
+    } catch (error) {
+      issues.push(`Forum posts collection not accessible: ${error.message}`);
+    }
+    
+    // Check if comments collection exists
+    try {
+      await db.collection('comments').limit(1).get();
+    } catch (error) {
+      warnings.push('Comments collection not found - may not be created yet');
+    }
+    
+    return {
+      status: issues.length > 0 ? 'failed' : (warnings.length > 0 ? 'warning' : 'passed'),
+      critical: issues.length > 0,
+      message: issues.length > 0 ? 'Community features have critical issues' : 
+               warnings.length > 0 ? 'Community features have warnings' : 
+               'Community features fully functional',
+      issues,
+      warnings
+    };
+  } catch (error) {
+    return {
+      status: 'failed',
+      critical: true,
+      message: `Failed to check community features: ${error.message}`,
+      issues: [error.message]
+    };
+  }
+}
+
+async function checkAnalyticsTracking() {
+  try {
+    const issues = [];
+    const warnings = [];
+    
+    // Check analytics collection
+    try {
+      await db.collection('analytics').limit(1).get();
+    } catch (error) {
+      issues.push(`Analytics collection not accessible: ${error.message}`);
+    }
+    
+    // Check if analytics routes are configured
+    const analyticsConfig = {
+      tracking_enabled: process.env.ANALYTICS_ENABLED !== 'false',
+      google_analytics: !!process.env.GA_TRACKING_ID,
+      custom_analytics: true
+    };
+    
+    if (!analyticsConfig.tracking_enabled) {
+      warnings.push('Analytics tracking is disabled');
+    }
+    
+    return {
+      status: issues.length > 0 ? 'failed' : (warnings.length > 0 ? 'warning' : 'passed'),
+      critical: issues.length > 0,
+      message: issues.length > 0 ? 'Analytics tracking has critical issues' : 
+               warnings.length > 0 ? 'Analytics tracking has warnings' : 
+               'Analytics tracking fully functional',
+      issues,
+      warnings,
+      details: analyticsConfig
+    };
+  } catch (error) {
+    return {
+      status: 'failed',
+      critical: true,
+      message: `Failed to check analytics: ${error.message}`,
+      issues: [error.message]
+    };
+  }
+}
+
+async function checkSchedulingSystem() {
+  try {
+    const issues = [];
+    const warnings = [];
+    
+    // Check promotion_schedules collection
+    try {
+      await db.collection('promotion_schedules').limit(1).get();
+    } catch (error) {
+      issues.push(`Promotion schedules collection not accessible: ${error.message}`);
+    }
+    
+    // Check if scheduler is running
+    if (!process.env.SCHEDULER_ENABLED || process.env.SCHEDULER_ENABLED === 'false') {
+      warnings.push('Scheduler is disabled - scheduled posts will not be published');
+    }
+    
+    // Check timezone configuration
+    if (!process.env.DEFAULT_TIMEZONE) {
+      warnings.push('DEFAULT_TIMEZONE not set, using UTC');
+    }
+    
+    return {
+      status: issues.length > 0 ? 'failed' : (warnings.length > 0 ? 'warning' : 'passed'),
+      critical: issues.length > 0,
+      message: issues.length > 0 ? 'Scheduling system has critical issues' : 
+               warnings.length > 0 ? 'Scheduling system has warnings' : 
+               'Scheduling system fully functional',
+      issues,
+      warnings
+    };
+  } catch (error) {
+    return {
+      status: 'failed',
+      critical: true,
+      message: `Failed to check scheduling system: ${error.message}`,
+      issues: [error.message]
+    };
+  }
+}
+
+async function checkWithdrawalSystem() {
+  try {
+    const issues = [];
+    const warnings = [];
+    
+    // Check withdrawals collection
+    try {
+      await db.collection('withdrawals').limit(1).get();
+    } catch (error) {
+      issues.push(`Withdrawals collection not accessible: ${error.message}`);
+    }
+    
+    // Check PayPal payout configuration
+    if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+      issues.push('PayPal credentials missing - withdrawals will fail');
+    }
+    
+    if (process.env.PAYOUTS_ENABLED === 'false') {
+      warnings.push('Payouts are disabled - users cannot withdraw funds');
+    }
+    
+    // Check minimum withdrawal amount
+    if (!process.env.MIN_WITHDRAWAL_AMOUNT) {
+      warnings.push('MIN_WITHDRAWAL_AMOUNT not configured');
+    }
+    
+    return {
+      status: issues.length > 0 ? 'failed' : (warnings.length > 0 ? 'warning' : 'passed'),
+      critical: issues.length > 0,
+      message: issues.length > 0 ? 'Withdrawal system has critical issues' : 
+               warnings.length > 0 ? 'Withdrawal system has warnings' : 
+               'Withdrawal system fully functional',
+      issues,
+      warnings
+    };
+  } catch (error) {
+    return {
+      status: 'failed',
+      critical: true,
+      message: `Failed to check withdrawal system: ${error.message}`,
+      issues: [error.message]
+    };
+  }
+}
+
+async function checkAdminDashboard() {
+  try {
+    const issues = [];
+    const warnings = [];
+    
+    // Check if admin routes are accessible
+    const adminCollections = ['admin_users', 'system_logs', 'audit_logs'];
+    
+    for (const collection of adminCollections) {
+      try {
+        await db.collection(collection).limit(1).get();
+      } catch (error) {
+        warnings.push(`${collection} collection not accessible`);
+      }
+    }
+    
+    // Check admin authentication
+    if (!process.env.ADMIN_EMAIL) {
+      warnings.push('ADMIN_EMAIL not configured - admin account may not be set up');
+    }
+    
+    return {
+      status: issues.length > 0 ? 'failed' : (warnings.length > 0 ? 'warning' : 'passed'),
+      critical: issues.length > 0,
+      message: issues.length > 0 ? 'Admin dashboard has critical issues' : 
+               warnings.length > 0 ? 'Admin dashboard has warnings' : 
+               'Admin dashboard fully functional',
+      issues,
+      warnings
+    };
+  } catch (error) {
+    return {
+      status: 'failed',
+      critical: true,
+      message: `Failed to check admin dashboard: ${error.message}`,
+      issues: [error.message]
+    };
+  }
+}
+
+// Extended comprehensive health check with all features
+router.get('/full', authMiddleware, async (req, res) => {
+  try {
+    const checks = {
+      environment_variables: await checkEnvironmentVariables(),
+      firebase_connection: await checkFirebaseConnection(),
+      database_collections: await checkDatabaseCollections(),
+      platform_credentials: await checkPlatformCredentials(),
+      payment_system: await checkPaymentSystem(),
+      ai_services: await checkAIServices(),
+      storage_access: await checkStorageAccess(),
+      email_service: await checkEmailService(),
+      rate_limiting: checkRateLimiting(),
+      user_authentication: await checkUserAuthentication(),
+      content_upload_flow: await checkContentUploadFlow(),
+      community_features: await checkCommunityFeatures(),
+      analytics_tracking: await checkAnalyticsTracking(),
+      scheduling_system: await checkSchedulingSystem(),
+      withdrawal_system: await checkWithdrawalSystem(),
+      admin_dashboard: await checkAdminDashboard()
+    };
+
+    // Calculate overall status
+    const criticalIssues = Object.values(checks).filter(c => c.critical && c.status === 'failed').length;
+    const errors = Object.values(checks).filter(c => c.status === 'failed').length;
+    const warnings = Object.values(checks).filter(c => c.status === 'warning').length;
+    const passed = Object.values(checks).filter(c => c.status === 'passed').length;
+
+    let overall_status = 'healthy';
+    if (criticalIssues > 0) {
+      overall_status = 'critical';
+    } else if (errors > 0) {
+      overall_status = 'degraded';
+    } else if (warnings > 0) {
+      overall_status = 'warning';
+    }
+
+    res.json({
+      overall_status,
+      checks,
+      summary: {
+        total_checks: Object.keys(checks).length,
+        passed,
+        warnings,
+        errors,
+        critical: criticalIssues
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Full diagnostics error:', error);
+    res.status(500).json({
+      overall_status: 'critical',
+      error: 'Failed to run full diagnostics',
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;

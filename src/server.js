@@ -1522,10 +1522,31 @@ express.response.send = function(body) {
 };
 
 if (require.main === module) {
-  const server = app.listen(PORT, () => {
+  const server = app.listen(PORT, async () => {
     console.log(`🚀 AutoPromote Server is running on port ${PORT}`);
     console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
     console.log(`🔗 API endpoints available at: http://localhost:${PORT}/api/`);
+    
+    // Run startup diagnostics to catch configuration issues immediately
+    try {
+      const StartupDiagnostics = require('./utils/startupDiagnostics');
+      const diagnostics = new StartupDiagnostics();
+      const result = await diagnostics.runAll();
+      
+      if (!result.success) {
+        console.error('\n⚠️  SERVER STARTED WITH CRITICAL ERRORS - FIX IMMEDIATELY!');
+        console.error('Some features will not work until these are resolved.\n');
+      } else if (result.hasErrors) {
+        console.warn('\n⚠️  SERVER STARTED WITH NON-CRITICAL ERRORS');
+        console.warn('Some features may have limited functionality.\n');
+      } else if (result.hasWarnings) {
+        console.log('\n✅ SERVER STARTED SUCCESSFULLY (with minor warnings)');
+      } else {
+        console.log('\n✅ SERVER STARTED - ALL SYSTEMS OPERATIONAL\n');
+      }
+    } catch (diagError) {
+      console.error('Failed to run startup diagnostics:', diagError.message);
+    }
   }).on('error', (err) => {
     console.log('❌ Server startup error:', err.message);
     if (err.code === 'EADDRINUSE') {
