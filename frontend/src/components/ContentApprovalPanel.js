@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
 import { auth } from '../firebaseClient';
+import { parseJsonSafe } from '../utils/parseJsonSafe';
 
 function ContentApprovalPanel() {
   const [content, setContent] = useState([]);
@@ -27,13 +28,16 @@ function ContentApprovalPanel() {
         })
       ]);
 
-      const [contentData, statsData] = await Promise.all([
-        contentRes.json(),
-        statsRes.json()
+      const [contentParsed, statsParsed] = await Promise.all([
+        parseJsonSafe(contentRes),
+        parseJsonSafe(statsRes)
       ]);
 
-      if (contentData.success) setContent(contentData.content);
-      if (statsData.success) setStats(statsData.stats);
+      const contentData = contentParsed.json || null;
+      const statsData = statsParsed.json || null;
+
+      if (contentData && contentData.success) setContent(contentData.content);
+      if (statsData && statsData.success) setStats(statsData.stats);
       
       setLoading(false);
     } catch (error) {

@@ -29,7 +29,6 @@ const LoginForm = ({ onLogin, onClose }) => {
 
     try {
       const { email, password } = formData;
-      console.log("Attempting login with:", email);
       try {
         localStorage.setItem("tosAgreed", "true");
       } catch (_) {

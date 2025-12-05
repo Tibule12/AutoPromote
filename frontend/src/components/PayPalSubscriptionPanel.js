@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { auth } from '../firebaseClient';
+import { parseJsonSafe } from '../utils/parseJsonSafe';
 import { API_BASE_URL } from '../config';
 import toast from 'react-hot-toast';
 import './PayPalSubscriptionPanel.css';
@@ -23,9 +24,9 @@ const PayPalSubscriptionPanel = () => {
   const fetchPlans = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/plans`);
-      if (res.ok) {
-        const data = await res.json();
-        setPlans(data.plans || []);
+      const parsed = await parseJsonSafe(res);
+      if (parsed.ok && parsed.json && Array.isArray(parsed.json.plans)) {
+        setPlans(parsed.json.plans || []);
       }
     } catch (error) {
       console.error('Error fetching plans:', error);
@@ -38,10 +39,14 @@ const PayPalSubscriptionPanel = () => {
       const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/status`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setCurrentSubscription(data.subscription);
+      const parsed = await parseJsonSafe(res);
+      if (parsed.ok && parsed.json) {
+        setCurrentSubscription(parsed.json.subscription);
+      } else if (parsed.status === 404) {
+        // No subscription found; clear currentSubscription
+        setCurrentSubscription(null);
+      } else {
+        console.warn('PayPal subscription API returned error or non-JSON response', { status: parsed.status, preview: parsed.textPreview || parsed.error });
       }
       setLoading(false);
     } catch (error) {
@@ -56,10 +61,9 @@ const PayPalSubscriptionPanel = () => {
       const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/usage`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setUsage(data.usage);
+      const parsed = await parseJsonSafe(res);
+      if (parsed.ok && parsed.json) {
+        setUsage(parsed.json.usage);
       }
     } catch (error) {
       console.error('Error fetching usage:', error);

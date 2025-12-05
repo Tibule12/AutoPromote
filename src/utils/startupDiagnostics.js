@@ -185,8 +185,8 @@ class StartupDiagnostics {
     
     const platforms = {
       youtube: ['YT_CLIENT_ID', 'YT_CLIENT_SECRET'],
-      twitter: ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET', 'TWITTER_API_KEY', 'TWITTER_API_SECRET'],
-      facebook: ['FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET'],
+      twitter: ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'],
+      facebook: ['FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET', 'FB_CLIENT_ID', 'FB_CLIENT_SECRET'],
       tiktok: ['TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET', 'TIKTOK_PROD_CLIENT_KEY', 'TIKTOK_PROD_CLIENT_SECRET', 'TIKTOK_SANDBOX_CLIENT_KEY', 'TIKTOK_SANDBOX_CLIENT_SECRET'],
       telegram: ['TELEGRAM_BOT_TOKEN'],
       snapchat: ['SNAPCHAT_CLIENT_ID', 'SNAPCHAT_CLIENT_SECRET', 'SNAPCHAT_PUBLIC_CLIENT_ID', 'SNAPCHAT_CONFIDENTIAL_CLIENT_ID'],
@@ -256,13 +256,27 @@ class StartupDiagnostics {
       }
       if (platform === 'twitter') {
         const clientPair = process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET;
-        const apiPair = process.env.TWITTER_API_KEY && process.env.TWITTER_API_SECRET;
-        if (clientPair || apiPair) {
+        if (clientPair) {
           this.log('success', 'platforms', `${platform.toUpperCase()} credentials configured`);
           configuredCount++;
         } else {
           this.log('warning', 'platforms', `${platform.toUpperCase()} not fully configured`, {
-            missing_variables: ['TWITTER_CLIENT_ID/SECRET or TWITTER_API_KEY/SECRET'],
+            missing_variables: ['TWITTER_CLIENT_ID and TWITTER_CLIENT_SECRET'],
+            action_required: 'Add platform credentials to enable integration',
+            impact: `${platform} integration will not work`
+          });
+        }
+        continue;
+      }
+      if (platform === 'facebook') {
+        const fbClient = process.env.FB_CLIENT_ID && process.env.FB_CLIENT_SECRET;
+        const fbApp = process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET;
+        if (fbClient || fbApp) {
+          this.log('success', 'platforms', `${platform.toUpperCase()} credentials configured`);
+          configuredCount++;
+        } else {
+          this.log('warning', 'platforms', `${platform.toUpperCase()} not fully configured`, {
+            missing_variables: ['FB_CLIENT_ID/FB_CLIENT_SECRET or FACEBOOK_APP_ID/FACEBOOK_APP_SECRET'],
             action_required: 'Add platform credentials to enable integration',
             impact: `${platform} integration will not work`
           });

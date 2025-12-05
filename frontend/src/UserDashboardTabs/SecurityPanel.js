@@ -94,7 +94,7 @@ const SecurityPanel = ({ user }) => {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Loaded connections:', data); // Debug log
+        // Debug: connections loaded (removed verbose logging for privacy)
         const platforms = Object.entries(data.connections || {}).map(([key, value]) => ({
           id: key,
           provider: value.provider || key,
@@ -102,7 +102,7 @@ const SecurityPanel = ({ user }) => {
           scope: value.scope || 'Unknown',
           status: value.mode || 'active'
         }));
-        console.log('Processed platforms:', platforms); // Debug log
+        // Debug: processed platforms - removing raw logging to avoid leaking tokens
         setConnectedPlatforms(platforms);
       } else {
         console.error('Failed to fetch connections:', response.status);

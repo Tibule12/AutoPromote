@@ -235,7 +235,7 @@ function checkPlatformCredentials() {
   const platforms = {
     youtube: ['YT_CLIENT_ID', 'YT_CLIENT_SECRET'],
     twitter: ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'],
-    facebook: ['FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET'],
+    facebook: ['FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET', 'FB_CLIENT_ID', 'FB_CLIENT_SECRET'],
     tiktok: ['TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET', 'TIKTOK_PROD_CLIENT_KEY', 'TIKTOK_PROD_CLIENT_SECRET', 'TIKTOK_SANDBOX_CLIENT_KEY', 'TIKTOK_SANDBOX_CLIENT_SECRET'],
     telegram: ['TELEGRAM_BOT_TOKEN'],
     snapchat: ['SNAPCHAT_CLIENT_ID', 'SNAPCHAT_CLIENT_SECRET', 'SNAPCHAT_PUBLIC_CLIENT_ID', 'SNAPCHAT_CONFIDENTIAL_CLIENT_ID'],
@@ -281,9 +281,13 @@ function checkPlatformCredentials() {
       if (!configured) missing = ['SNAPCHAT_CLIENT_ID + SNAPCHAT_CLIENT_SECRET or SNAPCHAT_PUBLIC_CLIENT_ID + SNAPCHAT_CLIENT_SECRET or SNAPCHAT_CONFIDENTIAL_CLIENT_ID + SNAPCHAT_CLIENT_SECRET'];
     } else if (platform === 'twitter') {
       const clientPair = process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET;
-      const apiPair = process.env.TWITTER_API_KEY && process.env.TWITTER_API_SECRET;
-      configured = !!(clientPair || apiPair);
-      if (!configured) missing = ['TWITTER_CLIENT_ID/SECRET or TWITTER_API_KEY/SECRET'];
+      configured = !!clientPair;
+      if (!configured) missing = ['TWITTER_CLIENT_ID and TWITTER_CLIENT_SECRET'];
+    } else if (platform === 'facebook') {
+      const fbClient = process.env.FB_CLIENT_ID && process.env.FB_CLIENT_SECRET;
+      const fbApp = process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET;
+      configured = !!(fbClient || fbApp);
+      if (!configured) missing = ['FB_CLIENT_ID/FB_CLIENT_SECRET or FACEBOOK_APP_ID/FACEBOOK_APP_SECRET'];
     } else {
       missing = requiredVars.filter(v => !process.env[v]);
       configured = missing.length === 0;
