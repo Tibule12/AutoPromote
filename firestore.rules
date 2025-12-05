@@ -88,6 +88,32 @@ service cloud.firestore {
         get(/databases/$(database)/documents/chat_conversations/$(resource.data.conversationId)).data.userId == request.auth.uid;
     }
 
+    // Ads - users can read/write their own ads, admins can read/write all
+    match /ads/{adId} {
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid || 
+        isAdmin()
+      );
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && (
+        resource.data.userId == request.auth.uid || 
+        isAdmin()
+      );
+      allow delete: if request.auth != null && (
+        resource.data.userId == request.auth.uid || 
+        isAdmin()
+      );
+    }
+
+    // Ad analytics - users can read their own, admins can read all
+    match /ad_analytics/{adId} {
+      allow read: if request.auth != null && (
+        get(/databases/$(database)/documents/ads/$(adId)).data.userId == request.auth.uid || 
+        isAdmin()
+      );
+      allow write: if isAdmin() || isServiceAccount() || isBackend();
+    }
+
     // All other collections: only admins, service account, or backend
     match /{document=**} {
       allow read, write: if isAdmin() || isServiceAccount() || isBackend();

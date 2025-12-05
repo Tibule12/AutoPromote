@@ -201,6 +201,298 @@ const AdsPanel = () => {
     );
   };
 
+  const getPlatformSpecs = (platform) => {
+    // Platform-specific ad specifications
+    const specs = {
+      facebook: {
+        name: 'Facebook',
+        imageSize: '1200x628px',
+        videoSize: '1280x720px',
+        textLimit: 125,
+        headlineLimit: 40,
+        formats: ['Feed', 'Stories', 'Marketplace']
+      },
+      instagram: {
+        name: 'Instagram',
+        imageSize: '1080x1080px',
+        videoSize: '1080x1920px (Stories), 1080x1080px (Feed)',
+        textLimit: 2200,
+        headlineLimit: 30,
+        formats: ['Feed', 'Stories', 'Reels', 'Explore']
+      },
+      youtube: {
+        name: 'YouTube',
+        imageSize: '1280x720px',
+        videoSize: '1920x1080px',
+        textLimit: 5000,
+        headlineLimit: 100,
+        formats: ['In-Stream', 'Discovery', 'Bumper', 'Shorts']
+      },
+      tiktok: {
+        name: 'TikTok',
+        imageSize: '1080x1920px',
+        videoSize: '1080x1920px (9:16)',
+        textLimit: 100,
+        headlineLimit: 40,
+        formats: ['In-Feed', 'TopView', 'Brand Takeover']
+      },
+      twitter: {
+        name: 'Twitter/X',
+        imageSize: '1200x675px',
+        videoSize: '1280x720px',
+        textLimit: 280,
+        headlineLimit: 50,
+        formats: ['Promoted Tweet', 'Promoted Trend']
+      },
+      linkedin: {
+        name: 'LinkedIn',
+        imageSize: '1200x627px',
+        videoSize: '1280x720px',
+        textLimit: 600,
+        headlineLimit: 70,
+        formats: ['Sponsored Content', 'Message Ads', 'Dynamic Ads']
+      },
+      snapchat: {
+        name: 'Snapchat',
+        imageSize: '1080x1920px',
+        videoSize: '1080x1920px (9:16)',
+        textLimit: 180,
+        headlineLimit: 34,
+        formats: ['Snap Ads', 'Story Ads', 'Collection Ads']
+      },
+      reddit: {
+        name: 'Reddit',
+        imageSize: '1200x628px',
+        videoSize: '1280x720px',
+        textLimit: 300,
+        headlineLimit: 300,
+        formats: ['Promoted Posts', 'Display Ads']
+      },
+      pinterest: {
+        name: 'Pinterest',
+        imageSize: '1000x1500px (2:3)',
+        videoSize: '1000x1500px',
+        textLimit: 500,
+        headlineLimit: 100,
+        formats: ['Standard Pins', 'Carousel', 'Shopping Ads']
+      },
+      google: {
+        name: 'Google Ads',
+        imageSize: '1200x628px',
+        videoSize: '1920x1080px',
+        textLimit: 90,
+        headlineLimit: 30,
+        formats: ['Search', 'Display', 'Video', 'Shopping']
+      }
+    };
+    return specs[platform] || specs.facebook;
+  };
+
+  const handleDownloadAdPackage = (ad) => {
+    const specs = getPlatformSpecs(ad.externalPlatform || 'facebook');
+    
+    // Create ad package document
+    const adPackage = {
+      platform: specs.name,
+      campaign: ad.title,
+      description: ad.description,
+      callToAction: ad.callToAction,
+      targetUrl: ad.targetUrl,
+      budget: `$${ad.budget}`,
+      duration: `${ad.duration} days`,
+      imageUrl: ad.imageUrl,
+      videoUrl: ad.videoUrl,
+      specifications: specs,
+      targeting: ad.targeting,
+      createdAt: new Date().toISOString(),
+      suggestedHashtags: generateHashtags(ad.title, ad.description),
+      platformInstructions: getPlatformInstructions(ad.externalPlatform || 'facebook')
+    };
+
+    // Convert to formatted text
+    const content = `
+═══════════════════════════════════════════════
+  AutoPromote Ad Package - ${specs.name}
+═══════════════════════════════════════════════
+
+CAMPAIGN: ${ad.title}
+PLATFORM: ${specs.name}
+CREATED: ${new Date().toLocaleDateString()}
+
+─── AD COPY ───
+Headline: ${ad.title}
+Description: ${ad.description}
+Call to Action: ${ad.callToAction}
+Landing Page: ${ad.targetUrl || 'Not specified'}
+
+─── CREATIVE ASSETS ───
+Image URL: ${ad.imageUrl || 'Not provided'}
+Video URL: ${ad.videoUrl || 'Not provided'}
+
+─── BUDGET & SCHEDULE ───
+Budget: $${ad.budget}
+Duration: ${ad.duration} days
+Suggested Daily Budget: $${(ad.budget / ad.duration).toFixed(2)}
+
+─── PLATFORM SPECIFICATIONS ───
+Recommended Image Size: ${specs.imageSize}
+Recommended Video Size: ${specs.videoSize}
+Text Character Limit: ${specs.textLimit}
+Headline Character Limit: ${specs.headlineLimit}
+Available Formats: ${specs.formats.join(', ')}
+
+─── TARGETING OPTIONS ───
+${ad.targeting.platforms?.length > 0 ? `Target Platforms: ${ad.targeting.platforms.join(', ')}` : 'No platform targeting specified'}
+Age Range: ${ad.targeting.demographics?.ageMin || 18}-${ad.targeting.demographics?.ageMax || 65}
+${ad.targeting.demographics?.locations?.length > 0 ? `Locations: ${ad.targeting.demographics.locations.join(', ')}` : ''}
+${ad.targeting.demographics?.interests?.length > 0 ? `Interests: ${ad.targeting.demographics.interests.join(', ')}` : ''}
+
+─── SUGGESTED HASHTAGS ───
+${adPackage.suggestedHashtags.join(' ')}
+
+─── UPLOAD INSTRUCTIONS FOR ${specs.name.toUpperCase()} ───
+${adPackage.platformInstructions}
+
+═══════════════════════════════════════════════
+Generated by AutoPromote - www.autopromote.org
+═══════════════════════════════════════════════
+`;
+
+    // Create and download file
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `autopromote-ad-${ad.id}-${specs.name.toLowerCase().replace(/\s+/g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast.success(`Ad package downloaded for ${specs.name}!`);
+  };
+
+  const generateHashtags = (title, description) => {
+    const text = `${title} ${description}`.toLowerCase();
+    const hashtags = [];
+    
+    // Common marketing hashtags
+    if (text.includes('music')) hashtags.push('#Music', '#NewMusic', '#MusicPromotion');
+    if (text.includes('video')) hashtags.push('#Video', '#VideoMarketing', '#VideoContent');
+    if (text.includes('product')) hashtags.push('#Product', '#Shopping', '#NewProduct');
+    if (text.includes('business')) hashtags.push('#Business', '#Entrepreneur', '#SmallBusiness');
+    if (text.includes('art')) hashtags.push('#Art', '#Artist', '#ArtistsOnSocial');
+    
+    // Add general hashtags
+    hashtags.push('#Marketing', '#SocialMedia', '#DigitalMarketing', '#ContentCreator');
+    
+    return hashtags.slice(0, 10);
+  };
+
+  const getPlatformInstructions = (platform) => {
+    const instructions = {
+      facebook: `1. Go to Facebook Ads Manager (facebook.com/adsmanager)
+2. Click "Create" to start a new campaign
+3. Choose your objective (Traffic, Engagement, or Conversions)
+4. Set your budget and schedule
+5. Define your audience (use the targeting options above)
+6. Upload your creative assets (image/video)
+7. Copy and paste the ad copy from above
+8. Set your landing page URL
+9. Review and publish your ad`,
+
+      instagram: `1. Use Facebook Ads Manager (instagram ads run through Facebook)
+2. Select Instagram as placement when creating your ad
+3. Choose format: Feed, Stories, or Reels
+4. Upload creative in vertical format (1080x1920px for Stories/Reels)
+5. Add your caption (copy from above)
+6. Include relevant hashtags
+7. Set your landing page URL
+8. Preview and publish`,
+
+      youtube: `1. Go to Google Ads (ads.google.com)
+2. Create a new Video campaign
+3. Choose your campaign goal
+4. Upload your video to YouTube first
+5. Select video ad format (In-Stream, Discovery, or Bumper)
+6. Add headline and description
+7. Set targeting options
+8. Define budget and schedule
+9. Launch campaign`,
+
+      tiktok: `1. Go to TikTok Ads Manager (ads.tiktok.com)
+2. Create a new campaign
+3. Choose ad objective
+4. Set up ad group with targeting
+5. Upload video creative (9:16 vertical format)
+6. Add ad text and call-to-action
+7. Enter landing page URL
+8. Set budget and schedule
+9. Submit for review`,
+
+      twitter: `1. Go to Twitter Ads (ads.twitter.com)
+2. Choose campaign objective
+3. Set targeting parameters
+4. Upload creative (image or video)
+5. Compose tweet text (280 character limit)
+6. Add website card with URL
+7. Set budget and duration
+8. Launch campaign`,
+
+      linkedin: `1. Go to LinkedIn Campaign Manager
+2. Create a new campaign
+3. Choose objective (Website Visits, Engagement, etc.)
+4. Define your audience
+5. Upload ad creative
+6. Write introductory text and headline
+7. Add destination URL
+8. Set budget and schedule
+9. Launch campaign`,
+
+      snapchat: `1. Go to Snapchat Ads Manager
+2. Create a new campaign
+3. Select ad format (Snap Ad, Story Ad)
+4. Upload vertical creative (9:16 format)
+5. Add brand name and headline
+6. Set call-to-action
+7. Define targeting
+8. Set budget
+9. Submit for review`,
+
+      reddit: `1. Go to Reddit Ads (ads.reddit.com)
+2. Create a new campaign
+3. Choose objective
+4. Select subreddit targeting
+5. Upload creative
+6. Write post title and text
+7. Add destination URL
+8. Set budget and schedule
+9. Launch campaign`,
+
+      pinterest: `1. Go to Pinterest Ads Manager
+2. Create a new campaign
+3. Choose campaign objective
+4. Upload Pin creative (2:3 aspect ratio)
+5. Add Pin title and description
+6. Set destination URL
+7. Define targeting
+8. Set budget
+9. Publish campaign`,
+
+      google: `1. Go to Google Ads (ads.google.com)
+2. Create a new campaign
+3. Choose campaign type (Search, Display, or Video)
+4. Set campaign goal
+5. Upload display ads or write search ads
+6. Define keywords and targeting
+7. Set landing page URL
+8. Configure budget and bidding
+9. Launch campaign`
+    };
+
+    return instructions[platform] || instructions.facebook;
+  };
+
   return (
     <div style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ marginBottom: '2rem' }}>
@@ -411,6 +703,23 @@ const AdsPanel = () => {
                     }}
                   >
                     Pause Ad
+                  </button>
+                )}
+                {ad.type === 'external' && (
+                  <button
+                    onClick={() => handleDownloadAdPackage(ad)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: '#3b82f6',
+                      border: 'none',
+                      borderRadius: '6px',
+                      color: 'white',
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    📥 Download Ad Package
                   </button>
                 )}
                 <button
