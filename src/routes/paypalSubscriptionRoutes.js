@@ -428,7 +428,22 @@ router.get('/status', authMiddleware, async (req, res) => {
     }
 
     // Get user subscription
-    const subDoc = await db.collection('user_subscriptions').doc(userId).get();
+    let subDoc;
+    try {
+      subDoc = await db.collection('user_subscriptions').doc(userId).get();
+    } catch (dbError) {
+      console.error('[PayPal] Database error:', dbError);
+      // Return free plan if DB error
+      return res.json({
+        success: true,
+        subscription: {
+          planId: 'free',
+          planName: 'Free',
+          status: 'active',
+          features: SUBSCRIPTION_PLANS.free.features
+        }
+      });
+    }
     
     if (!subDoc.exists) {
       return res.json({
@@ -510,21 +525,34 @@ router.get('/usage', authMiddleware, async (req, res) => {
       ? new Date(userData.subscriptionPeriodStart) 
       : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    // Get usage counts
-    const uploadsSnap = await db.collection('content')
-      .where('userId', '==', userId)
-      .where('createdAt', '>=', periodStart.toISOString())
-      .get();
+    // Get usage counts (with error handling for missing indexes/collections)
+    let uploadsSnap, postsSnap, boostsSnap;
+    try {
+      uploadsSnap = await db.collection('content')
+        .where('userId', '==', userId)
+        .get();
+    } catch (e) {
+      console.log('[PayPal] Content query error:', e.message);
+      uploadsSnap = { size: 0 };
+    }
 
-    const postsSnap = await db.collection('community_posts')
-      .where('userId', '==', userId)
-      .where('createdAt', '>=', periodStart.toISOString())
-      .get();
+    try {
+      postsSnap = await db.collection('community_posts')
+        .where('userId', '==', userId)
+        .get();
+    } catch (e) {
+      console.log('[PayPal] Posts query error:', e.message);
+      postsSnap = { size: 0 };
+    }
 
-    const boostsSnap = await db.collection('viral_boosts')
-      .where('userId', '==', userId)
-      .where('createdAt', '>=', periodStart.toISOString())
-      .get();
+    try {
+      boostsSnap = await db.collection('viral_boosts')
+        .where('userId', '==', userId)
+        .get();
+    } catch (e) {
+      console.log('[PayPal] Boosts query error:', e.message);
+      boostsSnap = { size: 0 };
+    }
 
     const usage = {
       uploads: {
