@@ -940,6 +940,13 @@ app.use('/api/paypal', paypalWebhookRoutes);
 app.use('/api/paypal-subscriptions', routeLimiter({ windowHint: 'paypal_subscriptions' }), paypalSubscriptionRoutes);
 app.use('/api/viral-boost', routeLimiter({ windowHint: 'viral_boost' }), viralBoostRoutes);
 app.use('/api/rewards', routeLimiter({ windowHint: 'rewards' }), rewardsRoutes);
+try {
+  const adsRoutes = require('./routes/adsRoutes');
+  app.use('/api/ads', routeLimiter({ windowHint: 'ads' }), adsRoutes);
+  console.log('📢 Ads routes mounted at /api/ads');
+} catch (e) {
+  console.warn('⚠️ Ads routes mount failed:', e.message);
+}
 // Stripe integration removed
 app.use('/api/admin/variants', variantAdminRoutes);
 app.use('/api/admin/config', adminConfigRoutes);

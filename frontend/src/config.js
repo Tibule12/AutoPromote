@@ -120,7 +120,21 @@ export const API_ENDPOINTS = {
   // Platform aggregated status & user progress
   PLATFORM_STATUS: `${API_BASE_URL}/api/platform/status`,
   PLATFORM_DISCONNECT: (platform) => `${API_BASE_URL}/api/platform/disconnect/${platform}`,
-  USER_PROGRESS: `${API_BASE_URL}/api/users/progress`
+  USER_PROGRESS: `${API_BASE_URL}/api/users/progress`,
+
+  // Ads & Campaigns
+  ADS: `${API_BASE_URL}/api/ads`,
+  AD_LAUNCH: (adId) => `${API_BASE_URL}/api/ads/${adId}/launch`,
+  AD_PAUSE: (adId) => `${API_BASE_URL}/api/ads/${adId}/pause`,
+  AD_RESUME: (adId) => `${API_BASE_URL}/api/ads/${adId}/resume`,
+  AD_ANALYTICS: (adId) => `${API_BASE_URL}/api/ads/${adId}/analytics`,
+
+  // PayPal Subscriptions
+  PAYPAL_SUBSCRIPTIONS: `${API_BASE_URL}/api/paypal-subscriptions`,
+  PAYPAL_SUBSCRIPTION_STATUS: `${API_BASE_URL}/api/paypal-subscriptions/status`,
+  PAYPAL_SUBSCRIPTION_USAGE: `${API_BASE_URL}/api/paypal-subscriptions/usage`,
+  PAYPAL_CREATE_SUBSCRIPTION: `${API_BASE_URL}/api/paypal-subscriptions/create`,
+  PAYPAL_CANCEL_SUBSCRIPTION: (subscriptionId) => `${API_BASE_URL}/api/paypal-subscriptions/${subscriptionId}/cancel`
 };
 
 // Firebase configuration

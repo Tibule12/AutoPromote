@@ -13,6 +13,7 @@ import SecurityPanel from './UserDashboardTabs/SecurityPanel';
 import CommunityPanel from './UserDashboardTabs/CommunityPanel';
 import CommunityFeed from './CommunityFeed';
 import ClipStudioPanel from './UserDashboardTabs/ClipStudioPanel';
+import AdsPanel from './UserDashboardTabs/AdsPanel';
 import UsageLimitBanner from './components/UsageLimitBanner';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
@@ -486,6 +487,7 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 						<li className={activeTab === 'rewards' ? 'active' : ''} onClick={() => handleNav('rewards')}>Rewards</li>
 						<li className={activeTab === 'notifications' ? 'active' : ''} onClick={() => handleNav('notifications')}>Notifications</li>
 						<li className={activeTab === 'earnings' ? 'active' : ''} onClick={() => handleNav('earnings')}>Earnings</li>
+					<li className={activeTab === 'ads' ? 'active' : ''} onClick={() => handleNav('ads')}>📢 Ads</li>
 					<li className={activeTab === 'connections' ? 'active' : ''} onClick={() => handleNav('connections')}>Connections</li>
 					<li className={activeTab === 'security' ? 'active' : ''} onClick={() => handleNav('security')}>Security</li>
 					<li className={activeTab === 'feed' ? 'active' : ''} onClick={() => handleNav('feed')}>🎥 Feed</li>
@@ -563,6 +565,10 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 
 				{activeTab === 'earnings' && (
 					<EarningsPanel earnings={earnings} onClaim={claimPayout} />
+				)}
+
+				{activeTab === 'ads' && (
+					<AdsPanel />
 				)}
 
 				{activeTab === 'connections' && (
