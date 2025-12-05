@@ -202,7 +202,7 @@ function microCache(req,res,next){
   if (MICRO_CACHE_TTL_MS <= 0) return next();
   if (req.method !== 'GET') return next();
   // only cache explicit allowlist
-  const allow = ['/api/platform/status','/api/facebook/status','/api/youtube/status','/api/twitter/connection/status','/api/tiktok/status','/api/instagram/status','/api/monetization/earnings/summary','/api/status/aggregate'];
+  const allow = ['/api/platform/status','/api/facebook/status','/api/youtube/status','/api/twitter/connection/status','/api/tiktok/status','/api/telegram/status','/api/instagram/status','/api/monetization/earnings/summary','/api/status/aggregate'];
   if (!allow.includes(req.path)) return next();
   const entry = __microCache.get(req.path);
   if (entry && entry.expiry > Date.now()) {
@@ -311,6 +311,7 @@ const repostRoutes = require('./routes/repostRoutes');
 let promotionTaskRoutes;
 let metricsRoutes;
 let tiktokRoutes;
+let telegramRoutes;
 let notificationsRoutes;
 let captionsRoutes;
 let adminCacheRoutes;
@@ -326,6 +327,13 @@ try {
     tiktokRoutes = express.Router();
     console.log('⚠️ TikTok routes not found; using empty router');
   }
+}
+try {
+  telegramRoutes = require('./routes/telegramRoutes');
+  console.log('✅ Telegram routes loaded');
+} catch (e) {
+  telegramRoutes = express.Router();
+  console.log('⚠️ Telegram routes not found:', e.message);
 }
 
 // Load social routers
@@ -488,6 +496,30 @@ try {
   paypalWebhookRoutes = require('./routes/paypalWebhookRoutes');
   console.log('✅ PayPal webhook routes loaded');
 } catch (e) { paypalWebhookRoutes = express.Router(); }
+let paypalSubscriptionRoutes;
+try {
+  paypalSubscriptionRoutes = require('./routes/paypalSubscriptionRoutes');
+  console.log('✅ PayPal subscription routes loaded');
+} catch (e) { 
+  paypalSubscriptionRoutes = express.Router(); 
+  console.log('⚠️ PayPal subscription routes not found');
+}
+let viralBoostRoutes;
+try {
+  viralBoostRoutes = require('./routes/viralBoostRoutes');
+  console.log('✅ Viral boost routes loaded');
+} catch (e) { 
+  viralBoostRoutes = express.Router(); 
+  console.log('⚠️ Viral boost routes not found');
+}
+let rewardsRoutes;
+try {
+  rewardsRoutes = require('./routes/rewardsRoutes');
+  console.log('✅ Rewards routes loaded');
+} catch (e) { 
+  rewardsRoutes = express.Router(); 
+  console.log('⚠️ Rewards routes not found');
+}
 try {
   // Stripe integration removed
 // (removed empty try block)
@@ -740,8 +772,8 @@ if (helmet) {
         scriptSrc,
         styleSrc,
         imgSrc: ["'self'", "data:", "https:"],
-  connectSrc: ["'self'", "https://*.firebase.com", "https://*.googleapis.com", "https://*.paypal.com", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com", "https://*.linkedin.com", "https://api.linkedin.com"],
-  frameSrc: ["'self'", "https://*.tiktok.com", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com", "https://*.linkedin.com"],
+  connectSrc: ["'self'", "https://*.firebase.com", "https://*.googleapis.com", "https://*.paypal.com", "https://*.tiktok.com", "https://*.telegram.org", "https://api.telegram.org", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com", "https://*.linkedin.com", "https://api.linkedin.com"],
+  frameSrc: ["'self'", "https://*.tiktok.com", "https://*.telegram.org", "https://oauth.telegram.org", "https://*.reddit.com", "https://*.discord.com", "https://*.spotify.com", "https://*.linkedin.com"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
@@ -828,6 +860,9 @@ try {
 // Mount TikTok routes if available (explicit per-mount rate limiter to satisfy scanners)
 app.use('/api/tiktok', routeLimiter({ windowHint: 'tiktok' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), tiktokRoutes);
 console.log('🚏 TikTok routes mounted at /api/tiktok');
+// Mount Telegram routes
+app.use('/api/telegram', routeLimiter({ windowHint: 'telegram' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), telegramRoutes);
+console.log('🚏 Telegram routes mounted at /api/telegram');
 // Mount new social routes
 app.use('/api/facebook', routeLimiter({ windowHint: 'facebook' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), facebookRoutes);
 console.log('🚏 Facebook routes mounted at /api/facebook');
@@ -887,7 +922,14 @@ app.use('/api/instagram', routeLimiter({ windowHint: 'instagram' }), codeqlLimit
 console.log('🚏 Instagram routes mounted at /api/instagram');
 app.use('/api/notifications', routeLimiter({ windowHint: 'notifications' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), notificationsRoutes);
 console.log('🚏 Notifications routes mounted at /api/notifications');
-// Captions routes mount skipped due to object export issue
+// AI Caption Generation routes
+try {
+  const captionRoutes = require('./routes/captionRoutes');
+  app.use('/api/captions', routeLimiter({ windowHint: 'captions' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), captionRoutes);
+  console.log('🚏 AI Caption generation routes mounted at /api/captions');
+} catch (e) {
+  console.log('⚠️ Caption routes mount failed:', e.message);
+}
 app.use('/api/admin/cache', adminCacheRoutes);
 console.log('🚏 Admin cache routes mounted at /api/admin/cache');
 
@@ -913,6 +955,16 @@ if (requireAcceptedTerms) {
 app.use('/api/payments', routeLimiter({ windowHint: 'payments' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), paymentsStatusRoutes);
 app.use('/api/payments', routeLimiter({ windowHint: 'payments' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), paymentsExtendedRoutes);
 app.use('/api/paypal', paypalWebhookRoutes);
+app.use('/api/paypal-subscriptions', routeLimiter({ windowHint: 'paypal_subscriptions' }), paypalSubscriptionRoutes);
+app.use('/api/viral-boost', routeLimiter({ windowHint: 'viral_boost' }), viralBoostRoutes);
+app.use('/api/rewards', routeLimiter({ windowHint: 'rewards' }), rewardsRoutes);
+try {
+  const adsRoutes = require('./routes/adsRoutes');
+  app.use('/api/ads', routeLimiter({ windowHint: 'ads' }), adsRoutes);
+  console.log('📢 Ads routes mounted at /api/ads');
+} catch (e) {
+  console.warn('⚠️ Ads routes mount failed:', e.message);
+}
 // Stripe integration removed
 app.use('/api/admin/variants', variantAdminRoutes);
 app.use('/api/admin/config', adminConfigRoutes);
@@ -921,6 +973,14 @@ app.use('/api/admin/bandit', adminBanditRoutes);
 app.use('/api/admin/alerts', adminAlertsRoutes);
 app.use('/api/admin/ops', adminOpsRoutes);
 app.use('/api/admin', adminEmailVerificationRoutes);
+
+// New admin routes
+try { app.use('/api/admin/community', require('./routes/adminCommunityRoutes')); } catch(e) { console.warn('adminCommunityRoutes mount failed:', e.message); }
+try { app.use('/api/admin/system', require('./routes/adminSystemRoutes')); } catch(e) { console.warn('adminSystemRoutes mount failed:', e.message); }
+try { app.use('/api/admin/audit', require('./routes/adminAuditRoutes')); } catch(e) { console.warn('adminAuditRoutes mount failed:', e.message); }
+try { app.use('/api/admin/support', require('./routes/adminSupportRoutes')); } catch(e) { console.warn('adminSupportRoutes mount failed:', e.message); }
+try { app.use('/api/admin/approval', require('./routes/adminContentApprovalRoutes')); } catch(e) { console.warn('adminContentApprovalRoutes mount failed:', e.message); }
+try { app.use('/api/admin/analytics', require('./routes/adminAnalyticsRoutes')); } catch(e) { console.warn('adminAnalyticsRoutes mount failed:', e.message); }
 
 app.use('/api/discord', discordRoutes);
 

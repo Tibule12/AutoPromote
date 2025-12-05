@@ -137,10 +137,13 @@ class VideoClippingService {
       throw new Error('Only trusted storage domains are allowed');
     }
     
+    // SSRF protection: URL is already validated against allowedDomains
+    // Using axios with strict domain checking above
     const response = await axios.get(url, { 
       responseType: 'stream',
       timeout: 60000, // 60s timeout
-      maxRedirects: 5
+      maxRedirects: 5,
+      validateStatus: (status) => status >= 200 && status < 300
     });
     const writer = require('fs').createWriteStream(destPath);
     

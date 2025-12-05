@@ -559,8 +559,8 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 				obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
 			}, { merge: true });
 		}
-		// Secure logging - never log tokens
-		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s scope=%s hasToken=%s', uid, tokenData.scope, !!tokenData.access_token);
+		// Secure logging - never log tokens or sensitive data
+		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s scope=%s', uid, tokenData.scope || 'unknown');
 		// redirect back to dashboard with success
 		const url = new URL(DASHBOARD_URL);
 		url.searchParams.set('tiktok', 'connected');
