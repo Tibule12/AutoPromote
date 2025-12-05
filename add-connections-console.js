@@ -7,8 +7,12 @@ async function addTestConnections() {
   try {
     console.log("🚀 Adding test platform connections...");
     
-    // Get the auth token
-    const token = await firebase.auth().currentUser.getIdToken();
+    // Get the auth token from localStorage (already available)
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.error("❌ No auth token found. Please make sure you're logged in.");
+      return;
+    }
     const apiUrl = "https://autopromote.onrender.com";
     
     const connections = [
