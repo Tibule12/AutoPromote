@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
 import { auth } from '../firebaseClient';
 import { parseJsonSafe } from '../utils/parseJsonSafe';
+import toast from 'react-hot-toast';
 
 function ContentApprovalPanel() {
   const [content, setContent] = useState([]);
@@ -36,8 +37,17 @@ function ContentApprovalPanel() {
       const contentData = contentParsed.json || null;
       const statsData = statsParsed.json || null;
 
-      if (contentData && contentData.success) setContent(contentData.content);
-      if (statsData && statsData.success) setStats(statsData.stats);
+      if (contentParsed.ok && contentData && contentData.success) setContent(contentData.content);
+      else if (!contentParsed.ok) {
+        console.warn('Content approval pending endpoint returned non-OK status', { status: contentParsed.status, preview: contentParsed.textPreview || contentParsed.error });
+        toast.error('Content approval service unavailable (pending list)');
+      }
+
+      if (statsParsed.ok && statsData && statsData.success) setStats(statsData.stats);
+      else if (!statsParsed.ok) {
+        console.warn('Content approval stats endpoint returned non-OK status', { status: statsParsed.status, preview: statsParsed.textPreview || statsParsed.error });
+        toast.error('Content approval stats currently unavailable');
+      }
       
       setLoading(false);
     } catch (error) {

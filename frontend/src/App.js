@@ -7,6 +7,7 @@ import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndP
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
+import { parseJsonSafe } from './utils/parseJsonSafe';
 import ChatWidget from './ChatWidget';
 
 function App() {
@@ -107,7 +108,7 @@ function App() {
       if (!res.ok) {
         // Try to read response body for error details
         let body = null;
-        try { body = await res.json(); } catch (_) { body = null; }
+        try { const parsed = await parseJsonSafe(res); body = parsed.json || null; } catch (_) { body = null; }
         if (res.status === 401 && auth.currentUser) {
           const freshToken = await auth.currentUser.getIdToken(true);
           return fetchUserContent(freshToken);
@@ -121,8 +122,9 @@ function App() {
         }
         return;
       }
-      const data = await res.json();
-      setContent(data.content || []);
+      const parsed = await parseJsonSafe(res);
+      const data = parsed.json || null;
+      setContent((data && data.content) || []);
       // After content, also fetch schedules (reuse token)
       await fetchMySchedules(token);
     } catch (error) {}
@@ -145,8 +147,9 @@ function App() {
         }
       });
       if (res.ok) {
-        const data = await res.json();
-        setMySchedules(Array.isArray(data.schedules) ? data.schedules : []);
+        const parsed = await parseJsonSafe(res);
+        const data = parsed.json || null;
+        setMySchedules(Array.isArray(data?.schedules) ? data.schedules : []);
       }
     } catch (_) {}
   };
@@ -185,8 +188,9 @@ function App() {
           'Accept': 'application/json'
         }
       });
-      if (!res.ok) {
-        let body = null; try { body = await res.json(); } catch(_) { body = null; }
+      const parsed = await parseJsonSafe(res);
+      if (!parsed.ok) {
+        const body = parsed.json || null;
         if (res.status === 401 && auth.currentUser) {
           const freshToken = await auth.currentUser.getIdToken(true);
           return fetchAnalytics(freshToken);
@@ -198,9 +202,10 @@ function App() {
         }
         setIsAdmin(false);
         return;
+      } else {
+        const data = parsed.json;
+        setAnalytics(data);
       }
-      const data = await res.json();
-      setAnalytics(data);
     } catch (error) {}
   };
 
@@ -216,7 +221,8 @@ function App() {
         body: JSON.stringify({ idToken }),
       });
       if (res.ok) {
-        const data = await res.json();
+        const parsed = await parseJsonSafe(res);
+        const data = parsed.json || null;
         // If backend returns a custom token, exchange it for an ID token
         if (data.customToken) {
           // Sign in with custom token (modular API)
@@ -248,8 +254,9 @@ function App() {
           if (ok) handleLogin(userData);
         }
       } else {
-        const error = await res.json();
-        throw new Error(error.message || 'Login failed');
+        const parsedErr = await parseJsonSafe(res);
+        const errorBody = parsedErr.json || null;
+        throw new Error(errorBody?.message || 'Login failed');
       }
     } catch (error) {
       alert(error.message || 'Login failed');
@@ -264,7 +271,7 @@ function App() {
         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
       });
       if (res.ok) return true; // already accepted
-      let body = null; try { body = await res.json(); } catch(_) {}
+      let body = null; try { const parsed = await parseJsonSafe(res); body = parsed.json || null; } catch(_) {}
       if (res.status === 403 && body && body.error === 'terms_not_accepted') {
         setRequiredTermsVersion(body.requiredVersion || null);
         setTermsRequired(true);
@@ -290,7 +297,8 @@ function App() {
         body: JSON.stringify({ name, email, uid: firebaseUser.uid, idToken }),
       });
       if (res.ok) {
-        const data = await res.json();
+        const parsed = await parseJsonSafe(res);
+        const data = parsed.json || null;
         handleRegister({ ...data.user, token: idToken, uid: firebaseUser.uid });
         alert('Registration successful! You are now logged in.');
       } else {

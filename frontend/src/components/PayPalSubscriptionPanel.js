@@ -90,7 +90,8 @@ const PayPalSubscriptionPanel = () => {
       });
 
       if (res.ok) {
-        const data = await res.json();
+        const parsed = await parseJsonSafe(res);
+        const data = parsed.json || null;
         if (data.approvalUrl) {
           // Redirect to PayPal for approval
           window.location.href = data.approvalUrl;
