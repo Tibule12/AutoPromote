@@ -220,7 +220,6 @@ export default function VariantAdminPanel() {
           <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>MaxBudgetChange%<input type='number' value={autopilotMaxBudgetChange} onChange={e => setAutopilotMaxBudgetChange(e.target.value)} style={{ width: 80 }} /></label>
           <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}><input type='checkbox' checked={autopilotAllowBudgetIncrease} onChange={e => setAutopilotAllowBudgetIncrease(e.target.checked)} /> Allow budget increase</label>
                     <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}><input type='checkbox' checked={autopilotRequiresApproval} onChange={e => setAutopilotRequiresApproval(e.target.checked)} /> Require approval for auto-apply</label>
-            const body = { enabled: autopilotEnabled, confidenceThreshold: Number(autopilotThreshold), minSample: Number(autopilotMinSample), mode: autopilotMode, maxBudgetChangePercent: Number(autopilotMaxBudgetChange), allowBudgetIncrease: Boolean(autopilotAllowBudgetIncrease), requiresApproval: Boolean(autopilotRequiresApproval) };
           <button onClick={setAutopilot}>Update</button>
           <button onClick={previewAutopilot}>Preview</button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
