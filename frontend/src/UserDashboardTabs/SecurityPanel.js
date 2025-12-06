@@ -3,7 +3,7 @@ import { auth, db } from '../firebaseClient';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, multiFactor, PhoneAuthProvider, PhoneMultiFactorGenerator, RecaptchaVerifier, TotpMultiFactorGenerator, TotpSecret } from 'firebase/auth';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import './SecurityPanel.css';
-import { parseJsonSafe } from '../../utils/parseJsonSafe';
+import { parseJsonSafe } from '../utils/parseJsonSafe';
 
 const SecurityPanel = ({ user }) => {
   const [passwordForm, setPasswordForm] = useState({
