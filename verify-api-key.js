@@ -3,8 +3,12 @@ const fetch = require('node-fetch');
 
 async function verifyApiKey() {
   try {
-    const apiKey = 'AIzaSyASTUuMkz821PoHRopZ8yy1dW5COrAQPZY';
-    console.log('Testing Firebase API Key:', apiKey);
+    const apiKey = process.env.FIREBASE_API_KEY || process.env.REACT_APP_FIREBASE_API_KEY;
+    if (!apiKey) {
+      console.error('No FIREBASE_API_KEY or REACT_APP_FIREBASE_API_KEY environment variable found. Set it and re-run this script.');
+      process.exit(1);
+    }
+    console.log('Testing Firebase API Key (redacted)');
     
     // Create a dummy request to test the API key
     const response = await fetch(

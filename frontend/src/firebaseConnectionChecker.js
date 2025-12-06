@@ -7,23 +7,35 @@ import { getAuth, signInAnonymously } from 'firebase/auth';
 import { getFirestore, collection, getDocs, limit, query } from 'firebase/firestore';
 import { getStorage, ref, listAll } from 'firebase/storage';
 
-// Use the same config as in firebaseClient.js
+// Use the same config as in firebaseClient.js (read from env variables only)
 const firebaseConfig = {
-  apiKey: "AIzaSyBA9It1gCyKBpqAhGM5TxwdNoe68c3qEBE",
-  authDomain: "autopromote-cc6d3.firebaseapp.com",
-  projectId: "autopromote-cc6d3",
-  storageBucket: "autopromote-cc6d3.appspot.com",
-  messagingSenderId: "341498038874",
-  appId: "1:341498038874:web:eb3806b3073a005534a663",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
   measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
 console.log('Initializing Firebase with configuration...');
-if (!process.env.REACT_APP_FIREBASE_MEASUREMENT_ID) {
-  console.warn('REACT_APP_FIREBASE_MEASUREMENT_ID is not set. Firebase analytics will be disabled.');
+// Check presence of important env vars without printing actual secret values
+const firebaseKeys = [
+  'REACT_APP_FIREBASE_API_KEY',
+  'REACT_APP_FIREBASE_AUTH_DOMAIN',
+  'REACT_APP_FIREBASE_PROJECT_ID',
+  'REACT_APP_FIREBASE_STORAGE_BUCKET',
+  'REACT_APP_FIREBASE_MESSAGING_SENDER_ID',
+  'REACT_APP_FIREBASE_APP_ID',
+  'REACT_APP_FIREBASE_MEASUREMENT_ID'
+];
+const missingFirebaseKeys = firebaseKeys.filter(k => !process.env[k]);
+if (missingFirebaseKeys.length > 0) {
+  console.warn('Missing Firebase env vars:', missingFirebaseKeys.join(', '));
+  console.warn('Set these values on your frontend service on Render and redeploy.');
 } else {
-  console.debug('REACT_APP_FIREBASE_MEASUREMENT_ID is set.');
+  console.debug('All required Firebase env vars appear to be present.');
 }
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

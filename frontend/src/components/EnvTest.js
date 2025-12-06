@@ -2,9 +2,11 @@ import React, { useEffect } from 'react';
 
 const EnvTest = () => {
   useEffect(() => {
-    // Use the correct API key directly
-    console.log('Firebase API Key:', 'AIzaSyASTUuMkz821PoHRopZ8yy1dW5COrAQPZY');
-    console.log('Firebase Auth Domain:', 'autopromote-464de.firebaseapp.com');
+    // Avoid printing secrets in the console; only indicate presence
+    const apiKeyPresent = !!process.env.REACT_APP_FIREBASE_API_KEY;
+    const authDomainPresent = !!process.env.REACT_APP_FIREBASE_AUTH_DOMAIN;
+    console.debug('Firebase API Key present:', apiKeyPresent);
+    console.debug('Firebase Auth Domain present:', authDomainPresent);
   }, []);
 
   return null;
