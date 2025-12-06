@@ -1,15 +1,27 @@
 const { initializeApp } = require('firebase/app');
 const { getFunctions, httpsCallable } = require('firebase/functions');
 
-// Firebase config - replace with your actual config
-const firebaseConfig = {
-  apiKey: "AIzaSyD_your_api_key_here", // You'll need to get this from Firebase console
-  authDomain: "autopromote-cc6d3.firebaseapp.com",
-  projectId: "autopromote-cc6d3"
-};
+// Firebase config - read from env vars
+function getClientFirebaseConfig() {
+  const keys = [
+    'REACT_APP_FIREBASE_API_KEY',
+    'REACT_APP_FIREBASE_AUTH_DOMAIN',
+    'REACT_APP_FIREBASE_PROJECT_ID'
+  ];
+  const missing = keys.filter(k => !process.env[k]);
+  if (missing.length) {
+    console.error('Missing required Firebase client env vars:', missing.join(', '));
+    process.exit(1);
+  }
+  return {
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID
+  };
+}
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(getClientFirebaseConfig());
 const functions = getFunctions(app);
 
 async function testUploadVideoToYouTube() {

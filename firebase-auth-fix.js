@@ -18,18 +18,33 @@ try {
   console.log('Firebase Admin initialized with project:', serviceAccount.project_id);
 }
 
-// Firebase client config
-const firebaseConfig = {
-  apiKey: "AIzaSyASTUuMkz821PoHRopZ8yy1dW5COrAQPZY",
-  authDomain: "autopromote-cc6d3.firebaseapp.com",
-  projectId: "autopromote-cc6d3",
-  storageBucket: "autopromote-cc6d3.firebasestorage.app",
-  messagingSenderId: "317746682241",
-  appId: "1:317746682241:web:f363e099d55ffd1af1b080"
-};
+// Firebase client config - read from env vars to avoid hard-coded keys
+function getClientFirebaseConfig() {
+  const keys = [
+    'REACT_APP_FIREBASE_API_KEY',
+    'REACT_APP_FIREBASE_AUTH_DOMAIN',
+    'REACT_APP_FIREBASE_PROJECT_ID',
+    'REACT_APP_FIREBASE_STORAGE_BUCKET',
+    'REACT_APP_FIREBASE_MESSAGING_SENDER_ID',
+    'REACT_APP_FIREBASE_APP_ID'
+  ];
+  const missing = keys.filter(k => !process.env[k]);
+  if (missing.length) {
+    console.error('Missing required Firebase client env vars:', missing.join(', '));
+    process.exit(1);
+  }
+  return {
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID,
+    measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
+  };
+}
 
-// Initialize Firebase client
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(getClientFirebaseConfig());
 const auth = getAuth(app);
 
 // Step 1: Verify API key
