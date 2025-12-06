@@ -3,6 +3,7 @@ import { auth, db } from '../firebaseClient';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, multiFactor, PhoneAuthProvider, PhoneMultiFactorGenerator, RecaptchaVerifier, TotpMultiFactorGenerator, TotpSecret } from 'firebase/auth';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import './SecurityPanel.css';
+import { parseJsonSafe } from '../../utils/parseJsonSafe';
 
 const SecurityPanel = ({ user }) => {
   const [passwordForm, setPasswordForm] = useState({
@@ -93,9 +94,10 @@ const SecurityPanel = ({ user }) => {
       });
       
       if (response.ok) {
-        const data = await response.json();
+        const parsed = await parseJsonSafe(response);
+        const data = parsed.json || null;
         // Debug: connections loaded (removed verbose logging for privacy)
-        const platforms = Object.entries(data.connections || {}).map(([key, value]) => ({
+        const platforms = Object.entries(data?.connections || {}).map(([key, value]) => ({
           id: key,
           provider: value.provider || key,
           connectedAt: value.obtainedAt ? new Date(value.obtainedAt) : new Date(),
@@ -105,7 +107,8 @@ const SecurityPanel = ({ user }) => {
         // Debug: processed platforms - removing raw logging to avoid leaking tokens
         setConnectedPlatforms(platforms);
       } else {
-        console.error('Failed to fetch connections:', response.status);
+        const parsed = await parseJsonSafe(response);
+        console.error('Failed to fetch connections:', parsed.status || response.status, parsed.textPreview || parsed.error || '');
         setConnectedPlatforms([]);
       }
     } catch (error) {

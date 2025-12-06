@@ -8,6 +8,7 @@ import mockAnalyticsData from './mockAnalyticsData';
 import VariantAdminPanel from './components/VariantAdminPanel';
 import CommunityModerationPanel from './components/CommunityModerationPanel';
 import SystemHealthPanel from './components/SystemHealthPanel';
+import AdminDiagnosticsButton from './components/AdminDiagnosticsButton';
 import ContentApprovalPanel from './components/ContentApprovalPanel';
 import AdvancedAnalyticsPanel from './components/AdvancedAnalyticsPanel';
 import PayPalSubscriptionPanel from './components/PayPalSubscriptionPanel';
@@ -23,7 +24,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
   // New feature states
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPlatform, setFilterPlatform] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [isLoading, setIsLoading] = useState(false);
   const [openAIUsage, setOpenAIUsage] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
@@ -44,7 +45,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
       return null;
     }
     try {
-      console.log('Attempting to fetch analytics data from Firestore...');
+      console.debug('Fetching analytics data from Firestore...');
 
       // Get current date for today's metrics
       const today = new Date();
@@ -91,9 +92,12 @@ function AdminDashboard({ analytics, user, onLogout }) {
       });
 
       // Fetch revenue per content/user from revenue collection
-      const revenueSnapshot = await getDocs(collection(db, 'revenue'));
-      const revenuePerContent = [];
-      const revenuePerUser = {};
+        const parsed = await parseJsonSafe(revenueResponse);
+        if (parsed.ok && parsed.json) {
+          revenueApiData = parsed.json;
+        } else if (!parsed.ok) {
+          console.warn('Revenue analytics non-JSON or error', { status: parsed.status, preview: parsed.textPreview });
+        }
       revenueSnapshot.docs.forEach(doc => {
         const data = doc.data();
         if (data.contentId) {
@@ -430,7 +434,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
         }
       };
 
-      console.log('Successfully fetched Firestore analytics data');
+      console.debug('Successfully fetched Firestore analytics data');
       setDashboardData(firestoreAnalyticsData);
       setIsLoading(false);
       setRefreshing(false);
@@ -439,7 +443,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
       setError(err.message);
 
       // Fallback to mock data after a short delay
-      console.log('Falling back to mock analytics data');
+      console.debug('Falling back to mock analytics data');
       setTimeout(() => {
         setDashboardData(mockAnalyticsData);
         setIsLoading(false);
@@ -2224,7 +2228,12 @@ function AdminDashboard({ analytics, user, onLogout }) {
   if (isLoading) {
     return (
       <div style={{ marginTop: 24, padding: '24px', textAlign: 'center' }}>
-        <h2 style={{ color: '#333' }}>Admin Dashboard</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ color: '#333' }}>Admin Dashboard</h2>
+          <div>
+            <AdminDiagnosticsButton />
+          </div>
+        </div>
         <div style={{
           margin: '24px auto',
           width: '50px',
