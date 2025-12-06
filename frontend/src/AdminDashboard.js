@@ -302,6 +302,27 @@ function AdminDashboard({ analytics, user, onLogout }) {
 
       const contentEngagementRate = totalViews > 0 ? totalEngagement / totalViews : 0;
 
+  // Compute autopilot metrics: enabled tests and actions in last 24h
+  let autopilotEnabledCount = 0;
+  let autopilotActionsLast24h = 0;
+  try {
+    const abTestsSnapshot = await getDocs(collection(db, 'ab_tests'));
+    const abTests = abTestsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    const now = new Date();
+    const last24 = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+    for (const t of abTests) {
+      if (t.autopilot && t.autopilot.enabled) autopilotEnabledCount++;
+      if (Array.isArray(t.autopilotActions)) {
+        for (const a of t.autopilotActions) {
+          let triggeredAt = a && a.triggeredAt ? (typeof a.triggeredAt.toDate === 'function' ? a.triggeredAt.toDate() : new Date(a.triggeredAt)) : null;
+          if (triggeredAt && triggeredAt >= last24) autopilotActionsLast24h++;
+        }
+      }
+    }
+  } catch(err) {
+    console.warn('AdminDashboard: could not compute autopilot stats', err);
+  }
+
   // Create analytics data from Firestore data
   const firestoreAnalyticsData = {
         totalUsers,
@@ -334,6 +355,10 @@ function AdminDashboard({ analytics, user, onLogout }) {
         topContent,
         recentActivities,
         promotionSchedules: allPromotionSchedules,
+        autopilot: {
+          enabledCount: autopilotEnabledCount,
+          actionsLast24h: autopilotActionsLast24h
+        },
   // Revenue/event analytics
   revenueByPlatform,
   revenuePerContent,
@@ -2859,6 +2884,12 @@ function AdminDashboard({ analytics, user, onLogout }) {
             Last updated: {new Date().toLocaleString()}
           </div>
         </div>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+        <StatCard title="Autopilot enabled tests" value={dashboardData?.autopilot?.enabledCount || 0} subtitle="Number of ab-tests where autopilot is enabled" icon="🤖" color="#1976d2" />
+        <StatCard title="Autopilot actions (24h)" value={dashboardData?.autopilot?.actionsLast24h || 0} subtitle="Autopilot apply or rollback actions in last 24 hours" icon="📣" color="#2e7d32" />
+        <StatCard title="Active Promotions" value={dashboardData?.activePromotions || 0} subtitle="Promotion schedules currently active" icon="🚀" color="#7b1fa2" />
+        <StatCard title="Total Revenue" value={dashboardData?.totalRevenue || 0} subtitle="Total collected revenue" icon="💰" color="#d32f2f" />
+      </div>
       </div>
 
       <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap' }}>

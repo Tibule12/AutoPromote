@@ -1,5 +1,6 @@
 const contentAnalysisService = require('./contentAnalysisService');
 const abTestingService = require('./abTestingService');
+const { db } = require('./firebaseAdmin');
 
 async function testNewFeatures() {
     try {
@@ -44,6 +45,14 @@ async function testNewFeatures() {
         const abTest = await abTestingService.createTest(testContent.id, variants);
         console.log('✅ A/B Test created successfully:', abTest);
 
+        // Enable autopilot for this test (quick settings for test)
+        await db.collection('ab_tests').doc(abTest.testId).update({
+            'autopilot.enabled': true,
+            'autopilot.confidenceThreshold': 80,
+            'autopilot.minSample': 20
+        });
+        console.log('✅ Autopilot enabled for test', abTest.testId);
+
         // Update test metrics
         const metrics = {
             views: 1500,
@@ -52,7 +61,18 @@ async function testNewFeatures() {
             revenue: 200
         };
 
-        const updatedTest = await abTestingService.updateTestMetrics(abTest.testId, 'variant-a', metrics);
+        // Update each variant metrics to simulate a winner
+        const variantA_metrics = { views: 500, engagement: 200, conversions: 40, revenue: 100 };
+        const variantB_metrics = { views: 110, engagement: 40, conversions: 1, revenue: 2 };
+
+        await abTestingService.updateTestMetrics(abTest.testId, 'variant-b', variantB_metrics);
+        const updatedTestB = await abTestingService.updateTestMetrics(abTest.testId, 'variant-a', variantA_metrics);
+        console.log('✅ Test metrics updated successfully:', updatedTestB);
+
+        // Read updated test doc to see if the autopilot applied a winner
+        const snap = await db.collection('ab_tests').doc(abTest.testId).get();
+        const testDoc = snap.data();
+        console.log('🔎 Test doc after updates:', { winner: testDoc.winner, autopilotActions: testDoc.autopilotActions });
         console.log('✅ Test metrics updated successfully:', updatedTest);
 
         return true;
