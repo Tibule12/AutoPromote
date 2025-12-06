@@ -15,11 +15,12 @@ const firebaseConfig = {
   storageBucket: "autopromote-cc6d3.appspot.com",
   messagingSenderId: "341498038874",
   appId: "1:341498038874:web:eb3806b3073a005534a663",
-  measurementId: "G-KQQD12JFRM"
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "G-KQQD12JFRM"
 };
 
 // Initialize Firebase
 console.log('Initializing Firebase with configuration...');
+console.debug('REACT_APP_FIREBASE_MEASUREMENT_ID:', !!process.env.REACT_APP_FIREBASE_MEASUREMENT_ID ? '[SET]' : '[NOT SET]');
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
