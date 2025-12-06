@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SchedulesPanel from '../UserDashboardTabs/SchedulesPanel';
 
 describe('SchedulesPanel create schedule', () => {
@@ -9,15 +9,25 @@ describe('SchedulesPanel create schedule', () => {
     render(<SchedulesPanel schedulesList={[]} contentList={contentList} onCreate={mockOnCreate} onPause={() => {}} onResume={() => {}} onReschedule={() => {}} onDelete={() => {}} />);
 
     // Choose content
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'c1' } });
+    // The content select has an aria-label of "Select content"
+    fireEvent.change(screen.getByRole('combobox', { name: /Select content/i }), { target: { value: 'c1' } });
     // Set a when
-    fireEvent.change(screen.getByLabelText(/datetime-local/i), { target: { value: '2030-01-01T12:00' } });
+    fireEvent.change(screen.getByLabelText(/When/i), { target: { value: '2030-01-01T12:00' } });
+    expect(screen.getByLabelText(/When/i).value).toBe('2030-01-01T12:00');
+    // Ensure combobox value changed
+    const combo = screen.getByRole('combobox', { name: /Select content/i });
+    expect(combo.value).toBe('c1');
     // select one platform
     fireEvent.click(screen.getByLabelText(/youtube/i));
+    // checkbox should be checked
+    expect(screen.getByLabelText(/youtube/i).checked).toBe(true);
     // Submit
-    fireEvent.click(screen.getByRole('button', { name: /Create Schedule/i }));
+    const createBtn = screen.getByRole('button', { name: /Create Schedule/i });
+    const form = createBtn.closest('form');
+    fireEvent.submit(form);
 
-    expect(mockOnCreate).toHaveBeenCalled();
+    // Wait for async onCreate to be invoked and the state updates to complete
+    await waitFor(() => expect(mockOnCreate).toHaveBeenCalled());
     const payload = mockOnCreate.mock.calls[0][0];
     expect(payload.contentId).toBe('c1');
     expect(Array.isArray(payload.platforms)).toBe(true);

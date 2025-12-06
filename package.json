@@ -11,6 +11,7 @@
     "test:unit": "node test/basic-sanity.js",
     "test:routes": "node test/route-imports.test.js",
     "test": "npm run test:unit",
+    "test:jest": "cross-env FIREBASE_ADMIN_BYPASS=1 CI_ROUTE_IMPORTS=1 jest --runInBand --verbose --testPathIgnorePatterns=\"test/e2e/playwright/\"",
     "check:secrets": "node ./scripts/check-no-secrets.js",
     "test:e2e": "node test/e2e/upload-e2e.js",
     "test:e2e:playwright": "cross-env CORS_ALLOW_ALL=true GOOGLE_APPLICATION_CREDENTIALS=test/e2e/tmp/service-account.json node ./scripts/write-service-account.js && cross-env CORS_ALLOW_ALL=true GOOGLE_APPLICATION_CREDENTIALS=test/e2e/tmp/service-account.json npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1",

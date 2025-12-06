@@ -1,5 +1,15 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+// Mock firebase storage to avoid network calls during tests
+jest.mock('firebase/storage', () => {
+  const actual = jest.requireActual('firebase/storage');
+  return {
+    ...actual,
+    ref: jest.fn(() => ({})),
+    uploadBytes: jest.fn(async () => ({ success: true })),
+    getDownloadURL: jest.fn(async () => 'https://example.com/test.mp4')
+  };
+});
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ContentUploadForm from '../ContentUploadForm';
 
 describe('ContentUploadForm payloads', () => {
@@ -29,15 +39,15 @@ describe('ContentUploadForm payloads', () => {
     // Add overlay text, then click preview button
     const overlayInput = screen.getByPlaceholderText(/Add overlay text/i);
     fireEvent.change(overlayInput, { target: { value: 'Hello Overlay' } });
-    const overlayPos = screen.getByDisplayValue('bottom');
+    const overlayPos = screen.getByLabelText(/Overlay position/i);
     fireEvent.change(overlayPos, { target: { value: 'top' } });
 
     // Click preview button
-    const previewBtn = screen.getByText(/Preview Content/i);
+    const previewBtn = screen.getByLabelText(/Preview Content/i);
     fireEvent.click(previewBtn);
 
     // Wait for onUpload to be called
-    expect(onUpload).toHaveBeenCalled();
+    await waitFor(() => expect(onUpload).toHaveBeenCalled());
     const payload = onUpload.mock.calls[0][0];
     expect(Array.isArray(payload.platforms)).toBeTruthy();
     expect(payload.platforms).toContain('discord');
@@ -62,10 +72,10 @@ describe('ContentUploadForm payloads', () => {
     fireEvent.click(screen.getByLabelText(/YouTube/i));
 
     // Submit the form
-    const uploadBtn = screen.getByText(/Upload Content/i);
+    const uploadBtn = screen.getByRole('button', { name: /Upload Content/i });
     fireEvent.click(uploadBtn);
 
-    expect(onUpload).toHaveBeenCalled();
+    await waitFor(() => expect(onUpload).toHaveBeenCalled());
     const payload = onUpload.mock.calls[0][0];
     expect(Array.isArray(payload.platforms)).toBeTruthy();
     expect(payload.platforms).toContain('youtube');
@@ -75,9 +85,9 @@ describe('ContentUploadForm payloads', () => {
     const overlayInput = screen.getByPlaceholderText(/Add overlay text/i);
     fireEvent.change(overlayInput, { target: { value: 'Submit Overlay' } });
     // Submit the form
-    const uploadBtn2 = screen.getByText(/Upload Content/i);
+    const uploadBtn2 = screen.getByRole('button', { name: /Upload Content/i });
     fireEvent.click(uploadBtn2);
-    expect(onUpload).toHaveBeenCalled();
+    await waitFor(() => expect(onUpload).toHaveBeenCalled());
     const payload2 = onUpload.mock.calls[onUpload.mock.calls.length - 1][0];
     expect(payload2.meta).toBeDefined();
     expect(payload2.meta.overlay).toBeDefined();
