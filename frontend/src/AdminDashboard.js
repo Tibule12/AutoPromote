@@ -24,7 +24,6 @@ function AdminDashboard({ analytics, user, onLogout }) {
   // New feature states
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPlatform, setFilterPlatform] = useState('all');
-  const [isLoading, setIsLoading] = useState(false);
   const [openAIUsage, setOpenAIUsage] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
