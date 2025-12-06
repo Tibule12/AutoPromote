@@ -127,6 +127,25 @@ Indexes (recommended):
 
 ---
 
+## 7) ab_tests (collection)
+- Document ID: auto-generated
+- Fields:
+  - contentId: string (ref to `content`)
+  - variants: array of { id:string, name:string, promotionSettings:object, metrics: { views:number, engagement:number, conversions:number, revenue:number } }
+  - startDate: Timestamp
+  - status: 'active' | 'completed' | 'paused'
+  - winner: string | null (variant id)
+  - autopilot: { enabled: boolean, confidenceThreshold: number (0-100), minSample: number, mode: 'recommend' | 'auto', maxBudgetChangePercent: number, allowBudgetIncrease: boolean }
+  - autopilotActions: array of { variantId, confidence, triggeredAt: Timestamp, reason: string }
+  - autopilotRecommendations: array of { variantId, confidence, triggeredAt: Timestamp, reason: string }
+  - createdAt: Timestamp
+  - updatedAt: Timestamp
+
+Indexes (recommended):
+- ab_tests by contentId
+- ab_tests by status
+
+
 Daily upload cap:
 - The backend checks `content.where('user_id','==',uid).where('created_at','>=', startOfDayUTC)` and limits to max 10 per UTC day.
 - If Firestore prompts for an index, create the suggested composite index.

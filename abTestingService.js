@@ -1,4 +1,5 @@
-const { db } = require('./firebaseAdmin');
+const { admin, db } = require('./firebaseAdmin');
+const { calculateConfidenceForVariants } = require('./src/utils/statistics');
 const promotionService = require('./promotionService');
 
 class ABTestingService {
@@ -17,7 +18,18 @@ class ABTestingService {
                 })),
                 startDate: new Date(),
                 status: 'active',
-                winner: null
+                winner: null,
+                    autopilot: {
+                        enabled: false,
+                        confidenceThreshold: 95,
+                        minSample: 100,
+                        maxBudgetChangePercent: 10,
+                        allowBudgetIncrease: false,
+                        mode: 'recommend', // 'recommend' | 'auto'
+                        requiresApproval: false,
+                        approvedBy: null,
+                        approvedAt: null
+                }
             };
 
             // Create test document
@@ -72,6 +84,13 @@ class ABTestingService {
             // Check if we should determine a winner
             if (this.shouldDetermineWinner(testData)) {
                 await this.determineWinner(testId);
+            }
+
+            // If autopilot is enabled, evaluate whether to auto-apply a winner
+            try {
+                await this.maybeAutoApply(testId, testData);
+            } catch(err) {
+                console.warn('[ABTesting] autopilot evaluation error', err.message);
             }
 
             return testData;
@@ -130,7 +149,8 @@ class ABTestingService {
         const minDuration = 7 * 24 * 60 * 60 * 1000; // 7 days
         const minViews = 1000;
 
-        const testDuration = Date.now() - testData.startDate.toDate();
+        const startDate = testData.startDate && testData.startDate.toDate ? testData.startDate.toDate() : new Date(testData.startDate);
+        const testDuration = Date.now() - startDate;
         const totalViews = testData.variants.reduce((sum, variant) => sum + variant.metrics.views, 0);
 
         return testDuration >= minDuration && totalViews >= minViews;
@@ -221,9 +241,85 @@ class ABTestingService {
     }
 
     calculateConfidenceLevel(testData) {
-        // Implement statistical confidence calculation
-        // This is a simplified version
-        return 95; // 95% confidence level
+        try {
+            if (!testData || !testData.variants) return 0;
+            return calculateConfidenceForVariants(testData.variants);
+        } catch (err) {
+            console.warn('[ABTesting] calculateConfidenceLevel error', err.message);
+            return 0;
+        }
+    }
+
+    // Statistical helpers moved into src/utils/statistics.js
+
+    async maybeAutoApply(testId, testData) {
+        try {
+            if (!testData || !testData.autopilot || !testData.autopilot.enabled) return;
+            const minSample = testData.autopilot.minSample || 100;
+            const threshold = typeof testData.autopilot.confidenceThreshold === 'number' ? testData.autopilot.confidenceThreshold : 95;
+
+            // require min total views to proceed
+            const totalViews = testData.variants.reduce((sum, v) => sum + (v.metrics.views || 0), 0);
+            if (totalViews < minSample) return;
+
+            // Compute candidate winner by score
+            const variantScores = testData.variants.map(variant => ({
+                variantId: variant.id,
+                score: this.calculateVariantScore(variant.metrics || {})
+            }));
+            const winner = variantScores.reduce((prev, curr) => curr.score > prev.score ? curr : prev);
+
+            // Calculate confidence for the test as whole
+            const confidence = this.calculateConfidenceLevel(testData);
+            if (confidence >= threshold) {
+                // Make sure we haven't already got a winner
+                if (!testData.winner) {
+                    // If autopilot is configured in recommend-only mode, simply log the recommendation
+                    if (testData.autopilot && testData.autopilot.mode !== 'auto') {
+                        // write a recommendation record, but do not apply
+                        const testRef2 = db.collection('ab_tests').doc(testId);
+                        await testRef2.update({
+                            autopilotRecommendations: admin && admin.firestore && admin.firestore.FieldValue ? admin.firestore.FieldValue.arrayUnion({
+                                variantId: winner.variantId,
+                                confidence,
+                                triggeredAt: new Date(),
+                                reason: 'autopilot_recommendation'
+                            }) : (testData.autopilotRecommendations || []).concat({
+                                variantId: winner.variantId,
+                                confidence,
+                                triggeredAt: new Date(),
+                                reason: 'autopilot_recommendation'
+                            })
+                        });
+                        return;
+                    }
+                    // Use autopilotService to apply auto with safety checks (budget limits, etc.)
+                    try {
+                        const autopilotService = require('./src/services/autopilotService');
+                        const applyResult = await autopilotService.applyAuto(testId);
+                        // log autopilot action (applyResult will be logged by autopilotService.applyAuto as well)
+                        const testRef = db.collection('ab_tests').doc(testId);
+                        await testRef.update({
+                            autopilotActions: admin && admin.firestore && admin.firestore.FieldValue ? admin.firestore.FieldValue.arrayUnion({
+                                variantId: winner.variantId,
+                                confidence,
+                                triggeredAt: new Date(),
+                                reason: applyResult.applied ? 'autopilot_auto_apply' : (applyResult.reason || 'autopilot_auto_apply_failed')
+                            }) : (testData.autopilotActions || []).concat({
+                                variantId: winner.variantId,
+                                confidence,
+                                triggeredAt: new Date(),
+                                reason: applyResult.applied ? 'autopilot_auto_apply' : (applyResult.reason || 'autopilot_auto_apply_failed')
+                            })
+                        });
+                    } catch (e) {
+                        console.warn('[ABTesting] autopilot apply failed inside maybeAutoApply', e.message);
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn('[ABTesting] maybeAutoApply error', err.message);
+        }
     }
 
     generateTestRecommendations(testData) {

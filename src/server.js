@@ -461,6 +461,7 @@ let variantAdminRoutes;
 let adminConfigRoutes;
 let adminDashboardRoutes;
 let adminBanditRoutes;
+let abAdminRoutes;
 let adminAlertsRoutes;
 let adminEmailVerificationRoutes;
 try {
@@ -526,6 +527,10 @@ try {
   variantAdminRoutes = require('./routes/variantAdminRoutes');
   console.log('✅ Variant admin routes loaded');
 } catch (e) { variantAdminRoutes = express.Router(); console.log('⚠️ Variant admin routes not found'); }
+try {
+  abAdminRoutes = require('./routes/abAdminRoutes');
+  console.log('✅ AB admin routes loaded');
+} catch (e) { abAdminRoutes = express.Router(); console.log('⚠️ AB admin routes not found'); }
 try {
   adminConfigRoutes = require('./routes/adminConfigRoutes');
   console.log('✅ Admin config routes loaded');
@@ -975,6 +980,7 @@ try {
 }
 // Stripe integration removed
 app.use('/api/admin/variants', variantAdminRoutes);
+app.use('/api/admin/ab_tests', abAdminRoutes);
 app.use('/api/admin/config', adminConfigRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
 app.use('/api/admin/bandit', adminBanditRoutes);
