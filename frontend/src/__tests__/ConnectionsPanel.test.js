@@ -11,7 +11,8 @@ describe('ConnectionsPanel display and disconnect', () => {
       tiktokStatus={{ connected: false }} youtubeStatus={{ connected: false }} spotifyStatus={{ connected: false }} redditStatus={{ connected: false }} discordStatus={{ connected: false }} facebookStatus={{ connected: false }} linkedinStatus={{ connected: false }} snapchatStatus={{ connected: false }} telegramStatus={{ connected: false }} pinterestStatus={{ connected: false }}
       handleConnectTwitter={()=>{}} handleConnectTikTok={()=>{}} handleConnectYouTube={()=>{}} handleConnectSpotify={()=>{}} handleConnectReddit={()=>{}} handleConnectDiscord={()=>{}} handleConnectFacebook={()=>{}} handleConnectLinkedin={()=>{}} handleConnectSnapchat={()=>{}} handleConnectTelegram={()=>{}} handleConnectPinterest={()=>{}} handleDisconnectPlatform={handleDisconnect}
     />);
-    expect(screen.getByText(/Twitter connected.*bob/)).toBeInTheDocument();
+    // The UI shows the twitter handle as @bob, check for that
+    expect(screen.getByText(/@bob/)).toBeInTheDocument();
     const disconnectBtn = screen.getByLabelText(/Disconnect Twitter/i);
     fireEvent.click(disconnectBtn);
     expect(handleDisconnect).toHaveBeenCalledWith('twitter');

@@ -729,9 +729,10 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
           </div>
         </div>
         <div className="form-group full-width">
-          <label>Title</label>
+          <label htmlFor="content-title">Title</label>
           <div className="input-with-emoji">
             <input
+              id="content-title"
               ref={titleInputRef}
               type="text"
               placeholder="✨ Enter catchy title..."
@@ -756,9 +757,10 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
         </div>
         
         <div className="form-group full-width">
-          <label>Description</label>
+          <label htmlFor="content-description">Description</label>
           <div className="input-with-emoji">
             <textarea
+              id="content-description"
               ref={descInputRef}
               placeholder="📝 Describe your content..."
               value={description}
@@ -826,7 +828,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             </button>
           </div>
           <div className="overlay-controls">
-            <select value={overlayPosition} onChange={(e)=>setOverlayPosition(e.target.value)} className="form-select-small">
+            <select aria-label="Overlay position" value={overlayPosition} onChange={(e)=>setOverlayPosition(e.target.value)} className="form-select-small">
               <option value="top">⬆️ Top</option>
               <option value="center">⏺️ Center</option>
               <option value="bottom">⬇️ Bottom</option>
@@ -900,6 +902,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             className="preview-button"
             onClick={handlePreview}
             title="Preview (Ctrl+P)"
+            aria-label="Preview Content"
           >
             {isPreviewing ? (
               <><span className="loading-spinner"></span> Generating Preview...</>
@@ -921,6 +924,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             disabled={isUploading}
             className="submit-button"
             title="Upload (Ctrl+Enter)"
+            aria-label="Upload Content"
           >
             {isUploading ? (
               <>

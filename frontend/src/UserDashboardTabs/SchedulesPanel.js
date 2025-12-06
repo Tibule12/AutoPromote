@@ -23,17 +23,17 @@ const SchedulesPanel = ({ schedulesList, contentList, onCreate, onPause, onResum
       <div className="create-schedule" style={{marginBottom:'.75rem', padding:'.75rem', border:'1px solid #e7edf3', borderRadius:8}}>
         <h4>Create Schedule</h4>
         <form onSubmit={handleCreate} style={{display:'grid', gap:8}}>
-          <select value={newContentId} onChange={(e)=>setNewContentId(e.target.value)}>
+          <select aria-label="Select content" value={newContentId} onChange={(e)=>setNewContentId(e.target.value)}>
             <option value="">Select content</option>
             {(contentList || []).map(c => <option key={c.id} value={c.id}>{c.title || c.id}</option>)}
           </select>
-          <input type="datetime-local" value={newWhen} onChange={(e)=>setNewWhen(e.target.value)} />
+          <input aria-label="When" type="datetime-local" value={newWhen} onChange={(e)=>setNewWhen(e.target.value)} />
           <div style={{display:'flex', gap:8, flexWrap:'wrap'}}>
             {['youtube','tiktok','instagram','facebook','twitter','linkedin','reddit','discord','telegram','pinterest','spotify','snapchat'].map(p => (
               <label key={p}><input type="checkbox" checked={newPlatforms.includes(p)} onChange={()=>toggleNewPlatform(p)} /> {p}</label>
             ))}
           </div>
-          <select value={newFrequency} onChange={(e)=>setNewFrequency(e.target.value)}>
+          <select aria-label="Frequency" value={newFrequency} onChange={(e)=>setNewFrequency(e.target.value)}>
             <option value="once">Once</option>
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
