@@ -83,7 +83,7 @@ router.post('/auth/prepare', async (req, res) => {
       const mask = (s) => (s ? `${String(s).slice(0,8)}…${String(s).slice(-4)}` : 'missing');
       console.log('[Facebook][prepare] Using client/redirect', { clientId: mask(FB_CLIENT_ID), redirectPresent: !!FB_REDIRECT_CANON });
     } catch (_) {}
-    const nonce = Math.random().toString(36).slice(2);
+    const nonce = crypto.randomBytes(8).toString('hex');
     const state = `${uid}.${nonce}`;
     await db.collection('users').doc(uid).collection('oauth_state').doc('facebook').set({
       state,
@@ -112,7 +112,7 @@ router.get('/auth/start', async (req, res) => {
       uid = decoded.uid;
     }
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
-    const nonce = Math.random().toString(36).slice(2);
+    const nonce = crypto.randomBytes(8).toString('hex');
     const state = `${uid}.${nonce}`;
     await db.collection('users').doc(uid).collection('oauth_state').doc('facebook').set({
       state,
