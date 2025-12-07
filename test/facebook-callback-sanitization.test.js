@@ -1,3 +1,4 @@
+process.env.FIREBASE_ADMIN_BYPASS = process.env.FIREBASE_ADMIN_BYPASS || '1';
 const express = require('express');
 const request = require('supertest');
 const app = express();

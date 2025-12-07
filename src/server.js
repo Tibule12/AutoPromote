@@ -31,6 +31,7 @@ try {
 } catch (e) { console.warn('[diagnostic] internal check failed:', e && e.message); }
 
 const express = require('express');
+const logger = require('./utils/logger');
 const cors = require('cors');
 const path = require('path');
 // Security & performance middlewares (declare once)
@@ -38,6 +39,13 @@ let helmet, compression;
 try { compression = require('compression'); } catch(_) { /* optional */ }
 try { helmet = require('helmet'); } catch(_) { /* optional */ }
 
+// ---------------------------------------------------------------------------
+// Test-run environment defaults
+// Prefer skipping viral optimizations and heavy background work during CI or test runs
+if (!process.env.NO_VIRAL_OPTIMIZATION && (process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.CI_ROUTE_IMPORTS === '1')) {
+  process.env.NO_VIRAL_OPTIMIZATION = '1';
+  logger.debug('[TEST] NO_VIRAL_OPTIMIZATION enabled for test/CI environment');
+}
 // ---------------------------------------------------------------------------
 // Enable shared keep-alive agents early (reduces cold outbound latency)
 // ---------------------------------------------------------------------------
@@ -186,9 +194,9 @@ function slowRequestLogger(req,res,next){
   res.once('finish', () => {
     const dur = Date.now() - started;
     recordLatency(dur);
-    if (dur >= SLOW_REQ_MS) {
-      console.warn(`[slow] ${req.method} ${req.originalUrl} ${dur}ms status=${res.statusCode}`);
-    }
+      if (dur >= SLOW_REQ_MS) {
+        logger.warn(`[slow] ${req.method} ${req.originalUrl} ${dur}ms status=${res.statusCode}`);
+      }
   });
   next();
 }
@@ -647,7 +655,7 @@ app.use((req, res, next) => {
         const ua = req.headers['user-agent'] || '';
         const ts = new Date().toISOString();
         const line = `[ACCESS] ts=${ts} ${req.method} ${req.originalUrl} status=${res.statusCode} requestID="${req.requestId || ''}" clientIP="${ip}" responseTimeMS=${duration} responseBytes=${bytes} userAgent="${ua.replace(/\"/g,'') }"`;
-        console.log(line);
+        logger.info(line);
         // Optional: write access log line to a daily file for security evidence (enable with LOG_EVENTS_TO_FILE=true)
         try {
           if (process.env.LOG_EVENTS_TO_FILE === 'true') {
@@ -690,17 +698,17 @@ const allowAll = process.env.CORS_ALLOW_ALL === 'true';
 
 const corsOptions = {
   origin: function (origin, callback) {
-    try { console.log('[cors.origin] origin:', origin, 'allowAll:', allowAll); } catch (e) {}
+    try { logger.debug('[cors.origin] origin:', origin, 'allowAll:', allowAll); } catch (e) {}
     // Allow requests with no origin (like mobile apps or curl requests).
     if (!origin) return callback(null, true);
     // In development or when allowAll is set, also treat the string 'null' as no-origin and allow it.
     if (origin === 'null' && (allowAll || process.env.NODE_ENV === 'development')) return callback(null, true);
     if (allowAll || allowedOrigins.includes(origin)) {
-      try { console.log('[cors.origin] -> allowed'); } catch(e) {}
+      try { logger.debug('[cors.origin] -> allowed'); } catch(e) {}
       return callback(null, true);
     }
-    console.warn('[cors.origin] -> blocked', origin);
-    try { console.warn('[cors.origin] -> stack', new Error('origin-blocked').stack); } catch(e) {}
+    logger.warn('[cors.origin] -> blocked', origin);
+    try { logger.warn('[cors.origin] -> stack', new Error('origin-blocked').stack); } catch(e) {}
     return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
@@ -711,7 +719,7 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 204,
 };
-console.log('[diagnostic] CORS allowAll:', allowAll, 'allowedOrigins:', allowedOrigins.join(','));
+logger.debug('[diagnostic] CORS allowAll:', allowAll, 'allowedOrigins:', allowedOrigins.join(','));
 
 // Proactively set Vary header for caches and handle preflight explicitly
 app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
@@ -721,7 +729,7 @@ app.use((req,res,next)=>{
     if (req.path === '/api/content/upload' || (req.headers && req.headers.origin && req.headers.origin.includes('127.0.0.1'))) {
       // Log a summarized set of headers for the upload route to help identify why requests are blocked by CORS
       const sampleHeaders = { origin: req.headers.origin, host: req.headers.host, 'user-agent': req.headers['user-agent'], referer: req.headers.referer, 'content-type': req.headers['content-type'] };
-      console.log('[request.debug] method:', req.method, 'path:', req.path, 'headers:', sampleHeaders);
+      logger.debug('[request.debug] method:', req.method, 'path:', req.path, 'headers:', sampleHeaders);
     }
   } catch(e){};
   next();
@@ -1859,6 +1867,33 @@ module.exports.__warmupState = () => (__warmupState);
 // Export Express app for integration tests
 module.exports = app;
 } catch (e) { console.error(e); }
+
+// Optional scheduled integration scan runner (outside try-catch to ensure we can log if not enabled)
+try {
+  const enableScan = process.env.ENABLE_HEALTH_SCANS === 'true';
+  const intervalMs = parseInt(process.env.HEALTH_SCAN_INTERVAL_MS || '3600000', 10);
+  const scanStore = process.env.HEALTH_SCAN_STORE === 'true';
+  const scanWebhook = process.env.SCAN_FAILURE_WEBHOOK || null;
+  if (enableScan && intervalMs > 0) {
+    const { runIntegrationChecks } = require('./services/healthRunner');
+    const runAndStore = async () => {
+      try {
+        const result = await runIntegrationChecks({ dashboard: 'user', userId: process.env.HEALTH_SCAN_USER || 'system-scan' });
+        if (scanStore || result.overall === 'failed') {
+          try { await (require('./firebaseAdmin').db).collection('system_scans').add({ dashboard: 'user', uid: process.env.HEALTH_SCAN_USER || 'system-scan', result, createdAt: new Date().toISOString() }); } catch(e){}
+        }
+        if (scanWebhook && result.overall === 'failed') {
+          try {
+            const doFetch = (typeof fetch === 'function') ? fetch : require('node-fetch');
+            await doFetch(scanWebhook, { method: 'POST', headers: { 'content-type':'application/json' }, body: JSON.stringify({ level: 'failed', details: result }) });
+          } catch(e) {}
+        }
+      } catch (e) { console.error('[health-scan] scheduled run failed:', e && e.message); }
+    };
+    setInterval(runAndStore, intervalMs);
+    console.log('[health-scan] scheduled scan enabled. Interval(ms)=', intervalMs, 'store=', scanStore);
+  }
+} catch (e) { console.warn('[health-scan] scheduler initialization error:', e && e.message); }
 
 // Global process-level error handlers to surface crashes in logs and allow process managers to restart
 process.on('uncaughtException', (err) => {

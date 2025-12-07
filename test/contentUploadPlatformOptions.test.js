@@ -7,8 +7,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use('/api/content', require('../src/contentRoutes'));
 
-(async () => {
-  try {
+describe('Content upload platform options forwarding', () => {
+  it('forwards platform_options payloads to per-platform tasks', async () => {
     const payload = {
       title: 'Test upload',
       type: 'video',
@@ -26,18 +26,15 @@ app.use('/api/content', require('../src/contentRoutes'));
       .send(payload)
       .expect(201);
     const body = res.body || {};
-    if (!Array.isArray(body.platform_tasks)) { console.error('Missing platform_tasks in response', body); process.exit(1); }
+    expect(Array.isArray(body.platform_tasks)).toBe(true);
     const discordTask = body.platform_tasks.find(t => t.platform === 'discord');
-    if (!discordTask || !discordTask.task || !discordTask.task.payload || !discordTask.task.payload.platformOptions) { console.error('Discord task payload missing platformOptions', discordTask); process.exit(1); }
-    if (discordTask.task.payload.platformOptions.channelId !== 'chan123') { console.error('Discord channelId mismatch', discordTask.task.payload.platformOptions); process.exit(1); }
+    expect(discordTask).toBeDefined();
+    expect(discordTask.task.payload.platformOptions.channelId).toBe('chan123');
     const spotifyTask = body.platform_tasks.find(t => t.platform === 'spotify');
-    if (!spotifyTask || !spotifyTask.task || spotifyTask.task.payload.platformOptions.name !== 'My Playlist For Test') { console.error('Spotify playlist name missing or mismatch', spotifyTask); process.exit(1); }
+    expect(spotifyTask).toBeDefined();
+    expect(spotifyTask.task.payload.platformOptions.name).toBe('My Playlist For Test');
     const pinterestTask = body.platform_tasks.find(t => t.platform === 'pinterest');
-    if (!pinterestTask || !pinterestTask.task || pinterestTask.task.payload.platformOptions.boardId !== 'b-1234-abcdef') { console.error('Pinterest boardId missing or mismatch', pinterestTask); process.exit(1); }
-    console.log('Content upload platform_options forwarding OK');
-    process.exit(0);
-  } catch (e) {
-    console.error('Test failed:', e && e.message ? e.message : e);
-    process.exit(1);
-  }
-})();
+    expect(pinterestTask).toBeDefined();
+    expect(pinterestTask.task.payload.platformOptions.boardId).toBe('b-1234-abcdef');
+  }, 20000);
+});

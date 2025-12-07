@@ -6,16 +6,18 @@ const authMiddleware = async (req, res, next) => {
     // Extract token from Authorization header
     const authHeader = req.headers['authorization'] || req.headers['Authorization'];
     const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
-    // Allow integration test bypass with special token
-    if (token === 'test-token-for-testUser123') {
-      req.userId = 'testUser123';
-      req.user = { uid: 'testUser123', email: 'testuser@example.com', test: true };
-      return next();
-    }
-    // Allow integration test bypass for admin user
-    if (token === 'test-token-for-adminUser') {
-      req.userId = 'adminUser123';
-      req.user = { uid: 'adminUser123', email: 'admin@example.com', role: 'admin', isAdmin: true };
+    // Allow integration test bypass with test tokens of the form 'test-token-for-{uid}'
+    if (typeof token === 'string' && token.startsWith('test-token-for-')) {
+      const uid = token.slice('test-token-for-'.length);
+      req.userId = uid;
+      req.user = { uid, email: `${uid}@example.com`, test: true };
+      if (uid.toLowerCase().includes('admin') || uid === 'adminUser123' || uid === 'adminUser') {
+        req.user.isAdmin = true;
+        req.user.role = 'admin';
+      } else {
+        req.user.isAdmin = false;
+        req.user.role = req.user.role || 'user';
+      }
       return next();
     }
     // If another upstream middleware already attached a user object, skip heavy work

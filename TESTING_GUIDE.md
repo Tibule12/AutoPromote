@@ -91,6 +91,59 @@ npm install
 node test-paypal-webhook-local.js
 node test-paypal-integration.js
 node test-production-flow.js
+
+## 🔍 Integration Scan (Dashboard Self-Test)
+
+There's a new integration scan endpoint which runs a suite of lightweight checks intended to simulate core dashboard workflows (both user and admin). The scan is available at:
+
+```
+GET /api/diagnostics/scan?dashboard=user
+GET /api/diagnostics/scan?dashboard=admin  # admin-only
+```
+
+- Requesting the Admin scan requires admin privileges — the UI automatically falls back to a user-level scan if the client is non-admin.
+- Admins can request to persist scan results by adding `&store=1` to the request (the result will be saved to the `system_scans` collection).
+- This endpoint is intended to be called when opening the Admin or User dashboards. The frontend `SystemHealthPanel` automatically triggers the scan and displays results.
+
+Run from the command line using a valid token (or in bypass/test mode with `test-token-for-<uid>`):
+
+```
+curl -H "Authorization: Bearer test-token-for-testUser123" "http://localhost:5000/api/diagnostics/scan?dashboard=user"
+curl -H "Authorization: Bearer test-token-for-adminUser" "http://localhost:5000/api/diagnostics/scan?dashboard=admin&store=1"
+```
+
+The endpoint returns a JSON structure containing per-check results and an overall status (ok/warning/failed). Use the Admin UI to view details and errors.
+
+### Scheduled Scans
+
+You can have the server run scheduled scans automatically by enabling the following environment variables:
+
+```
+ENABLE_HEALTH_SCANS=true
+HEALTH_SCAN_INTERVAL_MS=3600000  # 1 hour
+HEALTH_SCAN_STORE=true           # Persist scans to `system_scans`
+SCAN_FAILURE_WEBHOOK=https://hooks.example.com/your-webhook-url
+```
+
+When scheduled scans are enabled, results will be persisted to `system_scans`. If `SCAN_FAILURE_WEBHOOK` is configured, a POST will be sent when a scan fails.
+
+### Remediation & Auto-Fixes
+
+The diagnostics system also provides remediation suggestions for failing checks, and administrators can request an automatic remediation for a recorded scan. This can be useful for automated fixes like re-seeding a missing admin document, creating a sample leaderboard entry, or seeding test content used for validation.
+
+To run a remediation for a stored scan:
+
+```
+curl -X POST -H "Authorization: Bearer test-token-for-adminUser" "http://localhost:5000/api/diagnostics/scans/{SCAN_ID}/remediate"
+```
+
+You can also pass a JSON body to target specific checks:
+
+```
+{ "checks": ["db", "admin", "leaderboard"] }
+```
+
+Remediations are safe, limited actions intended for testing and recovery; they do not change environment variables. They are logged in `system_scans_remediation` with details and the admin who requested them.
 ```
 
 ## Test Environment Setup

@@ -11,10 +11,13 @@
     "test:unit": "node test/basic-sanity.js",
     "test:routes": "node test/route-imports.test.js",
     "test": "npm run test:unit",
-    "test:jest": "cross-env FIREBASE_ADMIN_BYPASS=1 CI_ROUTE_IMPORTS=1 jest --runInBand --verbose --testPathIgnorePatterns=\"test/e2e/playwright/\"",
+    "test:jest": "cross-env FIREBASE_ADMIN_BYPASS=1 CI_ROUTE_IMPORTS=1 NO_VIRAL_OPTIMIZATION=1 jest --runInBand --verbose --testPathIgnorePatterns=\"test/e2e/playwright/\"",
+    "seed:emulator": "node ./scripts/seed-autopilot-emulator.js",
+    "emulator:smoketest": "node ./scripts/seed-autopilot-emulator.js && node ./scripts/emulator-smoketest-run.js",
     "check:secrets": "node ./scripts/check-no-secrets.js",
     "test:e2e": "node test/e2e/upload-e2e.js",
     "test:e2e:playwright": "cross-env CORS_ALLOW_ALL=true GOOGLE_APPLICATION_CREDENTIALS=test/e2e/tmp/service-account.json node ./scripts/write-service-account.js && cross-env CORS_ALLOW_ALL=true GOOGLE_APPLICATION_CREDENTIALS=test/e2e/tmp/service-account.json npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1",
+    "emulator:start": "npx firebase emulators:start --only firestore,functions",
     "check:grpc-versions": "node -e \"const fs=require('fs'); const out=JSON.parse(require('child_process').execSync('npm ls @grpc/grpc-js --json').toString()||'{}'); const versions=new Set(); function scan(n){ if(!n||!n.dependencies) return; Object.keys(n.dependencies).forEach(k=>{ const d=n.dependencies[k]; if(k==='@grpc/grpc-js'){ versions.add(d.version); } scan(d); }); } scan(out); console.log('grpc versions:', [...versions].join(', ')); if(versions.size>1){ console.error('Multiple versions found'); process.exit(1);} \"",
     "check:grpc-install": "node ./scripts/check-grpc-install.js"
   },
@@ -52,9 +55,14 @@
     "node-forge": "1.3.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "@babel/preset-react": "^7.22.0",
     "@playwright/test": "^1.42.0",
+    "babel-jest": "^30.2.0",
     "cross-env": "^7.0.3",
     "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
     "supertest": "^7.1.4"
   }
 }
