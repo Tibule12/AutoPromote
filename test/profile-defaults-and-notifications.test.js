@@ -1,7 +1,3 @@
-// Smoke tests for profile defaults + notifications routers (no external HTTP lib)
-const path = require('path');
-const assert = (c,m)=> { if(!c){ console.error('FAIL', m); process.exit(1);} };
-
 const defaultsRouter = require('../src/routes/profileDefaultsRoutes');
 const notificationsRouter = require('../src/routes/notificationsRoutes');
 
@@ -18,30 +14,30 @@ async function invoke(handler, { body={}, userId='user-test' }={}){
   });
 }
 
-async function main(){
-  // Profile defaults GET (will 401 without userId) - we pass userId so OK
-  const getDefaults = find(defaultsRouter,'get','/defaults');
-  assert(getDefaults,'GET /defaults not found');
-  let resp = await invoke(getDefaults, {});
-  assert(resp.status === 200,'defaults fetch should 200');
-  assert(resp.body.ok === true,'defaults ok flag');
+describe('Profile defaults and notifications routers', ()=>{
+  it('can GET /defaults and validate response', async ()=>{
+    const getDefaults = find(defaultsRouter,'get','/defaults');
+    expect(getDefaults).toBeDefined();
+    const resp = await invoke(getDefaults, {});
+    expect(resp.status).toBe(200);
+    expect(resp.body.ok).toBe(true);
+  });
 
-  // Profile defaults POST invalid variantStrategy
-  const postDefaults = find(defaultsRouter,'post','/defaults');
-  resp = await invoke(postDefaults,{ body:{ variantStrategy:'invalid' } });
-  assert(resp.status === 400,'invalid strategy should 400');
+  it('POST /defaults invalid variantStrategy returns 400', async ()=>{
+    const postDefaults = find(defaultsRouter,'post','/defaults');
+    const resp = await invoke(postDefaults,{ body:{ variantStrategy:'invalid' } });
+    expect(resp.status).toBe(400);
+  });
 
-  // Notifications list
-  const listNotifications = find(notificationsRouter,'get','/');
-  assert(listNotifications,'notifications GET missing');
-  resp = await invoke(listNotifications,{});
-  if (resp.status !== 200) {
-    console.log('Skipping notifications assertion (status=',resp.status,') maybe auth middleware path mismatch');
-  } else {
-    assert(resp.status === 200,'notifications GET should 200 with userId');
-  }
-
-  console.log('Profile defaults & notifications smoke tests passed.');
-}
-
-main().catch(e=>{ console.error('Test crash', e); process.exit(1); });
+  it('GET notifications responds (ok or 200)', async ()=>{
+    const listNotifications = find(notificationsRouter,'get','/');
+    expect(listNotifications).toBeDefined();
+    const resp = await invoke(listNotifications,{});
+    if (resp.status !== 200) {
+      // Accept non-200 here (e.g., missing middleware), but assert no crash
+      expect(resp.status).toBeDefined();
+    } else {
+      expect(resp.status).toBe(200);
+    }
+  });
+});

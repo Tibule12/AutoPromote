@@ -4,6 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const { admin, db } = require('../firebaseAdmin');
+const { runIntegrationChecks, performRemediation } = require('../services/healthRunner');
 const authMiddleware = require('../authMiddleware');
 
 /**
@@ -82,6 +83,74 @@ router.get('/health', authMiddleware, async (req, res) => {
       error: 'Failed to run diagnostics',
       message: error.message
     });
+  }
+});
+
+/**
+ * GET /api/diagnostics/scan
+ * Run a set of lightweight integration-style checks for dashboard flows.
+ * Query params: dashboard=user|admin
+ */
+router.get('/scan', authMiddleware, async (req, res) => {
+  try {
+    const dashboard = (req.query.dashboard || 'user').toLowerCase();
+    if (dashboard === 'admin' && !(req.user && req.user.role === 'admin')) {
+      return res.status(403).json({ error: 'admin_required' });
+    }
+    const uid = req.userId || req.user?.uid || 'testUser123';
+    const result = await runIntegrationChecks({ dashboard, userId: uid });
+    // Optionally store results (admins can request to store scan records)
+    try {
+      if (req.query.store === '1' && req.user && req.user.role === 'admin') {
+        await db.collection('system_scans').add({ dashboard, uid, result, createdAt: new Date().toISOString() });
+      }
+    } catch (e) { /* best-effort */ }
+    // If scan failed and webhook configured, notify
+    try {
+      const scanWebhook = process.env.SCAN_FAILURE_WEBHOOK || null;
+      if (scanWebhook && result.overall === 'failed') {
+        const doFetch = (typeof fetch === 'function') ? fetch : require('node-fetch');
+        await doFetch(scanWebhook, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ level: 'failed', dashboard, results: result }) });
+      }
+    } catch (e) { /* best-effort */ }
+    res.json({ success: true, results: result });
+  } catch (error) {
+    console.error('[Diagnostics] Scan error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * POST /api/diagnostics/scans/:id/remediate
+ * Admin-only endpoint to remediate failing checks detected in a stored scan.
+ */
+router.post('/scans/:id/remediate', authMiddleware, async (req, res) => {
+  try {
+    if (!(req.user && req.user.role === 'admin')) return res.status(403).json({ error: 'admin_required' });
+    const id = req.params.id;
+    const scanSnap = await db.collection('system_scans').doc(id).get();
+    if (!scanSnap.exists) return res.status(404).json({ error: 'scan_not_found' });
+    const scan = scanSnap.data();
+    const checks = Object.keys(scan.result?.checks || {});
+    const targetChecks = (req.body && Array.isArray(req.body.checks) && req.body.checks.length > 0) ? req.body.checks : checks;
+    const applied = [];
+    const failed = [];
+    for (const key of targetChecks) {
+      const checkData = scan.result.checks[key];
+      if (!checkData || checkData.status === 'ok') continue;
+      try {
+        const remediation = await performRemediation(key, { userId: req.userId || req.user.uid });
+        applied.push({ key, remediation });
+      } catch (e) {
+        failed.push({ key, error: e.message || String(e) });
+      }
+    }
+    // Save remediation results into a dedicated collection
+    await db.collection('system_scans_remediation').add({ scanId: id, applied, failed, by: req.userId || req.user.uid, at: new Date().toISOString() });
+    res.json({ success: true, applied, failed });
+  } catch (e) {
+    console.error('[Diagnostics] Remediation error:', e);
+    res.status(500).json({ success: false, error: e.message });
   }
 });
 
@@ -891,6 +960,20 @@ router.get('/full', authMiddleware, async (req, res) => {
       error: 'Failed to run full diagnostics',
       message: error.message
     });
+  }
+});
+
+// Admin-only: list historical scans
+// GET /api/diagnostics/scans
+router.get('/scans', authMiddleware, async (req, res) => {
+  try {
+    if (!(req.user && req.user.role === 'admin')) return res.status(403).json({ error: 'admin_required' });
+    const snap = await db.collection('system_scans').orderBy('createdAt','desc').limit(20).get();
+    const scans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, scans });
+  } catch (e) {
+    console.error('[Diagnostics] List scans error:', e);
+    res.status(500).json({ success: false, error: e.message });
   }
 });
 

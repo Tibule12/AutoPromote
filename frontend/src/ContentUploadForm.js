@@ -925,6 +925,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             className="submit-button"
             title="Upload (Ctrl+Enter)"
             aria-label="Upload Content"
+            onClick={(e) => { e.preventDefault(); handleSubmit(e); }}
           >
             {isUploading ? (
               <>

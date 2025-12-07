@@ -18,6 +18,9 @@ router.get('/content/:id', authMiddleware, async (req, res) => {
     const content = contentDoc.data();
     
     // Check if user has permission to view this content's analytics
+    if (process.env.DEBUG_AUTH === 'true') {
+      console.log('[analytics] debug: content.userId=%s content.uid=%s req.user=%o', content.userId, content.uid, req.user);
+    }
     if (content.userId !== req.user.uid && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Access denied' });
     }

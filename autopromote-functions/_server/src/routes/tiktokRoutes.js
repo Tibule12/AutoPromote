@@ -371,18 +371,38 @@ router.get('/auth/start', ttWriteLimiter, async (req, res) => {
 			</div>
 			<script>
 				(function(){
-										const auth = ${JSON.stringify(authUrl)};
-										function isAllowedAuthUrl(url) {
-											try { if (!url || typeof url !== 'string') return false; if (url.startsWith('tg:') || url.startsWith('tg://')) return true; const u = new URL(url); const allowed = ['sandbox.tiktok.com','www.tiktok.com','open.tiktokapis.com','accounts.google.com']; return allowed.includes(u.hostname) || u.origin === window.location.origin; } catch (_) { return false; }
-										document.getElementById('continue').addEventListener('click',function(){
-												try {
-													if (isAllowedAuthUrl(auth)) window.location.href = auth;
-													else window.open(auth, '_blank');
-												} catch(e) { window.open(auth, '_self'); }
-										});
+					const auth = ${JSON.stringify(authUrl)};
+					function isAllowedAuthUrl(url) {
+						try { 
+							if (!url || typeof url !== 'string') return false; 
+							if (url.startsWith('tg:') || url.startsWith('tg://')) return true; 
+							const u = new URL(url); 
+							const allowed = ['sandbox.tiktok.com','www.tiktok.com','open.tiktokapis.com','accounts.google.com']; 
+							return allowed.includes(u.hostname) || u.origin === window.location.origin; 
+						} catch (_) { 
+							return false; 
+						}
+					}
+					
+					document.getElementById('continue').addEventListener('click',function(){
+						try {
+							if (isAllowedAuthUrl(auth)) window.location.href = auth;
+							else window.open(auth, '_blank');
+						} catch(e) { window.open(auth, '_self'); }
+					});
+					
 					document.getElementById('copy').addEventListener('click', async function(){
-						try { await navigator.clipboard.writeText(auth); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy URL',1500); }
-						catch(e){ const inp=document.getElementById('authUrl'); inp.select(); document.execCommand('copy'); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy URL',1500); }
+						try { 
+							await navigator.clipboard.writeText(auth); 
+							this.textContent='Copied'; 
+							setTimeout(()=>this.textContent='Copy URL',1500); 
+						} catch(e){ 
+							const inp=document.getElementById('authUrl'); 
+							inp.select(); 
+							document.execCommand('copy'); 
+							this.textContent='Copied'; 
+							setTimeout(()=>this.textContent='Copy URL',1500); 
+						}
 					});
 				})();
 			</script>
@@ -559,8 +579,8 @@ router.get('/callback', rateLimit({ max: 10, windowMs: 60000, key: r => r.ip }),
 				obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
 			}, { merge: true });
 		}
-		// Secure logging - never log tokens
-		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] success uid=%s scope=%s hasToken=%s', uid, tokenData.scope, !!tokenData.access_token);
+		// Secure logging - never log tokens or sensitive data
+		if (DEBUG_TIKTOK_OAUTH) console.log('[TikTok][callback] Connection successful');
 		// redirect back to dashboard with success
 		const url = new URL(DASHBOARD_URL);
 		url.searchParams.set('tiktok', 'connected');

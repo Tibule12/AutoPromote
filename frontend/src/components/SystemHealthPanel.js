@@ -11,6 +11,9 @@ function SystemHealthPanel() {
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [scanResults, setScanResults] = useState(null);
 
   useEffect(() => {
     fetchAllData();
@@ -52,16 +55,54 @@ function SystemHealthPanel() {
       ]);
 
       if (healthData.success) setHealth(healthData.health);
+      setIsAdmin(healthRes.status === 200);
       setDiagnostics(diagnosticsData);
       if (errorsData.success) setErrors(errorsData.errors);
       if (metricsData.success) setApiMetrics(metricsData.metrics);
       if (activityData.success) setActivities(activityData.activities);
       
       setLoading(false);
+      // Run integration scan: attempt admin-level scan and fallback to user-level
+      try {
+        const attemptAdmin = await fetch(`${API_BASE_URL}/api/diagnostics/scan?dashboard=admin`, { headers: { Authorization: `Bearer ${token}` } });
+        let scanResp = attemptAdmin;
+        if (attemptAdmin.status === 403) {
+          scanResp = await fetch(`${API_BASE_URL}/api/diagnostics/scan?dashboard=user`, { headers: { Authorization: `Bearer ${token}` } });
+        }
+          const scanData = await scanResp.json();
+          setScanResults(scanData.results);
+          // if we fetched admin/system health earlier and got 200, set isAdmin
+          if (healthRes && healthRes.status === 200) setIsAdmin(true);
+      } catch (e) {
+        console.error('Scan failed:', e);
+      }
     } catch (error) {
       console.error('Error fetching system data:', error);
       setLoading(false);
     }
+  };
+
+  // runAndStoreScan is defined later with better handling.
+
+  const fetchHistory = async () => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      const res = await fetch(`${API_BASE_URL}/api/diagnostics/scans`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 403) return; const d = await res.json(); if (d.scans) setHistory(d.scans);
+    } catch (e) { console.error('Fetch scan history failed', e); }
+  };
+
+  const runAndStoreScan = async () => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      const resp = await fetch(`${API_BASE_URL}/api/diagnostics/scan?dashboard=admin&store=1`, { headers: { Authorization: `Bearer ${token}` } });
+      if (resp.status === 200) {
+        const data = await resp.json();
+        setScanResults(data.results);
+      } else {
+        console.error('Failed to store scan', resp.status);
+      }
+    } catch (e) { console.error('Store scan failed', e); }
   };
 
   if (loading) {
@@ -83,6 +124,16 @@ function SystemHealthPanel() {
         <button onClick={fetchAllData} style={refreshButtonStyle}>
           🔄 Refresh Now
         </button>
+        {isAdmin && (
+          <>
+            <button onClick={runAndStoreScan} style={{ ...refreshButtonStyle, backgroundColor: '#2e7d32', marginLeft: 8 }}>
+              💾 Run & Save Scan
+            </button>
+            <button onClick={fetchHistory} style={{ ...refreshButtonStyle, backgroundColor: '#1976d2', marginLeft: 8 }}>
+              🕘 Fetch Scan History
+            </button>
+          </>
+        )}
       </div>
 
       {/* System Health */}
@@ -427,6 +478,88 @@ function SystemHealthPanel() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Integration Scan Results */}
+      {scanResults && (
+        <div style={{ ...containerStyle, marginTop: 20 }}>
+          <h3>Integration Scan Results</h3>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: 20 }}>
+            {Object.entries(scanResults.checks).map(([key, check]) => (
+              <div key={key} style={{ padding: 10, borderRadius: 6, border: '1px solid #eee', minWidth: 220 }}>
+                <div style={{ fontWeight: '600' }}>{key.replace(/_/g,' ').toUpperCase()}</div>
+                <div style={{ color: check.status === 'ok' ? '#2e7d32' : check.status === 'warning' ? '#ed6c02' : '#d32f2f', marginTop: 6 }}>{check.message}</div>
+                {check.id && <div style={{ fontSize: '0.85rem', marginTop: 8 }}>ID: {check.id}</div>}
+                {check.squadId && <div style={{ fontSize: '0.85rem', marginTop: 8 }}>SquadId: {check.squadId}</div>}
+                {check.connection && (
+                  <div style={{ fontSize: '0.85rem', marginTop: 8 }}>
+                    {Object.entries(check.connection).slice(0,4).map(([k,v]) => <div key={k}><strong>{k}</strong>: {String(v)}</div>)}
+                  </div>
+                )}
+                {/* Show remediation suggestion & action for admin */}
+                {isAdmin && check.status !== 'ok' && (
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ fontSize: '0.9rem', color: '#666' }}><strong>Suggestion:</strong> {check.recommendation}</div>
+                    <button onClick={async () => {
+                      try {
+                        const token = await auth.currentUser?.getIdToken();
+                        const scanId = scanResults.scanId || null; // if coming directly from history
+                        const targetScanId = scanId || 'UNKNOWN';
+                        // If scanning live (not stored), we need to store the scan first to remediate against it
+                        let recordId = scanId;
+                        if (!recordId) {
+                          // store current scan to system_scans
+                          const storeResp = await fetch(`${API_BASE_URL}/api/diagnostics/scan?dashboard=admin&store=1`, { headers: { Authorization: `Bearer ${token}` } });
+                          const storeData = await storeResp.json();
+                          // no guaranteed id; fetch the latest recorded scan instead
+                          const historyResp = await fetch(`${API_BASE_URL}/api/diagnostics/scans`, { headers: { Authorization: `Bearer ${token}` } });
+                          const historyData = await historyResp.json();
+                          if (historyData.scans && historyData.scans.length) recordId = historyData.scans[0].id;
+                        }
+                        if (!recordId) throw new Error('Unable to obtain scan record id');
+                        // call remediation endpoint for this single check
+                        const remediationResp = await fetch(`${API_BASE_URL}/api/diagnostics/scans/${recordId}/remediate`, { method: 'POST', headers: { 'content-type':'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ checks: [key] }) });
+                        const remediationData = await remediationResp.json();
+                        if (remediationData.success) {
+                          alert('Remediation applied successfully. Re-run scan to verify.');
+                          fetchAllData(); fetchHistory();
+                        } else {
+                          alert('Remediation failed: ' + JSON.stringify(remediationData));
+                        }
+                      } catch (e) { console.error('Remediation failed:', e); alert('Remediation failed: ' + (e && e.message)); }
+                    }} style={{ marginTop: 8, padding: '6px 12px', borderRadius: 6, backgroundColor: '#2e7d32', color: 'white', border: 'none' }}>Run suggested fix</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {history && history.length > 0 && (
+        <div style={{ ...containerStyle, marginTop: 20 }}>
+          <h3>Scan History</h3>
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={thStyle}>When</th>
+                <th style={thStyle}>Dashboard</th>
+                <th style={thStyle}>Overall</th>
+                <th style={thStyle}>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map(scan => (
+                <tr key={scan.id}>
+                  <td style={tdStyle}>{new Date(scan.createdAt).toLocaleString()}</td>
+                  <td style={tdStyle}>{scan.dashboard}</td>
+                  <td style={{ ...tdStyle, color: scan.result.overall === 'ok' ? '#2e7d32' : (scan.result.overall === 'warning' ? '#ed6c02' : '#d32f2f') }}>{scan.result.overall}</td>
+                  <td style={tdStyle}><details><summary>View</summary><pre style={{ whiteSpace:'pre-wrap' }}>{JSON.stringify(scan.result, null, 2)}</pre></details></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

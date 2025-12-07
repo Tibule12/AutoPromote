@@ -1,4 +1,13 @@
 const admin = require('firebase-admin');
+const bypass = process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.NODE_ENV === 'test' || typeof process.env.JEST_WORKER_ID !== 'undefined';
+if (bypass) {
+    try {
+        module.exports = require('./src/firebaseAdmin');
+    } catch (e) {
+        console.warn('[firebaseAdmin] bypass import failed, falling back to local shim', e && e.message);
+    }
+}
+if (!bypass) {
 // Diagnostic: log google-gax and @grpc/grpc-js versions/paths and whether 'single-subchannel-channel.js' exists
 try {
     const fs = require('fs');
@@ -86,3 +95,4 @@ if (admin.apps.length === 0) {
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
 module.exports = { admin, db };
+}

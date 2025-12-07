@@ -1,3 +1,4 @@
+process.env.FIREBASE_ADMIN_BYPASS = process.env.FIREBASE_ADMIN_BYPASS || '1';
 const express = require('express');
 const request = require('supertest');
 const app = express();
@@ -21,23 +22,15 @@ ssrf.safeFetch = (url, fetchFn, opts) => {
 
 app.use('/api/youtube', require('../src/routes/youtubeRoutes'));
 
-(async () => {
-  try {
+describe('YouTube callback sanitization', () => {
+  test('Sanitizes tokens from response', async () => {
     const res = await request(app)
       .get('/api/youtube/callback?code=testcode')
       .expect('Content-Type', /json/)
       .expect(200);
-
     const body = res.body || {};
-    if (body.access_token || body.refresh_token || (body.token && (body.token.access_token || body.token.refresh_token))) {
-      console.error('Sanitization failed - tokens present in response');
-      console.error('Response body:', JSON.stringify(body));
-      process.exit(1);
-    }
-    console.log('YouTube callback sanitization test passed');
-    console.log('OK');
-  } catch (e) {
-    console.error('Test failed:', e && e.message ? e.message : e);
-    process.exit(1);
-  }
-})();
+    expect(body.access_token).toBeUndefined();
+    expect(body.refresh_token).toBeUndefined();
+    expect(body.token && (body.token.access_token || body.token.refresh_token)).toBeUndefined();
+  });
+});

@@ -3,7 +3,20 @@
 // Seeds content into high-visibility zones, orchestrates boost chains, tracks viral velocity
 
 const { db } = require('../firebaseAdmin');
-const boostChainEngine = require('./boostChainEngine');
+const bypass = process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.NO_VIRAL_OPTIMIZATION === '1' || process.env.NO_VIRAL_OPTIMIZATION === 'true';
+
+if (bypass) {
+  module.exports = {
+    seedContentToVisibilityZones: async (content, platform, options = {}) => ({ success: true, seedingResults: [] }),
+    orchestrateBoostChain: async (content, platforms, options = {}) => ({ success: true, chainId: 'stub-chain', squadSize: 0 }),
+    generateOvernightViralPlan: (content, platforms) => ({ plan: [] }),
+    applyAlgorithmHijacking: (content, platform) => ({ success: true }),
+    checkZoneRequirements: (content, reqs) => ({ eligible: false, met: [], unmet: reqs }),
+    calculateViralVelocity: () => ({ current: 0, category: 'new' }),
+    trackExposureSaturation: async () => ({})
+  };
+} else {
+  const boostChainEngine = require('./boostChainEngine');
 
 // High-visibility zones by platform
 const VISIBILITY_ZONES = {
@@ -614,3 +627,5 @@ module.exports = {
   VIRAL_VELOCITY_THRESHOLDS,
   ALGORITHM_STRATEGIES
 };
+
+}

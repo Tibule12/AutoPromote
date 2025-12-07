@@ -39,6 +39,13 @@ try { compression = require('compression'); } catch(_) { /* optional */ }
 try { helmet = require('helmet'); } catch(_) { /* optional */ }
 
 // ---------------------------------------------------------------------------
+// Test-run environment defaults
+// Prefer skipping viral optimizations and heavy background work during CI or test runs
+if (!process.env.NO_VIRAL_OPTIMIZATION && (process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.CI_ROUTE_IMPORTS === '1')) {
+  process.env.NO_VIRAL_OPTIMIZATION = '1';
+  console.log('[TEST] NO_VIRAL_OPTIMIZATION enabled for test/CI environment');
+}
+// ---------------------------------------------------------------------------
 // Enable shared keep-alive agents early (reduces cold outbound latency)
 // ---------------------------------------------------------------------------
 try {
@@ -461,6 +468,7 @@ let variantAdminRoutes;
 let adminConfigRoutes;
 let adminDashboardRoutes;
 let adminBanditRoutes;
+let abAdminRoutes;
 let adminAlertsRoutes;
 let adminEmailVerificationRoutes;
 try {
@@ -526,6 +534,10 @@ try {
   variantAdminRoutes = require('./routes/variantAdminRoutes');
   console.log('✅ Variant admin routes loaded');
 } catch (e) { variantAdminRoutes = express.Router(); console.log('⚠️ Variant admin routes not found'); }
+try {
+  abAdminRoutes = require('./routes/abAdminRoutes');
+  console.log('✅ AB admin routes loaded');
+} catch (e) { abAdminRoutes = express.Router(); console.log('⚠️ AB admin routes not found'); }
 try {
   adminConfigRoutes = require('./routes/adminConfigRoutes');
   console.log('✅ Admin config routes loaded');
@@ -930,6 +942,14 @@ try {
 } catch (e) {
   console.log('⚠️ Caption routes mount failed:', e.message);
 }
+// System Diagnostics routes
+try {
+  const systemDiagnosticsRoutes = require('./routes/systemDiagnosticsRoutes');
+  app.use('/api/diagnostics', systemDiagnosticsRoutes);
+  console.log('🔍 System diagnostics routes mounted at /api/diagnostics');
+} catch (e) {
+  console.log('⚠️ Diagnostics routes mount failed:', e.message);
+}
 app.use('/api/admin/cache', adminCacheRoutes);
 console.log('🚏 Admin cache routes mounted at /api/admin/cache');
 
@@ -967,6 +987,7 @@ try {
 }
 // Stripe integration removed
 app.use('/api/admin/variants', variantAdminRoutes);
+app.use('/api/admin/ab_tests', abAdminRoutes);
 app.use('/api/admin/config', adminConfigRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
 app.use('/api/admin/bandit', adminBanditRoutes);
@@ -1514,10 +1535,31 @@ express.response.send = function(body) {
 };
 
 if (require.main === module) {
-  const server = app.listen(PORT, () => {
+  const server = app.listen(PORT, async () => {
     console.log(`🚀 AutoPromote Server is running on port ${PORT}`);
     console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
     console.log(`🔗 API endpoints available at: http://localhost:${PORT}/api/`);
+    
+    // Run startup diagnostics to catch configuration issues immediately
+    try {
+      const StartupDiagnostics = require('./utils/startupDiagnostics');
+      const diagnostics = new StartupDiagnostics();
+      const result = await diagnostics.runAll();
+      
+      if (!result.success) {
+        console.error('\n⚠️  SERVER STARTED WITH CRITICAL ERRORS - FIX IMMEDIATELY!');
+        console.error('Some features will not work until these are resolved.\n');
+      } else if (result.hasErrors) {
+        console.warn('\n⚠️  SERVER STARTED WITH NON-CRITICAL ERRORS');
+        console.warn('Some features may have limited functionality.\n');
+      } else if (result.hasWarnings) {
+        console.log('\n✅ SERVER STARTED SUCCESSFULLY (with minor warnings)');
+      } else {
+        console.log('\n✅ SERVER STARTED - ALL SYSTEMS OPERATIONAL\n');
+      }
+    } catch (diagError) {
+      console.error('Failed to run startup diagnostics:', diagError.message);
+    }
   }).on('error', (err) => {
     console.log('❌ Server startup error:', err.message);
     if (err.code === 'EADDRINUSE') {

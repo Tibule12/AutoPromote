@@ -1,50 +1,55 @@
 const express = require('express');
 const request = require('supertest');
-const app = express();
-app.use(express.json());
-app.use('/api/platform', require('../src/routes/platformRoutes'));
 
-async function simAndGet(platform, meta) {
-  // Simulate add
-  await request(app)
-    .post(`/api/platform/${platform}/auth/simulate`)
-    .set('Authorization', 'Bearer test-token-for-testUser123')
-    .send({ meta })
-    .expect(200);
-  // Fetch metadata
-  const res = await request(app)
-    .get(`/api/platform/${platform}/metadata`)
-    .set('Authorization', 'Bearer test-token-for-testUser123')
-    .expect(200);
-  return res.body;
-}
+describe('Platform metadata simulate endpoints', () => {
+  let app;
+  beforeAll(() => {
+    app = express();
+    app.use(express.json());
+    app.use('/api/platform', require('../src/routes/platformRoutes'));
+  });
+  beforeAll(() => { process.env.DEBUG_TEST_LOGS = '1'; });
 
-(async () => {
-  try {
-    console.log('Testing Spotify simulate + metadata...');
-    const spRes = await simAndGet('spotify', { display_name: 'SimUser', playlists: [{ id: 'p1', name: 'P1' }] });
-    if (!spRes.meta || !Array.isArray(spRes.meta.playlists)) { console.error('Spotify metadata not present', spRes); process.exit(1); }
-    console.log('Spotify metadata OK');
-
-    console.log('Testing Discord simulate + metadata...');
-    const dRes = await simAndGet('discord', { display_name: 'DUser', guilds: [{ id: 'g1', name: 'G1' }] });
-    if (!dRes.meta || !Array.isArray(dRes.meta.guilds)) { console.error('Discord metadata not present', dRes); process.exit(1); }
-    console.log('Discord metadata OK');
-
-    console.log('Testing LinkedIn simulate + metadata...');
-    const lRes = await simAndGet('linkedin', { profile: { localizedFirstName: 'L' }, organizations: [{ id: 'o1', name: 'Org' }] });
-    if (!lRes.meta || !Array.isArray(lRes.meta.organizations)) { console.error('LinkedIn metadata not present', lRes); process.exit(1); }
-    console.log('LinkedIn metadata OK');
-
-    console.log('Platform metadata simulate tests passed');
-    // Test Pinterest simulate & metadata
-    console.log('Testing Pinterest simulate + metadata...');
-    const pRes = await simAndGet('pinterest', { display_name: 'PUser', boards: [{ id: 'b1', name: 'Board 1' }] });
-    if (!pRes.meta || !Array.isArray(pRes.meta.boards)) { console.error('Pinterest metadata not present', pRes); process.exit(1); }
-    console.log('Pinterest metadata OK');
-    process.exit(0);
-  } catch (e) {
-    console.error('Test failed:', e.message || e);
-    process.exit(1);
+  async function simAndGet(platform, meta) {
+    await request(app)
+      .post(`/api/platform/${platform}/auth/simulate`)
+      .set('Authorization', 'Bearer test-token-for-testUser123')
+      .send({ meta })
+      .expect(200);
+    // Read the stored connection doc directly from the bypass DB for debugging
+    const { db } = require('../src/firebaseAdmin');
+    try {
+      const d = await db.collection('users').doc('testUser123').collection('connections').doc(platform).get();
+      if (d.exists) console.log('Stored connection meta for platform', platform, d.data()); else console.log('No stored connection doc for', platform);
+    } catch (e) { console.log('Error reading stored connection doc for', platform, e && e.message); }
+    const res = await request(app)
+      .get(`/api/platform/${platform}/metadata`)
+      .set('Authorization', 'Bearer test-token-for-testUser123')
+      .expect(200);
+    return res.body;
   }
-})();
+
+  it('returns Spotify metadata after simulate', async () => {
+    const res = await simAndGet('spotify', { display_name: 'SimUser', playlists: [{ id: 'p1', name: 'P1' }] });
+    expect(res.meta).toBeDefined();
+    expect(Array.isArray(res.meta.playlists)).toBe(true);
+  });
+
+  it('returns Discord metadata after simulate', async () => {
+    const res = await simAndGet('discord', { display_name: 'DUser', guilds: [{ id: 'g1', name: 'G1' }] });
+    expect(res.meta).toBeDefined();
+    expect(Array.isArray(res.meta.guilds)).toBe(true);
+  });
+
+  it('returns LinkedIn metadata after simulate', async () => {
+    const res = await simAndGet('linkedin', { profile: { localizedFirstName: 'L' }, organizations: [{ id: 'o1', name: 'Org' }] });
+    expect(res.meta).toBeDefined();
+    expect(Array.isArray(res.meta.organizations)).toBe(true);
+  });
+
+  it('returns Pinterest metadata after simulate', async () => {
+    const res = await simAndGet('pinterest', { display_name: 'PUser', boards: [{ id: 'b1', name: 'Board 1' }] });
+    expect(res.meta).toBeDefined();
+    expect(Array.isArray(res.meta.boards)).toBe(true);
+  });
+});
