@@ -50,7 +50,11 @@ router.get('/pending', authMiddleware, adminOnly, async (req, res) => {
     
     res.json({ success: true, content, total: content.length });
   } catch (error) {
-    console.error('Error fetching pending content:', error);
+    console.error('Error fetching pending content:', error?.message || error);
+    if (error && error.message && error.message.includes('requires an index')) {
+      const linkMatch = (error.message.match(/https:\/\/console\.firebase\.google\.com[^\s]+/) || [null])[0];
+      return res.status(422).json({ success: false, error: 'Missing Firestore composite index required by this query', indexLink: linkMatch || null });
+    }
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -288,7 +292,11 @@ router.get('/stats', authMiddleware, adminOnly, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching approval stats:', error);
+    console.error('Error fetching approval stats:', error?.message || error);
+    if (error && error.message && error.message.includes('requires an index')) {
+      const linkMatch = (error.message.match(/https:\/\/console\.firebase\.google\.com[^\s]+/) || [null])[0];
+      return res.status(422).json({ success: false, error: 'Missing Firestore composite index required by this query', indexLink: linkMatch || null });
+    }
     res.status(500).json({ success: false, error: error.message });
   }
 });

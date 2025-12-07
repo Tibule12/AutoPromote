@@ -191,7 +191,7 @@ async function createUserWithAdminSDK() {
       uid: userRecord.uid
     };
   } catch (error) {
-    console.log('❌ Error creating user with Admin SDK:', error);
+    console.log('❌ Error creating user with Admin SDK:', error.code || '', error.message || String(error));
     return {
       success: false,
       error: error.message
@@ -232,7 +232,7 @@ async function listUsers() {
       }))
     };
   } catch (error) {
-    console.log('❌ Error listing users:', error);
+    console.log('❌ Error listing users:', error.code || '', error.message || String(error));
     return {
       success: false,
       error: error.message
@@ -336,14 +336,20 @@ async function attemptKnownUserLogins() {
             }
             
           } catch (createError) {
-            console.log(`❌ Failed to create user ${user.email}:`, createError);
+            console.log(`❌ Failed to create user ${user.email}:`, createError.code || '', createError.message || String(createError));
           }
         } else {
-          console.log(`❌ Error checking user ${user.email}:`, userError);
+          console.log(`❌ Error checking user ${user.email}:`, userError.code || '', userError.message || String(userError));
         }
       }
     }
   }
+}
+
+function maskSecret(value, unmasked = 4) {
+  if (!value) return '<none>';
+  const s = String(value);
+  return '***' + s.slice(-unmasked);
 }
 
 // Run all steps
@@ -352,13 +358,10 @@ async function runAuthFix() {
     console.log('==================================================');
     console.log('FIREBASE AUTHENTICATION DIAGNOSTIC AND FIX UTILITY');
     console.log('==================================================');
-    function maskSecret(value, unmasked = 4) {
-      if (!value) return '<none>';
-      const s = String(value);
-      return '***' + s.slice(-unmasked);
-    }
+    // Use top-level helper
     console.log('Firebase Project ID:', firebaseConfig.projectId);
-    console.log('API Key (masked):', maskSecret(firebaseConfig.apiKey));
+    // Avoid printing API keys even masked in logs to prevent accidental leaks
+    console.log('API Key configured: [SET]');
     
     // Step 1: Verify API key
     const isApiKeyValid = await verifyApiKey();
@@ -412,3 +415,6 @@ async function runAuthFix() {
 
 // Run the fix
 runAuthFix().catch(console.error);
+
+// Export helper for unit testing
+module.exports = { maskSecret };

@@ -116,7 +116,7 @@ class VideoClippingService {
     const blockedHosts = [
       'localhost', '127.0.0.1', '0.0.0.0',
       /^10\..*/, /^172\.(1[6-9]|2[0-9]|3[01])\..*/, /^192\.168\..*/,
-      /^169\.254\..*/, /^::1$/, /^fc00:.*/, /^fe80:.*/
+      /^169\.254\..*/, /^::1$/, /^fc00:.*/, /^fd00:.*/, /^fe80:.*/
     ];
     
     if (blockedHosts.some(blocked => 
@@ -137,39 +137,93 @@ class VideoClippingService {
       throw new Error('Only trusted storage domains are allowed');
     }
     
-    // SSRF protection: Validate URL protocol to prevent SSRF attacks
+    // SSRF protection: only allow HTTPS
     const urlProtocol = parsedUrl.protocol;
-    if (urlProtocol !== 'https:' && urlProtocol !== 'http:') {
-      throw new Error('Only HTTP/HTTPS protocols are allowed');
+    if (urlProtocol !== 'https:') {
+      throw new Error('Only HTTPS URLs are allowed');
     }
     
-    // Additional SSRF protection: prevent private IP ranges
-    const privateIpPattern = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|169\.254\.|::1|fc00:|fe80:)/;
-    if (privateIpPattern.test(hostname)) {
+    // Additional SSRF protection: prevent private IP ranges, including IPv6 ULA (fc00/ fd00)
+    const privateIpPattern = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|169\.254\.|::1$|f[cd]00:|fe80:)/i;
+    async function hostResolvesToPrivate(host) {
+      try {
+        const addrs = await require('dns').promises.lookup(host, { all: true });
+        for (const addr of addrs) {
+          const address = addr.address;
+          if (privateIpPattern.test(address)) return true;
+          if (net.isIP(address)) {
+            if (address.startsWith('::1') || address.startsWith('fe80') || address.startsWith('fc00') || address.startsWith('fd00')) return true;
+          }
+        }
+      } catch (_err) {
+        return true;
+      }
+      return false;
+    }
+    if (privateIpPattern.test(hostname) || await hostResolvesToPrivate(hostname)) {
       throw new Error('Private IP addresses are not allowed');
     }
+
+    // Check port
+    const port = parsedUrl.port ? parseInt(parsedUrl.port, 10) : 443;
+    if (port !== 443) {
+      throw new Error('Invalid port for HTTPS resource');
+    }
     
-    // Using axios with strict domain and protocol checking
-    const response = await axios.get(url, { 
-      responseType: 'stream',
-      timeout: 60000, // 60s timeout
-      maxRedirects: 5,
-      validateStatus: (status) => status >= 200 && status < 300,
-      // Prevent redirects to private IPs
-      beforeRedirect: (options) => {
-        const redirectHost = new URL(options.href).hostname;
-        if (privateIpPattern.test(redirectHost)) {
-          throw new Error('Redirect to private IP blocked');
+    // HEAD request preflight to inspect headers and redirects
+    let headResp = null;
+    try {
+      headResp = await axios.head(url, { timeout: 10000, maxRedirects: 0, validateStatus: s => s >= 200 && s < 400 });
+    } catch (err) {
+      if (err.response) {
+        headResp = err.response;
+      } else {
+        throw new Error('Failed to access video URL');
+      }
+    }
+    if (headResp.status >= 300 && headResp.status < 400) {
+      const location = headResp.headers && headResp.headers.location;
+      if (location) {
+        const redirectUrl = new URL(location, url);
+        if (await hostResolvesToPrivate(redirectUrl.hostname)) {
+          throw new Error('Redirects to private networks are not allowed');
         }
       }
-    });
+      throw new Error('Redirects are not allowed when downloading video');
+    }
+
+    // Validate content-length and content-type
+    const contentLength = headResp.headers && headResp.headers['content-length'] ? parseInt(headResp.headers['content-length'], 10) : null;
+    const MAX_BYTES = this.maxDownloadBytes || 400 * 1024 * 1024;
+    if (contentLength !== null && contentLength > MAX_BYTES) {
+      throw new Error('Video file is too large');
+    }
+    const contentType = headResp.headers && headResp.headers['content-type'];
+    if (contentType && !contentType.startsWith('video/') && contentType !== 'application/octet-stream') {
+      throw new Error('Unexpected content type');
+    }
+    const response = await axios.get(url, { responseType: 'stream', timeout: 60000, maxRedirects: 0 });
     const writer = require('fs').createWriteStream(destPath);
     
+    // Check the streaming size and abort if it exceeds MAX_BYTES
+    let totalBytes = 0;
+    let aborted = false;
+    response.data.on('data', (chunk) => {
+      totalBytes += chunk.length;
+      if (totalBytes > MAX_BYTES) {
+        aborted = true;
+        response.data.destroy(new Error('Video file is too large'));
+      }
+    });
     response.data.pipe(writer);
     
     return new Promise((resolve, reject) => {
-      writer.on('finish', resolve);
-      writer.on('error', reject);
+      writer.on('finish', () => {
+        if (aborted) return reject(new Error('Video file is too large'));
+        resolve();
+      });
+      writer.on('error', (err) => reject(err));
+      response.data.on('error', (err) => reject(err));
     });
   }
 
