@@ -170,19 +170,13 @@ class VideoClippingService {
     }
     
     // Using axios with strict domain and protocol checking
+    // Do not automatically follow redirects: prevents redirect-based SSRF
     const response = await axios.get(url, { 
       responseType: 'stream',
       timeout: 60000, // 60s timeout
-      maxRedirects: 5,
+      maxRedirects: 0,
       validateStatus: (status) => status >= 200 && status < 300,
-      // Prevent redirects to private IPs
-      beforeRedirect: async (options) => {
-        const redirectHost = new URL(options.href).hostname;
-        // Ensure the redirect target does not resolve to a private IP
-        if (await hostResolvesToPrivate(redirectHost)) {
-          throw new Error('Redirect to private IP blocked');
-        }
-      }
+      // No auto redirects allowed to avoid redirect-based SSRF.
     });
     const writer = require('fs').createWriteStream(destPath);
     
