@@ -37,7 +37,7 @@ function ContentApprovalPanel() {
       const contentData = contentParsed.json || null;
       const statsData = statsParsed.json || null;
 
-      if (contentParsed.ok && contentData && contentData.success) setContent(contentData.content);
+      if (contentParsed.ok && contentData && contentData.success) setContent(contentData.content || contentData.pending || []);
       else if (!contentParsed.ok) {
         console.warn('Content approval pending endpoint returned non-OK status', { status: contentParsed.status, preview: contentParsed.textPreview || contentParsed.error });
         toast.error('Content approval service unavailable (pending list)');

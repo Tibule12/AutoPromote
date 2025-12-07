@@ -405,7 +405,7 @@ router.get('/approval/pending', authMiddleware, adminOnly, async (req, res) => {
       console.log('No pending content or collection missing:', queryError.message);
     }
     
-    res.json({ success: true, pending: pendingContent, count: pendingContent.length });
+    res.json({ success: true, content: pendingContent, count: pendingContent.length });
   } catch (error) {
     console.error('Error fetching pending approvals:', error);
     res.status(500).json({ success: false, error: error.message });

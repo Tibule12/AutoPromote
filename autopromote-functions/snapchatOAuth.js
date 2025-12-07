@@ -9,7 +9,7 @@ exports.getSnapchatAuthUrl = functions.region(region).https.onCall(async (data, 
   if (!clientId || !redirectUri) {
     throw new functions.https.HttpsError('failed-precondition', 'Snapchat client config missing.');
   }
-  const state = data && data.state ? data.state : Math.random().toString(36).slice(2);
+  const state = data && data.state ? data.state : (require('crypto').randomBytes(8).toString('hex'));
   const url = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(process.env.SNAPCHAT_SCOPES || 'snapchat-marketing-api')} &state=${encodeURIComponent(state)}`;
   return { url, state };
 });

@@ -10,7 +10,7 @@ exports.getDiscordAuthUrl = functions.region(region).https.onCall(async (data, c
     throw new functions.https.HttpsError('failed-precondition', 'Discord client config missing.');
   }
   const scope = (process.env.DISCORD_SCOPES || 'identify guilds');
-  const state = data && data.state ? data.state : Math.random().toString(36).slice(2);
+  const state = data && data.state ? data.state : (require('crypto').randomBytes(8).toString('hex'));
   const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
   return { url, state };
 });

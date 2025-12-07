@@ -10,7 +10,7 @@ exports.getSpotifyAuthUrl = functions.region(region).https.onCall(async (data, c
     throw new functions.https.HttpsError('failed-precondition', 'Spotify client config missing.');
   }
   const scope = (process.env.SPOTIFY_SCOPES || 'user-read-email playlist-modify-public playlist-modify-private');
-  const state = data && data.state ? data.state : Math.random().toString(36).slice(2);
+  const state = data && data.state ? data.state : (require('crypto').randomBytes(8).toString('hex'));
   const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
   return { url, state };
 });

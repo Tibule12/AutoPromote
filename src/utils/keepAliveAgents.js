@@ -42,4 +42,8 @@ function summarizeAgent(agent){
   } catch(_) { return { error: 'summarize_failed' }; }
 }
 
-module.exports = { httpAgent, httpsAgent, summarizeAgent };
+function destroy(){
+  try { httpAgent.destroy(); } catch(e) {}
+  try { httpsAgent.destroy(); } catch(e) {}
+}
+module.exports = { httpAgent, httpsAgent, summarizeAgent, destroy };

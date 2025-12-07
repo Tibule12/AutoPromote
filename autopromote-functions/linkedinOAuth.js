@@ -10,7 +10,7 @@ exports.getLinkedInAuthUrl = functions.region(region).https.onCall(async (data, 
     throw new functions.https.HttpsError('failed-precondition', 'LinkedIn client config missing.');
   }
   const scopes = (process.env.LINKEDIN_SCOPES || 'r_liteprofile r_emailaddress');
-  const state = data && data.state ? data.state : Math.random().toString(36).slice(2);
+  const state = data && data.state ? data.state : (require('crypto').randomBytes(8).toString('hex'));
   const url = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scopes)}`;
   return { url, state };
 });

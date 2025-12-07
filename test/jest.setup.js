@@ -11,6 +11,26 @@ if (!process.env.ENABLE_BACKGROUND_JOBS) process.env.ENABLE_BACKGROUND_JOBS = 'f
 
 if (!process.env.DEBUG_TEST_LOGS) {
   const originalLog = console.log;
+
+// Global teardown for long-lived agents and resources that tests may leave open
+try {
+  const ka = require('../src/utils/keepAliveAgents');
+  if (ka && typeof ka.destroy === 'function') {
+    global.afterAll(async () => {
+      try { ka.destroy(); } catch(e) { /* ignore */ }
+    });
+  }
+} catch(e) { /* not present in some test environments */ }
+// Also try to terminate any DB clients created by firebaseAdmin shims
+try {
+  const fb = require('../src/firebaseAdmin');
+  if (fb && fb.db && typeof fb.db.terminate === 'function') {
+    global.afterAll(async () => {
+      try { await fb.db.terminate(); } catch(e) { /* ignore */ }
+      try { if (fb.admin && typeof fb.admin.app === 'function') await fb.admin.app().delete(); } catch(e) { /* ignore */ }
+    });
+  }
+} catch(e) { /* no-op */ }
   const originalWarn = console.warn;
   const originalError = console.error;
   // Replace console methods with no-ops; restore at process exit
