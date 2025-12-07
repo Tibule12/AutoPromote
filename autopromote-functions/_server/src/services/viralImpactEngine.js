@@ -6,6 +6,7 @@ const { db } = require('../firebaseAdmin');
 const bypass = process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.NO_VIRAL_OPTIMIZATION === '1' || process.env.NO_VIRAL_OPTIMIZATION === 'true';
 
 if (bypass) {
+  // Minimal no-op implementations to avoid heavy logic during CI/test
   module.exports = {
     seedContentToVisibilityZones: async (content, platform, options = {}) => ({ success: true, seedingResults: [] }),
     orchestrateBoostChain: async (content, platforms, options = {}) => ({ success: true, chainId: 'stub-chain', squadSize: 0 }),
@@ -16,6 +17,7 @@ if (bypass) {
     trackExposureSaturation: async () => ({})
   };
 } else {
+  // Only require heavy modules and define implementations when not in bypass/test mode
   const boostChainEngine = require('./boostChainEngine');
 
 // High-visibility zones by platform

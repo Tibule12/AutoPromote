@@ -104,55 +104,17 @@ class VideoClippingService {
    * Protected against SSRF attacks
    */
   async downloadVideo(url, destPath) {
-    // Validate URL to prevent SSRF attacks
-    const parsedUrl = new URL(url);
-    
-    // Only allow HTTPS protocol
-    if (parsedUrl.protocol !== 'https:') {
-      throw new Error('Only HTTPS URLs are allowed');
-    }
-    
-    // Block private/internal IP ranges
-    const hostname = parsedUrl.hostname;
-    const blockedHosts = [
-      'localhost', '127.0.0.1', '0.0.0.0',
-      /^10\..*/, /^172\.(1[6-9]|2[0-9]|3[01])\..*/, /^192\.168\..*/,
-      /^169\.254\..*/, /^::1$/, /^fc00:.*/, /^fd00:.*/, /^fe80:.*/
-    ];
-    
-    if (blockedHosts.some(blocked => 
-      typeof blocked === 'string' ? hostname === blocked : blocked.test(hostname)
-    )) {
-      throw new Error('Access to private networks is not allowed');
-    }
-    
-    // Only allow Firebase Storage and trusted CDN domains
+    // Use central SSRF validation helper
     const allowedDomains = [
       'firebasestorage.googleapis.com',
       'storage.googleapis.com',
       'cloudinary.com',
       'cloudfront.net'
     ];
-    
-    if (!allowedDomains.some(domain => hostname.endsWith(domain))) {
-      throw new Error('Only trusted storage domains are allowed');
-    }
-    
-    // SSRF protection: only allow HTTPS
-    const urlProtocol = parsedUrl.protocol;
-    if (urlProtocol !== 'https:') {
-      throw new Error('Only HTTPS URLs are allowed');
-    }
-    
-    // Use central validateUrl for SSRF verification and private IP checks
-    const allowedDomains = [
-      'firebasestorage.googleapis.com',
-      'storage.googleapis.com',
-      'cloudinary.com',
-      'cloudfront.net'
-    ];
+
     const v = await validateUrl(url, { requireHttps: true, allowHosts: allowedDomains });
     if (!v.ok) {
+      // Map validation failure reasons to friendly errors (keeps previous behavior/messages)
       switch (v.reason) {
         case 'insecure_protocol':
         case 'invalid_protocol':
@@ -168,14 +130,12 @@ class VideoClippingService {
       }
     }
 
-    // Check port (deny non-standard ports that could be used for admin services)
+    // Check port explicitly
+    const parsedUrl = new URL(url);
     const port = parsedUrl.port ? parseInt(parsedUrl.port, 10) : 443;
-    const allowedPorts = [443];
-    if (!allowedPorts.includes(port)) {
-      throw new Error('Invalid port for HTTPS resource');
-    }
-    
-    // Perform a HEAD request (without redirects) to inspect headers safely using safeFetch (axios.head)
+    if (port !== 443) throw new Error('Invalid port for HTTPS resource');
+
+    // Perform a HEAD preflight using safeFetch (axios.head)
     let headResp = null;
     try {
       headResp = await safeFetch(url, axios.head, { requireHttps: true, allowHosts: allowedDomains, fetchOptions: { timeout: 10000, maxRedirects: 0 } });
@@ -188,38 +148,31 @@ class VideoClippingService {
         headResp = null; // allow fallback to streaming GET
       }
     }
-
-    // If HEAD returned a 3xx, inspect the Location header and prevent redirect to private networks
     if (headResp && headResp.status >= 300 && headResp.status < 400) {
       const location = headResp.headers && headResp.headers.location;
       if (location) {
         const redirectUrl = new URL(location, url);
-        const redirectHost = redirectUrl.hostname;
-        if (await hostResolvesToPrivate(redirectHost)) {
-          throw new Error('Redirects to private networks are not allowed');
-        }
+        const redirectCheck = await validateUrl(redirectUrl.toString(), { requireHttps: true, allowHosts: allowedDomains });
+        if (!redirectCheck.ok) throw new Error('Redirects to private or disallowed hosts are not allowed');
       }
       throw new Error('Redirects are not allowed when downloading video');
     }
 
-    // Validate content length if present
+    // Validate content-length and content-type
     const contentLength = headResp && headResp.headers && headResp.headers['content-length'] ? parseInt(headResp.headers['content-length'], 10) : null;
-    const MAX_BYTES = this.maxDownloadBytes || 400 * 1024 * 1024; // 400MB default limit; override in tests via instance
+    const MAX_BYTES = this.maxDownloadBytes || 400 * 1024 * 1024;
     if (contentLength !== null && contentLength > MAX_BYTES) {
       throw new Error('Video file is too large');
     }
-
-    // Validate content-type if present
     const contentType = headResp && headResp.headers && headResp.headers['content-type'];
     if (contentType && !contentType.startsWith('video/') && contentType !== 'application/octet-stream') {
       throw new Error('Unexpected content type');
     }
 
-    // Now perform streaming GET with a byte-limit and no redirects using safeFetch (axios.get)
     const response = await safeFetch(url, axios.get, { requireHttps: true, allowHosts: allowedDomains, fetchOptions: { responseType: 'stream', timeout: 60000, maxRedirects: 0 } });
     const writer = require('fs').createWriteStream(destPath);
     
-    // Track the response size and abort if it exceeds MAX_BYTES
+    // Check the streaming size and abort if it exceeds MAX_BYTES
     let totalBytes = 0;
     let aborted = false;
     response.data.on('data', (chunk) => {
@@ -229,7 +182,6 @@ class VideoClippingService {
         response.data.destroy(new Error('Video file is too large'));
       }
     });
-    
     response.data.pipe(writer);
     
     return new Promise((resolve, reject) => {

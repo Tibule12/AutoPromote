@@ -71,6 +71,8 @@ describe('tiktokRoutes', () => {
         get: async () => ({ exists: false, data: () => ({}) })
       })
     });
+    // Set the expected oauth_state for callback validation (nonce must match the state)
+    const stateSetter = await firebaseAdmin.db.collection('users').doc('testUser123').collection('oauth_state').doc('tiktok').set({ nonce: '123456', isPopup: false });
 
     // Monkey patch safeFetch to return token info
     const ssrf = require('../../../src/utils/ssrfGuard');
