@@ -11,6 +11,12 @@ on:
 jobs:
   playwright-e2e:
     runs-on: ubuntu-latest
+    env:
+      FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64 }}
+      FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      REACT_APP_SENTRY_DSN: ${{ secrets.REACT_APP_SENTRY_DSN }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     strategy:
       matrix:
         node-version: [20]
