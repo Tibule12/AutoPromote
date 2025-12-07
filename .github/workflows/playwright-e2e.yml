@@ -30,10 +30,25 @@ jobs:
           cache: 'npm'
       - name: Install deps
         run: npm ci
+      - name: Check for FIREBASE Admin service account (skip E2E if missing)
+        id: check_firebase_secret
+        shell: bash
+        run: |
+          if [ -n "$FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64" ] || [ -n "$FIREBASE_ADMIN_SERVICE_ACCOUNT" ]; then
+            echo "run-tests=true" >> $GITHUB_OUTPUT
+            echo "Found Firebase service account secret. Will run E2E tests.";
+          else
+            echo "run-tests=false" >> $GITHUB_OUTPUT
+            echo "No Firebase service account secret found. Skipping Playwright E2E (or set FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64 / FIREBASE_ADMIN_SERVICE_ACCOUNT)";
+          fi
       - name: Prepare playwright browsers
         run: npx playwright install --with-deps
       - name: Run Playwright E2E
+        if: steps.check_firebase_secret.outputs.run-tests == 'true'
         run: npm run test:e2e:playwright
+      - name: Skip Playwright E2E (NO SERVICE ACCOUNT)
+        if: steps.check_firebase_secret.outputs.run-tests == 'false'
+        run: echo "Skipping Playwright tests because FIREBASE_ADMIN_SERVICE_ACCOUNT* secret not set. Add it to run e2e tests."
       - name: Run smoke tests (daily)
         if: github.event_name == 'schedule'
         run: node ./tools/smoke-tests/runSmokeTests.js
