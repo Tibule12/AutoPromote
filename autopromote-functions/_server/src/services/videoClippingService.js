@@ -5,6 +5,8 @@
 const ffmpeg = require('fluent-ffmpeg');
 const { db, storage } = require('../firebaseAdmin');
 const axios = require('axios');
+const dns = require('dns').promises;
+const net = require('net');
 const crypto = require('crypto');
 const fs = require('fs').promises;
 const path = require('path');
@@ -143,9 +145,27 @@ class VideoClippingService {
       throw new Error('Only HTTP/HTTPS protocols are allowed');
     }
     
-    // Additional SSRF protection: prevent private IP ranges
-    const privateIpPattern = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|169\.254\.|::1|fc00:|fe80:)/;
-    if (privateIpPattern.test(hostname)) {
+    // Additional SSRF protection: resolve hostname and validate IP addresses
+    const privateIpPattern = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|169\.254\.|::1|fc00:|fe80:)/i;
+    async function hostResolvesToPrivate(host) {
+      try {
+        const addrs = await dns.lookup(host, { all: true });
+        for (const addr of addrs) {
+          const address = addr.address;
+          // Direct IP strings in hostname (like 127.0.0.1) should be blocked
+          if (privateIpPattern.test(address)) return true;
+          // Also check for IPv6 mapping
+          if (net.isIP(address)) {
+            if (address.startsWith('::1') || address.startsWith('fe80') || address.startsWith('fc00')) return true;
+          }
+        }
+      } catch (_err) {
+        // If we cannot resolve the hostname, reject to be safe
+        return true;
+      }
+      return false;
+    }
+    if (await hostResolvesToPrivate(hostname)) {
       throw new Error('Private IP addresses are not allowed');
     }
     
@@ -156,9 +176,10 @@ class VideoClippingService {
       maxRedirects: 5,
       validateStatus: (status) => status >= 200 && status < 300,
       // Prevent redirects to private IPs
-      beforeRedirect: (options) => {
+      beforeRedirect: async (options) => {
         const redirectHost = new URL(options.href).hostname;
-        if (privateIpPattern.test(redirectHost)) {
+        // Ensure the redirect target does not resolve to a private IP
+        if (await hostResolvesToPrivate(redirectHost)) {
           throw new Error('Redirect to private IP blocked');
         }
       }

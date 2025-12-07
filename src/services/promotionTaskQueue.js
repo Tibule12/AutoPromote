@@ -46,7 +46,9 @@ function computeNextAttempt(attempts, classification) {
   // Exponential backoff with jitter, classification-based modifier
   const base = BASE_BACKOFF_MS * Math.pow(2, Math.min(attempts, 6));
   const classFactor = classification === 'rate_limit' ? 2 : classification === 'auth' ? 3 : 1;
-  const jitter = Math.floor(crypto.randomInt(0, Math.max(1, Math.floor(base * 0.3))));
+  // Use deterministic, cryptographically-secure jitter to avoid predictable retry window
+  const jitterRange = Math.max(1, Math.floor(base * 0.3));
+  const jitter = crypto.randomInt(0, jitterRange);
   return Date.now() + (base * classFactor) + jitter;
 }
 

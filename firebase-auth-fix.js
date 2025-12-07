@@ -352,8 +352,13 @@ async function runAuthFix() {
     console.log('==================================================');
     console.log('FIREBASE AUTHENTICATION DIAGNOSTIC AND FIX UTILITY');
     console.log('==================================================');
+    function maskSecret(value, unmasked = 4) {
+      if (!value) return '<none>';
+      const s = String(value);
+      return '***' + s.slice(-unmasked);
+    }
     console.log('Firebase Project ID:', firebaseConfig.projectId);
-    console.log('API Key:', firebaseConfig.apiKey);
+    console.log('API Key (masked):', maskSecret(firebaseConfig.apiKey));
     
     // Step 1: Verify API key
     const isApiKeyValid = await verifyApiKey();
@@ -382,22 +387,22 @@ async function runAuthFix() {
     console.log('If you can now log in with any of the accounts, the issue has been fixed.');
     console.log('Please try logging in to your application again with these credentials:');
     console.log('\nADMIN USER:');
-    console.log('Email: admin123@gmail.com (check your environment variables or local config)');
+    console.log('Email: <admin email masked>');
     console.log('Password: <REDACTED>');
     console.log('\nREGULAR USER:');
-    console.log('Email: test@example.com (check your environment variables or local config)');
+    console.log('Email: <test user email masked>');
     console.log('Password: <REDACTED>');
     console.log('\nYOUR USER:');
-    console.log('Email: tmtshwelo21@gmail.com (not displayed for security)');
+    console.log('Email: <your user email masked>');
     console.log('Password: <REDACTED>');
     console.log('\nNEW TEST USER:');
     if (testUser.success) {
-      console.log('Email:', testUser.email);
+      console.log('Email (masked):', testUser.email ? ('***' + String(testUser.email).slice(-8)) : '<none>');
       console.log('Password: <REDACTED>');
     }
     console.log('\nNEW ADMIN USER:');
     if (adminUser.success) {
-      console.log('Email:', adminUser.email);
+      console.log('Email (masked):', adminUser.email ? ('***' + String(adminUser.email).slice(-8)) : '<none>');
       console.log('Password: <REDACTED>');
     }
   } catch (error) {
