@@ -221,7 +221,7 @@ router.get('/funnel', authMiddleware, adminOnly, async (req, res) => {
     
     res.json({ success: true, funnel, timeframe });
   } catch (error) {
-    console.error('Error fetching conversion funnel:', error?.message || error);
+    console.error('Error fetching conversion funnel:', error.message || error);
     if (error && error.message && error.message.includes('requires an index')) {
       const linkMatch = (error.message.match(/https:\/\/console\.firebase\.google\.com[^\s]+/) || [null])[0];
       return res.status(422).json({ success: false, error: 'Missing Firestore composite index required by this query', indexLink: linkMatch || null });

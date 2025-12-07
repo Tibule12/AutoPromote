@@ -198,6 +198,145 @@ router.put('/users/:id/role', authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
+// Suspend user
+router.post('/users/:id/suspend', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
+
+    await userRef.update({
+      suspended: true,
+      suspendedBy: req.user.uid,
+      suspendedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    await db.collection('audit_logs').add({
+      action: 'suspend_user',
+      adminId: req.user.uid,
+      targetId: userId,
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.json({ success: true, message: 'User suspended' });
+  } catch (error) {
+    console.error('Error suspending user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Unsuspend user
+router.post('/users/:id/unsuspend', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
+
+    await userRef.update({
+      suspended: false,
+      unsuspendedBy: req.user.uid,
+      unsuspendedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    await db.collection('audit_logs').add({
+      action: 'unsuspend_user',
+      adminId: req.user.uid,
+      targetId: userId,
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.json({ success: true, message: 'User unsuspended' });
+  } catch (error) {
+    console.error('Error unsuspending user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Admin upgrade user subscription (set plan)
+router.post('/users/:id/upgrade', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { planId } = req.body;
+    if (!planId) return res.status(400).json({ error: 'planId required' });
+
+    const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
+
+    // Update user subscriptions - write to both users and user_subscriptions collections
+    const planName = planId; // For basic set; real implementations map planId to human name
+    await userRef.update({
+      subscriptionTier: planId,
+      subscriptionStatus: 'active',
+      updatedAt: new Date().toISOString()
+    });
+
+    await db.collection('user_subscriptions').doc(userId).set({
+      userId,
+      planId,
+      planName,
+      status: 'active',
+      amount: 0,
+      currency: 'USD',
+      nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    await db.collection('audit_logs').add({
+      action: 'upgrade_user_subscription',
+      adminId: req.user.uid,
+      targetId: userId,
+      details: { planId },
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.json({ success: true, message: 'User subscription upgraded' });
+  } catch (error) {
+    console.error('Error upgrading user subscription:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /subscriptions - list all user subscriptions for admin
+router.get('/subscriptions', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { tier, status, limit = 100 } = req.query;
+    let query = db.collection('user_subscriptions');
+
+    if (tier) query = query.where('planId', '==', tier);
+    if (status) query = query.where('status', '==', status);
+
+    const snapshot = await query.orderBy('createdAt', 'desc').limit(parseInt(limit)).get();
+    const subscriptions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json({ success: true, subscriptions });
+  } catch (error) {
+    console.error('Error fetching subscriptions:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// Admin-only OpenAI usage/charge stats
+router.get('/openai/usage', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    // Attempt to pull usage stats if present
+    const usageSnapshot = await db.collection('openai_usage').orderBy('date', 'desc').limit(30).get();
+    const usage = usageSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Aggregate cost
+    const totalCost = usage.reduce((sum, u) => sum + (u.cost || 0), 0);
+
+    res.json({ success: true, usage: { totalCost, daily: usage } });
+  } catch (error) {
+    console.error('Error fetching OpenAI usage:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
 // Delete user
 router.delete('/users/:id', authMiddleware, adminOnly, async (req, res) => {
   try {

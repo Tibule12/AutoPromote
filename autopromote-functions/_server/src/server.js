@@ -31,8 +31,9 @@ try {
 } catch (e) { console.warn('[diagnostic] internal check failed:', e && e.message); }
 
 const express = require('express');
-// Initialize Sentry for functions server
-try { const sentry = require('./sentry'); const Sentry = sentry.init(); global.__sentry_functions = Sentry; if (Sentry) { process.on('unhandledRejection', (err) => { try { Sentry.captureException(err); } catch(e){} }); process.on('uncaughtException', (err) => { try { Sentry.captureException(err); } catch(e){} }); } } catch(e) { /* no-op */ }
+// Initialize server-side Sentry (if configured)
+try { const sentry = require('./sentry'); const Sentry = sentry.init(); global.__sentry = Sentry; if (Sentry) { process.on('unhandledRejection', (err) => { try { Sentry.captureException(err); } catch(e){} }); process.on('uncaughtException', (err) => { try { Sentry.captureException(err); } catch(e){} }); } } catch(e) { /* no-op */ }
+const logger = require('./utils/logger');
 const cors = require('cors');
 const path = require('path');
 // Security & performance middlewares (declare once)
@@ -45,7 +46,7 @@ try { helmet = require('helmet'); } catch(_) { /* optional */ }
 // Prefer skipping viral optimizations and heavy background work during CI or test runs
 if (!process.env.NO_VIRAL_OPTIMIZATION && (process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.CI_ROUTE_IMPORTS === '1')) {
   process.env.NO_VIRAL_OPTIMIZATION = '1';
-  console.log('[TEST] NO_VIRAL_OPTIMIZATION enabled for test/CI environment');
+  logger.debug('[TEST] NO_VIRAL_OPTIMIZATION enabled for test/CI environment');
 }
 // ---------------------------------------------------------------------------
 // Enable shared keep-alive agents early (reduces cold outbound latency)
@@ -206,9 +207,9 @@ function slowRequestLogger(req,res,next){
   res.once('finish', () => {
     const dur = Date.now() - started;
     recordLatency(dur);
-    if (dur >= SLOW_REQ_MS) {
-      console.warn(`[slow] ${req.method} ${req.originalUrl} ${dur}ms status=${res.statusCode}`);
-    }
+      if (dur >= SLOW_REQ_MS) {
+        logger.warn(`[slow] ${req.method} ${req.originalUrl} ${dur}ms status=${res.statusCode}`);
+      }
   });
   next();
 }
@@ -589,9 +590,9 @@ try {
 const { db, auth, storage } = require('./firebaseAdmin');
 
 const app = express();
-// Attach Sentry request handler if configured
-if (global.__sentry_functions && global.__sentry_functions.Handlers && typeof global.__sentry_functions.Handlers.requestHandler === 'function') {
-  app.use(global.__sentry_functions.Handlers.requestHandler());
+// Attach Sentry request handler if Sentry initialized
+if (global.__sentry && global.__sentry.Handlers && typeof global.__sentry.Handlers.requestHandler === 'function') {
+  app.use(global.__sentry.Handlers.requestHandler());
 }
 // Honor X-Forwarded-* headers from Render/production proxies so req.protocol
 // reflects the original HTTPS scheme when we build OAuth redirect URLs.
@@ -671,7 +672,7 @@ app.use((req, res, next) => {
         const ua = req.headers['user-agent'] || '';
         const ts = new Date().toISOString();
         const line = `[ACCESS] ts=${ts} ${req.method} ${req.originalUrl} status=${res.statusCode} requestID="${req.requestId || ''}" clientIP="${ip}" responseTimeMS=${duration} responseBytes=${bytes} userAgent="${ua.replace(/\"/g,'') }"`;
-        console.log(line);
+        logger.info(line);
         // Optional: write access log line to a daily file for security evidence (enable with LOG_EVENTS_TO_FILE=true)
         try {
           if (process.env.LOG_EVENTS_TO_FILE === 'true') {
@@ -714,17 +715,17 @@ const allowAll = process.env.CORS_ALLOW_ALL === 'true';
 
 const corsOptions = {
   origin: function (origin, callback) {
-    try { console.log('[cors.origin] origin:', origin, 'allowAll:', allowAll); } catch (e) {}
+    try { logger.debug('[cors.origin] origin:', origin, 'allowAll:', allowAll); } catch (e) {}
     // Allow requests with no origin (like mobile apps or curl requests).
     if (!origin) return callback(null, true);
     // In development or when allowAll is set, also treat the string 'null' as no-origin and allow it.
     if (origin === 'null' && (allowAll || process.env.NODE_ENV === 'development')) return callback(null, true);
     if (allowAll || allowedOrigins.includes(origin)) {
-      try { console.log('[cors.origin] -> allowed'); } catch(e) {}
+      try { logger.debug('[cors.origin] -> allowed'); } catch(e) {}
       return callback(null, true);
     }
-    console.warn('[cors.origin] -> blocked', origin);
-    try { console.warn('[cors.origin] -> stack', new Error('origin-blocked').stack); } catch(e) {}
+    logger.warn('[cors.origin] -> blocked', origin);
+    try { logger.warn('[cors.origin] -> stack', new Error('origin-blocked').stack); } catch(e) {}
     return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
@@ -735,7 +736,7 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 204,
 };
-console.log('[diagnostic] CORS allowAll:', allowAll, 'allowedOrigins:', allowedOrigins.join(','));
+logger.debug('[diagnostic] CORS allowAll:', allowAll, 'allowedOrigins:', allowedOrigins.join(','));
 
 // Proactively set Vary header for caches and handle preflight explicitly
 app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
@@ -745,7 +746,7 @@ app.use((req,res,next)=>{
     if (req.path === '/api/content/upload' || (req.headers && req.headers.origin && req.headers.origin.includes('127.0.0.1'))) {
       // Log a summarized set of headers for the upload route to help identify why requests are blocked by CORS
       const sampleHeaders = { origin: req.headers.origin, host: req.headers.host, 'user-agent': req.headers['user-agent'], referer: req.headers.referer, 'content-type': req.headers['content-type'] };
-      console.log('[request.debug] method:', req.method, 'path:', req.path, 'headers:', sampleHeaders);
+      logger.debug('[request.debug] method:', req.method, 'path:', req.path, 'headers:', sampleHeaders);
     }
   } catch(e){};
   next();
@@ -1243,17 +1244,15 @@ app.get('/api/ping', statusPublicLimiter, (_req,res) => {
   return res.json({ ok:true, ts: Date.now() });
 });
 
-// Test Sentry capture for functions copy
+// Test Sentry capture: sends a test event to Sentry and returns status
 app.get('/api/test/sentry', statusPublicLimiter, async (req, res) => {
   try {
-    const sentry = require('./sentry');
-    const Sentry = sentry.getSentry && sentry.getSentry();
-    if (Sentry && typeof Sentry.captureException === 'function') {
-      const testError = new Error('Functions server Sentry test event from /api/test/sentry');
-      Sentry.captureException(testError);
-      return res.status(200).json({ ok: true, message: 'Sentry (functions) test event sent' });
-    }
-    return res.status(200).json({ ok: false, message: 'Sentry not configured' });
+    const { captureException } = require('./sentry');
+    const testError = new Error('Sentry test event from /api/test/sentry');
+    // Optionally attach a user if request contains test token
+    try { if (req.headers && req.headers.authorization && typeof req.headers.authorization === 'string') { const t = req.headers.authorization.replace(/^Bearer\s+/i,''); if (t.startsWith('test-token-for-')) captureException(new Error('Sentry test: user:' + t.replace('test-token-for-',''))); } } catch(e){}
+    captureException(testError);
+    return res.status(200).json({ ok: true, message: 'Sentry test event sent' });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message || String(e) });
   }
@@ -1346,10 +1345,17 @@ app.get('/api/health', statusPublicLimiter, async (req, res) => {
       videoClipping: !!process.env.OPENAI_API_KEY || !!process.env.GOOGLE_CLOUD_API_KEY,
       transcriptionProvider: process.env.TRANSCRIPTION_PROVIDER || 'openai'
     };
+    // External platform connectivity + credential checks (non-invasive)
     extended.diagnostics.platforms = {
-      tiktok: { configured: !!(process.env.TIKTOK_CLIENT_ID || process.env.TIKTOK_CLIENT_SECRET || process.env.TIKTOK_APP_TOKEN) },
-      facebook: { configured: !!(process.env.FACEBOOK_APP_ID || process.env.FACEBOOK_APP_SECRET || process.env.FACEBOOK_PAGE_ACCESS_TOKEN) },
-      paypal: { configured: !!(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET) }
+      tiktok: {
+        configured: !!(process.env.TIKTOK_CLIENT_ID || process.env.TIKTOK_CLIENT_SECRET || process.env.TIKTOK_APP_TOKEN),
+      },
+      facebook: {
+        configured: !!(process.env.FACEBOOK_APP_ID || process.env.FACEBOOK_APP_SECRET || process.env.FACEBOOK_PAGE_ACCESS_TOKEN),
+      },
+      paypal: {
+        configured: !!(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
+      }
     };
   } catch (e) {
     extended.diagnosticsError = e.message;
@@ -1547,10 +1553,6 @@ app.use((err, req, res, next) => {
 });
 
 // Add response interceptor for debugging
-// Attach Sentry error handler after routes so errors are captured and reported
-if (global.__sentry_functions && global.__sentry_functions.Handlers && typeof global.__sentry_functions.Handlers.errorHandler === 'function') {
-  app.use(global.__sentry_functions.Handlers.errorHandler());
-}
 const originalSend = express.response.send;
 express.response.send = function(body) {
   const route = this.req.originalUrl;
@@ -1575,6 +1577,11 @@ express.response.send = function(body) {
   }
   return originalSend.call(this, body);
 };
+
+// Attach Sentry error handler after routes so errors are captured and reported
+if (global.__sentry && global.__sentry.Handlers && typeof global.__sentry.Handlers.errorHandler === 'function') {
+  app.use(global.__sentry.Handlers.errorHandler());
+}
 
 if (require.main === module) {
   const server = app.listen(PORT, async () => {
@@ -1908,6 +1915,33 @@ module.exports.__warmupState = () => (__warmupState);
 // Export Express app for integration tests
 module.exports = app;
 } catch (e) { console.error(e); }
+
+// Optional scheduled integration scan runner (outside try-catch to ensure we can log if not enabled)
+try {
+  const enableScan = process.env.ENABLE_HEALTH_SCANS === 'true';
+  const intervalMs = parseInt(process.env.HEALTH_SCAN_INTERVAL_MS || '3600000', 10);
+  const scanStore = process.env.HEALTH_SCAN_STORE === 'true';
+  const scanWebhook = process.env.SCAN_FAILURE_WEBHOOK || null;
+  if (enableScan && intervalMs > 0) {
+    const { runIntegrationChecks } = require('./services/healthRunner');
+    const runAndStore = async () => {
+      try {
+        const result = await runIntegrationChecks({ dashboard: 'user', userId: process.env.HEALTH_SCAN_USER || 'system-scan' });
+        if (scanStore || result.overall === 'failed') {
+          try { await (require('./firebaseAdmin').db).collection('system_scans').add({ dashboard: 'user', uid: process.env.HEALTH_SCAN_USER || 'system-scan', result, createdAt: new Date().toISOString() }); } catch(e){}
+        }
+        if (scanWebhook && result.overall === 'failed') {
+          try {
+            const doFetch = (typeof fetch === 'function') ? fetch : require('node-fetch');
+            await doFetch(scanWebhook, { method: 'POST', headers: { 'content-type':'application/json' }, body: JSON.stringify({ level: 'failed', details: result }) });
+          } catch(e) {}
+        }
+      } catch (e) { console.error('[health-scan] scheduled run failed:', e && e.message); }
+    };
+    setInterval(runAndStore, intervalMs).unref();
+    console.log('[health-scan] scheduled scan enabled. Interval(ms)=', intervalMs, 'store=', scanStore);
+  }
+} catch (e) { console.warn('[health-scan] scheduler initialization error:', e && e.message); }
 
 // Global process-level error handlers to surface crashes in logs and allow process managers to restart
 process.on('uncaughtException', (err) => {

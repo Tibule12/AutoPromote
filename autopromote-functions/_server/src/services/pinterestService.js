@@ -1,5 +1,6 @@
 // pinterestService.js - minimal placeholder implementation
 const { db } = require('../firebaseAdmin');
+const { tokensFromDoc } = require('./connectionTokenUtils');
 const { safeFetch } = require('../utils/ssrfGuard');
 
 let fetchFn = global.fetch;
