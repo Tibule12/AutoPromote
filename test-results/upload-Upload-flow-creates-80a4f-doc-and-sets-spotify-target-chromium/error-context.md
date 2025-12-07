@@ -5,7 +5,7 @@
   - heading "Upload E2E Test Page" [level=1] [ref=e2]
   - generic [ref=e3]:
     - text: Title
-    - textbox "Title" [ref=e4]: Playwright E2E 1764497117273
+    - textbox "Title" [ref=e4]: Playwright E2E 1765130789278
   - generic [ref=e5]:
     - text: Description
     - textbox "Description" [ref=e6]: Playwright test upload
@@ -28,5 +28,5 @@
     - text: Schedule (ISO datetime)
     - textbox "Schedule (ISO datetime)" [ref=e16]
   - button "Submit" [active] [ref=e17]
-  - generic [ref=e18]: "{ \"status\": 403, \"body\": { \"error\": \"terms_not_accepted\", \"requiredVersion\": \"AUTOPROMOTE-v1.0\" } }"
+  - generic [ref=e18]: "{ \"status\": 500, \"body\": { \"error\": \"internal_error\" } }"
 ```

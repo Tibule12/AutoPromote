@@ -31,6 +31,8 @@ try {
 } catch (e) { console.warn('[diagnostic] internal check failed:', e && e.message); }
 
 const express = require('express');
+// Initialize server-side Sentry (if configured)
+try { const sentry = require('./sentry'); const Sentry = sentry.init(); global.__sentry = Sentry; if (Sentry) { process.on('unhandledRejection', (err) => { try { Sentry.captureException(err); } catch(e){} }); process.on('uncaughtException', (err) => { try { Sentry.captureException(err); } catch(e){} }); } } catch(e) { /* no-op */ }
 const logger = require('./utils/logger');
 const cors = require('cors');
 const path = require('path');
@@ -588,6 +590,10 @@ try {
 const { db, auth, storage } = require('./firebaseAdmin');
 
 const app = express();
+// Attach Sentry request handler if Sentry initialized
+if (global.__sentry && global.__sentry.Handlers && typeof global.__sentry.Handlers.requestHandler === 'function') {
+  app.use(global.__sentry.Handlers.requestHandler());
+}
 // Honor X-Forwarded-* headers from Render/production proxies so req.protocol
 // reflects the original HTTPS scheme when we build OAuth redirect URLs.
 app.set('trust proxy', true);
@@ -1238,6 +1244,20 @@ app.get('/api/ping', statusPublicLimiter, (_req,res) => {
   return res.json({ ok:true, ts: Date.now() });
 });
 
+// Test Sentry capture: sends a test event to Sentry and returns status
+app.get('/api/test/sentry', statusPublicLimiter, async (req, res) => {
+  try {
+    const { captureException } = require('./sentry');
+    const testError = new Error('Sentry test event from /api/test/sentry');
+    // Optionally attach a user if request contains test token
+    try { if (req.headers && req.headers.authorization && typeof req.headers.authorization === 'string') { const t = req.headers.authorization.replace(/^Bearer\s+/i,''); if (t.startsWith('test-token-for-')) captureException(new Error('Sentry test: user:' + t.replace('test-token-for-',''))); } } catch(e){}
+    captureException(testError);
+    return res.status(200).json({ ok: true, message: 'Sentry test event sent' });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message || String(e) });
+  }
+});
+
 // Readiness endpoint (503 until warm-up completes unless disabled)
 const READINESS_REQUIRE_WARMUP = process.env.READINESS_REQUIRE_WARMUP !== 'false';
 app.get('/api/ready', statusPublicLimiter, (req,res) => {
@@ -1324,6 +1344,18 @@ app.get('/api/health', statusPublicLimiter, async (req, res) => {
       chatbot: !!process.env.OPENAI_API_KEY,
       videoClipping: !!process.env.OPENAI_API_KEY || !!process.env.GOOGLE_CLOUD_API_KEY,
       transcriptionProvider: process.env.TRANSCRIPTION_PROVIDER || 'openai'
+    };
+    // External platform connectivity + credential checks (non-invasive)
+    extended.diagnostics.platforms = {
+      tiktok: {
+        configured: !!(process.env.TIKTOK_CLIENT_ID || process.env.TIKTOK_CLIENT_SECRET || process.env.TIKTOK_APP_TOKEN),
+      },
+      facebook: {
+        configured: !!(process.env.FACEBOOK_APP_ID || process.env.FACEBOOK_APP_SECRET || process.env.FACEBOOK_PAGE_ACCESS_TOKEN),
+      },
+      paypal: {
+        configured: !!(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
+      }
     };
   } catch (e) {
     extended.diagnosticsError = e.message;
@@ -1545,6 +1577,11 @@ express.response.send = function(body) {
   }
   return originalSend.call(this, body);
 };
+
+// Attach Sentry error handler after routes so errors are captured and reported
+if (global.__sentry && global.__sentry.Handlers && typeof global.__sentry.Handlers.errorHandler === 'function') {
+  app.use(global.__sentry.Handlers.errorHandler());
+}
 
 if (require.main === module) {
   const server = app.listen(PORT, async () => {
@@ -1901,7 +1938,7 @@ try {
         }
       } catch (e) { console.error('[health-scan] scheduled run failed:', e && e.message); }
     };
-    setInterval(runAndStore, intervalMs);
+    setInterval(runAndStore, intervalMs).unref();
     console.log('[health-scan] scheduled scan enabled. Interval(ms)=', intervalMs, 'store=', scanStore);
   }
 } catch (e) { console.warn('[health-scan] scheduler initialization error:', e && e.message); }

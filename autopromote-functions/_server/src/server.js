@@ -31,6 +31,8 @@ try {
 } catch (e) { console.warn('[diagnostic] internal check failed:', e && e.message); }
 
 const express = require('express');
+// Initialize Sentry for functions server
+try { const sentry = require('./sentry'); const Sentry = sentry.init(); global.__sentry_functions = Sentry; if (Sentry) { process.on('unhandledRejection', (err) => { try { Sentry.captureException(err); } catch(e){} }); process.on('uncaughtException', (err) => { try { Sentry.captureException(err); } catch(e){} }); } } catch(e) { /* no-op */ }
 const cors = require('cors');
 const path = require('path');
 // Security & performance middlewares (declare once)
@@ -587,6 +589,10 @@ try {
 const { db, auth, storage } = require('./firebaseAdmin');
 
 const app = express();
+// Attach Sentry request handler if configured
+if (global.__sentry_functions && global.__sentry_functions.Handlers && typeof global.__sentry_functions.Handlers.requestHandler === 'function') {
+  app.use(global.__sentry_functions.Handlers.requestHandler());
+}
 // Honor X-Forwarded-* headers from Render/production proxies so req.protocol
 // reflects the original HTTPS scheme when we build OAuth redirect URLs.
 app.set('trust proxy', true);
@@ -1237,6 +1243,22 @@ app.get('/api/ping', statusPublicLimiter, (_req,res) => {
   return res.json({ ok:true, ts: Date.now() });
 });
 
+// Test Sentry capture for functions copy
+app.get('/api/test/sentry', statusPublicLimiter, async (req, res) => {
+  try {
+    const sentry = require('./sentry');
+    const Sentry = sentry.getSentry && sentry.getSentry();
+    if (Sentry && typeof Sentry.captureException === 'function') {
+      const testError = new Error('Functions server Sentry test event from /api/test/sentry');
+      Sentry.captureException(testError);
+      return res.status(200).json({ ok: true, message: 'Sentry (functions) test event sent' });
+    }
+    return res.status(200).json({ ok: false, message: 'Sentry not configured' });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message || String(e) });
+  }
+});
+
 // Readiness endpoint (503 until warm-up completes unless disabled)
 const READINESS_REQUIRE_WARMUP = process.env.READINESS_REQUIRE_WARMUP !== 'false';
 app.get('/api/ready', statusPublicLimiter, (req,res) => {
@@ -1323,6 +1345,11 @@ app.get('/api/health', statusPublicLimiter, async (req, res) => {
       chatbot: !!process.env.OPENAI_API_KEY,
       videoClipping: !!process.env.OPENAI_API_KEY || !!process.env.GOOGLE_CLOUD_API_KEY,
       transcriptionProvider: process.env.TRANSCRIPTION_PROVIDER || 'openai'
+    };
+    extended.diagnostics.platforms = {
+      tiktok: { configured: !!(process.env.TIKTOK_CLIENT_ID || process.env.TIKTOK_CLIENT_SECRET || process.env.TIKTOK_APP_TOKEN) },
+      facebook: { configured: !!(process.env.FACEBOOK_APP_ID || process.env.FACEBOOK_APP_SECRET || process.env.FACEBOOK_PAGE_ACCESS_TOKEN) },
+      paypal: { configured: !!(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET) }
     };
   } catch (e) {
     extended.diagnosticsError = e.message;
@@ -1520,6 +1547,10 @@ app.use((err, req, res, next) => {
 });
 
 // Add response interceptor for debugging
+// Attach Sentry error handler after routes so errors are captured and reported
+if (global.__sentry_functions && global.__sentry_functions.Handlers && typeof global.__sentry_functions.Handlers.errorHandler === 'function') {
+  app.use(global.__sentry_functions.Handlers.errorHandler());
+}
 const originalSend = express.response.send;
 express.response.send = function(body) {
   const route = this.req.originalUrl;
