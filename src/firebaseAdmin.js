@@ -58,8 +58,9 @@ if (bypass) {
     // Global in-memory store for bypass mode to persist simple doc sets between operations
     const __inMemoryDB = new Map();
     const CollectionStub = function(name) { this._name = name || 'collection'; };
+    const crypto = require('crypto');
     CollectionStub.prototype.doc = function(id) {
-        const _id = id || ('stub-' + Math.random().toString(16).slice(2,8));
+        const _id = id || ('stub-' + (crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(4).toString('hex')));
         const fullPath = `${this._name}/${_id}`;
         return {
             id: _id,
@@ -93,7 +94,7 @@ if (bypass) {
         };
     };
     CollectionStub.prototype.add = async function(data) {
-        const id = 'stub-' + Math.random().toString(16).slice(2,10);
+        const id = 'stub-' + (crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(5).toString('hex'));
         const fullPath = `${this._name}/${id}`;
         __inMemoryDB.set(fullPath, { id, data: data || {}, updatedAt: new Date().toISOString() });
         return { id, get: async () => ({ exists: true, data: () => (data || {}) }), update: async () => {}, set: async () => {}, collection: () => new CollectionStub() };

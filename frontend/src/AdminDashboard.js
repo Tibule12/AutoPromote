@@ -27,6 +27,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
   const [openAIUsage, setOpenAIUsage] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('all');
 
   const refreshData = () => {
     // Trigger dashboard data refresh (VariantAdminPanel rendered in UI tabs elsewhere)
@@ -90,22 +91,10 @@ function AdminDashboard({ analytics, user, onLogout }) {
         }
       });
 
-      // Fetch revenue per content/user from revenue collection
-        const parsed = await parseJsonSafe(revenueResponse);
-        if (parsed.ok && parsed.json) {
-          revenueApiData = parsed.json;
-        } else if (!parsed.ok) {
-          console.warn('Revenue analytics non-JSON or error', { status: parsed.status, preview: parsed.textPreview });
-        }
-      revenueSnapshot.docs.forEach(doc => {
-        const data = doc.data();
-        if (data.contentId) {
-          revenuePerContent.push({ contentId: data.contentId, totalRevenue: data.totalRevenue || 0 });
-        }
-        if (data.userId) {
-          revenuePerUser[data.userId] = (revenuePerUser[data.userId] || 0) + (data.totalRevenue || 0);
-        }
-      });
+      // Compute revenue per content/user from the transactions collection
+      const revenuePerContent = [];
+      const revenuePerUser = {};
+      // transactionsSnapshot is fetched later, but we can compute once it's available below
       const promotionSchedulesSnapshot = await getDocs(collection(db, 'promotion_schedules'));
       const allPromotionSchedules = promotionSchedulesSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -147,12 +136,28 @@ function AdminDashboard({ analytics, user, onLogout }) {
     console.warn('Could not fetch revenue analytics:', err);
   }
 
-      // Fetch real transactions data
+      // Fetch real transactions data and compute per-content and per-user revenue
       const transactionsSnapshot = await getDocs(collection(db, 'transactions'));
       const allTransactions = transactionsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+
+      // Aggregate revenue per content and per user
+      transactionsSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.contentId) {
+          const existing = revenuePerContent.find(r => r.contentId === data.contentId);
+          if (existing) {
+            existing.totalRevenue += data.amount || 0;
+          } else {
+            revenuePerContent.push({ contentId: data.contentId, totalRevenue: data.amount || 0 });
+          }
+        }
+        if (data.userId) {
+          revenuePerUser[data.userId] = (revenuePerUser[data.userId] || 0) + (data.amount || 0);
+        }
+      });
 
       // Calculate real revenue metrics from transactions
       const totalRevenue = allTransactions.reduce((sum, transaction) => sum + (transaction.amount || 0), 0);

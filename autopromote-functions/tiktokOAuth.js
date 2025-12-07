@@ -27,7 +27,7 @@ exports.getTikTokAuthUrl = functions.region(region).https.onCall(async (data, co
   if (!isTikTokConfigValid()) {
     throw new functions.https.HttpsError('failed-precondition', `TikTok OAuth environment variables not set for mode ${TIKTOK_ENV}.`);
   }
-  const state = data.state || Math.random().toString(36).substring(2);
+  const state = data.state || (require('crypto').randomBytes(8).toString('hex'));
   // Keep function scope broad here; frontend route uses narrower initial scope
   const DEFAULT_TIKTOK_SCOPES = 'user.info.profile video.upload video.publish video.data';
   const scope = (process.env.TIKTOK_OAUTH_SCOPES || DEFAULT_TIKTOK_SCOPES).trim();

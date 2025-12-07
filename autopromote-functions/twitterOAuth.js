@@ -7,7 +7,7 @@ exports.getTwitterAuthUrl = functions.region(region).https.onCall(async (data, c
   // Twitter has multiple OAuth flows; return a placeholder or build a URL if env vars exist
   const clientId = process.env.TWITTER_CLIENT_ID || process.env.TWITTER_API_KEY;
   const redirectUri = process.env.TWITTER_REDIRECT_URI;
-  const state = data && data.state ? data.state : Math.random().toString(36).slice(2);
+  const state = data && data.state ? data.state : (require('crypto').randomBytes(8).toString('hex'));
   if (!clientId || !redirectUri) {
     throw new functions.https.HttpsError('failed-precondition', 'Twitter client config missing.');
   }

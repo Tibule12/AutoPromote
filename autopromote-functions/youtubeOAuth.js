@@ -17,7 +17,7 @@ exports.getYouTubeAuthUrl = functions.region(region).https.onRequest((req, res) 
   if (!YT_CLIENT_ID || !YT_REDIRECT_URI) {
     return res.status(500).json({ error: 'YouTube client ID or redirect URI not set.' });
   }
-  const state = req.query.state || Math.random().toString(36).substring(2);
+  const state = req.query.state || (require('crypto').randomBytes(8).toString('hex'));
   const scope = 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly';
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${YT_CLIENT_ID}` +
     `&redirect_uri=${encodeURIComponent(YT_REDIRECT_URI)}` +

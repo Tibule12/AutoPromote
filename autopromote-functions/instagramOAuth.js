@@ -9,7 +9,7 @@ exports.getInstagramAuthUrl = functions.region(region).https.onCall(async (data,
   if (!clientId || !redirectUri) {
     throw new functions.https.HttpsError('failed-precondition', 'Instagram client config missing.');
   }
-  const state = data && data.state ? data.state : Math.random().toString(36).slice(2);
+  const state = data && data.state ? data.state : (require('crypto').randomBytes(8).toString('hex'));
   const url = `https://api.instagram.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(process.env.INSTAGRAM_SCOPES || 'user_profile,user_media')}&response_type=code&state=${encodeURIComponent(state)}`;
   return { url, state };
 });

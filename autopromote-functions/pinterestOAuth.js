@@ -10,7 +10,7 @@ exports.getPinterestAuthUrl = functions.region(region).https.onCall(async (data,
     throw new functions.https.HttpsError('failed-precondition', 'Pinterest client config missing.');
   }
   const scope = (process.env.PINTEREST_SCOPES || 'pins:read,pins:write,boards:read');
-  const state = data && data.state ? data.state : Math.random().toString(36).slice(2);
+  const state = data && data.state ? data.state : (require('crypto').randomBytes(8).toString('hex'));
   const authUrl = `https://www.pinterest.com/oauth/?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
   return { url: authUrl, state };
 });

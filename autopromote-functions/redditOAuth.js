@@ -10,7 +10,7 @@ exports.getRedditAuthUrl = functions.region(region).https.onCall(async (data, co
     throw new functions.https.HttpsError('failed-precondition', 'Reddit client config missing.');
   }
   const scope = (process.env.REDDIT_SCOPES || 'identity read submit');
-  const state = data && data.state ? data.state : Math.random().toString(36).slice(2);
+  const state = data && data.state ? data.state : (require('crypto').randomBytes(8).toString('hex'));
   const url = `https://www.reddit.com/api/v1/authorize?client_id=${clientId}&response_type=code&state=${encodeURIComponent(state)}&redirect_uri=${encodeURIComponent(redirectUri)}&duration=permanent&scope=${encodeURIComponent(scope)}`;
   return { url, state };
 });

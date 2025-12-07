@@ -63,6 +63,17 @@ try {
   console.warn('[startup] keepAliveAgents initialization failed:', e.message);
 }
 
+// Graceful cleanup: destroy keep-alive agents on process exit to avoid
+// lingering open sockets during test teardown or server shutdown.
+try {
+  const { destroy } = require('./utils/keepAliveAgents');
+  if (destroy && typeof destroy === 'function') {
+    ['SIGINT','SIGTERM','exit'].forEach(ev => process.on(ev, () => {
+      try { destroy(); } catch(e) {}
+    }));
+  }
+} catch(e) { /* ignore */ }
+
 // ---------------------------------------------------------------------------
 // Observability & startup environment reminders
 // ---------------------------------------------------------------------------
@@ -1722,7 +1733,7 @@ if (ENABLE_BACKGROUND) {
       if (!ok) return;
       platformMetricsRunning = true;
       try {
-        const jitter = Math.random() * 250;
+        const jitter = require('crypto').randomInt(0, 250);
         if (jitter) await new Promise(r=>setTimeout(r,jitter));
         const r = await pollPlatformPostMetricsBatch({ batchSize: 5 });
         if (r.processed) console.log(`[BG][platform-metrics] Updated ${r.processed} platform post metrics`);
