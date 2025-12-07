@@ -51,6 +51,7 @@ jobs:
           // Prefer the most recent completed run
           const completedRun = matchingRuns.find(r => r.status === 'completed');
           const run = completedRun || matchingRuns[0];
+          console.log(`Found Playwright run id=${run.id} head_sha=${run.head_sha} status=${run.status} conclusion=${run.conclusion} url=${run.html_url}`);
           // If the run hasn't completed yet, surface a clearer error
           if (run.status !== 'completed') throw new Error(`Playwright E2E run not completed (status=${run.status}). Please ensure Playwright workflow has finished before deploying.`);
           // run.conclusion may be null under some edge cases, handle that explicitly
