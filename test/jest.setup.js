@@ -16,16 +16,16 @@ if (!process.env.DEBUG_TEST_LOGS) {
 try {
   const ka = require('../src/utils/keepAliveAgents');
   if (ka && typeof ka.destroy === 'function') {
-    global.afterAll(async () => {
-      try { ka.destroy(); } catch(e) { /* ignore */ }
-    });
+    const safeAfterAll = (fn) => { if (typeof afterAll === 'function') { afterAll(fn); } else if (typeof global.afterAll === 'function') { global.afterAll(fn); } else { process.on('exit', fn); } };
+    safeAfterAll(async () => { try { ka.destroy(); } catch(e) { /* ignore */ } });
   }
 } catch(e) { /* not present in some test environments */ }
 // Also try to terminate any DB clients created by firebaseAdmin shims
 try {
   const fb = require('../src/firebaseAdmin');
   if (fb && fb.db && typeof fb.db.terminate === 'function') {
-    global.afterAll(async () => {
+    const safeAfterAll = (fn) => { if (typeof afterAll === 'function') { afterAll(fn); } else if (typeof global.afterAll === 'function') { global.afterAll(fn); } else { process.on('exit', fn); } };
+    safeAfterAll(async () => {
       try { await fb.db.terminate(); } catch(e) { /* ignore */ }
       try { if (fb.admin && typeof fb.admin.app === 'function') await fb.admin.app().delete(); } catch(e) { /* ignore */ }
     });
@@ -43,6 +43,29 @@ try {
     console.error = originalError;
   });
 }
+
+// Track timers created during tests so we can clear them and avoid open handles
+const __testIntervals = [];
+const __testTimeouts = [];
+const __testImmediates = [];
+const __origSetInterval = global.setInterval;
+const __origSetTimeout = global.setTimeout;
+const __origSetImmediate = global.setImmediate;
+global.setInterval = (...args) => { const id = __origSetInterval(...args); try { if (id && typeof id.unref === 'function') id.unref(); } catch(e) {} __testIntervals.push(id); return id; };
+global.setTimeout = (...args) => { const id = __origSetTimeout(...args); try { if (id && typeof id.unref === 'function') id.unref(); } catch(e) {} __testTimeouts.push(id); return id; };
+if (typeof __origSetImmediate === 'function') {
+  global.setImmediate = (...args) => { const id = __origSetImmediate(...args); __testImmediates.push(id); return id; };
+}
+
+const safeAfterAll = (fn) => { if (typeof afterAll === 'function') { afterAll(fn); } else if (typeof global.afterAll === 'function') { global.afterAll(fn); } else { process.on('exit', fn); } };
+
+safeAfterAll(async () => {
+  try {
+    for (const id of __testIntervals) try { clearInterval(id); } catch(e) {}
+    for (const id of __testTimeouts) try { clearTimeout(id); } catch(e) {}
+    for (const id of __testImmediates) try { clearImmediate(id); } catch(e) {}
+  } catch (_) {}
+});
 
 // If in test bypass mode, ensure firebaseAdmin admin.auth is a simple verifier that maps
 // `test-token-for-<uid>` into { uid: '<uid>' } for tests relying on Authorization headers.
@@ -81,15 +104,36 @@ try {
         }
         // Clear any previous usage_ledger entries for the test user(s) to avoid rate-limit/usage failure
         try {
-          const ledger = await db.collection('usage_ledger').where('userId', 'in', ['testUser123','adminUser','adminUser123']).get();
-          const batch = db.batch ? db.batch() : null;
-          if (ledger && ledger.forEach) {
-            ledger.forEach(doc => {
-              if (batch) batch.delete(doc.ref);
-              else if (doc.ref && doc.ref.delete) doc.ref.delete();
-            });
+          // Guard: some test DB shims may not implement Firestore-style query API (where/get)
+          if (db && typeof db.collection === 'function') {
+            const ledgerCol = db.collection('usage_ledger');
+            if (ledgerCol && typeof ledgerCol.where === 'function') {
+              const ledger = await ledgerCol.where('userId', 'in', ['testUser123','adminUser','adminUser123']).get();
+              const batch = db.batch ? db.batch() : null;
+              if (ledger && ledger.forEach) {
+                ledger.forEach(doc => { try { if (batch) batch.delete(doc.ref); else if (doc.ref && doc.ref.delete) doc.ref.delete(); } catch(e) {} });
+              }
+              if (batch && batch.commit) await batch.commit();
+            } else if (ledgerCol && typeof ledgerCol.get === 'function') {
+              // If where() is missing, fallback to read all and filter by userId then delete
+              const ledger = await ledgerCol.get();
+              const batch = db.batch ? db.batch() : null;
+              if (ledger && ledger.forEach) {
+                ledger.forEach(doc => {
+                  try {
+                    const data = doc.data ? doc.data() : (doc && doc._fieldsProto) ? doc : null;
+                    const userId = data && (data.userId || (data.user && data.user.userId)) || null;
+                    if (['testUser123','adminUser','adminUser123'].includes(userId)) {
+                      if (batch) batch.delete(doc.ref); else if (doc.ref && doc.ref.delete) doc.ref.delete();
+                    }
+                  } catch(e) {}
+                });
+              }
+              if (batch && batch.commit) await batch.commit();
+            } else {
+              if (process.env.DEBUG_TEST_LOGS === '1') console.warn('[jest.setup] Skipping usage_ledger cleanup: query API unavailable');
+            }
           }
-          if (batch && batch.commit) await batch.commit();
         } catch (e) { if (process.env.DEBUG_TEST_LOGS === '1') console.warn('[jest.setup] Clearing usage_ledger failed:', e && e.message); }
       } catch (seedErr) {
         // Best-effort seeding; ignore failures under non-bypass mode or if DB not ready

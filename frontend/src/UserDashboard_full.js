@@ -60,6 +60,7 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 	const [twitterStatus, setTwitterStatus] = useState({ connected: false, identity: null });
 	const [snapchatStatus, setSnapchatStatus] = useState({ connected: false, profile: null });
 	const [connectBanner, setConnectBanner] = useState(null);
+	const [systemHealth, setSystemHealth] = useState({ ok: true, status: 'unknown', message: null });
 	const [tiktokStatus, setTikTokStatus] = useState({ connected: false, meta: null });
 	const [facebookStatus, setFacebookStatus] = useState({ connected: false, meta: null });
 	const [payouts, setPayouts] = useState([]);
@@ -74,6 +75,23 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 
 		// Toggle dashboard-mode class on mount/unmount so global gradients don't show through dashboard pages
 		useEffect(() => {
+				// Fetch system health on dashboard load and log to console if any service degraded
+				(async function checkSystemHealth(){
+					try {
+						const res = await fetch(`${API_BASE_URL}/api/health`);
+						const json = await res.json();
+						if (!res.ok || (json && json.status && json.status !== 'OK')) {
+							setSystemHealth({ ok: false, status: json && json.status || 'degraded', message: json && json.message });
+							console.error('[SystemHealth] Dashboard detected degraded system:', json);
+						} else {
+							setSystemHealth({ ok: true, status: 'OK', message: null });
+						}
+					} catch (e) {
+						setSystemHealth({ ok: false, status: 'error', message: e.message });
+						console.error('[SystemHealth] Dashboard detected error checking health:', e && e.message);
+					}
+				})();
+
 			document.documentElement?.classList?.add('dashboard-mode');
 			document.body?.classList?.add('dashboard-mode');
 			return () => {
@@ -499,6 +517,11 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 
 			<main className="dashboard-main">
 				<UsageLimitBanner />
+				{systemHealth && !systemHealth.ok && (
+					<div style={{ padding: '8px 12px', background: '#ffebee', color: '#b71c1c', borderRadius: 6, marginBottom: 12 }}>
+						⚠️ System status degraded: {systemHealth.status} {systemHealth.message ? ` - ${systemHealth.message}` : ''}
+					</div>
+				)}
 				{connectBanner && (
 					<div className={`connect-banner ${connectBanner.type}`} style={{
 						padding: '1rem',

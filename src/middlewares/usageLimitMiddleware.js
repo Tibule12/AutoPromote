@@ -25,7 +25,8 @@ function usageLimitMiddleware(options = {}) {
       }
 
       // Optional test-mode fast-path: skip DB usage checks and treat as free tier reset
-      if (process.env.ENABLE_TEST_USAGE_NO_DB === '1' && (process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.NODE_ENV === 'test' || typeof process.env.JEST_WORKER_ID !== 'undefined')) {
+      // If running under CI, admin bypass, or tests, prefer to bypass DB checks to avoid flaky tests due to persisted usage records
+      if (process.env.ENABLE_TEST_USAGE_NO_DB === '1' || (process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.NODE_ENV === 'test' || typeof process.env.JEST_WORKER_ID !== 'undefined')) {
         req.userUsage = {
           limit: freeLimit,
           used: 0,

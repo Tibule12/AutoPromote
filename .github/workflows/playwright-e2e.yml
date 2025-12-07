@@ -1,0 +1,33 @@
+name: Playwright E2E
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 5 * * *' # daily smoke tests at 05:00 UTC
+
+jobs:
+  playwright-e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install deps
+        run: npm ci
+      - name: Prepare playwright browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright E2E
+        run: npm run test:e2e:playwright
+      - name: Run smoke tests (daily)
+        if: github.event_name == 'schedule'
+        run: node ./tools/smoke-tests/runSmokeTests.js

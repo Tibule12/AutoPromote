@@ -58,6 +58,13 @@ const authMiddleware = async (req, res, next) => {
     
     // Set the user ID on the request for later use
     req.userId = decodedToken.uid;
+
+    // Attach Sentry user context for this request if Sentry is initialized
+    try {
+      if (global.__sentry && typeof global.__sentry.setUser === 'function') {
+        global.__sentry.setUser({ id: decodedToken.uid, username: decodedToken.email, email: decodedToken.email });
+      }
+    } catch (_) { /* ignore */ }
     
     try {
       // Get user data from Firestore

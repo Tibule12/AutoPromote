@@ -343,6 +343,16 @@ firebase deploy --only firestore:indexes
 npm install @sentry/node
 # Add SENTRY_DSN to environment
 ```
+**Frontend Sentry:**
+```bash
+# Set frontend DSN for the React app (used by @sentry/react)
+REACT_APP_SENTRY_DSN=your_sentry_dsn_here
+```
+**Server Sentry:**
+```bash
+# Set server DSN for Node app
+SENTRY_DSN=your_sentry_dsn_here
+```
 
 ---
 

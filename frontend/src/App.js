@@ -9,6 +9,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
 import { parseJsonSafe } from './utils/parseJsonSafe';
 import ChatWidget from './ChatWidget';
+import { Sentry } from './sentryClient';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -41,6 +42,7 @@ function App() {
         setIsAdmin(false);
         localStorage.clear();
         setContent([]); // Clear content on logout
+        try { if (Sentry && typeof Sentry.setUser === 'function') Sentry.setUser(null); } catch (_) {}
         return;
       }
       try {
@@ -63,6 +65,7 @@ function App() {
         }
         // Proceed to set user and prefetch content once terms are satisfied.
         setUser({ ...userData, token }); // keep token in memory in React state only
+        try { if (Sentry && typeof Sentry.setUser === 'function') Sentry.setUser({ id: userData.uid, username: userData.email, email: userData.email }); } catch(_) {}
         setIsAdmin(hasAdminClaim);
         const safeUserForStorage = { ...userData };
         localStorage.setItem('user', JSON.stringify(safeUserForStorage));

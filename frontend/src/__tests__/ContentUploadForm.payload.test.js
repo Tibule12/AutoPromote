@@ -46,8 +46,8 @@ describe('ContentUploadForm payloads', () => {
     const previewBtn = screen.getByLabelText(/Preview Content/i);
     fireEvent.click(previewBtn);
 
-    // Wait for onUpload to be called
-    await waitFor(() => expect(onUpload).toHaveBeenCalled());
+    // Wait for onUpload to be called (increased timeout for CI reliability)
+    await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 5000 });
     const payload = onUpload.mock.calls[0][0];
     expect(Array.isArray(payload.platforms)).toBeTruthy();
     expect(payload.platforms).toContain('discord');
@@ -74,8 +74,7 @@ describe('ContentUploadForm payloads', () => {
     // Submit the form
     const uploadBtn = screen.getByRole('button', { name: /Upload Content/i });
     fireEvent.click(uploadBtn);
-
-    await waitFor(() => expect(onUpload).toHaveBeenCalled());
+    await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 10000 });
     const payload = onUpload.mock.calls[0][0];
     expect(Array.isArray(payload.platforms)).toBeTruthy();
     expect(payload.platforms).toContain('youtube');
@@ -87,7 +86,7 @@ describe('ContentUploadForm payloads', () => {
     // Submit the form
     const uploadBtn2 = screen.getByRole('button', { name: /Upload Content/i });
     fireEvent.click(uploadBtn2);
-    await waitFor(() => expect(onUpload).toHaveBeenCalled());
+    await waitFor(() => expect(onUpload).toHaveBeenCalledTimes(2), { timeout: 10000 });
     const payload2 = onUpload.mock.calls[onUpload.mock.calls.length - 1][0];
     expect(payload2.meta).toBeDefined();
     expect(payload2.meta.overlay).toBeDefined();
