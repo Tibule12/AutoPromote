@@ -28,6 +28,9 @@ Some of these endpoints likely run promotion or content aggregation queries that
 See `firestore.indexes.json` which now includes (ASC + DESC variants to match queries ordering by createdAt desc):
 ```
 promotion_tasks:
+  content:
+    - (approvalStatus ASC, approvedAt DESC)    # newly added
+    - (approvalStatus ASC, rejectedAt DESC)    # newly added
   - (type ASC, status ASC, createdAt ASC)
   - (uid ASC, type ASC, createdAt ASC)
   - (type ASC, status ASC, createdAt DESC)   # newly added

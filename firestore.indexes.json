@@ -1,137 +1,272 @@
 {
   "indexes": [
-    { "collectionGroup": "content", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "user_id", "order": "ASCENDING" },
-      { "fieldPath": "created_at", "order": "DESCENDING" }
-    ] },
-    { "collectionGroup": "content", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "user_id", "order": "ASCENDING" },
-      { "fieldPath": "created_at", "order": "ASCENDING" }
-    ] },
-    { "collectionGroup": "content", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "status", "order": "ASCENDING" },
-      { "fieldPath": "created_at", "order": "DESCENDING" }
-    ] },
-    { "collectionGroup": "content", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "type", "order": "ASCENDING" },
-      { "fieldPath": "created_at", "order": "DESCENDING" }
-    ] },
-    { "collectionGroup": "analytics", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "content_id", "order": "ASCENDING" },
-      { "fieldPath": "timestamp", "order": "DESCENDING" }
-    ] },
-    { "collectionGroup": "promotions", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "user_id", "order": "ASCENDING" },
-      { "fieldPath": "is_active", "order": "ASCENDING" },
-      { "fieldPath": "created_at", "order": "DESCENDING" }
-    ] },
-    { "collectionGroup": "promotions", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "platform", "order": "ASCENDING" },
-      { "fieldPath": "is_active", "order": "ASCENDING" },
-      { "fieldPath": "created_at", "order": "DESCENDING" }
-    ] },
-    { "collectionGroup": "promotion_tasks", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "type", "order": "ASCENDING" },
-      { "fieldPath": "status", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "ASCENDING" }
-    ] },
-    { "collectionGroup": "promotion_tasks", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "uid", "order": "ASCENDING" },
-      { "fieldPath": "type", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "ASCENDING" }
-    ] }
-    ,{ "collectionGroup": "promotion_tasks", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "type", "order": "ASCENDING" },
-      { "fieldPath": "status", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "promotion_tasks", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "uid", "order": "ASCENDING" },
-      { "fieldPath": "type", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "promotion_schedules", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "user_id", "order": "ASCENDING" },
-      { "fieldPath": "startTime", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "generated_clips", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "userId", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "content", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "userId", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "notifications", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "user_id", "order": "ASCENDING" },
-      { "fieldPath": "created_at", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "community_posts", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "status", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "community_posts", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "userId", "order": "ASCENDING" },
-      { "fieldPath": "status", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "community_posts", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "status", "order": "ASCENDING" },
-      { "fieldPath": "type", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "community_posts", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "status", "order": "ASCENDING" },
-      { "fieldPath": "isAIGenerated", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "community_following", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "followerId", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "community_following", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "followingId", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "community_comments", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "postId", "order": "ASCENDING" },
-      { "fieldPath": "status", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "community_comments", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "postId", "order": "ASCENDING" },
-      { "fieldPath": "parentCommentId", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "ASCENDING" }
-    ] }
-    ,{ "collectionGroup": "community_likes", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "postId", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "community_shares", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "postId", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "ads", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "userId", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "ads", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "userId", "order": "ASCENDING" },
-      { "fieldPath": "type", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "ads", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "type", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "ads", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "status", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
-    ,{ "collectionGroup": "ads", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "externalPlatform", "order": "ASCENDING" },
-      { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ] }
+    {
+      "collectionGroup": "content",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "content",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "content",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "approvalStatus", "order": "ASCENDING" },
+        { "fieldPath": "approvedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "content",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "approvalStatus", "order": "ASCENDING" },
+        { "fieldPath": "rejectedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "content",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "analytics",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "content_id", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "promotions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "is_active", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "promotions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "platform", "order": "ASCENDING" },
+        { "fieldPath": "is_active", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "promotion_tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "promotion_tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "promotion_tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "promotion_tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "promotion_tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "uid", "order": "ASCENDING" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "promotion_schedules",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "startTime", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "generated_clips",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "content",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "community_posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "community_posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "community_posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "community_posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "isAIGenerated", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "community_following",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "followerId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "community_following",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "followingId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "community_comments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "postId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "community_comments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "postId", "order": "ASCENDING" },
+        { "fieldPath": "parentCommentId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "community_likes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "postId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "community_shares",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "postId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "externalPlatform", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
   ],
   "fieldOverrides": []
 }

@@ -118,7 +118,7 @@ class VideoClippingService {
     const blockedHosts = [
       'localhost', '127.0.0.1', '0.0.0.0',
       /^10\..*/, /^172\.(1[6-9]|2[0-9]|3[01])\..*/, /^192\.168\..*/,
-      /^169\.254\..*/, /^::1$/, /^fc00:.*/, /^fe80:.*/
+      /^169\.254\..*/, /^::1$/, /^fc00:.*/, /^fd00:.*/, /^fe80:.*/
     ];
     
     if (blockedHosts.some(blocked => 
@@ -139,14 +139,14 @@ class VideoClippingService {
       throw new Error('Only trusted storage domains are allowed');
     }
     
-    // SSRF protection: Validate URL protocol to prevent SSRF attacks
+    // SSRF protection: only allow HTTPS
     const urlProtocol = parsedUrl.protocol;
-    if (urlProtocol !== 'https:' && urlProtocol !== 'http:') {
-      throw new Error('Only HTTP/HTTPS protocols are allowed');
+    if (urlProtocol !== 'https:') {
+      throw new Error('Only HTTPS URLs are allowed');
     }
     
     // Additional SSRF protection: resolve hostname and validate IP addresses
-    const privateIpPattern = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|169\.254\.|::1|fc00:|fe80:)/i;
+    const privateIpPattern = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|169\.254\.|::1$|f[cd]00:|fe80:)/i;
     async function hostResolvesToPrivate(host) {
       try {
         const addrs = await dns.lookup(host, { all: true });
@@ -168,23 +168,84 @@ class VideoClippingService {
     if (await hostResolvesToPrivate(hostname)) {
       throw new Error('Private IP addresses are not allowed');
     }
+
+    // Check port (deny non-standard ports that could be used for admin services)
+    const port = parsedUrl.port ? parseInt(parsedUrl.port, 10) : 443;
+    const allowedPorts = [443];
+    if (!allowedPorts.includes(port)) {
+      throw new Error('Invalid port for HTTPS resource');
+    }
     
-    // Using axios with strict domain and protocol checking
-    // Do not automatically follow redirects: prevents redirect-based SSRF
-    const response = await axios.get(url, { 
+    // Perform a HEAD request (without redirects) to inspect headers safely
+    let headResp = null;
+    try {
+      headResp = await axios.head(url, {
+        timeout: 10000,
+        maxRedirects: 0,
+        validateStatus: status => status >= 200 && status < 400
+      });
+    } catch (err) {
+      if (err.response) {
+        headResp = err.response;
+      } else {
+        throw new Error('Failed to access video URL');
+      }
+    }
+
+    // If HEAD returned a 3xx, inspect the Location header and prevent redirect to private networks
+    if (headResp.status >= 300 && headResp.status < 400) {
+      const location = headResp.headers && headResp.headers.location;
+      if (location) {
+        const redirectUrl = new URL(location, url);
+        const redirectHost = redirectUrl.hostname;
+        if (await hostResolvesToPrivate(redirectHost)) {
+          throw new Error('Redirects to private networks are not allowed');
+        }
+      }
+      throw new Error('Redirects are not allowed when downloading video');
+    }
+
+    // Validate content length if present
+    const contentLength = headResp.headers && headResp.headers['content-length'] ? parseInt(headResp.headers['content-length'], 10) : null;
+    const MAX_BYTES = this.maxDownloadBytes || 400 * 1024 * 1024; // 400MB default limit; override in tests via instance
+    if (contentLength !== null && contentLength > MAX_BYTES) {
+      throw new Error('Video file is too large');
+    }
+
+    // Validate content-type if present
+    const contentType = headResp.headers && headResp.headers['content-type'];
+    if (contentType && !contentType.startsWith('video/') && contentType !== 'application/octet-stream') {
+      throw new Error('Unexpected content type');
+    }
+
+    // Now perform streaming GET with a byte-limit and no redirects
+    const response = await axios.get(url, {
       responseType: 'stream',
-      timeout: 60000, // 60s timeout
+      timeout: 60000,
       maxRedirects: 0,
-      validateStatus: (status) => status >= 200 && status < 300,
-      // No auto redirects allowed to avoid redirect-based SSRF.
     });
     const writer = require('fs').createWriteStream(destPath);
+    
+    // Track the response size and abort if it exceeds MAX_BYTES
+    let totalBytes = 0;
+    let aborted = false;
+    response.data.on('data', (chunk) => {
+      totalBytes += chunk.length;
+      if (totalBytes > MAX_BYTES) {
+        aborted = true;
+        response.data.destroy(new Error('Video file is too large'));
+      }
+    });
     
     response.data.pipe(writer);
     
     return new Promise((resolve, reject) => {
-      writer.on('finish', resolve);
-      writer.on('error', reject);
+      writer.on('finish', () => {
+        if (aborted) return reject(new Error('Video file is too large'));
+        resolve();
+      });
+      writer.on('error', (err) => reject(err));
+      response.data.on('error', (err) => reject(err));
     });
   }
 
