@@ -105,10 +105,18 @@ test('Upload flow creates content doc and sets spotify target', async ({ page },
     await page.check('#target_spotify');
     await page.click('#submit');
     // Wait for #res to be populated with a JSON response
-    await page.waitForSelector('#res');
+    // Wait for #res to be rendered and to contain non-empty text to avoid parsing race conditions
+    await page.waitForFunction(() => {
+      const el = document.getElementById('res');
+      return el && el.textContent && el.textContent.trim().length > 0;
+    }, { timeout: 20000 });
     const text = await page.$eval('#res', el => el.textContent);
     let parsed;
-    try { parsed = JSON.parse(text); } catch (e) { throw new Error('Response not JSON: ' + text); }
+    try { parsed = JSON.parse(text); } catch (e) {
+      // Dump text for later inspection before failing the test
+      console.error('[DEBUG] Response text that failed to parse as JSON:', text);
+      throw new Error('Response not JSON: ' + text);
+    }
     expect(parsed.status).toBe(201);
     // Prefer the flattened `content` key from the API response; fall back to `body.content` when
     // the UI or an intermediate wrapper includes a `body` property for backward compatibility.
