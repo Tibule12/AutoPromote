@@ -52,8 +52,16 @@ if (admin.apps.length === 0) {
     // This avoids accidentally picking up a gcloud user token which can expire.
     if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
         try {
+            const path = require('path');
+            const fs = require('fs');
             const saPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-            const saJson = require(saPath);
+            const resolvedSaPath = path.isAbsolute(saPath) ? saPath : path.resolve(process.cwd(), saPath);
+            if (!fs.existsSync(resolvedSaPath)) {
+                throw new Error(`Service account file not found at ${resolvedSaPath}`);
+            }
+            const saJson = JSON.parse(fs.readFileSync(resolvedSaPath, 'utf8'));
+            try { if (process.env.DEBUG_FIREBASE_ADMIN === '1') console.log('[firebaseAdmin] Read service account JSON from', resolvedSaPath); } catch (_) {}
+            try { if (process.env.DEBUG_FIREBASE_ADMIN === '1') console.log('[firebaseAdmin] Loaded service account JSON from', resolvedSaPath); } catch (_) {}
             admin.initializeApp({
                 credential: admin.credential.cert(saJson),
                 databaseURL: process.env.FIREBASE_DATABASE_URL || '',

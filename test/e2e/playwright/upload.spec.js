@@ -69,6 +69,11 @@ test('Upload flow creates content doc and sets spotify target', async ({ page },
     console.warn('⚠️ Could not write temporary service account file for tests:', e.message);
   }
   const { db } = require('../../../src/firebaseAdmin');
+  try {
+    await db.collection('users').doc('testUser123').set({ lastAcceptedTerms: { version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0', acceptedAt: new Date().toISOString() } }, { merge: true });
+  } catch (e) {
+    console.warn('⚠️ Could not seed lastAcceptedTerms for testUser123:', e.message);
+  }
   const { mainServer, fixtureServer, mainPort, fixturePort } = await startServers();
   try {
     const pageUrl = `http://127.0.0.1:${fixturePort}/upload_test_page.html`;
