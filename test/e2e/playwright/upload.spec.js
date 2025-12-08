@@ -117,10 +117,10 @@ test('Upload flow creates content doc and sets spotify target', async ({ page },
       console.error('[DEBUG] Response text that failed to parse as JSON:', text);
       throw new Error('Response not JSON: ' + text);
     }
-    expect(parsed.status).toBe(201);
-    // Prefer the flattened `content` key from the API response; fall back to `body.content` when
-    // the UI or an intermediate wrapper includes a `body` property for backward compatibility.
-    const contentId = parsed.content?.id || parsed.body?.content?.id;
+    const normalize = require('../../utils/normalizeApiResponse');
+    const { status, body } = normalize(parsed, parsed.status || parsed.statusCode);
+    expect(status).toBe(201);
+    const contentId = body?.content?.id;
     if (!contentId) console.warn('Warning: upload page returned unexpected response shape:', text);
     expect(contentId).toBeTruthy();
     // Validate in Firestore

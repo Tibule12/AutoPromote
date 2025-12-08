@@ -61,18 +61,20 @@ describe('Content Upload & Promotion Integration', () => {
         .post('/api/content/upload')
         .set('Authorization', `Bearer test-token-for-${testUserId}`)
         .send(payload);
-      console.log('POST /api/content/upload response:', res.statusCode, res.body);
+      const normalize = require('../../test/utils/normalizeApiResponse');
+      const { status, body: apiBody } = normalize(res.body, res.statusCode);
+      console.log('POST /api/content/upload response:', status, apiBody);
     } catch (err) {
       console.error('Error during POST /api/content/upload:', err);
       throw err;
     }
 
-    expect(res.statusCode).toBe(201);
-    expect(res.body.content).toBeDefined();
-    expect(res.body.promotion_schedule).toBeDefined();
-    expect(res.body.content.target_platforms.length).toBeGreaterThanOrEqual(5);
-    expect(res.body.promotion_schedule.schedule_type).toBe('specific');
-    expect(res.body.content.status).toBe('pending');
+    expect(status).toBe(201);
+    expect(apiBody.content).toBeDefined();
+    expect(apiBody.promotion_schedule).toBeDefined();
+    expect(apiBody.content.target_platforms.length).toBeGreaterThanOrEqual(5);
+    expect(apiBody.promotion_schedule.schedule_type).toBe('specific');
+    expect(apiBody.content.status).toBe('pending');
     expect(res.body.growth_guarantee_badge).toBeDefined();
     expect(res.body.auto_promotion).toBeDefined();
     // Add more assertions for notifications, tracking, etc. as needed
