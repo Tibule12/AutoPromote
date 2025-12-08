@@ -57,12 +57,14 @@ jobs:
         if: steps.check_firebase_secret.outputs.run-tests == 'cloud'
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/test/e2e/tmp/service-account.json
+          NO_VIRAL_OPTIMIZATION: '1'
         run: npm run test:e2e:playwright
       - name: Run Playwright E2E (emulator)
         if: steps.check_firebase_secret.outputs.run-tests == 'emulator'
         env:
           FIRESTORE_EMULATOR_HOST: localhost:8080
           GCLOUD_PROJECT: autopromote-cc6d3
+          NO_VIRAL_OPTIMIZATION: '1'
         run: |
           # Use firebase emulators:exec to ensure the emulator environment variables are set for the child process
           npx firebase emulators:exec --only firestore --project autopromote-cc6d3 --quiet "node ./scripts/seed-autopilot-emulator.js && npm run test:e2e:playwright:emulator"
