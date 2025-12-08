@@ -98,13 +98,17 @@ jobs:
       - name: Install sentry-cli
         run: npm install -g @sentry/cli
       - name: Create and upload Sentry release
-        if: ${{ secrets.SENTRY_AUTH_TOKEN && vars.SENTRY_ORG && vars.SENTRY_PROJECT }}
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
           RELEASE: ${{ github.sha }}
         run: |
+          # Guard: make sure vars and secrets exist; if not, skip gracefully
+          if [ -z "${SENTRY_AUTH_TOKEN:-}" ] || [ -z "${SENTRY_ORG:-}" ] || [ -z "${SENTRY_PROJECT:-}" ]; then
+            echo "Sentry envs not set; skipping Sentry release upload."
+            exit 0
+          fi
           set -e
           sentry-cli releases --org "$SENTRY_ORG" --project "$SENTRY_PROJECT" new "$RELEASE"
           sentry-cli releases --org "$SENTRY_ORG" --project "$SENTRY_PROJECT" files "$RELEASE" upload-sourcemaps frontend/build --url-prefix "~/"
