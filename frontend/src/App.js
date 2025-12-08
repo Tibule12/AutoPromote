@@ -10,6 +10,7 @@ import { API_ENDPOINTS, API_BASE_URL } from './config';
 import { parseJsonSafe } from './utils/parseJsonSafe';
 import ChatWidget from './ChatWidget';
 import { Sentry } from './sentryClient';
+import TestSentryButton from './components/TestSentryButton';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -682,6 +683,12 @@ function App() {
       )}
       {/* AI Chat Widget - only show when user is logged in */}
       {user && <ChatWidget />}
+      {/* Optional: show Sentry test UI in non-prod or when explicitly enabled */}
+      {(process.env.REACT_APP_SHOW_SENTRY_TEST_BUTTON === '1' || process.env.NODE_ENV !== 'production') && (
+        <div style={{ position: 'fixed', bottom: 10, right: 10, zIndex: 9999 }}>
+          <TestSentryButton />
+        </div>
+      )}
     </div>
   );
 }
