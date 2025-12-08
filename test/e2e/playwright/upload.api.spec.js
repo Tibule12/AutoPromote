@@ -22,6 +22,11 @@ test('API upload test - create content and check Firestore', async () => {
   }
   const { db } = require('../../../src/firebaseAdmin');
   const app = require('../../../src/server');
+  try {
+    await db.collection('users').doc('testUser123').set({ lastAcceptedTerms: { version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0', acceptedAt: new Date().toISOString() } }, { merge: true });
+  } catch (e) {
+    console.warn('⚠️ Could not seed lastAcceptedTerms for testUser123:', e.message);
+  }
   const mainServer = app.listen(0);
   await new Promise((r) => mainServer.once('listening', r));
   const mainPort = mainServer.address().port;

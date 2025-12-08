@@ -30,25 +30,51 @@ jobs:
           cache: 'npm'
       - name: Install deps
         run: npm ci
-      - name: Check for FIREBASE Admin service account (skip E2E if missing)
+      - name: Check for FIREBASE Admin service account (cloud vs emulator)
         id: check_firebase_secret
         shell: bash
         run: |
           if [ -n "$FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64" ] || [ -n "$FIREBASE_ADMIN_SERVICE_ACCOUNT" ]; then
-            echo "run-tests=true" >> $GITHUB_OUTPUT
-            echo "Found Firebase service account secret. Will run E2E tests.";
+            echo "run-tests=cloud" >> $GITHUB_OUTPUT
+            echo "Found Firebase service account secret. Will run E2E tests against cloud service account.";
           else
-            echo "run-tests=false" >> $GITHUB_OUTPUT
-            echo "No Firebase service account secret found. Skipping Playwright E2E (or set FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64 / FIREBASE_ADMIN_SERVICE_ACCOUNT)";
+            echo "run-tests=emulator" >> $GITHUB_OUTPUT
+            echo "No Firebase service account secret found. Will run E2E tests using the Firebase emulator.";
           fi
       - name: Prepare playwright browsers
         run: npx playwright install --with-deps
-      - name: Run Playwright E2E
-        if: steps.check_firebase_secret.outputs.run-tests == 'true'
+      - name: Upload test reporters directory (pre-clean)
+        run: rm -rf test-results || true
+      - name: Cloud seed Firestore (if cloud mode)
+        if: steps.check_firebase_secret.outputs.run-tests == 'cloud'
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/test/e2e/tmp/service-account.json
+        run: |
+          # Ensure service account exists and is written
+          node ./scripts/write-service-account.js || true
+          node ./scripts/seed-autopilot-cloud.js
+      - name: Run Playwright E2E (cloud)
+        if: steps.check_firebase_secret.outputs.run-tests == 'cloud'
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/test/e2e/tmp/service-account.json
         run: npm run test:e2e:playwright
-      - name: Skip Playwright E2E (NO SERVICE ACCOUNT)
-        if: steps.check_firebase_secret.outputs.run-tests == 'false'
-        run: echo "Skipping Playwright tests because FIREBASE_ADMIN_SERVICE_ACCOUNT* secret not set. Add it to run e2e tests."
+      - name: Run Playwright E2E (emulator)
+        if: steps.check_firebase_secret.outputs.run-tests == 'emulator'
+        env:
+          FIRESTORE_EMULATOR_HOST: localhost:8080
+          GCLOUD_PROJECT: autopromote-cc6d3
+        run: |
+          # Use firebase emulators:exec to ensure the emulator environment variables are set for the child process
+          npx firebase emulators:exec --only firestore --project autopromote-cc6d3 --quiet "node ./scripts/seed-autopilot-emulator.js && npm run test:e2e:playwright:emulator"
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-report
+          path: |
+            test-results/**
+            playwright-report/**
+            test/e2e/**/playwright-report/**
       - name: Run smoke tests (daily)
         if: github.event_name == 'schedule'
         run: node ./tools/smoke-tests/runSmokeTests.js
