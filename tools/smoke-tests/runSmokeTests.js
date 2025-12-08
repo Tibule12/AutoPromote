@@ -122,8 +122,9 @@ async function processOneYouTubeTask() {
   let created = null;
   if (TOKEN) {
     created = await createContent();
-    if (created && created.ok && created.body && created.body.content && created.body.content.id) {
-      const cid = created.body.content.id;
+    if (created && created.ok) {
+      const cid = (created.body && created.body.content && created.body.content.id) || (created.body && created.body.id) || (created.content && created.content.id);
+      if (cid) {
       // my content should include it
       await getMyContent();
 
@@ -132,6 +133,7 @@ async function processOneYouTubeTask() {
       if (enq && enq.ok) {
         // try to process a task (this may fail with provider auth errors but should show progress)
         await processOneYouTubeTask();
+      }
       }
     }
   } else {

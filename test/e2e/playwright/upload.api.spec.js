@@ -45,11 +45,14 @@ test('API upload test - create content and check Firestore', async () => {
     });
     const json = await res.json();
     expect(res.status).toBe(201);
-    const contentId = json.body?.content?.id;
+    // The server returns a direct 'content' field; older tests expected a 'body' wrapper.
+    // Accept either shape to be robust in CI and ensure we're deleting the correct doc.
+    const contentId = json.content?.id || json.body?.content?.id;
+    if (!contentId) console.warn('Warning: upload API returned unexpected json shape:', JSON.stringify(json));
     expect(contentId).toBeTruthy();
     // cleanup
     // Defer firebaseAdmin require until after we set GOOGLE_APPLICATION_CREDENTIALS
-    await db.collection('content').doc(contentId).delete();
+    if (contentId) await db.collection('content').doc(contentId).delete();
   } finally {
     await new Promise((r) => mainServer ? mainServer.close(r) : r());
   }
