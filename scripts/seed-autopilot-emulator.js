@@ -24,7 +24,8 @@ async function main(){
     name: 'Autopilot Admin',
     role: 'admin',
     isAdmin: true,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    lastAcceptedTerms: { version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0', acceptedAt: new Date().toISOString() }
   });
 
   // Create a regular test user
@@ -32,7 +33,8 @@ async function main(){
     email: 'testuser@example.com',
     name: 'Test User',
     role: 'user',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    lastAcceptedTerms: { version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0', acceptedAt: new Date().toISOString() }
   });
 
   // Create a content item
