@@ -43,7 +43,9 @@ async function startServer() {
       }
       const fetchRes = await fetch(apiUrl, opts);
       const text = await fetchRes.text();
-      res.status(fetchRes.status).set(Object.fromEntries(fetchRes.headers.entries())).send(text);
+      const forwardedHeaders = Object.fromEntries(fetchRes.headers.entries());
+      forwardedHeaders['content-type'] = forwardedHeaders['content-type'] || 'application/json';
+      res.status(fetchRes.status).set(forwardedHeaders).send(text);
     } catch (e) {
       console.error('Fixture proxy error:', e && e.message);
       res.status(500).send({ error: e && e.message });
@@ -92,7 +94,7 @@ async function runE2E() {
       throw new Error('Upload did not return success status 201; got: ' + parsed.status);
     }
     // Verify the content doc exists in Firestore
-    const contentId = parsed.body && parsed.body.content && parsed.body.content.id;
+    const contentId = (parsed.content && parsed.content.id) || (parsed.body && parsed.body.content && parsed.body.content.id);
     if (!contentId) {
       throw new Error('No content ID returned from upload');
     }

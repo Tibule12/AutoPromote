@@ -56,7 +56,9 @@
             body: JSON.stringify(payload)
           });
           const json = await res.json();
-          document.getElementById('res').textContent = JSON.stringify({ status: res.status, body: json }, null, 2);
+          // Standardized: show status and flatten API response so tests and clients can read data
+          // as { status, ...apiResponse } instead of using `body` wrapper.
+          document.getElementById('res').textContent = JSON.stringify({ status: res.status, ...json }, null, 2);
         } catch (e) {
           document.getElementById('res').textContent = JSON.stringify({ error: e.message }, null, 2);
         }

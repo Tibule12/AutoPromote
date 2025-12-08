@@ -87,7 +87,12 @@ test('Upload flow creates content doc and sets spotify target', async ({ page },
         if (fetchHeaders.origin) delete fetchHeaders.origin;
         const res = await fetch(url, { method: 'POST', body: reqBody, headers: fetchHeaders });
         const text = await res.text();
-        route.fulfill({ status: res.status, body: text, headers: Object.fromEntries(res.headers.entries()) });
+        // Ensure the returned content is treated as JSON when the server responds with JSON; some
+        // intermediaries or fetch polyfills may not set content-type headers correctly when
+        // forwarding, so assert it explicitly here for the page to parse consistently.
+        const forwardedHeaders = Object.fromEntries(res.headers.entries());
+        forwardedHeaders['content-type'] = forwardedHeaders['content-type'] || 'application/json';
+        route.fulfill({ status: res.status, body: text, headers: forwardedHeaders });
       } catch (err) {
         await route.fulfill({ status: 500, body: JSON.stringify({ error: err.message }) });
       }
@@ -105,7 +110,10 @@ test('Upload flow creates content doc and sets spotify target', async ({ page },
     let parsed;
     try { parsed = JSON.parse(text); } catch (e) { throw new Error('Response not JSON: ' + text); }
     expect(parsed.status).toBe(201);
-    const contentId = parsed.body?.content?.id;
+    // Prefer the flattened `content` key from the API response; fall back to `body.content` when
+    // the UI or an intermediate wrapper includes a `body` property for backward compatibility.
+    const contentId = parsed.content?.id || parsed.body?.content?.id;
+    if (!contentId) console.warn('Warning: upload page returned unexpected response shape:', text);
     expect(contentId).toBeTruthy();
     // Validate in Firestore
     const doc = await db.collection('content').doc(contentId).get();
