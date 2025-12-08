@@ -12,6 +12,7 @@ export function initSentry() {
       integrations: [new BrowserTracing()],
       tracesSampleRate: parseFloat(process.env.REACT_APP_SENTRY_TRACES_SAMPLE_RATE || '0.05'),
       environment: process.env.NODE_ENV || 'development',
+      release: process.env.REACT_APP_COMMIT_HASH || process.env.REACT_APP_GIT_SHA || process.env.REACT_APP_VERSION || null,
       // sendDefaultPii can be toggled via REACT_APP_SENTRY_SEND_DEFAULT_PII (set to '1' or 'true')
       sendDefaultPii: ((String(process.env.REACT_APP_SENTRY_SEND_DEFAULT_PII || 'false')).toLowerCase() === 'true') || String(process.env.REACT_APP_SENTRY_SEND_DEFAULT_PII || '0') === '1',
       // Sanitize PII by default: remove Authorization header and cookies from event payloads
