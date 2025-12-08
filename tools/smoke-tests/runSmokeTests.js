@@ -52,15 +52,17 @@ async function createContent() {
     // no target_platforms to avoid requiring platform options
     auto_promote: false
   };
-  try {
+    try {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` },
       body: JSON.stringify(body)
     });
     const json = await res.json();
-    log('CREATE', `${res.status} ${JSON.stringify(json).slice(0, 300)}`);
-    return { ok: res.ok, body: json };
+    const normalize = require('../../test/utils/normalizeApiResponse');
+    const { status, body: apiBody } = normalize(json, res.status);
+    log('CREATE', `${res.status} ${JSON.stringify(apiBody).slice(0, 300)}`);
+    return { ok: res.ok, body: apiBody };
   } catch (e) {
     log('CREATE', 'ERROR ' + e.message);
     return null;

@@ -89,12 +89,14 @@ async function runE2E() {
     await page.waitForSelector('#res');
     const text = await page.$eval('#res', el => el.textContent);
     const parsed = JSON.parse(text);
+    const normalize = require('../utils/normalizeApiResponse');
+    const { status, body } = normalize(parsed, parsed.status || parsed.statusCode);
     console.log('E2E page response status:', parsed.status);
     if (parsed.status !== 201) {
       throw new Error('Upload did not return success status 201; got: ' + parsed.status);
     }
     // Verify the content doc exists in Firestore
-    const contentId = (parsed.content && parsed.content.id) || (parsed.body && parsed.body.content && parsed.body.content.id);
+    const contentId = body?.content?.id;
     if (!contentId) {
       throw new Error('No content ID returned from upload');
     }
