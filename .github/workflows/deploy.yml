@@ -110,6 +110,6 @@ jobs:
             exit 0
           fi
           set -e
-          sentry-cli releases --org "$SENTRY_ORG" --project "$SENTRY_PROJECT" new "$RELEASE"
-          sentry-cli releases --org "$SENTRY_ORG" --project "$SENTRY_PROJECT" files "$RELEASE" upload-sourcemaps frontend/build --url-prefix "~/"
-          sentry-cli releases --org "$SENTRY_ORG" --project "$SENTRY_PROJECT" finalize "$RELEASE"
+          sentry-cli releases --org "$SENTRY_ORG" --project "$SENTRY_PROJECT" new "$RELEASE" || echo "WARNING: sentry-cli release create failed"
+          sentry-cli releases --org "$SENTRY_ORG" --project "$SENTRY_PROJECT" files "$RELEASE" upload-sourcemaps frontend/build --url-prefix "~/" || echo "WARNING: sentry-cli upload-sourcemaps failed"
+          sentry-cli releases --org "$SENTRY_ORG" --project "$SENTRY_PROJECT" finalize "$RELEASE" || echo "WARNING: sentry-cli finalize failed"
