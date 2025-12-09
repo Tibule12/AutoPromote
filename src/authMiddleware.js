@@ -18,17 +18,17 @@ const authMiddleware = async (req, res, next) => {
         req.user.isAdmin = false;
         req.user.role = req.user.role || 'user';
       }
-      // If running in a CI/test/emulator environment, ensure lastAcceptedTerms exists for test tokens
-      try {
-        const shouldAutoAccept = !!(process.env.FIRESTORE_EMULATOR_HOST || process.env.GITHUB_ACTIONS === 'true' || process.env.NODE_ENV === 'test' || process.env.CI === 'true' || process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.CI_ROUTE_IMPORTS === '1');
-        if (shouldAutoAccept) {
-          const requiredVersion = process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0';
-          const now = new Date().toISOString();
-          // Merge lastAcceptedTerms to avoid overwriting other fields
-          await db.collection('users').doc(uid).set({ lastAcceptedTerms: { version: requiredVersion, acceptedAt: now } }, { merge: true });
-        }
-      } catch (e) {
-        try { console.warn('[authMiddleware] Could not auto-accept terms for test token uid=%s: %s', uid, e && e.message); } catch (_) {}
+      // NOTE: Do NOT auto-seed production data from middleware.
+      // Deprecated behavior: previously this middleware auto-wrote a user's
+      // `lastAcceptedTerms` in CI/test environments which weakened production
+      // controls and caused false negatives/positives during static analysis.
+      //
+      // To seed `lastAcceptedTerms` for test tokens, run the explicit helper:
+      // `node tools/smoke-tests/acceptTermsForUid.js --uid <uid>` (CI should run
+      // deterministic seeding before E2E). This keeps runtime behavior unchanged
+      // and avoids silent writes during request handling.
+      if (process.env.DEBUG_AUTH === 'true') {
+        console.log('[authMiddleware] test-token for uid=%s detected; skipping auto-seed. Use tools/smoke-tests/acceptTermsForUid.js to seed lastAcceptedTerms.', uid);
       }
       return next();
     }
