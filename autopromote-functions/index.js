@@ -53,7 +53,8 @@ const app = express();
 // short-lived smoke tests you may set `CORS_ALLOW_ALL=1` but
 // the default is conservative (deny cross-origin browser requests).
 const allowedOriginsEnv = process.env.CORS_ALLOWED_ORIGINS || '';
-const corsAllowAll = process.env.CORS_ALLOW_ALL === '1' || process.env.CORS_ALLOW_ALL === 'true';
+// Only allow wildcard CORS when running inside CI (GitHub Actions)
+const corsAllowAll = (process.env.CORS_ALLOW_ALL === '1' || process.env.CORS_ALLOW_ALL === 'true') && (process.env.GITHUB_ACTIONS === 'true' || process.env.CI === 'true');
 let corsOptions;
 if (corsAllowAll) {
   corsOptions = {
