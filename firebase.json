@@ -24,11 +24,9 @@
   "storage": {
     "rules": "storage.rules"
   },
-  "functions": [
-  {
-    "runtime": "nodejs20",
+  "functions": {
     "source": "autopromote-functions",
-    "codebase": "autopromote-functions",
+    "runtime": "nodejs20",
     "ignore": [
       "node_modules",
       ".git",
@@ -40,8 +38,7 @@
       "npm --prefix \"$RESOURCE_DIR\" run lint",
       "node ./autopromote-functions/copy-server.js"
     ]
-  }
-],
+  },
   "emulators": {
     "dataconnect": {
       "dataDir": "dataconnect/.dataconnect/pgliteData"

@@ -1,5 +1,5 @@
 const express = require('express');
-const { db, auth, storage } = require('./firebaseAdmin');
+const { admin, db, auth, storage } = require('./firebaseAdmin');
 const authMiddleware = require('./authMiddleware');
 const router = express.Router();
 const { rateLimiter } = require('./middlewares/globalRateLimiter');
@@ -324,7 +324,7 @@ router.get('/subscriptions', authMiddleware, adminOnly, async (req, res) => {
 router.get('/openai/usage', authMiddleware, adminOnly, async (req, res) => {
   try {
     // Attempt to pull usage stats if present
-    const usageSnapshot = await db.collection('openai_usage').orderBy('date', 'desc').limit(30).get();
+    const usageSnapshot = await db.collection('openai_usage').orderBy('createdAt', 'desc').limit(30).get();
     const usage = usageSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     // Aggregate cost
@@ -388,8 +388,9 @@ router.delete('/users/:id', authMiddleware, adminOnly, async (req, res) => {
 
 // Get platform analytics
 router.get('/analytics', authMiddleware, adminOnly, async (req, res) => {
+  // Make period available to try/catch
+  let period = req.query && req.query.period ? req.query.period : '7d';
   try {
-    const { period = '7d' } = req.query;
     let days = 7;
     
     if (period === '30d') days = 30;

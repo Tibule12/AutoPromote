@@ -97,3 +97,20 @@ jobs:
       - name: Route Import Tests
         run: |
           CI_ROUTE_IMPORTS=1 npm run test:routes
+
+  lint:
+    name: Lint codebase (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install deps
+        run: npm ci
+      - name: Run ESLint
+        run: npm run lint

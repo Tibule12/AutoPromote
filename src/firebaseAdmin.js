@@ -122,11 +122,11 @@ if (bypass) {
     const db = admin.firestore();
     
     module.exports = { admin, db };
-} else {
-    // When not bypassing, try to use root firebaseAdmin module first
-    try {
-        module.exports = require('../firebaseAdmin');
-    } catch (e) {
+}
+// When not bypassing, try to use root firebaseAdmin module first
+try {
+    module.exports = require('../firebaseAdmin');
+} catch (e) {
         // Fall back to local initialization if root module not available
         console.warn('[firebaseAdmin shim] Root firebaseAdmin.js not found, using local init:', e.message);
         
@@ -157,4 +157,3 @@ if (bypass) {
         const db = admin.firestore();
         module.exports = { admin, db };
     }
-}

@@ -2,7 +2,9 @@
 // Ensure test bypass variables are set early before any module imports
 if (!process.env.FIREBASE_ADMIN_BYPASS) process.env.FIREBASE_ADMIN_BYPASS = '1';
 if (!process.env.CI_ROUTE_IMPORTS) process.env.CI_ROUTE_IMPORTS = '1';
-if (!process.env.NO_VIRAL_OPTIMIZATION) process.env.NO_VIRAL_OPTIMIZATION = '1';
+// Do NOT force NO_VIRAL_OPTIMIZATION in unit tests; enabling viral optimization is useful
+// to test and validate sanitizer & real engine interactions. Tests can set NO_VIRAL_OPTIMIZATION explicitly
+// when a bypass is desired for a known scenario.
 if (!process.env.NODE_ENV) process.env.NODE_ENV = 'test';
 // Helpful CI/testing defaults
 if (!process.env.ALLOW_PAYMENTS_DEV_MOCK) process.env.ALLOW_PAYMENTS_DEV_MOCK = 'true';

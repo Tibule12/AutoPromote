@@ -8,11 +8,13 @@ const paypalWebhookLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_L
 const { db } = require('../firebaseAdmin');
 let codeqlLimiter; try { codeqlLimiter = require('../middlewares/codeqlRateLimit'); } catch(_) { codeqlLimiter = null; }
 const { audit } = require('../services/auditLogger');
+/* eslint-disable-next-line no-unused-vars */
 let paypalSdk;
 try { paypalSdk = require('@paypal/paypal-server-sdk'); } catch(_) { /* optional */ }
 const authMiddleware = require('../authMiddleware');
 const rateLimit = require('../middlewares/simpleRateLimit');
 
+const { safeFetch } = require('../utils/ssrfGuard');
 // Polyfill / select fetch implementation (Render may run Node < 18 in some cases)
 let fetchFn = (typeof fetch === 'function') ? fetch : null;
 if (!fetchFn) {
@@ -30,8 +32,7 @@ async function getAccessToken(){
   const basic = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
   const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
   if (!fetchFn) throw new Error('fetch_unavailable');
-  // Use safeFetch for SSRF protection
-  const { safeFetch } = require('../utils/ssrfGuard');
+  // Use safeFetch for SSRF protection (module-level import used)
   const res = await safeFetch(base + '/v1/oauth2/token', fetchFn, {
     fetchOptions: {
       method:'POST',

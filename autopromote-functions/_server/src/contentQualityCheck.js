@@ -52,7 +52,7 @@ router.post('/quality-check', upload.single('file'), async (req, res) => {
     }
   } catch (_) {
     // If path checks fail for any reason, avoid continuing with the operation
-    try { safeUnlink(filePath); } catch(_){};
+    try { safeUnlink(filePath); } catch(_){}
     return res.status(400).json({ error: 'invalid_file_path' });
   }
   try {
