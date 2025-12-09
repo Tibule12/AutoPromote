@@ -3,6 +3,7 @@
 // Powered by OpenAI GPT-4o
 
 const axios = require('axios');
+const { logOpenAIUsage } = require('./openaiUsageLogger');
 const { db } = require('../firebaseAdmin');
 
 class ChatbotService {
@@ -128,6 +129,11 @@ IMPORTANT:
       );
 
       const botResponse = response.data.choices[0].message.content;
+      // Log OpenAI usage for chat
+      try {
+        const usage = response.data.usage || {};
+        await logOpenAIUsage({ userId, model: this.model, feature: 'chatbot', usage, promptSnippet: messages.slice(-1)[0]?.content?.toString()?.slice(0,300) });
+      } catch (_) {}
 
       // Save messages to database
       await this.saveMessage(conversationId, 'user', message, userId);

@@ -3,6 +3,7 @@
 // Generates platform-optimized, engaging captions with hashtags
 
 const axios = require('axios');
+const { logOpenAIUsage } = require('./openaiUsageLogger');
 
 class CaptionGenerationService {
   constructor() {
@@ -78,6 +79,11 @@ class CaptionGenerationService {
       );
 
       const generatedText = response.data.choices[0].message.content.trim();
+      // Log OpenAI usage (best-effort)
+      try {
+        const usage = response.data.usage || {};
+        await logOpenAIUsage({ model: this.model, feature: 'caption_generation', usage, promptSnippet: prompt.slice(0, 500) });
+      } catch (e) { /* best-effort */ }
       
       // Parse the response
       const parsed = this.parseGeneratedCaption(generatedText, includeHashtags);

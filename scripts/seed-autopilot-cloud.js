@@ -49,6 +49,9 @@ async function main(){
   // Test user
   await db.collection('users').doc('testUser123').set({ email: 'testuser@example.com', name: 'Test User', role: 'user', createdAt: now, lastAcceptedTerms: { version: process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0', acceptedAt: now } }, { merge: true });
 
+  // Seed a test subscription for testUser123 (optional)
+  await db.collection('user_subscriptions').doc('testUser123').set({ userId: 'testUser123', planId: 'free', planName: 'Free', status: 'active', currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), createdAt: now }, { merge: true });
+
   // Content
   const contentRef = db.collection('content').doc('test-content-1');
   await contentRef.set({ title: 'Test Content for Autopilot', userId: 'testUser123', createdAt: now }, { merge: true });

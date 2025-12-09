@@ -4,23 +4,12 @@ const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
 const { v4: uuidv4 } = require('./lib/uuid-compat');
 const path = require('path');
+const cors = require('cors');
+const express = require('express');
 admin.initializeApp();
 
-// Diagnostic: print module paths and local directory content to assist runtime debugging
-try {
-  console.log('[index] module.paths:', module.paths);
-  const fs = require('fs');
-  const files = fs.readdirSync(__dirname).slice(0, 40);
-  console.log('[index] functions directory listing (slice):', files.join(', '));
-  if (fs.existsSync(path.join(__dirname, '_server'))) {
-    const serverFiles = fs.readdirSync(path.join(__dirname, '_server')).slice(0, 40);
-    console.log('[index] _server directory listing (slice):', serverFiles.join(', '));
-  } else {
-    console.log('[index] _server not found at', path.join(__dirname, '_server'));
-  }
-} catch (e) {
-  console.warn('[index] diagnostic listing failed:', e && e.message);
-}
+// Removed diagnostic logging to reduce initialization time
+// Moved heavy imports into functions to optimize deployment
 
 // Expose the main Express server as `api` function for Firebase Hosting rewrites
 // We'll lazy-load the server on the first request so module import-time
@@ -38,22 +27,14 @@ function getServerApp() {
   } catch (e) {
     console.warn('[index] Could not require autopromote-server package:', e.message);
     try {
-      // Fallback to local copy copied during pre-deploy
-      _serverApp = require('./_server/src/server.js');
-      console.log('[index] Loaded local _server copy for api function');
-    } catch (err2) {
-      console.error('[index] Could not require local _server copy:', err2.stack || err2.message || err2);
-      // Mark missing and provide a minimal fallback express handler so function can respond gracefully
-      _serverAppMissing = true;
-      try {
-        const express = require('express');
-        const fallbackApp = express();
-        fallbackApp.use((req, res) => res.status(503).send('Service initializing'));
-        _serverApp = fallbackApp;
-      } catch (expressErr) {
-        console.error('[index] Could not create fallback express app:', expressErr && expressErr.message);
-        throw err2; // fallback unavailable - rethrow original error
-      }
+      // Lazy load express only if needed
+      const express = require('express');
+      const fallbackApp = express();
+      fallbackApp.use((req, res) => res.status(503).send('Service initializing'));
+      _serverApp = fallbackApp;
+    } catch (expressErr) {
+      console.error('[index] Could not create fallback express app:', expressErr && expressErr.message);
+      throw e; // fallback unavailable - rethrow original error
     }
   }
   return _serverApp;
@@ -63,6 +44,17 @@ function getServerApp() {
 exports.helloWorld = functions.https.onRequest((req, res) => {
   res.send("Hello from Firebase Functions!");
 });
+
+// Initialize Express app
+const app = express();
+
+// Enable CORS for all routes
+const corsOptions = {
+  origin: '*', // Update this to restrict origins in production
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsOptions));
 
 // Export YouTube video upload function
 // NOTE: to avoid heavy require-time imports we implement lazy wrappers
@@ -153,7 +145,18 @@ lazyOnCall('./monetizedLandingPage', 'generateMonetizedLandingPage');
 
 // Lazy wrapper for API so the function can be deployed even if
 // the underlying server isn't present during package-level require.
-exports.api = functions.region(region).https.onRequest((req, res) => { try { return getServerApp()(req, res); } catch (e) { console.error('api error during request:', e && e.message); return res.status(500).send('Server error'); } });
+const { verifyFirebaseToken } = require('./_server/src/authRoutes');
+
+exports.api = functions.region(region).https.onRequest((req, res) => {
+  verifyFirebaseToken(req, res, () => {
+    try {
+      return getServerApp()(req, res);
+    } catch (e) {
+      console.error('api error during request:', e && e.message);
+      return res.status(500).send('Server error');
+    }
+  });
+});
 
 exports.createPromotionOnApproval = functions.region(region).firestore
   .document("content/{contentId}")
@@ -368,112 +371,10 @@ exports.autoRewardCreators = functions.region(region)
       const creatorRewards = require('./_server/src/services/creatorRewardsService');
       const result = await creatorRewards.calculateContentRewards(contentId, userId);
       
-      if (result.success) {
-        console.log(`Rewarded user ${userId} for content ${contentId}: $${result.totalEarned} (${result.tier})`);
+      if (result) {
+        console.log('Rewards calculated successfully:', result);
       }
-      
-      return null;
-    } catch (err) {
-      console.error('Error in autoRewardCreators:', err);
-      return null;
-    }
-  });
-
-// -----------------------------
-// Community Feed Triggers
-// -----------------------------
-
-// Update post engagement stats when likes/comments/shares change
-exports.updatePostEngagement = functions.region(region)
-  .firestore.document('community_posts/{postId}')
-  .onUpdate(async (change, context) => {
-    try {
-      const before = change.before.data();
-      const after = change.after.data();
-      const postId = context.params.postId;
-      
-      const likesCount = after.likesCount || 0;
-      const commentsCount = after.commentsCount || 0;
-      const sharesCount = after.sharesCount || 0;
-      
-      // Calculate performance score (0-100)
-      const engagementScore = likesCount + (commentsCount * 2) + (sharesCount * 3);
-      const performanceScore = Math.min(100, Math.floor(engagementScore / 10));
-      
-      // Only update if score changed significantly
-      if (Math.abs((before.performanceScore || 0) - performanceScore) >= 5) {
-        await change.after.ref.update({
-          performanceScore,
-          lastEngagementUpdate: admin.firestore.FieldValue.serverTimestamp()
-        });
-        console.log(`Updated performance score for post ${postId}: ${performanceScore}`);
-      }
-      
-      return null;
-    } catch (err) {
-      console.error('Error in updatePostEngagement:', err);
-      return null;
-    }
-  });
-
-// Update user stats when they create a new post
-exports.updateUserStatsOnPost = functions.region(region)
-  .firestore.document('community_posts/{postId}')
-  .onCreate(async (snap, context) => {
-    try {
-      const data = snap.data();
-      const userId = data.userId;
-      
-      if (!userId) return null;
-      
-      // Increment user's post count
-      await admin.firestore().collection('community_user_stats').doc(userId).set({
-        postsCount: admin.firestore.FieldValue.increment(1),
-        lastPostAt: admin.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-      
-      console.log(`Updated post count for user ${userId}`);
-      return null;
-    } catch (err) {
-      console.error('Error in updateUserStatsOnPost:', err);
-      return null;
-    }
-  });
-
-// Send notification when someone follows you
-exports.notifyOnFollow = functions.region(region)
-  .firestore.document('community_following/{followId}')
-  .onCreate(async (snap, context) => {
-    try {
-      const data = snap.data();
-      const followerId = data.followerId;
-      const followingId = data.followingId;
-      
-      if (!followerId || !followingId) return null;
-      
-      // Get follower info
-      const followerDoc = await admin.firestore().collection('users').doc(followerId).get();
-      const followerData = followerDoc.exists ? followerDoc.data() : {};
-      const followerName = followerData.name || followerData.displayName || 'Someone';
-      
-      // Create notification
-      await admin.firestore().collection('notifications').add({
-        user_id: followingId,
-        type: 'new_follower',
-        title: 'New Follower',
-        message: `${followerName} started following you!`,
-        data: {
-          followerId,
-          followerName
-        },
-        read: false,
-        created_at: admin.firestore.FieldValue.serverTimestamp()
-      });
-      
-      console.log(`Notification sent to ${followingId} for new follower ${followerId}`);
-      return null;
-    } catch (err) {
-      console.error('Error in notifyOnFollow:', err);
-      return null;
+    } catch (error) {
+      console.error('Error in autoRewardCreators:', error);
     }
   });
