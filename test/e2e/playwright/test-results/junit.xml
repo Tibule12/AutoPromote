@@ -1,0 +1,137 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="0" time="60.179206">
+<testsuite name="upload.api.spec.js" timestamp="2025-12-09T10:51:22.380Z" hostname="chromium" tests="1" failures="0" skipped="0" time="31.276" errors="0">
+<testcase name="API upload test - create content and check Firestore" classname="upload.api.spec.js" time="31.276">
+<system-out>
+<![CDATA[[diagnostic] google-gax@4.6.1 at C:\Users\asus\AutoPromte\AutoPromote\node_modules\google-gax\build\src\index.js; @grpc/grpc-js@1.14.0 at C:\Users\asus\AutoPromte\AutoPromote\node_modules\@grpc\grpc-js\package.json (has single-subchannel-channel: true)
+[startup] Keep-alive agents enabled (max=50, free=10)
+✅ Auth routes loaded
+✅ User routes loaded
+✅ Content routes loaded
+✅ Analytics routes loaded
+✅ Admin routes loaded
+✅ Admin analytics routes loaded
+✅ Using top-level tiktokRoutes.js
+✅ Telegram routes loaded
+✅ Facebook routes loaded
+✅ YouTube routes loaded
+✅ Twitter auth routes loaded
+✅ Snapchat routes loaded
+✅ Generic platform routes loaded
+✅ Promotion task routes loaded
+✅ Notifications routes loaded
+✅ Captions routes loaded
+✅ Admin cache routes loaded
+✅ Metrics routes loaded
+✅ Instagram routes loaded
+✅ Platform connections routes loaded
+✅ Admin security routes loaded
+✅ Shortlink routes loaded
+✅ Billing routes loaded
+✅ Payments status routes loaded
+✅ Payments extended routes loaded
+✅ PayPal webhook routes loaded
+✅ PayPal subscription routes loaded
+✅ Viral boost routes loaded
+✅ Rewards routes loaded
+✅ Variant admin routes loaded
+✅ AB admin routes loaded
+✅ Admin config routes loaded
+✅ Admin dashboard routes loaded
+✅ Admin bandit routes loaded
+✅ Admin alerts routes loaded
+✅ Admin ops routes loaded
+✅ Admin email verification routes loaded
+✅ Discord routes loaded
+[diagnostic] CORS allowAll: [33mtrue[39m allowedOrigins: https://www.autopromote.org,https://autopromote.org,https://autopromote-1.onrender.com,https://autopromote.onrender.com
+✅ Distributed rate limiter active
+✅ CodeQL general rate limiter applied at /api/
+🚏 TikTok routes mounted at /api/tiktok
+🚏 Telegram routes mounted at /api/telegram
+🚏 Facebook routes mounted at /api/facebook
+🚏 YouTube routes mounted at /api/youtube
+🚏 Twitter routes mounted at /api/twitter
+🚏 Snapchat routes mounted at /api/snapchat
+🚏 Platform connections routes mounted at /api/platform
+🚏 Community feed routes mounted at /api/community
+🚏 Viral growth routes mounted at /api/viral
+🚏 AI Clip generation routes mounted at /api/clips
+🚏 AI Chat routes mounted at /api/chat
+🚏 Generic platform routes mounted at /api/:platform/*
+🚏 Promotion task routes mounted at /api/promotion-tasks
+🚏 Metrics routes mounted at /api/metrics
+🚏 Instagram routes mounted at /api/instagram
+🚏 Notifications routes mounted at /api/notifications
+🚏 AI Caption generation routes mounted at /api/captions
+🔍 System diagnostics routes mounted at /api/diagnostics
+🚏 Admin cache routes mounted at /api/admin/cache
+📢 Ads routes mounted at /api/ads
+✅ Demo page available at /tiktok-demo
+✅ Mock TikTok OAuth frontend available at /mock/tiktok_oauth_frontend.html
+ℹ️ Background job runner disabled (set ENABLE_BACKGROUND_JOBS=true to enable).
+[request.debug] method: POST path: /api/content/upload headers: {
+  origin: [90mundefined[39m,
+  host: [32m'127.0.0.1:52505'[39m,
+  [32m'user-agent'[39m: [32m'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)'[39m,
+  referer: [90mundefined[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m
+}
+[cors.origin] origin: [90mundefined[39m allowAll: [33mtrue[39m
+[upload] origin: [90mundefined[39m auth: [33mtrue[39m
+🚀 [VIRAL UPLOAD] Content uploaded with complete viral optimization: {
+  contentId: [32m'OHlwD77LWCjj4mrTp2W3'[39m,
+  scheduleId: [32m'zhfCA0K6nTSHhnPIKdy4'[39m,
+  platformTasks: [33m1[39m,
+  viralScore: [33m0[39m,
+  hashtagCount: [33m0[39m,
+  boostChainId: [1mnull[22m
+}
+[trackUsage] Tracked upload for user testUser123 in month 2025-12
+[ACCESS] ts=2025-12-09T10:52:04.029Z POST /api/content/upload status=201 requestID="miygnkpe-cc3107be-8fcf-400f-9f24-4fdead6e1583" clientIP="::ffff:127.0.0.1" responseTimeMS=8106 responseBytes=2351 userAgent="node-fetch/1.0 (+https://github.com/bitinn/node-fetch)"
+]]>
+</system-out>
+<system-err>
+<![CDATA[⚠️ DISCORD_PUBLIC_KEY is not set. /api/discord/interactions endpoint is disabled.
+[VideoClipping] ⚠️ OPENAI_API_KEY not configured. Falling back to Google Cloud.
+[VideoClipping] ⚠️ GOOGLE_CLOUD_API_KEY not configured.
+[VideoClipping] 💡 Add OPENAI_API_KEY or GOOGLE_CLOUD_API_KEY for transcription.
+[Chatbot] ⚠️ OPENAI_API_KEY not configured. Chatbot will not work.
+[Chatbot] 💡 Add OPENAI_API_KEY to your environment variables.
+[Chatbot] 📖 See OPENAI_SETUP_GUIDE.md for setup instructions.
+[CaptionGen] ⚠️ OPENAI_API_KEY not configured. Caption generation will not work.
+[Hashtag] ⚠️ OPENAI_API_KEY not configured. Advanced hashtag generation will not work.
+[slow] POST /api/content/upload 8106ms status=201
+]]>
+</system-err>
+</testcase>
+</testsuite>
+<testsuite name="upload.spec.js" timestamp="2025-12-09T10:51:22.380Z" hostname="chromium" tests="1" failures="0" skipped="0" time="15.069" errors="0">
+<testcase name="Upload flow creates content doc and sets spotify target" classname="upload.spec.js" time="15.069">
+<system-out>
+<![CDATA[[request.debug] method: POST path: /api/content/upload headers: {
+  origin: [90mundefined[39m,
+  host: [32m'127.0.0.1:56552'[39m,
+  [32m'user-agent'[39m: [32m'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)'[39m,
+  referer: [90mundefined[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m
+}
+[cors.origin] origin: [90mundefined[39m allowAll: [33mtrue[39m
+[upload] origin: [90mundefined[39m auth: [33mtrue[39m
+🚀 [VIRAL UPLOAD] Content uploaded with complete viral optimization: {
+  contentId: [32m'LByYT1vmZBl5euwr4Nrk'[39m,
+  scheduleId: [32m'VPwcq2gEh7ofzHrEB0hr'[39m,
+  platformTasks: [33m2[39m,
+  viralScore: [33m0[39m,
+  hashtagCount: [33m0[39m,
+  boostChainId: [1mnull[22m
+}
+[trackUsage] Tracked upload for user testUser123 in month 2025-12
+[ACCESS] ts=2025-12-09T10:52:17.142Z POST /api/content/upload status=201 requestID="miygnua0-e680ceb5-7974-4e85-94ee-fa3508660e6f" clientIP="::ffff:127.0.0.1" responseTimeMS=8813 responseBytes=3011 userAgent="node-fetch/1.0 (+https://github.com/bitinn/node-fetch)"
+]]>
+</system-out>
+<system-err>
+<![CDATA[[slow] POST /api/content/upload 8814ms status=201
+]]>
+</system-err>
+</testcase>
+</testsuite>
+</testsuites>
