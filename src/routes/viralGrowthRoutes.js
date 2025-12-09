@@ -16,6 +16,7 @@ const viralWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMI
 // Import viral engines
 const hashtagEngine = require('../services/hashtagEngine');
 const smartDistributionEngine = require('../services/smartDistributionEngine');
+const boostChainEngine = require('../services/boostChainEngine');
 const viralImpactEngine = require('../services/viralImpactEngine');
 const algorithmExploitationEngine = require('../services/algorithmExploitationEngine');
 

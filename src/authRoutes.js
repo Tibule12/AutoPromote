@@ -341,28 +341,12 @@ router.post('/login', async (req, res) => {
 router.post('/admin-login', async (req, res) => {
   try {
     console.log('Admin login request received; idTokenPresent=%s emailPresent=%s', !!(req.body && req.body.idToken), !!(req.body && req.body.email));
-            role: decodedToken.admin ? 'admin' : 'user'
+    const { idToken, email } = req.body || {};
 
     if (!idToken) {
       console.log('No idToken provided in admin login request');
       return res.status(401).json({ error: 'No ID token provided' });
-
-        // --- PATCH: Always respect admin status from either source ---
-        // If either the admins collection OR the token claims indicate admin, set admin status
-        const claimsSayAdmin = decodedToken.admin === true || decodedToken.role === 'admin';
-        const firestoreSaysAdmin = (role === 'admin' || isAdmin === true);
-        if (claimsSayAdmin || firestoreSaysAdmin) {
-          role = 'admin';
-          isAdmin = true;
-          adminStatusSource = claimsSayAdmin ? 'token_claims' : adminStatusSource;
-        } else {
-          role = 'user';
-          isAdmin = false;
-        }
-
-        // --- END PATCH ---
     }
-
     console.log('Verifying Firebase ID token for admin login... (truncated token)');
     // Verify the Firebase ID token
     const decodedToken = await admin.auth().verifyIdToken(idToken);
@@ -373,6 +357,7 @@ router.post('/admin-login', async (req, res) => {
     let role = 'user';
     let isAdmin = false;
     let fromCollection = null;
+    let adminStatusSource = 'unknown';
     
     // For admin login, check admin claims in token first, then try admins collection
     try {

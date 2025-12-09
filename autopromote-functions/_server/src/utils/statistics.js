@@ -90,6 +90,7 @@ function gammaSample(k) {
     }
     const d = k - 1 / 3;
     const c = 1 / Math.sqrt(9 * d);
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         let x = normalSample();
         let v = 1 + c * x;
@@ -156,6 +157,7 @@ function gammaSampleRNG(k, rng) {
     }
     const d = k - 1 / 3;
     const c = 1 / Math.sqrt(9 * d);
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         let x = normalSampleRNG(rng);
         let v = 1 + c * x;

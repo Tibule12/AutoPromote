@@ -60,7 +60,7 @@ async function computeSuggestedWeights() {
   try { const cfg = await getConfig(); if (cfg.rewardNormalization && cfg.rewardNormalization.method) method = cfg.rewardNormalization.method; } catch(_){ }
   let wCtrRaw=avgCtr, wQualRaw=avgQual, wReachRaw=avgReach;
   if (method === 'zscore') {
-    function std(vals, mean){ const v = vals.reduce((a,b)=> a + Math.pow(b-mean,2),0)/ (vals.length||1); return Math.sqrt(v)||1; }
+    const std = (vals, mean) => { const v = vals.reduce((a,b)=> a + Math.pow(b-mean,2),0)/ (vals.length||1); return Math.sqrt(v)||1; };
     const ctrVals = rewards.map(r=>r.rc); const qualVals = rewards.map(r=>r.rq); const reachVals = rewards.map(r=>r.rr);
     const ctrStd = std(ctrVals, avgCtr); const qualStd = std(qualVals, avgQual); const reachStd = std(reachVals, avgReach);
     wCtrRaw = avgCtr/ctrStd; wQualRaw = avgQual/qualStd; wReachRaw = avgReach/reachStd;

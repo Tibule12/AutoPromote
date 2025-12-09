@@ -5,6 +5,7 @@
 const ffmpeg = require('fluent-ffmpeg');
 const { db, storage } = require('../firebaseAdmin');
 const axios = require('axios');
+const { logOpenAIUsage } = require('./openaiUsageLogger');
 const { validateUrl, safeFetch } = require('../utils/ssrfGuard');
 const crypto = require('crypto');
 const fs = require('fs').promises;
@@ -288,6 +289,12 @@ class VideoClippingService {
 
       // Convert Whisper format to our format
       const segments = response.data.segments || [];
+      // Log OpenAI usage: record transcription event + size
+      try {
+        const st = await fs.stat(audioPath).catch(() => null);
+        const sizeBytes = st ? st.size : null;
+        await logOpenAIUsage({ feature: 'transcription', model: 'whisper-1', usage: { bytes: sizeBytes }, promptSnippet: null });
+      } catch (_) {}
       return segments.map(seg => ({
         start: seg.start,
         end: seg.end,

@@ -24,6 +24,7 @@ const authMiddleware = async (req, res, next) => {
         if (shouldAutoAccept) {
           const requiredVersion = process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0';
           const now = new Date().toISOString();
+          // Merge lastAcceptedTerms to avoid overwriting other fields
           await db.collection('users').doc(uid).set({ lastAcceptedTerms: { version: requiredVersion, acceptedAt: now } }, { merge: true });
         }
       } catch (e) {

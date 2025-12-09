@@ -16,9 +16,10 @@ if (bypass) {
     calculateViralVelocity: () => ({ current: 0, category: 'new' }),
     trackExposureSaturation: async () => ({})
   };
-} else {
-  // Only require heavy modules and define implementations when not in bypass/test mode
-  const boostChainEngine = require('./boostChainEngine');
+}
+
+// Only require heavy modules and define implementations when not in bypass/test mode
+const boostChainEngine = require('./boostChainEngine');
 
 // High-visibility zones by platform
 const VISIBILITY_ZONES = {
@@ -630,4 +631,3 @@ module.exports = {
   ALGORITHM_STRATEGIES
 };
 
-}

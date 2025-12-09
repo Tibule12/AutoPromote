@@ -241,7 +241,7 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 		await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({ lastAuthUrl: authUrl }, { merge: true });
 		if (DEBUG_TIKTOK_OAUTH) {
 			console.log('[TikTok][prepare] uid=%s mode=%s statePresent=%s authUrlPresent=%s popup=%s', uid, TIKTOK_ENV, !!state, !!authUrl, isPopup);
-		  }
+		}
 		return res.json({ authUrl, mode: TIKTOK_ENV });
 	} catch (e) {
 		if (DEBUG_TIKTOK_OAUTH) console.error('[TikTok][prepare][error]', e);
@@ -253,11 +253,11 @@ router.post('/auth/prepare', rateLimit({ max: 10, windowMs: 60000, key: r => r.u
 router.get('/auth', rateLimit({ max: 10, windowMs: 60000, key: r => r.userId || r.ip }), authMiddleware, ttWriteLimiter, async (req, res) => {
 	const cfg = activeConfig();
 	if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
-	try {
-		const uid = req.userId || req.user?.uid;
+		try {
+			const uid = req.userId || req.user?.uid;
 		if (!uid) return res.status(401).json({ error: 'Unauthorized' });
-		const crypto = require('crypto');
-		const nonce = crypto.randomBytes(16).toString('hex'); // Use cryptographically secure random
+			const crypto = require('crypto');
+			const nonce = crypto.randomBytes(16).toString('hex'); // Use cryptographically secure random
 		const state = `${uid}.${nonce}`;
 		await db.collection('users').doc(uid).collection('oauth_state').doc('tiktok').set({
 			state,

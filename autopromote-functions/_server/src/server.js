@@ -43,10 +43,12 @@ try { helmet = require('helmet'); } catch(_) { /* optional */ }
 
 // ---------------------------------------------------------------------------
 // Test-run environment defaults
-// Prefer skipping viral optimizations and heavy background work during CI or test runs
-if (!process.env.NO_VIRAL_OPTIMIZATION && (process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.CI_ROUTE_IMPORTS === '1')) {
+// Previously we auto-enabled NO_VIRAL_OPTIMIZATION when running in CI or bypass modes.
+// This prevented test suites from exercising the viral optimization and sanitizer code paths.
+// We only enable NO_VIRAL_OPTIMIZATION now when the FORCE_NO_VIRAL_OPTIMIZATION flag is set.
+if (!process.env.NO_VIRAL_OPTIMIZATION && process.env.FORCE_NO_VIRAL_OPTIMIZATION === '1') {
   process.env.NO_VIRAL_OPTIMIZATION = '1';
-  logger.debug('[TEST] NO_VIRAL_OPTIMIZATION enabled for test/CI environment');
+  logger.debug('[TEST] FORCE_NO_VIRAL_OPTIMIZATION enabled');
 }
 // ---------------------------------------------------------------------------
 // Enable shared keep-alive agents early (reduces cold outbound latency)
@@ -587,7 +589,7 @@ try {
 }
 
 // Import initialized Firebase services
-const { db, auth, storage } = require('./firebaseAdmin');
+const { admin, db, auth, storage } = require('./firebaseAdmin');
 
 const app = express();
 // Attach Sentry request handler if Sentry initialized
@@ -671,7 +673,7 @@ app.use((req, res, next) => {
         const ip = req.headers['x-forwarded-for'] || req.ip || (req.connection && req.connection.remoteAddress) || '';
         const ua = req.headers['user-agent'] || '';
         const ts = new Date().toISOString();
-        const line = `[ACCESS] ts=${ts} ${req.method} ${req.originalUrl} status=${res.statusCode} requestID="${req.requestId || ''}" clientIP="${ip}" responseTimeMS=${duration} responseBytes=${bytes} userAgent="${ua.replace(/\"/g,'') }"`;
+        const line = `[ACCESS] ts=${ts} ${req.method} ${req.originalUrl} status=${res.statusCode} requestID="${req.requestId || ''}" clientIP="${ip}" responseTimeMS=${duration} responseBytes=${bytes} userAgent="${ua.replace(/"/g, '') }"`;
         logger.info(line);
         // Optional: write access log line to a daily file for security evidence (enable with LOG_EVENTS_TO_FILE=true)
         try {
@@ -748,7 +750,7 @@ app.use((req,res,next)=>{
       const sampleHeaders = { origin: req.headers.origin, host: req.headers.host, 'user-agent': req.headers['user-agent'], referer: req.headers.referer, 'content-type': req.headers['content-type'] };
       logger.debug('[request.debug] method:', req.method, 'path:', req.path, 'headers:', sampleHeaders);
     }
-  } catch(e){};
+  } catch(e){}
   next();
 });
 app.use(cors(corsOptions));
@@ -1077,7 +1079,7 @@ try {
 }
 
 // Explicit root-level routes for TikTok verification variations
-function sendFirstExisting(res, candidates) {
+const sendFirstExisting = (res, candidates) => {
   const fs = require('fs');
   try {
     const allowedBases = [path.join(__dirname, '../public/.well-known/'), path.join(__dirname, '../docs/.well-known/')];
@@ -1094,7 +1096,7 @@ function sendFirstExisting(res, candidates) {
     }
   } catch (_) { /* ignore whole helper failures */ }
   return false;
-}
+};
 
 app.get(['/tiktok-developers-site-verification.txt', '/tiktok-site-verification.txt'], (req, res) => {
   const targetFile = req.path.endsWith('developers-site-verification.txt')
@@ -1645,7 +1647,7 @@ const ALERT_CHECK_INTERVAL_MS = parseInt(process.env.ALERT_CHECK_INTERVAL_MS || 
 
 // Leader election: only one instance (the leader) should launch intervals.
 let __isLeader = false;
-async function electLeader(){
+const electLeader = async () => {
   try {
     const { db } = require('./firebaseAdmin');
     const id = require('crypto').randomUUID();
@@ -1674,7 +1676,7 @@ async function electLeader(){
   } catch (e) {
     console.warn('[leader] election error:', e.message);
   }
-}
+};
 if (ENABLE_BACKGROUND) {
   // Periodically renew election
   electLeader();
@@ -1840,9 +1842,9 @@ if (ENABLE_BACKGROUND) {
     }, LOCK_CLEAN_INTERVAL_MS).unref();
 
     // Bandit auto-tuning, exploration factor, and alerts loops guarded by leader flag
-    function leaderInterval(fn, ms){
+    const leaderInterval = (fn, ms) => {
       setInterval(() => { if (!__isLeader) return; fn(); }, ms).unref();
-    }
+    };
     try {
       const { applyAutoTune } = require('./services/banditTuningService');
       leaderInterval(async () => {

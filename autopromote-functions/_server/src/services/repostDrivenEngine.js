@@ -468,13 +468,7 @@ class RepostDrivenEngine {
     }
   }
 
-  // Get content fingerprint for tracking
-  generateContentFingerprint(contentId) {
-    return crypto.createHash('md5')
-      .update(contentId + Date.now().toString())
-      .digest('hex')
-      .substring(0, 16);
-  }
+  // NOTE: generateContentFingerprint is defined earlier in the class; duplicate removed
 }
 
 module.exports = new RepostDrivenEngine();

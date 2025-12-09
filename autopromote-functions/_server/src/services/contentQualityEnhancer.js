@@ -373,7 +373,7 @@ class ContentQualityEnhancer {
 
     for (const suggestion of highPriority) {
       switch (suggestion.type) {
-        case 'hook':
+        case 'hook': {
           // Add a strong hook if missing
           const hooks = [
             'You won\'t believe this...',
@@ -383,6 +383,7 @@ class ContentQualityEnhancer {
           ];
           improved = hooks[Math.floor(Math.random() * hooks.length)] + '\n\n' + improved;
           break;
+        }
 
         case 'length':
           // This would require more complex logic to expand/shorten
