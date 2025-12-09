@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-console, no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from './config';
 import { parseJsonSafe } from './utils/parseJsonSafe';

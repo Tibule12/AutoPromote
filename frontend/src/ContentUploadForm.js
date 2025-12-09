@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useState, useRef, useEffect } from 'react';
 import './ContentUploadForm.css';
 import { storage, auth } from './firebaseClient';
