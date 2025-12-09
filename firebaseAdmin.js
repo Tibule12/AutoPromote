@@ -1,106 +1,14 @@
-const admin = require('firebase-admin');
-const bypass = process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.NODE_ENV === 'test' || typeof process.env.JEST_WORKER_ID !== 'undefined';
-if (bypass) {
-    try {
-        module.exports = require('./src/firebaseAdmin');
-    } catch (e) {
-        console.warn('[firebaseAdmin] bypass import failed, falling back to local shim', e && e.message);
-    }
-}
-if (!bypass) {
-// Diagnostic: log google-gax and @grpc/grpc-js versions/paths and whether 'single-subchannel-channel.js' exists
-try {
-    const fs = require('fs');
-    const path = require('path');
-    try {
-        const gaxPkg = require('google-gax/package.json');
-        const gaxResolved = require.resolve('google-gax');
-        let grpcInfo = 'not installed';
-        try {
-            const grpcPkgPath = require.resolve('@grpc/grpc-js/package.json');
-            const grpcPkg = require('@grpc/grpc-js/package.json');
-            // Try to find single-subchannel-channel.js based on known build structure
-            let singleSubExists = false;
-            try {
-                // Look for known file locations across versions
-                const potentialPaths = [
-                    path.join(path.dirname(require.resolve('@grpc/grpc-js/package.json')), 'build', 'src', 'single-subchannel-channel.js'),
-                    path.join(path.dirname(require.resolve('@grpc/grpc-js/package.json')), 'build', 'src', 'single_subchannel_channel.js'),
-                    path.join(path.dirname(require.resolve('@grpc/grpc-js/package.json')), 'src', 'single-subchannel-channel.js')
-                ];
-                for (const p of potentialPaths) {
-                    if (fs.existsSync(p)) { singleSubExists = true; break; }
-                }
-            } catch (_) { singleSubExists = false; }
-            grpcInfo = `@grpc/grpc-js@${grpcPkg.version} at ${grpcPkgPath} (has single-subchannel-channel: ${singleSubExists})`;
-        } catch (e) {
-            grpcInfo = `@grpc/grpc-js missing (${e && e.message})`;
-        }
-        console.log(`[diagnostic] google-gax@${gaxPkg.version} at ${gaxResolved}; ${grpcInfo}`);
-    } catch (e) {
-        console.warn('[diagnostic] google-gax not found:', e && e.message);
-    }
-} catch (e) {
-    // Do not block startup on diagnostics
-    console.warn('[diagnostic] internal check failed:', e && e.message);
-}
-let adminConfig = null;
-try { adminConfig = require('./firebaseConfig.server'); } catch (_) { adminConfig = null; }
+// Placeholder for firebaseAdmin.js
+// Add Firebase Admin SDK initialization logic here
 
-if (admin.apps.length === 0) {
-    // Prefer using a provided service-account JSON when GOOGLE_APPLICATION_CREDENTIALS is set.
-    // This avoids accidentally picking up a gcloud user token which can expire.
-    if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-        try {
-            const path = require('path');
-            const fs = require('fs');
-            const saPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-            const resolvedSaPath = path.isAbsolute(saPath) ? saPath : path.resolve(process.cwd(), saPath);
-            if (!fs.existsSync(resolvedSaPath)) {
-                throw new Error(`Service account file not found at ${resolvedSaPath}`);
-            }
-            const saJson = JSON.parse(fs.readFileSync(resolvedSaPath, 'utf8'));
-            try { if (process.env.DEBUG_FIREBASE_ADMIN === '1') console.log('[firebaseAdmin] Read service account JSON from', resolvedSaPath); } catch (_) {}
-            try { if (process.env.DEBUG_FIREBASE_ADMIN === '1') console.log('[firebaseAdmin] Loaded service account JSON from', resolvedSaPath); } catch (_) {}
-            admin.initializeApp({
-                credential: admin.credential.cert(saJson),
-                databaseURL: process.env.FIREBASE_DATABASE_URL || '',
-                storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
-                projectId: process.env.FIREBASE_PROJECT_ID || saJson.project_id || ''
-            });
-            console.log('✅ Firebase Admin initialized using service account JSON from GOOGLE_APPLICATION_CREDENTIALS');
-        } catch (e) {
-            console.warn('⚠️ Failed to load service account JSON from GOOGLE_APPLICATION_CREDENTIALS:', e.message || e);
-            // fallback to applicationDefault() as a last resort
-            admin.initializeApp({
-                credential: admin.credential.applicationDefault(),
-                databaseURL: process.env.FIREBASE_DATABASE_URL || '',
-                storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
-                projectId: process.env.FIREBASE_PROJECT_ID || ''
-            });
-            console.log('✅ Firebase Admin initialized using applicationDefault() fallback');
-        }
-    } else if (adminConfig) {
-        admin.initializeApp({
-            credential: admin.credential.cert(adminConfig),
-            databaseURL: process.env.FIREBASE_DATABASE_URL || '',
-            storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
-            projectId: process.env.FIREBASE_PROJECT_ID || ''
-        });
-        console.log('✅ Firebase Admin initialized with server config');
-    } else {
-        // Last resort: try applicationDefault()
-        admin.initializeApp({
-            credential: admin.credential.applicationDefault(),
-            databaseURL: process.env.FIREBASE_DATABASE_URL || '',
-            storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
-            projectId: process.env.FIREBASE_PROJECT_ID || ''
-        });
-        console.log('✅ Firebase Admin initialized with applicationDefault() fallback');
-    }
-}
+const admin = require('firebase-admin');
+
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+  databaseURL: 'https://autopromote-cc6d3.firebaseio.com'
+});
 
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
+
 module.exports = { admin, db };
-}

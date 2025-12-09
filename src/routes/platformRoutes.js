@@ -12,7 +12,7 @@ const admin = require('../firebaseAdmin').admin;
 const engagementBoostingService = require('../services/engagementBoostingService');
 const { enqueuePlatformPostTask } = require('../services/promotionTaskQueue');
 const { postToTelegram } = require('../services/telegramService');
-const { searchTracks, getPlaylist, createPlaylist, addTracksToPlaylist } = require('../services/spotifyService');
+const { searchTracks, createPlaylist, addTracksToPlaylist } = require('../services/spotifyService');
 const rateLimit = require('../middlewares/simpleRateLimit');
 const { rateLimiter } = require('../middlewares/globalRateLimiter');
 
@@ -92,6 +92,10 @@ router.get('/:platform/status', authMiddleware, rateLimit({ max: 50, windowMs: 6
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   const uid = req.userId || req.user?.uid;
+  // Ensure we have host and a state token available for OAuth redirect URIs
+  const host = `${req.protocol}://${req.get('host')}`;
+  const crypto = require('crypto');
+  const state = req.query && req.query.state ? req.query.state : crypto.randomBytes(18).toString('base64url');
   if (!uid) return res.json({ ok: true, platform, connected: false });
 
   const cacheKey = `${uid}:${platform}`;
@@ -151,6 +155,9 @@ router.get('/:platform/metadata', authMiddleware, rateLimit({ max: 20, windowMs:
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).json({ ok: false, error: 'unsupported_platform' });
   const uid = req.userId || req.user?.uid;
+  const host = `${req.protocol}://${req.get('host')}`;
+  const crypto = require('crypto');
+  const state = req.query && req.query.state ? req.query.state : crypto.randomBytes(18).toString('base64url');
   if (!uid) return res.status(401).json({ ok: false, error: 'missing_user' });
   try {
     const connSnap = await db.collection('users').doc(uid).collection('connections').doc(platform).get();

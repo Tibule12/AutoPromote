@@ -3,6 +3,7 @@
 // Finds trending, relevant hashtags for maximum reach
 
 const axios = require('axios');
+const { logOpenAIUsage } = require('./openaiUsageLogger');
 
 class HashtagService {
   constructor() {
@@ -65,6 +66,11 @@ class HashtagService {
       );
 
       const generatedText = response.data.choices[0].message.content.trim();
+      // Log OpenAI usage
+      try {
+        const usage = response.data.usage || {};
+        await logOpenAIUsage({ model: this.model, feature: 'hashtag_generation', usage, promptSnippet: prompt.slice(0, 500) });
+      } catch (_) {}
       
       // Parse hashtags
       const parsed = this.parseHashtagResponse(generatedText, count);

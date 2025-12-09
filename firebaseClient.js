@@ -9,3 +9,6 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 
 module.exports = { app, auth, storage };
+
+// Placeholder for firebaseClient.js
+// Add Firebase Client SDK initialization logic here

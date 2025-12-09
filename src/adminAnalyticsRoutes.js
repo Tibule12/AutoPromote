@@ -415,6 +415,8 @@ router.get('/content', adminLimiter, authMiddleware, async (req, res) => {
 
 // Get platform performance analytics
 router.get('/platform-performance', adminLimiter, authMiddleware, async (req, res) => {
+  // Ensure period is available to both try and catch blocks
+  let period = req.query && req.query.period ? req.query.period : '30d';
   try {
     // Check if user is admin (check both admin collection and legacy methods)
     if (!req.user || 
@@ -423,7 +425,7 @@ router.get('/platform-performance', adminLimiter, authMiddleware, async (req, re
       return res.status(403).json({ error: 'Admin access required' });
     }
 
-    const { period = '30d' } = req.query;
+    // prefer the period value already read from the request (above)
     let days = 30;
     if (period === '7d') days = 7;
     if (period === '90d') days = 90;
@@ -467,7 +469,7 @@ router.get('/platform-performance', adminLimiter, authMiddleware, async (req, re
     });
 
     res.json({
-      period,
+      period: period,
       platform_performance: Object.entries(platformPerformance).map(([platform, data]) => ({
         platform,
         views: data.views,
@@ -481,7 +483,7 @@ router.get('/platform-performance', adminLimiter, authMiddleware, async (req, re
 
     // Return empty data instead of mock data for accurate reporting
     res.json({
-      period: '30d',
+      period: period,
       platform_performance: []
     });
   }
@@ -489,6 +491,8 @@ router.get('/platform-performance', adminLimiter, authMiddleware, async (req, re
 
 // Get revenue trends over time
 router.get('/revenue-trends', adminLimiter, authMiddleware, async (req, res) => {
+  // Ensure period is available to both try and catch blocks
+  let period = req.query && req.query.period ? req.query.period : '30d';
   try {
     // Check if user is admin (check both admin collection and legacy methods)
     if (!req.user || 
@@ -497,7 +501,7 @@ router.get('/revenue-trends', adminLimiter, authMiddleware, async (req, res) => 
       return res.status(403).json({ error: 'Admin access required' });
     }
 
-    const { period = '30d' } = req.query;
+    // prefer the period value already read from the request (above)
     let days = 30;
     if (period === '7d') days = 7;
     if (period === '90d') days = 90;
@@ -520,7 +524,7 @@ router.get('/revenue-trends', adminLimiter, authMiddleware, async (req, res) => 
     });
 
     res.json({
-      period,
+      period: period,
       revenue_trends: Object.entries(dailyRevenue).map(([date, revenue]) => ({
         date,
         revenue: Math.round(revenue)
@@ -531,7 +535,7 @@ router.get('/revenue-trends', adminLimiter, authMiddleware, async (req, res) => 
 
     // Return empty data instead of mock data for accurate reporting
     res.json({
-      period,
+      period: period,
       revenue_trends: []
     });
   }

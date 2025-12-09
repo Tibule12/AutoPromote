@@ -39,7 +39,7 @@ describe('Content Upload & Promotion Integration', () => {
       .post('/api/content/upload')
       .set('Authorization', `Bearer test-token-for-${testUserId}`)
       .send(payload);
-    const normalize = require('../../../../test/utils/normalizeApiResponse');
+    const normalize = require('../../test/utils/normalizeApiResponse');
     const { status, body: apiBody } = normalize(res.body, res.statusCode);
     expect(status).toBe(201);
     expect(apiBody.content).toBeDefined();

@@ -1,3 +1,6 @@
+// Placeholder for firebaseConfig.server.js
+// Add Firebase server configuration logic here
+
 // Server-side Firebase configuration loader
 // Loads either a raw JSON from FIREBASE_SERVICE_ACCOUNT_JSON, a base64-encoded JSON from FIREBASE_SERVICE_ACCOUNT_BASE64,
 // or individual FIREBASE_* env vars (FIREBASE_PRIVATE_KEY, FIREBASE_CLIENT_EMAIL, FIREBASE_PROJECT_ID, etc.).

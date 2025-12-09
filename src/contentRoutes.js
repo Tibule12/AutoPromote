@@ -4,7 +4,8 @@ const { db } = require('./firebaseAdmin');
 const logger = require('./utils/logger');
 const authMiddleware = require('./authMiddleware');
 const Joi = require('joi');
-const sanitizeForFirestore = require('./utils/sanitizeForFirestore');
+const path = require('path');
+const sanitizeForFirestore = require(path.join(__dirname, 'utils', 'sanitizeForFirestore'));
 const { usageLimitMiddleware, trackUsage } = require('./middlewares/usageLimitMiddleware');
 
 // Enable test bypass for viral optimization when running under CI/test flags

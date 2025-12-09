@@ -6,24 +6,26 @@ const fetch = require('node-fetch');
 const { db } = require('../firebaseAdmin');
 const bypass = process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.NO_VIRAL_OPTIMIZATION === '1' || process.env.NO_VIRAL_OPTIMIZATION === 'true' || typeof process.env.JEST_WORKER_ID !== 'undefined';
 
-if (bypass) {
-  function _formatHashtagsForPlatform(hashtags, platform) {
-    switch (platform) {
-      case 'tiktok':
-      case 'instagram':
-      case 'facebook':
-      case 'twitter':
-        return (hashtags || []).join(' ');
-      case 'youtube':
-        return (hashtags || []).map(t => t.replace('#', '')).join(', ');
-      case 'linkedin':
-        return (hashtags || []).slice(0, 5).join(' ');
-      case 'reddit':
-        return (hashtags || []).map(t => t.replace(/^#/, '')).join(', ');
-      default:
-        return (hashtags || []).join(' ');
-    }
+// keep a tiny platform formatting helper available to both bypass and main implementations
+const _formatHashtagsForPlatform = (hashtags, platform) => {
+  switch (platform) {
+    case 'tiktok':
+    case 'instagram':
+    case 'facebook':
+    case 'twitter':
+      return (hashtags || []).join(' ');
+    case 'youtube':
+      return (hashtags || []).map(t => t.replace('#', '')).join(', ');
+    case 'linkedin':
+      return (hashtags || []).slice(0, 5).join(' ');
+    case 'reddit':
+      return (hashtags || []).map(t => t.replace(/^#/, '')).join(', ');
+    default:
+      return (hashtags || []).join(' ');
   }
+};
+
+if (bypass) {
   module.exports = {
     generateCustomHashtags: async ({ content = {}, platform = 'tiktok', customTags = [] } = {}) => {
       // Minimal deterministic no-op implementation for tests
@@ -36,7 +38,7 @@ if (bypass) {
     rotateHashtags: () => [],
     formatHashtagsForPlatform: _formatHashtagsForPlatform
   };
-} else {
+}
 
 // Comprehensive trending hashtags database by platform and category
 const TRENDING_HASHTAGS = {
@@ -322,10 +324,11 @@ function formatHashtagsForPlatform(hashtags, platform) {
     case 'youtube':
       // Comma-separated for tags field
       return hashtags.map(tag => tag.replace('#', '')).join(', ');
-    case 'twitter':
+    case 'twitter': {
       // Space-separated, but limit to 280 chars
       let result = hashtags.join(' ');
       return result.length > 200 ? hashtags.slice(0, 8).join(' ') : result;
+    }
     case 'facebook':
       // Space-separated
       return hashtags.join(' ');
@@ -526,5 +529,3 @@ function generateRotationId() {
     formatHashtagsForPlatform,
     detectCategory
   };
-
-}

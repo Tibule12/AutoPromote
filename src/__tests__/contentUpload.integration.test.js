@@ -56,13 +56,14 @@ describe('Content Upload & Promotion Integration', () => {
 
     console.log('Starting POST /api/content/upload integration test...');
     let res;
+    let status, apiBody;
     try {
       res = await agent
         .post('/api/content/upload')
         .set('Authorization', `Bearer test-token-for-${testUserId}`)
         .send(payload);
       const normalize = require('../../test/utils/normalizeApiResponse');
-      const { status, body: apiBody } = normalize(res.body, res.statusCode);
+      ({ status, body: apiBody } = normalize(res.body, res.statusCode));
       console.log('POST /api/content/upload response:', status, apiBody);
     } catch (err) {
       console.error('Error during POST /api/content/upload:', err);
