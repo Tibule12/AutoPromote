@@ -48,12 +48,42 @@ exports.helloWorld = functions.https.onRequest((req, res) => {
 // Initialize Express app
 const app = express();
 
-// Enable CORS for all routes
-const corsOptions = {
-  origin: '*', // Update this to restrict origins in production
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
+// Configure CORS. In production this should be restricted via
+// the `CORS_ALLOWED_ORIGINS` env var (comma-separated). For
+// short-lived smoke tests you may set `CORS_ALLOW_ALL=1` but
+// the default is conservative (deny cross-origin browser requests).
+const allowedOriginsEnv = process.env.CORS_ALLOWED_ORIGINS || '';
+const corsAllowAll = process.env.CORS_ALLOW_ALL === '1' || process.env.CORS_ALLOW_ALL === 'true';
+let corsOptions;
+if (corsAllowAll) {
+  corsOptions = {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  };
+} else if (allowedOriginsEnv) {
+  const allowedList = allowedOriginsEnv.split(',').map(s => s.trim()).filter(Boolean);
+  corsOptions = {
+    origin: function(origin, callback) {
+      // Allow server-to-server requests (no Origin header)
+      if (!origin) return callback(null, true);
+      if (allowedList.includes(origin)) return callback(null, true);
+      return callback(new Error('Not allowed by CORS'), false);
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  };
+} else {
+  // Conservative default: do not allow cross-origin browser requests.
+  corsOptions = {
+    origin: function(origin, callback) {
+      if (!origin) return callback(null, true);
+      return callback(new Error('Not allowed by CORS'), false);
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  };
+}
 app.use(cors(corsOptions));
 
 // Export YouTube video upload function
