@@ -59,12 +59,14 @@ async function validateUrl(urlString, opts = {}) {
       if (!matched) return { ok: false, reason: 'host_not_whitelisted' };
     }
 
-    const url = new URL(urlString);
-    if (url.username || url.password) return { ok: false, reason: 'embedded_credentials' };
-    if (opts.requireHttps !== false && url.protocol !== 'https:') return { ok: false, reason: 'insecure_protocol' };
-    if (!['http:', 'https:'].includes(url.protocol)) return { ok: false, reason: 'invalid_protocol' };
-
-    const host = url.hostname;
+    // Parse protocol and host with a conservative regex to avoid
+    // constructing a URL object directly from untrusted input.
+    const m = urlString.match(/^(?:(https?):\/\/)?([^\/\s@:\?#]+)(?::(\d+))?(?:[\/\?#].*)?$/i);
+    if (!m) return { ok: false, reason: 'invalid_url' };
+    const protocol = m[1] ? m[1].toLowerCase() + ':' : null;
+    const host = m[2];
+    if (opts.requireHttps !== false && protocol !== 'https:') return { ok: false, reason: 'insecure_protocol' };
+    if (protocol && !['http:', 'https:'].includes(protocol)) return { ok: false, reason: 'invalid_protocol' };
 
     // If host is an IP literal, check directly and avoid DNS lookup
     const ipFamily = net.isIP(host);
