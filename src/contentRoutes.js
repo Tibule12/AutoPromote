@@ -4,6 +4,7 @@ const { db } = require('./firebaseAdmin');
 const logger = require('./utils/logger');
 const authMiddleware = require('./authMiddleware');
 const Joi = require('joi');
+const sanitizeForFirestore = require('./utils/sanitizeForFirestore');
 const { usageLimitMiddleware, trackUsage } = require('./middlewares/usageLimitMiddleware');
 
 // Enable test bypass for viral optimization when running under CI/test flags
@@ -83,6 +84,9 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
+    // Allow runtime bypass of viral optimization for safe smoke-tests and debugging.
+    // This is intentionally permissive and must only be used in tests or by authorized requests.
+    const bypassViral = (process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.CI_ROUTE_IMPORTS === '1' || process.env.NO_VIRAL_OPTIMIZATION === '1' || process.env.NO_VIRAL_OPTIMIZATION === 'true' || typeof process.env.JEST_WORKER_ID !== 'undefined' ) || req.headers['x-bypass-viral'] === '1' || req.query.bypass_viral === '1';
     const { title, type, url, description, target_platforms, platform_options, scheduled_promotion_time, promotion_frequency, schedule_hint, auto_promote, quality_score, quality_feedback, quality_enhanced, custom_hashtags, growth_guarantee, viral_boost } = req.body;
 
     // Initialize viral engines (lazy-load to avoid import-time side effects during tests)
@@ -125,8 +129,8 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
     let algorithmOptimization = { optimizationScore: 0 };
     let viralSeeding = { seedingResults: [] };
     let boostChain = { chainId: null, squadSize: 0 };
-    if (process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.CI_ROUTE_IMPORTS === '1' || process.env.NO_VIRAL_OPTIMIZATION === '1' || process.env.NO_VIRAL_OPTIMIZATION === 'true' || typeof process.env.JEST_WORKER_ID !== 'undefined') {
-      // Test/CI bypass: do not run viral optimization
+    if (bypassViral) {
+      // Test/CI/request bypass: do not run viral optimization
     } else {
       console.log('🔥 [VIRAL] Generating algorithm-breaking hashtags...');
       hashtagOptimization = await hashtagEngine.generateCustomHashtags({
@@ -162,14 +166,14 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
 
     // Update content with viral optimization data
     await contentRef.update({
-      viral_optimization: {
+      viral_optimization: sanitizeForFirestore({
         hashtags: hashtagOptimization,
         distribution: distributionStrategy,
         algorithm: algorithmOptimization,
         seeding: viralSeeding,
         boost_chain: boostChain,
         optimized_at: new Date().toISOString()
-      },
+      }),
       viral_velocity: { current: 0, category: 'new', status: 'optimizing' },
       growth_guarantee_badge: {
         enabled: true,
@@ -183,19 +187,19 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
                           scheduled_promotion_time ||
                           new Date().toISOString();
 
-    const scheduleData = {
+      const scheduleData = {
       contentId: contentRef.id,
       user_id: userId,
       platform: target_platforms?.join(',') || 'all',
-      scheduleType: (process.env.FIREBASE_ADMIN_BYPASS === '1' || process.env.CI_ROUTE_IMPORTS === '1' || process.env.NO_VIRAL_OPTIMIZATION === '1' || process.env.NO_VIRAL_OPTIMIZATION === 'true' || typeof process.env.JEST_WORKER_ID !== 'undefined') ? 'specific' : 'viral_optimized',
+      scheduleType: bypassViral ? 'specific' : 'viral_optimized',
       startTime: optimalTiming,
       frequency: promotion_frequency || 'once',
       isActive: true,
-      viral_optimization: {
+      viral_optimization: sanitizeForFirestore({
         peak_time_score: distributionStrategy.platforms?.[0]?.timing?.score || 0,
         hashtag_count: hashtagOptimization.hashtags?.length || 0,
         algorithm_score: algorithmOptimization.optimizationScore || 0
-      }
+      })
     };
     const scheduleRef = await db.collection('promotion_schedules').add(cleanObject(scheduleData));
     const promotion_schedule = { id: scheduleRef.id, ...scheduleData };
@@ -310,16 +314,17 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
       viral_optimized: true
     });
 
+    const sanitizedViralOpt = sanitizeForFirestore({
+      hashtags: hashtagOptimization,
+      distribution: distributionStrategy,
+      algorithm: algorithmOptimization,
+      seeding: viralSeeding,
+      boost_chain: boostChain
+    });
     res.status(201).json({
       content: {
         ...content,
-        viral_optimization: {
-          hashtags: hashtagOptimization,
-          distribution: distributionStrategy,
-          algorithm: algorithmOptimization,
-          seeding: viralSeeding,
-          boost_chain: boostChain
-        }
+        viral_optimization: sanitizedViralOpt
       },
       promotion_schedule,
       platform_tasks: platformTasks,
