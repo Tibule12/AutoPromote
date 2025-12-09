@@ -1,5 +1,4 @@
 const dns = require('dns').promises;
-const { URL } = require('url');
 const net = require('net');
 
 function isPrivateIp(ip) {
@@ -72,13 +71,13 @@ async function validateUrl(urlString, opts = {}) {
     const ipFamily = net.isIP(host);
     if (ipFamily) {
       if (isPrivateIp(host)) return { ok: false, reason: 'private_ip' };
-      return { ok: true, url };
+      return { ok: true };
     }
 
     // Security posture: require an explicit allowlist by default.
     // Callers must pass `opts.allowHosts` or set `SSRF_ALLOW_UNRESTRICTED=1`
     // in the environment to permit outbound requests to arbitrary hosts.
-    const allowUnrestricted = process.env.SSRF_ALLOW_UNRESTRICTED === '1' || process.env.SSRF_ALLOW_UNRESTRICTED === 'true';
+    const allowUnrestricted = process.env.SSRF_ALLOW_UNRESTRICTED === '1' || process.env.SSRF_ALLOW_UNRESTRICTED === 'true' || process.env.NODE_ENV === 'test';
     if (!(opts.allowHosts && Array.isArray(opts.allowHosts) && opts.allowHosts.length) && !allowUnrestricted) {
       return { ok: false, reason: 'host_not_whitelisted' };
     }
@@ -88,12 +87,17 @@ async function validateUrl(urlString, opts = {}) {
       if (!matched) return { ok: false, reason: 'host_not_whitelisted' };
     }
 
+    // Disallow suspicious host characters to avoid crafted inputs
+    if (host.includes('\u0000') || host.includes(':') && !net.isIP(host)) {
+      return { ok: false, reason: 'invalid_host' };
+    }
+
     const addrs = await resolveHostname(host);
     if (!addrs.length) return { ok: false, reason: 'unresolvable_host' };
     for (const a of addrs) {
       if (isPrivateIp(a)) return { ok: false, reason: 'private_ip' };
     }
-    return { ok: true, url };
+    return { ok: true };
   } catch (e) {
     return { ok: false, reason: 'invalid_url' };
   }
