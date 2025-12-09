@@ -272,6 +272,6 @@ function UploadPanel({ onUpload, contentList, platformMetadata, platformOptions,
       )}
     </section>
   );
-};
+}
 
 export default UploadPanel;

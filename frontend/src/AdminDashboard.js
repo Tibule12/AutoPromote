@@ -86,7 +86,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
         if (event.platform && event.type && (event.type === 'ad_click' || event.type === 'affiliate_conversion')) {
           revenueByPlatform[event.platform] = (revenueByPlatform[event.platform] || 0) + (event.value || 0);
         }
-        if (event.type && eventCounts.hasOwnProperty(event.type)) {
+        if (event.type && Object.prototype.hasOwnProperty.call(eventCounts, event.type)) {
           eventCounts[event.type] += 1;
         }
       });
@@ -1087,7 +1087,8 @@ function AdminDashboard({ analytics, user, onLogout }) {
         });
         const parsed = await parseJsonSafe(response);
         if (parsed.ok && parsed.json && parsed.json.success) {
-          alert(`Message sent to ${data.recipientCount} users`);
+          const recipientCount = parsed.json?.recipientCount || parsed.json?.recipients?.length || 0;
+          alert(`Message sent to ${recipientCount} users`);
           setShowBulkMessage(false);
           setBulkMessageData({ subject: '', message: '', targetAudience: 'all' });
         }
