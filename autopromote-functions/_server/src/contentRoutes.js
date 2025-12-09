@@ -4,6 +4,8 @@ const { db } = require('./firebaseAdmin');
 const logger = require('./utils/logger');
 const authMiddleware = require('./authMiddleware');
 const Joi = require('joi');
+const path = require('path');
+const sanitizeForFirestore = require(path.join(__dirname, 'utils', 'sanitizeForFirestore'));
 const { usageLimitMiddleware, trackUsage } = require('./middlewares/usageLimitMiddleware');
 
 // Enable test bypass for viral optimization when running under CI/test flags
@@ -162,14 +164,14 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
 
     // Update content with viral optimization data
     await contentRef.update({
-      viral_optimization: {
+      viral_optimization: sanitizeForFirestore({
         hashtags: hashtagOptimization,
         distribution: distributionStrategy,
         algorithm: algorithmOptimization,
         seeding: viralSeeding,
         boost_chain: boostChain,
         optimized_at: new Date().toISOString()
-      },
+      }),
       viral_velocity: { current: 0, category: 'new', status: 'optimizing' },
       growth_guarantee_badge: {
         enabled: true,
@@ -191,11 +193,11 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
       startTime: optimalTiming,
       frequency: promotion_frequency || 'once',
       isActive: true,
-      viral_optimization: {
+      viral_optimization: sanitizeForFirestore({
         peak_time_score: distributionStrategy.platforms?.[0]?.timing?.score || 0,
         hashtag_count: hashtagOptimization.hashtags?.length || 0,
         algorithm_score: algorithmOptimization.optimizationScore || 0
-      }
+      })
     };
     const scheduleRef = await db.collection('promotion_schedules').add(cleanObject(scheduleData));
     const promotion_schedule = { id: scheduleRef.id, ...scheduleData };
@@ -310,16 +312,17 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
       viral_optimized: true
     });
 
+    const sanitizedViralOpt = sanitizeForFirestore({
+      hashtags: hashtagOptimization,
+      distribution: distributionStrategy,
+      algorithm: algorithmOptimization,
+      seeding: viralSeeding,
+      boost_chain: boostChain
+    });
     res.status(201).json({
       content: {
         ...content,
-        viral_optimization: {
-          hashtags: hashtagOptimization,
-          distribution: distributionStrategy,
-          algorithm: algorithmOptimization,
-          seeding: viralSeeding,
-          boost_chain: boostChain
-        }
+        viral_optimization: sanitizedViralOpt
       },
       promotion_schedule,
       platform_tasks: platformTasks,
