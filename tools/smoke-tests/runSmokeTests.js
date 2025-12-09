@@ -50,7 +50,8 @@ async function createContent() {
     url: CONTENT_URL,
     description: 'Smoke test content - please ignore',
     // no target_platforms to avoid requiring platform options
-    auto_promote: false
+    // server expects `auto_promote` to be an object (optional); send an empty object to disable
+    auto_promote: {}
   };
     try {
     const res = await fetch(url, {
