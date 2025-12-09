@@ -29,17 +29,14 @@ export const cachedFetch = async (key, fetchFn, ttl = 30000) => {
   const promise = (async () => {
     try {
       const data = await fetchFn();
-      
+
       // Store in cache
       cache.set(key, {
         data,
         timestamp: Date.now()
       });
-      
+
       return data;
-    } catch (error) {
-      // Don't cache errors
-      throw error;
     } finally {
       // Remove from pending requests
       pendingRequests.delete(key);
