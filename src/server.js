@@ -1,4 +1,26 @@
-// ...existing code...
+// Bootstrap: ensure Firebase service account env is materialized as a credentials file
+// This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
+try {
+  const os = require('os');
+  const fs = require('fs');
+  const path = require('path');
+  const svcRaw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON || (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 ? Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8') : null);
+  if (svcRaw && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    try {
+      const parsed = JSON.parse(svcRaw);
+      if (parsed && parsed.private_key && typeof parsed.private_key === 'string') parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');
+      const tmpPath = path.join(os.tmpdir(), `autopromote-service-account-${Date.now()}.json`);
+      fs.writeFileSync(tmpPath, JSON.stringify(parsed, null, 2), { mode: 0o600 });
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
+      if (!process.env.FIREBASE_PROJECT_ID && parsed && parsed.project_id) {
+        process.env.FIREBASE_PROJECT_ID = parsed.project_id;
+      }
+      console.log(`[startup] Wrote service account JSON to ${tmpPath} and set GOOGLE_APPLICATION_CREDENTIALS`);
+    } catch (e) {
+      console.warn('[startup] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON/BASE64:', e && e.message);
+    }
+  }
+} catch (e) { /* ignore bootstrap failures */ }
 
 // Diagnostic: Log google-gax and @grpc/grpc-js versions if present to help debug runtime dependency mismatches
 try {
