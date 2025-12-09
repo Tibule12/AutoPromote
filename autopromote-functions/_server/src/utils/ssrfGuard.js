@@ -44,6 +44,21 @@ async function resolveHostname(hostname) {
 async function validateUrl(urlString, opts = {}) {
   // opts: { allowHosts: ['example.com'], requireHttps: true }
   try {
+    // Quick sanity checks before calling URL to help CodeQL determine
+    // the host is validated first when an allowlist is provided.
+    if (urlString.includes('@')) return { ok: false, reason: 'embedded_credentials' };
+
+    // If an allowlist is provided, try to extract the host without
+    // constructing a URL object (helps static analysis). This also
+    // prevents accidental use of credentials in the authority.
+    if (opts.allowHosts && Array.isArray(opts.allowHosts) && opts.allowHosts.length) {
+      const hostMatch = urlString.match(/^(?:https?:\/\/)?([^\/\s@:\?#]+)(?:[:\/\?#]|$)/i);
+      const candidate = hostMatch && hostMatch[1] ? hostMatch[1] : null;
+      if (!candidate) return { ok: false, reason: 'invalid_url' };
+      const matched = opts.allowHosts.some(h => h === candidate || candidate.endsWith('.' + h));
+      if (!matched) return { ok: false, reason: 'host_not_whitelisted' };
+    }
+
     const url = new URL(urlString);
     if (url.username || url.password) return { ok: false, reason: 'embedded_credentials' };
     if (opts.requireHttps !== false && url.protocol !== 'https:') return { ok: false, reason: 'insecure_protocol' };
