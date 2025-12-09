@@ -58,6 +58,14 @@ async function validateUrl(urlString, opts = {}) {
       return { ok: true, url };
     }
 
+    // Security posture: require an explicit allowlist by default.
+    // Callers must pass `opts.allowHosts` or set `SSRF_ALLOW_UNRESTRICTED=1`
+    // in the environment to permit outbound requests to arbitrary hosts.
+    const allowUnrestricted = process.env.SSRF_ALLOW_UNRESTRICTED === '1' || process.env.SSRF_ALLOW_UNRESTRICTED === 'true';
+    if (!(opts.allowHosts && Array.isArray(opts.allowHosts) && opts.allowHosts.length) && !allowUnrestricted) {
+      return { ok: false, reason: 'host_not_whitelisted' };
+    }
+
     if (opts.allowHosts && Array.isArray(opts.allowHosts) && opts.allowHosts.length) {
       const matched = opts.allowHosts.some(h => h === host || host.endsWith('.' + h));
       if (!matched) return { ok: false, reason: 'host_not_whitelisted' };
