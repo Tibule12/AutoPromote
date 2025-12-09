@@ -51,7 +51,7 @@ async function validateUrl(urlString, opts = {}) {
     // constructing a URL object (helps static analysis). This also
     // prevents accidental use of credentials in the authority.
     if (opts.allowHosts && Array.isArray(opts.allowHosts) && opts.allowHosts.length) {
-      const hostMatch = urlString.match(/^(?:https?:\/\/)?([^\/\s@:\?#]+)(?:[:\/\?#]|$)/i);
+      const hostMatch = urlString.match(new RegExp('^(?:https?:\\/\\/)?([^\\/\\s@:\\?#]+)(?:[:\\/\\?#]|$)', 'i'));
       const candidate = hostMatch && hostMatch[1] ? hostMatch[1] : null;
       if (!candidate) return { ok: false, reason: 'invalid_url' };
       const matched = opts.allowHosts.some(h => h === candidate || candidate.endsWith('.' + h));
@@ -60,7 +60,7 @@ async function validateUrl(urlString, opts = {}) {
 
     // Parse protocol and host with a conservative regex to avoid
     // constructing a URL object directly from untrusted input.
-    const m = urlString.match(/^(?:(https?):\/\/)?([^\/\s@:\?#]+)(?::(\d+))?(?:[\/\?#].*)?$/i);
+    const m = urlString.match(new RegExp('^(?:(https?):\\/\\/)?([^\\/\\s@:\\?#]+)(?::(\\d+))?(?:[\\/\\?#].*)?$', 'i'));
     if (!m) return { ok: false, reason: 'invalid_url' };
     const protocol = m[1] ? m[1].toLowerCase() + ':' : null;
     const host = m[2];
