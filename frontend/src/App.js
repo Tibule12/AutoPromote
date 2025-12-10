@@ -465,16 +465,18 @@ function App() {
       const { file, platforms, title, description, type, schedule, isDryRun, trimStart, trimEnd, template, rotate, flipH, flipV } = params;
       const token = await auth.currentUser.getIdToken(true);
       let finalUrl = '';
-      // Always upload file for video/image and get url
-      if ((type === 'video' || type === 'image' || type === 'audio') && file) {
-        const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
-        const storageRef = ref(storage, filePath);
-        await uploadBytes(storageRef, file);
-        finalUrl = await getDownloadURL(storageRef);
-      }
-      // For preview/dry run, use preview url
+      // If this is a preview/dry-run, do NOT upload the file to storage.
+      // Use a `preview://` URL so preview pipelines and workers treat it as a local preview token.
       if (isDryRun && file) {
         finalUrl = `preview://${file.name}`;
+      } else {
+        // Only upload file for real submissions (not dry-run)
+        if ((type === 'video' || type === 'image' || type === 'audio') && file) {
+          const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
+          const storageRef = ref(storage, filePath);
+          await uploadBytes(storageRef, file);
+          finalUrl = await getDownloadURL(storageRef);
+        }
       }
       const schedule_hint = {
         ...schedule,
