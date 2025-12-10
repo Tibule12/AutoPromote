@@ -120,6 +120,32 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
       status: 'pending',
       viral_optimized: true
     };
+
+    // Support preview/dry-run requests from the frontend: do not persist content,
+    // instead generate platform previews and return them in the shape the
+    // frontend expects (an array `previews` of per-platform preview objects).
+    if (req.body.isDryRun) {
+      try {
+        // Lazy-load heavy preview service to avoid import-time side-effects
+        contentQualityEnhancer = contentQualityEnhancer || require('./services/contentQualityEnhancer');
+        const fakeContent = {
+          title: contentData.title,
+          description: contentData.description,
+          type: contentData.type,
+          url: contentData.url,
+          meta: contentData.meta || {}
+        };
+        const platforms = Array.isArray(target_platforms) && target_platforms.length ? target_platforms : ['tiktok','youtube','instagram'];
+        const previewResult = await contentQualityEnhancer.generateContentPreview(fakeContent, platforms);
+        // `previewResult.previews` is an object keyed by platform; convert to array
+        const previewsObj = previewResult && previewResult.previews ? previewResult.previews : {};
+        const previewsArray = Object.keys(previewsObj).map(p => ({ platform: p, ...previewsObj[p] }));
+        return res.json({ previews: previewsArray, summary: previewResult.summary || null });
+      } catch (previewErr) {
+        console.error('[PREVIEW] Error generating dry-run preview:', previewErr);
+        return res.status(500).json({ error: 'preview_generation_failed' });
+      }
+    }
     const contentRef = await db.collection('content').add(cleanObject(contentData));
     const contentDoc = await contentRef.get();
     const content = { id: contentRef.id, ...contentDoc.data() };
