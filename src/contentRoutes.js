@@ -30,7 +30,7 @@ function cleanObject(obj) {
 const contentUploadSchema = Joi.object({
   title: Joi.string().required(),
   type: Joi.string().valid('video', 'image', 'audio').required(),
-  url: Joi.string().uri().required(),
+  url: Joi.alternatives().try(Joi.string().uri(), Joi.string().pattern(/^preview:\/\//)).required(),
   description: Joi.string().max(500).allow(''),
   target_platforms: Joi.array().items(Joi.string()).optional(),
   // Per-platform options map: { <platform>: { <key>: <value>, ... } }
