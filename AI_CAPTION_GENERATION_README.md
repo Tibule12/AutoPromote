@@ -480,7 +480,7 @@ Monitor AI usage in Admin Panel → AI Usage tab:
 ## 🤝 Support
 
 **Documentation:** https://docs.autopromote.org  
-**Email:** support@autopromote.org  
+**Email:** thulani@autopromote.org  
 **Discord:** [Community Server]  
 **GitHub Issues:** https://github.com/Tibule12/AutoPromote/issues
 

@@ -638,7 +638,7 @@ app.get('/facebook-data-deletion', (req, res) => {
           <h1>Facebook Data Deletion Request</h1>
           <p>If you wish to delete your Facebook-related data from AutoPromote, please follow these steps:</p>
           <ol>
-            <li>Send an email to <b>support@autopromote.org</b> with the subject "Facebook Data Deletion Request".</li>
+            <li>Send an email to <b>thulani@autopromote.org</b> with the subject "Facebook Data Deletion Request".</li>
             <li>Include your Facebook user ID and any relevant details in your message.</li>
             <li>We will process your request and delete your data as soon as possible, typically within 30 days.</li>
           </ol>
