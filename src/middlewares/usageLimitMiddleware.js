@@ -37,6 +37,19 @@ function usageLimitMiddleware(options = {}) {
         return next();
       }
 
+      // Temporary operator bypass: if DISABLE_UPLOAD_LIMIT is set, skip limit checks.
+      // This is intended for short-term debugging / launch readiness only.
+      if (process.env.DISABLE_UPLOAD_LIMIT === '1') {
+        req.userUsage = {
+          limit: Infinity,
+          used: 0,
+          remaining: Infinity,
+          isPaid: true,
+          monthKey: new Date().toISOString().slice(0,7)
+        };
+        return next();
+      }
+
       // Check if user has paid subscription
       const userDoc = await db.collection('users').doc(userId).get();
       const userData = userDoc.data() || {};
