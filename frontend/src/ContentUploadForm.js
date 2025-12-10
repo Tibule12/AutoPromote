@@ -261,6 +261,8 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
         type,
         description,
         url,
+        // backend expects `target_platforms`; include it and keep `platforms` for compatibility
+        target_platforms: selectedPlatformsVal,
         platforms: selectedPlatformsVal,
         isDryRun: true,
         meta: {
@@ -360,6 +362,8 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
         type,
         description,
         url,
+        // include both keys so backend preview and upload handlers accept the platforms list
+        target_platforms: selectedPlatformsVal,
         platforms: selectedPlatformsVal,
         template: template !== 'none' ? template : undefined,
         meta: {
