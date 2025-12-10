@@ -330,7 +330,9 @@ router.get('/openai/usage', authMiddleware, adminOnly, async (req, res) => {
     // Aggregate cost
     const totalCost = usage.reduce((sum, u) => sum + (u.cost || 0), 0);
 
-    res.json({ success: true, usage: { totalCost, daily: usage } });
+    // Include a top-level `configured` flag so frontends can easily detect
+    // whether OpenAI is configured in the runtime environment.
+    res.json({ success: true, configured: !!process.env.OPENAI_API_KEY, usage: { totalCost, daily: usage } });
   } catch (error) {
     console.error('Error fetching OpenAI usage:', error);
     res.status(500).json({ success: false, error: 'Internal server error' });

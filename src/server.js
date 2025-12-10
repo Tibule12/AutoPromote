@@ -995,6 +995,53 @@ if (requireAcceptedTerms) {
 app.use('/api/payments', routeLimiter({ windowHint: 'payments' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), paymentsStatusRoutes);
 app.use('/api/payments', routeLimiter({ windowHint: 'payments' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), paymentsExtendedRoutes);
 app.use('/api/paypal', paypalWebhookRoutes);
+// Fallback lightweight status endpoint to avoid 404s from frontends if the
+// full PayPal router isn't available in a particular deploy variant.
+try {
+  const authMiddleware = require('./authMiddleware');
+  app.get('/api/paypal-subscriptions/status', authMiddleware, async (req, res) => {
+    try {
+      const { db } = require('./firebaseAdmin');
+      const userId = req.userId || req.user?.uid;
+      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+      let subDoc;
+      try {
+        subDoc = await db.collection('user_subscriptions').doc(userId).get();
+      } catch (e) {
+        return res.json({ success: true, subscription: { planId: 'free', planName: 'Free', status: 'active', features: {} } });
+      }
+
+      if (!subDoc.exists) {
+        return res.json({ success: true, subscription: { planId: 'free', planName: 'Free', status: 'active', features: {} } });
+      }
+
+      const subscription = subDoc.data();
+      return res.json({
+        success: true,
+        subscription: {
+          planId: subscription.planId,
+          planName: subscription.planName,
+          status: subscription.status,
+          amount: subscription.amount,
+          currency: subscription.currency,
+          nextBillingDate: subscription.nextBillingDate,
+          features: subscription.features,
+          cancelledAt: subscription.cancelledAt,
+          expiresAt: subscription.expiresAt
+        }
+      });
+    } catch (err) {
+      console.error('[PayPal-Fallback] status handler error:', err);
+      return res.status(500).json({ error: 'Failed to fetch subscription status' });
+    }
+  });
+} catch (e) {
+  // If authMiddleware or firebaseAdmin are not available in this runtime,
+  // do nothing; the normal router may be mounted elsewhere.
+  console.warn('PayPal fallback status route not mounted:', e && e.message);
+}
+
 app.use('/api/paypal-subscriptions', routeLimiter({ windowHint: 'paypal_subscriptions' }), paypalSubscriptionRoutes);
 app.use('/api/viral-boost', routeLimiter({ windowHint: 'viral_boost' }), viralBoostRoutes);
 app.use('/api/rewards', routeLimiter({ windowHint: 'rewards' }), rewardsRoutes);
