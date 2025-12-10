@@ -510,9 +510,17 @@ function App() {
         },
         body: JSON.stringify(payload)
       });
-      const result = await res.json();
+      // Read response body safely so we can show any server-side validation error
+      let result = null;
+      try {
+        result = await res.json();
+      } catch (e) {
+        // If response is not JSON, try to read as text
+        try { const txt = await res.text(); result = { text: txt }; } catch (_) { result = null; }
+      }
       if (!res.ok) {
-        throw new Error(result.message || 'Upload/preview failed');
+        const serverErr = (result && (result.error || result.message || result.text)) || `HTTP ${res.status}`;
+        throw new Error(serverErr || 'Upload/preview failed');
       }
       if (isDryRun) {
         return result;
