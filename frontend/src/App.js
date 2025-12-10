@@ -534,10 +534,19 @@ function App() {
       if (isDryRun) {
         return result;
       }
+
+      // If server marked the content as pending approval, do not attempt any immediate posts.
+      if (result && result.content && result.content.status === 'pending_approval') {
+        await fetchUserContent(token);
+        alert('Content uploaded and queued for promotion. It will be published to selected platforms after approval.');
+        return result;
+      }
         try {
           const chosen = Array.isArray(platforms) ? platforms : [];
+          // Require explicit user request to perform immediate platform posts.
+          const shouldImmediatePost = params?.immediate_post === true && !DISABLE_IMMEDIATE_POSTS;
           const postYouTube = async () => {
-            if (DISABLE_IMMEDIATE_POSTS) { console.log('[Upload] Skipping immediate YouTube post (disabled via flag)'); return; }
+            if (!shouldImmediatePost) { console.log('[Upload] Immediate YouTube post not requested or disabled'); return; }
             if (!chosen.includes('youtube')) return;
           try {
             // Ensure contentId and fileUrl are sent as required by backend
@@ -604,13 +613,13 @@ function App() {
             if (!r.ok) console.warn('Instagram upload failed');
           } catch (_) {}
         };
-        // Use queued server-side posts for consistency, unless immediate posting is explicitly enabled
-        if (!DISABLE_IMMEDIATE_POSTS) {
+        // Only run immediate posts when explicitly requested by the user (params.immediate_post)
+        if (params?.immediate_post === true && !DISABLE_IMMEDIATE_POSTS) {
           await postYouTube();
           await postFacebook();
           await postInstagram();
         } else {
-          console.log('[Upload] Immediate platform posts disabled; posts will be processed by backend queued tasks');
+          console.log('[Upload] Immediate platform posts not requested or disabled; posts will be processed by backend queued tasks');
         }
       } catch (e) {
         console.warn('Auto-post skipped or partial:', e?.message);
