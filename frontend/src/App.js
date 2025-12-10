@@ -469,6 +469,10 @@ function App() {
       // Use a `preview://` URL so preview pipelines and workers treat it as a local preview token.
       if (isDryRun && file) {
         finalUrl = `preview://${file.name}`;
+      } else if (!isDryRun && !file && params.url) {
+        // If the caller already uploaded the file (some upload forms do client-side storage
+        // upload) prefer the provided `url` instead of re-uploading.
+        finalUrl = params.url;
       } else {
         // Only upload file for real submissions (not dry-run)
         if ((type === 'video' || type === 'image' || type === 'audio') && file) {
