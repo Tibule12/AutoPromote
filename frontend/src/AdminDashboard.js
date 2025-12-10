@@ -31,6 +31,31 @@ function AdminDashboard({ analytics, user, onLogout }) {
   const [showUserModal, setShowUserModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
 
+  // Safe formatting helpers to avoid TypeErrors when values are missing
+  const safeNum = (n, fallback = '0') => {
+    if (n === null || n === undefined) return fallback;
+    if (typeof n === 'number') return n.toLocaleString();
+    const parsed = Number(n);
+    return Number.isNaN(parsed) ? fallback : parsed.toLocaleString();
+  };
+
+  const safeCurrency = (n, decimals = 2) => {
+    if (n === null || n === undefined) return `$0.${'0'.repeat(decimals)}`;
+    const parsed = Number(n) || 0;
+    return `$${parsed.toFixed(decimals)}`;
+  };
+
+  const safeDate = (d, opts) => {
+    try {
+      if (!d) return '—';
+      // Firestore Timestamp support
+      if (d && typeof d.seconds === 'number') return new Date(d.seconds * 1000).toLocaleString();
+      return new Date(d).toLocaleString(undefined, opts);
+    } catch (e) {
+      return '—';
+    }
+  };
+
   const refreshData = () => {
     // Trigger dashboard data refresh (VariantAdminPanel rendered in UI tabs elsewhere)
     setRefreshing(true);
@@ -820,13 +845,13 @@ function AdminDashboard({ analytics, user, onLogout }) {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>
-                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>User</th>
-                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Email</th>
-                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Plan</th>
-                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Status</th>
-                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Joined</th>
-                      <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #eee' }}>Actions</th>
-                    </tr>
+            <StatCard
+              title="Total Impressions"
+              value={safeNum(totalImpressions)}
+              subtitle={`${safeNum(totalClicks)} clicks`}
+              color="#1976d2"
+              icon="👀"
+            />
                   </thead>
                   <tbody>
                     {filteredUsers.map((user) => (
@@ -1478,7 +1503,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
           <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-10px' }}>
             <StatCard
               title="Total API Requests"
-              value={usage.totalRequests.toLocaleString()}
+              value={safeNum(usage?.totalRequests)}
               subtitle="This month"
               color="#1976d2"
               icon="🤖"
@@ -1486,23 +1511,23 @@ function AdminDashboard({ analytics, user, onLogout }) {
             />
             <StatCard
               title="Total Cost"
-              value={usage.totalCost}
-              subtitle={`$${usage.averageCostPerRequest.toFixed(3)} per request`}
+              value={safeCurrency(usage?.totalCost, 2)}
+              subtitle={`${safeCurrency(usage?.averageCostPerRequest, 3)} per request`}
               color="#2e7d32"
               icon="💰"
               trend={8}
             />
             <StatCard
               title="Chatbot Requests"
-              value={usage.chatbotRequests.toLocaleString()}
-              subtitle={`$${usage.chatbotCost.toFixed(2)}`}
+              value={safeNum(usage?.chatbotRequests)}
+              subtitle={safeCurrency(usage?.chatbotCost, 2)}
               color="#5e35b1"
               icon="💬"
             />
             <StatCard
               title="Transcription Requests"
-              value={usage.transcriptionRequests.toLocaleString()}
-              subtitle={`$${usage.transcriptionCost.toFixed(2)}`}
+              value={safeNum(usage?.transcriptionRequests)}
+              subtitle={safeCurrency(usage?.transcriptionCost, 2)}
               color="#ed6c02"
               icon="🎙️"
             />
@@ -1664,18 +1689,18 @@ function AdminDashboard({ analytics, user, onLogout }) {
         <div style={{ marginTop: 24 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-10px' }}>
             <StatCard
-              title="Total Ads"
-              value={totalAds}
-              subtitle={`${activeAds} active, ${draftAds} draft`}
+              title="Total Sent"
+              value={safeNum(totalSent)}
+              subtitle={`${safeNum(totalOpens)} opens`}
               color="#1976d2"
-              icon="📢"
+              icon="✉️"
             />
             <StatCard
-              title="Active Ads"
-              value={activeAds}
-              subtitle={`${pausedAds} paused`}
+              title="Open Rate"
+              value={totalSent ? ((totalOpens / totalSent) * 100).toFixed(1) + '%' : '0.0%'}
+              subtitle={`${safeNum(totalClicks)} clicks`}
               color="#2e7d32"
-              icon="▶️"
+              icon="📈"
             />
             <StatCard
               title="Total Impressions"
@@ -2078,12 +2103,12 @@ function AdminDashboard({ analytics, user, onLogout }) {
                           {template.status}
                         </span>
                       </td>
-                      <td style={{ padding: '12px' }}>{template.sent.toLocaleString()}</td>
+                      <td style={{ padding: '12px' }}>{safeNum(template.sent)}</td>
                       <td style={{ padding: '12px' }}>
-                        {template.opens.toLocaleString()} ({((template.opens / template.sent) * 100).toFixed(1)}%)
+                        {safeNum(template.opens)} ({template.sent ? (((template.opens || 0) / template.sent) * 100).toFixed(1) : '0.0'}%)
                       </td>
                       <td style={{ padding: '12px' }}>
-                        {template.clicks.toLocaleString()} ({((template.clicks / template.sent) * 100).toFixed(1)}%)
+                        {safeNum(template.clicks)} ({template.sent ? (((template.clicks || 0) / template.sent) * 100).toFixed(1) : '0.0'}%)
                       </td>
                       <td style={{ padding: '12px' }}>
                         <button style={{

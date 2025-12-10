@@ -296,7 +296,19 @@ router.get('/stats', authMiddleware, adminOnly, async (req, res) => {
     console.error('Error fetching approval stats:', error.message || error);
     if (error && error.message && error.message.includes('requires an index')) {
       const linkMatch = (error.message.match(/https:\/\/console\.firebase\.google\.com[^\s]+/) || [null])[0];
-      return res.status(422).json({ success: false, error: 'Missing Firestore composite index required by this query', indexLink: linkMatch || null });
+      // Return a graceful fallback so the admin UI does not break in production
+      return res.status(200).json({
+        success: true,
+        stats: {
+          pending: 0,
+          approved: 0,
+          rejected: 0,
+          approvedToday: 0,
+          rejectedToday: 0
+        },
+        warning: 'missing_index',
+        indexLink: linkMatch || null
+      });
     }
     res.status(500).json({ success: false, error: error.message });
   }
