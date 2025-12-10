@@ -49,6 +49,10 @@ function validateBody(schema) {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
     if (error) {
+      // Log the offending body to aid debugging (do not leak sensitive tokens)
+      try {
+        logger.warn('[VALIDATION] Request body failed schema validation', { path: req.path, error: error.details[0].message, bodyPreview: JSON.stringify(req.body).slice(0, 200) });
+      } catch (e) { /* ignore logging failures */ }
       return res.status(400).json({ error: error.details[0].message });
     }
     next();
