@@ -10,6 +10,9 @@
 // Prefer custom domain by default; environment variable can override per-deploy
 export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://www.autopromote.org';
 
+// Public site URL used for user-facing pages (Terms, Privacy, etc.)
+export const PUBLIC_SITE_URL = process.env.REACT_APP_SITE_URL || 'https://autopromote.org';
+
 // API Endpoints
 export const API_ENDPOINTS = {
   // Auth endpoints

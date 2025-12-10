@@ -6,7 +6,7 @@
 
 import React from 'react';
 import './WelcomePage.css';
-import { API_BASE_URL } from './config';
+import { API_BASE_URL, PUBLIC_SITE_URL } from './config';
 
 const WelcomePage = ({ onGetStarted, onSignIn }) => (
   <div className="new-welcome-root">
@@ -41,9 +41,9 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => (
       </div>
       <div className="new-welcome-footer">
         <div style={{display:'flex',gap:12,alignItems:'center',justifyContent:'center',flexWrap:'wrap'}}>
-          <a href={`${API_BASE_URL}/terms`} target="_blank" rel="noreferrer" style={{color:'#6c4cf7',textDecoration:'underline'}}>Terms of Service</a>
+          <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer" style={{color:'#6c4cf7',textDecoration:'underline'}}>Terms of Service</a>
           <span style={{color:'#bbb'}}>•</span>
-          <a href={`${API_BASE_URL}/privacy`} target="_blank" rel="noreferrer" style={{color:'#6c4cf7',textDecoration:'underline'}}>Privacy Policy</a>
+          <a href={`${PUBLIC_SITE_URL}/privacy`} target="_blank" rel="noreferrer" style={{color:'#6c4cf7',textDecoration:'underline'}}>Privacy Policy</a>
         </div>
         <div style={{marginTop:8}}>
           <span style={{fontSize:'0.95rem', color:'#888'}}>© {new Date().getFullYear()} AutoPromote. All rights reserved.</span>

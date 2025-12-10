@@ -120,8 +120,22 @@ if (bypass) {
         auth: () => ({ verifyIdToken: async () => ({ uid: 'stub-uid' }) })
     };
     const db = admin.firestore();
+    // Minimal auth stub (verifyIdToken used by auth middleware)
+    const auth = admin.auth();
+    // Minimal storage stub so modules that call storage.bucket() won't crash in bypass mode
+    const storage = {
+        bucket: () => ({
+            file: (p) => ({
+                name: p,
+                async exists() { return [false]; },
+                async download() { throw new Error('Storage stub: no file'); },
+                async save(_buf) { return true; }
+            }),
+            async upload() { throw new Error('Storage stub: upload not implemented'); }
+        })
+    };
     
-    module.exports = { admin, db };
+    module.exports = { admin, db, auth, storage };
 }
 // When not bypassing, try to use root firebaseAdmin module first
 try {
@@ -155,5 +169,8 @@ try {
         }
         
         const db = admin.firestore();
-        module.exports = { admin, db };
+        const auth = admin.auth ? admin.auth() : null;
+        let storage = null;
+        try { storage = admin.storage ? admin.storage() : null; } catch (_) { storage = null; }
+        module.exports = { admin, db, auth, storage };
     }
