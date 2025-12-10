@@ -15,4 +15,4 @@ This short summary highlights key points from our full Terms & Conditions. It do
 - Age: You must meet the minimum age to use the Platform.
 - Changes: We can change the Terms; material changes will be announced and posted.
 
-Please read the full Terms & Privacy Policy for complete details. Contact: support@autopromote.com.
+Please read the full Terms & Privacy Policy for complete details. Contact: thulani@autopromote.org.

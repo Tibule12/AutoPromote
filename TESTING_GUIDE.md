@@ -527,7 +527,7 @@ If critical issues arise post-launch:
 **Emergency Contacts:**
 - Tech Lead: [your email]
 - DevOps: [devops email]
-- Support: support@autopromote.org
+- Support: thulani@autopromote.org
 
 ---
 
