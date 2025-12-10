@@ -100,6 +100,8 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
     const viralImpactEngine = require('./services/viralImpactEngine');
     const algorithmExploitationEngine = require('./services/algorithmExploitationEngine');
 
+    const isAdmin = !!(req.user && (req.user.isAdmin === true || req.user.role === 'admin'));
+
     const contentData = {
       title,
       type,
@@ -121,7 +123,8 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
       duration: (typeof (req.body.meta && req.body.meta.duration) === 'number') ? req.body.meta.duration : undefined,
       user_id: userId,
       created_at: new Date(),
-      status: 'pending',
+      // default to pending_approval for non-admin uploads; admins are auto-approved
+      status: isAdmin ? 'approved' : 'pending_approval',
       viral_optimized: true
     };
 
@@ -164,33 +167,34 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
       // Test/CI/request bypass: do not run viral optimization
     } else {
       console.log('🔥 [VIRAL] Generating algorithm-breaking hashtags...');
+      const requestedPlatforms = Array.isArray(target_platforms) ? target_platforms : [];
       hashtagOptimization = await hashtagEngine.generateCustomHashtags({
         content,
-        platform: target_platforms?.[0] || 'tiktok',
+        platform: requestedPlatforms[0] || 'tiktok',
         customTags: custom_hashtags || [],
         growthGuarantee: growth_guarantee !== false
       });
       console.log('🎯 [VIRAL] Creating smart distribution strategy...');
       distributionStrategy = await smartDistributionEngine.generateDistributionStrategy(
         content,
-        target_platforms || ['tiktok', 'instagram'],
+        requestedPlatforms,
         { timezone: 'UTC', growthGuarantee: growth_guarantee !== false }
       );
       console.log('⚡ [VIRAL] Applying algorithm exploitation...');
       algorithmOptimization = algorithmExploitationEngine.optimizeForAlgorithm(
         content,
-        target_platforms?.[0] || 'tiktok'
+        requestedPlatforms[0] || 'tiktok'
       );
       console.log('🌊 [VIRAL] Seeding content to visibility zones...');
       viralSeeding = await viralImpactEngine.seedContentToVisibilityZones(
         content,
-        target_platforms?.[0] || 'tiktok',
+        requestedPlatforms[0] || null,
         { forceAll: viral_boost?.force_seeding || false }
       );
       console.log('🔗 [VIRAL] Creating boost chain for viral spread...');
       boostChain = await viralImpactEngine.orchestrateBoostChain(
         content,
-        target_platforms || ['tiktok'],
+        requestedPlatforms,
         { userId, squadUserIds: viral_boost?.squad_user_ids || [] }
       );
     }
@@ -218,24 +222,29 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
                           scheduled_promotion_time ||
                           new Date().toISOString();
 
-      const scheduleData = {
-      contentId: contentRef.id,
-      user_id: userId,
-      platform: target_platforms?.join(',') || 'all',
-      scheduleType: bypassViral ? 'specific' : 'viral_optimized',
-      startTime: optimalTiming,
-      frequency: promotion_frequency || 'once',
-      isActive: true,
-      viral_optimization: sanitizeForFirestore({
-        peak_time_score: distributionStrategy.platforms?.[0]?.timing?.score || 0,
-        hashtag_count: hashtagOptimization.hashtags?.length || 0,
-        algorithm_score: algorithmOptimization.optimizationScore || 0
-      })
-    };
-    const scheduleRef = await db.collection('promotion_schedules').add(cleanObject(scheduleData));
-    const promotion_schedule = { id: scheduleRef.id, ...scheduleData };
-    // Backwards compat: some tests expect snake_case attribute names
-    promotion_schedule.schedule_type = promotion_schedule.scheduleType || promotion_schedule.schedule_type;
+      // If uploader is not an admin, do not create promotion schedules or enqueue platform posts here.
+      // Firestore triggers (createPromotionOnApproval) will run when an admin changes status to 'approved'.
+      let promotion_schedule = null;
+      if (isAdmin) {
+        const scheduleData = {
+          contentId: contentRef.id,
+          user_id: userId,
+          platform: Array.isArray(target_platforms) ? target_platforms.join(',') : (target_platforms || ''),
+          scheduleType: bypassViral ? 'specific' : 'viral_optimized',
+          startTime: optimalTiming,
+          frequency: promotion_frequency || 'once',
+          isActive: true,
+          viral_optimization: sanitizeForFirestore({
+            peak_time_score: distributionStrategy.platforms?.[0]?.timing?.score || 0,
+            hashtag_count: hashtagOptimization.hashtags?.length || 0,
+            algorithm_score: algorithmOptimization.optimizationScore || 0
+          })
+        };
+        const scheduleRef = await db.collection('promotion_schedules').add(cleanObject(scheduleData));
+        promotion_schedule = { id: scheduleRef.id, ...scheduleData };
+        // Backwards compat: some tests expect snake_case attribute names
+        promotion_schedule.schedule_type = promotion_schedule.scheduleType || promotion_schedule.schedule_type;
+      }
     // Auto-enqueue promotion tasks with viral optimization
     // If upload included edit metadata, enqueue a media transform task so a worker may process it
     if (req.body.meta && (req.body.meta.trimStart || req.body.meta.trimEnd || req.body.meta.rotate || req.body.meta.flipH || req.body.meta.flipV)) {
@@ -247,7 +256,8 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
     const { enqueueYouTubeUploadTask, enqueuePlatformPostTask } = require('./services/promotionTaskQueue');
     const platformTasks = [];
 
-    if (Array.isArray(target_platforms)) {
+    // Only enqueue platform tasks immediately when the uploader is an admin (auto-approved)
+    if (isAdmin && Array.isArray(target_platforms)) {
       for (const platform of target_platforms) {
         try {
           const optionsForPlatform = (platform_options && platform_options[platform]) ? platform_options[platform] : {};
@@ -330,7 +340,7 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
     }
     logger.info(`🚀 [VIRAL UPLOAD] Content uploaded with complete viral optimization:`, {
       contentId: contentRef.id,
-      scheduleId: scheduleRef.id,
+      scheduleId: promotion_schedule ? promotion_schedule.id : null,
       platformTasks: platformTasks.length,
       viralScore: algorithmOptimization.optimizationScore,
       hashtagCount: hashtagOptimization.hashtags?.length,
@@ -352,6 +362,19 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
       seeding: viralSeeding,
       boost_chain: boostChain
     });
+    // If uploader is not an admin, return a short acknowledgment indicating the content is queued
+    // for promotion and requires admin approval before any platform posting occurs.
+    if (!isAdmin) {
+      return res.status(201).json({
+        content: {
+          id: contentRef.id,
+          status: 'pending_approval'
+        },
+        message: 'Content uploaded and queued for promotion; awaiting admin approval.'
+      });
+    }
+
+    // Admin flow: include detailed scheduling and platform task information.
     res.status(201).json({
       content: {
         ...content,
@@ -376,7 +399,7 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
         ...auto_promote,
         viral_optimized: (process.env.NO_VIRAL_OPTIMIZATION === '1' || process.env.NO_VIRAL_OPTIMIZATION === 'true' || process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1' || typeof process.env.JEST_WORKER_ID !== 'undefined') ? false : true,
         expected_viral_velocity: (process.env.NO_VIRAL_OPTIMIZATION === '1' || process.env.NO_VIRAL_OPTIMIZATION === 'true' || process.env.CI_ROUTE_IMPORTS === '1' || process.env.FIREBASE_ADMIN_BYPASS === '1' || typeof process.env.JEST_WORKER_ID !== 'undefined') ? 'none' : 'explosive',
-        overnight_viral_plan: (typeof viralImpactEngine !== 'undefined' && typeof viralImpactEngine.generateOvernightViralPlan === 'function') ? viralImpactEngine.generateOvernightViralPlan(content, target_platforms || ['tiktok']) : null
+        overnight_viral_plan: (typeof viralImpactEngine !== 'undefined' && typeof viralImpactEngine.generateOvernightViralPlan === 'function') ? viralImpactEngine.generateOvernightViralPlan(content, Array.isArray(target_platforms) ? target_platforms : []) : null
       }
     });
   } catch (error) {

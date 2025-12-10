@@ -487,6 +487,11 @@ function App() {
         frequency: schedule?.frequency || userDefaults.defaultFrequency || 'once',
         timezone: userDefaults.timezone || 'UTC'
       };
+      // Defensive: ensure non-empty URL for real uploads (avoid sending empty "url" to server)
+      if (!isDryRun && (!finalUrl || String(finalUrl).trim() === '')) {
+        alert('Upload failed: missing file URL. Please retry the upload.');
+        return { ok: false, error: 'missing_url' };
+      }
       const payload = {
         title: title || (file ? file.name : ''),
         type: type || 'video',
@@ -611,7 +616,7 @@ function App() {
         console.warn('Auto-post skipped or partial:', e?.message);
       }
       await fetchUserContent(token);
-      alert('Content uploaded! Posting to connected platforms has been triggered.');
+      alert('Content uploaded and queued for promotion. It will be published to selected platforms after approval.');
     } catch (error) {
       alert('Error uploading content: ' + error.message);
     }
