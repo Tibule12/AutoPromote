@@ -7,7 +7,7 @@ import { auth, db, storage } from './firebaseClient';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, signInWithCustomToken } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { API_ENDPOINTS, API_BASE_URL } from './config';
+import { API_ENDPOINTS, API_BASE_URL, PUBLIC_SITE_URL } from './config';
 import { parseJsonSafe } from './utils/parseJsonSafe';
 import ChatWidget from './ChatWidget';
 import { Sentry } from './sentryClient';
@@ -614,7 +614,7 @@ function App() {
               <button onClick={acceptTerms} style={{ background: '#111827', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: 8, cursor: 'pointer' }}>
                 Accept and Continue
               </button>
-              <a href={`${API_BASE_URL}/terms`} target="_blank" rel="noreferrer">View Terms</a>
+              <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">View Terms</a>
             </div>
           </div>
         </div>
