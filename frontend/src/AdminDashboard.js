@@ -845,13 +845,13 @@ function AdminDashboard({ analytics, user, onLogout }) {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>
-            <StatCard
-              title="Total Impressions"
-              value={safeNum(totalImpressions)}
-              subtitle={`${safeNum(totalClicks)} clicks`}
-              color="#1976d2"
-              icon="👀"
-            />
+                      <th style={{ textAlign: 'left', padding: '12px' }}>User</th>
+                      <th style={{ textAlign: 'left', padding: '12px' }}>Email</th>
+                      <th style={{ textAlign: 'left', padding: '12px' }}>Plan</th>
+                      <th style={{ textAlign: 'left', padding: '12px' }}>Status</th>
+                      <th style={{ textAlign: 'left', padding: '12px' }}>Created</th>
+                      <th style={{ textAlign: 'left', padding: '12px' }}>Actions</th>
+                    </tr>
                   </thead>
                   <tbody>
                     {filteredUsers.map((user) => (
