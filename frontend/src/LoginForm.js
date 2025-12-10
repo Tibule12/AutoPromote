@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import "./Auth.css";
+import { PUBLIC_SITE_URL } from './config';
 
 const LoginForm = ({ onLogin, onClose }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -132,7 +133,7 @@ const LoginForm = ({ onLogin, onClose }) => {
             onChange={(event) => setAgreed(event.target.checked)}
           />
           <label htmlFor="agreeTerms" className="form-label">
-            I agree to the <a href="/terms" target="_blank" rel="noreferrer">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+            I agree to the <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">Terms of Service</a> and <a href={`${PUBLIC_SITE_URL}/privacy`} target="_blank" rel="noreferrer">Privacy Policy</a>.
           </label>
         </div>
 
