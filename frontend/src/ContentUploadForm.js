@@ -460,6 +460,18 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
     selectedPlatforms: selectedPlatformsVal
   });
 
+  // Prevent Enter from submitting the form implicitly. We want explicit button clicks
+  // for Preview and Upload; allow Ctrl/Cmd+Enter to submit and Enter inside textareas.
+  const handleFormKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      const targetTag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+      // Allow Enter inside textarea; allow Ctrl/Cmd+Enter to trigger submission via keyboard shortcut handler
+      if (targetTag !== 'TEXTAREA' && !(e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+      }
+    }
+  };
+
   const handleFileChange = (selected) => {
     setFile(selected);
     setRotate(0);
@@ -563,7 +575,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
 
   return (
     <div className="content-upload-container">
-      <form onSubmit={handleSubmit} className="content-upload-form">
+      <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} className="content-upload-form">
         <h3>✨ Create Content</h3>
         
         <DraftManager 
