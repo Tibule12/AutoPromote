@@ -998,12 +998,36 @@ app.use('/api/paypal', paypalWebhookRoutes);
 // Fallback lightweight status endpoint to avoid 404s from frontends if the
 // full PayPal router isn't available in a particular deploy variant.
 try {
-  const authMiddleware = require('./authMiddleware');
-  app.get('/api/paypal-subscriptions/status', authMiddleware, async (req, res) => {
+  // Lightweight, tolerant status endpoint: accepts optional Bearer ID token.
+  app.get('/api/paypal-subscriptions/status', async (req, res) => {
     try {
-      const { db } = require('./firebaseAdmin');
-      const userId = req.userId || req.user?.uid;
-      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+      const { db, admin } = require('./firebaseAdmin');
+      let userId = req.userId || (req.user && req.user.uid) || null;
+
+      // If no user from middleware, attempt to verify Authorization Bearer token (if provided)
+      if (!userId) {
+        try {
+          const authHeader = (req.headers && (req.headers.authorization || req.headers.Authorization)) || '';
+          if (authHeader && authHeader.startsWith('Bearer ')) {
+            const idToken = authHeader.slice(7).trim();
+            if (idToken) {
+              try {
+                const decoded = await admin.auth().verifyIdToken(idToken);
+                userId = decoded && decoded.uid;
+              } catch (vtErr) {
+                // token invalid/expired; we'll treat as unauthenticated below
+              }
+            }
+          }
+        } catch (e) {
+          // ignore verification errors
+        }
+      }
+
+      // If still no user, return default free subscription so frontend doesn't 404
+      if (!userId) {
+        return res.json({ success: true, subscription: { planId: 'free', planName: 'Free', status: 'active', features: {} } });
+      }
 
       let subDoc;
       try {
