@@ -230,7 +230,7 @@ Everything is set up. Your platform now has:
 - Test Script: `test-caption-generation.js`
 
 **Support:**
-- Email: support@autopromote.org
+- Email: thulani@autopromote.org
 - GitHub: https://github.com/Tibule12/AutoPromote/issues
 
 ---

@@ -67,7 +67,7 @@ These Terms are governed by the laws of the Republic of South Africa. Any disput
 We may update the Terms. We’ll post changes and an updated date. Continued use after changes constitutes acceptance. Material changes will be notified as appropriate.
 
 ## 19. Notices
-Notices to you may be sent via email or posted in the Platform. Notices to us should be sent to: support@autopromote.com.
+Notices to you may be sent via email or posted in the Platform. Notices to us should be sent to: thulani@autopromote.org.
 
 ## 20. Severability
 If a court finds any provision invalid, the remaining provisions remain in effect.
@@ -76,7 +76,7 @@ If a court finds any provision invalid, the remaining provisions remain in effec
 These Terms (and incorporated documents such as the Privacy Policy) constitute the entire agreement between you and the Platform.
 
 ## 22. Contact
-For support or legal questions: support@autopromote.com
+For support or legal questions: thulani@autopromote.org
 
 ---
 

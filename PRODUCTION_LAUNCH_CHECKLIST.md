@@ -556,7 +556,7 @@ Use code: LAUNCH100
 
 👉 Sign up now: https://www.autopromote.org
 
-Questions? DM us or email support@autopromote.org
+Questions? DM us or email thulani@autopromote.org
 ```
 
 ---
