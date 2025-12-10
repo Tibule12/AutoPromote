@@ -153,9 +153,38 @@ router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), 
         return res.status(500).json({ error: 'preview_generation_failed' });
       }
     }
-    const contentRef = await db.collection('content').add(cleanObject(contentData));
-    const contentDoc = await contentRef.get();
-    const content = { id: contentRef.id, ...contentDoc.data() };
+    // Idempotency guard: prevent accidental duplicate content docs when the same user
+    // uploads the same file/url multiple times in quick succession (e.g., double-click).
+    // If a recent content doc (within the last 60 seconds) exists for this user+url,
+    // return that instead of creating a new doc.
+    let contentRef = null;
+    let content = null;
+    try {
+      if (url) {
+        const cutoff = new Date(Date.now() - (60 * 1000)); // 60 seconds
+        const recentSnap = await db.collection('content')
+          .where('user_id', '==', userId)
+          .where('url', '==', url)
+          .where('created_at', '>=', cutoff)
+          .limit(1)
+          .get();
+        if (!recentSnap.empty) {
+          const doc = recentSnap.docs[0];
+          contentRef = doc.ref;
+          content = { id: doc.id, ...doc.data() };
+          logger.info('[upload] Idempotency: returning existing recent content for user/url', { userId, url, contentId: doc.id });
+        }
+      }
+    } catch (e) {
+      // If the idempotency check fails for any reason, fall back to creating content.
+      console.warn('[upload] idempotency check failed, proceeding to create content', e && e.message);
+    }
+
+    if (!contentRef) {
+      contentRef = await db.collection('content').add(cleanObject(contentData));
+      const contentDoc = await contentRef.get();
+      content = { id: contentRef.id, ...contentDoc.data() };
+    }
 
     // VIRAL OPTIMIZATION: optionally disabled for test/debug via environment
     let hashtagOptimization = { hashtags: [] };
