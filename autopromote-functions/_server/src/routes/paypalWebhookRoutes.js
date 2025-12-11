@@ -137,7 +137,8 @@ router.get('/debug/status', authMiddleware, paypalPublicLimiter, async (req,res)
     ok:true,
     env:{ hasClientId, hasSecret, mode, webhookIdPresent },
     runtime:{ node: process.version, fetchAvailable: !!fetchFn, fetchType: fetchFn && fetchFn.name },
-    token:{ cached: tokenCached, expiresInMs: tokenCached ? (__tokenCache.expiresAt - Date.now()) : null }
+    token:{ cached: tokenCached, expiresInMs: tokenCached ? (__tokenCache.expiresAt - Date.now()) : null },
+    sdk: { subscriptions: !!(paypalSdk && paypalSdk.subscriptions), core: !!(paypalSdk && paypalSdk.core) }
   });
 });
 

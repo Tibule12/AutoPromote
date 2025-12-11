@@ -163,6 +163,11 @@ router.post('/create-subscription', authMiddleware, async (req, res) => {
     const userDoc = await db.collection('users').doc(userId).get();
     const userData = userDoc.data() || {};
 
+    // Create PayPal subscription - ensure SDK is available
+    if (!paypal || !paypal.subscriptions || !paypal.subscriptions.SubscriptionsCreateRequest) {
+      console.error('[PayPal] SDK subscriptions API missing:', !!paypal, !!(paypal && paypal.subscriptions));
+      return res.status(500).json({ error: 'PayPal SDK unavailable', message: 'PayPal SDK subscriptions API unavailable on server' });
+    }
     // Create PayPal subscription
     const request = new paypal.subscriptions.SubscriptionsCreateRequest();
     request.requestBody({

@@ -128,6 +128,7 @@ router.post('/capture-order/:id', authMiddleware, paypalPublicLimiter, async (re
 
 // Lightweight debug endpoint to introspect PayPal integration health
 router.get('/debug/status', authMiddleware, paypalPublicLimiter, async (req,res) => {
+  // Include SDK presence information for debugging deployments
   const hasClientId = !!process.env.PAYPAL_CLIENT_ID;
   const hasSecret = !!process.env.PAYPAL_CLIENT_SECRET;
   const mode = process.env.PAYPAL_MODE || 'sandbox(default)';
@@ -137,7 +138,8 @@ router.get('/debug/status', authMiddleware, paypalPublicLimiter, async (req,res)
     ok:true,
     env:{ hasClientId, hasSecret, mode, webhookIdPresent },
     runtime:{ node: process.version, fetchAvailable: !!fetchFn, fetchType: fetchFn && fetchFn.name },
-    token:{ cached: tokenCached, expiresInMs: tokenCached ? (__tokenCache.expiresAt - Date.now()) : null }
+    token:{ cached: tokenCached, expiresInMs: tokenCached ? (__tokenCache.expiresAt - Date.now()) : null },
+    sdk: { subscriptions: !!(paypalSdk && paypalSdk.subscriptions), core: !!(paypalSdk && paypalSdk.core) }
   });
 });
 
