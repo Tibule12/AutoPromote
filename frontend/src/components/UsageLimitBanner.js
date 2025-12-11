@@ -36,8 +36,8 @@ const UsageLimitBanner = () => {
   };
 
   const handleUpgrade = () => {
-    // Navigate to pricing page
-    window.location.href = '/pricing';
+    // Navigate to pricing page (use hash router so we don't hit server)
+    window.location.hash = '#/pricing';
   };
 
   if (loading || !usage || usage.isPaid) {

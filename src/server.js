@@ -1333,6 +1333,16 @@ app.get('/admin-dashboard', routeLimiter({ windowHint: 'admin_static' }), (req, 
   }
 });
 
+// Redirect /pricing to the SPA hash route so direct navigation doesn't 404
+app.get(['/pricing', '/pricing/*'], (req, res) => {
+  try {
+    return res.redirect(302, '/#/pricing');
+  } catch (e) {
+    console.error('[server] /pricing redirect error', e && e.message ? e.message : e);
+    return res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  }
+});
+
 // Health check endpoint (supports verbose diagnostics via ?verbose=1 or header x-health-verbose=1)
 // Simple version endpoint (package version + commit hash if available)
 app.get('/api/version', statusPublicLimiter, (_req,res) => {
