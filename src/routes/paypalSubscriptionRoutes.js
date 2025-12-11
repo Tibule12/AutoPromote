@@ -501,12 +501,34 @@ router.post('/cancel', authMiddleware, async (req, res) => {
  * GET /api/paypal-subscriptions/status
  * Get current subscription status
  */
-router.get('/status', authMiddleware, async (req, res) => {
+router.get('/status', async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
-
+    // Attempt to read user from request (set by authMiddleware) or verify id token if provided
+    let userId = req.userId || (req.user && req.user.uid) || null;
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      // Try Authorization Bearer token verification
+      try {
+        const admin = require('../firebaseAdmin').admin;
+        const authHeader = (req.headers && (req.headers.authorization || req.headers.Authorization)) || '';
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          const idToken = authHeader.slice(7).trim();
+          if (idToken) {
+            try {
+              const decoded = await admin.auth().verifyIdToken(idToken);
+              userId = decoded && decoded.uid;
+            } catch (vtErr) {
+              // invalid token, proceed as unauthenticated
+            }
+          }
+        }
+      } catch (e) {
+        // ignore admin verification errors
+      }
+    }
+
+    // If still no user, return default free subscription so frontend doesn't 404
+    if (!userId) {
+      return res.json({ success: true, subscription: { planId: 'free', planName: 'Free', status: 'active', features: SUBSCRIPTION_PLANS.free.features } });
     }
 
     // Get user subscription
