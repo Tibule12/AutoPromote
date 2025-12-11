@@ -38,14 +38,14 @@ const PayPalSubscriptionPanel = () => {
       const token = await auth.currentUser?.getIdToken();
       const endpointsToTry = [
         `${API_BASE_URL || window.location.origin}/api/paypal-subscriptions/status`,
-        `https://autopromote.org/api/paypal-subscriptions/status`,
-        `https://www.autopromote.org/api/paypal-subscriptions/status`
+        `https://autopromote.org/api/paypal-subscriptions/status`
       ];
       let parsed = null;
       let lastError = null;
       for (const endpoint of endpointsToTry) {
         try {
-          const res = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` } });
+          const headers = token ? { Authorization: `Bearer ${token}` } : {};
+          const res = await fetch(endpoint, { headers });
           parsed = await parseJsonSafe(res);
           if (parsed && parsed.ok && parsed.json) {
             // Report which endpoint succeeded
@@ -96,6 +96,11 @@ const PayPalSubscriptionPanel = () => {
   const fetchUsage = async () => {
     try {
       const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        // No token — user not logged in or not yet initialized. Skip usage fetch.
+        setUsage(null);
+        return;
+      }
       const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/usage`, {
         headers: { Authorization: `Bearer ${token}` }
       });
