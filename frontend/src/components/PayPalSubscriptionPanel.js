@@ -151,8 +151,8 @@ const PayPalSubscriptionPanel = () => {
         headers,
         body: JSON.stringify({ 
           planId,
-          returnUrl: `${window.location.origin}/dashboard?payment=success`,
-          cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`
+          returnUrl: `${window.location.origin}/#/dashboard?payment=success`,
+          cancelUrl: `${window.location.origin}/#/dashboard?payment=cancelled`
         })
       });
 
