@@ -8,9 +8,10 @@ const { db } = require('../firebaseAdmin');
 const { audit } = require('../services/auditLogger');
 const { rateLimiter } = require('../middlewares/globalRateLimiter');
 
-// PayPal SDK
+// PayPal SDK + helpers
 const paypalClient = require('../paypalClient');
-const paypal = require('@paypal/paypal-server-sdk');
+let paypal;
+try { paypal = require('@paypal/paypal-server-sdk'); } catch (e) { paypal = null; }
 
 // Apply rate limiting
 const paypalLimiter = rateLimiter({ 
@@ -20,6 +21,62 @@ const paypalLimiter = rateLimiter({
 });
 
 router.use(paypalLimiter);
+
+// Polyfill/require fetch for server-side REST fallback
+let fetchFn = (typeof fetch === 'function') ? fetch : null;
+if (!fetchFn) {
+  try { fetchFn = require('node-fetch'); } catch (e) { fetchFn = null; }
+}
+
+const { safeFetch } = require('../utils/ssrfGuard');
+
+async function getAccessToken() {
+  if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) throw new Error('paypal_creds_missing');
+  const basic = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
+  const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  if (!fetchFn) throw new Error('fetch_unavailable');
+  const res = await safeFetch(base + '/v1/oauth2/token', fetchFn, {
+    fetchOptions: { method: 'POST', headers: { Authorization: `Basic ${basic}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=client_credentials' },
+    requireHttps: true,
+    allowHosts: ['api-m.paypal.com', 'api-m.sandbox.paypal.com']
+  });
+  if (!res.ok) throw new Error('token_http_' + res.status);
+  const json = await res.json();
+  return json.access_token;
+}
+
+async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUrl, customId }) {
+  const access = await getAccessToken();
+  const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  const body = {
+    plan_id: planId,
+    subscriber: {
+      name: {
+        given_name: (userData && (userData.displayName || userData.name) || 'User').split(' ')[0],
+        surname: (userData && (userData.displayName || userData.name) || '').split(' ')[1] || ''
+      },
+      email_address: (userData && userData.email) || undefined
+    },
+    application_context: {
+      brand_name: 'AutoPromote',
+      locale: 'en-US',
+      shipping_preference: 'NO_SHIPPING',
+      user_action: 'SUBSCRIBE_NOW',
+      return_url: returnUrl,
+      cancel_url: cancelUrl
+    },
+    custom_id: customId
+  };
+
+  const res = await safeFetch(base + '/v1/billing/subscriptions', fetchFn, {
+    fetchOptions: { method: 'POST', headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) },
+    requireHttps: true,
+    allowHosts: ['api-m.paypal.com', 'api-m.sandbox.paypal.com']
+  });
+  const json = await res.json().catch(()=>null);
+  if (!res.ok) throw new Error('subscription_create_http_' + res.status + ' ' + (json && json.name));
+  return json;
+}
 
 // Subscription plans configuration
 const SUBSCRIPTION_PLANS = {
@@ -258,17 +315,25 @@ router.post('/activate', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    // Get subscription details from PayPal
-    const client = paypalClient.client();
-    const request = new paypal.subscriptions.SubscriptionsGetRequest(subscriptionId);
-    const subscription = await client.execute(request);
+    // Get subscription details from PayPal - use SDK if available else REST fallback
+    let paypalSub = null;
+    if (paypal && paypal.subscriptions && paypal.subscriptions.SubscriptionsGetRequest) {
+      const client = paypalClient.client();
+      const request = new paypal.subscriptions.SubscriptionsGetRequest(subscriptionId);
+      const subscription = await client.execute(request);
+      paypalSub = subscription.result;
+    } else {
+      console.warn('[PayPal] SDK SubscriptionsGetRequest missing; using REST fallback');
+      const access = await getAccessToken();
+      const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+      const res = await safeFetch(base + `/v1/billing/subscriptions/${subscriptionId}`, fetchFn, { fetchOptions: { method: 'GET', headers: { Authorization: `Bearer ${access}` } }, requireHttps: true, allowHosts: ['api-m.paypal.com', 'api-m.sandbox.paypal.com'] });
+      paypalSub = await res.json().catch(()=>null);
+    }
 
-    const paypalSub = subscription.result;
-    
-    if (paypalSub.status !== 'ACTIVE' && paypalSub.status !== 'APPROVED') {
+    if (!paypalSub || (paypalSub.status !== 'ACTIVE' && paypalSub.status !== 'APPROVED')) {
       return res.status(400).json({ 
         error: 'Subscription not active',
-        status: paypalSub.status
+        status: paypalSub && paypalSub.status
       });
     }
 
