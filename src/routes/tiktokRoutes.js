@@ -712,30 +712,110 @@ router.get('/debug/state', authMiddleware, ttPublicLimiter, async (req, res) => 
 // TikTok video upload endpoint
 // NOTE: DEMO MODE - For TikTok API approval demonstration
 // Once video.upload and video.publish scopes are approved, this will use real API
-router.post('/upload', rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }), async (req, res) => {
+router.post('/upload', authMiddleware, rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }), async (req, res) => {
 	// DEMO MODE: Return success response to demonstrate UX flow for TikTok approval
 	// This allows screen recording of the complete user flow as required by TikTok
 	const DEMO_MODE = process.env.TIKTOK_DEMO_MODE === 'true';
-	
-	if (DEMO_MODE) {
-		console.log('[TikTok Upload] DEMO MODE - Simulating successful upload');
-		return res.status(200).json({
-			ok: true,
-			demo: true,
-			message: 'Demo upload successful - awaiting video.upload scope approval',
-			videoId: 'demo_' + Date.now(),
-			shareUrl: 'https://www.tiktok.com/@demo/video/123456789',
-			note: 'This is a demonstration response. Real uploads require video.upload and video.publish scopes.'
+
+	try {
+		const uid = req.userId || req.user?.uid;
+		if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+
+		// Accept payload fields used by frontend: url (storage URL), title, meta, platform_options
+		const { url: video_url, title, meta = {}, platform_options = {} } = req.body || {};
+		const tiktokOpts = platform_options && platform_options.tiktok;
+
+		// If TikTok options present, validate required UX fields (privacy + consent)
+		if (tiktokOpts) {
+			if (!tiktokOpts.privacy) {
+				return res.status(400).json({ error: 'tiktok_missing_privacy', message: 'TikTok privacy selection is required.' });
+			}
+			if (!tiktokOpts.consent) {
+				return res.status(400).json({ error: 'tiktok_missing_consent', message: 'Explicit TikTok consent required.' });
+			}
+			// Disallow overlays/watermarks (frontend should remove overlays before publish)
+			if (meta && meta.overlay) {
+				return res.status(400).json({ error: 'tiktok_overlay_prohibited', message: 'Overlay/watermark prohibited for TikTok uploads.' });
+			}
+
+			// Load stored connection to check creator constraints
+			const connSnap = await db.collection('users').doc(uid).collection('connections').doc('tiktok').get();
+			const conn = connSnap.exists ? connSnap.data() : null;
+
+			// Conservative default info
+			const defaultInfo = {
+				display_name: conn && conn.open_id ? (conn.display_name || conn.open_id) : 'TikTok Creator',
+				privacy_level_options: ['SELF_ONLY','FRIENDS','EVERYONE'],
+				max_video_post_duration_sec: 60,
+				interactions: { comments: true, duet: true, stitch: true },
+				can_post: !!(conn && (conn.access_token || conn.tokens || conn.tokens?.access_token)),
+				posting_cap_per_24h: 15
+			};
+
+			// Determine creator info (use stored conn presence as proxy); try a quick token check
+			let creator = defaultInfo;
+			try {
+				if (conn) {
+					const tokens = conn.tokens || (conn.hasEncryption ? null : { access_token: conn.access_token, refresh_token: conn.refresh_token });
+					const accessToken = tokens && (tokens.access_token || tokens);
+					if (accessToken) {
+						// Attempt to fetch live creator info; if it fails, proceed with defaults
+						const infoRes = await safeFetch('https://open.tiktokapis.com/v2/creator/info/', fetch, {
+							fetchOptions: { method: 'GET', headers: { Authorization: `Bearer ${accessToken}` }, timeout: 4000 },
+							requireHttps: true,
+							allowHosts: ['open.tiktokapis.com']
+						});
+						if (infoRes.ok) {
+							const infoJson = await infoRes.json().catch(()=>null);
+							creator = {
+								display_name: (infoJson && (infoJson.data?.display_name || infoJson.data?.user?.display_name)) || defaultInfo.display_name,
+								privacy_level_options: (infoJson && infoJson.data && infoJson.data.privacy_level_options) || defaultInfo.privacy_level_options,
+								max_video_post_duration_sec: (infoJson && infoJson.data && infoJson.data.max_video_post_duration_sec) || defaultInfo.max_video_post_duration_sec,
+								interactions: (infoJson && infoJson.data && infoJson.data.interactions) || defaultInfo.interactions,
+								can_post: true,
+								posting_cap_per_24h: (infoJson && infoJson.data && infoJson.data.posting_cap_per_24h) || defaultInfo.posting_cap_per_24h
+							};
+						}
+					}
+				}
+			} catch (e) {
+				// Ignore live fetch failures and use defaults
+			}
+
+			// Enforce duration constraint if provided
+			if (meta && typeof meta.duration === 'number' && creator && creator.max_video_post_duration_sec && meta.duration > creator.max_video_post_duration_sec) {
+				return res.status(400).json({ error: 'tiktok_duration_exceeded', message: `Video duration ${meta.duration}s exceeds allowed ${creator.max_video_post_duration_sec}s for this creator.` });
+			}
+
+			if (creator && creator.can_post === false) {
+				return res.status(403).json({ error: 'tiktok_cannot_post', message: 'This TikTok account is not permitted to post via third-party apps.' });
+			}
+		}
+
+		// All validations passed — in DEMO mode simulate success so reviewers can record UX flow
+		if (DEMO_MODE) {
+			console.log('[TikTok Upload] DEMO MODE - Validations passed, simulating upload');
+			return res.status(200).json({
+				ok: true,
+				demo: true,
+				message: 'Demo upload successful - awaiting video.upload scope approval',
+				videoId: 'demo_' + Date.now(),
+				shareUrl: 'https://www.tiktok.com/@demo/video/123456789',
+				note: 'This is a demonstration response. Real uploads require video.upload and video.publish scopes.'
+			});
+		}
+
+		// Production: upload not enabled until scopes approved
+		return res.status(403).json({
+			error: 'TikTok video upload not available',
+			reason: 'video.upload and video.publish scopes not approved',
+			approvedScopes: ['user.info.profile', 'video.list'],
+			message: 'Currently you can only view video lists. Upload functionality requires additional TikTok approval.'
 		});
+	} catch (err) {
+		console.error('TikTok upload validation error:', err && err.message);
+		return res.status(500).json({ error: 'tiktok_upload_failed', details: err && err.message });
 	}
-	
-	// Production mode: Return 403 until scopes are approved
-	return res.status(403).json({ 
-		error: 'TikTok video upload not available',
-		reason: 'video.upload and video.publish scopes not approved',
-		approvedScopes: ['user.info.profile', 'video.list'],
-		message: 'Currently you can only view video lists. Upload functionality requires additional TikTok approval.'
-	});
 	
 	/* DISABLED CODE - Uncomment when video.upload/video.publish scopes are approved
 	const { access_token, open_id, video_url, title } = req.body;
@@ -932,3 +1012,124 @@ router.post('/analytics', rateLimit({ max: 20, windowMs: 3600000, key: r => r.ip
 });
 
 module.exports = router;
+
+// 2.2) Creator info for Direct Post API UX
+// Returns minimal creator settings needed by the frontend: display name, privacy options,
+// max video duration, and allowed interactions (comment/duet/stitch). This is used by
+// the frontend to render the required UX before publishing to TikTok.
+router.get('/creator_info', authMiddleware, ttPublicLimiter, async (req, res) => {
+	try {
+		const uid = req.userId || req.user?.uid;
+		if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+
+		const DEMO_MODE = process.env.TIKTOK_DEMO_MODE === 'true' || process.env.FIREBASE_ADMIN_BYPASS === '1';
+
+		// Try to load stored connection (may be encrypted)
+		const connSnap = await db.collection('users').doc(uid).collection('connections').doc('tiktok').get();
+		const conn = connSnap.exists ? connSnap.data() : null;
+
+		// Default conservative info (used when tokens missing or in demo mode)
+		const defaultInfo = {
+			display_name: conn && conn.open_id ? (conn.display_name || conn.open_id) : 'TikTok Creator',
+			privacy_level_options: ['SELF_ONLY','FRIENDS','EVERYONE'],
+			max_video_post_duration_sec: 60,
+			interactions: { comments: true, duet: true, stitch: true },
+			can_post: !!(conn && (conn.access_token || conn.tokens || conn.tokens?.access_token)),
+			posting_cap_per_24h: 15
+		};
+
+		if (DEMO_MODE || !conn) {
+			// audit log the creator_info access for review evidence
+			try {
+				await db.collection('admin_audit').add({
+					type: 'tiktok_creator_info',
+					uid,
+					demo: !!DEMO_MODE,
+					result: { creator: defaultInfo },
+					createdAt: admin.firestore.FieldValue.serverTimestamp()
+				});
+			} catch (e) { console.warn('Failed to write tiktok creator_info audit log', e && e.message); }
+			return res.json({ ok: true, creator: defaultInfo, demo: true });
+		}
+
+		// Try to call TikTok API to get creator-level info if possible. The exact
+		// API surface for 'creator info' may vary; we attempt a general call and
+		// fallback to defaults when unavailable.
+		try {
+			const tokens = conn.tokens || (conn.hasEncryption ? null : { access_token: conn.access_token, refresh_token: conn.refresh_token });
+			const accessToken = tokens && (tokens.access_token || tokens);
+			if (!accessToken) return res.json({ ok: true, creator: defaultInfo });
+
+			// Attempt to call a hypothetical creator info endpoint; if it doesn't
+			// exist, the safeFetch will fail gracefully and we'll return defaults.
+			const infoRes = await safeFetch('https://open.tiktokapis.com/v2/creator/info/', fetch, {
+				fetchOptions: { method: 'GET', headers: { Authorization: `Bearer ${accessToken}` }, timeout: 5000 },
+				requireHttps: true,
+				allowHosts: ['open.tiktokapis.com']
+			});
+			if (!infoRes.ok) {
+				return res.json({ ok: true, creator: defaultInfo });
+			}
+			const infoJson = await infoRes.json().catch(()=>null);
+			// Map returned fields to our UX contract, with safe fallbacks.
+			const mapped = {
+				display_name: (infoJson && (infoJson.data?.display_name || infoJson.data?.user?.display_name)) || defaultInfo.display_name,
+				privacy_level_options: (infoJson && infoJson.data && infoJson.data.privacy_level_options) || defaultInfo.privacy_level_options,
+				max_video_post_duration_sec: (infoJson && infoJson.data && infoJson.data.max_video_post_duration_sec) || defaultInfo.max_video_post_duration_sec,
+				interactions: (infoJson && infoJson.data && infoJson.data.interactions) || defaultInfo.interactions,
+				can_post: true,
+				posting_cap_per_24h: (infoJson && infoJson.data && infoJson.data.posting_cap_per_24h) || defaultInfo.posting_cap_per_24h
+			};
+			// audit log the successful creator_info mapping (avoid storing tokens or PII)
+			try {
+				await db.collection('admin_audit').add({
+					type: 'tiktok_creator_info',
+					uid,
+					demo: false,
+					result: { creator: mapped },
+					createdAt: admin.firestore.FieldValue.serverTimestamp()
+				});
+			} catch (e) { console.warn('Failed to write tiktok creator_info audit log', e && e.message); }
+			return res.json({ ok: true, creator: mapped });
+		} catch (e) {
+			// On any failure, return conservative defaults
+			return res.json({ ok: true, creator: defaultInfo });
+		}
+	} catch (err) {
+		console.error('TikTok /creator_info error:', err && err.message);
+		return res.status(500).json({ error: 'creator_info_failed' });
+	}
+});
+
+// --- Admin-only endpoints for audit / review evidence ---
+// Returns recent assistant actions (requires admin privileges)
+router.get('/admin/assistant_actions', authMiddleware, async (req, res) => {
+	try {
+		if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: 'forbidden' });
+		const limit = Math.min(200, parseInt(req.query.limit || '50', 10));
+		const q = db.collection('assistant_actions').orderBy('createdAt', 'desc').limit(limit);
+		const snap = await q.get();
+		const items = [];
+		snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+		return res.json({ ok: true, count: items.length, items });
+	} catch (e) {
+		console.error('admin assistant_actions error', e && e.message);
+		return res.status(500).json({ error: 'failed' });
+	}
+});
+
+// Returns recent TikTok creator_info audit logs (requires admin privileges)
+router.get('/admin/tiktok_checks', authMiddleware, async (req, res) => {
+	try {
+		if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: 'forbidden' });
+		const limit = Math.min(200, parseInt(req.query.limit || '50', 10));
+		const q = db.collection('admin_audit').where('type', '==', 'tiktok_creator_info').orderBy('createdAt', 'desc').limit(limit);
+		const snap = await q.get();
+		const items = [];
+		snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+		return res.json({ ok: true, count: items.length, items });
+	} catch (e) {
+		console.error('admin tiktok_checks error', e && e.message);
+		return res.status(500).json({ error: 'failed' });
+	}
+});

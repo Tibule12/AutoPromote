@@ -21,6 +21,11 @@ const ClipStudioPanel = ({ content = [] }) => {
     addCaptions: true,
     addBranding: false
   });
+  // Locks and modal state to prevent duplicate actions and confirm exports
+  const [generatingClipId, setGeneratingClipId] = useState(null);
+  const [exportingClipId, setExportingClipId] = useState(null);
+  const [confirmExport, setConfirmExport] = useState({ open: false, clipId: null, platforms: [], scheduledTime: new Date(Date.now() + 3600000).toISOString() });
+  const [exportImmediate, setExportImmediate] = useState(false);
 
   // Filter for videos only
   const videoContent = content.filter(c => c.type === 'video');
@@ -114,11 +119,12 @@ const ClipStudioPanel = ({ content = [] }) => {
   };
 
   const generateClip = async (clip) => {
+    if (!currentAnalysis?.id) return toast.error('No analysis selected');
+    if (generatingClipId) return; // another generation in-flight
+    setGeneratingClipId(clip.id);
     const toastId = toast.loading('Generating clip...');
-
     try {
       const token = await auth.currentUser?.getIdToken();
-      
       const response = await fetch(`${API_BASE_URL}/api/clips/generate`, {
         method: 'POST',
         headers: {
@@ -133,50 +139,72 @@ const ClipStudioPanel = ({ content = [] }) => {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Generation failed');
+        const error = await response.json().catch(()=>({ error: 'Generation failed' }));
+        throw new Error(error.error || error.message || 'Generation failed');
       }
 
-      const result = await response.json();
+      await response.json().catch(()=>null);
       toast.success('Clip generated successfully!', { id: toastId });
-      
-      // Reload clips list
       await loadGeneratedClips();
-
     } catch (error) {
       console.error('Generation error:', error);
-      toast.error(error.message, { id: toastId });
+      toast.error(error.message || 'Generation failed', { id: toastId });
+    } finally {
+      setGeneratingClipId(null);
     }
   };
 
+  // Open export confirmation modal instead of sending immediately
   const exportClip = async (clipId, platforms) => {
+    setConfirmExport({ open: true, clipId, platforms: platforms || ['tiktok'], scheduledTime: new Date(Date.now() + 3600000).toISOString() });
+    setExportImmediate(false);
+  };
+
+  const performExport = async () => {
+    if (!confirmExport.clipId || exportingClipId) return;
+    setExportingClipId(confirmExport.clipId);
     const toastId = toast.loading('Scheduling export...');
 
     try {
       const token = await auth.currentUser?.getIdToken();
-      
-      const response = await fetch(`${API_BASE_URL}/api/clips/${clipId}/export`, {
+      const payload = {
+        platforms: confirmExport.platforms,
+        scheduledTime: confirmExport.scheduledTime,
+        immediate_post: exportImmediate,
+        immediatePost: exportImmediate
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/clips/${confirmExport.clipId}/export`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          platforms,
-          scheduledTime: new Date(Date.now() + 3600000).toISOString()
-        })
+        body: JSON.stringify(payload)
       });
 
+      const parsed = await response.json().catch(()=>({}));
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Export failed');
+        const errMsg = parsed.error || parsed.message || 'Export failed';
+        throw new Error(errMsg);
       }
 
-      toast.success('Clip scheduled for export!', { id: toastId });
+      // If backend indicates pending approval, surface that specifically
+      const status = parsed.status || (parsed.content && parsed.content.status) || '';
+      if (status === 'pending_approval' || (parsed.message && parsed.message.toLowerCase().includes('pending'))) {
+        toast.success('Export queued — pending admin approval', { id: toastId });
+      } else {
+        toast.success(parsed.message || 'Clip scheduled for export!', { id: toastId });
+      }
 
     } catch (error) {
       console.error('Export error:', error);
-      toast.error(error.message, { id: toastId });
+      toast.error(error.message || 'Export failed', { id: toastId });
+    } finally {
+      setExportingClipId(null);
+      setConfirmExport({ open: false, clipId: null, platforms: [], scheduledTime: new Date(Date.now() + 3600000).toISOString() });
+      setExportImmediate(false);
     }
   };
 
@@ -285,8 +313,9 @@ const ClipStudioPanel = ({ content = [] }) => {
                       <button 
                         className="btn-primary btn-sm"
                         onClick={() => exportClip(clip.id, clip.platforms || ['tiktok'])}
+                        disabled={exportingClipId === clip.id}
                       >
-                        Export to Platforms
+                        {exportingClipId === clip.id ? 'Scheduling...' : 'Export to Platforms'}
                       </button>
                     </div>
                   </div>
@@ -395,12 +424,13 @@ const ClipStudioPanel = ({ content = [] }) => {
                         </div>
                       </div>
                     </div>
-                    <div className="clip-actions">
+                      <div className="clip-actions">
                       <button 
                         className="btn-primary"
                         onClick={() => generateClip(clip)}
+                        disabled={generatingClipId === clip.id}
                       >
-                        Generate Clip
+                        {generatingClipId === clip.id ? 'Generating...' : 'Generate Clip'}
                       </button>
                     </div>
                   </div>
@@ -409,6 +439,28 @@ const ClipStudioPanel = ({ content = [] }) => {
             </div>
           </div>
         </>
+      )}
+      {/* Export Confirmation Modal */}
+      {confirmExport.open && (
+        <div className="export-modal-overlay" style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2000}}>
+          <div style={{background:'#0f1724',padding:20,borderRadius:8,width:'min(640px,95%)'}}>
+            <h3 style={{marginTop:0}}>Confirm Export</h3>
+            <p>You're about to schedule this clip for export to: <strong>{(confirmExport.platforms || []).join(', ')}</strong></p>
+            <div style={{display:'grid',gap:8,marginTop:8}}>
+              <label>Scheduled time</label>
+              <input type="datetime-local" value={confirmExport.scheduledTime ? confirmExport.scheduledTime.slice(0,16) : ''} onChange={(e)=>setConfirmExport(prev=>({...prev, scheduledTime: new Date(e.target.value).toISOString()}))} style={{padding:8,borderRadius:6,border:'1px solid rgba(255,255,255,0.08)'}} />
+              <label style={{display:'flex',alignItems:'center',gap:8}}>
+                <input type="checkbox" checked={exportImmediate} onChange={(e)=>setExportImmediate(e.target.checked)} />
+                <span>Publish immediately (requires admin approval or sufficient permissions)</span>
+              </label>
+            </div>
+
+            <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginTop:16}}>
+              <button className="btn-secondary" onClick={()=>{ setConfirmExport({ open:false, clipId:null, platforms:[], scheduledTime: new Date(Date.now() + 3600000).toISOString() }); setExportImmediate(false); }}>Cancel</button>
+              <button className="btn-primary" onClick={performExport} disabled={exportingClipId === confirmExport.clipId}>{exportingClipId === confirmExport.clipId ? 'Scheduling...' : 'Confirm & Schedule'}</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
