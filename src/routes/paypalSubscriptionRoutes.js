@@ -271,6 +271,7 @@ router.post('/create-subscription', authMiddleware, async (req, res) => {
 
       res.json({
         success: true,
+        used: 'sdk',
         subscriptionId: subscription.result.id,
         approvalUrl: approvalLink?.href,
         planId,
@@ -285,7 +286,7 @@ router.post('/create-subscription', authMiddleware, async (req, res) => {
         await db.collection('subscription_intents').doc(subscriptionId).set({ userId, planId, paypalSubscriptionId: subscriptionId, status: 'pending', amount: plan.price, createdAt: new Date().toISOString() });
         audit.log('paypal.subscription.created', { userId, planId, subscriptionId });
         const approvalLink = (rest && rest.links && rest.links.find(l=>l.rel==='approve')) || null;
-        return res.json({ success: true, subscriptionId, approvalUrl: approvalLink?.href, planId, amount: plan.price });
+        return res.json({ success: true, used: 'rest', subscriptionId, approvalUrl: approvalLink?.href, planId, amount: plan.price });
       } catch (e) {
         console.error('[PayPal] Create subscription REST fallback error:', e);
         audit.log('paypal.subscription.error', { userId: req.userId, error: e.message || String(e) });

@@ -275,8 +275,7 @@ router.post('/create-subscription', authMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      subscriptionId: subscription.result.id,
-      approvalUrl: approvalLink?.href,
+        used: 'sdk',
       planId,
       amount: plan.price
     });
