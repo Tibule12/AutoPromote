@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable no-console, no-unused-vars */
 import React, { useEffect, useState } from 'react';
-import { API_BASE_URL } from './config';
+import { API_BASE_URL, API_ENDPOINTS } from './config';
 import { parseJsonSafe } from './utils/parseJsonSafe';
 import { auth } from './firebaseClient';
 import { collection, getDocs, query, limit, orderBy, where, Timestamp } from 'firebase/firestore';
@@ -514,8 +514,33 @@ function AdminDashboard({ analytics, user, onLogout }) {
       setDashboardData(analytics);
       setIsLoading(false);
     } else {
-      // Try to fetch data from Firestore
-      fetchFirestoreData();
+      // Prefer server-side analytics endpoint (admin-only)
+      const fetchServerAnalytics = async () => {
+        try {
+          const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+          const res = await fetch(API_ENDPOINTS.ADMIN_ANALYTICS, {
+            headers: { Authorization: token ? `Bearer ${token}` : '' }
+          });
+          const parsed = await parseJsonSafe(res);
+          if (parsed.ok && parsed.json) {
+            setDashboardData(parsed.json);
+            setIsLoading(false);
+            return;
+          }
+          console.warn('Server analytics returned non-ok response; status:', parsed.status, 'error:', parsed.error || parsed.textPreview);
+        } catch (e) {
+          console.error('Error fetching server analytics:', e.message || e);
+        }
+
+        // If server fetch fails, fall back to direct Firestore fetch in development only
+        if (process.env.NODE_ENV === 'development') {
+          fetchFirestoreData();
+        } else {
+          setDashboardData(mockAnalyticsData);
+          setIsLoading(false);
+        }
+      };
+      fetchServerAnalytics();
     }
   }, [analytics]);
 
