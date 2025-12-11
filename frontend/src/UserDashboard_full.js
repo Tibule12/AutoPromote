@@ -18,7 +18,6 @@ import AdsPanel from './UserDashboardTabs/AdsPanel';
 import UsageLimitBanner from './components/UsageLimitBanner';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
-import AssistantDrawer from './components/AssistantDrawer';
 import toast, { Toaster } from 'react-hot-toast';
 import { cachedFetch, batchWithDelay, clearCache } from './utils/requestCache';
 
@@ -637,7 +636,6 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 					<ClipStudioPanel content={contentList} />
 				)}
 			</main>
-			<AssistantDrawer user={user} platformSummary={platformSummary} />
 		</div>
 	);
 };

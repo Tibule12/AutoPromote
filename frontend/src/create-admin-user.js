@@ -3,7 +3,7 @@ const admin = require('./firebaseAdmin');
 async function createAdminUser() {
     try {
         // First check if user exists
-        const email = 'admin123@gmail.com';
+        const email = 'admin12@gmail.com';
         try {
             const userRecord = await admin.auth.getUserByEmail(email);
             console.log('Admin user already exists:', userRecord.uid);

@@ -31,7 +31,7 @@ export default function AssistantDrawer({ user, platformSummary }) {
   return (
     <div style={{ position: 'fixed', right: 12, bottom: 12, zIndex: 1200 }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <button onClick={() => setOpen(o => !o)} style={{ background: '#111827', color: '#fff', borderRadius: 8, padding: '10px 14px', border: 'none', cursor: 'pointer' }}>{open ? 'Close Assistant' : 'Help ▼'}</button>
+        <button onClick={() => setOpen(o => !o)} style={{ background: '#111827', color: '#fff', borderRadius: 8, padding: '10px 14px', border: 'none', cursor: 'pointer' }}>{open ? 'Close Assistant' : 'Assistant'}</button>
       </div>
       {open && (
         <div style={{ width: 360, maxWidth: 'calc(100vw - 32px)', background: '#0b1220', color: '#fff', borderRadius: 8, padding: 12, marginTop: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.6)' }}>
