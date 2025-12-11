@@ -241,7 +241,7 @@ router.post('/webhook', (codeqlLimiter && codeqlLimiter.webhooks) ? codeqlLimite
     return res.status(400).json({ ok:false, error:'signature_verification_failed' });
   }
 
-  // Minimal event routing placeholder
+  // Minimal event routing and subscription lifecycle handling
   try {
     if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
       const amount = event.resource && event.resource.amount && event.resource.amount.value;
@@ -251,6 +251,97 @@ router.post('/webhook', (codeqlLimiter && codeqlLimiter.webhooks) ? codeqlLimite
       await db.collection('payment_events').add({ provider: 'paypal', type: event.event_type, amount, currency, captureId, orderId, at: new Date().toISOString(), rawId: event.id });
       if (orderId) {
         await db.collection('payments').doc(orderId).set({ status:'captured', captureId, amount, currency, updatedAt: new Date().toISOString() }, { merge:true });
+      }
+    }
+
+    // Handle subscription activations and cancellations
+    if (event.event_type === 'BILLING.SUBSCRIPTION.ACTIVATED') {
+      const subscriptionId = (event.resource && (event.resource.id || event.resource.subscription_id));
+      if (subscriptionId) {
+        try {
+          const intentDoc = await db.collection('subscription_intents').doc(subscriptionId).get();
+          if (intentDoc.exists) {
+            const intent = intentDoc.data();
+            const userId = intent.userId;
+            const planId = intent.planId;
+            const planName = intent.planName || planId;
+            const amount = intent.amount || 0;
+
+            // Update users document
+            try {
+              await db.collection('users').doc(userId).update({
+                subscriptionTier: planId,
+                subscriptionStatus: 'active',
+                paypalSubscriptionId: subscriptionId,
+                subscriptionStartedAt: new Date().toISOString(),
+                subscriptionPeriodStart: new Date().toISOString(),
+                subscriptionPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                isPaid: true,
+                updatedAt: new Date().toISOString()
+              });
+            } catch (e) { }
+
+            // Create or update user_subscriptions doc
+            try {
+              await db.collection('user_subscriptions').doc(userId).set({
+                userId,
+                planId,
+                planName,
+                paypalSubscriptionId: subscriptionId,
+                status: 'active',
+                amount,
+                currency: 'USD',
+                billingCycle: 'monthly',
+                startDate: new Date().toISOString(),
+                nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              }, { merge:true });
+            } catch (e) { }
+
+            // Mark intent activated
+            try {
+              await db.collection('subscription_intents').doc(subscriptionId).update({ status: 'activated', activatedAt: new Date().toISOString() });
+            } catch (e) { }
+
+            // Log subscription event
+            try {
+              await db.collection('subscription_events').add({ userId, type: 'subscription_activated', planId, paypalSubscriptionId: subscriptionId, amount, timestamp: new Date().toISOString() });
+            } catch (e) { }
+          } else {
+            // No intent found; attempt to match by user_subscriptions
+            const subsQuery = await db.collection('user_subscriptions').where('paypalSubscriptionId', '==', subscriptionId).limit(1).get();
+            if (!subsQuery.empty) {
+              subsQuery.forEach(doc => {
+                doc.ref.update({ status: 'active', updatedAt: new Date().toISOString() }).catch(()=>{});
+              });
+            }
+          }
+        } catch (e) {
+          console.error('[PayPal webhook] Activation handling error:', e);
+        }
+      }
+    }
+
+    if (event.event_type === 'BILLING.SUBSCRIPTION.CANCELLED' || event.event_type === 'BILLING.SUBSCRIPTION.SUSPENDED') {
+      const subscriptionId = (event.resource && (event.resource.id || event.resource.subscription_id));
+      if (subscriptionId) {
+        try {
+          const subsQuery = await db.collection('user_subscriptions').where('paypalSubscriptionId', '==', subscriptionId).limit(1).get();
+          if (!subsQuery.empty) {
+            subsQuery.forEach(doc => {
+              const data = doc.data() || {};
+              const userId = data.userId;
+              const expiresAt = data.nextBillingDate || data.expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+              doc.ref.update({ status: 'cancelled', cancelledAt: new Date().toISOString(), expiresAt, updatedAt: new Date().toISOString() }).catch(()=>{});
+              if (userId) {
+                db.collection('users').doc(userId).update({ subscriptionStatus: 'cancelled', subscriptionCancelledAt: new Date().toISOString(), subscriptionExpiresAt: expiresAt, updatedAt: new Date().toISOString() }).catch(()=>{});
+              }
+            });
+          }
+        } catch (e) {
+          console.error('[PayPal webhook] Cancellation handling error:', e);
+        }
       }
     }
   } catch(_){ }
