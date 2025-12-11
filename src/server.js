@@ -1610,11 +1610,11 @@ app.get('/api/users/progress', require('./authMiddleware'), async (req, res) => 
 
 // Ensure unmatched routes serve the React app
 app.use((req, res, next) => {
-  if (!req.path.startsWith('/static')) {
-    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
-  } else {
-    next();
+  // Avoid serving index.html for API, static, or well-known paths
+  if (req.path && (req.path.startsWith('/static') || req.path.startsWith('/api') || req.path.startsWith('/.well-known') || req.path.startsWith('/favicon') || req.path.startsWith('/WhatsApp '))) {
+    return next();
   }
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
 });
 
 // Catch all handler: send back React's index.html file for client-side routing

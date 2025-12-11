@@ -3,9 +3,12 @@ const { present, tokenInfo } = require('./utils/logSanitizer');
 
 const authMiddleware = async (req, res, next) => {
   try {
-    // Extract token from Authorization header
+    // Extract token from Authorization header or query param (id_token)
     const authHeader = req.headers['authorization'] || req.headers['Authorization'];
-    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+    let token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+    if (!token && req.query) {
+      token = req.query.id_token || req.query.idToken || req.query.token || token;
+    }
     // Allow integration test bypass with test tokens of the form 'test-token-for-{uid}'
     if (typeof token === 'string' && token.startsWith('test-token-for-')) {
       const uid = token.slice('test-token-for-'.length);
@@ -99,6 +102,7 @@ const authMiddleware = async (req, res, next) => {
           role: 'admin',
           fromCollection: 'admins'
         };
+        req.user.token = token;
   if (debugAuth) console.log('Admin user data attached to request');
         return next();
       }
@@ -120,6 +124,7 @@ const authMiddleware = async (req, res, next) => {
           email: decodedToken.email,
           ...basicUserData
         };
+        req.user.token = token;
   if (debugAuth) console.log('New user document created and attached to request for uid=%s', decodedToken.uid);
       } else {
         // If user exists but role needs to be updated based on claims
@@ -152,6 +157,8 @@ const authMiddleware = async (req, res, next) => {
           email: decodedToken.email,
           ...userData
         };
+        // Attach the raw token for request-scoped usage in HTML templates
+        req.user.token = token;
         // Normalize: ensure isAdmin reflects effective state (collection or claims)
         if (isAdminInCollection || isAdminFromClaims) {
           req.user.isAdmin = true;
@@ -169,6 +176,7 @@ const authMiddleware = async (req, res, next) => {
         role: roleFromClaims,
         isAdmin: isAdminFromClaims
       };
+      req.user.token = token;
       
       console.log('Proceeding with basic user info from token claims only for uid=%s', req.user.uid);
       console.log('User from token claims: uid=%s role=%s isAdmin=%s', req.user.uid, req.user.role, !!req.user.isAdmin);
