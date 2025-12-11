@@ -56,55 +56,45 @@ const PayPalSubscriptionPanel = () => {
 
   const fetchCurrentSubscription = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const endpointsToTry = [
-        `${API_BASE_URL || window.location.origin}/api/paypal-subscriptions/status`,
-        `https://autopromote.org/api/paypal-subscriptions/status`
-      ];
-      let parsed = null;
-      let lastError = null;
-      for (const endpoint of endpointsToTry) {
-        try {
-          const headers = token ? { Authorization: `Bearer ${token}` } : {};
-          const res = await fetch(endpoint, { headers });
-          parsed = await parseJsonSafe(res);
-          if (parsed && parsed.ok && parsed.json) {
-            // Report which endpoint succeeded
-            console.log('[PayPal] subscription status fetched from', endpoint);
-            break;
-          }
-          // If endpoint returned 404, keep trying others
-          if (parsed && parsed.status === 404) {
-            lastError = { endpoint, status: 404 };
-            continue;
-          }
-          // Some other error; capture and continue
-          lastError = { endpoint, status: parsed.status || 'error', detail: parsed.error || parsed.textPreview };
-        } catch (e) {
-          lastError = { endpoint, error: e.message };
-        }
+      const currentUser = auth.currentUser;
+      // If no signed-in user, show free plan directly
+      if (!currentUser) {
+        setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
+        setLoading(false);
+        return;
       }
+
+      let token = null;
+      try { token = await currentUser.getIdToken(); } catch (e) { token = null; }
+
+      const endpoint = `${API_BASE_URL || window.location.origin}/api/paypal-subscriptions/status`;
+      let parsed = null;
+      try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(endpoint, { headers });
+        parsed = await parseJsonSafe(res);
+        // If 401, try forced token refresh once
+        if (parsed && parsed.status === 401 && token) {
+          try {
+            token = await currentUser.getIdToken(true);
+            const retryRes = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` } });
+            parsed = await parseJsonSafe(retryRes);
+          } catch (e) {
+            // ignore
+          }
+        }
+      } catch (e) {
+        parsed = { ok: false, status: 'error', error: e.message };
+      }
+
       if (parsed && parsed.ok && parsed.json) {
         setCurrentSubscription(parsed.json.subscription);
-      } else if (parsed && parsed.status === 404) {
-        // No subscription found on this host; try canonical site as a fallback
-        try {
-          const fallbackRes = await fetch(`https://autopromote.org/api/paypal-subscriptions/status`, { headers: { Authorization: `Bearer ${token}` } });
-          const fallbackParsed = await parseJsonSafe(fallbackRes);
-          if (fallbackParsed.ok && fallbackParsed.json) {
-            setCurrentSubscription(fallbackParsed.json.subscription);
-          } else {
-            setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
-            // Inform user non-intrusively and include endpoint info
-            toast(`Could not load subscription status (${lastError?.endpoint || 'unknown'}); using free plan`, { icon: 'ℹ️' });
-          }
-        } catch (e) {
-          setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
-          toast(`Could not load subscription status (${lastError?.endpoint || 'unknown'}); using free plan`, { icon: 'ℹ️' });
+      } else {
+        if (parsed && parsed.status === 401) {
+          // Unauthorized after refresh: prompt user
+          toast.error('Please sign in to view subscription status');
         }
-      } else if (!parsed.ok) {
-        // In case the route returns 401/403 or other errors, fall back to free plan so UI doesn't crash
-        console.warn('PayPal subscription API returned error or non-JSON response', { status: parsed.status, preview: parsed.textPreview || parsed.error });
+        // Always fallback to free plan
         setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
       }
       setLoading(false);
@@ -116,9 +106,14 @@ const PayPalSubscriptionPanel = () => {
 
   const fetchUsage = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        setUsage(null);
+        return;
+      }
+      let token;
+      try { token = await currentUser.getIdToken(true); } catch (e) { token = null; }
       if (!token) {
-        // No token — user not logged in or not yet initialized. Skip usage fetch.
         setUsage(null);
         return;
       }
