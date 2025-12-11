@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from '../firebaseClient';
-import { collection, addDoc, query, orderBy, limit, getDocs, doc, updateDoc, increment, arrayUnion, arrayRemove, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { auth } from '../firebaseClient';
+import { API_BASE_URL } from '../config';
 import './CommunityPanel.css';
+import ExplainButton from '../components/ExplainButton';
 
 function CommunityPanel() {
   const [posts, setPosts] = useState([]);
@@ -9,6 +10,7 @@ function CommunityPanel() {
   const [loading, setLoading] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [replyText, setReplyText] = useState('');
+  const [comments, setComments] = useState([]);
   const [filter, setFilter] = useState('all'); // all, questions, tips, issues
 
   const categories = [
@@ -19,26 +21,58 @@ function CommunityPanel() {
     { value: 'feature', label: '✨ Feature Request', color: '#8b5cf6' }
   ];
 
-  // Load posts from Firestore
+  // Load posts from backend feed (paginated)
+  const [loadingFeed, setLoadingFeed] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [lastPostId, setLastPostId] = useState(null);
+
+  const loadFeed = async (reset = false) => {
+    const user = auth.currentUser;
+    if (!user) return; // require auth for feed
+
+    setLoadingFeed(true);
+    try {
+      const token = await user.getIdToken();
+      const params = new URLSearchParams();
+      params.set('limit', '50');
+      if (!reset && lastPostId) params.set('lastPostId', lastPostId);
+
+      const url = `${API_BASE_URL}/api/community/feed?${params.toString()}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!res.ok) {
+        console.error('Failed to load feed');
+        return;
+      }
+
+      const data = await res.json();
+      if (reset) {
+        setPosts(data.posts || []);
+      } else {
+        setPosts(prev => [...prev, ...(data.posts || [])]);
+      }
+
+      setHasMore(!!data.hasMore);
+      if (data.posts && data.posts.length > 0) {
+        setLastPostId(data.posts[data.posts.length - 1].id);
+      }
+    } catch (err) {
+      console.error('Error loading feed:', err);
+    } finally {
+      setLoadingFeed(false);
+    }
+  };
+
   useEffect(() => {
-    const q = query(
-      collection(db, 'community_posts'),
-      orderBy('createdAt', 'desc'),
-      limit(50)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const postsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setPosts(postsData);
-    });
-
-    return () => unsubscribe();
+    // initial load when user is available
+    const tryLoad = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      await loadFeed(true);
+    };
+    tryLoad();
   }, []);
 
-  // Create new post
+  // Create new post (via backend to centralize moderation/audit)
   const handleCreatePost = async (e) => {
     e.preventDefault();
     if (!newPost.title.trim() || !newPost.content.trim()) {
@@ -49,22 +83,36 @@ function CommunityPanel() {
     setLoading(true);
     try {
       const user = auth.currentUser;
-      await addDoc(collection(db, 'community_posts'), {
-        title: newPost.title,
-        content: newPost.content,
-        category: newPost.category,
-        authorId: user.uid,
-        authorName: user.displayName || user.email.split('@')[0],
-        authorPhoto: user.photoURL || null,
-        createdAt: serverTimestamp(),
-        replies: [],
-        likes: [],
-        helpful: [],
-        views: 0
+      const token = await user.getIdToken();
+
+      // Map local fields to backend API (backend expects type/caption/mediaUrl)
+      const payload = {
+        type: 'text',
+        caption: `${newPost.title}\n\n${newPost.content}`
+      };
+
+      const res = await fetch(`${API_BASE_URL}/api/community/posts`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify(payload)
       });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error('Create post failed:', err);
+        alert(err.error || 'Failed to create post');
+        return;
+      }
 
       setNewPost({ title: '', content: '', category: 'general' });
       alert('Post created successfully!');
+      // Refresh feed to include new post
+      setLastPostId(null);
+      await loadFeed(true);
     } catch (error) {
       console.error('Error creating post:', error);
       alert('Failed to create post');
@@ -73,27 +121,35 @@ function CommunityPanel() {
     }
   };
 
-  // Add reply to post
+  // Add reply to post (via backend)
   const handleReply = async (postId) => {
     if (!replyText.trim()) return;
 
     setLoading(true);
     try {
       const user = auth.currentUser;
-      const postRef = doc(db, 'community_posts', postId);
-      
-      await updateDoc(postRef, {
-        replies: arrayUnion({
-          id: Date.now().toString(),
-          authorId: user.uid,
-          authorName: user.displayName || user.email.split('@')[0],
-          authorPhoto: user.photoURL || null,
-          content: replyText,
-          createdAt: new Date().toISOString(),
-          likes: []
-        })
+      const token = await user.getIdToken();
+
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({ text: replyText })
       });
 
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error('Add reply failed:', err);
+        alert(err.error || 'Failed to add reply');
+        return;
+      }
+
+      const data = await res.json();
+      // Append the returned comment to local comments state
+      setComments(prev => [data.comment, ...prev]);
       setReplyText('');
       alert('Reply added!');
     } catch (error) {
@@ -104,58 +160,105 @@ function CommunityPanel() {
     }
   };
 
-  // Like/Unlike post
+  // Like/Unlike post (via backend)
   const handleLike = async (postId) => {
     const user = auth.currentUser;
-    const postRef = doc(db, 'community_posts', postId);
     const post = posts.find(p => p.id === postId);
-    
+
     try {
-      if (post.likes?.includes(user.uid)) {
-        await updateDoc(postRef, {
-          likes: arrayRemove(user.uid)
+      const token = await user.getIdToken();
+
+      if (post.likes?.includes(user.uid) || post.hasLiked) {
+        // Unlike
+        const res = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/like`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
         });
+        if (!res.ok) {
+          console.error('Unlike failed');
+        }
       } else {
-        await updateDoc(postRef, {
-          likes: arrayUnion(user.uid)
+        // Like
+        const res = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/like`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
         });
+        if (!res.ok) {
+          console.error('Like failed');
+        }
       }
     } catch (error) {
       console.error('Error liking post:', error);
     }
+    // refresh feed to reflect counts
+    await loadFeed(true);
   };
 
   // Mark as helpful
   const handleMarkHelpful = async (postId) => {
     const user = auth.currentUser;
-    const postRef = doc(db, 'community_posts', postId);
     const post = posts.find(p => p.id === postId);
-    
+
     try {
-      if (post.helpful?.includes(user.uid)) {
-        await updateDoc(postRef, {
-          helpful: arrayRemove(user.uid)
+      const token = await user.getIdToken();
+
+      if (post.hasHelpful || post.helpful?.includes(user.uid)) {
+        // Unmark helpful
+        const res = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/helpful`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
         });
+        if (!res.ok) console.error('Unmark helpful failed');
       } else {
-        await updateDoc(postRef, {
-          helpful: arrayUnion(user.uid)
+        // Mark helpful
+        const res = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/helpful`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
         });
+        if (!res.ok) console.error('Mark helpful failed');
       }
     } catch (error) {
       console.error('Error marking helpful:', error);
     }
+    // refresh feed to reflect updated helpfulCount
+    await loadFeed(true);
   };
 
-  // Increment view count when opening post
+  // Open post: fetch authoritative post and comments from backend (increments views server-side)
   const handleOpenPost = async (post) => {
-    setSelectedPost(post);
-    const postRef = doc(db, 'community_posts', post.id);
     try {
-      await updateDoc(postRef, {
-        views: increment(1)
+      const user = auth.currentUser;
+      const token = user ? await user.getIdToken() : null;
+
+      const res = await fetch(`${API_BASE_URL}/api/community/posts/${post.id}`, {
+        method: 'GET',
+        headers: token ? { Authorization: `Bearer ${token}`, Accept: 'application/json' } : { Accept: 'application/json' }
       });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedPost(data.post);
+      } else {
+        // Fallback to provided post
+        setSelectedPost(post);
+      }
+
+      // Load comments for the post
+      const commentsRes = await fetch(`${API_BASE_URL}/api/community/posts/${post.id}/comments`, {
+        method: 'GET',
+        headers: token ? { Authorization: `Bearer ${token}`, Accept: 'application/json' } : { Accept: 'application/json' }
+      });
+
+      if (commentsRes.ok) {
+        const cd = await commentsRes.json();
+        setComments(cd.comments || []);
+      } else {
+        setComments(post.replies || []);
+      }
     } catch (error) {
-      console.error('Error updating views:', error);
+      console.error('Error loading post details:', error);
+      setSelectedPost(post);
+      setComments(post.replies || []);
     }
   };
 
@@ -193,10 +296,30 @@ function CommunityPanel() {
     return date.toLocaleDateString();
   };
 
+  const getPostTitle = (post) => {
+    if (!post) return '';
+    if (post.title) return post.title;
+    if (post.caption) {
+      const parts = post.caption.split('\n\n');
+      return parts[0] || post.caption;
+    }
+    return '';
+  };
+
+  const getPostContent = (post) => {
+    if (!post) return '';
+    if (post.content) return post.content;
+    if (post.caption) {
+      const parts = post.caption.split('\n\n');
+      return parts.slice(1).join('\n\n') || parts[0] || '';
+    }
+    return '';
+  };
+
   return (
     <div className="community-panel">
       <div className="community-header">
-        <h2>🌟 Community Help & Support</h2>
+        <h2 style={{display:'flex', alignItems:'center', gap:8}}>🌟 Community Help & Support <ExplainButton contextSummary={"Explain the community feed: post questions, tips, or issues. Posts are moderated and you can mark helpful, reply, or like posts. Use the assistant for posting tips or templates."} /></h2>
         <p>Connect with other users, ask questions, and share your expertise</p>
       </div>
 
@@ -306,14 +429,21 @@ function CommunityPanel() {
                     {post.content.length > 150 ? '...' : ''}
                   </p>
 
-                  <div className="post-stats">
-                    <span>💬 {post.replies?.length || 0} replies</span>
-                    <span>👍 {post.likes?.length || 0} likes</span>
-                    <span>✅ {post.helpful?.length || 0} helpful</span>
-                    <span>👀 {post.views || 0} views</span>
-                  </div>
+                      <div className="post-stats">
+                        <span>💬 {post.commentsCount || post.replies?.length || 0} replies</span>
+                        <span>👍 {post.likesCount || post.likes?.length || 0} likes</span>
+                        <span>✅ {post.helpfulCount || post.helpful?.length || 0} helpful</span>
+                        <span>👀 {post.viewsCount || post.views || 0} views</span>
+                      </div>
                 </div>
               ))
+            )}
+            {hasMore && (
+              <div style={{ textAlign: 'center', marginTop: 12 }}>
+                <button onClick={() => loadFeed(false)} disabled={loadingFeed}>
+                  {loadingFeed ? 'Loading...' : 'Load more'}
+                </button>
+              </div>
             )}
           </div>
         </>
@@ -343,15 +473,15 @@ function CommunityPanel() {
               </div>
             </div>
 
-            <h2 className="post-detail-title">{selectedPost.title}</h2>
-            <p className="post-detail-content">{selectedPost.content}</p>
+            <h2 className="post-detail-title">{getPostTitle(selectedPost)}</h2>
+            <p className="post-detail-content">{getPostContent(selectedPost)}</p>
 
             <div className="post-actions">
               <button 
                 onClick={() => handleLike(selectedPost.id)}
-                className={selectedPost.likes?.includes(auth.currentUser?.uid) ? 'active' : ''}
+                className={(selectedPost.hasLiked || selectedPost.likes?.includes(auth.currentUser?.uid)) ? 'active' : ''}
               >
-                👍 Like ({selectedPost.likes?.length || 0})
+                👍 Like ({selectedPost.likesCount || selectedPost.likes?.length || 0})
               </button>
               <button 
                 onClick={() => handleMarkHelpful(selectedPost.id)}
@@ -359,13 +489,13 @@ function CommunityPanel() {
               >
                 ✅ Helpful ({selectedPost.helpful?.length || 0})
               </button>
-              <span className="view-count">👀 {selectedPost.views || 0} views</span>
+              <span className="view-count">👀 {selectedPost.viewsCount || selectedPost.views || 0} views</span>
             </div>
           </div>
 
           {/* Replies section */}
           <div className="replies-section">
-            <h3>💬 Replies ({selectedPost.replies?.length || 0})</h3>
+            <h3>💬 Replies ({comments.length || 0})</h3>
             
             <div className="reply-form">
               <textarea
@@ -385,25 +515,25 @@ function CommunityPanel() {
             </div>
 
             <div className="replies-list">
-              {selectedPost.replies?.length === 0 ? (
+              {comments.length === 0 ? (
                 <div className="empty-state">
                   <p>No replies yet. Be the first to respond! 💭</p>
                 </div>
               ) : (
-                selectedPost.replies?.map(reply => (
+                comments.map(reply => (
                   <div key={reply.id} className="reply-card">
                     <div className="reply-header">
-                      {reply.authorPhoto && (
-                        <img src={reply.authorPhoto} alt="" className="author-avatar-small" />
+                      {reply.userAvatar && (
+                        <img src={reply.userAvatar} alt="" className="author-avatar-small" />
                       )}
                       <div>
-                        <div className="reply-author">{reply.authorName}</div>
+                        <div className="reply-author">{reply.userName || reply.authorName}</div>
                         <div className="reply-date">{formatDate(reply.createdAt)}</div>
                       </div>
                     </div>
-                    <p className="reply-content">{reply.content}</p>
+                    <p className="reply-content">{reply.text || reply.content}</p>
                     <div className="reply-likes">
-                      👍 {reply.likes?.length || 0}
+                      👍 {reply.likesCount || reply.likes?.length || 0}
                     </div>
                   </div>
                 ))

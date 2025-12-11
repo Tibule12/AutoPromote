@@ -256,7 +256,11 @@ router.post('/:clipId/export', authMiddleware, async (req, res) => {
     }
 
     // Create content entry for this clip
-    const contentRef = await db.collection('content').add({
+    // Determine admin status
+    const isAdmin = !!(req.user && (req.user.isAdmin === true || req.user.role === 'admin'));
+
+    // Create content entry for this clip
+    const contentPayload = {
       userId,
       title: clipData.caption || `Clip from ${clipData.contentId}`,
       description: clipData.caption || '',
@@ -268,31 +272,56 @@ router.post('/:clipId/export', authMiddleware, async (req, res) => {
       viralScore: clipData.viralScore,
       duration: clipData.duration,
       target_platforms: platforms,
-      createdAt: new Date().toISOString()
-    });
+      createdAt: new Date().toISOString(),
+      audit: {
+        createdBy: userId,
+        createdVia: 'clip-studio',
+        createdAt: new Date().toISOString()
+      }
+    };
 
+    // If user is admin, mark content active and create schedule; otherwise mark pending
+    if (isAdmin) {
+      contentPayload.status = 'approved';
+    } else {
+      contentPayload.status = 'pending_approval';
+    }
+
+    const contentRef = await db.collection('content').add(contentPayload);
     const contentId = contentRef.id;
 
-    // Create promotion schedule
-    const scheduleTime = scheduledTime || new Date(Date.now() + 3600000).toISOString(); // Default: 1 hour from now
-    
-    await db.collection('promotion_schedules').add({
-      userId,
-      contentId,
-      platforms,
-      scheduledTime: scheduleTime,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    });
+    if (isAdmin) {
+      // Create promotion schedule for admin users only
+      const scheduleTime = scheduledTime || new Date(Date.now() + 3600000).toISOString(); // Default: 1 hour from now
+      await db.collection('promotion_schedules').add({
+        userId,
+        contentId,
+        platforms,
+        scheduledTime: scheduleTime,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
 
-    res.json({
-      success: true,
-      contentId,
-      message: 'Clip scheduled for export',
-      platforms,
-      scheduledTime: scheduleTime
-    });
+      console.log(`[ClipRoutes] Admin export: content ${contentId} scheduled for ${platforms.join(', ')}`);
+
+      res.json({
+        success: true,
+        contentId,
+        message: 'Clip scheduled for export',
+        platforms,
+        scheduledTime: scheduleTime
+      });
+    } else {
+      // Non-admin uploads are pending approval — inform the client and do not create schedules
+      console.log(`[ClipRoutes] Non-admin export: content ${contentId} created with pending_approval`);
+      res.json({
+        success: true,
+        contentId,
+        message: 'Clip created and awaiting admin approval before it can be scheduled for posting.',
+        platforms
+      });
+    }
 
   } catch (error) {
     console.error('[ClipRoutes] Export clip error:', error);

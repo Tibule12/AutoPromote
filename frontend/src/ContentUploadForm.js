@@ -13,6 +13,7 @@ import HashtagSuggestions from './components/HashtagSuggestions';
 import DraftManager from './components/DraftManager';
 import ProgressIndicator from './components/ProgressIndicator';
 import BestTimeToPost from './components/BestTimeToPost';
+import ExplainButton from './components/ExplainButton';
 
 // Security: Comprehensive sanitization to prevent XSS attacks
 // Uses direct string replacement - no DOM manipulation
@@ -87,6 +88,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
   const [type, setType] = useState('video');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState(null);
+  const [idempotencyKey, setIdempotencyKey] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [rotate, setRotate] = useState(0);
   const [flipH, setFlipH] = useState(false);
@@ -111,6 +113,13 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
   const [textStyles, setTextStyles] = useState({ fontSize: 16, color: '#ffffff', fontWeight: 'bold', shadow: true });
   const [isUploading, setIsUploading] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  // TikTok-specific UX state (Direct Post compliance)
+  const [tiktokCreatorInfo, setTiktokCreatorInfo] = useState(null);
+  const [tiktokPrivacy, setTiktokPrivacy] = useState('');
+  const [tiktokInteractions, setTiktokInteractions] = useState({ comments: true, duet: false, stitch: false });
+  const [tiktokCommercial, setTiktokCommercial] = useState({ isBranded: false, disclosureType: '' });
+  const [tiktokConsentChecked, setTiktokConsentChecked] = useState(false);
+  const uploadLockRef = useRef(false);
   const [error, setError] = useState('');
   const [previews, setPreviews] = useState([]);
   const [qualityScore, setQualityScore] = useState(null);
@@ -186,6 +195,40 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
   useEffect(()=>{
     if (Array.isArray(extSelectedPlatforms)) setSelectedPlatforms(extSelectedPlatforms || []);
   }, [extSelectedPlatforms]);
+
+  // Fetch TikTok creator info when TikTok is selected so the UI can enforce rules
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      if (!selectedPlatformsVal.includes('tiktok')) return;
+      try {
+        const currentUser = auth && auth.currentUser;
+        let headers = { Accept: 'application/json' };
+        if (currentUser) {
+          const token = await currentUser.getIdToken(true);
+          headers.Authorization = `Bearer ${token}`;
+        }
+        const res = await fetch('/api/tiktok/creator_info', { headers });
+        if (!res.ok) {
+          console.warn('TikTok creator_info fetch not ok', res.status);
+          return;
+        }
+        const json = await res.json();
+        if (!mounted) return;
+        if (json && json.creator) {
+          setTiktokCreatorInfo(json.creator);
+          // default privacy to empty so user must choose
+          setTiktokPrivacy('');
+          // respect suggested interactions if provided
+          if (json.creator.interactions) setTiktokInteractions(json.creator.interactions);
+        }
+      } catch (err) {
+        console.warn('Failed to load TikTok creator_info', err);
+      }
+    };
+    load();
+    return () => { mounted = false; };
+  }, [selectedPlatformsVal]);
   const [discordChannelId, setDiscordChannelId] = useState(extPlatformOptions?.discord?.channelId || '');
   const [telegramChatId, setTelegramChatId] = useState(extPlatformOptions?.telegram?.chatId || '');
   const [redditSubreddit, setRedditSubreddit] = useState(extPlatformOptions?.reddit?.subreddit || '');
@@ -261,6 +304,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
         type,
         description,
         url,
+        idempotency_key: idempotencyKey || undefined,
         // backend expects `target_platforms`; include it and keep `platforms` for compatibility
         target_platforms: selectedPlatformsVal,
         platforms: selectedPlatformsVal,
@@ -309,6 +353,12 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Prevent duplicate submissions from multiple clicks / events
+    if (uploadLockRef.current) {
+      console.warn('[Upload] Duplicate submit prevented');
+      return;
+    }
+    uploadLockRef.current = true;
     setError('');
     setIsUploading(true);
     setShowProgress(true);
@@ -321,6 +371,31 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
       if (!file) {
         console.error('[Upload] No file selected');
         throw new Error('Please select a file to upload.');
+      }
+
+      // TikTok-specific client-side checks (Direct Post compliance)
+      if (selectedPlatformsVal.includes('tiktok')) {
+        // Require explicit consent checkbox
+        if (!tiktokConsentChecked) {
+          throw new Error('You must confirm the TikTok consent checkbox before publishing to TikTok.');
+        }
+        // Require privacy selection
+        if (!tiktokPrivacy) {
+          throw new Error('Please select a privacy option for TikTok posts.');
+        }
+        // Ensure creator account allows posting
+        if (tiktokCreatorInfo && tiktokCreatorInfo.can_post === false) {
+          throw new Error('TikTok account is not permitted to post from third-party apps. Connect a different account or post manually.');
+        }
+        // Prohibit overlays/watermarks for TikTok
+        if (overlayText && overlayText.trim().length > 0) {
+          throw new Error('TikTok uploads must not contain watermarks or overlay text. Please remove overlay text before posting to TikTok.');
+        }
+        // Enforce max duration if creator info provided
+        const maxDur = tiktokCreatorInfo && tiktokCreatorInfo.max_video_post_duration_sec ? tiktokCreatorInfo.max_video_post_duration_sec : null;
+        if (type === 'video' && maxDur && duration > maxDur) {
+          throw new Error(`This creator account allows videos up to ${maxDur} seconds. Please trim your video before posting to TikTok.`);
+        }
       }
 
       let url = '';
@@ -362,6 +437,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
         type,
         description,
         url,
+        idempotency_key: idempotencyKey || undefined,
         // include both keys so backend preview and upload handlers accept the platforms list
         target_platforms: selectedPlatformsVal,
         platforms: selectedPlatformsVal,
@@ -386,6 +462,17 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
           twitter: selectedPlatformsVal.includes('twitter') ? { message: twitterMessage || undefined } : undefined
         }
       };
+      // Add TikTok platform options if TikTok is selected
+      if (selectedPlatformsVal.includes('tiktok')) {
+        contentData.platform_options = contentData.platform_options || {};
+        contentData.platform_options.tiktok = {
+          privacy: tiktokPrivacy || undefined,
+          interactions: tiktokInteractions || undefined,
+          commercial: tiktokCommercial && tiktokCommercial.isBranded ? { disclosureType: tiktokCommercial.disclosureType || undefined } : undefined,
+          // Include explicit consent flag so server-side can validate prior to publishing
+          consent: !!tiktokConsentChecked
+        };
+      }
       // Add overlay metadata to submit payload
       if (overlayText) contentData.meta.overlay = { text: overlayText, position: overlayPosition };
       console.log('[Upload] Content data to send:', contentData);
@@ -413,6 +500,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
       setError(err.message || 'Failed to upload content. Please try again.');
       setShowProgress(false);
     } finally {
+      uploadLockRef.current = false;
       setIsUploading(false);
       console.log('[Upload] Upload process finished');
     }
@@ -486,6 +574,13 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
     setDuration(0);
     setSelectedFilter(null);
     if (selected) {
+      // Generate a short idempotency key when a file is selected to help server-side dedup
+      try {
+        const key = `${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
+        setIdempotencyKey(key);
+      } catch (err) {
+        setIdempotencyKey(null);
+      }
       try {
         const url = URL.createObjectURL(selected);
         setPreviewUrl(url);
@@ -580,7 +675,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
   return (
     <div className="content-upload-container">
       <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} className="content-upload-form">
-        <h3>✨ Create Content</h3>
+        <h3 style={{display:'flex', alignItems:'center', gap:8}}>✨ Create Content <ExplainButton contextSummary={"Explain the upload flow: select a file, preview it, then upload to cloud storage. The server uses an idempotency key to avoid duplicates and you can Retry failed uploads safely."} /></h3>
         
         <DraftManager 
           onLoadDraft={handleLoadDraft}
@@ -743,6 +838,51 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
             {selectedPlatformsVal.includes('twitter') && <input placeholder="Twitter message (optional)" value={twitterMessage} onChange={(e)=>{ setTwitterMessage(e.target.value); if (typeof extSetPlatformOption === 'function') extSetPlatformOption('twitter','message', e.target.value); }} />}
           </div>
             </div>
+            {/* TikTok-specific publish options required for Direct Post API compliance */}
+            {selectedPlatformsVal.includes('tiktok') && (
+              <div className="form-group tiktok-options" style={{border:'1px solid #efeef0', padding:12, borderRadius:8, background:'#fbfbfc'}}>
+                <label style={{display:'flex', alignItems:'center', gap:8}}>TikTok Publish Options</label>
+                <div style={{fontSize:12,color:'#666',marginBottom:8}}>Creator: {tiktokCreatorInfo ? (tiktokCreatorInfo.display_name || '—') : 'Loading...'}</div>
+                <div style={{display:'grid',gap:8}}>
+                  <div>
+                    <label>Privacy (required)</label>
+                    <select value={tiktokPrivacy} onChange={e=>setTiktokPrivacy(e.target.value)} className="form-select">
+                      <option value="">Select privacy</option>
+                      {(tiktokCreatorInfo && Array.isArray(tiktokCreatorInfo.privacy_level_options) ? tiktokCreatorInfo.privacy_level_options : ['EVERYONE','FRIENDS','SELF_ONLY']).map(p => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label>Interactions</label>
+                    <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                      <label><input type="checkbox" checked={!!tiktokInteractions.comments} onChange={e=>setTiktokInteractions(prev=>({...prev, comments: e.target.checked}))} /> Comments</label>
+                      <label><input type="checkbox" checked={!!tiktokInteractions.duet} onChange={e=>setTiktokInteractions(prev=>({...prev, duet: e.target.checked}))} disabled={tiktokCreatorInfo && tiktokCreatorInfo.interactions && !tiktokCreatorInfo.interactions.duet} /> Duet</label>
+                      <label><input type="checkbox" checked={!!tiktokInteractions.stitch} onChange={e=>setTiktokInteractions(prev=>({...prev, stitch: e.target.checked}))} disabled={tiktokCreatorInfo && tiktokCreatorInfo.interactions && !tiktokCreatorInfo.interactions.stitch} /> Stitch</label>
+                    </div>
+                  </div>
+                  <div>
+                    <label>Commercial / Branded Content</label>
+                    <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                      <label><input type="checkbox" checked={!!tiktokCommercial.isBranded} onChange={e=>setTiktokCommercial(prev=>({...prev, isBranded: e.target.checked, disclosureType: prev.disclosureType}))} /> This post contains branded content</label>
+                      {tiktokCommercial.isBranded && (
+                        <select value={tiktokCommercial.disclosureType} onChange={e=>setTiktokCommercial(prev=>({...prev, disclosureType: e.target.value}))} className="form-select-small">
+                          <option value="">Select disclosure</option>
+                          <option value="your_brand">Your Brand</option>
+                          <option value="branded_content">Branded Content</option>
+                        </select>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{fontSize:13}}>
+                    <label><input type="checkbox" checked={tiktokConsentChecked} onChange={e=>setTiktokConsentChecked(e.target.checked)} /> I confirm I have the rights to use any music and that this content follows TikTok's Music Usage rules and does not contain watermarks.</label>
+                  </div>
+                  {tiktokCreatorInfo && tiktokCreatorInfo.max_video_post_duration_sec && (
+                    <div style={{fontSize:12,color:'#666'}}>Max allowed video duration for this creator: {tiktokCreatorInfo.max_video_post_duration_sec} seconds</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="form-group full-width">
@@ -938,7 +1078,7 @@ function ContentUploadForm({ onUpload, platformMetadata: extPlatformMetadata, pl
           </button>
           <button 
             type="submit" 
-            disabled={isUploading}
+            disabled={isUploading || (selectedPlatformsVal.includes('tiktok') && !tiktokConsentChecked)}
             className="submit-button"
             title="Upload (Ctrl+Enter)"
             aria-label="Upload Content"

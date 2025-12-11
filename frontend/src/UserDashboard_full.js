@@ -9,6 +9,7 @@ import RewardsPanel from './UserDashboardTabs/RewardsPanel';
 import NotificationsPanel from './UserDashboardTabs/NotificationsPanel';
 import EarningsPanel from './UserDashboardTabs/EarningsPanel';
 import ConnectionsPanel from './UserDashboardTabs/ConnectionsPanel';
+import AdminAuditViewer from './AdminAuditViewer';
 import SecurityPanel from './UserDashboardTabs/SecurityPanel';
 import CommunityPanel from './UserDashboardTabs/CommunityPanel';
 import CommunityFeed from './CommunityFeed';
@@ -17,6 +18,7 @@ import AdsPanel from './UserDashboardTabs/AdsPanel';
 import UsageLimitBanner from './components/UsageLimitBanner';
 import { auth } from './firebaseClient';
 import { API_ENDPOINTS, API_BASE_URL } from './config';
+import AssistantDrawer from './components/AssistantDrawer';
 import toast, { Toaster } from 'react-hot-toast';
 import { cachedFetch, batchWithDelay, clearCache } from './utils/requestCache';
 
@@ -345,7 +347,20 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 				await loadAllPlatformStatusesUnified();
 			} catch (e) { /* ignore */ }
 		};
-			loadInitial();
+			// If user is already present, run initial load. Otherwise wait for auth state.
+			const currentUser = auth.currentUser;
+			if (currentUser) {
+				loadInitial();
+			} else {
+				// Wait for auth state to initialize then run loadInitial once
+				const unsubscribe = auth.onAuthStateChanged((u) => {
+					if (u) {
+						// run initial load once
+						loadInitial().catch(() => {});
+						unsubscribe();
+					}
+				});
+			}
 		const loadEarnings = async () => {
 			try { const currentUser = auth.currentUser; if (!currentUser) return; const token = await currentUser.getIdToken(true); const res = await fetch(API_ENDPOINTS.EARNINGS_SUMMARY, { headers: { Authorization: `Bearer ${token}` } }).catch(() => ({ ok: false })); if (res.ok) { const d = await res.json().catch(() => null); if (d) setEarnings(d); } } catch (e) { /* silently ignore */ }
 		};
@@ -506,6 +521,7 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 						<li className={activeTab === 'earnings' ? 'active' : ''} onClick={() => handleNav('earnings')}>Earnings</li>
 					<li className={activeTab === 'ads' ? 'active' : ''} onClick={() => handleNav('ads')}>📢 Ads</li>
 					<li className={activeTab === 'connections' ? 'active' : ''} onClick={() => handleNav('connections')}>Connections</li>
+					<li className={activeTab === 'admin-audit' ? 'active' : ''} onClick={() => handleNav('admin-audit')}>Admin Audit</li>
 					<li className={activeTab === 'security' ? 'active' : ''} onClick={() => handleNav('security')}>Security</li>
 					<li className={activeTab === 'feed' ? 'active' : ''} onClick={() => handleNav('feed')}>🎥 Feed</li>
 					<li className={activeTab === 'community' ? 'active' : ''} onClick={() => handleNav('community')}>💬 Forum</li>
@@ -601,6 +617,10 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 					/>
 				)}
 
+				{activeTab === 'admin-audit' && (
+					<AdminAuditViewer />
+				)}
+
 				{activeTab === 'security' && (
 					<SecurityPanel user={user} />
 				)}
@@ -617,6 +637,7 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 					<ClipStudioPanel content={contentList} />
 				)}
 			</main>
+			<AssistantDrawer user={user} platformSummary={platformSummary} />
 		</div>
 	);
 };

@@ -149,6 +149,15 @@ router.get('/posts/:postId', authMiddleware, async (req, res) => {
 
     const hasLiked = !likeDoc.empty;
 
+    // Check if user marked helpful
+    const helpfulDoc = await db.collection('community_helpful')
+      .where('postId', '==', postId)
+      .where('userId', '==', userId)
+      .limit(1)
+      .get();
+
+    const hasHelpful = !helpfulDoc.empty;
+
     // Increment view count
     await db.collection('community_posts').doc(postId).update({
       viewsCount: (postData.viewsCount || 0) + 1
@@ -159,13 +168,119 @@ router.get('/posts/:postId', authMiddleware, async (req, res) => {
       post: {
         id: postDoc.id,
         ...postData,
-        hasLiked
+        hasLiked,
+        hasHelpful,
+        helpfulCount: postData.helpfulCount || (postData.helpful ? postData.helpful.length : 0)
       }
     });
 
   } catch (error) {
     console.error('[Community] Get post error:', error);
     res.status(500).json({ error: 'Failed to fetch post' });
+  }
+});
+
+
+/**
+ * POST /api/community/posts/:postId/helpful
+ * Mark a post as helpful
+ */
+router.post('/posts/:postId/helpful', authMiddleware, async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.userId || req.user?.uid;
+
+    // Check if already marked helpful
+    const existing = await db.collection('community_helpful')
+      .where('postId', '==', postId)
+      .where('userId', '==', userId)
+      .limit(1)
+      .get();
+
+    if (!existing.empty) {
+      return res.status(400).json({ error: 'Already marked helpful' });
+    }
+
+    // Get user info
+    const userDoc = await db.collection('users').doc(userId).get();
+    const userData = userDoc.exists ? userDoc.data() : {};
+
+    // Create helpful record
+    await db.collection('community_helpful').add({
+      postId,
+      userId,
+      userName: userData.name || userData.displayName || 'Anonymous',
+      createdAt: new Date().toISOString()
+    });
+
+    // Increment helpful count on post
+    const postRef = db.collection('community_posts').doc(postId);
+    const postDoc = await postRef.get();
+    if (postDoc.exists) {
+      await postRef.update({
+        helpfulCount: (postDoc.data().helpfulCount || 0) + 1
+      });
+
+      // Notify post owner
+      const postData = postDoc.data();
+      if (postData.userId !== userId) {
+        await db.collection('notifications').add({
+          userId: postData.userId,
+          type: 'post_helpful',
+          title: 'Marked Helpful',
+          message: `${userData.name || 'Someone'} marked your post as helpful`,
+          postId,
+          actorId: userId,
+          actorName: userData.name || 'Anonymous',
+          read: false,
+          createdAt: new Date().toISOString()
+        });
+      }
+    }
+
+    res.json({ success: true, message: 'Marked helpful' });
+  } catch (error) {
+    console.error('[Community] Mark helpful error:', error);
+    res.status(500).json({ error: 'Failed to mark helpful' });
+  }
+});
+
+
+/**
+ * DELETE /api/community/posts/:postId/helpful
+ * Unmark a post as helpful
+ */
+router.delete('/posts/:postId/helpful', authMiddleware, async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.userId || req.user?.uid;
+
+    // Find and delete helpful record
+    const snapshot = await db.collection('community_helpful')
+      .where('postId', '==', postId)
+      .where('userId', '==', userId)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({ error: 'Helpful mark not found' });
+    }
+
+    await snapshot.docs[0].ref.delete();
+
+    // Decrement helpful count
+    const postRef = db.collection('community_posts').doc(postId);
+    const postDoc = await postRef.get();
+    if (postDoc.exists) {
+      await postRef.update({
+        helpfulCount: Math.max((postDoc.data().helpfulCount || 1) - 1, 0)
+      });
+    }
+
+    res.json({ success: true, message: 'Unmarked helpful' });
+  } catch (error) {
+    console.error('[Community] Unmark helpful error:', error);
+    res.status(500).json({ error: 'Failed to unmark helpful' });
   }
 });
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { API_ENDPOINTS } from '../config';
+import ExplainButton from '../components/ExplainButton';
 
 const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, redditStatus, youtubeStatus, twitterStatus, tiktokStatus, facebookStatus, linkedinStatus, snapchatStatus, telegramStatus, pinterestStatus,
   handleConnectSpotify, handleConnectDiscord, handleConnectReddit, handleConnectYouTube, handleConnectTwitter, handleConnectSnapchat, handleConnectLinkedin, handleConnectTelegram, handleConnectPinterest, handleConnectTikTok, handleConnectFacebook,
@@ -67,7 +68,7 @@ const ConnectionsPanel = ({ platformSummary, discordStatus, spotifyStatus, reddi
   };
   return (
     <section className="connections-panel">
-      <h3>Connections</h3>
+      <h3 style={{display:'flex', alignItems:'center', gap:8}}>Connections <ExplainButton contextSummary={"Explain the Connections panel: shows whether each social platform is connected, how to reconnect, and common causes for disconnection (expired tokens, permission changes)."} /></h3>
       <div style={{ display: 'grid', gap: '.75rem' }}>
         <div style={{display:'flex', gap:'.75rem', alignItems:'center'}}>
           {twitterStatus?.connected ? (

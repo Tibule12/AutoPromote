@@ -960,6 +960,14 @@ try {
 } catch (e) {
   console.log('⚠️ Chat routes mount failed:', e.message);
 }
+// Assistant routes (scaffold) - gated by ASSISTANT_ENABLED env variable
+try {
+  const assistantRoutes = require('./routes/assistantRoutes');
+  app.use('/api/assistant', routeLimiter({ windowHint: 'assistant' }), codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req,res,next)=>next(), authMiddleware, assistantRoutes);
+  console.log('🚏 Assistant routes mounted at /api/assistant (ASSISTANT_ENABLED must be true to respond)');
+} catch (e) {
+  console.log('⚠️ Assistant routes mount failed:', e.message);
+}
 // Mount generic platform routes under /api so frontend placeholder endpoints like
 // /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
 try {
