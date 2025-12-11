@@ -1343,6 +1343,17 @@ app.get(['/pricing', '/pricing/*'], (req, res) => {
   }
 });
 
+// Redirect /dashboard to the SPA hash route so PayPal return URLs won't 404
+app.get(['/dashboard', '/dashboard/*'], (req, res) => {
+  try {
+    const qs = req.originalUrl && req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+    return res.redirect(302, '/#/dashboard' + qs);
+  } catch (e) {
+    console.error('[server] /dashboard redirect error', e && e.message ? e.message : e);
+    return res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  }
+});
+
 // Health check endpoint (supports verbose diagnostics via ?verbose=1 or header x-health-verbose=1)
 // Simple version endpoint (package version + commit hash if available)
 app.get('/api/version', statusPublicLimiter, (_req,res) => {
