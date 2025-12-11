@@ -170,7 +170,11 @@ const PayPalSubscriptionPanel = () => {
         }
         console.error('Failed to create subscription:', parsed);
         const errorMessage = (parsed && parsed.json && parsed.json.error) || parsed?.error || parsed?.textPreview || 'Failed to create subscription';
-        toast.error(errorMessage);
+        if (errorMessage && String(errorMessage).toLowerCase().includes('paypal sdk')) {
+          toast.error('Payment service unavailable; the PayPal SDK is not available on the server. Please contact support.');
+        } else {
+          toast.error(errorMessage);
+        }
         return;
       }
 
