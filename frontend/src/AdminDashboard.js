@@ -1536,7 +1536,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
 
         <div style={{ marginTop: 30 }}>
           <BarChart
-            data={usage.monthlyTrend.map(day => ({
+            data={(usage && Array.isArray(usage.monthlyTrend) ? usage.monthlyTrend : []).map(day => ({
               month: new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
               revenue: day.cost
             }))}
@@ -1553,18 +1553,25 @@ function AdminDashboard({ analytics, user, onLogout }) {
               boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
             }}>
               <h3 style={{ marginTop: 0, marginBottom: '20px' }}>Cost Breakdown</h3>
-              <ProgressBar
-                label="Chatbot (GPT-4o)"
-                value={Math.round((usage.chatbotCost / usage.totalCost) * 100)}
-                max={100}
-                color="#5e35b1"
-              />
-              <ProgressBar
-                label="Transcription (Whisper)"
-                value={Math.round((usage.transcriptionCost / usage.totalCost) * 100)}
-                max={100}
-                color="#ed6c02"
-              />
+              {(() => {
+                const totalCost = usage?.totalCost || 0;
+                return (
+                  <>
+                    <ProgressBar
+                      label="Chatbot (GPT-4o)"
+                      value={totalCost > 0 ? Math.round((usage?.chatbotCost || 0) / totalCost * 100) : 0}
+                      max={100}
+                      color="#5e35b1"
+                    />
+                    <ProgressBar
+                      label="Transcription (Whisper)"
+                      value={totalCost > 0 ? Math.round((usage?.transcriptionCost || 0) / totalCost * 100) : 0}
+                      max={100}
+                      color="#ed6c02"
+                    />
+                  </>
+                );
+              })()}
             </div>
           </div>
 
