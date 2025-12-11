@@ -36,13 +36,36 @@ const PayPalSubscriptionPanel = () => {
   const fetchCurrentSubscription = async () => {
     try {
       const token = await auth.currentUser?.getIdToken();
-      const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/status`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const parsed = await parseJsonSafe(res);
-      if (parsed.ok && parsed.json) {
+      const endpointsToTry = [
+        `${API_BASE_URL || window.location.origin}/api/paypal-subscriptions/status`,
+        `https://autopromote.org/api/paypal-subscriptions/status`,
+        `https://www.autopromote.org/api/paypal-subscriptions/status`
+      ];
+      let parsed = null;
+      let lastError = null;
+      for (const endpoint of endpointsToTry) {
+        try {
+          const res = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` } });
+          parsed = await parseJsonSafe(res);
+          if (parsed && parsed.ok && parsed.json) {
+            // Report which endpoint succeeded
+            console.log('[PayPal] subscription status fetched from', endpoint);
+            break;
+          }
+          // If endpoint returned 404, keep trying others
+          if (parsed && parsed.status === 404) {
+            lastError = { endpoint, status: 404 };
+            continue;
+          }
+          // Some other error; capture and continue
+          lastError = { endpoint, status: parsed.status || 'error', detail: parsed.error || parsed.textPreview };
+        } catch (e) {
+          lastError = { endpoint, error: e.message };
+        }
+      }
+      if (parsed && parsed.ok && parsed.json) {
         setCurrentSubscription(parsed.json.subscription);
-      } else if (parsed.status === 404) {
+      } else if (parsed && parsed.status === 404) {
         // No subscription found on this host; try canonical site as a fallback
         try {
           const fallbackRes = await fetch(`https://autopromote.org/api/paypal-subscriptions/status`, { headers: { Authorization: `Bearer ${token}` } });
@@ -51,12 +74,12 @@ const PayPalSubscriptionPanel = () => {
             setCurrentSubscription(fallbackParsed.json.subscription);
           } else {
             setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
-            // Inform user non-intrusively
-            toast('Could not load subscription status from this host; using free plan', { icon: 'ℹ️' });
+            // Inform user non-intrusively and include endpoint info
+            toast(`Could not load subscription status (${lastError?.endpoint || 'unknown'}); using free plan`, { icon: 'ℹ️' });
           }
         } catch (e) {
           setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
-          toast('Could not load subscription status; using free plan', { icon: 'ℹ️' });
+          toast(`Could not load subscription status (${lastError?.endpoint || 'unknown'}); using free plan`, { icon: 'ℹ️' });
         }
       } else if (!parsed.ok) {
         // In case the route returns 401/403 or other errors, fall back to free plan so UI doesn't crash
