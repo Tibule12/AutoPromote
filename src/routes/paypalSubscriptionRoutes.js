@@ -8,9 +8,10 @@ const { db } = require('../firebaseAdmin');
 const { audit } = require('../services/auditLogger');
 const { rateLimiter } = require('../middlewares/globalRateLimiter');
 
-// PayPal SDK
+// PayPal SDK + helpers
 const paypalClient = require('../paypalClient');
-const paypal = require('@paypal/paypal-server-sdk');
+let paypal;
+try { paypal = require('@paypal/paypal-server-sdk'); } catch (e) { paypal = null; }
 
 // Apply rate limiting
 const paypalLimiter = rateLimiter({ 
@@ -20,6 +21,62 @@ const paypalLimiter = rateLimiter({
 });
 
 router.use(paypalLimiter);
+
+// Polyfill/require fetch for server-side REST fallback
+let fetchFn = (typeof fetch === 'function') ? fetch : null;
+if (!fetchFn) {
+  try { fetchFn = require('node-fetch'); } catch (e) { fetchFn = null; }
+}
+
+const { safeFetch } = require('../utils/ssrfGuard');
+
+async function getAccessToken() {
+  if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) throw new Error('paypal_creds_missing');
+  const basic = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
+  const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  if (!fetchFn) throw new Error('fetch_unavailable');
+  const res = await safeFetch(base + '/v1/oauth2/token', fetchFn, {
+    fetchOptions: { method: 'POST', headers: { Authorization: `Basic ${basic}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=client_credentials' },
+    requireHttps: true,
+    allowHosts: ['api-m.paypal.com', 'api-m.sandbox.paypal.com']
+  });
+  if (!res.ok) throw new Error('token_http_' + res.status);
+  const json = await res.json();
+  return json.access_token;
+}
+
+async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUrl, customId }) {
+  const access = await getAccessToken();
+  const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  const body = {
+    plan_id: planId,
+    subscriber: {
+      name: {
+        given_name: (userData && (userData.displayName || userData.name) || 'User').split(' ')[0],
+        surname: (userData && (userData.displayName || userData.name) || '').split(' ')[1] || ''
+      },
+      email_address: (userData && userData.email) || undefined
+    },
+    application_context: {
+      brand_name: 'AutoPromote',
+      locale: 'en-US',
+      shipping_preference: 'NO_SHIPPING',
+      user_action: 'SUBSCRIBE_NOW',
+      return_url: returnUrl,
+      cancel_url: cancelUrl
+    },
+    custom_id: customId
+  };
+
+  const res = await safeFetch(base + '/v1/billing/subscriptions', fetchFn, {
+    fetchOptions: { method: 'POST', headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) },
+    requireHttps: true,
+    allowHosts: ['api-m.paypal.com', 'api-m.sandbox.paypal.com']
+  });
+  const json = await res.json().catch(()=>null);
+  if (!res.ok) throw new Error('subscription_create_http_' + res.status + ' ' + (json && json.name));
+  return json;
+}
 
 // Subscription plans configuration
 const SUBSCRIPTION_PLANS = {
@@ -163,66 +220,78 @@ router.post('/create-subscription', authMiddleware, async (req, res) => {
     const userDoc = await db.collection('users').doc(userId).get();
     const userData = userDoc.data() || {};
 
-    // Create PayPal subscription - ensure SDK is available
-    if (!paypal || !paypal.subscriptions || !paypal.subscriptions.SubscriptionsCreateRequest) {
-      console.error('[PayPal] SDK subscriptions API missing:', !!paypal, !!(paypal && paypal.subscriptions));
-      return res.status(500).json({ error: 'PayPal SDK unavailable', message: 'PayPal SDK subscriptions API unavailable on server' });
+    // Create PayPal subscription - prefer SDK, fall back to REST if SDK missing
+    if (paypal && paypal.subscriptions && paypal.subscriptions.SubscriptionsCreateRequest) {
+      const request = new paypal.subscriptions.SubscriptionsCreateRequest();
+      request.requestBody({
+        plan_id: plan.paypalPlanId,
+        subscriber: {
+          name: {
+            given_name: userData.displayName?.split(' ')[0] || 'User',
+            surname: userData.displayName?.split(' ')[1] || ''
+          },
+          email_address: userData.email || req.user?.email
+        },
+        application_context: {
+          brand_name: 'AutoPromote',
+          locale: 'en-US',
+          shipping_preference: 'NO_SHIPPING',
+          user_action: 'SUBSCRIBE_NOW',
+          payment_method: {
+            payer_selected: 'PAYPAL',
+            payee_preferred: 'IMMEDIATE_PAYMENT_REQUIRED'
+          },
+          return_url: returnUrl || `${process.env.FRONTEND_URL}/dashboard?payment=success`,
+          cancel_url: cancelUrl || `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`
+        },
+        custom_id: userId
+      });
+
+      const client = paypalClient.client();
+      const subscription = await client.execute(request);
+
+      // Store subscription intent in Firestore
+      await db.collection('subscription_intents').doc(subscription.result.id).set({
+        userId,
+        planId,
+        paypalSubscriptionId: subscription.result.id,
+        status: 'pending',
+        amount: plan.price,
+        createdAt: new Date().toISOString()
+      });
+
+      audit.log('paypal.subscription.created', { 
+        userId, 
+        planId, 
+        subscriptionId: subscription.result.id 
+      });
+
+      // Get approval URL
+      const approvalLink = subscription.result.links.find(link => link.rel === 'approve');
+
+      res.json({
+        success: true,
+        subscriptionId: subscription.result.id,
+        approvalUrl: approvalLink?.href,
+        planId,
+        amount: plan.price
+      });
+    } else {
+      // REST fallback
+      try {
+        console.warn('[PayPal] SDK subscriptions API missing; using REST fallback');
+        const rest = await createSubscriptionViaRest({ planId: plan.paypalPlanId, userData, returnUrl: returnUrl || `${process.env.FRONTEND_URL}/dashboard?payment=success`, cancelUrl: cancelUrl || `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`, customId: userId });
+        const subscriptionId = rest && (rest.id || rest.subscription_id);
+        await db.collection('subscription_intents').doc(subscriptionId).set({ userId, planId, paypalSubscriptionId: subscriptionId, status: 'pending', amount: plan.price, createdAt: new Date().toISOString() });
+        audit.log('paypal.subscription.created', { userId, planId, subscriptionId });
+        const approvalLink = (rest && rest.links && rest.links.find(l=>l.rel==='approve')) || null;
+        return res.json({ success: true, subscriptionId, approvalUrl: approvalLink?.href, planId, amount: plan.price });
+      } catch (e) {
+        console.error('[PayPal] Create subscription REST fallback error:', e);
+        audit.log('paypal.subscription.error', { userId: req.userId, error: e.message || String(e) });
+        return res.status(500).json({ error: 'Failed to create subscription' });
+      }
     }
-    // Create PayPal subscription
-    const request = new paypal.subscriptions.SubscriptionsCreateRequest();
-    request.requestBody({
-      plan_id: plan.paypalPlanId,
-      subscriber: {
-        name: {
-          given_name: userData.displayName?.split(' ')[0] || 'User',
-          surname: userData.displayName?.split(' ')[1] || ''
-        },
-        email_address: userData.email || req.user?.email
-      },
-      application_context: {
-        brand_name: 'AutoPromote',
-        locale: 'en-US',
-        shipping_preference: 'NO_SHIPPING',
-        user_action: 'SUBSCRIBE_NOW',
-        payment_method: {
-          payer_selected: 'PAYPAL',
-          payee_preferred: 'IMMEDIATE_PAYMENT_REQUIRED'
-        },
-        return_url: returnUrl || `${process.env.FRONTEND_URL}/dashboard?payment=success`,
-        cancel_url: cancelUrl || `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`
-      },
-      custom_id: userId
-    });
-
-    const client = paypalClient.client();
-    const subscription = await client.execute(request);
-
-    // Store subscription intent in Firestore
-    await db.collection('subscription_intents').doc(subscription.result.id).set({
-      userId,
-      planId,
-      paypalSubscriptionId: subscription.result.id,
-      status: 'pending',
-      amount: plan.price,
-      createdAt: new Date().toISOString()
-    });
-
-    audit.log('paypal.subscription.created', { 
-      userId, 
-      planId, 
-      subscriptionId: subscription.result.id 
-    });
-
-    // Get approval URL
-    const approvalLink = subscription.result.links.find(link => link.rel === 'approve');
-
-    res.json({
-      success: true,
-      subscriptionId: subscription.result.id,
-      approvalUrl: approvalLink?.href,
-      planId,
-      amount: plan.price
-    });
 
   } catch (error) {
     console.error('[PayPal] Create subscription error:', error);
@@ -258,17 +327,25 @@ router.post('/activate', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    // Get subscription details from PayPal
-    const client = paypalClient.client();
-    const request = new paypal.subscriptions.SubscriptionsGetRequest(subscriptionId);
-    const subscription = await client.execute(request);
+    // Get subscription details from PayPal - use SDK if available else REST fallback
+    let paypalSub = null;
+    if (paypal && paypal.subscriptions && paypal.subscriptions.SubscriptionsGetRequest) {
+      const client = paypalClient.client();
+      const request = new paypal.subscriptions.SubscriptionsGetRequest(subscriptionId);
+      const subscription = await client.execute(request);
+      paypalSub = subscription.result;
+    } else {
+      console.warn('[PayPal] SDK SubscriptionsGetRequest missing; using REST fallback');
+      const access = await getAccessToken();
+      const base = process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+      const res = await safeFetch(base + `/v1/billing/subscriptions/${subscriptionId}`, fetchFn, { fetchOptions: { method: 'GET', headers: { Authorization: `Bearer ${access}` } }, requireHttps: true, allowHosts: ['api-m.paypal.com', 'api-m.sandbox.paypal.com'] });
+      paypalSub = await res.json().catch(()=>null);
+    }
 
-    const paypalSub = subscription.result;
-    
-    if (paypalSub.status !== 'ACTIVE' && paypalSub.status !== 'APPROVED') {
+    if (!paypalSub || (paypalSub.status !== 'ACTIVE' && paypalSub.status !== 'APPROVED')) {
       return res.status(400).json({ 
         error: 'Subscription not active',
-        status: paypalSub.status
+        status: paypalSub && paypalSub.status
       });
     }
 
