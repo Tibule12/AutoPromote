@@ -19,6 +19,27 @@ const PayPalSubscriptionPanel = () => {
     fetchPlans();
     fetchCurrentSubscription();
     fetchUsage();
+
+    // Detect return from PayPal (e.g., /dashboard?payment=success or ?payment=cancelled)
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const payment = params.get('payment');
+      const subscriptionParam = params.get('subscriptionId') || params.get('subscription_id') || params.get('token') || params.get('id');
+      if (payment === 'success') {
+        // If we have a subscriptionId parameter, try to activate it on the server
+        if (subscriptionParam) {
+          activateSubscription(subscriptionParam);
+        } else {
+          // Without subscription id, still refresh status
+          fetchCurrentSubscription();
+        }
+        // Remove query params to clean URL after handling
+        const newUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    } catch (e) {
+      // ignore
+    }
   }, []);
 
   const fetchPlans = async () => {
@@ -115,16 +136,24 @@ const PayPalSubscriptionPanel = () => {
 
   const handleSubscribe = async (planId) => {
     if (processing) return;
-    
+
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      toast.error('Please sign in to upgrade');
+      return;
+    }
+
     setProcessing(true);
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await currentUser.getIdToken(true);
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+
       const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/create-subscription`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify({ 
           planId,
           returnUrl: `${window.location.origin}/dashboard?payment=success`,
@@ -132,19 +161,72 @@ const PayPalSubscriptionPanel = () => {
         })
       });
 
-      if (res.ok) {
-        const parsed = await parseJsonSafe(res);
-        const data = parsed.json || null;
-        if (data.approvalUrl) {
-          // Redirect to PayPal for approval
-          window.location.href = data.approvalUrl;
+      const parsed = await parseJsonSafe(res);
+
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          toast.error('Please sign in to upgrade');
+          return;
+        }
+        console.error('Failed to create subscription:', parsed);
+        const errorMessage = (parsed && parsed.json && parsed.json.error) || parsed?.error || parsed?.textPreview || 'Failed to create subscription';
+        toast.error(errorMessage);
+        return;
+      }
+
+      const data = parsed.json || null;
+      if (data && data.approvalUrl) {
+        const approvalUrl = data.approvalUrl;
+        const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+        toast.success('Opening PayPal...');
+        if (isMobile) {
+          window.location.href = approvalUrl;
+        } else {
+          window.open(approvalUrl, '_blank', 'noopener,noreferrer');
         }
       } else {
-        toast.error('Failed to create subscription');
+        console.warn('Create subscription returned no approval URL:', parsed);
+        toast.error('Could not obtain an approval link; please try again or contact support');
       }
     } catch (error) {
       console.error('Error subscribing:', error);
       toast.error('Failed to process subscription');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const activateSubscription = async (subscriptionId) => {
+    if (!subscriptionId) return;
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      toast.error('Please sign in to activate your subscription');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const token = await currentUser.getIdToken(true);
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+      const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/activate`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ subscriptionId })
+      });
+      const parsed = await parseJsonSafe(res);
+      if (res.ok && parsed.ok) {
+        toast.success(parsed.json?.message || 'Subscription activated');
+        fetchCurrentSubscription();
+      } else {
+        console.error('Activation failed:', parsed);
+        toast.error((parsed && parsed.json && parsed.json.error) || 'Failed to activate subscription');
+      }
+    } catch (e) {
+      console.error('Activation error:', e);
+      toast.error('Failed to activate subscription');
     } finally {
       setProcessing(false);
     }
@@ -155,15 +237,22 @@ const PayPalSubscriptionPanel = () => {
       return;
     }
 
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      toast.error('Please sign in to cancel your subscription');
+      return;
+    }
+
     setProcessing(true);
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await currentUser.getIdToken(true);
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
       const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/cancel`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify({ reason: 'User requested cancellation' })
       });
 
@@ -171,7 +260,8 @@ const PayPalSubscriptionPanel = () => {
         toast.success('Subscription cancelled successfully');
         fetchCurrentSubscription();
       } else {
-        toast.error('Failed to cancel subscription');
+        const parsed = await parseJsonSafe(res);
+        toast.error((parsed && parsed.json && parsed.json.error) || 'Failed to cancel subscription');
       }
     } catch (error) {
       console.error('Error cancelling subscription:', error);
