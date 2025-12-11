@@ -173,7 +173,10 @@ router.post('/oauth/prepare', authMiddleware, oauthPrepareLimiter, async (req, r
           authUrl = fallbackUrl;
         } else {
           if (DEBUG_SNAPCHAT_OAUTH) console.warn('snapchat: both primary and fallback auth URLs returned 5xx', probe.status, probe2.status);
-          // leave authUrl as primary; frontend will receive it and can show provider error
+          // If both attempts returned 5xx, return a 503 so the frontend can
+          // surface a friendly 'service unavailable' message instead of
+          // opening the provider page and showing a generic provider error.
+          return res.status(503).json({ error: 'provider_unavailable', details: 'Snapchat returned 5xx for primary and fallback auth URLs', probeStatus: { primary: probe.status, fallback: probe2.status } });
         }
       } else {
         if (DEBUG_SNAPCHAT_OAUTH) console.log('snapchat: auth URL probe OK status=', probe.status);

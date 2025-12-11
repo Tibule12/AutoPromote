@@ -459,7 +459,16 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 				try {
 					const prepareRes = await fetch(endpointUrl, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ popup: true }) });
 						const prepareData = await prepareRes.json().catch(()=>null);
-						if (!prepareRes.ok || !prepareData?.authUrl) throw new Error(prepareData?.error || 'Auth prepare failed');
+						if (!prepareRes.ok) {
+							const msg = (prepareData && (prepareData.error || prepareData.details || prepareData.message)) ? (prepareData.error || prepareData.details || prepareData.message) : 'Auth prepare failed';
+							console.warn('Prepare endpoint POST returned error', prepareRes.status, msg, prepareData);
+							toast.error(msg);
+							return;
+						}
+						if (!prepareData?.authUrl) {
+							toast.error('Auth prepare failed: no authUrl returned');
+							return;
+						}
 						// If provider probe returned 5xx or probe error, surface helpful error and do not open provider page
 						const probeStatus = prepareData.probeStatus;
 						if (probeStatus === 'probe_error' || (typeof probeStatus === 'number' && probeStatus >= 500)) {
@@ -468,7 +477,8 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 							return;
 						}
 						toast.success('Opening authentication window...');
-						if (isMobile) window.location.href = prepareData.authUrl;
+						if (isMobile && prepareData.appUrl) window.location.href = prepareData.appUrl;
+						else if (isMobile) window.location.href = prepareData.authUrl;
 						else window.open(prepareData.authUrl, '_blank');
 					return;
 				} catch (err) {
@@ -493,7 +503,15 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 							headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
 						});
 						const prepareData = await prepareRes.json();
-						if (!prepareRes.ok || !prepareData?.authUrl) throw new Error('Auth prepare failed');
+						if (!prepareRes.ok) {
+							const msg = prepareData && (prepareData.error || prepareData.details || prepareData.message) ? (prepareData.error || prepareData.details || prepareData.message) : 'Auth prepare failed';
+							toast.error(msg);
+							return;
+						}
+						if (!prepareData?.authUrl) {
+							toast.error('Auth prepare failed: no authUrl returned');
+							return;
+						}
 						toast.success('Opening authentication window...');
 						if (isMobile) window.location.href = prepareData.authUrl;
 						else window.open(prepareData.authUrl, '_blank');
