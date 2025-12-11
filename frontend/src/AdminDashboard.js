@@ -1689,16 +1689,16 @@ function AdminDashboard({ analytics, user, onLogout }) {
         <div style={{ marginTop: 24 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', margin: '-10px' }}>
             <StatCard
-              title="Total Sent"
-              value={safeNum(totalSent)}
-              subtitle={`${safeNum(totalOpens)} opens`}
+              title="Total Ads"
+              value={totalAds.toLocaleString()}
+              subtitle={`${activeAds} active`}
               color="#1976d2"
-              icon="✉️"
+              icon="📣"
             />
             <StatCard
-              title="Open Rate"
-              value={totalSent ? ((totalOpens / totalSent) * 100).toFixed(1) + '%' : '0.0%'}
-              subtitle={`${safeNum(totalClicks)} clicks`}
+              title="Avg CTR"
+              value={`${avgCTR}%`}
+              subtitle={`${totalClicks.toLocaleString()} clicks`}
               color="#2e7d32"
               icon="📈"
             />

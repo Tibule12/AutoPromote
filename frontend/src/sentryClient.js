@@ -3,9 +3,9 @@ import { BrowserTracing } from '@sentry/tracing';
 
 export function initSentry() {
   try {
-    // Use env var if present, otherwise fall back to a provided DSN
-    const defaultDsn = 'https://63a1444835dbfbbc9500d15fb0afdba4@o4510494724980736.ingest.us.sentry.io/4510494731141120';
-    const dsn = process.env.REACT_APP_SENTRY_DSN || defaultDsn;
+    // Only initialize Sentry if `REACT_APP_SENTRY_DSN` is explicitly provided.
+    // Avoid using a hard-coded fallback DSN in client builds to prevent unwanted 403/forbidden events.
+    const dsn = process.env.REACT_APP_SENTRY_DSN;
     if (!dsn) return;
     Sentry.init({
       dsn,
