@@ -10,6 +10,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { API_ENDPOINTS, API_BASE_URL, PUBLIC_SITE_URL } from './config';
 import { parseJsonSafe } from './utils/parseJsonSafe';
 import ChatWidget from './ChatWidget';
+import PayPalSubscriptionPanel from './components/PayPalSubscriptionPanel';
 import { Sentry } from './sentryClient';
 import TestSentryButton from './components/TestSentryButton';
 
@@ -36,6 +37,7 @@ function App() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [pendingLogin, setPendingLogin] = useState(null); // { userData, token }
   const navigate = useNavigate();
+  const [routePathState, setRoutePathState] = useState((typeof window !== 'undefined') ? (window.location.hash ? window.location.hash.replace(/^#/, '') : window.location.pathname) : '/');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -630,6 +632,21 @@ function App() {
       alert('Error uploading content: ' + error.message);
     }
   };
+
+  // If the URL includes a direct pricing route, render pricing panel
+  useEffect(() => {
+    const onHashChange = () => setRoutePathState(window.location.hash ? window.location.hash.replace(/^#/, '') : window.location.pathname);
+    window.addEventListener('hashchange', onHashChange);
+    window.addEventListener('popstate', onHashChange);
+    return () => {
+      window.removeEventListener('hashchange', onHashChange);
+      window.removeEventListener('popstate', onHashChange);
+    };
+  }, []);
+
+  if (routePathState && routePathState.startsWith('/pricing')) {
+    return <PayPalSubscriptionPanel />;
+  }
 
   return (
     <div>
