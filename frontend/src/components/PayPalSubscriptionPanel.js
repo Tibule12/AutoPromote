@@ -43,8 +43,21 @@ const PayPalSubscriptionPanel = () => {
       if (parsed.ok && parsed.json) {
         setCurrentSubscription(parsed.json.subscription);
       } else if (parsed.status === 404) {
-        // No subscription found; default to free subscription
-        setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
+        // No subscription found on this host; try canonical site as a fallback
+        try {
+          const fallbackRes = await fetch(`https://autopromote.org/api/paypal-subscriptions/status`, { headers: { Authorization: `Bearer ${token}` } });
+          const fallbackParsed = await parseJsonSafe(fallbackRes);
+          if (fallbackParsed.ok && fallbackParsed.json) {
+            setCurrentSubscription(fallbackParsed.json.subscription);
+          } else {
+            setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
+            // Inform user non-intrusively
+            toast('Could not load subscription status from this host; using free plan', { icon: 'ℹ️' });
+          }
+        } catch (e) {
+          setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
+          toast('Could not load subscription status; using free plan', { icon: 'ℹ️' });
+        }
       } else if (!parsed.ok) {
         // In case the route returns 401/403 or other errors, fall back to free plan so UI doesn't crash
         console.warn('PayPal subscription API returned error or non-JSON response', { status: parsed.status, preview: parsed.textPreview || parsed.error });
