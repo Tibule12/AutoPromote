@@ -43,10 +43,12 @@ const PayPalSubscriptionPanel = () => {
       if (parsed.ok && parsed.json) {
         setCurrentSubscription(parsed.json.subscription);
       } else if (parsed.status === 404) {
-        // No subscription found; clear currentSubscription
-        setCurrentSubscription(null);
-      } else {
+        // No subscription found; default to free subscription
+        setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
+      } else if (!parsed.ok) {
+        // In case the route returns 401/403 or other errors, fall back to free plan so UI doesn't crash
         console.warn('PayPal subscription API returned error or non-JSON response', { status: parsed.status, preview: parsed.textPreview || parsed.error });
+        setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
       }
       setLoading(false);
     } catch (error) {
