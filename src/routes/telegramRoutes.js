@@ -5,6 +5,7 @@ const authMiddleware = require('../authMiddleware');
 const { admin, db } = require('../firebaseAdmin');
 const { rateLimiter } = require('../middlewares/globalRateLimiter');
 const telegramService = require('../services/telegramService');
+const fetch = require('node-fetch');
 let codeqlLimiter;
 try { codeqlLimiter = require('../middlewares/codeqlRateLimit'); } catch(_) { codeqlLimiter = null; }
 
@@ -21,6 +22,9 @@ if (codeqlLimiter && codeqlLimiter.writes) {
 // Environment variables
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || 'AutoPromoteBot';
+// Ensure we don't include leading '@' when embedding into t.me links or the
+// Telegram widget (widget expects username without leading '@')
+const BOT_USERNAME_SAFE = (BOT_USERNAME || '').replace(/^@+/, '');
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://www.autopromote.org';
 
@@ -28,7 +32,7 @@ const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://www.autopromote.org'
  * GET /api/telegram/auth/start
  * Returns HTML page with Telegram Login Widget for OAuth
  */
-router.get('/auth/start', authMiddleware, (req, res) => {
+router.get('/auth/start', authMiddleware, async (req, res) => {
 	const uid = req.user.uid;
 	
 	if (!BOT_TOKEN || !BOT_USERNAME) {
@@ -36,6 +40,30 @@ router.get('/auth/start', authMiddleware, (req, res) => {
 			error: 'telegram_not_configured',
 			missing: !BOT_TOKEN ? ['TELEGRAM_BOT_TOKEN'] : ['TELEGRAM_BOT_USERNAME']
 		});
+	}
+	// Perform a server-side check to confirm the bot token is valid and
+	// the bot can be queried via Telegram API. If the token is invalid,
+	// render a helpful error instead of embedding the widget which will
+	// otherwise display "Username invalid".
+	try {
+		const getMeRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`);
+		const getMeJson = await getMeRes.json().catch(()=>({ ok: false }));
+		if (!getMeRes.ok || getMeJson.ok !== true) {
+			console.error('Telegram getMe failed:', getMeJson);
+			return res.status(500).send(`<html><body><h1>Telegram not available</h1><p>Bot token or username misconfigured. Please check TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_USERNAME on the server.</p><p>Error: ${String(getMeJson.description || 'bot not reachable')}</p><p><a href="${DASHBOARD_URL}/dashboard">← Back to Dashboard</a></p></body></html>`);
+		}
+		// If the getMe response returns a username different to the configured
+		// BOT_USERNAME_SAFE, show a clear message so maintainers can spot env mismatches.
+		try {
+			const meUsername = (getMeJson.result && getMeJson.result.username) ? String(getMeJson.result.username).toLowerCase() : null;
+			if (meUsername && BOT_USERNAME_SAFE && meUsername !== BOT_USERNAME_SAFE.toLowerCase()) {
+				console.error('Telegram token username mismatch: token->%s env->%s', meUsername, BOT_USERNAME_SAFE);
+				return res.status(500).send(`<html><body><h1>Telegram configuration error</h1><p>Your configured TELEGRAM_BOT_USERNAME (${BOT_USERNAME_SAFE}) does not match the bot username from the token (${getMeJson.result.username}).</p><p>Please ensure TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_USERNAME match the same bot.</p><p><a href="${DASHBOARD_URL}/dashboard">← Back to Dashboard</a></p></body></html>`);
+			}
+		} catch (_) { /* ignore check errors */ }
+	} catch (err) {
+		console.error('Telegram getMe probe error:', err && err.message ? err.message : err);
+		return res.status(500).send(`<html><body><h1>Telegram not available</h1><p>Bot token or network error occurred.</p><p><a href="${DASHBOARD_URL}/dashboard">← Back to Dashboard</a></p></body></html>`);
 	}
 	
 	const html = `<!DOCTYPE html>
@@ -125,7 +153,7 @@ router.get('/auth/start', authMiddleware, (req, res) => {
 		
 		<div class="widget-container">
 			<script async src="https://telegram.org/js/telegram-widget.js?22" 
-				data-telegram-login="${BOT_USERNAME}" 
+				data-telegram-login="${BOT_USERNAME_SAFE}" 
 				data-size="large" 
 				data-onauth="onTelegramAuth(user)" 
 				data-request-access="write">
@@ -177,6 +205,37 @@ router.get('/auth/start', authMiddleware, (req, res) => {
 </html>`;
 	
 	res.send(html);
+});
+
+/**
+ * POST /api/telegram/auth/prepare
+ * Prepare a Telegram connection by issuing a short-lived state and returning
+ * a web/app URL to open (t.me/<bot>?start=<state> and tg:// deep link).
+ */
+router.post('/auth/prepare', authMiddleware, tgWriteLimiter, async (req, res) => {
+	try {
+		const uid = req.userId || req.user?.uid || 'anonymous';
+		if (!BOT_USERNAME) return res.status(500).json({ ok: false, error: 'telegram_bot_not_configured' });
+
+		const state = require('../lib/uuid-compat').v4();
+		const popupRequested = !!(req.body && req.body.popup === true);
+
+		await db.collection('oauth_states').doc(state).set({
+			uid,
+			platform: 'telegram',
+			popup: popupRequested,
+			createdAt: new Date().toISOString(),
+			expiresAt: Date.now() + (10 * 60 * 1000) // 10 minutes
+		});
+
+		const webUrl = `https://t.me/${BOT_USERNAME_SAFE}?start=${encodeURIComponent(state)}`;
+		const appUrl = `tg://resolve?domain=${encodeURIComponent(BOT_USERNAME_SAFE)}&start=${encodeURIComponent(state)}`;
+
+		return res.json({ ok: true, authUrl: webUrl, appUrl, state, popup: popupRequested });
+	} catch (e) {
+		console.error('Telegram prepare error:', e);
+		return res.status(500).json({ ok: false, error: e.message || 'prepare_failed' });
+	}
 });
 
 /**
