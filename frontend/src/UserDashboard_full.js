@@ -397,7 +397,7 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 	const handleConnectReddit = async () => openProviderAuth(API_ENDPOINTS.REDDIT_AUTH_START);
 	const handleConnectDiscord = async () => openProviderAuth(API_ENDPOINTS.DISCORD_AUTH_START);
 	const handleConnectLinkedin = async () => openProviderAuth(API_ENDPOINTS.LINKEDIN_AUTH_START);
-	const handleConnectTelegram = async () => openProviderAuth(API_ENDPOINTS.TELEGRAM_AUTH_START);
+	const handleConnectTelegram = async () => openProviderAuth(API_ENDPOINTS.TELEGRAM_AUTH_PREPARE || API_ENDPOINTS.TELEGRAM_AUTH_START);
 	const handleConnectPinterest = async () => openProviderAuth(API_ENDPOINTS.PINTEREST_AUTH_START);
 
 	const refreshAllStatus = async () => {
@@ -458,11 +458,18 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 			if (isPrepareEndpoint) {
 				try {
 					const prepareRes = await fetch(endpointUrl, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ popup: true }) });
-					const prepareData = await prepareRes.json().catch(()=>null);
-					if (!prepareRes.ok || !prepareData?.authUrl) throw new Error(prepareData?.error || 'Auth prepare failed');
-					toast.success('Opening authentication window...');
-					if (isMobile) window.location.href = prepareData.authUrl;
-					else window.open(prepareData.authUrl, '_blank');
+						const prepareData = await prepareRes.json().catch(()=>null);
+						if (!prepareRes.ok || !prepareData?.authUrl) throw new Error(prepareData?.error || 'Auth prepare failed');
+						// If provider probe returned 5xx or probe error, surface helpful error and do not open provider page
+						const probeStatus = prepareData.probeStatus;
+						if (probeStatus === 'probe_error' || (typeof probeStatus === 'number' && probeStatus >= 500)) {
+							console.warn('Provider probe indicates an error, aborting open. probeStatus=', probeStatus, prepareData);
+							toast.error('Provider temporarily unavailable. Please try again later or contact support.');
+							return;
+						}
+						toast.success('Opening authentication window...');
+						if (isMobile) window.location.href = prepareData.authUrl;
+						else window.open(prepareData.authUrl, '_blank');
 					return;
 				} catch (err) {
 					console.warn('Prepare endpoint POST failed:', err.message);

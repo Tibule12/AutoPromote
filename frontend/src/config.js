@@ -95,6 +95,7 @@ export const API_ENDPOINTS = {
   LINKEDIN_METADATA: `${API_BASE_URL}/api/linkedin/metadata`,
 
   TELEGRAM_AUTH_START: `${API_BASE_URL}/api/telegram/auth/start`,
+  TELEGRAM_AUTH_PREPARE: `${API_BASE_URL}/api/telegram/auth/prepare`,
   TELEGRAM_STATUS: `${API_BASE_URL}/api/telegram/status`,
   TELEGRAM_METADATA: `${API_BASE_URL}/api/telegram/metadata`,
 
