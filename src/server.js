@@ -1608,6 +1608,14 @@ app.get('/api/users/progress', require('./authMiddleware'), async (req, res) => 
   }
 });
 
+// Ensure unmatched routes serve the React app
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/static')) {
+    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+  } else {
+    next();
+  }
+});
 
 // Catch all handler: send back React's index.html file for client-side routing
 app.get('*', (req, res) => {
