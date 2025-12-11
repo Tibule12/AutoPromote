@@ -446,44 +446,66 @@ const UserDashboard = ({ user, content, stats, badges = [], notifications = [], 
 
 	const claimPayout = async () => { const toastId = toast.loading('Requesting payout...'); try { await withAuth(async (token) => { const res = await fetch(API_ENDPOINTS.EARNINGS_PAYOUT_SELF, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); if (!res.ok) throw new Error('Payout failed'); toast.success('Payout requested successfully!', { id: toastId }); }); } catch (e) { console.warn(e); toast.error('Payout request failed', { id: toastId }); } };
 
-	const openProviderAuth = async (endpointUrl) => { try { const currentUser = auth.currentUser; if (!currentUser) { toast.error('Please sign in first'); return; } const token = await currentUser.getIdToken(true); 
-		const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-		
-		// First, check if this is a two-step flow (returns JSON with prepareUrl) or direct redirect
-		// Try GET first to see what we get
+	const openProviderAuth = async (endpointUrl) => {
 		try {
-			const checkRes = await fetch(endpointUrl, { method: 'GET', headers: { Authorization: `Bearer ${token}` } });
-			const contentType = checkRes.headers.get('content-type');
-			
-			if (contentType?.includes('application/json')) {
-				// Two-step flow: GET returns JSON with prepareUrl, then POST to prepare
-				const data = await checkRes.json();
-				if (data.prepareUrl) {
-					// POST to prepare endpoint to get the actual auth URL
-					const prepareRes = await fetch(data.prepareUrl, { 
-						method: 'POST', 
-						headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } 
-					});
-					const prepareData = await prepareRes.json();
-					if (!prepareRes.ok || !prepareData?.authUrl) throw new Error('Auth prepare failed');
+			const currentUser = auth.currentUser;
+			if (!currentUser) { toast.error('Please sign in first'); return; }
+			const token = await currentUser.getIdToken(true);
+			const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+
+			// If the endpoint is a "prepare" endpoint, POST to it to retrieve the authUrl
+			const isPrepareEndpoint = String(endpointUrl).includes('/prepare') || String(endpointUrl).endsWith('/oauth/prepare');
+			if (isPrepareEndpoint) {
+				try {
+					const prepareRes = await fetch(endpointUrl, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ popup: true }) });
+					const prepareData = await prepareRes.json().catch(()=>null);
+					if (!prepareRes.ok || !prepareData?.authUrl) throw new Error(prepareData?.error || 'Auth prepare failed');
 					toast.success('Opening authentication window...');
 					if (isMobile) window.location.href = prepareData.authUrl;
 					else window.open(prepareData.authUrl, '_blank');
 					return;
+				} catch (err) {
+					console.warn('Prepare endpoint POST failed:', err.message);
+					toast.error('Failed to start authentication. Please try again.');
+					return; // don't try to GET a prepare endpoint
 				}
 			}
-		} catch (jsonErr) {
-			// Not JSON or fetch failed, fall through to direct redirect approach
-			console.log('Two-step auth not available, using direct redirect', jsonErr.message);
-		}
-		
-		// Direct redirect flow: YouTube/TikTok/Facebook - append token as query param
-		const separator = endpointUrl.includes('?') ? '&' : '?';
-		const authUrl = `${endpointUrl}${separator}id_token=${encodeURIComponent(token)}`;
-		toast.success('Opening authentication window...');
-		if (isMobile) window.location.href = authUrl;
-		else window.open(authUrl, '_blank');
-	} catch (e) { console.warn(e); toast.error(e.message || 'Failed to start auth'); } };
+
+			// First, check if this is a two-step flow (returns JSON with prepareUrl) or direct redirect
+			// Try GET first to see what we get
+			try {
+				const checkRes = await fetch(endpointUrl, { method: 'GET', headers: { Authorization: `Bearer ${token}` } });
+				const contentType = checkRes.headers.get('content-type');
+				if (contentType?.includes('application/json')) {
+					// Two-step flow: GET returns JSON with prepareUrl, then POST to prepare
+					const data = await checkRes.json();
+					if (data.prepareUrl) {
+						// POST to prepare endpoint to get the actual auth URL
+						const prepareRes = await fetch(data.prepareUrl, {
+							method: 'POST',
+							headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+						});
+						const prepareData = await prepareRes.json();
+						if (!prepareRes.ok || !prepareData?.authUrl) throw new Error('Auth prepare failed');
+						toast.success('Opening authentication window...');
+						if (isMobile) window.location.href = prepareData.authUrl;
+						else window.open(prepareData.authUrl, '_blank');
+						return;
+					}
+				}
+			} catch (jsonErr) {
+				// Not JSON or fetch failed, fall through to direct redirect approach
+				console.log('Two-step auth not available, using direct redirect', jsonErr.message);
+			}
+
+			// Direct redirect flow: append token as query param and open
+			const separator = endpointUrl.includes('?') ? '&' : '?';
+			const authUrl = `${endpointUrl}${separator}id_token=${encodeURIComponent(token)}`;
+			toast.success('Opening authentication window...');
+			if (isMobile) window.location.href = authUrl;
+			else window.open(authUrl, '_blank');
+		} catch (e) { console.warn(e); toast.error(e.message || 'Failed to start auth'); }
+	};
 
 	return (
 		<div className="dashboard-root">
