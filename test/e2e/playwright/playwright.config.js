@@ -9,6 +9,7 @@ module.exports = {
     headless: true,
     viewport: { width: 1280, height: 800 },
     actionTimeout: 60000,
+    extraHTTPHeaders: { 'x-playwright-e2e': '1' },
     // Artifact captures for failed tests in CI/locally
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

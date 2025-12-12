@@ -146,6 +146,30 @@
   color: #1e40af;
 }
 
+.platform-tile.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.edit-platform-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #374151;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.edit-platform-btn:hover { background: rgba(59,130,246,0.06); }
+
+.platform-expanded { margin-top: 8px; }
+.platform-guideline { font-size: 12px; color: #6b7280; margin-top: 2px; }
+.platform-expanded ul { margin: 8px 0 0 18px; padding: 0; }
+.platform-expanded li { margin-bottom: 6px; }
+.platform-action-row { display:flex; gap:8px; align-items:center; margin-top:8px; }
+.preview-cards { display:flex; gap:1rem; flex-wrap:wrap; margin-top:8px; }
+.quality-check-mini { font-size:13px; color:#374151; margin-top:8px; }
+
 .sr-only { 
   position:absolute; 
   left:-9999px; 

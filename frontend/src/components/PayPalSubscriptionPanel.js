@@ -66,8 +66,9 @@ const PayPalSubscriptionPanel = () => {
   const fetchCurrentSubscription = async () => {
     try {
       const currentUser = auth.currentUser;
+      const isE2E = typeof window !== 'undefined' && window.__E2E_BYPASS === true;
       // If no signed-in user, show free plan directly
-      if (!currentUser) {
+      if (!currentUser && !isE2E) {
         setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
         setLoading(false);
         return;
@@ -142,14 +143,17 @@ const PayPalSubscriptionPanel = () => {
     if (processing) return;
 
     const currentUser = auth.currentUser;
-    if (!currentUser) {
+    const isE2E = typeof window !== 'undefined' && window.__E2E_BYPASS === true;
+    if (!currentUser && !isE2E) {
       toast.error('Please sign in to upgrade');
       return;
     }
 
     setProcessing(true);
     try {
-      const token = await currentUser.getIdToken(true);
+      let token = null;
+      try { if (currentUser) token = await currentUser.getIdToken(true); } catch (_) { token = null; }
+      if (!token && isE2E && typeof window !== 'undefined') token = window.__E2E_TEST_TOKEN || null;
       const headers = {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -455,7 +459,7 @@ const PayPalSubscriptionPanel = () => {
                 </div>
 
                 <div className="plan-features">
-                  {Object.entries(plan.features).map(([key, value]) => (
+                  {Object.entries(plan.features || {}).map(([key, value]) => (
                     <div key={key} className="feature-item">
                       <span className="feature-icon">{getFeatureIcon(key)}</span>
                       <span className="feature-name">

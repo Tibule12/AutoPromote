@@ -39,9 +39,15 @@ function App() {
   const navigate = useNavigate();
   const [routePathState, setRoutePathState] = useState((typeof window !== 'undefined') ? (window.location.hash ? window.location.hash.replace(/^#/, '') : window.location.pathname) : '/');
 
+  // E2E test auth bypass: when true, skip firebase auth and set test user
+  const E2E_AUTH_BYPASS = (process.env.REACT_APP_E2E_AUTH_BYPASS === 'true');
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
+        // If E2E bypass is active, do not clear localStorage or reset user
+        if (typeof window !== 'undefined' && window.__E2E_BYPASS === true) {
+          return; // keep the E2E bypass user
+        }
         setUser(null);
         setIsAdmin(false);
         localStorage.clear();
@@ -87,7 +93,37 @@ function App() {
       setShowLogin(false);
       setShowRegister(false);
     }
-    return () => unsubscribe();
+    return () => { try { if (unsubscribe && typeof unsubscribe === 'function') unsubscribe(); } catch(_){} };
+  }, []);
+
+  // If E2E bypass is enabled, set a pre-authorized test user and fetch content
+  useEffect(() => {
+    if (!E2E_AUTH_BYPASS) return;
+    const setTestUser = async () => {
+      try {
+        const testToken = 'e2e-test-token';
+        const testUser = { uid: 'e2e-user', email: 'e2e@local', name: 'E2E User', role: 'user', token: testToken };
+        setUser(testUser);
+        await fetchUserContent(testToken);
+      } catch (_) {}
+    };
+    setTestUser();
+  }, [E2E_AUTH_BYPASS]);
+
+  // Runtime E2E bypass via window.__E2E_BYPASS = true set by tests.
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && window.__E2E_BYPASS === true) {
+        (async () => {
+          try {
+            const testToken = (window.__E2E_TEST_TOKEN || 'e2e-test-token');
+            const testUser = { uid: 'e2e-user', email: 'e2e@local', name: 'E2E User', role: 'user', token: testToken };
+            setUser(testUser);
+            await fetchUserContent(testToken);
+          } catch (_) {}
+        })();
+      }
+    } catch (_) {}
   }, []);
 
   const fetchUserContent = async (providedToken = null) => {
@@ -462,10 +498,21 @@ function App() {
 
   // Content upload handler (with file and platforms)
   const handleContentUpload = async (params) => {
+    console.log('[E2E] handleContentUpload called with params:', { isDryRun: params.isDryRun, platforms: params.platforms || params.target_platforms });
     try {
       // Destructure all possible fields from params
       const { file, platforms, title, description, type, schedule, isDryRun, trimStart, trimEnd, template, rotate, flipH, flipV } = params;
-      const token = await auth.currentUser.getIdToken(true);
+      // Use Firebase auth token when available; fall back to app user token or runtime E2E test token
+      let token = null;
+      try {
+        const current = auth && auth.currentUser;
+        if (current) token = await current.getIdToken(true);
+      } catch (_) { token = null; }
+      if (!token && user && user.token) token = user.token;
+      if (!token && typeof window !== 'undefined' && window.__E2E_BYPASS === true && window.__E2E_TEST_TOKEN) token = window.__E2E_TEST_TOKEN;
+      if (!token) {
+        throw new Error('Authentication token missing for content upload request');
+      }
       let finalUrl = '';
       // If this is a preview/dry-run, do NOT upload the file to storage.
       // Use a `preview://` URL so preview pipelines and workers treat it as a local preview token.
@@ -495,6 +542,7 @@ function App() {
         return { ok: false, error: 'missing_url' };
       }
       const payload = {
+        isDryRun: !!isDryRun,
         title: title || (file ? file.name : ''),
         type: type || 'video',
         url: finalUrl,
@@ -512,6 +560,7 @@ function App() {
           ...(template ? { template } : {})
         }
       };
+      console.log('[E2E] handleContentUpload: calling API', API_ENDPOINTS.CONTENT_UPLOAD, 'payload:', payload, 'token?', Boolean(token));
       const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
         method: 'POST',
         headers: {
