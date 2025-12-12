@@ -50,9 +50,18 @@ test('API upload test - create content and check Firestore', async () => {
     const contentId = body?.content?.id;
     if (!contentId) console.warn('Warning: upload API returned unexpected json shape:', JSON.stringify(json));
     expect(contentId).toBeTruthy();
-    // cleanup
-    // Defer firebaseAdmin require until after we set GOOGLE_APPLICATION_CREDENTIALS
-    if (contentId) await db.collection('content').doc(contentId).delete();
+    // cleanup - attempt to delete if Firestore is available; skip if no credentials are set
+    try {
+      if (contentId && process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        await db.collection('content').doc(contentId).delete();
+      } else if (contentId && String(contentId).startsWith('e2e-fake-')) {
+        console.log('[E2E] Skipping Firestore cleanup for fake content id:', contentId);
+      } else {
+        console.warn('[E2E] Skipping Firestore cleanup - no credentials available');
+      }
+    } catch (e) {
+      console.warn('[E2E] Could not delete test content, skipping cleanup:', e.message);
+    }
   } finally {
     await new Promise((r) => mainServer ? mainServer.close(r) : r());
   }
