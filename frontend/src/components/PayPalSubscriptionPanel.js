@@ -22,19 +22,28 @@ const PayPalSubscriptionPanel = () => {
 
     // Detect return from PayPal (e.g., /dashboard?payment=success or ?payment=cancelled)
     try {
+      // Collect params from both search and hash (hash may contain query when using hash-routing)
       const params = new URLSearchParams(window.location.search);
+      if (window.location.hash && window.location.hash.includes('?')) {
+        const hashQs = window.location.hash.split('?')[1];
+        const hashParams = new URLSearchParams(hashQs);
+        for (const [k, v] of hashParams.entries()) params.set(k, v);
+      }
       const payment = params.get('payment');
       const subscriptionParam = params.get('subscriptionId') || params.get('subscription_id') || params.get('token') || params.get('id');
-      if (payment === 'success') {
-        // If we have a subscriptionId parameter, try to activate it on the server
-        if (subscriptionParam) {
-          activateSubscription(subscriptionParam);
-        } else {
-          // Without subscription id, still refresh status
-          fetchCurrentSubscription();
+      if (payment === 'success' || payment === 'cancelled') {
+        if (payment === 'success') {
+          if (subscriptionParam) {
+            activateSubscription(subscriptionParam);
+          } else {
+            fetchCurrentSubscription();
+          }
+        } else if (payment === 'cancelled') {
+          toast('Payment cancelled', { icon: '⚠️' });
         }
         // Remove query params to clean URL after handling
-        const newUrl = window.location.pathname + window.location.hash;
+        const cleanedHash = window.location.hash ? window.location.hash.split('?')[0] : '';
+        const newUrl = window.location.pathname + (cleanedHash || window.location.hash);
         window.history.replaceState({}, document.title, newUrl);
       }
     } catch (e) {
