@@ -41,7 +41,7 @@ test('API payout request - create payout doc and update user pending earnings', 
     }
 
     // Call payout API
-    const res = await fetch(`http://127.0.0.1:${mainPort}/api/earnings/payout/self`, {
+    const res = await fetch(`http://127.0.0.1:${mainPort}/api/monetization/earnings/payout/self`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer test-token-for-${uid}`, 'x-playwright-e2e': '1' },
       body: JSON.stringify({ paymentMethod: 'paypal' })
