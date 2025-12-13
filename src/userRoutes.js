@@ -43,7 +43,7 @@ router.get('/me', authMiddleware, writeLimiter, async (req, res) => {
 // Update current user (profile defaults)
 router.put('/me', authMiddleware, writeLimiter, async (req, res) => {
   try {
-    const { name, timezone, schedulingDefaults, notifications, defaultPlatforms, defaultFrequency } = req.body;
+    const { name, timezone, schedulingDefaults, notifications, defaultPlatforms, defaultFrequency, paypalEmail } = req.body;
     const ref = db.collection('users').doc(req.userId);
       // Get current user data to check admin status
       const currentSnap = await ref.get();
@@ -53,6 +53,7 @@ router.put('/me', authMiddleware, writeLimiter, async (req, res) => {
         ...(timezone ? { timezone } : {}),
         ...(schedulingDefaults ? { schedulingDefaults } : {}),
         ...(notifications ? { notifications } : {}),
+        ...(paypalEmail ? { paypalEmail } : {}),
         updatedAt: new Date()
       };
       // For backward compatibility fields
@@ -113,12 +114,13 @@ router.get('/profile', authMiddleware, publicLimiter, async (req, res) => {
 // Update user profile
 router.put('/profile', authMiddleware, writeLimiter, async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, paypalEmail } = req.body;
     
     const userRef = db.collection('users').doc(req.userId);
     await userRef.update({
       name,
       email,
+      ...(paypalEmail ? { paypalEmail } : {}),
       updatedAt: new Date().toISOString()
     });
 

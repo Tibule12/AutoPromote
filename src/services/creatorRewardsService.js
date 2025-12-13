@@ -250,7 +250,7 @@ async function getUserEarnings(userId) {
 /**
  * Process payout request
  */
-async function requestPayout(userId, paymentMethod = 'stripe') {
+async function requestPayout(userId, paymentMethod = 'paypal') {
   try {
     const userRef = db.collection('users').doc(userId);
     const userDoc = await userRef.get();
@@ -268,12 +268,24 @@ async function requestPayout(userId, paymentMethod = 'stripe') {
       };
     }
     
-    // Create payout record
+    // Fraud/KYC checks: if the operator requires KYC for large payouts, enforce it
+    if (process.env.REQUIRE_KYC_FOR_PAYOUTS === 'true') {
+      const kycThreshold = parseFloat(process.env.PAYOUTS_KYC_THRESHOLD || '500');
+      if ((pendingEarnings || 0) >= kycThreshold && !userData.kycVerified) {
+        return { error: `KYC verification required for payouts >= $${kycThreshold}. Please complete identity verification.` };
+      }
+    }
+    // Create payout record (default PayPal)
+    const method = (paymentMethod || 'paypal').toLowerCase();
+    if (method === 'paypal' && !userData.paypalEmail) {
+      return { error: 'PayPal email not configured. Please add your PayPal email in account settings.' };
+    }
     const payoutRef = await db.collection('payouts').add({
       userId,
       amount: pendingEarnings,
       status: 'pending',
-      paymentMethod,
+      paymentMethod: method,
+      payee: method === 'paypal' ? { paypalEmail: userData.paypalEmail } : {},
       requestedAt: new Date().toISOString()
     });
     

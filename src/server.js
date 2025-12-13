@@ -1774,6 +1774,7 @@ const LOCK_CLEAN_INTERVAL_MS = parseInt(process.env.LOCK_CLEAN_INTERVAL_MS || '3
 const BANDIT_TUNER_INTERVAL_MS = parseInt(process.env.BANDIT_TUNER_INTERVAL_MS || '900000', 10); // 15 min default
 const EXPLORATION_CTRL_INTERVAL_MS = parseInt(process.env.EXPLORATION_CTRL_INTERVAL_MS || '600000', 10); // 10 min default
 const ALERT_CHECK_INTERVAL_MS = parseInt(process.env.ALERT_CHECK_INTERVAL_MS || '900000', 10); // 15 min default
+const PAYOUTS_PROCESS_INTERVAL_MS = parseInt(process.env.PAYOUTS_PROCESS_INTERVAL_MS || '3600000', 10); // 1h default
 
 // Leader election: only one instance (the leader) should launch intervals.
 let __isLeader = false;
@@ -2011,6 +2012,27 @@ if (ENABLE_BACKGROUND) {
         try { const r = await runAlertChecks(); if (r.exploration.alerted || r.diversity.alerted) console.log('[BG][alerts] alerts dispatched'); } catch(e){ console.warn('[BG][alerts] error:', e.message); }
       }, ALERT_CHECK_INTERVAL_MS);
     } catch(e) { console.log('[BG][alerts] skipped:', e.message); }
+
+    // Leader-only: periodically process pending payouts if enabled and configured
+    const payoutsEnabled = process.env.PAYOUTS_ENABLED === 'true' && process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET;
+    if (payoutsEnabled) {
+      try {
+        const paypalPayoutService = require('./services/paypalPayoutService');
+        leaderInterval(async () => {
+          try {
+            const processed = await paypalPayoutService.processPendingPayouts(50);
+            if (processed && processed.processed) console.log(`[BG][payouts] processed ${processed.processed} pending payouts`);
+            try { require('./services/metricsRecorder').incrCounter('payouts.processed', processed.processed || 0); } catch(_){}
+            try { require('./services/statusRecorder').recordRun('payoutProcessor', { processed: processed.processed || 0, ok:true }); } catch(_){ }
+          } catch (e) {
+            console.warn('[BG][payouts] payout processing failed:', e && e.message);
+            try { require('./services/statusRecorder').recordRun('payoutProcessor', { error: e.message, ok: false }); } catch(_){ }
+          }
+        }, PAYOUTS_PROCESS_INTERVAL_MS);
+      } catch (e) { console.log('[BG][payouts] skipped: payout service not found', e.message); }
+    } else {
+      console.log('[BG][payouts] Payout processing disabled (PAYMENTS_ENABLED/PAYPAL not configured or PAYOUTS_ENABLED=false)');
+    }
 
     // Latency snapshot persistence (leader only)
     const LAT_SNAPSHOT_INTERVAL_MS = parseInt(process.env.LAT_SNAPSHOT_INTERVAL_MS || '60000', 10);
