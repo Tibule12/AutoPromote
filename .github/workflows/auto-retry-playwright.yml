@@ -8,6 +8,8 @@ on:
 jobs:
   rerun-if-failed:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
       - name: Auto-rerun Playwright on failure
         uses: actions/github-script@v6
@@ -27,5 +29,6 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             core.info(`Re-running workflow run ${run.id} for ${owner}/${repo}`);
-            await github.rest.actions.reRunWorkflowRun({ owner, repo, run_id: run.id });
+            // Use generic request to avoid REST method mismatch in octokit versions
+            await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun', { owner, repo, run_id: run.id });
             core.info('Request to re-run workflow submitted.');
