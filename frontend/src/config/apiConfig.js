@@ -27,6 +27,8 @@ const ADMIN_ENDPOINTS = {
   analytics: `${API_BASE_URL}/api/admin/analytics/overview`,
   users: `${API_BASE_URL}/api/admin/users`,
   content: `${API_BASE_URL}/api/admin/content`,
+  payouts: `${API_BASE_URL}/api/monetization/admin/payouts`,
+  payoutProcess: (id) => `${API_BASE_URL}/api/monetization/admin/payouts/${id}/process`,
 };
 
 // Export all endpoints
