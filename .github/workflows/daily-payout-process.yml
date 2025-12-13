@@ -1,0 +1,36 @@
+name: 'Daily Process Payouts (Sandbox only)'
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 3 * * *' # Daily at 03:00 UTC
+
+jobs:
+  process-payouts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run payout processor (sandbox)
+        env:
+          NODE_ENV: 'development'
+          PAYPAL_MODE: 'sandbox'
+          PAYOUTS_ENABLED: 'true'
+          ENABLE_BACKGROUND_JOBS: 'false'
+          # Provide these as GitHub secrets in your repo settings when enabling this workflow
+          # FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          # PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
+          # PAYPAL_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+          # GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT_JSON" ]; then echo 'WARNING: no FIREBASE_SERVICE_ACCOUNT_JSON defined — workflow will be a dry-run'; fi
+          node scripts/process-pending-payouts.js
