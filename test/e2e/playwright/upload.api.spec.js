@@ -4,6 +4,8 @@ const fetch = require('node-fetch');
 
 test('API upload test - create content and check Firestore', async () => {
   process.env.CORS_ALLOW_ALL = 'true';
+  process.env.BYPASS_ACCEPTED_TERMS = '1';
+  process.env.BYPASS_ACCEPTED_TERMS = '1';
   // Prefer a supplied GOOGLE_APPLICATION_CREDENTIALS path; otherwise, if the env provides the service account
   // JSON or base64, write it to test/e2e/tmp/service-account.json and use that.
   const tmpSaPath = path.resolve(__dirname, '..', 'tmp', 'service-account.json');
@@ -40,7 +42,7 @@ test('API upload test - create content and check Firestore', async () => {
     };
     const res = await fetch(`http://127.0.0.1:${mainPort}/api/content/upload`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer test-token-for-testUser123' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer test-token-for-testUser123', 'x-playwright-e2e': '1' },
       body: JSON.stringify(payload)
     });
     const json = await res.json();

@@ -85,7 +85,10 @@ function rateLimitMiddleware(limit = 10, windowMs = 60000) {
 router.post('/upload', authMiddleware, usageLimitMiddleware({ freeLimit: 10 }), validateBody(contentUploadSchema), rateLimitMiddleware(10, 60000), async (req, res) => {
   try {
     try { logger.debug('[upload] origin:', req.headers.origin, 'auth:', !!req.headers.authorization); } catch (e) {}
+    try { logger.debug('[upload.headers] x-playwright-e2e:', req.headers['x-playwright-e2e'], 'host', req.headers.host, 'user-agent', req.headers['user-agent']); } catch(e) { }
+    try { console.log('[upload.debug.headers]', Object.keys(req.headers).sort().map(k=>`${k}:${String(req.headers[k]).slice(0,120)}`).join(' | ')); } catch (e) {}
     const userId = req.userId || req.user?.uid;
+    try { console.debug('[upload] userUsage:', req.userUsage); } catch(e) {}
     // Bypass Firestore and complex viral flows for E2E tests when header present
     const hostHeader = req.headers && (req.headers.host || '');
     const isE2ETest = req.headers && (req.headers['x-playwright-e2e'] === '1' || (hostHeader && (hostHeader.includes('127.0.0.1') || hostHeader.includes('localhost'))));
