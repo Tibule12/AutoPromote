@@ -31,6 +31,15 @@ test.beforeEach(async ({ page }) => {
   await page.setExtraHTTPHeaders({ 'x-playwright-e2e': '1' });
   // Stub users/me to always return a logged-in user, to avoid hitting backend auth in SPA tests
   await page.route('**/api/users/me', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user: { uid: 'testUser', email: 'test@local', name: 'Test User' } }) }); });
+  // Ensure SPA sees a logged-in user by injecting a localStorage entry during page init
+  await page.addInitScript(() => {
+    try {
+      window.__E2E_BYPASS = true;
+      window.__E2E_TEST_TOKEN = 'e2e-test-token';
+      window.__E2E_BYPASS_UPLOADS = true;
+      localStorage.setItem('user', JSON.stringify({ uid: 'testUser', email: 'test@local', name: 'Test User', role: 'user' }));
+    } catch (e) { /* swallow in CI */ }
+  });
 });
 
 test('Per-platform card: Spotify preview, quality, upload', async ({ page }) => {
