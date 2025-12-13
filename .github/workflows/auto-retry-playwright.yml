@@ -1,0 +1,31 @@
+name: Auto Retry Playwright
+
+on:
+  workflow_run:
+    types: [completed]
+    workflows: ["Playwright E2E"]
+
+jobs:
+  rerun-if-failed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-rerun Playwright on failure
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            // Only rerun one time to avoid infinite loops
+            if (!run) return;
+            if (run.conclusion !== 'failure') {
+              core.info('Workflow did not fail; no rerun will be attempted.');
+              return;
+            }
+            if ((run.run_attempt || 1) > 1) {
+              core.info(`Run attempt ${run.run_attempt} > 1; skipping rerun.`);
+              return;
+            }
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            core.info(`Re-running workflow run ${run.id} for ${owner}/${repo}`);
+            await github.rest.actions.reRunWorkflowRun({ owner, repo, run_id: run.id });
+            core.info('Request to re-run workflow submitted.');
