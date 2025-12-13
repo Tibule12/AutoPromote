@@ -4,6 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../authMiddleware');
+const { db } = require('../firebaseAdmin');
 const monetizationService = require('../services/monetizationService');
 const referralGrowthEngine = require('../services/referralGrowthEngine');
 const { rateLimiter } = require('../middlewares/globalRateLimiter');
@@ -435,8 +436,17 @@ router.get('/admin/payouts', authMiddleware, async (req, res) => {
     if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: 'Unauthorized' });
     const status = req.query.status || 'pending';
     const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
-    const q = db.collection('payouts').where('status', '==', status).orderBy('requestedAt', 'desc').limit(limit);
-    const snap = await q.get();
+    let snap;
+    try {
+      // Attempt ordered query (may require composite index)
+      const q = db.collection('payouts').where('status', '==', status).orderBy('requestedAt', 'desc').limit(limit);
+      snap = await q.get();
+    } catch (e) {
+      // If index missing or ordering fails, fallback to a simpler query
+      console.warn('[AdminPayouts] ordered query failed, falling back to simple query:', e.message);
+      const q2 = db.collection('payouts').where('status', '==', status).limit(limit);
+      snap = await q2.get();
+    }
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     res.json({ success: true, items });
   } catch (err) {
