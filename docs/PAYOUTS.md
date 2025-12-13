@@ -31,6 +31,7 @@ Scripts
  - Background: Enable `ENABLE_BACKGROUND_JOBS=true` plus `PAYOUTS_ENABLED=true` to activate automatic processing.
 Admin operations
 - List pending payouts: `GET /api/monetization/admin/payouts?status=pending&limit=50` (admin only)
+- If you want sorted results using `requestedAt` and a `status` filter, add a composite Firestore index for `payouts` on `(status, requestedAt)` to avoid errors in queries requiring ordering. The admin route falls back to unsorted results if the index is missing.
 - Get payout details: `GET /api/monetization/admin/payouts/:id` (admin only)
 - Trigger manual processing (admin): `POST /api/monetization/admin/payouts/process` with optional `{ limit }`
 
