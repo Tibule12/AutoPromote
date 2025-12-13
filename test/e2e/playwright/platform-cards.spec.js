@@ -31,12 +31,19 @@ test.beforeEach(async ({ page }) => {
   await page.setExtraHTTPHeaders({ 'x-playwright-e2e': '1' });
   // Stub users/me to always return a logged-in user, to avoid hitting backend auth in SPA tests
   await page.route('**/api/users/me', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user: { uid: 'testUser', email: 'test@local', name: 'Test User' } }) }); });
+  // Also intercept absolute host URLs used in the production build
+  await page.route('https://autopromote.onrender.com/api/users/me', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user: { uid: 'testUser', email: 'test@local', name: 'Test User' } }) }); });
   // Stub common platform/status and other initial endpoints the SPA loads on startup
   await page.route('**/api/platform/status', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ raw: {} }) }); });
+  await page.route('https://autopromote.onrender.com/api/platform/status', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ raw: {} }) }); });
   await page.route('**/api/health', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'OK' }) }); });
+  await page.route('https://autopromote.onrender.com/api/health', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'OK' }) }); });
   await page.route('**/api/notifications', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ notifications: [] }) }); });
+  await page.route('https://autopromote.onrender.com/api/users/notifications', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ notifications: [] }) }); });
   await page.route('**/api/content/my-content', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: [] }) }); });
+  await page.route('https://autopromote.onrender.com/api/content/my-content', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: [] }) }); });
   await page.route('**/api/content/my-promotion-schedules', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ schedules: [] }) }); });
+  await page.route('https://autopromote.onrender.com/api/content/my-promotion-schedules', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ schedules: [] }) }); });
   // Ensure SPA sees a logged-in user by injecting a localStorage entry during page init
   await page.addInitScript(() => {
     try {
@@ -46,6 +53,10 @@ test.beforeEach(async ({ page }) => {
       localStorage.setItem('user', JSON.stringify({ uid: 'testUser', email: 'test@local', name: 'Test User', role: 'user' }));
     } catch (e) { /* swallow in CI */ }
   });
+  // Global logging for debugging SPA runtime issues in CI
+  page.on('console', msg => console.log('[PAGE LOG]', msg.text()));
+  page.on('pageerror', err => console.log('[PAGE ERROR]', err.message || err));
+  page.on('requestfailed', req => console.log('[REQUEST FAILED]', req.url(), req.failure() && req.failure().errorText));
 });
 
 test('Per-platform card: Spotify preview, quality, upload', async ({ page }) => {
@@ -343,12 +354,20 @@ test('Per-platform SPA: Spotify preview & upload (dashboard)', async ({ page }) 
     await page.addInitScript(() => { window.__E2E_BYPASS = true; window.__E2E_TEST_TOKEN = 'e2e-test-token'; window.__E2E_BYPASS_UPLOADS = true; localStorage.setItem('user', JSON.stringify({ uid: 'testUser', email: 'test@local', name: 'Test User', role: 'user' })); });
   await page.goto(BASE + '/#/dashboard', { waitUntil: 'networkidle' });
   page.on('console', msg => console.log('[PAGE LOG]', msg.text()));
+  page.on('pageerror', err => console.log('[PAGE ERROR]', err.message || err));
+  page.on('requestfailed', req => console.log('[REQUEST FAILED]', req.url(), req.failure() && req.failure().errorText));
   page.on('request', req => console.log('[REQUEST]', req.method(), req.url()));
   page.on('response', res => console.log('[RESPONSE]', res.status(), res.url()));
   const userStored = await page.evaluate(() => localStorage.getItem('user'));
   console.log('[debug] localStorage user on SPA test:', userStored);
   const navHtml = await page.evaluate(() => document.querySelector('nav') ? document.querySelector('nav').innerHTML : 'NO NAV');
   console.log('[debug] nav innerHTML first 400 chars:', navHtml && navHtml.substring ? navHtml.substring(0,400) : navHtml);
+  const docTitle = await page.title();
+  const readyState = await page.evaluate(() => document.readyState);
+  console.log('[debug] document.title:', docTitle, 'readyState:', readyState);
+  // Log script tags to detect missing bundles
+  const scriptSrcs = await page.evaluate(() => Array.from(document.querySelectorAll('script')).map(s => s.src || s.innerText && s.innerText.substring ? s.src || '[inline script]' : '[unknown]'));
+  console.log('[debug] found script srcs:', scriptSrcs.slice(0,20));
 
   // Find Upload nav button and open Upload panel
   await page.waitForSelector('nav li:has-text("Upload")', { timeout: 60000 });
