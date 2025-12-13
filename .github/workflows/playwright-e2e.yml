@@ -20,6 +20,9 @@ jobs:
       TWITTER_TOKEN_ENCRYPTION_KEY: ${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}
       ENABLE_TEST_USAGE_NO_DB: '1'
       FIREBASE_ADMIN_BYPASS: '1'
+      BYPASS_ACCEPTED_TERMS: '1'
+      CI_ROUTE_IMPORTS: '1'
+      CORS_ALLOW_ALL: 'true'
       OPENAI_LOGGING_ENABLED: '1'
     strategy:
       matrix:
