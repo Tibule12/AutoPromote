@@ -14,6 +14,7 @@ import AdminDiagnosticsButton from './components/AdminDiagnosticsButton';
 import ContentApprovalPanel from './components/ContentApprovalPanel';
 import AdvancedAnalyticsPanel from './components/AdvancedAnalyticsPanel';
 import PayPalSubscriptionPanel from './components/PayPalSubscriptionPanel';
+import AdminPayoutsPanel from './components/AdminPayoutsPanel';
 import './AdminDashboard.css';
 
 function AdminDashboard({ analytics, user, onLogout }) {
@@ -2832,6 +2833,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
       case 'moderation':
         return <ModerationPanel dashboardData={dashboardData} />;
 
+      case 'payouts':
+        return <AdminPayoutsPanel />;
+
       case 'subscriptions':
         return <PayPalSubscriptionPanel />;
 
@@ -2971,6 +2975,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
         <TabButton name="support" label="Support" icon="🎧" />
         <TabButton name="moderation" label="Moderation" icon="🛡️" />
         <TabButton name="subscriptions" label="Subscriptions" icon="💳" />
+        <TabButton name="payouts" label="Payouts" icon="💸" />
         <TabButton name="openai" label="AI Usage" icon="🤖" />
         <TabButton name="notifications" label="Notifications" icon="📧" />
       </div>
