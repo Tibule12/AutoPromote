@@ -25,6 +25,14 @@ test.afterAll(async () => {
   if (serverProcess) serverProcess.kill();
 });
 
+// Global test setup for SPA tests:
+test.beforeEach(async ({ page }) => {
+  // ensure E2E bypass header is present everywhere
+  await page.setExtraHTTPHeaders({ 'x-playwright-e2e': '1' });
+  // Stub users/me to always return a logged-in user, to avoid hitting backend auth in SPA tests
+  await page.route('**/api/users/me', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user: { uid: 'testUser', email: 'test@local', name: 'Test User' } }) }); });
+});
+
 test('Per-platform card: Spotify preview, quality, upload', async ({ page }) => {
   // Mock quality-check
   await page.route('**/api/content/quality-check', async (route) => {
