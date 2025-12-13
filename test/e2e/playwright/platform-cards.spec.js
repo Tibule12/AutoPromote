@@ -31,6 +31,12 @@ test.beforeEach(async ({ page }) => {
   await page.setExtraHTTPHeaders({ 'x-playwright-e2e': '1' });
   // Stub users/me to always return a logged-in user, to avoid hitting backend auth in SPA tests
   await page.route('**/api/users/me', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user: { uid: 'testUser', email: 'test@local', name: 'Test User' } }) }); });
+  // Stub common platform/status and other initial endpoints the SPA loads on startup
+  await page.route('**/api/platform/status', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ raw: {} }) }); });
+  await page.route('**/api/health', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'OK' }) }); });
+  await page.route('**/api/notifications', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ notifications: [] }) }); });
+  await page.route('**/api/content/my-content', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: [] }) }); });
+  await page.route('**/api/content/my-promotion-schedules', async (route) => { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ schedules: [] }) }); });
   // Ensure SPA sees a logged-in user by injecting a localStorage entry during page init
   await page.addInitScript(() => {
     try {
