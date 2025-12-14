@@ -1,6 +1,6 @@
 name: Functions Emulator Smoke Tests
 
-on:
+"on":
   workflow_dispatch: {}
   pull_request:
     types: [opened, synchronize, reopened]
@@ -24,7 +24,8 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-      - name: Diagnostic: show repo and runner info
+
+      - name: "Diagnostic: show repo and runner info"
         run: |
           echo "PWD: $PWD"
           echo "Listing repo root:" && ls -la
@@ -33,12 +34,12 @@ jobs:
         shell: bash
 
       - name: Secret present (non-fatal)
-        if: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+        if: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT != '' }}
         run: |
           echo "FIREBASE_ADMIN_SERVICE_ACCOUNT appears present (not showing content)."
 
       - name: Secret missing (diagnostic)
-        if: ${{ !secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+        if: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT == '' }}
         run: |
           echo "FIREBASE_ADMIN_SERVICE_ACCOUNT appears missing; secrets may be restricted for PRs or forks."
 
