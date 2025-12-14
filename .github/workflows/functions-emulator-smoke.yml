@@ -26,21 +26,30 @@ jobs:
         run: |
           npm ci
 
-      - name: Validate SA secret
+      - name: Fail if `FIREBASE_ADMIN_SERVICE_ACCOUNT` not set
+        if: ${{ !secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
         run: |
-          if [ -n "${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}" ]; then
-            echo "Using FIREBASE_ADMIN_SERVICE_ACCOUNT secret";
-          else
-            echo "ERROR: No service account secret found. Set FIREBASE_ADMIN_SERVICE_ACCOUNT.";
-            exit 1;
-          fi
+          echo "ERROR: FIREBASE_ADMIN_SERVICE_ACCOUNT secret is not set. Add the service account secret to repository secrets and retry.";
+          exit 1
         shell: bash
 
+      - name: Confirm secret is present
+        if: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+        run: echo "FIREBASE_ADMIN_SERVICE_ACCOUNT is present"
+
       - name: Write service account
+        if: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
         run: |
+          set -euo pipefail
           echo "$GITHUB_WORKSPACE" && echo "Writing service account from secret"
-          echo "${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}" | base64 --decode > $GITHUB_WORKSPACE/sa.json
-          ls -al $GITHUB_WORKSPACE/sa.json
+          SECRET_CONTENT="${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}"
+          # If the secret starts with '{' assume it's raw JSON, otherwise treat as base64
+          if printf "%s" "$SECRET_CONTENT" | head -c 1 | grep -q '{'; then
+            printf "%s" "$SECRET_CONTENT" > "$GITHUB_WORKSPACE/sa.json"
+          else
+            printf "%s" "$SECRET_CONTENT" | base64 --decode > "$GITHUB_WORKSPACE/sa.json"
+          fi
+          ls -al "$GITHUB_WORKSPACE/sa.json"
         shell: bash
 
       - name: Set GOOGLE_APPLICATION_CREDENTIALS
