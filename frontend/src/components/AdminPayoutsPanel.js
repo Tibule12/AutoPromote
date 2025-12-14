@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AdminTable from './AdminTable';
-import { ADMIN_ENDPOINTS } from '../config';
+import { API_ENDPOINTS } from '../config';
 import { auth } from '../firebaseClient';
 import '../AdminDashboard.css';
 
@@ -16,16 +16,33 @@ const AdminPayoutsPanel = ({ token }) => {
     try {
       let tokenHeader = {};
       try { const idToken = auth.currentUser ? await auth.currentUser.getIdToken(true) : null; if (idToken) tokenHeader = { Authorization: `Bearer ${idToken}` }; } catch (_) { tokenHeader = {}; }
-      const res = await fetch(`${ADMIN_ENDPOINTS.payouts}?status=pending&limit=200`, { headers: tokenHeader });
-      const json = await res.json();
-      if (json && json.items) setPayouts(json.items);
-      else setPayouts([]);
+      // Retry the request a few times to account for E2E route-intercept race conditions
+      let attempts = 0;
+      let lastErr = null;
+      while (attempts < 3) {
+        try {
+          const res = await fetch(`${API_ENDPOINTS.ADMIN_PAYOUTS}?status=pending&limit=200`, { headers: tokenHeader });
+          const json = await res.json().catch(() => null);
+          if (json && json.items) setPayouts(json.items);
+          else setPayouts([]);
+          lastErr = null;
+          break;
+        } catch (e) {
+          lastErr = e;
+          attempts += 1;
+          // small backoff
+          await new Promise(r => setTimeout(r, 200));
+        }
+      }
+      if (lastErr) throw lastErr;
     } catch (e) {
       setError(e.message || 'Failed to fetch payouts');
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchPayouts(); // eslint-disable-next-line react-hooks/exhaustive-deps }, []);
+  useEffect(() => {
+    fetchPayouts();
+  }, []);
 
   const handleView = (p) => setSelected(p);
   const handleProcess = async (p) => {
@@ -33,7 +50,7 @@ const AdminPayoutsPanel = ({ token }) => {
     try {
       let tokenHeader = {};
       try { const idToken = auth.currentUser ? await auth.currentUser.getIdToken(true) : null; if (idToken) tokenHeader = { Authorization: `Bearer ${idToken}` }; } catch (_) { tokenHeader = {}; }
-      const res = await fetch(ADMIN_ENDPOINTS.payoutProcess(p.id), { method: 'POST', headers: tokenHeader });
+      const res = await fetch(API_ENDPOINTS.ADMIN_PAYOUT_PROCESS(p.id), { method: 'POST', headers: tokenHeader });
       const json = await res.json();
       if (json.success) {
         alert('Payout processed (dry-run if payouts not enabled)');
