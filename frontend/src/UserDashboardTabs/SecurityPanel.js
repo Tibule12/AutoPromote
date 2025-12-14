@@ -5,6 +5,20 @@ import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import './SecurityPanel.css';
 import { API_BASE_URL } from '../config';
 import { parseJsonSafe } from '../utils/parseJsonSafe';
+import toast from 'react-hot-toast';
+
+// Prefer same-origin during local development to avoid hitting production API
+function resolveApiPath(path) {
+  try {
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+    const isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(hostname) || hostname.endsWith('.local');
+    const base = API_BASE_URL || process.env.REACT_APP_API_BASE_URL || '';
+    if (isLocal) return `${''}${path}`;
+    return `${base || ''}${path}`;
+  } catch (e) {
+    return `${process.env.REACT_APP_API_BASE_URL || API_BASE_URL || ''}${path}`;
+  }
+}
 
 const SecurityPanel = ({ user }) => {
   const [passwordForm, setPasswordForm] = useState({
@@ -88,19 +102,44 @@ const SecurityPanel = ({ user }) => {
         return;
       }
       const token = await currentUser.getIdToken();
-      const base = API_BASE_URL || process.env.REACT_APP_API_BASE_URL || '';
-      // If base is empty, use same-origin `/api/...` so local dev proxies work
-      const url = `${base}${base ? '' : ''}/api/users/connections`;
-      const response = await fetch(`${base || ''}/api/users/connections`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const endpoint = resolveApiPath('/api/users/connections');
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 7000);
+      let response;
+      try {
+        response = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal });
+      } catch (err) {
+        // If local dev, try same-origin fallback
+        const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+        const isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(hostname) || hostname.endsWith('.local');
+        if (isLocal) {
+          try {
+            clearTimeout(timeout);
+            const fallbackCtrl = new AbortController();
+            const fallbackTimeout = setTimeout(() => fallbackCtrl.abort(), 7000);
+            response = await fetch('/api/users/connections', { headers: { Authorization: `Bearer ${token}` }, signal: fallbackCtrl.signal });
+            clearTimeout(fallbackTimeout);
+          } catch (fallbackErr) {
+            console.error('Failed to fetch connections (fallback):', fallbackErr);
+            toast.error('Failed to load connected platforms. Is the backend running locally?');
+            setConnectedPlatforms([]);
+            setLoadingPlatforms(false);
+            return;
+          }
+        } else {
+          console.error('Failed to fetch connections:', err);
+          toast.error('Failed to load connected platforms. Check your network or API configuration.');
+          setConnectedPlatforms([]);
+          setLoadingPlatforms(false);
+          return;
         }
-      });
-      
-      if (response.ok) {
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      if (response && response.ok) {
         const parsed = await parseJsonSafe(response);
         const data = parsed.json || null;
-        // Debug: connections loaded (removed verbose logging for privacy)
         const platforms = Object.entries(data?.connections || {}).map(([key, value]) => ({
           id: key,
           provider: value.provider || key,
@@ -108,11 +147,12 @@ const SecurityPanel = ({ user }) => {
           scope: value.scope || 'Unknown',
           status: value.mode || 'active'
         }));
-        // Debug: processed platforms - removing raw logging to avoid leaking tokens
         setConnectedPlatforms(platforms);
-      } else {
+      } else if (response) {
         const parsed = await parseJsonSafe(response);
         console.error('Failed to fetch connections:', parsed.status || response.status, parsed.textPreview || parsed.error || '');
+        setConnectedPlatforms([]);
+      } else {
         setConnectedPlatforms([]);
       }
     } catch (error) {

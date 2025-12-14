@@ -95,19 +95,43 @@ const PayPalSubscriptionPanel = () => {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(endpoint, { headers });
-        parsed = await parseJsonSafe(res);
         // If 401, try forced token refresh once
-        if (parsed && parsed.status === 401 && token) {
+        if (res.status === 401 && token) {
           try {
             token = await currentUser.getIdToken(true);
             const retryRes = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` } });
             parsed = await parseJsonSafe(retryRes);
           } catch (e) {
-            // ignore
+            parsed = { ok: false, status: 'error', error: e.message };
           }
+        } else {
+          parsed = await parseJsonSafe(res);
         }
+
+        // If endpoint not found (404), fall back to free plan silently
+        if (parsed && parsed.status === 404) {
+          console.warn('PayPal subscription status endpoint returned 404; falling back to free plan');
+          setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
+          setLoading(false);
+          return;
+        }
+
       } catch (e) {
-        parsed = { ok: false, status: 'error', error: e.message };
+        // Network or other fetch error: if we're on localhost, try same-origin fallback
+        const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+        const isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(hostname) || hostname.endsWith('.local');
+        if (isLocal) {
+          try {
+            const fallbackRes = await fetch('/api/paypal-subscriptions/status', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+            parsed = await parseJsonSafe(fallbackRes);
+          } catch (fallbackErr) {
+            console.error('Failed to fetch PayPal subscription status (fallback):', fallbackErr);
+            parsed = { ok: false, status: 'error', error: fallbackErr.message };
+          }
+        } else {
+          console.error('Failed to fetch PayPal subscription status:', e);
+          parsed = { ok: false, status: 'error', error: e.message };
+        }
       }
 
       if (parsed && parsed.ok && parsed.json) {
@@ -116,7 +140,14 @@ const PayPalSubscriptionPanel = () => {
         if (parsed && parsed.status === 401) {
           // Unauthorized after refresh: prompt user
           toast.error('Please sign in to view subscription status');
+        } else if (parsed && parsed.status === 404) {
+          // Already handled above, but be defensive
+          console.warn('PayPal subscription status not available (404)');
+        } else if (parsed && parsed.status === 'error') {
+          // Non-fatal network/config issue
+          console.warn('PayPal subscription fetch error:', parsed.error || parsed.textPreview || parsed.status);
         }
+
         // Always fallback to free plan
         setCurrentSubscription({ planId: 'free', planName: 'Free', status: 'active', features: {} });
       }
