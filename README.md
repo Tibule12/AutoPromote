@@ -68,6 +68,7 @@ AutoPromote is a free, automated content promotion platform that helps creators 
 
 ## Tech Stack
 
+
 - Frontend: React (SPA served from `frontend/build`)
 - Backend: Node.js + Express (`src/server.js`)
 - Firebase: Firestore, Auth, Storage, Cloud Functions (free tier)
