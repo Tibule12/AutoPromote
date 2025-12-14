@@ -1,0 +1,50 @@
+name: Functions Emulator Smoke Tests
+
+"on":
+  workflow_dispatch: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  smoke-tests:
+    name: Emulator Smoke Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FIREBASE_PROJECT: autopromote-cc6d3
+      FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: "Diagnostic: show repo and runner info"
+        run: |
+          echo "PWD: $PWD"
+          echo "Listing repo root:" && ls -la
+          echo "Runner info:" && uname -a || true
+          echo "Filtered env:" && env | grep -E 'GITHUB_|RUNNER_|HOME|USER' || true
+        shell: bash
+
+      - name: Secret present (non-fatal)
+        if: ${{ env.FIREBASE_ADMIN_SERVICE_ACCOUNT != '' }}
+        run: |
+          echo "FIREBASE_ADMIN_SERVICE_ACCOUNT appears present (not showing content)."
+
+      - name: Secret missing (diagnostic)
+        if: ${{ env.FIREBASE_ADMIN_SERVICE_ACCOUNT == '' }}
+        run: |
+          echo "FIREBASE_ADMIN_SERVICE_ACCOUNT appears missing; secrets may be restricted for PRs or forks."
+
+      - name: Smoke test placeholder (no side effects)
+        run: |
+          echo "Placeholder: emulators test skipped in diagnostic run."
+          echo "If this runs and logs appear, workflow is syntactically valid and GitHub is executing jobs."
