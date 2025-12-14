@@ -38,25 +38,35 @@ function clipRateLimit(req, res, next) {
 router.post('/analyze', authMiddleware, clipRateLimit, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
+    console.log('[ClipRoutes] incoming request: userId=%s userPresent=%s', userId, !!req.user);
     const { contentId, videoUrl } = req.body;
 
     if (!contentId || !videoUrl) {
       return res.status(400).json({ error: 'contentId and videoUrl are required' });
     }
 
-    // Verify user owns this content
+    // Verify user owns this content (support both snake_case and camelCase schemas)
     const contentDoc = await db.collection('content').doc(contentId).get();
     if (!contentDoc.exists) {
       return res.status(404).json({ error: 'Content not found' });
     }
 
-    const contentData = contentDoc.data();
-    if (contentData.userId !== userId) {
+    const contentData = contentDoc.data() || {};
+    const contentOwner = contentData.userId || contentData.user_id || contentData.user || null;
+    if (contentOwner !== userId) {
+      console.warn('[ClipRoutes] Ownership mismatch: content=%s owner=%s requester=%s', contentId, contentOwner, userId);
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
     // Start analysis (this may take a while for long videos)
-    const result = await videoClippingService.analyzeVideo(videoUrl, contentId, userId);
+    console.log('[ClipRoutes] Starting analysis for content=%s user=%s', contentId, userId);
+    let result;
+    try {
+      result = await videoClippingService.analyzeVideo(videoUrl, contentId, userId);
+    } catch (err) {
+      console.error('[ClipRoutes] analyzeVideo threw:', err && err.message, err && err.stack);
+      throw err;
+    }
 
     // Update content document with analysis reference
     await db.collection('content').doc(contentId).update({
