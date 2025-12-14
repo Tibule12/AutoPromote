@@ -6,6 +6,18 @@ import { auth } from '../firebaseClient';
 import { parseJsonSafe } from '../utils/parseJsonSafe';
 import { API_BASE_URL } from '../config';
 import toast from 'react-hot-toast';
+
+// Return a resolved API URL that prefers same-origin during local development
+function resolveApi(path) {
+  try {
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+    const isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(hostname) || hostname.endsWith('.local');
+    const base = (!isLocal && API_BASE_URL) ? API_BASE_URL : '';
+    return `${base || ''}${path}`;
+  } catch (e) {
+    return `${API_BASE_URL || ''}${path}`;
+  }
+}
 import './PayPalSubscriptionPanel.css';
 
 const PayPalSubscriptionPanel = () => {
@@ -53,7 +65,8 @@ const PayPalSubscriptionPanel = () => {
 
   const fetchPlans = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/plans`);
+      const url = resolveApi('/api/paypal-subscriptions/plans');
+      const res = await fetch(url);
       const parsed = await parseJsonSafe(res);
       if (parsed.ok && parsed.json && Array.isArray(parsed.json.plans)) {
         setPlans(parsed.json.plans || []);
@@ -77,7 +90,7 @@ const PayPalSubscriptionPanel = () => {
       let token = null;
       try { token = await currentUser.getIdToken(); } catch (e) { token = null; }
 
-      const endpoint = `${API_BASE_URL || window.location.origin}/api/paypal-subscriptions/status`;
+      const endpoint = resolveApi('/api/paypal-subscriptions/status');
       let parsed = null;
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -127,7 +140,8 @@ const PayPalSubscriptionPanel = () => {
         setUsage(null);
         return;
       }
-      const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/usage`, {
+      const usageUrl = resolveApi('/api/paypal-subscriptions/usage');
+      const res = await fetch(usageUrl, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const parsed = await parseJsonSafe(res);
