@@ -3,6 +3,7 @@ import { auth, db } from '../firebaseClient';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, multiFactor, PhoneAuthProvider, PhoneMultiFactorGenerator, RecaptchaVerifier, TotpMultiFactorGenerator, TotpSecret } from 'firebase/auth';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import './SecurityPanel.css';
+import { API_BASE_URL } from '../config';
 import { parseJsonSafe } from '../utils/parseJsonSafe';
 
 const SecurityPanel = ({ user }) => {
@@ -87,7 +88,10 @@ const SecurityPanel = ({ user }) => {
         return;
       }
       const token = await currentUser.getIdToken();
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'https://api.autopromote.org'}/api/users/connections`, {
+      const base = API_BASE_URL || process.env.REACT_APP_API_BASE_URL || '';
+      // If base is empty, use same-origin `/api/...` so local dev proxies work
+      const url = `${base}${base ? '' : ''}/api/users/connections`;
+      const response = await fetch(`${base || ''}/api/users/connections`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
