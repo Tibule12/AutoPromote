@@ -64,6 +64,8 @@ class VideoClippingService {
 
       // 7. Save analysis to Firestore
       const analysisId = crypto.randomBytes(16).toString('hex');
+      // Persist a rich topClips payload so downstream `generateClip` can find
+      // clips by `id` and access caption/platform suggestions.
       await db.collection('clip_analyses').doc(analysisId).create({
         userId,
         contentId,
@@ -73,10 +75,15 @@ class VideoClippingService {
         scenes: scenes.length,
         clipSuggestions: clipSuggestions.length,
         topClips: clipSuggestions.slice(0, 10).map(c => ({
+          id: c.id,
           start: c.start,
           end: c.end,
+          duration: c.duration,
           score: c.viralScore,
-          reason: c.reason
+          reason: c.reason,
+          platforms: c.platforms || [],
+          captionSuggestion: c.captionSuggestion || null,
+          text: c.text || ''
         })),
         createdAt: new Date().toISOString(),
         status: 'completed'
