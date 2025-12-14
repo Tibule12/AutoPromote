@@ -28,18 +28,18 @@ jobs:
 
       - name: Validate SA secret
         run: |
-          if [ -z "${{ secrets.SA_KEY_BASE64 }}" ]; then
-            echo "ERROR: SA_KEY_BASE64 secret is not set. Add the service account secret to repository secrets and retry.";
-            exit 1;
+          if [ -n "${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}" ]; then
+            echo "Using FIREBASE_ADMIN_SERVICE_ACCOUNT secret";
           else
-            echo "SA_KEY_BASE64 is present";
+            echo "ERROR: No service account secret found. Set FIREBASE_ADMIN_SERVICE_ACCOUNT.";
+            exit 1;
           fi
         shell: bash
 
       - name: Write service account
         run: |
           echo "$GITHUB_WORKSPACE" && echo "Writing service account from secret"
-          echo "${{ secrets.SA_KEY_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/sa.json
+          echo "${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}" | base64 --decode > $GITHUB_WORKSPACE/sa.json
           ls -al $GITHUB_WORKSPACE/sa.json
         shell: bash
 
