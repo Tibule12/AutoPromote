@@ -117,8 +117,20 @@ function App() {
         (async () => {
           try {
             const testToken = (window.__E2E_TEST_TOKEN || 'e2e-test-token');
-            const testUser = { uid: 'e2e-user', email: 'e2e@local', name: 'E2E User', role: 'user', token: testToken };
+            // Prefer an existing user object in localStorage (tests may set an admin user there).
+            let testUser = null;
+            try {
+              const raw = localStorage.getItem('user');
+              if (raw) {
+                testUser = JSON.parse(raw);
+                testUser.token = testToken;
+              }
+            } catch (_) { /* ignore parse errors */ }
+            if (!testUser) {
+              testUser = { uid: 'e2e-user', email: 'e2e@local', name: 'E2E User', role: 'user', token: testToken };
+            }
             setUser(testUser);
+            if (testUser.role === 'admin' || testUser.isAdmin === true) setIsAdmin(true);
             await fetchUserContent(testToken);
           } catch (_) {}
         })();

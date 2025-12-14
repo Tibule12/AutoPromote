@@ -33,6 +33,8 @@ export const API_ENDPOINTS = {
   
   // Admin endpoints
   ADMIN_ANALYTICS: `${API_BASE_URL}/api/admin/analytics/overview`,
+  ADMIN_PAYOUTS: `${API_BASE_URL}/api/monetization/admin/payouts`,
+  ADMIN_PAYOUT_PROCESS: (id) => `${API_BASE_URL}/api/monetization/admin/payouts/${id}/process`,
   
   // TikTok endpoints
   TIKTOK_AUTH_START: `${API_BASE_URL}/api/tiktok/auth/start`,
