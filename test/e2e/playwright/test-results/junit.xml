@@ -1,8 +1,0 @@
-<testsuites id="" name="" tests="1" failures="0" skipped="1" errors="0" time="23.452291">
-<testsuite name="clip-studio.spec.js" timestamp="2025-12-14T14:41:32.828Z" hostname="chromium" tests="1" failures="0" skipped="1" time="10.058" errors="0">
-<testcase name="AI Clip Studio: analyze and generate clip (SPA)" classname="clip-studio.spec.js" time="10.058">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-</testsuites>
