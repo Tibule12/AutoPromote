@@ -57,6 +57,15 @@ test.beforeEach(async ({ page }) => {
   page.on('console', msg => console.log('[PAGE LOG]', msg.text()));
   page.on('pageerror', err => console.log('[PAGE ERROR]', err.message || err));
   page.on('requestfailed', req => console.log('[REQUEST FAILED]', req.url(), req.failure() && req.failure().errorText));
+  // Dismiss any unexpected dialogs that may appear during CI runs
+  page.on('dialog', async dialog => {
+    try {
+      console.log('[PAGE DIALOG]', dialog.message());
+      await dialog.dismiss();
+    } catch (e) {
+      // ignore dialog handling errors — do not let unexpected dialogs crash tests
+    }
+  });
 });
 
 test('Per-platform card: Spotify preview, quality, upload', async ({ page }) => {
