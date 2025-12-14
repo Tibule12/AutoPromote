@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 30
     env:
       FIREBASE_PROJECT: autopromote-cc6d3
+      FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,12 +35,12 @@ jobs:
         shell: bash
 
       - name: Secret present (non-fatal)
-        if: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT != '' }}
+        if: ${{ env.FIREBASE_ADMIN_SERVICE_ACCOUNT != '' }}
         run: |
           echo "FIREBASE_ADMIN_SERVICE_ACCOUNT appears present (not showing content)."
 
       - name: Secret missing (diagnostic)
-        if: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT == '' }}
+        if: ${{ env.FIREBASE_ADMIN_SERVICE_ACCOUNT == '' }}
         run: |
           echo "FIREBASE_ADMIN_SERVICE_ACCOUNT appears missing; secrets may be restricted for PRs or forks."
 
