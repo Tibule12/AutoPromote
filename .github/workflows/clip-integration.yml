@@ -1,0 +1,56 @@
+name: AI Clip Integration Test
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  clip-integration:
+    name: Run AI Clip integration test (gated)
+    runs-on: ubuntu-latest
+    env:
+      RUN_INTEGRATION_CLIP: ${{ secrets.RUN_INTEGRATION_CLIP }}
+      FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GOOGLE_CLOUD_API_KEY: ${{ secrets.GOOGLE_CLOUD_API_KEY }}
+    steps:
+      - name: Check gate
+        run: |
+          if [ -z "${RUN_INTEGRATION_CLIP}" ]; then
+            echo "RUN_INTEGRATION_CLIP not set; skipping integration job.";
+            exit 0;
+          fi
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        if: ${{ env.RUN_INTEGRATION_CLIP != '' }}
+        run: npm ci
+
+      - name: Install ffmpeg
+        if: ${{ env.RUN_INTEGRATION_CLIP != '' }}
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Ensure service account exists and write it
+        if: ${{ env.RUN_INTEGRATION_CLIP != '' }}
+        run: |
+          node ./scripts/write-service-account.js || true
+        env:
+          FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+
+      - name: Run AI Clip integration test
+        if: ${{ env.RUN_INTEGRATION_CLIP != '' }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/test/e2e/tmp/service-account.json
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          # Run the integration test for clip generation
+          RUN_INTEGRATION_CLIP=1 npx jest src/__tests__/videoClippingService.integration.test.js -i --runInBand
+
+      - name: Cleanup service account
+        if: always()
+        run: rm -f test/e2e/tmp/service-account.json || true
