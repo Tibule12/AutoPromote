@@ -469,6 +469,23 @@ router.get('/admin/payouts/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Admin: process a single payout by id
+router.post('/admin/payouts/:id/process', authMiddleware, async (req, res) => {
+  try {
+    if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: 'Unauthorized' });
+    const id = req.params.id;
+    const doc = await db.collection('payouts').doc(id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Payout not found' });
+    const paypalPayoutService = require('../services/paypalPayoutService');
+    // Ensure payouts enabled or allow dry-run via env
+    const result = await paypalPayoutService.executePayout(doc);
+    res.json({ success: true, result });
+  } catch (err) {
+    console.error('Error processing payout:', err);
+    res.status(500).json({ error: 'Failed to process payout' });
+  }
+});
+
 // GET /earnings/leaderboard - Get top earning creators
 router.get('/earnings/leaderboard', async (req, res) => {
   try {
