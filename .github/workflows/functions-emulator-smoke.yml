@@ -1,0 +1,53 @@
+name: Functions Emulator Smoke Tests
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  smoke-tests:
+    name: Emulator Smoke Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FIREBASE_PROJECT: autopromote-cc6d3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Write service account
+        if: secrets.SA_KEY_BASE64 != ''
+        run: |
+          echo "$GITHUB_WORKSPACE" && echo "Writing service account from secret"
+          echo "${{ secrets.SA_KEY_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/sa.json
+          ls -al $GITHUB_WORKSPACE/sa.json
+        shell: bash
+
+      - name: Set GOOGLE_APPLICATION_CREDENTIALS
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/sa.json
+        run: echo "Using GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS"
+
+      - name: Run emulator smoke test
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/sa.json
+        run: |
+          set -o pipefail
+          npx firebase emulators:exec --project $FIREBASE_PROJECT --only functions,firestore,storage "node scripts/seed-autopilot-emulator.js && node scripts/test-landing-page-trigger.js" 2>&1 | tee emulator-test.log
+
+      - name: Upload emulator logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emulator-logs
+          path: emulator-test.log
