@@ -92,7 +92,7 @@ router.get("/user", authMiddleware, async (req, res) => {
 
     // Parse time range
     const now = new Date();
-    let startDate = new Date();
+    const startDate = new Date();
     if (range === "24h") startDate.setHours(now.getHours() - 24);
     else if (range === "7d") startDate.setDate(now.getDate() - 7);
     else if (range === "30d") startDate.setDate(now.getDate() - 30);

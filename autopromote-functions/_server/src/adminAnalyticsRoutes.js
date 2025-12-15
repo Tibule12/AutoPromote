@@ -34,9 +34,9 @@ router.get("/overview", adminLimiter, authMiddleware, async (req, res) => {
     }
 
     // Initialize empty arrays for collections that might not exist yet
-    let users = [];
-    let content = [];
-    let promotionSchedules = [];
+    const users = [];
+    const content = [];
+    const promotionSchedules = [];
 
     try {
       // Get all users
@@ -439,7 +439,7 @@ router.get("/content", adminLimiter, authMiddleware, async (req, res) => {
 // Get platform performance analytics
 router.get("/platform-performance", adminLimiter, authMiddleware, async (req, res) => {
   // Ensure period is available to both try and catch blocks
-  let period = req.query && req.query.period ? req.query.period : "30d";
+  const period = req.query && req.query.period ? req.query.period : "30d";
   try {
     // Check if user is admin (check both admin collection and legacy methods)
     if (
@@ -519,7 +519,7 @@ router.get("/platform-performance", adminLimiter, authMiddleware, async (req, re
 // Get revenue trends over time
 router.get("/revenue-trends", adminLimiter, authMiddleware, async (req, res) => {
   // Ensure period is available to both try and catch blocks
-  let period = req.query && req.query.period ? req.query.period : "30d";
+  const period = req.query && req.query.period ? req.query.period : "30d";
   try {
     // Check if user is admin (check both admin collection and legacy methods)
     if (

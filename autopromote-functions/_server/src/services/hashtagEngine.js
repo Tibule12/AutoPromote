@@ -34,7 +34,7 @@ if (bypass) {
   module.exports = {
     generateCustomHashtags: async ({ content = {}, platform = "tiktok", customTags = [] } = {}) => {
       // Minimal deterministic no-op implementation for tests
-      let tags = customTags && customTags.length ? customTags.slice() : ["#ap"];
+      const tags = customTags && customTags.length ? customTags.slice() : ["#ap"];
       // Ensure Reddit has at least two tags so formatting is comma-separated in tests
       if (platform === "reddit" && tags.length < 2) tags.push("#rd2");
       return {
@@ -436,7 +436,7 @@ function formatHashtagsForPlatform(hashtags, platform) {
       return hashtags.map(tag => tag.replace("#", "")).join(", ");
     case "twitter": {
       // Space-separated, but limit to 280 chars
-      let result = hashtags.join(" ");
+      const result = hashtags.join(" ");
       return result.length > 200 ? hashtags.slice(0, 8).join(" ") : result;
     }
     case "facebook":

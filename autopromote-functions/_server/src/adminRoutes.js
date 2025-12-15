@@ -405,7 +405,7 @@ router.delete("/users/:id", authMiddleware, adminOnly, async (req, res) => {
 // Get platform analytics
 router.get("/analytics", authMiddleware, adminOnly, async (req, res) => {
   // Make period available to try/catch
-  let period = req.query && req.query.period ? req.query.period : "7d";
+  const period = req.query && req.query.period ? req.query.period : "7d";
   try {
     let days = 7;
 

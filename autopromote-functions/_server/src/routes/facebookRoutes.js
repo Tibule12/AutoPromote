@@ -17,12 +17,10 @@ const DASHBOARD_URL = process.env.DASHBOARD_URL || "https://www.autopromote.org"
 
 function ensureEnv(res) {
   if (!FB_CLIENT_ID || !FB_CLIENT_SECRET || !FB_REDIRECT_URI) {
-    return res
-      .status(500)
-      .json({
-        error:
-          "Facebook is not configured. Missing FB_CLIENT_ID, FB_CLIENT_SECRET, or FB_REDIRECT_URI.",
-      });
+    return res.status(500).json({
+      error:
+        "Facebook is not configured. Missing FB_CLIENT_ID, FB_CLIENT_SECRET, or FB_REDIRECT_URI.",
+    });
   }
 }
 
@@ -168,12 +166,10 @@ router.get("/callback", async (req, res) => {
       if (error_code) url.searchParams.set("code", String(error_code));
       return res.redirect(url.toString());
     } catch (_) {
-      return res
-        .status(400)
-        .json({
-          error: "OAuth error",
-          details: { error, error_description, error_message, error_reason, error_code },
-        });
+      return res.status(400).json({
+        error: "OAuth error",
+        details: { error, error_description, error_message, error_reason, error_code },
+      });
     }
   }
   if (!code) return res.status(400).json({ error: "Missing code" });
@@ -204,12 +200,10 @@ router.get("/callback", async (req, res) => {
           url.searchParams.set("reason", String(tokenData.error.code));
         return res.redirect(url.toString());
       } catch (_) {
-        return res
-          .status(400)
-          .json({
-            error: "Failed to obtain Facebook access token",
-            details: { error: tokenData.error },
-          });
+        return res.status(400).json({
+          error: "Failed to obtain Facebook access token",
+          details: { error: tokenData.error },
+        });
       }
     }
     // Fetch managed pages
@@ -234,7 +228,7 @@ router.get("/callback", async (req, res) => {
     }
 
     if (uidFromState) {
-      let stored = {
+      const stored = {
         provider: "facebook",
         token_type: tokenData.token_type,
         expires_in: tokenData.expires_in,
@@ -357,7 +351,7 @@ router.post("/upload", authMiddleware, async (req, res) => {
 
     // Build endpoint/body
     let endpoint = `https://graph.facebook.com/${encodeURIComponent(pageId)}/feed`;
-    let body = { access_token: page.access_token };
+    const body = { access_token: page.access_token };
     if (content.type === "image" && content.url) {
       endpoint = `https://graph.facebook.com/${encodeURIComponent(pageId)}/photos`;
       body.url = content.url;

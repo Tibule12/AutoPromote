@@ -22,7 +22,7 @@ function analyzeMetadata(metadata) {
   const height = videoStream ? videoStream.height : 0;
   const videoBitrate = videoStream ? videoStream.bit_rate : 0;
   const audioBitrate = audioStream ? audioStream.bit_rate : 0;
-  let feedback = [];
+  const feedback = [];
   let needsEnhancement = false;
 
   if (width < 1280 || height < 720) {

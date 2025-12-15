@@ -618,15 +618,13 @@ router.post("/:platform/auth/simulate", authMiddleware, platformWriteLimiter, as
 
     // Post-connection hooks: create event, update user's connectedPlatforms list and write lightweight recommendations
     try {
-      await db
-        .collection("events")
-        .add({
-          type: "platform_connected",
-          uid,
-          platform,
-          simulated: true,
-          at: new Date().toISOString(),
-        });
+      await db.collection("events").add({
+        type: "platform_connected",
+        uid,
+        platform,
+        simulated: true,
+        at: new Date().toISOString(),
+      });
       // add platform to user's connectedPlatforms array
       try {
         if (
@@ -1255,7 +1253,7 @@ router.get("/linkedin/auth/callback", platformPublicLimiter, async (req, res) =>
       body,
     });
     const tokenJson = await tokenRes.json();
-    let meta = {};
+    const meta = {};
     // Fetch basic profile if access token acquired
     if (tokenJson.access_token) {
       try {
@@ -1417,7 +1415,7 @@ router.get("/pinterest/auth/callback", platformPublicLimiter, async (req, res) =
       body,
     });
     const tokenJson = await tokenRes.json();
-    let meta = {};
+    const meta = {};
     if (tokenJson.access_token) {
       try {
         // fetch user account and boards
@@ -1844,7 +1842,7 @@ router.post(
       if (!uid) return res.status(401).json({ ok: false, error: "missing_user" });
       const playlistId = String(req.params.id || "").trim();
       if (!playlistId) return res.status(400).json({ ok: false, error: "playlistId_required" });
-      let trackUris = req.body.trackUris || req.body.tracks || null;
+      const trackUris = req.body.trackUris || req.body.tracks || null;
       if (!Array.isArray(trackUris) || trackUris.length === 0)
         return res.status(400).json({ ok: false, error: "trackUris_required" });
       const result = await addTracksToPlaylist({ uid, playlistId, trackUris });
