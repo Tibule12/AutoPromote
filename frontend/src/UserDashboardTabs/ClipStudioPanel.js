@@ -7,6 +7,8 @@ import { auth } from '../firebaseClient';
 import { API_BASE_URL } from '../config';
 import toast from 'react-hot-toast';
 import './ClipStudioPanel.css';
+import GeneratePublishModal from './GeneratePublishModal';
+import toast from 'react-hot-toast';
 
 const ClipStudioPanel = ({ content = [] }) => {
   const [analyses, setAnalyses] = useState([]);
@@ -21,6 +23,8 @@ const ClipStudioPanel = ({ content = [] }) => {
     addCaptions: true,
     addBranding: false
   });
+  const [gpOpen, setGpOpen] = useState(false);
+  const [selectedContent, setSelectedContent] = useState(null);
   // Locks and modal state to prevent duplicate actions and confirm exports
   const [generatingClipId, setGeneratingClipId] = useState(null);
   const [exportingClipId, setExportingClipId] = useState(null);
@@ -222,6 +226,7 @@ const ClipStudioPanel = ({ content = [] }) => {
 
   return (
     <div className="clip-studio-panel">
+      <GeneratePublishModal open={gpOpen} contentItem={selectedContent || {}} onClose={() => setGpOpen(false)} onStarted={(jobId) => { setGpOpen(false); toast.success('Generation started'); }} />
       <div className="clip-studio-header">
         <h2>🎬 AI Clip Studio</h2>
         <p>Generate viral short clips from your long-form videos</p>
@@ -238,6 +243,23 @@ const ClipStudioPanel = ({ content = [] }) => {
                 <p>📹 No videos uploaded yet</p>
                 <p className="empty-hint">Upload a long-form video to get started with AI clip generation</p>
               </div>
+            ) : (
+              <div className="video-grid">
+                {videoContent.map(video => (
+                  <div key={video.id} className="video-card">
+                    <div className="video-thumb" style={{ backgroundImage: `url(${video.thumbnail || ''})` }} />
+                    <div className="video-meta">
+                      <div className="video-title">{video.title || video.id}</div>
+                      <div className="video-actions">
+                        <button className="btn btn-secondary btn-sm" onClick={() => loadAnalysis(video.clipAnalysis?.analysisId)}>View {video.clipAnalysis?.clipsGenerated || 0} Clips</button>
+                        <button className="btn btn-primary" onClick={() => analyzeVideo(video)}>Generate Clips</button>
+                        <button className="btn btn-primary btn-ghost" onClick={() => setGpOpen(true) || setSelectedContent(video)}>Generate & Publish</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             ) : (
               <div className="video-grid">
                 {videoContent.map(video => (

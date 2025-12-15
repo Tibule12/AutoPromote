@@ -23,6 +23,8 @@ describe('clipRoutes', () => {
         update: async () => true
       })
     });
+    // Ensure src-level firebaseAdmin (used by src routes) sees the same stub
+    try { require('../../firebaseAdmin').db.collection = firebaseAdmin.db.collection; } catch (e) { /* best-effort */ }
     // Also stub server-side firebase admin used by /autopromote-functions/_server routes
     serverFirebaseAdmin.db.collection = (name) => ({
       doc: (id) => ({
@@ -38,6 +40,7 @@ describe('clipRoutes', () => {
     firebaseAdmin.db.collection = (name) => ({
       doc: (id) => ({ get: async () => makeDoc({ user_id: 'testUser123' }), update: async () => true })
     });
+    try { const srcFb = require('../../firebaseAdmin'); srcFb.db.collection = (name) => ({ doc: (id) => ({ get: async () => makeDoc({ user_id: 'testUser123' }), update: async () => true }) }); } catch (e) {}
 
     // Stub analyzeVideo to avoid heavy work
     const videoClippingService = require('../../services/videoClippingService');
@@ -46,6 +49,7 @@ describe('clipRoutes', () => {
     // Mount app after stubbing to ensure route resolves the stubbed db
     const app = express();
     app.use(bodyParser.json());
+    delete require.cache[require.resolve('../../routes/clipRoutes')];
     app.use('/api/clips', require('../../routes/clipRoutes'));
 
     const res = await request(app)
@@ -53,11 +57,7 @@ describe('clipRoutes', () => {
       .set('Authorization', 'Bearer test-token-for-testUser123')
       .send({ contentId: 'content123', videoUrl: 'https://storage.googleapis.com/bucket/video.mp4' });
 
-    // Debug on unexpected response
-    if (res.status !== 200) {
-      console.error('[TEST DEBUG] analyze res body:', JSON.stringify(res.body), 'text:', res.text);
-    }
-    console.error('[TEST DEBUG] headers sent:', res.request && res.request.header);
+    // No debug logging in normal test runs
 
     expect(res.status).toBe(200);
     expect(res.body.analysisId).toBe('analysis123');
@@ -69,6 +69,7 @@ describe('clipRoutes', () => {
     firebaseAdmin.db.collection = (name) => ({
       doc: (id) => ({ get: async () => makeDoc({ user_id: 'otherUser' }), update: async () => true })
     });
+    try { const srcFb = require('../../firebaseAdmin'); srcFb.db.collection = (name) => ({ doc: (id) => ({ get: async () => makeDoc({ user_id: 'otherUser' }), update: async () => true }) }); } catch (e) {}
 
     // Mount app after stubbing to ensure route resolves the stubbed db
     const app = express();
