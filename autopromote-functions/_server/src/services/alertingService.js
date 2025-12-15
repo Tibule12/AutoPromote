@@ -90,7 +90,7 @@ async function checkDiversity() {
     const minRatio = (cfg.alerting && cfg.alerting.minDiversityRatio) || 0.15;
     const snap = await db.collection("variant_stats").orderBy("updatedAt", "desc").limit(200).get();
     if (snap.empty) return { skipped: true };
-    let activeSet = new Set();
+    const activeSet = new Set();
     let total = 0;
     snap.forEach(d => {
       const v = d.data();

@@ -145,7 +145,7 @@ const SLOW_REQ_MS = parseInt(process.env.SLOW_REQ_MS || "3000", 10);
 let __printedStartupMissing = false;
 // Latency aggregation (simple ring buffer + percentile calc)
 const LAT_SAMPLE_SIZE = parseInt(process.env.LAT_SAMPLE_SIZE || "500", 10); // keep last 500 by default
-let __latSamples = new Array(LAT_SAMPLE_SIZE);
+const __latSamples = new Array(LAT_SAMPLE_SIZE);
 let __latIndex = 0;
 let __latCount = 0;
 function recordLatency(ms) {
@@ -2188,7 +2188,7 @@ try {
         const userData = userSnap.data() || {};
         let contentCount = 0;
         let published = 0;
-        let platforms = new Set();
+        const platforms = new Set();
         contentSnap.forEach(d => {
           const v = d.data() || {};
           contentCount++;
@@ -2367,7 +2367,7 @@ try {
       "[startup] Detected ENABLE_BACKROUND_JOBS (typo). Mapped to ENABLE_BACKGROUND_JOBS for compatibility."
     );
   }
-  let ENABLE_BACKGROUND = process.env.ENABLE_BACKGROUND_JOBS === "true";
+  const ENABLE_BACKGROUND = process.env.ENABLE_BACKGROUND_JOBS === "true";
   const STATS_POLL_INTERVAL_MS = parseInt(process.env.STATS_POLL_INTERVAL_MS || "180000", 10); // 3 minutes default
   const TASK_PROCESS_INTERVAL_MS = parseInt(process.env.TASK_PROCESS_INTERVAL_MS || "60000", 10); // 1 minute default
   const PLATFORM_STATS_POLL_INTERVAL_MS = parseInt(

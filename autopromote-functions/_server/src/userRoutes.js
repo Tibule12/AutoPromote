@@ -72,7 +72,7 @@ router.put("/me", authMiddleware, writeLimiter, async (req, res) => {
     // Get current user data to check admin status
     const currentSnap = await ref.get();
     const currentData = currentSnap.exists ? currentSnap.data() : {};
-    let updates = {
+    const updates = {
       ...(name !== undefined ? { name } : {}),
       ...(timezone ? { timezone } : {}),
       ...(schedulingDefaults ? { schedulingDefaults } : {}),

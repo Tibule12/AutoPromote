@@ -38,10 +38,10 @@ router.post("/register", async (req, res) => {
     // Store additional user data in Firestore
     const userDocRef = admin.firestore().collection("users").doc(userRecord.uid);
     const userSnap = await userDocRef.get();
-    let currentData = userSnap.exists ? userSnap.data() : {};
+    const currentData = userSnap.exists ? userSnap.data() : {};
     // Only set role/isAdmin to 'user'/false if not already admin
-    let docRole = currentData.role === "admin" ? "admin" : role;
-    let docIsAdmin = currentData.role === "admin" ? true : false;
+    const docRole = currentData.role === "admin" ? "admin" : role;
+    const docIsAdmin = currentData.role === "admin" ? true : false;
     await userDocRef.set({
       name,
       email,
@@ -52,21 +52,17 @@ router.post("/register", async (req, res) => {
 
     // Generate email verification link
     try {
-      const verifyLink = await admin
-        .auth()
-        .generateEmailVerificationLink(email, {
-          url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
-        });
+      const verifyLink = await admin.auth().generateEmailVerificationLink(email, {
+        url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
+      });
       await sendVerificationEmail({ email, link: verifyLink });
     } catch (e) {
       console.log("⚠️ Could not send verification email:", e.message);
     }
-    res
-      .status(201)
-      .json({
-        message: "User registered. Verification email sent.",
-        requiresEmailVerification: true,
-      });
+    res.status(201).json({
+      message: "User registered. Verification email sent.",
+      requiresEmailVerification: true,
+    });
   } catch (error) {
     console.error("Registration error:", error);
     res.status(500).json({ error: error.message });
@@ -92,12 +88,10 @@ router.post("/resend-verification", async (req, res) => {
     global.__resendLimiter.set(key, entry);
     const LIMIT = parseInt(process.env.RESEND_VERIFICATION_LIMIT || "5", 10); // default 5 per 15m
     if (entry.count > LIMIT) {
-      return res
-        .status(429)
-        .json({
-          error: "too_many_requests",
-          retryAfterMinutes: Math.ceil((entry.first + 15 * 60 * 1000 - now) / 60000),
-        });
+      return res.status(429).json({
+        error: "too_many_requests",
+        retryAfterMinutes: Math.ceil((entry.first + 15 * 60 * 1000 - now) / 60000),
+      });
     }
     const user = await admin
       .auth()
@@ -105,11 +99,9 @@ router.post("/resend-verification", async (req, res) => {
       .catch(() => null);
     if (!user) return res.status(404).json({ error: "User not found" });
     if (user.emailVerified) return res.json({ message: "Already verified" });
-    const link = await admin
-      .auth()
-      .generateEmailVerificationLink(email, {
-        url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
-      });
+    const link = await admin.auth().generateEmailVerificationLink(email, {
+      url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
+    });
     await sendVerificationEmail({ email, link });
     return res.json({
       message: "Verification email sent",
@@ -446,7 +438,7 @@ router.post("/admin-login", async (req, res) => {
     let role = "user";
     let isAdmin = false;
     let fromCollection = null;
-    let adminStatusSource = "unknown";
+    const adminStatusSource = "unknown";
 
     // For admin login, check admin claims in token first, then try admins collection
     try {

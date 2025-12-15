@@ -60,12 +60,12 @@ describe("Content Upload & Promotion Integration", () => {
     console.log("Starting POST /api/content/upload integration test...");
     let res;
     let status, apiBody;
+    const normalize = require("../../test/utils/normalizeApiResponse");
     try {
       res = await agent
         .post("/api/content/upload")
         .set("Authorization", `Bearer test-token-for-${testUserId}`)
         .send(payload);
-      const normalize = require("../../test/utils/normalizeApiResponse");
       ({ status, body: apiBody } = normalize(res.body, res.statusCode));
       console.log("POST /api/content/upload response:", status, apiBody);
     } catch (err) {

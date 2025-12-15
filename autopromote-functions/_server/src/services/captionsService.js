@@ -15,7 +15,7 @@ function plainTextToSRT(text) {
   const cleaned = text.replace(/\r/g, "").trim();
   const rawParts = cleaned.split(/\n+|(?<=[.!?])\s+/).filter(Boolean);
   let idx = 1;
-  let out = [];
+  const out = [];
   let timeCursorMs = 0;
   const perWordMs = 350; // heuristic
   rawParts.forEach(segment => {

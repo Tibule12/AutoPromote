@@ -70,7 +70,7 @@ const updateUserProfile = async (req, res) => {
     const userRef = db.collection("users").doc(req.user.uid);
     const currentSnap = await userRef.get();
     const currentData = currentSnap.exists ? currentSnap.data() : {};
-    let updateData = {
+    const updateData = {
       name: req.body.name,
       email: req.body.email,
       updated_at: new Date().toISOString(),

@@ -34,7 +34,7 @@ function calculateConfidenceForVariants(variants) {
       views: v.metrics.views || 0,
       rate: v.metrics.views ? (v.metrics.conversions || 0) / v.metrics.views : 0,
     }));
-    let top = rates.reduce((p, c) => (c.rate > p.rate ? c : p), rates[0]);
+    const top = rates.reduce((p, c) => (c.rate > p.rate ? c : p), rates[0]);
     const others = rates.filter(r => r.id !== top.id);
     if (!others.length) return 0;
     const combinedConversions = others.reduce((acc, r) => acc + r.conversions, 0);
@@ -59,7 +59,7 @@ function calculateBayesianConfidence(variants, samples = 4000) {
     views: v.metrics.views || 0,
     rate: v.metrics.views ? (v.metrics.conversions || 0) / v.metrics.views : 0,
   }));
-  let top = rates.reduce((p, c) => (c.rate > p.rate ? c : p), rates[0]);
+  const top = rates.reduce((p, c) => (c.rate > p.rate ? c : p), rates[0]);
   const others = rates.filter(r => r.id !== top.id);
   if (!others.length) return 0;
 
@@ -97,7 +97,7 @@ function gammaSample(k) {
   const c = 1 / Math.sqrt(9 * d);
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    let x = normalSample();
+    const x = normalSample();
     let v = 1 + c * x;
     if (v <= 0) continue;
     v = v * v * v;
@@ -130,7 +130,7 @@ function generatePosteriorSamplesForTopVsBaseline(variants, samples = 400) {
     conversions: v.metrics.conversions || 0,
     views: v.metrics.views || 0,
   }));
-  let top = rates.reduce(
+  const top = rates.reduce(
     (p, c) =>
       c.views && c.conversions / c.views > (p.views ? p.conversions / p.views : 0) ? c : p,
     rates[0]
@@ -160,7 +160,7 @@ function mulberry32(seed) {
   let t = seed >>> 0;
   return function () {
     t += 0x6d2b79f5;
-    var r = Math.imul(t ^ (t >>> 15), 1 | t);
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
     r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
     return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
   };
@@ -184,7 +184,7 @@ function gammaSampleRNG(k, rng) {
   const c = 1 / Math.sqrt(9 * d);
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    let x = normalSampleRNG(rng);
+    const x = normalSampleRNG(rng);
     let v = 1 + c * x;
     if (v <= 0) continue;
     v = v * v * v;
@@ -209,7 +209,7 @@ function generatePosteriorSamplesForTopVsBaselineDeterministic(variants, samples
     conversions: v.metrics.conversions || 0,
     views: v.metrics.views || 0,
   }));
-  let top = rates.reduce(
+  const top = rates.reduce(
     (p, c) =>
       c.views && c.conversions / c.views > (p.views ? p.conversions / p.views : 0) ? c : p,
     rates[0]

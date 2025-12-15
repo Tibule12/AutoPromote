@@ -47,7 +47,7 @@ class PromotionService {
       const content = { id: contentDoc.id, ...contentDoc.data() };
 
       // Normalize incoming data and apply defaults/optimizations
-      let normalized = this.normalizeScheduleData(scheduleData);
+      const normalized = this.normalizeScheduleData(scheduleData);
 
       // Apply platform-specific optimization if not specified
       if (!normalized.platformSpecificSettings && normalized.platform) {
@@ -335,7 +335,7 @@ class PromotionService {
   // Advanced next promotion time calculation with recurrence patterns
   calculateNextPromotionTime(startTime, frequency, recurrencePattern = null) {
     const start = new Date(startTime);
-    let nextTime = new Date(start);
+    const nextTime = new Date(start);
 
     if (recurrencePattern) {
       // Handle complex recurrence patterns
