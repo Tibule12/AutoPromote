@@ -1,14 +1,14 @@
-const request = require('supertest');
-const app = require('../server');
-const { searchTracks } = require('../services/spotifyService');
-const { createPlaylist, addTracksToPlaylist } = require('../services/spotifyService');
+const request = require("supertest");
+const app = require("../server");
+const { searchTracks } = require("../services/spotifyService");
+const { createPlaylist, addTracksToPlaylist } = require("../services/spotifyService");
 
-jest.mock('../services/spotifyService');
+jest.mock("../services/spotifyService");
 
-describe('Spotify search route', () => {
+describe("Spotify search route", () => {
   let server;
   let agent;
-  beforeAll((done) => {
+  beforeAll(done => {
     server = app.listen(0, () => {
       agent = request.agent(server);
       done();
@@ -18,38 +18,60 @@ describe('Spotify search route', () => {
     if (server && server.close) await new Promise(r => server.close(r));
   });
 
-  it('returns search results for authenticated user', async () => {
-    searchTracks.mockImplementation(async ({ uid, query, limit }) => ({ tracks: [ { id: 't1', uri: 'spotify:track:t1', name: 'Track 1', artists: ['Artist 1'] } ] }));
-    const res = await agent.get('/api/spotify/search').set('Authorization', 'Bearer test-token-for-user1').query({ q: 'beatles' });
+  it("returns search results for authenticated user", async () => {
+    searchTracks.mockImplementation(async ({ uid, query, limit }) => ({
+      tracks: [{ id: "t1", uri: "spotify:track:t1", name: "Track 1", artists: ["Artist 1"] }],
+    }));
+    const res = await agent
+      .get("/api/spotify/search")
+      .set("Authorization", "Bearer test-token-for-user1")
+      .query({ q: "beatles" });
     expect(res.statusCode).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(Array.isArray(res.body.results)).toBe(true);
     expect(res.body.results.length).toBeGreaterThan(0);
   });
 
-  it('creates a new playlist', async () => {
-    createPlaylist.mockImplementation(async ({ uid, name, description }) => ({ success: true, playlistId: 'pl1', name, url: 'https://open.spotify.com/playlist/pl1' }));
-    const res = await agent.post('/api/spotify/playlists').set('Authorization', 'Bearer test-token-for-user1').send({ name: 'New Playlist', description: 'desc' });
+  it("creates a new playlist", async () => {
+    createPlaylist.mockImplementation(async ({ uid, name, description }) => ({
+      success: true,
+      playlistId: "pl1",
+      name,
+      url: "https://open.spotify.com/playlist/pl1",
+    }));
+    const res = await agent
+      .post("/api/spotify/playlists")
+      .set("Authorization", "Bearer test-token-for-user1")
+      .send({ name: "New Playlist", description: "desc" });
     expect(res.statusCode).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(res.body.playlist).toBeDefined();
   });
 
-  it('adds tracks to playlist', async () => {
-    addTracksToPlaylist.mockImplementation(async ({ uid, playlistId, trackUris }) => ({ success: true, snapshotId: 'snap1', tracksAdded: trackUris.length }));
-    const res = await agent.post('/api/spotify/playlists/pl1/tracks').set('Authorization', 'Bearer test-token-for-user1').send({ trackUris: ['spotify:track:t1'] });
+  it("adds tracks to playlist", async () => {
+    addTracksToPlaylist.mockImplementation(async ({ uid, playlistId, trackUris }) => ({
+      success: true,
+      snapshotId: "snap1",
+      tracksAdded: trackUris.length,
+    }));
+    const res = await agent
+      .post("/api/spotify/playlists/pl1/tracks")
+      .set("Authorization", "Bearer test-token-for-user1")
+      .send({ trackUris: ["spotify:track:t1"] });
     expect(res.statusCode).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(res.body.snapshotId).toBeDefined();
   });
 
-  it('returns spotify metadata (playlists) for connected user', async () => {
-    const uid = 'user1';
-    const existingMeta = { playlists: [{ id: 'p1', name: 'My Fav' }] };
+  it("returns spotify metadata (playlists) for connected user", async () => {
+    const uid = "user1";
+    const existingMeta = { playlists: [{ id: "p1", name: "My Fav" }] };
     // Simulate the user connection by creating Firestore doc in test environment is non-trivial here.
     // We'll mock fetch to return meta from the route, by mocking spotifyService.getUserProfile or by mocking db lookup.
     // Simpler: call status and metadata endpoints; ensure they return 200 when not connected (fallback):
-    const res = await agent.get('/api/spotify/metadata').set('Authorization', 'Bearer test-token-for-user1');
+    const res = await agent
+      .get("/api/spotify/metadata")
+      .set("Authorization", "Bearer test-token-for-user1");
     expect(res.statusCode).toBe(200);
     expect(res.body.ok).toBeDefined();
   });

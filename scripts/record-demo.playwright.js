@@ -2,18 +2,20 @@
 // Simple Playwright script to record a flow using the mock backend.
 // Usage: npx playwright install && node scripts/record-demo.playwright.js
 
-const { chromium } = require('playwright');
-const fs = require('fs');
-const path = require('path');
+const { chromium } = require("playwright");
+const fs = require("fs");
+const path = require("path");
 
 (async () => {
   const browser = await chromium.launch({ headless: false });
-  const context = await browser.newContext({ recordVideo: { dir: 'tmp/videos', size: { width: 1280, height: 720 } } });
+  const context = await browser.newContext({
+    recordVideo: { dir: "tmp/videos", size: { width: 1280, height: 720 } },
+  });
   const page = await context.newPage();
 
   try {
     // Navigate to demo page
-    await page.goto('http://localhost:5000/tiktok-demo', { waitUntil: 'networkidle' });
+    await page.goto("http://localhost:5000/tiktok-demo", { waitUntil: "networkidle" });
 
     // Wait a short moment to capture the page
     await page.waitForTimeout(2000);
@@ -26,9 +28,9 @@ const path = require('path');
 
     // Close context to flush video to disk
     await context.close();
-    console.log('Recorded video saved to tmp/videos (check the latest file)');
+    console.log("Recorded video saved to tmp/videos (check the latest file)");
   } catch (e) {
-    console.error('Recording failed', e);
+    console.error("Recording failed", e);
   } finally {
     await browser.close();
   }

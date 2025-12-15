@@ -2,7 +2,7 @@
 // AutoPromote Boost Chains & Viral Loops Logic
 // Spreads content virally via user-to-user chains, squads, and referral rewards
 
-const { v4: uuidv4 } = require('../../lib/uuid-compat');
+const { v4: uuidv4 } = require("../../lib/uuid-compat");
 
 function createBoostChain(contentId, initiatorId, squadUserIds = []) {
   // Create a boost chain record
@@ -12,8 +12,8 @@ function createBoostChain(contentId, initiatorId, squadUserIds = []) {
     initiatorId,
     squadUserIds,
     createdAt: new Date(),
-    status: 'active',
-    chainEvents: []
+    status: "active",
+    chainEvents: [],
   };
 }
 
@@ -22,7 +22,7 @@ function addBoostChainEvent(chain, userId, eventType, details = {}) {
     userId,
     eventType,
     details,
-    timestamp: new Date()
+    timestamp: new Date(),
   });
   return chain;
 }
@@ -30,12 +30,12 @@ function addBoostChainEvent(chain, userId, eventType, details = {}) {
 function suggestRepostTiming(chain, platform) {
   // Suggest optimal repost timing for viral spread
   const windows = {
-    tiktok: '19:00',
-    instagram: '11:00',
-    youtube: '15:00',
-    twitter: '13:00'
+    tiktok: "19:00",
+    instagram: "11:00",
+    youtube: "15:00",
+    twitter: "13:00",
   };
-  return windows[platform] || '12:00';
+  return windows[platform] || "12:00";
 }
 
 function rewardReferral(userId, chainId) {
@@ -44,7 +44,7 @@ function rewardReferral(userId, chainId) {
     userId,
     chainId,
     credits: 10,
-    message: 'You earned 10 promotion credits for viral sharing!'
+    message: "You earned 10 promotion credits for viral sharing!",
   };
 }
 
@@ -52,5 +52,5 @@ module.exports = {
   createBoostChain,
   addBoostChainEvent,
   suggestRepostTiming,
-  rewardReferral
+  rewardReferral,
 };

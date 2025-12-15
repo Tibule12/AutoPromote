@@ -1,26 +1,26 @@
-const admin = require('firebase-admin');
+const admin = require("firebase-admin");
 
 // Initialize Firebase Admin if not already initialized
 try {
   admin.app();
-  console.log('Firebase Admin already initialized');
+  console.log("Firebase Admin already initialized");
 } catch (error) {
-  const serviceAccount = require('./serviceAccountKey.json');
+  const serviceAccount = require("./serviceAccountKey.json");
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://autopromote-cc6d3.firebaseio.com"
+    databaseURL: "https://autopromote-cc6d3.firebaseio.com",
   });
-  console.log('Firebase Admin initialized');
+  console.log("Firebase Admin initialized");
 }
 
 async function checkAdminCollection() {
   try {
-    console.log('Checking admin collection status...');
-    
+    console.log("Checking admin collection status...");
+
     // Get all admin documents
-    const adminsSnapshot = await admin.firestore().collection('admins').get();
+    const adminsSnapshot = await admin.firestore().collection("admins").get();
     console.log(`Found ${adminsSnapshot.size} admin documents.`);
-    
+
     // Log each admin document
     if (adminsSnapshot.size > 0) {
       adminsSnapshot.forEach(doc => {
@@ -30,21 +30,23 @@ async function checkAdminCollection() {
         console.log(`- Name: ${data.name}`);
         console.log(`- Role: ${data.role}`);
         console.log(`- IsAdmin: ${data.isAdmin}`);
-        console.log('-----------------------------------');
+        console.log("-----------------------------------");
       });
     } else {
-      console.log('No admin documents found. Try running setup-admin-user.js first.');
+      console.log("No admin documents found. Try running setup-admin-user.js first.");
     }
-    
+
     // Check if the specific admin email exists
-    const targetEmail = 'admin123@gmail.com';
-    const userByEmailQuery = await admin.firestore().collection('admins')
-      .where('email', '==', targetEmail)
+    const targetEmail = "admin123@gmail.com";
+    const userByEmailQuery = await admin
+      .firestore()
+      .collection("admins")
+      .where("email", "==", targetEmail)
       .get();
-    
+
     if (userByEmailQuery.empty) {
       console.log(`\nAdmin with email ${targetEmail} not found in the admins collection.`);
-      console.log('Try running setup-admin-user.js to create this admin.');
+      console.log("Try running setup-admin-user.js to create this admin.");
     } else {
       console.log(`\nAdmin with email ${targetEmail} found:`);
       userByEmailQuery.forEach(doc => {
@@ -53,17 +55,17 @@ async function checkAdminCollection() {
       });
     }
   } catch (error) {
-    console.error('Error checking admin collection:', error);
+    console.error("Error checking admin collection:", error);
   }
 }
 
 // Run the check
 checkAdminCollection()
   .then(() => {
-    console.log('\nCheck completed. If no admins were found, run setup-admin-user.js');
+    console.log("\nCheck completed. If no admins were found, run setup-admin-user.js");
     setTimeout(() => process.exit(0), 1000);
   })
   .catch(error => {
-    console.error('Check failed:', error);
+    console.error("Check failed:", error);
     process.exit(1);
   });

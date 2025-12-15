@@ -7,13 +7,13 @@ function checkViralInsurance(content, metrics) {
   if (metrics.views < threshold) {
     return {
       insured: true,
-      action: 'retry',
-      message: 'Your content is insured! We’ll boost it again for free.'
+      action: "retry",
+      message: "Your content is insured! We’ll boost it again for free.",
     };
   }
   return { insured: false };
 }
 
 module.exports = {
-  checkViralInsurance
+  checkViralInsurance,
 };

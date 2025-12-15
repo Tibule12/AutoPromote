@@ -42,6 +42,7 @@ Firebase credentials have been accidentally committed to the repository. These c
 ## Changes Made
 
 We have:
+
 1. Removed all hardcoded credentials from the source code
 2. Updated configuration to only use environment variables
 3. Added security notices to prevent future incidents
@@ -50,6 +51,7 @@ We have:
 ## Environment Variables Setup
 
 ### For Backend (server):
+
 ```
 FIREBASE_SERVICE_ACCOUNT={"type":"service_account",...} # Full JSON service account key
 # OR individual fields:
@@ -59,6 +61,7 @@ FIREBASE_PRIVATE_KEY=your-private-key-with-newlines
 ```
 
 ### For Frontend (client):
+
 ```
 REACT_APP_FIREBASE_API_KEY=your-api-key
 REACT_APP_FIREBASE_AUTH_DOMAIN=your-auth-domain

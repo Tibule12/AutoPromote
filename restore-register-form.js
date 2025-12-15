@@ -1,10 +1,10 @@
 // restore-register-form.js
 // This script restores the register form functionality in AuthSwitcher.js
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const authSwitcherPath = path.join(__dirname, 'frontend', 'src', 'AuthSwitcher.js');
+const authSwitcherPath = path.join(__dirname, "frontend", "src", "AuthSwitcher.js");
 
 // Check if the file exists
 if (!fs.existsSync(authSwitcherPath)) {
@@ -14,7 +14,7 @@ if (!fs.existsSync(authSwitcherPath)) {
 
 // Read the current file
 console.log(`Reading current AuthSwitcher.js...`);
-const currentFile = fs.readFileSync(authSwitcherPath, 'utf8');
+const currentFile = fs.readFileSync(authSwitcherPath, "utf8");
 
 // Create the updated file content with register form
 const updatedContent = `import React, { useState } from 'react';
@@ -92,7 +92,7 @@ export default AuthSwitcher;
 `;
 
 // Write the updated content to a backup file first
-const backupPath = path.join(__dirname, 'frontend', 'src', 'AuthSwitcher.js.backup');
+const backupPath = path.join(__dirname, "frontend", "src", "AuthSwitcher.js.backup");
 fs.writeFileSync(backupPath, currentFile);
 console.log(`✅ Backed up current file to ${backupPath}`);
 

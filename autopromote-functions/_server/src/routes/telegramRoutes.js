@@ -1,44 +1,56 @@
 // Telegram OAuth and Bot API integration
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authMiddleware = require('../authMiddleware');
-const { admin, db } = require('../firebaseAdmin');
-const { rateLimiter } = require('../middlewares/globalRateLimiter');
-const telegramService = require('../services/telegramService');
+const authMiddleware = require("../authMiddleware");
+const { admin, db } = require("../firebaseAdmin");
+const { rateLimiter } = require("../middlewares/globalRateLimiter");
+const telegramService = require("../services/telegramService");
 let codeqlLimiter;
-try { codeqlLimiter = require('../middlewares/codeqlRateLimit'); } catch(_) { codeqlLimiter = null; }
+try {
+  codeqlLimiter = require("../middlewares/codeqlRateLimit");
+} catch (_) {
+  codeqlLimiter = null;
+}
 
 // Rate limiters for Telegram routes
-const tgPublicLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TG_PUBLIC || '120', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '10'), windowHint: 'telegram_public' });
-const tgWriteLimiter = rateLimiter({ capacity: parseInt(process.env.RATE_LIMIT_TG_WRITES || '60', 10), refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || '5'), windowHint: 'telegram_writes' });
+const tgPublicLimiter = rateLimiter({
+  capacity: parseInt(process.env.RATE_LIMIT_TG_PUBLIC || "120", 10),
+  refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || "10"),
+  windowHint: "telegram_public",
+});
+const tgWriteLimiter = rateLimiter({
+  capacity: parseInt(process.env.RATE_LIMIT_TG_WRITES || "60", 10),
+  refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || "5"),
+  windowHint: "telegram_writes",
+});
 
 // Apply public limiter at router level
 router.use((req, res, next) => tgPublicLimiter(req, res, next));
 if (codeqlLimiter && codeqlLimiter.writes) {
-	router.use(codeqlLimiter.writes);
+  router.use(codeqlLimiter.writes);
 }
 
 // Environment variables
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || 'AutoPromoteBot';
+const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || "AutoPromoteBot";
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://www.autopromote.org';
+const DASHBOARD_URL = process.env.DASHBOARD_URL || "https://www.autopromote.org";
 
 /**
  * GET /api/telegram/auth/start
  * Returns HTML page with Telegram Login Widget for OAuth
  */
-router.get('/auth/start', authMiddleware, (req, res) => {
-	const uid = req.user.uid;
-	
-	if (!BOT_TOKEN || !BOT_USERNAME) {
-		return res.status(500).json({ 
-			error: 'telegram_not_configured',
-			missing: !BOT_TOKEN ? ['TELEGRAM_BOT_TOKEN'] : ['TELEGRAM_BOT_USERNAME']
-		});
-	}
-	
-	const html = `<!DOCTYPE html>
+router.get("/auth/start", authMiddleware, (req, res) => {
+  const uid = req.user.uid;
+
+  if (!BOT_TOKEN || !BOT_USERNAME) {
+    return res.status(500).json({
+      error: "telegram_not_configured",
+      missing: !BOT_TOKEN ? ["TELEGRAM_BOT_TOKEN"] : ["TELEGRAM_BOT_USERNAME"],
+    });
+  }
+
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
@@ -147,7 +159,7 @@ router.get('/auth/start', authMiddleware, (req, res) => {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'Authorization': 'Bearer ${req.user.token || ''}'
+					'Authorization': 'Bearer ${req.user.token || ""}'
 				},
 				body: JSON.stringify({ authData: user, uid: '${uid}' })
 			})
@@ -175,174 +187,170 @@ router.get('/auth/start', authMiddleware, (req, res) => {
 	</script>
 </body>
 </html>`;
-	
-	res.send(html);
+
+  res.send(html);
 });
 
 /**
  * POST /api/telegram/auth/callback
  * Verify Telegram auth data and store connection
  */
-router.post('/auth/callback', authMiddleware, tgWriteLimiter, async (req, res) => {
-	try {
-		const uid = req.user.uid;
-		const { authData } = req.body;
-		
-		if (!authData || !authData.id || !authData.hash) {
-			return res.status(400).json({ 
-				success: false, 
-				error: 'missing_auth_data' 
-			});
-		}
-		
-		// Verify the auth data came from Telegram
-		const isValid = telegramService.verifyTelegramAuth(authData);
-		
-		if (!isValid) {
-			return res.status(401).json({ 
-				success: false, 
-				error: 'invalid_telegram_auth' 
-			});
-		}
-		
-		// Store the connection
-		const result = await telegramService.storeTelegramAuth(uid, authData);
-		
-		res.json(result);
-	} catch (error) {
-		console.error('Telegram auth callback error:', error);
-		res.status(500).json({ 
-			success: false, 
-			error: error.message || 'auth_failed' 
-		});
-	}
+router.post("/auth/callback", authMiddleware, tgWriteLimiter, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const { authData } = req.body;
+
+    if (!authData || !authData.id || !authData.hash) {
+      return res.status(400).json({
+        success: false,
+        error: "missing_auth_data",
+      });
+    }
+
+    // Verify the auth data came from Telegram
+    const isValid = telegramService.verifyTelegramAuth(authData);
+
+    if (!isValid) {
+      return res.status(401).json({
+        success: false,
+        error: "invalid_telegram_auth",
+      });
+    }
+
+    // Store the connection
+    const result = await telegramService.storeTelegramAuth(uid, authData);
+
+    res.json(result);
+  } catch (error) {
+    console.error("Telegram auth callback error:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "auth_failed",
+    });
+  }
 });
 
 /**
  * GET /api/telegram/status
  * Check if user has connected Telegram
  */
-router.get('/status', authMiddleware, async (req, res) => {
-	try {
-		const uid = req.user.uid;
-		const connection = await telegramService.getUserTelegramConnection(uid);
-		
-		if (!connection) {
-			return res.json({ 
-				connected: false,
-				platform: 'telegram'
-			});
-		}
-		
-		res.json({
-			connected: true,
-			platform: 'telegram',
-			userId: connection.userId,
-			username: connection.username,
-			firstName: connection.firstName,
-			lastName: connection.lastName,
-			photoUrl: connection.photoUrl,
-			connectedAt: connection.connectedAt
-		});
-	} catch (error) {
-		console.error('Telegram status error:', error);
-		res.status(500).json({ 
-			connected: false, 
-			error: error.message 
-		});
-	}
+router.get("/status", authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const connection = await telegramService.getUserTelegramConnection(uid);
+
+    if (!connection) {
+      return res.json({
+        connected: false,
+        platform: "telegram",
+      });
+    }
+
+    res.json({
+      connected: true,
+      platform: "telegram",
+      userId: connection.userId,
+      username: connection.username,
+      firstName: connection.firstName,
+      lastName: connection.lastName,
+      photoUrl: connection.photoUrl,
+      connectedAt: connection.connectedAt,
+    });
+  } catch (error) {
+    console.error("Telegram status error:", error);
+    res.status(500).json({
+      connected: false,
+      error: error.message,
+    });
+  }
 });
 
 /**
  * DELETE /api/telegram/disconnect
  * Disconnect Telegram account
  */
-router.delete('/disconnect', authMiddleware, tgWriteLimiter, async (req, res) => {
-	try {
-		const uid = req.user.uid;
-		
-		await db.collection('users')
-			.doc(uid)
-			.collection('connections')
-			.doc('telegram')
-			.delete();
-		
-		res.json({ 
-			success: true, 
-			message: 'Telegram disconnected' 
-		});
-	} catch (error) {
-		console.error('Telegram disconnect error:', error);
-		res.status(500).json({ 
-			success: false, 
-			error: error.message 
-		});
-	}
+router.delete("/disconnect", authMiddleware, tgWriteLimiter, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+
+    await db.collection("users").doc(uid).collection("connections").doc("telegram").delete();
+
+    res.json({
+      success: true,
+      message: "Telegram disconnected",
+    });
+  } catch (error) {
+    console.error("Telegram disconnect error:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
 });
 
 /**
  * POST /api/telegram/webhook
  * Webhook endpoint for Telegram bot updates
  */
-router.post('/webhook', async (req, res) => {
-	try {
-		// Verify webhook secret if configured
-		const secret = req.headers['x-telegram-bot-api-secret-token'];
-		if (WEBHOOK_SECRET && secret !== WEBHOOK_SECRET) {
-			return res.status(401).json({ error: 'invalid_webhook_secret' });
-		}
-		
-		const update = req.body;
-		
-		// Log webhook received
-		console.log('Telegram webhook received:', {
-			updateId: update.update_id,
-			message: update.message ? 'present' : 'none',
-			chatId: update.message?.chat?.id
-		});
-		
-		// Handle different update types
-		if (update.message) {
-			const chatId = update.message.chat.id;
-			const text = update.message.text;
-			
-			// Handle /start command
-			if (text === '/start') {
-				// You can send a welcome message or instructions
-				console.log(`New chat started with ID: ${chatId}`);
-			}
-		}
-		
-		// Always respond 200 to acknowledge receipt
-		res.json({ ok: true });
-	} catch (error) {
-		console.error('Telegram webhook error:', error);
-		res.status(500).json({ error: error.message });
-	}
+router.post("/webhook", async (req, res) => {
+  try {
+    // Verify webhook secret if configured
+    const secret = req.headers["x-telegram-bot-api-secret-token"];
+    if (WEBHOOK_SECRET && secret !== WEBHOOK_SECRET) {
+      return res.status(401).json({ error: "invalid_webhook_secret" });
+    }
+
+    const update = req.body;
+
+    // Log webhook received
+    console.log("Telegram webhook received:", {
+      updateId: update.update_id,
+      message: update.message ? "present" : "none",
+      chatId: update.message?.chat?.id,
+    });
+
+    // Handle different update types
+    if (update.message) {
+      const chatId = update.message.chat.id;
+      const text = update.message.text;
+
+      // Handle /start command
+      if (text === "/start") {
+        // You can send a welcome message or instructions
+        console.log(`New chat started with ID: ${chatId}`);
+      }
+    }
+
+    // Always respond 200 to acknowledge receipt
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Telegram webhook error:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 /**
  * POST /api/telegram/test-message
  * Test endpoint to send a message via bot (for testing)
  */
-router.post('/test-message', authMiddleware, tgWriteLimiter, async (req, res) => {
-	try {
-		const uid = req.user.uid;
-		const { message } = req.body;
-		
-		const result = await telegramService.postToTelegram({
-			uid,
-			payload: { message: message || 'Test message from AutoPromote!' }
-		});
-		
-		res.json(result);
-	} catch (error) {
-		console.error('Telegram test message error:', error);
-		res.status(500).json({ 
-			success: false, 
-			error: error.message 
-		});
-	}
+router.post("/test-message", authMiddleware, tgWriteLimiter, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const { message } = req.body;
+
+    const result = await telegramService.postToTelegram({
+      uid,
+      payload: { message: message || "Test message from AutoPromote!" },
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error("Telegram test message error:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
 });
 
 module.exports = router;

@@ -1,29 +1,29 @@
 /**
  * Authentication Fix
- * 
+ *
  * This script helps diagnose and fix common authentication issues.
  * It checks for clock synchronization issues which often cause JWT validation failures.
  */
 
-const os = require('os');
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const os = require("os");
+const { execSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
 // ANSI color codes for better readability
 const colors = {
-  reset: '\x1b[0m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  cyan: '\x1b[36m',
-  magenta: '\x1b[35m',
-  white: '\x1b[37m',
-  brightRed: '\x1b[91m',
-  brightGreen: '\x1b[92m',
-  brightYellow: '\x1b[93m',
-  brightCyan: '\x1b[96m'
+  reset: "\x1b[0m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  cyan: "\x1b[36m",
+  magenta: "\x1b[35m",
+  white: "\x1b[37m",
+  brightRed: "\x1b[91m",
+  brightGreen: "\x1b[92m",
+  brightYellow: "\x1b[93m",
+  brightCyan: "\x1b[96m",
 };
 
 console.log(`\n${colors.brightCyan}===============================================${colors.reset}`);
@@ -33,7 +33,7 @@ console.log(`${colors.brightCyan}===============================================
 // Create a helper function to run commands with error handling
 const runCommand = (command, ignoreErrors = false) => {
   try {
-    const output = execSync(command, { encoding: 'utf8' });
+    const output = execSync(command, { encoding: "utf8" });
     return { success: true, output };
   } catch (error) {
     if (!ignoreErrors) {
@@ -52,7 +52,9 @@ const serverTime = new Date();
 console.log(`${colors.white}Local system time: ${serverTime.toISOString()}${colors.reset}`);
 
 // Create batch file to sync system clock on Windows
-console.log(`\n${colors.brightYellow}Creating system clock synchronization script...${colors.reset}`);
+console.log(
+  `\n${colors.brightYellow}Creating system clock synchronization script...${colors.reset}`
+);
 
 const batContent = `@echo off
 echo ===============================================
@@ -83,11 +85,13 @@ echo.
 pause
 `;
 
-fs.writeFileSync(path.join(__dirname, 'sync-system-clock.bat'), batContent);
+fs.writeFileSync(path.join(__dirname, "sync-system-clock.bat"), batContent);
 console.log(`${colors.green}Created sync-system-clock.bat${colors.reset}`);
 
 // Create a diagnostic document
-console.log(`\n${colors.brightYellow}Creating authentication troubleshooting guide...${colors.reset}`);
+console.log(
+  `\n${colors.brightYellow}Creating authentication troubleshooting guide...${colors.reset}`
+);
 
 const authFixMd = `# Authentication Troubleshooting Guide
 
@@ -150,12 +154,16 @@ GitHub Pages hosts static content and cannot serve as an API backend.
 If you continue to experience issues after trying these solutions, please contact support with the output from \`firebase-diagnostics.js\`.
 `;
 
-fs.writeFileSync(path.join(__dirname, 'AUTHENTICATION_FIX.md'), authFixMd);
+fs.writeFileSync(path.join(__dirname, "AUTHENTICATION_FIX.md"), authFixMd);
 console.log(`${colors.green}Created AUTHENTICATION_FIX.md${colors.reset}`);
 
 console.log(`\n${colors.brightGreen}Authentication fix completed!${colors.reset}`);
 console.log(`${colors.white}Next steps:${colors.reset}`);
-console.log(`${colors.white}1. Run the sync-system-clock.bat file to synchronize your system clock${colors.reset}`);
+console.log(
+  `${colors.white}1. Run the sync-system-clock.bat file to synchronize your system clock${colors.reset}`
+);
 console.log(`${colors.white}2. Restart your browser and clear cache${colors.reset}`);
 console.log(`${colors.white}3. Try logging in again${colors.reset}`);
-console.log(`${colors.white}4. Check AUTHENTICATION_FIX.md for more troubleshooting tips${colors.reset}`);
+console.log(
+  `${colors.white}4. Check AUTHENTICATION_FIX.md for more troubleshooting tips${colors.reset}`
+);

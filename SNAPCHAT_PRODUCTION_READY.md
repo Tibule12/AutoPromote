@@ -9,6 +9,7 @@ All Snapchat Marketing API features have been implemented and tested. The integr
 ## ✅ Completed Features
 
 ### 1. OAuth 2.0 Authentication Flow
+
 - **Endpoints**:
   - `POST /api/snapchat/oauth/prepare` - Generates OAuth URL with state validation
   - `GET /api/snapchat/auth/callback` - Handles OAuth callback and token exchange
@@ -28,6 +29,7 @@ All Snapchat Marketing API features have been implemented and tested. The integr
   - Toast notifications for success/error states
 
 ### 2. Ad Creative Management
+
 - **Endpoint**: `POST /api/snapchat/creative`
 - **Features**:
   - Automatic media upload to Snapchat
@@ -38,6 +40,7 @@ All Snapchat Marketing API features have been implemented and tested. The integr
   - Ad account ID auto-detection from connection
 
 - **Payload Example**:
+
 ```json
 {
   "title": "My Awesome Ad",
@@ -51,6 +54,7 @@ All Snapchat Marketing API features have been implemented and tested. The integr
 ```
 
 ### 3. Analytics & Performance Metrics
+
 - **Endpoint**: `GET /api/snapchat/analytics/:creativeId`
 - **Features**:
   - Impressions, swipes, and spend tracking
@@ -65,6 +69,7 @@ All Snapchat Marketing API features have been implemented and tested. The integr
   - `granularity` - DAY, HOUR, or TOTAL
 
 ### 4. Metadata & Account Discovery
+
 - **Endpoint**: `GET /api/snapchat/metadata`
 - **Features**:
   - Fetches user's organizations
@@ -73,6 +78,7 @@ All Snapchat Marketing API features have been implemented and tested. The integr
   - Caches metadata in dashboard state
 
 ### 5. Automated Content Posting
+
 - **Service**: `src/services/snapchatService.js`
 - **Integration**: Connected to `platformPoster` for scheduled posts
 - **Features**:
@@ -87,6 +93,7 @@ All Snapchat Marketing API features have been implemented and tested. The integr
 ## 🎨 Frontend Integration
 
 ### Dashboard Features
+
 1. **Connection Status**:
    - Visual indicator in Connections panel
    - Profile display (name, bitmoji URL if available)
@@ -116,6 +123,7 @@ All Snapchat Marketing API features have been implemented and tested. The integr
 ## 🔧 Environment Configuration
 
 ### Required Environment Variables
+
 ```bash
 # Snapchat OAuth Credentials
 SNAPCHAT_CLIENT_ID=your_public_client_id
@@ -141,20 +149,21 @@ SNAPCHAT_DEBUG_ALLOW=true  # Enables public debug endpoints
 
 ## 📋 API Endpoints Summary
 
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/api/snapchat/oauth/prepare` | POST | ✅ | Generate OAuth URL |
-| `/api/snapchat/auth/callback` | GET/POST | ❌ | Handle OAuth callback |
-| `/api/snapchat/status` | GET | ✅ | Get connection status |
-| `/api/snapchat/metadata` | GET | ✅ | Fetch organizations & ad accounts |
-| `/api/snapchat/creative` | POST | ✅ | Create ad creative |
-| `/api/snapchat/analytics/:creativeId` | GET | ✅ | Get creative performance stats |
+| Endpoint                              | Method   | Auth | Description                       |
+| ------------------------------------- | -------- | ---- | --------------------------------- |
+| `/api/snapchat/oauth/prepare`         | POST     | ✅   | Generate OAuth URL                |
+| `/api/snapchat/auth/callback`         | GET/POST | ❌   | Handle OAuth callback             |
+| `/api/snapchat/status`                | GET      | ✅   | Get connection status             |
+| `/api/snapchat/metadata`              | GET      | ✅   | Fetch organizations & ad accounts |
+| `/api/snapchat/creative`              | POST     | ✅   | Create ad creative                |
+| `/api/snapchat/analytics/:creativeId` | GET      | ✅   | Get creative performance stats    |
 
 ### Debug Endpoints (when enabled)
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/api/snapchat/_debug/authorize_probe` | GET | ❌ | Test OAuth URL generation |
-| `/api/snapchat/_debug/authorize_probe_public` | GET | ❌ | Public OAuth URL inspection |
+
+| Endpoint                                      | Method | Auth | Description                 |
+| --------------------------------------------- | ------ | ---- | --------------------------- |
+| `/api/snapchat/_debug/authorize_probe`        | GET    | ❌   | Test OAuth URL generation   |
+| `/api/snapchat/_debug/authorize_probe_public` | GET    | ❌   | Public OAuth URL inspection |
 
 ---
 
@@ -172,6 +181,7 @@ SNAPCHAT_DEBUG_ALLOW=true  # Enables public debug endpoints
 ## 📊 Data Storage Architecture
 
 ### Firestore Structure
+
 ```
 users/{userId}/connections/snapchat:
 {
@@ -243,6 +253,7 @@ oauth_states/{state}:
 ## 🚀 Deployment Readiness
 
 ### Pre-Deployment Checklist
+
 - [x] All environment variables configured
 - [x] Redirect URI registered in Snapchat Developer Portal
 - [x] OAuth scopes approved: `snapchat-marketing-api`
@@ -253,6 +264,7 @@ oauth_states/{state}:
 - [x] Firestore security rules updated
 
 ### Post-Approval Steps
+
 1. ✅ Ensure `SNAPCHAT_CLIENT_ID` and `SNAPCHAT_CLIENT_SECRET` are set in production
 2. ✅ Verify `SNAPCHAT_REDIRECT_URI` matches registered callback URL
 3. ✅ Test OAuth flow end-to-end
@@ -265,34 +277,39 @@ oauth_states/{state}:
 ## 📖 Usage Examples
 
 ### Creating a Snap Ad Creative
+
 ```javascript
-const response = await fetch('/api/snapchat/creative', {
-  method: 'POST',
+const response = await fetch("/api/snapchat/creative", {
+  method: "POST",
   headers: {
-    'Authorization': `Bearer ${userToken}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${userToken}`,
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    title: 'Summer Sale',
-    description: 'Get 50% off all items!',
-    media_url: 'https://example.com/video.mp4',
-    type: 'video',
-    ad_account_id: 'abc123',  // Optional if stored in connection
-    call_to_action: 'SHOP_NOW',
-    web_url: 'https://example.com/sale'
-  })
+    title: "Summer Sale",
+    description: "Get 50% off all items!",
+    media_url: "https://example.com/video.mp4",
+    type: "video",
+    ad_account_id: "abc123", // Optional if stored in connection
+    call_to_action: "SHOP_NOW",
+    web_url: "https://example.com/sale",
+  }),
 });
 
 const { creative_id, media_id } = await response.json();
 ```
 
 ### Fetching Analytics
+
 ```javascript
-const response = await fetch(`/api/snapchat/analytics/${creativeId}?start_time=2025-11-25T00:00:00Z&end_time=2025-12-02T23:59:59Z&granularity=DAY`, {
-  headers: {
-    'Authorization': `Bearer ${userToken}`
+const response = await fetch(
+  `/api/snapchat/analytics/${creativeId}?start_time=2025-11-25T00:00:00Z&end_time=2025-12-02T23:59:59Z&granularity=DAY`,
+  {
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
   }
-});
+);
 
 const { analytics } = await response.json();
 // analytics contains: impressions, swipes, spend, quartiles, conversions

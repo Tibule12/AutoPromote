@@ -1,9 +1,12 @@
 // collaborationEngine.js
 // Real-time collaboration and squad co-creation
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 function randomId(len = 9) {
-  return crypto.randomBytes(Math.ceil(len/2)).toString('hex').substr(0, len);
+  return crypto
+    .randomBytes(Math.ceil(len / 2))
+    .toString("hex")
+    .substr(0, len);
 }
 
 function startCollaborationSession(userIds, contentId) {
@@ -12,10 +15,10 @@ function startCollaborationSession(userIds, contentId) {
     userIds,
     contentId,
     startedAt: new Date(),
-    status: 'active'
+    status: "active",
   };
 }
 
 module.exports = {
-  startCollaborationSession
+  startCollaborationSession,
 };

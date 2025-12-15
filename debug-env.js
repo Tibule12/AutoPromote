@@ -1,23 +1,23 @@
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 
-console.log('Testing environment variable validation...');
+console.log("Testing environment variable validation...");
 dotenv.config();
 
 // Validate required environment variables
-const requiredEnvVars = ['JWT_SECRET', 'FIREBASE_SERVICE_ACCOUNT'];
+const requiredEnvVars = ["JWT_SECRET", "FIREBASE_SERVICE_ACCOUNT"];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
-console.log('Required variables check:');
+console.log("Required variables check:");
 requiredEnvVars.forEach(varName => {
-  console.log(`  ${varName}: ${process.env[varName] ? '✓ SET' : '✗ MISSING'}`);
+  console.log(`  ${varName}: ${process.env[varName] ? "✓ SET" : "✗ MISSING"}`);
 });
 
 if (missingEnvVars.length > 0) {
-  console.error('❌ Missing required environment variables:');
+  console.error("❌ Missing required environment variables:");
   missingEnvVars.forEach(varName => {
     console.error(`   - ${varName}`);
   });
   process.exit(1);
 } else {
-  console.log('✅ All required environment variables are set!');
+  console.log("✅ All required environment variables are set!");
 }

@@ -2,7 +2,7 @@
 module.exports = function adminOnly(req, res, next) {
   // Require explicit isAdmin flag (set only via claims or admins collection)
   if (!req.user || req.user.isAdmin !== true) {
-    return res.status(403).json({ error: 'admin_required' });
+    return res.status(403).json({ error: "admin_required" });
   }
   return next();
 };

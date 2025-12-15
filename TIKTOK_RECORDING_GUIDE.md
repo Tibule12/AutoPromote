@@ -7,7 +7,9 @@ TikTok requires a screen recording showing your complete "Post to TikTok" user f
 ## ✅ Pre-Recording Checklist
 
 ### 1. Enable Demo Mode
+
 Add this to your `.env` file (both local and Render):
+
 ```bash
 TIKTOK_DEMO_MODE=true
 ```
@@ -15,6 +17,7 @@ TIKTOK_DEMO_MODE=true
 This enables a mock upload response so you can demonstrate the full flow without having the upload scopes yet.
 
 ### 2. Deploy to Production
+
 ```bash
 git add .
 git commit -m "Enable TikTok demo mode for API approval recording"
@@ -24,7 +27,9 @@ git push origin main
 Wait for Render to deploy, then add `TIKTOK_DEMO_MODE=true` to your Render environment variables.
 
 ### 3. Test Your Flow
+
 Before recording, test the complete flow:
+
 1. Go to https://autopromote.org (or your deployed URL)
 2. Login
 3. Go to Connections tab
@@ -39,7 +44,9 @@ Before recording, test the complete flow:
 ## 🎬 Recording Script
 
 ### Part 1: TikTok Authorization (30-45 seconds)
+
 **Show:**
+
 1. Open your app (autopromote.org)
 2. Login to your account
 3. Navigate to "Connections" tab
@@ -52,7 +59,9 @@ Before recording, test the complete flow:
 **Narration/Text:** "User authorizes AutoPromote to access their TikTok account"
 
 ### Part 2: Post-to-TikTok Flow (60-90 seconds)
+
 **Show:**
+
 1. Navigate to "Upload" tab
 2. Click "Choose File" and select a video (must be .mp4, under 50MB)
 3. Video preview appears
@@ -69,7 +78,9 @@ Before recording, test the complete flow:
 **Narration/Text:** "User selects video, chooses TikTok as target, and posts content"
 
 ### Part 3: Confirmation (15-30 seconds)
+
 **Show:**
+
 1. Navigate to content dashboard/history
 2. Show the posted content appears
 3. TikTok is listed as one of the platforms
@@ -80,12 +91,14 @@ Before recording, test the complete flow:
 ## 📋 Technical Requirements
 
 ### Video Requirements:
+
 - **Format:** MP4 (TikTok requires this)
 - **Max size:** 50MB per file
 - **Max files:** 3 videos in the recording
 - **Resolution:** 1080p recommended for clarity
 
 ### Recording Requirements:
+
 - **Screen capture software:** OBS Studio, Loom, or QuickTime (Mac)
 - **Duration:** 2-4 minutes total
 - **Show clearly:**
@@ -113,6 +126,7 @@ From their guidelines at https://developers.tiktok.com/doc/content-sharing-guide
 ### "Please list the API response data fields that your API client will save in its database"
 
 Answer with:
+
 ```
 Our application stores the following TikTok API response fields in our database:
 
@@ -147,6 +161,7 @@ Note: We do NOT store access_tokens or refresh_tokens in our database for securi
 ## 📞 If You Have Issues
 
 Common problems:
+
 - **TikTok OAuth fails:** Check TIKTOK_CLIENT_KEY and redirect URI match
 - **Upload button disabled:** Make sure video is MP4 and under 50MB
 - **No success message:** Check browser console for errors

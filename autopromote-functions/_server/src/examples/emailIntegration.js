@@ -1,14 +1,14 @@
 // Email integration examples for AutoPromote
 // Add these to your existing route handlers
 
-const { 
-  sendWelcomeEmail, 
+const {
+  sendWelcomeEmail,
   sendPasswordResetEmail,
   sendPayoutNotification,
   sendContentPublishedNotification,
   sendSecurityAlert,
-  sendScheduleReminder
-} = require('./services/emailService');
+  sendScheduleReminder,
+} = require("./services/emailService");
 
 // Example 1: Send welcome email after user registration
 async function onUserRegistration(user) {
@@ -16,11 +16,11 @@ async function onUserRegistration(user) {
     await sendWelcomeEmail({
       email: user.email,
       name: user.name,
-      loginUrl: 'https://autopromote.org/dashboard'
+      loginUrl: "https://autopromote.org/dashboard",
     });
-    console.log('Welcome email sent to:', user.email);
+    console.log("Welcome email sent to:", user.email);
   } catch (error) {
-    console.error('Failed to send welcome email:', error);
+    console.error("Failed to send welcome email:", error);
     // Don't block registration if email fails
   }
 }
@@ -31,11 +31,11 @@ async function onPasswordResetRequest(user, resetToken) {
     const resetUrl = `https://autopromote.org/reset-password?token=${resetToken}`;
     await sendPasswordResetEmail({
       email: user.email,
-      link: resetUrl
+      link: resetUrl,
     });
-    console.log('Password reset email sent to:', user.email);
+    console.log("Password reset email sent to:", user.email);
   } catch (error) {
-    console.error('Failed to send password reset email:', error);
+    console.error("Failed to send password reset email:", error);
     throw error; // This should block the reset if email fails
   }
 }
@@ -48,11 +48,11 @@ async function onPayoutProcessed(user, payout) {
       name: user.name,
       amount: payout.amount.toFixed(2),
       method: payout.method,
-      expectedDate: payout.expectedDate
+      expectedDate: payout.expectedDate,
     });
-    console.log('Payout notification sent to:', user.email);
+    console.log("Payout notification sent to:", user.email);
   } catch (error) {
-    console.error('Failed to send payout notification:', error);
+    console.error("Failed to send payout notification:", error);
   }
 }
 
@@ -63,11 +63,11 @@ async function onContentPublished(user, content) {
       email: user.email,
       name: user.name,
       contentTitle: content.title,
-      platforms: content.platforms
+      platforms: content.platforms,
     });
-    console.log('Content published notification sent to:', user.email);
+    console.log("Content published notification sent to:", user.email);
   } catch (error) {
-    console.error('Failed to send content notification:', error);
+    console.error("Failed to send content notification:", error);
   }
 }
 
@@ -77,14 +77,14 @@ async function onSuspiciousLogin(user, loginInfo) {
     await sendSecurityAlert({
       email: user.email,
       name: user.name,
-      action: 'Login',
+      action: "Login",
       device: loginInfo.device,
       location: loginInfo.location,
-      timestamp: new Date().toLocaleString()
+      timestamp: new Date().toLocaleString(),
     });
-    console.log('Security alert sent to:', user.email);
+    console.log("Security alert sent to:", user.email);
   } catch (error) {
-    console.error('Failed to send security alert:', error);
+    console.error("Failed to send security alert:", error);
   }
 }
 
@@ -96,11 +96,11 @@ async function onScheduleReminder(user, schedule) {
       name: user.name,
       contentTitle: schedule.contentTitle,
       scheduledTime: new Date(schedule.scheduledTime).toLocaleString(),
-      platforms: schedule.platforms
+      platforms: schedule.platforms,
     });
-    console.log('Schedule reminder sent to:', user.email);
+    console.log("Schedule reminder sent to:", user.email);
   } catch (error) {
-    console.error('Failed to send schedule reminder:', error);
+    console.error("Failed to send schedule reminder:", error);
   }
 }
 
@@ -110,5 +110,5 @@ module.exports = {
   onPayoutProcessed,
   onContentPublished,
   onSuspiciousLogin,
-  onScheduleReminder
+  onScheduleReminder,
 };

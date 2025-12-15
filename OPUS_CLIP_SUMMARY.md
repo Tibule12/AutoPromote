@@ -9,6 +9,7 @@ I've successfully built a complete **Opus Clip-style AI video clipping system** 
 ## 📦 Files Created
 
 ### Backend Services
+
 ```
 src/services/videoClippingService.js      (750 lines)
   ├─ Video analysis engine
@@ -27,6 +28,7 @@ src/routes/clipRoutes.js                  (275 lines)
 ```
 
 ### Frontend Components
+
 ```
 frontend/src/UserDashboardTabs/ClipStudioPanel.js      (450 lines)
 frontend/src/UserDashboardTabs/ClipStudioPanel.css     (450 lines)
@@ -39,6 +41,7 @@ frontend/src/UserDashboardTabs/ClipStudioPanel.css     (450 lines)
 ```
 
 ### Configuration & Documentation
+
 ```
 AI_CLIP_GENERATION_README.md     - Complete feature documentation
 AI_CLIP_DEPLOYMENT.md            - Deployment guide & troubleshooting
@@ -52,6 +55,7 @@ frontend/.../UserDashboard_full.js (updated) - Dashboard integration
 ## 🎯 How It Works
 
 ### User Flow
+
 ```
 1. User uploads long-form video (5+ minutes)
    ↓
@@ -75,6 +79,7 @@ frontend/.../UserDashboard_full.js (updated) - Dashboard integration
 ```
 
 ### Viral Scoring Algorithm
+
 ```javascript
 Base Score: 50
 
@@ -99,12 +104,14 @@ Final Score: 0-100
 ### 1. Install FFmpeg on Your Server
 
 **If deploying to Render.com:**
+
 ```bash
 # Add to your render.yaml or build command:
 apt-get update && apt-get install -y ffmpeg && npm install
 ```
 
 **Or SSH into server:**
+
 ```bash
 sudo apt-get update
 sudo apt-get install -y ffmpeg
@@ -114,11 +121,13 @@ ffmpeg -version  # Verify
 ### 2. Add Environment Variable
 
 **On Render.com Dashboard:**
+
 - Go to your service → Environment
 - Add: `OPENAI_API_KEY` = `sk-your-openai-key`
 - Add: `TRANSCRIPTION_PROVIDER` = `openai`
 
 **Or in local .env:**
+
 ```bash
 OPENAI_API_KEY=sk-your-openai-key-here
 TRANSCRIPTION_PROVIDER=openai
@@ -127,6 +136,7 @@ TRANSCRIPTION_PROVIDER=openai
 ### 3. That's It!
 
 Everything else is already deployed:
+
 - ✅ Code pushed to GitHub
 - ✅ Firestore rules deployed
 - ✅ Frontend integrated
@@ -137,18 +147,21 @@ Everything else is already deployed:
 ## 💡 Key Features
 
 ### 1. AI-Powered Analysis
+
 - Automatic scene detection
 - Speech-to-text transcription
 - Engagement pattern recognition
 - Viral moment identification
 
 ### 2. Smart Clip Generation
+
 - 10-20 suggestions per video
 - Ranked by viral score (0-100)
 - Reason explanations for each clip
 - Platform-specific recommendations
 
 ### 3. Professional Export
+
 - Vertical (9:16) for TikTok/Reels
 - Horizontal (16:9) for YouTube
 - Square (1:1) for Instagram Feed
@@ -156,6 +169,7 @@ Everything else is already deployed:
 - Branding options
 
 ### 4. Seamless Integration
+
 - New "AI Clips" tab in dashboard
 - Uses existing auth system
 - One-click export to platforms
@@ -166,17 +180,20 @@ Everything else is already deployed:
 ## 📊 Pricing & Costs
 
 ### OpenAI Whisper API
+
 - **$0.006 per minute** of audio
 - 10 min video = **$0.06**
 - 60 min video = **$0.36**
 
 ### Example Monthly Costs (100 videos × 10 min avg)
+
 - Transcription: **$6.00**
 - Storage: **$1.30**
 - Bandwidth: **$5-10**
 - **Total: ~$12-17/month**
 
 ### Suggested Pricing Model
+
 - **Free Tier**: 3 clips/month
 - **Pro Tier**: $9.99/month - Unlimited clips
 - **Per-Clip**: $0.99/clip (no subscription)
@@ -219,14 +236,14 @@ The ClipStudio panel includes:
 
 vs. Opus Clip:
 
-| Feature | Opus Clip | Your Implementation |
-|---------|-----------|---------------------|
-| Cost | $29-99/mo | ~$12-17/mo (at scale) |
-| Integration | External | Native to platform |
-| Customization | Limited | Full control |
-| Data Ownership | Their servers | Your Firebase |
-| Branding | Watermark | Custom branding |
-| Platform Export | Manual | One-click to all |
+| Feature         | Opus Clip     | Your Implementation   |
+| --------------- | ------------- | --------------------- |
+| Cost            | $29-99/mo     | ~$12-17/mo (at scale) |
+| Integration     | External      | Native to platform    |
+| Customization   | Limited       | Full control          |
+| Data Ownership  | Their servers | Your Firebase         |
+| Branding        | Watermark     | Custom branding       |
+| Platform Export | Manual        | One-click to all      |
 
 ---
 
@@ -252,15 +269,19 @@ vs. Opus Clip:
 ## 🐛 Common Issues & Solutions
 
 ### "FFmpeg not found"
+
 **Solution**: Install FFmpeg on server (see step 1 above)
 
 ### "OpenAI transcription failed"
+
 **Solution**: Check API key is set correctly, verify billing
 
 ### Analysis takes too long
+
 **Solution**: Use lower resolution, implement queue system
 
 ### Out of memory
+
 **Solution**: Upgrade Render instance, clean temp files
 
 ---
@@ -268,12 +289,14 @@ vs. Opus Clip:
 ## 🎯 Next Enhancement Ideas
 
 ### Phase 2 (Optional)
+
 - [ ] Background job queue for long videos
 - [ ] Email notifications when complete
 - [ ] Clip preview before generation
 - [ ] Manual trim/adjust tools
 
 ### Phase 3 (Future)
+
 - [ ] AI voice-over generation
 - [ ] Automatic background music
 - [ ] Face detection for framing

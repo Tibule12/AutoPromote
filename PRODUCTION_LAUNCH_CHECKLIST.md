@@ -9,6 +9,7 @@
 ## ✅ VERIFIED COMPLETE (Already Production Ready)
 
 ### Core Platform Infrastructure
+
 - ✅ **Authentication System** - Firebase Auth with JWT verification
 - ✅ **User Management** - Firestore user provisioning
 - ✅ **Content Upload** - Multipart upload with Firebase Storage
@@ -22,6 +23,7 @@
 - ✅ **CORS Protection** - Allowlist-based origins
 
 ### Social Platform Integrations (12/12)
+
 1. ✅ **YouTube** - OAuth + upload (319 lines)
 2. ✅ **Twitter/X** - OAuth + posting (377 lines)
 3. ✅ **Facebook** - OAuth + page posting (298 lines service + 350 lines routes)
@@ -36,6 +38,7 @@
 12. ⚠️ **Instagram** - Requires Facebook Business Account (75% complete)
 
 ### PayPal Payment System
+
 - ✅ **PayPal Client** - Environment detection (sandbox/live)
 - ✅ **PayPal Webhook Handler** - RSA signature verification (269 lines)
 - ✅ **PayPal Subscriptions** - Plan management (591 lines)
@@ -52,6 +55,7 @@
 ### 1. Environment Variables Verification ⚠️
 
 **Verify these are SET in Render Backend:**
+
 ```bash
 # PayPal Configuration (CRITICAL)
 PAYPAL_CLIENT_ID=<your_client_id>          # ✅ You said it's set
@@ -92,6 +96,7 @@ VERIFY_REDIRECT_URL=https://www.autopromote.org/verified  # ⚠️ Set for email
 ```
 
 **ACTION STEPS:**
+
 1. Log into Render Dashboard
 2. Navigate to Backend Service → Environment
 3. Verify ALL variables above are set correctly
@@ -136,14 +141,17 @@ VERIFY_REDIRECT_URL=https://www.autopromote.org/verified  # ⚠️ Set for email
 **CodeQL Alerts - Must Fix Before Launch:**
 
 #### A. SSRF Protection - ALREADY FIXED ✅
+
 - ✅ PayPal routes use `safeFetch` with `allowHosts`
 - ✅ Lines 34, 61, 87 in `paypalWebhookRoutes.js`
 
 #### B. Rate Limiting - VERIFY COMPLETE ✅
+
 - ✅ PayPal routes have rate limiters applied
 - ✅ `paypalPublicLimiter` and `paypalWebhookLimiter` active
 
 #### C. Remaining Critical Issues (Can launch with these, but fix within 1 week):
+
 ```bash
 # Priority 1 (Fix this week):
 - [ ] Add URL validation to TikTok routes (SSRF line 530)
@@ -164,6 +172,7 @@ VERIFY_REDIRECT_URL=https://www.autopromote.org/verified  # ⚠️ Set for email
 **Current Status:** Optional (grandfathered)
 
 **Required Changes:**
+
 ```javascript
 // In Render Environment Variables:
 REQUIRE_EMAIL_VERIFICATION=true           // ⚠️ ENFORCE
@@ -172,6 +181,7 @@ VERIFY_REDIRECT_URL=https://www.autopromote.org/verified  // ⚠️ SET
 ```
 
 **Test Flow:**
+
 1. Register new user
 2. Check email for verification link
 3. Click link → Should redirect to dashboard
@@ -184,12 +194,14 @@ VERIFY_REDIRECT_URL=https://www.autopromote.org/verified  // ⚠️ SET
 **Current Status:** Middleware exists
 
 **Required Changes:**
+
 ```javascript
 // Verify in Render:
 REQUIRED_TERMS_VERSION=AUTOPROMOTE-v1.0   // ⚠️ SET
 ```
 
 **Test Flow:**
+
 1. Login as new user
 2. Should show terms acceptance modal
 3. Try to access `/api/content` without accepting → Should get 403
@@ -210,6 +222,7 @@ REACT_APP_PAYPAL_CLIENT_ID=<client_id>    // ⚠️ Same as backend
 ```
 
 **Build and Deploy Frontend:**
+
 ```bash
 cd frontend
 npm run build
@@ -221,11 +234,13 @@ npm run build
 ### 7. DNS & SSL Verification ⚠️
 
 **Verify these URLs work:**
+
 - ✅ `https://www.autopromote.org` → Frontend
 - ✅ `https://api.autopromote.org` → Backend API
 - ⚠️ `https://api.autopromote.org/api/paypal/webhook` → PayPal webhook endpoint
 
 **Test Commands:**
+
 ```bash
 # Test backend health:
 curl https://api.autopromote.org/health
@@ -239,17 +254,20 @@ curl https://api.autopromote.org/api/paypal/webhook
 ### 8. Database Rules & Indexes 🔥
 
 **Firestore Rules:**
+
 ```bash
 cd c:\Users\asus\AutoPromte\AutoPromote
 firebase deploy --only firestore:rules
 ```
 
 **Firestore Indexes:**
+
 ```bash
 firebase deploy --only firestore:indexes
 ```
 
 **Verify indexes exist for:**
+
 - `users` → email, role, emailVerified
 - `content` → userId, status, createdAt
 - `payments` → userId, status, createdAt
@@ -263,6 +281,7 @@ firebase deploy --only firestore:indexes
 **Critical User Journeys to Test:**
 
 #### A. New User Registration
+
 ```bash
 1. Go to https://www.autopromote.org
 2. Click "Sign Up"
@@ -276,6 +295,7 @@ firebase deploy --only firestore:indexes
 ```
 
 #### B. Content Upload & Scheduling
+
 ```bash
 1. Login to dashboard
 2. Click "Upload" tab
@@ -288,6 +308,7 @@ firebase deploy --only firestore:indexes
 ```
 
 #### C. Platform Connection (Test 2-3 platforms)
+
 ```bash
 1. Click "Connections" tab
 2. Click "Connect YouTube"
@@ -298,6 +319,7 @@ firebase deploy --only firestore:indexes
 ```
 
 #### D. PayPal Subscription Purchase
+
 ```bash
 1. Click user menu → "Upgrade"
 2. Select "Premium" plan ($9.99/month)
@@ -309,6 +331,7 @@ firebase deploy --only firestore:indexes
 ```
 
 #### E. Admin Functions
+
 ```bash
 1. Login as admin user
 2. Go to Admin Dashboard
@@ -339,16 +362,21 @@ firebase deploy --only firestore:indexes
    - Track payment success rates
 
 **Optional: Set up Sentry or similar:**
+
 ```bash
 npm install @sentry/node
 # Add SENTRY_DSN to environment
 ```
+
 **Frontend Sentry:**
+
 ```bash
 # Set frontend DSN for the React app (used by @sentry/react)
 REACT_APP_SENTRY_DSN=your_sentry_dsn_here
 ```
+
 **Server Sentry:**
+
 ```bash
 # Set server DSN for Node app
 SENTRY_DSN=your_sentry_dsn_here
@@ -359,11 +387,13 @@ SENTRY_DSN=your_sentry_dsn_here
 ### 11. Legal & Compliance ✅
 
 **Already Complete:**
+
 - ✅ Privacy Policy: https://Tibule12.github.io/AutoPromote/docs/privacy.html
 - ✅ Terms of Service: https://Tibule12.github.io/AutoPromote/docs/terms.html
 - ✅ Data Deletion: https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
 
 **Verify Accessible:**
+
 ```bash
 curl -I https://Tibule12.github.io/AutoPromote/docs/privacy.html
 curl -I https://Tibule12.github.io/AutoPromote/docs/terms.html
@@ -371,6 +401,7 @@ curl -I https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
 ```
 
 **Update if needed:**
+
 - Review terms for subscription cancellation policy
 - Review privacy policy for payment data handling
 - Ensure GDPR compliance (if serving EU users)
@@ -380,6 +411,7 @@ curl -I https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
 ## 📋 FINAL PRE-LAUNCH CHECKLIST
 
 ### Day -3 (December 12)
+
 - [ ] Verify ALL environment variables in Render
 - [ ] Change `PAYPAL_MODE=live`
 - [ ] Set `PAYMENTS_ENABLED=true`
@@ -390,6 +422,7 @@ curl -I https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
 - [ ] Build and deploy frontend
 
 ### Day -2 (December 13)
+
 - [ ] Run full E2E test suite (all 5 user journeys above)
 - [ ] Test all 11 platform connections
 - [ ] Verify email verification flow works
@@ -399,6 +432,7 @@ curl -I https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
 - [ ] Test on mobile devices (iOS & Android)
 
 ### Day -1 (December 14)
+
 - [ ] Final security scan (fix top 10 CodeQL alerts)
 - [ ] Performance test (simulate 100 concurrent users)
 - [ ] Backup Firestore database
@@ -408,6 +442,7 @@ curl -I https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
 - [ ] Test with 5 beta users (friends/family)
 
 ### Launch Day (December 15)
+
 - [ ] Final smoke test (all critical paths)
 - [ ] Monitor logs for errors
 - [ ] Monitor payment transactions
@@ -421,16 +456,19 @@ curl -I https://Tibule12.github.io/AutoPromote/docs/data-deletion.html
 ## 🚨 CRITICAL PATH ISSUES
 
 ### Issue #1: Payment System Not Enabled
-**Current State:** 
+
+**Current State:**
+
 ```javascript
 // These are likely FALSE or not set:
-PAYMENTS_ENABLED=false
-PAYOUTS_ENABLED=false  
-ALLOW_LIVE_PAYMENTS=false
-PAYPAL_MODE=sandbox
+PAYMENTS_ENABLED = false;
+PAYOUTS_ENABLED = false;
+ALLOW_LIVE_PAYMENTS = false;
+PAYPAL_MODE = sandbox;
 ```
 
 **Fix Required:**
+
 ```bash
 # In Render Backend Environment:
 PAYMENTS_ENABLED=true
@@ -445,9 +483,11 @@ NODE_ENV=production
 ---
 
 ### Issue #2: Email Verification Not Enforced
+
 **Current State:** Optional (grandfathered accounts exempt)
 
 **Fix Required:**
+
 ```bash
 REQUIRE_EMAIL_VERIFICATION=true
 GRANDFATHER_POLICY_CUTOFF=  # Empty/not set
@@ -458,9 +498,11 @@ GRANDFATHER_POLICY_CUTOFF=  # Empty/not set
 ---
 
 ### Issue #3: Terms Acceptance Not Enforced
+
 **Current State:** Middleware exists but version not set
 
 **Fix Required:**
+
 ```bash
 REQUIRED_TERMS_VERSION=AUTOPROMOTE-v1.0
 ```
@@ -472,6 +514,7 @@ REQUIRED_TERMS_VERSION=AUTOPROMOTE-v1.0
 ## 📊 LAUNCH METRICS TO TRACK
 
 ### Day 1 Targets:
+
 - User Signups: 50-100
 - Platform Connections: 100-200 (avg 2 per user)
 - Content Uploads: 20-50
@@ -479,6 +522,7 @@ REQUIRED_TERMS_VERSION=AUTOPROMOTE-v1.0
 - Active Posts: 50-100
 
 ### Week 1 Targets:
+
 - User Signups: 500-1,000
 - Subscriptions: 50-100
 - Content Uploads: 200-500
@@ -507,6 +551,7 @@ REQUIRED_TERMS_VERSION=AUTOPROMOTE-v1.0
 3. **Monitoring** - Set up basic health checks and log alerts
 
 **Launch Strategy:**
+
 - **Soft Launch** December 15 (invite only, 100 users)
 - **Public Beta** December 18 (open signup, monitor for issues)
 - **Full Launch** December 22 (marketing push, press release)
@@ -518,6 +563,7 @@ This gives you 3-7 days buffer to catch and fix any production issues before goi
 ## 📞 SUPPORT & ESCALATION
 
 **If issues arise:**
+
 1. Check Render logs first
 2. Check PayPal webhook logs
 3. Check Firestore audit_logs
@@ -525,6 +571,7 @@ This gives you 3-7 days buffer to catch and fix any production issues before goi
 5. Rollback if critical (keep previous deploy available)
 
 **Emergency Contacts:**
+
 - Render Support: https://render.com/support
 - PayPal Developer Support: https://developer.paypal.com/support
 - Firebase Support: https://firebase.google.com/support
@@ -562,6 +609,7 @@ Questions? DM us or email thulani@autopromote.org
 ---
 
 **NEXT STEPS:**
+
 1. ✅ Review this checklist
 2. ⚠️ Set environment variables in Render TODAY
 3. ⚠️ Test PayPal subscription flow
