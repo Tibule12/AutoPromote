@@ -8,6 +8,9 @@ const runIntegration = process.env.RUN_INTEGRATION_CLIP === '1';
 
 // Mock firebaseAdmin to capture saved generated clip metadata and provide analysis doc
 jest.mock('../firebaseAdmin', () => {
+  const fsPromises = require('fs').promises;
+  const path = require('path');
+  const os = require('os');
   let savedGeneratedClip = null;
   const db = {
     collection: (name) => {
@@ -38,7 +41,7 @@ jest.mock('../firebaseAdmin', () => {
       upload: async (src, opts) => {
         // copy to temp to simulate upload
         const dest = path.join(os.tmpdir(), path.basename(src));
-        await fs.copyFile(src, dest);
+        await fsPromises.copyFile(src, dest);
         return;
       },
       file: () => ({ getSignedUrl: async () => ['https://storage.test/signed-clip.mp4'] })
