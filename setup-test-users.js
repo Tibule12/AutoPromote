@@ -1,66 +1,67 @@
-const { auth, db } = require('./firebaseAdmin');
+const { auth, db } = require("./firebaseAdmin");
 
 async function createTestUser() {
-    try {
-        console.log('Creating test user...');
-        
-        const email = 'test@example.com';
-        const password = process.env.TEST_PASSWORD || 'Test123!';
+  try {
+    console.log("Creating test user...");
 
-        // Create user in Firebase Auth
-        const userRecord = await auth.createUser({
-            email: email,
-            password: password,
-            displayName: 'Test User',
-            emailVerified: true
-        });
+    const email = "test@example.com";
+    const password = process.env.TEST_PASSWORD || "Test123!";
 
-        // Store additional user data in Firestore
-        await db.collection('users').doc(userRecord.uid).set({
-            name: 'Test User',
-            email: userRecord.email,
-            role: 'user',
-            createdAt: new Date().toISOString()
-        });
+    // Create user in Firebase Auth
+    const userRecord = await auth.createUser({
+      email: email,
+      password: password,
+      displayName: "Test User",
+      emailVerified: true,
+    });
 
-        console.log('✅ Test user created successfully');
-        console.log('Email:', email);
-        console.log('Password: <REDACTED>');
-        console.log('User ID:', userRecord.uid);
+    // Store additional user data in Firestore
+    await db.collection("users").doc(userRecord.uid).set({
+      name: "Test User",
+      email: userRecord.email,
+      role: "user",
+      createdAt: new Date().toISOString(),
+    });
 
-        // Create an admin user
-        const adminEmail = 'admin@example.com';
-        const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123!';
+    console.log("✅ Test user created successfully");
+    console.log("Email:", email);
+    console.log("Password: <REDACTED>");
+    console.log("User ID:", userRecord.uid);
 
-        const adminRecord = await auth.createUser({
-            email: adminEmail,
-            password: adminPassword,
-            displayName: 'Admin User',
-            emailVerified: true
-        });
+    // Create an admin user
+    const adminEmail = "admin@example.com";
+    const adminPassword = process.env.ADMIN_PASSWORD || "Admin123!";
 
-        // Set custom claims for admin
-        await auth.setCustomUserClaims(adminRecord.uid, { role: 'admin' });
+    const adminRecord = await auth.createUser({
+      email: adminEmail,
+      password: adminPassword,
+      displayName: "Admin User",
+      emailVerified: true,
+    });
 
-        // Store admin data in Firestore
-        await db.collection('users').doc(adminRecord.uid).set({
-            name: 'Admin User',
-            email: adminRecord.email,
-            role: 'admin',
-            createdAt: new Date().toISOString()
-        });
+    // Set custom claims for admin
+    await auth.setCustomUserClaims(adminRecord.uid, { role: "admin" });
 
-        console.log('\n✅ Admin user created successfully');
-        console.log('Email:', adminEmail);
-        console.log('Password: <REDACTED>');
-        console.log('User ID:', adminRecord.uid);
+    // Store admin data in Firestore
+    await db.collection("users").doc(adminRecord.uid).set({
+      name: "Admin User",
+      email: adminRecord.email,
+      role: "admin",
+      createdAt: new Date().toISOString(),
+    });
 
-    } catch (error) {
-        console.error('Error creating test users:', error);
-    }
+    console.log("\n✅ Admin user created successfully");
+    console.log("Email:", adminEmail);
+    console.log("Password: <REDACTED>");
+    console.log("User ID:", adminRecord.uid);
+  } catch (error) {
+    console.error("Error creating test users:", error);
+  }
 }
 
-createTestUser().then(() => process.exit(0)).catch(error => {
-    console.error('Fatal error:', error);
+createTestUser()
+  .then(() => process.exit(0))
+  .catch(error => {
+    console.error("Fatal error:", error);
     process.exit(1);
-});
+  });

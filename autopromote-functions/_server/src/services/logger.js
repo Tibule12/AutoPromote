@@ -6,7 +6,7 @@ function base(level, message, meta = {}) {
     ts: new Date().toISOString(),
     level,
     message,
-    ...meta
+    ...meta,
   };
   try {
     // Avoid crashing on circular structures
@@ -17,7 +17,7 @@ function base(level, message, meta = {}) {
 }
 
 module.exports = {
-  info: (m, meta) => base('info', m, meta),
-  warn: (m, meta) => base('warn', m, meta),
-  error: (m, meta) => base('error', m, meta)
+  info: (m, meta) => base("info", m, meta),
+  warn: (m, meta) => base("warn", m, meta),
+  error: (m, meta) => base("error", m, meta),
 };

@@ -6,14 +6,14 @@ function getUserDashboard(userId) {
   return {
     userId,
     widgets: [
-      { type: 'views', value: Math.floor(Math.random() * 100000) },
-      { type: 'growth', value: Math.random().toFixed(2) },
-      { type: 'viralScore', value: Math.random().toFixed(2) }
+      { type: "views", value: Math.floor(Math.random() * 100000) },
+      { type: "growth", value: Math.random().toFixed(2) },
+      { type: "viralScore", value: Math.random().toFixed(2) },
     ],
-    updatedAt: new Date()
+    updatedAt: new Date(),
   };
 }
 
 module.exports = {
-  getUserDashboard
+  getUserDashboard,
 };

@@ -2,7 +2,9 @@
   "name": "functions",
   "description": "Cloud Functions for Firebase",
   "scripts": {
-    "lint": "echo 'Lint skipped'",
+    "lint": "eslint --ext .js index.js lib --max-warnings=0",
+    "format": "prettier --write \"**/*.{js,json}\"",
+    "format:check": "prettier --check \"**/*.{js,json}\"",
     "postinstall": "node copy-server.js",
     "serve": "firebase emulators:start --only functions",
     "shell": "firebase functions:shell",

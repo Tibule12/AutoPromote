@@ -17,7 +17,9 @@
   box-shadow: 0 22px 48px rgba(15, 23, 42, 0.14);
   width: 100%;
   max-width: 420px;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .auth-form:hover {
@@ -79,7 +81,9 @@
   border-radius: 10px;
   font-size: 1rem;
   background-color: #f8fafc;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .form-input:focus {
@@ -99,7 +103,9 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .auth-button:hover:not(:disabled) {
@@ -196,7 +202,9 @@
 
 /* Loading animation */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-spinner {

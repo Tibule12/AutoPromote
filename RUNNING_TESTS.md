@@ -25,6 +25,7 @@ If you encounter the error "... is not recognized as the name of a cmdlet, funct
 ### Common Issues:
 
 1. **Firebase Admin SDK not installed**:
+
    ```
    npm install firebase-admin
    ```

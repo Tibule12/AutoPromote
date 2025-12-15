@@ -1,15 +1,15 @@
 // This script creates a very basic express server to test admin login
-const express = require('express');
-const fetch = require('node-fetch');
+const express = require("express");
+const fetch = require("node-fetch");
 const app = express();
 const PORT = 5002;
-const DEFAULT_ADMIN_EMAIL = process.env.TEST_ADMIN_EMAIL || '';
+const DEFAULT_ADMIN_EMAIL = process.env.TEST_ADMIN_EMAIL || "";
 
 // Basic middleware
 app.use(express.json());
 
 // Test endpoint
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.send(`
     <h1>Admin Endpoint Tester</h1>
     <form id="loginForm">

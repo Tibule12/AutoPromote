@@ -1,11 +1,10 @@
 // UsageLimitBanner.js
 // Display user's upload limit and upgrade prompt
 
-import React, { useState, useEffect } from 'react';
-import { auth } from '../firebaseClient';
-import { API_BASE_URL } from '../config';
-import toast from 'react-hot-toast';
-import './UsageLimitBanner.css';
+import React, { useState, useEffect } from "react";
+import { auth } from "../firebaseClient";
+import { API_BASE_URL } from "../config";
+import "./UsageLimitBanner.css";
 
 const UsageLimitBanner = () => {
   const [usage, setUsage] = useState(null);
@@ -21,7 +20,7 @@ const UsageLimitBanner = () => {
       if (!token) return;
 
       const response = await fetch(`${API_BASE_URL}/api/usage/stats`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -29,7 +28,7 @@ const UsageLimitBanner = () => {
         setUsage(data.stats);
       }
     } catch (error) {
-      console.error('Failed to load usage stats:', error);
+      console.error("Failed to load usage stats:", error);
     } finally {
       setLoading(false);
     }
@@ -37,7 +36,7 @@ const UsageLimitBanner = () => {
 
   const handleUpgrade = () => {
     // Navigate to pricing page (use hash router so we don't hit server)
-    window.location.hash = '#/pricing';
+    window.location.hash = "#/pricing";
   };
 
   if (loading || !usage || usage.isPaid) {
@@ -49,7 +48,9 @@ const UsageLimitBanner = () => {
   const isAtLimit = usage.remaining === 0;
 
   return (
-    <div className={`usage-banner ${isAtLimit ? 'limit-reached' : isNearLimit ? 'near-limit' : ''}`}>
+    <div
+      className={`usage-banner ${isAtLimit ? "limit-reached" : isNearLimit ? "near-limit" : ""}`}
+    >
       <div className="usage-banner-content">
         <div className="usage-info">
           <div className="usage-text">
@@ -72,10 +73,7 @@ const UsageLimitBanner = () => {
             )}
           </div>
           <div className="usage-progress">
-            <div 
-              className="usage-progress-bar" 
-              style={{ width: `${percentUsed}%` }}
-            />
+            <div className="usage-progress-bar" style={{ width: `${percentUsed}%` }} />
           </div>
         </div>
         <button className="upgrade-button" onClick={handleUpgrade}>
@@ -84,7 +82,8 @@ const UsageLimitBanner = () => {
       </div>
       {isAtLimit && (
         <div className="limit-message">
-          Upgrade to Premium to continue uploading and promoting your content with unlimited uploads per month.
+          Upgrade to Premium to continue uploading and promoting your content with unlimited uploads
+          per month.
         </div>
       )}
     </div>

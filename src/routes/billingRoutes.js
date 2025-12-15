@@ -1,6 +1,6 @@
-const express = require('express');
-const authMiddleware = require('../authMiddleware');
-const { db } = require('../firebaseAdmin');
+const express = require("express");
+const authMiddleware = require("../authMiddleware");
+const { db } = require("../firebaseAdmin");
 // Stripe integration removed
 
 const router = express.Router();

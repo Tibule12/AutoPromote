@@ -1,0 +1,14 @@
+node_modules
+frontend/node_modules
+autopromote-functions/node_modules
+build
+frontend/build
+dist
+coverage
+docs/static
+.git
+.vscode
+npm-debug.log
+yarn-error.log
+**/package-lock.json
+**/pnpm-lock.yaml

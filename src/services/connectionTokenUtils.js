@@ -1,19 +1,23 @@
-const { decryptToken } = require('./secretVault');
+const { decryptToken } = require("./secretVault");
 
 function isEncryptedString(val) {
-  return typeof val === 'string' && val.length > 40; // heuristic for base64 of iv+tag+enc
+  return typeof val === "string" && val.length > 40; // heuristic for base64 of iv+tag+enc
 }
 
 function parseMaybeJson(str) {
-  try { return JSON.parse(str); } catch (_) { return null; }
+  try {
+    return JSON.parse(str);
+  } catch (_) {
+    return null;
+  }
 }
 
 function tokensFromDoc(doc) {
   if (!doc) return null;
   // If tokens is an object (legacy), return as-is
-  if (doc.tokens && typeof doc.tokens === 'object') return doc.tokens;
+  if (doc.tokens && typeof doc.tokens === "object") return doc.tokens;
   // If tokens is a string, decrypt + parse JSON
-  if (doc.tokens && typeof doc.tokens === 'string') {
+  if (doc.tokens && typeof doc.tokens === "string") {
     const dec = decryptToken(doc.tokens);
     const parsed = parseMaybeJson(dec);
     if (parsed) return parsed;

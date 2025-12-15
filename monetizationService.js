@@ -1,11 +1,11 @@
-const { db } = require('./firebaseAdmin');
+const { db } = require("./firebaseAdmin");
 
 class MonetizationService {
   constructor() {
     // Business rules
     this.REVENUE_PER_MILLION_VIEWS = 900000; // $900,000 per 1M views
     this.CREATOR_PAYOUT_RATE = 0.01; // 1% of revenue goes to creator
-    this.PLATFORM_FEE_RATE = 0.10; // 10% of revenue goes to platform
+    this.PLATFORM_FEE_RATE = 0.1; // 10% of revenue goes to platform
   }
 
   /**
@@ -20,7 +20,7 @@ class MonetizationService {
    */
   async processTransaction(transactionData) {
     try {
-      console.log('💰 Processing monetization transaction:', transactionData);
+      console.log("💰 Processing monetization transaction:", transactionData);
 
       const {
         contentId,
@@ -29,7 +29,7 @@ class MonetizationService {
         engagementsGenerated = 0,
         cost = 0,
         paypalOrderId,
-        paypalCaptureId
+        paypalCaptureId,
       } = transactionData;
 
       // Calculate revenue based on views generated
@@ -54,28 +54,27 @@ class MonetizationService {
         paypalOrderId,
         paypalCaptureId,
         timestamp: new Date(),
-        type: 'promotion_revenue',
-        status: 'completed'
+        type: "promotion_revenue",
+        status: "completed",
       };
 
       // Save to Firestore
-      const transactionRef = await db.collection('transactions').add(transactionRecord);
+      const transactionRef = await db.collection("transactions").add(transactionRecord);
 
-      console.log('✅ Transaction processed successfully:', {
+      console.log("✅ Transaction processed successfully:", {
         transactionId: transactionRef.id,
         revenueGenerated,
         creatorPayout,
-        platformFee
+        platformFee,
       });
 
       return {
         success: true,
         transactionId: transactionRef.id,
-        transaction: transactionRecord
+        transaction: transactionRecord,
       };
-
     } catch (error) {
-      console.error('❌ Error processing transaction:', error);
+      console.error("❌ Error processing transaction:", error);
       throw new Error(`Failed to process transaction: ${error.message}`);
     }
   }
@@ -90,25 +89,25 @@ class MonetizationService {
    */
   async getRevenueAnalytics(options = {}) {
     try {
-      console.log('📊 Fetching revenue analytics:', options);
+      console.log("📊 Fetching revenue analytics:", options);
 
-      let query = db.collection('transactions');
+      let query = db.collection("transactions");
 
       // Apply filters
       if (options.startDate) {
-        query = query.where('timestamp', '>=', options.startDate);
+        query = query.where("timestamp", ">=", options.startDate);
       }
       if (options.endDate) {
-        query = query.where('timestamp', '<=', options.endDate);
+        query = query.where("timestamp", "<=", options.endDate);
       }
       if (options.userId) {
-        query = query.where('userId', '==', options.userId);
+        query = query.where("userId", "==", options.userId);
       }
 
       const snapshot = await query.get();
       const transactions = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
 
       // Calculate analytics
@@ -116,27 +115,35 @@ class MonetizationService {
       const totalCreatorPayouts = transactions.reduce((sum, t) => sum + (t.creatorPayout || 0), 0);
       const totalPlatformFees = transactions.reduce((sum, t) => sum + (t.platformFee || 0), 0);
       const totalViews = transactions.reduce((sum, t) => sum + (t.viewsGenerated || 0), 0);
-      const totalEngagements = transactions.reduce((sum, t) => sum + (t.engagementsGenerated || 0), 0);
+      const totalEngagements = transactions.reduce(
+        (sum, t) => sum + (t.engagementsGenerated || 0),
+        0
+      );
 
       // Calculate monthly breakdown
       const monthlyRevenue = {};
       transactions.forEach(transaction => {
         const date = transaction.timestamp?.toDate();
         if (date) {
-          const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-          monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + (transaction.revenueGenerated || 0);
+          const monthKey = date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+          monthlyRevenue[monthKey] =
+            (monthlyRevenue[monthKey] || 0) + (transaction.revenueGenerated || 0);
         }
       });
 
       // Calculate revenue by content type (if available)
       const revenueByContentType = {};
       transactions.forEach(transaction => {
-        const type = transaction.contentType || 'Other';
-        revenueByContentType[type] = (revenueByContentType[type] || 0) + (transaction.revenueGenerated || 0);
+        const type = transaction.contentType || "Other";
+        revenueByContentType[type] =
+          (revenueByContentType[type] || 0) + (transaction.revenueGenerated || 0);
       });
 
       // Convert to percentages for content type breakdown
-      const totalRevenueForTypes = Object.values(revenueByContentType).reduce((sum, amount) => sum + amount, 0);
+      const totalRevenueForTypes = Object.values(revenueByContentType).reduce(
+        (sum, amount) => sum + amount,
+        0
+      );
       const contentTypePercentages = {};
       Object.entries(revenueByContentType).forEach(([type, amount]) => {
         contentTypePercentages[type] = Math.round((amount / totalRevenueForTypes) * 100);
@@ -149,25 +156,27 @@ class MonetizationService {
         totalViews,
         totalEngagements,
         transactionCount: transactions.length,
-        averageRevenuePerTransaction: transactions.length > 0 ? totalRevenue / transactions.length : 0,
+        averageRevenuePerTransaction:
+          transactions.length > 0 ? totalRevenue / transactions.length : 0,
         averageViewsPerTransaction: transactions.length > 0 ? totalViews / transactions.length : 0,
-        monthlyRevenue: Object.entries(monthlyRevenue).map(([month, revenue]) => ({
-          month,
-          revenue
-        })).slice(-6), // Last 6 months
+        monthlyRevenue: Object.entries(monthlyRevenue)
+          .map(([month, revenue]) => ({
+            month,
+            revenue,
+          }))
+          .slice(-6), // Last 6 months
         revenueByContentType: contentTypePercentages,
-        transactions: transactions.slice(-10) // Last 10 transactions
+        transactions: transactions.slice(-10), // Last 10 transactions
       };
 
-      console.log('✅ Revenue analytics calculated:', {
+      console.log("✅ Revenue analytics calculated:", {
         totalRevenue,
-        transactionCount: transactions.length
+        transactionCount: transactions.length,
       });
 
       return analytics;
-
     } catch (error) {
-      console.error('❌ Error fetching revenue analytics:', error);
+      console.error("❌ Error fetching revenue analytics:", error);
       throw new Error(`Failed to fetch revenue analytics: ${error.message}`);
     }
   }
@@ -179,9 +188,7 @@ class MonetizationService {
    */
   async getCreatorPayoutSummary(userId) {
     try {
-      const transactions = await db.collection('transactions')
-        .where('userId', '==', userId)
-        .get();
+      const transactions = await db.collection("transactions").where("userId", "==", userId).get();
 
       const payoutData = transactions.docs.map(doc => doc.data());
 
@@ -194,11 +201,10 @@ class MonetizationService {
         totalViews,
         transactionCount,
         averagePayoutPerTransaction: transactionCount > 0 ? totalEarned / transactionCount : 0,
-        averagePayoutPerThousandViews: totalViews > 0 ? (totalEarned / totalViews) * 1000 : 0
+        averagePayoutPerThousandViews: totalViews > 0 ? (totalEarned / totalViews) * 1000 : 0,
       };
-
     } catch (error) {
-      console.error('❌ Error fetching creator payout summary:', error);
+      console.error("❌ Error fetching creator payout summary:", error);
       throw new Error(`Failed to fetch creator payout summary: ${error.message}`);
     }
   }
@@ -209,7 +215,7 @@ class MonetizationService {
    */
   async getPlatformFeesSummary() {
     try {
-      const transactions = await db.collection('transactions').get();
+      const transactions = await db.collection("transactions").get();
       const totalFees = transactions.docs.reduce((sum, doc) => {
         const data = doc.data();
         return sum + (data.platformFee || 0);
@@ -217,11 +223,10 @@ class MonetizationService {
 
       return {
         totalCollected: totalFees,
-        transactionCount: transactions.size
+        transactionCount: transactions.size,
       };
-
     } catch (error) {
-      console.error('❌ Error fetching platform fees summary:', error);
+      console.error("❌ Error fetching platform fees summary:", error);
       throw new Error(`Failed to fetch platform fees summary: ${error.message}`);
     }
   }

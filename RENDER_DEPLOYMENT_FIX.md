@@ -11,10 +11,12 @@ This commit fixes multiple deployment errors on Render:
 ## Changes Made
 
 ### 1. Firebase-Only Cleanup
+
 - Removed the unused legacy dependency and the compatibility layer that wrapped it
 - Verified all modules now import the shared Firebase admin instance instead
 
 ### 2. Firebase Service Account Fix
+
 - Updated the Firebase configuration to check for credentials in multiple locations:
   - First priority: `FIREBASE_SERVICE_ACCOUNT` environment variable (full JSON)
   - Second priority: Individual credential fields (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`)
@@ -22,6 +24,7 @@ This commit fixes multiple deployment errors on Render:
   - Last resort: Application default credentials
 
 ### 3. Admin Test Routes Fix
+
 - Modified server.js to handle missing adminTestRoutes module gracefully
 - The server will now create a dummy router if the module is missing
 
@@ -30,19 +33,25 @@ This commit fixes multiple deployment errors on Render:
 When deploying to Render, make sure to set at least one of these options for Firebase credentials:
 
 ### Option 1: Full Service Account JSON (Recommended)
+
 Set the `FIREBASE_SERVICE_ACCOUNT` environment variable with the entire JSON content of your service account key file. Make sure to escape newlines with `\n`.
 
 ### Option 2: Individual Credential Fields
+
 Set these three environment variables:
+
 - `FIREBASE_PROJECT_ID`: Your Firebase project ID
 - `FIREBASE_CLIENT_EMAIL`: Your Firebase client email
 - `FIREBASE_PRIVATE_KEY`: Your Firebase private key (with newlines as `\n`)
 
 ### Option 3: Upload serviceAccountKey.json
+
 If you're using a custom build command in Render, you could include steps to generate or download the service account key file before starting the server.
 
 ### Additional Configuration
+
 Other helpful environment variables:
+
 - `FIREBASE_DATABASE_URL`: Your Firebase database URL
 - `FIREBASE_STORAGE_BUCKET`: Your Firebase storage bucket
 - `FRONTEND_URL`: URL of your frontend app (for CORS)
@@ -59,8 +68,8 @@ If you see runtime errors similar to "Cannot find module './single-subchannel-ch
 - Verify Render environment uses the repo's `package-lock.json` rather than resolving on each build
 
 ### Debugging tip: Dependency verification endpoint
-If you are still seeing gRPC or Firestore errors after redeploy, you can enable a temporary debug endpoint in the deployed server to inspect installed versions. Set `DEBUG_DEPS_TOKEN` env var to a secret value in Render and request `/api/debug/deps` with header `x-debug-token: <token>` to obtain a JSON payload describing installed `google-gax` and `@grpc/grpc-js` versions and whether the `single-subchannel-channel.js` file exists on disk.
 
+If you are still seeing gRPC or Firestore errors after redeploy, you can enable a temporary debug endpoint in the deployed server to inspect installed versions. Set `DEBUG_DEPS_TOKEN` env var to a secret value in Render and request `/api/debug/deps` with header `x-debug-token: <token>` to obtain a JSON payload describing installed `google-gax` and `@grpc/grpc-js` versions and whether the `single-subchannel-channel.js` file exists on disk.
 
 ## Troubleshooting
 

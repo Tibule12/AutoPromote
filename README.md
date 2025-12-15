@@ -13,44 +13,44 @@ AutoPromote is a free, automated content promotion platform that helps creators 
 ## MVP Features (Current Status)
 
 - Auth & Profiles
-	- [x] Firebase Auth with token verification and Firestore user provisioning (`src/authMiddleware.js`)
-	- [ ] Profile defaults API (timezone, preferred windows, default platforms/frequency)
+  - [x] Firebase Auth with token verification and Firestore user provisioning (`src/authMiddleware.js`)
+  - [ ] Profile defaults API (timezone, preferred windows, default platforms/frequency)
 
 - Upload & Quality Check
-	- [x] Upload API with schedule_hint support and safe URL handling (`src/contentRoutes.js`)
-	- [x] Dry‑run preview to see derived schedule without saving
-	- [x] FFmpeg‑based content quality check with auto‑enhance fallback (`src/contentQualityCheck.js`)
-	- [x] AI-powered content analysis with OpenAI GPT-4o (`contentAnalysisService.js`)
+  - [x] Upload API with schedule_hint support and safe URL handling (`src/contentRoutes.js`)
+  - [x] Dry‑run preview to see derived schedule without saving
+  - [x] FFmpeg‑based content quality check with auto‑enhance fallback (`src/contentQualityCheck.js`)
+  - [x] AI-powered content analysis with OpenAI GPT-4o (`contentAnalysisService.js`)
 
 - AI Content Optimization (NEW! 🤖)
-	- [x] Smart caption generation for all platforms (`src/services/captionGenerationService.js`)
-	- [x] Intelligent hashtag generation with trending/niche mix (`src/services/hashtagService.js`)
-	- [x] A/B testing variations for captions
-	- [x] Platform-specific optimization (Instagram, TikTok, YouTube, LinkedIn, etc.)
-	- [x] Viral potential scoring and recommendations
-	- [x] Multilingual support via GPT-4o
-	- [x] Rate-limited API endpoints at `/api/captions/*`
+  - [x] Smart caption generation for all platforms (`src/services/captionGenerationService.js`)
+  - [x] Intelligent hashtag generation with trending/niche mix (`src/services/hashtagService.js`)
+  - [x] A/B testing variations for captions
+  - [x] Platform-specific optimization (Instagram, TikTok, YouTube, LinkedIn, etc.)
+  - [x] Viral potential scoring and recommendations
+  - [x] Multilingual support via GPT-4o
+  - [x] Rate-limited API endpoints at `/api/captions/*`
 
 - Scheduling & Promotion
-	- [x] Schedule derivation from `schedule_hint` or explicit time
-	- [x] Firestore promotion schedules and simulated execution (`src/promotionService.js`)
-	- [x] Admin endpoints for listing active promotions and managing schedules
-	- [ ] Clean up naming and remove legacy artifacts in `promotionService`
+  - [x] Schedule derivation from `schedule_hint` or explicit time
+  - [x] Firestore promotion schedules and simulated execution (`src/promotionService.js`)
+  - [x] Admin endpoints for listing active promotions and managing schedules
+  - [ ] Clean up naming and remove legacy artifacts in `promotionService`
 
 - Monetized Landing Pages & Smart Links
-	- [~] Cloud Functions exported: `generateMonetizedLandingPage`, `generateSmartLink` (`autopromote-functions/index.js`)
-	- [~] Server marks intents on content (`landingPageRequestedAt`, `smartLinkRequestedAt`) to integrate generation
-	- [x] Basic content analytics and simulated platform breakdowns
-	- [x] Optimization recommendations and platform timing suggestions (`src/optimizationService.js`)
-	- [x] Wilson-scored variant ranking & champion selection
-	- [x] Performance dashboards & per-content performance APIs
+  - [~] Cloud Functions exported: `generateMonetizedLandingPage`, `generateSmartLink` (`autopromote-functions/index.js`)
+  - [~] Server marks intents on content (`landingPageRequestedAt`, `smartLinkRequestedAt`) to integrate generation
+  - [x] Basic content analytics and simulated platform breakdowns
+  - [x] Optimization recommendations and platform timing suggestions (`src/optimizationService.js`)
+  - [x] Wilson-scored variant ranking & champion selection
+  - [x] Performance dashboards & per-content performance APIs
 
 - Admin
-	- [x] Admin routes mounted; moderation via status updates; active promotions listing
-	- [ ] Minimal admin UI screens for approve/flag/boost/pause and global counters
-
+  - [x] Admin routes mounted; moderation via status updates; active promotions listing
+  - [ ] Minimal admin UI screens for approve/flag/boost/pause and global counters
 
 ## Firebase Functions (Free Tier)
+
 - Landing Page Generator: `generateMonetizedLandingPage`
 - Promotion Templates: create/list/attach
 - Firestore triggers: create schedule on content create/approval
@@ -67,7 +67,6 @@ AutoPromote is a free, automated content promotion platform that helps creators 
 - `notifications` (planned), `rewards` (planned)
 
 ## Tech Stack
-
 
 - Frontend: React (SPA served from `frontend/build`)
 - Backend: Node.js + Express (`src/server.js`)
@@ -141,8 +140,10 @@ Planned Next Security Enhancements:
 Rebuild denormalized click counters from historical shortlink events:
 
 ```
-node scripts/backfillClickCounters.js --dry   # preview
-node scripts/backfillClickCounters.js         # apply
+
+node scripts/backfillClickCounters.js --dry # preview
+node scripts/backfillClickCounters.js # apply
+
 ```
 
 ## Variant Ranking Method
@@ -173,8 +174,10 @@ While Stripe / PayPal accounts are still under review, the app exposes a unified
 
 Environment flags:
 ```
-ALLOW_PAYMENTS_DEV_MOCK=false  # enable mock subscription/payout endpoints for local testing
-ENABLE_MANUAL_PROVIDER=false   # adds a always-on dev provider
+
+ALLOW_PAYMENTS_DEV_MOCK=false # enable mock subscription/payout endpoints for local testing
+ENABLE_MANUAL_PROVIDER=false # adds a always-on dev provider
+
 ```
 
 Dev mocks (when ALLOW_PAYMENTS_DEV_MOCK=true):
@@ -192,13 +195,16 @@ Provider abstraction lives under `src/services/payments/` (stripe, paypal placeh
  - Worker now periodically snapshots balances (probabilistic) to status docs.
 
 ```
+
 ALLOW_LIVE_PAYMENTS=false
 PAYOUT_HOLD_DAYS=7
 STRIPE_PRICE_PRO=price_12345
 STRIPE_PRICE_SCALE=price_67890
 FREE_PLAN_QUOTA=50
 Events emitted:
+
 - `stripe.onboard.started`, `stripe.account.status`, `stripe.login_link.created`
+
 ```
 firestore collection: audit_logs (order by at desc)
 
@@ -216,7 +222,7 @@ Daily aggregated metrics are stored in `content_daily_metrics` documents with id
 The background worker performs a rollup shortly after UTC midnight (probabilistically to avoid contention) or when `FORCE_DAILY_ROLLUP=true`.
 
 ## Variant Selection Strategies
- 
+
 Environment variable `VARIANT_SELECTION_STRATEGY` controls how the next variant is chosen when multiple message variants are present:
 
 - `rotation` (default): round-robin by historical post count
@@ -229,7 +235,9 @@ Overrides:
 Set in `.env`:
 
 ```
+
 VARIANT_SELECTION_STRATEGY=bandit
+
 ```
 
 Untried variants are forced early by assigning them a very high sentinel score ensuring initial exploration.
@@ -238,7 +246,9 @@ Untried variants are forced early by assigning them a very high sentinel score e
 Run the script to verify service account detection and perform a lightweight Firestore read:
 
 ```
+
 node scripts/checkFirebaseCredentials.js
+
 ```
 
 Supports JSON path, raw JSON, base64 JSON, or individual FIREBASE_* key fields.
@@ -340,13 +350,15 @@ Launch TODO (Optional Enhancements, can ship post-MVP):
 	 - BANDIT_TUNER_MIN_EVENTS=50
 2. (Optional) Configure alerting via /api/admin/config/update:
 ```
+
 {
-	"alerting": {
-		"webhookUrl": "https://ops.example.com/hooks/autopromote",
-		"enabledEvents": ["exploration_drift","variant_diversity_low","bandit_manual_rollback","bandit_auto_rollback","email_delivery_failure"],
-		"minDiversityRatio": 0.2
-	}
+"alerting": {
+"webhookUrl": "https://ops.example.com/hooks/autopromote",
+"enabledEvents": ["exploration_drift","variant_diversity_low","bandit_manual_rollback","bandit_auto_rollback","email_delivery_failure"],
+"minDiversityRatio": 0.2
 }
+}
+
 ```
 3. Monitor `/api/admin/dashboard/overview` for initial system stabilization.
 4. Adjust `banditExplorationTarget` if exploration too high/low once >200 selection events recorded.
@@ -365,3 +377,4 @@ Returns restored weights + emits alert & history doc.
 | bandit_manual_rollback | warning | Manual rollback executed |
 | email_delivery_failure | warning | Email provider send failed |
 
+```

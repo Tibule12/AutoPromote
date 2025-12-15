@@ -2,100 +2,100 @@
 // AutoPromote Monetization Layer
 // Premium tiers, paid boosts, influencer marketplace, ROI tracking
 
-const { db } = require('../firebaseAdmin');
-const crypto = require('crypto');
+const { db } = require("../firebaseAdmin");
+const crypto = require("crypto");
 
 class MonetizationService {
   // Premium tier definitions
   get PREMIUM_TIERS() {
     return {
       FREE: {
-        name: 'Free',
+        name: "Free",
         price: 0,
         limits: {
           monthlyUploads: 5,
           monthlyBoosts: 2,
-          analytics: 'basic',
-          support: 'community'
+          analytics: "basic",
+          support: "community",
         },
-        features: ['Basic optimization', 'Community support']
+        features: ["Basic optimization", "Community support"],
       },
       GROWTH_PRO: {
-        name: 'Growth Pro',
+        name: "Growth Pro",
         price: 29.99,
         limits: {
           monthlyUploads: 50,
           monthlyBoosts: 20,
-          analytics: 'advanced',
-          support: 'priority'
+          analytics: "advanced",
+          support: "priority",
         },
         features: [
-          'Advanced optimization',
-          'Influencer reposts',
-          'A/B testing',
-          'Priority support',
-          'Custom hashtags',
-          'Growth reports'
-        ]
+          "Advanced optimization",
+          "Influencer reposts",
+          "A/B testing",
+          "Priority support",
+          "Custom hashtags",
+          "Growth reports",
+        ],
       },
       ANALYTICS_PLUS: {
-        name: 'Analytics Plus',
+        name: "Analytics Plus",
         price: 49.99,
         limits: {
           monthlyUploads: 100,
           monthlyBoosts: 50,
-          analytics: 'premium',
-          support: 'dedicated'
+          analytics: "premium",
+          support: "dedicated",
         },
         features: [
-          'All Growth Pro features',
-          'Competitor tracking',
-          'Deep analytics',
-          'ROI reports',
-          'API access',
-          'Dedicated support'
-        ]
+          "All Growth Pro features",
+          "Competitor tracking",
+          "Deep analytics",
+          "ROI reports",
+          "API access",
+          "Dedicated support",
+        ],
       },
       ENTERPRISE: {
-        name: 'Enterprise',
+        name: "Enterprise",
         price: 99.99,
         limits: {
           monthlyUploads: -1, // unlimited
           monthlyBoosts: -1,
-          analytics: 'enterprise',
-          support: 'white_glove'
+          analytics: "enterprise",
+          support: "white_glove",
         },
         features: [
-          'All Analytics Plus features',
-          'Custom integrations',
-          'Team management',
-          'White-glove support',
-          'Custom reporting'
-        ]
-      }
+          "All Analytics Plus features",
+          "Custom integrations",
+          "Team management",
+          "White-glove support",
+          "Custom reporting",
+        ],
+      },
     };
   }
 
   // Subscribe user to premium tier
-  async subscribeToTier(userId, tierName, paymentMethod = 'stripe') {
+  async subscribeToTier(userId, tierName, paymentMethod = "stripe") {
     try {
       const tier = this.PREMIUM_TIERS[tierName];
       if (!tier) {
-        throw new Error('Invalid tier name');
+        throw new Error("Invalid tier name");
       }
 
       // Process payment (would integrate with Stripe/PayPal)
       const paymentResult = await this.processPayment(userId, tier.price, paymentMethod);
 
       if (!paymentResult.success) {
-        throw new Error('Payment processing failed');
+        throw new Error("Payment processing failed");
       }
 
       // Update user subscription
       const subscription = {
         userId,
         tier: tierName,
-        status: 'active',
+        status: "active",
         startedAt: new Date().toISOString(),
         currentPeriodStart: new Date().toISOString(),
         currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
@@ -105,20 +105,20 @@ class MonetizationService {
         usage: {
           uploadsThisMonth: 0,
           boostsThisMonth: 0,
-          lastReset: new Date().toISOString()
-        }
+          lastReset: new Date().toISOString(),
+        },
       };
 
-      await db.collection('user_subscriptions').doc(userId).set(subscription);
+      await db.collection("user_subscriptions").doc(userId).set(subscription);
 
       return {
         success: true,
         subscription,
         tier,
-        message: `Successfully subscribed to ${tier.name} tier`
+        message: `Successfully subscribed to ${tier.name} tier`,
       };
     } catch (error) {
-      console.error('Error subscribing to tier:', error);
+      console.error("Error subscribing to tier:", error);
       throw error;
     }
   }
@@ -129,22 +129,22 @@ class MonetizationService {
     console.log(`💳 Processing payment for user ${userId}: $${amount} via ${method}`);
 
     // Simulate payment processing
-      // Use crypto.randomInt to avoid insecure randomness reported by static analyzers
-      const success = (crypto.randomInt(100) >= 5); // 95% success rate
+    // Use crypto.randomInt to avoid insecure randomness reported by static analyzers
+    const success = crypto.randomInt(100) >= 5; // 95% success rate
 
     return {
       success,
-      paymentId: success ? `pay_${Date.now()}_${crypto.randomBytes(6).toString('hex')}` : null,
+      paymentId: success ? `pay_${Date.now()}_${crypto.randomBytes(6).toString("hex")}` : null,
       amount,
       method,
-      processedAt: new Date().toISOString()
+      processedAt: new Date().toISOString(),
     };
   }
 
   // Check user's subscription status and limits
-  async checkSubscriptionLimits(userId, action = 'upload') {
+  async checkSubscriptionLimits(userId, action = "upload") {
     try {
-      const subscriptionDoc = await db.collection('user_subscriptions').doc(userId).get();
+      const subscriptionDoc = await db.collection("user_subscriptions").doc(userId).get();
 
       let subscription;
       if (subscriptionDoc.exists) {
@@ -156,15 +156,15 @@ class MonetizationService {
             // Auto-renew subscription
             subscription = await this.renewSubscription(userId, subscription);
           } else {
-            subscription.status = 'expired';
+            subscription.status = "expired";
           }
         }
       } else {
         // Free tier
         subscription = {
-          tier: 'FREE',
-          status: 'active',
-          usage: { uploadsThisMonth: 0, boostsThisMonth: 0 }
+          tier: "FREE",
+          status: "active",
+          usage: { uploadsThisMonth: 0, boostsThisMonth: 0 },
         };
       }
 
@@ -180,14 +180,14 @@ class MonetizationService {
           tier: subscription.tier,
           status: subscription.status,
           limits,
-          usage: subscription.usage
+          usage: subscription.usage,
         },
         canPerformAction,
         upgradeRequired: !canPerformAction,
-        suggestedTier: canPerformAction ? null : this.suggestUpgradeTier(subscription.tier, action)
+        suggestedTier: canPerformAction ? null : this.suggestUpgradeTier(subscription.tier, action),
       };
     } catch (error) {
-      console.error('Error checking subscription limits:', error);
+      console.error("Error checking subscription limits:", error);
       throw error;
     }
   }
@@ -197,9 +197,9 @@ class MonetizationService {
     const usage = subscription.usage;
 
     switch (action) {
-      case 'upload':
+      case "upload":
         return limits.monthlyUploads === -1 || usage.uploadsThisMonth < limits.monthlyUploads;
-      case 'boost':
+      case "boost":
         return limits.monthlyBoosts === -1 || usage.boostsThisMonth < limits.monthlyBoosts;
       default:
         return true;
@@ -208,7 +208,7 @@ class MonetizationService {
 
   // Suggest upgrade tier
   suggestUpgradeTier(currentTier, action) {
-    const tierOrder = ['FREE', 'GROWTH_PRO', 'ANALYTICS_PLUS', 'ENTERPRISE'];
+    const tierOrder = ["FREE", "GROWTH_PRO", "ANALYTICS_PLUS", "ENTERPRISE"];
     const currentIndex = tierOrder.indexOf(currentTier);
 
     if (currentIndex === -1 || currentIndex === tierOrder.length - 1) {
@@ -222,26 +222,26 @@ class MonetizationService {
       tier: suggestedTier,
       name: tier.name,
       price: tier.price,
-      reason: `Your ${currentTier} tier limit exceeded for ${action}s`
+      reason: `Your ${currentTier} tier limit exceeded for ${action}s`,
     };
   }
 
   // Update usage counters
   async updateUsage(userId, action) {
     try {
-      const subscriptionRef = db.collection('user_subscriptions').doc(userId);
+      const subscriptionRef = db.collection("user_subscriptions").doc(userId);
       const subscriptionDoc = await subscriptionRef.get();
 
       if (!subscriptionDoc.exists) {
         // Free tier user - still track usage
         await subscriptionRef.set({
-          tier: 'FREE',
-          status: 'active',
+          tier: "FREE",
+          status: "active",
           usage: {
-            uploadsThisMonth: action === 'upload' ? 1 : 0,
-            boostsThisMonth: action === 'boost' ? 1 : 0,
-            lastReset: new Date().toISOString()
-          }
+            uploadsThisMonth: action === "upload" ? 1 : 0,
+            boostsThisMonth: action === "boost" ? 1 : 0,
+            lastReset: new Date().toISOString(),
+          },
         });
         return;
       }
@@ -252,22 +252,25 @@ class MonetizationService {
       // Reset counters if month changed
       const lastReset = new Date(usage.lastReset);
       const now = new Date();
-      if (now.getMonth() !== lastReset.getMonth() || now.getFullYear() !== lastReset.getFullYear()) {
+      if (
+        now.getMonth() !== lastReset.getMonth() ||
+        now.getFullYear() !== lastReset.getFullYear()
+      ) {
         usage.uploadsThisMonth = 0;
         usage.boostsThisMonth = 0;
         usage.lastReset = now.toISOString();
       }
 
       // Update usage
-      if (action === 'upload') {
+      if (action === "upload") {
         usage.uploadsThisMonth += 1;
-      } else if (action === 'boost') {
+      } else if (action === "boost") {
         usage.boostsThisMonth += 1;
       }
 
       await subscriptionRef.update({ usage });
     } catch (error) {
-      console.error('Error updating usage:', error);
+      console.error("Error updating usage:", error);
       throw error;
     }
   }
@@ -278,36 +281,40 @@ class MonetizationService {
       const tier = this.PREMIUM_TIERS[subscription.tier];
 
       // Process renewal payment
-      const paymentResult = await this.processPayment(userId, tier.price, subscription.paymentMethod);
+      const paymentResult = await this.processPayment(
+        userId,
+        tier.price,
+        subscription.paymentMethod
+      );
 
       if (!paymentResult.success) {
         // Payment failed - mark as expired
-        await db.collection('user_subscriptions').doc(userId).update({
-          status: 'payment_failed',
-          lastPaymentAttempt: new Date().toISOString()
+        await db.collection("user_subscriptions").doc(userId).update({
+          status: "payment_failed",
+          lastPaymentAttempt: new Date().toISOString(),
         });
 
         return {
           ...subscription,
-          status: 'payment_failed'
+          status: "payment_failed",
         };
       }
 
       // Update subscription
       const renewedSubscription = {
         ...subscription,
-        status: 'active',
+        status: "active",
         currentPeriodStart: new Date().toISOString(),
         currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         lastPaymentId: paymentResult.paymentId,
-        renewedAt: new Date().toISOString()
+        renewedAt: new Date().toISOString(),
       };
 
-      await db.collection('user_subscriptions').doc(userId).update(renewedSubscription);
+      await db.collection("user_subscriptions").doc(userId).update(renewedSubscription);
 
       return renewedSubscription;
     } catch (error) {
-      console.error('Error renewing subscription:', error);
+      console.error("Error renewing subscription:", error);
       throw error;
     }
   }
@@ -318,9 +325,9 @@ class MonetizationService {
       const { platform, targetViews, duration, budget } = boostOptions;
 
       // Check subscription limits
-      const limitsCheck = await this.checkSubscriptionLimits(userId, 'boost');
+      const limitsCheck = await this.checkSubscriptionLimits(userId, "boost");
       if (!limitsCheck.canPerformAction) {
-        throw new Error('Boost limit exceeded. Upgrade your plan to boost more content.');
+        throw new Error("Boost limit exceeded. Upgrade your plan to boost more content.");
       }
 
       // Calculate boost cost
@@ -340,32 +347,32 @@ class MonetizationService {
         targetViews,
         duration,
         budget: budget || boostCost,
-        status: 'scheduled',
+        status: "scheduled",
         createdAt: new Date().toISOString(),
         scheduledFor: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
         progress: {
           views: 0,
           engagements: 0,
-          spent: 0
-        }
+          spent: 0,
+        },
       };
 
-      const boostRef = await db.collection('paid_boosts').add(boost);
+      const boostRef = await db.collection("paid_boosts").add(boost);
 
       // Deduct credits
       await this.deductCredits(userId, boostCost, `Paid boost for content ${contentId}`);
 
       // Update usage
-      await this.updateUsage(userId, 'boost');
+      await this.updateUsage(userId, "boost");
 
       return {
         boostId: boostRef.id,
         ...boost,
         cost: boostCost,
-        message: `Paid boost created successfully. ${boostCost} credits deducted.`
+        message: `Paid boost created successfully. ${boostCost} credits deducted.`,
       };
     } catch (error) {
-      console.error('Error creating paid boost:', error);
+      console.error("Error creating paid boost:", error);
       throw error;
     }
   }
@@ -373,10 +380,10 @@ class MonetizationService {
   // Calculate boost cost
   calculateBoostCost(platform, targetViews, duration) {
     const baseCosts = {
-      tiktok: 0.01,    // $0.01 per view
+      tiktok: 0.01, // $0.01 per view
       instagram: 0.015, // $0.015 per view
-      youtube: 0.02,   // $0.02 per view
-      twitter: 0.008   // $0.008 per view
+      youtube: 0.02, // $0.02 per view
+      twitter: 0.008, // $0.008 per view
     };
 
     const baseCost = baseCosts[platform] || baseCosts.tiktok;
@@ -388,7 +395,7 @@ class MonetizationService {
   // Check credit balance
   async checkCreditBalance(userId, requiredCredits) {
     try {
-      const creditsDoc = await db.collection('user_credits').doc(userId).get();
+      const creditsDoc = await db.collection("user_credits").doc(userId).get();
 
       if (!creditsDoc.exists) {
         return false;
@@ -397,7 +404,7 @@ class MonetizationService {
       const balance = creditsDoc.data().balance || 0;
       return balance >= requiredCredits;
     } catch (error) {
-      console.error('Error checking credit balance:', error);
+      console.error("Error checking credit balance:", error);
       return false;
     }
   }
@@ -405,16 +412,16 @@ class MonetizationService {
   // Deduct credits
   async deductCredits(userId, amount, description) {
     try {
-      const creditsRef = db.collection('user_credits').doc(userId);
+      const creditsRef = db.collection("user_credits").doc(userId);
       const creditsDoc = await creditsRef.get();
 
       if (!creditsDoc.exists) {
-        throw new Error('No credit balance found');
+        throw new Error("No credit balance found");
       }
 
       const currentBalance = creditsDoc.data().balance || 0;
       if (currentBalance < amount) {
-        throw new Error('Insufficient credits');
+        throw new Error("Insufficient credits");
       }
 
       await creditsRef.update({
@@ -422,18 +429,18 @@ class MonetizationService {
         transactions: [
           ...(creditsDoc.data().transactions || []),
           {
-            type: 'debit',
+            type: "debit",
             amount: -amount,
             timestamp: new Date().toISOString(),
-            description
-          }
+            description,
+          },
         ],
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       });
 
       return true;
     } catch (error) {
-      console.error('Error deducting credits:', error);
+      console.error("Error deducting credits:", error);
       throw error;
     }
   }
@@ -444,47 +451,46 @@ class MonetizationService {
       // Mock influencer data (would be from real marketplace API)
       const influencers = [
         {
-          id: 'inf_001',
-          name: 'Sarah Johnson',
+          id: "inf_001",
+          name: "Sarah Johnson",
           platform,
           niche,
           followers: 250000,
           engagementRate: 8.5,
           pricePerPost: 500,
-          specialties: ['lifestyle', 'fashion', 'beauty'],
+          specialties: ["lifestyle", "fashion", "beauty"],
           rating: 4.8,
-          completedCampaigns: 45
+          completedCampaigns: 45,
         },
         {
-          id: 'inf_002',
-          name: 'Mike Chen',
+          id: "inf_002",
+          name: "Mike Chen",
           platform,
           niche,
           followers: 180000,
           engagementRate: 12.2,
           pricePerPost: 350,
-          specialties: ['tech', 'gaming', 'education'],
+          specialties: ["tech", "gaming", "education"],
           rating: 4.9,
-          completedCampaigns: 67
+          completedCampaigns: 67,
         },
         {
-          id: 'inf_003',
-          name: 'Emma Rodriguez',
+          id: "inf_003",
+          name: "Emma Rodriguez",
           platform,
           niche,
           followers: 320000,
           engagementRate: 6.8,
           pricePerPost: 750,
-          specialties: ['fitness', 'health', 'motivation'],
+          specialties: ["fitness", "health", "motivation"],
           rating: 4.7,
-          completedCampaigns: 89
-        }
+          completedCampaigns: 89,
+        },
       ];
 
       // Filter by budget and niche
-      const filtered = influencers.filter(inf =>
-        inf.pricePerPost <= budget &&
-        inf.specialties.includes(niche)
+      const filtered = influencers.filter(
+        inf => inf.pricePerPost <= budget && inf.specialties.includes(niche)
       );
 
       return {
@@ -493,10 +499,10 @@ class MonetizationService {
         budget,
         availableInfluencers: filtered,
         totalAvailable: filtered.length,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Error getting influencer marketplace:', error);
+      console.error("Error getting influencer marketplace:", error);
       throw error;
     }
   }
@@ -505,9 +511,9 @@ class MonetizationService {
   async bookInfluencerRepost(userId, influencerId, contentId, platform) {
     try {
       // Check subscription allows influencer reposts
-      const limitsCheck = await this.checkSubscriptionLimits(userId, 'boost');
-      if (limitsCheck.subscription.tier === 'FREE') {
-        throw new Error('Influencer reposts require a premium subscription');
+      const limitsCheck = await this.checkSubscriptionLimits(userId, "boost");
+      if (limitsCheck.subscription.tier === "FREE") {
+        throw new Error("Influencer reposts require a premium subscription");
       }
 
       // Get influencer details (mock)
@@ -525,7 +531,7 @@ class MonetizationService {
         influencerId,
         contentId,
         platform,
-        status: 'booked',
+        status: "booked",
         price: influencer.pricePerPost,
         bookedAt: new Date().toISOString(),
         expectedDelivery: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(), // 48 hours
@@ -533,24 +539,27 @@ class MonetizationService {
           contacted: false,
           contentReceived: false,
           posted: false,
-          reported: false
-        }
+          reported: false,
+        },
       };
 
-      const bookingRef = await db.collection('influencer_bookings').add(booking);
+      const bookingRef = await db.collection("influencer_bookings").add(booking);
 
       // Deduct credits
-      await this.deductCredits(userId, influencer.pricePerPost,
-        `Influencer repost booking with ${influencer.name}`);
+      await this.deductCredits(
+        userId,
+        influencer.pricePerPost,
+        `Influencer repost booking with ${influencer.name}`
+      );
 
       return {
         bookingId: bookingRef.id,
         ...booking,
         influencer,
-        message: `Influencer repost booked successfully. ${influencer.pricePerPost} credits deducted.`
+        message: `Influencer repost booked successfully. ${influencer.pricePerPost} credits deducted.`,
       };
     } catch (error) {
-      console.error('Error booking influencer repost:', error);
+      console.error("Error booking influencer repost:", error);
       throw error;
     }
   }
@@ -559,16 +568,16 @@ class MonetizationService {
   async getInfluencerDetails(influencerId) {
     // Mock data - would come from real marketplace
     const influencers = {
-      'inf_001': {
-        id: 'inf_001',
-        name: 'Sarah Johnson',
-        platform: 'instagram',
+      inf_001: {
+        id: "inf_001",
+        name: "Sarah Johnson",
+        platform: "instagram",
         followers: 250000,
         engagementRate: 8.5,
         pricePerPost: 500,
-        specialties: ['lifestyle', 'fashion', 'beauty'],
-        rating: 4.8
-      }
+        specialties: ["lifestyle", "fashion", "beauty"],
+        rating: 4.8,
+      },
     };
 
     return influencers[influencerId] || null;
@@ -577,16 +586,17 @@ class MonetizationService {
   // Calculate ROI for content
   async calculateROI(contentId) {
     try {
-      const contentDoc = await db.collection('content').doc(contentId).get();
+      const contentDoc = await db.collection("content").doc(contentId).get();
       if (!contentDoc.exists) {
-        throw new Error('Content not found');
+        throw new Error("Content not found");
       }
 
       const content = contentDoc.data();
 
       // Get all boosts and costs for this content
-      const boostsQuery = await db.collection('paid_boosts')
-        .where('contentId', '==', contentId)
+      const boostsQuery = await db
+        .collection("paid_boosts")
+        .where("contentId", "==", contentId)
         .get();
 
       let totalCost = 0;
@@ -607,21 +617,21 @@ class MonetizationService {
         contentId,
         costs: {
           totalSpent: totalCost,
-          boostsCount: boostsQuery.size
+          boostsCount: boostsQuery.size,
         },
         revenue: {
           totalRevenue: revenue,
-          currentMetrics
+          currentMetrics,
         },
         roi: {
           percentage: roi,
           profit,
-          status: profit > 0 ? 'profitable' : profit === 0 ? 'break_even' : 'loss'
+          status: profit > 0 ? "profitable" : profit === 0 ? "break_even" : "loss",
         },
-        calculatedAt: new Date().toISOString()
+        calculatedAt: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Error calculating ROI:', error);
+      console.error("Error calculating ROI:", error);
       throw error;
     }
   }
@@ -630,17 +640,18 @@ class MonetizationService {
   async getMonetizationDashboard(userId) {
     try {
       // Get subscription info
-      const subscriptionDoc = await db.collection('user_subscriptions').doc(userId).get();
-      const subscription = subscriptionDoc.exists ? subscriptionDoc.data() : { tier: 'FREE' };
+      const subscriptionDoc = await db.collection("user_subscriptions").doc(userId).get();
+      const subscription = subscriptionDoc.exists ? subscriptionDoc.data() : { tier: "FREE" };
 
       // Get credit balance
-      const creditsDoc = await db.collection('user_credits').doc(userId).get();
+      const creditsDoc = await db.collection("user_credits").doc(userId).get();
       const credits = creditsDoc.exists ? creditsDoc.data() : { balance: 0, totalEarned: 0 };
 
       // Get recent boosts
-      const boostsQuery = await db.collection('paid_boosts')
-        .where('userId', '==', userId)
-        .orderBy('createdAt', 'desc')
+      const boostsQuery = await db
+        .collection("paid_boosts")
+        .where("userId", "==", userId)
+        .orderBy("createdAt", "desc")
         .limit(10)
         .get();
 
@@ -656,22 +667,22 @@ class MonetizationService {
         userId,
         subscription: {
           tier: subscription.tier,
-          status: subscription.status || 'active',
+          status: subscription.status || "active",
           currentPeriodEnd: subscription.currentPeriodEnd,
-          usage: subscription.usage
+          usage: subscription.usage,
         },
         credits: {
           balance: credits.balance || 0,
-          totalEarned: credits.totalEarned || 0
+          totalEarned: credits.totalEarned || 0,
         },
         recentBoosts,
         earnings,
         tierLimits: this.PREMIUM_TIERS[subscription.tier].limits,
         upgradeOptions: this.getUpgradeOptions(subscription.tier),
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Error getting monetization dashboard:', error);
+      console.error("Error getting monetization dashboard:", error);
       throw error;
     }
   }
@@ -680,9 +691,7 @@ class MonetizationService {
   async getEarningsSummary(userId) {
     try {
       // Get user's content and calculate earnings
-      const contentQuery = await db.collection('content')
-        .where('user_id', '==', userId)
-        .get();
+      const contentQuery = await db.collection("content").where("user_id", "==", userId).get();
 
       let totalRevenue = 0;
       let totalViews = 0;
@@ -700,17 +709,17 @@ class MonetizationService {
         totalViews,
         totalEngagements,
         averageRPM: totalViews > 0 ? (totalRevenue / totalViews) * 1000 : 0,
-        contentCount: contentQuery.size
+        contentCount: contentQuery.size,
       };
     } catch (error) {
-      console.error('Error getting earnings summary:', error);
+      console.error("Error getting earnings summary:", error);
       return { totalRevenue: 0, totalViews: 0, totalEngagements: 0 };
     }
   }
 
   // Get upgrade options
   getUpgradeOptions(currentTier) {
-    const tierOrder = ['FREE', 'GROWTH_PRO', 'ANALYTICS_PLUS', 'ENTERPRISE'];
+    const tierOrder = ["FREE", "GROWTH_PRO", "ANALYTICS_PLUS", "ENTERPRISE"];
     const currentIndex = tierOrder.indexOf(currentTier);
 
     if (currentIndex === -1 || currentIndex === tierOrder.length - 1) {
@@ -726,7 +735,7 @@ class MonetizationService {
         name: tier.name,
         price: tier.price,
         features: tier.features,
-        savings: i > currentIndex + 1 ? 'Bundle discount available' : null
+        savings: i > currentIndex + 1 ? "Bundle discount available" : null,
       });
     }
 

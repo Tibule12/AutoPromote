@@ -1,7 +1,7 @@
-import React from 'react';
-import '../AdminDashboard.css';
+import React from "react";
+import "../AdminDashboard.css";
 
-const ActivityFeed = ({ activities, title = 'Recent Activity' }) => {
+const ActivityFeed = ({ activities, title = "Recent Activity" }) => {
   return (
     <div className="dashboard-panel">
       <h3 className="panel-title">{title}</h3>
@@ -10,19 +10,23 @@ const ActivityFeed = ({ activities, title = 'Recent Activity' }) => {
           activities.map((activity, index) => (
             <div key={index} className="activity-item">
               <div className="activity-icon">
-                {activity.type === 'user' ? '👤' : 
-                 activity.type === 'content' ? '📄' : 
-                 activity.type === 'promotion' ? '🚀' : '📊'}
+                {activity.type === "user"
+                  ? "👤"
+                  : activity.type === "content"
+                    ? "📄"
+                    : activity.type === "promotion"
+                      ? "🚀"
+                      : "📊"}
               </div>
               <div className="activity-content">
-                <div className="activity-title">
-                  {activity.title || 'Action performed'}
-                </div>
+                <div className="activity-title">{activity.title || "Action performed"}</div>
                 <div className="activity-description">
-                  {activity.description || 'No description available'}
+                  {activity.description || "No description available"}
                 </div>
                 <div className="activity-time">
-                  {activity.timestamp ? new Date(activity.timestamp.seconds * 1000).toLocaleString() : 'Unknown time'}
+                  {activity.timestamp
+                    ? new Date(activity.timestamp.seconds * 1000).toLocaleString()
+                    : "Unknown time"}
                 </div>
               </div>
             </div>

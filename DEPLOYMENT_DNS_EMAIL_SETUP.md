@@ -25,6 +25,7 @@ Add custom domains inside each Render service first. Render will show the exact 
   - Status: 301 (permanent)
 
 Notes
+
 - If you prefer the apex domain to host the site directly, you can instead create a CNAME at `@` pointing to your Render frontend hostname. Cloudflare supports CNAME flattening at the apex. The redirect approach is simpler and avoids www/apex duplicates.
 - After adding records, go back to Render → Custom Domains and click “Verify” for each service. DNS can take a few minutes to propagate.
 
@@ -45,6 +46,7 @@ Notes
     - Mailtrap (SMTP): `MAILTRAP_HOST=sandbox.smtp.mailtrap.io`, `MAILTRAP_PORT=2525`, `MAILTRAP_USER=...`, `MAILTRAP_PASS=...`
 
 Cors/authorized domains
+
 - Ensure the backend CORS allow-list includes `https://www.autopromote.org` (and `https://autopromote.org` if the apex serves the app).
 - In Firebase Authentication → Settings → Authorized domains: add `www.autopromote.org` and `autopromote.org`.
 
@@ -69,9 +71,9 @@ After records propagate, click “Verify” in the provider dashboard. Once veri
 
 ### 4) Smoke tests
 
-1) Open `https://www.autopromote.org` in a browser and ensure the app loads.
-2) In the browser devtools, confirm API calls go to `https://api.autopromote.org/...` and succeed (200/204).
-3) Run a “Forgot Password” or “Send Verification Email” flow and confirm receipt in your inbox. If undelivered, re-check provider auth status and DNS.
+1. Open `https://www.autopromote.org` in a browser and ensure the app loads.
+2. In the browser devtools, confirm API calls go to `https://api.autopromote.org/...` and succeed (200/204).
+3. Run a “Forgot Password” or “Send Verification Email” flow and confirm receipt in your inbox. If undelivered, re-check provider auth status and DNS.
 
 ### 5) Troubleshooting
 

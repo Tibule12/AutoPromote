@@ -42,6 +42,7 @@ FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
 ### 3. Check Firebase Admin Initialization
 
 The server logs should show successful Firebase Admin initialization. Look for:
+
 ```
 ✅ Firebase Admin initialized successfully
 ```
@@ -57,34 +58,38 @@ To isolate the issue, try the following steps:
 
    ```javascript
    // test-firebase-connection.js
-   require('dotenv').config();
-   const admin = require('firebase-admin');
+   require("dotenv").config();
+   const admin = require("firebase-admin");
 
    try {
      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-     
+
      admin.initializeApp({
-       credential: admin.credential.cert(serviceAccount)
+       credential: admin.credential.cert(serviceAccount),
      });
-     
-     console.log('Firebase Admin initialized successfully');
-     console.log('Project ID:', serviceAccount.project_id);
-     
+
+     console.log("Firebase Admin initialized successfully");
+     console.log("Project ID:", serviceAccount.project_id);
+
      // Test Firestore connection
-     admin.firestore().collection('test').doc('test').set({
-       test: 'Connection successful',
-       timestamp: admin.firestore.FieldValue.serverTimestamp()
-     })
-     .then(() => {
-       console.log('Firestore write successful');
-       process.exit(0);
-     })
-     .catch(error => {
-       console.error('Firestore write failed:', error);
-       process.exit(1);
-     });
+     admin
+       .firestore()
+       .collection("test")
+       .doc("test")
+       .set({
+         test: "Connection successful",
+         timestamp: admin.firestore.FieldValue.serverTimestamp(),
+       })
+       .then(() => {
+         console.log("Firestore write successful");
+         process.exit(0);
+       })
+       .catch(error => {
+         console.error("Firestore write failed:", error);
+         process.exit(1);
+       });
    } catch (error) {
-     console.error('Firebase initialization failed:', error);
+     console.error("Firebase initialization failed:", error);
      process.exit(1);
    }
    ```
@@ -94,36 +99,38 @@ To isolate the issue, try the following steps:
 
    ```javascript
    // test-token.js
-   require('dotenv').config();
-   const admin = require('firebase-admin');
+   require("dotenv").config();
+   const admin = require("firebase-admin");
 
    // Initialize Firebase
    try {
      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-     
+
      admin.initializeApp({
-       credential: admin.credential.cert(serviceAccount)
+       credential: admin.credential.cert(serviceAccount),
      });
-     
-     console.log('Firebase Admin initialized successfully');
-     
+
+     console.log("Firebase Admin initialized successfully");
+
      // Replace with your token
-     const token = 'your-firebase-id-token';
-     
-     admin.auth().verifyIdToken(token)
+     const token = "your-firebase-id-token";
+
+     admin
+       .auth()
+       .verifyIdToken(token)
        .then(decodedToken => {
-         console.log('Token verification successful');
-         console.log('User ID:', decodedToken.uid);
-         console.log('Email:', decodedToken.email);
-         console.log('Claims:', JSON.stringify(decodedToken, null, 2));
+         console.log("Token verification successful");
+         console.log("User ID:", decodedToken.uid);
+         console.log("Email:", decodedToken.email);
+         console.log("Claims:", JSON.stringify(decodedToken, null, 2));
          process.exit(0);
        })
        .catch(error => {
-         console.error('Token verification failed:', error);
+         console.error("Token verification failed:", error);
          process.exit(1);
        });
    } catch (error) {
-     console.error('Firebase initialization failed:', error);
+     console.error("Firebase initialization failed:", error);
      process.exit(1);
    }
    ```
@@ -154,7 +161,7 @@ Review the server logs during login attempts to identify the exact point of fail
 **Problem**: The authentication token has expired
 **Solution**: Refresh the token on the client side before sending requests
 
-### "auth/argument-error" 
+### "auth/argument-error"
 
 **Problem**: Invalid token format or structure
 **Solution**: Ensure the token is being sent correctly from the client

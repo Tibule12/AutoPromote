@@ -7,11 +7,11 @@ function repurposeContent(content, targetFormat) {
     originalId: content.id,
     targetFormat,
     repurposedId: Math.random().toString(36).substr(2, 9),
-    status: 'repurposed',
-    createdAt: new Date()
+    status: "repurposed",
+    createdAt: new Date(),
   };
 }
 
 module.exports = {
-  repurposeContent
+  repurposeContent,
 };

@@ -38,7 +38,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -65,15 +66,15 @@
   .best-time-to-post {
     padding: 12px;
   }
-  
+
   .best-time-icon {
     font-size: 28px;
   }
-  
+
   .best-time-message {
     font-size: 14px;
   }
-  
+
   .best-time-details {
     font-size: 12px;
   }

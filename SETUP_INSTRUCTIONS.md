@@ -20,6 +20,7 @@ Before you can run the AutoPromote application, you need to install Node.js and 
 After installing Node.js and npm, follow these steps to set up the project:
 
 ### Server Setup (Back-end)
+
 1. Navigate to the server directory:
    ```
    cd server
@@ -35,6 +36,7 @@ After installing Node.js and npm, follow these steps to set up the project:
    The server will start on port 5000 by default.
 
 ### Client Setup (Front-end)
+
 1. Navigate to the client directory:
    ```
    cd client
@@ -66,7 +68,9 @@ To run both the client and server simultaneously, you can:
    ```
 
 Alternatively, you can install a package like `concurrently` to run both servers from a single command:
+
 ```
 npm install -g concurrently
 ```
+
 Then, from the root directory, you can create a script to start both servers.

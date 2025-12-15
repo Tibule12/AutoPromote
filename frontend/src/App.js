@@ -1,18 +1,36 @@
 // Trigger CI/CD: minor change for deployment
 /* eslint-disable no-console, no-unused-vars */
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
-import './App.css';
-import { auth, db, storage } from './firebaseClient';
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, signInWithCustomToken } from 'firebase/auth';
-import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { API_ENDPOINTS, API_BASE_URL, PUBLIC_SITE_URL } from './config';
-import { parseJsonSafe } from './utils/parseJsonSafe';
-import ChatWidget from './ChatWidget';
-import PayPalSubscriptionPanel from './components/PayPalSubscriptionPanel';
-import { Sentry } from './sentryClient';
-import TestSentryButton from './components/TestSentryButton';
+import React, { useState, useEffect } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
+import "./App.css";
+import { auth, db, storage } from "./firebaseClient";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signOut,
+  signInWithCustomToken,
+} from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { API_ENDPOINTS, API_BASE_URL, PUBLIC_SITE_URL } from "./config";
+import { parseJsonSafe } from "./utils/parseJsonSafe";
+import ChatWidget from "./ChatWidget";
+import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
+import { Sentry } from "./sentryClient";
+import TestSentryButton from "./components/TestSentryButton";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -24,61 +42,75 @@ function App() {
   const [mySchedules, setMySchedules] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [userDefaults, setUserDefaults] = useState({
-    timezone: 'UTC',
+    timezone: "UTC",
     defaultPlatforms: [],
-    defaultFrequency: 'once'
+    defaultFrequency: "once",
   });
   // Feature flag: when true (default unless REACT_APP_DISABLE_IMMEDIATE_POSTS is 'false'),
   // disable direct client-side platform posts and rely on backend queued tasks.
-  const DISABLE_IMMEDIATE_POSTS = (process.env.REACT_APP_DISABLE_IMMEDIATE_POSTS === undefined) || process.env.REACT_APP_DISABLE_IMMEDIATE_POSTS !== 'false';
+  const DISABLE_IMMEDIATE_POSTS =
+    process.env.REACT_APP_DISABLE_IMMEDIATE_POSTS === undefined ||
+    process.env.REACT_APP_DISABLE_IMMEDIATE_POSTS !== "false";
   const [justLoggedOut, setJustLoggedOut] = useState(false);
   const [termsRequired, setTermsRequired] = useState(false);
   const [requiredTermsVersion, setRequiredTermsVersion] = useState(null);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [pendingLogin, setPendingLogin] = useState(null); // { userData, token }
   const navigate = useNavigate();
-  const [routePathState, setRoutePathState] = useState((typeof window !== 'undefined') ? (window.location.hash ? window.location.hash.replace(/^#/, '') : window.location.pathname) : '/');
+  const [routePathState, setRoutePathState] = useState(
+    typeof window !== "undefined"
+      ? window.location.hash
+        ? window.location.hash.replace(/^#/, "")
+        : window.location.pathname
+      : "/"
+  );
 
   // E2E test auth bypass: when true, skip firebase auth and set test user
-  const E2E_AUTH_BYPASS = (process.env.REACT_APP_E2E_AUTH_BYPASS === 'true');
+  const E2E_AUTH_BYPASS = process.env.REACT_APP_E2E_AUTH_BYPASS === "true";
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async firebaseUser => {
       if (!firebaseUser) {
         // If E2E bypass is active, do not clear localStorage or reset user
-        if (typeof window !== 'undefined' && window.__E2E_BYPASS === true) {
+        if (typeof window !== "undefined" && window.__E2E_BYPASS === true) {
           return; // keep the E2E bypass user
         }
         setUser(null);
         setIsAdmin(false);
         localStorage.clear();
         setContent([]); // Clear content on logout
-        try { if (Sentry && typeof Sentry.setUser === 'function') Sentry.setUser(null); } catch (_) {}
+        try {
+          if (Sentry && typeof Sentry.setUser === "function") Sentry.setUser(null);
+        } catch (_) {}
         return;
       }
       try {
         const token = await firebaseUser.getIdToken(true);
         const idTokenResult = await firebaseUser.getIdTokenResult(true);
-        const hasAdminClaim = idTokenResult.claims.admin === true || idTokenResult.claims.role === 'admin';
+        const hasAdminClaim =
+          idTokenResult.claims.admin === true || idTokenResult.claims.role === "admin";
         const userData = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           name: firebaseUser.displayName,
           // Keep tokens in memory via Firebase auth.currentUser.getIdToken()
           isAdmin: hasAdminClaim,
-          role: hasAdminClaim ? 'admin' : 'user',
+          role: hasAdminClaim ? "admin" : "user",
         };
         // Before allowing the app to enter the dashboard, ensure terms are accepted.
-        const ok = await ensureTermsAccepted(token, userData, 'authState');
+        const ok = await ensureTermsAccepted(token, userData, "authState");
         if (!ok) {
           // Block login UI transition until the user accepts. Keep user null for now.
           return;
         }
         // Proceed to set user and prefetch content once terms are satisfied.
         setUser({ ...userData, token }); // keep token in memory in React state only
-        try { if (Sentry && typeof Sentry.setUser === 'function') Sentry.setUser({ id: userData.uid, username: userData.email, email: userData.email }); } catch(_) {}
+        try {
+          if (Sentry && typeof Sentry.setUser === "function")
+            Sentry.setUser({ id: userData.uid, username: userData.email, email: userData.email });
+        } catch (_) {}
         setIsAdmin(hasAdminClaim);
         const safeUserForStorage = { ...userData };
-        localStorage.setItem('user', JSON.stringify(safeUserForStorage));
+        localStorage.setItem("user", JSON.stringify(safeUserForStorage));
         // User signed in (UID suppressed in logs)
         await fetchUserContent(token);
       } catch (error) {
@@ -88,21 +120,33 @@ function App() {
         setContent([]);
       }
     });
-    if (window.location.pathname === '/admin-login') {
+    if (window.location.pathname === "/admin-login") {
       setShowAdminLogin(true);
       setShowLogin(false);
       setShowRegister(false);
     }
-    return () => { try { if (unsubscribe && typeof unsubscribe === 'function') unsubscribe(); } catch(_){} };
+    return () => {
+      try {
+        if (unsubscribe && typeof unsubscribe === "function") unsubscribe();
+      } catch (_) {}
+    };
   }, []);
 
   // If E2E bypass is enabled, set a pre-authorized test user and fetch content
+  // Run when E2E_AUTH_BYPASS toggles; fetchUserContent intentionally omitted from deps
+  // eslint-disable-next-line
   useEffect(() => {
     if (!E2E_AUTH_BYPASS) return;
     const setTestUser = async () => {
       try {
-        const testToken = 'e2e-test-token';
-        const testUser = { uid: 'e2e-user', email: 'e2e@local', name: 'E2E User', role: 'user', token: testToken };
+        const testToken = "e2e-test-token";
+        const testUser = {
+          uid: "e2e-user",
+          email: "e2e@local",
+          name: "E2E User",
+          role: "user",
+          token: testToken,
+        };
         setUser(testUser);
         await fetchUserContent(testToken);
       } catch (_) {}
@@ -111,26 +155,36 @@ function App() {
   }, [E2E_AUTH_BYPASS]);
 
   // Runtime E2E bypass via window.__E2E_BYPASS = true set by tests.
+  // Run on mount for E2E bypass checks; fetchUserContent intentionally omitted from deps
+  // eslint-disable-next-line
   useEffect(() => {
     try {
-      if (typeof window !== 'undefined' && window.__E2E_BYPASS === true) {
+      if (typeof window !== "undefined" && window.__E2E_BYPASS === true) {
         (async () => {
           try {
-            const testToken = (window.__E2E_TEST_TOKEN || 'e2e-test-token');
+            const testToken = window.__E2E_TEST_TOKEN || "e2e-test-token";
             // Prefer an existing user object in localStorage (tests may set an admin user there).
             let testUser = null;
             try {
-              const raw = localStorage.getItem('user');
+              const raw = localStorage.getItem("user");
               if (raw) {
                 testUser = JSON.parse(raw);
                 testUser.token = testToken;
               }
-            } catch (_) { /* ignore parse errors */ }
+            } catch (_) {
+              /* ignore parse errors */
+            }
             if (!testUser) {
-              testUser = { uid: 'e2e-user', email: 'e2e@local', name: 'E2E User', role: 'user', token: testToken };
+              testUser = {
+                uid: "e2e-user",
+                email: "e2e@local",
+                name: "E2E User",
+                role: "user",
+                token: testToken,
+              };
             }
             setUser(testUser);
-            if (testUser.role === 'admin' || testUser.isAdmin === true) setIsAdmin(true);
+            if (testUser.role === "admin" || testUser.isAdmin === true) setIsAdmin(true);
             await fetchUserContent(testToken);
           } catch (_) {}
         })();
@@ -152,23 +206,28 @@ function App() {
         }
       }
       const res = await fetch(API_ENDPOINTS.MY_CONTENT, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        mode: 'cors'
+        mode: "cors",
       });
       if (!res.ok) {
         // Try to read response body for error details
         let body = null;
-        try { const parsed = await parseJsonSafe(res); body = parsed.json || null; } catch (_) { body = null; }
+        try {
+          const parsed = await parseJsonSafe(res);
+          body = parsed.json || null;
+        } catch (_) {
+          body = null;
+        }
         if (res.status === 401 && auth.currentUser) {
           const freshToken = await auth.currentUser.getIdToken(true);
           return fetchUserContent(freshToken);
         }
-        if (res.status === 403 && body && body.error === 'terms_not_accepted') {
+        if (res.status === 403 && body && body.error === "terms_not_accepted") {
           // Show a full-screen modal rather than an in-dashboard banner
           setTermsRequired(true);
           setRequiredTermsVersion(body.requiredVersion || null);
@@ -191,15 +250,16 @@ function App() {
       if (!token) {
         const currentUser = auth.currentUser;
         if (currentUser) token = await currentUser.getIdToken(true);
-        else if (user && user.token) token = user.token; else return;
+        else if (user && user.token) token = user.token;
+        else return;
       }
       const res = await fetch(API_ENDPOINTS.MY_SCHEDULES, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       });
       if (res.ok) {
         const parsed = await parseJsonSafe(res);
@@ -230,18 +290,18 @@ function App() {
       setIsAdmin(false);
       return;
     }
-    const isAdminUser = user.role === 'admin' || user.isAdmin === true;
+    const isAdminUser = user.role === "admin" || user.isAdmin === true;
     if (!isAdminUser) {
       return;
     }
     try {
       const res = await fetch(API_ENDPOINTS.ADMIN_ANALYTICS, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       });
       const parsed = await parseJsonSafe(res);
       if (!parsed.ok) {
@@ -250,7 +310,7 @@ function App() {
           const freshToken = await auth.currentUser.getIdToken(true);
           return fetchAnalytics(freshToken);
         }
-        if (res.status === 403 && body && body.error === 'terms_not_accepted') {
+        if (res.status === 403 && body && body.error === "terms_not_accepted") {
           setTermsRequired(true);
           setRequiredTermsVersion(body.requiredVersion || null);
           return;
@@ -271,8 +331,8 @@ function App() {
       const idToken = await firebaseUser.getIdToken();
       // Performing login against configured endpoint
       const res = await fetch(API_ENDPOINTS.LOGIN, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({ idToken }),
       });
       if (res.ok) {
@@ -285,36 +345,52 @@ function App() {
           const customIdToken = await customUserCredential.user.getIdToken();
           // If user agreed at login screen, proactively accept terms on server before proceeding
           try {
-            if (localStorage.getItem('tosAgreed') === 'true') {
+            if (localStorage.getItem("tosAgreed") === "true") {
               const url = `${API_BASE_URL}/api/users/me/accept-terms`;
-              await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${customIdToken}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({}) }).catch(()=>{});
-              localStorage.removeItem('tosAgreed');
+              await fetch(url, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${customIdToken}`,
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                },
+                body: JSON.stringify({}),
+              }).catch(() => {});
+              localStorage.removeItem("tosAgreed");
             }
-          } catch(_) {}
+          } catch (_) {}
           // Before proceeding, ensure ToS accepted (pre-dashboard)
           const userData = { ...data.user, token: customIdToken };
-          const ok = await ensureTermsAccepted(customIdToken, userData, 'login');
+          const ok = await ensureTermsAccepted(customIdToken, userData, "login");
           if (ok) handleLogin(userData);
         } else {
           // If user agreed at login screen, proactively accept terms on server before proceeding
           try {
-            if (localStorage.getItem('tosAgreed') === 'true') {
+            if (localStorage.getItem("tosAgreed") === "true") {
               const url = `${API_BASE_URL}/api/users/me/accept-terms`;
-              await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({}) }).catch(()=>{});
-              localStorage.removeItem('tosAgreed');
+              await fetch(url, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${idToken}`,
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                },
+                body: JSON.stringify({}),
+              }).catch(() => {});
+              localStorage.removeItem("tosAgreed");
             }
-          } catch(_) {}
+          } catch (_) {}
           const userData = { ...data.user, token: idToken };
-          const ok = await ensureTermsAccepted(idToken, userData, 'login');
+          const ok = await ensureTermsAccepted(idToken, userData, "login");
           if (ok) handleLogin(userData);
         }
       } else {
         const parsedErr = await parseJsonSafe(res);
         const errorBody = parsedErr.json || null;
-        throw new Error(errorBody?.message || 'Login failed');
+        throw new Error(errorBody?.message || "Login failed");
       }
     } catch (error) {
-      alert(error.message || 'Login failed');
+      alert(error.message || "Login failed");
     }
   };
 
@@ -322,12 +398,16 @@ function App() {
   const ensureTermsAccepted = async (token, userData, source) => {
     try {
       const res = await fetch(API_ENDPOINTS.MY_CONTENT, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       });
       if (res.ok) return true; // already accepted
-      let body = null; try { const parsed = await parseJsonSafe(res); body = parsed.json || null; } catch(_) {}
-      if (res.status === 403 && body && body.error === 'terms_not_accepted') {
+      let body = null;
+      try {
+        const parsed = await parseJsonSafe(res);
+        body = parsed.json || null;
+      } catch (_) {}
+      if (res.status === 403 && body && body.error === "terms_not_accepted") {
         setRequiredTermsVersion(body.requiredVersion || null);
         setTermsRequired(true);
         setPendingLogin({ userData, token });
@@ -347,25 +427,29 @@ function App() {
       await updateProfile(firebaseUser, { displayName: name });
       const idToken = await firebaseUser.getIdToken();
       const res = await fetch(API_ENDPOINTS.REGISTER, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${idToken}` },
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ name, email, uid: firebaseUser.uid, idToken }),
       });
       if (res.ok) {
         const parsed = await parseJsonSafe(res);
         const data = parsed.json || null;
         handleRegister({ ...data.user, token: idToken, uid: firebaseUser.uid });
-        alert('Registration successful! You are now logged in.');
+        alert("Registration successful! You are now logged in.");
       } else {
-        handleRegister({ uid: firebaseUser.uid, email, name, token: idToken, role: 'user' });
-        alert('Registration partially successful. Some features may be limited.');
+        handleRegister({ uid: firebaseUser.uid, email, name, token: idToken, role: "user" });
+        alert("Registration partially successful. Some features may be limited.");
       }
     } catch (error) {
-      alert('Registration failed: ' + (error.message || 'Unknown error'));
+      alert("Registration failed: " + (error.message || "Unknown error"));
     }
   };
 
-  const handleLogin = async (userData) => {
+  const handleLogin = async userData => {
     try {
       localStorage.clear();
       if (!userData || !userData.role) {
@@ -377,15 +461,19 @@ function App() {
       if (!userData.token) {
         return;
       }
-      const forceAdmin = userData.role === 'admin' || userData.isAdmin === true;
+      const forceAdmin = userData.role === "admin" || userData.isAdmin === true;
       // Always preserve admin status, never downgrade
-        const updatedUserData = { ...userData, role: forceAdmin ? 'admin' : userData.role, isAdmin: forceAdmin };
-        // Persist only non-sensitive metadata. Remove token before storing.
-        const { token: _token, ...safeUpdated } = updatedUserData;
-        localStorage.setItem('user', JSON.stringify(safeUpdated));
+      const updatedUserData = {
+        ...userData,
+        role: forceAdmin ? "admin" : userData.role,
+        isAdmin: forceAdmin,
+      };
+      // Persist only non-sensitive metadata. Remove token before storing.
+      const { token: _token, ...safeUpdated } = updatedUserData;
+      localStorage.setItem("user", JSON.stringify(safeUpdated));
       setUser(prev => {
-        if (prev && (prev.role === 'admin' || prev.isAdmin === true)) {
-          return { ...prev, ...updatedUserData, role: 'admin', isAdmin: true };
+        if (prev && (prev.role === "admin" || prev.isAdmin === true)) {
+          return { ...prev, ...updatedUserData, role: "admin", isAdmin: true };
         }
         return updatedUserData;
       });
@@ -394,17 +482,17 @@ function App() {
       // ...existing code... (Firestore update logic removed)
       if (forceAdmin) {
         await fetchAnalytics();
-        navigate('/admin-dashboard');
+        navigate("/admin-dashboard");
       } else {
         await fetchUserContent();
-        navigate('/');
+        navigate("/");
       }
     } catch (error) {
       handleLogout();
     }
   };
 
-  const handleRegister = (userData) => {
+  const handleRegister = userData => {
     setUser(userData);
     setShowRegister(false);
   };
@@ -413,33 +501,33 @@ function App() {
   const saveUserDefaults = async ({ timezone, defaultPlatforms, defaultFrequency }) => {
     try {
       const currentUser = auth.currentUser;
-      if (!currentUser) throw new Error('Not authenticated');
+      if (!currentUser) throw new Error("Not authenticated");
       const token = await currentUser.getIdToken(true);
       const res = await fetch(API_ENDPOINTS.USERS_ME, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        body: JSON.stringify({ timezone, defaultPlatforms, defaultFrequency })
+        body: JSON.stringify({ timezone, defaultPlatforms, defaultFrequency }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || err.message || 'Failed to save defaults');
+        throw new Error(err.error || err.message || "Failed to save defaults");
       }
       const data = await res.json();
       const u = data && data.user ? data.user : {};
       const sched = u.schedulingDefaults || {};
       setUserDefaults({
-        timezone: u.timezone || timezone || 'UTC',
+        timezone: u.timezone || timezone || "UTC",
         schedulingDefaults: sched,
         defaultPlatforms: sched.platforms || defaultPlatforms || [],
-        defaultFrequency: sched.frequency || defaultFrequency || 'once'
+        defaultFrequency: sched.frequency || defaultFrequency || "once",
       });
       return true;
     } catch (e) {
-      alert(e.message || 'Could not save settings');
+      alert(e.message || "Could not save settings");
       return false;
     }
   };
@@ -458,7 +546,9 @@ function App() {
       setJustLoggedOut(true);
       setTermsRequired(false);
       setRequiredTermsVersion(null);
-    } catch (error) { console.error('Logout error:', error); }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   // Accept Terms action: posts acceptance and continues pending login if any
@@ -474,13 +564,17 @@ function App() {
       const url = `${API_BASE_URL}/api/users/me/accept-terms`;
       const payload = requiredTermsVersion ? { acceptedTermsVersion: requiredTermsVersion } : {};
       const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload)
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
       });
-      const body = await res.json().catch(()=>({}));
+      const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        alert('Failed to accept terms: ' + (body.error || res.status));
+        alert("Failed to accept terms: " + (body.error || res.status));
         return;
       }
       setTermsRequired(false);
@@ -496,36 +590,61 @@ function App() {
         if (isAdmin) await fetchAnalytics();
       }
     } catch (e) {
-      alert('Could not accept terms. Please try again.');
+      alert("Could not accept terms. Please try again.");
     }
   };
 
   // Redirect after logout
   React.useEffect(() => {
     if (justLoggedOut && !user) {
-      navigate('/');
+      navigate("/");
       setJustLoggedOut(false);
     }
   }, [justLoggedOut, user, navigate]);
 
   // Content upload handler (with file and platforms)
-  const handleContentUpload = async (params) => {
-    console.log('[E2E] handleContentUpload called with params:', { isDryRun: params.isDryRun, platforms: params.platforms || params.target_platforms });
+  const handleContentUpload = async params => {
+    console.log("[E2E] handleContentUpload called with params:", {
+      isDryRun: params.isDryRun,
+      platforms: params.platforms || params.target_platforms,
+    });
     try {
       // Destructure all possible fields from params
-      const { file, platforms, title, description, type, schedule, isDryRun, trimStart, trimEnd, template, rotate, flipH, flipV } = params;
+      const {
+        file,
+        platforms,
+        title,
+        description,
+        type,
+        schedule,
+        isDryRun,
+        trimStart,
+        trimEnd,
+        template,
+        rotate,
+        flipH,
+        flipV,
+      } = params;
       // Use Firebase auth token when available; fall back to app user token or runtime E2E test token
       let token = null;
       try {
         const current = auth && auth.currentUser;
         if (current) token = await current.getIdToken(true);
-      } catch (_) { token = null; }
-      if (!token && user && user.token) token = user.token;
-      if (!token && typeof window !== 'undefined' && window.__E2E_BYPASS === true && window.__E2E_TEST_TOKEN) token = window.__E2E_TEST_TOKEN;
-      if (!token) {
-        throw new Error('Authentication token missing for content upload request');
+      } catch (_) {
+        token = null;
       }
-      let finalUrl = '';
+      if (!token && user && user.token) token = user.token;
+      if (
+        !token &&
+        typeof window !== "undefined" &&
+        window.__E2E_BYPASS === true &&
+        window.__E2E_TEST_TOKEN
+      )
+        token = window.__E2E_TEST_TOKEN;
+      if (!token) {
+        throw new Error("Authentication token missing for content upload request");
+      }
+      let finalUrl = "";
       // If this is a preview/dry-run, do NOT upload the file to storage.
       // Use a `preview://` URL so preview pipelines and workers treat it as a local preview token.
       if (isDryRun && file) {
@@ -536,7 +655,7 @@ function App() {
         finalUrl = params.url;
       } else {
         // Only upload file for real submissions (not dry-run)
-        if ((type === 'video' || type === 'image' || type === 'audio') && file) {
+        if ((type === "video" || type === "image" || type === "audio") && file) {
           const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
           const storageRef = ref(storage, filePath);
           await uploadBytes(storageRef, file);
@@ -545,42 +664,52 @@ function App() {
       }
       const schedule_hint = {
         ...schedule,
-        frequency: schedule?.frequency || userDefaults.defaultFrequency || 'once',
-        timezone: userDefaults.timezone || 'UTC'
+        frequency: schedule?.frequency || userDefaults.defaultFrequency || "once",
+        timezone: userDefaults.timezone || "UTC",
       };
       // Defensive: ensure non-empty URL for real uploads (avoid sending empty "url" to server)
-      if (!isDryRun && (!finalUrl || String(finalUrl).trim() === '')) {
-        alert('Upload failed: missing file URL. Please retry the upload.');
-        return { ok: false, error: 'missing_url' };
+      if (!isDryRun && (!finalUrl || String(finalUrl).trim() === "")) {
+        alert("Upload failed: missing file URL. Please retry the upload.");
+        return { ok: false, error: "missing_url" };
       }
       const payload = {
         isDryRun: !!isDryRun,
-        title: title || (file ? file.name : ''),
-        type: type || 'video',
+        title: title || (file ? file.name : ""),
+        type: type || "video",
         url: finalUrl,
-        description: description || '',
-        target_platforms: platforms && platforms.length ? platforms : (userDefaults.defaultPlatforms || ['youtube','tiktok','instagram']),
+        description: description || "",
+        target_platforms:
+          platforms && platforms.length
+            ? platforms
+            : userDefaults.defaultPlatforms || ["youtube", "tiktok", "instagram"],
         platform_options: params.platformOptions || params.platform_options || {},
         schedule_hint,
         meta: {
           ...(params.meta || {}),
-          ...(typeof trimStart !== 'undefined' ? { trimStart } : {}),
-          ...(typeof trimEnd !== 'undefined' ? { trimEnd } : {}),
-          ...(typeof rotate !== 'undefined' ? { rotate } : {}),
-          ...(typeof flipH !== 'undefined' ? { flipH } : {}),
-          ...(typeof flipV !== 'undefined' ? { flipV } : {}),
-          ...(template ? { template } : {})
-        }
-      };
-      console.log('[E2E] handleContentUpload: calling API', API_ENDPOINTS.CONTENT_UPLOAD, 'payload:', payload, 'token?', Boolean(token));
-      const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          ...(typeof trimStart !== "undefined" ? { trimStart } : {}),
+          ...(typeof trimEnd !== "undefined" ? { trimEnd } : {}),
+          ...(typeof rotate !== "undefined" ? { rotate } : {}),
+          ...(typeof flipH !== "undefined" ? { flipH } : {}),
+          ...(typeof flipV !== "undefined" ? { flipV } : {}),
+          ...(template ? { template } : {}),
         },
-        body: JSON.stringify(payload)
+      };
+      console.log(
+        "[E2E] handleContentUpload: calling API",
+        API_ENDPOINTS.CONTENT_UPLOAD,
+        "payload:",
+        payload,
+        "token?",
+        Boolean(token)
+      );
+      const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
       });
       // Read response body safely so we can show any server-side validation error
       let result = null;
@@ -588,29 +717,40 @@ function App() {
         result = await res.json();
       } catch (e) {
         // If response is not JSON, try to read as text
-        try { const txt = await res.text(); result = { text: txt }; } catch (_) { result = null; }
+        try {
+          const txt = await res.text();
+          result = { text: txt };
+        } catch (_) {
+          result = null;
+        }
       }
       if (!res.ok) {
-        const serverErr = (result && (result.error || result.message || result.text)) || `HTTP ${res.status}`;
-        throw new Error(serverErr || 'Upload/preview failed');
+        const serverErr =
+          (result && (result.error || result.message || result.text)) || `HTTP ${res.status}`;
+        throw new Error(serverErr || "Upload/preview failed");
       }
       if (isDryRun) {
         return result;
       }
 
       // If server marked the content as pending approval, do not attempt any immediate posts.
-      if (result && result.content && result.content.status === 'pending_approval') {
+      if (result && result.content && result.content.status === "pending_approval") {
         await fetchUserContent(token);
-        alert('Content uploaded and queued for promotion. It will be published to selected platforms after approval.');
+        alert(
+          "Content uploaded and queued for promotion. It will be published to selected platforms after approval."
+        );
         return result;
       }
-        try {
-          const chosen = Array.isArray(platforms) ? platforms : [];
-          // Require explicit user request to perform immediate platform posts.
-          const shouldImmediatePost = params?.immediate_post === true && !DISABLE_IMMEDIATE_POSTS;
-          const postYouTube = async () => {
-            if (!shouldImmediatePost) { console.log('[Upload] Immediate YouTube post not requested or disabled'); return; }
-            if (!chosen.includes('youtube')) return;
+      try {
+        const chosen = Array.isArray(platforms) ? platforms : [];
+        // Require explicit user request to perform immediate platform posts.
+        const shouldImmediatePost = params?.immediate_post === true && !DISABLE_IMMEDIATE_POSTS;
+        const postYouTube = async () => {
+          if (!shouldImmediatePost) {
+            console.log("[Upload] Immediate YouTube post not requested or disabled");
+            return;
+          }
+          if (!chosen.includes("youtube")) return;
           try {
             // Ensure contentId and fileUrl are sent as required by backend
             // Try all possible keys for contentId from upload response
@@ -627,53 +767,93 @@ function App() {
                 if (last && last.id) contentId = last.id;
               }
             }
-            console.log('YouTube upload: contentId', contentId, 'fileUrl', payload.url, 'result', result);
+            console.log(
+              "YouTube upload: contentId",
+              contentId,
+              "fileUrl",
+              payload.url,
+              "result",
+              result
+            );
             const fileUrl = payload.url;
             if (!contentId || !fileUrl) {
-              console.warn('Missing contentId or fileUrl for YouTube upload');
+              console.warn("Missing contentId or fileUrl for YouTube upload");
               return;
             }
             const r = await fetch(API_ENDPOINTS.YOUTUBE_UPLOAD, {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              body: JSON.stringify({ contentId, videoUrl: payload.url, title: title || (file ? file.name : ''), description: description || '', shortsMode: payload.platform_options?.youtube?.shortsMode })
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify({
+                contentId,
+                videoUrl: payload.url,
+                title: title || (file ? file.name : ""),
+                description: description || "",
+                shortsMode: payload.platform_options?.youtube?.shortsMode,
+              }),
             });
-            if (!r.ok) console.warn('YouTube upload failed');
+            if (!r.ok) console.warn("YouTube upload failed");
           } catch (_) {}
         };
         const getFacebookStatus = async () => {
-          const s = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' } });
+          const s = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, {
+            headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+          });
           if (!s.ok) return null;
           return s.json();
         };
         const postFacebook = async () => {
-          if (!chosen.includes('facebook')) return;
+          if (!chosen.includes("facebook")) return;
           try {
             const st = await getFacebookStatus();
             const pageId = st?.pages?.[0]?.id;
             if (!pageId) return;
-            const body = { pageId, content: { type: type || 'video', url: payload.url, title: title || (file ? file.name : ''), description: description || '' } };
+            const body = {
+              pageId,
+              content: {
+                type: type || "video",
+                url: payload.url,
+                title: title || (file ? file.name : ""),
+                description: description || "",
+              },
+            };
             const r = await fetch(API_ENDPOINTS.FACEBOOK_UPLOAD, {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              body: JSON.stringify(body)
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify(body),
             });
-            if (!r.ok) console.warn('Facebook upload failed');
+            if (!r.ok) console.warn("Facebook upload failed");
           } catch (_) {}
         };
         const postInstagram = async () => {
-          if (!chosen.includes('instagram')) return;
+          if (!chosen.includes("instagram")) return;
           try {
             const st = await getFacebookStatus();
             const pageId = st?.pages?.[0]?.id;
             if (!pageId) return;
-            const mediaType = (type || 'video').toLowerCase();
+            const mediaType = (type || "video").toLowerCase();
             const r = await fetch(API_ENDPOINTS.INSTAGRAM_UPLOAD, {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              body: JSON.stringify({ pageId, mediaUrl: payload.url, caption: `${title || ''}\n${description || ''}`.trim(), mediaType })
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify({
+                pageId,
+                mediaUrl: payload.url,
+                caption: `${title || ""}\n${description || ""}`.trim(),
+                mediaType,
+              }),
             });
-            if (!r.ok) console.warn('Instagram upload failed');
+            if (!r.ok) console.warn("Instagram upload failed");
           } catch (_) {}
         };
         // Only run immediate posts when explicitly requested by the user (params.immediate_post)
@@ -682,45 +862,89 @@ function App() {
           await postFacebook();
           await postInstagram();
         } else {
-          console.log('[Upload] Immediate platform posts not requested or disabled; posts will be processed by backend queued tasks');
+          console.log(
+            "[Upload] Immediate platform posts not requested or disabled; posts will be processed by backend queued tasks"
+          );
         }
       } catch (e) {
-        console.warn('Auto-post skipped or partial:', e?.message);
+        console.warn("Auto-post skipped or partial:", e?.message);
       }
       await fetchUserContent(token);
-      alert('Content uploaded and queued for promotion. It will be published to selected platforms after approval.');
+      alert(
+        "Content uploaded and queued for promotion. It will be published to selected platforms after approval."
+      );
     } catch (error) {
-      alert('Error uploading content: ' + error.message);
+      alert("Error uploading content: " + error.message);
     }
   };
 
   // If the URL includes a direct pricing route, render pricing panel
   useEffect(() => {
-    const onHashChange = () => setRoutePathState(window.location.hash ? window.location.hash.replace(/^#/, '') : window.location.pathname);
-    window.addEventListener('hashchange', onHashChange);
-    window.addEventListener('popstate', onHashChange);
+    const onHashChange = () =>
+      setRoutePathState(
+        window.location.hash ? window.location.hash.replace(/^#/, "") : window.location.pathname
+      );
+    window.addEventListener("hashchange", onHashChange);
+    window.addEventListener("popstate", onHashChange);
     return () => {
-      window.removeEventListener('hashchange', onHashChange);
-      window.removeEventListener('popstate', onHashChange);
+      window.removeEventListener("hashchange", onHashChange);
+      window.removeEventListener("popstate", onHashChange);
     };
   }, []);
 
-  if (routePathState && routePathState.startsWith('/pricing')) {
+  if (routePathState && routePathState.startsWith("/pricing")) {
     return <PayPalSubscriptionPanel />;
   }
 
   return (
     <div>
       {showTermsModal && (
-        <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.5)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center'}}>
-          <div style={{background:'#fff',borderRadius:16,boxShadow:'0 12px 36px rgba(0,0,0,0.2)',padding:'24px 22px',maxWidth:560,width:'90%'}}>
-            <h3 style={{marginTop:0,marginBottom:8}}>Accept Terms of Service</h3>
-            <p style={{marginTop:0,color:'#444'}}>Please accept the latest Terms of Service{requiredTermsVersion ? ` (${requiredTermsVersion})` : ''} to continue.</p>
-            <div style={{display:'flex',gap:12,marginTop:16,alignItems:'center'}}>
-              <button onClick={acceptTerms} style={{ background: '#111827', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: 8, cursor: 'pointer' }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 16,
+              boxShadow: "0 12px 36px rgba(0,0,0,0.2)",
+              padding: "24px 22px",
+              maxWidth: 560,
+              width: "90%",
+            }}
+          >
+            <h3 style={{ marginTop: 0, marginBottom: 8 }}>Accept Terms of Service</h3>
+            <p style={{ marginTop: 0, color: "#444" }}>
+              Please accept the latest Terms of Service
+              {requiredTermsVersion ? ` (${requiredTermsVersion})` : ""} to continue.
+            </p>
+            <div style={{ display: "flex", gap: 12, marginTop: 16, alignItems: "center" }}>
+              <button
+                onClick={acceptTerms}
+                style={{
+                  background: "#111827",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px 16px",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                }}
+              >
                 Accept and Continue
               </button>
-              <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">View Terms</a>
+              <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">
+                View Terms
+              </a>
             </div>
           </div>
         </div>
@@ -728,71 +952,135 @@ function App() {
       {/* If no user, show welcome/login page */}
       {!user ? (
         <>
-          {!showLogin && !showRegister && (() => {
-            try {
-              const WelcomePage = require('./WelcomePage').default;
-              return <WelcomePage onGetStarted={() => setShowRegister(true)} onSignIn={() => setShowLogin(true)} />;
-            } catch (e) {
-              return <div style={{color:'red'}}>Welcome page not found.</div>;
-            }
-          })()}
+          {!showLogin &&
+            !showRegister &&
+            (() => {
+              try {
+                const WelcomePage = require("./WelcomePage").default;
+                return (
+                  <WelcomePage
+                    onGetStarted={() => setShowRegister(true)}
+                    onSignIn={() => setShowLogin(true)}
+                  />
+                );
+              } catch (e) {
+                return <div style={{ color: "red" }}>Welcome page not found.</div>;
+              }
+            })()}
           {/* Show login modal if requested */}
-          {showLogin && (() => {
-            try {
-              const LoginForm = require('./LoginForm').default;
-              return (
-                <div className="modal-overlay" style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',zIndex:9999,overflowY:'auto'}}>
-                  <div style={{minHeight:'100%',display:'flex',justifyContent:'center',alignItems:'flex-start',padding:'3rem 1.25rem'}}>
-                    <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
+          {showLogin &&
+            (() => {
+              try {
+                const LoginForm = require("./LoginForm").default;
+                return (
+                  <div
+                    className="modal-overlay"
+                    style={{
+                      position: "fixed",
+                      top: 0,
+                      left: 0,
+                      width: "100vw",
+                      height: "100vh",
+                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      zIndex: 9999,
+                      overflowY: "auto",
+                    }}
+                  >
+                    <div
+                      style={{
+                        minHeight: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "flex-start",
+                        padding: "3rem 1.25rem",
+                      }}
+                    >
+                      <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
+                    </div>
                   </div>
-                </div>
-              );
-            } catch (e) {
-              return <div style={{color:'red'}}>Login form not found.</div>;
-            }
-          })()}
+                );
+              } catch (e) {
+                return <div style={{ color: "red" }}>Login form not found.</div>;
+              }
+            })()}
           {/* Show register modal if requested */}
-          {showRegister && (() => {
-            try {
-              const RegisterForm = require('./RegisterForm').default;
-              return (
-                <div className="modal-overlay" style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',zIndex:9999,overflowY:'auto'}}>
-                  <div style={{minHeight:'100%',display:'flex',justifyContent:'center',alignItems:'flex-start',padding:'3rem 1.25rem'}}>
-                    <RegisterForm onRegister={registerUser} onClose={() => setShowRegister(false)} />
+          {showRegister &&
+            (() => {
+              try {
+                const RegisterForm = require("./RegisterForm").default;
+                return (
+                  <div
+                    className="modal-overlay"
+                    style={{
+                      position: "fixed",
+                      top: 0,
+                      left: 0,
+                      width: "100vw",
+                      height: "100vh",
+                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      zIndex: 9999,
+                      overflowY: "auto",
+                    }}
+                  >
+                    <div
+                      style={{
+                        minHeight: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "flex-start",
+                        padding: "3rem 1.25rem",
+                      }}
+                    >
+                      <RegisterForm
+                        onRegister={registerUser}
+                        onClose={() => setShowRegister(false)}
+                      />
+                    </div>
                   </div>
-                </div>
-              );
-            } catch (e) {
-              return <div style={{color:'red'}}>Register form not found.</div>;
-            }
-          })()}
+                );
+              } catch (e) {
+                return <div style={{ color: "red" }}>Register form not found.</div>;
+              }
+            })()}
         </>
-      ) : (user && (user.role === 'admin' || user.isAdmin === true)) ? (
+      ) : user && (user.role === "admin" || user.isAdmin === true) ? (
         // Render admin dashboard for admin users
         (() => {
           try {
-            const AdminDashboard = require('./AdminDashboard').default;
+            const AdminDashboard = require("./AdminDashboard").default;
             return <AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />;
           } catch (e) {
-            return <div style={{color:'red'}}>Admin dashboard not found.</div>;
+            return <div style={{ color: "red" }}>Admin dashboard not found.</div>;
           }
         })()
       ) : (
         // Render full user dashboard for normal users
         (() => {
           try {
-            const UserDashboard = require('./UserDashboard_full').default;
-            return <UserDashboard user={user} content={content} userDefaults={userDefaults} onSaveDefaults={saveUserDefaults} onLogout={handleLogout} onUpload={handleContentUpload} mySchedules={mySchedules} onSchedulesChanged={refreshSchedules} />;
+            const UserDashboard = require("./UserDashboard_full").default;
+            return (
+              <UserDashboard
+                user={user}
+                content={content}
+                userDefaults={userDefaults}
+                onSaveDefaults={saveUserDefaults}
+                onLogout={handleLogout}
+                onUpload={handleContentUpload}
+                mySchedules={mySchedules}
+                onSchedulesChanged={refreshSchedules}
+              />
+            );
           } catch (e) {
-            return <div style={{color:'red'}}>User dashboard not found.</div>;
+            return <div style={{ color: "red" }}>User dashboard not found.</div>;
           }
         })()
       )}
       {/* AI Chat Widget - only show when user is logged in */}
       {user && <ChatWidget />}
       {/* Optional: show Sentry test UI in non-prod or when explicitly enabled */}
-      {(process.env.REACT_APP_SHOW_SENTRY_TEST_BUTTON === '1' || process.env.NODE_ENV !== 'production') && (
-        <div style={{ position: 'fixed', bottom: 10, right: 10, zIndex: 9999 }}>
+      {(process.env.REACT_APP_SHOW_SENTRY_TEST_BUTTON === "1" ||
+        process.env.NODE_ENV !== "production") && (
+        <div style={{ position: "fixed", bottom: 10, right: 10, zIndex: 9999 }}>
           <TestSentryButton />
         </div>
       )}
