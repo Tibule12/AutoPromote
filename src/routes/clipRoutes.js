@@ -4,6 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const videoClippingService = require('../services/videoClippingService');
+const crypto = require('crypto');
 const authMiddleware = require('../authMiddleware');
 const { db } = require('../firebaseAdmin');
 
@@ -30,6 +31,23 @@ function clipRateLimit(req, res, next) {
   next();
 }
 
+// Simple in-memory job store for generation jobs (suitable for testing/demo)
+const generationJobs = new Map();
+
+function createJob(userId, contentId, options) {
+  const jobId = crypto.randomBytes(8).toString('hex');
+  const job = { id: jobId, userId, contentId, options, status: 'queued', createdAt: new Date().toISOString() };
+  generationJobs.set(jobId, job);
+  return job;
+}
+
+function updateJob(jobId, patch) {
+  const job = generationJobs.get(jobId) || {};
+  const updated = { ...job, ...patch };
+  generationJobs.set(jobId, updated);
+  return updated;
+}
+
 /**
  * POST /api/clips/analyze
  * Analyze a video and generate clip suggestions
@@ -47,6 +65,7 @@ router.post('/analyze', authMiddleware, clipRateLimit, async (req, res) => {
 
     // Verify user owns this content (support both snake_case and camelCase schemas)
     const contentDoc = await db.collection('content').doc(contentId).get();
+    
     if (!contentDoc.exists) {
       return res.status(404).json({ error: 'Content not found' });
     }
@@ -87,6 +106,72 @@ router.post('/analyze', authMiddleware, clipRateLimit, async (req, res) => {
   } catch (error) {
     console.error('[ClipRoutes] Analysis error:', error);
     res.status(500).json({ error: error.message || 'Analysis failed' });
+  }
+});
+
+/**
+ * POST /api/clips/generate-and-publish
+ * One-click flow: analyze, generate best clip, and publish/schedule to selected platforms.
+ * Body: { contentId, options }
+ */
+router.post('/generate-and-publish', authMiddleware, clipRateLimit, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    const { contentId, options = {} } = req.body;
+    if (!contentId) return res.status(400).json({ error: 'contentId required' });
+
+    const contentDoc = await db.collection('content').doc(contentId).get();
+    if (!contentDoc.exists) return res.status(404).json({ error: 'Content not found' });
+    const contentData = contentDoc.data() || {};
+    const contentOwner = contentData.userId || contentData.user_id || contentData.user || null;
+    if (contentOwner !== userId) return res.status(403).json({ error: 'Unauthorized' });
+
+    const job = createJob(userId, contentId, options);
+    // Kick off async worker (fire-and-forget)
+    (async () => {
+      try {
+        updateJob(job.id, { status: 'analyzing' });
+        const analysisRes = await videoClippingService.analyzeVideo(contentData.videoUrl || contentData.sourceUrl, contentId, userId);
+        updateJob(job.id, { status: 'analyzed', analysisId: analysisRes.analysisId });
+
+        // Choose first top clip
+        const top = (analysisRes.topClips && analysisRes.topClips[0]) || null;
+        if (!top) {
+          updateJob(job.id, { status: 'failed', error: 'No clip suggestions' });
+          return;
+        }
+
+        updateJob(job.id, { status: 'generating', clipId: top.id });
+        const genRes = await videoClippingService.generateClip(analysisRes.analysisId, top.id, options);
+
+        updateJob(job.id, { status: 'complete', clipResult: genRes });
+      } catch (err) {
+        console.error('[ClipRoutes] generate-and-publish worker error:', err && err.message);
+        updateJob(job.id, { status: 'failed', error: err && err.message });
+      }
+    })();
+
+    res.json({ success: true, jobId: job.id });
+  } catch (error) {
+    console.error('[ClipRoutes] generate-and-publish error:', error);
+    res.status(500).json({ error: error.message || 'Failed' });
+  }
+});
+
+/**
+ * GET /api/clips/generate-status/:jobId
+ * Polling endpoint to read job status
+ */
+router.get('/generate-status/:jobId', authMiddleware, async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const job = generationJobs.get(jobId);
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+    // Only expose limited fields
+    return res.json({ success: true, job: { id: job.id, status: job.status, clipResult: job.clipResult || null, error: job.error || null } });
+  } catch (err) {
+    console.error('[ClipRoutes] status error:', err);
+    res.status(500).json({ error: 'Failed to read job status' });
   }
 });
 

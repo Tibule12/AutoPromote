@@ -136,17 +136,17 @@ if (bypass) {
     };
     
     module.exports = { admin, db, auth, storage };
-}
-// When not bypassing, try to use root firebaseAdmin module first
-try {
-    module.exports = require('../firebaseAdmin');
-} catch (e) {
+} else {
+    // When not bypassing, try to use root firebaseAdmin module first
+    try {
+        module.exports = require('../firebaseAdmin');
+    } catch (e) {
         // Fall back to local initialization if root module not available
         console.warn('[firebaseAdmin shim] Root firebaseAdmin.js not found, using local init:', e.message);
-        
+
         const admin = require('firebase-admin');
         const adminConfig = require('../firebaseConfig.server.js');
-        
+
         if (admin.apps.length === 0) {
             // Validate minimal required fields
             const required = ['project_id','private_key','client_email'];
@@ -167,10 +167,11 @@ try {
                 throw initError;
             }
         }
-        
+
         const db = admin.firestore();
         const auth = admin.auth ? admin.auth() : null;
         let storage = null;
         try { storage = admin.storage ? admin.storage() : null; } catch (_) { storage = null; }
         module.exports = { admin, db, auth, storage };
     }
+}
