@@ -117,6 +117,11 @@ test("SPA: Record TikTok direct post flow (mocked backend)", async ({ page }) =>
   // Consent element
   if ((await page.$("#tiktok-consent")) !== null) await page.check("#tiktok-consent");
 
+  // Ensure creator nickname is visible so users know which account they are posting with
+  await page.waitForSelector('[data-testid="creator-badge"]', { timeout: 10000 });
+  const creatorText = await page.locator('[data-testid="creator-badge"]').innerText();
+  expect(creatorText).toContain("Posting as");
+
   // Attach demo video prepared in repository
   const demoVideo = path.resolve(__dirname, "test-assets/test.mp4");
   await page.setInputFiles("#content-file-input", demoVideo);

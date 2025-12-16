@@ -805,6 +805,26 @@
   color: inherit;
 }
 
+/* Creator badge */
+.creator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  color: #111827;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  margin: 8px 0 12px 0;
+  border: 1px solid rgba(17,24,39,0.04);
+}
+
+.dashboard-mode .creator-badge {
+  background: rgba(255,255,255,0.03);
+  color: #eef2ff;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
 .preview-area {
   background: #f9fafb;
   border-radius: 12px;
