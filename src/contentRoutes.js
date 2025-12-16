@@ -602,6 +602,7 @@ router.post(
 
 // GET /my-content - Get user's own content
 router.get("/my-content", authMiddleware, async (req, res) => {
+  const startMs = Date.now();
   try {
     const userId = req.userId || req.user?.uid;
     // Debugging aid: optionally log sanitized user info when diagnosing 403 issues
@@ -623,6 +624,11 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       }
     }
     if (!userId) {
+      console.warn(
+        "[GET /my-content][unauthorized] ip=%s path=%s",
+        req.ip || req.headers["x-forwarded-for"] || "unknown",
+        req.originalUrl || req.url
+      );
       return res.status(401).json({ error: "Unauthorized" });
     }
     const contentRef = db
@@ -634,6 +640,14 @@ router.get("/my-content", authMiddleware, async (req, res) => {
     snapshot.forEach(doc => {
       content.push({ id: doc.id, ...doc.data() });
     });
+    const took = Date.now() - startMs;
+    if (took > 500)
+      console.warn(
+        "[GET /my-content][slow] userId=%s took=%dms ip=%s",
+        userId,
+        took,
+        req.ip || req.headers["x-forwarded-for"] || "unknown"
+      );
     res.json({ content });
   } catch (error) {
     console.error("[GET /my-content] Error:", error);
