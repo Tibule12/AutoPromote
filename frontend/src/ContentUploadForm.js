@@ -1,8 +1,6 @@
-/* eslint-disable */
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 /* eslint-env browser, es6 */
-/* eslint parserOptions: { "sourceType": "module" } */
 import React, { useState, useRef, useEffect } from "react";
 import "./ContentUploadForm.css";
 import { storage, auth } from "./firebaseClient";
