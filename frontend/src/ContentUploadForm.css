@@ -446,6 +446,14 @@
   padding: 32px 16px;
   text-align: center;
   transition: all 0.3s;
+
+  /* Keep the drop zone at a reasonable visible width and height so it
+     doesn't collapse into a narrow vertical strip when layout changes */
+  width: 100%;
+  max-width: 640px;
+  min-height: 120px;
+  margin: 0 auto;
+  display: block;
 }
 
 .file-upload:hover {
@@ -464,6 +472,12 @@
   margin-top: 10px;
   font-size: 14px;
   color: #666;
+  /* Prevent long filenames from wrapping into vertical columns */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
 }
 
 .preview-area {
