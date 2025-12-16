@@ -1,5 +1,6 @@
 const { admin, db } = require("./firebaseAdmin");
 const { present, tokenInfo } = require("./utils/logSanitizer");
+const diag = require("./diagnostics");
 
 const authMiddleware = async (req, res, next) => {
   const startMs = Date.now();
@@ -53,6 +54,17 @@ const authMiddleware = async (req, res, next) => {
           : `No ip=${requestContext.ip}`
       );
     if (!token) {
+      diag.incAuthFail("no_token", requestContext.ip);
+      // If an IP is generating many unauthenticated requests, throttle to reduce load
+      if (diag.getIpCount(requestContext.ip) > 80) {
+        console.warn(
+          "[auth][throttle_no_token] ip=%s path=%s count=%d",
+          requestContext.ip,
+          requestContext.path,
+          diag.getIpCount(requestContext.ip)
+        );
+        return res.status(429).json({ error: "Rate limit exceeded" });
+      }
       console.warn(
         "[auth][no_token] ip=%s origin=%s path=%s",
         requestContext.ip,
@@ -65,6 +77,17 @@ const authMiddleware = async (req, res, next) => {
     if (debugAuth) console.log("[auth] tokenInfo=%o", tokenInfo(token));
     // Check if this is a custom token (shouldn't be used directly for auth)
     if (token.length < 100 || !token.startsWith("eyJ")) {
+      diag.incAuthFail("invalid_token_format", requestContext.ip);
+      // Throttle obvious bad token formats from same IP
+      if (diag.getIpCount(requestContext.ip) > 120) {
+        console.warn(
+          "[auth][throttle_invalid_token] ip=%s path=%s count=%d",
+          requestContext.ip,
+          requestContext.path,
+          diag.getIpCount(requestContext.ip)
+        );
+        return res.status(429).json({ error: "Rate limit exceeded" });
+      }
       console.warn(
         "[auth][invalid_token_format] ip=%s path=%s tokenLen=%d",
         requestContext.ip,
@@ -85,6 +108,7 @@ const authMiddleware = async (req, res, next) => {
     try {
       decodedToken = await admin.auth().verifyIdToken(token);
     } catch (verifyErr) {
+      diag.incAuthFail("verify_error", requestContext.ip);
       console.warn(
         "[auth][verify_error] ip=%s path=%s code=%s messagePresent=%s",
         requestContext.ip,
