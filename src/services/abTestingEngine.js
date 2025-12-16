@@ -7,16 +7,19 @@ function runABTest(contentVariants) {
     variantId: idx,
     views: Math.floor(Math.random() * 50000),
     engagementRate: Math.random().toFixed(2),
-    winner: idx === 0 // Simulate first variant as winner
+    winner: idx === 0, // Simulate first variant as winner
   }));
 }
 
 function selectBestVariant(testResults) {
   // Select variant with highest views
-  return testResults.reduce((best, curr) => curr.views > best.views ? curr : best, testResults[0]);
+  return testResults.reduce(
+    (best, curr) => (curr.views > best.views ? curr : best),
+    testResults[0]
+  );
 }
 
 module.exports = {
   runABTest,
-  selectBestVariant
+  selectBestVariant,
 };

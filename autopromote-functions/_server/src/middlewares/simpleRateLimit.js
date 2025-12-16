@@ -7,18 +7,18 @@ module.exports = function simpleRateLimit(opts = {}) {
   const max = opts.max || 20;
   const keyFn = opts.key || (req => req.ip);
   const buckets = new Map();
-  return function(req, res, next) {
-    const key = keyFn(req) || 'anon';
+  return function (req, res, next) {
+    const key = keyFn(req) || "anon";
     const now = Date.now();
     let bucket = buckets.get(key);
     if (!bucket || bucket.reset < now) {
-      bucket = { count:0, reset: now + windowMs };
+      bucket = { count: 0, reset: now + windowMs };
       buckets.set(key, bucket);
     }
     bucket.count++;
     if (bucket.count > max) {
-      const retrySec = Math.ceil((bucket.reset - now)/1000);
-      return res.status(429).json({ error:'rate_limited', retryAfterSec: retrySec });
+      const retrySec = Math.ceil((bucket.reset - now) / 1000);
+      return res.status(429).json({ error: "rate_limited", retryAfterSec: retrySec });
     }
     next();
   };

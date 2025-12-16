@@ -13,25 +13,29 @@ function loadPlans() {
   try {
     const raw = process.env.SUBSCRIPTION_PLANS_JSON;
     if (!raw) {
-      parsed = [ { id: 'free', price: 0, monthlyTaskQuota: 15, aiQuota: 80 } ];
+      parsed = [{ id: "free", price: 0, monthlyTaskQuota: 15, aiQuota: 80 }];
       return parsed;
     }
     const arr = JSON.parse(raw);
-    if (!Array.isArray(arr) || !arr.length) throw new Error('empty array');
+    if (!Array.isArray(arr) || !arr.length) throw new Error("empty array");
     parsed = arr.map(p => ({
       id: String(p.id),
-      price: Number(p.price)||0,
-      monthlyTaskQuota: Number(p.monthlyTaskQuota)||0,
-      aiQuota: Number(p.aiQuota)||0
+      price: Number(p.price) || 0,
+      monthlyTaskQuota: Number(p.monthlyTaskQuota) || 0,
+      aiQuota: Number(p.aiQuota) || 0,
     }));
     return parsed;
   } catch (e) {
-    parsed = [ { id: 'free', price: 0, monthlyTaskQuota: 15, aiQuota: 80 } ];
+    parsed = [{ id: "free", price: 0, monthlyTaskQuota: 15, aiQuota: 80 }];
     return parsed;
   }
 }
 
-function getPlans() { return loadPlans(); }
-function getPlan(id) { return loadPlans().find(p => p.id === id) || loadPlans()[0]; }
+function getPlans() {
+  return loadPlans();
+}
+function getPlan(id) {
+  return loadPlans().find(p => p.id === id) || loadPlans()[0];
+}
 
 module.exports = { getPlans, getPlan };

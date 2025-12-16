@@ -1,15 +1,25 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import GeneratePublishModal from '../GeneratePublishModal';
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import GeneratePublishModal from "../GeneratePublishModal";
 
-global.fetch = jest.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ jobId: 'job1' }) }));
+// Use an explicit async mock to avoid intermittent undefined resolution
+global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({ jobId: "job1" }) }));
 
-test('opens modal and starts generation', async () => {
+test("opens modal and starts generation", async () => {
   const onStarted = jest.fn();
-  render(<GeneratePublishModal open={true} contentItem={{ id: 'c1', title: 'Video 1' }} onClose={() => {}} onStarted={onStarted} />);
+  render(
+    <GeneratePublishModal
+      open={true}
+      contentItem={{ id: "c1", title: "Video 1" }}
+      onClose={() => {}}
+      onStarted={onStarted}
+    />
+  );
 
   expect(screen.getByText(/Generate & Publish/i)).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Confirm'));
+  // Ensure fetch mock is installed right before the network call
+  global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({ jobId: "job1" }) }));
+  fireEvent.click(screen.getByText("Confirm"));
 
   await waitFor(() => expect(onStarted).toHaveBeenCalled());
   expect(screen.getByText(/Processing/i)).toBeInTheDocument();

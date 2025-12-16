@@ -1,5 +1,5 @@
-import React from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import React from "react";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
 export default function HistogramChart({ samples = [], bins = 10 }) {
   if (!samples || !samples.length) return null;
@@ -24,12 +24,12 @@ export default function HistogramChart({ samples = [], bins = 10 }) {
   const data = counts.map((c, i) => ({ bin: labels[i], count: c }));
 
   return (
-    <div style={{ width: '100%', height: 120 }}>
+    <div style={{ width: "100%", height: 120 }}>
       <ResponsiveContainer>
         <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
           <XAxis dataKey="bin" hide={true} />
           <YAxis hide={true} />
-          <Tooltip formatter={(value) => [value, 'Count']} />
+          <Tooltip formatter={value => [value, "Count"]} />
           <Bar dataKey="count" fill="#1976d2" />
         </BarChart>
       </ResponsiveContainer>

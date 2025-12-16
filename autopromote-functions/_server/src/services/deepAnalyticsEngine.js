@@ -11,7 +11,7 @@ function getContentAnalytics(contentId) {
     shares: Math.floor(Math.random() * 5000),
     followersGained: Math.floor(Math.random() * 2000),
     engagementRate: Math.random().toFixed(2),
-    growthRate: Math.random().toFixed(2)
+    growthRate: Math.random().toFixed(2),
   };
 }
 
@@ -24,11 +24,11 @@ function getCompetitorAnalytics(competitorId) {
     shares: Math.floor(Math.random() * 10000),
     followersGained: Math.floor(Math.random() * 5000),
     engagementRate: Math.random().toFixed(2),
-    growthRate: Math.random().toFixed(2)
+    growthRate: Math.random().toFixed(2),
   };
 }
 
 module.exports = {
   getContentAnalytics,
-  getCompetitorAnalytics
+  getCompetitorAnalytics,
 };

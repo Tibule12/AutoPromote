@@ -21,7 +21,11 @@
     "lint": "node -e \"try{require('child_process').execSync('eslint --ext .js,.jsx src test --rule \"no-console:0\" --rule \"no-unused-vars:0\" --rule \"no-restricted-syntax:0\"', {stdio: 'inherit'})}catch(e){ /* swallow non-zero */ }\"",
     "emulator:start": "npx firebase emulators:start --only firestore,functions",
     "check:grpc-versions": "node -e \"const fs=require('fs'); const out=JSON.parse(require('child_process').execSync('npm ls @grpc/grpc-js --json').toString()||'{}'); const versions=new Set(); function scan(n){ if(!n||!n.dependencies) return; Object.keys(n.dependencies).forEach(k=>{ const d=n.dependencies[k]; if(k==='@grpc/grpc-js'){ versions.add(d.version); } scan(d); }); } scan(out); console.log('grpc versions:', [...versions].join(', ')); if(versions.size>1){ console.error('Multiple versions found'); process.exit(1);} \"",
-    "check:grpc-install": "node ./scripts/check-grpc-install.js"
+    "check:grpc-install": "node ./scripts/check-grpc-install.js",
+    "format": "prettier --write \"**/*.{js,jsx,json,css,md,html}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,json,css,md,html}\"",
+    "convert-recording": "node ./scripts/convert_webm_to_mp4.js",
+    "prepare": "husky install"
   },
   "engines": {
     "node": ">=20"
@@ -60,7 +64,6 @@
     "node-forge": "1.3.2",
     "serialize-javascript": "6.0.2"
   },
-
   "devDependencies": {
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0",
@@ -68,14 +71,30 @@
     "@playwright/test": "^1.42.0",
     "babel-jest": "^30.2.0",
     "cross-env": "^7.0.3",
+    "eslint": "^8.44.0",
+    "eslint-config-prettier": "^10.1.8",
+    "ffmpeg-static": "^5.3.0",
+    "husky": "^9.1.7",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
+    "lint-staged": "^16.2.7",
     "nock": "^13.3.0",
-    "supertest": "^7.1.4",
-    "eslint": "^8.44.0"
-  }
-  ,
+    "prettier": "^3.7.4",
+    "supertest": "^7.1.4"
+  },
   "eslintConfig": {
-    "root": true
+    "root": true,
+    "extends": [
+      "prettier"
+    ]
+  },
+  "lint-staged": {
+    "**/*.{js,jsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "**/*.{json,md,css}": [
+      "prettier --write"
+    ]
   }
 }

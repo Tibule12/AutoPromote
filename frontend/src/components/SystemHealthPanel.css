@@ -21,8 +21,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .error-state .error-icon {
@@ -59,7 +63,7 @@
   padding: 24px;
   border-radius: 8px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
@@ -126,9 +130,15 @@
   font-size: 1.5rem;
 }
 
-.status-icon.success { color: #2e7d32; }
-.status-icon.warning { color: #ed6c02; }
-.status-icon.error { color: #d32f2f; }
+.status-icon.success {
+  color: #2e7d32;
+}
+.status-icon.warning {
+  color: #ed6c02;
+}
+.status-icon.error {
+  color: #d32f2f;
+}
 
 .summary-stats {
   display: flex;
@@ -141,9 +151,15 @@
   font-weight: 500;
 }
 
-.stat.success { color: #2e7d32; }
-.stat.warning { color: #ed6c02; }
-.stat.error { color: #d32f2f; }
+.stat.success {
+  color: #2e7d32;
+}
+.stat.warning {
+  color: #ed6c02;
+}
+.stat.error {
+  color: #d32f2f;
+}
 
 .timestamp {
   font-size: 0.85rem;
@@ -161,12 +177,12 @@
   background: white;
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.2s;
 }
 
 .check-item:hover {
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .check-header {

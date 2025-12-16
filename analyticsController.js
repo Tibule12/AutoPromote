@@ -1,4 +1,4 @@
-const { db } = require('./firebaseClient');
+const { db } = require("./firebaseClient");
 
 // @desc    Create new analytics record
 // @route   POST /api/analytics
@@ -6,7 +6,7 @@ const { db } = require('./firebaseClient');
 const createAnalytics = async (req, res) => {
   const { contentId, views, engagement, revenue } = req.body;
   try {
-    const docRef = await db.collection('analytics').add({
+    const docRef = await db.collection("analytics").add({
       content_id: contentId,
       views,
       engagement,
@@ -26,9 +26,12 @@ const createAnalytics = async (req, res) => {
 // @access  Public
 const getAnalyticsByContentId = async (req, res) => {
   try {
-    const snapshot = await db.collection('analytics').where('content_id', '==', req.params.contentId).get();
+    const snapshot = await db
+      .collection("analytics")
+      .where("content_id", "==", req.params.contentId)
+      .get();
     if (snapshot.empty) {
-      return res.status(404).json({ message: 'Analytics not found' });
+      return res.status(404).json({ message: "Analytics not found" });
     }
     // Return the first matching analytics document
     const doc = snapshot.docs[0];

@@ -25,16 +25,19 @@ This testing suite provides comprehensive tools for verifying the integration be
 ### Command Line Testing
 
 1. Database Connection Check:
+
    ```
    node checkDatabaseConnection.js
    ```
 
 2. Admin Queries Test:
+
    ```
    node testAdminQueries.js
    ```
 
 3. Generate Sample Data:
+
    ```
    node generateSampleData.js
    ```
@@ -47,6 +50,7 @@ This testing suite provides comprehensive tools for verifying the integration be
 ### Browser-Based Testing
 
 1. Start the application:
+
    ```
    npm start
    ```

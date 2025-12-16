@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 function ContentList({ content }) {
   if (!content || content.length === 0) {
@@ -11,7 +11,12 @@ function ContentList({ content }) {
         {content.map(item => (
           <li key={item.id || item.title} style={{ marginBottom: 12 }}>
             <strong>{item.title}</strong> ({item.type})<br />
-            {item.description && <span>{item.description}<br /></span>}
+            {item.description && (
+              <span>
+                {item.description}
+                <br />
+              </span>
+            )}
             {item.url && (
               <a href={item.url} target="_blank" rel="noopener noreferrer">
                 View {item.type}

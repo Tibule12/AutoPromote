@@ -1,6 +1,7 @@
 # Firebase Setup Guide
 
 ## Prerequisites
+
 1. Node.js installed
 2. Firebase CLI installed (`npm install -g firebase-tools`)
 3. Google account
@@ -8,6 +9,7 @@
 ## Setup Steps
 
 1. Create a Firebase Project:
+
    ```bash
    # Login to Firebase
    firebase login
@@ -15,6 +17,7 @@
    # Initialize project
    firebase init
    ```
+
    Select the following features:
    - Authentication
    - Firestore
@@ -27,8 +30,9 @@
    - Add other methods as needed (Google, etc.)
 
 3. Configure Environment Variables:
-   
+
    Create a `.env` file in the root directory:
+
    ```env
    # Firebase Frontend Config
    REACT_APP_FIREBASE_API_KEY=your-api-key
@@ -44,6 +48,7 @@
    ```
 
 4. Install Dependencies:
+
    ```bash
    # In root directory
    npm install firebase-admin
@@ -62,19 +67,22 @@
 
 6. Initialize Storage Rules:
    Create storage.rules:
+
    ```
    rules_version = '2';
    service firebase.storage {
      match /b/{bucket}/o {
        match /uploads/{allPaths=**} {
          allow read: if true;
-         allow write: if request.auth != null 
+         allow write: if request.auth != null
            && request.resource.size < 50 * 1024 * 1024; // 50MB limit
        }
      }
    }
    ```
+
    Deploy storage rules:
+
    ```bash
    firebase deploy --only storage
    ```

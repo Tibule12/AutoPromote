@@ -1,7 +1,7 @@
 // platformAutomation.js
 // This script automates promotion execution and revenue generation for all due promotions.
 
-const promotionService = require('./promotionService');
+const promotionService = require("./promotionService");
 
 async function runPlatformAutomation() {
   try {
@@ -16,18 +16,20 @@ async function runPlatformAutomation() {
       // Only execute if startTime is in the past and endTime is in the future (or not set)
       if (promo.startTime <= now && (!promo.endTime || promo.endTime >= now)) {
         try {
-          console.log(`\n🚀 Executing promotion: ${promo.id} for content: ${promo.contentId} on platform: ${promo.platform}`);
+          console.log(
+            `\n🚀 Executing promotion: ${promo.id} for content: ${promo.contentId} on platform: ${promo.platform}`
+          );
           const result = await promotionService.executePromotion(promo.id);
-          console.log('✅ Promotion executed:', result);
+          console.log("✅ Promotion executed:", result);
         } catch (err) {
-          console.error('❌ Error executing promotion:', err);
+          console.error("❌ Error executing promotion:", err);
         }
       }
     }
 
-    console.log('\n🎉 Platform automation run complete!');
+    console.log("\n🎉 Platform automation run complete!");
   } catch (error) {
-    console.error('❌ Platform automation error:', error);
+    console.error("❌ Platform automation error:", error);
   }
 }
 

@@ -52,5 +52,5 @@ jobs:
           RUN_INTEGRATION_CLIP=1 npx jest src/__tests__/videoClippingService.integration.test.js -i --runInBand
 
       - name: Cleanup service account
-        if: always()
+        if: ${{ always() }}
         run: rm -f test/e2e/tmp/service-account.json || true

@@ -1,30 +1,50 @@
-const { db } = require('../../firebaseAdmin');
+const { db } = require("../../firebaseAdmin");
 
 // Factory: returns middleware that enforces acceptance of the given terms version
 // options: { version: string }
 module.exports = function requireAcceptedTerms(options = {}) {
-  const requiredVersion = options.version || process.env.REQUIRED_TERMS_VERSION || 'AUTOPROMOTE-v1.0';
+  const requiredVersion =
+    options.version || process.env.REQUIRED_TERMS_VERSION || "AUTOPROMOTE-v1.0";
 
   return async function (req, res, next) {
     try {
       // Bypass terms check for E2E tests: either special header or origin from localhost
-      const hostHeader = req.headers && (req.headers.host || '');
-      const ua = req.headers && (req.headers['user-agent'] || '');
-      const isE2EHeader = req.headers && (req.headers['x-playwright-e2e'] === '1');
-      const isLocalHost = hostHeader && (hostHeader.includes('127.0.0.1') || hostHeader.includes('localhost'));
-        const isNodeFetchUA = typeof ua === 'string' && (ua.includes('node-fetch') || ua.toLowerCase().includes('playwright'));
-        const authHeader = req.headers && (req.headers['authorization'] || req.headers['Authorization']);
-        const isTestToken = typeof authHeader === 'string' && authHeader.startsWith('Bearer test-token-for-');
-        try { console.log('[requireAcceptedTerms.debug] isE2EHeader:', !!isE2EHeader, 'isLocalHost:', !!isLocalHost, 'isNodeFetchUA:', !!isNodeFetchUA, 'isTestToken:', !!isTestToken, 'authHeaderPreview:', authHeader ? authHeader.slice(0,40) : null); } catch (e) {}
+      const hostHeader = req.headers && (req.headers.host || "");
+      const ua = req.headers && (req.headers["user-agent"] || "");
+      const isE2EHeader = req.headers && req.headers["x-playwright-e2e"] === "1";
+      const isLocalHost =
+        hostHeader && (hostHeader.includes("127.0.0.1") || hostHeader.includes("localhost"));
+      const isNodeFetchUA =
+        typeof ua === "string" &&
+        (ua.includes("node-fetch") || ua.toLowerCase().includes("playwright"));
+      const authHeader =
+        req.headers && (req.headers["authorization"] || req.headers["Authorization"]);
+      const isTestToken =
+        typeof authHeader === "string" && authHeader.startsWith("Bearer test-token-for-");
+      try {
+        console.log(
+          "[requireAcceptedTerms.debug] isE2EHeader:",
+          !!isE2EHeader,
+          "isLocalHost:",
+          !!isLocalHost,
+          "isNodeFetchUA:",
+          !!isNodeFetchUA,
+          "isTestToken:",
+          !!isTestToken,
+          "authHeaderPreview:",
+          authHeader ? authHeader.slice(0, 40) : null
+        );
+      } catch (e) {}
       // Allow runtime bypass for CI or E2E runs via environment
-      if (process.env.BYPASS_ACCEPTED_TERMS === '1') return next();
-      if (req.headers && (isE2EHeader || isLocalHost || isNodeFetchUA || isTestToken)) return next();
+      if (process.env.BYPASS_ACCEPTED_TERMS === "1") return next();
+      if (req.headers && (isE2EHeader || isLocalHost || isNodeFetchUA || isTestToken))
+        return next();
       // Ensure user is authenticated and we have uid
       const uid = req.userId || (req.user && req.user.uid);
-      if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+      if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
       // Read user's last accepted terms from Firestore user doc
-      const userDoc = await db.collection('users').doc(uid).get();
+      const userDoc = await db.collection("users").doc(uid).get();
       const userData = userDoc.exists ? userDoc.data() : {};
       const last = userData.lastAcceptedTerms || null;
 
@@ -33,11 +53,13 @@ module.exports = function requireAcceptedTerms(options = {}) {
       }
 
       // Not accepted or version mismatch: include required version and hint header
-      try { res.setHeader('x-required-terms-version', requiredVersion); } catch(_) {}
-      return res.status(403).json({ error: 'terms_not_accepted', requiredVersion });
+      try {
+        res.setHeader("x-required-terms-version", requiredVersion);
+      } catch (_) {}
+      return res.status(403).json({ error: "terms_not_accepted", requiredVersion });
     } catch (err) {
-      console.error('requireAcceptedTerms error:', err);
-      return res.status(500).json({ error: 'internal_error' });
+      console.error("requireAcceptedTerms error:", err);
+      return res.status(500).json({ error: "internal_error" });
     }
   };
 };

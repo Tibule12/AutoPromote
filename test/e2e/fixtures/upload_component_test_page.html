@@ -4,13 +4,43 @@
     <meta charset="utf-8" />
     <title>Upload Component E2E Test</title>
     <style>
-      body { font-family: Arial; padding: 2rem; }
-      label { display:block; margin-top: 0.5rem; }
-      .platform-tile { display:inline-block; padding: 8px 12px; border:1px solid #ccc; border-radius:8px; cursor:pointer; margin-right:8px; }
-      .platform-tile.selected { background:#def; border-color:#3b82f6; }
-      .platform-expanded { margin-top:12px; border:1px solid #ddd; padding:12px; border-radius:8px; }
-      .preview-card { display:inline-block; border:1px solid #ccc; border-radius:8px; padding:8px; margin:8px; }
-      button { padding:6px 10px; margin-right:6px; }
+      body {
+        font-family: Arial;
+        padding: 2rem;
+      }
+      label {
+        display: block;
+        margin-top: 0.5rem;
+      }
+      .platform-tile {
+        display: inline-block;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-right: 8px;
+      }
+      .platform-tile.selected {
+        background: #def;
+        border-color: #3b82f6;
+      }
+      .platform-expanded {
+        margin-top: 12px;
+        border: 1px solid #ddd;
+        padding: 12px;
+        border-radius: 8px;
+      }
+      .preview-card {
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 8px;
+        margin: 8px;
+      }
+      button {
+        padding: 6px 10px;
+        margin-right: 6px;
+      }
     </style>
   </head>
   <body>
@@ -28,10 +58,10 @@
       <div class="platform-tile" data-platform="pinterest" id="tile-pinterest">Pinterest</div>
       <div class="platform-tile" data-platform="youtube" id="tile-youtube">YouTube</div>
     </div>
-    <div id="expanded" class="platform-expanded" style="display:none;">
+    <div id="expanded" class="platform-expanded" style="display: none">
       <h3 id="expanded-title"></h3>
       <div id="expanded-body"></div>
-      <div style="margin-top:8px;">
+      <div style="margin-top: 8px">
         <button id="preview-btn">Preview</button>
         <button id="quality-btn">Quality Check</button>
         <button id="upload-btn">Upload</button>
@@ -42,106 +72,163 @@
     </div>
 
     <script>
-      const fileInput = document.getElementById('content-file-input');
+      const fileInput = document.getElementById("content-file-input");
       let selectedFile = null;
-      fileInput.addEventListener('change', () => { selectedFile = fileInput.files[0]; });
-      const tiles = document.querySelectorAll('.platform-tile');
+      fileInput.addEventListener("change", () => {
+        selectedFile = fileInput.files[0];
+      });
+      const tiles = document.querySelectorAll(".platform-tile");
       let selectedPlatform = null;
-      tiles.forEach(t => t.addEventListener('click', () => {
-        tiles.forEach(x=>x.classList.remove('selected'));
-        t.classList.add('selected');
-        selectedPlatform = t.getAttribute('data-platform');
-        document.getElementById('expanded').style.display = 'block';
-        document.getElementById('expanded-title').textContent = selectedPlatform.charAt(0).toUpperCase()+selectedPlatform.slice(1)+" Options";
-        document.getElementById('expanded-body').innerHTML = '';
-        if (selectedPlatform === 'tiktok') {
-          document.getElementById('expanded-body').innerHTML = '<label>Privacy<select id="tiktok-privacy"><option value="">Select privacy</option><option value="EVERYONE">EVERYONE</option><option value="FRIENDS">FRIENDS</option><option value="SELF_ONLY">SELF_ONLY</option></select></label><label><input id="tiktok-consent" type="checkbox" /> Consent</label>';
-        } else if (selectedPlatform === 'discord') {
-          document.getElementById('expanded-body').innerHTML = '<label>Discord Channel ID<input id="discord-channel-id" placeholder="Discord channel ID" /></label>';
-        } else if (selectedPlatform === 'telegram') {
-          document.getElementById('expanded-body').innerHTML = '<label>Telegram Chat ID<input id="telegram-chat-id" placeholder="Telegram chat ID" /></label>';
-        } else if (selectedPlatform === 'reddit') {
-          document.getElementById('expanded-body').innerHTML = '<label>Reddit Subreddit<input id="reddit-subreddit" placeholder="Reddit subreddit" /></label>';
-        } else if (selectedPlatform === 'linkedin') {
-          document.getElementById('expanded-body').innerHTML = '<label>LinkedIn Company ID<input id="linkedin-company-id" placeholder="LinkedIn organization/company ID" /></label>';
-        } else if (selectedPlatform === 'twitter') {
-          document.getElementById('expanded-body').innerHTML = '<label>Twitter message<input id="twitter-message" placeholder="Twitter message (optional)" /></label>';
-        } else if (selectedPlatform === 'spotify') {
-          document.getElementById('expanded-body').innerHTML = '<label>Playlist ID<input id="spotify-playlist" /></label>';
-        } else if (selectedPlatform === 'snapchat') {
-          document.getElementById('expanded-body').innerHTML = '<label>Snapchat Creative ID<input id="snapchat-creative-id" placeholder="Snap creative id" /></label>';
-        } else if (selectedPlatform === 'pinterest') {
-          document.getElementById('expanded-body').innerHTML = '<label>Pinterest Board<input id="pinterest-board" placeholder="Pinterest board id" /></label><label>Pin Note<textarea id="pinterest-note" placeholder="Pin note"></textarea></label>';
-        } else if (selectedPlatform === 'youtube') {
-          document.getElementById('expanded-body').innerHTML = '<label>YouTube Title<input id="youtube-title" placeholder="Video title" /></label><label>Description<textarea id="youtube-description" placeholder="Video description"></textarea></label><label>Visibility<select id="youtube-visibility"><option value="public">Public</option><option value="unlisted">Unlisted</option><option value="private">Private</option></select></label>';
-        }
-      }));
+      tiles.forEach(t =>
+        t.addEventListener("click", () => {
+          tiles.forEach(x => x.classList.remove("selected"));
+          t.classList.add("selected");
+          selectedPlatform = t.getAttribute("data-platform");
+          document.getElementById("expanded").style.display = "block";
+          document.getElementById("expanded-title").textContent =
+            selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1) + " Options";
+          document.getElementById("expanded-body").innerHTML = "";
+          if (selectedPlatform === "tiktok") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Privacy<select id="tiktok-privacy"><option value="">Select privacy</option><option value="EVERYONE">EVERYONE</option><option value="FRIENDS">FRIENDS</option><option value="SELF_ONLY">SELF_ONLY</option></select></label><label><input id="tiktok-consent" type="checkbox" /> Consent</label>';
+          } else if (selectedPlatform === "discord") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Discord Channel ID<input id="discord-channel-id" placeholder="Discord channel ID" /></label>';
+          } else if (selectedPlatform === "telegram") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Telegram Chat ID<input id="telegram-chat-id" placeholder="Telegram chat ID" /></label>';
+          } else if (selectedPlatform === "reddit") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Reddit Subreddit<input id="reddit-subreddit" placeholder="Reddit subreddit" /></label>';
+          } else if (selectedPlatform === "linkedin") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>LinkedIn Company ID<input id="linkedin-company-id" placeholder="LinkedIn organization/company ID" /></label>';
+          } else if (selectedPlatform === "twitter") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Twitter message<input id="twitter-message" placeholder="Twitter message (optional)" /></label>';
+          } else if (selectedPlatform === "spotify") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Playlist ID<input id="spotify-playlist" /></label>';
+          } else if (selectedPlatform === "snapchat") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Snapchat Creative ID<input id="snapchat-creative-id" placeholder="Snap creative id" /></label>';
+          } else if (selectedPlatform === "pinterest") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Pinterest Board<input id="pinterest-board" placeholder="Pinterest board id" /></label><label>Pin Note<textarea id="pinterest-note" placeholder="Pin note"></textarea></label>';
+          } else if (selectedPlatform === "youtube") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>YouTube Title<input id="youtube-title" placeholder="Video title" /></label><label>Description<textarea id="youtube-description" placeholder="Video description"></textarea></label><label>Visibility<select id="youtube-visibility"><option value="public">Public</option><option value="unlisted">Unlisted</option><option value="private">Private</option></select></label>';
+          }
+        })
+      );
 
       async function endpointCall(path, body) {
         // Use absolute API base to ensure fetch routes through the test proxy
-        const API_BASE = 'http://127.0.0.1:5000';
+        const API_BASE = "http://127.0.0.1:5000";
         try {
           const res = await fetch(API_BASE + path, {
-            method:'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer test-token' }, body: JSON.stringify(body)
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
+            body: JSON.stringify(body),
           });
           const j = await res.json();
-          return { ok: res.ok, json:j };
-        } catch (e) { return { ok:false, json:{ error: e.message } }; }
+          return { ok: res.ok, json: j };
+        } catch (e) {
+          return { ok: false, json: { error: e.message } };
+        }
       }
 
-      document.getElementById('preview-btn').addEventListener('click', async () => {
-        if (!selectedPlatform) return alert('Select a platform');
-        let title = 'E2E';
-        let description = 'desc';
+      document.getElementById("preview-btn").addEventListener("click", async () => {
+        if (!selectedPlatform) return alert("Select a platform");
+        let title = "E2E";
+        let description = "desc";
         const platformOptions = {};
-        if (selectedPlatform === 'youtube') {
-          const ytTitle = document.getElementById('youtube-title');
-          const ytDesc = document.getElementById('youtube-description');
-          const ytVis = document.getElementById('youtube-visibility');
-          const ytShorts = document.getElementById('youtube-shorts');
+        if (selectedPlatform === "youtube") {
+          const ytTitle = document.getElementById("youtube-title");
+          const ytDesc = document.getElementById("youtube-description");
+          const ytVis = document.getElementById("youtube-visibility");
+          const ytShorts = document.getElementById("youtube-shorts");
           if (ytTitle && ytTitle.value) title = ytTitle.value;
           if (ytDesc && ytDesc.value) description = ytDesc.value;
-          platformOptions.youtube = { visibility: ytVis ? ytVis.value : 'public', shortsMode: ytShorts ? !!ytShorts.checked : false };
+          platformOptions.youtube = {
+            visibility: ytVis ? ytVis.value : "public",
+            shortsMode: ytShorts ? !!ytShorts.checked : false,
+          };
         }
-        const payload = { title, description, type: 'video', isDryRun: true, target_platforms: [selectedPlatform], platforms: [selectedPlatform], platform_options: platformOptions };
-        const r = await endpointCall('/api/content/upload', payload);
-        const cards = document.getElementById('preview-cards'); cards.innerHTML='';
-        (r.json.previews || []).forEach(p => { const c=document.createElement('div'); c.className='preview-card'; c.textContent = p.title; cards.appendChild(c); });
+        const payload = {
+          title,
+          description,
+          type: "video",
+          isDryRun: true,
+          target_platforms: [selectedPlatform],
+          platforms: [selectedPlatform],
+          platform_options: platformOptions,
+        };
+        const r = await endpointCall("/api/content/upload", payload);
+        const cards = document.getElementById("preview-cards");
+        cards.innerHTML = "";
+        (r.json.previews || []).forEach(p => {
+          const c = document.createElement("div");
+          c.className = "preview-card";
+          c.textContent = p.title;
+          cards.appendChild(c);
+        });
       });
 
-      document.getElementById('quality-btn').addEventListener('click', async () => {
-        if (!selectedPlatform) return alert('Select a platform');
-        let title = 'E2E';
-        let description = 'desc';
+      document.getElementById("quality-btn").addEventListener("click", async () => {
+        if (!selectedPlatform) return alert("Select a platform");
+        let title = "E2E";
+        let description = "desc";
         const platformOptions = {};
-        if (selectedPlatform === 'youtube') {
-          const ytTitle = document.getElementById('youtube-title');
-          const ytDesc = document.getElementById('youtube-description');
+        if (selectedPlatform === "youtube") {
+          const ytTitle = document.getElementById("youtube-title");
+          const ytDesc = document.getElementById("youtube-description");
           if (ytTitle && ytTitle.value) title = ytTitle.value;
           if (ytDesc && ytDesc.value) description = ytDesc.value;
         }
-        const payload = { title, description, type: 'video', platform: selectedPlatform, platform_options: platformOptions };
-        const r = await endpointCall('/api/content/quality-check', payload);
-        document.getElementById('quality-result').textContent = r.json.quality_score ? 'Score: '+r.json.quality_score : 'Error';
+        const payload = {
+          title,
+          description,
+          type: "video",
+          platform: selectedPlatform,
+          platform_options: platformOptions,
+        };
+        const r = await endpointCall("/api/content/quality-check", payload);
+        document.getElementById("quality-result").textContent = r.json.quality_score
+          ? "Score: " + r.json.quality_score
+          : "Error";
       });
 
-      document.getElementById('upload-btn').addEventListener('click', async () => {
-        if (!selectedPlatform) return alert('Select a platform');
-        let title = 'E2E';
-        let description = 'desc';
+      document.getElementById("upload-btn").addEventListener("click", async () => {
+        if (!selectedPlatform) return alert("Select a platform");
+        let title = "E2E";
+        let description = "desc";
         const platformOptions = {};
-        if (selectedPlatform === 'youtube') {
-          const ytTitle = document.getElementById('youtube-title');
-          const ytDesc = document.getElementById('youtube-description');
-          const ytVis = document.getElementById('youtube-visibility');
-          const ytShorts = document.getElementById('youtube-shorts');
+        if (selectedPlatform === "youtube") {
+          const ytTitle = document.getElementById("youtube-title");
+          const ytDesc = document.getElementById("youtube-description");
+          const ytVis = document.getElementById("youtube-visibility");
+          const ytShorts = document.getElementById("youtube-shorts");
           if (ytTitle && ytTitle.value) title = ytTitle.value;
           if (ytDesc && ytDesc.value) description = ytDesc.value;
-          platformOptions.youtube = { visibility: ytVis ? ytVis.value : 'public', shortsMode: ytShorts ? !!ytShorts.checked : false };
+          platformOptions.youtube = {
+            visibility: ytVis ? ytVis.value : "public",
+            shortsMode: ytShorts ? !!ytShorts.checked : false,
+          };
         }
-        const payload = { title, description, type: 'video', target_platforms: [selectedPlatform], platforms: [selectedPlatform], isDryRun: false, platform_options: platformOptions };
-        const r = await endpointCall('/api/content/upload', payload);
-        document.getElementById('upload-status').textContent = r.ok ? 'Upload submitted' : 'Upload failed';
+        const payload = {
+          title,
+          description,
+          type: "video",
+          target_platforms: [selectedPlatform],
+          platforms: [selectedPlatform],
+          isDryRun: false,
+          platform_options: platformOptions,
+        };
+        const r = await endpointCall("/api/content/upload", payload);
+        document.getElementById("upload-status").textContent = r.ok
+          ? "Upload submitted"
+          : "Upload failed";
       });
     </script>
   </body>

@@ -6,15 +6,15 @@ function getGrowthCoaching(userId, contentMetrics) {
   return {
     userId,
     tips: [
-      'Post at peak times for your audience.',
-      'Use trending hashtags and sounds.',
-      'Engage with comments quickly.',
-      'Try different content formats for variety.'
+      "Post at peak times for your audience.",
+      "Use trending hashtags and sounds.",
+      "Engage with comments quickly.",
+      "Try different content formats for variety.",
     ],
-    nextStep: 'Try a viral challenge for extra reach!'
+    nextStep: "Try a viral challenge for extra reach!",
   };
 }
 
 module.exports = {
-  getGrowthCoaching
+  getGrowthCoaching,
 };

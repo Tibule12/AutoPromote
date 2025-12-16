@@ -5,6 +5,7 @@ This document describes the expected structure of your Firestore data model used
 The app enforces a daily upload cap of 10 items per user (UTC day) and auto-schedules posting at platform-optimal windows if you don’t specify a time.
 
 ## 1) users (collection)
+
 - Document ID: Firebase Auth UID (string)
 - Fields:
   - email: string
@@ -16,6 +17,7 @@ The app enforces a daily upload cap of 10 items per user (UTC day) and auto-sche
   - dailyUploadCount: number (optional cache; source of truth is counting `content` for the current UTC day)
 
 ### Subcollection: connections
+
 - Path: users/{uid}/connections/{provider}
 - {provider} one of: 'tiktok' | 'facebook' | 'instagram' | 'youtube'
 - Fields (provider-specific):
@@ -36,6 +38,7 @@ The app enforces a daily upload cap of 10 items per user (UTC day) and auto-sche
       - display_name: string
 
 ## 2) content (collection)
+
 - Document ID: auto-generated
 - Fields:
   - user_id: string (UID)
@@ -66,11 +69,13 @@ The app enforces a daily upload cap of 10 items per user (UTC day) and auto-sche
   - quality_enhanced: boolean (optional)
 
 Indexes (recommended):
+
 - content by created_at desc
 - content where user_id == :uid order by created_at desc
 - Optional (may trigger index prompt): user_id == :uid AND created_at >= :startOfDayUTC (for daily upload cap)
 
 ## 3) promotion_schedules (collection)
+
 - Document ID: auto-generated
 - Fields:
   - contentId: string (ref: content doc id)
@@ -86,10 +91,12 @@ Indexes (recommended):
   - updated_at: Timestamp
 
 Indexes (recommended):
+
 - promotion_schedules where contentId in [:ids]
 - promotion_schedules where is_active == true order by start_time asc
 
 ## 4) analytics (collection)
+
 - Document ID: auto-generated
 - Fields:
   - content_id: string (ref)
@@ -98,9 +105,11 @@ Indexes (recommended):
   - metrics: object (views, likes, shares, comments, watchTime, etc.)
 
 Indexes (recommended):
+
 - analytics where content_id == :id order by metrics_updated_at desc
 
 ## 5) notifications (collection)
+
 - Document ID: auto-generated
 - Fields:
   - user_id: string
@@ -112,6 +121,7 @@ Indexes (recommended):
   - created_at: Timestamp
 
 ## 6) payouts (collection)
+
 - Document ID: auto-generated
 - Fields:
   - contentId: string
@@ -128,6 +138,7 @@ Indexes (recommended):
 ---
 
 ## 7) ab_tests (collection)
+
 - Document ID: auto-generated
 - Fields:
   - contentId: string (ref to `content`)
@@ -142,21 +153,24 @@ Indexes (recommended):
   - updatedAt: Timestamp
 
 Indexes (recommended):
+
 - ab_tests by contentId
 - ab_tests by status
 
-
 Daily upload cap:
+
 - The backend checks `content.where('user_id','==',uid).where('created_at','>=', startOfDayUTC)` and limits to max 10 per UTC day.
 - If Firestore prompts for an index, create the suggested composite index.
 
 Auto-scheduling windows (if you don’t specify a time):
+
 - YouTube: 15:00 UTC
 - TikTok: 19:00 UTC
 - Instagram: 11:00 UTC
 - Facebook: 09:00 UTC
 
 Quality checks:
+
 - Endpoint: POST /api/content/quality-check (multipart/form-data file="file")
 - The server analyzes with ffmpeg and, if needed, enhances to 1280x720, ~1.5 Mbps video, 128 kbps audio, returning a qualityScore and feedback.
 - Consider running a quick quality check before final upload for best results. If you pass `quality_score`, `quality_feedback`, and `quality_enhanced` in `/api/content/upload` body, they will be stored on the content document for auditing.

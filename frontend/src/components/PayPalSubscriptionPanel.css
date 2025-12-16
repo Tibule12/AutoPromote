@@ -68,7 +68,8 @@
   opacity: 0.9;
 }
 
-.billing-date, .expiry-date {
+.billing-date,
+.expiry-date {
   margin: 8px 0;
   opacity: 0.9;
 }

@@ -1,6 +1,6 @@
 /**
  * Application Configuration
- * 
+ *
  * This file centralizes all configuration settings for the application.
  * Use these constants instead of hardcoding URLs or settings.
  */
@@ -9,10 +9,10 @@
 // Prefer env var from Render; fallback to the deployed backend domain.
 // Prefer custom domain by default; environment variable can override per-deploy
 // Default to same-origin API when no env var is provided so front-end calls `/api/...` on the current host.
-export const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || "";
 
 // Public site URL used for user-facing pages (Terms, Privacy, etc.)
-export const PUBLIC_SITE_URL = process.env.REACT_APP_SITE_URL || 'https://autopromote.org';
+export const PUBLIC_SITE_URL = process.env.REACT_APP_SITE_URL || "https://autopromote.org";
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -26,16 +26,16 @@ export const API_ENDPOINTS = {
   CONTENT_UPLOAD: `${API_BASE_URL}/api/content/upload`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
   MY_SCHEDULES: `${API_BASE_URL}/api/content/my-promotion-schedules`,
-  
+
   // User endpoints
   USERS_ME: `${API_BASE_URL}/api/users/me`,
   USERS_NOTIFICATIONS: `${API_BASE_URL}/api/users/notifications`,
-  
+
   // Admin endpoints
   ADMIN_ANALYTICS: `${API_BASE_URL}/api/admin/analytics/overview`,
   ADMIN_PAYOUTS: `${API_BASE_URL}/api/monetization/admin/payouts`,
-  ADMIN_PAYOUT_PROCESS: (id) => `${API_BASE_URL}/api/monetization/admin/payouts/${id}/process`,
-  
+  ADMIN_PAYOUT_PROCESS: id => `${API_BASE_URL}/api/monetization/admin/payouts/${id}/process`,
+
   // TikTok endpoints
   TIKTOK_AUTH_START: `${API_BASE_URL}/api/tiktok/auth/start`,
   TIKTOK_STATUS: `${API_BASE_URL}/api/tiktok/status`,
@@ -67,13 +67,13 @@ export const API_ENDPOINTS = {
   SNAPCHAT_STATUS: `${API_BASE_URL}/api/snapchat/status`,
   SNAPCHAT_METADATA: `${API_BASE_URL}/api/snapchat/metadata`,
   SNAPCHAT_CREATIVE: `${API_BASE_URL}/api/snapchat/creative`,
-  SNAPCHAT_ANALYTICS: (creativeId) => `${API_BASE_URL}/api/snapchat/analytics/${creativeId}`,
+  SNAPCHAT_ANALYTICS: creativeId => `${API_BASE_URL}/api/snapchat/analytics/${creativeId}`,
 
   // Schedule actions (construct with ID)
-  SCHEDULE_PAUSE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/pause`,
-  SCHEDULE_RESUME: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/resume`,
-  SCHEDULE_RESCHEDULE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}/reschedule`,
-  SCHEDULE_DELETE: (id) => `${API_BASE_URL}/api/content/promotion-schedules/${id}`,
+  SCHEDULE_PAUSE: id => `${API_BASE_URL}/api/content/promotion-schedules/${id}/pause`,
+  SCHEDULE_RESUME: id => `${API_BASE_URL}/api/content/promotion-schedules/${id}/resume`,
+  SCHEDULE_RESCHEDULE: id => `${API_BASE_URL}/api/content/promotion-schedules/${id}/reschedule`,
+  SCHEDULE_DELETE: id => `${API_BASE_URL}/api/content/promotion-schedules/${id}`,
 
   // Health check
   HEALTH: `${API_BASE_URL}/api/health`,
@@ -126,22 +126,23 @@ export const API_ENDPOINTS = {
 
   // Platform aggregated status & user progress
   PLATFORM_STATUS: `${API_BASE_URL}/api/platform/status`,
-  PLATFORM_DISCONNECT: (platform) => `${API_BASE_URL}/api/platform/disconnect/${platform}`,
+  PLATFORM_DISCONNECT: platform => `${API_BASE_URL}/api/platform/disconnect/${platform}`,
   USER_PROGRESS: `${API_BASE_URL}/api/users/progress`,
 
   // Ads & Campaigns
   ADS: `${API_BASE_URL}/api/ads`,
-  AD_LAUNCH: (adId) => `${API_BASE_URL}/api/ads/${adId}/launch`,
-  AD_PAUSE: (adId) => `${API_BASE_URL}/api/ads/${adId}/pause`,
-  AD_RESUME: (adId) => `${API_BASE_URL}/api/ads/${adId}/resume`,
-  AD_ANALYTICS: (adId) => `${API_BASE_URL}/api/ads/${adId}/analytics`,
+  AD_LAUNCH: adId => `${API_BASE_URL}/api/ads/${adId}/launch`,
+  AD_PAUSE: adId => `${API_BASE_URL}/api/ads/${adId}/pause`,
+  AD_RESUME: adId => `${API_BASE_URL}/api/ads/${adId}/resume`,
+  AD_ANALYTICS: adId => `${API_BASE_URL}/api/ads/${adId}/analytics`,
 
   // PayPal Subscriptions
   PAYPAL_SUBSCRIPTIONS: `${API_BASE_URL}/api/paypal-subscriptions`,
   PAYPAL_SUBSCRIPTION_STATUS: `${API_BASE_URL}/api/paypal-subscriptions/status`,
   PAYPAL_SUBSCRIPTION_USAGE: `${API_BASE_URL}/api/paypal-subscriptions/usage`,
   PAYPAL_CREATE_SUBSCRIPTION: `${API_BASE_URL}/api/paypal-subscriptions/create`,
-  PAYPAL_CANCEL_SUBSCRIPTION: (subscriptionId) => `${API_BASE_URL}/api/paypal-subscriptions/${subscriptionId}/cancel`
+  PAYPAL_CANCEL_SUBSCRIPTION: subscriptionId =>
+    `${API_BASE_URL}/api/paypal-subscriptions/${subscriptionId}/cancel`,
 };
 
 // Firebase configuration
@@ -153,11 +154,11 @@ export const FIREBASE_CONFIG = {
 export const FEATURES = {
   ENABLE_STRIPE: false,
   ENABLE_ANALYTICS: true,
-  DEBUG_MODE: process.env.NODE_ENV === 'development'
+  DEBUG_MODE: process.env.NODE_ENV === "development",
 };
 
 // Default settings
 export const DEFAULTS = {
   CONTENT_PER_PAGE: 10,
-  AVATAR_URL: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+  AVATAR_URL: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
 };

@@ -6,11 +6,11 @@ function crossPostContent(content, platforms) {
   return platforms.map(platform => ({
     platform,
     contentId: content.id,
-    status: 'posted',
-    timestamp: new Date()
+    status: "posted",
+    timestamp: new Date(),
   }));
 }
 
 module.exports = {
-  crossPostContent
+  crossPostContent,
 };

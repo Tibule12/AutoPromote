@@ -1,6 +1,6 @@
 name: Functions Emulator Smoke Tests
 
-"on":
+on:
   workflow_dispatch: {}
   pull_request:
     types: [opened, synchronize, reopened]

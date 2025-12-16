@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import "./Auth.css";
-import { PUBLIC_SITE_URL } from './config';
+import { PUBLIC_SITE_URL } from "./config";
 
 const LoginForm = ({ onLogin, onClose }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -11,13 +11,16 @@ const LoginForm = ({ onLogin, onClose }) => {
   const [resetEmail, setResetEmail] = useState("");
   const [resetMsg, setResetMsg] = useState("");
 
-  const handleChange = useCallback((event) => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) setError("");
-  }, [error]);
+  const handleChange = useCallback(
+    event => {
+      const { name, value } = event.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+      if (error) setError("");
+    },
+    [error]
+  );
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async event => {
     event.preventDefault();
     setError("");
 
@@ -77,7 +80,7 @@ const LoginForm = ({ onLogin, onClose }) => {
     }
   };
 
-  const requestReset = async (event) => {
+  const requestReset = async event => {
     event.preventDefault();
     setResetMsg("");
 
@@ -88,11 +91,14 @@ const LoginForm = ({ onLogin, onClose }) => {
     }
 
     try {
-      const response = await fetch((process.env.REACT_APP_API_BASE || "") + "/api/auth/request-password-reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        (process.env.REACT_APP_API_BASE || "") + "/api/auth/request-password-reset",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
       const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
@@ -130,10 +136,18 @@ const LoginForm = ({ onLogin, onClose }) => {
             id="agreeTerms"
             type="checkbox"
             checked={agreed}
-            onChange={(event) => setAgreed(event.target.checked)}
+            onChange={event => setAgreed(event.target.checked)}
           />
           <label htmlFor="agreeTerms" className="form-label">
-            I agree to the <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">Terms of Service</a> and <a href={`${PUBLIC_SITE_URL}/privacy`} target="_blank" rel="noreferrer">Privacy Policy</a>.
+            I agree to the{" "}
+            <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href={`${PUBLIC_SITE_URL}/privacy`} target="_blank" rel="noreferrer">
+              Privacy Policy
+            </a>
+            .
           </label>
         </div>
 
@@ -153,9 +167,13 @@ const LoginForm = ({ onLogin, onClose }) => {
 
         <div className="form-group" style={{ marginTop: 8 }}>
           <small>
-            <a href="#" onClick={(event) => { event.preventDefault(); setResetRequested((prev) => !prev); }}>
+            <button
+              type="button"
+              onClick={() => setResetRequested(prev => !prev)}
+              className="link-like"
+            >
               {resetRequested ? "Hide password reset" : "Forgot password?"}
-            </a>
+            </button>
           </small>
         </div>
 
@@ -166,12 +184,19 @@ const LoginForm = ({ onLogin, onClose }) => {
               placeholder="Email for reset"
               className="form-input"
               value={resetEmail}
-              onChange={(event) => setResetEmail(event.target.value)}
+              onChange={event => setResetEmail(event.target.value)}
             />
-            <button type="button" className="auth-button" style={{ marginTop: 8 }} onClick={requestReset}>
+            <button
+              type="button"
+              className="auth-button"
+              style={{ marginTop: 8 }}
+              onClick={requestReset}
+            >
               Send Reset Email
             </button>
-            {resetMsg && <div style={{ marginTop: 6, fontSize: 12, color: "#1976d2" }}>{resetMsg}</div>}
+            {resetMsg && (
+              <div style={{ marginTop: 6, fontSize: 12, color: "#1976d2" }}>{resetMsg}</div>
+            )}
           </div>
         )}
 
@@ -186,9 +211,15 @@ const LoginForm = ({ onLogin, onClose }) => {
           )}
         </button>
 
-        <a href="#" onClick={(event) => { event.preventDefault(); if (onClose) onClose(); }} className="auth-link">
-          Don't have an account? Create one
-        </a>
+        <button
+          type="button"
+          onClick={() => {
+            if (onClose) onClose();
+          }}
+          className="auth-link"
+        >
+          Don&apos;t have an account? Create one
+        </button>
       </form>
     </div>
   );

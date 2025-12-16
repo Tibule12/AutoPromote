@@ -9,6 +9,7 @@ If you're experiencing 401 Unauthorized errors in your application, here are the
 JWT tokens rely on timestamps to validate token expiration. If your system clock is out of sync with the Firebase servers, token validation will fail.
 
 **Solution:**
+
 - Run the `sync-system-clock.bat` script we've created for you
 - This will synchronize your system clock with internet time servers
 - After synchronization, try logging in again
@@ -18,6 +19,7 @@ JWT tokens rely on timestamps to validate token expiration. If your system clock
 Your application may be using outdated or invalid Firebase credentials.
 
 **Solution:**
+
 - Generate new Firebase service account credentials from the Firebase console
 - Update your environment variables with the new credentials
 - Restart your backend server
@@ -27,6 +29,7 @@ Your application may be using outdated or invalid Firebase credentials.
 Firebase ID tokens expire after 1 hour by default.
 
 **Solution:**
+
 - Make sure your application refreshes tokens before they expire
 - Implement token refresh logic in your frontend
 
@@ -35,6 +38,7 @@ Firebase ID tokens expire after 1 hour by default.
 If your backend is not configured to accept requests from your frontend domain, authentication requests will fail.
 
 **Solution:**
+
 - Check that your backend CORS configuration includes your frontend domain
 - For GitHub Pages, make sure it allows `https://tibule12.github.io`
 
@@ -43,6 +47,7 @@ If your backend is not configured to accept requests from your frontend domain, 
 GitHub Pages hosts static content and cannot serve as an API backend.
 
 **Solution:**
+
 - Make sure all API requests go to your actual backend (`https://autopromote.onrender.com`)
 - Run the `fix-github-pages.js` script after each build
 

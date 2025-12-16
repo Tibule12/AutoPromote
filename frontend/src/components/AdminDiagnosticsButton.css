@@ -1,3 +1,21 @@
-.admin-diag-btn{background:#1976d2;color:#fff;border:0;padding:8px 10px;border-radius:6px;cursor:pointer}
-.admin-diag-btn:hover{opacity:.9}
-.admin-diag-panel{position:absolute;z-index:1000;background:#fff;border:1px solid #ddd;border-radius:8px;padding:6px;margin-top:6px;box-shadow:0 10px 30px rgba(0,0,0,0.1)}
+.admin-diag-btn {
+  background: #1976d2;
+  color: #fff;
+  border: 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.admin-diag-btn:hover {
+  opacity: 0.9;
+}
+.admin-diag-panel {
+  position: absolute;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 6px;
+  margin-top: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}

@@ -7,23 +7,24 @@
 //   2. CANONICAL_HOST (general site host)
 //   3. api.autopromote.org (default fallback for API/OAuth endpoints)
 
-const CANONICAL_HOST = process.env.CANONICAL_OAUTH_HOST || process.env.CANONICAL_HOST || 'api.autopromote.org';
+const CANONICAL_HOST =
+  process.env.CANONICAL_OAUTH_HOST || process.env.CANONICAL_HOST || "api.autopromote.org";
 
 function canonicalizeRedirect(input, opts = {}) {
-  const requiredPath = (opts && opts.requiredPath) || '/';
+  const requiredPath = (opts && opts.requiredPath) || "/";
   try {
-    if (!input || typeof input !== 'string') {
+    if (!input || typeof input !== "string") {
       return `https://${CANONICAL_HOST}${requiredPath}`;
     }
     const u = new URL(input);
     // Force https + canonical host
-    u.protocol = 'https:';
+    u.protocol = "https:";
     u.hostname = CANONICAL_HOST;
     // Enforce required path
     if (u.pathname !== requiredPath) {
       u.pathname = requiredPath;
       // Clear search to avoid stale params on path change
-      u.search = '';
+      u.search = "";
     }
     return u.toString();
   } catch (_) {

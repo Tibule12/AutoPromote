@@ -10,12 +10,12 @@ Make sure the Firebase client is properly initialized in your React application:
 
 ```javascript
 // firebaseConfig.js
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getStorage } from 'firebase/storage';
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 // Import the client config
-import { clientConfig } from './config/firebaseClient';
+import { clientConfig } from "./config/firebaseClient";
 
 // Initialize Firebase
 const app = initializeApp(clientConfig);
@@ -31,41 +31,41 @@ Create a LoginForm component that handles user authentication:
 
 ```javascript
 // LoginForm.js
-import React, { useState } from 'react';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import React, { useState } from "react";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 const LoginForm = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
       const auth = getAuth();
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       const idToken = await user.getIdToken();
-      
+
       // Call your backend with the token
-      const response = await fetch('https://autopromote.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("https://autopromote.onrender.com/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken, email }),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Server authentication failed');
+        throw new Error("Server authentication failed");
       }
-      
+
       const data = await response.json();
       onLogin({ ...data.user, token: idToken });
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -78,24 +78,19 @@ const LoginForm = ({ onLogin }) => {
       {error && <div className="error">{error}</div>}
       <div>
         <label>Email:</label>
-        <input 
-          type="email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          required 
-        />
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
       </div>
       <div>
         <label>Password:</label>
-        <input 
-          type="password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          required 
+        <input
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
         />
       </div>
       <button type="submit" disabled={loading}>
-        {loading ? 'Logging in...' : 'Login'}
+        {loading ? "Logging in..." : "Login"}
       </button>
     </form>
   );
@@ -110,10 +105,10 @@ Once authenticated, use the token for subsequent API requests:
 
 ```javascript
 // Example API call with authentication token
-const fetchUserProfile = async (token) => {
-  const response = await fetch('https://autopromote.onrender.com/api/users/profile', {
+const fetchUserProfile = async token => {
+  const response = await fetch("https://autopromote.onrender.com/api/users/profile", {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
   return response.json();
@@ -135,33 +130,33 @@ To create test users for Firebase Authentication:
 2. Or use the Firebase Admin SDK to programmatically create users:
 
 ```javascript
-const admin = require('firebase-admin');
+const admin = require("firebase-admin");
 
 async function createTestUser() {
   try {
     const userRecord = await admin.auth().createUser({
-      email: 'test@example.com',
-      password: 'password123',
-      displayName: 'Test User'
+      email: "test@example.com",
+      password: "password123",
+      displayName: "Test User",
     });
-    
-    console.log('Created test user:', userRecord.uid);
-    
+
+    console.log("Created test user:", userRecord.uid);
+
     // Add custom claims for admin role if needed
-    await admin.auth().setCustomUserClaims(userRecord.uid, { role: 'admin' });
-    
+    await admin.auth().setCustomUserClaims(userRecord.uid, { role: "admin" });
+
     // Add user to Firestore database
-    await admin.firestore().collection('users').doc(userRecord.uid).set({
-      email: 'test@example.com',
-      name: 'Test User',
-      role: 'admin',
+    await admin.firestore().collection("users").doc(userRecord.uid).set({
+      email: "test@example.com",
+      name: "Test User",
+      role: "admin",
       isAdmin: true,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
-    
-    console.log('Added user data to Firestore');
+
+    console.log("Added user data to Firestore");
   } catch (error) {
-    console.error('Error creating test user:', error);
+    console.error("Error creating test user:", error);
   }
 }
 

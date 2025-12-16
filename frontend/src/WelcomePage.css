@@ -2,7 +2,7 @@
 .new-welcome-root {
   min-height: 100vh;
   position: relative;
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: "Inter", Arial, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,16 +11,19 @@
 }
 .new-welcome-bg-gradient {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: linear-gradient(135deg, #6c4cf7 0%, #a084f7 60%, #f8f7ff 100%);
   z-index: 0;
 }
 .new-welcome-content {
   position: relative;
   z-index: 1;
-  background: rgba(255,255,255,0.98);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 36px;
-  box-shadow: 0 12px 48px rgba(79,47,247,0.18);
+  box-shadow: 0 12px 48px rgba(79, 47, 247, 0.18);
   padding: 3.2rem 2.2rem 2.7rem 2.2rem;
   max-width: 480px;
   width: 98vw;
@@ -42,7 +45,7 @@
   height: 90px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 4px 24px rgba(79,47,247,0.10);
+  box-shadow: 0 4px 24px rgba(79, 47, 247, 0.1);
   object-fit: contain;
 }
 .new-welcome-title {
@@ -83,8 +86,11 @@
   font-size: 1.18rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 16px rgba(79,47,247,0.12);
-  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 2px 16px rgba(79, 47, 247, 0.12);
+  transition:
+    background 0.2s,
+    box-shadow 0.2s,
+    transform 0.2s;
   outline: none;
   margin-bottom: 0.2rem;
   margin-top: 0.2rem;
@@ -92,12 +98,12 @@
 .new-welcome-btn.primary {
   background: linear-gradient(90deg, #4f2ff7 60%, #6c4cf7 100%);
   color: #fff;
-  box-shadow: 0 6px 24px rgba(79,47,247,0.18);
+  box-shadow: 0 6px 24px rgba(79, 47, 247, 0.18);
   transform: translateY(-2px) scale(1.04);
 }
 .new-welcome-btn:hover {
   background: #4f2ff7;
-  box-shadow: 0 8px 32px rgba(79,47,247,0.22);
+  box-shadow: 0 8px 32px rgba(79, 47, 247, 0.22);
   transform: translateY(-3px) scale(1.05);
 }
 .new-welcome-features {
@@ -111,7 +117,7 @@
 .feature-card {
   background: #f6f3ff;
   border-radius: 18px;
-  box-shadow: 0 4px 18px rgba(79,47,247,0.10);
+  box-shadow: 0 4px 18px rgba(79, 47, 247, 0.1);
   padding: 1.1rem 1.7rem;
   display: flex;
   align-items: center;

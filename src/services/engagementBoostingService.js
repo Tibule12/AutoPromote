@@ -2,7 +2,7 @@
 // AutoPromote Engagement Boosting System
 // Caption generators, viral sound matchers, A/B testing, retry boosts
 
-const { db } = require('../firebaseAdmin');
+const { db } = require("../firebaseAdmin");
 
 // Caption templates for different content types and viral hooks
 const CAPTION_TEMPLATES = {
@@ -16,7 +16,7 @@ const CAPTION_TEMPLATES = {
     "The most important video you'll watch today 📌",
     "I cried making this... emotional warning ⚠️",
     "This took me 3 months to figure out... now you know! 🧠",
-    "The real reason this works... science backed 💯"
+    "The real reason this works... science backed 💯",
   ],
   viral: [
     "POV: {scenario} 💭",
@@ -28,7 +28,7 @@ const CAPTION_TEMPLATES = {
     "Why {everyone} is wrong about {topic} 🤔",
     "{celebrity} would never admit this... but it's true! ⭐",
     "I tried {trend} for {duration}... here's what happened 📈",
-    "The {adjective} way to {action} 💫"
+    "The {adjective} way to {action} 💫",
   ],
   engagement: [
     "Comment your thoughts below! 👇",
@@ -40,34 +40,31 @@ const CAPTION_TEMPLATES = {
     "Share your story in the comments! 📝",
     "Who's trying this? 🙋‍♀️",
     "Rate this 1-10! ⭐",
-    "What's your favorite part? 🎯"
+    "What's your favorite part? 🎯",
   ],
   hashtags: {
-    trending: ['#fyp', '#viral', '#trending', '#explorepage', '#reels'],
-    niche: ['#lifehacks', '#motivation', '#success', '#mindset', '#growth'],
-    branded: ['#AutoPromoteBoosted', '#ViralGrowth', '#ContentThatConverts']
-  }
+    trending: ["#fyp", "#viral", "#trending", "#explorepage", "#reels"],
+    niche: ["#lifehacks", "#motivation", "#success", "#mindset", "#growth"],
+    branded: ["#AutoPromoteBoosted", "#ViralGrowth", "#ContentThatConverts"],
+  },
 };
 
 // Viral sound library (would be populated from trending data)
 const VIRAL_SOUND_LIBRARY = {
   tiktok: [
-    { id: 'trend1', name: 'Viral Dance Beat', category: 'dance', popularity: 95 },
-    { id: 'trend2', name: 'Emotional Piano', category: 'emotional', popularity: 88 },
-    { id: 'trend3', name: 'Comedy Sound', category: 'comedy', popularity: 92 },
-    { id: 'trend4', name: 'Motivational Beat', category: 'motivation', popularity: 85 }
+    { id: "trend1", name: "Viral Dance Beat", category: "dance", popularity: 95 },
+    { id: "trend2", name: "Emotional Piano", category: "emotional", popularity: 88 },
+    { id: "trend3", name: "Comedy Sound", category: "comedy", popularity: 92 },
+    { id: "trend4", name: "Motivational Beat", category: "motivation", popularity: 85 },
   ],
   instagram: [
-    { id: 'reel1', name: 'Trending Reels Sound', category: 'general', popularity: 90 },
-    { id: 'reel2', name: 'Story Sound', category: 'story', popularity: 78 }
-  ]
-  ,
-  linkedin: [
-    { id: 'li_001', name: 'Professional Voiceover', category: 'professional', popularity: 60 }
+    { id: "reel1", name: "Trending Reels Sound", category: "general", popularity: 90 },
+    { id: "reel2", name: "Story Sound", category: "story", popularity: 78 },
   ],
-  reddit: [
-    { id: 'rd_001', name: 'Discussion Audio', category: 'discussion', popularity: 40 }
-  ]
+  linkedin: [
+    { id: "li_001", name: "Professional Voiceover", category: "professional", popularity: 60 },
+  ],
+  reddit: [{ id: "rd_001", name: "Discussion Audio", category: "discussion", popularity: 40 }],
 };
 
 class EngagementBoostingService {
@@ -92,9 +89,9 @@ class EngagementBoostingService {
       hook,
       body,
       engagementBait,
-      wordCount: fullCaption.split(' ').length,
+      wordCount: fullCaption.split(" ").length,
       hashtags: this.generateCaptionHashtags(content, platform),
-      optimizationScore: this.calculateCaptionScore(fullCaption, platform)
+      optimizationScore: this.calculateCaptionScore(fullCaption, platform),
     };
   }
 
@@ -102,11 +99,19 @@ class EngagementBoostingService {
   selectHook(content, category) {
     const hooks = CAPTION_TEMPLATES.hooks;
     const categoryHooks = {
-      educational: hooks.filter(h => h.includes('learn') || h.includes('secret') || h.includes('important')),
-      emotional: hooks.filter(h => h.includes('cried') || h.includes('life') || h.includes('emotional')),
-      entertaining: hooks.filter(h => h.includes('believe') || h.includes('happens') || h.includes('blowing')),
-      motivational: hooks.filter(h => h.includes('changed') || h.includes('secret') || h.includes('works')),
-      general: hooks
+      educational: hooks.filter(
+        h => h.includes("learn") || h.includes("secret") || h.includes("important")
+      ),
+      emotional: hooks.filter(
+        h => h.includes("cried") || h.includes("life") || h.includes("emotional")
+      ),
+      entertaining: hooks.filter(
+        h => h.includes("believe") || h.includes("happens") || h.includes("blowing")
+      ),
+      motivational: hooks.filter(
+        h => h.includes("changed") || h.includes("secret") || h.includes("works")
+      ),
+      general: hooks,
     };
 
     const relevantHooks = categoryHooks[category] || categoryHooks.general;
@@ -120,37 +125,46 @@ class EngagementBoostingService {
 
     // Fill in template variables
     return template
-      .replace('{scenario}', content.scenario || 'you wake up tomorrow')
-      .replace('{blank}', content.blank || 'absolutely nothing')
-      .replace('{punchline}', content.punchline || 'viral content everywhere')
-      .replace('{common_situation}', content.situation || 'life is normal')
-      .replace('{twist}', content.twist || 'this happens')
-      .replace('{skill}', content.skill || 'go viral')
-      .replace('{timeframe}', content.timeframe || '24 hours')
-      .replace('{number}', content.number || '5')
-      .replace('{benefit}', content.benefit || 'grow your audience')
-      .replace('{amateur}', content.amateur || 'beginners')
-      .replace('{pro}', content.pro || 'experts')
-      .replace('{everyone}', content.everyone || 'people')
-      .replace('{topic}', content.topic || 'social media')
-      .replace('{celebrity}', content.celebrity || 'influencers')
-      .replace('{trend}', content.trend || 'this trend')
-      .replace('{duration}', content.duration || 'a week')
-      .replace('{adjective}', content.adjective || 'smart')
-      .replace('{action}', content.action || 'succeed');
+      .replace("{scenario}", content.scenario || "you wake up tomorrow")
+      .replace("{blank}", content.blank || "absolutely nothing")
+      .replace("{punchline}", content.punchline || "viral content everywhere")
+      .replace("{common_situation}", content.situation || "life is normal")
+      .replace("{twist}", content.twist || "this happens")
+      .replace("{skill}", content.skill || "go viral")
+      .replace("{timeframe}", content.timeframe || "24 hours")
+      .replace("{number}", content.number || "5")
+      .replace("{benefit}", content.benefit || "grow your audience")
+      .replace("{amateur}", content.amateur || "beginners")
+      .replace("{pro}", content.pro || "experts")
+      .replace("{everyone}", content.everyone || "people")
+      .replace("{topic}", content.topic || "social media")
+      .replace("{celebrity}", content.celebrity || "influencers")
+      .replace("{trend}", content.trend || "this trend")
+      .replace("{duration}", content.duration || "a week")
+      .replace("{adjective}", content.adjective || "smart")
+      .replace("{action}", content.action || "succeed");
   }
 
   // Generate engagement bait for platform
   generateEngagementBait(platform) {
     const baits = CAPTION_TEMPLATES.engagement;
     const platformBaits = {
-      tiktok: baits.filter(b => b.includes('comment') || b.includes('tag') || b.includes('save')),
-      instagram: baits.filter(b => b.includes('save') || b.includes('tag') || b.includes('story')),
-      youtube: baits.filter(b => b.includes('like') || b.includes('subscribe') || b.includes('comment')),
-      twitter: baits.filter(b => b.includes('retweet') || b.includes('reply') || b.includes('like'))
-      ,
-      linkedin: baits.filter(b => b.includes('share') || b.toLowerCase().includes('share to') || b.includes('follow')),
-      reddit: ["Upvote if you agree", "Explain why in the comments", "This belongs in the community discussion"]
+      tiktok: baits.filter(b => b.includes("comment") || b.includes("tag") || b.includes("save")),
+      instagram: baits.filter(b => b.includes("save") || b.includes("tag") || b.includes("story")),
+      youtube: baits.filter(
+        b => b.includes("like") || b.includes("subscribe") || b.includes("comment")
+      ),
+      twitter: baits.filter(
+        b => b.includes("retweet") || b.includes("reply") || b.includes("like")
+      ),
+      linkedin: baits.filter(
+        b => b.includes("share") || b.toLowerCase().includes("share to") || b.includes("follow")
+      ),
+      reddit: [
+        "Upvote if you agree",
+        "Explain why in the comments",
+        "This belongs in the community discussion",
+      ],
     };
 
     const relevantBaits = platformBaits[platform] || baits;
@@ -163,10 +177,9 @@ class EngagementBoostingService {
       tiktok: `${hook}\n\n${body}\n\n${engagementBait}`,
       instagram: `${hook}\n\n${body}\n\n${engagementBait}`,
       youtube: `${hook}\n\n${body}\n\n${engagementBait}\n\n#viral #trending`,
-      twitter: `${hook} ${body} ${engagementBait}`
-      ,
+      twitter: `${hook} ${body} ${engagementBait}`,
       linkedin: `${hook}\n\n${body}\n\n${engagementBait}`,
-      reddit: `${body}\n\n${engagementBait}`
+      reddit: `${body}\n\n${engagementBait}`,
     };
 
     return formats[platform] || `${hook}\n\n${body}\n\n${engagementBait}`;
@@ -175,8 +188,8 @@ class EngagementBoostingService {
   // Generate hashtags for caption
   generateCaptionHashtags(content, platform) {
     const trending = CAPTION_TEMPLATES.hashtags.trending;
-    const niche = CAPTION_TEMPLATES.hashtags.niche.filter(tag =>
-      content.category && tag.toLowerCase().includes(content.category.toLowerCase())
+    const niche = CAPTION_TEMPLATES.hashtags.niche.filter(
+      tag => content.category && tag.toLowerCase().includes(content.category.toLowerCase())
     );
     const branded = CAPTION_TEMPLATES.hashtags.branded;
 
@@ -195,16 +208,24 @@ class EngagementBoostingService {
     let score = 50; // Base score
 
     // Length optimization
-    const wordCount = caption.split(' ').length;
-    const optimalLengths = { tiktok: [10, 25], instagram: [15, 30], youtube: [20, 40], twitter: [5, 15], linkedin: [20, 60], reddit: [20, 400] };
+    const wordCount = caption.split(" ").length;
+    const optimalLengths = {
+      tiktok: [10, 25],
+      instagram: [15, 30],
+      youtube: [20, 40],
+      twitter: [5, 15],
+      linkedin: [20, 60],
+      reddit: [20, 400],
+    };
     const [min, max] = optimalLengths[platform] || [10, 25];
     if (wordCount >= min && wordCount <= max) score += 20;
 
     // Hook presence
-    if (caption.includes('!') || caption.includes('?') || caption.includes('...')) score += 15;
+    if (caption.includes("!") || caption.includes("?") || caption.includes("...")) score += 15;
 
     // Engagement bait
-    if (caption.includes('comment') || caption.includes('tag') || caption.includes('save')) score += 10;
+    if (caption.includes("comment") || caption.includes("tag") || caption.includes("save"))
+      score += 10;
 
     // Hashtags
     const hashtagCount = (caption.match(/#/g) || []).length;
@@ -219,8 +240,8 @@ class EngagementBoostingService {
     if (!sounds.length) return null;
 
     // Match by content category
-    const categoryMatches = sounds.filter(sound =>
-      content.category && sound.category === content.category
+    const categoryMatches = sounds.filter(
+      sound => content.category && sound.category === content.category
     );
 
     // Fallback to most popular
@@ -242,21 +263,21 @@ class EngagementBoostingService {
         variations: variations.map((v, i) => ({
           id: `v${i + 1}`,
           ...v,
-          metrics: { views: 0, engagements: 0, clicks: 0 }
+          metrics: { views: 0, engagements: 0, clicks: 0 },
         })),
         duration, // hours
         startTime: new Date().toISOString(),
         endTime: new Date(Date.now() + duration * 60 * 60 * 1000).toISOString(),
-        status: 'active',
-        winner: null
+        status: "active",
+        winner: null,
       };
 
       // Store in database
-      await db.collection('ab_tests').doc(testId).set(abTest);
+      await db.collection("ab_tests").doc(testId).set(abTest);
 
       return abTest;
     } catch (error) {
-      console.error('Error creating A/B test:', error);
+      console.error("Error creating A/B test:", error);
       throw error;
     }
   }
@@ -264,15 +285,15 @@ class EngagementBoostingService {
   // Get A/B test results
   async getABTestResults(testId) {
     try {
-      const testDoc = await db.collection('ab_tests').doc(testId).get();
-      if (!testDoc.exists) throw new Error('A/B test not found');
+      const testDoc = await db.collection("ab_tests").doc(testId).get();
+      if (!testDoc.exists) throw new Error("A/B test not found");
 
       const test = testDoc.data();
 
       // Calculate winner based on engagement rate
       const variations = test.variations.map(v => ({
         ...v,
-        engagementRate: v.metrics.views > 0 ? v.metrics.engagements / v.metrics.views : 0
+        engagementRate: v.metrics.views > 0 ? v.metrics.engagements / v.metrics.views : 0,
       }));
 
       const winner = variations.reduce((best, current) =>
@@ -285,10 +306,10 @@ class EngagementBoostingService {
         variations,
         winner: winner.id,
         confidence: this.calculateTestConfidence(variations),
-        endTime: test.endTime
+        endTime: test.endTime,
       };
     } catch (error) {
-      console.error('Error getting A/B test results:', error);
+      console.error("Error getting A/B test results:", error);
       throw error;
     }
   }
@@ -315,8 +336,8 @@ class EngagementBoostingService {
   // Check if content needs retry boost
   async checkRetryEligibility(contentId) {
     try {
-      const contentDoc = await db.collection('content').doc(contentId).get();
-      if (!contentDoc.exists) throw new Error('Content not found');
+      const contentDoc = await db.collection("content").doc(contentId).get();
+      if (!contentDoc.exists) throw new Error("Content not found");
 
       const content = contentDoc.data();
       const metrics = content.metrics || {};
@@ -326,14 +347,14 @@ class EngagementBoostingService {
         tiktok: { views: 20000, engagements: 1000 },
         instagram: { views: 15000, engagements: 800 },
         youtube: { views: 10000, engagements: 500 },
-        twitter: { views: 5000, engagements: 200 }
+        twitter: { views: 5000, engagements: 200 },
       };
 
-      const platform = content.target_platforms?.[0] || 'tiktok';
+      const platform = content.target_platforms?.[0] || "tiktok";
       const threshold = thresholds[platform] || thresholds.tiktok;
 
-      const needsRetry = metrics.views < threshold.views ||
-                        metrics.engagements < threshold.engagements;
+      const needsRetry =
+        metrics.views < threshold.views || metrics.engagements < threshold.engagements;
 
       return {
         contentId,
@@ -341,10 +362,10 @@ class EngagementBoostingService {
         currentMetrics: metrics,
         thresholds: threshold,
         platform,
-        retryReason: needsRetry ? this.getRetryReason(metrics, threshold) : null
+        retryReason: needsRetry ? this.getRetryReason(metrics, threshold) : null,
       };
     } catch (error) {
-      console.error('Error checking retry eligibility:', error);
+      console.error("Error checking retry eligibility:", error);
       throw error;
     }
   }
@@ -357,7 +378,7 @@ class EngagementBoostingService {
     if (metrics.engagements < threshold.engagements) {
       return `Engagements (${metrics.engagements}) below threshold (${threshold.engagements})`;
     }
-    return 'Performance below growth guarantee';
+    return "Performance below growth guarantee";
   }
 
   // Schedule retry boost
@@ -365,7 +386,7 @@ class EngagementBoostingService {
     try {
       const eligibility = await this.checkRetryEligibility(contentId);
       if (!eligibility.needsRetry) {
-        throw new Error('Content does not qualify for retry boost');
+        throw new Error("Content does not qualify for retry boost");
       }
 
       const retryBoost = {
@@ -377,18 +398,19 @@ class EngagementBoostingService {
           newHashtags: retryStrategy.newHashtags || true,
           newTiming: retryStrategy.newTiming || true,
           newThumbnail: retryStrategy.newThumbnail || false,
-          ...retryStrategy
+          ...retryStrategy,
         },
-        scheduledTime: retryStrategy.scheduledTime || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours later
-        status: 'scheduled',
-        createdAt: new Date().toISOString()
+        scheduledTime:
+          retryStrategy.scheduledTime || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours later
+        status: "scheduled",
+        createdAt: new Date().toISOString(),
       };
 
-      await db.collection('retry_boosts').doc(retryBoost.retryId).set(retryBoost);
+      await db.collection("retry_boosts").doc(retryBoost.retryId).set(retryBoost);
 
       return retryBoost;
     } catch (error) {
-      console.error('Error scheduling retry boost:', error);
+      console.error("Error scheduling retry boost:", error);
       throw error;
     }
   }
@@ -401,22 +423,22 @@ class EngagementBoostingService {
         "This {concept} changed everything for me...",
         "What {industry} gets wrong about {topic}...",
         "The {number} step process that actually works...",
-        "Why {common_belief} is completely wrong..."
+        "Why {common_belief} is completely wrong...",
       ],
       entertaining: [
         "I tried {activity} for {time}... here's what happened!",
         "POV: You're {scenario} 💭",
         "When {normal_thing} goes {unexpected} 😱",
         "Nobody: {nothing}\nMe: {everything} 😂",
-        "The most {adjective} {thing} ever created..."
+        "The most {adjective} {thing} ever created...",
       ],
       motivational: [
         "How I went from {starting_point} to {ending_point}...",
         "The {one_thing} that changed my entire life...",
         "Why {successful_people} all do this one thing...",
         "The mindset shift that brought me {result}...",
-        "Stop {bad_habit} and start {good_habit}..."
-      ]
+        "Stop {bad_habit} and start {good_habit}...",
+      ],
     };
 
     const typeTemplates = templates[contentType] || templates.entertaining;
