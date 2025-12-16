@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-restricted-syntax */
 const { test, expect } = require("@playwright/test");
 const fs = require("fs");
 const path = require("path");
@@ -117,6 +118,11 @@ test("SPA: Record TikTok direct post flow (mocked backend)", async ({ page }) =>
   // Consent element
   if ((await page.$("#tiktok-consent")) !== null) await page.check("#tiktok-consent");
 
+  // Ensure creator nickname is visible so users know which account they are posting with
+  await page.waitForSelector('[data-testid="creator-badge"]', { timeout: 10000 });
+  const creatorText = await page.locator('[data-testid="creator-badge"]').innerText();
+  expect(creatorText).toContain("Posting as");
+
   // Attach demo video prepared in repository
   const demoVideo = path.resolve(__dirname, "test-assets/test.mp4");
   await page.setInputFiles("#content-file-input", demoVideo);
@@ -182,14 +188,15 @@ test("SPA: Record TikTok direct post flow (mocked backend)", async ({ page }) =>
   if (fs.existsSync(convertScript)) {
     // Use child_process to invoke conversion script synchronously
     const cp = require("child_process");
+    let res;
     try {
-      const res = cp.spawnSync("node", [convertScript], { stdio: "inherit" });
-      if (res.status !== 0)
+      res = cp.spawnSync("node", [convertScript], { stdio: "inherit" });
+      if (res && res.status !== 0)
         console.warn(
           "Conversion script exited non-zero; you can re-run `npm run convert-recording` to convert the saved webm."
         );
     } catch (e) {
-      console.warn("Conversion script failed to run:", e.message);
+      console.warn("Conversion script failed to run:", e && e.message);
     }
   }
 

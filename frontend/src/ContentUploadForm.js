@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
+/* eslint-env browser, es6 */
 import React, { useState, useRef, useEffect } from "react";
 import "./ContentUploadForm.css";
 import { storage, auth } from "./firebaseClient";
@@ -1322,6 +1323,25 @@ function ContentUploadForm({
         </h3>
 
         <DraftManager onLoadDraft={handleLoadDraft} currentDraft={getCurrentDraft()} />
+
+        {/* Show which creator/account will be used for platform uploads (e.g., TikTok nickname) */}
+        {(() => {
+          const currentUser = auth && auth.currentUser;
+          const creatorName =
+            tiktokCreatorInfo && (tiktokCreatorInfo.display_name || tiktokCreatorInfo.open_id)
+              ? tiktokCreatorInfo.display_name || tiktokCreatorInfo.open_id
+              : currentUser
+                ? currentUser.displayName || currentUser.email || currentUser.uid
+                : null;
+          return (
+            creatorName && (
+              <div className="creator-badge" data-testid="creator-badge">
+                <span style={{ opacity: 0.9 }}>👤 Posting as</span>
+                <strong style={{ marginLeft: 8 }}>{escapeHtml(creatorName)}</strong>
+              </div>
+            )
+          );
+        })()}
 
         {error && <div className="error-message">{error}</div>}
 

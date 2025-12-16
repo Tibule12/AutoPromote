@@ -777,6 +777,54 @@
   }
 }
 
+/* Fix: ensure right-column panels (eg. TikTok options, platform tiles)
+   stay visually inside the main form and don't overflow when embedded
+   in the dashboard (dark mode). */
+.right-column .form-group,
+.right-column .platform-grid,
+.right-column .tiktok-options {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 12px;
+}
+
+.tiktok-options {
+  /* keep default visual appearance but ensure containment */
+  background: #fbfbfc;
+  border: 1px solid #efeef0;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* When the form is embedded in dark dashboard mode, make option panels
+   match the dark style so they feel like part of the same card. */
+.dashboard-mode .tiktok-options {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: inherit;
+}
+
+/* Creator badge */
+.creator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  color: #111827;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  margin: 8px 0 12px 0;
+  border: 1px solid rgba(17,24,39,0.04);
+}
+
+.dashboard-mode .creator-badge {
+  background: rgba(255,255,255,0.03);
+  color: #eef2ff;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
 .preview-area {
   background: #f9fafb;
   border-radius: 12px;
@@ -798,6 +846,91 @@
   max-height: 400px;
   object-fit: contain;
   border-radius: 12px;
+}
+
+/* Upload history: make cards and thumbnails smaller and friendlier */
+.content-grid {
+  display: grid !important;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.content-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 8px;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  overflow: hidden;
+  min-height: 140px;
+}
+
+.content-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+
+.content-card img,
+.content-card video {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.content-card h5 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.content-card p {
+  font-size: 0.85rem;
+  color: #9aa4b2;
+  margin: 0.25rem 0;
+}
+
+.content-card .meta-row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  align-items: center;
+}
+
+/* Small play icon overlay for video thumbnails */
+.content-card > div > div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.6);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+  .content-card img,
+  .content-card video {
+    height: 100px;
+  }
+  .content-card {
+    padding: 6px;
+    min-height: 120px;
+  }
 }
 
 .preview-overlay {

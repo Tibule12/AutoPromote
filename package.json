@@ -91,7 +91,11 @@
     ]
   },
   "lint-staged": {
-    "**/*.{js,jsx}": [
+    "frontend/**/*.{js,jsx}": [
+      "prettier --write",
+      "npm --prefix frontend run lint -- --fix"
+    ],
+    "src/**/*.{js,jsx}": [
       "prettier --write",
       "eslint --fix"
     ],
