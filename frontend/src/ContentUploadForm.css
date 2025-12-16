@@ -1170,27 +1170,29 @@
   }
 }
 
-/* Dashboard page override: keep the upload form visually stable (centered-ish) to prevent
-   wide layout shifts when form content (like selected files) changes. Use a fixed side-column
-   width so selecting files doesn't change the overall layout unexpectedly. */
+/* Dashboard page override: when embedded in the dashboard keep the form full-width so it
+   lines up with the dashboard columns and doesn't center itself (which caused a large
+   blank area in the middle). */
 .upload-panel .content-upload-container {
-  max-width: 1200px; /* cap width for stable layout */
-  margin: 0 auto;
+  max-width: none; /* allow it to expand to the parent's width */
+  margin: 0; /* remove centering */
   width: 100%;
-  padding: 0 16px;
+  padding: 0 12px; /* small inset for breathing room */
 }
 
-/* Use a predictable right column width to avoid layout reflow when content changes */
+/* Use a predictable column layout that doesn't collapse when content grows.
+   left column uses minmax(0, 1fr) to prevent overflow issues and allow shrinkage. */
 @media (min-width: 1024px) {
   .content-upload-grid {
-    grid-template-columns: 1fr minmax(280px, 360px);
+    grid-template-columns: minmax(0, 1fr) 360px;
     gap: 24px;
   }
   .right-column {
-    min-width: 280px;
+    width: 360px;
+    flex: 0 0 360px;
   }
   .left-column {
-    min-width: 360px;
+    min-width: 0; /* allow the left column to shrink properly */
   }
 }
 
@@ -1206,6 +1208,7 @@
 .file-info {
   white-space: normal;
   word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* Smooth scroll behavior */
