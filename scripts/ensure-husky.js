@@ -19,11 +19,27 @@ if (!hasHusky()) {
   process.exit(0);
 }
 
-console.log("Husky found; running `npx husky install` in", projectRoot);
-const res = spawnSync("npx", ["husky", "install"], { stdio: "inherit", cwd: projectRoot });
-if (res.status !== 0) {
-  console.error("husky install failed with code", res.status);
-  process.exit(res.status || 1);
+console.log("Husky found; attempting to run `npx husky install` in", projectRoot);
+try {
+  const res = spawnSync("npx", ["husky", "install"], {
+    stdio: "inherit",
+    cwd: projectRoot,
+    shell: true,
+  });
+  if (res && res.status === 0) {
+    console.log("husky install complete.");
+  } else {
+    console.warn(
+      "husky install failed or exited non-zero; continuing without husky. status=",
+      res && res.status
+    );
+  }
+} catch (e) {
+  console.warn(
+    "Error running husky install; continuing without husky.",
+    e && e.message ? e.message : e
+  );
 }
 
-console.log("husky install complete.");
+// Don't fail prepare when husky cannot be installed (e.g., devDependencies not present in subfolder installs)
+process.exit(0);
