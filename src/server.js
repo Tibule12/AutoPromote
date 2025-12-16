@@ -1993,6 +1993,7 @@ try {
   let __healthCache = { ts: 0, data: null };
   const HEALTH_CACHE_MS = parseInt(process.env.HEALTH_CACHE_MS || "15000", 10); // 15s default
   app.get("/api/health", statusPublicLimiter, async (req, res) => {
+    const startMs = Date.now();
     const verbose =
       req.query.verbose === "1" ||
       req.query.full === "1" ||
@@ -2003,9 +2004,27 @@ try {
       timestamp: new Date().toISOString(),
       uptimeSec: Math.round(process.uptime()),
     };
-    if (!verbose) return res.json(base);
+    if (!verbose) {
+      const total = Date.now() - startMs;
+      if (total > 500)
+        console.warn(
+          "[health][slow] took=%dms ip=%s path=%s",
+          total,
+          req.ip || req.headers["x-forwarded-for"] || "unknown",
+          req.originalUrl || req.url
+        );
+      return res.json(base);
+    }
     const now = Date.now();
     if (__healthCache.data && now - __healthCache.ts < HEALTH_CACHE_MS) {
+      const total = Date.now() - startMs;
+      if (total > 500)
+        console.warn(
+          "[health][slow-cache] took=%dms ip=%s path=%s",
+          total,
+          req.ip || req.headers["x-forwarded-for"] || "unknown",
+          req.originalUrl || req.url
+        );
       return res.json(__healthCache.data);
     }
     const extended = { ...base, diagnostics: {} };
