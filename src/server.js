@@ -1992,6 +1992,25 @@ try {
   // Cache extended diagnostics to avoid repeated heavy Firestore queries.
   let __healthCache = { ts: 0, data: null };
   const HEALTH_CACHE_MS = parseInt(process.env.HEALTH_CACHE_MS || "15000", 10); // 15s default
+
+  // Event loop delay monitoring (node >= 12.17)
+  try {
+    const { monitorEventLoopDelay } = require("perf_hooks");
+    const eld = monitorEventLoopDelay({ resolution: 20 });
+    eld.enable();
+    setInterval(() => {
+      const mean = Math.round(eld.mean / 1e6); // ms
+      const max = Math.round(eld.max / 1e6);
+      if (mean > 50 || max > 200) {
+        console.warn("[perf][event-loop] mean=%dms max=%dms", mean, max);
+      }
+      // reset stats to avoid unbounded memory
+      eld.reset();
+    }, 15_000);
+  } catch (e) {
+    // ignore if perf_hooks not available
+  }
+
   app.get("/api/health", statusPublicLimiter, async (req, res) => {
     const startMs = Date.now();
     const verbose =

@@ -6,6 +6,7 @@ const router = express.Router();
 const { admin, db } = require("../firebaseAdmin");
 const { runIntegrationChecks, performRemediation } = require("../services/healthRunner");
 const authMiddleware = require("../authMiddleware");
+const diag = require("../diagnostics");
 
 /**
  * GET /api/diagnostics/health
@@ -49,6 +50,16 @@ router.get("/health", authMiddleware, async (req, res) => {
 
     // 10. Rate Limiting Check
     diagnostics.checks.rate_limiting = checkRateLimiting();
+
+    // 11. Quick auth failure summary (in-memory counters)
+    try {
+      diagnostics.checks.auth = {
+        status: "ok",
+        summary: diag.snapshot(),
+      };
+    } catch (e) {
+      diagnostics.checks.auth = { status: "warning", error: "failed to read auth diagnostics" };
+    }
 
     // Calculate overall status
     const allChecks = Object.values(diagnostics.checks);
@@ -159,15 +170,13 @@ router.post("/scans/:id/remediate", authMiddleware, async (req, res) => {
       }
     }
     // Save remediation results into a dedicated collection
-    await db
-      .collection("system_scans_remediation")
-      .add({
-        scanId: id,
-        applied,
-        failed,
-        by: req.userId || req.user.uid,
-        at: new Date().toISOString(),
-      });
+    await db.collection("system_scans_remediation").add({
+      scanId: id,
+      applied,
+      failed,
+      by: req.userId || req.user.uid,
+      at: new Date().toISOString(),
+    });
     res.json({ success: true, applied, failed });
   } catch (e) {
     console.error("[Diagnostics] Remediation error:", e);
