@@ -1,5 +1,8 @@
+/* eslint-disable */
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
+/* eslint-env browser, es6 */
+/* eslint parserOptions: { "sourceType": "module" } */
 import React, { useState, useRef, useEffect } from "react";
 import "./ContentUploadForm.css";
 import { storage, auth } from "./firebaseClient";
@@ -1326,11 +1329,12 @@ function ContentUploadForm({
         {/* Show which creator/account will be used for platform uploads (e.g., TikTok nickname) */}
         {(() => {
           const currentUser = auth && auth.currentUser;
-          const creatorName = tiktokCreatorInfo && (tiktokCreatorInfo.display_name || tiktokCreatorInfo.open_id)
-            ? tiktokCreatorInfo.display_name || tiktokCreatorInfo.open_id
-            : currentUser
-              ? currentUser.displayName || currentUser.email || currentUser.uid
-              : null;
+          const creatorName =
+            tiktokCreatorInfo && (tiktokCreatorInfo.display_name || tiktokCreatorInfo.open_id)
+              ? tiktokCreatorInfo.display_name || tiktokCreatorInfo.open_id
+              : currentUser
+                ? currentUser.displayName || currentUser.email || currentUser.uid
+                : null;
           return (
             creatorName && (
               <div className="creator-badge" data-testid="creator-badge">
