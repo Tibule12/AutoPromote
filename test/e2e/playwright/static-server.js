@@ -3,8 +3,10 @@ const path = require("path");
 const app = express();
 const port = process.env.STATIC_SERVER_PORT || 5000;
 // Avoid starting multiple servers when tests `require` this module repeatedly
+let __staticServerReady;
 if (global.__STATIC_SERVER_STARTED) {
   console.log("Static server already started; skipping");
+  __staticServerReady = Promise.resolve();
 } else {
   global.__STATIC_SERVER_STARTED = true;
 
@@ -40,13 +42,35 @@ if (global.__STATIC_SERVER_STARTED) {
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../../../frontend/build/index.html"));
   });
-  try {
-    app.listen(port, () => console.log("Static server started on port", port));
-  } catch (err) {
-    if (err && err.code === "EADDRINUSE") {
-      console.log("Static server port already in use; assuming an existing server is running");
-    } else {
-      throw err;
-    }
-  }
+
+  __staticServerReady = new Promise((resolve, reject) => {
+    // Start server and handle errors like EADDRINUSE (can't catch via try/catch)
+    const server = app.listen(port);
+    server.on("listening", () => {
+      const p = server.address().port;
+      console.log("Static server started on port", p);
+      process.env.E2E_BASE_URL = `http://localhost:${p}`;
+      resolve();
+    });
+    server.on("error", err => {
+      if (err && err.code === "EADDRINUSE") {
+        console.log("Static server port already in use; attempting to bind to an ephemeral port");
+        const fallback = app.listen(0);
+        fallback.on("listening", () => {
+          const p = fallback.address().port;
+          console.log("Static server started on ephemeral port", p);
+          process.env.E2E_BASE_URL = `http://localhost:${p}`;
+          resolve();
+        });
+        fallback.on("error", e => {
+          console.error("Failed to start static server on fallback port", e);
+          reject(e);
+        });
+      } else {
+        reject(err);
+      }
+    });
+  });
 }
+
+module.exports = __staticServerReady;
