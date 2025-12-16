@@ -41,6 +41,11 @@ async function main() {
     process.exit(2);
   }
 
+  // Parse optional CLI args for quality overrides
+  const argv = require("minimist")(process.argv.slice(2));
+  const preset = argv.preset || argv.p || "veryfast";
+  const crf = argv.crf || argv.c || 23;
+
   // Attempt to use bundled ffmpeg (ffmpeg-static) if available
   let ffmpegPath;
   try {
@@ -59,7 +64,7 @@ async function main() {
   const outName = `tiktok_direct_post_${Date.now()}.mp4`;
   const outPath = path.join(downloads, outName);
 
-  console.log("Converting", webm, "->", outPath);
+  console.log("Converting", webm, "->", outPath, "preset=", preset, "crf=", crf);
 
   const args = [
     "-y",
@@ -68,9 +73,9 @@ async function main() {
     "-c:v",
     "libx264",
     "-preset",
-    "veryfast",
+    String(preset),
     "-crf",
-    "23",
+    String(crf),
     "-c:a",
     "aac",
     "-b:a",
