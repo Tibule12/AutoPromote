@@ -14,10 +14,30 @@ const authMiddleware = async (req, res, next) => {
 
     // Instrumentation: record a small request context for diagnostics
     const requestContext = {
-      ip: req.ip || req.headers["x-forwarded-for"] || req.connection?.remoteAddress || "unknown",
+      ip:
+        req.ip ||
+        (req.headers && (req.headers["x-forwarded-for"] || req.headers["x-real-ip"])) ||
+        req.connection?.remoteAddress ||
+        "unknown",
       origin: req.headers.origin || req.headers.referer || null,
       path: req.originalUrl || req.url,
     };
+
+    // Fast block: if IP is blocked, return 429 immediately to reduce load
+    try {
+      if (diag.isBlocked(requestContext.ip)) {
+        console.warn(
+          "[auth][blocked_request] ip=%s path=%s",
+          requestContext.ip,
+          requestContext.path
+        );
+        return res
+          .status(429)
+          .json({ error: "Temporarily blocked due to repeated invalid auth attempts" });
+      }
+    } catch (e) {
+      // don't fail request on diag errors
+    }
 
     // Allow integration test bypass with test tokens of the form 'test-token-for-{uid}'
     if (typeof token === "string" && token.startsWith("test-token-for-")) {
@@ -55,15 +75,19 @@ const authMiddleware = async (req, res, next) => {
       );
     if (!token) {
       diag.incAuthFail("no_token", requestContext.ip);
-      // If an IP is generating many unauthenticated requests, throttle to reduce load
-      if (diag.getIpCount(requestContext.ip) > 80) {
+      // If an IP is generating many unauthenticated requests, block to reduce load
+      const ipCount = diag.getIpCount(requestContext.ip);
+      if (ipCount > 50 && !diag.isBlocked(requestContext.ip)) {
+        diag.blockIp(requestContext.ip, 10 * 60 * 1000); // block 10 minutes
         console.warn(
-          "[auth][throttle_no_token] ip=%s path=%s count=%d",
+          "[auth][auto_block_no_token] ip=%s path=%s count=%d",
           requestContext.ip,
           requestContext.path,
-          diag.getIpCount(requestContext.ip)
+          ipCount
         );
-        return res.status(429).json({ error: "Rate limit exceeded" });
+        return res
+          .status(429)
+          .json({ error: "Temporarily blocked due to repeated invalid auth attempts" });
       }
       console.warn(
         "[auth][no_token] ip=%s origin=%s path=%s",
@@ -109,6 +133,20 @@ const authMiddleware = async (req, res, next) => {
       decodedToken = await admin.auth().verifyIdToken(token);
     } catch (verifyErr) {
       diag.incAuthFail("verify_error", requestContext.ip);
+      // If many verify errors from same IP, escalate to blocking
+      const ipCount = diag.getIpCount(requestContext.ip);
+      if (ipCount > 80 && !diag.isBlocked(requestContext.ip)) {
+        diag.blockIp(requestContext.ip, 10 * 60 * 1000);
+        console.warn(
+          "[auth][auto_block_verify_error] ip=%s path=%s count=%d",
+          requestContext.ip,
+          requestContext.path,
+          ipCount
+        );
+        return res
+          .status(429)
+          .json({ error: "Temporarily blocked due to repeated invalid auth attempts" });
+      }
       console.warn(
         "[auth][verify_error] ip=%s path=%s code=%s messagePresent=%s",
         requestContext.ip,
