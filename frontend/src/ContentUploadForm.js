@@ -1425,30 +1425,32 @@ function ContentUploadForm({
               <div className="preview-controls">
                 {type === "video" ? (
                   <div className="video-controls">
-                    <label>
-                      Trim Start:{" "}
-                      <input
-                        type="number"
-                        min={0}
-                        max={duration}
-                        step="0.1"
-                        value={trimStart}
-                        onChange={e => setTrimStart(parseFloat(e.target.value) || 0)}
-                      />{" "}
-                      secs
-                    </label>
-                    <label>
-                      Trim End:{" "}
-                      <input
-                        type="number"
-                        min={0}
-                        max={duration}
-                        step="0.1"
-                        value={trimEnd}
-                        onChange={e => setTrimEnd(parseFloat(e.target.value) || duration)}
-                      />{" "}
-                      secs
-                    </label>
+                    <div className="trim-row">
+                      <label>
+                        Trim Start:{" "}
+                        <input
+                          type="number"
+                          min={0}
+                          max={duration}
+                          step="0.1"
+                          value={trimStart}
+                          onChange={e => setTrimStart(parseFloat(e.target.value) || 0)}
+                        />{" "}
+                        secs
+                      </label>
+                      <label>
+                        Trim End:{" "}
+                        <input
+                          type="number"
+                          min={0}
+                          max={duration}
+                          step="0.1"
+                          value={trimEnd}
+                          onChange={e => setTrimEnd(parseFloat(e.target.value) || duration)}
+                        />{" "}
+                        secs
+                      </label>
+                    </div>
                     <div className="range-row">
                       <input
                         type="range"
