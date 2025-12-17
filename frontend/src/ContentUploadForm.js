@@ -139,7 +139,6 @@ function ContentUploadForm({
   });
   const [isUploading, setIsUploading] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
-  const [fullPreviewOpen, setFullPreviewOpen] = useState(false); // toggle for modal preview
   // TikTok-specific UX state (Direct Post compliance)
   const [tiktokCreatorInfo, setTiktokCreatorInfo] = useState(null);
   const [tiktokPrivacy, setTiktokPrivacy] = useState("");
@@ -1403,15 +1402,6 @@ function ContentUploadForm({
                           setTrimEnd(dur);
                         }}
                       />
-                      <button
-                        type="button"
-                        className="control-btn"
-                        style={{ position: "absolute", right: 12, top: 12, zIndex: 4 }}
-                        onClick={() => setFullPreviewOpen(true)}
-                        aria-label="Open full preview"
-                      >
-                        Enlarge
-                      </button>
                     </div>
                   ) : type === "audio" ? (
                     <div style={{ width: "100%" }}>
@@ -1469,47 +1459,6 @@ function ContentUploadForm({
                   </div>
                 )}
                 <div className="preview-controls">
-                  {/* Modal for full-screen preview */}
-                  {fullPreviewOpen && (
-                    <div
-                      role="dialog"
-                      aria-modal="true"
-                      className="full-preview-modal"
-                      onClick={() => setFullPreviewOpen(false)}
-                      style={{
-                        position: "fixed",
-                        inset: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background: "rgba(0,0,0,0.6)",
-                        zIndex: 9999,
-                      }}
-                    >
-                      <div
-                        onClick={e => e.stopPropagation()}
-                        style={{
-                          width: "90%",
-                          maxWidth: "1280px",
-                          background: "#000",
-                          borderRadius: 10,
-                        }}
-                      >
-                        <video
-                          src={previewUrl}
-                          controls
-                          autoPlay
-                          style={{ width: "100%", height: "auto" }}
-                        />
-                        <div style={{ textAlign: "right", padding: 8 }}>
-                          <button className="control-btn" onClick={() => setFullPreviewOpen(false)}>
-                            Close
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   {type === "video" ? (
                     <div className="video-controls">
                       <label>
