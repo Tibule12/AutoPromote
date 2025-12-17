@@ -439,7 +439,7 @@
   }
 }
 
-.file-upload {
+..file-upload {
   border: 3px dashed #d1d5db;
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
   border-radius: 16px;
@@ -450,9 +450,9 @@
   /* Keep the drop zone at a reasonable visible width and height so it
      doesn't collapse into a narrow vertical strip when layout changes */
   width: 100%;
-  max-width: 640px;
+  max-width: 100%; /* allow it to use the available column width */
   min-height: 120px;
-  margin: 0 auto;
+  margin: 0; /* don't center — use the full horizontal space */
   display: block;
 }
 
@@ -527,10 +527,10 @@
 .preview-video,
 .preview-image {
   width: 100%;
-  max-width: 640px;
-  max-height: 360px;
+  max-width: 100%;
   border-radius: 6px;
   object-fit: contain;
+  height: auto;
 }
 
 .preview-controls {
@@ -1198,7 +1198,7 @@
    left column uses minmax(0, 1fr) to prevent overflow issues and allow shrinkage. */
 @media (min-width: 1024px) {
   .content-upload-grid {
-    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-columns: 1.6fr 360px; /* give left column more width for previews */
     gap: 24px;
   }
   .right-column {
@@ -1207,6 +1207,22 @@
   }
   .left-column {
     min-width: 0; /* allow the left column to shrink properly */
+  }
+
+  /* allow file upload and preview to expand horizontally on desktop */
+  .file-upload,
+  .preview-wrapper,
+  .preview-area {
+    max-width: none;
+    min-width: 480px; /* ensure comfortable horizontal space for video */
+  }
+  .file-upload {
+    margin: 0; /* ensure it uses available width */
+  }
+  .preview-video,
+  .preview-image {
+    max-height: 540px;
+    aspect-ratio: 16 / 9;
   }
 }
 
