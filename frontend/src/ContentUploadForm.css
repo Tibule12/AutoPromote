@@ -493,6 +493,19 @@
   border-radius: 6px;
   background: #fff;
   position: relative;
+  min-height: 240px; /* ensure live preview is visible in-column */
+  box-sizing: border-box;
+}
+
+/* Make the inline preview more prominent and readable inside the column */
+.preview-wrapper .preview-video,
+.preview-wrapper .preview-image {
+  width: 100%;
+  max-width: 100%;
+  max-height: 420px;
+  min-height: 180px;
+  border-radius: 6px;
+  object-fit: contain;
 }
 
 .preview-overlay {
