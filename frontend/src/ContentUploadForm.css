@@ -1197,13 +1197,16 @@
 /* Use a predictable column layout that doesn't collapse when content grows.
    left column uses minmax(0, 1fr) to prevent overflow issues and allow shrinkage. */
 @media (min-width: 1024px) {
+  /* Give the left column even more space and slightly reduce the right column so previews have room */
   .content-upload-grid {
-    grid-template-columns: 1.6fr 360px; /* give left column more width for previews */
+    grid-template-columns: 2.2fr 320px; /* wider left column */
     gap: 24px;
   }
   .right-column {
-    width: 360px;
-    flex: 0 0 360px;
+    width: 320px;
+    flex: 0 0 320px;
+    position: relative;
+    z-index: 1; /* keep controls below the dropzone */
   }
   .left-column {
     min-width: 0; /* allow the left column to shrink properly */
@@ -1214,14 +1217,17 @@
   .preview-wrapper,
   .preview-area {
     max-width: none;
-    min-width: 480px; /* ensure comfortable horizontal space for video */
+    min-width: 640px; /* ensure comfortable horizontal space for video */
+    box-sizing: border-box;
   }
   .file-upload {
     margin: 0; /* ensure it uses available width */
+    position: relative; /* create stacking context */
+    z-index: 5; /* stay above adjacent form controls */
   }
   .preview-video,
   .preview-image {
-    max-height: 540px;
+    max-height: 640px;
     aspect-ratio: 16 / 9;
   }
 
@@ -1244,7 +1250,15 @@
     margin: 0 auto;
     aspect-ratio: 16 / 9;
     max-height: 720px;
-    z-index: 2;
+    z-index: 6;
+  }
+
+  /* Ensure right-column form elements don't visually overlap the drop zone */
+  .right-column .form-group,
+  .right-column .form-select,
+  .right-column .platform-grid {
+    position: relative;
+    z-index: 1;
   }
 }
 
