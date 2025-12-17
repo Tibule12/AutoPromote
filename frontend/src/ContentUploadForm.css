@@ -583,11 +583,54 @@
 }
 
 .preview-controls {
-  margin-top: 8px;
+  margin-top: 12px;
   display: flex;
+  flex-direction: column; /* stack controls under preview */
+  gap: 12px;
+  align-items: center;
+}
+
+/* Keep video controls compact and centered by default; expand to row on wide screens */
+.video-controls {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   align-items: center;
-  flex-wrap: wrap;
+}
+.video-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.video-controls input[type="number"] {
+  width: 110px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+.range-row {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  max-width: 560px;
+}
+
+@media (min-width: 768px) {
+  .video-controls {
+    flex-direction: row;
+    align-items: center;
+  }
+  .video-controls label {
+    flex-direction: row;
+    align-items: center;
+  }
+  .video-controls input[type="number"] {
+    width: 90px;
+  }
+  .range-row {
+    max-width: 720px;
+  }
 }
 
 .pinterest-options {
