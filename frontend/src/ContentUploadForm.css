@@ -1224,6 +1224,28 @@
     max-height: 540px;
     aspect-ratio: 16 / 9;
   }
+
+  /* When a file is selected, collapse to a single column so the preview can use full width */
+  .content-upload-grid.has-file {
+    grid-template-columns: 1fr;
+  }
+  .content-upload-grid.has-file .right-column {
+    display: none;
+  }
+  .content-upload-grid.has-file .left-column {
+    min-width: 0;
+  }
+  .content-upload-grid.has-file .preview-area {
+    grid-column: 1 / -1;
+    margin: 12px 0 24px 0;
+  }
+  .content-upload-grid.has-file .preview-wrapper {
+    max-width: none;
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    max-height: 720px;
+    z-index: 2;
+  }
 }
 
 /* Ensure preview and file upload areas don't expand past their column */
