@@ -1353,7 +1353,7 @@ function ContentUploadForm({
             <option value="audio">Audio</option>
           </select>
         </div>
-        <div className="content-upload-grid">
+        <div className={`content-upload-grid ${file ? "has-file" : ""}`}>
           <div className="left-column">
             <div className="form-group">
               <label htmlFor="content-file-input">File</label>
