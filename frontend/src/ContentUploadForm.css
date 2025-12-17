@@ -596,12 +596,14 @@
   flex-direction: column;
   gap: 8px;
   align-items: center;
+  width: 100%;
 }
 .video-controls label {
   display: flex;
   flex-direction: column;
   gap: 6px;
   align-items: flex-start;
+  width: 100%;
 }
 .video-controls input[type="number"] {
   width: 110px;
@@ -611,9 +613,12 @@
 }
 .range-row {
   display: flex;
-  gap: 6px;
+  gap: 12px;
   width: 100%;
-  max-width: 560px;
+  max-width: 720px;
+}
+.range-row input[type="range"] {
+  flex: 1;
 }
 
 @media (min-width: 768px) {
@@ -1340,7 +1345,9 @@
     grid-column: 1 / -1;
     margin: 12px 0 24px 0;
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* stack preview and controls vertically */
+    align-items: center;
+    gap: 12px;
   }
   .content-upload-grid.has-file .preview-wrapper {
     width: min(900px, 100%);
