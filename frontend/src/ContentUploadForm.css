@@ -1291,15 +1291,27 @@
   .content-upload-grid.has-file .left-column {
     min-width: 0;
   }
+  /* Make the preview span both columns but keep it constrained and centered so
+     it is large and horizontal without hiding the right column panels. */
   .content-upload-grid.has-file .preview-area {
+    grid-column: 1 / -1;
     margin: 12px 0 24px 0;
+    display: flex;
+    justify-content: center;
   }
   .content-upload-grid.has-file .preview-wrapper {
-    max-width: 100%; /* ensure preview fits inside the column */
-    margin: 0;
+    width: min(900px, 100%);
+    margin: 0 auto;
     aspect-ratio: 16 / 9;
     max-height: 540px; /* reasonable limit */
     z-index: 3; /* keep above minor elements but not overlay layout */
+    display: block;
+  }
+  .content-upload-grid.has-file .preview-wrapper .preview-video {
+    width: 100%;
+    aspect-ratio: 16/9;
+    height: auto;
+    object-fit: cover; /* fill the horizontal space while preserving aspect */
   }
 
   /* Ensure right-column form elements don't visually overlap the drop zone */
