@@ -493,8 +493,10 @@
   border-radius: 6px;
   background: #fff;
   position: relative;
-  min-height: 240px; /* ensure live preview is visible in-column */
+  min-height: 180px; /* ensure live preview is visible in-column */
   box-sizing: border-box;
+  width: min(560px, 100%); /* prefer a horizontal, demo-friendly width but responsive */
+  min-width: 260px; /* keep readable even in narrow layouts */
 }
 
 /* Make the inline preview more prominent and readable inside the column */
@@ -502,10 +504,44 @@
 .preview-wrapper .preview-image {
   width: 100%;
   max-width: 100%;
-  max-height: 420px;
-  min-height: 180px;
+  max-height: 360px;
+  height: auto;
+  aspect-ratio: 16/9;
   border-radius: 6px;
   object-fit: contain;
+}
+
+/* Trim controls: make inputs inline and compact on larger screens */
+@media (min-width: 768px) {
+  .video-controls {
+    align-items: center;
+  }
+  .video-controls label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-right: 12px;
+  }
+  .video-controls input[type="number"] {
+    width: 90px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+  }
+}
+
+/* Small screens: keep stacked controls for better spacing */
+@media (max-width: 767px) {
+  .video-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .video-controls input[type="number"] {
+    width: 100%;
+  }
 }
 
 .preview-overlay {
