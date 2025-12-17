@@ -1350,7 +1350,8 @@
     gap: 12px;
   }
   .content-upload-grid.has-file .preview-wrapper {
-    width: min(900px, 100%);
+    width: 720px; /* fixed demo-friendly width on desktop */
+    max-width: calc(100% - 40px);
     margin: 0 auto;
     aspect-ratio: 16 / 9;
     max-height: 540px; /* reasonable limit */
@@ -1362,6 +1363,52 @@
     aspect-ratio: 16/9;
     height: auto;
     object-fit: cover; /* fill the horizontal space while preserving aspect */
+  }
+
+  /* Trim row centered under preview */
+  .content-upload-grid.has-file .video-controls {
+    /* Ensure controls stack vertically under the preview on desktop and stay centered */
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 720px;
+  }
+  .content-upload-grid.has-file .video-controls .range-row {
+    width: 100%;
+  }
+  .trim-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 720px;
+    margin-top: 8px;
+  }
+
+  .trim-row label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* When preview spans columns force labels and inputs to be compact */
+  .content-upload-grid.has-file .video-controls label {
+    width: auto;
+  }
+  .content-upload-grid.has-file .trim-row label input[type="number"] {
+    width: 96px;
+  }
+
+  @media (max-width: 768px) {
+    .content-upload-grid.has-file .preview-wrapper {
+      width: 100%;
+      max-width: none;
+    }
+    .trim-row {
+      flex-direction: column;
+      gap: 8px;
+    }
   }
 
   /* Ensure right-column form elements don't visually overlap the drop zone */
