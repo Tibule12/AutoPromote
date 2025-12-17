@@ -1216,8 +1216,8 @@
   .file-upload,
   .preview-wrapper,
   .preview-area {
-    max-width: none;
-    min-width: 640px; /* ensure comfortable horizontal space for video */
+    max-width: 100%;
+    min-width: 0; /* allow the elements to shrink to column width and avoid overflow */
     box-sizing: border-box;
   }
   .file-upload {
@@ -1231,26 +1231,26 @@
     aspect-ratio: 16 / 9;
   }
 
-  /* When a file is selected, collapse to a single column so the preview can use full width */
+  /* Previously we collapsed to a single column when a file was selected.
+     That caused the preview to expand and overlay other controls which
+     made the form unusable. Keep the two-column layout and instead constrain
+     the preview to its column. */
   .content-upload-grid.has-file {
-    grid-template-columns: 1fr;
-  }
-  .content-upload-grid.has-file .right-column {
-    display: none;
+    /* retain standard columns; do not collapse */
+    grid-template-columns: 2.2fr 320px;
   }
   .content-upload-grid.has-file .left-column {
     min-width: 0;
   }
   .content-upload-grid.has-file .preview-area {
-    grid-column: 1 / -1;
     margin: 12px 0 24px 0;
   }
   .content-upload-grid.has-file .preview-wrapper {
-    max-width: none;
-    margin: 0 auto;
+    max-width: 100%; /* ensure preview fits inside the column */
+    margin: 0;
     aspect-ratio: 16 / 9;
-    max-height: 720px;
-    z-index: 6;
+    max-height: 540px; /* reasonable limit */
+    z-index: 3; /* keep above minor elements but not overlay layout */
   }
 
   /* Ensure right-column form elements don't visually overlap the drop zone */
