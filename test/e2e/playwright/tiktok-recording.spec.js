@@ -52,7 +52,8 @@ test("Record TikTok direct post flow and save video", async ({ page }) => {
   });
 
   // Use the lightweight upload component fixture to make recording deterministic
-  if (!BASE) BASE = await startServer();
+  // Always start the local fixture server for this test (don't rely on E2E_BASE_URL)
+  BASE = await startServer();
   await page.goto(BASE + "/upload_component_test_page.html", { waitUntil: "networkidle" });
 
   // Click TikTok tile and expand on the fixture page — try several selectors for robustness
