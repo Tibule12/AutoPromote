@@ -71,11 +71,16 @@
 
 .file-upload {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 .file-upload .form-file-input {
   position: absolute;
-  left: 0;
-  top: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   opacity: 0;
@@ -443,26 +448,27 @@
 }
 
 .file-upload {
-  border: 3px dashed #d1d5db;
-  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border: 2px dashed rgba(148, 163, 184, 0.18);
+  background: linear-gradient(135deg, rgba(249, 249, 251, 0.02) 0%, rgba(243, 244, 246, 0.02) 100%);
   border-radius: 16px;
-  padding: 32px 16px;
+  padding: 28px 18px;
   text-align: center;
-  transition: all 0.3s;
+  transition: all 0.25s ease;
 
-  /* Keep the drop zone at a reasonable visible width and height so it
-     doesn't collapse into a narrow vertical strip when layout changes */
+  /* Keep the drop zone friendly sized and centered inside the column */
   width: 100%;
-  max-width: 100%; /* allow it to use the available column width */
-  min-height: 120px;
-  margin: 0; /* don't center — use the full horizontal space */
-  display: block;
+  max-width: 640px; /* allow a wider preview on desktop */
+  min-height: 140px;
+  margin: 0 auto; /* center within its column */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .file-upload:hover {
   border-color: #3b82f6;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.06) 0%, rgba(219, 234, 254, 0.06) 100%);
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.08);
 }
 
 @media (max-width: 640px) {
@@ -476,11 +482,33 @@
   font-size: 14px;
   color: #666;
   /* Prevent long filenames from wrapping into vertical columns */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
   max-width: 100%;
   display: block;
+}
+
+/* Style the inner drop zone content so it doesn't become a narrow vertical strip */
+.file-upload .drop-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 2px dashed rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.01);
+  box-sizing: border-box;
+}
+
+.file-upload .drop-zone.dragging {
+  border-color: #1976d2;
+  background: rgba(25, 118, 210, 0.03);
+  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.06) inset;
 }
 
 .preview-area {
@@ -498,10 +526,10 @@
   position: relative;
   min-height: 140px; /* keep visible but smaller */
   box-sizing: border-box;
-  width: min(360px, calc(100% - 64px)); /* smaller width to ensure it stays inside form */
+  width: min(640px, calc(100% - 64px)); /* allow larger preview but stay inside form */
   min-width: 200px; /* keep readable even in narrow layouts */
   max-width: 100%;
-  max-height: 260px;
+  max-height: 360px;
 }
 
 /* Make the inline preview more prominent and readable inside the column */
@@ -1393,7 +1421,7 @@
     align-items: center;
   }
   .content-upload-grid.has-file .preview-wrapper {
-    max-width: 360px;
+    max-width: 640px;
     margin: 0 auto;
   }
   /* Place the preview under the selected file in the left column on desktop */
@@ -1415,10 +1443,10 @@
   }
   .content-upload-grid.has-file .preview-wrapper {
     width: 100%;
-    max-width: 360px; /* keep preview compact inside main column */
+    max-width: 640px; /* keep preview compact inside main column */
     margin: 0 auto; /* center under file box */
     aspect-ratio: 16 / 9;
-    max-height: 260px;
+    max-height: 360px;
     z-index: 3;
     display: block;
     padding: 6px;
