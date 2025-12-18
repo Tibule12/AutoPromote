@@ -1419,20 +1419,52 @@
   /* Ensure preview is centered under the selected file (main column) */
   .content-upload-grid.has-file .preview-area {
     align-items: center;
+    justify-content: center;
   }
   .content-upload-grid.has-file .preview-wrapper {
     max-width: 640px;
     margin: 0 auto;
   }
   /* Place the preview under the selected file in the left column on desktop */
+  /* Place the live preview in the right column (above templates) on desktop */
   .content-upload-grid.has-file .preview-area {
-    grid-column: 1 / 2; /* main form column */
-    margin: 12px 0 24px 0;
+    grid-column: 2 / 3; /* right column */
+    margin: 8px 0 16px 0;
     display: flex;
     flex-direction: column;
-    align-items: center; /* center under the file box */
+    align-items: center; /* center the preview horizontally */
     gap: 12px;
     width: 100%;
+    justify-self: center;
+  }
+
+  /* Ensure preview area renders in the right column on desktop even if
+     markup places it elsewhere — we want it above the Templates card. */
+  .content-upload-grid .preview-area,
+  .right-column .preview-area,
+  .preview-area {
+    grid-column: 2 / 3 !important;
+  }
+
+  .preview-wrapper {
+    /* visible container so the preview doesn't look like an empty black box */
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.42));
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .preview-wrapper .preview-video,
+  .preview-wrapper .preview-image {
+    max-height: 100%;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
   }
   .content-upload-grid.has-file .preview-area > label {
     width: 100%;
@@ -1443,13 +1475,13 @@
   }
   .content-upload-grid.has-file .preview-wrapper {
     width: 100%;
-    max-width: 640px; /* keep preview compact inside main column */
-    margin: 0 auto; /* center under file box */
+    max-width: 320px; /* match right-column width */
+    margin: 0; /* align to column flow */
     aspect-ratio: 16 / 9;
     max-height: 360px;
     z-index: 3;
     display: block;
-    padding: 6px;
+    padding: 8px;
     align-self: center;
   }
   .content-upload-grid.has-file .preview-wrapper .preview-video {
@@ -1462,16 +1494,16 @@
   /* Center controls under the preview */
   .content-upload-grid.has-file .video-controls {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     width: 100%;
-    max-width: 360px;
+    max-width: 320px;
     position: relative;
     z-index: 10; /* ensure controls sit above platform cards */
   }
   .content-upload-grid.has-file .trim-row {
     max-width: 320px;
-    align-self: center;
-    margin: 0 auto 8px;
+    align-self: stretch;
+    margin: 0 0 8px 0;
     position: relative;
     z-index: 10;
   }
