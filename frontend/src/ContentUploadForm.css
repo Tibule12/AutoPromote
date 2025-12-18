@@ -489,16 +489,16 @@
   align-items: center;
   justify-content: center;
   border: 1px solid #e6e6e6;
-  padding: 8px; /* tighter padding for compact layout */
+  padding: 6px; /* tighter padding for compact layout */
   border-radius: 6px;
   background: #fff;
   position: relative;
-  min-height: 160px; /* keep visible but smaller */
+  min-height: 140px; /* keep visible but smaller */
   box-sizing: border-box;
-  width: min(480px, calc(100% - 64px)); /* smaller, professional width */
-  min-width: 240px; /* keep readable even in narrow layouts */
+  width: min(360px, calc(100% - 64px)); /* smaller width to ensure it stays inside form */
+  min-width: 200px; /* keep readable even in narrow layouts */
   max-width: 100%;
-  max-height: 360px;
+  max-height: 260px;
 }
 
 /* Make the inline preview more prominent and readable inside the column */
@@ -506,7 +506,7 @@
 .preview-wrapper .preview-image {
   width: 100%;
   max-width: 100%;
-  max-height: 360px;
+  max-height: 220px; /* reduce video height so it fits inside the compact preview */
   height: auto;
   aspect-ratio: 16/9;
   border-radius: 6px;
@@ -1386,11 +1386,11 @@
     gap: 12px;
   }
   .content-upload-grid.has-file .preview-wrapper {
-    width: 560px; /* smaller demo-friendly width to fit tighter viewports */
+    width: 360px; /* reduced so preview fits comfortably inside the form */
     max-width: calc(100% - 80px);
     margin: 0 auto;
     aspect-ratio: 16 / 9;
-    max-height: 360px; /* reduced to better fit the form */
+    max-height: 260px; /* smaller limit to avoid overflow */
     z-index: 3; /* keep above minor elements but not overlay layout */
     display: block;
   }
@@ -1407,23 +1407,23 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 560px;
+    max-width: 320px;
   }
   .content-upload-grid.has-file .video-controls .range-row {
     width: 100%;
   }
   .content-upload-grid.has-file .range-row {
-    max-width: 520px;
+    max-width: 320px;
     justify-content: center;
     margin: 0 auto;
   }
   .trim-row {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     justify-content: center;
     align-items: center;
     width: 100%;
-    max-width: 520px;
+    max-width: 320px;
     margin-top: 8px;
   }
 
@@ -1431,6 +1431,10 @@
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  .content-upload-grid.has-file .trim-row label input[type="number"] {
+    width: 64px;
   }
 
   /* When preview spans columns force labels and inputs to be compact */
