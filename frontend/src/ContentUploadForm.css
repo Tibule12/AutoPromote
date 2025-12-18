@@ -64,7 +64,7 @@
   .content-upload-grid .preview-area,
   .right-column .preview-area,
   .preview-area {
-    grid-column: 1 / 2 !important;
+    grid-column: 2 / 3 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
