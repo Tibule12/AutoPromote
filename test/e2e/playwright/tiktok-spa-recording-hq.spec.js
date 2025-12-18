@@ -49,6 +49,20 @@ test("SPA HQ: Record TikTok direct post flow (mocked backend, slow)", async ({ p
     });
   });
   await page.route("**/api/content/upload", async route => {
+    // Return previews for dry-run preview calls, otherwise return success id after a short delay
+    const post = route.request().postData();
+    let body = {};
+    try {
+      body = post ? JSON.parse(post) : {};
+    } catch (e) {}
+    if (body && body.isDryRun) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true, id: "hq-demo", previews: [{ title: "Demo Preview" }] }),
+      });
+      return;
+    }
     await new Promise(r => setTimeout(r, 800));
     await route.fulfill({
       status: 200,
