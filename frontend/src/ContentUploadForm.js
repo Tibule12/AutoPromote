@@ -180,10 +180,8 @@ function ContentUploadForm({
       }
     };
   }, [previewUrl]);
-
-  // Keyboard shortcuts
+  // If branded content is selected, prevent 'SELF_ONLY' privacy by auto-switching
   useEffect(() => {
-    // If branded content is selected, prevent 'SELF_ONLY' privacy by auto-switching
     if (tiktokCommercial && tiktokCommercial.brandedContent) {
       if (tiktokPrivacy === "SELF_ONLY") {
         setTiktokPrivacy("EVERYONE");
@@ -191,7 +189,7 @@ function ContentUploadForm({
         setTimeout(() => setPrivacyAutoSwitched(false), 8000);
       }
     }
-  }, [tiktokCommercial && tiktokCommercial.brandedContent]);
+  }, [tiktokCommercial && tiktokCommercial.brandedContent, tiktokPrivacy]);
 
   const getTikTokDeclaration = () => {
     const isCommercial = tiktokCommercial && tiktokCommercial.isCommercial;
@@ -375,6 +373,10 @@ function ContentUploadForm({
         const res = await fetch("/api/tiktok/creator_info", { headers });
         if (!res.ok) {
           console.warn("TikTok creator_info fetch not ok", res.status);
+          // If the server endpoint is unavailable (404/500) default to a safe
+          // visibility so the UI doesn't block uploads/previews. User can still
+          // change visibility in the UI.
+          setTiktokPrivacy("PUBLIC");
           return;
         }
         const json = await res.json();
@@ -400,6 +402,9 @@ function ContentUploadForm({
         }
       } catch (err) {
         console.warn("Failed to load TikTok creator_info", err);
+        // Network or server error: default to PUBLIC so client-side checks
+        // won't prevent preview/upload when creator info is unavailable.
+        setTiktokPrivacy("PUBLIC");
       }
     };
     load();
@@ -644,9 +649,44 @@ function ContentUploadForm({
       const result = await onUpload(contentData);
       const previews =
         result && (result.previews || (result.content_preview ? [result.content_preview] : []));
-      setPerPlatformPreviews(prev => ({ ...prev, [platform]: previews }));
+
+      // If the backend didn't return previews (400/500 or dry-run not supported),
+      // fall back to a local preview using the selected file's object URL so the
+      // Preview button still shows something useful to the user.
+      if (!previews || (Array.isArray(previews) && previews.length === 0)) {
+        const fallback = [];
+        if (previewUrl) {
+          fallback.push({
+            platform,
+            thumbnail: previewUrl,
+            title: title || (file && file.name) || "Preview",
+            description: description || "",
+          });
+        }
+        setPerPlatformPreviews(prev => ({
+          ...prev,
+          [platform]: fallback.length ? fallback : null,
+        }));
+      } else {
+        setPerPlatformPreviews(prev => ({ ...prev, [platform]: previews }));
+      }
     } catch (err) {
-      setError(err.message || "Platform preview failed.");
+      // On error, show a local preview if available so the Preview action remains useful
+      if (previewUrl) {
+        setPerPlatformPreviews(prev => ({
+          ...prev,
+          [platform]: [
+            {
+              platform,
+              thumbnail: previewUrl,
+              title: title || (file && file.name) || "Preview",
+              description: description || "",
+            },
+          ],
+        }));
+      } else {
+        setError(err.message || "Platform preview failed.");
+      }
     }
   };
 
