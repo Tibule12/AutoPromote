@@ -951,18 +951,21 @@
 }
 
 .preview-area {
-  background: #f9fafb;
+  /* Use a subtle dark translucent background so preview lives inside the form */
+  background: rgba(255, 255, 255, 0.02);
   border-radius: 12px;
-  padding: 16px;
-  margin-top: 16px;
+  padding: 12px;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .preview-wrapper {
   position: relative;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  background: #000;
-  margin-bottom: 16px;
+  background: transparent; /* keep the inner element transparent to blend with form */
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .preview-video,
@@ -1379,52 +1382,54 @@
   .content-upload-grid.has-file .left-column {
     min-width: 0;
   }
-  /* Place the preview under the selected file inside the left column so it sits
-     directly beneath the file input and remains inside the form panel. */
+  /* Place the preview inside the right column on desktop so it appears centered
+     inside the form panel, not spanning both columns. */
   .content-upload-grid.has-file .preview-area {
-    grid-column: 1 / 2; /* occupy left column */
+    grid-column: 2 / 3; /* occupy right column only on desktop */
     margin: 12px 0 24px 0;
     display: flex;
     flex-direction: column; /* stack preview and controls vertically */
-    align-items: flex-start; /* align to left to sit beneath the file box */
+    align-items: center;
+    justify-content: center;
     gap: 12px;
-    width: 100%;
   }
   .content-upload-grid.has-file .preview-area > label {
     width: 100%;
-    text-align: left; /* left-align the Live Preview label under the file box */
+    text-align: center; /* center the Live Preview label */
     font-weight: 600;
     color: inherit;
-    margin-bottom: 6px;
   }
   .content-upload-grid.has-file .preview-wrapper {
-    width: 100%; /* fill the left column but constrained by max-width */
-    max-width: 360px; /* keep the size you liked but inside left column */
-    margin: 0; /* align with file box */
+    width: 100%; /* fill the right column */
+    max-width: 320px; /* constrain to right column width */
+    margin: 0 auto;
     aspect-ratio: 16 / 9;
-    max-height: 260px; /* keep sensible height */
-    z-index: 3;
+    max-height: 260px; /* smaller limit to avoid overflow */
+    z-index: 3; /* keep above minor elements but not overlay layout */
     display: block;
-    padding: 6px;
-    align-self: flex-start; /* align to left edge of column */
   }
   .content-upload-grid.has-file .preview-wrapper .preview-video {
     width: 100%;
     aspect-ratio: 16/9;
     height: auto;
-    object-fit: contain;
+    object-fit: contain; /* avoid cropping and overflow */
   }
 
-  /* Keep controls aligned under the left-aligned preview */
+  /* Trim row centered under preview */
   .content-upload-grid.has-file .video-controls {
+    /* Ensure controls stack vertically under the preview on desktop and stay centered */
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
-    max-width: 360px;
-  }
-  .content-upload-grid.has-file .trim-row {
     max-width: 320px;
-    align-self: flex-start;
+  }
+  .content-upload-grid.has-file .video-controls .range-row {
+    width: 100%;
+  }
+  .content-upload-grid.has-file .range-row {
+    max-width: 320px;
+    justify-content: center;
+    margin: 0 auto;
   }
 
   /* Trim row centered under preview */
