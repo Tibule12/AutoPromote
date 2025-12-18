@@ -1484,7 +1484,7 @@
   /* Place the preview under the selected file in the left column on desktop */
   /* Place the live preview in the right column (above templates) on desktop */
   .content-upload-grid.has-file .preview-area {
-    grid-column: 1 / 2; /* main/center column */
+    grid-column: 2 / 3; /* move preview into right column (above Templates) */
     margin: 8px 0 16px 0;
     display: flex;
     flex-direction: column;
@@ -1499,7 +1499,7 @@
   .content-upload-grid .preview-area,
   .right-column .preview-area,
   .preview-area {
-    grid-column: 1 / 2 !important;
+    grid-column: 2 / 3 !important; /* force into right column */
   }
 
   .preview-wrapper {
