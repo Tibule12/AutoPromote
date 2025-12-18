@@ -76,25 +76,44 @@ test("SPA HQ: Record TikTok direct post flow (mocked backend, slow)", async ({ p
   await page.click('nav li:has-text("Upload")');
   await page.waitForTimeout(1500);
 
-  // Click TikTok tile and expand (slowly highlight)
-  const tiktokTile = page.locator('div[aria-label="Tiktok"]').first();
-  if ((await tiktokTile.count()) === 0) {
-    const tile = page.locator("#tile-tiktok");
-    await tile.scrollIntoViewIfNeeded();
-    await tile.click({ force: true });
-  } else {
-    await tiktokTile.scrollIntoViewIfNeeded();
-    await tiktokTile.click({ force: true });
+  // Click TikTok tile and ensure it's selected, then open the expanded/edit panel.
+  const tileSelectors = ['div[aria-label="Tiktok"]', '#tile-tiktok', '.platform-tile[data-platform="tiktok"]'];
+  let tileClicked = false;
+  for (const sel of tileSelectors) {
+    try {
+      const t = page.locator(sel).first();
+      await t.scrollIntoViewIfNeeded();
+      await t.click({ force: true });
+      tileClicked = true;
+      break;
+    } catch (e) {
+      // try next
+    }
   }
-  await page.waitForTimeout(1500);
+  if (!tileClicked) throw new Error('Could not locate TikTok tile to select it');
+  await page.waitForTimeout(600);
 
-  // Expand edit if present
-  const editBtn = page.locator("button.edit-platform-btn", {
-    has: page.locator('div[aria-label="Tiktok"]'),
-  });
+  // Ensure tile has the selected class; click again if needed
+  const primaryTile = page.locator(tileSelectors.join(',')).first();
+  try {
+    const classAttr = await primaryTile.getAttribute('class');
+    if (!classAttr || !classAttr.includes('selected')) {
+      await primaryTile.click({ force: true });
+      await page.waitForTimeout(400);
+    }
+  } catch (e) {}
+
+  // Try to open the edit/expanded panel via the edit button related to the tile
+  const editBtn = page.locator('button.edit-platform-btn', { has: page.locator('div[aria-label="Tiktok"]') });
   if ((await editBtn.count()) > 0) {
     await editBtn.click({ force: true });
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(800);
+  } else {
+    const anyEdit = page.locator('button.edit-platform-btn').first();
+    if ((await anyEdit.count()) > 0) {
+      await anyEdit.click({ force: true });
+      await page.waitForTimeout(800);
+    }
   }
 
   // Wait for TikTok per-platform UI or generic expanded panel — prefer the preview button inside the expanded panel
