@@ -1475,14 +1475,31 @@
   }
   .content-upload-grid.has-file .preview-wrapper {
     width: 100%;
-    max-width: 640px; /* allow a wider preview inside the main column */
-    margin: 0 auto; /* center inside the column */
-    aspect-ratio: 16 / 9;
-    max-height: 420px;
+    /* On desktop we show a compact phone-style preview similar to mobile */
+    max-width: 280px;
+    margin: 8px auto; /* center inside the column */
+    aspect-ratio: 9 / 16; /* tall phone-like frame */
+    max-height: 520px;
     z-index: 3;
     display: block;
     padding: 8px;
     align-self: center;
+  }
+
+  /* Make the inner video match the phone-style container */
+  .content-upload-grid.has-file .preview-wrapper .preview-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.5));
+  }
+
+  /* Ensure controls align to the compact preview width */
+  .content-upload-grid.has-file .video-controls,
+  .content-upload-grid.has-file .trim-row,
+  .content-upload-grid.has-file .range-row {
+    max-width: 280px;
   }
   .content-upload-grid.has-file .preview-wrapper .preview-video {
     width: 100%;
