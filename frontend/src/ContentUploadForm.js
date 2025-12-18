@@ -542,7 +542,7 @@ function ContentUploadForm({
       if (selectedPlatformsVal.includes("twitter"))
         contentData.platform_options.twitter = { message: twitterMessage || undefined };
       // Call backend preview (reuse onUpload with dry run)
-      const result = await onUpload(contentData);
+      const result = await onUpload({ ...contentData, isDryRun: true });
       console.log("[E2E] handlePlatformPreview result", result);
       if (result && result.previews) {
         setPreviews(result.previews);
@@ -646,7 +646,7 @@ function ContentUploadForm({
       if (!file) throw new Error("Please select a file to preview.");
       const contentData = buildContentDataForPlatform(platform, true);
       console.log("[E2E] handlePlatformPreview contentData", contentData);
-      const result = await onUpload(contentData);
+      const result = await onUpload({ ...contentData, isDryRun: true });
       const previews =
         result && (result.previews || (result.content_preview ? [result.content_preview] : []));
 
