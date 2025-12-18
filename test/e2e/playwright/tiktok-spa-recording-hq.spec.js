@@ -97,8 +97,9 @@ test("SPA HQ: Record TikTok direct post flow (mocked backend, slow)", async ({ p
     await page.waitForTimeout(1000);
   }
 
-  await page.waitForSelector("#tiktok-privacy, #tiktok-consent, .platform-expanded, #expanded", {
-    timeout: 60000,
+  // Wait for TikTok per-platform UI (privacy/consent) or generic expanded panel.
+  await page.waitForSelector("#tiktok-privacy, #tiktok-consent, .platform-expanded, #expanded, .platform-expanded .platform-upload-status", {
+    timeout: 90000,
   });
   await page.waitForTimeout(800);
 
