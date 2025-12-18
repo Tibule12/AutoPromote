@@ -1365,7 +1365,8 @@
     box-sizing: border-box;
   }
   .file-upload {
-    margin: 0; /* ensure it uses available width */
+    margin: 0 auto; /* center in the column */
+    max-width: 480px; /* prevent it from collapsing to a narrow vertical strip */
     position: relative; /* create stacking context */
     z-index: 5; /* stay above adjacent form controls */
   }
@@ -1385,6 +1386,15 @@
   }
   .content-upload-grid.has-file .left-column {
     min-width: 0;
+  }
+
+  /* Ensure preview is centered under the selected file (main column) */
+  .content-upload-grid.has-file .preview-area {
+    align-items: center;
+  }
+  .content-upload-grid.has-file .preview-wrapper {
+    max-width: 360px;
+    margin: 0 auto;
   }
   /* Place the preview under the selected file in the left column on desktop */
   .content-upload-grid.has-file .preview-area {
@@ -1427,11 +1437,20 @@
     align-items: center;
     width: 100%;
     max-width: 360px;
+    position: relative;
+    z-index: 10; /* ensure controls sit above platform cards */
   }
   .content-upload-grid.has-file .trim-row {
     max-width: 320px;
     align-self: center;
-    margin: 0 auto;
+    margin: 0 auto 8px;
+    position: relative;
+    z-index: 10;
+  }
+  .content-upload-grid.has-file .range-row {
+    position: relative;
+    z-index: 10;
+    max-width: 320px;
   }
 
   /* Mobile / narrow: keep preview spanning full width */
@@ -1489,13 +1508,9 @@
   align-items: center;
   width: 100%;
   max-width: 320px;
-  margin-top: 8px;
-}
-
-.trim-row label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  margin: 12px auto 0; /* center under preview with some breathing room */
+  position: relative;
+  z-index: 4; /* ensure it sits above neighboring tiles and doesn't overlap visually */
 }
 
 .content-upload-grid.has-file .trim-row label input[type="number"] {
