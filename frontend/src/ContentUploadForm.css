@@ -489,14 +489,16 @@
   align-items: center;
   justify-content: center;
   border: 1px solid #e6e6e6;
-  padding: 12px;
+  padding: 8px; /* tighter padding for compact layout */
   border-radius: 6px;
   background: #fff;
   position: relative;
-  min-height: 180px; /* ensure live preview is visible in-column */
+  min-height: 160px; /* keep visible but smaller */
   box-sizing: border-box;
-  width: min(560px, 100%); /* prefer a horizontal, demo-friendly width but responsive */
-  min-width: 260px; /* keep readable even in narrow layouts */
+  width: min(480px, calc(100% - 64px)); /* smaller, professional width */
+  min-width: 240px; /* keep readable even in narrow layouts */
+  max-width: 100%;
+  max-height: 360px;
 }
 
 /* Make the inline preview more prominent and readable inside the column */
@@ -615,11 +617,20 @@
   display: flex;
   gap: 12px;
   width: 100%;
-  max-width: 560px;
+  max-width: 520px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 .range-row input[type="range"] {
-  flex: 1;
+  width: 100%;
   min-width: 0;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #e5e7eb;
+  transform: none;
 }
 
 @media (min-width: 768px) {
@@ -635,13 +646,12 @@
     width: 90px;
   }
   .range-row {
-    max-width: 560px;
+    display: grid;
+    grid-template-columns: repeat(2, 240px);
+    gap: 16px;
+    justify-content: center;
+    max-width: 520px;
   }
-}
-
-.pinterest-options {
-  display: grid;
-  gap: 0.5rem;
 }
 .pinterest-options select,
 .pinterest-options input {
@@ -669,7 +679,6 @@
   font-size: 13px;
 }
 .range-row {
-  display: flex;
   gap: 6px;
 }
 .template-hint {
@@ -1109,36 +1118,66 @@
   width: 80px;
 }
 
+/* Range controls: compact track + small thumb for a professional look */
 .range-row {
   display: flex;
   gap: 12px;
   width: 100%;
+  max-width: 520px;
+  justify-content: center;
 }
 
 .range-row input[type="range"] {
-  flex: 1;
+  width: 100%;
+  min-width: 0;
   height: 6px;
   border-radius: 3px;
   outline: none;
   appearance: none;
   -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #3b82f6;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: #e5e7eb;
+  transform: none;
 }
 
-.range-row input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+/* WebKit track/thumb */
+.range-row input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+}
+.range-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #3b82f6;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  margin-top: -4px; /* vertically center */
+}
+
+/* Firefox */
+.range-row input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+.range-row input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #3b82f6;
   border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* IE/Edge */
+.range-row input[type="range"]::-ms-track {
+  height: 6px;
+}
+.range-row input[type="range"]::-ms-thumb {
+  width: 14px;
+  height: 14px;
 }
 
 .file-info {
