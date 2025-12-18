@@ -1494,23 +1494,23 @@
   /* Center controls under the preview */
   .content-upload-grid.has-file .video-controls {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     width: 100%;
-    max-width: 320px;
+    max-width: 640px;
     position: relative;
     z-index: 10; /* ensure controls sit above platform cards */
   }
   .content-upload-grid.has-file .trim-row {
-    max-width: 320px;
-    align-self: stretch;
-    margin: 0 0 8px 0;
+    max-width: 640px;
+    align-self: center;
+    margin: 8px auto 0;
     position: relative;
     z-index: 10;
   }
   .content-upload-grid.has-file .range-row {
     position: relative;
     z-index: 10;
-    max-width: 320px;
+    max-width: 640px;
   }
 
   /* Mobile / narrow: keep preview spanning full width */
