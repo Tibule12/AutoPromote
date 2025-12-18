@@ -1428,7 +1428,7 @@
   /* Place the preview under the selected file in the left column on desktop */
   /* Place the live preview in the right column (above templates) on desktop */
   .content-upload-grid.has-file .preview-area {
-    grid-column: 2 / 3; /* right column */
+    grid-column: 1 / 2; /* main/center column */
     margin: 8px 0 16px 0;
     display: flex;
     flex-direction: column;
@@ -1443,7 +1443,7 @@
   .content-upload-grid .preview-area,
   .right-column .preview-area,
   .preview-area {
-    grid-column: 2 / 3 !important;
+    grid-column: 1 / 2 !important;
   }
 
   .preview-wrapper {
@@ -1475,10 +1475,10 @@
   }
   .content-upload-grid.has-file .preview-wrapper {
     width: 100%;
-    max-width: 320px; /* match right-column width */
-    margin: 0; /* align to column flow */
+    max-width: 640px; /* allow a wider preview inside the main column */
+    margin: 0 auto; /* center inside the column */
     aspect-ratio: 16 / 9;
-    max-height: 360px;
+    max-height: 420px;
     z-index: 3;
     display: block;
     padding: 8px;
