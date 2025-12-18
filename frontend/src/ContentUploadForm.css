@@ -7,12 +7,15 @@
 }
 
 .content-upload-form {
-  background: white;
+  /* Use a subtle dark-transparent background so the form blends with dark dashboard */
+  background: rgba(8, 10, 12, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
   width: 100%;
   box-sizing: border-box;
+  color: #e6e6e6; /* ensure text remains readable on darker background */
 }
 
 .content-upload-form h3 {
@@ -488,10 +491,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e6e6e6;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 6px; /* tighter padding for compact layout */
   border-radius: 6px;
-  background: #fff;
+  background: transparent; /* remove bright white background */
   position: relative;
   min-height: 140px; /* keep visible but smaller */
   box-sizing: border-box;
@@ -511,6 +514,7 @@
   aspect-ratio: 16/9;
   border-radius: 6px;
   object-fit: contain;
+  background: transparent; /* ensure video element doesn't show white background */
 }
 
 /* Trim controls: make inputs inline and compact on larger screens */
@@ -1375,19 +1379,26 @@
   .content-upload-grid.has-file .left-column {
     min-width: 0;
   }
-  /* Make the preview span both columns but keep it constrained and centered so
-     it is large and horizontal without hiding the right column panels. */
+  /* Place the preview inside the right column on desktop so it appears centered
+     inside the form panel, not spanning both columns. */
   .content-upload-grid.has-file .preview-area {
-    grid-column: 1 / -1;
+    grid-column: 2 / 3; /* occupy right column only on desktop */
     margin: 12px 0 24px 0;
     display: flex;
     flex-direction: column; /* stack preview and controls vertically */
     align-items: center;
+    justify-content: center;
     gap: 12px;
   }
+  .content-upload-grid.has-file .preview-area > label {
+    width: 100%;
+    text-align: center; /* center the Live Preview label */
+    font-weight: 600;
+    color: inherit;
+  }
   .content-upload-grid.has-file .preview-wrapper {
-    width: 360px; /* reduced so preview fits comfortably inside the form */
-    max-width: calc(100% - 80px);
+    width: 100%; /* fill the right column */
+    max-width: 320px; /* constrain to right column width */
     margin: 0 auto;
     aspect-ratio: 16 / 9;
     max-height: 260px; /* smaller limit to avoid overflow */
