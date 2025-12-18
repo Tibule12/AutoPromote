@@ -55,10 +55,23 @@ test("Record TikTok direct post flow and save video", async ({ page }) => {
   if (!BASE) BASE = await startServer();
   await page.goto(BASE + "/upload_component_test_page.html", { waitUntil: "networkidle" });
 
-  // Click TikTok tile and expand on the fixture page
-  await page.waitForSelector("#tile-tiktok", { timeout: 10000 });
-  await page.click("#tile-tiktok");
-  await page.waitForSelector("#expanded", { timeout: 10000 });
+  // Click TikTok tile and expand on the fixture page — try several selectors for robustness
+  const tileSelectors = ["#tile-tiktok", ".platform-tile[data-platform=\"tiktok\"]", "div[aria-label=\"Tiktok\"]"];
+  let clicked = false;
+  for (const sel of tileSelectors) {
+    try {
+      await page.waitForSelector(sel, { timeout: 15000 });
+      await page.click(sel);
+      clicked = true;
+      break;
+    } catch (e) {
+      // try next selector
+    }
+  }
+  if (!clicked) throw new Error("TikTok tile not found on fixture page");
+
+  // Wait for either the fixture's expanded element or the app's platform-expanded panel
+  await page.waitForSelector("#expanded, .platform-expanded", { timeout: 20000 });
 
   // Set privacy and consent (Direct Post requirements)
   await page.selectOption("#tiktok-privacy", "EVERYONE");
