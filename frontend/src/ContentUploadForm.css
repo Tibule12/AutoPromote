@@ -1694,36 +1694,62 @@
   }
 }
 
-/* Final override: force a consistent phone-style preview on desktop so
-   the Live Preview matches the mobile review appearance exactly. */
+/* Desktop: enforce a compact phone-style preview that stays inside the
+   left (main) column and does not overlap adjacent tiles or the header. */
 @media (min-width: 1024px) {
-  .content-upload-grid.has-file .preview-wrapper {
-    /* explicit phone-like frame dimensions */
-    max-width: 360px;
+  /* Ensure the grid layout remains predictable */
+  .content-upload-grid {
+    grid-template-columns: 2.2fr 320px;
+    gap: 24px;
+  }
+
+  .right-column {
+    width: 320px;
+    flex: 0 0 320px;
+    position: relative;
+    z-index: 1; /* keep right-column content beneath the preview frame */
+  }
+
+  /* Place preview in the main column and keep it in-flow (no absolute/fixed) */
+  .content-upload-grid.has-file .preview-area {
+    grid-column: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 12px 0 16px 0;
     width: 100%;
+  }
+
+  /* Compact phone-like frame */
+  .content-upload-grid.has-file .preview-wrapper {
     width: 360px;
+    max-width: 100%;
     aspect-ratio: 9 / 16;
-    padding: 12px;
+    padding: 10px;
     border-radius: 28px;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.85));
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
-    margin: 12px auto;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.9));
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
+    margin: 8px auto;
+    position: relative; /* keep it in the document flow */
+    z-index: 6; /* above right-column tiles but below global header */
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
   }
 
+  /* Video fills the phone frame without escaping */
   .content-upload-grid.has-file .preview-wrapper .preview-video {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* match mobile cropping behavior */
+    object-fit: cover;
     border-radius: 18px;
     background: #000;
     display: block;
   }
 
-  /* Keep controls the same width and centered under the phone frame */
+  /* Controls centered below the compact preview */
   .content-upload-grid.has-file .video-controls,
   .content-upload-grid.has-file .trim-row,
   .content-upload-grid.has-file .range-row {
@@ -1732,11 +1758,21 @@
     margin: 8px auto 0;
     align-self: center;
     justify-content: center;
+    position: relative;
+    z-index: 6;
   }
 
-  .content-upload-grid.has-file .preview-area > label {
-    text-align: center;
-    display: block;
-    width: 100%;
+  /* Ensure tiles and platform grid sit beneath the preview visually */
+  .platform-grid,
+  .preview-card,
+  .right-column .platform-grid {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Small safeguard: do not allow preview to escape viewport top */
+  .content-upload-grid.has-file .preview-wrapper {
+    margin-top: 24px;
+    max-height: calc(100vh - 160px);
   }
 }
