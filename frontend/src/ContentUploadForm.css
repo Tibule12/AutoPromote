@@ -1532,10 +1532,10 @@
   .content-upload-grid.has-file .preview-wrapper {
     width: 100%;
     /* On desktop we show a compact phone-style preview similar to mobile */
-    max-width: 280px;
+    max-width: 300px;
     margin: 8px auto; /* center inside the column */
     aspect-ratio: 9 / 16; /* tall phone-like frame */
-    max-height: 520px;
+    max-height: 520px; /* cap height so it doesn't stretch full viewport */
     z-index: 3;
     display: block;
     padding: 8px;
@@ -1779,20 +1779,21 @@
 
   /* Compact phone-like frame */
   .content-upload-grid.has-file .preview-wrapper {
-    width: 360px;
+    width: 300px;
     max-width: 100%;
     aspect-ratio: 9 / 16;
     padding: 10px;
-    border-radius: 28px;
+    border-radius: 22px;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.9));
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
-    margin: 8px auto;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+    margin: 12px auto;
     position: relative; /* keep it in the document flow */
     z-index: 6; /* above right-column tiles but below global header */
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
+    max-height: 520px; /* prevent full-viewport stretching */
   }
 
   /* Video fills the phone frame without escaping */
