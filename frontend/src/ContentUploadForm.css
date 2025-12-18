@@ -439,7 +439,7 @@
   }
 }
 
-..file-upload {
+.file-upload {
   border: 3px dashed #d1d5db;
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
   border-radius: 16px;
@@ -615,10 +615,11 @@
   display: flex;
   gap: 12px;
   width: 100%;
-  max-width: 720px;
+  max-width: 560px;
 }
 .range-row input[type="range"] {
   flex: 1;
+  min-width: 0;
 }
 
 @media (min-width: 768px) {
@@ -634,7 +635,7 @@
     width: 90px;
   }
   .range-row {
-    max-width: 720px;
+    max-width: 560px;
   }
 }
 
@@ -1119,11 +1120,7 @@
   height: 6px;
   border-radius: 3px;
   outline: none;
-  -webkit-appearance: none;
-  background: #e5e7eb;
-}
-
-.range-row input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
   -webkit-appearance: none;
   appearance: none;
   width: 18px;
@@ -1350,11 +1347,11 @@
     gap: 12px;
   }
   .content-upload-grid.has-file .preview-wrapper {
-    width: 720px; /* fixed demo-friendly width on desktop */
-    max-width: calc(100% - 40px);
+    width: 560px; /* smaller demo-friendly width to fit tighter viewports */
+    max-width: calc(100% - 80px);
     margin: 0 auto;
     aspect-ratio: 16 / 9;
-    max-height: 540px; /* reasonable limit */
+    max-height: 360px; /* reduced to better fit the form */
     z-index: 3; /* keep above minor elements but not overlay layout */
     display: block;
   }
@@ -1362,7 +1359,7 @@
     width: 100%;
     aspect-ratio: 16/9;
     height: auto;
-    object-fit: cover; /* fill the horizontal space while preserving aspect */
+    object-fit: contain; /* avoid cropping and overflow */
   }
 
   /* Trim row centered under preview */
@@ -1371,18 +1368,23 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 720px;
+    max-width: 560px;
   }
   .content-upload-grid.has-file .video-controls .range-row {
     width: 100%;
   }
+  .content-upload-grid.has-file .range-row {
+    max-width: 520px;
+    justify-content: center;
+    margin: 0 auto;
+  }
   .trim-row {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     justify-content: center;
     align-items: center;
     width: 100%;
-    max-width: 720px;
+    max-width: 520px;
     margin-top: 8px;
   }
 
