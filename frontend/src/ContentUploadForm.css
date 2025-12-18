@@ -1379,37 +1379,52 @@
   .content-upload-grid.has-file .left-column {
     min-width: 0;
   }
-  /* Place the preview inside the right column on desktop so it appears centered
-     inside the form panel, not spanning both columns. */
+  /* Place the preview under the selected file inside the left column so it sits
+     directly beneath the file input and remains inside the form panel. */
   .content-upload-grid.has-file .preview-area {
-    grid-column: 2 / 3; /* occupy right column only on desktop */
+    grid-column: 1 / 2; /* occupy left column */
     margin: 12px 0 24px 0;
     display: flex;
     flex-direction: column; /* stack preview and controls vertically */
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start; /* align to left to sit beneath the file box */
     gap: 12px;
+    width: 100%;
   }
   .content-upload-grid.has-file .preview-area > label {
     width: 100%;
-    text-align: center; /* center the Live Preview label */
+    text-align: left; /* left-align the Live Preview label under the file box */
     font-weight: 600;
     color: inherit;
+    margin-bottom: 6px;
   }
   .content-upload-grid.has-file .preview-wrapper {
-    width: 100%; /* fill the right column */
-    max-width: 320px; /* constrain to right column width */
-    margin: 0 auto;
+    width: 100%; /* fill the left column but constrained by max-width */
+    max-width: 360px; /* keep the size you liked but inside left column */
+    margin: 0; /* align with file box */
     aspect-ratio: 16 / 9;
-    max-height: 260px; /* smaller limit to avoid overflow */
-    z-index: 3; /* keep above minor elements but not overlay layout */
+    max-height: 260px; /* keep sensible height */
+    z-index: 3;
     display: block;
+    padding: 6px;
+    align-self: flex-start; /* align to left edge of column */
   }
   .content-upload-grid.has-file .preview-wrapper .preview-video {
     width: 100%;
     aspect-ratio: 16/9;
     height: auto;
-    object-fit: contain; /* avoid cropping and overflow */
+    object-fit: contain;
+  }
+
+  /* Keep controls aligned under the left-aligned preview */
+  .content-upload-grid.has-file .video-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 360px;
+  }
+  .content-upload-grid.has-file .trim-row {
+    max-width: 320px;
+    align-self: flex-start;
   }
 
   /* Trim row centered under preview */
