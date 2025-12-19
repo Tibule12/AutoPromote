@@ -167,6 +167,7 @@ function ContentUploadForm({
   const [enhancedSuggestions, setEnhancedSuggestions] = useState(null);
   const [privacyAutoSwitched, setPrivacyAutoSwitched] = useState(false);
   const [tiktokProcessingNotice, setTiktokProcessingNotice] = useState("");
+  const [tiktokPollStatus, setTiktokPollStatus] = useState(null);
   const titleInputRef = useRef(null);
   const descInputRef = useRef(null);
 
@@ -794,6 +795,16 @@ function ContentUploadForm({
       setPerPlatformUploadStatus(prev => ({ ...prev, [platform]: "Publishing to platform..." }));
       const resp = await onUpload(contentData);
       console.log("[Upload] onUpload response:", resp);
+      // If backend created a content record, try to poll for its processing status
+      try {
+        const maybeKey = idempotencyKey || (resp && (resp.idempotency_key || resp.id));
+        if (maybeKey) {
+          setTiktokPollStatus({ status: "pending", message: "Waiting for platform processing..." });
+          pollMyContentForIdempotency(maybeKey, platform);
+        }
+      } catch (e) {
+        console.warn("Polling setup failed", e);
+      }
       setPerPlatformUploadStatus(prev => ({
         ...prev,
         [platform]: "✓ Upload submitted. It may take a few minutes to process.",
@@ -807,6 +818,56 @@ function ContentUploadForm({
       }));
     } finally {
       setPerPlatformUploading(prev => ({ ...prev, [platform]: false }));
+    }
+  };
+
+  // Poll /api/content/my-content for a record with the given idempotency key.
+  // This helps surface post-processing state to the user (TikTok may take minutes).
+  const pollMyContentForIdempotency = async (key, platform, attempts = 15, intervalMs = 4000) => {
+    try {
+      const currentUser = auth && auth.currentUser;
+      let headers = { Accept: "application/json" };
+      if (currentUser) {
+        const token = await currentUser.getIdToken(true);
+        headers.Authorization = `Bearer ${token}`;
+      }
+      for (let i = 0; i < attempts; i++) {
+        try {
+          const res = await fetch(API_ENDPOINTS.MY_CONTENT, { headers });
+          if (!res.ok) {
+            console.warn("pollMyContentForIdempotency: my-content fetch not ok", res.status);
+            await new Promise(r => setTimeout(r, intervalMs));
+            continue;
+          }
+          const list = await res.json();
+          if (Array.isArray(list) && list.length) {
+            const found = list.find(
+              c => c.idempotency_key === key || c.id === key || c.content_id === key
+            );
+            if (found) {
+              const msg = found.published
+                ? `Published on ${platform}. View: ${found.platform_post_url || found.share_url || "(open your profile)"}`
+                : `Upload recorded. Processing on ${platform}. Refresh in a few minutes to see status.`;
+              setTiktokPollStatus({
+                status: found.published ? "published" : "processing",
+                message: msg,
+                record: found,
+              });
+              return found;
+            }
+          }
+        } catch (err) {
+          console.warn("pollMyContentForIdempotency error", err);
+        }
+        await new Promise(r => setTimeout(r, intervalMs));
+      }
+      setTiktokPollStatus({
+        status: "timeout",
+        message: "Processing is taking longer than expected. Check your TikTok profile later.",
+      });
+    } catch (err) {
+      console.error("pollMyContentForIdempotency fatal", err);
+      setTiktokPollStatus({ status: "error", message: "Unable to poll status." });
     }
   };
 
