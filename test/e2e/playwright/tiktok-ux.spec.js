@@ -1,28 +1,13 @@
 const { test, expect } = require("@playwright/test");
-const { spawn } = require("child_process");
-
 const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
-const BASE = `http://localhost:${STATIC_PORT}`;
-
-let serverProcess;
 
 test.beforeAll(async () => {
-  serverProcess = spawn("node", ["test/e2e/playwright/static-server.js"], { stdio: "inherit" });
-  const maxWait = 5000;
-  const start = Date.now();
-  const fetch = require("node-fetch");
-  while (Date.now() - start < maxWait) {
-    try {
-      const res = await fetch(`${BASE}/upload_component_test_page.html`);
-      if (res.ok) break;
-    } catch (e) {}
-    await new Promise(r => setTimeout(r, 200));
-  }
+  // Start the in-process static server module so it sets E2E_BASE_URL reliably
+  const staticReady = require("./static-server");
+  await staticReady;
 });
 
-test.afterAll(async () => {
-  if (serverProcess) serverProcess.kill();
-});
+const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
 
 test.beforeEach(async ({ page }) => {
   await page.setExtraHTTPHeaders({ "x-playwright-e2e": "1" });
@@ -56,7 +41,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("TikTok UX: privacy no-default, consent required, commercial disclosure enforced", async ({ page }) => {
-  await page.goto(`${BASE}/upload_component_test_page.html`);
+  await page.goto(`${getBase()}/upload_component_test_page.html`);
   // select TikTok tile
   await page.click('#tile-tiktok');
   // ensure privacy select present and default is empty
