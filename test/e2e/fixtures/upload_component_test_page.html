@@ -155,6 +155,16 @@
             shortsMode: ytShorts ? !!ytShorts.checked : false,
           };
         }
+        if (selectedPlatform === 'tiktok') {
+          const consentEl = document.getElementById('tiktok-consent');
+          const privacyEl = document.getElementById('tiktok-privacy');
+          const consent = consentEl ? !!consentEl.checked : false;
+          const privacy = privacyEl ? privacyEl.value : "";
+          if (consent && privacy) {
+            platformOptions.tiktok = { consent, privacy };
+          }
+        }
+
         const payload = {
           title,
           description,
@@ -216,6 +226,16 @@
             shortsMode: ytShorts ? !!ytShorts.checked : false,
           };
         }
+        if (selectedPlatform === 'tiktok') {
+          const consentEl = document.getElementById('tiktok-consent');
+          const privacyEl = document.getElementById('tiktok-privacy');
+          const consent = consentEl ? !!consentEl.checked : false;
+          const privacy = privacyEl ? privacyEl.value : "";
+          if (consent && privacy) {
+            platformOptions.tiktok = { consent, privacy };
+          }
+        }
+
         const payload = {
           title,
           description,
