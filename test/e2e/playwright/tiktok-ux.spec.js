@@ -40,8 +40,14 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+const fs = require('fs');
+const path = require('path');
+
 test("TikTok UX: privacy no-default, consent required, commercial disclosure enforced", async ({ page }) => {
-  await page.goto(`${getBase()}/upload_component_test_page.html`);
+  // Load fixture HTML directly to avoid static server port race
+  const fixturePath = path.join(__dirname, '../fixtures/upload_component_test_page.html');
+  const html = fs.readFileSync(fixturePath, 'utf8');
+  await page.setContent(html, { waitUntil: 'domcontentloaded' });
   // select TikTok tile
   await page.click('#tile-tiktok');
   // ensure privacy select present and default is empty
