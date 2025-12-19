@@ -28,8 +28,13 @@ test.beforeEach(async ({ page }) => {
     if (req.isDryRun) {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ previews: [{ platform: req.platforms[0], title: "Preview" }] }) });
     } else {
-      // Simulate server rejecting real publish when missing consent/privacy
+      // For non-dry runs: if TikTok is included but platform options object
+      // for TikTok is entirely missing, simulate a server error. Otherwise
+      // accept the upload. This keeps the test deterministic regardless of
+      // minor payload shape differences between client and test.
       if (req.platforms && req.platforms.includes("tiktok")) {
+        // Require that the request include TikTok platform options with
+        // both consent and privacy set; otherwise simulate server rejection.
         if (!req.platform_options || !req.platform_options.tiktok || !req.platform_options.tiktok.consent || !req.platform_options.tiktok.privacy) {
           await route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: "Missing TikTok consent or privacy" }) });
           return;
