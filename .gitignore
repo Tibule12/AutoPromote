@@ -23,3 +23,14 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# Local secrets (service account for audits)
+keys/*.json
+
+# Local env and secrets
+.env
+service-account-key.json
+*.key
+*.pem
+**/service-account-key.json
+**/.env
