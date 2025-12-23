@@ -224,13 +224,11 @@ router.post("/oauth/prepare", authMiddleware, oauthPrepareLimiter, async (req, r
           // If both attempts returned 5xx, return a 503 so the frontend can
           // surface a friendly 'service unavailable' message instead of
           // opening the provider page and showing a generic provider error.
-          return res
-            .status(503)
-            .json({
-              error: "provider_unavailable",
-              details: "Snapchat returned 5xx for primary and fallback auth URLs",
-              probeStatus: { primary: probe.status, fallback: probe2.status },
-            });
+          return res.status(503).json({
+            error: "provider_unavailable",
+            details: "Snapchat returned 5xx for primary and fallback auth URLs",
+            probeStatus: { primary: probe.status, fallback: probe2.status },
+          });
         }
       } else {
         if (DEBUG_SNAPCHAT_OAUTH) console.log("snapchat: auth URL probe OK status=", probe.status);
@@ -262,7 +260,18 @@ router.post("/oauth/prepare", authMiddleware, oauthPrepareLimiter, async (req, r
     }
 
     // Return the scope and a probeStatus to help client diagnostics
-    res.json({ authUrl, state, popup: popupRequested, scope, probeStatus: probeStatusVar });
+    const scopeWarning =
+      scope === "snapchat-marketing-api"
+        ? "This scope may require Snapchat Marketing API approval. If you see an authorization error, try using scope=display_name or request API access in the Snapchat developer console."
+        : null;
+    res.json({
+      authUrl,
+      state,
+      popup: popupRequested,
+      scope,
+      probeStatus: probeStatusVar,
+      scopeWarning,
+    });
   } catch (err) {
     console.error("Snapchat OAuth prepare error:", err);
     res.status(500).json({ error: "OAuth prepare failed", details: err.message });
@@ -442,13 +451,34 @@ router.all("/auth/callback", callbackLimiter, async (req, res) => {
         error: tokenData.error,
         error_description: tokenData.error_description,
       });
-      // Avoid returning token/secret details; only return minimal error info
-      return res
-        .status(400)
-        .json({
-          error: "Failed to exchange code for token",
+
+      // If the provider reports an invalid scope, give a clear UX path:
+      // - For browser GET flows, redirect to dashboard with a helpful query param
+      // - For programmatic POST flows, return a clear error explaining scope needs
+      if (tokenData && tokenData.error === "invalid_scope") {
+        console.warn("snapchat: invalid_scope reported by provider for state=", state);
+        if (req.method === "GET") {
+          // Redirect to dashboard with a query param so frontend can show an explanation
+          return res.redirect(
+            `${DASHBOARD_URL}?snapchat=error_invalid_scope&message=${encodeURIComponent(
+              "Snapchat rejected the requested scope. Request Marketing API access or retry with scope=display_name."
+            )}`
+          );
+        }
+
+        return res.status(400).json({
+          error: "invalid_scope",
+          message:
+            "Requested scope is not allowed for this Snapchat app. Request Marketing API access in the Snapchat developer console or retry with scope=display_name.",
           details: { error: tokenData.error, error_description: tokenData.error_description },
         });
+      }
+
+      // Avoid returning token/secret details; only return minimal error info
+      return res.status(400).json({
+        error: "Failed to exchange code for token",
+        details: { error: tokenData.error, error_description: tokenData.error_description },
+      });
     }
 
     // Get user profile information
@@ -715,12 +745,10 @@ router.post("/creative", authMiddleware, apiActionLimiter, async (req, res) => {
       process.env.SNAPCHAT_AD_ACCOUNT_ID;
 
     if (!adAccountId) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Ad account ID is required. Please provide ad_account_id or configure SNAPCHAT_AD_ACCOUNT_ID",
-        });
+      return res.status(400).json({
+        error:
+          "Ad account ID is required. Please provide ad_account_id or configure SNAPCHAT_AD_ACCOUNT_ID",
+      });
     }
 
     // Upload media if media_url provided
