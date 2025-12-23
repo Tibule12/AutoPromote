@@ -498,6 +498,38 @@ router.get("/earnings/leaderboard", async (req, res) => {
   }
 });
 
+// GET /earnings/payouts - Get authenticated user's payout history
+router.get("/earnings/payouts", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const status = req.query.status; // optional filter e.g., 'pending' or 'completed'
+    const limit = Math.min(parseInt(req.query.limit || "100", 10), 500);
+
+    let snap;
+    try {
+      let q = db
+        .collection("payouts")
+        .where("uid", "==", userId)
+        .orderBy("requestedAt", "desc")
+        .limit(limit);
+      if (status) q = q.where("status", "==", status);
+      snap = await q.get();
+    } catch (e) {
+      // fallback: if ordering or composite index fails, use a simpler query
+      console.warn("[UserPayouts] ordered query failed, falling back to simple query:", e.message);
+      let q2 = db.collection("payouts").where("uid", "==", userId).limit(limit);
+      if (status) q2 = q2.where("status", "==", status);
+      snap = await q2.get();
+    }
+
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, payouts: items });
+  } catch (err) {
+    console.error("Error listing user payouts:", err);
+    res.status(500).json({ error: "Failed to list payouts" });
+  }
+});
+
 // POST /content/:contentId/calculate-rewards - Calculate rewards for specific content
 router.post("/content/:contentId/calculate-rewards", authMiddleware, async (req, res) => {
   try {
