@@ -2428,12 +2428,78 @@ try {
     ) {
       return next();
     }
-    res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
+    try {
+      const fs = require("fs");
+      const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
+      if (!fs.existsSync(frontIndex)) {
+        console.warn(
+          `[startup] Frontend build not found at ${frontIndex}. Returning 503 placeholder for SPA routes.`
+        );
+        return res
+          .status(503)
+          .send(
+            "<html><body><h1>Service Unavailable</h1><p>Frontend build not found. Please run <code>npm --prefix frontend run build</code> during deploy.</p></body></html>"
+          );
+      }
+      return res.sendFile(frontIndex, err => {
+        if (err) {
+          console.warn(
+            "[startup] sendFile error for SPA route:",
+            err && err.message ? err.message : err
+          );
+          return res
+            .status(503)
+            .send(
+              "<html><body><h1>Service Unavailable</h1><p>Error serving frontend index. Try rebuilding.</p></body></html>"
+            );
+        }
+      });
+    } catch (e) {
+      console.warn("[startup] SPA route error:", e && e.message ? e.message : e);
+      return res
+        .status(503)
+        .send(
+          "<html><body><h1>Service Unavailable</h1><p>Frontend currently unavailable.</p></body></html>"
+        );
+    }
   });
 
   // Catch all handler: send back React's index.html file for client-side routing
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+    try {
+      const fs = require("fs");
+      const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
+      if (!fs.existsSync(frontIndex)) {
+        console.warn(
+          `[startup] Frontend build not found at ${frontIndex}. Returning 503 placeholder.`
+        );
+        return res
+          .status(503)
+          .send(
+            "<html><body><h1>Service Unavailable</h1><p>Frontend build not found. Please run <code>npm --prefix frontend run build</code> during deploy.</p></body></html>"
+          );
+      }
+      return res.sendFile(frontIndex, err => {
+        if (err) {
+          console.warn(
+            "[startup] catch-all sendFile error:",
+            err && err.message ? err.message : err
+          );
+          return res
+            .status(503)
+            .send(
+              "<html><body><h1>Service Unavailable</h1><p>Error serving frontend index. Try rebuilding.</p></body></html>"
+            );
+        }
+      });
+    } catch (e) {
+      console.warn("[startup] catch-all handler error:", e && e.message ? e.message : e);
+      return res
+        .status(503)
+        .send(
+          "<html><body><h1>Service Unavailable</h1><p>Frontend currently unavailable.</p></body></html>"
+        );
+    }
   });
 
   // Error handling middleware
