@@ -153,14 +153,25 @@ router.post("/oauth/prepare", authMiddleware, oauthPrepareLimiter, async (req, r
   if (res.headersSent) return;
 
   try {
-    // Use space separated scopes per Snapchat OAuth requirements
-    // Use space separated scopes per Snapchat OAuth requirements
-    // Allow a `test_scope` body param for quick debugging (e.g. 'display_name')
+    // Determine scope to request. Priority:
+    // 1) `test_scope` body param (for quick debugging)
+    // 2) `SNAPCHAT_DEFAULT_SCOPE` env var (configurable on Render)
+    // 3) hardcoded default 'snapchat-marketing-api'
     const requestedScope = (req.body && req.body.test_scope) || null;
+    const envDefaultScope = process.env.SNAPCHAT_DEFAULT_SCOPE || null;
     const allowedScopes = new Set(["snapchat-marketing-api", "display_name"]);
-    const scope = allowedScopes.has(String(requestedScope))
-      ? String(requestedScope)
-      : "snapchat-marketing-api";
+    let scope = "snapchat-marketing-api";
+    let scopeSource = "default";
+    if (requestedScope && allowedScopes.has(String(requestedScope))) {
+      scope = String(requestedScope);
+      scopeSource = "request";
+    } else if (envDefaultScope && allowedScopes.has(String(envDefaultScope))) {
+      scope = String(envDefaultScope);
+      scopeSource = "env";
+    } else {
+      scope = "snapchat-marketing-api";
+      scopeSource = "default";
+    }
     const { v4: uuidv4 } = require("../lib/uuid-compat");
     const state = uuidv4();
     const userId = req.userId || "anonymous";
@@ -264,11 +275,14 @@ router.post("/oauth/prepare", authMiddleware, oauthPrepareLimiter, async (req, r
       scope === "snapchat-marketing-api"
         ? "This scope may require Snapchat Marketing API approval. If you see an authorization error, try using scope=display_name or request API access in the Snapchat developer console."
         : null;
+    if (DEBUG_SNAPCHAT_OAUTH)
+      console.log("snapchat: selected scope=%s source=%s", scope, scopeSource);
     res.json({
       authUrl,
       state,
       popup: popupRequested,
       scope,
+      scopeSource,
       probeStatus: probeStatusVar,
       scopeWarning,
     });
@@ -288,12 +302,18 @@ router.get(
     if (res.headersSent) return;
     try {
       const state = require("../lib/uuid-compat").v4();
-      const scope =
-        req.query &&
-        req.query.test_scope &&
-        ["snapchat-marketing-api", "display_name"].includes(req.query.test_scope)
-          ? req.query.test_scope
-          : "snapchat-marketing-api";
+      const envDefaultScope = process.env.SNAPCHAT_DEFAULT_SCOPE || null;
+      const requestedQueryScope = req.query && req.query.test_scope ? req.query.test_scope : null;
+      let scope = "snapchat-marketing-api";
+      let scopeSource = "default";
+      const allowedS = ["snapchat-marketing-api", "display_name"];
+      if (requestedQueryScope && allowedS.includes(requestedQueryScope)) {
+        scope = requestedQueryScope;
+        scopeSource = "request";
+      } else if (envDefaultScope && allowedS.includes(envDefaultScope)) {
+        scope = envDefaultScope;
+        scopeSource = "env";
+      }
       const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
       const url = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
       let status = null;
@@ -320,13 +340,27 @@ router.get(
           }
         };
         console.log(
-          "snapchat: preflight authUrl clientId=%s redirect=%s probe=%s",
+          "snapchat: preflight authUrl clientId=%s redirect=%s probe=%s scope=%s source=%s",
           mask(clientIdForAuthorize),
           cfg.redirect,
-          status
+          status,
+          scope,
+          scopeSource
         );
       }
-      res.json({ ok: true, authUrl: url, probeStatus: status, location, scope });
+      const scopeWarning =
+        scope === "snapchat-marketing-api"
+          ? "This scope may require Snapchat Marketing API approval. If you see an authorization error, try using scope=display_name or request API access in the Snapchat developer console."
+          : null;
+      res.json({
+        ok: true,
+        authUrl: url,
+        probeStatus: status,
+        location,
+        scope,
+        scopeSource,
+        scopeWarning,
+      });
     } catch (e) {
       res.status(500).json({ ok: false, error: e.message });
     }

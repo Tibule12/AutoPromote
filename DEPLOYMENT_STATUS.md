@@ -215,6 +215,8 @@
 
 > Deploy note: For Render or other PaaS deployments that host the backend and static frontend together, ensure the frontend production build runs during deploy (for example: `npm --prefix frontend run build`) so `frontend/build/index.html` is present and the server can serve the SPA. If you use CI, add this to your deploy workflow.
 
+> Snapchat scope: you can control the default OAuth scope from the Render dashboard by adding `SNAPCHAT_DEFAULT_SCOPE` (allowed values: `snapchat-marketing-api`, `display_name`). Use `display_name` to test or when Marketing API access is not yet approved.
+
 ### Backend API (Render)
 
 - **URL:** https://autopromote.onrender.com
