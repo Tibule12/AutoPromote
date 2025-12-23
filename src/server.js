@@ -1858,6 +1858,19 @@ try {
   // Serve static files from the React app build directory
   app.use(express.static(path.join(__dirname, "../frontend/build")));
 
+  // Warn if the frontend build is missing (helps diagnose deploys like Render where build step may be omitted)
+  try {
+    const fs = require("fs");
+    const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
+    if (!fs.existsSync(frontIndex)) {
+      console.warn(
+        `[startup] Frontend build not found at ${frontIndex}. Static SPA will return 404 for root. Ensure 'npm --prefix frontend run build' runs during deploy.`
+      );
+    }
+  } catch (e) {
+    /* ignore */
+  }
+
   // Serve the admin test HTML file
   app.get("/admin-test", routeLimiter({ windowHint: "admin_static" }), (req, res) => {
     // Check if file exists before sending
@@ -1886,8 +1899,22 @@ try {
   app.get("/admin-dashboard", routeLimiter({ windowHint: "admin_static" }), (req, res) => {
     // Check if file exists before sending
     try {
-      res.sendFile(path.join(__dirname, "frontend/build", "index.html"));
+      const fs = require("fs");
+      const frontIndexPath = path.join(__dirname, "../frontend/build", "index.html");
+      if (!fs.existsSync(frontIndexPath)) {
+        console.warn(
+          `[startup] Frontend build not found at ${frontIndexPath}. Run 'npm --prefix frontend run build' during deploy.`
+        );
+        return res.send(
+          "<html><body><h1>Admin Dashboard</h1><p>The actual dashboard is not available.</p></body></html>"
+        );
+      }
+      return res.sendFile(frontIndexPath);
     } catch (error) {
+      console.warn(
+        "[startup] admin-dashboard sendFile error:",
+        error && error.message ? error.message : error
+      );
       res.send(
         "<html><body><h1>Admin Dashboard</h1><p>The actual dashboard is not available.</p></body></html>"
       );
