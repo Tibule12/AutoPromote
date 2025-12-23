@@ -1976,6 +1976,21 @@ try {
         process.env.COMMIT_HASH ||
         process.env.VERCEL_GIT_COMMIT_SHA ||
         null;
+
+      // Frontend build presence check - helps detect deploys missing 'npm --prefix frontend run build'
+      try {
+        const fs = require("fs");
+        const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
+        const frontPresent = fs.existsSync(frontIndex);
+        extended.diagnostics.frontend = { present: frontPresent, path: frontIndex };
+        if (!frontPresent) {
+          extended.diagnostics.frontend.message = "frontend build missing";
+          extended.diagnostics.degraded = true;
+        }
+      } catch (e) {
+        extended.diagnostics.frontendError = e.message;
+        extended.diagnostics.degraded = true;
+      }
       extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === "true";
 
       // OpenAI configuration status

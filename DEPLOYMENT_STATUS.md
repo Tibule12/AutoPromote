@@ -213,6 +213,8 @@
 - **Last Deploy:** Latest commit
 - **Build:** React production build in `/docs`
 
+> Deploy note: For Render or other PaaS deployments that host the backend and static frontend together, ensure the frontend production build runs during deploy (for example: `npm --prefix frontend run build`) so `frontend/build/index.html` is present and the server can serve the SPA. If you use CI, add this to your deploy workflow.
+
 ### Backend API (Render)
 
 - **URL:** https://autopromote.onrender.com
