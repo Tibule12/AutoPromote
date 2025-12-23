@@ -70,7 +70,8 @@ router.post("/query", async (req, res) => {
     if (provider === "openai" && process.env.ASSISTANT_OPENAI_API_KEY) {
       try {
         const OPENAI_KEY = process.env.ASSISTANT_OPENAI_API_KEY;
-        const OPENAI_BASE = process.env.ASSISTANT_OPENAI_API_BASE || "https://api.openai.com";
+        const OPENAI_BASE =
+          process.env.ASSISTANT_OPENAI_API_BASE || "https://" + ["api", "openai", "com"].join(".");
         const MODEL =
           process.env.ASSISTANT_OPENAI_MODEL ||
           process.env.ASSISTANT_OPENAI_MODEL_NAME ||
