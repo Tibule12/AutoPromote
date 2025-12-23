@@ -2173,6 +2173,21 @@ try {
           configured: !!(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
         },
       };
+
+      // Frontend build presence check - helps detect deploys missing 'npm --prefix frontend run build'
+      try {
+        const fs = require("fs");
+        const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
+        const frontPresent = fs.existsSync(frontIndex);
+        extended.diagnostics.frontend = { present: frontPresent, path: frontIndex };
+        if (!frontPresent) {
+          extended.diagnostics.frontend.message = "frontend build missing";
+          extended.diagnostics.degraded = true;
+        }
+      } catch (e) {
+        extended.diagnostics.frontendError = e.message;
+        extended.diagnostics.degraded = true;
+      }
     } catch (e) {
       extended.diagnosticsError = e.message;
     }
