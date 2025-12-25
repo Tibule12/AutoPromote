@@ -3,8 +3,10 @@
 // Track manual reposts, scrape metrics, cross-platform promotion
 
 const { db } = require("../firebaseAdmin");
-const fetch = require("node-fetch");
+const _fetch = require("node-fetch");
+void _fetch;
 const crypto = require("crypto");
+const logger = require("../services/logger");
 
 class RepostDrivenEngine {
   // Track manual repost with embedded markers
@@ -42,7 +44,7 @@ class RepostDrivenEngine {
         message: "Repost tracking initiated. Metrics will be scraped automatically.",
       };
     } catch (error) {
-      console.error("Error tracking manual repost:", error);
+      logger.error("Error tracking manual repost:", error);
       throw error;
     }
   }
@@ -92,7 +94,7 @@ class RepostDrivenEngine {
         this.scrapeRepostMetrics(repostId, platform, repostUrl);
       }, 1000);
     } catch (error) {
-      console.error("Error scheduling metric scraping:", error);
+      logger.error("Error scheduling metric scraping:", error);
       throw error;
     }
   }
@@ -100,7 +102,7 @@ class RepostDrivenEngine {
   // Scrape metrics from repost URL
   async scrapeRepostMetrics(repostId, platform, repostUrl) {
     try {
-      console.log(`🔍 Scraping metrics for repost ${repostId} on ${platform}`);
+      logger.info(`🔍 Scraping metrics for repost ${repostId} on ${platform}`);
 
       let metrics = { views: 0, engagements: 0, shares: 0, comments: 0, likes: 0 };
 
@@ -119,7 +121,7 @@ class RepostDrivenEngine {
           metrics = await this.scrapeTwitterMetrics(repostUrl);
           break;
         default:
-          console.warn(`Unsupported platform for scraping: ${platform}`);
+          logger.warn(`Unsupported platform for scraping: ${platform}`);
           return;
       }
 
@@ -133,9 +135,9 @@ class RepostDrivenEngine {
       // Update original content metrics
       await this.updateOriginalContentMetrics(repostId, metrics);
 
-      console.log(`✅ Scraped metrics for repost ${repostId}:`, metrics);
+      logger.info(`✅ Scraped metrics for repost ${repostId}:`, metrics);
     } catch (error) {
-      console.error(`Error scraping metrics for repost ${repostId}:`, error);
+      logger.error(`Error scraping metrics for repost ${repostId}:`, error);
 
       // Update scrape status to failed
       await db.collection("manual_reposts").doc(repostId).update({
@@ -147,7 +149,7 @@ class RepostDrivenEngine {
   }
 
   // Scrape TikTok metrics (simulated - would use TikTok API)
-  async scrapeTikTokMetrics(url) {
+  async scrapeTikTokMetrics(_url) {
     // In production, this would use TikTok's API or scraping service
     // For now, simulate realistic metrics
     const baseViews = crypto.randomInt(10000, 50000 + 10000);
@@ -165,7 +167,7 @@ class RepostDrivenEngine {
   }
 
   // Scrape Instagram metrics
-  async scrapeInstagramMetrics(url) {
+  async scrapeInstagramMetrics(_url) {
     const baseViews = crypto.randomInt(5000, 30000 + 5000);
     const engagementRate = 0.03 + (crypto.randomInt(0, 100000) / 100000) * 0.12;
 
@@ -181,7 +183,7 @@ class RepostDrivenEngine {
   }
 
   // Scrape YouTube metrics
-  async scrapeYouTubeMetrics(url) {
+  async scrapeYouTubeMetrics(_url) {
     const baseViews = crypto.randomInt(10000, 100000 + 10000);
     const engagementRate = 0.02 + (crypto.randomInt(0, 100000) / 100000) * 0.08;
 
@@ -196,7 +198,7 @@ class RepostDrivenEngine {
   }
 
   // Scrape Twitter metrics
-  async scrapeTwitterMetrics(url) {
+  async scrapeTwitterMetrics(_url) {
     const baseViews = crypto.randomInt(2000, 20000 + 2000);
     const engagementRate = 0.01 + (crypto.randomInt(0, 100000) / 100000) * 0.06;
 
