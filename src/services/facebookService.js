@@ -1,7 +1,6 @@
 // facebookService.js - Facebook Graph API OAuth and page posting
-const { db, admin } = require("../firebaseAdmin");
+const { db } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
-const crypto = require("crypto");
 
 let fetchFn = global.fetch;
 if (!fetchFn) {
@@ -245,7 +244,7 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
       return { platform: "facebook", success: false, error: "not_authenticated" };
     }
 
-    const tokens = connection.tokens;
+    // connection.tokens intentionally omitted (unused in this path)
     const meta = connection.meta || {};
 
     // Get selected page from payload or use default from connection

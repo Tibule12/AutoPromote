@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const { db } = require("../firebaseAdmin");
 
 // Generic event recorder. Minimal schema for future aggregation.

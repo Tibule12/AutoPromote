@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- this module intentionally logs to console when using the built-in console provider for local testing */
 // emailProviders.js - provider registry & factory
 // Supports: console (default), sendgrid (API key), mailgun (API key + domain),
 //           resend (API key), mailtrap (SMTP)
@@ -6,7 +7,7 @@ const { maskEmail } = require("../utils/logSanitizer");
 const providers = {
   console: () => ({
     name: "console",
-    async send({ to, subject, html, text, headers }) {
+    async send({ to, subject, html, text, headers: _headers }) {
       console.log("\n[email][console] to=%s subject=%s", maskEmail(to), subject);
       if (text) console.log("[email][text]", text.slice(0, 800));
       if (html) console.log("[email][html]", html.slice(0, 800));
@@ -106,16 +107,15 @@ const providers = {
     const key = process.env.MAILGUN_API_KEY;
     const domain = process.env.MAILGUN_DOMAIN;
     if (!key || !domain) throw new Error("missing MAILGUN_API_KEY/MAILGUN_DOMAIN");
-    let formData;
     try {
-      formData = require("form-data");
+      require("form-data");
     } catch (e) {
       throw new Error("form-data package not installed");
     }
     const fetch = require("node-fetch");
     return {
       name: "mailgun",
-      async send({ to, subject, html, text, headers }) {
+      async send({ to, subject, html, text, headers: _headers }) {
         const auth = Buffer.from(`api:${key}`).toString("base64");
         const body = new URLSearchParams();
         body.append("from", process.env.EMAIL_FROM || `AutoPromote <no-reply@${domain}>`);
