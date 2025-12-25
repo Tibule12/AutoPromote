@@ -2,9 +2,7 @@ const {
   enqueueMediaTransformTask,
   processNextMediaTransformTask,
 } = require("../services/mediaTransform");
-const { db } = require("../firebaseAdmin");
 const admin = require("../firebaseAdmin").admin;
-const fs = require("fs");
 const stream = require("stream");
 
 jest.mock("child_process", () => ({
@@ -20,7 +18,10 @@ jest.mock("child_process", () => ({
 describe("mediaTransform", () => {
   it("enqueues and processes a transform task (mocked ffmpeg/storage)", async () => {
     // Mock fetch to return a Readable stream in res.body
-    global.fetch = jest.fn(async url => ({ ok: true, body: stream.Readable.from(["binarydata"]) }));
+    global.fetch = jest.fn(async _url => ({
+      ok: true,
+      body: stream.Readable.from(["binarydata"]),
+    }));
     // Mock admin.storage bucket upload and file getSignedUrl
     const bucket = {
       upload: jest.fn(async () => {}),

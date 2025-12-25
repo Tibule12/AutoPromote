@@ -1,0 +1,28 @@
+rules:
+  - id: js-eval-usage
+    patterns:
+      - pattern: eval($X)
+    message: "Avoid using eval(); it can lead to code injection vulnerabilities."
+    languages: [javascript, typescript]
+    severity: ERROR
+
+  - id: js-new-function
+    patterns:
+      - pattern: new Function($ARGS)
+    message: "Avoid dynamic Function constructors; they behave like eval()."
+    languages: [javascript, typescript]
+    severity: ERROR
+
+  - id: hardcoded-credential-like-string
+    pattern-regex: |
+      (?i)(api[_-]?key|secret[_-]?key|access[_-]?token|password|private[_-]?key)\s*[:=]\s*['\"][^'\"]{8,}['\"]
+    message: "Hardcoded credential-like string found. Consider using secrets management."
+    languages: [javascript, python]
+    severity: WARNING
+
+  - id: openai-direct-call
+    pattern-regex: |
+      (api\.openai\.com)|(from\s+openai)|(require\(['\"]openai['\"]\))
+    message: "Direct OpenAI API usage detected; ensure keys are not hardcoded and calls are audited."
+    languages: [javascript, python]
+    severity: WARNING

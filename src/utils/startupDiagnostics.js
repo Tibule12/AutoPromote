@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Startup Diagnostics - Runs automatically when server starts
  * Logs all critical errors and warnings to console and database

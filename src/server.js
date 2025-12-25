@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
 // This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
 try {
@@ -244,11 +245,10 @@ async function runWarmup(trigger = "auto") {
   const t0 = Date.now();
   try {
     const tasks = [];
-    const taskMeta = [];
     const timeWrap = (label, fn) => {
       const t0 = Date.now();
       return fn()
-        .then(r => ({ status: "fulfilled", took: Date.now() - t0, label }))
+        .then(_r => ({ status: "fulfilled", took: Date.now() - t0, label }))
         .catch(e => ({ status: "rejected", took: Date.now() - t0, label, error: e.message }));
     };
     try {
@@ -623,6 +623,8 @@ try {
   console.log("⚠️ Captions routes not found:", e.message);
   captionsRoutes = express.Router();
 }
+// Intentionally not mounted in this instance; keep available for tests
+void captionsRoutes;
 try {
   adminCacheRoutes = require("./routes/adminCacheRoutes");
   console.log("✅ Admin cache routes loaded");
@@ -824,6 +826,9 @@ try {
 
   // Import initialized Firebase services
   const { admin, db, auth, storage } = require("./firebaseAdmin");
+  void admin; // some deployments don't use these directly in this file
+  void auth;
+  void storage;
 
   const app = express();
   // Attach Sentry request handler if Sentry initialized
@@ -855,7 +860,7 @@ try {
     routeLimiter = require("./middlewares/globalRateLimiter").rateLimiter;
   } catch (e) {
     routeLimiter =
-      (opts = {}) =>
+      (_opts = {}) =>
       (req, res, next) =>
         next();
   }
@@ -2518,7 +2523,7 @@ try {
   });
 
   // Error handling middleware
-  app.use((err, req, res, next) => {
+  app.use((err, req, res, _next) => {
     console.log("Server error:", err.message);
 
     // Provide more specific error messages for common errors
@@ -2598,7 +2603,7 @@ try {
   }
 
   if (require.main === module) {
-    const server = app
+    app
       .listen(PORT, async () => {
         console.log(`🚀 AutoPromote Server is running on port ${PORT}`);
         console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
@@ -2749,7 +2754,6 @@ try {
       const {
         processNextYouTubeTask,
         processNextPlatformTask,
-        enqueueMediaTransform,
       } = require("./services/promotionTaskQueue");
       const { acquireLock, INSTANCE_ID } = require("./services/workerLockService");
       console.log("🔐 Worker instance id:", INSTANCE_ID);
@@ -2816,10 +2820,9 @@ try {
           for (let i = 0; i < MAX_BATCH; i++) {
             const yt = await processNextYouTubeTask();
             const pf = await processNextPlatformTask();
-            const tf =
-              mt && typeof mt.processNextMediaTransformTask === "function"
-                ? await mt.processNextMediaTransformTask()
-                : null;
+            if (mt && typeof mt.processNextMediaTransformTask === "function") {
+              await mt.processNextMediaTransformTask();
+            }
             if (!yt && !pf) break;
             processed += (yt ? 1 : 0) + (pf ? 1 : 0);
           }

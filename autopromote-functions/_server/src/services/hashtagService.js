@@ -41,43 +41,19 @@ class HashtagService {
       const prompt = this.buildHashtagPrompt(contentData, platform, count, mixRatio, language);
 
       // Call OpenAI
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: this.model,
-          messages: [
-            {
-              role: "system",
-              content: `You are a social media hashtag expert. You understand trending topics, niche communities, and platform-specific hashtag strategies. You generate hashtags that maximize reach and engagement.`,
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.7,
-          max_tokens: 500,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.openaiApiKey}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 30000,
-        }
-      );
+      const { chatCompletions } = require('./openaiClient');
+      const aiResp = await chatCompletions({
+        model: this.model,
+        messages: [
+          { role: 'system', content: 'You are a social media hashtag expert. You understand trending topics, niche communities, and platform-specific hashtag strategies. You generate hashtags that maximize reach and engagement.' },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 500,
+      }, { feature: 'hashtag_generation' });
 
-      const generatedText = response.data.choices[0].message.content.trim();
-      // Log OpenAI usage
-      try {
-        const usage = response.data.usage || {};
-        await logOpenAIUsage({
-          model: this.model,
-          feature: "hashtag_generation",
-          usage,
-          promptSnippet: prompt.slice(0, 500),
-        });
-      } catch (_) {}
+      const generatedText = aiResp.choices[0].message.content.trim();
+      // (Logging performed by openaiClient)
 
       // Parse hashtags
       const parsed = this.parseHashtagResponse(generatedText, count);
@@ -365,26 +341,18 @@ Requirements:
 
 Format: Just list the hashtags separated by spaces, starting with #`;
 
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: this.model,
-          messages: [
-            { role: "system", content: "You are a social media trends expert." },
-            { role: "user", content: prompt },
-          ],
-          temperature: 0.3,
-          max_tokens: 300,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.openaiApiKey}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const { chatCompletions } = require('./openaiClient');
+      const aiResp = await chatCompletions({
+        model: this.model,
+        messages: [
+          { role: 'system', content: 'You are a social media trends expert.' },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.3,
+        max_tokens: 300,
+      }, { feature: 'trending_hashtags' });
 
-      const text = response.data.choices[0].message.content.trim();
+      const text = aiResp.choices[0].message.content.trim();
       const hashtags = (text.match(/#[\w\u00C0-\u024F\u1E00-\u1EFF]+/g) || []).slice(0, count);
 
       return {

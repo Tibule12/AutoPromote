@@ -16,12 +16,12 @@ jest.mock("../firebaseAdmin", () => {
     collection: name => {
       if (name === "content") {
         return {
-          doc: id => ({ get: async () => ({ exists: true, data: () => ({ userId: "user1" }) }) }),
+          doc: _id => ({ get: async () => ({ exists: true, data: () => ({ userId: "user1" }) }) }),
         };
       }
       if (name === "clip_analyses") {
         return {
-          doc: id => ({
+          doc: _id => ({
             create: createMock,
             get: async () => ({
               exists: true,
@@ -48,7 +48,7 @@ jest.mock("../firebaseAdmin", () => {
       if (name === "generated_clips") {
         return { add: addMock };
       }
-      return { doc: id => ({ get: async () => ({ exists: false }) }) };
+      return { doc: _id => ({ get: async () => ({ exists: false }) }) };
     },
   };
   return {
@@ -98,21 +98,19 @@ describe("VideoClippingService - analyze & generate integration", () => {
     jest.spyOn(svc, "detectScenes").mockResolvedValue([{ start: 0, end: 15, duration: 15 }]);
 
     // Return predictable clip suggestion
-    jest
-      .spyOn(svc, "generateClipSuggestions")
-      .mockReturnValue([
-        {
-          id: "clip1",
-          start: 0,
-          end: 15,
-          duration: 15,
-          viralScore: 85,
-          reason: "Good",
-          platforms: ["tiktok"],
-          captionSuggestion: "Nice clip",
-          text: "hello",
-        },
-      ]);
+    jest.spyOn(svc, "generateClipSuggestions").mockReturnValue([
+      {
+        id: "clip1",
+        start: 0,
+        end: 15,
+        duration: 15,
+        viralScore: 85,
+        reason: "Good",
+        platforms: ["tiktok"],
+        captionSuggestion: "Nice clip",
+        text: "hello",
+      },
+    ]);
 
     const res = await svc.analyzeVideo(
       "https://storage.googleapis.com/bucket/video.mp4",

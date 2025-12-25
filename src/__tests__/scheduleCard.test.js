@@ -1,10 +1,11 @@
+/* eslint-disable no-unused-vars */
 let React;
-let render, screen, fireEvent;
-let ScheduleCard;
+let _render, _screen, _fireEvent;
+let _ScheduleCard;
 try {
   React = require("react");
-  ({ render, screen, fireEvent } = require("@testing-library/react"));
-  ScheduleCard = require("../components/ScheduleCard");
+  ({ render: _render, screen: _screen, fireEvent: _fireEvent } = require("@testing-library/react"));
+  _ScheduleCard = require("../components/ScheduleCard");
 } catch (e) {
   // Running under node-only server tests where react & dom libs are not installed; skip UI tests
   React = null;

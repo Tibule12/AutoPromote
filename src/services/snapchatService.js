@@ -14,7 +14,7 @@ if (!fetchFn) {
 
 const { tokensFromDoc } = require("./connectionTokenUtils");
 
-async function postToSnapchat({ contentId, payload, reason, uid }) {
+async function postToSnapchat({ contentId, payload, reason: _reason, uid }) {
   const bypass =
     process.env.CI_ROUTE_IMPORTS === "1" ||
     process.env.FIREBASE_ADMIN_BYPASS === "1" ||

@@ -1,4 +1,5 @@
 const { db } = require("../../firebaseAdmin");
+const logger = require("../services/logger");
 
 // Factory: returns middleware that enforces acceptance of the given terms version
 // options: { version: string }
@@ -22,18 +23,13 @@ module.exports = function requireAcceptedTerms(options = {}) {
       const isTestToken =
         typeof authHeader === "string" && authHeader.startsWith("Bearer test-token-for-");
       try {
-        console.log(
-          "[requireAcceptedTerms.debug] isE2EHeader:",
-          !!isE2EHeader,
-          "isLocalHost:",
-          !!isLocalHost,
-          "isNodeFetchUA:",
-          !!isNodeFetchUA,
-          "isTestToken:",
-          !!isTestToken,
-          "authHeaderPreview:",
-          authHeader ? authHeader.slice(0, 40) : null
-        );
+        logger.info("requireAcceptedTerms.debug", {
+          isE2EHeader: !!isE2EHeader,
+          isLocalHost: !!isLocalHost,
+          isNodeFetchUA: !!isNodeFetchUA,
+          isTestToken: !!isTestToken,
+          authHeaderPreview: authHeader ? authHeader.slice(0, 40) : null,
+        });
       } catch (e) {}
       // Allow runtime bypass for CI or E2E runs via environment
       if (process.env.BYPASS_ACCEPTED_TERMS === "1") return next();
@@ -58,7 +54,7 @@ module.exports = function requireAcceptedTerms(options = {}) {
       } catch (_) {}
       return res.status(403).json({ error: "terms_not_accepted", requiredVersion });
     } catch (err) {
-      console.error("requireAcceptedTerms error:", err);
+      logger.error("requireAcceptedTerms.error", { err: err && err.message ? err.message : err });
       return res.status(500).json({ error: "internal_error" });
     }
   };

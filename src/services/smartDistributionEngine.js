@@ -2,7 +2,8 @@
 // AutoPromote Smart Distribution Engine
 // Peak engagement time scheduling, trending content optimization, platform-specific formatting
 
-const { db } = require("../firebaseAdmin");
+const { db: _db } = require("../firebaseAdmin");
+void _db;
 const hashtagEngine = require("./hashtagEngine");
 
 // Peak engagement times by platform (in UTC hours)
@@ -317,7 +318,7 @@ async function optimizeCaption(content, platform, options = {}) {
  * @param {string} platform - Platform name
  * @returns {string} Generated hook
  */
-function generateHook(content, platform) {
+function generateHook(content, _platform) {
   const title = content.title || "";
   const category = content.category || hashtagEngine.detectCategory(content);
 

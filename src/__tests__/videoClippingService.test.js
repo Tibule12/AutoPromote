@@ -30,9 +30,7 @@ describe("VideoClippingService SSRF protections (server)", () => {
   });
 
   test("throws on redirect to private IPs (prevent redirect-based SSRF)", async () => {
-    jest
-      .spyOn(dns, "lookup")
-      .mockImplementation(async (host, opts) => [{ address: "8.8.8.8", family: 4 }]);
+    jest.spyOn(dns, "lookup").mockImplementation(async () => [{ address: "8.8.8.8", family: 4 }]);
     nock("https://storage.googleapis.com")
       .get("/mybucket/redirect")
       .reply(302, "redirect", { Location: "http://127.0.0.1/private.mp4" });
@@ -43,9 +41,7 @@ describe("VideoClippingService SSRF protections (server)", () => {
   });
 
   test("allows downloading from trusted CDN domain and writes file", async () => {
-    jest
-      .spyOn(dns, "lookup")
-      .mockImplementation(async (host, opts) => [{ address: "8.8.8.8", family: 4 }]);
+    jest.spyOn(dns, "lookup").mockImplementation(async () => [{ address: "8.8.8.8", family: 4 }]);
     const scope = nock("https://storage.googleapis.com")
       .get("/mybucket/video.mp4")
       .reply(200, "mp4data");
@@ -59,9 +55,7 @@ describe("VideoClippingService SSRF protections (server)", () => {
   });
 
   test("rejects large content-length header", async () => {
-    jest
-      .spyOn(dns, "lookup")
-      .mockImplementation(async (host, opts) => [{ address: "8.8.8.8", family: 4 }]);
+    jest.spyOn(dns, "lookup").mockImplementation(async () => [{ address: "8.8.8.8", family: 4 }]);
     nock("https://storage.googleapis.com")
       .head("/mybucket/huge")
       .reply(200, "", { "Content-Length": String(5 * 1024 * 1024 * 1024) });
@@ -72,9 +66,7 @@ describe("VideoClippingService SSRF protections (server)", () => {
   });
 
   test("rejects unexpected content-type", async () => {
-    jest
-      .spyOn(dns, "lookup")
-      .mockImplementation(async (host, opts) => [{ address: "8.8.8.8", family: 4 }]);
+    jest.spyOn(dns, "lookup").mockImplementation(async () => [{ address: "8.8.8.8", family: 4 }]);
     nock("https://storage.googleapis.com")
       .head("/mybucket/html")
       .reply(200, "", { "Content-Type": "text/html" });
@@ -93,9 +85,7 @@ describe("VideoClippingService SSRF protections (server)", () => {
   });
 
   test("aborts while streaming when size exceeds limit", async () => {
-    jest
-      .spyOn(dns, "lookup")
-      .mockImplementation(async (host, opts) => [{ address: "8.8.8.8", family: 4 }]);
+    jest.spyOn(dns, "lookup").mockImplementation(async () => [{ address: "8.8.8.8", family: 4 }]);
     svc.maxDownloadBytes = 20 * 1024; // 20KB
     const bigPayload = Buffer.alloc(50 * 1024, "a"); // 50KB
     nock("https://storage.googleapis.com").head("/mybucket/themega").reply(200);

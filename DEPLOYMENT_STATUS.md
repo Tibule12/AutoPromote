@@ -215,7 +215,16 @@
 
 > Deploy note: For Render or other PaaS deployments that host the backend and static frontend together, ensure the frontend production build runs during deploy (for example: `npm --prefix frontend run build`) so `frontend/build/index.html` is present and the server can serve the SPA. If you use CI, add this to your deploy workflow.
 
-> Snapchat scope: you can control the default OAuth scope from the Render dashboard by adding `SNAPCHAT_DEFAULT_SCOPE` (allowed values: `snapchat-marketing-api`, `display_name`). Use `display_name` to test or when Marketing API access is not yet approved.
+> Snapchat scope: you can control the default OAuth scope from the Render dashboard by adding `SNAPCHAT_DEFAULT_SCOPE` (recommended value for testing: `https://auth.snapchat.com/oauth2/api/user.display_name`).
+>
+> Supported aliases we accept in `test_scope` and `SNAPCHAT_DEFAULT_SCOPE`:
+>
+> - `display_name` → `https://auth.snapchat.com/oauth2/api/user.display_name`
+> - `external_id` → `https://auth.snapchat.com/oauth2/api/user.external_id`
+> - `bitmoji.avatar` → `https://auth.snapchat.com/oauth2/api/user.bitmoji.avatar`
+> - `camkit_lens_push_to_device` → `https://auth.snapchat.com/oauth2/api/camkit_lens_push_to_device` (Camera Kit only)
+>
+> Use the `display_name` URL while you wait for Marketing API approval; once approved you can set `SNAPCHAT_DEFAULT_SCOPE` to the marketing scopes required for your app.
 
 ### Backend API (Render)
 
