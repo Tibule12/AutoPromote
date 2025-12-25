@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const express = require("express");
 const request = require("supertest");
 const bodyParser = require("body-parser");
@@ -11,12 +12,12 @@ process.env.DEBUG_TIKTOK_OAUTH = "true";
 // Bypass Firebase Admin and stub token verification so getUidFromAuthHeader accepts the test token
 process.env.FIREBASE_ADMIN_BYPASS = "1";
 const firebaseAdmin = require("../../firebaseAdmin");
-firebaseAdmin.admin.auth = () => ({ verifyIdToken: async token => ({ uid: "testUser123" }) });
+firebaseAdmin.admin.auth = () => ({ verifyIdToken: async _token => ({ uid: "testUser123" }) });
 // Ensure our stub supports nested .collection() calls used by the route
-const stubCollection = name => ({
-  doc: id => ({
-    collection: sub => ({
-      doc: subId => ({
+const stubCollection = _name => ({
+  doc: _id => ({
+    collection: _sub => ({
+      doc: _subId => ({
         set: async () => true,
         get: async () => ({ exists: false, data: () => ({}) }),
       }),
@@ -70,10 +71,10 @@ describe("tiktokRoutes", () => {
     let lastSetArgs = null;
     const originalCollection = firebaseAdmin.db.collection;
     // Override collection to specifically capture users/{uid}/connections/tiktok.set
-    firebaseAdmin.db.collection = name => ({
-      doc: id => ({
-        collection: sub => ({
-          doc: subId => ({
+    firebaseAdmin.db.collection = _name => ({
+      doc: _id => ({
+        collection: _sub => ({
+          doc: _subId => ({
             set: async obj => {
               lastSetArgs = obj;
               return true;
@@ -89,7 +90,7 @@ describe("tiktokRoutes", () => {
       }),
     });
     // Set the expected oauth_state for callback validation (nonce must match the state)
-    const stateSetter = await firebaseAdmin.db
+    await firebaseAdmin.db
       .collection("users")
       .doc("testUser123")
       .collection("oauth_state")
@@ -98,7 +99,7 @@ describe("tiktokRoutes", () => {
 
     // Monkey patch safeFetch to return token info
     const ssrf = require("../../../src/utils/ssrfGuard");
-    ssrf.safeFetch = (url, fetchFn, opts) => {
+    ssrf.safeFetch = (_url, _fetchFn, _opts) => {
       return Promise.resolve({
         ok: true,
         json: async () => ({
@@ -113,7 +114,7 @@ describe("tiktokRoutes", () => {
 
     // Make the request; ensure we include a state so the route uses a known uid
     const state = "testUser123.123456";
-    const res = await request(app)
+    await request(app)
       .get(`/api/tiktok/callback?code=abc123&state=${encodeURIComponent(state)}`)
       .expect(302);
 

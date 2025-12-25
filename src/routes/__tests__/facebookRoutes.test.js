@@ -7,7 +7,7 @@ process.env.FB_REDIRECT_URI =
   process.env.FB_REDIRECT_URI || "https://example.com/api/facebook/callback";
 process.env.FIREBASE_ADMIN_BYPASS = "1";
 const firebaseAdmin = require("../../firebaseAdmin");
-firebaseAdmin.admin.auth = () => ({ verifyIdToken: async token => ({ uid: "testUser123" }) });
+firebaseAdmin.admin.auth = () => ({ verifyIdToken: async _token => ({ uid: "testUser123" }) });
 const app = express();
 app.use(bodyParser.json());
 app.use("/api/facebook", require("../facebookRoutes"));

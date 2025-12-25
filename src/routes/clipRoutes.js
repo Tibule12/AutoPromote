@@ -7,6 +7,7 @@ const videoClippingService = require("../services/videoClippingService");
 const crypto = require("crypto");
 const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
+const logger = require("../utils/logger");
 
 // Rate limiting
 const rateLimitMap = new Map();
@@ -64,7 +65,7 @@ function updateJob(jobId, patch) {
 router.post("/analyze", authMiddleware, clipRateLimit, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
-    console.log("[ClipRoutes] incoming request: userId=%s userPresent=%s", userId, !!req.user);
+    logger.debug("ClipRoutes.incomingRequest", { userId, userPresent: !!req.user });
     const { contentId, videoUrl } = req.body;
 
     if (!contentId || !videoUrl) {
@@ -81,22 +82,20 @@ router.post("/analyze", authMiddleware, clipRateLimit, async (req, res) => {
     const contentData = contentDoc.data() || {};
     const contentOwner = contentData.userId || contentData.user_id || contentData.user || null;
     if (contentOwner !== userId) {
-      console.warn(
-        "[ClipRoutes] Ownership mismatch: content=%s owner=%s requester=%s",
-        contentId,
-        contentOwner,
-        userId
-      );
+      logger.warn("ClipRoutes.ownershipMismatch", { contentId, contentOwner, requester: userId });
       return res.status(403).json({ error: "Unauthorized" });
     }
 
     // Start analysis (this may take a while for long videos)
-    console.log("[ClipRoutes] Starting analysis for content=%s user=%s", contentId, userId);
+    logger.info("ClipRoutes.startAnalysis", { contentId, userId });
     let result;
     try {
       result = await videoClippingService.analyzeVideo(videoUrl, contentId, userId);
     } catch (err) {
-      console.error("[ClipRoutes] analyzeVideo threw:", err && err.message, err && err.stack);
+      logger.error("ClipRoutes.analyzeVideoError", {
+        message: err && err.message ? err.message : err,
+        stack: err && err.stack,
+      });
       throw err;
     }
 
@@ -426,9 +425,7 @@ router.post("/:clipId/export", authMiddleware, async (req, res) => {
         updatedAt: new Date().toISOString(),
       });
 
-      console.log(
-        `[ClipRoutes] Admin export: content ${contentId} scheduled for ${platforms.join(", ")}`
-      );
+      logger.info("ClipRoutes.adminExport", { contentId, platforms });
 
       res.json({
         success: true,
@@ -439,9 +436,7 @@ router.post("/:clipId/export", authMiddleware, async (req, res) => {
       });
     } else {
       // Non-admin uploads are pending approval — inform the client and do not create schedules
-      console.log(
-        `[ClipRoutes] Non-admin export: content ${contentId} created with pending_approval`
-      );
+      logger.info("ClipRoutes.nonAdminExport", { contentId, message: "pending_approval" });
       res.json({
         success: true,
         contentId,
@@ -450,7 +445,9 @@ router.post("/:clipId/export", authMiddleware, async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("[ClipRoutes] Export clip error:", error);
+    logger.error("ClipRoutes.exportError", {
+      error: error && error.message ? error.message : error,
+    });
     res.status(500).json({ error: "Failed to export clip" });
   }
 });

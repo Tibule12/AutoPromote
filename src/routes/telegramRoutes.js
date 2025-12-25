@@ -2,7 +2,8 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../authMiddleware");
-const { admin, db } = require("../firebaseAdmin");
+const { db } = require("../firebaseAdmin");
+const logger = require("../services/logger");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 const telegramService = require("../services/telegramService");
 const fetch = require("node-fetch");
@@ -387,7 +388,7 @@ router.post("/webhook", async (req, res) => {
     const update = req.body;
 
     // Log webhook received
-    console.log("Telegram webhook received:", {
+    logger.info("Telegram webhook received", {
       updateId: update.update_id,
       message: update.message ? "present" : "none",
       chatId: update.message?.chat?.id,
@@ -401,14 +402,14 @@ router.post("/webhook", async (req, res) => {
       // Handle /start command
       if (text === "/start") {
         // You can send a welcome message or instructions
-        console.log(`New chat started with ID: ${chatId}`);
+        logger.info(`New chat started with ID: ${chatId}`);
       }
     }
 
     // Always respond 200 to acknowledge receipt
     res.json({ ok: true });
   } catch (error) {
-    console.error("Telegram webhook error:", error);
+    logger.error("Telegram webhook error:", error);
     res.status(500).json({ error: error.message });
   }
 });

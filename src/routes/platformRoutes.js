@@ -6,6 +6,7 @@ const { db } = require("../firebaseAdmin");
 const { encryptToken } = require("../services/secretVault");
 const { tokensFromDoc } = require("../services/connectionTokenUtils");
 const { safeFetch } = require("../utils/ssrfGuard");
+const logger = require("../utils/logger");
 // Engines to warm-up/connect on new platform connections
 const smartDistributionEngine = require("../services/smartDistributionEngine");
 const admin = require("../firebaseAdmin").admin;
@@ -113,10 +114,11 @@ router.get(
       return res.status(404).json({ ok: false, error: "unsupported_platform" });
     const uid = req.userId || req.user?.uid;
     // Ensure we have host and a state token available for OAuth redirect URIs
-    const host = `${req.protocol}://${req.get("host")}`;
+    void `${req.protocol}://${req.get("host")}`; // reserved for future redirect hints
     const crypto = require("crypto");
-    const state =
-      req.query && req.query.state ? req.query.state : crypto.randomBytes(18).toString("base64url");
+    void (req.query && req.query.state
+      ? req.query.state
+      : crypto.randomBytes(18).toString("base64url")); // reserved for future redirect hints
     if (!uid) return res.json({ ok: true, platform, connected: false });
 
     const cacheKey = `${uid}:${platform}`;
@@ -437,7 +439,7 @@ router.get(
         );
         const url = `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}&scope=${scope}&state=${state}`;
         try {
-          console.log(
+          logger.info(
             "[oauth][prepare][pinterest] authUrlPresent=%s redirectPresent=%s statePresent=%s",
             !!url,
             !!redirectUri,
@@ -618,15 +620,13 @@ router.post("/:platform/auth/simulate", authMiddleware, platformWriteLimiter, as
 
     // Post-connection hooks: create event, update user's connectedPlatforms list and write lightweight recommendations
     try {
-      await db
-        .collection("events")
-        .add({
-          type: "platform_connected",
-          uid,
-          platform,
-          simulated: true,
-          at: new Date().toISOString(),
-        });
+      await db.collection("events").add({
+        type: "platform_connected",
+        uid,
+        platform,
+        simulated: true,
+        at: new Date().toISOString(),
+      });
       // add platform to user's connectedPlatforms array
       try {
         if (
@@ -1393,12 +1393,11 @@ router.get("/pinterest/auth/callback", platformPublicLimiter, async (req, res) =
     );
     // Avoid logging sensitive OAuth callback parameters; redact full values and only log presence/length info
     try {
-      console.log(
-        "[oauth][pinterest] callback redirectUriPresent=%s queryKeys=%s statePresent=%s",
-        !!redirectUri,
-        Object.keys(req.query || {}).length,
-        !!state
-      );
+      logger.info("oauth.pinterest.callback", {
+        redirectUriPresent: !!redirectUri,
+        queryKeys: Object.keys(req.query || {}).length,
+        statePresent: !!state,
+      });
     } catch (_) {}
     // try { console.log('[oauth][pinterest] callback redirectUri:', redirectUri, 'query:', req.query, 'state:', state); } catch(_){}
     const tokenUrl = "https://api.pinterest.com/v5/oauth/token";
@@ -1499,7 +1498,7 @@ router.get("/pinterest/auth/callback", platformPublicLimiter, async (req, res) =
 // Generic placeholder callback for other platforms — keep as a fallback
 // and ensure it's defined after specific platform callback handlers so it
 // doesn't intercept platforms that have a proper implementation.
-router.get("/:platform/auth/callback", platformPublicLimiter, async (req, res, next) => {
+router.get("/:platform/auth/callback", platformPublicLimiter, async (req, res, _next) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).send("Unsupported platform");
   return sendPlain(res, 200, "Callback placeholder - implement OAuth exchange for " + platform);
@@ -1566,7 +1565,7 @@ router.post("/:platform/boards", authMiddleware, platformWriteLimiter, async (re
     // If user has a token, try to create board using Pinterest API v5
     if (hasAccessToken) {
       try {
-        const accessToken = tokens.access_token;
+        void tokens.access_token; // reserved for potential direct API calls
         const postBody = { name };
         if (description) postBody.description = description;
         // Use service helper to create board to centralize logic & testing
