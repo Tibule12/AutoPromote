@@ -106,14 +106,12 @@ async function runIntegrationChecks(opts = {}) {
 
   // 6) Content upload (add minimal doc) and schema validation (basic)
   try {
-    const contentRef = await db
-      .collection("content")
-      .add({
-        title: "Health-run content",
-        url: "https://example.com/video.mp4",
-        uid: userId || "testUser123",
-        createdAt: new Date().toISOString(),
-      });
+    const contentRef = await db.collection("content").add({
+      title: "Health-run content",
+      url: "https://example.com/video.mp4",
+      uid: userId || "testUser123",
+      createdAt: new Date().toISOString(),
+    });
     results.content_upload = { status: "ok", message: "Content doc added", id: contentRef.id };
   } catch (e) {
     results.content_upload = {
@@ -195,7 +193,7 @@ async function runIntegrationChecks(opts = {}) {
   const overall = anyFailed ? "failed" : anyWarning ? "warning" : "ok";
 
   // Attach generic guidance per check if not present
-  Object.entries(results).forEach(([k, v]) => {
+  Object.entries(results).forEach(([, v]) => {
     if (!v.recommendation) v.recommendation = "No action required";
   });
 
@@ -254,14 +252,12 @@ async function performRemediation(checkKey, opts = {}) {
         .set({ userId: uid, score: 10, displayName: "Health Runner" }, { merge: true });
       applied.push("seeded leaderboard with an entry");
     } else if (checkKey === "content_upload") {
-      const contentRef = await db
-        .collection("content")
-        .add({
-          title: "Health-run content (remediate)",
-          url: "https://example.com/video.mp4",
-          uid,
-          createdAt: new Date().toISOString(),
-        });
+      const contentRef = await db.collection("content").add({
+        title: "Health-run content (remediate)",
+        url: "https://example.com/video.mp4",
+        uid,
+        createdAt: new Date().toISOString(),
+      });
       applied.push(`created content doc ${contentRef.id}`);
     } else if (checkKey === "platforms") {
       // Create a dummy platform connection
@@ -280,16 +276,14 @@ async function performRemediation(checkKey, opts = {}) {
         );
       applied.push("created a dummy spotify connection for user");
     } else if (checkKey === "growth_squad") {
-      const s = await db
-        .collection("growth_squads")
-        .add({
-          creatorId: uid,
-          name: `Health Squad ${Date.now()}`,
-          members: [uid],
-          memberCount: 1,
-          maxMembers: 5,
-          createdAt: new Date().toISOString(),
-        });
+      const s = await db.collection("growth_squads").add({
+        creatorId: uid,
+        name: `Health Squad ${Date.now()}`,
+        members: [uid],
+        memberCount: 1,
+        maxMembers: 5,
+        createdAt: new Date().toISOString(),
+      });
       applied.push(`created growth squad ${s.id}`);
     } else {
       return {
