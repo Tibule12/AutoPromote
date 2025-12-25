@@ -54,33 +54,18 @@ class CaptionGenerationService {
       );
 
       // Call OpenAI API
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: this.model,
-          messages: [
-            {
-              role: "system",
-              content: `You are an expert social media copywriter specializing in ${platform}. You create engaging, viral-worthy captions that drive engagement and conversions.`,
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.8, // More creative
-          max_tokens: 500,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.openaiApiKey}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 30000,
-        }
-      );
+      const { chatCompletions } = require('./openaiClient');
+      const aiResp = await chatCompletions({
+        model: this.model,
+        messages: [
+          { role: 'system', content: `You are an expert social media copywriter specializing in ${platform}. You create engaging, viral-worthy captions that drive engagement and conversions.` },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.8,
+        max_tokens: 500,
+      }, { feature: 'caption_generation' });
 
-      const generatedText = response.data.choices[0].message.content.trim();
+      const generatedText = aiResp.choices[0].message.content.trim();
       // Log OpenAI usage (best-effort)
       try {
         const usage = response.data.usage || {};

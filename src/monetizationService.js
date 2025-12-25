@@ -1,4 +1,4 @@
-const { db } = require("./firebaseAdmin");
+/* eslint-disable no-console */ const { db } = require("./firebaseAdmin");
 
 class MonetizationService {
   constructor() {

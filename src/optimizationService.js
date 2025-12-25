@@ -4,7 +4,7 @@ module.exports = {
     // Add optimization logic here
     return data;
   },
-  generateOptimizationRecommendations: (content, analyticsData = {}) => {
+  generateOptimizationRecommendations: (content, _analyticsData = {}) => {
     // Example recommendation logic
     return [
       {
