@@ -19,7 +19,7 @@ describe("Spotify search route", () => {
   });
 
   it("returns search results for authenticated user", async () => {
-    searchTracks.mockImplementation(async ({ uid, query, limit }) => ({
+    searchTracks.mockImplementation(async () => ({
       tracks: [{ id: "t1", uri: "spotify:track:t1", name: "Track 1", artists: ["Artist 1"] }],
     }));
     const res = await agent
@@ -33,10 +33,11 @@ describe("Spotify search route", () => {
   });
 
   it("creates a new playlist", async () => {
-    createPlaylist.mockImplementation(async ({ uid, name, description }) => ({
+    createPlaylist.mockImplementation(async ({ name, description: _description }) => ({
       success: true,
       playlistId: "pl1",
       name,
+      description: _description,
       url: "https://open.spotify.com/playlist/pl1",
     }));
     const res = await agent
@@ -49,7 +50,7 @@ describe("Spotify search route", () => {
   });
 
   it("adds tracks to playlist", async () => {
-    addTracksToPlaylist.mockImplementation(async ({ uid, playlistId, trackUris }) => ({
+    addTracksToPlaylist.mockImplementation(async ({ playlistId: _playlistId, trackUris }) => ({
       success: true,
       snapshotId: "snap1",
       tracksAdded: trackUris.length,
@@ -64,8 +65,6 @@ describe("Spotify search route", () => {
   });
 
   it("returns spotify metadata (playlists) for connected user", async () => {
-    const uid = "user1";
-    const existingMeta = { playlists: [{ id: "p1", name: "My Fav" }] };
     // Simulate the user connection by creating Firestore doc in test environment is non-trivial here.
     // We'll mock fetch to return meta from the route, by mocking spotifyService.getUserProfile or by mocking db lookup.
     // Simpler: call status and metadata endpoints; ensure they return 200 when not connected (fallback):

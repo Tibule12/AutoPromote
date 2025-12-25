@@ -27,7 +27,7 @@ jest.mock("../../firebaseAdmin", () => ({
         };
       }
       if (name === "users") {
-        return { doc: uid => ({ collection: () => ({ doc: () => userConnDoc() }) }) };
+        return { doc: _uid => ({ collection: () => ({ doc: () => userConnDoc() }) }) };
       }
       if (name === "content") {
         return {

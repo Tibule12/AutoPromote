@@ -149,7 +149,7 @@ try {
     const fbAdmin = require("../src/firebaseAdmin");
     if (fbAdmin && fbAdmin.admin && typeof fbAdmin.admin.auth === "function") {
       fbAdmin.admin.auth = () => ({
-        verifyIdToken: async token => {
+        verifyIdToken: async _token => {
           if (!token) return { uid: "stub-uid" };
           const t = String(token);
           if (t.startsWith("test-token-for-")) return { uid: t.replace("test-token-for-", "") };
@@ -182,33 +182,27 @@ try {
             { merge: true }
           );
         // Ensure an admin user exists for admin endpoint tests
-        await db
-          .collection("admins")
-          .doc("adminUser")
-          .set(
-            {
-              email: "adminUser@example.com",
-              uid: "adminUser",
-              role: "admin",
-              isAdmin: true,
-              createdAt: now,
-            },
-            { merge: true }
-          );
+        await db.collection("admins").doc("adminUser").set(
+          {
+            email: "adminUser@example.com",
+            uid: "adminUser",
+            role: "admin",
+            isAdmin: true,
+            createdAt: now,
+          },
+          { merge: true }
+        );
         // Some tests use adminUser123 as admin token
-        await db
-          .collection("admins")
-          .doc("adminUser123")
-          .set(
-            {
-              email: "adminUser123@example.com",
-              uid: "adminUser123",
-              role: "admin",
-              isAdmin: true,
-              createdAt: now,
-            },
-            { merge: true }
-          );
+        await db.collection("admins").doc("adminUser123").set(
+          {
+            email: "adminUser123@example.com",
+            uid: "adminUser123",
+            role: "admin",
+            isAdmin: true,
+            createdAt: now,
+          },
+          { merge: true }
+        );
         await db
           .collection("users")
           .doc("adminUser")
@@ -249,19 +243,16 @@ try {
           .doc("testUser123")
           .set({ userId: "testUser123", score: 150, displayName: "Test User" }, { merge: true });
         // Add a minimal content doc (id 12345) so analytics endpoints can return 200
-        await db
-          .collection("content")
-          .doc("12345")
-          .set(
-            {
-              title: "Test Content",
-              type: "video",
-              uid: "testUser123",
-              userId: "testUser123",
-              createdAt: now,
-            },
-            { merge: true }
-          );
+        await db.collection("content").doc("12345").set(
+          {
+            title: "Test Content",
+            type: "video",
+            uid: "testUser123",
+            userId: "testUser123",
+            createdAt: now,
+          },
+          { merge: true }
+        );
         // Add basic connection docs for a few platforms (used by simulate tests)
         const platformConnections = ["spotify", "discord", "linkedin", "pinterest"];
         for (const p of platformConnections) {

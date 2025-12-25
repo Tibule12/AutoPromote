@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 const { admin, db } = require("./firebaseAdmin");
-const { present, tokenInfo } = require("./utils/logSanitizer");
+const { tokenInfo } = require("./utils/logSanitizer");
 const diag = require("./diagnostics");
 
 const authMiddleware = async (req, res, next) => {

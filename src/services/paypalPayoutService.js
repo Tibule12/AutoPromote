@@ -1,6 +1,8 @@
 const paypal = require("@paypal/paypal-server-sdk");
 const paypalClient = require("../paypalClient");
-const { admin, db } = require("../firebaseAdmin");
+const { admin: _admin, db } = require("../firebaseAdmin");
+const logger = require("../services/logger");
+void _admin;
 
 async function executePayout(payoutDoc) {
   // payoutDoc should have: id, userId, amount, payee: { paypalEmail }
@@ -67,7 +69,7 @@ async function executePayout(payoutDoc) {
 
     return { success: true, result };
   } catch (error) {
-    console.error("[PayPalPayout] error executing payout", error && error.message);
+    logger.error("[PayPalPayout] error executing payout", error && error.message);
     await db
       .collection("payouts")
       .doc(payoutDoc.id)

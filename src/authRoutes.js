@@ -1,10 +1,12 @@
+/* eslint-disable no-console */
 const express = require("express");
 const admin = require("firebase-admin");
 const router = express.Router();
 const { sendVerificationEmail, sendPasswordResetEmail } = require("./services/emailService");
 
 // Middleware to verify Firebase token
-const verifyFirebaseToken = async (req, res, next) => {
+// eslint-disable-next-line no-unused-vars -- kept for potential future use as an exported middleware
+const _verifyFirebaseToken = async (req, res, next) => {
   try {
     const idToken = req.headers.authorization?.split("Bearer ")[1];
     if (!idToken) {
@@ -52,21 +54,17 @@ router.post("/register", async (req, res) => {
 
     // Generate email verification link
     try {
-      const verifyLink = await admin
-        .auth()
-        .generateEmailVerificationLink(email, {
-          url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
-        });
+      const verifyLink = await admin.auth().generateEmailVerificationLink(email, {
+        url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
+      });
       await sendVerificationEmail({ email, link: verifyLink });
     } catch (e) {
       console.log("⚠️ Could not send verification email:", e.message);
     }
-    res
-      .status(201)
-      .json({
-        message: "User registered. Verification email sent.",
-        requiresEmailVerification: true,
-      });
+    res.status(201).json({
+      message: "User registered. Verification email sent.",
+      requiresEmailVerification: true,
+    });
   } catch (error) {
     console.error("Registration error:", error);
     res.status(500).json({ error: error.message });
@@ -92,12 +90,10 @@ router.post("/resend-verification", async (req, res) => {
     global.__resendLimiter.set(key, entry);
     const LIMIT = parseInt(process.env.RESEND_VERIFICATION_LIMIT || "5", 10); // default 5 per 15m
     if (entry.count > LIMIT) {
-      return res
-        .status(429)
-        .json({
-          error: "too_many_requests",
-          retryAfterMinutes: Math.ceil((entry.first + 15 * 60 * 1000 - now) / 60000),
-        });
+      return res.status(429).json({
+        error: "too_many_requests",
+        retryAfterMinutes: Math.ceil((entry.first + 15 * 60 * 1000 - now) / 60000),
+      });
     }
     const user = await admin
       .auth()
@@ -105,11 +101,9 @@ router.post("/resend-verification", async (req, res) => {
       .catch(() => null);
     if (!user) return res.status(404).json({ error: "User not found" });
     if (user.emailVerified) return res.json({ message: "Already verified" });
-    const link = await admin
-      .auth()
-      .generateEmailVerificationLink(email, {
-        url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
-      });
+    const link = await admin.auth().generateEmailVerificationLink(email, {
+      url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
+    });
     await sendVerificationEmail({ email, link });
     return res.json({
       message: "Verification email sent",
@@ -212,7 +206,8 @@ router.post("/login", async (req, res) => {
         const userRecord = await admin.auth().getUserByEmail(email);
         // We can't verify the password directly with Admin SDK
         // Creating a custom token for the user
-        const customToken = await admin.auth().createCustomToken(userRecord.uid);
+        // eslint-disable-next-line no-unused-vars -- created for potential client-side exchange
+        const _customToken = await admin.auth().createCustomToken(userRecord.uid);
 
         // Instead of directly using this as decoded token, we should provide
         // the custom token to the client and have them exchange it for an ID token
@@ -430,7 +425,7 @@ router.post("/admin-login", async (req, res) => {
       !!(req.body && req.body.idToken),
       !!(req.body && req.body.email)
     );
-    const { idToken, email } = req.body || {};
+    const { idToken } = req.body || {};
 
     if (!idToken) {
       console.log("No idToken provided in admin login request");
@@ -446,7 +441,8 @@ router.post("/admin-login", async (req, res) => {
     let role = "user";
     let isAdmin = false;
     let fromCollection = null;
-    let adminStatusSource = "unknown";
+    // eslint-disable-next-line no-unused-vars -- placeholder for future admin source tracking
+    let _adminStatusSource = "unknown";
 
     // For admin login, check admin claims in token first, then try admins collection
     try {

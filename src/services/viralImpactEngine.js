@@ -12,17 +12,17 @@ const bypass =
 if (bypass) {
   // Minimal no-op implementations to avoid heavy logic during CI/test
   module.exports = {
-    seedContentToVisibilityZones: async (content, platform, options = {}) => ({
+    seedContentToVisibilityZones: async (_content, _platform, _options = {}) => ({
       success: true,
       seedingResults: [],
     }),
-    orchestrateBoostChain: async (content, platforms, options = {}) => ({
+    orchestrateBoostChain: async (_content, _platforms, _options = {}) => ({
       success: true,
       chainId: "stub-chain",
       squadSize: 0,
     }),
-    generateOvernightViralPlan: (content, platforms) => ({ plan: [] }),
-    applyAlgorithmHijacking: (content, platform) => ({ success: true }),
+    generateOvernightViralPlan: (_content, _platforms) => ({ plan: [] }),
+    applyAlgorithmHijacking: (_content, _platform) => ({ success: true }),
     checkZoneRequirements: (content, reqs) => ({ eligible: false, met: [], unmet: reqs }),
     calculateViralVelocity: () => ({ current: 0, category: "new" }),
     trackExposureSaturation: async () => ({}),
@@ -351,7 +351,7 @@ function generateSeedingStrategy(content, platform, zone) {
 
   // Select strategies based on zone and content - fix biased random
   const crypto = require("crypto");
-  for (const [key, strategy] of Object.entries(strategies)) {
+  for (const [, strategy] of Object.entries(strategies)) {
     if (strategy.impact === "high" || crypto.randomInt(0, 100) > 50) {
       applicableStrategies.push({
         name: strategy.name,
@@ -597,7 +597,7 @@ async function trackExposureSaturation(contentId, platforms) {
  * @param {Array} platforms - Target platforms
  * @returns {object} Viral simulation plan
  */
-function generateOvernightViralPlan(content, platforms) {
+function generateOvernightViralPlan(content, _platforms) {
   const plan = {
     contentId: content.id,
     goal: "Simulate overnight viral growth",

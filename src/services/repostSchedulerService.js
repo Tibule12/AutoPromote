@@ -30,7 +30,7 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
     byContentPlatform[key].push({ ...v, ts });
   });
   const tasks = [];
-  for (const [key, arr] of Object.entries(byContentPlatform)) {
+  for (const [, arr] of Object.entries(byContentPlatform)) {
     if (tasks.length >= limit) break;
     if (arr.length < 1) continue;
     arr.sort((a, b) => a.ts - b.ts);

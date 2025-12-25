@@ -38,7 +38,9 @@ function calculateConfidenceForVariants(variants) {
     const others = rates.filter(r => r.id !== top.id);
     if (!others.length) return 0;
     const combinedConversions = others.reduce((acc, r) => acc + r.conversions, 0);
+    void combinedConversions;
     const combinedViews = others.reduce((acc, r) => acc + r.views, 0);
+    void combinedViews;
     // For more robust handling, use a Bayesian Monte Carlo approximation of
     // P(top > others). This tends to handle low-conversion cases better.
     const bayesConfidence = calculateBayesianConfidence(variants);
