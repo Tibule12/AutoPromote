@@ -1,7 +1,6 @@
+/* eslint-disable no-console */
 const express = require("express");
 const fetch = require("node-fetch");
-const { google } = require("googleapis");
-const streamifier = require("streamifier");
 const { admin, db } = require("../../firebaseAdmin");
 const authMiddleware = require("../../authMiddleware");
 const crypto = require("crypto");
@@ -181,12 +180,10 @@ router.get("/callback", ytPublicLimiter, async (req, res) => {
         if (tokenData && tokenData.error) url.searchParams.set("reason", String(tokenData.error));
         return res.redirect(url.toString());
       } catch (_) {
-        return res
-          .status(400)
-          .json({
-            error: "Failed to obtain YouTube access token",
-            details: { error: tokenData.error },
-          });
+        return res.status(400).json({
+          error: "Failed to obtain YouTube access token",
+          details: { error: tokenData.error },
+        });
       }
     }
 

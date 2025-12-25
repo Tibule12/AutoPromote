@@ -56,13 +56,11 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
       const linkMatch = (error.message.match(/https:\/\/console\.firebase\.google\.com[^\s]+/) || [
         null,
       ])[0];
-      return res
-        .status(422)
-        .json({
-          success: false,
-          error: "Missing Firestore composite index required by this query",
-          indexLink: linkMatch || null,
-        });
+      return res.status(422).json({
+        success: false,
+        error: "Missing Firestore composite index required by this query",
+        indexLink: linkMatch || null,
+      });
     }
     res.status(500).json({ success: false, error: error.message });
   }
@@ -342,7 +340,8 @@ router.post("/:contentId/scan", authMiddleware, adminOnly, async (req, res) => {
       return res.status(404).json({ success: false, error: "Content not found" });
     }
 
-    const content = contentDoc.data();
+    // eslint-disable-next-line no-unused-vars -- placeholder for future use
+    const _content = contentDoc.data();
 
     // Simulate content scanning (integrate with OpenAI Moderation API or similar)
     const scanResults = {
