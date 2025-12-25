@@ -1,7 +1,7 @@
 // contentIdeaEngine.js
 // AI-powered content idea generator
 
-function generateContentIdeas(userId, interests) {
+function generateContentIdeas(_userId, _interests) {
   // Stub: Suggest viral topics and formats
   return [
     "React to trending TikTok challenge",

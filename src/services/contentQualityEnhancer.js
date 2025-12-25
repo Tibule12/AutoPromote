@@ -2,9 +2,13 @@
 // AutoPromote Content Quality Enhancement
 // Thumbnail generator, caption optimizer, hook builder, preview system
 
-const { db } = require("../firebaseAdmin");
-const fs = require("fs").promises;
-const path = require("path");
+const { db: _db } = require("../firebaseAdmin");
+const _fs = require("fs").promises;
+const _path = require("path");
+const logger = require("./logger");
+void _db;
+void _fs;
+void _path;
 
 class ContentQualityEnhancer {
   // Generate thumbnail suggestions
@@ -36,7 +40,7 @@ class ContentQualityEnhancer {
 
       return suggestions;
     } catch (error) {
-      console.error("Error generating thumbnail suggestions:", error);
+      logger.error("Error generating thumbnail suggestions:", error);
       throw error;
     }
   }
@@ -210,7 +214,7 @@ class ContentQualityEnhancer {
   }
 
   // Optimize caption with AI suggestions
-  async optimizeCaption(caption, platform, content) {
+  async optimizeCaption(caption, platform, _content) {
     try {
       const optimization = {
         original: caption,
