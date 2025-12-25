@@ -129,7 +129,6 @@ async function enqueueYouTubeUploadTask({
 
 async function processNextYouTubeTask() {
   // Fetch one queued task (simple FIFO by createdAt)
-  const nowIso = new Date().toISOString();
   let snapshot;
   try {
     snapshot = await db
@@ -148,7 +147,6 @@ async function processNextYouTubeTask() {
   }
 
   if (snapshot.empty) return null;
-  const doc = snapshot.docs[0];
   // Pick first eligible by nextAttemptAt <= now
   let selectedDoc = null;
   let selectedData = null;
@@ -311,15 +309,13 @@ async function enqueuePlatformPostTask({
       if (used >= quota) {
         // Record overage event (best effort)
         try {
-          await db
-            .collection("events")
-            .add({
-              type: "task_quota_block",
-              uid,
-              plan: planTier,
-              quota,
-              createdAt: new Date().toISOString(),
-            });
+          await db.collection("events").add({
+            type: "task_quota_block",
+            uid,
+            plan: planTier,
+            quota,
+            createdAt: new Date().toISOString(),
+          });
         } catch (_) {}
         return {
           skipped: true,
@@ -346,33 +342,27 @@ async function enqueuePlatformPostTask({
     if (totalContent < MIN_CONTENT_FOR_REVENUE) {
       // Mark user doc with progress to eligibility (best-effort)
       try {
-        await db
-          .collection("users")
-          .doc(uid)
-          .set(
-            {
-              revenueEligible: false,
-              contentCount: totalContent,
-              requiredForRevenue: MIN_CONTENT_FOR_REVENUE,
-            },
-            { merge: true }
-          );
+        await db.collection("users").doc(uid).set(
+          {
+            revenueEligible: false,
+            contentCount: totalContent,
+            requiredForRevenue: MIN_CONTENT_FOR_REVENUE,
+          },
+          { merge: true }
+        );
       } catch (_) {}
       // We still enqueue the task (platform growth) but note in payload metadata not revenue eligible yet
       payload.__revenueEligible = false;
     } else {
       try {
-        await db
-          .collection("users")
-          .doc(uid)
-          .set(
-            {
-              revenueEligible: true,
-              contentCount: totalContent,
-              requiredForRevenue: MIN_CONTENT_FOR_REVENUE,
-            },
-            { merge: true }
-          );
+        await db.collection("users").doc(uid).set(
+          {
+            revenueEligible: true,
+            contentCount: totalContent,
+            requiredForRevenue: MIN_CONTENT_FOR_REVENUE,
+          },
+          { merge: true }
+        );
       } catch (_) {}
       payload.__revenueEligible = true;
     }
@@ -689,14 +679,12 @@ async function processNextPlatformTask() {
             });
             if (changed) {
               try {
-                await db
-                  .collection("events")
-                  .add({
-                    type: "variant_reactivation_batch",
-                    contentId: task.contentId,
-                    platform: task.platform,
-                    at: new Date().toISOString(),
-                  });
+                await db.collection("events").add({
+                  type: "variant_reactivation_batch",
+                  contentId: task.contentId,
+                  platform: task.platform,
+                  at: new Date().toISOString(),
+                });
               } catch (_) {}
             }
           } catch (_) {}
@@ -788,18 +776,16 @@ async function processNextPlatformTask() {
           payload = { ...payload, message: selectedVariant };
           // Record exploration vs exploitation event (best-effort)
           try {
-            await db
-              .collection("events")
-              .add({
-                type: "variant_selection",
-                contentId: task.contentId,
-                platform: task.platform,
-                strategy: "ucb1",
-                exploration,
-                chosen: selectedVariant,
-                idx: bestIdx,
-                at: new Date().toISOString(),
-              });
+            await db.collection("events").add({
+              type: "variant_selection",
+              contentId: task.contentId,
+              platform: task.platform,
+              strategy: "ucb1",
+              exploration,
+              chosen: selectedVariant,
+              idx: bestIdx,
+              at: new Date().toISOString(),
+            });
           } catch (_) {}
           // Record selection metrics (reward placeholders) for tuner (use current normalized components as proxies)
           try {
@@ -945,16 +931,14 @@ async function processNextPlatformTask() {
           } catch (_) {}
           await ref.set(ffTask);
           try {
-            await db
-              .collection("events")
-              .add({
-                type: "fast_follow_enqueued",
-                contentId: task.contentId,
-                platform: task.platform,
-                variant: selectedVariant,
-                delayMs: ffDelayMs,
-                at: new Date().toISOString(),
-              });
+            await db.collection("events").add({
+              type: "fast_follow_enqueued",
+              contentId: task.contentId,
+              platform: task.platform,
+              variant: selectedVariant,
+              delayMs: ffDelayMs,
+              at: new Date().toISOString(),
+            });
           } catch (_) {}
         }
       }

@@ -7,7 +7,8 @@ const fetch = require("node-fetch");
 const { db } = require("../firebaseAdmin");
 const hashtagEngine = require("./hashtagEngine");
 // New platform service stubs
-const { postToSpotify } = require("./spotifyService");
+const { postToSpotify: _postToSpotify } = require("./spotifyService");
+void _postToSpotify;
 const { postToReddit } = require("./redditService");
 const { postToDiscord } = require("./discordService");
 const { postToLinkedIn } = require("./linkedinService");
