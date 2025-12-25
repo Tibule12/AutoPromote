@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const { db } = require("./firebaseAdmin");
 const optimizationService = require("./optimizationService");
 const paypalClient = require("./paypalClient");
@@ -29,10 +30,10 @@ class PromotionService {
   }
 
   // Schedule a promotion for content with advanced algorithms
-  async schedulePromotion(contentId, scheduleData) {
+  async schedulePromotion(contentId, _scheduleData) {
     try {
       console.log(`📊 Scheduling promotion for content ID: ${contentId}`);
-      console.log("📋 Schedule data:", scheduleData);
+      console.log("📋 Schedule data:", _scheduleData);
 
       // Get content details for optimization
       const contentRef = db.collection("content").doc(contentId);
@@ -47,7 +48,7 @@ class PromotionService {
       const content = { id: contentDoc.id, ...contentDoc.data() };
 
       // Normalize incoming data and apply defaults/optimizations
-      let normalized = this.normalizeScheduleData(scheduleData);
+      let normalized = this.normalizeScheduleData(_scheduleData);
 
       // Apply platform-specific optimization if not specified
       if (!normalized.platformSpecificSettings && normalized.platform) {
@@ -103,7 +104,7 @@ class PromotionService {
   }
 
   // Optimize platform-specific settings
-  optimizePlatformSettings(content, platform, scheduleData) {
+  optimizePlatformSettings(content, platform, _scheduleData) {
     const settings = {};
 
     switch (platform) {
