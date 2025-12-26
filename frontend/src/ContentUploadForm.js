@@ -466,9 +466,15 @@ function ContentUploadForm({
     setEnhancedSuggestions(null);
     setError("");
     try {
+      const currentUser = auth && auth.currentUser;
+      const headers = { "Content-Type": "application/json" };
+      if (currentUser) {
+        const token = await currentUser.getIdToken(true).catch(() => null);
+        if (token) headers.Authorization = `Bearer ${token}`;
+      }
       const response = await fetch(API_ENDPOINTS.CONTENT_QUALITY_CHECK, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           title,
           description,
@@ -753,9 +759,15 @@ function ContentUploadForm({
     setPerPlatformQuality(prev => ({ ...prev, [platform]: { loading: true } }));
     setError("");
     try {
+      const currentUser = auth && auth.currentUser;
+      const headers = { "Content-Type": "application/json" };
+      if (currentUser) {
+        const token = await currentUser.getIdToken(true).catch(() => null);
+        if (token) headers.Authorization = `Bearer ${token}`;
+      }
       const response = await fetch(API_ENDPOINTS.CONTENT_QUALITY_CHECK, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ title, description, type, platform }),
       });
       const text = await response.text();
@@ -1971,17 +1983,23 @@ function ContentUploadForm({
                       />
                     )}
                     {expandedPlatform === "tiktok" && (
-                      <div style={{ display: "grid", gap: 8 }}>
+                      <div
+                        className="form-group tiktok-options"
+                        style={{ display: "grid", gap: 8 }}
+                      >
                         <div style={{ fontSize: 12, color: "#666" }}>
                           Creator:{" "}
                           {tiktokCreatorInfo ? tiktokCreatorInfo.display_name || "—" : "Loading..."}
                         </div>
                         <div>
-                          <label>Privacy (required)</label>
+                          <label style={{ fontWeight: 700, color: "#000" }}>
+                            Privacy (required)
+                          </label>
                           <select
                             value={tiktokPrivacy}
                             onChange={e => setTiktokPrivacy(e.target.value)}
-                            className="form-select"
+                            className="form-select privacy-select"
+                            aria-label="TikTok privacy selection"
                           >
                             <option value="">Select privacy</option>
                             {(tiktokCreatorInfo &&
