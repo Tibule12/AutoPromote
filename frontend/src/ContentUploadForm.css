@@ -368,6 +368,21 @@
   cursor: pointer;
 }
 
+/* Make TikTok privacy select stand out: black text and bold */
+.form-group.tiktok-options .form-select,
+.form-group.tiktok-options .form-select option {
+  color: #000000;
+  font-weight: 700;
+  background-color: #ffffff;
+}
+/* Ensure visibility in dashboard-mode (dark theme) */
+.dashboard-mode .form-group.tiktok-options .form-select,
+.dashboard-mode .form-group.tiktok-options .form-select option {
+  color: #000000 !important;
+  font-weight: 700 !important;
+  background-color: #ffffff !important;
+}
+
 .input-with-emoji {
   position: relative;
   display: flex;
