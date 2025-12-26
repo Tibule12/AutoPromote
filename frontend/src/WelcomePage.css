@@ -24,14 +24,15 @@
   background: rgba(255, 255, 255, 0.98);
   border-radius: 36px;
   box-shadow: 0 12px 48px rgba(79, 47, 247, 0.18);
-  padding: 3.2rem 2.2rem 2.7rem 2.2rem;
+  padding: 3.2rem 2.2rem;
   max-width: 480px;
   width: 98vw;
+  min-height: calc(100vh - 48px);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.7rem;
-  justify-content: center;
+  justify-content: space-between; /* push footer to bottom */
 }
 .new-welcome-logo-row {
   display: flex;
@@ -143,10 +144,12 @@
 }
 @media (max-width: 600px) {
   .new-welcome-content {
-    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+    padding: 1.2rem 0.5rem;
     margin: 1.2rem 0.2rem;
     max-width: 99vw;
     gap: 1.1rem;
+    min-height: calc(100vh - 36px);
+    justify-content: space-between;
   }
   .new-welcome-logo {
     width: 54px;
