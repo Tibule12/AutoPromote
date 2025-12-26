@@ -1,0 +1,40 @@
+name: Verify Frontend Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
+
+      - name: Build frontend
+        run: npm --prefix frontend run build --if-present
+
+      - name: Verify build artifact exists
+        run: |
+          if [ ! -f frontend/build/index.html ]; then
+            echo "ERROR: frontend/build/index.html not found. Ensure build step ran successfully.";
+            ls -la frontend || true;
+            exit 1;
+          fi
+
+      - name: Run verify script (optional)
+        run: npm run verify:frontend-build || true
