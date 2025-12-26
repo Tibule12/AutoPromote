@@ -2455,11 +2455,37 @@ try {
         console.warn(
           `[startup] Frontend build not found at ${frontIndex}. Returning 503 placeholder for SPA routes.`
         );
-        return res
-          .status(503)
-          .send(
-            "<html><body><h1>Service Unavailable</h1><p>Frontend build not found. Please run <code>npm --prefix frontend run build</code> during deploy.</p></body></html>"
-          );
+        return res.status(503).send(`
+            <!doctype html>
+            <html>
+              <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width,initial-scale=1" />
+                <title>Service Unavailable</title>
+                <style>
+                  body{font-family:Inter,Arial,sans-serif;background:#f6f3ff;margin:0;padding:24px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+                  .card{background:#fff;border-radius:12px;padding:28px;max-width:760px;width:100%;box-shadow:0 12px 40px rgba(79,47,247,0.06);text-align:center}
+                  .foot{margin-top:20px;color:#6b6b6b;font-size:0.95rem}
+                  .foot a{color:#6c4cf7;text-decoration:underline;margin:0 8px}
+                </style>
+              </head>
+              <body>
+                <div class="card">
+                  <h1>Service Unavailable</h1>
+                  <p>Frontend build not found. Please run <code>npm --prefix frontend run build</code> during deploy.</p>
+
+                  <div class="foot">
+                    <div>
+                      <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/terms" target="_blank" rel="noreferrer">Terms of Service</a>
+                      <span>•</span>
+                      <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>
+                    </div>
+                    <div style="margin-top:8px">© ${new Date().getFullYear()} AutoPromote. All rights reserved.</div>
+                  </div>
+                </div>
+              </body>
+            </html>
+          `);
       }
       return res.sendFile(frontIndex, err => {
         if (err) {
@@ -2467,20 +2493,72 @@ try {
             "[startup] sendFile error for SPA route:",
             err && err.message ? err.message : err
           );
-          return res
-            .status(503)
-            .send(
-              "<html><body><h1>Service Unavailable</h1><p>Error serving frontend index. Try rebuilding.</p></body></html>"
-            );
+          return res.status(503).send(`
+              <!doctype html>
+              <html>
+                <head>
+                  <meta charset="utf-8" />
+                  <meta name="viewport" content="width=device-width,initial-scale=1" />
+                  <title>Service Unavailable</title>
+                  <style>
+                    body{font-family:Inter,Arial,sans-serif;background:#f6f3ff;margin:0;padding:24px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+                    .card{background:#fff;border-radius:12px;padding:28px;max-width:760px;width:100%;box-shadow:0 12px 40px rgba(79,47,247,0.06);text-align:center}
+                    .foot{margin-top:20px;color:#6b6b6b;font-size:0.95rem}
+                    .foot a{color:#6c4cf7;text-decoration:underline;margin:0 8px}
+                  </style>
+                </head>
+                <body>
+                  <div class="card">
+                    <h1>Service Unavailable</h1>
+                    <p>Error serving frontend index. Try rebuilding.</p>
+
+                    <div class="foot">
+                      <div>
+                        <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/terms" target="_blank" rel="noreferrer">Terms of Service</a>
+                        <span>•</span>
+                        <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>
+                      </div>
+                      <div style="margin-top:8px">© ${new Date().getFullYear()} AutoPromote. All rights reserved.</div>
+                    </div>
+                  </div>
+                </body>
+              </html>
+            `);
         }
       });
     } catch (e) {
       console.warn("[startup] SPA route error:", e && e.message ? e.message : e);
-      return res
-        .status(503)
-        .send(
-          "<html><body><h1>Service Unavailable</h1><p>Frontend currently unavailable.</p></body></html>"
-        );
+      return res.status(503).send(`
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8" />
+              <meta name="viewport" content="width=device-width,initial-scale=1" />
+              <title>Service Unavailable</title>
+              <style>
+                body{font-family:Inter,Arial,sans-serif;background:#f6f3ff;margin:0;padding:24px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+                .card{background:#fff;border-radius:12px;padding:28px;max-width:760px;width:100%;box-shadow:0 12px 40px rgba(79,47,247,0.06);text-align:center}
+                .foot{margin-top:20px;color:#6b6b6b;font-size:0.95rem}
+                .foot a{color:#6c4cf7;text-decoration:underline;margin:0 8px}
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <h1>Service Unavailable</h1>
+                <p>Frontend currently unavailable.</p>
+
+                <div class="foot">
+                  <div>
+                    <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/terms" target="_blank" rel="noreferrer">Terms of Service</a>
+                    <span>•</span>
+                    <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>
+                  </div>
+                  <div style="margin-top:8px">© ${new Date().getFullYear()} AutoPromote. All rights reserved.</div>
+                </div>
+              </div>
+            </body>
+          </html>
+        `);
     }
   });
 
@@ -2514,11 +2592,37 @@ try {
       });
     } catch (e) {
       console.warn("[startup] catch-all handler error:", e && e.message ? e.message : e);
-      return res
-        .status(503)
-        .send(
-          "<html><body><h1>Service Unavailable</h1><p>Frontend currently unavailable.</p></body></html>"
-        );
+      return res.status(503).send(`
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8" />
+              <meta name="viewport" content="width=device-width,initial-scale=1" />
+              <title>Service Unavailable</title>
+              <style>
+                body{font-family:Inter,Arial,sans-serif;background:#f6f3ff;margin:0;padding:24px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+                .card{background:#fff;border-radius:12px;padding:28px;max-width:760px;width:100%;box-shadow:0 12px 40px rgba(79,47,247,0.06);text-align:center}
+                .foot{margin-top:20px;color:#6b6b6b;font-size:0.95rem}
+                .foot a{color:#6c4cf7;text-decoration:underline;margin:0 8px}
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <h1>Service Unavailable</h1>
+                <p>Frontend currently unavailable.</p>
+
+                <div class="foot">
+                  <div>
+                    <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/terms" target="_blank" rel="noreferrer">Terms of Service</a>
+                    <span>•</span>
+                    <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>
+                  </div>
+                  <div style="margin-top:8px">© ${new Date().getFullYear()} AutoPromote. All rights reserved.</div>
+                </div>
+              </div>
+            </body>
+          </html>
+        `);
     }
   });
 
