@@ -31,7 +31,6 @@ async function enqueueMediaTransformTask({ contentId, uid, meta, url }) {
 
 async function processNextMediaTransformTask() {
   // Fetch one queued media_transform task
-  const nowIso = new Date().toISOString();
   const snap = await db
     .collection("promotion_tasks")
     .where("type", "==", "media_transform")

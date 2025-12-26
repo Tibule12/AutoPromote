@@ -9,7 +9,7 @@ jest.mock("../../firebaseAdmin", () => ({
 }));
 
 jest.mock("../pinterestService", () => ({
-  postToPinterest: jest.fn(async args => ({ ok: true })),
+  postToPinterest: jest.fn(async _args => ({ ok: true })),
 }));
 const { postToPinterest } = require("../pinterestService");
 
@@ -19,7 +19,7 @@ describe("platformPoster platformOptions merge", () => {
   });
 
   test("dispatchPlatformPost merges platformOptions into top-level args for pinterest", async () => {
-    const res = await dispatchPlatformPost({
+    await dispatchPlatformPost({
       platform: "pinterest",
       contentId: "abc",
       payload: { message: "Hello", platformOptions: { pinterest: { boardId: "board123" } } },

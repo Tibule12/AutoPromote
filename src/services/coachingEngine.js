@@ -1,7 +1,7 @@
 // coachingEngine.js
 // Personalized growth coaching and recommendations logic
 
-function getGrowthCoaching(userId, contentMetrics) {
+function getGrowthCoaching(userId, _contentMetrics) {
   // Stub: Simulate coaching tips
   return {
     userId,

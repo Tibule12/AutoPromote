@@ -14,8 +14,8 @@ const makeDoc = data => ({ exists: true, data: () => data, update: async () => t
 describe("clipRoutes", () => {
   beforeEach(() => {
     // Default db.collection stub; tests will override specific collection() usages
-    firebaseAdmin.db.collection = name => ({
-      doc: id => ({
+    firebaseAdmin.db.collection = _name => ({
+      doc: _id => ({
         get: async () => ({ exists: false, data: () => ({}) }),
         set: async () => true,
         update: async () => true,
@@ -28,8 +28,8 @@ describe("clipRoutes", () => {
       /* best-effort */
     }
     // Also stub server-side firebase admin used by /autopromote-functions/_server routes
-    serverFirebaseAdmin.db.collection = name => ({
-      doc: id => ({
+    serverFirebaseAdmin.db.collection = _name => ({
+      doc: _id => ({
         get: async () => ({ exists: false, data: () => ({}) }),
         set: async () => true,
       }),
@@ -38,16 +38,17 @@ describe("clipRoutes", () => {
 
   test("POST /api/clips/analyze succeeds when content owner matches token (user_id schema)", async () => {
     // Arrange: stub content doc to have snake_case user_id on the default firebaseAdmin used by root routes
-    firebaseAdmin.db.collection = name => ({
-      doc: id => ({
+    firebaseAdmin.db.collection = _name => ({
+      doc: _id => ({
         get: async () => makeDoc({ user_id: "testUser123" }),
         update: async () => true,
       }),
     });
+    let srcFb;
     try {
-      const srcFb = require("../../firebaseAdmin");
-      srcFb.db.collection = name => ({
-        doc: id => ({
+      srcFb = require("../../firebaseAdmin");
+      srcFb.db.collection = _name => ({
+        doc: _id => ({
           get: async () => makeDoc({ user_id: "testUser123" }),
           update: async () => true,
         }),
@@ -84,13 +85,17 @@ describe("clipRoutes", () => {
 
   test("POST /api/clips/analyze returns 403 when content owned by another user", async () => {
     // Stub content owner to a different user on the default firebaseAdmin used by root routes
-    firebaseAdmin.db.collection = name => ({
-      doc: id => ({ get: async () => makeDoc({ user_id: "otherUser" }), update: async () => true }),
+    firebaseAdmin.db.collection = _name => ({
+      doc: _id => ({
+        get: async () => makeDoc({ user_id: "testUser123" }),
+        update: async () => true,
+      }),
     });
+    let srcFb;
     try {
-      const srcFb = require("../../firebaseAdmin");
-      srcFb.db.collection = name => ({
-        doc: id => ({
+      srcFb = require("../../firebaseAdmin");
+      srcFb.db.collection = _name => ({
+        doc: _id => ({
           get: async () => makeDoc({ user_id: "otherUser" }),
           update: async () => true,
         }),

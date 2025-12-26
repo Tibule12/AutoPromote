@@ -441,6 +441,23 @@ function ContentUploadForm({
     setPinterestNote(extPlatformOptions?.pinterest?.note || "");
     setSpotifyPlaylistId(extPlatformOptions?.spotify?.playlistId || "");
     setSpotifyPlaylistName(extPlatformOptions?.spotify?.name || "");
+    // Initialize TikTok options from external props if provided (helps tests and parent-controlled forms)
+    if (extPlatformOptions?.tiktok) {
+      setTiktokPrivacy(extPlatformOptions.tiktok.privacy || "");
+      setTiktokInteractions(
+        extPlatformOptions.tiktok.interactions || { comments: false, duet: false, stitch: false }
+      );
+      if (extPlatformOptions.tiktok.commercial) {
+        setTiktokCommercial({
+          isCommercial: true,
+          yourBrand: !!extPlatformOptions.tiktok.commercial.yourBrand,
+          brandedContent: !!extPlatformOptions.tiktok.commercial.brandedContent,
+        });
+      }
+      if (typeof extPlatformOptions.tiktok.consent !== "undefined") {
+        setTiktokConsentChecked(!!extPlatformOptions.tiktok.consent);
+      }
+    }
   }, [extPlatformOptions]);
   const handleQualityCheck = async e => {
     e.preventDefault();
@@ -547,6 +564,22 @@ function ContentUploadForm({
         contentData.platform_options.linkedin = { companyId: linkedinCompanyId || undefined };
       if (selectedPlatformsVal.includes("twitter"))
         contentData.platform_options.twitter = { message: twitterMessage || undefined };
+      // Include TikTok options for previews so tests and clients see the consent/privacy metadata
+      if (selectedPlatformsVal.includes("tiktok")) {
+        contentData.platform_options = contentData.platform_options || {};
+        contentData.platform_options.tiktok = {
+          privacy: tiktokPrivacy || undefined,
+          interactions: tiktokInteractions || undefined,
+          commercial:
+            tiktokCommercial && tiktokCommercial.isCommercial
+              ? {
+                  yourBrand: !!tiktokCommercial.yourBrand,
+                  brandedContent: !!tiktokCommercial.brandedContent,
+                }
+              : undefined,
+          consent: !!tiktokConsentChecked,
+        };
+      }
       // Call backend preview (reuse onUpload with dry run)
       const result = await onUpload({ ...contentData, isDryRun: true });
       console.log("[E2E] handlePlatformPreview result", result);

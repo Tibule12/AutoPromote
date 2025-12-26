@@ -94,7 +94,7 @@ router.post("/boost/create", authMiddleware, async (req, res) => {
 // GET /influencer/marketplace - Get influencer marketplace
 router.get("/influencer/marketplace", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId;
+    void req.userId;
     const { platform, niche, budget } = req.query;
 
     if (!platform || !niche || !budget) {
@@ -149,7 +149,7 @@ router.post("/influencer/book", authMiddleware, async (req, res) => {
 // GET /roi/:contentId - Calculate ROI for content
 router.get("/roi/:contentId", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId;
+    void req.userId;
     const { contentId } = req.params;
 
     const roi = await monetizationService.calculateROI(contentId);

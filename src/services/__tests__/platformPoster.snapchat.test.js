@@ -7,7 +7,7 @@ jest.mock("../../firebaseAdmin", () => ({
     }),
   },
 }));
-jest.mock("../snapchatService", () => ({ postToSnapchat: jest.fn(async args => ({ ok: true })) }));
+jest.mock("../snapchatService", () => ({ postToSnapchat: jest.fn(async _args => ({ ok: true })) }));
 const { postToSnapchat } = require("../snapchatService");
 
 describe("platformPoster snapchat handler", () => {
@@ -15,7 +15,7 @@ describe("platformPoster snapchat handler", () => {
     postToSnapchat.mockClear();
   });
   test("dispatchPlatformPost merges platformOptions to top-level for snapchat", async () => {
-    const res = await dispatchPlatformPost({
+    await dispatchPlatformPost({
       platform: "snapchat",
       contentId: "abc",
       payload: { message: "Hello", platformOptions: { snapchat: { campaignId: "camp123" } } },

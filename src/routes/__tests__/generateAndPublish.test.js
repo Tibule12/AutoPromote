@@ -9,8 +9,8 @@ const firebaseAdmin = require("../../../firebaseAdmin");
 describe("generate-and-publish", () => {
   beforeEach(() => {
     // Default db.collection stub; tests will override specific collection() usages
-    firebaseAdmin.db.collection = name => ({
-      doc: id => ({
+    firebaseAdmin.db.collection = _name => ({
+      doc: _id => ({
         get: async () => ({ exists: false, data: () => ({}) }),
         set: async () => true,
         update: async () => true,
@@ -20,8 +20,8 @@ describe("generate-and-publish", () => {
 
   test("enqueue and then poll status", async () => {
     // Stub content doc to have owner userId
-    firebaseAdmin.db.collection = name => ({
-      doc: id => ({
+    firebaseAdmin.db.collection = _name => ({
+      doc: _id => ({
         get: async () => ({
           exists: true,
           data: () => ({ userId: "testUser", videoUrl: "https://storage/video.mp4" }),
@@ -29,8 +29,9 @@ describe("generate-and-publish", () => {
       }),
     });
     // Also stub the src-level firebaseAdmin (used by routes required from src/)
+    let srcFb;
     try {
-      const srcFb = require("../../firebaseAdmin");
+      srcFb = require("../../firebaseAdmin");
       srcFb.db.collection = firebaseAdmin.db.collection;
     } catch (e) {
       /* best-effort */
@@ -38,18 +39,18 @@ describe("generate-and-publish", () => {
 
     // Stub analyze and generate to avoid heavy work
     const videoClippingService = require("../../services/videoClippingService");
-    videoClippingService.analyzeVideo = async (videoUrl, contentId, userId) => ({
+    videoClippingService.analyzeVideo = async (_videoUrl, _contentId, _userId) => ({
       analysisId: "a1",
       topClips: [{ id: "c1" }],
       clipsGenerated: 1,
     });
-    videoClippingService.generateClip = async (analysisId, clipId, options) => ({
+    videoClippingService.generateClip = async (_analysisId, _clipId, _options) => ({
       success: true,
       clipUrl: "https://storage/clip.mp4",
     });
 
     // Verify stub works as expected
-    const docCheck = await firebaseAdmin.db.collection("content").doc("content123").get();
+    await firebaseAdmin.db.collection("content").doc("content123").get();
     // Mount app after stubbing to ensure route resolves the stubbed db
     const app = express();
     app.use(bodyParser.json());

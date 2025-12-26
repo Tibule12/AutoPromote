@@ -2,6 +2,7 @@
 // AI-powered video clipping service (Opus Clip style)
 // Analyzes long-form videos and generates viral short clips
 
+/* eslint-disable no-console */
 const ffmpeg = require("fluent-ffmpeg");
 const { db, storage } = require("../firebaseAdmin");
 const axios = require("axios");
@@ -246,11 +247,28 @@ class VideoClippingService {
           width: videoStream?.width,
           height: videoStream?.height,
           aspectRatio: videoStream ? `${videoStream.width}:${videoStream.height}` : "16:9",
-          fps: videoStream ? eval(videoStream.r_frame_rate) : 30,
+          fps: videoStream ? parseRFrameRate(videoStream.r_frame_rate) : 30,
           hasAudio: !!audioStream,
           fileSize: metadata.format.size,
           bitrate: metadata.format.bit_rate,
         });
+
+        function parseRFrameRate(r) {
+          // Accept formats like '30', '30000/1001', '25/1'
+          if (!r) return 30;
+          if (typeof r === "number") return r;
+          const s = String(r).trim();
+          if (/^\d+(?:\.\d+)?$/.test(s)) return parseFloat(s);
+          const m = s.match(/^(\d+)\/(\d+)$/);
+          if (m) {
+            const num = parseFloat(m[1]);
+            const den = parseFloat(m[2]);
+            if (den === 0) return 30;
+            return num / den;
+          }
+          // Fallback to default
+          return 30;
+        }
       });
     });
   }
@@ -314,20 +332,11 @@ class VideoClippingService {
       formData.append("response_format", "verbose_json");
       formData.append("timestamp_granularities", "word");
 
-      const response = await axios.post(
-        "https://api.openai.com/v1/audio/transcriptions",
-        formData,
-        {
-          headers: {
-            ...formData.getHeaders(),
-            Authorization: `Bearer ${this.openaiApiKey}`,
-          },
-          maxBodyLength: Infinity,
-        }
-      );
+      const { audioTranscriptions } = require("./openaiClient");
+      const response = await audioTranscriptions(formData, { feature: "transcription" });
 
       // Convert Whisper format to our format
-      const segments = response.data.segments || [];
+      const segments = response.segments || response?.data?.segments || [];
       // Log OpenAI usage: record transcription event + size
       try {
         const st = await fs.stat(audioPath).catch(() => null);
@@ -357,7 +366,7 @@ class VideoClippingService {
   /**
    * Transcribe audio using Google Cloud Speech-to-Text
    */
-  async transcribeWithGoogle(audioPath) {
+  async transcribeWithGoogle(_audioPath) {
     // Placeholder - implement Google Cloud Speech-to-Text integration
     console.warn("[VideoClipping] Google transcription not yet implemented");
     return [];
@@ -367,7 +376,7 @@ class VideoClippingService {
    * Detect scene changes using FFmpeg scene detection
    */
   async detectScenes(videoPath, duration) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const scenes = [];
       let lastTimestamp = 0;
 
@@ -424,8 +433,8 @@ class VideoClippingService {
   /**
    * Score video segments for viral potential
    */
-  async scoreSegments(scenes, transcript, metadata) {
-    return scenes.map((scene, index) => {
+  async scoreSegments(scenes, transcript, _metadata) {
+    return scenes.map((scene, _index) => {
       // Find transcript segments overlapping this scene
       const sceneTranscript = transcript.filter(
         t =>
@@ -496,7 +505,7 @@ class VideoClippingService {
   /**
    * Generate clip suggestions from scored segments
    */
-  generateClipSuggestions(scoredSegments, transcript) {
+  generateClipSuggestions(scoredSegments, _transcript) {
     const clips = [];
 
     // Sort segments by viral score
@@ -504,7 +513,7 @@ class VideoClippingService {
       .sort((a, b) => b.viralScore - a.viralScore)
       .slice(0, 20); // Top 20 segments
 
-    topSegments.forEach((segment, index) => {
+    topSegments.forEach((segment, _index) => {
       const duration = segment.end - segment.start;
 
       // Skip very short or very long segments

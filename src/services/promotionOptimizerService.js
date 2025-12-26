@@ -6,7 +6,7 @@ const { db } = require("../firebaseAdmin");
 const DEFAULT_BASELINE_CTR = parseFloat(process.env.BASELINE_CTR_TARGET || "0.03"); // 3%
 const MIN_POSTS_FOR_BASELINE = parseInt(process.env.MIN_POSTS_FOR_BASELINE || "3", 10);
 
-async function fetchRecentPerformance({ contentId, platform, uid, limit = 100 }) {
+async function fetchRecentPerformance({ contentId, platform, _uid, limit = 100 }) {
   const snap = await db
     .collection("platform_posts")
     .where("contentId", "==", contentId)
@@ -45,8 +45,8 @@ function predictedReach({ baseAvgImpressionsPerPost, qualityScore, boostFactor =
   return Math.round(baseAvgImpressionsPerPost * (0.6 + 0.4 * q) * boostFactor);
 }
 
-async function computeOptimizationProfile({ contentId, platform, uid }) {
-  const perf = await fetchRecentPerformance({ contentId, platform, uid });
+async function computeOptimizationProfile({ contentId, platform, _uid }) {
+  const perf = await fetchRecentPerformance({ contentId, platform, _uid });
   // Derive baseline average impressions
   const baseAvg = perf.posts ? perf.impressions / perf.posts : 500; // fallback constant
   let contentDoc = null;

@@ -3,6 +3,7 @@ const fetch = require("node-fetch");
 const crypto = require("crypto");
 const { admin, db } = require("../../firebaseAdmin");
 const authMiddleware = require("../../authMiddleware");
+const logger = require("../utils/logger");
 
 const router = express.Router();
 
@@ -17,12 +18,10 @@ const DASHBOARD_URL = process.env.DASHBOARD_URL || "https://www.autopromote.org"
 
 function ensureEnv(res) {
   if (!FB_CLIENT_ID || !FB_CLIENT_SECRET || !FB_REDIRECT_URI) {
-    return res
-      .status(500)
-      .json({
-        error:
-          "Facebook is not configured. Missing FB_CLIENT_ID, FB_CLIENT_SECRET, or FB_REDIRECT_URI.",
-      });
+    return res.status(500).json({
+      error:
+        "Facebook is not configured. Missing FB_CLIENT_ID, FB_CLIENT_SECRET, or FB_REDIRECT_URI.",
+    });
   }
 }
 
@@ -94,7 +93,7 @@ router.post("/auth/prepare", async (req, res) => {
     // Light diagnostics (masked)
     try {
       const mask = s => (s ? `${String(s).slice(0, 8)}…${String(s).slice(-4)}` : "missing");
-      console.log("[Facebook][prepare] Using client/redirect", {
+      logger.debug("Facebook.prepare", {
         clientId: mask(FB_CLIENT_ID),
         redirectPresent: !!FB_REDIRECT_CANON,
       });
@@ -145,6 +144,7 @@ router.get("/auth/start", async (req, res) => {
     const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(FB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(FB_REDIRECT_CANON)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&auth_type=rerequest`;
     return res.redirect(authUrl);
   } catch (e) {
+    logger.error("Facebook.startError", { error: e && e.message ? e.message : e });
     return res.status(500).json({ error: "Failed to start Facebook OAuth" });
   }
 });
@@ -168,12 +168,10 @@ router.get("/callback", async (req, res) => {
       if (error_code) url.searchParams.set("code", String(error_code));
       return res.redirect(url.toString());
     } catch (_) {
-      return res
-        .status(400)
-        .json({
-          error: "OAuth error",
-          details: { error, error_description, error_message, error_reason, error_code },
-        });
+      return res.status(400).json({
+        error: "OAuth error",
+        details: { error, error_description, error_message, error_reason, error_code },
+      });
     }
   }
   if (!code) return res.status(400).json({ error: "Missing code" });
@@ -181,7 +179,7 @@ router.get("/callback", async (req, res) => {
     // Light diagnostics (masked)
     try {
       const mask = s => (s ? `${String(s).slice(0, 8)}…${String(s).slice(-4)}` : "missing");
-      console.log("[Facebook][callback] Exchanging code with", {
+      logger.debug("Facebook.callbackExchange", {
         clientId: mask(FB_CLIENT_ID),
         redirectPresent: !!FB_REDIRECT_CANON,
       });
@@ -204,12 +202,10 @@ router.get("/callback", async (req, res) => {
           url.searchParams.set("reason", String(tokenData.error.code));
         return res.redirect(url.toString());
       } catch (_) {
-        return res
-          .status(400)
-          .json({
-            error: "Failed to obtain Facebook access token",
-            details: { error: tokenData.error },
-          });
+        return res.status(400).json({
+          error: "Failed to obtain Facebook access token",
+          details: { error: tokenData.error },
+        });
       }
     }
     // Fetch managed pages
@@ -399,16 +395,16 @@ router.post("/deauthorize", express.json(), async (req, res) => {
     }
 
     // Parse signed_request (format: signature.payload)
-    const [encodedSig, encodedPayload] = signedRequest.split(".");
+    const [, encodedPayload] = signedRequest.split(".");
     if (!encodedPayload) {
-      console.warn("[Facebook] Deauthorize callback: invalid signed_request format");
+      logger.warn("Facebook.deauthorize.invalidPayload");
       return res.json({ success: true });
     }
 
     const payload = JSON.parse(Buffer.from(encodedPayload, "base64").toString("utf8"));
     const userId = payload.user_id; // Facebook user ID
 
-    console.log("[Facebook] Deauthorize callback received for user:", userId);
+    logger.info("Facebook.deauthorize.received", { userId });
 
     // Find and remove connection for this Facebook user
     // Note: We store by our internal uid, not Facebook user_id, so we need to query
@@ -422,7 +418,7 @@ router.post("/deauthorize", express.json(), async (req, res) => {
       // Check if this connection matches the Facebook user ID (stored in pages data)
       if (data.pages && data.pages.some(p => String(p.id) === String(userId))) {
         await doc.ref.delete();
-        console.log("[Facebook] Removed connection for Facebook user:", userId);
+        logger.info("Facebook.deauthorize.removedConnection", { userId });
       }
     }
 

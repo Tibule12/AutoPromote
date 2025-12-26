@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // Integration test for /api/content/upload
 // Requires: jest, supertest, and your Express app
 
@@ -59,6 +60,7 @@ describe("Content Upload & Promotion Integration", () => {
     };
 
     console.log("Starting POST /api/content/upload integration test...");
+    const normalize = require("../../test/utils/normalizeApiResponse");
     let res;
     let status, apiBody;
     try {
@@ -68,7 +70,6 @@ describe("Content Upload & Promotion Integration", () => {
         // Avoid E2E bypass that returns minimal response when host is localhost
         .set("Host", "example.com")
         .send(payload);
-      const normalize = require("../../test/utils/normalizeApiResponse");
       ({ status, body: apiBody } = normalize(res.body, res.statusCode));
       console.log("POST /api/content/upload response:", status, apiBody);
     } catch (err) {

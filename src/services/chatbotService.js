@@ -2,8 +2,8 @@
 // AI Chatbot Service with multilingual support (all 11 South African languages)
 // Powered by OpenAI GPT-4o
 
-const axios = require("axios");
 const { logOpenAIUsage } = require("./openaiUsageLogger");
+/* eslint-disable no-console */
 const { db } = require("../firebaseAdmin");
 
 class ChatbotService {
@@ -107,9 +107,9 @@ IMPORTANT:
         content: message,
       });
 
-      // Call OpenAI API
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
+      // Call OpenAI API via central client
+      const { chatCompletions } = require("./openaiClient");
+      const response = await chatCompletions(
         {
           model: this.model,
           messages: messages,
@@ -118,12 +118,7 @@ IMPORTANT:
           presence_penalty: 0.6,
           frequency_penalty: 0.3,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${this.openaiApiKey}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { userId }
       );
 
       const botResponse = response.data.choices[0].message.content;

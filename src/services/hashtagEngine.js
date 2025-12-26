@@ -2,7 +2,8 @@
 // AutoPromote Hashtag Engine: Generates custom, algorithm-breaking hashtags for every post
 // Features: trending/niche blend, rotation, spam avoidance, performance tracking, branded communities
 
-const fetch = require("node-fetch");
+const _fetch = require("node-fetch");
+void _fetch;
 const { db } = require("../firebaseAdmin");
 const bypass =
   process.env.CI_ROUTE_IMPORTS === "1" ||
@@ -32,7 +33,11 @@ const _formatHashtagsForPlatform = (hashtags, platform) => {
 
 if (bypass) {
   module.exports = {
-    generateCustomHashtags: async ({ content = {}, platform = "tiktok", customTags = [] } = {}) => {
+    generateCustomHashtags: async ({
+      _content = {},
+      platform = "tiktok",
+      customTags = [],
+    } = {}) => {
       // Minimal deterministic no-op implementation for tests
       let tags = customTags && customTags.length ? customTags.slice() : ["#ap"];
       // Ensure Reddit has at least two tags so formatting is comma-separated in tests

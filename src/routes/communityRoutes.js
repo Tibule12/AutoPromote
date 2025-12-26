@@ -3,6 +3,7 @@
 
 const express = require("express");
 const router = express.Router();
+const logger = require("../utils/logger");
 const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
@@ -892,11 +893,20 @@ router.get("/suggestions", authMiddleware, async (req, res) => {
       }))
       .sort((a, b) => b.engagementScore - a.engagementScore)
       .slice(0, limit)
-      .map(({ engagementScore, totalEngagement, aiClipsCount, ...rest }) => rest); // Remove internal scores
+      .map(
+        ({
+          engagementScore: _engagementScore,
+          totalEngagement: _totalEngagement,
+          aiClipsCount: _aiClipsCount,
+          ...rest
+        }) => rest
+      ); // Remove internal scores
 
     res.json({ success: true, suggestions });
   } catch (error) {
-    console.error("[Community] Get suggestions error:", error);
+    logger.error("Community.suggestionsError", {
+      error: error && error.message ? error.message : error,
+    });
     res.status(500).json({ error: "Failed to fetch suggestions" });
   }
 });

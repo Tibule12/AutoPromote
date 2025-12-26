@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-unused-vars -- mock server used for local testing and CI; console output is intentional */
 // Simple mock backend that simulates TikTok sandbox token exchange and content share
 // Run with: node src/mock/tiktok_share_backend.js
 

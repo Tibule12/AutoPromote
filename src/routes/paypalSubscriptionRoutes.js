@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // paypalSubscriptionRoutes.js
 // PayPal subscription management for community monetization
 
@@ -318,17 +319,14 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
           customId: userId,
         });
         const subscriptionId = rest && (rest.id || rest.subscription_id);
-        await db
-          .collection("subscription_intents")
-          .doc(subscriptionId)
-          .set({
-            userId,
-            planId,
-            paypalSubscriptionId: subscriptionId,
-            status: "pending",
-            amount: plan.price,
-            createdAt: new Date().toISOString(),
-          });
+        await db.collection("subscription_intents").doc(subscriptionId).set({
+          userId,
+          planId,
+          paypalSubscriptionId: subscriptionId,
+          status: "pending",
+          amount: plan.price,
+          createdAt: new Date().toISOString(),
+        });
         audit.log("paypal.subscription.created", { userId, planId, subscriptionId });
         const approvalLink =
           (rest && rest.links && rest.links.find(l => l.rel === "approve")) || null;

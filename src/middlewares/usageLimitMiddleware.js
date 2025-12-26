@@ -2,6 +2,7 @@
 // Enforce monthly content upload limits for free users
 
 const { db } = require("../firebaseAdmin");
+const logger = require("../utils/logger");
 
 /**
  * Check if user has exceeded their monthly upload limit
@@ -55,7 +56,7 @@ function usageLimitMiddleware(options = {}) {
           monthKey: new Date().toISOString().slice(0, 7),
         };
         try {
-          console.debug("[usageLimit] E2E/Test bypass applied", {
+          logger.debug("[usageLimit] E2E/Test bypass applied", {
             hostHeader: hostHeader,
             isE2EDebugHeader,
             isLocalHost,
@@ -147,7 +148,9 @@ function usageLimitMiddleware(options = {}) {
 
       next();
     } catch (error) {
-      console.error("[usageLimitMiddleware] Error checking usage limits:", error);
+      logger.error("[usageLimitMiddleware] Error checking usage limits", {
+        error: error && error.message ? error.message : error,
+      });
       // On error, allow the request but log it
       next();
     }
@@ -174,11 +177,11 @@ async function trackUsage(userId, type = "upload", metadata = {}) {
       metadata: metadata || {},
     });
 
-    const __logger = require("../utils/logger") || {};
-    const debug = typeof __logger.debug === "function" ? __logger.debug : () => {};
-    debug(`[trackUsage] Tracked ${type} for user ${userId} in month ${monthKey}`);
+    logger.debug(`[trackUsage] Tracked ${type} for user ${userId} in month ${monthKey}`);
   } catch (error) {
-    console.error("[trackUsage] Error tracking usage:", error);
+    logger.error("[trackUsage] Error tracking usage", {
+      error: error && error.message ? error.message : error,
+    });
     // Don't throw - tracking failure shouldn't block the upload
   }
 }
@@ -236,7 +239,9 @@ async function getUserUsageStats(userId) {
       monthKey,
     };
   } catch (error) {
-    console.error("[getUserUsageStats] Error:", error);
+    logger.error("[getUserUsageStats] Error", {
+      error: error && error.message ? error.message : error,
+    });
     throw error;
   }
 }

@@ -239,11 +239,26 @@ class VideoClippingService {
           width: videoStream?.width,
           height: videoStream?.height,
           aspectRatio: videoStream ? `${videoStream.width}:${videoStream.height}` : "16:9",
-          fps: videoStream ? eval(videoStream.r_frame_rate) : 30,
+          fps: videoStream ? parseRFrameRate(videoStream.r_frame_rate) : 30,
           hasAudio: !!audioStream,
           fileSize: metadata.format.size,
           bitrate: metadata.format.bit_rate,
         });
+
+      function parseRFrameRate(r) {
+        if (!r) return 30;
+        if (typeof r === 'number') return r;
+        const s = String(r).trim();
+        if (/^\d+(?:\.\d+)?$/.test(s)) return parseFloat(s);
+        const m = s.match(/^(\d+)\/(\d+)$/);
+        if (m) {
+          const num = parseFloat(m[1]);
+          const den = parseFloat(m[2]);
+          if (den === 0) return 30;
+          return num / den;
+        }
+        return 30;
+      }
       });
     });
   }
@@ -307,20 +322,11 @@ class VideoClippingService {
       formData.append("response_format", "verbose_json");
       formData.append("timestamp_granularities", "word");
 
-      const response = await axios.post(
-        "https://api.openai.com/v1/audio/transcriptions",
-        formData,
-        {
-          headers: {
-            ...formData.getHeaders(),
-            Authorization: `Bearer ${this.openaiApiKey}`,
-          },
-          maxBodyLength: Infinity,
-        }
-      );
+      const { audioTranscriptions } = require('./openaiClient');
+      const response = await audioTranscriptions(formData, { feature: 'transcription' });
 
       // Convert Whisper format to our format
-      const segments = response.data.segments || [];
+      const segments = response.segments || response?.data?.segments || [];
       // Log OpenAI usage: record transcription event + size
       try {
         const st = await fs.stat(audioPath).catch(() => null);
