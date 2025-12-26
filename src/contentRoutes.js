@@ -57,6 +57,8 @@ const contentUploadSchema = Joi.object({
   quality_score: Joi.number().optional(),
   quality_feedback: Joi.array().optional(),
   quality_enhanced: Joi.boolean().optional(),
+  // Preview-only flag used by the frontend to request a dry-run (do not persist)
+  isDryRun: Joi.boolean().optional(),
 });
 
 function validateBody(schema) {
