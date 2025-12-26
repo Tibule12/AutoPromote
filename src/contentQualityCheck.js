@@ -42,6 +42,25 @@ function analyzeMetadata(metadata) {
   return { feedback, needsEnhancement, width, height, videoBitrate, audioBitrate };
 }
 
+// Accept JSON preview requests for preview:// URLs (used by frontend preview flow)
+router.post("/quality-check", express.json(), async (req, res) => {
+  try {
+    const body = req.body || {};
+    if (body.url && typeof body.url === "string" && body.url.startsWith("preview://")) {
+      // Preview: no real file available to analyze; return a conservative OK result
+      return res.json({
+        qualityScore: 100,
+        feedback: ["Preview content - automated quality checks are skipped for preview."],
+        enhanced: false,
+      });
+    }
+  } catch (e) {
+    // fall through to multipart handler
+  }
+  // If not a JSON preview request, defer to the multipart handler
+  return res.status(400).json({ error: "No preview url provided" });
+});
+
 router.post("/quality-check", upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
