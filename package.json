@@ -1,4 +1,5 @@
 {
+  "$schema": "./package.schema.json",
   "name": "autopromote-server",
   "main": "src/server.js",
   "version": "1.0.0",
