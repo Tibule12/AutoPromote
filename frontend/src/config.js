@@ -39,6 +39,7 @@ export const API_ENDPOINTS = {
   // TikTok endpoints
   TIKTOK_AUTH_START: `${API_BASE_URL}/api/tiktok/auth/start`,
   TIKTOK_STATUS: `${API_BASE_URL}/api/tiktok/status`,
+  TIKTOK_CREATOR_INFO: `${API_BASE_URL}/api/tiktok/creator_info`,
 
   // Facebook endpoints
   FACEBOOK_AUTH_START: `${API_BASE_URL}/api/facebook/auth/start`,

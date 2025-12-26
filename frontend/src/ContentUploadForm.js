@@ -371,7 +371,7 @@ function ContentUploadForm({
           const token = await currentUser.getIdToken(true);
           headers.Authorization = `Bearer ${token}`;
         }
-        const res = await fetch("/api/tiktok/creator_info", { headers });
+        const res = await fetch(API_ENDPOINTS.TIKTOK_CREATOR_INFO, { headers });
         if (!res.ok) {
           console.warn("TikTok creator_info fetch not ok", res.status);
           // If the server endpoint is unavailable, do NOT default privacy.
