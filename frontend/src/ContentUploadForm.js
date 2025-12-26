@@ -466,7 +466,7 @@ function ContentUploadForm({
     setEnhancedSuggestions(null);
     setError("");
     try {
-      const response = await fetch("/api/content/quality-check", {
+      const response = await fetch(API_ENDPOINTS.CONTENT_QUALITY_CHECK, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -476,15 +476,21 @@ function ContentUploadForm({
           url: file ? `preview://${file.name}` : "",
         }),
       });
-      const result = await response.json();
-      if (response.ok) {
-        setQualityScore(result.quality_score);
-        setQualityFeedback(result.quality_feedback);
-        if (result.enhanced && result.quality_score < 70) {
+      const text = await response.text();
+      let result = null;
+      try {
+        result = text ? JSON.parse(text) : null;
+      } catch (e) {
+        throw new Error("Invalid JSON response from quality check");
+      }
+      if (response.ok && result) {
+        setQualityScore(result.qualityScore || result.quality_score || null);
+        setQualityFeedback(result.feedback || result.quality_feedback || []);
+        if (result.enhanced && (result.qualityScore || result.quality_score) < 70) {
           setEnhancedSuggestions(result.enhanced);
         }
       } else {
-        setError(result.error || "Quality check failed.");
+        setError((result && result.error) || "Quality check failed.");
       }
     } catch (err) {
       setError(err.message || "Quality check failed.");
@@ -584,9 +590,23 @@ function ContentUploadForm({
       const result = await onUpload({ ...contentData, isDryRun: true });
       console.log("[E2E] handlePlatformPreview result", result);
       if (result && result.previews) {
-        setPreviews(result.previews);
+        const sanitized = result.previews.map(p => {
+          const thumb = p.thumbnail;
+          let thumbnail = thumb;
+          if (thumbnail && typeof thumbnail === "object") {
+            thumbnail = thumbnail.url || thumbnail.original || thumbnail.thumbnail || "";
+          }
+          return { ...p, thumbnail };
+        });
+        setPreviews(sanitized);
       } else if (result && result.content_preview) {
-        setPreviews([result.content_preview]);
+        const p = result.content_preview;
+        const thumb = p.thumbnail;
+        let thumbnail = thumb;
+        if (thumbnail && typeof thumbnail === "object") {
+          thumbnail = thumbnail.url || thumbnail.original || thumbnail.thumbnail || "";
+        }
+        setPreviews([{ ...p, thumbnail }]);
       } else {
         setError("No preview data returned.");
       }
@@ -733,13 +753,23 @@ function ContentUploadForm({
     setPerPlatformQuality(prev => ({ ...prev, [platform]: { loading: true } }));
     setError("");
     try {
-      const response = await fetch("/api/content/quality-check", {
+      const response = await fetch(API_ENDPOINTS.CONTENT_QUALITY_CHECK, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description, type, platform }),
       });
-      const result = await response.json();
-      if (response.ok) {
+      const text = await response.text();
+      let result = null;
+      try {
+        result = text ? JSON.parse(text) : null;
+      } catch (e) {
+        setPerPlatformQuality(prev => ({
+          ...prev,
+          [platform]: { loading: false, error: "Invalid JSON response from quality check" },
+        }));
+        return;
+      }
+      if (response.ok && result) {
         setPerPlatformQuality(prev => ({ ...prev, [platform]: { loading: false, result } }));
       } else {
         setPerPlatformQuality(prev => ({
@@ -2798,24 +2828,53 @@ function ContentUploadForm({
                 }}
               >
                 <strong>Suggested Improvements:</strong>
-                <div>
-                  <b>Title:</b> {enhancedSuggestions.title}
-                </div>
-                <div>
-                  <b>Description:</b> {enhancedSuggestions.description}
-                </div>
-                <button
-                  type="button"
-                  style={{ marginTop: "0.5rem" }}
-                  className="apply-enhancements-btn"
-                  onClick={() => {
-                    setTitle(enhancedSuggestions.title);
-                    setDescription(enhancedSuggestions.description);
-                    setEnhancedSuggestions(null);
-                  }}
-                >
-                  Apply Suggestions
-                </button>
+                {/* Support multiple enhanced shapes: prefer title/description but fall back to structured suggestions */}
+                {enhancedSuggestions.title || enhancedSuggestions.description ? (
+                  <>
+                    <div>
+                      <b>Title:</b> {enhancedSuggestions.title}
+                    </div>
+                    <div>
+                      <b>Description:</b> {enhancedSuggestions.description}
+                    </div>
+                    <button
+                      type="button"
+                      style={{ marginTop: "0.5rem" }}
+                      className="apply-enhancements-btn"
+                      onClick={() => {
+                        if (enhancedSuggestions.title) setTitle(enhancedSuggestions.title);
+                        if (enhancedSuggestions.description)
+                          setDescription(enhancedSuggestions.description);
+                        setEnhancedSuggestions(null);
+                      }}
+                    >
+                      Apply Suggestions
+                    </button>
+                  </>
+                ) : enhancedSuggestions.original ? (
+                  <div>
+                    <div>
+                      <b>Original:</b>
+                      <pre style={{ whiteSpace: "pre-wrap" }}>
+                        {JSON.stringify(enhancedSuggestions.original, null, 2)}
+                      </pre>
+                    </div>
+                    <div>
+                      <b>Suggestions:</b>
+                      <pre style={{ whiteSpace: "pre-wrap" }}>
+                        {JSON.stringify(enhancedSuggestions.suggestions, null, 2)}
+                      </pre>
+                    </div>
+                    <div>
+                      <b>Improvements:</b>
+                      <pre style={{ whiteSpace: "pre-wrap" }}>
+                        {JSON.stringify(enhancedSuggestions.improvements, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                ) : (
+                  <div>Suggested improvements available.</div>
+                )}
               </div>
             )}
           </div>
