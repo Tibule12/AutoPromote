@@ -27,7 +27,8 @@
     "convert-recording": "node ./scripts/convert_webm_to_mp4.js",
     "convert-recording:hq": "node ./scripts/convert_webm_to_mp4.js --preset slow --crf 18",
     "prepare": "node -e \"const fs=require('fs'), cp=require('child_process'); const tryRun=(p)=>{ if(fs.existsSync(p)){ cp.execFileSync(process.execPath, [p], {stdio:'inherit'}); return true; } return false; }; if(tryRun('./scripts/ensure-husky.js')) process.exit(0); if(tryRun('../scripts/ensure-husky.js')) process.exit(0); if(tryRun('../../scripts/ensure-husky.js')) process.exit(0); console.log('No ensure-husky script found in CWD or parents; skipping husky install');\"",
-    "verify:frontend-build": "node ./scripts/verify-frontend-build.js"
+    "verify:frontend-build": "node ./scripts/verify-frontend-build.js",
+    "build:frontend": "npm --prefix frontend ci || (npm --prefix frontend install && npm --prefix frontend run build)"
   },
   "engines": {
     "node": ">=20"
