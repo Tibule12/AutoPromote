@@ -182,6 +182,83 @@ router.get(
 );
 
 // GET /api/:platform/metadata - return helpful metadata for the connected user (playlist lists, org pages, guilds)
+
+// POST /api/:platform/webhook - platform webhook callbacks to update content status
+router.post("/:platform/webhook", platformWebhookLimiter, async (req, res) => {
+  const platform = normalize(req.params.platform);
+  const remote = req.ip || req.headers["x-forwarded-for"] || req.connection?.remoteAddress;
+  try {
+    // Optional secret validation per-platform (e.g., set TIKTOK_WEBHOOK_SECRET in env)
+    const secretHeader = (req.headers["x-platform-webhook-secret"] || "").toString();
+    const configuredSecret = (
+      process.env[`${platform.toUpperCase()}_WEBHOOK_SECRET`] || ""
+    ).toString();
+    if (configuredSecret && configuredSecret !== secretHeader) {
+      console.warn("[webhook] invalid secret for platform=%s from=%s", platform, remote);
+      return res.status(401).json({ ok: false, error: "invalid_webhook_secret" });
+    }
+
+    if (platform !== "tiktok" && platform !== "youtube" && platform !== "facebook") {
+      // For now, support TikTok + common providers; reject unknown platforms to avoid surprise writes
+      return res.status(400).json({ ok: false, error: "unsupported_platform_for_webhook" });
+    }
+
+    const payload = req.body || {};
+    const contentId =
+      payload.content_id || payload.contentId || payload.id || payload.content_id || null;
+    const idempotencyKey = payload.idempotency_key || payload.idempotencyKey || null;
+    const status = payload.status || payload.state || payload.processing_state || null;
+    const published = typeof payload.published !== "undefined" ? !!payload.published : undefined;
+    const platformPostUrl = payload.platform_post_url || payload.share_url || payload.url || null;
+
+    let contentRef = null;
+    if (contentId) {
+      contentRef = db.collection("content").doc(String(contentId));
+      const doc = await contentRef.get();
+      if (!doc.exists) contentRef = null;
+    }
+
+    if (!contentRef && idempotencyKey) {
+      const q = await db
+        .collection("content")
+        .where("idempotency_key", "==", String(idempotencyKey))
+        .limit(1)
+        .get();
+      if (!q.empty) contentRef = q.docs[0].ref;
+    }
+
+    if (!contentRef) {
+      console.warn("[webhook] no matching content found for platform=%s payloadKeys=%o", platform, {
+        contentId,
+        idempotencyKey,
+      });
+      return res.status(404).json({ ok: false, error: "content_not_found" });
+    }
+
+    const updated = {};
+    if (status) updated.status = String(status);
+    if (typeof published !== "undefined") updated.published = !!published;
+    if (platformPostUrl) updated.platform_post_url = String(platformPostUrl);
+    updated[`platform_data.${platform}.lastWebhookAt`] = new Date().toISOString();
+    updated.updatedAt = new Date().toISOString();
+
+    await contentRef.update(updated);
+
+    console.log(
+      "[webhook] updated content",
+      contentRef.id,
+      "platform=",
+      platform,
+      "updates=",
+      Object.keys(updated)
+    );
+    return res.json({ ok: true, updated: Object.keys(updated) });
+  } catch (err) {
+    console.error("[webhook] error", err && err.message);
+    return res.status(500).json({ ok: false, error: "webhook_handler_failed" });
+  }
+});
+
 router.get(
   "/:platform/metadata",
   authMiddleware,

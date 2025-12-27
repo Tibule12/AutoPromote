@@ -30,20 +30,28 @@ test("upload panel toggles between upload and history tabs", async () => {
     />
   );
 
-  // Initially upload tab should be active
-  expect(screen.getByText(/Upload Content/i)).toBeInTheDocument();
+  // Initially upload tab should be active (tab button should be selected)
+  const uploadTab = screen.getByRole("tab", { name: /Upload Content/i });
+  expect(uploadTab).toBeInTheDocument();
+  expect(uploadTab).toHaveAttribute("aria-selected", "true");
 
   // Click history tab
   const historyBtn = screen.getByRole("tab", { name: /Upload History/i });
   fireEvent.click(historyBtn);
 
-  // Now the history heading and the cute video card should appear
-  expect(screen.getByText(/Upload History/i)).toBeInTheDocument();
+  // Now the history tab should be selected and the cute video card should appear
+  const historyTab = screen.getByRole("tab", { name: /Upload History/i });
+  expect(historyTab).toBeInTheDocument();
+  expect(historyTab).toHaveAttribute("aria-selected", "true");
   expect(screen.getByText(/Cute Video/i)).toBeInTheDocument();
   expect(screen.getByText(/Lovely short clip/i)).toBeInTheDocument();
   expect(screen.getByText(/Tiktok/i)).toBeInTheDocument();
-  // Ensure the created date badge is visible (date string)
-  expect(screen.getByText(/\d{1,2}\/\d{1,2}\/\d{4}/i)).toBeInTheDocument();
+  // Ensure the created date badge is visible (date string) scoped to the card
+  const { within } = require("@testing-library/react");
+  const cards = screen.getAllByRole("button");
+  const card = cards.find(c => within(c).queryByText(/Cute Video/i));
+  expect(card).toBeDefined();
+  expect(within(card).getByText(/\d{4}\/\d{1,2}\/\d{1,2}/)).toBeInTheDocument();
 });
 
 test("upload history shows View on platform link and refresh when processing", async () => {
@@ -78,9 +86,11 @@ test("upload history shows View on platform link and refresh when processing", a
   const historyBtn = screen.getByRole("tab", { name: /Upload History/i });
   fireEvent.click(historyBtn);
 
-  // The processing label should be visible
-  expect(screen.getByText(/processing/i)).toBeInTheDocument();
-
-  // The 'View on platform' link should be present
-  expect(screen.getByText(/View on platform/i)).toBeInTheDocument();
+  // The processing label should be visible inside the content card and the 'View on platform' link should be present
+  const { within } = require("@testing-library/react");
+  const cards = screen.getAllByRole("button");
+  const card = cards.find(c => within(c).queryByText(/Processing Video/i));
+  expect(card).toBeDefined();
+  expect(within(card).getByText(/Still processing/i)).toBeInTheDocument();
+  expect(within(card).getByRole("link", { name: /View on platform/i })).toBeInTheDocument();
 });
