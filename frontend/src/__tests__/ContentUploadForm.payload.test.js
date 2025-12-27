@@ -1,6 +1,10 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ContentUploadForm from "../ContentUploadForm";
+
+// Increase timeout for multi-step submit flows in CI
+jest.setTimeout(20000);
+
 // Mock firebase storage to avoid network calls during tests
 jest.mock("firebase/storage", () => {
   const actual = jest.requireActual("firebase/storage");
@@ -79,7 +83,7 @@ describe("ContentUploadForm payloads", () => {
     const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
     fireEvent.click(uploadBtn);
     // Click confirm in modal
-    const confirmBtn = await screen.findByRole("button", { name: /Confirm publish/i });
+    const confirmBtn = await screen.findByRole("button", { name: /Confirm\s*&?\s*Publish/i });
     fireEvent.click(confirmBtn);
 
     await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 10000 });
@@ -94,7 +98,7 @@ describe("ContentUploadForm payloads", () => {
     // Submit the form
     const uploadBtn2 = screen.getByRole("button", { name: /Upload Content/i });
     fireEvent.click(uploadBtn2);
-    const confirmBtn2 = await screen.findByRole("button", { name: /Confirm publish/i });
+    const confirmBtn2 = await screen.findByRole("button", { name: /Confirm\s*&?\s*Publish/i });
     fireEvent.click(confirmBtn2);
 
     await waitFor(() => expect(onUpload).toHaveBeenCalledTimes(2), { timeout: 10000 });
