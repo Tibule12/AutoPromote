@@ -140,6 +140,34 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     global.fetch = origFetch;
   });
 
+  test("handles structured preview title objects without crashing", async () => {
+    const onUpload = jest.fn(async () => ({
+      previews: [
+        {
+          platform: "tiktok",
+          title: { original: "origTitle", suggestions: ["s1"] },
+          description: { text: "desc" },
+          thumbnail: "/img.png",
+        },
+      ],
+    }));
+
+    render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
+
+    // Provide minimal fields and a file
+    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "Preview Obj" } });
+    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const fileInput = screen.getByLabelText(/File/i);
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    // Click preview to trigger onUpload
+    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    fireEvent.click(previewBtn);
+
+    // Expect the preview card to render a stringified title containing "origTitle"
+    await screen.findByText(/origTitle/, { timeout: 3000 });
+  });
+
   test("disabled interaction checkboxes include explanatory title attributes", async () => {
     const onUpload = jest.fn(async () => ({}));
     // Mock creator_info fetch to disable comments

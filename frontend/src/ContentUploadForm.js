@@ -596,6 +596,23 @@ function ContentUploadForm({
       // Call backend preview (reuse onUpload with dry run)
       const result = await onUpload({ ...contentData, isDryRun: true });
       console.log("[E2E] handlePlatformPreview result", result);
+      // Helper to convert possibly-structured fields into safe strings for rendering
+      const safeText = v => {
+        if (!v && v !== 0) return "";
+        if (typeof v === "string") return v;
+        if (typeof v === "number") return String(v);
+        if (Array.isArray(v)) return v.join(", ");
+        if (typeof v === "object") {
+          // Prefer common readable keys
+          if (v.text) return String(v.text);
+          if (v.title) return String(v.title);
+          if (v.original) return String(v.original);
+          if (v.improved) return JSON.stringify(v.improved);
+          return JSON.stringify(v);
+        }
+        return String(v);
+      };
+
       if (result && result.previews) {
         const sanitized = result.previews.map(p => {
           const thumb = p.thumbnail;
@@ -603,7 +620,12 @@ function ContentUploadForm({
           if (thumbnail && typeof thumbnail === "object") {
             thumbnail = thumbnail.url || thumbnail.original || thumbnail.thumbnail || "";
           }
-          return { ...p, thumbnail };
+          // Ensure strings for text fields so React doesn't try to render objects
+          const title = safeText(p.title);
+          const description = safeText(p.description);
+          const caption = safeText(p.caption);
+          const sound = safeText(p.sound);
+          return { ...p, thumbnail, title, description, caption, sound };
         });
         setPreviews(sanitized);
       } else if (result && result.content_preview) {
@@ -613,7 +635,11 @@ function ContentUploadForm({
         if (thumbnail && typeof thumbnail === "object") {
           thumbnail = thumbnail.url || thumbnail.original || thumbnail.thumbnail || "";
         }
-        setPreviews([{ ...p, thumbnail }]);
+        const title = safeText(p.title);
+        const description = safeText(p.description);
+        const caption = safeText(p.caption);
+        const sound = safeText(p.sound);
+        setPreviews([{ ...p, thumbnail, title, description, caption, sound }]);
       } else {
         setError("No preview data returned.");
       }
@@ -716,6 +742,22 @@ function ContentUploadForm({
       const previews =
         result && (result.previews || (result.content_preview ? [result.content_preview] : []));
 
+      // Helper to ensure preview text fields are safe strings
+      const safeText = v => {
+        if (!v && v !== 0) return "";
+        if (typeof v === "string") return v;
+        if (typeof v === "number") return String(v);
+        if (Array.isArray(v)) return v.join(", ");
+        if (typeof v === "object") {
+          if (v.text) return String(v.text);
+          if (v.title) return String(v.title);
+          if (v.original) return String(v.original);
+          if (v.improved) return JSON.stringify(v.improved);
+          return JSON.stringify(v);
+        }
+        return String(v);
+      };
+
       // If the backend didn't return previews (400/500 or dry-run not supported),
       // fall back to a local preview using the selected file's object URL so the
       // Preview button still shows something useful to the user.
@@ -725,8 +767,8 @@ function ContentUploadForm({
           fallback.push({
             platform,
             thumbnail: previewUrl,
-            title: title || (file && file.name) || "Preview",
-            description: description || "",
+            title: safeText(title || (file && file.name) || "Preview"),
+            description: safeText(description || ""),
           });
         }
         setPerPlatformPreviews(prev => ({
@@ -734,7 +776,23 @@ function ContentUploadForm({
           [platform]: fallback.length ? fallback : null,
         }));
       } else {
-        setPerPlatformPreviews(prev => ({ ...prev, [platform]: previews }));
+        // sanitize per-platform previews before setting state
+        const sanitized = previews.map(p => {
+          const thumb = p.thumbnail;
+          let thumbnail = thumb;
+          if (thumbnail && typeof thumbnail === "object") {
+            thumbnail = thumbnail.url || thumbnail.original || thumbnail.thumbnail || "";
+          }
+          return {
+            ...p,
+            thumbnail,
+            title: safeText(p.title),
+            description: safeText(p.description),
+            caption: safeText(p.caption),
+            sound: safeText(p.sound),
+          };
+        });
+        setPerPlatformPreviews(prev => ({ ...prev, [platform]: sanitized }));
       }
     } catch (err) {
       // On error, show a local preview if available so the Preview action remains useful
