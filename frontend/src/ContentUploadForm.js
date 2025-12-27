@@ -363,7 +363,8 @@ function ContentUploadForm({
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      if (!selectedPlatformsVal.includes("tiktok")) return;
+      // Fetch creator info either when TikTok is selected OR when the TikTok panel is opened.
+      if (!(selectedPlatformsVal.includes("tiktok") || expandedPlatform === "tiktok")) return;
       try {
         const currentUser = auth && auth.currentUser;
         let headers = { Accept: "application/json" };
@@ -417,7 +418,7 @@ function ContentUploadForm({
     return () => {
       mounted = false;
     };
-  }, [selectedPlatformsVal]);
+  }, [selectedPlatformsVal, expandedPlatform]);
   const [discordChannelId, setDiscordChannelId] = useState(
     extPlatformOptions?.discord?.channelId || ""
   );
@@ -1991,6 +1992,12 @@ function ContentUploadForm({
                           Creator:{" "}
                           {tiktokCreatorInfo ? tiktokCreatorInfo.display_name || "—" : "Loading..."}
                         </div>
+                        {tiktokCreatorInfo && tiktokCreatorInfo.can_post === false && (
+                          <div className="tiktok-disabled-banner" role="alert">
+                            This TikTok account cannot publish via third-party apps right now.
+                            Please try again later.
+                          </div>
+                        )}
                         <div>
                           <label style={{ fontWeight: 700, color: "#000" }}>
                             Privacy (required)
@@ -2042,6 +2049,12 @@ function ContentUploadForm({
                                   }))
                                 }
                                 disabled={tiktokInteractionDisabled.comments}
+                                title={
+                                  tiktokInteractionDisabled.comments
+                                    ? "Comments disabled by creator"
+                                    : undefined
+                                }
+                                aria-disabled={tiktokInteractionDisabled.comments}
                               />{" "}
                               Comments
                             </label>
@@ -2058,6 +2071,12 @@ function ContentUploadForm({
                                       }))
                                     }
                                     disabled={tiktokInteractionDisabled.duet}
+                                    title={
+                                      tiktokInteractionDisabled.duet
+                                        ? "Duet disabled by creator"
+                                        : undefined
+                                    }
+                                    aria-disabled={tiktokInteractionDisabled.duet}
                                   />{" "}
                                   Duet
                                 </label>
@@ -2072,6 +2091,12 @@ function ContentUploadForm({
                                       }))
                                     }
                                     disabled={tiktokInteractionDisabled.stitch}
+                                    title={
+                                      tiktokInteractionDisabled.stitch
+                                        ? "Stitch disabled by creator"
+                                        : undefined
+                                    }
+                                    aria-disabled={tiktokInteractionDisabled.stitch}
                                   />{" "}
                                   Stitch
                                 </label>
@@ -2387,6 +2412,12 @@ function ContentUploadForm({
                                 }))
                               }
                               disabled={tiktokInteractionDisabled.stitch}
+                              title={
+                                tiktokInteractionDisabled.stitch
+                                  ? "Stitch disabled by creator"
+                                  : undefined
+                              }
+                              aria-disabled={tiktokInteractionDisabled.stitch}
                             />{" "}
                             Stitch
                           </label>
@@ -2729,10 +2760,22 @@ function ContentUploadForm({
         <div style={{ display: "flex", gap: ".5rem", marginTop: ".5rem", flexWrap: "wrap" }}>
           <button
             type="button"
-            disabled={isUploading || isPreviewing}
+            disabled={
+              isUploading ||
+              isPreviewing ||
+              (selectedPlatformsVal.includes("tiktok") &&
+                tiktokCreatorInfo &&
+                tiktokCreatorInfo.can_post === false)
+            }
             className="preview-button"
             onClick={handlePreview}
-            title="Preview (Ctrl+P)"
+            title={
+              selectedPlatformsVal.includes("tiktok") &&
+              tiktokCreatorInfo &&
+              tiktokCreatorInfo.can_post === false
+                ? "Preview disabled: creator account cannot publish right now"
+                : "Preview (Ctrl+P)"
+            }
             aria-label="Preview Content"
           >
             {isPreviewing ? (
@@ -2761,10 +2804,19 @@ function ContentUploadForm({
                 tiktokCommercial &&
                 tiktokCommercial.isCommercial &&
                 !tiktokCommercial.yourBrand &&
-                !tiktokCommercial.brandedContent)
+                !tiktokCommercial.brandedContent) ||
+              (selectedPlatformsVal.includes("tiktok") &&
+                tiktokCreatorInfo &&
+                tiktokCreatorInfo.can_post === false)
             }
             className="submit-button"
-            title="Upload (Ctrl+Enter)"
+            title={
+              selectedPlatformsVal.includes("tiktok") &&
+              tiktokCreatorInfo &&
+              tiktokCreatorInfo.can_post === false
+                ? "Upload disabled: creator account cannot publish right now"
+                : "Upload (Ctrl+Enter)"
+            }
             aria-label="Upload Content"
             onClick={e => {
               e.preventDefault();
