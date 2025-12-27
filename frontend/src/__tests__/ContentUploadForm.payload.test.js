@@ -75,21 +75,28 @@ describe("ContentUploadForm payloads", () => {
     fireEvent.change(fileInput, { target: { files: [file] } });
     fireEvent.click(screen.getByLabelText(/YouTube/i));
 
-    // Submit the form
+    // Submit the form (click Upload -> confirm modal -> confirm)
     const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
     fireEvent.click(uploadBtn);
+    // Click confirm in modal
+    const confirmBtn = await screen.findByRole("button", { name: /Confirm publish/i });
+    fireEvent.click(confirmBtn);
+
     await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 10000 });
     const payload = onUpload.mock.calls[0][0];
     expect(Array.isArray(payload.platforms)).toBeTruthy();
     expect(payload.platforms).toContain("youtube");
 
     // Overlay should also be present in submission payload if set
-    // Set overlay and submit again
+    // Set overlay and submit again (confirm modal)
     const overlayInput = screen.getByPlaceholderText(/Add overlay text/i);
     fireEvent.change(overlayInput, { target: { value: "Submit Overlay" } });
     // Submit the form
     const uploadBtn2 = screen.getByRole("button", { name: /Upload Content/i });
     fireEvent.click(uploadBtn2);
+    const confirmBtn2 = await screen.findByRole("button", { name: /Confirm publish/i });
+    fireEvent.click(confirmBtn2);
+
     await waitFor(() => expect(onUpload).toHaveBeenCalledTimes(2), { timeout: 10000 });
     const payload2 = onUpload.mock.calls[onUpload.mock.calls.length - 1][0];
     expect(payload2.meta).toBeDefined();

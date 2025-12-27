@@ -480,6 +480,18 @@ router.post("/admin/payouts/:id/process", authMiddleware, async (req, res) => {
   }
 });
 
+// Mount tipping and promotions sub-routers
+try {
+  router.use("/tips", require("./tippingRoutes"));
+} catch (e) {
+  console.warn("Tipping routes not available:", e && e.message);
+}
+try {
+  router.use("/promotions", require("./promotionRoutes"));
+} catch (e) {
+  console.warn("Promotions routes not available:", e && e.message);
+}
+
 // GET /earnings/leaderboard - Get top earning creators
 router.get("/earnings/leaderboard", async (req, res) => {
   try {
