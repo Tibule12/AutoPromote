@@ -225,4 +225,67 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     await screen.findByText(/You need to indicate if your content promotes yourself/i);
     expect(uploadBtn).toBeDisabled();
   });
+
+  test("opens Preview Edit modal and applies edits to form and preview card", async () => {
+    const onUpload = jest.fn(async payload => ({
+      previews: [{ platform: "tiktok", title: payload.title, description: payload.description }],
+    }));
+
+    render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
+
+    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "Initial Title" } });
+    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const fileInput = screen.getByLabelText(/File/i);
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    // Generate preview
+    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    fireEvent.click(previewBtn);
+
+    // Wait for preview card to render
+    await screen.findByText(/Initial Title/);
+
+    // Click Edit Preview on the preview card
+    const editBtn = screen.getByRole("button", { name: /Edit preview/i });
+    fireEvent.click(editBtn);
+
+    // Change title in modal and save
+    const editTitleInput = screen.getByLabelText(/Edit preview title/i);
+    fireEvent.change(editTitleInput, { target: { value: "Edited Title" } });
+
+    const saveBtn = screen.getByRole("button", { name: /Save edit/i });
+    fireEvent.click(saveBtn);
+
+    // Form title should update and preview card should show edited title
+    expect(screen.getByLabelText(/Title/i)).toHaveValue("Edited Title");
+    await screen.findByText(/Edited Title/);
+  });
+
+  test("Confirm modal requires TikTok consent before calling onUpload", async () => {
+    const onUpload = jest.fn(async () => ({}));
+
+    render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
+
+    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "Publish Test" } });
+    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const fileInput = screen.getByLabelText(/File/i);
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    // Click Upload (opens confirm modal)
+    const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
+    fireEvent.click(uploadBtn);
+
+    // Confirm button should be disabled until consent checkbox is checked
+    const confirmBtn = await screen.findByRole("button", { name: /Confirm publish/i });
+    expect(confirmBtn).toBeDisabled();
+
+    const consentCheckbox = screen.getByRole("checkbox");
+    fireEvent.click(consentCheckbox);
+    expect(confirmBtn).not.toBeDisabled();
+
+    // Click confirm - should trigger the upload flow and call onUpload eventually
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 5000 });
+  });
 });

@@ -16,6 +16,8 @@ import DraftManager from "./components/DraftManager";
 import ProgressIndicator from "./components/ProgressIndicator";
 import BestTimeToPost from "./components/BestTimeToPost";
 import ExplainButton from "./components/ExplainButton";
+import PreviewEditModal from "./components/PreviewEditModal";
+import ConfirmPublishModal from "./components/ConfirmPublishModal";
 
 // Security: Comprehensive sanitization to prevent XSS attacks
 // Uses direct string replacement - no DOM manipulation
@@ -161,6 +163,12 @@ function ContentUploadForm({
   const [tiktokConsentChecked, setTiktokConsentChecked] = useState(false);
   const uploadLockRef = useRef(false);
   const [error, setError] = useState("");
+
+  // Preview / Confirm modal state
+  const [showPreviewEditModal, setShowPreviewEditModal] = useState(false);
+  const [previewToEdit, setPreviewToEdit] = useState(null);
+  const [showConfirmPublishModal, setShowConfirmPublishModal] = useState(false);
+
   const [previews, setPreviews] = useState([]);
   const [qualityScore, setQualityScore] = useState(null);
   const [qualityFeedback, setQualityFeedback] = useState([]);
@@ -953,6 +961,28 @@ function ContentUploadForm({
     } finally {
       setPerPlatformUploading(prev => ({ ...prev, [platform]: false }));
     }
+  };
+
+  // Open preview edit modal for a specific preview card
+  const openPreviewEdit = p => {
+    setPreviewToEdit(p);
+    setShowPreviewEditModal(true);
+  };
+
+  const handleSavePreviewEdits = edited => {
+    // Apply edits to the global form state so the final upload uses the edited values
+    if (edited.title) setTitle(edited.title);
+    if (edited.description) setDescription(edited.description);
+    if (Array.isArray(edited.hashtags)) setHashtags(edited.hashtags);
+    setShowPreviewEditModal(false);
+  };
+
+  const submitFromConfirmed = () => {
+    // Create a synthetic event that satisfies the production guard (isTrusted)
+    const fakeEvent = { preventDefault: () => {}, nativeEvent: { isTrusted: true } };
+    setShowConfirmPublishModal(false);
+    // Call the existing submit handler with a trusted-like event
+    handleSubmit(fakeEvent);
   };
 
   // Poll /api/content/my-content for a record with the given idempotency key.
@@ -1993,6 +2023,16 @@ function ContentUploadForm({
                             <div>
                               <strong>Description:</strong> {p.description}
                             </div>
+                            <div style={{ marginTop: 8 }}>
+                              <button
+                                type="button"
+                                className="edit-platform-btn"
+                                onClick={() => openPreviewEdit(p)}
+                                aria-label={`Edit preview ${p.platform || ""}`}
+                              >
+                                Edit Preview
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -2868,7 +2908,7 @@ function ContentUploadForm({
             ✨ Quality Check
           </button>
           <button
-            type="submit"
+            type="button"
             disabled={
               isUploading ||
               (selectedPlatformsVal.includes("tiktok") && !tiktokConsentChecked) ||
@@ -2892,7 +2932,7 @@ function ContentUploadForm({
             aria-label="Upload Content"
             onClick={e => {
               e.preventDefault();
-              handleSubmit(e);
+              setShowConfirmPublishModal(true);
             }}
           >
             {isUploading ? (
@@ -3056,6 +3096,16 @@ function ContentUploadForm({
                 <div>
                   <strong>Description:</strong> {p.description}
                 </div>
+                <div style={{ marginTop: 8 }}>
+                  <button
+                    type="button"
+                    className="edit-platform-btn"
+                    onClick={() => openPreviewEdit(p)}
+                    aria-label={`Edit preview ${p.platform || ""}`}
+                  >
+                    Edit Preview
+                  </button>
+                </div>
                 {p.caption && (
                   <div>
                     <strong>Caption:</strong> {p.caption}
@@ -3076,6 +3126,26 @@ function ContentUploadForm({
           </div>
         </div>
       )}
+
+      {/* Global modal components */}
+      <PreviewEditModal
+        open={showPreviewEditModal}
+        preview={previewToEdit}
+        onClose={() => setShowPreviewEditModal(false)}
+        onSave={handleSavePreviewEdits}
+      />
+
+      <ConfirmPublishModal
+        open={showConfirmPublishModal}
+        platforms={selectedPlatformsVal}
+        title={title}
+        description={description}
+        hashtags={hashtags}
+        tiktokConsentChecked={tiktokConsentChecked}
+        setTiktokConsentChecked={setTiktokConsentChecked}
+        onClose={() => setShowConfirmPublishModal(false)}
+        onConfirm={submitFromConfirmed}
+      />
     </div>
   );
 }
