@@ -11,6 +11,8 @@ test("upload panel toggles between upload and history tabs", async () => {
       url: "/video.mp4",
       createdAt: Date.now(),
       status: "published",
+      description: "Lovely short clip",
+      platforms: ["tiktok"],
     },
   ];
 
@@ -38,4 +40,8 @@ test("upload panel toggles between upload and history tabs", async () => {
   // Now the history heading and the cute video card should appear
   expect(screen.getByText(/Upload History/i)).toBeInTheDocument();
   expect(screen.getByText(/Cute Video/i)).toBeInTheDocument();
+  expect(screen.getByText(/Lovely short clip/i)).toBeInTheDocument();
+  expect(screen.getByText(/Tiktok/i)).toBeInTheDocument();
+  // Ensure the created date badge is visible (date string)
+  expect(screen.getByText(/\d{1,2}\/\d{1,2}\/\d{4}/i)).toBeInTheDocument();
 });
