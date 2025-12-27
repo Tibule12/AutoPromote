@@ -14,6 +14,7 @@ function UploadPanel({
 }) {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [activeTab, setActiveTab] = useState("upload");
+  const [refreshedStatus, setRefreshedStatus] = useState({});
 
   const handleMediaClick = item => {
     if (item.type === "video" || item.type === "audio") {
@@ -23,6 +24,31 @@ function UploadPanel({
 
   const closeModal = () => {
     setSelectedMedia(null);
+  };
+
+  const refreshStatus = async item => {
+    try {
+      const headers = { Accept: "application/json" };
+      // If firebase auth available globally, include token
+      if (window && window.firebaseAuthToken)
+        headers.Authorization = `Bearer ${window.firebaseAuthToken}`;
+      const res = await fetch("/api/content/my-content", { headers });
+      if (!res.ok) return;
+      const list = await res.json();
+      if (!Array.isArray(list)) return;
+      const found = list.find(
+        c =>
+          c.id === item.id || c.content_id === item.id || c.idempotency_key === item.idempotency_key
+      );
+      if (found) {
+        setRefreshedStatus(prev => ({
+          ...prev,
+          [item.id || item.content_id || item.idempotency_key]: found,
+        }));
+      }
+    } catch (err) {
+      console.warn("refreshStatus failed", err);
+    }
   };
 
   return (
@@ -131,7 +157,10 @@ function UploadPanel({
                       {item.description && <div className="cute-desc">{item.description}</div>}
 
                       <div className="cute-row">
-                        <div className="cute-sub">{statusText}</div>
+                        <div className="cute-sub">
+                          {refreshedStatus[item.id || item.content_id || item.idempotency_key]
+                            ?.status || statusText}
+                        </div>
                         {item.platforms && (
                           <div className="platform-list">
                             {(Array.isArray(item.platforms)
@@ -144,6 +173,40 @@ function UploadPanel({
                             ))}
                           </div>
                         )}
+
+                        {/* Show Refresh and View links when relevant */}
+                        <div style={{ marginLeft: 8 }}>
+                          {(refreshedStatus[item.id || item.content_id || item.idempotency_key]
+                            ?.status === "processing" ||
+                            statusText === "processing") && (
+                            <button
+                              type="button"
+                              className="edit-platform-btn"
+                              onClick={() => refreshStatus(item)}
+                            >
+                              Refresh status
+                            </button>
+                          )}
+
+                          {(item.platform_post_url ||
+                            item.share_url ||
+                            refreshedStatus[item.id || item.content_id || item.idempotency_key]
+                              ?.platform_post_url) && (
+                            <a
+                              href={
+                                item.platform_post_url ||
+                                item.share_url ||
+                                refreshedStatus[item.id || item.content_id || item.idempotency_key]
+                                  ?.platform_post_url
+                              }
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ marginLeft: 8 }}
+                            >
+                              View on platform
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
