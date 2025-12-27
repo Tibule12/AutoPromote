@@ -19,6 +19,13 @@ import ExplainButton from "./components/ExplainButton";
 import PreviewEditModal from "./components/PreviewEditModal";
 import ConfirmPublishModal from "./components/ConfirmPublishModal";
 
+// Default inline thumbnail (avoids external 404s when thumbnail is missing)
+const DEFAULT_THUMBNAIL = (function () {
+  const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="16">Preview Thumbnail</text></svg>';
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+})();
+
 // Security: Comprehensive sanitization to prevent XSS attacks
 // Uses direct string replacement - no DOM manipulation
 const sanitizeInput = input => {
@@ -2024,7 +2031,7 @@ function ContentUploadForm({
                                 : "Preview"}
                             </h5>
                             <img
-                              src={p.thumbnail || "/default-thumb.png"}
+                              src={p.thumbnail || DEFAULT_THUMBNAIL}
                               alt="Preview Thumbnail"
                               style={{
                                 width: "100%",
@@ -2253,7 +2260,11 @@ function ContentUploadForm({
                                     : "Preview"}
                                 </h5>
                                 <img
-                                  src={p.thumbnail || "/default-thumb.png"}
+                                  src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
+                                  onError={e => {
+                                    e.target.onerror = null;
+                                    e.target.src = DEFAULT_THUMBNAIL;
+                                  }}
                                   alt="Preview Thumbnail"
                                   style={{
                                     width: "100%",
@@ -2342,7 +2353,11 @@ function ContentUploadForm({
                                     : "Preview"}
                                 </h5>
                                 <img
-                                  src={p.thumbnail || "/default-thumb.png"}
+                                  src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
+                                  onError={e => {
+                                    e.target.onerror = null;
+                                    e.target.src = DEFAULT_THUMBNAIL;
+                                  }}
                                   alt="Preview Thumbnail"
                                   style={{
                                     width: "100%",
@@ -3102,7 +3117,11 @@ function ContentUploadForm({
                     : "Preview"}
                 </h5>
                 <img
-                  src={p.thumbnail || "/default-thumb.png"}
+                  src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
+                  onError={e => {
+                    e.target.onerror = null;
+                    e.target.src = DEFAULT_THUMBNAIL;
+                  }}
                   alt="Preview Thumbnail"
                   style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 6 }}
                 />

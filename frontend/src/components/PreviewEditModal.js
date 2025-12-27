@@ -10,7 +10,22 @@ export default function PreviewEditModal({ open, preview, onClose, onSave }) {
     if (!open) return;
     setTitle(preview?.title || "");
     setDescription(preview?.description || "");
-    setHashtagsInput((preview && preview.hashtags && preview.hashtags.join(" ")) || "");
+    // Normalize hashtags into a space-separated string. Handles arrays, strings, and structured objects.
+    const h = preview?.hashtags;
+    if (!h) {
+      setHashtagsInput("");
+    } else if (Array.isArray(h)) {
+      setHashtagsInput(h.join(" "));
+    } else if (typeof h === "string") {
+      setHashtagsInput(h);
+    } else if (typeof h === "object") {
+      if (h.original) setHashtagsInput(h.original);
+      else if (h.text) setHashtagsInput(h.text);
+      else if (Array.isArray(h.suggestions)) setHashtagsInput(h.suggestions.join(" "));
+      else setHashtagsInput(JSON.stringify(h));
+    } else {
+      setHashtagsInput(String(h));
+    }
   }, [open, preview]);
 
   if (!open) return null;
