@@ -737,7 +737,39 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
+// GET /status/:id - Return lightweight status for a content item (auth required)
+router.get("/status/:id", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    const id = req.params.id;
+    // Try direct doc id first
+    let contentDoc = await db.collection("content").doc(id).get();
+    if (!contentDoc.exists) {
+      // Fallback: search by idempotency_key
+      const q = await db.collection("content").where("idempotency_key", "==", id).limit(1).get();
+      if (!q.empty) contentDoc = q.docs[0];
+    }
+    if (!contentDoc || !contentDoc.exists)
+      return res.status(404).json({ error: "Content not found" });
+    const data = contentDoc.data() || {};
+    // Return minimal fields for polling clients
+    const status = data.status || data.processing_state || null;
+    const published = !!data.published;
+    const platformPostUrl = data.platform_post_url || data.share_url || null;
+    return res.json({
+      ok: true,
+      id: contentDoc.id,
+      status,
+      published,
+      platform_post_url: platformPostUrl,
+      record: data,
+    });
+  } catch (error) {
+    console.error("[GET /status/:id] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 // GET /:id - Get individual content
 router.get("/:id", authMiddleware, async (req, res) => {
   try {
