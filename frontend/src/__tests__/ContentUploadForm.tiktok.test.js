@@ -168,6 +168,19 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     await screen.findByText(/origTitle/, { timeout: 3000 });
   });
 
+  test("programmatic submit does not trigger upload in production guard", async () => {
+    const onUpload = jest.fn(async () => ({}));
+
+    render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
+
+    // Simulate programmatic submit (no nativeEvent)
+    const form = screen.getByTestId("content-upload-form");
+    await fireEvent.submit(form);
+
+    // onUpload should NOT have been called
+    expect(onUpload).not.toHaveBeenCalled();
+  });
+
   test("disabled interaction checkboxes include explanatory title attributes", async () => {
     const onUpload = jest.fn(async () => ({}));
     // Mock creator_info fetch to disable comments
