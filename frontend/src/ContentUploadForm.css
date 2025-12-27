@@ -383,6 +383,17 @@
   background-color: #ffffff !important;
 }
 
+/* Banner when creator account cannot publish via third-party apps */
+.tiktok-disabled-banner {
+  background: #fff4f4;
+  color: #b66;
+  border: 1px solid #f0c6c6;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
 .input-with-emoji {
   position: relative;
   display: flex;
