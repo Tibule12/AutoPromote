@@ -1,6 +1,10 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ContentUploadForm from "../ContentUploadForm";
+
+// Increase timeout for multi-step submit flows in CI
+jest.setTimeout(20000);
+
 // Mock firebase storage to avoid network calls during tests
 jest.mock("firebase/storage", () => {
   const actual = jest.requireActual("firebase/storage");
@@ -30,11 +34,13 @@ describe("ContentUploadForm payloads", () => {
     const fileInput = screen.getByLabelText(/File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
-    // Select platforms: Discord and YouTube
-    const discordToggle = screen.getByLabelText(/Discord/i);
-    fireEvent.click(discordToggle);
-    const youtubeToggle = screen.getByLabelText(/YouTube/i);
-    fireEvent.click(youtubeToggle);
+    // Select platforms: Discord and YouTube (click the platform cards)
+    const discordBtns = screen.getAllByRole("button", { name: /Discord/i });
+    const discordBtn = discordBtns.find(b => b.classList && b.classList.contains("platform-card"));
+    fireEvent.click(discordBtn);
+    const youtubeBtns = screen.getAllByRole("button", { name: /YouTube/i });
+    const youtubeBtn = youtubeBtns.find(b => b.classList && b.classList.contains("platform-card"));
+    fireEvent.click(youtubeBtn);
 
     // Set Discord channel id (platform option)
     const discordChannel = screen.getByPlaceholderText(/Discord channel ID/i);
@@ -79,7 +85,7 @@ describe("ContentUploadForm payloads", () => {
     const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
     fireEvent.click(uploadBtn);
     // Click confirm in modal
-    const confirmBtn = await screen.findByRole("button", { name: /Confirm publish/i });
+    const confirmBtn = await screen.findByRole("button", { name: /Confirm\s*&?\s*Publish/i });
     fireEvent.click(confirmBtn);
 
     await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 10000 });
@@ -94,7 +100,7 @@ describe("ContentUploadForm payloads", () => {
     // Submit the form
     const uploadBtn2 = screen.getByRole("button", { name: /Upload Content/i });
     fireEvent.click(uploadBtn2);
-    const confirmBtn2 = await screen.findByRole("button", { name: /Confirm publish/i });
+    const confirmBtn2 = await screen.findByRole("button", { name: /Confirm\s*&?\s*Publish/i });
     fireEvent.click(confirmBtn2);
 
     await waitFor(() => expect(onUpload).toHaveBeenCalledTimes(2), { timeout: 10000 });

@@ -19,6 +19,13 @@ import ExplainButton from "./components/ExplainButton";
 import PreviewEditModal from "./components/PreviewEditModal";
 import ConfirmPublishModal from "./components/ConfirmPublishModal";
 
+// Default inline thumbnail (avoids external 404s when thumbnail is missing)
+const DEFAULT_THUMBNAIL = (function () {
+  const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="16">Preview Thumbnail</text></svg>';
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+})();
+
 // Security: Comprehensive sanitization to prevent XSS attacks
 // Uses direct string replacement - no DOM manipulation
 const sanitizeInput = input => {
@@ -288,6 +295,9 @@ function ContentUploadForm({
   const [perPlatformQuality, setPerPlatformQuality] = useState({});
   const [perPlatformUploading, setPerPlatformUploading] = useState({});
   const [perPlatformUploadStatus, setPerPlatformUploadStatus] = useState({});
+  const [perPlatformFile, setPerPlatformFile] = useState({});
+  const [perPlatformTitle, setPerPlatformTitle] = useState({});
+  const [perPlatformDescription, setPerPlatformDescription] = useState({});
   // Per-platform quick guidelines and details to help users adhere to platform UX constraints
   const platformGuidelines = {
     tiktok: {
@@ -667,13 +677,19 @@ function ContentUploadForm({
   };
 
   const buildContentDataForPlatform = (platform, isDryRun = true) => {
-    const finalTitle = title || (file ? file.name : "");
+    const fileForPlatform = (perPlatformFile && perPlatformFile[platform]) || file;
+    const finalTitle =
+      (perPlatformTitle && perPlatformTitle[platform]) ||
+      title ||
+      (fileForPlatform ? fileForPlatform.name : "");
+    const finalDescription =
+      (perPlatformDescription && perPlatformDescription[platform]) || description || "";
     const contentData = {
       title: finalTitle,
       type,
-      description,
-      url: file ? `preview://${file.name}` : "",
-      file: file ? { name: file.name } : undefined,
+      description: finalDescription,
+      url: fileForPlatform ? `preview://${fileForPlatform.name}` : "",
+      file: fileForPlatform ? { name: fileForPlatform.name } : undefined,
       idempotency_key: idempotencyKey || undefined,
       target_platforms: [platform],
       platforms: [platform],
@@ -738,12 +754,20 @@ function ContentUploadForm({
     return contentData;
   };
 
+  const handlePerPlatformFileChange = (platform, fileObj) => {
+    setPerPlatformFile(prev => ({ ...prev, [platform]: fileObj || null }));
+    if (fileObj && !(perPlatformTitle && perPlatformTitle[platform])) {
+      setPerPlatformTitle(prev => ({ ...prev, [platform]: fileObj.name }));
+    }
+  };
+
   const handlePlatformPreview = async platform => {
     setPerPlatformPreviews(prev => ({ ...prev, [platform]: null }));
     setError("");
     console.log("[E2E] handlePlatformPreview called for platform:", platform);
+    const fileToUse = (perPlatformFile && perPlatformFile[platform]) || file;
     try {
-      if (!file) throw new Error("Please select a file to preview.");
+      if (!fileToUse) throw new Error("Please select a file to preview.");
       const contentData = buildContentDataForPlatform(platform, true);
       console.log("[E2E] handlePlatformPreview contentData", contentData);
       const result = await onUpload({ ...contentData, isDryRun: true });
@@ -804,7 +828,25 @@ function ContentUploadForm({
       }
     } catch (err) {
       // On error, show a local preview if available so the Preview action remains useful
-      if (previewUrl) {
+      if (fileToUse) {
+        const tmpThumb = previewUrl || (fileToUse && URL.createObjectURL(fileToUse));
+        setPerPlatformPreviews(prev => ({
+          ...prev,
+          [platform]: [
+            {
+              platform,
+              thumbnail: tmpThumb,
+              title:
+                (perPlatformTitle && perPlatformTitle[platform]) ||
+                title ||
+                (fileToUse && fileToUse.name) ||
+                "Preview",
+              description:
+                (perPlatformDescription && perPlatformDescription[platform]) || description || "",
+            },
+          ],
+        }));
+      } else if (previewUrl) {
         setPerPlatformPreviews(prev => ({
           ...prev,
           [platform]: [
@@ -870,7 +912,8 @@ function ContentUploadForm({
     setPerPlatformUploadStatus(prev => ({ ...prev, [platform]: "Preparing upload..." }));
     setError("");
     try {
-      if (!file) throw new Error("Please select a file to upload.");
+      const fileToUse = (perPlatformFile && perPlatformFile[platform]) || file;
+      if (!fileToUse) throw new Error("Please select a file to upload.");
       // Platform-specific client-side checks (TikTok)
       if (platform === "tiktok") {
         if (!tiktokConsentChecked)
@@ -925,9 +968,9 @@ function ContentUploadForm({
         // E2E bypass: don't call real Firebase Storage; use placeholder URL
         url = `https://example.com/e2e-${platform}.mp4`;
       } else {
-        const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
+        const filePath = `uploads/${type}s/${Date.now()}_${fileToUse.name}`;
         const storageRef = ref(storage, filePath);
-        await uploadBytes(storageRef, file);
+        await uploadBytes(storageRef, fileToUse);
         url = await getDownloadURL(storageRef);
       }
 
@@ -951,7 +994,10 @@ function ContentUploadForm({
         ...prev,
         [platform]: "✓ Upload submitted. It may take a few minutes to process.",
       }));
-      // Optionally clear form fields for that platform only — we won't clear global file/title here
+      // Clear per-platform inputs for this platform only
+      setPerPlatformFile(prev => ({ ...prev, [platform]: null }));
+      setPerPlatformTitle(prev => ({ ...prev, [platform]: "" }));
+      setPerPlatformDescription(prev => ({ ...prev, [platform]: "" }));
     } catch (err) {
       setError(err.message || "Platform upload failed.");
       setPerPlatformUploadStatus(prev => ({
@@ -1831,27 +1877,55 @@ function ContentUploadForm({
                       key={p}
                       role="button"
                       tabIndex={0}
-                      aria-pressed={selectedPlatformsVal.includes(p)}
+                      aria-expanded={expandedPlatform === p}
                       aria-label={p.charAt(0).toUpperCase() + p.slice(1)}
                       onKeyDown={e => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          if (!disabled) togglePlatform(p);
+                          if (!disabled) {
+                            const nextExpand = expandedPlatform === p ? null : p;
+                            setExpandedPlatform(nextExpand);
+                            if (typeof extSetSelectedPlatforms === "function") {
+                              const current = Array.isArray(extSelectedPlatforms)
+                                ? extSelectedPlatforms
+                                : [];
+                              const isSel = current.includes(p);
+                              extSetSelectedPlatforms(
+                                isSel ? current.filter(x => x !== p) : [...current, p]
+                              );
+                            } else {
+                              setSelectedPlatforms(prev => {
+                                const curr = Array.isArray(prev) ? prev : [];
+                                const isSel = curr.includes(p);
+                                return isSel ? curr.filter(x => x !== p) : [...curr, p];
+                              });
+                            }
+                          }
                         }
                       }}
-                      className={`platform-tile ${selectedPlatformsVal.includes(p) ? "selected" : ""} ${disabled ? "disabled" : ""}`}
+                      className={`platform-card ${expandedPlatform === p ? "expanded" : ""} ${disabled ? "disabled" : ""}`}
                       onClick={() => {
-                        if (!disabled) togglePlatform(p);
-                        else setError("This TikTok account cannot post via third-party apps.");
+                        if (!disabled) {
+                          const nextExpand = expandedPlatform === p ? null : p;
+                          setExpandedPlatform(nextExpand);
+                          if (typeof extSetSelectedPlatforms === "function") {
+                            const current = Array.isArray(extSelectedPlatforms)
+                              ? extSelectedPlatforms
+                              : [];
+                            const isSel = current.includes(p);
+                            extSetSelectedPlatforms(
+                              isSel ? current.filter(x => x !== p) : [...current, p]
+                            );
+                          } else {
+                            setSelectedPlatforms(prev => {
+                              const curr = Array.isArray(prev) ? prev : [];
+                              const isSel = curr.includes(p);
+                              return isSel ? curr.filter(x => x !== p) : [...curr, p];
+                            });
+                          }
+                        } else setError("This TikTok account cannot post via third-party apps.");
                       }}
                     >
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        aria-hidden="true"
-                        checked={selectedPlatformsVal.includes(p)}
-                        readOnly
-                      />
                       <div className="platform-icon" aria-hidden="true">
                         {getPlatformIcon(p)}
                       </div>
@@ -1893,18 +1967,12 @@ function ContentUploadForm({
                           )}
                         </div>
                         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          {selectedPlatformsVal.includes(p) && (
-                            <button
-                              type="button"
-                              className="edit-platform-btn"
-                              onClick={ev => {
-                                ev.stopPropagation();
-                                setExpandedPlatform(expandedPlatform === p ? null : p);
-                              }}
-                            >
-                              {expandedPlatform === p ? "Close" : "Edit"}
-                            </button>
-                          )}
+                          <div
+                            className="open-platform-indicator"
+                            style={{ fontSize: 12, color: "#374151" }}
+                          >
+                            {expandedPlatform === p ? "Close" : "Open"}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1954,6 +2022,50 @@ function ContentUploadForm({
                         </ul>
                       </div>
                     )}
+                    {/* Per-platform inputs: file, title, description (defaults to global if empty) */}
+                    <div
+                      className="per-platform-form"
+                      style={{ marginTop: 8, display: "grid", gap: 8 }}
+                    >
+                      <label style={{ fontWeight: 700 }}>
+                        Upload for{" "}
+                        {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)}
+                      </label>
+                      <input
+                        aria-label={`Platform file ${expandedPlatform}`}
+                        type="file"
+                        onChange={e =>
+                          handlePerPlatformFileChange(
+                            expandedPlatform,
+                            e.target.files && e.target.files[0]
+                          )
+                        }
+                      />
+                      <input
+                        aria-label={`Platform title ${expandedPlatform}`}
+                        placeholder="Title"
+                        className="form-input"
+                        value={perPlatformTitle[expandedPlatform] || title}
+                        onChange={e =>
+                          setPerPlatformTitle(prev => ({
+                            ...prev,
+                            [expandedPlatform]: e.target.value,
+                          }))
+                        }
+                      />
+                      <textarea
+                        aria-label={`Platform description ${expandedPlatform}`}
+                        placeholder="Description"
+                        className="form-input"
+                        value={perPlatformDescription[expandedPlatform] || description}
+                        onChange={e =>
+                          setPerPlatformDescription(prev => ({
+                            ...prev,
+                            [expandedPlatform]: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
                     {expandedPlatform === "discord" && (
                       <input
                         placeholder="Discord channel ID"
@@ -1970,7 +2082,10 @@ function ContentUploadForm({
                         type="button"
                         className="preview-button"
                         onClick={() => handlePlatformPreview(expandedPlatform)}
-                        disabled={!file || perPlatformUploading[expandedPlatform]}
+                        disabled={
+                          !((perPlatformFile && perPlatformFile[expandedPlatform]) || file) ||
+                          perPlatformUploading[expandedPlatform]
+                        }
                       >
                         Preview
                       </button>
@@ -1990,6 +2105,7 @@ function ContentUploadForm({
                         className="submit-button"
                         onClick={() => handlePlatformUpload(expandedPlatform)}
                         disabled={
+                          !((perPlatformFile && perPlatformFile[expandedPlatform]) || file) ||
                           perPlatformUploading[expandedPlatform] ||
                           (expandedPlatform === "tiktok" &&
                             tiktokCommercial &&
@@ -2024,7 +2140,7 @@ function ContentUploadForm({
                                 : "Preview"}
                             </h5>
                             <img
-                              src={p.thumbnail || "/default-thumb.png"}
+                              src={p.thumbnail || DEFAULT_THUMBNAIL}
                               alt="Preview Thumbnail"
                               style={{
                                 width: "100%",
@@ -2253,7 +2369,11 @@ function ContentUploadForm({
                                     : "Preview"}
                                 </h5>
                                 <img
-                                  src={p.thumbnail || "/default-thumb.png"}
+                                  src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
+                                  onError={e => {
+                                    e.target.onerror = null;
+                                    e.target.src = DEFAULT_THUMBNAIL;
+                                  }}
                                   alt="Preview Thumbnail"
                                   style={{
                                     width: "100%",
@@ -2342,7 +2462,11 @@ function ContentUploadForm({
                                     : "Preview"}
                                 </h5>
                                 <img
-                                  src={p.thumbnail || "/default-thumb.png"}
+                                  src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
+                                  onError={e => {
+                                    e.target.onerror = null;
+                                    e.target.src = DEFAULT_THUMBNAIL;
+                                  }}
                                   alt="Preview Thumbnail"
                                   style={{
                                     width: "100%",
@@ -3102,7 +3226,11 @@ function ContentUploadForm({
                     : "Preview"}
                 </h5>
                 <img
-                  src={p.thumbnail || "/default-thumb.png"}
+                  src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
+                  onError={e => {
+                    e.target.onerror = null;
+                    e.target.src = DEFAULT_THUMBNAIL;
+                  }}
                   alt="Preview Thumbnail"
                   style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 6 }}
                 />
