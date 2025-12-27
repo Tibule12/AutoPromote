@@ -398,7 +398,44 @@
   position: relative;
   display: flex;
   align-items: stretch;
+}
+
+/* Modal styles for Preview Edit and Confirm publish */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1200;
+}
+
+.modal {
+  background: #ffffff;
+  color: #111827;
+  padding: 16px;
+  border-radius: 10px;
+  max-width: 720px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 12px 48px rgba(2, 6, 23, 0.35);
+}
+
+.modal-row {
+  margin-top: 8px;
+}
+
+.modal-actions {
+  display: flex;
   gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.dashboard-mode .modal {
+  background: rgba(7, 10, 17, 0.95);
+  color: #eef2ff;
 }
 
 .input-with-emoji .form-input,
