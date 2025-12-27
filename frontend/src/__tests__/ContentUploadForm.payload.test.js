@@ -34,11 +34,13 @@ describe("ContentUploadForm payloads", () => {
     const fileInput = screen.getByLabelText(/File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
-    // Select platforms: Discord and YouTube
-    const discordToggle = screen.getByLabelText(/Discord/i);
-    fireEvent.click(discordToggle);
-    const youtubeToggle = screen.getByLabelText(/YouTube/i);
-    fireEvent.click(youtubeToggle);
+    // Select platforms: Discord and YouTube (click the platform cards)
+    const discordBtns = screen.getAllByRole("button", { name: /Discord/i });
+    const discordBtn = discordBtns.find(b => b.classList && b.classList.contains("platform-card"));
+    fireEvent.click(discordBtn);
+    const youtubeBtns = screen.getAllByRole("button", { name: /YouTube/i });
+    const youtubeBtn = youtubeBtns.find(b => b.classList && b.classList.contains("platform-card"));
+    fireEvent.click(youtubeBtn);
 
     // Set Discord channel id (platform option)
     const discordChannel = screen.getByPlaceholderText(/Discord channel ID/i);

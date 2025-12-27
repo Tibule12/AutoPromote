@@ -144,18 +144,14 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
 
     render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
 
-    // Select the TikTok platform tile and expand its options so the disabled banner is visible
-    // Select and expand the TikTok platform tile using role=button and filter to the tile element
+    // Select the TikTok platform card and expand its options so the disabled banner is visible
+    // Select and expand the TikTok platform card using role=button and filter to the card element
     const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
     const tiktokTile = tiktokButtons.find(
-      b => b.classList && b.classList.contains("platform-tile")
+      b => b.classList && b.classList.contains("platform-card")
     );
     expect(tiktokTile).toBeDefined();
     fireEvent.click(tiktokTile);
-    // Click the Edit button inside the selected tile to expand platform options
-    const { within } = require("@testing-library/react");
-    const editBtn = within(tiktokTile).getByText(/Edit/i);
-    fireEvent.click(editBtn);
 
     // Wait for the banner to appear inside the expanded area
     await screen.findByText(/cannot publish via third-party apps/i, { timeout: 3000 });
@@ -230,16 +226,13 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
 
     // Select and expand TikTok options so the UI fetches creator_info and disables interactions
-    // Find the TikTok platform tile (filter among multiple matches) and expand it
+    // Find the TikTok platform card (filter among multiple matches) and expand it
     const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
     const tiktokTile = tiktokButtons.find(
-      b => b.classList && b.classList.contains("platform-tile")
+      b => b.classList && b.classList.contains("platform-card")
     );
     expect(tiktokTile).toBeDefined();
     fireEvent.click(tiktokTile);
-    const { within } = require("@testing-library/react");
-    const editBtn = within(tiktokTile).getByText(/Edit/i);
-    fireEvent.click(editBtn);
 
     await waitFor(async () => {
       const commentsCheckboxes = await screen.findAllByLabelText(/Comments/i);
@@ -365,5 +358,38 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
 
     // Cleanup E2E flag
     delete window.__E2E_TEST_TIKTOK_CONSENT;
+  });
+
+  test("per-platform card has its own file/title/description inputs and preview uses per-platform file", async () => {
+    const onUpload = jest.fn(async () => {
+      // Simulate preview backend failure so code falls back to local file preview
+      throw new Error("preview backend down");
+    });
+
+    render(<ContentUploadForm onUpload={onUpload} />);
+
+    // Find the TikTok platform tile and expand it
+    const buttons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tile = buttons.find(b => b.classList && b.classList.contains("platform-card"));
+    expect(tile).toBeDefined();
+    fireEvent.click(tile);
+
+    // Expanded panel should render the per-platform form
+    await screen.findByText(/Upload for TikTok/i);
+
+    // Provide per-platform file and title using accessible labels
+    const pf = new File(["abc"], "platform.mp4", { type: "video/mp4" });
+    const fileInput = screen.getByLabelText(/Platform file TikTok/i);
+    fireEvent.change(fileInput, { target: { files: [pf] } });
+
+    const titleInput = screen.getByLabelText(/Platform title TikTok/i);
+    fireEvent.change(titleInput, { target: { value: "Platform Title" } });
+
+    // Click Preview inside the expanded panel
+    const previewBtn = screen.getByText(/Preview/i);
+    fireEvent.click(previewBtn);
+    // We expect the per-platform preview card to show the given title after fallback
+    const matches = await screen.findAllByText(/Platform Title/, { timeout: 3000 });
+    expect(matches.length).toBeGreaterThan(0);
   });
 });
