@@ -110,18 +110,41 @@ function UploadPanel({
                     role="button"
                     tabIndex={0}
                   >
-                    {item.url && item.type === "video" && (
-                      <div className="cute-video-thumb">
-                        <video src={item.url} className="cute-video" />
-                        <div className="cute-play">▶</div>
-                        <div className="cute-badge">
-                          {new Date(item.createdAt || Date.now()).toLocaleDateString()}
-                        </div>
+                    <div className="cute-video-thumb">
+                      {item.url && item.type === "video" ? (
+                        <>
+                          <video src={item.url} className="cute-video" />
+                          <div className="cute-play">▶</div>
+                        </>
+                      ) : item.url && item.type === "image" ? (
+                        <img src={item.url} alt={titleText} className="cute-video" />
+                      ) : (
+                        <div className="cute-placeholder">No media</div>
+                      )}
+                      <div className="cute-badge">
+                        {new Date(item.createdAt || Date.now()).toLocaleString()}
                       </div>
-                    )}
+                    </div>
+
                     <div className="cute-meta">
                       <div className="cute-title">{titleText}</div>
-                      <div className="cute-sub">{statusText}</div>
+                      {item.description && <div className="cute-desc">{item.description}</div>}
+
+                      <div className="cute-row">
+                        <div className="cute-sub">{statusText}</div>
+                        {item.platforms && (
+                          <div className="platform-list">
+                            {(Array.isArray(item.platforms)
+                              ? item.platforms
+                              : [item.platforms]
+                            ).map((p, i) => (
+                              <span key={i} className="platform-pill">
+                                {String(p).charAt(0).toUpperCase() + String(p).slice(1)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
