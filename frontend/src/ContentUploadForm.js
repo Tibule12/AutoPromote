@@ -1006,6 +1006,15 @@ function ContentUploadForm({
   };
 
   const handleSubmit = async e => {
+    // Protect against non-user-initiated/form auto-submits which may occur when fields change.
+    // In production, require the event to be a trusted user action (e.nativeEvent.isTrusted === true).
+    if (process.env.NODE_ENV === "production") {
+      if (!e || !e.nativeEvent || !e.nativeEvent.isTrusted) {
+        console.warn("[Upload] Ignoring non-user-initiated submit (production guard)");
+        return;
+      }
+    }
+
     e.preventDefault();
     // Prevent duplicate submissions from multiple clicks / events
     if (uploadLockRef.current) {
@@ -1552,7 +1561,12 @@ function ContentUploadForm({
 
   return (
     <div className="content-upload-container">
-      <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} className="content-upload-form">
+      <form
+        onSubmit={handleSubmit}
+        onKeyDown={handleFormKeyDown}
+        className="content-upload-form"
+        data-testid="content-upload-form"
+      >
         <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
           ✨ Create Content{" "}
           <ExplainButton
