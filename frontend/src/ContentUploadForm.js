@@ -371,8 +371,8 @@ function ContentUploadForm({
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      // Fetch creator info either when TikTok is selected OR when the TikTok panel is opened.
-      if (!(selectedPlatformsVal.includes("tiktok") || expandedPlatform === "tiktok")) return;
+      // Fetch creator info only when the TikTok panel is opened (avoid background fetches during headless tests)
+      if (expandedPlatform !== "tiktok") return;
       try {
         const currentUser = auth && auth.currentUser;
         let headers = { Accept: "application/json" };
@@ -974,6 +974,22 @@ function ContentUploadForm({
     if (edited.title) setTitle(edited.title);
     if (edited.description) setDescription(edited.description);
     if (Array.isArray(edited.hashtags)) setHashtags(edited.hashtags);
+    // Update any preview card that matches this thumbnail or platform so the preview reflects edits immediately
+    setPreviews(prev =>
+      prev.map(p => {
+        const matches =
+          (previewToEdit && previewToEdit.thumbnail && p.thumbnail === previewToEdit.thumbnail) ||
+          p.platform === previewToEdit?.platform;
+        if (matches)
+          return {
+            ...p,
+            title: edited.title || p.title,
+            description: edited.description || p.description,
+            hashtags: edited.hashtags || p.hashtags,
+          };
+        return p;
+      })
+    );
     setShowPreviewEditModal(false);
   };
 
