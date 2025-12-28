@@ -1645,6 +1645,26 @@
   margin-bottom: 12px;
 }
 
+/* Platform-specific mock previews */
+.platform-preview {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+.platform-tiktok video,
+.platform-tiktok img {
+  background: #000;
+}
+.platform-tiktok {
+  /* simulate vertical phone frame */
+  width: 200px;
+  height: 356px; /* 9:16 */
+}
+.platform-youtube {
+  width: 320px;
+  height: 180px; /* 16:9 */
+}
+
 .preview-card > div {
   margin: 8px 0;
   font-size: 13px;
