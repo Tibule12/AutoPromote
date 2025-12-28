@@ -818,9 +818,13 @@ function ContentUploadForm({
       if (!previews || (Array.isArray(previews) && previews.length === 0)) {
         const fallback = [];
         if (previewUrl) {
+          const mediaUrl = previewUrl;
+          const mediaType = (typeof mediaUrl === "string" && mediaUrl.toLowerCase().endsWith(".mp4")) ? "video" : "image";
           fallback.push({
             platform,
             thumbnail: previewUrl,
+            mediaUrl,
+            mediaType,
             title: safeText(title || (file && file.name) || "Preview"),
             description: safeText(description || ""),
           });
@@ -837,14 +841,27 @@ function ContentUploadForm({
           if (thumbnail && typeof thumbnail === "object") {
             thumbnail = thumbnail.url || thumbnail.original || thumbnail.thumbnail || "";
           }
-          return {
-            ...p,
-            thumbnail,
-            title: safeText(p.title),
-            description: safeText(p.description),
-            caption: safeText(p.caption),
-            sound: safeText(p.sound),
-          };
+          // Determine a media URL and type (video vs image) for richer previews
+        const mediaUrl = p.url || p.mediaUrl || thumbnail || "";
+        let mediaType = "image";
+        if (
+          p.type === "video" ||
+          (mediaUrl && typeof mediaUrl === "string" && mediaUrl.toLowerCase().endsWith(".mp4")) ||
+          (p.mime && typeof p.mime === "string" && p.mime.startsWith("video")) ||
+          (p.file && p.file.name && /\.mp4$/i.test(p.file.name))
+        ) {
+          mediaType = "video";
+        }
+        return {
+          ...p,
+          thumbnail,
+          mediaUrl,
+          mediaType,
+          title: safeText(p.title),
+          description: safeText(p.description),
+          caption: safeText(p.caption),
+          sound: safeText(p.sound),
+        };
         });
         setPerPlatformPreviews(prev => ({ ...prev, [platform]: sanitized }));
       }
@@ -858,6 +875,8 @@ function ContentUploadForm({
             {
               platform,
               thumbnail: tmpThumb,
+              mediaUrl: tmpThumb,
+              mediaType: (fileToUse && fileToUse.type && fileToUse.type.startsWith("video")) ? "video" : "image",
               title:
                 (perPlatformTitle && perPlatformTitle[platform]) ||
                 title ||
@@ -1058,6 +1077,28 @@ function ContentUploadForm({
         return p;
       })
     );
+
+    // Also update per-platform previews if the edited preview belongs to a platform
+    setPerPlatformPreviews(prevPlatforms => {
+      const out = { ...prevPlatforms };
+      Object.keys(out).forEach(key => {
+        if (!Array.isArray(out[key])) return;
+        out[key] = out[key].map(p => {
+          const matches =
+            (previewToEdit && previewToEdit.thumbnail && p.thumbnail === previewToEdit.thumbnail) ||
+            p.platform === previewToEdit?.platform;
+          if (matches)
+            return {
+              ...p,
+              title: edited.title || p.title,
+              description: edited.description || p.description,
+              hashtags: edited.hashtags || p.hashtags,
+            };
+          return p;
+        });
+      });
+      return out;
+    });
     setShowPreviewEditModal(false);
   };
 
@@ -2138,11 +2179,21 @@ function ContentUploadForm({
                     ? pv.platform.charAt(0).toUpperCase() + pv.platform.slice(1)
                     : "Preview"}
                 </h5>
-                <img
-                  src={pv.thumbnail || DEFAULT_THUMBNAIL}
-                  alt="Preview Thumbnail"
-                  style={{ width: 200, height: 120, objectFit: "cover" }}
-                />
+                {pv.mediaType === "video" ? (
+                  <video
+                    aria-label="Preview media"
+                    src={pv.mediaUrl || pv.thumbnail}
+                    controls
+                    style={{ width: 200, height: 120, objectFit: "cover" }}
+                  />
+                ) : (
+                  <img
+                    aria-label="Preview media"
+                    src={pv.thumbnail || DEFAULT_THUMBNAIL}
+                    alt="Preview Thumbnail"
+                    style={{ width: 200, height: 120, objectFit: "cover" }}
+                  />
+                )}
                 <div>
                   <strong>Title:</strong> {pv.title}
                 </div>
@@ -2163,6 +2214,14 @@ function ContentUploadForm({
             ))}
           </div>
         )}
+
+        {/* Focused view preview edit modal */}
+        <PreviewEditModal
+          open={showPreviewEditModal}
+          preview={previewToEdit}
+          onClose={() => setShowPreviewEditModal(false)}
+          onSave={handleSavePreviewEdits}
+        />
       </div>
     );
   }
@@ -2647,16 +2706,31 @@ function ContentUploadForm({
                                 ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
                                 : "Preview"}
                             </h5>
-                            <img
-                              src={p.thumbnail || DEFAULT_THUMBNAIL}
-                              alt="Preview Thumbnail"
-                              style={{
-                                width: "100%",
-                                height: 120,
-                                objectFit: "cover",
-                                borderRadius: 6,
-                              }}
-                            />
+                            {p.mediaType === "video" ? (
+                              <video
+                                aria-label="Preview media"
+                                src={p.mediaUrl || p.thumbnail}
+                                controls
+                                style={{
+                                  width: "100%",
+                                  height: 120,
+                                  objectFit: "cover",
+                                  borderRadius: 6,
+                                }}
+                              />
+                            ) : (
+                              <img
+                                aria-label="Preview media"
+                                src={p.thumbnail || DEFAULT_THUMBNAIL}
+                                alt="Preview Thumbnail"
+                                style={{
+                                  width: "100%",
+                                  height: 120,
+                                  objectFit: "cover",
+                                  borderRadius: 6,
+                                }}
+                              />
+                            )}
                             <div>
                               <strong>Title:</strong> {p.title}
                             </div>
@@ -2876,20 +2950,35 @@ function ContentUploadForm({
                                     ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
                                     : "Preview"}
                                 </h5>
-                                <img
-                                  src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
-                                  onError={e => {
-                                    e.target.onerror = null;
-                                    e.target.src = DEFAULT_THUMBNAIL;
-                                  }}
-                                  alt="Preview Thumbnail"
-                                  style={{
-                                    width: "100%",
-                                    height: 120,
-                                    objectFit: "cover",
-                                    borderRadius: 6,
-                                  }}
-                                />
+                                {p.mediaType === "video" ? (
+                                  <video
+                                    aria-label="Preview media"
+                                    src={p.mediaUrl || p.thumbnail}
+                                    controls
+                                    style={{
+                                      width: "100%",
+                                      height: 120,
+                                      objectFit: "cover",
+                                      borderRadius: 6,
+                                    }}
+                                  />
+                                ) : (
+                                  <img
+                                    aria-label="Preview media"
+                                    src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
+                                    onError={e => {
+                                      e.target.onerror = null;
+                                      e.target.src = DEFAULT_THUMBNAIL;
+                                    }}
+                                    alt="Preview Thumbnail"
+                                    style={{
+                                      width: "100%",
+                                      height: 120,
+                                      objectFit: "cover",
+                                      borderRadius: 6,
+                                    }}
+                                  />
+                                )}
                                 <div>
                                   <strong>Title:</strong> {p.title}
                                 </div>
@@ -2969,20 +3058,35 @@ function ContentUploadForm({
                                     ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
                                     : "Preview"}
                                 </h5>
-                                <img
-                                  src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
-                                  onError={e => {
-                                    e.target.onerror = null;
-                                    e.target.src = DEFAULT_THUMBNAIL;
-                                  }}
-                                  alt="Preview Thumbnail"
-                                  style={{
-                                    width: "100%",
-                                    height: 120,
-                                    objectFit: "cover",
-                                    borderRadius: 6,
-                                  }}
-                                />
+                                {p.mediaType === "video" ? (
+                                  <video
+                                    aria-label="Preview media"
+                                    src={p.mediaUrl || p.thumbnail}
+                                    controls
+                                    style={{
+                                      width: "100%",
+                                      height: 120,
+                                      objectFit: "cover",
+                                      borderRadius: 6,
+                                    }}
+                                  />
+                                ) : (
+                                  <img
+                                    aria-label="Preview media"
+                                    src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
+                                    onError={e => {
+                                      e.target.onerror = null;
+                                      e.target.src = DEFAULT_THUMBNAIL;
+                                    }}
+                                    alt="Preview Thumbnail"
+                                    style={{
+                                      width: "100%",
+                                      height: 120,
+                                      objectFit: "cover",
+                                      borderRadius: 6,
+                                    }}
+                                  />
+                                )}
                                 <div>
                                   <strong>Title:</strong> {p.title}
                                 </div>

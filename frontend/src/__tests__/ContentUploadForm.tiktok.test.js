@@ -340,16 +340,32 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     const previewBtn = screen.getByLabelText(/Preview Content/i);
     fireEvent.click(previewBtn);
 
-    // Wait for preview card to render
+    // Wait for preview card to render and ensure the preview media is shown
     await screen.findByText(/Initial Title/);
+    const media = await screen.findByLabelText(/Preview media/i);
+    expect(media).toBeDefined();
+    // If it's a video, ensure the element is a VIDEO node
+    expect(media.tagName === "VIDEO" || media.tagName === "IMG").toBeTruthy();
 
-    // Ensure Edit Preview button is present on the preview card
+    // Ensure Edit Preview button is present on the preview card and opens the modal
     const editBtn = await screen.findByRole("button", { name: /Edit preview/i }, { timeout: 3000 });
     expect(editBtn).toBeDefined();
 
-    // Form title should still show the original value and preview card should show the initial title
+    // Open edit modal and update title
+    fireEvent.click(editBtn);
+    // Wait for the modal dialog to appear, then scope queries to it for reliability
+    await screen.findByRole('dialog');
+    const dialog = screen.getByRole('dialog');
+    const modalTitle = within(dialog).getByLabelText(/Edit preview title/i);
+    fireEvent.change(modalTitle, { target: { value: "Edited Title" } });
+    const saveBtn = within(dialog).getByRole("button", { name: /Save edit/i });
+    fireEvent.click(saveBtn);
+
+    // Expect the preview card to reflect the edited title
+    await screen.findByText(/Edited Title/);
+
+    // Form title should still show the original value (editing preview doesn't change global title unless user saves in final flow)
     expect(screen.getByLabelText(/Platform title tiktok/i)).toHaveValue("Initial Title");
-    await screen.findByText(/Initial Title/);
   });
 
   test("Confirm modal requires TikTok consent before calling onUpload", async () => {
