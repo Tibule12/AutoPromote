@@ -113,6 +113,8 @@ function ContentUploadForm({
   setSelectedPlatforms: extSetSelectedPlatforms,
   spotifySelectedTracks: extSpotifySelectedTracks,
   setSpotifySelectedTracks: extSetSpotifySelectedTracks,
+  // When true, render only the platform cards (no global form elements)
+  platformCardsOnly = false,
 }) {
   const [title, setTitle] = useState("");
   const [type, setType] = useState("video");
@@ -175,6 +177,7 @@ function ContentUploadForm({
   const [showPreviewEditModal, setShowPreviewEditModal] = useState(false);
   const [previewToEdit, setPreviewToEdit] = useState(null);
   const [showConfirmPublishModal, setShowConfirmPublishModal] = useState(false);
+  const [confirmTargetPlatform, setConfirmTargetPlatform] = useState(null);
 
   const [previews, setPreviews] = useState([]);
   const [qualityScore, setQualityScore] = useState(null);
@@ -291,6 +294,7 @@ function ContentUploadForm({
     ? extSelectedPlatforms
     : selectedPlatforms;
   const [expandedPlatform, setExpandedPlatform] = useState(null);
+  const [focusedPlatform, setFocusedPlatform] = useState(null);
   const [perPlatformPreviews, setPerPlatformPreviews] = useState({});
   const [perPlatformQuality, setPerPlatformQuality] = useState({});
   const [perPlatformUploading, setPerPlatformUploading] = useState({});
@@ -374,7 +378,13 @@ function ContentUploadForm({
     },
   };
   useEffect(() => {
-    if (Array.isArray(extSelectedPlatforms)) setSelectedPlatforms(extSelectedPlatforms || []);
+    if (Array.isArray(extSelectedPlatforms)) {
+      setSelectedPlatforms(extSelectedPlatforms || []);
+      // If parent provides selected platforms, expand the first one inline for quick options
+      if (extSelectedPlatforms && extSelectedPlatforms.length > 0) {
+        setExpandedPlatform(extSelectedPlatforms[0]);
+      }
+    }
   }, [extSelectedPlatforms]);
 
   // Fetch TikTok creator info when TikTok is selected so the UI can enforce rules
@@ -382,7 +392,7 @@ function ContentUploadForm({
     let mounted = true;
     const load = async () => {
       // Fetch creator info only when the TikTok panel is opened (avoid background fetches during headless tests)
-      if (expandedPlatform !== "tiktok") return;
+      if (expandedPlatform !== "tiktok" && focusedPlatform !== "tiktok") return;
       try {
         const currentUser = auth && auth.currentUser;
         let headers = { Accept: "application/json" };
@@ -436,7 +446,7 @@ function ContentUploadForm({
     return () => {
       mounted = false;
     };
-  }, [selectedPlatformsVal, expandedPlatform]);
+  }, [selectedPlatformsVal, expandedPlatform, focusedPlatform]);
   const [discordChannelId, setDiscordChannelId] = useState(
     extPlatformOptions?.discord?.channelId || ""
   );
@@ -691,8 +701,14 @@ function ContentUploadForm({
       url: fileForPlatform ? `preview://${fileForPlatform.name}` : "",
       file: fileForPlatform ? { name: fileForPlatform.name } : undefined,
       idempotency_key: idempotencyKey || undefined,
-      target_platforms: [platform],
-      platforms: [platform],
+      target_platforms:
+        Array.isArray(selectedPlatformsVal) && selectedPlatformsVal.length
+          ? selectedPlatformsVal
+          : [platform],
+      platforms:
+        Array.isArray(selectedPlatformsVal) && selectedPlatformsVal.length
+          ? selectedPlatformsVal
+          : [platform],
       isDryRun: isDryRun,
       meta: {
         trimStart: type === "video" || type === "audio" ? trimStart : undefined,
@@ -706,45 +722,51 @@ function ContentUploadForm({
       },
       platform_options: {},
     };
-    // copy only platform-specific options
-    if (platform === "discord")
-      contentData.platform_options.discord = { channelId: discordChannelId || undefined };
-    if (platform === "telegram")
-      contentData.platform_options.telegram = { chatId: telegramChatId || undefined };
-    if (platform === "reddit")
-      contentData.platform_options.reddit = { subreddit: redditSubreddit || undefined };
-    if (platform === "linkedin")
-      contentData.platform_options.linkedin = { companyId: linkedinCompanyId || undefined };
-    if (platform === "twitter")
-      contentData.platform_options.twitter = { message: twitterMessage || undefined };
-    if (platform === "pinterest")
-      contentData.platform_options.pinterest =
-        pinterestBoard || pinterestNote
-          ? { boardId: pinterestBoard || undefined, note: pinterestNote || undefined }
-          : undefined;
-    if (platform === "spotify")
-      contentData.platform_options.spotify =
-        (spotifyTracks && spotifyTracks.length) || spotifyPlaylistId || spotifyPlaylistName
-          ? {
-              trackUris:
-                spotifyTracks && spotifyTracks.length ? spotifyTracks.map(t => t.uri) : undefined,
-              playlistId: spotifyPlaylistId || undefined,
-              name: spotifyPlaylistName || undefined,
-            }
-          : undefined;
-    if (platform === "tiktok")
-      contentData.platform_options.tiktok = {
-        privacy: tiktokPrivacy || undefined,
-        interactions: tiktokInteractions || undefined,
-        commercial:
-          tiktokCommercial && tiktokCommercial.isCommercial
+    // copy platform-specific options for all selected platforms (useful for multi-platform previews)
+    const platformsToInclude =
+      Array.isArray(selectedPlatformsVal) && selectedPlatformsVal.length
+        ? selectedPlatformsVal
+        : [platform];
+    platformsToInclude.forEach(pl => {
+      if (pl === "discord")
+        contentData.platform_options.discord = { channelId: discordChannelId || undefined };
+      if (pl === "telegram")
+        contentData.platform_options.telegram = { chatId: telegramChatId || undefined };
+      if (pl === "reddit")
+        contentData.platform_options.reddit = { subreddit: redditSubreddit || undefined };
+      if (pl === "linkedin")
+        contentData.platform_options.linkedin = { companyId: linkedinCompanyId || undefined };
+      if (pl === "twitter")
+        contentData.platform_options.twitter = { message: twitterMessage || undefined };
+      if (pl === "pinterest")
+        contentData.platform_options.pinterest =
+          pinterestBoard || pinterestNote
+            ? { boardId: pinterestBoard || undefined, note: pinterestNote || undefined }
+            : undefined;
+      if (pl === "spotify")
+        contentData.platform_options.spotify =
+          (spotifyTracks && spotifyTracks.length) || spotifyPlaylistId || spotifyPlaylistName
             ? {
-                yourBrand: !!tiktokCommercial.yourBrand,
-                brandedContent: !!tiktokCommercial.brandedContent,
+                trackUris:
+                  spotifyTracks && spotifyTracks.length ? spotifyTracks.map(t => t.uri) : undefined,
+                playlistId: spotifyPlaylistId || undefined,
+                name: spotifyPlaylistName || undefined,
               }
-            : undefined,
-        consent: !!tiktokConsentChecked,
-      };
+            : undefined;
+      if (pl === "tiktok")
+        contentData.platform_options.tiktok = {
+          privacy: tiktokPrivacy || undefined,
+          interactions: tiktokInteractions || undefined,
+          commercial:
+            tiktokCommercial && tiktokCommercial.isCommercial
+              ? {
+                  yourBrand: !!tiktokCommercial.yourBrand,
+                  brandedContent: !!tiktokCommercial.brandedContent,
+                }
+              : undefined,
+          consent: !!tiktokConsentChecked,
+        };
+    });
     if (platform === "youtube")
       contentData.platform_options.youtube = {
         visibility: youtubeVisibility || undefined,
@@ -1043,7 +1065,15 @@ function ContentUploadForm({
     // Create a synthetic event that satisfies the production guard (isTrusted)
     const fakeEvent = { preventDefault: () => {}, nativeEvent: { isTrusted: true } };
     setShowConfirmPublishModal(false);
-    // Call the existing submit handler with a trusted-like event
+    // If a focused per-platform upload initiated the confirm modal, handle that specific platform upload
+    if (confirmTargetPlatform) {
+      const platform = confirmTargetPlatform;
+      setConfirmTargetPlatform(null);
+      // Trigger the per-platform upload flow
+      handlePlatformUpload(platform);
+      return;
+    }
+    // Otherwise, call the existing submit handler with a trusted-like event
     handleSubmit(fakeEvent);
   };
 
@@ -1651,6 +1681,493 @@ function ContentUploadForm({
     }
   };
 
+  // By default render a simplified view that only shows platform cards.
+  // Clicking a card will set `focusedPlatform` and reveal the per-platform form.
+  if (!focusedPlatform) {
+    const platforms = [
+      "youtube",
+      "tiktok",
+      "instagram",
+      "facebook",
+      "twitter",
+      "linkedin",
+      "reddit",
+      "discord",
+      "telegram",
+      "pinterest",
+      "spotify",
+      "snapchat",
+    ];
+
+    return (
+      <div className="content-upload-container">
+        <div className="form-group">
+          <label>🎯 Target Platforms</label>
+          <div className="platform-grid">
+            {platforms.map(p => {
+              const disabled =
+                p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false;
+              return (
+                <div
+                  key={p}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={p.charAt(0).toUpperCase() + p.slice(1)}
+                  onClick={() => {
+                    if (!disabled) {
+                      setFocusedPlatform(p);
+                      // If parent controls selected platforms (extSelectedPlatforms provided), do not override it.
+                      if (typeof extSetSelectedPlatforms === "function")
+                        extSetSelectedPlatforms([p]);
+                      else if (!Array.isArray(extSelectedPlatforms)) setSelectedPlatforms([p]);
+                    } else setError("This TikTok account cannot post via third-party apps.");
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === " " || e.key === "Enter") {
+                      e.preventDefault();
+                      if (!disabled) {
+                        setFocusedPlatform(p);
+                        if (typeof extSetSelectedPlatforms === "function")
+                          extSetSelectedPlatforms([p]);
+                        else if (!Array.isArray(extSelectedPlatforms)) setSelectedPlatforms([p]);
+                      } else setError("This TikTok account cannot post via third-party apps.");
+                    }
+                  }}
+                  className={`platform-card ${disabled ? "disabled" : ""}`}
+                >
+                  <div className="platform-icon" aria-hidden="true">
+                    {getPlatformIcon(p)}
+                  </div>
+                  <div className="platform-name">{p.charAt(0).toUpperCase() + p.slice(1)}</div>
+                </div>
+              );
+            })}
+          </div>
+          {/* Inline expanded area for when parent provides a single selected platform */}
+          {expandedPlatform && (
+            <div style={{ marginTop: 12 }} className="expanded-platform-inline">
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)} Options
+              </div>
+              {platformGuidelines[expandedPlatform] && (
+                <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 8 }}>
+                  {platformGuidelines[expandedPlatform].summary}
+                </div>
+              )}
+
+              {/* Platform-specific small inputs for selected platforms (tests rely on these) */}
+              {expandedPlatform === "discord" && (
+                <div style={{ display: "grid", gap: 8 }}>
+                  <input
+                    placeholder="Discord channel ID"
+                    value={discordChannelId}
+                    onChange={e => {
+                      setDiscordChannelId(e.target.value);
+                      if (typeof extSetPlatformOption === "function") {
+                        extSetPlatformOption("discord", "channelId", e.target.value);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+
+              {expandedPlatform === "tiktok" && (
+                <div style={{ display: "grid", gap: 8 }} className="tiktok-expanded-inline">
+                  <div style={{ fontSize: 12, color: "#666" }}>
+                    Creator:{" "}
+                    {tiktokCreatorInfo ? tiktokCreatorInfo.display_name || "—" : "Loading..."}
+                  </div>
+                  {tiktokCreatorInfo && tiktokCreatorInfo.can_post === false && (
+                    <div className="tiktok-disabled-banner" role="alert">
+                      This TikTok account cannot publish via third-party apps right now. Please try
+                      again later.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}{" "}
+        </div>
+      </div>
+    );
+  }
+
+  // If a platform was focused, render only that platform's isolated form
+  if (focusedPlatform) {
+    const p = focusedPlatform;
+    return (
+      <div className="content-upload-container">
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            type="button"
+            onClick={() => setFocusedPlatform(null)}
+            aria-label="Back to platforms"
+          >
+            ← Back
+          </button>
+          <h3 style={{ margin: 0 }}>Upload to {p.charAt(0).toUpperCase() + p.slice(1)}</h3>
+        </div>
+        {error && <div className="error-message">{error}</div>}
+
+        <div className="form-group full-width">
+          <label>{`Platform title ${p}`}</label>
+          <div className="input-with-emoji">
+            <input
+              aria-label={`Platform title ${p}`}
+              type="text"
+              value={(perPlatformTitle && perPlatformTitle[p]) || ""}
+              onChange={e =>
+                setPerPlatformTitle(prev => ({ ...prev, [p]: sanitizeInput(e.target.value) }))
+              }
+              className="form-input"
+              maxLength={100}
+            />
+            <button
+              type="button"
+              className="emoji-btn"
+              onClick={() => openEmojiPicker(`platform-title-${p}`)}
+            >
+              😊
+            </button>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>{`Platform file ${p}`}</label>
+          <div
+            className={`file-upload drop-zone ${isDropActive ? "dragging" : ""}`}
+            data-testid="drop-zone"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+          >
+            <input
+              aria-label={`Platform file ${p}`}
+              type="file"
+              accept={type === "video" ? "video/*" : type === "audio" ? "audio/*" : "image/*"}
+              onChange={e => handlePerPlatformFileChange(p, e.target.files[0])}
+              className="form-file-input"
+            />
+            <div className="drop-help">Drop files here or click to browse</div>
+            {perPlatformFile && perPlatformFile[p] && (
+              <div className="file-info">
+                Selected file: {perPlatformFile[p].name} (
+                {(perPlatformFile[p].size / 1024 / 1024).toFixed(2)} MB)
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>🎨 Text Overlay (optional)</label>
+          <div className="input-with-emoji">
+            <input
+              placeholder="Add overlay text..."
+              value={overlayText}
+              onChange={e => setOverlayText(e.target.value)}
+              className="form-input"
+            />
+            <button
+              className="emoji-btn"
+              type="button"
+              onClick={() => openEmojiPicker("overlay-text")}
+            >
+              😊
+            </button>
+          </div>
+          <div className="overlay-controls">
+            <select
+              aria-label="Overlay position"
+              className="form-select-small"
+              value={overlayPosition}
+              onChange={e => setOverlayPosition(e.target.value)}
+            >
+              <option value="top">⬆️ Top</option>
+              <option value="center">⏺️ Center</option>
+              <option value="bottom">⬇️ Bottom</option>
+            </select>
+            <input
+              className="color-picker"
+              title="Text color"
+              type="color"
+              value="#ffffff"
+              readOnly
+            />
+            <select className="form-select-small" value={12} onChange={() => {}}>
+              <option value="12">Small</option>
+              <option value="16">Medium</option>
+              <option value="24">Large</option>
+              <option value="32">XL</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Include TikTok-specific publish options in the focused per-platform view */}
+        {p === "tiktok" && (
+          <div
+            className="form-group tiktok-options"
+            style={{
+              border: "1px solid #efeef0",
+              padding: 12,
+              borderRadius: 8,
+              background: "#fbfbfc",
+              marginTop: 12,
+            }}
+          >
+            <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              TikTok Publish Options
+            </label>
+            <div style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>
+              Creator: {tiktokCreatorInfo ? tiktokCreatorInfo.display_name || "—" : "Loading..."}
+            </div>
+            <div style={{ display: "grid", gap: 8 }}>
+              <div>
+                <label>Privacy (required)</label>
+                <select
+                  value={tiktokPrivacy}
+                  onChange={e => setTiktokPrivacy(e.target.value)}
+                  className="form-select"
+                >
+                  <option value="">Select privacy</option>
+                  {(tiktokCreatorInfo && Array.isArray(tiktokCreatorInfo.privacy_level_options)
+                    ? tiktokCreatorInfo.privacy_level_options
+                    : ["EVERYONE", "FRIENDS", "SELF_ONLY"]
+                  ).map(pv => (
+                    <option
+                      key={pv}
+                      value={pv}
+                      disabled={
+                        tiktokCommercial && tiktokCommercial.brandedContent && pv === "SELF_ONLY"
+                      }
+                      title={
+                        tiktokCommercial && tiktokCommercial.brandedContent && pv === "SELF_ONLY"
+                          ? "Branded content visibility cannot be set to private."
+                          : undefined
+                      }
+                    >
+                      {pv}
+                    </option>
+                  ))}
+                </select>
+                {privacyAutoSwitched && (
+                  <div style={{ fontSize: 12, color: "#b66", marginTop: 6 }}>
+                    Branded content cannot be private — visibility has been changed to “EVERYONE”.
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label>Interactions</label>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <label
+                    title={
+                      tiktokInteractionDisabled.comments
+                        ? "Comments disabled by creator"
+                        : undefined
+                    }
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!!tiktokInteractions.comments}
+                      onChange={e =>
+                        setTiktokInteractions(prev => ({ ...prev, comments: e.target.checked }))
+                      }
+                      disabled={tiktokInteractionDisabled.comments}
+                      title={
+                        tiktokInteractionDisabled.comments
+                          ? "Comments disabled by creator"
+                          : undefined
+                      }
+                    />{" "}
+                    Comments
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={!!tiktokInteractions.duet}
+                      onChange={e =>
+                        setTiktokInteractions(prev => ({ ...prev, duet: e.target.checked }))
+                      }
+                      disabled={tiktokInteractionDisabled.duet}
+                    />{" "}
+                    Duet
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={!!tiktokInteractions.stitch}
+                      onChange={e =>
+                        setTiktokInteractions(prev => ({ ...prev, stitch: e.target.checked }))
+                      }
+                      disabled={tiktokInteractionDisabled.stitch}
+                      title={
+                        tiktokInteractionDisabled.stitch ? "Stitch disabled by creator" : undefined
+                      }
+                      aria-disabled={tiktokInteractionDisabled.stitch}
+                    />{" "}
+                    Stitch
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label>Commercial / Branded Content</label>
+                <div
+                  style={{ display: "flex", gap: 8, alignItems: "center", flexDirection: "column" }}
+                >
+                  <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <input
+                      type="checkbox"
+                      checked={!!tiktokCommercial.isCommercial}
+                      onChange={e =>
+                        setTiktokCommercial(prev => ({ ...prev, isCommercial: e.target.checked }))
+                      }
+                    />{" "}
+                    This content is commercial or promotional
+                  </label>
+                  {tiktokCommercial.isCommercial && (
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <input
+                          type="checkbox"
+                          checked={!!tiktokCommercial.yourBrand}
+                          onChange={e =>
+                            setTiktokCommercial(prev => ({ ...prev, yourBrand: e.target.checked }))
+                          }
+                        />{" "}
+                        Your Brand
+                      </label>
+                      <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <input
+                          type="checkbox"
+                          checked={!!tiktokCommercial.brandedContent}
+                          onChange={e =>
+                            setTiktokCommercial(prev => ({
+                              ...prev,
+                              brandedContent: e.target.checked,
+                            }))
+                          }
+                        />{" "}
+                        Branded Content
+                      </label>
+                    </div>
+                  )}
+                  {tiktokCommercial.isCommercial &&
+                    !tiktokCommercial.yourBrand &&
+                    !tiktokCommercial.brandedContent && (
+                      <div
+                        style={{ fontSize: 12, color: "#b66", marginTop: 6 }}
+                        title="You need to indicate if your content promotes yourself, a third party, or both."
+                      >
+                        You need to indicate if your content promotes yourself, a third party, or
+                        both.
+                      </div>
+                    )}
+                </div>
+              </div>
+
+              <div style={{ fontSize: 13 }}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={tiktokConsentChecked}
+                    onChange={e => setTiktokConsentChecked(e.target.checked)}
+                  />{" "}
+                  {getTikTokDeclaration()}
+                </label>
+              </div>
+
+              {tiktokCreatorInfo && tiktokCreatorInfo.max_video_post_duration_sec && (
+                <div style={{ fontSize: 12, color: "#666" }}>
+                  Max allowed video duration for this creator:{" "}
+                  {tiktokCreatorInfo.max_video_post_duration_sec} seconds
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: ".5rem", marginTop: ".5rem", flexWrap: "wrap" }}>
+          <button
+            aria-label="Preview Content"
+            className="preview-button"
+            type="button"
+            disabled={
+              isPreviewing ||
+              (p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false)
+            }
+            onClick={() => handlePlatformPreview(p)}
+          >
+            ⚡ Preview
+          </button>
+          <button
+            aria-label="Upload Content"
+            className="submit-button"
+            type="button"
+            disabled={
+              isUploading ||
+              (p === "tiktok" && !tiktokConsentChecked) ||
+              (p === "tiktok" &&
+                tiktokCommercial &&
+                tiktokCommercial.isCommercial &&
+                !tiktokCommercial.yourBrand &&
+                !tiktokCommercial.brandedContent) ||
+              (p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false)
+            }
+            onClick={() => {
+              if (p === "tiktok" && !tiktokConsentChecked) {
+                setConfirmTargetPlatform(p);
+                setShowConfirmPublishModal(true);
+              } else {
+                // If consent already given (or not a TikTok upload), proceed immediately
+                handlePlatformUpload(p);
+              }
+            }}
+          >
+            🚀 Upload
+          </button>
+        </div>
+
+        {perPlatformPreviews[p] && (
+          <div style={{ marginTop: 12 }} className="preview-cards">
+            {perPlatformPreviews[p].map((pv, idx) => (
+              <div key={idx} className="preview-card">
+                <h5>
+                  {pv.platform
+                    ? pv.platform.charAt(0).toUpperCase() + pv.platform.slice(1)
+                    : "Preview"}
+                </h5>
+                <img
+                  src={pv.thumbnail || DEFAULT_THUMBNAIL}
+                  alt="Preview Thumbnail"
+                  style={{ width: 200, height: 120, objectFit: "cover" }}
+                />
+                <div>
+                  <strong>Title:</strong> {pv.title}
+                </div>
+                <div>
+                  <strong>Description:</strong> {pv.description}
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <button
+                    type="button"
+                    className="edit-platform-btn"
+                    onClick={() => openPreviewEdit(pv)}
+                    aria-label={`Edit preview ${pv.platform || ""}`}
+                  >
+                    Edit Preview
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Continue with full form when not in simplified mode
   return (
     <div className="content-upload-container">
       <form
@@ -1659,15 +2176,6 @@ function ContentUploadForm({
         className="content-upload-form"
         data-testid="content-upload-form"
       >
-        <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          ✨ Create Content{" "}
-          <ExplainButton
-            contextSummary={
-              "Explain the upload flow: select a file, preview it, then upload to cloud storage. The server uses an idempotency key to avoid duplicates and you can Retry failed uploads safely."
-            }
-          />
-        </h3>
-
         <DraftManager onLoadDraft={handleLoadDraft} currentDraft={getCurrentDraft()} />
 
         {/* Show which creator/account will be used for platform uploads (e.g., TikTok nickname) */}

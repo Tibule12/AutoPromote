@@ -818,9 +818,7 @@ test("Per-platform SPA: Spotify preview & upload (dashboard)", async ({ page }) 
   // Click Spotify tile
   const spotifyTile = page.locator('div[aria-label="Spotify"]');
   await spotifyTile.click();
-  // Expand tile
-  await spotifyTile.locator("button.edit-platform-btn").click();
-  // Wait for the expanded per-platform UI to render
+  // Expand tile (card click toggles expansion) — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   // Attach file
   await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
@@ -986,7 +984,7 @@ test("Per-platform SPA: YouTube preview & upload (dashboard)", async ({ page }) 
   await page.waitForSelector("#content-file-input");
   const youtubeTile = page.locator('div[aria-label="Youtube"]');
   await youtubeTile.click();
-  await youtubeTile.locator("button.edit-platform-btn").click();
+  // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
   // Fill common fields
@@ -1131,7 +1129,7 @@ test("Per-platform SPA: TikTok preview & upload (dashboard)", async ({ page }) =
   await page.waitForSelector("#content-file-input");
   const tiktokTile = page.locator('div[aria-label="Tiktok"]');
   await tiktokTile.click();
-  await tiktokTile.locator("button.edit-platform-btn").click();
+  // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   // Ensure the platform-expanded UI is rendered before further actions
   await page.waitForSelector(".platform-expanded");
@@ -1275,7 +1273,7 @@ test("Per-platform SPA: Snapchat preview & upload (dashboard)", async ({ page })
   await page.waitForSelector("#content-file-input");
   const snapchatTile = page.locator('div[aria-label="Snapchat"]');
   await snapchatTile.click();
-  await snapchatTile.locator("button.edit-platform-btn").click();
+  // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
   await page.waitForSelector(".platform-expanded .preview-button:not([disabled])", {
@@ -1391,7 +1389,7 @@ test("Per-platform SPA: Pinterest preview & upload (dashboard)", async ({ page }
   await page.waitForSelector("#content-file-input");
   const pinterestTile = page.locator('div[aria-label="Pinterest"]');
   await pinterestTile.click();
-  await pinterestTile.locator("button.edit-platform-btn").click();
+  // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   // SPA uses shared inputs for Pinterest options; select by placeholder
   await page.fill('input[placeholder="Pinterest board id (or leave blank)"]', "board-1");
@@ -1479,7 +1477,7 @@ test("Per-platform SPA: Discord preview & upload (dashboard)", async ({ page }) 
   await page.waitForSelector("#content-file-input");
   const discordTile = page.locator('div[aria-label="Discord"]');
   await discordTile.click();
-  await discordTile.locator("button.edit-platform-btn").click();
+  // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   await page.waitForSelector('.platform-expanded input[placeholder="Discord channel ID"]', {
     timeout: 10000,
@@ -1568,7 +1566,7 @@ test("Per-platform SPA: Telegram preview & upload (dashboard)", async ({ page })
   await page.waitForSelector("#content-file-input");
   const telegramTile = page.locator('div[aria-label="Telegram"]');
   await telegramTile.click();
-  await telegramTile.locator("button.edit-platform-btn").click();
+  // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   await page.waitForSelector('.platform-expanded input[placeholder="Telegram chat ID"]', {
     timeout: 10000,
@@ -1657,7 +1655,7 @@ test("Per-platform SPA: Reddit preview & upload (dashboard)", async ({ page }) =
   await page.waitForSelector("#content-file-input");
   const redditTile = page.locator('div[aria-label="Reddit"]');
   await redditTile.click();
-  await redditTile.locator("button.edit-platform-btn").click();
+  // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   await page.waitForSelector('.platform-expanded input[placeholder="Reddit subreddit"]', {
     timeout: 10000,
@@ -1743,7 +1741,7 @@ test("Per-platform SPA: LinkedIn preview & upload (dashboard)", async ({ page })
   await page.waitForSelector("#content-file-input");
   const linkedinTile = page.locator('div[aria-label="Linkedin"]');
   await linkedinTile.click();
-  await linkedinTile.locator("button.edit-platform-btn").click();
+  // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   await page.waitForSelector(
     '.platform-expanded input[placeholder="LinkedIn organization/company ID"]',
@@ -1830,7 +1828,7 @@ test("Per-platform SPA: Twitter preview & upload (dashboard)", async ({ page }) 
   await page.waitForSelector("#content-file-input");
   const twitterTile = page.locator('div[aria-label="Twitter"]');
   await twitterTile.click();
-  await twitterTile.locator("button.edit-platform-btn").click();
+  // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   await page.waitForSelector('.platform-expanded input[placeholder="Twitter message (optional)"]', {
     timeout: 10000,

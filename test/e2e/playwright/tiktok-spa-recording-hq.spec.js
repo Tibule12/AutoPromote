@@ -117,20 +117,7 @@ test("SPA HQ: Record TikTok direct post flow (mocked backend, slow)", async ({ p
     }
   } catch (e) {}
 
-  // Try to open the edit/expanded panel via the edit button related to the tile
-  const editBtn = page.locator('button.edit-platform-btn', { has: page.locator('div[aria-label="Tiktok"]') });
-  if ((await editBtn.count()) > 0) {
-    await editBtn.click({ force: true });
-    await page.waitForTimeout(800);
-  } else {
-    const anyEdit = page.locator('button.edit-platform-btn').first();
-    if ((await anyEdit.count()) > 0) {
-      await anyEdit.click({ force: true });
-      await page.waitForTimeout(800);
-    }
-  }
-
-  // Wait for TikTok per-platform UI or generic expanded panel — prefer the preview button inside the expanded panel
+  // Card click toggles expansion; wait for TikTok per-platform UI or generic expanded panel — prefer the preview button inside the expanded panel
   await page.waitForSelector(".platform-expanded button.preview-button, #tiktok-privacy, #tiktok-consent, #expanded", {
     timeout: 90000,
   });

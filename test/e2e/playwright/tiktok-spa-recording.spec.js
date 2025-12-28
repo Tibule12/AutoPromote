@@ -98,11 +98,7 @@ test("SPA: Record TikTok direct post flow (mocked backend)", async ({ page }) =>
     await tiktokTile.click({ force: true });
   }
 
-  // Expand the per-platform UI (if your SPA needs a button click; attempt both)
-  let localEditBtn = null;
-  if ((await tiktokTile.count()) > 0) localEditBtn = tiktokTile.locator("button.edit-platform-btn");
-  if (localEditBtn && (await localEditBtn.count()) > 0) await localEditBtn.click({ force: true });
-  // Wait for any of the known expanded selectors or TikTok-specific inputs
+  // Wait for any of the known expanded selectors or TikTok-specific inputs (card click toggles expansion)
   await page.waitForSelector(
     "#tiktok-privacy, #tiktok-consent, .platform-expanded, #expanded, .platform-expanded .platform-upload-status",
     { timeout: 20000 }

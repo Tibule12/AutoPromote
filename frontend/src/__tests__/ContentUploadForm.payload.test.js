@@ -21,31 +21,26 @@ describe("ContentUploadForm payloads", () => {
     const onUpload = jest.fn(async payload => ({
       previews: [{ platform: "youtube", title: payload.title }],
     }));
-    render(<ContentUploadForm onUpload={onUpload} />);
+    const { rerender } = render(<ContentUploadForm onUpload={onUpload} />);
 
-    // Fill required fields
-    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "Test Title" } });
-    fireEvent.change(screen.getByLabelText(/Description/i), {
-      target: { value: "Test Description" },
-    });
-
-    // Add a dummy file to allow preview
-    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
-    const fileInput = screen.getByLabelText(/File/i);
-    fireEvent.change(fileInput, { target: { files: [file] } });
-
-    // Select platforms: Discord and YouTube (click the platform cards)
-    const discordBtns = screen.getAllByRole("button", { name: /Discord/i });
-    const discordBtn = discordBtns.find(b => b.classList && b.classList.contains("platform-card"));
-    fireEvent.click(discordBtn);
-    const youtubeBtns = screen.getAllByRole("button", { name: /YouTube/i });
-    const youtubeBtn = youtubeBtns.find(b => b.classList && b.classList.contains("platform-card"));
-    fireEvent.click(youtubeBtn);
-
-    // Set Discord channel id (platform option)
-    const discordChannel = screen.getByPlaceholderText(/Discord channel ID/i);
+    // Pre-select Discord and YouTube so Discord options are available
+    rerender(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["discord", "youtube"]} />);
+    const discordChannel = await screen.findByPlaceholderText(/Discord channel ID/i);
     fireEvent.change(discordChannel, { target: { value: "12345" } });
 
+    // Click YouTube tile to open its focused view and provide per-platform fields
+    const youtubeBtns = screen.getAllByRole("button", { name: /YouTube/i });
+    const youtubeTile = youtubeBtns.find(b => b.classList && b.classList.contains("platform-card"));
+    expect(youtubeTile).toBeDefined();
+    fireEvent.click(youtubeTile);
+
+    // Provide per-platform title and file
+    fireEvent.change(screen.getByLabelText(/Platform title youtube/i), {
+      target: { value: "Test Title" },
+    });
+    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const fileInput = screen.getByLabelText(/Platform file youtube/i);
+    fireEvent.change(fileInput, { target: { files: [file] } });
     // Add overlay text, then click preview button
     const overlayInput = screen.getByPlaceholderText(/Add overlay text/i);
     fireEvent.change(overlayInput, { target: { value: "Hello Overlay" } });
@@ -74,40 +69,33 @@ describe("ContentUploadForm payloads", () => {
     const onUpload = jest.fn(async () => ({}));
     render(<ContentUploadForm onUpload={onUpload} />);
 
-    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "Upload Title" } });
-    fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: "Desc" } });
-    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
-    const fileInput = screen.getByLabelText(/File/i);
-    fireEvent.change(fileInput, { target: { files: [file] } });
-    fireEvent.click(screen.getByLabelText(/YouTube/i));
+    // Click YouTube to open focused view and provide per-platform fields
+    const youtubeBtns = screen.getAllByRole("button", { name: /YouTube/i });
+    const youtubeTile = youtubeBtns.find(b => b.classList && b.classList.contains("platform-card"));
+    expect(youtubeTile).toBeDefined();
+    fireEvent.click(youtubeTile);
 
-    // Submit the form (click Upload -> confirm modal -> confirm)
-    const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
-    fireEvent.click(uploadBtn);
-    // Click confirm in modal
-    const confirmBtn = await screen.findByRole("button", { name: /Confirm\s*&?\s*Publish/i });
-    fireEvent.click(confirmBtn);
+    // Provide a file in the focused view and click the per-platform Upload button
+    const file2 = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const fileInput2 = screen.getByLabelText(/Platform file youtube/i);
+    fireEvent.change(fileInput2, { target: { files: [file2] } });
+
+    // Set overlay text before upload
+    const overlay = screen.getByPlaceholderText(/Add overlay text/i);
+    fireEvent.change(overlay, { target: { value: "Submit Overlay" } });
+
+    const perUploadBtn = screen.getByRole("button", { name: /Upload Content/i });
+    fireEvent.click(perUploadBtn);
 
     await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 10000 });
     const payload = onUpload.mock.calls[0][0];
+    console.log("[TEST] payload:", payload);
     expect(Array.isArray(payload.platforms)).toBeTruthy();
     expect(payload.platforms).toContain("youtube");
-
-    // Overlay should also be present in submission payload if set
-    // Set overlay and submit again (confirm modal)
-    const overlayInput = screen.getByPlaceholderText(/Add overlay text/i);
-    fireEvent.change(overlayInput, { target: { value: "Submit Overlay" } });
-    // Submit the form
-    const uploadBtn2 = screen.getByRole("button", { name: /Upload Content/i });
-    fireEvent.click(uploadBtn2);
-    const confirmBtn2 = await screen.findByRole("button", { name: /Confirm\s*&?\s*Publish/i });
-    fireEvent.click(confirmBtn2);
-
-    await waitFor(() => expect(onUpload).toHaveBeenCalledTimes(2), { timeout: 10000 });
-    const payload2 = onUpload.mock.calls[onUpload.mock.calls.length - 1][0];
-    expect(payload2.meta).toBeDefined();
-    expect(payload2.meta.overlay).toBeDefined();
-    expect(payload2.meta.overlay.text).toBe("Submit Overlay");
+    expect(payload.meta).toBeDefined();
+    console.log("[TEST] payload.meta:", payload.meta);
+    expect(payload.meta.overlay).toBeDefined();
+    expect(payload.meta.overlay.text).toBe("Submit Overlay");
   });
 });
 
