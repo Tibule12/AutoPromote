@@ -570,4 +570,31 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     expect(["VIDEO", "IMG"]).toContain(media.tagName);
     expect(media.getAttribute("src")).toMatch(/^(blob:|http)/);
   });
+
+  test("falls back to local file preview when backend returns empty preview object", async () => {
+    const onUpload = jest.fn(async () => ({
+      previews: [{ platform: "tiktok", thumbnail: "", title: "EmptyPreview" }],
+    }));
+
+    render(<ContentUploadForm onUpload={onUpload} />);
+
+    // Expand TikTok focused view
+    const buttons2 = screen.getAllByRole("button", { name: /TikTok/i });
+    const tile2 = buttons2.find(b => b.classList && b.classList.contains("platform-card"));
+    fireEvent.click(tile2);
+
+    // Select a video file
+    const file = new File(["data"], "video.mp4", { type: "video/mp4" });
+    const fileInput = screen.getByLabelText(/Platform file tiktok/i);
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    // Click preview - backend returned empty preview thumbnail, UI should fallback to blob URL and render <video>
+    const previewBtn2 = screen.getByLabelText(/Preview Content/i);
+    fireEvent.click(previewBtn2);
+
+    const media2 = await screen.findByLabelText(/Preview media/i, { timeout: 3000 });
+    expect(media2).toBeDefined();
+    expect(["VIDEO", "IMG"]).toContain(media2.tagName);
+    expect(media2.getAttribute("src")).toMatch(/^(blob:|http|preview:)/);
+  });
 });
