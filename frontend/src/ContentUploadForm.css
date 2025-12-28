@@ -218,6 +218,33 @@
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
+/* Focused platform view styles */
+.platform-focused .platform-focused-layout {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 20px;
+  align-items: start;
+}
+.platform-focused .focus-left {
+  background: #0f1724;
+  padding: 12px;
+  border-radius: 8px;
+}
+.platform-focused .focus-right {
+  padding: 12px;
+}
+.back-btn {
+  background: transparent;
+  border: none;
+  color: #374151;
+  cursor: pointer;
+  font-size: 14px;
+}
+@media (max-width: 768px) {
+  .platform-focused .platform-focused-layout {
+    grid-template-columns: 1fr;
+  }
+}
 .platform-tile.selected .platform-icon {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #fff;
@@ -250,6 +277,61 @@
 }
 .edit-platform-btn:hover {
   background: rgba(59, 130, 246, 0.06);
+}
+
+/* New card layout for single-platform upload flow */
+.platform-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.platform-card:hover {
+  border-color: #d1d5db;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.platform-card:focus {
+  outline: 3px solid rgba(59, 130, 246, 0.16);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.platform-card.expanded {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  box-shadow: 0 6px 22px rgba(59, 130, 246, 0.12);
+}
+
+.platform-card .platform-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.open-platform-indicator {
+  font-size: 12px;
+  color: #374151;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.platform-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .platform-expanded {

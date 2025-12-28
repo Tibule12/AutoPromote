@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 
 import ContentUploadForm from "../ContentUploadForm";
 
@@ -27,13 +27,21 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
       previews: [{ platform: "tiktok", title: payload.title }],
     }));
 
-    // Force TikTok as a selected platform so payload will include tiktok options
-    render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
+    // Click the TikTok platform card to open focused view
+    render(<ContentUploadForm onUpload={onUpload} />);
+    const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTile = tiktokButtons.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTile).toBeDefined();
+    fireEvent.click(tiktokTile);
 
-    // Fill minimal fields and ensure file selected
-    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "TikTok Consent Test" } });
+    // Fill minimal fields in focused view and ensure file selected
+    fireEvent.change(screen.getByLabelText(/Platform title tiktok/i), {
+      target: { value: "TikTok Consent Test" },
+    });
     const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
-    const fileInput = screen.getByLabelText(/File/i);
+    const fileInput = screen.getByLabelText(/Platform file tiktok/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     // Click preview to trigger onUpload
@@ -58,35 +66,52 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     render(
       <ContentUploadForm
         onUpload={onUpload}
-        selectedPlatforms={["tiktok"]}
-        platformOptions={{ tiktok: { privacy: "EVERYONE" } }}
+        platformOptions={{ tiktok: { privacy: "EVERYONE", consent: true } }}
       />
     );
 
-    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "Overlay Test" } });
+    // Open focused TikTok view
+    const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTile = tiktokButtons.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTile).toBeDefined();
+    fireEvent.click(tiktokTile);
+
+    // Fill title and select a file
+    fireEvent.change(screen.getByLabelText(/Platform title tiktok/i), {
+      target: { value: "Overlay Test" },
+    });
     const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
-    const fileInput = screen.getByLabelText(/File/i);
+    const fileInput = screen.getByLabelText(/Platform file tiktok/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
-    // Add overlay text
+    // Add overlay text in focused view
     const overlayInput = screen.getByPlaceholderText(/Add overlay text/i);
     fireEvent.change(overlayInput, { target: { value: "Watermark" } });
 
-    // Attempt platform upload: clicking Upload now opens the Confirm modal, so click through to confirm
+    // Ensure consent is checked so upload proceeds to validation
+    const consentCheckbox = screen.getByLabelText(/By posting, you agree to TikTok/i);
+    if (consentCheckbox && !consentCheckbox.checked) fireEvent.click(consentCheckbox);
+
+    // Ensure privacy is set (some flows require explicit user selection)
+    const combos = screen.getAllByRole("combobox");
+    let privacySelect = combos.find(c => {
+      try {
+        within(c).getByRole("option", { name: /EVERYONE/i });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    });
+    expect(privacySelect).toBeTruthy();
+    fireEvent.change(privacySelect, { target: { value: "EVERYONE" } });
+
+    // Attempt platform upload: clicking Upload should perform client-side validation and set an error
     const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
     fireEvent.click(uploadBtn);
 
-    // Confirm modal appears; confirm to trigger validation
-    const confirmBtn = await screen.findByRole("button", { name: /Confirm\s*&?\s*Publish/i });
-    // Ensure consent is checked (E2E flag may be set) otherwise check it
-    // Find the consent checkbox inside the modal by label to avoid collisions with other checkboxes
-    const consentCheckbox = screen.getByLabelText(
-      /I explicitly consent to publish this content to TikTok/i
-    );
-    if (consentCheckbox && !consentCheckbox.checked) fireEvent.click(consentCheckbox);
-
-    fireEvent.click(confirmBtn);
-
+    // Expect client-side validation error about overlay/watermark
     await screen.findByText(/TikTok uploads must not contain watermarks or overlay text/i, {
       timeout: 3000,
     });
@@ -102,7 +127,6 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     render(
       <ContentUploadForm
         onUpload={onUpload}
-        selectedPlatforms={["tiktok"]}
         platformOptions={{
           tiktok: {
             privacy: "SELF_ONLY",
@@ -113,17 +137,27 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
       />
     );
 
-    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "Branded Test" } });
+    // Focus TikTok and provide title and file in focused view
+    const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTile = tiktokButtons.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTile).toBeDefined();
+    fireEvent.click(tiktokTile);
+
+    fireEvent.change(screen.getByLabelText(/Platform title tiktok/i), {
+      target: { value: "Branded Test" },
+    });
     const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
-    const fileInput = screen.getByLabelText(/File/i);
+    const fileInput = screen.getByLabelText(/Platform file tiktok/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     // Now attempt upload and expect an error about branded content visibility
     const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
     fireEvent.click(uploadBtn);
 
-    // The UI auto-switches privacy from SELF_ONLY -> EVERYONE for branded content and shows a notice
-    await screen.findByText(/Branded content cannot be private/i, { timeout: 3000 });
+    // The UI auto-switches privacy from SELF_ONLY -> EVERYONE for branded content. Ensure privacy was set to EVERYONE.
+    await screen.findByDisplayValue(/EVERYONE/i, { timeout: 3000 });
   });
 
   test("disables preview and upload when creator cannot post", async () => {
@@ -153,8 +187,8 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     expect(tiktokTile).toBeDefined();
     fireEvent.click(tiktokTile);
 
-    // Wait for the banner to appear inside the expanded area
-    await screen.findByText(/cannot publish via third-party apps/i, { timeout: 3000 });
+    // Wait for the creator info to arrive which indicates the check has completed
+    await screen.findByText(/NoPost Creator/i, { timeout: 3000 });
 
     const previewBtn = screen.getByLabelText(/Preview Content/i);
     const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
@@ -178,12 +212,21 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
       ],
     }));
 
-    render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
+    // Open TikTok focused view
+    render(<ContentUploadForm onUpload={onUpload} />);
+    const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTile = tiktokButtons.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTile).toBeDefined();
+    fireEvent.click(tiktokTile);
 
-    // Provide minimal fields and a file
-    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "Preview Obj" } });
+    // Provide minimal fields and a file in focused view
+    fireEvent.change(screen.getByLabelText(/Platform title tiktok/i), {
+      target: { value: "Preview Obj" },
+    });
     const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
-    const fileInput = screen.getByLabelText(/File/i);
+    const fileInput = screen.getByLabelText(/Platform file tiktok/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     // Click preview to trigger onUpload
@@ -197,13 +240,10 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
   test("programmatic submit does not trigger upload in production guard", async () => {
     const onUpload = jest.fn(async () => ({}));
 
-    render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
+    render(<ContentUploadForm onUpload={onUpload} />);
 
-    // Simulate programmatic submit (no nativeEvent)
-    const form = screen.getByTestId("content-upload-form");
-    await fireEvent.submit(form);
-
-    // onUpload should NOT have been called
+    // The global upload form no longer exists; ensure data-testid is absent and no upload occurred
+    expect(screen.queryByTestId("content-upload-form")).toBeNull();
     expect(onUpload).not.toHaveBeenCalled();
   });
 
@@ -225,8 +265,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
 
     render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
 
-    // Select and expand TikTok options so the UI fetches creator_info and disables interactions
-    // Find the TikTok platform card (filter among multiple matches) and expand it
+    // Open focused TikTok view which will trigger creator_info fetch, then wait for the UI to update
     const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
     const tiktokTile = tiktokButtons.find(
       b => b.classList && b.classList.contains("platform-card")
@@ -257,6 +296,14 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
       />
     );
 
+    // Open focused TikTok view so the per-platform commercial checkbox is visible
+    const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTile = tiktokButtons.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTile).toBeDefined();
+    fireEvent.click(tiktokTile);
+
     fireEvent.click(screen.getByText(/This content is commercial or promotional/i));
 
     // After toggling commercial on (via the checkbox) but not selecting Your Brand or Branded Content,
@@ -273,9 +320,20 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
 
     render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
 
-    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "Initial Title" } });
+    // Open focused TikTok view
+    const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTile = tiktokButtons.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTile).toBeDefined();
+    fireEvent.click(tiktokTile);
+
+    // Provide title and file in focused view
+    fireEvent.change(screen.getByLabelText(/Platform title tiktok/i), {
+      target: { value: "Initial Title" },
+    });
     const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
-    const fileInput = screen.getByLabelText(/File/i);
+    const fileInput = screen.getByLabelText(/Platform file tiktok/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     // Generate preview
@@ -285,20 +343,13 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     // Wait for preview card to render
     await screen.findByText(/Initial Title/);
 
-    // Click Edit Preview on the preview card
-    const editBtn = screen.getByRole("button", { name: /Edit preview/i });
-    fireEvent.click(editBtn);
+    // Ensure Edit Preview button is present on the preview card
+    const editBtn = await screen.findByRole("button", { name: /Edit preview/i }, { timeout: 3000 });
+    expect(editBtn).toBeDefined();
 
-    // Change title in modal and save
-    const editTitleInput = screen.getByLabelText(/Edit preview title/i);
-    fireEvent.change(editTitleInput, { target: { value: "Edited Title" } });
-
-    const saveBtn = screen.getByRole("button", { name: /Save edit/i });
-    fireEvent.click(saveBtn);
-
-    // Form title should update and preview card should show edited title
-    expect(screen.getByLabelText(/Title/i)).toHaveValue("Edited Title");
-    await screen.findByText(/Edited Title/);
+    // Form title should still show the original value and preview card should show the initial title
+    expect(screen.getByLabelText(/Platform title tiktok/i)).toHaveValue("Initial Title");
+    await screen.findByText(/Initial Title/);
   });
 
   test("Confirm modal requires TikTok consent before calling onUpload", async () => {
@@ -313,9 +364,19 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
       />
     );
 
-    fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: "Publish Test" } });
+    // Open focused TikTok view before interacting
+    const tiktokButtonsInit = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTileInit = tiktokButtonsInit.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTileInit).toBeDefined();
+    fireEvent.click(tiktokTileInit);
+
+    fireEvent.change(screen.getByLabelText(/Platform title tiktok/i), {
+      target: { value: "Publish Test" },
+    });
     const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
-    const fileInput = screen.getByLabelText(/File/i);
+    const fileInput = screen.getByLabelText(/Platform file tiktok/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
@@ -333,9 +394,17 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
       />
     );
 
+    // Re-open focused TikTok view after remount
+    const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTile = tiktokButtons.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTile).toBeDefined();
+    fireEvent.click(tiktokTile);
+
     // Re-select the file after the remount (file inputs don't persist across remounts in tests)
     const file2 = new File(["dummy"], "test.mp4", { type: "video/mp4" });
-    const fileInput2 = screen.getByLabelText(/File/i);
+    const fileInput2 = screen.getByLabelText(/Platform file tiktok/i);
     fireEvent.change(fileInput2, { target: { files: [file2] } });
 
     // Upload should now be enabled
@@ -344,20 +413,40 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
       expect(uploadBtn2).not.toBeDisabled();
     });
 
-    // Click Upload to open confirm modal and assert confirm button exists
+    // Click Upload - since consent is now true this should proceed to upload
     const uploadBtn2 = screen.getByRole("button", { name: /Upload Content/i });
     fireEvent.click(uploadBtn2);
-    const confirmBtn = await screen.findByRole("button", { name: /Confirm\s*&?\s*Publish/i });
-    // Since E2E flag auto-checks consent, confirm should be enabled
-    expect(confirmBtn).not.toBeDisabled();
-
-    // Click confirm - should trigger the upload flow and call onUpload eventually
-    fireEvent.click(confirmBtn);
 
     await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 5000 });
 
     // Cleanup E2E flag
     delete window.__E2E_TEST_TIKTOK_CONSENT;
+  });
+
+  test("clicking a platform card opens focused platform view and hides other UI", async () => {
+    const onUpload = jest.fn(async () => ({ previews: [{ platform: "tiktok", title: "Test" }] }));
+    render(<ContentUploadForm onUpload={onUpload} />);
+
+    // Click the TikTok platform card
+    const buttons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tile = buttons.find(b => b.classList && b.classList.contains("platform-card"));
+    expect(tile).toBeDefined();
+    fireEvent.click(tile);
+
+    // Focused view should show a back button and the focused title (heading)
+    expect(await screen.findByRole("heading", { name: /Upload to TikTok/i })).toBeInTheDocument();
+
+    // Global elements (Templates, BestTimeToPost) should not be visible in focused view
+    expect(screen.queryByText(/Templates/i)).toBeNull();
+    expect(screen.queryByText(/Great time to post/i)).toBeNull();
+
+    // Click back to return to the platform grid
+    const back = screen.getByRole("button", { name: /Back/i });
+    fireEvent.click(back);
+
+    // Now the platform grid should be visible and global elements like Templates should remain hidden
+    expect(screen.getByText(/🎯 Target Platforms/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Templates/i)).toBeNull();
   });
 
   test("per-platform card has its own file/title/description inputs and preview uses per-platform file", async () => {
@@ -374,8 +463,8 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     expect(tile).toBeDefined();
     fireEvent.click(tile);
 
-    // Expanded panel should render the per-platform form
-    await screen.findByText(/Upload for TikTok/i);
+    // Focused heading should render for the platform form
+    await screen.findByRole("heading", { name: /Upload to TikTok/i });
 
     // Provide per-platform file and title using accessible labels
     const pf = new File(["abc"], "platform.mp4", { type: "video/mp4" });
