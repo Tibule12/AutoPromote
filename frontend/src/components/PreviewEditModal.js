@@ -42,6 +42,25 @@ export default function PreviewEditModal({ open, preview, onClose, onSave }) {
     <div className="modal-overlay" role="dialog" aria-modal="true">
       <div className="modal">
         <h3>Edit Preview</h3>
+        {preview && (preview.mediaType === "video" ? (
+          <div style={{ marginBottom: 12 }}>
+            <video
+              aria-label="Preview media"
+              src={preview.mediaUrl || preview.thumbnail}
+              controls
+              style={{ width: "100%", maxHeight: 240, objectFit: "cover", borderRadius: 6 }}
+            />
+          </div>
+        ) : preview.thumbnail ? (
+          <div style={{ marginBottom: 12 }}>
+            <img
+              aria-label="Preview media"
+              src={preview.mediaUrl || preview.thumbnail}
+              alt="Preview media"
+              style={{ width: "100%", maxHeight: 240, objectFit: "cover", borderRadius: 6 }}
+            />
+          </div>
+        ) : null)}
         <div className="modal-row">
           <label>Title</label>
           <input
