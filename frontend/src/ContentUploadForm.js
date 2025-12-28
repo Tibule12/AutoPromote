@@ -883,13 +883,31 @@ function ContentUploadForm({
             thumbnail = thumbnail.url || thumbnail.original || thumbnail.thumbnail || "";
           }
           // Determine a media URL and type (video vs image) for richer previews
-          const mediaUrl = p.url || p.mediaUrl || thumbnail || "";
+          let mediaUrl = p.url || p.mediaUrl || thumbnail || "";
+
+          // FALLBACK: if backend returned an empty mediaUrl, prefer the local preview URL
+          // or create an object URL from the selected file so the preview shows the user's media
+          if (!mediaUrl) {
+            if (previewUrl) {
+              mediaUrl = previewUrl;
+            } else if (fileToUse) {
+              try {
+                mediaUrl = URL.createObjectURL(fileToUse);
+                // Track created object URLs to revoke on unmount
+                objectUrlsRef.current.add(mediaUrl);
+              } catch (e) {
+                mediaUrl = "";
+              }
+            }
+          }
+
           let mediaType = "image";
           if (
             p.type === "video" ||
             (mediaUrl && typeof mediaUrl === "string" && mediaUrl.toLowerCase().endsWith(".mp4")) ||
             (p.mime && typeof p.mime === "string" && p.mime.startsWith("video")) ||
-            (p.file && p.file.name && /\.mp4$/i.test(p.file.name))
+            (p.file && p.file.name && /\.mp4$/i.test(p.file.name)) ||
+            (fileToUse && fileToUse.type && fileToUse.type.startsWith("video"))
           ) {
             mediaType = "video";
           }
