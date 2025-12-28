@@ -237,6 +237,51 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     await screen.findByText(/origTitle/, { timeout: 3000 });
   });
 
+  test("handles preview hashtag object shapes and shows space-separated hashtags in modal", async () => {
+    const onUpload = jest.fn(async () => ({
+      previews: [
+        {
+          platform: "tiktok",
+          title: "Hashtag Test",
+          description: "",
+          hashtags: { hashtags: ["#fyp", "#tiktok"] },
+          thumbnail: "/img.png",
+        },
+      ],
+    }));
+
+    render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
+
+    const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTile = tiktokButtons.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTile).toBeDefined();
+    fireEvent.click(tiktokTile);
+
+    // Provide title and file in focused view
+    fireEvent.change(screen.getByLabelText(/Platform title tiktok/i), {
+      target: { value: "Hashtag Test" },
+    });
+    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const fileInput = screen.getByLabelText(/Platform file tiktok/i);
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    // Generate preview
+    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    fireEvent.click(previewBtn);
+
+    // Wait for preview card and Edit button
+    const editBtn = await screen.findByRole("button", { name: /Edit preview/i }, { timeout: 3000 });
+    fireEvent.click(editBtn);
+
+    // Modal should appear and hashtags input should show "#fyp #tiktok"
+    const dialog = await screen.findByRole("dialog");
+    const hashtagsInput = within(dialog).getByLabelText(/Edit preview hashtags/i);
+    expect(hashtagsInput).toBeDefined();
+    expect(hashtagsInput).toHaveValue("#fyp #tiktok");
+  });
+
   test("programmatic submit does not trigger upload in production guard", async () => {
     const onUpload = jest.fn(async () => ({}));
 
@@ -354,8 +399,8 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     // Open edit modal and update title
     fireEvent.click(editBtn);
     // Wait for the modal dialog to appear, then scope queries to it for reliability
-    await screen.findByRole('dialog');
-    const dialog = screen.getByRole('dialog');
+    await screen.findByRole("dialog");
+    const dialog = screen.getByRole("dialog");
     const modalTitle = within(dialog).getByLabelText(/Edit preview title/i);
     fireEvent.change(modalTitle, { target: { value: "Edited Title" } });
     const saveBtn = within(dialog).getByRole("button", { name: /Save edit/i });
