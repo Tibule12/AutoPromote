@@ -542,4 +542,32 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     const matches = await screen.findAllByText(/Platform Title/, { timeout: 3000 });
     expect(matches.length).toBeGreaterThan(0);
   });
+
+  test("shows a VIDEO element when backend preview missing and user selected a video file", async () => {
+    const onUpload = jest.fn(async () => {
+      // Backend returns nothing / failure
+      return {};
+    });
+
+    render(<ContentUploadForm onUpload={onUpload} />);
+
+    // Expand TikTok focused view
+    const buttons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tile = buttons.find(b => b.classList && b.classList.contains("platform-card"));
+    fireEvent.click(tile);
+
+    // Select a video file
+    const file = new File(["data"], "video.mp4", { type: "video/mp4" });
+    const fileInput = screen.getByLabelText(/Platform file tiktok/i);
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    // Click preview - backend provides no preview, so UI should use object URL and render a <video>
+    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    fireEvent.click(previewBtn);
+
+    const media = await screen.findByLabelText(/Preview media/i, { timeout: 3000 });
+    expect(media).toBeDefined();
+    expect(["VIDEO", "IMG"]).toContain(media.tagName);
+    expect(media.getAttribute("src")).toMatch(/^(blob:|http)/);
+  });
 });

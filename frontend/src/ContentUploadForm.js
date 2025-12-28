@@ -175,6 +175,21 @@ function ContentUploadForm({
 
   // Preview / Confirm modal state
   const [showPreviewEditModal, setShowPreviewEditModal] = useState(false);
+  // Keep track of created object URLs (so we can revoke them on unmount)
+  const objectUrlsRef = React.useRef(new Set());
+
+  useEffect(() => {
+    return () => {
+      // Revoke any created object URLs when component unmounts
+      try {
+        objectUrlsRef.current.forEach(url => {
+          try {
+            URL.revokeObjectURL(url);
+          } catch (_) {}
+        });
+      } catch (_) {}
+    };
+  }, []);
   const [previewToEdit, setPreviewToEdit] = useState(null);
   const [showConfirmPublishModal, setShowConfirmPublishModal] = useState(false);
   const [confirmTargetPlatform, setConfirmTargetPlatform] = useState(null);
@@ -817,16 +832,42 @@ function ContentUploadForm({
       // Preview button still shows something useful to the user.
       if (!previews || (Array.isArray(previews) && previews.length === 0)) {
         const fallback = [];
-        if (previewUrl) {
-          const mediaUrl = previewUrl;
-          const mediaType = (typeof mediaUrl === "string" && mediaUrl.toLowerCase().endsWith(".mp4")) ? "video" : "image";
+        // Prefer an explicit previewUrl (global), otherwise use the per-platform selected file
+        let mediaUrl = previewUrl || null;
+        let mediaType = null;
+        if (!mediaUrl && fileToUse) {
+          try {
+            mediaUrl = URL.createObjectURL(fileToUse);
+            // Track created object URLs to revoke on unmount
+            objectUrlsRef.current.add(mediaUrl);
+          } catch (e) {
+            mediaUrl = null;
+          }
+        }
+        if (mediaUrl) {
+          // Determine if it's a video
+          if (
+            (fileToUse && fileToUse.type && fileToUse.type.startsWith("video")) ||
+            (typeof mediaUrl === "string" && mediaUrl.toLowerCase().endsWith(".mp4"))
+          ) {
+            mediaType = "video";
+          } else {
+            mediaType = "image";
+          }
           fallback.push({
             platform,
-            thumbnail: previewUrl,
+            thumbnail: mediaUrl,
             mediaUrl,
             mediaType,
-            title: safeText(title || (file && file.name) || "Preview"),
-            description: safeText(description || ""),
+            title: safeText(
+              (perPlatformTitle && perPlatformTitle[platform]) ||
+                title ||
+                (fileToUse && fileToUse.name) ||
+                "Preview"
+            ),
+            description: safeText(
+              (perPlatformDescription && perPlatformDescription[platform]) || description || ""
+            ),
           });
         }
         setPerPlatformPreviews(prev => ({
@@ -842,26 +883,26 @@ function ContentUploadForm({
             thumbnail = thumbnail.url || thumbnail.original || thumbnail.thumbnail || "";
           }
           // Determine a media URL and type (video vs image) for richer previews
-        const mediaUrl = p.url || p.mediaUrl || thumbnail || "";
-        let mediaType = "image";
-        if (
-          p.type === "video" ||
-          (mediaUrl && typeof mediaUrl === "string" && mediaUrl.toLowerCase().endsWith(".mp4")) ||
-          (p.mime && typeof p.mime === "string" && p.mime.startsWith("video")) ||
-          (p.file && p.file.name && /\.mp4$/i.test(p.file.name))
-        ) {
-          mediaType = "video";
-        }
-        return {
-          ...p,
-          thumbnail,
-          mediaUrl,
-          mediaType,
-          title: safeText(p.title),
-          description: safeText(p.description),
-          caption: safeText(p.caption),
-          sound: safeText(p.sound),
-        };
+          const mediaUrl = p.url || p.mediaUrl || thumbnail || "";
+          let mediaType = "image";
+          if (
+            p.type === "video" ||
+            (mediaUrl && typeof mediaUrl === "string" && mediaUrl.toLowerCase().endsWith(".mp4")) ||
+            (p.mime && typeof p.mime === "string" && p.mime.startsWith("video")) ||
+            (p.file && p.file.name && /\.mp4$/i.test(p.file.name))
+          ) {
+            mediaType = "video";
+          }
+          return {
+            ...p,
+            thumbnail,
+            mediaUrl,
+            mediaType,
+            title: safeText(p.title),
+            description: safeText(p.description),
+            caption: safeText(p.caption),
+            sound: safeText(p.sound),
+          };
         });
         setPerPlatformPreviews(prev => ({ ...prev, [platform]: sanitized }));
       }
@@ -876,7 +917,10 @@ function ContentUploadForm({
               platform,
               thumbnail: tmpThumb,
               mediaUrl: tmpThumb,
-              mediaType: (fileToUse && fileToUse.type && fileToUse.type.startsWith("video")) ? "video" : "image",
+              mediaType:
+                fileToUse && fileToUse.type && fileToUse.type.startsWith("video")
+                  ? "video"
+                  : "image",
               title:
                 (perPlatformTitle && perPlatformTitle[platform]) ||
                 title ||
@@ -2179,21 +2223,26 @@ function ContentUploadForm({
                     ? pv.platform.charAt(0).toUpperCase() + pv.platform.slice(1)
                     : "Preview"}
                 </h5>
-                {pv.mediaType === "video" ? (
-                  <video
-                    aria-label="Preview media"
-                    src={pv.mediaUrl || pv.thumbnail}
-                    controls
-                    style={{ width: 200, height: 120, objectFit: "cover" }}
-                  />
-                ) : (
-                  <img
-                    aria-label="Preview media"
-                    src={pv.thumbnail || DEFAULT_THUMBNAIL}
-                    alt="Preview Thumbnail"
-                    style={{ width: 200, height: 120, objectFit: "cover" }}
-                  />
-                )}
+                <div
+                  className={`platform-preview ${pv.platform ? `platform-${pv.platform}` : ""}`}
+                  style={{ width: 200 }}
+                >
+                  {pv.mediaType === "video" ? (
+                    <video
+                      aria-label="Preview media"
+                      src={pv.mediaUrl || pv.thumbnail}
+                      controls
+                      style={{ width: "100%", height: 320, objectFit: "cover" }}
+                    />
+                  ) : (
+                    <img
+                      aria-label="Preview media"
+                      src={pv.thumbnail || DEFAULT_THUMBNAIL}
+                      alt="Preview Thumbnail"
+                      style={{ width: "100%", height: 320, objectFit: "cover" }}
+                    />
+                  )}
+                </div>
                 <div>
                   <strong>Title:</strong> {pv.title}
                 </div>
