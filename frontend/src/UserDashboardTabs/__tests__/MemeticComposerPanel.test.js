@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { act } from "react";
 import MemeticComposerPanel from "../MemeticComposerPanel";
 
 jest.mock("../../firebaseClient", () => ({
@@ -9,7 +10,26 @@ jest.mock("../../firebaseClient", () => ({
 describe("MemeticComposerPanel", () => {
   beforeEach(() => {
     global.fetch = jest.fn();
-    // mock audio play/pause
+    // provide a controllable mock Audio implementation so we can trigger events
+    const handlers = {};
+    const audioMock = {
+      play: jest.fn().mockResolvedValue(),
+      pause: jest.fn(),
+      addEventListener: (ev, fn) => {
+        handlers[ev] = fn;
+      },
+      removeEventListener: ev => {
+        delete handlers[ev];
+      },
+      trigger: (ev, ...args) => {
+        if (handlers[ev]) handlers[ev](...args);
+      },
+      duration: 0,
+      currentTime: 0,
+      src: "",
+    };
+    global.Audio = jest.fn(() => audioMock);
+    // keep the prototype-based play/pause as fallback in some tests
     HTMLMediaElement.prototype.play = jest.fn().mockResolvedValue();
     HTMLMediaElement.prototype.pause = jest.fn();
   });
@@ -35,7 +55,17 @@ describe("MemeticComposerPanel", () => {
     global.fetch.mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
-        json: async () => ({ variants: [{ id: "v1", caption: "Variant 1", score: 42 }] }),
+        json: async () => ({
+          variants: [
+            {
+              id: "v1",
+              caption: "Variant 1",
+              score: 42,
+              previewUrl: "https://example.com/v1.mp3",
+              thumbnailUrl: "https://example.com/v1.jpg",
+            },
+          ],
+        }),
       })
     );
 
@@ -60,11 +90,30 @@ describe("MemeticComposerPanel", () => {
     // Variant should show up
     expect(await screen.findByText(/Variant 1/)).toBeInTheDocument();
 
-    // Click Preview (should call audio play)
+    // Click Preview (should call audio play and show thumbnail)
     const previewBtn = screen.getByText(/Preview/i);
     fireEvent.click(previewBtn);
 
-    await waitFor(() => expect(HTMLMediaElement.prototype.play).toHaveBeenCalled());
+    // Assert thumbnail is rendered
+    expect(await screen.findByAltText(/Variant 1|Variant thumbnail/i)).toBeInTheDocument();
+
+    // audio instance should have been created
+    expect(global.Audio).toHaveBeenCalled();
+    const audioInstance = global.Audio.mock.results[0].value;
+
+    // trigger loadedmetadata and timeupdate events to update scrubber
+    audioInstance.duration = 3.2;
+    await act(async () => audioInstance.trigger("loadedmetadata"));
+    audioInstance.currentTime = 1.1;
+    await act(async () => audioInstance.trigger("timeupdate"));
+
+    const scrubber = await screen.findByLabelText(/Audio scrubber/i);
+    // input value may be stringified - allow approximate check
+    expect(Number(scrubber.value)).toBeCloseTo(1.1, 1);
+
+    // change scrubber (seek)
+    fireEvent.change(scrubber, { target: { value: "2.0" } });
+    expect(audioInstance.currentTime).toBe(2);
 
     // Click Seed Plan
     const seedBtn = screen.getByText(/Seed Plan/i);

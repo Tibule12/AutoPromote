@@ -70,3 +70,28 @@
   color: #93a0b0;
   padding: 12px;
 }
+.variant-thumbnail {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 12px;
+}
+.variant-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.audio-scrubber {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.audio-scrubber input[type="range"] {
+  flex: 1;
+}
+.scrubber-times {
+  color: #9aa4b2;
+  font-size: 0.9rem;
+}
