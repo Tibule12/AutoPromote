@@ -20,6 +20,29 @@ const MemeticComposerPanel = ({ onClose }) => {
   const [audioCurrentTime, setAudioCurrentTime] = useState(0);
   const audioHandlersRef = React.useRef({});
 
+  // modal state for variant preview
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewVariant, setPreviewVariant] = useState(null);
+
+  const openPreview = variant => {
+    setPreviewVariant(variant);
+    setPreviewOpen(true);
+    // prepare audio for preview
+    if (!audioRef.current) audioRef.current = new Audio();
+    audioRef.current.src = variant.previewUrl || variant.url || selectedSound?.url || "";
+    setAudioCurrentTime(0);
+    setAudioDuration(0);
+  };
+
+  const closePreview = () => {
+    // pause playback and close
+    try {
+      if (audioRef.current) audioRef.current.pause();
+    } catch (e) {}
+    setPreviewVariant(null);
+    setPreviewOpen(false);
+  };
+
   const formatTime = secs => {
     const s = Math.floor(secs || 0);
     const mins = Math.floor(s / 60);
@@ -229,6 +252,8 @@ const MemeticComposerPanel = ({ onClose }) => {
                         src={v.thumbnailUrl}
                         alt={v.caption || v.title || "Variant thumbnail"}
                         className="variant-thumbnail"
+                        onClick={() => openPreview(v)}
+                        role="button"
                       />
                     )}
                     <div className="variant-caption">{v.caption || v.title || "Variant"}</div>
@@ -314,8 +339,129 @@ const MemeticComposerPanel = ({ onClose }) => {
                       </div>
                     </div>
                   )}
+
+                  {/* small visual progress bar when playing */}
+                  {playingVariantId === v.id && (
+                    <div className="waveform-bar" aria-hidden="true">
+                      <div
+                        className="waveform-fill"
+                        style={{
+                          width:
+                            audioDuration > 0
+                              ? `${(audioCurrentTime / audioDuration) * 100}%`
+                              : `0%`,
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Preview Modal */}
+          {previewOpen && previewVariant && (
+            <div className="preview-modal-overlay" role="dialog" aria-modal="true">
+              <div className="preview-modal">
+                <div className="preview-header">
+                  <h4>{previewVariant.caption || previewVariant.title || "Preview"}</h4>
+                  <div>
+                    <button
+                      className="btn-secondary"
+                      onClick={closePreview}
+                      aria-label="Close preview"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+
+                <div className="preview-content">
+                  {previewVariant.thumbnailUrl && (
+                    <img
+                      className="preview-image"
+                      src={previewVariant.thumbnailUrl}
+                      alt={previewVariant.caption || previewVariant.title || "Preview"}
+                    />
+                  )}
+
+                  <div className="preview-meta">
+                    <p>{previewVariant.reason || previewVariant.description || ""}</p>
+
+                    <div className="modal-controls">
+                      <button
+                        className="btn-primary"
+                        onClick={() => {
+                          try {
+                            if (!audioRef.current) audioRef.current = new Audio();
+                            const audio = audioRef.current;
+                            audio.src =
+                              previewVariant.previewUrl ||
+                              previewVariant.url ||
+                              selectedSound?.url ||
+                              "";
+
+                            // attach handlers similar to inline preview
+                            const handlers = {};
+                            handlers.loadedmetadata = () => setAudioDuration(audio.duration || 0);
+                            handlers.timeupdate = () => setAudioCurrentTime(audio.currentTime || 0);
+                            handlers.ended = () => setPlayingVariantId(null);
+                            audioHandlersRef.current = handlers;
+                            if (audio.addEventListener) {
+                              audio.addEventListener("loadedmetadata", handlers.loadedmetadata);
+                              audio.addEventListener("timeupdate", handlers.timeupdate);
+                              audio.addEventListener("ended", handlers.ended);
+                            } else {
+                              audio.onloadedmetadata = handlers.loadedmetadata;
+                              audio.ontimeupdate = handlers.timeupdate;
+                              audio.onended = handlers.ended;
+                            }
+
+                            audio.play();
+                            setPlayingVariantId(previewVariant.id);
+                          } catch (e) {
+                            toast.error("Unable to play preview");
+                          }
+                        }}
+                      >
+                        Play
+                      </button>
+
+                      <button
+                        className="btn-secondary"
+                        onClick={() => {
+                          try {
+                            if (audioRef.current) audioRef.current.pause();
+                          } catch (e) {}
+                          setPlayingVariantId(null);
+                        }}
+                      >
+                        Pause
+                      </button>
+
+                      <div style={{ flex: 1 }} />
+
+                      <div className="scrubber-times">
+                        {formatTime(audioCurrentTime)} / {formatTime(audioDuration)}
+                      </div>
+                    </div>
+
+                    {/* waveform in modal */}
+                    <div className="waveform-bar" aria-hidden="true" style={{ marginTop: 12 }}>
+                      <div
+                        className="waveform-fill"
+                        data-testid="modal-waveform-fill"
+                        style={{
+                          width:
+                            audioDuration > 0
+                              ? `${(audioCurrentTime / audioDuration) * 100}%`
+                              : `0%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
