@@ -9,10 +9,15 @@ jest.mock("../../firebaseClient", () => ({
 describe("MemeticComposerPanel", () => {
   beforeEach(() => {
     global.fetch = jest.fn();
+    // mock audio play/pause
+    HTMLMediaElement.prototype.play = jest.fn().mockResolvedValue();
+    HTMLMediaElement.prototype.pause = jest.fn();
   });
 
   afterEach(() => {
     jest.resetAllMocks();
+    delete HTMLMediaElement.prototype.play;
+    delete HTMLMediaElement.prototype.pause;
   });
 
   test("loads sounds, generates a plan and seeds it", async () => {
@@ -20,7 +25,9 @@ describe("MemeticComposerPanel", () => {
     global.fetch.mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
-        json: async () => ({ sounds: [{ id: "s1", title: "Sound 1" }] }),
+        json: async () => ({
+          sounds: [{ id: "s1", title: "Sound 1", url: "https://example.com/s1.mp3" }],
+        }),
       })
     );
 
@@ -52,6 +59,12 @@ describe("MemeticComposerPanel", () => {
 
     // Variant should show up
     expect(await screen.findByText(/Variant 1/)).toBeInTheDocument();
+
+    // Click Preview (should call audio play)
+    const previewBtn = screen.getByText(/Preview/i);
+    fireEvent.click(previewBtn);
+
+    await waitFor(() => expect(HTMLMediaElement.prototype.play).toHaveBeenCalled());
 
     // Click Seed Plan
     const seedBtn = screen.getByText(/Seed Plan/i);
