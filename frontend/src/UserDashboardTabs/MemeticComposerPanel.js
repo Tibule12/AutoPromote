@@ -14,9 +14,25 @@ const MemeticComposerPanel = ({ onClose }) => {
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [plan, setPlan] = useState(null);
   const [seeding, setSeeding] = useState(false);
+  const audioRef = React.useRef(null);
+  const [playingVariantId, setPlayingVariantId] = useState(null);
 
   useEffect(() => {
     loadSounds();
+  }, []);
+
+  // cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        try {
+          audioRef.current.pause();
+        } catch (e) {
+          /* ignore */
+        }
+        audioRef.current = null;
+      }
+    };
   }, []);
 
   const loadSounds = async () => {
@@ -187,9 +203,32 @@ const MemeticComposerPanel = ({ onClose }) => {
                   <div className="variant-actions">
                     <button
                       className="btn-secondary btn-sm"
-                      onClick={() => toast(`Preview: ${v.caption || v.title || "Variant"}`)}
+                      onClick={() => {
+                        const url = v.previewUrl || selectedSound?.url;
+                        if (!url) return toast.error("No audio available for preview");
+
+                        if (!audioRef.current) audioRef.current = new Audio();
+                        const audio = audioRef.current;
+
+                        // pause if already playing this variant
+                        if (playingVariantId === v.id) {
+                          audio.pause();
+                          setPlayingVariantId(null);
+                          return;
+                        }
+
+                        audio.src = url;
+                        audio.onended = () => setPlayingVariantId(null);
+                        audio
+                          .play()
+                          .then(() => setPlayingVariantId(v.id))
+                          .catch(err => {
+                            console.error("Audio play failed", err);
+                            toast.error("Unable to play audio preview");
+                          });
+                      }}
                     >
-                      Preview
+                      {playingVariantId === v.id ? "Pause" : "Preview"}
                     </button>
                     <button className="btn-primary btn-sm" onClick={seedPlan} disabled={seeding}>
                       {seeding ? "Seeding..." : "Seed Plan"}
