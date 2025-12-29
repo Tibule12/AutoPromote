@@ -9,7 +9,8 @@ jest.mock("../../firebaseClient", () => ({
 
 describe("MemeticComposerPanel", () => {
   beforeEach(() => {
-    global.fetch = jest.fn();
+    // default fetch returns an empty successful response so unexpected calls won't hang
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
     // provide a controllable mock Audio implementation so we can trigger events
     const handlers = {};
     const audioMock = {
@@ -38,6 +39,12 @@ describe("MemeticComposerPanel", () => {
     jest.resetAllMocks();
     delete HTMLMediaElement.prototype.play;
     delete HTMLMediaElement.prototype.pause;
+    // remove global.fetch to avoid leaking behavior between test files
+    try {
+      delete global.fetch;
+    } catch (e) {
+      global.fetch = undefined;
+    }
   });
 
   test("loads sounds, generates a plan and seeds it", async () => {
