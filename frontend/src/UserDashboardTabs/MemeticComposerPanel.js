@@ -32,6 +32,42 @@ const MemeticComposerPanel = ({ onClose }) => {
     audioRef.current.src = variant.previewUrl || variant.url || selectedSound?.url || "";
     setAudioCurrentTime(0);
     setAudioDuration(0);
+
+    // focus modal after opening
+    setTimeout(() => {
+      try {
+        const el = document.querySelector(".preview-modal-overlay");
+        if (el) el.focus && el.focus();
+      } catch (e) {}
+    }, 0);
+  };
+
+  // deterministic waveform peak generator
+  const generateWaveformPeaks = (variant, count = 40) => {
+    if (!variant) return Array(count).fill(0.1);
+    if (Array.isArray(variant.waveform) && variant.waveform.length > 0) {
+      // normalize and trim/pad
+      const arr = variant.waveform.slice(0, count);
+      while (arr.length < count) arr.push(0);
+      return arr.map(v => Math.max(0, Math.min(1, v)));
+    }
+
+    // deterministic pseudo-random based on variant.id or caption
+    const seedStr = (variant.id || variant.caption || variant.title || "").toString();
+    let seed = 0;
+    for (let i = 0; i < seedStr.length; i++)
+      seed = (seed * 31 + seedStr.charCodeAt(i)) & 0xffffffff;
+
+    const peaks = [];
+    for (let i = 0; i < count; i++) {
+      // simple LCG
+      seed = (seed * 1664525 + 1013904223) & 0xffffffff;
+      const v = ((seed >>> 16) & 0xffff) / 0xffff; // 0..1
+      // bias toward mid frequencies
+      const shaped = Math.pow(v, 0.8) * (0.4 + 0.6 * Math.abs(Math.sin((i / count) * Math.PI)));
+      peaks.push(Number(Math.max(0.02, Math.min(1, shaped)).toFixed(3)));
+    }
+    return peaks;
   };
 
   const closePreview = () => {
@@ -344,14 +380,28 @@ const MemeticComposerPanel = ({ onClose }) => {
                   {playingVariantId === v.id && (
                     <div className="waveform-bar" aria-hidden="true">
                       <div
-                        className="waveform-fill"
-                        style={{
-                          width:
+                        className="waveform-peaks"
+                        role="img"
+                        aria-label="Audio waveform"
+                        style={{ display: "flex", gap: 2, alignItems: "end", height: 24 }}
+                      >
+                        {generateWaveformPeaks(v, 40).map((p, idx) => {
+                          const progressIndex =
                             audioDuration > 0
-                              ? `${(audioCurrentTime / audioDuration) * 100}%`
-                              : `0%`,
-                        }}
-                      />
+                              ? Math.floor((audioCurrentTime / Math.max(1, audioDuration)) * 40)
+                              : -1;
+                          return (
+                            <div
+                              key={idx}
+                              className={"wave-peak " + (idx <= progressIndex ? "filled" : "")}
+                              style={{ width: 4, height: Math.max(2, p * 24) }}
+                              data-peak-index={idx}
+                              data-testid="wave-peak"
+                              aria-hidden="true"
+                            />
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -375,6 +425,51 @@ const MemeticComposerPanel = ({ onClose }) => {
                     </button>
                   </div>
                 </div>
+                {/* keyboard handlers for modal: space toggles play/pause, arrows seek */}
+                <div
+                  tabIndex={-1}
+                  className="preview-key-catcher"
+                  data-testid="preview-key-catcher"
+                  onKeyDown={e => {
+                    if (e.key === " " || e.code === "Space") {
+                      e.preventDefault();
+                      // toggle play/pause
+                      try {
+                        if (!audioRef.current) audioRef.current = new Audio();
+                        const audio = audioRef.current;
+                        if (audio.paused || playingVariantId !== previewVariant.id) {
+                          audio
+                            .play()
+                            .then(() => setPlayingVariantId(previewVariant.id))
+                            .catch(() => {});
+                        } else {
+                          audio.pause();
+                          setPlayingVariantId(null);
+                        }
+                      } catch (err) {}
+                    }
+                    if (e.key === "ArrowRight") {
+                      e.preventDefault();
+                      if (audioRef.current && audioDuration > 0) {
+                        audioRef.current.currentTime = Math.min(
+                          audioDuration,
+                          (audioRef.current.currentTime || 0) + 5
+                        );
+                        setAudioCurrentTime(audioRef.current.currentTime || 0);
+                      }
+                    }
+                    if (e.key === "ArrowLeft") {
+                      e.preventDefault();
+                      if (audioRef.current && audioDuration > 0) {
+                        audioRef.current.currentTime = Math.max(
+                          0,
+                          (audioRef.current.currentTime || 0) - 5
+                        );
+                        setAudioCurrentTime(audioRef.current.currentTime || 0);
+                      }
+                    }
+                  }}
+                />
 
                 <div className="preview-content">
                   {previewVariant.thumbnailUrl && (

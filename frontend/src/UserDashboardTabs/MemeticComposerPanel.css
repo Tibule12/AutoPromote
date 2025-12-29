@@ -152,3 +152,16 @@
   align-items: center;
   margin-top: 10px;
 }
+.wave-peak {
+  background: rgba(255, 255, 255, 0.06);
+  transition:
+    background-color 120ms linear,
+    height 120ms linear;
+  border-radius: 2px;
+}
+.wave-peak.filled {
+  background: linear-gradient(90deg, #7dd3fc, #60a5fa);
+}
+.preview-modal .waveform-fill {
+  transition: width 120ms linear;
+}
