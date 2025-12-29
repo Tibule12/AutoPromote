@@ -137,14 +137,40 @@ describe("MemeticComposerPanel", () => {
     expect(fill).not.toBeNull();
     expect(parseFloat(fill.style.width)).toBeGreaterThan(0);
 
+    // some filled peaks present (inline peaks reflect progress)
+    await waitFor(() =>
+      expect(
+        screen.getAllByTestId("wave-peak").filter(el => el.classList.contains("filled")).length
+      ).toBeGreaterThan(0)
+    );
+    const initialFilled = screen
+      .getAllByTestId("wave-peak")
+      .filter(el => el.classList.contains("filled")).length;
+
+    // keyboard: Space should pause playback
+    const keyCatcher = within(dialog).getByTestId("preview-key-catcher");
+    fireEvent.keyDown(keyCatcher, { key: " ", code: "Space" });
+    expect(audioInstance.pause).toHaveBeenCalled();
+
+    // keyboard: ArrowRight should seek forward (up to duration)
+    const before = audioInstance.currentTime;
+    fireEvent.keyDown(keyCatcher, { key: "ArrowRight" });
+    expect(audioInstance.currentTime).toBeGreaterThan(before);
+
     // simulate a seek in modal (set currentTime and trigger update)
     await act(async () => {
       audioInstance.currentTime = 3.0;
       audioInstance.trigger("timeupdate");
     });
 
-    const fill2 = within(dialog).getByTestId("modal-waveform-fill");
-    expect(parseFloat(fill2.style.width)).toBeGreaterThan(65);
+    // resume playback (Space toggles resume) so inline peaks will show again
+    fireEvent.keyDown(keyCatcher, { key: " ", code: "Space" });
+
+    await waitFor(() =>
+      expect(
+        screen.getAllByTestId("wave-peak").filter(el => el.classList.contains("filled")).length
+      ).toBeGreaterThan(initialFilled)
+    );
 
     // close modal
     fireEvent.click(screen.getByLabelText(/Close preview/i));
