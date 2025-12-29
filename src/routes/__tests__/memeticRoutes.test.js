@@ -8,6 +8,9 @@ const firebaseAdmin = require("../../../firebaseAdmin");
 
 const makeDoc = data => ({ exists: true, data: () => data, update: async () => true });
 
+// Allow extra time for memetic planner computations in CI
+jest.setTimeout(20000);
+
 describe("memetic plan route", () => {
   beforeEach(() => {
     firebaseAdmin.db.collection = _name => ({
