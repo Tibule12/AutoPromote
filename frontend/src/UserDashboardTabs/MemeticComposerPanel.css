@@ -1,0 +1,72 @@
+.memetic-composer {
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
+  border-radius: 8px;
+}
+.memetic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.memetic-header .muted {
+  color: #8b95a3;
+}
+.composer-grid {
+  display: flex;
+  gap: 20px;
+}
+.composer-left {
+  flex: 1;
+  min-width: 260px;
+}
+.composer-right {
+  flex: 1.2;
+  min-width: 320px;
+}
+.mutation-controls {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+.mutation-controls label {
+  display: block;
+  color: #d6dbe2;
+}
+.mutation-controls input[type="range"] {
+  width: 100%;
+}
+.composer-buttons {
+  margin-top: 12px;
+}
+.variants-list {
+  display: grid;
+  gap: 10px;
+}
+.variant-card {
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.variant-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.variant-caption {
+  font-weight: 600;
+}
+.variant-score {
+  color: #ffd166;
+}
+.btn-sm {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+.empty {
+  color: #93a0b0;
+  padding: 12px;
+}
