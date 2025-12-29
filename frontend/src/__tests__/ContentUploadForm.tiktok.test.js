@@ -445,6 +445,20 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
 
     // Now simulate the user giving consent and re-rendering (or use E2E flag)
     window.__E2E_TEST_TIKTOK_CONSENT = true;
+    // Mock creator_info to avoid a network failure that would clear privacy
+    const origFetchGlobal = global.fetch;
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        creator: {
+          display_name: "Test",
+          can_post: true,
+          interactions: { comments: true, duet: true, stitch: true },
+          privacy_level_options: ["EVERYONE", "FRIENDS", "SELF_ONLY"],
+        },
+      }),
+    }));
+
     // force remount so component picks up the flag; provide consent true and privacy to simulate user consent
     rerender(
       <ContentUploadForm
@@ -468,6 +482,18 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     const fileInput2 = screen.getByLabelText(/Platform file tiktok/i);
     fireEvent.change(fileInput2, { target: { files: [file2] } });
 
+    // Ensure privacy is explicitly set (some flows block preview/upload without it)
+    const combos = screen.getAllByRole("combobox");
+    let privacySelect = combos.find(c => {
+      try {
+        within(c).getByRole("option", { name: /EVERYONE/i });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    });
+    if (privacySelect) fireEvent.change(privacySelect, { target: { value: "EVERYONE" } });
+
     // Upload should now be enabled
     await waitFor(() => {
       const uploadBtn2 = screen.getByRole("button", { name: /Upload Content/i });
@@ -480,7 +506,8 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
 
     await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 5000 });
 
-    // Cleanup E2E flag
+    // Restore global.fetch and cleanup E2E flag
+    global.fetch = origFetchGlobal;
     delete window.__E2E_TEST_TIKTOK_CONSENT;
   });
 
@@ -588,12 +615,41 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     const fileInput = screen.getByLabelText(/Platform file tiktok/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
+    // Ensure privacy is set so preview is allowed
+    const combos = screen.getAllByRole("combobox");
+    let privacySelect = combos.find(c => {
+      try {
+        within(c).getByRole("option", { name: /EVERYONE/i });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    });
+    if (privacySelect) fireEvent.change(privacySelect, { target: { value: "EVERYONE" } });
+
+    // Mock creator_info to avoid network failure that clears privacy
+    const origFetch = global.fetch;
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        creator: {
+          display_name: "Test",
+          can_post: true,
+          interactions: { comments: true, duet: true, stitch: true },
+          privacy_level_options: ["EVERYONE", "FRIENDS", "SELF_ONLY"],
+        },
+      }),
+    }));
+
     // Click preview - backend returned empty preview thumbnail, UI should fallback to blob URL and render <video>
     const previewBtn2 = screen.getByLabelText(/Preview Content/i);
     fireEvent.click(previewBtn2);
 
     const media2 = await screen.findByLabelText(/Preview media/i, { timeout: 3000 });
     expect(media2).toBeDefined();
+
+    // restore fetch
+    global.fetch = origFetch;
     expect(["VIDEO", "IMG"]).toContain(media2.tagName);
     expect(media2.getAttribute("src")).toMatch(/^(blob:|http|preview:)/);
   });

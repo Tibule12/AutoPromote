@@ -13,6 +13,7 @@
     "test:routes": "node test/route-imports.test.js",
     "test": "npm run test:unit",
     "test:jest": "cross-env FIREBASE_ADMIN_BYPASS=1 CI_ROUTE_IMPORTS=1 OPENAI_LOGGING_ENABLED=1 jest --runInBand --verbose --testTimeout=20000 --testPathIgnorePatterns=\"test/e2e/playwright/\"",
+    "test:unit:emulator": "npx firebase emulators:exec \"npx jest --runInBand --detectOpenHandles\" --only firestore",
     "seed:emulator": "node ./scripts/seed-autopilot-emulator.js",
     "emulator:smoketest": "node ./scripts/seed-autopilot-emulator.js && node ./scripts/emulator-smoketest-run.js",
     "check:secrets": "node ./scripts/check-no-secrets.js",
@@ -72,6 +73,7 @@
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0",
     "@babel/preset-react": "^7.22.0",
+    "@firebase/rules-unit-testing": "^5.0.0",
     "@playwright/test": "^1.42.0",
     "babel-jest": "^30.2.0",
     "cross-env": "^7.0.3",
@@ -82,10 +84,10 @@
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
     "lint-staged": "^16.2.7",
+    "minimist": "^1.2.8",
     "nock": "^13.3.0",
     "prettier": "^3.7.4",
-    "supertest": "^7.1.4",
-    "minimist": "^1.2.8"
+    "supertest": "^7.1.4"
   },
   "eslintConfig": {
     "root": true,
