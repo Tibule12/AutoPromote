@@ -12,7 +12,16 @@ async function run() {
   for (const [k, provider] of Object.entries(providers)) {
     try {
       console.log('Fetching provider', k);
-      const feed = await provider.fetchTrending({ limit: 20, apiKey: process.env[`${k.toUpperCase()}_API_KEY`] });
+      // pass provider-specific auth config
+      const options = {};
+      if (k === 'spotify') {
+        options.clientId = process.env.SPOTIFY_CLIENT_ID;
+        options.clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+      }
+      if (k === 'tiktok') {
+        options.apiKey = process.env.TIKTOK_API_KEY; // placeholder
+      }
+      const feed = await provider.fetchTrending({ limit: 20, ...options });
       console.log(`Imported ${feed.length} items from ${k}`);
       if (feed.length > 0) {
         const added = await importFromProvider(db, k, feed);

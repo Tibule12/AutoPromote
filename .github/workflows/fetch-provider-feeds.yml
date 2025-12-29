@@ -18,6 +18,7 @@ jobs:
         run: npm ci
       - name: Fetch provider feeds
         env:
-          SPOTIFY_API_KEY: ${{ secrets.SPOTIFY_API_KEY }}
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
           TIKTOK_API_KEY: ${{ secrets.TIKTOK_API_KEY }}
         run: npm run fetch:providers

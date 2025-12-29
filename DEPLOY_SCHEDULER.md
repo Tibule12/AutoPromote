@@ -6,8 +6,10 @@ This repository includes two options to schedule regular imports of trending pro
 
 - The workflow `.github/workflows/fetch-provider-feeds.yml` runs `npm run fetch:providers` every 6 hours (configurable).
 - To enable provider API access, add the following repository secrets in GitHub:
-  - `SPOTIFY_API_KEY` (optional)
-  - `TIKTOK_API_KEY` (optional)
+  - `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` (for Spotify Client Credentials flow)
+  - `TIKTOK_API_KEY` (optional or vendor-provided key)
+
+  Note: The worker obtains a short-lived Spotify access token at runtime using the client ID/secret and does not store the raw secret in logs.
 
 2. Google Cloud Functions + Cloud Scheduler (production-ready)
 
