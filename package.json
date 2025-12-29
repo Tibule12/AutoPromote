@@ -13,6 +13,7 @@
     "test:routes": "node test/route-imports.test.js",
     "test": "npm run test:unit",
     "test:jest": "cross-env FIREBASE_ADMIN_BYPASS=1 CI_ROUTE_IMPORTS=1 OPENAI_LOGGING_ENABLED=1 jest --runInBand --verbose --testTimeout=20000 --testPathIgnorePatterns=\"test/e2e/playwright/\"",
+    "fetch:providers": "node scripts/fetch-provider-feeds.js",
     "test:unit:emulator": "npx firebase emulators:exec \"npx jest --runInBand --detectOpenHandles\" --only firestore",
     "seed:emulator": "node ./scripts/seed-autopilot-emulator.js",
     "emulator:smoketest": "node ./scripts/seed-autopilot-emulator.js && node ./scripts/emulator-smoketest-run.js",
