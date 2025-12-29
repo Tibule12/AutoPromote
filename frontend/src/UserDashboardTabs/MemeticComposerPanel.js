@@ -16,6 +16,16 @@ const MemeticComposerPanel = ({ onClose }) => {
   const [seeding, setSeeding] = useState(false);
   const audioRef = React.useRef(null);
   const [playingVariantId, setPlayingVariantId] = useState(null);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [audioCurrentTime, setAudioCurrentTime] = useState(0);
+  const audioHandlersRef = React.useRef({});
+
+  const formatTime = secs => {
+    const s = Math.floor(secs || 0);
+    const mins = Math.floor(s / 60);
+    const secsDisplay = s % 60;
+    return `${mins}:${secsDisplay.toString().padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     loadSounds();
@@ -26,11 +36,28 @@ const MemeticComposerPanel = ({ onClose }) => {
     return () => {
       if (audioRef.current) {
         try {
-          audioRef.current.pause();
+          // remove event listeners if present
+          const audio = audioRef.current;
+          const handlers = audioHandlersRef.current || {};
+          if (audio.removeEventListener) {
+            if (handlers.loadedmetadata)
+              audio.removeEventListener("loadedmetadata", handlers.loadedmetadata);
+            if (handlers.timeupdate) audio.removeEventListener("timeupdate", handlers.timeupdate);
+            if (handlers.ended) audio.removeEventListener("ended", handlers.ended);
+          } else {
+            if (handlers.loadedmetadata) audio.onloadedmetadata = null;
+            if (handlers.timeupdate) audio.ontimeupdate = null;
+            if (handlers.ended) audio.onended = null;
+          }
+          audio.pause();
         } catch (e) {
           /* ignore */
         }
         audioRef.current = null;
+        audioHandlersRef.current = {};
+        setAudioDuration(0);
+        setAudioCurrentTime(0);
+        setPlayingVariantId(null);
       }
     };
   }, []);
@@ -197,6 +224,13 @@ const MemeticComposerPanel = ({ onClose }) => {
               {plan.variants.map(v => (
                 <div key={v.id} className="variant-card">
                   <div className="variant-meta">
+                    {v.thumbnailUrl && (
+                      <img
+                        src={v.thumbnailUrl}
+                        alt={v.caption || v.title || "Variant thumbnail"}
+                        className="variant-thumbnail"
+                      />
+                    )}
                     <div className="variant-caption">{v.caption || v.title || "Variant"}</div>
                     <div className="variant-score">⚡ {v.score || v.viralScore || "—"}</div>
                   </div>
@@ -218,7 +252,26 @@ const MemeticComposerPanel = ({ onClose }) => {
                         }
 
                         audio.src = url;
-                        audio.onended = () => setPlayingVariantId(null);
+                        // attach events
+                        const handlers = {};
+                        handlers.loadedmetadata = () => setAudioDuration(audio.duration || 0);
+                        handlers.timeupdate = () => setAudioCurrentTime(audio.currentTime || 0);
+                        handlers.ended = () => setPlayingVariantId(null);
+
+                        // store handlers to remove later on cleanup
+                        audioHandlersRef.current = handlers;
+
+                        if (audio.addEventListener) {
+                          audio.addEventListener("loadedmetadata", handlers.loadedmetadata);
+                          audio.addEventListener("timeupdate", handlers.timeupdate);
+                          audio.addEventListener("ended", handlers.ended);
+                        } else {
+                          // fallback for older browsers
+                          audio.onloadedmetadata = handlers.loadedmetadata;
+                          audio.ontimeupdate = handlers.timeupdate;
+                          audio.onended = handlers.ended;
+                        }
+
                         audio
                           .play()
                           .then(() => setPlayingVariantId(v.id))
@@ -234,6 +287,33 @@ const MemeticComposerPanel = ({ onClose }) => {
                       {seeding ? "Seeding..." : "Seed Plan"}
                     </button>
                   </div>
+
+                  {/* Scrubber (visible when this variant is playing or has loaded) */}
+                  {playingVariantId === v.id && (
+                    <div className="audio-scrubber">
+                      <input
+                        type="range"
+                        min="0"
+                        max={Math.max(0, audioDuration)}
+                        step="0.1"
+                        value={Math.min(audioCurrentTime, audioDuration)}
+                        onChange={e => {
+                          const t = Number(e.target.value);
+                          if (
+                            audioRef.current &&
+                            typeof audioRef.current.currentTime !== "undefined"
+                          ) {
+                            audioRef.current.currentTime = t;
+                            setAudioCurrentTime(t);
+                          }
+                        }}
+                        aria-label="Audio scrubber"
+                      />
+                      <div className="scrubber-times">
+                        {formatTime(audioCurrentTime)} / {formatTime(audioDuration)}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
