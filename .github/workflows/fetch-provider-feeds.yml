@@ -29,11 +29,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify Slack (if configured)
-        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           set -e
+          if [ -z "$SLACK_WEBHOOK" ]; then
+            echo "SLACK_WEBHOOK not set; skipping Slack notification"
+            exit 0
+          fi
           TIT="⚠️ Workflow '${{ github.workflow }}' failed"
           TEXT="*Repo:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Run:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n*Actor:* ${{ github.actor }}"
           # Build payload using jq when available, otherwise fallback to manual json
@@ -44,10 +47,13 @@ jobs:
           fi
           curl -s -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK" || true
       - name: Notify Discord (if configured)
-        if: ${{ secrets.DISCORD_WEBHOOK_URL != '' }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "DISCORD_WEBHOOK not set; skipping Discord notification"
+            exit 0
+          fi
           CONTENT=":warning: **Workflow '${{ github.workflow }}' failed** in `${{ github.repository }}` on `${{ github.ref_name }}`. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           curl -s -X POST -H "Content-Type: application/json" -d "{\"content\": \"$CONTENT\"}" "$DISCORD_WEBHOOK" || true
 
