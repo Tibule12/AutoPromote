@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
 import { act } from "react";
 import MemeticComposerPanel from "../MemeticComposerPanel";
 
@@ -114,6 +114,41 @@ describe("MemeticComposerPanel", () => {
     // change scrubber (seek)
     fireEvent.change(scrubber, { target: { value: "2.0" } });
     expect(audioInstance.currentTime).toBe(2);
+
+    // Open modal by clicking thumbnail
+    const thumb = await screen.findByAltText(/Variant 1|Variant thumbnail/i);
+    fireEvent.click(thumb);
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByText(/Variant 1/)).toBeInTheDocument();
+
+    // Play inside modal and assert waveform updates
+    const playBtn = screen.getByText(/Play/i);
+    fireEvent.click(playBtn);
+
+    // trigger loadedmetadata and timeupdate events to update waveform
+    audioInstance.duration = 4.2;
+    await act(async () => audioInstance.trigger("loadedmetadata"));
+    audioInstance.currentTime = 1.4;
+    await act(async () => audioInstance.trigger("timeupdate"));
+
+    // waveform fill should reflect progress
+    const fill = within(dialog).getByTestId("modal-waveform-fill");
+    expect(fill).not.toBeNull();
+    expect(parseFloat(fill.style.width)).toBeGreaterThan(0);
+
+    // simulate a seek in modal (set currentTime and trigger update)
+    await act(async () => {
+      audioInstance.currentTime = 3.0;
+      audioInstance.trigger("timeupdate");
+    });
+
+    const fill2 = within(dialog).getByTestId("modal-waveform-fill");
+    expect(parseFloat(fill2.style.width)).toBeGreaterThan(65);
+
+    // close modal
+    fireEvent.click(screen.getByLabelText(/Close preview/i));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 
     // Click Seed Plan
     const seedBtn = screen.getByText(/Seed Plan/i);

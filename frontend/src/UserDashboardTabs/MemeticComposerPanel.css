@@ -95,3 +95,60 @@
   color: #9aa4b2;
   font-size: 0.9rem;
 }
+.waveform-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 3px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.waveform-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7dd3fc, #60a5fa);
+  width: 0%;
+  transition: width 120ms linear;
+}
+.preview-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+.preview-modal {
+  background: #0f1724;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: min(800px, 96%);
+  max-height: 90vh;
+  overflow: auto;
+}
+.preview-modal .preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.preview-modal .preview-content {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.preview-modal .preview-image {
+  width: 240px;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.preview-modal .preview-meta {
+  flex: 1;
+}
+.preview-modal .modal-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
