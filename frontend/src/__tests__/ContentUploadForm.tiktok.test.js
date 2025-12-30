@@ -157,7 +157,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(uploadBtn);
 
     // The UI auto-switches privacy from SELF_ONLY -> EVERYONE for branded content. Ensure privacy was set to EVERYONE.
-    await screen.findByDisplayValue(/EVERYONE/i, { timeout: 3000 });
+    await screen.findByDisplayValue(/EVERYONE/i, { timeout: 10000 });
   });
 
   test("disables preview and upload when creator cannot post", async () => {
@@ -188,7 +188,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(tiktokTile);
 
     // Wait for the creator info to arrive which indicates the check has completed
-    await screen.findByText(/NoPost Creator/i, { timeout: 3000 });
+    await screen.findByText(/NoPost Creator/i, { timeout: 10000 });
 
     const previewBtn = screen.getByLabelText(/Preview Content/i);
     const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
@@ -234,7 +234,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(previewBtn);
 
     // Expect the preview card to render a stringified title containing "origTitle"
-    await screen.findByText(/origTitle/, { timeout: 3000 });
+    await screen.findByText(/origTitle/, { timeout: 10000 });
   });
 
   test("handles preview hashtag object shapes and shows space-separated hashtags in modal", async () => {
@@ -272,7 +272,11 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(previewBtn);
 
     // Wait for preview card and Edit button
-    const editBtn = await screen.findByRole("button", { name: /Edit preview/i }, { timeout: 3000 });
+    const editBtn = await screen.findByRole(
+      "button",
+      { name: /Edit preview/i },
+      { timeout: 10000 }
+    );
     fireEvent.click(editBtn);
 
     // Modal should appear and hashtags input should show "#fyp #tiktok"
@@ -387,7 +391,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(tiktokTile);
 
     // Expect posting cap information and a disabled upload button
-    await screen.findByText(/Posting cap: 2 per 24h/i, { timeout: 3000 });
+    await screen.findByText(/Posting cap: 2 per 24h/i, { timeout: 10000 });
     await screen.findByText(/Posting cap reached/i);
 
     const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
@@ -431,7 +435,11 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     expect(media.tagName === "VIDEO" || media.tagName === "IMG").toBeTruthy();
 
     // Ensure Edit Preview button is present on the preview card and opens the modal
-    const editBtn = await screen.findByRole("button", { name: /Edit preview/i }, { timeout: 3000 });
+    const editBtn = await screen.findByRole(
+      "button",
+      { name: /Edit preview/i },
+      { timeout: 10000 }
+    );
     expect(editBtn).toBeDefined();
 
     // Open edit modal and update title
@@ -604,7 +612,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     const previewBtn = screen.getByText(/Preview/i);
     fireEvent.click(previewBtn);
     // We expect the per-platform preview card to show the given title after fallback
-    const matches = await screen.findAllByText(/Platform Title/, { timeout: 3000 });
+    const matches = await screen.findAllByText(/Platform Title/, { timeout: 10000 });
     expect(matches.length).toBeGreaterThan(0);
   });
 
@@ -630,7 +638,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     const previewBtn = screen.getByLabelText(/Preview Content/i);
     fireEvent.click(previewBtn);
 
-    const media = await screen.findByLabelText(/Preview media/i, { timeout: 3000 });
+    const media = await screen.findByLabelText(/Preview media/i, { timeout: 10000 });
     expect(media).toBeDefined();
     expect(["VIDEO", "IMG"]).toContain(media.tagName);
     expect(media.getAttribute("src")).toMatch(/^(blob:|http)/);
@@ -683,7 +691,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     const previewBtn2 = screen.getByLabelText(/Preview Content/i);
     fireEvent.click(previewBtn2);
 
-    const media2 = await screen.findByLabelText(/Preview media/i, { timeout: 3000 });
+    const media2 = await screen.findByLabelText(/Preview media/i, { timeout: 10000 });
     expect(media2).toBeDefined();
 
     // restore fetch

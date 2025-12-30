@@ -24,7 +24,14 @@ describe("memetic seed route", () => {
     let testDb;
 
     beforeAll(async () => {
-      testEnv = await initializeTestEnvironment({ projectId: "memetic-seed-test" });
+      // If the emulator host is set in env, forward it explicitly to avoid discovery races
+      const emHost = process.env.FIRESTORE_EMULATOR_HOST;
+      const opts = { projectId: "memetic-seed-test" };
+      if (emHost) {
+        const [host, port] = emHost.split(":");
+        opts.firestore = { host, port: parseInt(port, 10) };
+      }
+      testEnv = await initializeTestEnvironment(opts);
     });
 
     beforeEach(async () => {
