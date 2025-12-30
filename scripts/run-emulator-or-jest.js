@@ -26,7 +26,18 @@ function tryRunFirebaseExec() {
 
 function runJestDirect(envExtras = {}) {
   console.log('[run-emulator-or-jest] Running Jest directly (node ./scripts/exec-jest.js)');
+  const path = require('path');
   const env = Object.assign({}, process.env, envExtras);
+  // Remove any JEST_MATCH to ensure we run the full suite by default
+  if (env.JEST_MATCH) delete env.JEST_MATCH;
+  // Ensure frontend packages (e.g., @testing-library/jest-dom) are resolvable
+  const frontendNodeModules = path.join(process.cwd(), 'frontend', 'node_modules');
+  if (env.NODE_PATH) {
+    env.NODE_PATH = frontendNodeModules + path.delimiter + env.NODE_PATH;
+  } else {
+    env.NODE_PATH = frontendNodeModules;
+  }
+  // Node recognizes NODE_PATH when run with require('module').Module._initPaths() - many environments honor it
   const res = spawnSync('node', ['./scripts/exec-jest.js'], { stdio: 'inherit', env, shell: false });
   return res.status;
 }
@@ -215,6 +226,13 @@ function waitForHttpReady(host, port, timeoutMs = 10000) {
         } catch (e) {
           console.warn('[run-emulator-or-jest] Failed to read emulator locator file:', e && e.message);
         }
+      }
+
+      // If SKIP_JEST=1 is set, treat this as a smoke-check: emulator started successfully
+      if (process.env.SKIP_JEST === '1' || process.env.SKIP_EMULATOR_TEST === '1') {
+        console.log('[run-emulator-or-jest] SKIP_JEST set — emulator smoke-check OK, stopping emulator.');
+        await stopEmulator(emulatorChild);
+        process.exit(0);
       }
 
       // Run Jest directly — env will be inherited by worker processes
