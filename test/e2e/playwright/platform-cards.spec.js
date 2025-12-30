@@ -1867,6 +1867,45 @@ test("Per-platform card: TikTok respects creator_info and allows upload", async 
     });
   });
 
+});
+
+// New test: when posting cap is reached, the UI should show cap info and disable upload
+test("Per-platform card: TikTok blocks upload when posting cap reached", async ({ page }) => {
+  await page.route("**/api/tiktok/creator_info", async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        creator: {
+          display_name: "Capped Creator",
+          can_post: true,
+          privacy_level_options: ["EVERYONE", "FRIENDS", "SELF_ONLY"],
+          posting_cap_per_24h: 2,
+          posting_remaining: 0,
+          posts_in_last_24h: 2,
+          interactions: { comments: true, duet: true, stitch: true },
+        },
+      }),
+    });
+  });
+
+  // Navigate to upload and open TikTok card
+  await page.goto(BASE + "/#/dashboard", { waitUntil: "networkidle" });
+  await page.waitForSelector('nav li:has-text("Upload")', { timeout: 60000 });
+  await page.click('nav li:has-text("Upload")');
+  await page.waitForSelector("#content-file-input");
+
+  // Open TikTok tile
+  await page.click('#tile-tiktok');
+  await page.waitForSelector('.platform-expanded');
+
+  // Expect to see posting cap message and Upload button disabled
+  await page.waitForSelector('text=Posting cap: 2 per 24h', { timeout: 5000 });
+  await page.waitForSelector('text=Posting cap reached', { timeout: 5000 });
+  const uploadBtn = page.locator('.platform-expanded button.submit-button');
+  expect(await uploadBtn.isDisabled()).toBe(true);
+});
+
   // Mock quality-check and upload as above
   await page.route("**/api/content/quality-check", async route => {
     await route.fulfill({
