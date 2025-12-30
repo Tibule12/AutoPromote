@@ -358,6 +358,44 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     expect(uploadBtn).toBeDisabled();
   });
 
+  test("displays posting cap and disables upload when cap is reached", async () => {
+    const onUpload = jest.fn(async () => ({}));
+    const origFetch = global.fetch;
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        creator: {
+          display_name: "Cap Creator",
+          posting_cap_per_24h: 2,
+          posts_in_last_24h: 2,
+          posting_remaining: 0,
+          privacy_level_options: ["EVERYONE", "FRIENDS", "SELF_ONLY"],
+          interactions: { comments: true, duet: true, stitch: true },
+          can_post: true,
+        },
+      }),
+    }));
+
+    render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
+
+    // Open focused TikTok view
+    const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTile = tiktokButtons.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTile).toBeDefined();
+    fireEvent.click(tiktokTile);
+
+    // Expect posting cap information and a disabled upload button
+    await screen.findByText(/Posting cap: 2 per 24h/i, { timeout: 3000 });
+    await screen.findByText(/Posting cap reached/i);
+
+    const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
+    expect(uploadBtn).toBeDisabled();
+
+    global.fetch = origFetch;
+  });
+
   test("opens Preview Edit modal and applies edits to form and preview card", async () => {
     const onUpload = jest.fn(async payload => ({
       previews: [{ platform: "tiktok", title: payload.title, description: payload.description }],

@@ -2023,6 +2023,18 @@ function ContentUploadForm({
             </label>
             <div style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>
               Creator: {tiktokCreatorInfo ? tiktokCreatorInfo.display_name || "—" : "Loading..."}
+              {tiktokCreatorInfo && typeof tiktokCreatorInfo.posting_remaining === "number" && (
+                <div style={{ marginTop: 6, fontSize: 12 }}>
+                  Posting cap: {tiktokCreatorInfo.posting_cap_per_24h} per 24h • Remaining:{" "}
+                  {tiktokCreatorInfo.posting_remaining}
+                  {tiktokCreatorInfo.posting_remaining <= 0 && (
+                    <div style={{ marginTop: 8, color: "#b91c1c", fontWeight: "bold" }}>
+                      Posting cap reached — uploading to TikTok is currently disabled for this
+                      account.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div style={{ display: "grid", gap: 8 }}>
               <div>
@@ -2216,7 +2228,11 @@ function ContentUploadForm({
                 tiktokCommercial.isCommercial &&
                 !tiktokCommercial.yourBrand &&
                 !tiktokCommercial.brandedContent) ||
-              (p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false)
+              (p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false) ||
+              (p === "tiktok" &&
+                tiktokCreatorInfo &&
+                typeof tiktokCreatorInfo.posting_remaining === "number" &&
+                tiktokCreatorInfo.posting_remaining <= 0)
             }
             onClick={() => {
               if (p === "tiktok" && !tiktokConsentChecked) {
