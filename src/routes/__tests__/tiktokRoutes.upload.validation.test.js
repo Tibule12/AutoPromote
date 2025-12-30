@@ -4,7 +4,6 @@ const bodyParser = require("body-parser");
 
 // Ensure demo bypass is disabled for these tests unless explicitly set per-case
 delete process.env.FIREBASE_ADMIN_BYPASS;
-const firebaseAdmin = require("../../../firebaseAdmin");
 
 jest.resetModules();
 
