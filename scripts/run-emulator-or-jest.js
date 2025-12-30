@@ -38,6 +38,30 @@ try {
     process.exit(1);
   }
 
+  // Check Java version for Firestore emulator (requires JDK 21+ as of firebase-tools 15+)
+  try {
+    const jv = spawnSync('java', ['-version'], { stdio: 'pipe', shell: false });
+    const verOut = (jv.stderr || jv.stdout || {}).toString();
+    const m = verOut.match(/version\s+"(\d+)(?:\.([\d.]+))?/);
+    if (m) {
+      const major = parseInt(m[1], 10);
+      if (isNaN(major) || major < 21) {
+        console.error('[run-emulator-or-jest] Detected Java major version:', m[1]);
+        console.error('firebase emulators require JDK 21 or newer. Please install Temurin/OpenJDK 21+ to run the Firestore emulator.');
+        console.error('As a temporary measure, set ALLOW_FALLBACK_NO_EMULATOR=1 to run Jest without the emulator (some tests will fail).');
+        if (process.env.ALLOW_FALLBACK_NO_EMULATOR === '1' || process.env.ALLOW_FALLBACK_NO_EMULATOR === 'true') {
+          console.warn('[run-emulator-or-jest] ALLOW_FALLBACK_NO_EMULATOR set — running Jest directly (skipping emulator).');
+          const fallback = runJestDirect();
+          process.exit(fallback || 1);
+        }
+        process.exit(1);
+      }
+    }
+  } catch (e) {
+    // If java check fails, surface a helpful message but continue to emulator attempt which may fail similarly
+    console.warn('[run-emulator-or-jest] Could not determine Java version:', e && e.message);
+  }
+
   const code = tryRunFirebase();
   if (code === 0) process.exit(0);
   // If firebase failed, attempt to fallback (if explicitly allowed)
