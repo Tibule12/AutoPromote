@@ -25,14 +25,33 @@ function runJestDirect() {
 }
 
 try {
+  // Check firebase CLI availability first
+  const check = spawnSync('npx', ['firebase', '--version'], { stdio: 'pipe', shell: false });
+  if (check.status !== 0) {
+    console.error('[run-emulator-or-jest] Firebase CLI (`firebase`) not available via npx.');
+    console.error('Install it locally with `npm install --save-dev firebase-tools` or set ALLOW_FALLBACK_NO_EMULATOR=1 to run tests without the emulator (not recommended for emulator-dependent tests).');
+    if (process.env.ALLOW_FALLBACK_NO_EMULATOR === '1' || process.env.ALLOW_FALLBACK_NO_EMULATOR === 'true') {
+      console.warn('[run-emulator-or-jest] ALLOW_FALLBACK_NO_EMULATOR set — running Jest directly (skipping emulator).');
+      const fallback = runJestDirect();
+      process.exit(fallback || 1);
+    }
+    process.exit(1);
+  }
+
   const code = tryRunFirebase();
   if (code === 0) process.exit(0);
-  // If firebase failed, attempt to fallback
+  // If firebase failed, attempt to fallback (if explicitly allowed)
   console.warn('[run-emulator-or-jest] firebase emulators:exec returned non-zero exit code:', code);
-  const fallback = runJestDirect();
-  process.exit(fallback || code || 1);
+  if (process.env.ALLOW_FALLBACK_NO_EMULATOR === '1' || process.env.ALLOW_FALLBACK_NO_EMULATOR === 'true') {
+    const fallback = runJestDirect();
+    process.exit(fallback || code || 1);
+  }
+  process.exit(code || 1);
 } catch (err) {
   console.warn('[run-emulator-or-jest] Error while running firebase emulators:exec', err && err.message);
-  const fallbackCode = runJestDirect();
-  process.exit(fallbackCode || 1);
+  if (process.env.ALLOW_FALLBACK_NO_EMULATOR === '1' || process.env.ALLOW_FALLBACK_NO_EMULATOR === 'true') {
+    const fallbackCode = runJestDirect();
+    process.exit(fallbackCode || 1);
+  }
+  process.exit(1);
 }
