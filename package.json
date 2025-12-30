@@ -89,7 +89,8 @@
     "minimist": "^1.2.8",
     "nock": "^13.3.0",
     "prettier": "^3.7.4",
-    "supertest": "^7.1.4"
+    "supertest": "^7.1.4",
+    "firebase-tools": "^11.30.0"
   },
   "eslintConfig": {
     "root": true,
