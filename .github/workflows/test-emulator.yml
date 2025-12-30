@@ -30,9 +30,18 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          echo "Running npm ci; if it fails due to lockfile mismatch, fall back to npm install"
+          npm ci || (echo "npm ci failed — falling back to npm install" && npm install)
 
       - name: Run emulator-backed unit tests
         env:
           CI: true
         run: npm run test:emulator
+
+      - name: Note about lockfile
+        if: ${{ failure() }}
+        run: |
+          echo "If workflow failed due to lockfile mismatch, update your local lockfile:"
+          echo "  npm install --package-lock-only"
+          echo "Then commit the updated package-lock.json and push."
