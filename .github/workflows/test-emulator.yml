@@ -34,6 +34,11 @@ jobs:
           echo "Running npm ci; if it fails due to lockfile mismatch, fall back to npm install"
           npm ci || (echo "npm ci failed — falling back to npm install" && npm install)
 
+      - name: Install frontend dependencies
+        run: |
+          echo "Installing frontend devDependencies"
+          npm ci --prefix frontend || (echo "frontend npm ci failed — falling back to npm install" && npm install --prefix frontend)
+
       - name: Run emulator-backed unit tests
         env:
           CI: true

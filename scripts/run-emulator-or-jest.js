@@ -27,11 +27,27 @@ function tryRunFirebaseExec() {
 function runJestDirect(envExtras = {}) {
   console.log('[run-emulator-or-jest] Running Jest directly (node ./scripts/exec-jest.js)');
   const path = require('path');
+  const fs = require('fs');
   const env = Object.assign({}, process.env, envExtras);
   // Remove any JEST_MATCH to ensure we run the full suite by default
   if (env.JEST_MATCH) delete env.JEST_MATCH;
   // Ensure frontend packages (e.g., @testing-library/jest-dom) are resolvable
   const frontendNodeModules = path.join(process.cwd(), 'frontend', 'node_modules');
+  if (!fs.existsSync(frontendNodeModules)) {
+    console.log('[run-emulator-or-jest] frontend/node_modules missing — attempting to install frontend deps (npm ci --prefix frontend)');
+    const install = spawnSync('npm', ['ci', '--prefix', 'frontend'], { stdio: 'inherit', shell: true });
+    if (install.status !== 0) {
+      console.warn('[run-emulator-or-jest] npm ci --prefix frontend failed; trying npm install --prefix frontend');
+      const install2 = spawnSync('npm', ['install', '--prefix', 'frontend'], { stdio: 'inherit', shell: true });
+      if (install2.status !== 0) {
+        console.warn('[run-emulator-or-jest] Failed to install frontend dependencies automatically. CI should run `npm ci --prefix frontend` before tests.');
+      } else {
+        console.log('[run-emulator-or-jest] Frontend dependencies installed via npm install --prefix frontend');
+      }
+    } else {
+      console.log('[run-emulator-or-jest] Frontend dependencies installed via npm ci --prefix frontend');
+    }
+  }
   if (env.NODE_PATH) {
     env.NODE_PATH = frontendNodeModules + path.delimiter + env.NODE_PATH;
   } else {

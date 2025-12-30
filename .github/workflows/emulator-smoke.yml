@@ -30,6 +30,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install frontend dependencies
+        run: |
+          echo "Installing frontend devDependencies"
+          npm ci --prefix frontend || (echo "frontend npm ci failed — falling back to npm install" && npm install --prefix frontend)
+
       - name: "Smoke check: start emulator and verify ready"
         env:
           SKIP_JEST: '1'
