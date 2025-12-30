@@ -1,7 +1,7 @@
 const { runOnce } = require("../services/memeticWorker");
 
 // Increase default Jest timeout to allow emulator startup
-jest.setTimeout(30000);
+jest.setTimeout(120000);
 
 let hasRulesUnitTesting = true;
 let initializeTestEnvironment;
