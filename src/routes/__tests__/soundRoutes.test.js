@@ -19,7 +19,13 @@ describe("soundRoutes", () => {
   if (hasRulesUnitTesting) {
     let testEnv, testDb, originalDb;
     beforeAll(async () => {
-      testEnv = await initializeTestEnvironment({ projectId: "sound-routes" });
+      const emHost = process.env.FIRESTORE_EMULATOR_HOST;
+      const opts = { projectId: "sound-routes-test" };
+      if (emHost) {
+        const [host, port] = emHost.split(":");
+        opts.firestore = { host, port: parseInt(port, 10) };
+      }
+      testEnv = await initializeTestEnvironment(opts);
     });
     beforeEach(async () => {
       const ctx = testEnv.unauthenticatedContext();
