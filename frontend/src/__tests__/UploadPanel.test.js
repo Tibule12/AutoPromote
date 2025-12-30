@@ -51,7 +51,10 @@ test("upload panel toggles between upload and history tabs", async () => {
   const cards = screen.getAllByRole("button");
   const card = cards.find(c => within(c).queryByText(/Cute Video/i));
   expect(card).toBeDefined();
-  expect(within(card).getByText(/\d{4}\/\d{1,2}\/\d{1,2}/)).toBeInTheDocument();
+  // Match either YYYY/MM/DD or MM/DD/YYYY formats (CI runners vary by locale)
+  expect(
+    within(card).getByText(/(?:\d{4}\/\d{1,2}\/\d{1,2})|(?:\d{1,2}\/\d{1,2}\/\d{4})/)
+  ).toBeInTheDocument();
 });
 
 test("upload history shows View on platform link and refresh when processing", async () => {
