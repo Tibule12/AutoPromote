@@ -1126,9 +1126,10 @@ test("Per-platform SPA: TikTok preview & upload (dashboard)", async ({ page }) =
   await page.goto(BASE + "/#/dashboard", { waitUntil: "networkidle" });
   await page.waitForSelector('nav li:has-text("Upload")', { timeout: 60000 });
   await page.click('nav li:has-text("Upload")');
-  await page.waitForSelector("#content-file-input");
+  // Click the TikTok tile first; the file input is added when a tile is expanded in some builds
   const tiktokTile = page.locator('div[aria-label="Tiktok"]');
   await tiktokTile.click();
+  await page.waitForSelector("#content-file-input");
   // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   // Ensure the platform-expanded UI is rendered before further actions
@@ -1893,11 +1894,11 @@ test("Per-platform card: TikTok blocks upload when posting cap reached", async (
   await page.goto(BASE + "/#/dashboard", { waitUntil: "networkidle" });
   await page.waitForSelector('nav li:has-text("Upload")', { timeout: 60000 });
   await page.click('nav li:has-text("Upload")');
-  await page.waitForSelector("#content-file-input");
 
-  // Open TikTok tile
+  // Click the TikTok tile first — some builds add the file input on tile expansion
   await page.click('#tile-tiktok');
   await page.waitForSelector('.platform-expanded');
+  await page.waitForSelector("#content-file-input");
 
   // Expect to see posting cap message and Upload button disabled
   await page.waitForSelector('text=Posting cap: 2 per 24h', { timeout: 5000 });
@@ -1906,6 +1907,7 @@ test("Per-platform card: TikTok blocks upload when posting cap reached", async (
   expect(await uploadBtn.isDisabled()).toBe(true);
 });
 
+test("Per-platform card: TikTok preview and upload", async ({ page }) => {
   // Mock quality-check and upload as above
   await page.route("**/api/content/quality-check", async route => {
     await route.fulfill({
