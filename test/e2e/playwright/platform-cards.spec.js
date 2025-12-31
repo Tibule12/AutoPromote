@@ -6,6 +6,28 @@ const BASE = `http://localhost:${STATIC_PORT}`;
 
 let serverProcess;
 
+async function attachFileForPlatform(page, filePath) {
+  // Prefer per-platform file input inside expanded card
+  const perFile = page.locator('.platform-expanded input[type="file"]');
+  if ((await perFile.count()) > 0) {
+    await perFile.setInputFiles(filePath);
+    return;
+  }
+  // Fallback to global input
+  const globalFile = page.locator('#content-file-input');
+  if ((await globalFile.count()) > 0) {
+    await globalFile.setInputFiles(filePath);
+    return;
+  }
+  // Final fallback: any file input on the page
+  const anyFile = page.locator('input[type="file"]');
+  if ((await anyFile.count()) > 0) {
+    await anyFile.first().setInputFiles(filePath);
+    return;
+  }
+  throw new Error('No file input found to attach file: ' + filePath);
+}
+
 test.beforeAll(async () => {
   serverProcess = spawn("node", ["test/e2e/playwright/static-server.js"], { stdio: "inherit" });
   // Wait until fixture is reachable
@@ -199,7 +221,7 @@ test("Per-platform card: Spotify preview, quality, upload", async ({ page }) => 
   await page.goto(pageUrl);
   await page.waitForSelector("#content-file-input");
   await page.click("#tile-spotify");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
   expect(await page.locator(".preview-card").count()).toBeGreaterThan(0);
@@ -251,7 +273,7 @@ test("Per-platform card: Discord preview and upload", async ({ page }) => {
   await page.waitForSelector("#content-file-input");
   await page.click("#tile-discord");
   await page.fill('input[placeholder="Discord channel ID"]', "12345");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
   await page.click("#quality-btn");
@@ -301,7 +323,7 @@ test("Per-platform card: Telegram preview and upload", async ({ page }) => {
   await page.waitForSelector("#content-file-input");
   await page.click("#tile-telegram");
   await page.fill('input[placeholder="Telegram chat ID"]', "54321");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
   await page.click("#quality-btn");
@@ -351,7 +373,7 @@ test("Per-platform card: Reddit preview and upload", async ({ page }) => {
   await page.waitForSelector("#content-file-input");
   await page.click("#tile-reddit");
   await page.fill('input[placeholder="Reddit subreddit"]', "testsub");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
   await page.click("#quality-btn");
@@ -401,7 +423,7 @@ test("Per-platform card: LinkedIn preview and upload", async ({ page }) => {
   await page.waitForSelector("#content-file-input");
   await page.click("#tile-linkedin");
   await page.fill('input[placeholder="LinkedIn organization/company ID"]', "98765");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
   await page.click("#quality-btn");
@@ -451,7 +473,7 @@ test("Per-platform card: Twitter preview and upload", async ({ page }) => {
   await page.waitForSelector("#content-file-input");
   await page.click("#tile-twitter");
   await page.fill('input[placeholder="Twitter message (optional)"]', "Test tweet");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
   await page.click("#quality-btn");
@@ -500,7 +522,7 @@ test("Per-platform card: Snapchat preview and upload", async ({ page }) => {
   await page.goto(pageUrl);
   await page.waitForSelector("#content-file-input");
   await page.click("#tile-snapchat");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
   await page.click("#quality-btn");
@@ -553,7 +575,7 @@ test("Per-platform card: Pinterest preview and upload", async ({ page }) => {
   // SPA uses shared inputs for Pinterest options; select by placeholder
   await page.fill('input[placeholder="Pinterest board id"]', "board-1");
   await page.fill('textarea[placeholder="Pin note"]', "Test pin note");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
   await page.click("#quality-btn");
@@ -612,7 +634,7 @@ test("Per-platform card: YouTube preview and upload", async ({ page }) => {
   await page.fill("#youtube-title", "E2E YouTube Title");
   await page.fill("#youtube-description", "E2E YouTube Description");
   await page.selectOption("#youtube-visibility", "public");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
   await page.click("#quality-btn");
@@ -820,8 +842,8 @@ test("Per-platform SPA: Spotify preview & upload (dashboard)", async ({ page }) 
   await spotifyTile.click();
   // Expand tile (card click toggles expansion) — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
-  // Attach file
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  // Attach file (prefer per-platform input if present)
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   // Ensure preview button is enabled after attaching the file
   await page.waitForSelector(".platform-expanded .preview-button:not([disabled])", {
     timeout: 10000,
@@ -981,12 +1003,11 @@ test("Per-platform SPA: YouTube preview & upload (dashboard)", async ({ page }) 
   await page.goto(BASE + "/#/dashboard", { waitUntil: "networkidle" });
   await page.waitForSelector('nav li:has-text("Upload")', { timeout: 60000 });
   await page.click('nav li:has-text("Upload")');
-  await page.waitForSelector("#content-file-input");
   const youtubeTile = page.locator('div[aria-label="Youtube"]');
   await youtubeTile.click();
   // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   // Fill common fields
   await page.fill("#content-title", "E2E YouTube Title");
   await page.fill("#content-description", "E2E YouTube description from SPA test");
@@ -1134,7 +1155,7 @@ test("Per-platform SPA: TikTok preview & upload (dashboard)", async ({ page }) =
   await page.waitForSelector(".platform-expanded");
   // Ensure the platform-expanded UI is rendered before further actions
   await page.waitForSelector(".platform-expanded");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   // Set privacy & consent
   await page.locator(".platform-expanded select.form-select").selectOption("EVERYONE");
   // Debug: print expanded UI HTML and label texts
@@ -1271,12 +1292,11 @@ test("Per-platform SPA: Snapchat preview & upload (dashboard)", async ({ page })
   await page.goto(BASE + "/#/dashboard", { waitUntil: "networkidle" });
   await page.waitForSelector('nav li:has-text("Upload")', { timeout: 60000 });
   await page.click('nav li:has-text("Upload")');
-  await page.waitForSelector("#content-file-input");
   const snapchatTile = page.locator('div[aria-label="Snapchat"]');
   await snapchatTile.click();
   // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.waitForSelector(".platform-expanded .preview-button:not([disabled])", {
     timeout: 10000,
   });
@@ -1395,7 +1415,7 @@ test("Per-platform SPA: Pinterest preview & upload (dashboard)", async ({ page }
   // SPA uses shared inputs for Pinterest options; select by placeholder
   await page.fill('input[placeholder="Pinterest board id (or leave blank)"]', "board-1");
   await page.fill('input[placeholder="Pin note (optional)"]', "Test pin note");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.waitForSelector(".platform-expanded .preview-button:not([disabled])", {
     timeout: 10000,
   });
@@ -1484,7 +1504,7 @@ test("Per-platform SPA: Discord preview & upload (dashboard)", async ({ page }) 
     timeout: 10000,
   });
   await page.fill('.platform-expanded input[placeholder="Discord channel ID"]', "12345");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.waitForSelector(".platform-expanded .preview-button:not([disabled])", {
     timeout: 10000,
   });
@@ -1573,7 +1593,7 @@ test("Per-platform SPA: Telegram preview & upload (dashboard)", async ({ page })
     timeout: 10000,
   });
   await page.fill('.platform-expanded input[placeholder="Telegram chat ID"]', "54321");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.waitForSelector(".platform-expanded .preview-button:not([disabled])", {
     timeout: 10000,
   });
@@ -1662,7 +1682,7 @@ test("Per-platform SPA: Reddit preview & upload (dashboard)", async ({ page }) =
     timeout: 10000,
   });
   await page.fill('.platform-expanded input[placeholder="Reddit subreddit"]', "testsub");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.waitForSelector(".platform-expanded .preview-button:not([disabled])", {
     timeout: 10000,
   });
@@ -1752,7 +1772,7 @@ test("Per-platform SPA: LinkedIn preview & upload (dashboard)", async ({ page })
     '.platform-expanded input[placeholder="LinkedIn organization/company ID"]',
     "98765"
   );
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.locator(".platform-expanded button.preview-button").click();
   await page.waitForSelector(".platform-expanded .preview-card");
   await page.locator(".platform-expanded button.quality-check-button").click();
@@ -1838,7 +1858,7 @@ test("Per-platform SPA: Twitter preview & upload (dashboard)", async ({ page }) 
     '.platform-expanded input[placeholder="Twitter message (optional)"]',
     "Test tweet"
   );
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.locator(".platform-expanded button.preview-button").click();
   await page.waitForSelector(".platform-expanded .preview-card");
   await page.locator(".platform-expanded button.quality-check-button").click();
@@ -1942,7 +1962,7 @@ test("Per-platform card: TikTok preview and upload", async ({ page }) => {
   await page.goto(pageUrl);
   await page.waitForSelector("#content-file-input");
   await page.click("#tile-tiktok");
-  await page.setInputFiles("#content-file-input", "test/e2e/playwright/test-assets/test.mp4");
+  await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   // Set privacy and consent in fixture
   await page.selectOption("#tiktok-privacy", "EVERYONE");
   await page.check("#tiktok-consent");
