@@ -1230,10 +1230,27 @@ test("Per-platform SPA: TikTok preview & upload (dashboard)", async ({ page }) =
   if (!previewClicked) throw new Error('Could not find preview button');
   await page.waitForSelector('.preview-card, .platform-expanded .preview-card');
 
-  // Quality check — try multiple selectors
-  const qualitySelector = page.locator('.platform-expanded .quality-check-button:not([disabled]), button:has-text("Quality"), button.quality-check-button');
-  await qualitySelector.waitFor({ state: 'visible', timeout: 10000 });
-  await qualitySelector.first().click();
+  // Quality check — try multiple selectors and longer wait since checks can be async
+  const qualitySelectors = ['.platform-expanded .quality-check-button:not([disabled])', 'button:has-text("Quality")', '#quality-btn', 'button.quality-check-button', '.quality-check-button'];
+  let qualityClicked = false;
+  for (const sel of qualitySelectors) {
+    try {
+      const q = page.locator(sel);
+      await q.first().waitFor({ state: 'visible', timeout: 15000 });
+      await q.first().click();
+      qualityClicked = true;
+      break;
+    } catch (e) {
+      // try next
+    }
+  }
+  if (!qualityClicked) {
+    // If no quality button appeared, log DOM snapshot and throw
+    console.log('[DEBUG] No quality button found after preview; dumping available buttons:');
+    const btns = await page.evaluate(() => Array.from(document.querySelectorAll('button')).map(b => b.textContent.trim()).slice(0,50));
+    console.log('[DEBUG] Buttons:', btns);
+    throw new Error('Quality button not found after preview');
+  }
   await page.waitForSelector('.platform-expanded .quality-check-mini, .quality-check-mini');
   // Upload
   await page.waitForSelector(".platform-expanded .submit-button:not([disabled])", {
