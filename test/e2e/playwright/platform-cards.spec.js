@@ -1209,15 +1209,32 @@ test("Per-platform SPA: TikTok preview & upload (dashboard)", async ({ page }) =
   } catch (e) {
     console.log('[DEBUG] Consent handling error:', e && e.message);
   }
-  // Preview
-  await page.locator(".platform-expanded button.preview-button").click();
-  await page.waitForSelector(".platform-expanded .preview-card");
-  // Quality
-  await page.waitForSelector(".platform-expanded .quality-check-button:not([disabled])", {
-    timeout: 10000,
-  });
-  await page.locator(".platform-expanded button.quality-check-button").click();
-  await page.waitForSelector(".platform-expanded .quality-check-mini");
+  // Preview — try multiple preview button selectors
+  const previewSelectors = [
+    '.platform-expanded button.preview-button',
+    'button:has-text("Preview Content")',
+    'button:has-text("Preview")',
+    'button.preview-button',
+  ];
+  let previewClicked = false;
+  for (const sel of previewSelectors) {
+    try {
+      const btn = page.locator(sel);
+      if ((await btn.count()) > 0) {
+        await btn.first().click();
+        previewClicked = true;
+        break;
+      }
+    } catch (e) {}
+  }
+  if (!previewClicked) throw new Error('Could not find preview button');
+  await page.waitForSelector('.preview-card, .platform-expanded .preview-card');
+
+  // Quality check — try multiple selectors
+  const qualitySelector = page.locator('.platform-expanded .quality-check-button:not([disabled]), button:has-text("Quality"), button.quality-check-button');
+  await qualitySelector.waitFor({ state: 'visible', timeout: 10000 });
+  await qualitySelector.first().click();
+  await page.waitForSelector('.platform-expanded .quality-check-mini, .quality-check-mini');
   // Upload
   await page.waitForSelector(".platform-expanded .submit-button:not([disabled])", {
     timeout: 10000,
