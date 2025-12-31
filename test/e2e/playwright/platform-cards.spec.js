@@ -1150,11 +1150,11 @@ test("Per-platform SPA: TikTok preview & upload (dashboard)", async ({ page }) =
   // Click the TikTok tile first; the file input is added when a tile is expanded in some builds
   const tiktokTile = page.locator('div[aria-label="Tiktok"]');
   await tiktokTile.click();
-  await page.waitForSelector("#content-file-input");
   // Card click toggles expansion — wait for expanded per-platform UI
   await page.waitForSelector(".platform-expanded");
   // Ensure the platform-expanded UI is rendered before further actions
   await page.waitForSelector(".platform-expanded");
+  // Attach file using helper (handles per-platform or global inputs)
   await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   // Set privacy & consent
   await page.locator(".platform-expanded select.form-select").selectOption("EVERYONE");
