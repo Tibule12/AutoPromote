@@ -20,7 +20,23 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("Preview edit + Confirm require consent and send upload when confirmed", async ({ page }) => {
-  await page.goto(`${BASE}/upload_component_test_page.html`);
+  // Ensure static server is available before navigating (retry to avoid transient connection refused in CI)
+  const target = `${BASE}/upload_component_test_page.html`;
+  const maxWait = 15000; // ms
+  const start = Date.now();
+  let lastErr = null;
+  while (Date.now() - start < maxWait) {
+    try {
+      await page.goto(target, { waitUntil: "load", timeout: 4000 });
+      lastErr = null;
+      break;
+    } catch (e) {
+      lastErr = e;
+      // small backoff then retry
+      await new Promise(r => setTimeout(r, 300));
+    }
+  }
+  if (lastErr) throw lastErr;
 
   // Ensure the upload form is visible
   await page.waitForSelector("[data-testid=content-upload-form]");

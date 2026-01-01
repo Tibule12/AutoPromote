@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Futuristic Platform Card Prototype — 2040</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="stage">
+    <section class="card" role="article" aria-labelledby="card-title">
+      <div class="card-media" id="media" aria-hidden="true">
+        <div class="media-shimmer"></div>
+        <div class="media-frame">
+          <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" class="media-svg" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g" x1="0" x2="1">
+                <stop offset="0" stop-color="#14121b"/>
+                <stop offset="1" stop-color="#0f1724"/>
+              </linearGradient>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#g)" rx="10"/>
+            <g transform="translate(20,20)">
+              <rect x="0" y="0" width="120" height="120" rx="8" fill="#0e293b" opacity="0.9"/>
+              <text x="150" y="40" fill="#a7f3d0" font-size="18" font-family="Inter, system-ui, -apple-system">Aurora Loop</text>
+              <text x="150" y="70" fill="#94a3b8" font-size="12">Short clip · 9s · loop</text>
+            </g>
+          </svg>
+        </div>
+        <div class="floating-light"></div>
+      </div>
+
+      <div class="card-inner">
+        <header class="card-header">
+          <h2 id="card-title">Zen Garden Clip • #serene</h2>
+          <div class="badges">
+            <span class="badge primary">Short-form</span>
+            <span class="badge info">Autoplay</span>
+            <span class="badge constraint">9s max</span>
+          </div>
+        </header>
+
+        <div class="card-body">
+          <p class="description">An ambient visual loop tuned for short-form platforms. Auto-suggested hashtags and optimized thumbnail.</p>
+          <ul class="meta">
+            <li><strong>Predicted Engagement:</strong> A+</li>
+            <li><strong>Suggested Caption:</strong> Find calm in 9s</li>
+          </ul>
+        </div>
+
+        <footer class="card-footer">
+          <div class="actions">
+            <button class="btn btn-primary">One-Click Upload</button>
+            <button class="btn btn-ghost">Edit Preview</button>
+            <button class="btn btn-ghost small">AI Suggestions</button>
+          </div>
+          <div class="mini-controls">
+            <label class="toggle">
+              <input type="checkbox" checked aria-checked="true" />
+              <span>Live Preview</span>
+            </label>
+          </div>
+        </footer>
+      </div>
+    </section>
+
+    <aside class="side-panel" aria-label="Card inspector">
+      <h3>Inspector</h3>
+      <div class="inspector-row"><strong>Platform</strong><span> TikTok</span></div>
+      <div class="inspector-row"><strong>Aspect</strong><span> 9:16</span></div>
+      <div class="inspector-row"><strong>Max length</strong><span> 9s</span></div>
+      <div class="inspector-row"><strong>Accessibility</strong><span> Alt text suggested</span></div>
+      <div class="inspector-row"><strong>AI Notes</strong><span> Swap thumbnail for frame 00:02</span></div>
+    </aside>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -34,3 +34,7 @@ service-account-key.json
 *.pem
 **/service-account-key.json
 **/.env
+
+# Traces and temporary Playwright artifacts
+tmp/
+frontend/prototypes/futuristic-card/tmp/
