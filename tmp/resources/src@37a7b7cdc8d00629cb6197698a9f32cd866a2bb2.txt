@@ -2731,18 +2731,7 @@ test("Per-platform SPA: LinkedIn preview & upload (dashboard)", async ({ page })
   }
   if (!previewClicked) throw new Error('Preview button not found or not enabled');
   await waitForPreviewOk(page);
-  // Use safe selector check before attempting to click to avoid long action timeouts
-  const qualityAvailable = await safeWaitForSelector(page, '.platform-expanded .quality-check-button:not([disabled])', 10000);
-  if (qualityAvailable) {
-    await page.locator('.platform-expanded button.quality-check-button').click();
-    try {
-      await page.waitForSelector('.platform-expanded .quality-check-mini', { timeout: 10000 });
-    } catch (e) {
-      console.log('[DEBUG] Quality mini not shown (ok to continue)');
-    }
-  } else {
-    console.log('[DEBUG] No quality button found; skipping quality step');
-  }
+  try { await page.locator('.platform-expanded button.quality-check-button').click(); try { await page.waitForSelector('.platform-expanded .quality-check-mini', { timeout: 10000 }); } catch (e) { console.log('[DEBUG] Quality mini not shown (ok to continue)'); } } catch (e) { console.log('[DEBUG] No quality button found; skipping quality step'); }
   // Upload fallback
   const uploadSelectors = ['.platform-expanded .submit-button:not([disabled])','#upload-btn:not([disabled])','button:has-text("Upload"):not([disabled])','.platform-expanded button.submit-button:not([disabled])'];
   let uploadClicked=false;

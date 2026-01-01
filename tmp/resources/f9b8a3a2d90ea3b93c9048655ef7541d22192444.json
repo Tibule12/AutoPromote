@@ -1,0 +1,11 @@
+{
+  "isDryRun": true,
+  "title": "test.mp4",
+  "type": "video",
+  "url": "preview://test.mp4",
+  "description": "",
+  "target_platforms": ["discord"],
+  "platform_options": { "discord": {} },
+  "schedule_hint": { "frequency": "once", "timezone": "UTC" },
+  "meta": { "trimStart": 0, "trimEnd": 0 }
+}
