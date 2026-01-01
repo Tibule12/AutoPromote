@@ -1,0 +1,126 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner "Top navigation" [ref=e5]:
+      - button "Open menu" [ref=e6] [cursor=pointer]
+      - generic [ref=e10]: Your Dashboard
+      - generic [ref=e11]: Test User
+    - complementary "Sidebar" [ref=e12]:
+      - generic [ref=e13]:
+        - img "Avatar" [ref=e14]
+        - heading "Test User" [level=2] [ref=e15]
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - strong [ref=e18]: "Views:"
+            - text: "0"
+          - generic [ref=e19]:
+            - strong [ref=e20]: "Clicks:"
+            - text: "0"
+          - generic [ref=e21]:
+            - strong [ref=e22]: "CTR:"
+            - text: 0%
+          - generic [ref=e23]:
+            - strong [ref=e24]: "Revenue:"
+            - text: $0.00
+      - navigation [ref=e25]:
+        - list [ref=e26]:
+          - listitem [ref=e27] [cursor=pointer]: Profile
+          - listitem [ref=e28] [cursor=pointer]: Upload
+          - listitem [ref=e29] [cursor=pointer]: Schedules
+          - listitem [ref=e30] [cursor=pointer]: Analytics
+          - listitem [ref=e31] [cursor=pointer]: Rewards
+          - listitem [ref=e32] [cursor=pointer]: Notifications
+          - listitem [ref=e33] [cursor=pointer]: Earnings
+          - listitem [ref=e34] [cursor=pointer]: 📢 Ads
+          - listitem [ref=e35] [cursor=pointer]: Connections
+          - listitem [ref=e36] [cursor=pointer]: Admin Audit
+          - listitem [ref=e37] [cursor=pointer]: Security
+          - listitem [ref=e38] [cursor=pointer]: 🎥 Feed
+          - listitem [ref=e39] [cursor=pointer]: 💬 Forum
+          - listitem [ref=e40] [cursor=pointer]: AI Clips
+      - button "Logout" [ref=e41] [cursor=pointer]
+    - main [ref=e42]:
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - heading "Upload Content" [level=3] [ref=e45]
+          - tablist "Upload navigation" [ref=e46]:
+            - tab "Upload Content" [selected] [ref=e47] [cursor=pointer]
+            - tab "Upload History" [ref=e48] [cursor=pointer]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - button "Back to platforms" [ref=e51]: ← Back
+            - heading "Upload to Tiktok" [level=3] [ref=e52]
+          - generic [ref=e53]:
+            - generic [ref=e54]: Platform title tiktok
+            - generic [ref=e55]:
+              - textbox "Platform title tiktok" [ref=e56]: test.mp4
+              - button "😊" [ref=e57] [cursor=pointer]
+          - generic [ref=e58]:
+            - generic [ref=e59]: Platform file tiktok
+            - generic [ref=e60] [cursor=pointer]:
+              - button "Platform file tiktok" [ref=e61]
+              - generic [ref=e62]: Drop files here or click to browse
+              - generic [ref=e63]: "Selected file: test.mp4 (0.00 MB)"
+          - generic [ref=e64]:
+            - generic [ref=e65]: 🎨 Text Overlay (optional)
+            - generic [ref=e66]:
+              - textbox "Add overlay text..." [ref=e67]
+              - button "😊" [ref=e68] [cursor=pointer]
+            - generic [ref=e69]:
+              - combobox "Overlay position" [ref=e70] [cursor=pointer]:
+                - option "⬆️ Top" [selected]
+                - option "⏺️ Center"
+                - option "⬇️ Bottom"
+              - textbox "Text color" [ref=e71] [cursor=pointer]: "#ffffff"
+              - combobox [ref=e72] [cursor=pointer]:
+                - option "Small" [selected]
+                - option "Medium"
+                - option "Large"
+                - option "XL"
+          - generic [ref=e73]:
+            - generic [ref=e74]: TikTok Publish Options
+            - generic [ref=e75]: "Creator: Test Creator"
+            - generic [ref=e76]:
+              - generic [ref=e77]:
+                - generic [ref=e78]: Privacy (required)
+                - combobox [ref=e79] [cursor=pointer]:
+                  - option "Select privacy" [selected]
+                  - option "EVERYONE"
+                  - option "FRIENDS"
+                  - option "SELF_ONLY"
+              - generic [ref=e80]:
+                - generic [ref=e81]: Interactions
+                - generic [ref=e82]:
+                  - generic [ref=e83]:
+                    - checkbox "Comments" [ref=e84]
+                    - text: Comments
+                  - generic [ref=e85]:
+                    - checkbox "Duet" [ref=e86]
+                    - text: Duet
+                  - generic [ref=e87]:
+                    - checkbox "Stitch" [disabled] [ref=e88]
+                    - text: Stitch
+              - generic [ref=e89]:
+                - generic [ref=e90]: Commercial / Branded Content
+                - generic [ref=e92]:
+                  - checkbox "This content is commercial or promotional" [ref=e93]
+                  - text: This content is commercial or promotional
+              - generic [ref=e95]:
+                - checkbox "By posting, you agree to TikTok's Music Usage Confirmation." [ref=e96]
+                - text: By posting, you agree to TikTok's Music Usage Confirmation.
+              - generic [ref=e97]: "Max allowed video duration for this creator: 60 seconds"
+          - generic [ref=e98]:
+            - button "Preview Content" [active] [ref=e99] [cursor=pointer]: ⚡ Preview
+            - button "Upload Content" [disabled] [ref=e100]: 🚀 Upload
+          - generic [ref=e102]:
+            - heading "Tiktok" [level=5] [ref=e103]
+            - generic "Preview media" [ref=e105]
+            - generic [ref=e106]:
+              - strong [ref=e107]: "Title:"
+              - text: test.mp4
+            - strong [ref=e109]: "Description:"
+            - button "Edit preview tiktok" [ref=e111] [cursor=pointer]: Edit Preview
+  - button "Open chat" [ref=e112] [cursor=pointer]: 💬
+```
