@@ -1,9 +1,0 @@
-{
-  "creator": {
-    "display_name": "Test Creator",
-    "can_post": true,
-    "privacy_level_options": ["EVERYONE", "FRIENDS", "SELF_ONLY"],
-    "max_video_post_duration_sec": 60,
-    "interactions": { "comments": true, "duet": true, "stitch": false }
-  }
-}
