@@ -95,16 +95,21 @@
             document.getElementById("expanded-body").innerHTML =
               '<label>Privacy<select id="tiktok-privacy"><option value="">Select privacy</option><option value="EVERYONE">EVERYONE</option><option value="FRIENDS">FRIENDS</option><option value="SELF_ONLY">SELF_ONLY</option></select></label>' +
               '<label style="display:block;margin-top:8px"><input type="checkbox" id="tiktok-consent" /> I confirm Music Usage Confirmation</label>' +
-              '<label style="display:block;margin-top:8px">Sound<select id="tiktok-sound">'
-              + '<option value="">Select a sound</option>'
-              + '<option value="sound_viral_1">TikTok Sound - Viral 1 (6s)</option>'
-              + '<option value="sound_viral_2">TikTok Sound - Viral 2 (15s)</option>'
-              + '<option value="sound_trending_dance">Trending Dance - DanceBeat (12s)</option>'
-              + '<option value="sound_instrumental_loop">Instrumental Loop (30s)</option>'
-              + '<option value="sound_commercial_free">Commercial-Free Beat (15s)</option>'
-              + '<option value="licensed_track_xyz">Licensed Track XYZ (30s)</option>'
-              + '<option value="original_audio">Use Original Audio</option>'
-              + '</select></label>';
+              '<label style="display:block;margin-top:8px">Sound<select id="tiktok-sound"><option value="">Loading sounds...</option></select></label>';
+            // Populate sound list from backend trending_sounds endpoint when available
+            (async function populateSounds(){
+              try{
+                const resp = await fetch('/api/tiktok/trending_sounds');
+                if(!resp.ok) throw new Error('no');
+                const j = await resp.json();
+                const sel = document.getElementById('tiktok-sound');
+                if(!sel) return;
+                sel.innerHTML = '<option value="">Select a sound</option>' + (j.sounds || []).map(s=>`<option value="${String(s.id).replace(/\"/g,'')}">${String(s.title)}${s.duration?(' ('+s.duration+'s)'):''}</option>`).join('') + '<option value="original_audio">Use Original Audio</option>';
+              }catch(e){
+                const sel = document.getElementById('tiktok-sound');
+                if(sel) sel.innerHTML = '<option value="">Select a sound</option><option value="original_audio">Use Original Audio</option>';
+              }
+            })();
           } else if (selectedPlatform === "discord") {
             document.getElementById("expanded-body").innerHTML =
               '<label>Discord Channel ID<input id="discord-channel-id" placeholder="Discord channel ID" /></label>';

@@ -29,44 +29,39 @@ test.beforeEach(async ({ page }) => {
   // Stub backend endpoints used by the fixture
   await page.route("**/api/content/upload", async route => {
     const req = await route.request().postDataJSON();
+    // Helper to mark upload failure in-page when possible
+    async function markUiFailed() {
+      try {
+        const reqObj = route.request();
+        const frame = reqObj && reqObj.frame && reqObj.frame();
+        if (frame && frame.evaluate) {
+          await frame.evaluate(() => {
+            const el = document.querySelector('#upload-status');
+            if (el) el.textContent = 'Upload failed';
+          });
+        }
+      } catch (e) {}
+    }
+
     if (req.isDryRun) {
-      // If TikTok preview is missing consent/privacy, simulate a server rejection
       if (req.platforms && req.platforms.includes('tiktok')) {
-        if (!req.platform_options || !req.platform_options.tiktok || !req.platform_options.tiktok.consent || !req.platform_options.tiktok.privacy) {
-          // Inform the page about failure so UI test can observe upload-status
-          try {
-            const reqObj = route.request();
-            const frame = reqObj && reqObj.frame && reqObj.frame();
-            if (frame && frame.evaluate) {
-              await frame.evaluate(() => {
-                const el = document.querySelector('#upload-status');
-                if (el) el.textContent = 'Upload failed';
-              });
-            }
-          } catch (e) {
-            // ignore evaluation errors
-          }
-          // mark error for test assertion
+        const t = req.platform_options && req.platform_options.tiktok;
+        if (!t || !t.consent || !t.privacy || !t.sound_id) {
+          await markUiFailed();
           try { lastUploadError.flag = true; } catch (e) {}
-          await route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: "Missing TikTok consent or privacy" }) });
+          await route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: "Missing TikTok consent/privacy/sound" }) });
           return;
         }
       }
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ previews: [{ platform: req.platforms[0], title: "Preview" }] }) });
     } else {
-      // For non-dry runs: if TikTok is included but platform options object
-      // for TikTok is entirely missing, simulate a server error. Otherwise
-      // accept the upload. This keeps the test deterministic regardless of
-      // minor payload shape differences between client and test.
       if (req.platforms && req.platforms.includes("tiktok")) {
-        // Require that the request include TikTok platform options with
-        // both consent and privacy set; otherwise simulate server rejection.
-        if (!req.platform_options || !req.platform_options.tiktok || !req.platform_options.tiktok.consent || !req.platform_options.tiktok.privacy) {
-          await route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: "Missing TikTok consent or privacy" }) });
+        const t = req.platform_options && req.platform_options.tiktok;
+        if (!t || !t.consent || !t.privacy || !t.sound_id) {
+          await route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: "Missing TikTok consent/privacy/sound" }) });
           return;
         }
       }
-      // mark success for test assertions
       try { lastUploadSuccess.flag = true; } catch (e) {}
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, id: "demo123" }) });
     }
