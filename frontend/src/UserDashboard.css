@@ -106,13 +106,21 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
     Roboto,
     Arial,
     sans-serif;
+  /* Prevent the entire page from horizontally scrolling which causes content
+     to slide under the fixed sidebar. Keep horizontal scrolling inside the
+     dashboard main area so wide tables/cards scroll within the content pane. */
+  overflow-x: hidden;
+  /* Reserve space for the fixed topbar so page content doesn't sit under it */
+  padding-top: 64px;
 }
 
 /* Topbar */
 .dashboard-topbar {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 30;
+  left: 0;
+  right: 0;
+  z-index: 60;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -189,6 +197,11 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   max-width: 1200px;
   margin: 1rem auto;
   padding: 1rem;
+  /* Allow horizontal scroll inside the main content area instead of the
+     whole page. This prevents content from being hidden under the fixed
+     sidebar when the content is wider than the viewport. */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 @media (min-width: 1024px) {
   .dashboard-main {
