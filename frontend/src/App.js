@@ -31,6 +31,7 @@ import ChatWidget from "./ChatWidget";
 import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import { Sentry } from "./sentryClient";
 import TestSentryButton from "./components/TestSentryButton";
+import Footer from "./components/Footer";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -1084,6 +1085,8 @@ function App() {
           <TestSentryButton />
         </div>
       )}
+      {/* Global Footer */}
+      <Footer />
     </div>
   );
 }

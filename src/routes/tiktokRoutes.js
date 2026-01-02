@@ -892,6 +892,12 @@ router.post(
             message: "Explicit TikTok consent required.",
           });
         }
+        // Optional sound_id: must be a string when provided
+        if (tiktokOpts.sound_id && typeof tiktokOpts.sound_id !== "string") {
+          return res
+            .status(400)
+            .json({ error: "tiktok_invalid_sound", message: "Invalid sound identifier." });
+        }
         // Disallow overlays/watermarks (frontend should remove overlays before publish)
         if (meta && meta.overlay) {
           return res.status(400).json({
@@ -1143,6 +1149,7 @@ router.post(
             demo: true,
             outcome: "success",
             videoId: demoVideoId,
+            sound_id: tiktokOpts && tiktokOpts.sound_id ? tiktokOpts.sound_id : undefined,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             ip: req.ip,
           });
@@ -1380,6 +1387,29 @@ router.post(
     }
   }
 );
+
+// 4.1 Trending sounds - returns a list of available TikTok sounds (mocked when provider unavailable)
+router.get("/trending_sounds", ttPublicLimiter, async (req, res) => {
+  try {
+    const provider = require("../services/providers/tiktokProvider");
+    const items = (await provider.fetchTrending({ limit: 20 })) || [];
+    // Normalize to { id, title, duration }
+    const mapped = items.map(i => ({
+      id: i.id || i.sound_id || String(i.title).slice(0, 32),
+      title: i.title || i.name || i.id,
+      duration: i.duration || i.len || 0,
+    }));
+    return res.json({ ok: true, sounds: mapped });
+  } catch (e) {
+    // Fallback mock list
+    const mock = [
+      { id: "sound_viral_1", title: "TikTok Sound - Viral 1", duration: 6 },
+      { id: "sound_viral_2", title: "TikTok Sound - Viral 2", duration: 15 },
+      { id: "sound_trending_dance", title: "Trending Dance - DanceBeat", duration: 12 },
+    ];
+    return res.json({ ok: true, sounds: mock });
+  }
+});
 
 module.exports = router;
 

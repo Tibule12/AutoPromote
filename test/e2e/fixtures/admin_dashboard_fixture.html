@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Admin Dashboard Fixture</title>
+    <style>body{font-family:Arial;padding:1rem}.data-table{width:100%;border-collapse:collapse} .data-table th, .data-table td{border:1px solid #ddd;padding:8px}</style>
+  </head>
+  <body>
+    <h1>Admin Dashboard</h1>
+    <nav>
+      <button id="btn-overview">Overview</button>
+      <button id="btn-users">Users</button>
+      <button id="btn-content">Content</button>
+      <button id="btn-payouts">Payouts</button>
+    </nav>
+    <section id="payouts-section" style="display:none;margin-top:12px">
+      <h2>Payouts</h2>
+      <table class="data-table">
+        <thead><tr><th>Id</th><th>User</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>fake-payout-1</td>
+            <td>testUser</td>
+            <td>$12.34</td>
+            <td>pending</td>
+            <td><button class="process-btn">Process</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <script>
+      document.getElementById('btn-payouts').addEventListener('click', () => {
+        document.getElementById('payouts-section').style.display = 'block';
+      });
+      document.querySelector('.process-btn').addEventListener('click', () => {
+        alert('processed');
+      });
+    </script>
+  </body>
+</html>

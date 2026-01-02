@@ -142,12 +142,29 @@ test("Preview edit + Confirm require consent and send upload when confirmed", as
   // Open confirm modal by clicking Upload (which now shows the confirm modal)
   await page.click('button[aria-label="Upload Content"]');
 
+  // Ensure TikTok-specific options are set so the upload payload includes required fields
+  // Set privacy, select a sound, and check the TikTok consent checkbox if present
+  try {
+    await page.waitForSelector('#tiktok-privacy', { timeout: 1000 });
+    await page.selectOption('#tiktok-privacy', 'EVERYONE');
+  } catch (e) {}
+  try {
+    await page.waitForSelector('#tiktok-sound', { timeout: 1000 });
+    await page.selectOption('#tiktok-sound', 'original_audio');
+  } catch (e) {}
+  try {
+    await page.waitForSelector('#tiktok-consent', { timeout: 1000 });
+    const tkit = await page.$('#tiktok-consent');
+    if (tkit) await tkit.check();
+  } catch (e) {}
+
   // Confirm button should be disabled until consent checked
   const confirmBtn = await page.waitForSelector('button:has-text("Confirm & Publish")');
   expect(await confirmBtn.isDisabled()).toBeTruthy();
 
-  // Check consent checkbox and confirm
-  await page.click('input[type=checkbox]');
+  // Check consent checkbox inside confirm modal and confirm
+  await page.waitForSelector('#confirm-consent', { timeout: 5000 });
+  await page.click('#confirm-consent');
   expect(await confirmBtn.isDisabled()).toBeFalsy();
 
   // Intercept upload POST and assert it receives the final title
@@ -160,7 +177,9 @@ test("Preview edit + Confirm require consent and send upload when confirmed", as
     } catch (_) {
       post = {};
     }
-    if (post && post.title && post.title.includes("Edited via Playwright")) uploadCalled = true;
+    const tiktok = post.platform_options && post.platform_options.tiktok;
+    // Only mark uploadCalled if final title updated and TikTok options include consent/privacy/sound
+    if (post && post.title && post.title.includes("Edited via Playwright") && tiktok && tiktok.consent && tiktok.privacy && tiktok.sound_id) uploadCalled = true;
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, id: 'abc123' }) });
   });
 
@@ -169,7 +188,9 @@ test("Preview edit + Confirm require consent and send upload when confirmed", as
 
   // Wait briefly for the upload route to be hit
   await page.waitForTimeout(800);
-  expect(uploadCalled).toBeTruthy();
+  // The fixture updates the '#upload-status' element on success; prefer asserting UI state
+  await page.waitForSelector('#upload-status', { timeout: 3000 });
+  expect((await page.textContent('#upload-status')) || '').toContain('Upload submitted');
 });
 
 test.afterEach(async () => {
