@@ -893,6 +893,40 @@ function App() {
     };
   }, []);
 
+  // Simple static pages routing (Docs, Blog, About, Contact)
+  if (routePathState && routePathState.startsWith("/docs")) {
+    try {
+      const Docs = require("./Docs").default;
+      return <Docs />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Docs page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/blog")) {
+    try {
+      const Blog = require("./Blog").default;
+      return <Blog />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Blog page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/about")) {
+    try {
+      const About = require("./About").default;
+      return <About />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>About page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/contact")) {
+    try {
+      const Contact = require("./Contact").default;
+      return <Contact />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Contact page not found.</div>;
+    }
+  }
+
   if (routePathState && routePathState.startsWith("/pricing")) {
     return <PayPalSubscriptionPanel />;
   }
