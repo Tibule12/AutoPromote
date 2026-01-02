@@ -66,11 +66,11 @@ const Footer = () => {
 
             <nav className="ap-footer-links ap-legal" aria-label="Footer legal links">
               <a href={`${site}/terms`} target="_blank" rel="noopener noreferrer">
-                Terms
+                Terms of Service
               </a>
               <span className="dot">•</span>
               <a href={`${site}/privacy`} target="_blank" rel="noopener noreferrer">
-                Privacy
+                Privacy Policy
               </a>
               <span className="dot">•</span>
               <a href="/accessibility">Accessibility</a>

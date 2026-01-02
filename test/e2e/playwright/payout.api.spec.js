@@ -10,8 +10,7 @@ const hasCreds = !!(
   process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64
 );
 
-test(hasCreds ? "API payout request - create payout doc and update user pending earnings" : "skipped: payout API requires service account", async () => {
-  test.skip(!hasCreds, "No GOOGLE_APPLICATION_CREDENTIALS or service account provided");
+test("API payout request - create payout doc and update user pending earnings", async () => {
   const tmpSaPath = path.resolve(__dirname, "..", "tmp", "service-account.json");
   const fs = require("fs");
   try {
