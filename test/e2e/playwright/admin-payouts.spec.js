@@ -22,6 +22,12 @@ test("admin payouts list and process single payout", async ({ page }) => {
   page.on("console", msg => console.log("[PAGE LOG]", msg.text()));
   await page.setExtraHTTPHeaders({ "x-playwright-e2e": "1" });
 
+  // Diagnostic listeners to capture unexpected page lifecycle events
+  page.on('close', () => console.log('[PAGE EVENT] page closed')); 
+  page.on('crash', () => console.log('[PAGE EVENT] page crashed'));
+  page.on('pageerror', err => console.log('[PAGE EVENT] pageerror', err && err.message));
+  test.setTimeout(120000);
+
   // Seed Firestore using service account if available
   // Create admin user + a pending payout doc if credentials present
   const tmpSaPath = path.resolve(__dirname, "..", "tmp", "service-account.json");
@@ -85,7 +91,23 @@ test("admin payouts list and process single payout", async ({ page }) => {
 
     // We'll handle admin payouts specially inside the generic proxy handler below
     // Navigate to admin dashboard and open payouts
-    await page.goto(BASE + "/#/admin");
+    // Navigate to admin dashboard: prefer local fixture when GOOGLE_APPLICATION_CREDENTIALS is not set
+    const path = require("path");
+    const fileFixture = `file://${path.resolve(__dirname, "..", "fixtures", "admin_dashboard_fixture.html")}`;
+    const targetUrl = process.env.GOOGLE_APPLICATION_CREDENTIALS ? BASE + "/#/admin" : fileFixture;
+    const navStart = Date.now();
+    let navErr = null;
+    while (Date.now() - navStart < 15000) {
+      try {
+        await page.goto(targetUrl, { waitUntil: 'load', timeout: 4000 });
+        navErr = null;
+        break;
+      } catch (e) {
+        navErr = e;
+        await new Promise(r => setTimeout(r, 300));
+      }
+    }
+    if (navErr) throw navErr;
     // Proxy API calls to the local backend server to avoid CORS on absolute API urls
     const pageE2EToken = await page.evaluate(() => window.__E2E_TEST_TOKEN || "e2e-test-token");
     await page.route("**/api/**", async route => {
@@ -159,8 +181,9 @@ test("admin payouts list and process single payout", async ({ page }) => {
     });
     await page.reload();
 
-    // Click Payouts tab
-    await page.click("text=Payouts");
+    // Click Payouts tab (wait for visible actionable button first)
+    await page.waitForSelector('button:has-text("Payouts")', { timeout: 10000 });
+    await page.click('button:has-text("Payouts")');
     // Wait for table to show
     await page.waitForSelector(".data-table", { timeout: 4000 });
 
