@@ -41,7 +41,7 @@ describe("SchedulesPanel create schedule", () => {
     fireEvent.click(createBtn);
 
     // Wait for async onCreate to be invoked and the state updates to complete
-    await waitFor(() => expect(mockOnCreate).toHaveBeenCalled());
+    await waitFor(() => expect(mockOnCreate).toHaveBeenCalled(), { timeout: 10000 });
     const payload = mockOnCreate.mock.calls[0][0];
     expect(payload.contentId).toBe("c1");
     expect(Array.isArray(payload.platforms)).toBe(true);

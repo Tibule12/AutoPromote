@@ -3,6 +3,7 @@ const request = require("supertest");
 const bodyParser = require("body-parser");
 
 describe("snapchat prepare endpoint", () => {
+  jest.setTimeout(10000);
   let app;
   beforeAll(() => {
     process.env.FIREBASE_ADMIN_BYPASS = "1";

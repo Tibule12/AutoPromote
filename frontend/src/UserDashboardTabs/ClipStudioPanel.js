@@ -7,6 +7,7 @@ import { auth } from "../firebaseClient";
 import { API_BASE_URL } from "../config";
 import toast from "react-hot-toast";
 import "./ClipStudioPanel.css";
+import MemeticComposerPanel from "./MemeticComposerPanel";
 import GeneratePublishModal from "./GeneratePublishModal";
 
 const ClipStudioPanel = ({ content = [] }) => {
@@ -31,6 +32,9 @@ const ClipStudioPanel = ({ content = [] }) => {
     scheduledTime: new Date(Date.now() + 3600000).toISOString(),
   });
   const [exportImmediate, setExportImmediate] = useState(false);
+
+  // Memetic Composer UI toggle
+  const [composerOpen, setComposerOpen] = useState(false);
 
   // Filter for videos only
   const videoContent = content.filter(c => c.type === "video");
@@ -250,10 +254,22 @@ const ClipStudioPanel = ({ content = [] }) => {
           toast.success("Generation started");
         }}
       />
-      <div className="clip-studio-header">
-        <h2>🎬 AI Clip Studio</h2>
-        <p>Generate viral short clips from your long-form videos</p>
+      <div
+        className="clip-studio-header"
+        style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        <div>
+          <h2>🎬 AI Clip Studio</h2>
+          <p>Generate viral short clips from your long-form videos</p>
+        </div>
+        <div>
+          <button className="btn-secondary" onClick={() => setComposerOpen(true)}>
+            Open Memetic Composer
+          </button>
+        </div>
       </div>
+
+      {composerOpen && <MemeticComposerPanel onClose={() => setComposerOpen(false)} />}
 
       {!currentAnalysis ? (
         <>

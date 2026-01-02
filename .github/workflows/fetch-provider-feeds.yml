@@ -1,0 +1,59 @@
+name: Fetch Provider Feeds
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # every 6 hours
+  workflow_dispatch: {}
+
+jobs:
+  fetch-feeds:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Fetch provider feeds
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          TIKTOK_API_KEY: ${{ secrets.TIKTOK_API_KEY }}
+        run: npm run fetch:providers
+
+  notify-on-failure:
+    needs: fetch-feeds
+    if: needs.fetch-feeds.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack (if configured)
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          set -e
+          if [ -z "$SLACK_WEBHOOK" ]; then
+            echo "SLACK_WEBHOOK not set; skipping Slack notification"
+            exit 0
+          fi
+          TIT="⚠️ Workflow '${{ github.workflow }}' failed"
+          TEXT="*Repo:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Run:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n*Actor:* ${{ github.actor }}"
+          # Build payload using jq when available, otherwise fallback to manual json
+          if command -v jq >/dev/null 2>&1; then
+            PAYLOAD=$(jq -nc --arg t "$TIT" --arg b "$TEXT" '{text: ($t + "\n" + $b)}')
+          else
+            PAYLOAD="{\"text\": \"${TIT}\\n${TEXT}\"}"
+          fi
+          curl -s -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK" || true
+      - name: Notify Discord (if configured)
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "DISCORD_WEBHOOK not set; skipping Discord notification"
+            exit 0
+          fi
+          CONTENT=":warning: **Workflow '${{ github.workflow }}' failed** in `${{ github.repository }}` on `${{ github.ref_name }}`. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -s -X POST -H "Content-Type: application/json" -d "{\"content\": \"$CONTENT\"}" "$DISCORD_WEBHOOK" || true
+

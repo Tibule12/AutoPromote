@@ -14,5 +14,14 @@
     "no-console": "off",
     "no-unused-vars": "off",
     "no-restricted-syntax": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["frontend/**"],
+      "env": { "browser": true },
+      "parserOptions": { "sourceType": "module", "ecmaFeatures": { "jsx": true } },
+      "extends": ["react-app", "react-app/jest", "plugin:react/recommended"],
+      "rules": { "react/react-in-jsx-scope": "off", "react/prop-types": "off" }
+    }
+  ]
 }

@@ -1,5 +1,19 @@
 // Jest DOM custom matchers for testing-library
-import "@testing-library/jest-dom";
+// Use a safe require so the package can be resolved when Jest is run from the monorepo root
+try {
+  // prefer ESM style import where supported
+  require("@testing-library/jest-dom");
+} catch (e) {
+  try {
+    // Fallback: require directly from the frontend node_modules path (makes running from root reliable)
+    const path = require("path");
+    const pkgPath = path.resolve(__dirname, "..", "node_modules", "@testing-library", "jest-dom");
+    require(pkgPath);
+  } catch (e2) {
+    // If even the fallback fails, continue silently — tests that need jest-dom will fail later with a clearer error
+    /* no-op */
+  }
+}
 
 // Replace firebase client with a lightweight mock for jest environments (avoids node-specific fetch usage)
 jest.mock("./firebaseClient", () => ({

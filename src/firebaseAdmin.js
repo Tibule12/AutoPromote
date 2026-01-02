@@ -61,6 +61,7 @@ if (bypass) {
       if (include) {
         const fullPath = prefix + rel;
         const docRef = {
+          path: fullPath,
           id: rel,
           update: async newData => {
             const existing = __inMemoryDB.get(fullPath) || { id: rel, data: {} };
@@ -104,7 +105,10 @@ if (bypass) {
   };
 
   // Global in-memory store for bypass mode to persist simple doc sets between operations
-  const __inMemoryDB = new Map();
+  // Reuse any global store created by the top-level firebaseAdmin.js to keep a single
+  // in-memory DB across modules (avoid duplicate stores when different files require different stubs).
+  const __inMemoryDB =
+    global.__AUTOPROMOTE_IN_MEMORY_DB || (global.__AUTOPROMOTE_IN_MEMORY_DB = new Map());
   const CollectionStub = function (name) {
     this._name = name || "collection";
   };
@@ -115,6 +119,7 @@ if (bypass) {
       "stub-" + (crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(4).toString("hex"));
     const fullPath = `${this._name}/${_id}`;
     return {
+      path: fullPath,
       id: _id,
       set: async (data, opt) => {
         const existing = __inMemoryDB.get(fullPath) || { id: _id, data: {} };
@@ -175,9 +180,49 @@ if (bypass) {
     return new QueryStub(this._name).get();
   };
 
-  const firestoreStub = () => ({
-    collection: name => new CollectionStub(name),
-  });
+  const firestoreStub = () => {
+    const instance = {
+      collection: name => new CollectionStub(name),
+    };
+    // Minimal batch implementation to support code paths that call db.batch()
+    instance.batch = function () {
+      const ops = [];
+      function pathOf(ref) {
+        if (!ref) return null;
+        if (typeof ref === "string") return ref;
+        if (ref.path) return ref.path;
+        if (ref._path) return ref._path;
+        return null;
+      }
+      return {
+        delete(ref) {
+          ops.push({ op: "delete", ref: pathOf(ref) });
+        },
+        set(ref, data) {
+          ops.push({ op: "set", ref: pathOf(ref), data });
+        },
+        update(ref, data) {
+          ops.push({ op: "update", ref: pathOf(ref), data });
+        },
+        async commit() {
+          for (const o of ops) {
+            if (!o.ref) continue;
+            if (o.op === "delete") {
+              __inMemoryDB.delete(o.ref);
+            } else if (o.op === "set") {
+              __inMemoryDB.set(o.ref, { id: o.ref.split("/").pop(), data: o.data || {} });
+            } else if (o.op === "update") {
+              const existing = __inMemoryDB.get(o.ref) || { id: o.ref.split("/").pop(), data: {} };
+              existing.data = { ...(existing.data || {}), ...(o.data || {}) };
+              __inMemoryDB.set(o.ref, existing);
+            }
+          }
+          return Promise.resolve();
+        },
+      };
+    };
+    return instance;
+  };
   // Minimal Timestamp/FieldValue shims
   firestoreStub.FieldValue = { serverTimestamp: () => new Date(), delete: () => null };
   firestoreStub.Timestamp = {

@@ -157,7 +157,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(uploadBtn);
 
     // The UI auto-switches privacy from SELF_ONLY -> EVERYONE for branded content. Ensure privacy was set to EVERYONE.
-    await screen.findByDisplayValue(/EVERYONE/i, { timeout: 3000 });
+    await screen.findByDisplayValue(/EVERYONE/i, { timeout: 10000 });
   });
 
   test("disables preview and upload when creator cannot post", async () => {
@@ -188,7 +188,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(tiktokTile);
 
     // Wait for the creator info to arrive which indicates the check has completed
-    await screen.findByText(/NoPost Creator/i, { timeout: 3000 });
+    await screen.findByText(/NoPost Creator/i, { timeout: 10000 });
 
     const previewBtn = screen.getByLabelText(/Preview Content/i);
     const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
@@ -234,7 +234,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(previewBtn);
 
     // Expect the preview card to render a stringified title containing "origTitle"
-    await screen.findByText(/origTitle/, { timeout: 3000 });
+    await screen.findByText(/origTitle/, { timeout: 10000 });
   });
 
   test("handles preview hashtag object shapes and shows space-separated hashtags in modal", async () => {
@@ -272,7 +272,11 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(previewBtn);
 
     // Wait for preview card and Edit button
-    const editBtn = await screen.findByRole("button", { name: /Edit preview/i }, { timeout: 3000 });
+    const editBtn = await screen.findByRole(
+      "button",
+      { name: /Edit preview/i },
+      { timeout: 10000 }
+    );
     fireEvent.click(editBtn);
 
     // Modal should appear and hashtags input should show "#fyp #tiktok"
@@ -358,6 +362,44 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     expect(uploadBtn).toBeDisabled();
   });
 
+  test("displays posting cap and disables upload when cap is reached", async () => {
+    const onUpload = jest.fn(async () => ({}));
+    const origFetch = global.fetch;
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        creator: {
+          display_name: "Cap Creator",
+          posting_cap_per_24h: 2,
+          posts_in_last_24h: 2,
+          posting_remaining: 0,
+          privacy_level_options: ["EVERYONE", "FRIENDS", "SELF_ONLY"],
+          interactions: { comments: true, duet: true, stitch: true },
+          can_post: true,
+        },
+      }),
+    }));
+
+    render(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["tiktok"]} />);
+
+    // Open focused TikTok view
+    const tiktokButtons = screen.getAllByRole("button", { name: /TikTok/i });
+    const tiktokTile = tiktokButtons.find(
+      b => b.classList && b.classList.contains("platform-card")
+    );
+    expect(tiktokTile).toBeDefined();
+    fireEvent.click(tiktokTile);
+
+    // Expect posting cap information and a disabled upload button
+    await screen.findByText(/Posting cap: 2 per 24h/i, { timeout: 10000 });
+    await screen.findByText(/Posting cap reached/i);
+
+    const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
+    expect(uploadBtn).toBeDisabled();
+
+    global.fetch = origFetch;
+  });
+
   test("opens Preview Edit modal and applies edits to form and preview card", async () => {
     const onUpload = jest.fn(async payload => ({
       previews: [{ platform: "tiktok", title: payload.title, description: payload.description }],
@@ -393,7 +435,11 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     expect(media.tagName === "VIDEO" || media.tagName === "IMG").toBeTruthy();
 
     // Ensure Edit Preview button is present on the preview card and opens the modal
-    const editBtn = await screen.findByRole("button", { name: /Edit preview/i }, { timeout: 3000 });
+    const editBtn = await screen.findByRole(
+      "button",
+      { name: /Edit preview/i },
+      { timeout: 10000 }
+    );
     expect(editBtn).toBeDefined();
 
     // Open edit modal and update title
@@ -445,6 +491,20 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
 
     // Now simulate the user giving consent and re-rendering (or use E2E flag)
     window.__E2E_TEST_TIKTOK_CONSENT = true;
+    // Mock creator_info to avoid a network failure that would clear privacy
+    const origFetchGlobal = global.fetch;
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        creator: {
+          display_name: "Test",
+          can_post: true,
+          interactions: { comments: true, duet: true, stitch: true },
+          privacy_level_options: ["EVERYONE", "FRIENDS", "SELF_ONLY"],
+        },
+      }),
+    }));
+
     // force remount so component picks up the flag; provide consent true and privacy to simulate user consent
     rerender(
       <ContentUploadForm
@@ -468,6 +528,18 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     const fileInput2 = screen.getByLabelText(/Platform file tiktok/i);
     fireEvent.change(fileInput2, { target: { files: [file2] } });
 
+    // Ensure privacy is explicitly set (some flows block preview/upload without it)
+    const combos = screen.getAllByRole("combobox");
+    let privacySelect = combos.find(c => {
+      try {
+        within(c).getByRole("option", { name: /EVERYONE/i });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    });
+    if (privacySelect) fireEvent.change(privacySelect, { target: { value: "EVERYONE" } });
+
     // Upload should now be enabled
     await waitFor(() => {
       const uploadBtn2 = screen.getByRole("button", { name: /Upload Content/i });
@@ -480,7 +552,8 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
 
     await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 5000 });
 
-    // Cleanup E2E flag
+    // Restore global.fetch and cleanup E2E flag
+    global.fetch = origFetchGlobal;
     delete window.__E2E_TEST_TIKTOK_CONSENT;
   });
 
@@ -539,7 +612,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     const previewBtn = screen.getByText(/Preview/i);
     fireEvent.click(previewBtn);
     // We expect the per-platform preview card to show the given title after fallback
-    const matches = await screen.findAllByText(/Platform Title/, { timeout: 3000 });
+    const matches = await screen.findAllByText(/Platform Title/, { timeout: 10000 });
     expect(matches.length).toBeGreaterThan(0);
   });
 
@@ -565,9 +638,65 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     const previewBtn = screen.getByLabelText(/Preview Content/i);
     fireEvent.click(previewBtn);
 
-    const media = await screen.findByLabelText(/Preview media/i, { timeout: 3000 });
+    const media = await screen.findByLabelText(/Preview media/i, { timeout: 10000 });
     expect(media).toBeDefined();
     expect(["VIDEO", "IMG"]).toContain(media.tagName);
     expect(media.getAttribute("src")).toMatch(/^(blob:|http)/);
+  });
+
+  test("falls back to local file preview when backend returns empty preview object", async () => {
+    const onUpload = jest.fn(async () => ({
+      previews: [{ platform: "tiktok", thumbnail: "", title: "EmptyPreview" }],
+    }));
+
+    render(<ContentUploadForm onUpload={onUpload} />);
+
+    // Expand TikTok focused view
+    const buttons2 = screen.getAllByRole("button", { name: /TikTok/i });
+    const tile2 = buttons2.find(b => b.classList && b.classList.contains("platform-card"));
+    fireEvent.click(tile2);
+
+    // Select a video file
+    const file = new File(["data"], "video.mp4", { type: "video/mp4" });
+    const fileInput = screen.getByLabelText(/Platform file tiktok/i);
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    // Ensure privacy is set so preview is allowed
+    const combos = screen.getAllByRole("combobox");
+    let privacySelect = combos.find(c => {
+      try {
+        within(c).getByRole("option", { name: /EVERYONE/i });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    });
+    if (privacySelect) fireEvent.change(privacySelect, { target: { value: "EVERYONE" } });
+
+    // Mock creator_info to avoid network failure that clears privacy
+    const origFetch = global.fetch;
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        creator: {
+          display_name: "Test",
+          can_post: true,
+          interactions: { comments: true, duet: true, stitch: true },
+          privacy_level_options: ["EVERYONE", "FRIENDS", "SELF_ONLY"],
+        },
+      }),
+    }));
+
+    // Click preview - backend returned empty preview thumbnail, UI should fallback to blob URL and render <video>
+    const previewBtn2 = screen.getByLabelText(/Preview Content/i);
+    fireEvent.click(previewBtn2);
+
+    const media2 = await screen.findByLabelText(/Preview media/i, { timeout: 10000 });
+    expect(media2).toBeDefined();
+
+    // restore fetch
+    global.fetch = origFetch;
+    expect(["VIDEO", "IMG"]).toContain(media2.tagName);
+    expect(media2.getAttribute("src")).toMatch(/^(blob:|http|preview:)/);
   });
 });

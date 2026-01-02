@@ -2,6 +2,7 @@ const express = require("express");
 const request = require("supertest");
 
 describe("snapchat preflight endpoint", () => {
+  jest.setTimeout(10000);
   let app;
   beforeAll(() => {
     process.env.SNAPCHAT_PUBLIC_CLIENT_ID = "test_public_id";

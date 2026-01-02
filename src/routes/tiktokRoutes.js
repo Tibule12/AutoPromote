@@ -921,6 +921,24 @@ router.post(
 
         // Determine creator info (use stored conn presence as proxy); try a quick token check
         let creator = defaultInfo;
+
+        // If the stored connection includes a cached `creator_info`, prefer it over live fetch.
+        // This allows tests and some account configurations to provide explicit creator constraints.
+        if (conn && conn.creator_info) {
+          const c = conn.creator_info;
+          creator = {
+            display_name: c.display_name || defaultInfo.display_name,
+            privacy_level_options: c.privacy_level_options || defaultInfo.privacy_level_options,
+            max_video_post_duration_sec:
+              typeof c.max_video_post_duration_sec === "number"
+                ? c.max_video_post_duration_sec
+                : defaultInfo.max_video_post_duration_sec,
+            interactions: c.interactions || defaultInfo.interactions,
+            can_post: true,
+            posting_cap_per_24h: c.posting_cap_per_24h || defaultInfo.posting_cap_per_24h,
+          };
+        }
+
         try {
           if (conn) {
             const tokens =
@@ -972,6 +990,126 @@ router.post(
           // Ignore live fetch failures and use defaults
         }
 
+        // Validate selected privacy is permitted by the creator
+        if (tiktokOpts && typeof tiktokOpts.privacy === "string") {
+          const allowed = Array.isArray(creator.privacy_level_options)
+            ? creator.privacy_level_options
+            : [];
+          if (!allowed.includes(tiktokOpts.privacy)) {
+            try {
+              await db.collection("admin_audit").add({
+                type: "tiktok_publish_attempt",
+                uid,
+                outcome: "rejected",
+                reason: "privacy_not_allowed",
+                details: { requested: tiktokOpts.privacy, allowed },
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                ip: req.ip,
+              });
+            } catch (e) {
+              console.warn("Failed to write tiktok publish audit (privacy)", e && e.message);
+            }
+            return res.status(400).json({
+              error: "tiktok_privacy_not_allowed",
+              message: "Selected privacy option is not permitted by the connected TikTok account.",
+            });
+          }
+        }
+
+        // Validate requested interactions are allowed by the creator
+        if (tiktokOpts && tiktokOpts.interactions && typeof tiktokOpts.interactions === "object") {
+          const blocked = [];
+          ["comments", "duet", "stitch"].forEach(k => {
+            if (
+              tiktokOpts.interactions[k] &&
+              creator.interactions &&
+              creator.interactions[k] === false
+            )
+              blocked.push(k);
+          });
+          if (blocked.length) {
+            try {
+              await db.collection("admin_audit").add({
+                type: "tiktok_publish_attempt",
+                uid,
+                outcome: "rejected",
+                reason: "interaction_not_allowed",
+                details: { requested: tiktokOpts.interactions, blocked },
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                ip: req.ip,
+              });
+            } catch (e) {
+              console.warn("Failed to write tiktok publish audit (interaction)", e && e.message);
+            }
+            return res.status(400).json({
+              error: "tiktok_interaction_not_allowed",
+              message: `Requested interaction(s) not allowed by creator: ${blocked.join(", ")}`,
+            });
+          }
+        }
+
+        // Branded content cannot be private: enforce invariant server-side as well
+        if (
+          tiktokOpts &&
+          tiktokOpts.commercial &&
+          tiktokOpts.commercial.brandedContent &&
+          tiktokOpts.privacy === "SELF_ONLY"
+        ) {
+          try {
+            await db.collection("admin_audit").add({
+              type: "tiktok_publish_attempt",
+              uid,
+              outcome: "rejected",
+              reason: "branded_content_requires_public",
+              details: { commercial: tiktokOpts.commercial, privacy: tiktokOpts.privacy },
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              ip: req.ip,
+            });
+          } catch (e) {
+            console.warn("Failed to write tiktok publish audit (branded)", e && e.message);
+          }
+          return res.status(400).json({
+            error: "tiktok_branded_content_requires_public",
+            message: "Branded content cannot be private. Please choose a public privacy option.",
+          });
+        }
+
+        // Enforce posting cap per 24 hours if provided
+        if (creator && typeof creator.posting_cap_per_24h === "number") {
+          try {
+            const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            const q = db
+              .collection("admin_audit")
+              .where("type", "==", "tiktok_publish")
+              .where("uid", "==", uid)
+              .where("createdAt", ">=", cutoff);
+            const snap = await q.get();
+            const count = snap ? snap.size : 0;
+            if (count >= creator.posting_cap_per_24h) {
+              try {
+                await db.collection("admin_audit").add({
+                  type: "tiktok_publish_attempt",
+                  uid,
+                  outcome: "rejected",
+                  reason: "posting_cap_exceeded",
+                  details: { cap: creator.posting_cap_per_24h, count },
+                  createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                  ip: req.ip,
+                });
+              } catch (e) {
+                console.warn("Failed to write tiktok publish audit (cap)", e && e.message);
+              }
+              return res.status(403).json({
+                error: "tiktok_posting_cap_exceeded",
+                message: "Posting cap exceeded for this TikTok account in the last 24 hours.",
+              });
+            }
+          } catch (e) {
+            console.warn("Failed to check posting cap", e && e.message);
+            // Don't block publish on audit query failure; continue with validations below
+          }
+        }
+
         // Enforce duration constraint if provided
         if (
           meta &&
@@ -997,11 +1135,25 @@ router.post(
       // All validations passed — in DEMO mode simulate success so reviewers can record UX flow
       if (DEMO_MODE) {
         console.log("[TikTok Upload] DEMO MODE - Validations passed, simulating upload");
+        const demoVideoId = "demo_" + Date.now();
+        try {
+          await db.collection("admin_audit").add({
+            type: "tiktok_publish",
+            uid,
+            demo: true,
+            outcome: "success",
+            videoId: demoVideoId,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            ip: req.ip,
+          });
+        } catch (e) {
+          console.warn("Failed to write tiktok publish audit (demo success)", e && e.message);
+        }
         return res.status(200).json({
           ok: true,
           demo: true,
           message: "Demo upload successful - awaiting video.upload scope approval",
-          videoId: "demo_" + Date.now(),
+          videoId: demoVideoId,
           shareUrl: "https://www.tiktok.com/@demo/video/123456789",
           note: "This is a demonstration response. Real uploads require video.upload and video.publish scopes.",
         });
@@ -1359,6 +1511,24 @@ router.get("/creator_info", authMiddleware, ttPublicLimiter, async (req, res) =>
           (infoJson && infoJson.data && infoJson.data.posting_cap_per_24h) ||
           defaultInfo.posting_cap_per_24h,
       };
+      // Determine recent publish counts so the frontend can enforce posting_cap_per_24h without additional requests
+      try {
+        const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const snap = await db
+          .collection("admin_audit")
+          .where("type", "==", "tiktok_publish")
+          .where("uid", "==", uid)
+          .where("createdAt", ">=", cutoff)
+          .get();
+        const recentCount = snap ? snap.size || 0 : 0;
+        mapped.posts_in_last_24h = recentCount;
+        mapped.posting_remaining = Math.max(0, (mapped.posting_cap_per_24h || 0) - recentCount);
+      } catch (e) {
+        // ignore failures and leave counts unspecified
+        mapped.posts_in_last_24h = undefined;
+        mapped.posting_remaining = undefined;
+      }
+
       // audit log the successful creator_info mapping (avoid storing tokens or PII)
       try {
         await db.collection("admin_audit").add({

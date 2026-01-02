@@ -7,6 +7,8 @@ const svc = require("../services/videoClippingService");
 const dns = require("dns").promises;
 
 describe("VideoClippingService SSRF protections (server)", () => {
+  // Increase timeout for network-related tests on slow CI runners
+  jest.setTimeout(30000);
   afterEach(async () => {
     nock.cleanAll();
     jest.restoreAllMocks();

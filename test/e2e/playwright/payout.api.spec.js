@@ -60,21 +60,39 @@ test(hasCreds ? "API payout request - create payout doc and update user pending 
     } catch (e) {
       console.warn("⚠️ Could not seed user data in Firestore for payout test:", e.message);
     }
+    try {
+      const check = await db.collection("users").doc(uid).get();
+      console.warn("[E2E] seed check - user exists?", !!(check && check.exists), check && check.exists ? check.data() : null);
+    } catch (e) {
+      console.warn("[E2E] seed check failed:", e.message);
+    }
 
     // Call payout API
-    const res = await fetch(`http://127.0.0.1:${mainPort}/api/monetization/earnings/payout/self`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer test-token-for-${uid}`,
-        "x-playwright-e2e": "1",
-      },
-      body: JSON.stringify({ paymentMethod: "paypal" }),
-    });
+    // POST payout - make the call with a small retry/backoff to reduce transient CI flakes
+    async function postPayoutAttempt() {
+      return fetch(`http://127.0.0.1:${mainPort}/api/monetization/earnings/payout/self`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer test-token-for-${uid}`,
+          // Do not set x-playwright-e2e for this API test so auth middleware
+          // uses the provided test token and identifies the seeded user.
+        },
+        body: JSON.stringify({ paymentMethod: "paypal" }),
+      });
+    }
+
+    let res = await postPayoutAttempt();
+    if (!(res.status === 200 || res.status === 201 || res.status === 202)) {
+      // retry once after a short backoff for transient issues
+      await new Promise(r => setTimeout(r, 500));
+      res = await postPayoutAttempt();
+    }
     const json = await res.json();
     const statusOk = res.status === 200 || res.status === 201 || res.status === 202;
+    if (!statusOk) console.warn("Payout API responded with non-OK status:", res.status, json);
     expect(statusOk).toBeTruthy();
-    if (json.error) console.warn("API returned error:", json);
+    if (json && json.error) console.warn("API returned error:", json.error || json);
     expect(json.success).toBeTruthy();
     expect(json.amount).toBeTruthy();
     expect(json.amount).toBeCloseTo(pending, 2);

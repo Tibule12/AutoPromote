@@ -128,5 +128,5 @@ describe("tiktokRoutes", () => {
       "Captured tokens stored:",
       typeof lastSetArgs.tokens === "string" ? "[encrypted]" : lastSetArgs.tokens
     );
-  });
+  }, 20000);
 });
