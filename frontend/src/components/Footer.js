@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Footer.css";
 import { PUBLIC_SITE_URL } from "../config";
+import NewsletterSubscribe from "./NewsletterSubscribe";
 
 const Icon = ({ name }) => {
   if (name === "github")
@@ -26,6 +27,22 @@ const Icon = ({ name }) => {
 
 const Footer = () => {
   const site = PUBLIC_SITE_URL || "https://autopromote.org";
+  const [showNewsletter, setShowNewsletter] = useState(false);
+  const [lang, setLang] = useState(() => {
+    try {
+      return localStorage.getItem("ap_lang") || "en";
+    } catch (_) {
+      return "en";
+    }
+  });
+
+  const setLanguage = l => {
+    try {
+      localStorage.setItem("ap_lang", l);
+    } catch (_) {}
+    setLang(l);
+  };
+
   return (
     <footer className="ap-footer" role="contentinfo">
       <div className="ap-footer-main">
@@ -33,31 +50,40 @@ const Footer = () => {
           <div className="ap-logo" aria-label="AutoPromote logo">
             AutoPromote
           </div>
-          <nav className="ap-footer-links" aria-label="Footer primary links">
-            <a href={`${site}/docs`} target="_blank" rel="noopener noreferrer">
-              Docs
-            </a>
-            <span className="dot">•</span>
-            <a href={`${site}/blog`} target="_blank" rel="noopener noreferrer">
-              Blog
-            </a>
-            <span className="dot">•</span>
-            <a href={`${site}/about`} target="_blank" rel="noopener noreferrer">
-              About
-            </a>
-            <span className="dot">•</span>
-            <a href={`${site}/contact`} target="_blank" rel="noopener noreferrer">
-              Contact
-            </a>
-            <span className="dot">•</span>
-            <a href={`${site}/terms`} target="_blank" rel="noopener noreferrer">
-              Terms of Service
-            </a>
-            <span className="dot">•</span>
-            <a href={`${site}/privacy`} target="_blank" rel="noopener noreferrer">
-              Privacy Policy
-            </a>
-          </nav>
+
+          <div className="ap-footer-group">
+            <nav className="ap-footer-links" aria-label="Footer primary links">
+              <a href="/docs">Docs</a>
+              <span className="dot">•</span>
+              <a href="/blog">Blog</a>
+              <span className="dot">•</span>
+              <a href="/about">About</a>
+              <span className="dot">•</span>
+              <a href="/contact">Contact</a>
+              <span className="dot">•</span>
+              <a href="/pricing">Pricing</a>
+            </nav>
+
+            <nav className="ap-footer-links ap-legal" aria-label="Footer legal links">
+              <a href={`${site}/terms`} target="_blank" rel="noopener noreferrer">
+                Terms
+              </a>
+              <span className="dot">•</span>
+              <a href={`${site}/privacy`} target="_blank" rel="noopener noreferrer">
+                Privacy
+              </a>
+              <span className="dot">•</span>
+              <a href="/accessibility">Accessibility</a>
+              <span className="dot">•</span>
+              <a href="/cookies">Cookies</a>
+            </nav>
+
+            <nav className="ap-footer-links ap-company" aria-label="Company links">
+              <a href="/careers">Careers</a>
+              <span className="dot">•</span>
+              <a href="/support">Support</a>
+            </nav>
+          </div>
         </div>
 
         <div className="ap-footer-right">
@@ -87,6 +113,7 @@ const Footer = () => {
               <Icon name="linkedin" />
             </a>
           </div>
+
           <div className="ap-extra">
             <a
               className="ap-status"
@@ -96,6 +123,33 @@ const Footer = () => {
             >
               Status
             </a>
+
+            <div className="ap-lang">
+              <label htmlFor="ap-lang-select" className="sr-only">
+                Language
+              </label>
+              <select
+                id="ap-lang-select"
+                value={lang}
+                onChange={e => setLanguage(e.target.value)}
+                className="ap-lang-select"
+                aria-label="Select language"
+              >
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+              </select>
+            </div>
+
+            <button
+              type="button"
+              className="ap-newsletter-toggle"
+              onClick={() => setShowNewsletter(s => !s)}
+              aria-expanded={showNewsletter}
+            >
+              Subscribe
+            </button>
+
             <button
               type="button"
               className="ap-back-to-top"
@@ -109,6 +163,12 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {showNewsletter && (
+        <div className="ap-newsletter-panel">
+          <NewsletterSubscribe />
+        </div>
+      )}
 
       <div className="ap-footer-copy">
         © {new Date().getFullYear()} AutoPromote. All rights reserved.
