@@ -926,6 +926,38 @@ function App() {
       return <div style={{ color: "red" }}>Contact page not found.</div>;
     }
   }
+  if (routePathState && routePathState.startsWith("/support")) {
+    try {
+      const Support = require("./Support").default;
+      return <Support />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Support page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/careers")) {
+    try {
+      const Careers = require("./Careers").default;
+      return <Careers />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Careers page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/accessibility")) {
+    try {
+      const Accessibility = require("./Accessibility").default;
+      return <Accessibility />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Accessibility page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/cookies")) {
+    try {
+      const Cookies = require("./Cookies").default;
+      return <Cookies />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Cookies page not found.</div>;
+    }
+  }
 
   if (routePathState && routePathState.startsWith("/pricing")) {
     return <PayPalSubscriptionPanel />;
