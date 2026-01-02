@@ -6,7 +6,7 @@ import "./Auth.css";
 
 const AdminLoginForm = ({ onLogin }) => {
   const [formData, setFormData] = useState({
-    email: "admin@autopromote.org",
+    email: "thulani@autopromote.org",
     password: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
@@ -162,7 +162,7 @@ const AdminLoginForm = ({ onLogin }) => {
           style={{ marginTop: "15px", fontSize: "14px", color: "#666" }}
         >
           <p>Default admin credentials:</p>
-          <p>Email: admin@autopromote.org</p>
+          <p>Email: thulani@autopromote.org</p>
           <p>Password: AdminPassword123!</p>
         </div>
 

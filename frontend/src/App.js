@@ -960,7 +960,12 @@ function App() {
   }
 
   if (routePathState && routePathState.startsWith("/pricing")) {
-    return <PayPalSubscriptionPanel />;
+    try {
+      const Pricing = require("./Pricing").default;
+      return <Pricing />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Pricing page not found.</div>;
+    }
   }
 
   return (
