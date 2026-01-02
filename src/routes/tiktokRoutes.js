@@ -892,6 +892,12 @@ router.post(
             message: "Explicit TikTok consent required.",
           });
         }
+        // Optional sound_id: must be a string when provided
+        if (tiktokOpts.sound_id && typeof tiktokOpts.sound_id !== "string") {
+          return res
+            .status(400)
+            .json({ error: "tiktok_invalid_sound", message: "Invalid sound identifier." });
+        }
         // Disallow overlays/watermarks (frontend should remove overlays before publish)
         if (meta && meta.overlay) {
           return res.status(400).json({
@@ -1143,6 +1149,7 @@ router.post(
             demo: true,
             outcome: "success",
             videoId: demoVideoId,
+            sound_id: tiktokOpts && tiktokOpts.sound_id ? tiktokOpts.sound_id : undefined,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             ip: req.ip,
           });
