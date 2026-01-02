@@ -8,9 +8,11 @@ const Support = () => {
         Need help? Email our support team at{" "}
         <a href="mailto:support@autopromote.org">support@autopromote.org</a> or use the contact
         page.
-      </p>
-      <p>
-        For documentation and guides, visit the <a href="/docs">Docs</a> section.
+        <p>
+          Need help? Email our support team at{" "}
+          <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a> or use the contact
+          page.
+        </p>
       </p>
     </div>
   );

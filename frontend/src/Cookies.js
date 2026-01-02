@@ -7,7 +7,7 @@ const Cookies = () => {
       <p>
         We use cookies and similar technologies to provide core functionality and to improve your
         experience. You can control some cookie settings in your browser. For questions, email{" "}
-        <a href="mailto:privacy@autopromote.org">privacy@autopromote.org</a>.
+        <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
       </p>
     </div>
   );

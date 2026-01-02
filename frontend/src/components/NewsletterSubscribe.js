@@ -24,7 +24,7 @@ const NewsletterSubscribe = () => {
       }
     } catch (_) {}
     // Fallback: open mail client
-    window.location.href = `mailto:newsletter@autopromote.org?subject=Subscribe&body=Please%20subscribe%20${encodeURIComponent(
+    window.location.href = `mailto:thulani@autopromote.org?subject=Subscribe&body=Please%20subscribe%20${encodeURIComponent(
       email
     )}`;
     setStatus("Opened mail client as a fallback.");

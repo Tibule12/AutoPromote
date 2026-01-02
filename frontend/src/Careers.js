@@ -6,7 +6,7 @@ const Careers = () => {
       <h2>Careers</h2>
       <p>
         We are growing and hiring. If you are interested in joining the team, send your CV to{" "}
-        <a href="mailto:jobs@autopromote.org">jobs@autopromote.org</a>.
+        <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
       </p>
       <h3>Open Roles</h3>
       <ul>

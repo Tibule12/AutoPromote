@@ -9,11 +9,12 @@ const Accessibility = () => {
         standard accessibility practices and continue to improve the product. If you have trouble
         using this site, please contact{" "}
         <a href="mailto:accessibility@autopromote.org">accessibility@autopromote.org</a>.
-      </p>
-      <h3>Keyboard navigation</h3>
-      <p>
-        All interactive controls are operable by keyboard. Focus outlines are visible and color
-        contrast meets our target.
+        <p>
+          AutoPromote is committed to providing an accessible experience for all users. We follow
+          standard accessibility practices and continue to improve the product. If you have trouble
+          using this site, please contact{" "}
+          <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
+        </p>
       </p>
     </div>
   );
