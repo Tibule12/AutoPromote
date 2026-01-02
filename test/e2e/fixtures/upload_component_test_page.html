@@ -93,7 +93,9 @@
           document.getElementById("expanded-body").innerHTML = "";
           if (selectedPlatform === "tiktok") {
             document.getElementById("expanded-body").innerHTML =
-              '<label>Privacy<select id="tiktok-privacy"><option value="">Select privacy</option><option value="EVERYONE">EVERYONE</option><option value="FRIENDS">FRIENDS</option><option value="SELF_ONLY">SELF_ONLY</option></select></label>';
+              '<label>Privacy<select id="tiktok-privacy"><option value="">Select privacy</option><option value="EVERYONE">EVERYONE</option><option value="FRIENDS">FRIENDS</option><option value="SELF_ONLY">SELF_ONLY</option></select></label>' +
+              '<label style="display:block;margin-top:8px"><input type="checkbox" id="tiktok-consent" /> I confirm Music Usage Confirmation</label>' +
+              '<label style="display:block;margin-top:8px">Sound<select id="tiktok-sound"><option value="">Select a sound</option><option value="sound_viral_1">TikTok Sound 1</option><option value="sound_viral_2">TikTok Sound 2</option><option value="original_audio">Original audio</option></select></label>';
           } else if (selectedPlatform === "discord") {
             document.getElementById("expanded-body").innerHTML =
               '<label>Discord Channel ID<input id="discord-channel-id" placeholder="Discord channel ID" /></label>';
@@ -161,10 +163,13 @@
         if (selectedPlatform === 'tiktok') {
           const consentEl = document.getElementById('tiktok-consent');
           const privacyEl = document.getElementById('tiktok-privacy');
+          const soundEl = document.getElementById('tiktok-sound');
           const consent = consentEl ? !!consentEl.checked : false;
           const privacy = privacyEl ? privacyEl.value : "";
+          const sound = soundEl ? soundEl.value : "";
           if (consent && privacy) {
             platformOptions.tiktok = { consent, privacy };
+            if (sound) platformOptions.tiktok.sound_id = sound;
           }
         }
 
@@ -240,10 +245,13 @@
         if (selectedPlatform === 'tiktok') {
           const consentEl = document.getElementById('tiktok-consent');
           const privacyEl = document.getElementById('tiktok-privacy');
+          const soundEl = document.getElementById('tiktok-sound');
           const consent = consentEl ? !!consentEl.checked : false;
           const privacy = privacyEl ? privacyEl.value : "";
+          const sound = soundEl ? soundEl.value : "";
           if (consent && privacy) {
             platformOptions.tiktok = { consent, privacy };
+            if (sound) platformOptions.tiktok.sound_id = sound;
           }
         }
 
