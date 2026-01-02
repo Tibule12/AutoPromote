@@ -28,26 +28,8 @@ describe("clipRoutes", () => {
     let testDb;
 
     beforeAll(async () => {
-      const emHost = process.env.FIRESTORE_EMULATOR_HOST;
-      const opts = { projectId: "clip-routes-test" };
-      if (emHost) {
-        const [host, port] = emHost.split(":");
-        opts.firestore = { host, port: parseInt(port, 10) };
-      }
-      // Retry initializeTestEnvironment a few times to avoid transient discovery errors
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        try {
-          testEnv = await initializeTestEnvironment(opts);
-          break;
-        } catch (e) {
-          console.warn(
-            `[clipRoutes.test] initializeTestEnvironment attempt ${attempt} failed:`,
-            e && e.message
-          );
-          if (attempt === 3) throw e;
-          await new Promise(r => setTimeout(r, 500));
-        }
-      }
+      const { initializeTestEnvironmentWithDiscovery } = require("../../testUtils/initTestEnv");
+      testEnv = await initializeTestEnvironmentWithDiscovery("clip-routes-test");
     });
 
     beforeEach(async () => {

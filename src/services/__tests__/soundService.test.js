@@ -15,7 +15,8 @@ describe("soundService", () => {
   if (hasRulesUnitTesting) {
     let testEnv, testDb;
     beforeAll(async () => {
-      testEnv = await initializeTestEnvironment({ projectId: "sound-service" });
+      const { initializeTestEnvironmentWithDiscovery } = require("../../testUtils/initTestEnv");
+      testEnv = await initializeTestEnvironmentWithDiscovery("sound-service");
     });
     beforeEach(async () => {
       const ctx = testEnv.unauthenticatedContext();

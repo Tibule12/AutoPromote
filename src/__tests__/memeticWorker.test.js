@@ -20,7 +20,8 @@ describe("memeticWorker", () => {
     let testDb;
 
     beforeAll(async () => {
-      testEnv = await initializeTestEnvironment({ projectId: "memetic-test" });
+      const { initializeTestEnvironmentWithDiscovery } = require("../testUtils/initTestEnv");
+      testEnv = await initializeTestEnvironmentWithDiscovery("memetic-test");
     });
 
     beforeEach(async () => {
