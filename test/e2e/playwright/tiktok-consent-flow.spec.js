@@ -4,6 +4,68 @@ const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
 const BASE = `http://localhost:${STATIC_PORT}`;
 
 let serverProcess;
+const fs = require("fs");
+const http = require("http");
+const url = require("url");
+const path = require("path");
+
+// Start a minimal static server serving test fixtures when localhost:5000 is not available.
+async function ensureStaticServer(port = 5000) {
+  const fixturesRoot = path.resolve(__dirname, "..", "fixtures");
+  const frontendBuild = path.resolve(__dirname, "..", "..", "frontend", "build");
+  const roots = [fixturesRoot, frontendBuild];
+  // quick probe
+  try {
+    await new Promise((res, rej) => {
+      const req = http.request({ method: "GET", host: "127.0.0.1", port, path: "/", timeout: 1000 }, r => {
+        res();
+      });
+      req.on("error", rej);
+      req.end();
+    });
+    return null; // already up
+  } catch (e) {
+    // start simple server
+  }
+
+  const server = http.createServer((req, res) => {
+    try {
+      const u = url.parse(req.url).pathname || "/";
+      // Try each root (fixtures first, then built frontend)
+      let filePath = null;
+      for (const r of roots) {
+        const candidate = path.join(r, u.replace(/^\//, ""));
+        let final = candidate;
+        try {
+          if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) final = path.join(candidate, "index.html");
+        } catch (_) {}
+        if (fs.existsSync(final)) {
+          filePath = final;
+          break;
+        }
+      }
+      if (!filePath) {
+        res.statusCode = 404;
+        return res.end("Not found");
+      }
+      const ext = path.extname(filePath).toLowerCase();
+      const ct = ext === ".html" ? "text/html" : ext === ".js" ? "application/javascript" : ext === ".css" ? "text/css" : "application/octet-stream";
+      res.setHeader("Content-Type", ct + "; charset=utf-8");
+      const stream = fs.createReadStream(filePath);
+      stream.pipe(res);
+    } catch (err) {
+      res.statusCode = 500;
+      res.end("Server error");
+    }
+  });
+
+  await new Promise((res, rej) => {
+    server.once("error", rej);
+    server.listen(port, "127.0.0.1", () => res());
+  });
+
+  return server;
+}
 
 // Note: this test focuses on the SPA behavior: preview, edit, confirm modal and consent enforcement
 
@@ -22,6 +84,10 @@ test.beforeEach(async ({ page }) => {
 test("Preview edit + Confirm require consent and send upload when confirmed", async ({ page }) => {
   // Ensure static server is available before navigating (retry to avoid transient connection refused in CI)
   const target = `${BASE}/upload_component_test_page.html`;
+  // If static host is not available, start a local fixture server for the duration of this test
+  if (!serverProcess) {
+    serverProcess = await ensureStaticServer(Number(process.env.STATIC_SERVER_PORT || 5000));
+  }
   const maxWait = 15000; // ms
   const start = Date.now();
   let lastErr = null;
@@ -74,7 +140,13 @@ test("Preview edit + Confirm require consent and send upload when confirmed", as
   // Intercept upload POST and assert it receives the final title
   let uploadCalled = false;
   await page.route("**/api/content/upload", async route => {
-    const post = await route.request().postDataJSON().catch(() => ({}));
+    let post = {};
+    try {
+      const pd = route.request().postData();
+      post = pd ? JSON.parse(pd) : {};
+    } catch (_) {
+      post = {};
+    }
     if (post && post.title && post.title.includes("Edited via Playwright")) uploadCalled = true;
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, id: 'abc123' }) });
   });
@@ -85,4 +157,30 @@ test("Preview edit + Confirm require consent and send upload when confirmed", as
   // Wait briefly for the upload route to be hit
   await page.waitForTimeout(800);
   expect(uploadCalled).toBeTruthy();
+});
+
+test.afterEach(async () => {
+  try {
+    if (serverProcess && typeof serverProcess.close === "function") {
+      await new Promise(r => {
+        let done = false;
+        try {
+          serverProcess.close(() => {
+            if (!done) { done = true; r(); }
+          });
+        } catch (e) {
+          // if close throws, resolve anyway
+          if (!done) { done = true; r(); }
+        }
+        // fallback timeout to avoid hanging forever
+        setTimeout(() => {
+          if (!done) { done = true; r(); }
+        }, 1000);
+      });
+    }
+  } catch (e) {
+    // ignore
+  } finally {
+    serverProcess = null;
+  }
 });

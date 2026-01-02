@@ -45,7 +45,10 @@
   </head>
   <body>
     <h1>Per-platform Upload Component Test</h1>
-    <label>File <input id="content-file-input" type="file" /></label>
+    <div data-testid="content-upload-form">
+      <label>Title <input id="content-title" aria-label="Title" type="text" /></label>
+      <label>File <input id="content-file-input" type="file" /></label>
+    </div>
     <div id="platform-grid">
       <div class="platform-tile" data-platform="spotify" id="tile-spotify">Spotify</div>
       <div class="platform-tile" data-platform="tiktok" id="tile-tiktok" aria-label="Tiktok">Tiktok</div>
@@ -62,9 +65,9 @@
       <h3 id="expanded-title"></h3>
       <div id="expanded-body"></div>
       <div style="margin-top: 8px">
-        <button id="preview-btn">Preview</button>
+        <button id="preview-btn" aria-label="Preview Content">Preview</button>
         <button id="quality-btn">Quality Check</button>
-        <button id="upload-btn">Upload</button>
+        <button id="upload-btn" aria-label="Upload Content">Upload</button>
       </div>
       <div id="preview-cards"></div>
       <div id="quality-result"></div>
@@ -90,7 +93,7 @@
           document.getElementById("expanded-body").innerHTML = "";
           if (selectedPlatform === "tiktok") {
             document.getElementById("expanded-body").innerHTML =
-              '<label>Privacy<select id="tiktok-privacy"><option value="">Select privacy</option><option value="EVERYONE">EVERYONE</option><option value="FRIENDS">FRIENDS</option><option value="SELF_ONLY">SELF_ONLY</option></select></label><label><input id="tiktok-consent" type="checkbox" /> Consent</label>';
+              '<label>Privacy<select id="tiktok-privacy"><option value="">Select privacy</option><option value="EVERYONE">EVERYONE</option><option value="FRIENDS">FRIENDS</option><option value="SELF_ONLY">SELF_ONLY</option></select></label>';
           } else if (selectedPlatform === "discord") {
             document.getElementById("expanded-body").innerHTML =
               '<label>Discord Channel ID<input id="discord-channel-id" placeholder="Discord channel ID" /></label>';
@@ -177,10 +180,18 @@
         const r = await endpointCall("/api/content/upload", payload);
         const cards = document.getElementById("preview-cards");
         cards.innerHTML = "";
-        (r.json.previews || []).forEach(p => {
+        // If the endpoint returned previews, use them; otherwise synthesize a preview for testing
+        const previews = (r.json && r.json.previews) || [{ title: payload.title || title || 'Preview' }];
+        previews.forEach((p, idx) => {
           const c = document.createElement("div");
           c.className = "preview-card";
           c.textContent = p.title;
+          const editBtn = document.createElement('button');
+          editBtn.textContent = 'Edit Preview';
+          editBtn.addEventListener('click', () => {
+            openEditModal(c);
+          });
+          c.appendChild(editBtn);
           cards.appendChild(c);
         });
       });
@@ -245,11 +256,80 @@
           isDryRun: false,
           platform_options: platformOptions,
         };
-        const r = await endpointCall("/api/content/upload", payload);
-        document.getElementById("upload-status").textContent = r.ok
-          ? "Upload submitted"
-          : "Upload failed";
+        // Show confirm modal
+        openConfirmModal(payload, async finalPayload => {
+          const r = await endpointCall("/api/content/upload", finalPayload);
+          document.getElementById("upload-status").textContent = r.ok ? "Upload submitted" : "Upload failed";
+        });
       });
+
+      // Edit modal
+      function openEditModal(cardEl) {
+        let modal = document.getElementById('edit-modal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'edit-modal';
+          modal.style.position = 'fixed';
+          modal.style.left = '50%';
+          modal.style.top = '50%';
+          modal.style.transform = 'translate(-50%,-50%)';
+          modal.style.background = '#fff';
+          modal.style.padding = '12px';
+          modal.style.border = '1px solid #ccc';
+          modal.innerHTML = '<label>Edit title <input aria-label="Edit preview title" id="edit-preview-title" /></label><div><button id="edit-save">Save</button><button id="edit-cancel">Cancel</button></div>';
+          document.body.appendChild(modal);
+          document.getElementById('edit-cancel').addEventListener('click', () => modal.remove());
+        }
+        const input = modal.querySelector('#edit-preview-title');
+        input.value = cardEl.firstChild.textContent || '';
+        modal.style.display = 'block';
+        document.getElementById('edit-save').onclick = () => {
+          cardEl.firstChild.textContent = input.value;
+          modal.remove();
+        };
+      }
+
+      // Confirm modal
+      function openConfirmModal(payload, onConfirm) {
+        let modal = document.getElementById('confirm-modal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'confirm-modal';
+          modal.style.position = 'fixed';
+          modal.style.left = '50%';
+          modal.style.top = '50%';
+          modal.style.transform = 'translate(-50%,-50%)';
+          modal.style.background = '#fff';
+          modal.style.padding = '12px';
+          modal.style.border = '1px solid #ccc';
+          modal.innerHTML = '<label><input type="checkbox" id="confirm-consent" /> I consent</label><div><button id="confirm-publish">Confirm & Publish</button><button id="confirm-cancel">Cancel</button></div>';
+          document.body.appendChild(modal);
+        }
+        const confirmBtn = modal.querySelector('#confirm-publish');
+        const checkbox = modal.querySelector('#confirm-consent');
+        confirmBtn.disabled = true;
+        checkbox.onchange = () => {
+          confirmBtn.disabled = !checkbox.checked;
+        };
+        modal.style.display = 'block';
+        modal.querySelector('#confirm-cancel').onclick = () => modal.remove();
+        confirmBtn.onclick = async () => {
+          modal.remove();
+          // include edited title from preview if present
+          const edited = document.querySelector('.preview-card');
+          if (edited) payload.title = edited.firstChild.textContent || payload.title;
+          payload.isDryRun = false;
+          await onConfirm(payload);
+        };
+      }
+
+        // Auto-select the Tiktok tile so the expanded options and Preview button are visible for tests
+        (function autoSelectTiktok(){
+          try {
+            const t = document.getElementById('tile-tiktok');
+            if (t) t.click();
+          } catch (e) {}
+        })();
     </script>
   </body>
 </html>

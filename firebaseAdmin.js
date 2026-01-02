@@ -9,6 +9,11 @@ if (bypass) {
   // Minimal in-memory firestore stub
   const crypto = require('crypto');
   const __inMemoryDB = new Map();
+  // Expose shared in-memory DB globally so src/firebaseAdmin.js and other modules
+  // that also create a stub can reuse the same store during test bypass.
+  try {
+    global.__AUTOPROMOTE_IN_MEMORY_DB = __inMemoryDB;
+  } catch (_) {}
   const CollectionStub = function(name) { this._name = name || 'collection'; };
   CollectionStub.prototype.doc = function(id) {
     const _id = id || ('stub-' + (crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(4).toString('hex')));

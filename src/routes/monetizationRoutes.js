@@ -392,6 +392,13 @@ router.get("/earnings/summary", authMiddleware, async (req, res) => {
 router.post("/earnings/payout/self", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId;
+    try {
+      console.warn("[E2E] payout endpoint hit by userId=", userId);
+      const checkDoc = await db.collection("users").doc(userId).get();
+      console.warn("[E2E] payout endpoint - userDoc.exists=", !!(checkDoc && checkDoc.exists));
+    } catch (e) {
+      console.warn("[E2E] payout endpoint - could not read user doc:", e && e.message);
+    }
     const { paymentMethod } = req.body;
 
     const result = await creatorRewards.requestPayout(userId, paymentMethod || "paypal");
