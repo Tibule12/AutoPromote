@@ -30,7 +30,9 @@ const Footer = () => {
     <footer className="ap-footer" role="contentinfo">
       <div className="ap-footer-main">
         <div className="ap-footer-left">
-          <div className="ap-logo">AutoPromote</div>
+          <div className="ap-logo" aria-label="AutoPromote logo">
+            AutoPromote
+          </div>
           <nav className="ap-footer-links" aria-label="Footer primary links">
             <a href={`${site}/docs`} target="_blank" rel="noopener noreferrer">
               Docs
@@ -84,6 +86,26 @@ const Footer = () => {
             >
               <Icon name="linkedin" />
             </a>
+          </div>
+          <div className="ap-extra">
+            <a
+              className="ap-status"
+              href="https://status.autopromote.org"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Status
+            </a>
+            <button
+              type="button"
+              className="ap-back-to-top"
+              onClick={() => {
+                if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              aria-label="Back to top"
+            >
+              ↑
+            </button>
           </div>
         </div>
       </div>
