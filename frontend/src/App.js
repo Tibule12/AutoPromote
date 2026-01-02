@@ -893,8 +893,79 @@ function App() {
     };
   }, []);
 
+  // Simple static pages routing (Docs, Blog, About, Contact)
+  if (routePathState && routePathState.startsWith("/docs")) {
+    try {
+      const Docs = require("./Docs").default;
+      return <Docs />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Docs page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/blog")) {
+    try {
+      const Blog = require("./Blog").default;
+      return <Blog />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Blog page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/about")) {
+    try {
+      const About = require("./About").default;
+      return <About />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>About page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/contact")) {
+    try {
+      const Contact = require("./Contact").default;
+      return <Contact />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Contact page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/support")) {
+    try {
+      const Support = require("./Support").default;
+      return <Support />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Support page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/careers")) {
+    try {
+      const Careers = require("./Careers").default;
+      return <Careers />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Careers page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/accessibility")) {
+    try {
+      const Accessibility = require("./Accessibility").default;
+      return <Accessibility />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Accessibility page not found.</div>;
+    }
+  }
+  if (routePathState && routePathState.startsWith("/cookies")) {
+    try {
+      const Cookies = require("./Cookies").default;
+      return <Cookies />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Cookies page not found.</div>;
+    }
+  }
+
   if (routePathState && routePathState.startsWith("/pricing")) {
-    return <PayPalSubscriptionPanel />;
+    try {
+      const Pricing = require("./Pricing").default;
+      return <Pricing />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Pricing page not found.</div>;
+    }
   }
 
   return (

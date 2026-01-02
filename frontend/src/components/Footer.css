@@ -80,6 +80,72 @@
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
 }
 
+.ap-footer-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ap-footer-links.ap-legal {
+  color: #666;
+}
+
+.ap-footer-links.ap-company {
+  color: #666;
+}
+
+.ap-lang {
+  display: inline-block;
+}
+
+.ap-lang-select {
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 6px 8px;
+  background: #fff;
+}
+
+.ap-newsletter-toggle {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ap-newsletter-panel {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 0 0;
+}
+
+.ap-newsletter-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ap-newsletter-form input[type="email"] {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.ap-newsletter-form button {
+  background: #6c4cf7;
+  color: #fff;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ap-newsletter-status {
+  font-size: 0.9rem;
+  color: #444;
+}
+
 .ap-footer-copy {
   color: #888;
   font-size: 0.92rem;

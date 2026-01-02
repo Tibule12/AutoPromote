@@ -14,7 +14,8 @@ describe("fetchProviderFeedsWorker", () => {
   if (hasRulesUnitTesting) {
     let testEnv, testDb;
     beforeAll(async () => {
-      testEnv = await initializeTestEnvironment({ projectId: "fetch-provider-worker" });
+      const { initializeTestEnvironmentWithDiscovery } = require("../../testUtils/initTestEnv");
+      testEnv = await initializeTestEnvironmentWithDiscovery("fetch-provider-worker");
     });
     beforeEach(async () => {
       const ctx = testEnv.unauthenticatedContext();
