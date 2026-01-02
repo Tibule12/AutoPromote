@@ -30,11 +30,24 @@ async function ensureStaticServer(port = 5000) {
 
   const server = http.createServer((req, res) => {
     try {
-      const u = url.parse(req.url).pathname || "/";
+      const rawPath = url.parse(req.url).pathname || "/";
+      // Sanitize requested path to avoid path traversal and other unsafe input.
+      let rel = rawPath.replace(/^\//, "");
+      try {
+        rel = decodeURIComponent(rel);
+      } catch (_) {
+        // ignore malformed encodings and use raw rel
+      }
+      // Remove any null bytes and parent-directory segments
+      rel = rel.split("/").filter(p => p && p !== ".." && p.indexOf("\0") === -1).join("/");
+
       // Try each root (fixtures first, then built frontend)
       let filePath = null;
       for (const r of roots) {
-        const candidate = path.join(r, u.replace(/^\//, ""));
+        const resolvedRoot = path.resolve(r);
+        const candidate = path.resolve(resolvedRoot, rel || "");
+        // Ensure candidate is within the resolved root to prevent traversal
+        if (!(candidate === resolvedRoot || candidate.startsWith(resolvedRoot + path.sep))) continue;
         let final = candidate;
         try {
           if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) final = path.join(candidate, "index.html");
