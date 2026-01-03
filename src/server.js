@@ -1461,6 +1461,17 @@ try {
     console.warn("Content quality check route not available:", e.message);
   }
 
+  // AfterDark (adult) area - restricted access. Routes mounted under /afterdark
+  try {
+    const requireAdultAccess = require('./middleware/requireAdultAccess');
+    const afterDarkRoutes = require('./routes/afterDarkRoutes');
+    // Mount behind authMiddleware and requireAdultAccess
+    app.use('/afterdark', authMiddleware, requireAdultAccess, afterDarkRoutes);
+    console.log('🚏 AfterDark routes mounted at /afterdark (restricted)');
+  } catch (e) {
+    console.log('⚠️ AfterDark routes mount failed:', e.message);
+  }
+
   // Register optional routes
   app.use("/api/withdrawals", routeLimiter({ windowHint: "withdrawals" }), withdrawalRoutes);
   app.use("/api/monetization", routeLimiter({ windowHint: "monetization" }), monetizationRoutes);
