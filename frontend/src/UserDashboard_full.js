@@ -16,6 +16,9 @@ import CommunityPanel from "./UserDashboardTabs/CommunityPanel";
 import CommunityFeed from "./CommunityFeed";
 import ClipStudioPanel from "./UserDashboardTabs/ClipStudioPanel";
 import AdsPanel from "./UserDashboardTabs/AdsPanel";
+import AfterDarkLanding from "./AfterDarkLanding";
+import AfterDarkCreate from "./AfterDarkCreate";
+import AdminKyc from "./AdminKyc";
 import UsageLimitBanner from "./components/UsageLimitBanner";
 import { auth } from "./firebaseClient";
 import { API_ENDPOINTS, API_BASE_URL } from "./config";
@@ -89,6 +92,7 @@ const UserDashboard = ({
     revenueEligible: false,
   });
   const [platformSummary, setPlatformSummary] = useState({ platforms: {} });
+  const [afterdarkRefreshKey, setAfterdarkRefreshKey] = useState(0);
   const [pinterestCreateVisible, setPinterestCreateVisible] = useState(false);
   const [pinterestCreateName, setPinterestCreateName] = useState("");
   const [pinterestCreateDesc, setPinterestCreateDesc] = useState("");
@@ -98,6 +102,15 @@ const UserDashboard = ({
     () => (Array.isArray(mySchedules) ? mySchedules : []),
     [mySchedules]
   );
+  const hasAfterDarkAccess = !!(
+    user &&
+    (user.isAdmin ||
+      user.role === "admin" ||
+      user.kycVerified ||
+      (user.flags && user.flags.afterDarkAccess))
+  );
+  const isAdminUser = !!(user && (user.isAdmin || user.role === "admin"));
+  const needsKyc = !!(user && !user.kycVerified);
 
   // Toggle dashboard-mode class on mount/unmount so global gradients don't show through dashboard pages
   useEffect(() => {
@@ -1112,6 +1125,15 @@ const UserDashboard = ({
             >
               Admin Audit
             </li>
+            {isAdminUser && (
+              <li
+                className={activeTab === "admin-kyc" ? "active" : ""}
+                onClick={() => handleNav("admin-kyc")}
+              >
+                Admin KYC
+              </li>
+            )}
+            {/* KYC uploads disabled for live-only AfterDark by design */}
             <li
               className={activeTab === "security" ? "active" : ""}
               onClick={() => handleNav("security")}
@@ -1133,6 +1155,14 @@ const UserDashboard = ({
             >
               AI Clips
             </li>
+            {hasAfterDarkAccess && (
+              <li
+                className={activeTab === "afterdark" ? "active" : ""}
+                onClick={() => handleNav("afterdark")}
+              >
+                AfterDark
+              </li>
+            )}
           </ul>
         </nav>
         <button className="logout-btn" onClick={onLogout}>
@@ -1291,6 +1321,10 @@ const UserDashboard = ({
 
         {activeTab === "admin-audit" && <AdminAuditViewer />}
 
+        {activeTab === "admin-kyc" && isAdminUser && <AdminKyc />}
+
+        {/* KYC upload flow removed for live-only AfterDark */}
+
         {activeTab === "security" && <SecurityPanel user={user} />}
 
         {activeTab === "feed" && <CommunityFeed />}
@@ -1298,6 +1332,31 @@ const UserDashboard = ({
         {activeTab === "community" && <CommunityPanel />}
 
         {activeTab === "clips" && <ClipStudioPanel content={contentList} />}
+        {activeTab === "afterdark" && (
+          <div className="afterdark-panel">
+            <AfterDarkLanding key={afterdarkRefreshKey} />
+            {hasAfterDarkAccess && (
+              <AfterDarkCreate
+                onCreated={show => {
+                  toast.success("AfterDark show created");
+                  setAfterdarkRefreshKey(k => k + 1);
+                }}
+              />
+            )}
+          </div>
+        )}
+        {activeTab === "afterdark" && (
+          <div>
+            <AfterDarkLanding />
+            {user && (user.kycVerified || (user.flags && user.flags.afterDarkAccess)) && (
+              <AfterDarkCreate
+                onCreated={() => {
+                  /* no-op; refresh by reopening AfterDark tab */
+                }}
+              />
+            )}
+          </div>
+        )}
       </main>
     </div>
   );

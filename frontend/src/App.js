@@ -934,6 +934,33 @@ function App() {
       return <div style={{ color: "red" }}>Support page not found.</div>;
     }
   }
+
+  if (routePathState && routePathState.startsWith("/live")) {
+    try {
+      const LiveLanding = require("./LiveLanding").default;
+      return <LiveLanding />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Live landing page not found.</div>;
+    }
+  }
+
+  if (routePathState && routePathState.startsWith("/live/watch")) {
+    try {
+      const LiveWatch = require("./LiveWatch").default;
+      return <LiveWatch />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Live watch page not found.</div>;
+    }
+  }
+
+  if (routePathState && routePathState.startsWith("/streamer")) {
+    try {
+      const StreamerDashboard = require("./StreamerDashboard").default;
+      return <StreamerDashboard />;
+    } catch (e) {
+      return <div style={{ color: "red" }}>Streamer dashboard not found.</div>;
+    }
+  }
   if (routePathState && routePathState.startsWith("/careers")) {
     try {
       const Careers = require("./Careers").default;

@@ -415,6 +415,9 @@ function ContentUploadForm({
           const token = await currentUser.getIdToken(true);
           headers.Authorization = `Bearer ${token}`;
         }
+        if (typeof fetch !== "function") {
+          throw new Error("fetch_not_available");
+        }
         const res = await fetch(API_ENDPOINTS.TIKTOK_CREATOR_INFO, { headers });
         if (!res.ok) {
           console.warn("TikTok creator_info fetch not ok", res.status);
@@ -555,7 +558,12 @@ function ContentUploadForm({
     // If a local file is selected, generate a local preview to show immediately
     if (file) {
       try {
-        const url = URL.createObjectURL(file);
+        let url = null;
+        try {
+          url = URL.createObjectURL(file);
+        } catch (e) {
+          url = `preview://${file.name}`;
+        }
         setPreviewUrl(url);
       } catch (err) {
         console.error("[Preview] failed to generate local preview URL", err);
@@ -841,7 +849,8 @@ function ContentUploadForm({
             // Track created object URLs to revoke on unmount
             objectUrlsRef.current.add(mediaUrl);
           } catch (e) {
-            mediaUrl = null;
+            // In test environments URL.createObjectURL may be missing — fall back to preview:// scheme
+            mediaUrl = `preview://${fileToUse.name}`;
           }
         }
         if (mediaUrl) {
@@ -893,10 +902,9 @@ function ContentUploadForm({
             } else if (fileToUse) {
               try {
                 mediaUrl = URL.createObjectURL(fileToUse);
-                // Track created object URLs to revoke on unmount
                 objectUrlsRef.current.add(mediaUrl);
               } catch (e) {
-                mediaUrl = "";
+                mediaUrl = `preview://${fileToUse.name}`;
               }
             }
           }
@@ -927,7 +935,15 @@ function ContentUploadForm({
     } catch (err) {
       // On error, show a local preview if available so the Preview action remains useful
       if (fileToUse) {
-        const tmpThumb = previewUrl || (fileToUse && URL.createObjectURL(fileToUse));
+        let tmpThumb = previewUrl;
+        if (!tmpThumb) {
+          try {
+            tmpThumb = URL.createObjectURL(fileToUse);
+            objectUrlsRef.current.add(tmpThumb);
+          } catch (e) {
+            tmpThumb = `preview://${fileToUse.name}`;
+          }
+        }
         setPerPlatformPreviews(prev => ({
           ...prev,
           [platform]: [
@@ -3930,10 +3946,29 @@ function ContentUploadForm({
                   style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 6 }}
                 />
                 <div>
-                  <strong>Title:</strong> {p.title}
+                  <strong>Title:</strong>{" "}
+                  {(() => {
+                    const t = p.title;
+                    if (t === null || typeof t === "undefined") return "";
+                    if (typeof t === "string") return t;
+                    if (typeof t === "number") return String(t);
+                    if (Array.isArray(t)) return t.join(" ");
+                    if (typeof t === "object")
+                      return t.original || t.text || t.title || JSON.stringify(t);
+                    return String(t);
+                  })()}
                 </div>
                 <div>
-                  <strong>Description:</strong> {p.description}
+                  <strong>Description:</strong>{" "}
+                  {(() => {
+                    const d = p.description;
+                    if (d === null || typeof d === "undefined") return "";
+                    if (typeof d === "string") return d;
+                    if (typeof d === "number") return String(d);
+                    if (Array.isArray(d)) return d.join(" ");
+                    if (typeof d === "object") return d.text || d.description || JSON.stringify(d);
+                    return String(d);
+                  })()}
                 </div>
                 <div style={{ marginTop: 8 }}>
                   <button
