@@ -134,6 +134,58 @@ Planned Next Security Enhancements:
 - Automated security audit script summarizing posture & drift detection.
 - Dead-letter replay tool with integrity verification preview.
 
+## KYC / AfterDark Integration (Guidance)
+
+- The repo includes a scaffolded KYC provider flow: server endpoints `/api/users/me/kyc/start` (creates a single-use token and optionally returns a provider `redirectUrl`) and `/api/users/me/kyc/provider/callback` (validates token and grants `afterDarkAccess`).
+- Configure `KYC_PROVIDER` and `KYC_PROVIDER_REDIRECT_BASE` in your environment to enable real provider redirects. Persist and verify provider session IDs server-side before granting access.
+- The current implementation persists single-use tokens to the `kyc_tokens` collection and applies a per-user `RATE_LIMIT_KYC`. Replace the mock verification with provider-specific signature checks in production.
+
+Next steps for production hardening:
+- Replace mock verification with provider signature/API verification (Persona, Onfido).
+- Make tokens single-use durable (already persisted; ensure strong TTL enforcement in production).
+- Add server-side rate-limits with Redis for distributed environments.
+
+Persona integration notes:
+
+- Set `KYC_PROVIDER=persona` and provide `PERSONA_API_KEY` in your deployment environment. Optionally adjust `PERSONA_API_BASE` if using a different Persona endpoint.
+- The server creates a single-use token in `kyc_tokens` and attempts to create a Persona session via `src/services/kyc/personaService.js`.
+- Persona callbacks should be validated server-side via `POST /api/users/me/kyc/provider/callback` which checks the persisted token, verifies the provider session by calling Persona's session endpoint, marks the token used and grants `flags.afterDarkAccess` on success.
+- For webhook verification, set `PERSONA_WEBHOOK_SECRET` and verify HMAC signatures in your webhook handlers (not yet implemented in this scaffold).
+
+Security reminders:
+
+- Do not grant access purely on client-provided proof. Always verify provider sessions or signed webhooks server-side.
+- Apply strong TTLs and single-use enforcement on tokens (`kyc_tokens`). Use Firestore TTL policies or a Redis store with expiry in production.
+
+## CDN Playback Signing (optional)
+
+If you protect live playback at the CDN/edge, the server can generate short-lived signed playback URLs. Configure the following environment variables (see `.env.example`):
+
+- `CDN_SIGNING_SECRET`: HMAC secret used to sign playback requests (keep secret, rotate regularly).
+- `PLAYBACK_BASE_URL`: Base playback path on your CDN (e.g., `https://cdn.example.com/play`).
+- `PLAYBACK_URL_TTL_SECONDS`: Signed URL lifetime in seconds (default 300).
+
+The validate endpoint (`GET /api/live/validate?token=...`) will return a `playbackUrl` when signing is enabled. Use short TTLs and server-side revocation (revoke tokens in `live_tokens`) to stop access quickly.
+
+Notes:
+- Use CDN features (CloudFront signed URLs or signed cookies, Cloudflare Workers or token auth) for production-grade protection.
+- Ensure clocks are reasonably in sync between servers and CDN for expiry checks.
+
+PayPal integration
+
+- Create an app in PayPal Developer Dashboard (https://developer.paypal.com) under "My Apps & Credentials". Use the generated `Client ID` and `Secret` for sandbox and live modes.
+- Set the following environment variables in your Render service for payments:
+  - `PAYPAL_CLIENT_ID` — from PayPal app
+  - `PAYPAL_CLIENT_SECRET` — from PayPal app
+  - `PAYPAL_MODE` — `sandbox` or `live`
+  - `PAYPAL_WEBHOOK_ID` — optional: the webhook ID returned when registering a webhook in PayPal (used for signature verification)
+
+- The repo includes a minimal PayPal service scaffold (`src/services/payments/paypalService.js`) and a webhook endpoint (`POST /api/paypal/webhook`). The webhook handler verifies PayPal signatures (if `PAYPAL_WEBHOOK_ID` set) and emits events for order captures and related flows.
+
+Security & deployment notes for PayPal:
+- Keep `PAYPAL_CLIENT_SECRET` private and use Render secrets. Rotate periodically.
+- Test in `sandbox` mode and verify webhooks using the PayPal sandbox webhook simulator before switching to `live`.
+
 
 ## Backfill Script
 

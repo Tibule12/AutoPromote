@@ -1463,13 +1463,13 @@ try {
 
   // AfterDark (adult) area - restricted access. Routes mounted under /afterdark
   try {
-    const requireAdultAccess = require('./middleware/requireAdultAccess');
-    const afterDarkRoutes = require('./routes/afterDarkRoutes');
+    const requireAdultAccess = require("./middleware/requireAdultAccess");
+    const afterDarkRoutes = require("./routes/afterDarkRoutes");
     // Mount behind authMiddleware and requireAdultAccess
-    app.use('/afterdark', authMiddleware, requireAdultAccess, afterDarkRoutes);
-    console.log('🚏 AfterDark routes mounted at /afterdark (restricted)');
+    app.use("/afterdark", authMiddleware, requireAdultAccess, afterDarkRoutes);
+    console.log("🚏 AfterDark routes mounted at /afterdark (restricted)");
   } catch (e) {
-    console.log('⚠️ AfterDark routes mount failed:', e.message);
+    console.log("⚠️ AfterDark routes mount failed:", e.message);
   }
 
   // Register optional routes
@@ -2718,7 +2718,15 @@ try {
   }
 
   if (require.main === module) {
-    app
+    const http = require("http");
+    const server = http.createServer(app);
+    // attach Socket.IO for production/server runs
+    try {
+      if (typeof module.exports.attachSocket === "function") {
+        module.exports.attachSocket(server, {});
+      }
+    } catch (e) {}
+    server
       .listen(PORT, async () => {
         console.log(`🚀 AutoPromote Server is running on port ${PORT}`);
         console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
@@ -3287,6 +3295,39 @@ try {
   module.exports.getLatencyStats = getLatencyStats;
   module.exports.runWarmup = runWarmup;
   module.exports.__warmupState = () => __warmupState;
+
+  // Socket helper: attach a Socket.IO server to an existing http.Server
+  module.exports.attachSocket = function attachSocket(httpServer, opts = {}) {
+    try {
+      const { Server } = require("socket.io");
+      const io = new Server(httpServer, {
+        cors: {
+          origin: opts.corsOrigin || process.env.SOCKET_CORS_ORIGIN || "*",
+          methods: ["GET", "POST"],
+        },
+        allowEIO3: true,
+      });
+      // store globally so other modules (e.g. tipPubsub) can emit
+      global.__io = io;
+      io.on("connection", socket => {
+        try {
+          const qs = socket.handshake && socket.handshake.query ? socket.handshake.query : {};
+          if (qs.liveId) socket.join(`live:${qs.liveId}`);
+          socket.on("joinLive", liveId => {
+            if (liveId) socket.join(`live:${liveId}`);
+          });
+        } catch (e) {
+          // ignore
+        }
+      });
+      return io;
+    } catch (e) {
+      console.warn("[attachSocket] failed to initialize Socket.IO:", e && e.message);
+      return null;
+    }
+  };
+
+  module.exports.getIo = () => global.__io || null;
 
   // Export Express app for integration tests
   module.exports = app;
