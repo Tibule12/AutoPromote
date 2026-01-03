@@ -555,7 +555,12 @@ function ContentUploadForm({
     // If a local file is selected, generate a local preview to show immediately
     if (file) {
       try {
-        const url = URL.createObjectURL(file);
+        let url = null;
+        try {
+          url = URL.createObjectURL(file);
+        } catch (e) {
+          url = `preview://${file.name}`;
+        }
         setPreviewUrl(url);
       } catch (err) {
         console.error("[Preview] failed to generate local preview URL", err);
@@ -841,7 +846,8 @@ function ContentUploadForm({
             // Track created object URLs to revoke on unmount
             objectUrlsRef.current.add(mediaUrl);
           } catch (e) {
-            mediaUrl = null;
+            // In test environments URL.createObjectURL may be missing — fall back to preview:// scheme
+            mediaUrl = `preview://${fileToUse.name}`;
           }
         }
         if (mediaUrl) {
@@ -893,10 +899,9 @@ function ContentUploadForm({
             } else if (fileToUse) {
               try {
                 mediaUrl = URL.createObjectURL(fileToUse);
-                // Track created object URLs to revoke on unmount
                 objectUrlsRef.current.add(mediaUrl);
               } catch (e) {
-                mediaUrl = "";
+                mediaUrl = `preview://${fileToUse.name}`;
               }
             }
           }
@@ -927,7 +932,15 @@ function ContentUploadForm({
     } catch (err) {
       // On error, show a local preview if available so the Preview action remains useful
       if (fileToUse) {
-        const tmpThumb = previewUrl || (fileToUse && URL.createObjectURL(fileToUse));
+        let tmpThumb = previewUrl;
+        if (!tmpThumb) {
+          try {
+            tmpThumb = URL.createObjectURL(fileToUse);
+            objectUrlsRef.current.add(tmpThumb);
+          } catch (e) {
+            tmpThumb = `preview://${fileToUse.name}`;
+          }
+        }
         setPerPlatformPreviews(prev => ({
           ...prev,
           [platform]: [
