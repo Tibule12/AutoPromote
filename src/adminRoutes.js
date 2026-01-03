@@ -210,6 +210,41 @@ router.put("/users/:id/role", authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
+// Grant or revoke AfterDark access flag on a user
+router.post(
+  "/users/:id/afterdark-access",
+  authMiddleware,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const { granted } = req.body;
+      if (typeof granted === 'undefined') return res.status(400).json({ error: 'granted boolean required' });
+
+      const userRef = db.collection('users').doc(userId);
+      const userDoc = await userRef.get();
+      if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
+
+      const flags = Object.assign({}, userDoc.data().flags || {}, { afterDarkAccess: !!granted });
+      await userRef.update({ flags, updatedAt: new Date().toISOString() });
+
+      await db.collection('admin_audit').add({
+        action: 'afterdark_access_toggled',
+        adminId: req.user.uid,
+        targetId: userId,
+        granted: !!granted,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      const updated = await userRef.get();
+      res.json({ success: true, user: { id: updated.id, ...updated.data() } });
+    } catch (error) {
+      console.error('Error toggling AfterDark access:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+);
+
 // Suspend user
 router.post("/users/:id/suspend", authMiddleware, adminOnly, async (req, res) => {
   try {
