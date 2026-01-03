@@ -721,6 +721,34 @@ function AdminDashboard({ analytics, user, onLogout }) {
     </button>
   );
 
+  // Copy private live link helper
+  const handleCopyPrivateLink = async liveId => {
+    try {
+      if (!liveId) {
+        alert("No live ID available for this user.");
+        return;
+      }
+      const res = await fetch(`/api/live/${encodeURIComponent(liveId)}/create-token`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`Create token failed: ${res.status} ${txt}`);
+      }
+      const json = await res.json();
+      const token = json && json.token ? json.token : json?.t?.token || json?.data?.token;
+      if (!token) throw new Error("No token returned from server");
+      const url = `${window.location.origin}/live/${encodeURIComponent(liveId)}?token=${encodeURIComponent(token)}`;
+      await navigator.clipboard.writeText(url);
+      alert("Private live link copied to clipboard:\n" + url);
+    } catch (err) {
+      console.error("Could not create/copy private link:", err);
+      alert("Could not create private link: " + (err.message || err));
+    }
+  };
+
   const BarChart = ({ data, title }) => (
     <div
       style={{
@@ -1089,6 +1117,26 @@ function AdminDashboard({ analytics, user, onLogout }) {
                               }}
                             >
                               View Details
+                            </button>
+                            <button
+                              onClick={() => {
+                                const liveId = user.liveId || user.id;
+                                const confirmed = window.confirm(
+                                  `Create and copy private live link for liveId: ${liveId}?`
+                                );
+                                if (confirmed) handleCopyPrivateLink(liveId);
+                              }}
+                              style={{
+                                padding: "6px 12px",
+                                borderRadius: "6px",
+                                border: "none",
+                                backgroundColor: "#6a1b9a",
+                                color: "white",
+                                fontSize: "0.85rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Copy Live Link
                             </button>
                           </div>
                         </td>
