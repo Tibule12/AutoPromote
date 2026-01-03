@@ -415,6 +415,9 @@ function ContentUploadForm({
           const token = await currentUser.getIdToken(true);
           headers.Authorization = `Bearer ${token}`;
         }
+        if (typeof fetch !== "function") {
+          throw new Error("fetch_not_available");
+        }
         const res = await fetch(API_ENDPOINTS.TIKTOK_CREATOR_INFO, { headers });
         if (!res.ok) {
           console.warn("TikTok creator_info fetch not ok", res.status);
@@ -3943,10 +3946,29 @@ function ContentUploadForm({
                   style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 6 }}
                 />
                 <div>
-                  <strong>Title:</strong> {p.title}
+                  <strong>Title:</strong>{" "}
+                  {(() => {
+                    const t = p.title;
+                    if (t === null || typeof t === "undefined") return "";
+                    if (typeof t === "string") return t;
+                    if (typeof t === "number") return String(t);
+                    if (Array.isArray(t)) return t.join(" ");
+                    if (typeof t === "object")
+                      return t.original || t.text || t.title || JSON.stringify(t);
+                    return String(t);
+                  })()}
                 </div>
                 <div>
-                  <strong>Description:</strong> {p.description}
+                  <strong>Description:</strong>{" "}
+                  {(() => {
+                    const d = p.description;
+                    if (d === null || typeof d === "undefined") return "";
+                    if (typeof d === "string") return d;
+                    if (typeof d === "number") return String(d);
+                    if (Array.isArray(d)) return d.join(" ");
+                    if (typeof d === "object") return d.text || d.description || JSON.stringify(d);
+                    return String(d);
+                  })()}
                 </div>
                 <div style={{ marginTop: 8 }}>
                   <button

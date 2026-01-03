@@ -135,7 +135,7 @@ async function captureOrder(orderId) {
       headers: { Authorization: `Bearer ${access}`, "Content-Type": "application/json" },
     },
     requireHttps: true,
-    allowHosts: ["api-m.paypal.com", "api-m.sandbox.paypal.com"],
+    allowHosts: ["api-m.paypal.com", "api-m.sandbox-paypal.com"],
   });
   const json = await res.json();
   if (res.status >= 400) throw new Error(json.message || "capture_failed");
@@ -161,80 +161,8 @@ async function captureOrder(orderId) {
   return json;
 }
 
-// Route: Create PayPal order
-router.post(
-  "/create-order",
-  authMiddleware,
-  paypalPublicLimiter,
-  express.json(),
-  async (req, res) => {
-    const started = Date.now();
-    try {
-      const { amount, currency } = req.body || {};
-      if (typeof amount !== "number" || amount <= 0)
-        return res.status(400).json({ ok: false, error: "invalid_amount" });
-      // randomUUID may not exist on very old Node versions
-      const internalId = crypto.randomUUID
-        ? crypto.randomUUID()
-        : crypto.randomBytes(16).toString("hex");
-      const order = await createOrder({
-        amount,
-        currency: currency || "USD",
-        internalId,
-        userId: req.user.uid,
-      });
-      return res.json({
-        ok: true,
-        id: order.id,
-        status: order.status,
-        approveLinks: (order.links || []).filter(l => l.rel === "approve").map(l => l.href),
-        internalId,
-        ms: Date.now() - started,
-      });
-    } catch (e) {
-      console.error("[PayPal] create-order error:", (e && e.stack) || e);
-      return res
-        .status(500)
-        .json({
-          ok: false,
-          error: e.message,
-          code: (e.message || "").split(" ")[0],
-          ms: Date.now() - started,
-        });
-    }
-  }
-);
-
-// Route: Capture PayPal order (server-side)
-router.post("/capture-order/:id", authMiddleware, paypalPublicLimiter, async (req, res) => {
-  const started = Date.now();
-  try {
-    const orderId = req.params.id;
-    if (!orderId) return res.status(400).json({ ok: false, error: "missing_order_id" });
-    const result = await captureOrder(orderId);
-    return res.json({
-      ok: true,
-      orderId,
-      status: result.status,
-      raw: result,
-      ms: Date.now() - started,
-    });
-  } catch (e) {
-    console.error("[PayPal] capture-order error:", (e && e.stack) || e);
-    return res
-      .status(500)
-      .json({
-        ok: false,
-        error: e.message,
-        code: (e.message || "").split(" ")[0],
-        ms: Date.now() - started,
-      });
-  }
-});
-
 // Lightweight debug endpoint to introspect PayPal integration health
 router.get("/debug/status", authMiddleware, paypalPublicLimiter, async (req, res) => {
-  // Include SDK presence information for debugging deployments
   const hasClientId = !!process.env.PAYPAL_CLIENT_ID;
   const hasSecret = !!process.env.PAYPAL_CLIENT_SECRET;
   const mode = process.env.PAYPAL_MODE || "sandbox(default)";
@@ -260,8 +188,8 @@ router.get("/debug/status", authMiddleware, paypalPublicLimiter, async (req, res
 });
 
 // Simple in-memory cert cache (expires after TTL)
-const certCache = new Map(); // key: certUrl -> { pem, expiresAt }
-const CERT_TTL_MS = parseInt(process.env.PAYPAL_CERT_TTL_MS || "3600000", 10); // 1h
+const certCache = new Map();
+const CERT_TTL_MS = parseInt(process.env.PAYPAL_CERT_TTL_MS || "3600000", 10);
 
 function fetchCert(certUrl) {
   return new Promise((resolve, reject) => {
@@ -298,7 +226,6 @@ function fetchCert(certUrl) {
 function verifyRSASignature({ signature, sigBase, certPem, algorithm }) {
   try {
     if (!signature || !sigBase || !certPem) return false;
-    // PayPal header paypal-auth-algo e.g. 'SHA256withRSA'
     const algo = (algorithm || "SHA256withRSA").toUpperCase();
     let digest = "sha256";
     if (algo.includes("SHA512")) digest = "sha512";
@@ -312,7 +239,6 @@ function verifyRSASignature({ signature, sigBase, certPem, algorithm }) {
   }
 }
 
-// Raw body capture helper for PayPal verification
 function rawBodyBuffer(req, _res, buf) {
   req.rawBody = buf;
 }
@@ -383,21 +309,19 @@ router.post(
 
     // Persist minimal log regardless (auditable trail), avoid logging secrets in plain text
     try {
-      await db
-        .collection("webhook_logs")
-        .add({
-          provider: "paypal",
-          eventType: event.event_type,
-          verified,
-          verificationMode,
-          headers: {
-            transmissionId,
-            transmissionTime,
-            authAlgo,
-            certUrl: certUrl ? "REDACTED" : null,
-          },
-          receivedAt: new Date().toISOString(),
-        });
+      await db.collection("webhook_logs").add({
+        provider: "paypal",
+        eventType: event.event_type,
+        verified,
+        verificationMode,
+        headers: {
+          transmissionId,
+          transmissionTime,
+          authAlgo,
+          certUrl: certUrl ? "REDACTED" : null,
+        },
+        receivedAt: new Date().toISOString(),
+      });
     } catch (_) {}
     audit.log("paypal.webhook.received", {
       eventType: event.event_type,
@@ -421,32 +345,27 @@ router.post(
           event.resource.supplementary_data &&
           event.resource.supplementary_data.related_ids &&
           event.resource.supplementary_data.related_ids.order_id;
-        await db
-          .collection("payment_events")
-          .add({
-            provider: "paypal",
-            type: event.event_type,
-            amount,
-            currency,
-            captureId,
-            orderId,
-            at: new Date().toISOString(),
-            rawId: event.id,
-          });
+        await db.collection("payment_events").add({
+          provider: "paypal",
+          type: event.event_type,
+          amount,
+          currency,
+          captureId,
+          orderId,
+          at: new Date().toISOString(),
+          rawId: event.id,
+        });
         if (orderId) {
-          await db
-            .collection("payments")
-            .doc(orderId)
-            .set(
-              {
-                status: "captured",
-                captureId,
-                amount,
-                currency,
-                updatedAt: new Date().toISOString(),
-              },
-              { merge: true }
-            );
+          await db.collection("payments").doc(orderId).set(
+            {
+              status: "captured",
+              captureId,
+              amount,
+              currency,
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
         }
       }
 
@@ -519,16 +438,14 @@ router.post(
 
               // Log subscription event
               try {
-                await db
-                  .collection("subscription_events")
-                  .add({
-                    userId,
-                    type: "subscription_activated",
-                    planId,
-                    paypalSubscriptionId: subscriptionId,
-                    amount,
-                    timestamp: new Date().toISOString(),
-                  });
+                await db.collection("subscription_events").add({
+                  userId,
+                  type: "subscription_activated",
+                  planId,
+                  paypalSubscriptionId: subscriptionId,
+                  amount,
+                  timestamp: new Date().toISOString(),
+                });
               } catch (e) {}
             } else {
               // No intent found; attempt to match by user_subscriptions
