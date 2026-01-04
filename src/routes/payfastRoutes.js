@@ -26,7 +26,7 @@ router.post("/create-order", async (req, res) => {
 router.post(
   "/webhook",
   codeqlLimiter && codeqlLimiter.webhooks ? codeqlLimiter.webhooks : (req, res, next) => next(),
-  express.urlencoded({ extended: false }),
+  express.urlencoded({ extended: false, parameterLimit: 1000 }),
   async (req, res) => {
     try {
       if (!providers || !providers.payfast) return res.status(501).end();
