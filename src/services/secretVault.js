@@ -5,14 +5,18 @@
 
 const crypto = require("crypto");
 
-const RAW_KEY =
-  process.env.TWITTER_TOKEN_ENCRYPTION_KEY || process.env.GENERIC_TOKEN_ENCRYPTION_KEY || null;
+function getRawKey() {
+  return (
+    process.env.TWITTER_TOKEN_ENCRYPTION_KEY || process.env.GENERIC_TOKEN_ENCRYPTION_KEY || null
+  );
+}
 
 function hasEncryption() {
-  return !!RAW_KEY;
+  return !!getRawKey();
 }
 
 function deriveKey() {
+  const RAW_KEY = getRawKey();
   if (!RAW_KEY) return null;
   return crypto.createHash("sha256").update(RAW_KEY).digest();
 }
