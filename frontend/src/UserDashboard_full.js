@@ -1336,7 +1336,7 @@ const UserDashboard = ({
           </div>
         )}
       </main>
-      <FloatingActions />
+      {activeTab === "live" && <FloatingActions />}
       <BottomNav onCreate={() => handleNav("upload")} />
     </div>
   );
