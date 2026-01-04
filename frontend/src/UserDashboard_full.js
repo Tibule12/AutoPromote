@@ -16,8 +16,10 @@ import CommunityPanel from "./UserDashboardTabs/CommunityPanel";
 import CommunityFeed from "./CommunityFeed";
 import ClipStudioPanel from "./UserDashboardTabs/ClipStudioPanel";
 import AdsPanel from "./UserDashboardTabs/AdsPanel";
-import AfterDarkLanding from "./AfterDarkLanding";
-import AfterDarkCreate from "./AfterDarkCreate";
+import LiveWatch from "./LiveWatch";
+import FloatingActions from "./components/FloatingActions";
+import TopNav from "./components/TopNav";
+import BottomNav from "./components/BottomNav";
 import AdminKyc from "./AdminKyc";
 import UsageLimitBanner from "./components/UsageLimitBanner";
 import { auth } from "./firebaseClient";
@@ -1032,6 +1034,7 @@ const UserDashboard = ({
         position="top-right"
         toastOptions={{ duration: 4000, style: { background: "#1a1a2e", color: "#fff" } }}
       />
+      <TopNav />
       <header className="dashboard-topbar" aria-label="Top navigation">
         <button
           className="hamburger"
@@ -1155,14 +1158,9 @@ const UserDashboard = ({
             >
               AI Clips
             </li>
-            {hasAfterDarkAccess && (
-              <li
-                className={activeTab === "afterdark" ? "active" : ""}
-                onClick={() => handleNav("afterdark")}
-              >
-                AfterDark
-              </li>
-            )}
+            <li className={activeTab === "live" ? "active" : ""} onClick={() => handleNav("live")}>
+              Live
+            </li>
           </ul>
         </nav>
         <button className="logout-btn" onClick={onLogout}>
@@ -1332,32 +1330,14 @@ const UserDashboard = ({
         {activeTab === "community" && <CommunityPanel />}
 
         {activeTab === "clips" && <ClipStudioPanel content={contentList} />}
-        {activeTab === "afterdark" && (
-          <div className="afterdark-panel">
-            <AfterDarkLanding key={afterdarkRefreshKey} />
-            {hasAfterDarkAccess && (
-              <AfterDarkCreate
-                onCreated={show => {
-                  toast.success("AfterDark show created");
-                  setAfterdarkRefreshKey(k => k + 1);
-                }}
-              />
-            )}
-          </div>
-        )}
-        {activeTab === "afterdark" && (
-          <div>
-            <AfterDarkLanding />
-            {user && (user.kycVerified || (user.flags && user.flags.afterDarkAccess)) && (
-              <AfterDarkCreate
-                onCreated={() => {
-                  /* no-op; refresh by reopening AfterDark tab */
-                }}
-              />
-            )}
+        {activeTab === "live" && (
+          <div className="live-panel">
+            <LiveWatch />
           </div>
         )}
       </main>
+      <FloatingActions />
+      <BottomNav onCreate={() => handleNav("upload")} />
     </div>
   );
 };

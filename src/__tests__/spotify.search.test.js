@@ -1,3 +1,17 @@
+// Mock safeFetch (used by platformRoutes) before loading the app so
+// server route handlers use the mocked implementation during tests.
+jest.mock("../utils/ssrfGuard", () => ({
+  validateUrl: jest.fn().mockResolvedValue({ ok: true }),
+  safeFetch: jest.fn().mockImplementation(async (url, fetchFn, opts) => {
+    return {
+      status: 200,
+      ok: true,
+      json: async () => ({ playlists: { items: [{ id: "pl1", name: "Test Playlist" }] } }),
+      headers: { get: () => null },
+    };
+  }),
+}));
+
 const request = require("supertest");
 const app = require("../server");
 const { searchTracks } = require("../services/spotifyService");
