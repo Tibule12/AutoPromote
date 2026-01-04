@@ -3,6 +3,7 @@ SCA vendor helper scripts
 This folder contains helper PowerShell scripts to run vendor SCA scans locally and write reports into `evidence/`.
 
 Prerequisites
+
 - Java 11+ must be installed and available on PATH (verify with `java -version`).
 - Download the vendor agent jars and place them in the repository root:
   - Synopsys Detect: place `detect.jar` in repo root (download via Synopsys instructions)
@@ -11,6 +12,7 @@ Prerequisites
 - Ensure you have API tokens / credentials for each service.
 
 Usage
+
 - Black Duck (Synopsys Detect):
   - Run: `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run_blackduck.ps1`
   - The script will prompt for Black Duck URL and token (or read `BLACKDUCK_URL` and `BLACKDUCK_TOKEN` from env).
@@ -27,6 +29,7 @@ Usage
   - Outputs: `evidence/sonatype/`.
 
 Security notes
+
 - Do not commit tokens or credentials to source control. Prefer using environment variables.
 - The scripts will not persist credentials to disk; they only use them to call the respective agent.
 

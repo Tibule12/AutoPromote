@@ -1,16 +1,16 @@
 // workerLockService.js
 // Firestore-based lightweight lease for background workers to avoid duplicate processing on multi-instance deployments.
 
-const { db } = require('../firebaseAdmin');
-const { v4: uuidv4 } = require('../../lib/uuid-compat');
+const { db } = require("../firebaseAdmin");
+const { v4: uuidv4 } = require("../../lib/uuid-compat");
 
 const INSTANCE_ID = process.env.INSTANCE_ID || uuidv4();
 
 async function acquireLock(workerType, ttlMs) {
-  const lockRef = db.collection('system_locks').doc(workerType);
+  const lockRef = db.collection("system_locks").doc(workerType);
   const now = Date.now();
   const expiresAt = now + ttlMs;
-  return db.runTransaction(async (tx) => {
+  return db.runTransaction(async tx => {
     const snap = await tx.get(lockRef);
     if (!snap.exists) {
       tx.set(lockRef, { owner: INSTANCE_ID, expiresAt, updatedAt: now });

@@ -48,6 +48,7 @@ node create-test-firebase-users.js
 ```
 
 This will create:
+
 - Regular user: testuser@example.com / password123
 - Admin user: admin@example.com / admin123
 

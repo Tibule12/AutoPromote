@@ -1,7 +1,8 @@
 # Firebase Service Account Setup Guide
 
 ## Issue Detected
-The integration tests failed because of an authentication issue with your Firebase service account. 
+
+The integration tests failed because of an authentication issue with your Firebase service account.
 
 ## How to Fix
 
@@ -33,7 +34,7 @@ service cloud.firestore {
     match /{document=**} {
       allow read, write: if request.auth != null && request.auth.token.admin == true;
     }
-    
+
     // Your other rules here
   }
 }

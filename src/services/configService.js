@@ -1,13 +1,13 @@
 // configService.js - global dynamic configuration with Firestore caching
-const { db } = require('../firebaseAdmin');
+const { db } = require("../firebaseAdmin");
 
 let cache = { data: null, fetchedAt: 0 };
 const TTL_MS = 60000; // 60s cache
-const DOC_PATH = { collection: 'system_config', id: 'global' };
+const DOC_PATH = { collection: "system_config", id: "global" };
 
 async function getConfig(force = false) {
   const now = Date.now();
-  if (!force && cache.data && (now - cache.fetchedAt) < TTL_MS) return cache.data;
+  if (!force && cache.data && now - cache.fetchedAt < TTL_MS) return cache.data;
   try {
     const ref = db.collection(DOC_PATH.collection).doc(DOC_PATH.id);
     const snap = await ref.get();

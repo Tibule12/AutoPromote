@@ -1,0 +1,154 @@
+.streamer-dashboard {
+  padding: 20px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.sd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.sd-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sd-label {
+  font-size: 14px;
+  color: #333;
+  margin-right: 4px;
+}
+
+.sd-input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-width: 180px;
+}
+
+.sd-btn {
+  padding: 8px 12px;
+  background-color: #61dafb;
+  border: none;
+  border-radius: 6px;
+  color: #03303a;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.sd-btn:hover {
+  background-color: #4fd0e6;
+}
+
+.sd-ghost {
+  background: transparent;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.sd-section {
+  margin-top: 18px;
+}
+
+.sd-status {
+  min-height: 26px;
+  margin-bottom: 8px;
+}
+
+.sd-status-success {
+  color: #064e3b;
+  background: #d1fae5;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.sd-status-error {
+  color: #7f1d1d;
+  background: #fee2e2;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.sd-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.sd-table th,
+.sd-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.sd-empty {
+  padding: 20px;
+  color: #666;
+}
+
+.sd-token {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sd-small {
+  padding: 6px 8px;
+  border-radius: 5px;
+  background: #e6f7fb;
+  border: 1px solid #cfeef7;
+  color: #034048;
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+.sd-small:hover {
+  background: #d1f1f7;
+}
+
+.sd-danger {
+  background: #ffecec;
+  border: 1px solid #f5c2c2;
+  color: #7f1d1d;
+}
+
+.sd-revoked {
+  opacity: 0.6;
+}
+
+.sd-tips {
+  margin-bottom: 12px;
+  background: #fff8e1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ffe6a7;
+}
+.sd-tips ul {
+  margin: 6px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sd-tips li {
+  font-size: 13px;
+  color: #333;
+  padding: 4px 0;
+}
+
+@media (max-width: 720px) {
+  .sd-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .sd-controls {
+    flex-wrap: wrap;
+  }
+  .sd-input {
+    flex: 1 1 100%;
+  }
+}

@@ -35,6 +35,7 @@ npm run test:integration
 ```
 
 This script will:
+
 1. Connect to Firestore
 2. Check all required collections
 3. Test all admin dashboard queries

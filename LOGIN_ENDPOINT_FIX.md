@@ -1,6 +1,7 @@
 # Login API Endpoint Fix
 
 ## Problem
+
 The login endpoint was experiencing a 500 Internal Server Error because of a mismatch between what the client was sending and what the server was expecting.
 
 ## Changes Made
@@ -18,7 +19,7 @@ The login endpoint was experiencing a 500 Internal Server Error because of a mis
 
 4. **LoginForm.js**: Created a standalone login form component with better error handling
 
-5. **config/firebaseClient.js**: Added a dedicated client-side Firebase configuration 
+5. **config/firebaseClient.js**: Added a dedicated client-side Firebase configuration
 
 6. **server.js**: Improved error handling to provide better error messages for common issues
 
@@ -27,11 +28,13 @@ The login endpoint was experiencing a 500 Internal Server Error because of a mis
 ## How to Test
 
 1. Run the server:
+
    ```
    node server.js
    ```
 
 2. Test login with a test user:
+
    ```
    email: testuser@example.com
    password: password123
@@ -45,6 +48,7 @@ The login endpoint was experiencing a 500 Internal Server Error because of a mis
 ## Documentation
 
 Two new documentation files were created:
+
 - FIREBASE_AUTH_SETUP.md: Guide for setting up Firebase Authentication
 - DEBUG_LOGIN_ENDPOINT.md: Guide for debugging login issues
 

@@ -8,7 +8,7 @@ function scheduleInfluencerRepost(contentId, influencerId, platform) {
     influencerId,
     platform,
     scheduledAt: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
-    status: 'scheduled'
+    status: "scheduled",
   };
 }
 
@@ -18,13 +18,13 @@ function createPaidBoost(contentId, userId, amount, platform) {
     userId,
     amount,
     platform,
-    boostType: 'paid',
+    boostType: "paid",
     scheduledAt: new Date(),
-    status: 'active'
+    status: "active",
   };
 }
 
 module.exports = {
   scheduleInfluencerRepost,
-  createPaidBoost
+  createPaidBoost,
 };

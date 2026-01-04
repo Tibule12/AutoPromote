@@ -1,251 +1,249 @@
-/**
- * This HTML file provides a simple test interface for the admin login flow
- * It tests both the admins collection and the login process
- */
-<!DOCTYPE html>
+/** * This HTML file provides a simple test interface for the admin login flow * It tests both the
+admins collection and the login process */
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Login Test</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .panel {
-      border: 1px solid #ddd;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-    }
-    h2 {
-      margin-top: 0;
-      background: #f5f5f5;
-      padding: 10px;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      cursor: pointer;
-      margin: 5px 0;
-      border-radius: 4px;
-    }
-    button:disabled {
-      background: #cccccc;
-    }
-    pre {
-      background: #f5f5f5;
-      padding: 10px;
-      border-radius: 4px;
-      overflow-x: auto;
-    }
-    .success {
-      color: green;
-      font-weight: bold;
-    }
-    .error {
-      color: red;
-      font-weight: bold;
-    }
-    .warning {
-      color: orange;
-      font-weight: bold;
-    }
-    input {
-      padding: 8px;
-      margin: 5px 0;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .input-row {
-      margin-bottom: 10px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <h1>Admin Login Test</h1>
-  
-  <div class="panel">
-    <h2>Step 1: Setup Admin Collection</h2>
-    <p>Create the admins collection and admin user in Firestore.</p>
-    <button id="setupBtn">Setup Admin Collection</button>
-    <div id="setupResult"></div>
-  </div>
-  
-  <div class="panel">
-    <h2>Step 2: Test Admin Login</h2>
-    <div class="input-row">
-      <label for="email">Email:</label>
-      <input type="email" id="email" value="admin123@gmail.com">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .panel {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+      }
+      h2 {
+        margin-top: 0;
+        background: #f5f5f5;
+        padding: 10px;
+      }
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+        margin: 5px 0;
+        border-radius: 4px;
+      }
+      button:disabled {
+        background: #cccccc;
+      }
+      pre {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+      .success {
+        color: green;
+        font-weight: bold;
+      }
+      .error {
+        color: red;
+        font-weight: bold;
+      }
+      .warning {
+        color: orange;
+        font-weight: bold;
+      }
+      input {
+        padding: 8px;
+        margin: 5px 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .input-row {
+        margin-bottom: 10px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Admin Login Test</h1>
+
+    <div class="panel">
+      <h2>Step 1: Setup Admin Collection</h2>
+      <p>Create the admins collection and admin user in Firestore.</p>
+      <button id="setupBtn">Setup Admin Collection</button>
+      <div id="setupResult"></div>
     </div>
-    <div class="input-row">
-      <label for="password">Password:</label>
-      <input type="password" id="password" value="Admin12345">
+
+    <div class="panel">
+      <h2>Step 2: Test Admin Login</h2>
+      <div class="input-row">
+        <label for="email">Email:</label>
+        <input type="email" id="email" value="admin123@gmail.com" />
+      </div>
+      <div class="input-row">
+        <label for="password">Password:</label>
+        <input type="password" id="password" value="Admin12345" />
+      </div>
+      <button id="loginBtn">Login as Admin</button>
+      <div id="loginResult"></div>
     </div>
-    <button id="loginBtn">Login as Admin</button>
-    <div id="loginResult"></div>
-  </div>
-  
-  <div class="panel">
-    <h2>Step 3: Test Admin API Access</h2>
-    <button id="apiBtn" disabled>Test Admin API</button>
-    <div id="apiResult"></div>
-  </div>
-  
-  <script>
-    let token = null;
-    
-    // Setup admin collection
-    document.getElementById('setupBtn').addEventListener('click', async () => {
-      const resultDiv = document.getElementById('setupResult');
+
+    <div class="panel">
+      <h2>Step 3: Test Admin API Access</h2>
+      <button id="apiBtn" disabled>Test Admin API</button>
+      <div id="apiResult"></div>
+    </div>
+
+    <script>
+      let token = null;
+
+      // Setup admin collection
+      document.getElementById("setupBtn").addEventListener("click", async () => {
+        const resultDiv = document.getElementById("setupResult");
         // Show progress text
-        resultDiv.textContent = 'Setting up admin collection...';
-      
-      try {
-        const response = await fetch('/api/setup-admin', { method: 'POST' });
-        const data = await response.json();
-        
-        if (response.ok) {
-          // Show success using DOM APIs
-          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
-          const successP = document.createElement('p');
-          successP.className = 'success';
-          successP.textContent = 'Admin collection setup successful!';
-          resultDiv.appendChild(successP);
-          const pre = document.createElement('pre');
-          pre.textContent = JSON.stringify(data, null, 2);
-          resultDiv.appendChild(pre);
-        } else {
-          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
-          const errP = document.createElement('p');
-          errP.className = 'error';
-          errP.textContent = 'Admin collection setup failed';
-          resultDiv.appendChild(errP);
-          const preErr = document.createElement('pre');
-          preErr.textContent = JSON.stringify(data, null, 2);
-          resultDiv.appendChild(preErr);
+        resultDiv.textContent = "Setting up admin collection...";
+
+        try {
+          const response = await fetch("/api/setup-admin", { method: "POST" });
+          const data = await response.json();
+
+          if (response.ok) {
+            // Show success using DOM APIs
+            while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+            const successP = document.createElement("p");
+            successP.className = "success";
+            successP.textContent = "Admin collection setup successful!";
+            resultDiv.appendChild(successP);
+            const pre = document.createElement("pre");
+            pre.textContent = JSON.stringify(data, null, 2);
+            resultDiv.appendChild(pre);
+          } else {
+            while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+            const errP = document.createElement("p");
+            errP.className = "error";
+            errP.textContent = "Admin collection setup failed";
+            resultDiv.appendChild(errP);
+            const preErr = document.createElement("pre");
+            preErr.textContent = JSON.stringify(data, null, 2);
+            resultDiv.appendChild(preErr);
+          }
+        } catch (error) {
+          resultDiv.textContent = `Error: ${error.message}`;
         }
-      } catch (error) {
-        resultDiv.textContent = `Error: ${error.message}`;
-      }
-    });
-    
-    // Test admin login
-    document.getElementById('loginBtn').addEventListener('click', async () => {
-      const resultDiv = document.getElementById('loginResult');
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      
-      resultDiv.textContent = 'Logging in...';
-      resultDiv.style.color = '';
-      
-      try {
-        const loginResponse = await fetch('/api/auth/login-test', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        
-        const loginData = await loginResponse.json();
-        
-        if (loginResponse.ok && loginData.token) {
-          token = loginData.token;
-          // Build success content
-          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
-          const suc = document.createElement('p');
-          suc.className = 'success';
-          suc.textContent = 'Login successful!';
-          resultDiv.appendChild(suc);
-          const uEmail = document.createElement('p');
-          uEmail.textContent = `User: ${loginData.user.email}`;
-          resultDiv.appendChild(uEmail);
-          const uRole = document.createElement('p');
-          uRole.textContent = `Role: ${loginData.user.role}`;
-          resultDiv.appendChild(uRole);
-          const from = document.createElement('p');
-          from.textContent = `From collection: ${loginData.user.fromCollection || 'unknown'}`;
-          resultDiv.appendChild(from);
-          const tokenP = document.createElement('p');
-          tokenP.textContent = `Token: ${token.substring(0, 20)}...`;
-          resultDiv.appendChild(tokenP);
-          document.getElementById('apiBtn').disabled = false;
-        } else {
-          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
-          const failP = document.createElement('p');
-          failP.className = 'error';
-          failP.textContent = 'Login failed';
-          resultDiv.appendChild(failP);
-          const failPre = document.createElement('pre');
-          failPre.textContent = JSON.stringify(loginData, null, 2);
-          resultDiv.appendChild(failPre);
+      });
+
+      // Test admin login
+      document.getElementById("loginBtn").addEventListener("click", async () => {
+        const resultDiv = document.getElementById("loginResult");
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        resultDiv.textContent = "Logging in...";
+        resultDiv.style.color = "";
+
+        try {
+          const loginResponse = await fetch("/api/auth/login-test", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const loginData = await loginResponse.json();
+
+          if (loginResponse.ok && loginData.token) {
+            token = loginData.token;
+            // Build success content
+            while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+            const suc = document.createElement("p");
+            suc.className = "success";
+            suc.textContent = "Login successful!";
+            resultDiv.appendChild(suc);
+            const uEmail = document.createElement("p");
+            uEmail.textContent = `User: ${loginData.user.email}`;
+            resultDiv.appendChild(uEmail);
+            const uRole = document.createElement("p");
+            uRole.textContent = `Role: ${loginData.user.role}`;
+            resultDiv.appendChild(uRole);
+            const from = document.createElement("p");
+            from.textContent = `From collection: ${loginData.user.fromCollection || "unknown"}`;
+            resultDiv.appendChild(from);
+            const tokenP = document.createElement("p");
+            tokenP.textContent = `Token: ${token.substring(0, 20)}...`;
+            resultDiv.appendChild(tokenP);
+            document.getElementById("apiBtn").disabled = false;
+          } else {
+            while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+            const failP = document.createElement("p");
+            failP.className = "error";
+            failP.textContent = "Login failed";
+            resultDiv.appendChild(failP);
+            const failPre = document.createElement("pre");
+            failPre.textContent = JSON.stringify(loginData, null, 2);
+            resultDiv.appendChild(failPre);
+          }
+        } catch (error) {
+          resultDiv.textContent = `Error: ${error.message}`;
         }
-      } catch (error) {
-        resultDiv.textContent = `Error: ${error.message}`;
-      }
-    });
-    
-    // Test admin API access
-    document.getElementById('apiBtn').addEventListener('click', async () => {
+      });
+
+      // Test admin API access
+      document.getElementById("apiBtn").addEventListener("click", async () => {
         if (!token) {
-        const apiRes = document.getElementById('apiResult');
-        while (apiRes.firstChild) apiRes.removeChild(apiRes.firstChild);
-        const err = document.createElement('p');
-        err.className = 'error';
-        err.textContent = 'Please login first to get a token';
-        apiRes.appendChild(err);
-        return;
-      }
-      
-      const resultDiv = document.getElementById('apiResult');
-      // Show progress
-      while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
-      const testingP = document.createElement('p');
-      testingP.textContent = 'Testing API access...';
-      resultDiv.appendChild(testingP);
-      
-      try {
-        const apiResponse = await fetch('/api/admin/analytics/overview', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        const apiData = await apiResponse.json();
-        
-        if (apiResponse.ok) {
-          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
-          const successP2 = document.createElement('p');
-          successP2.className = 'success';
-          successP2.textContent = 'API access successful!';
-          resultDiv.appendChild(successP2);
-          const mockP = document.createElement('p');
-          mockP.textContent = `Is mock data: ${apiData.isMockData ? 'Yes' : 'No'}`;
-          resultDiv.appendChild(mockP);
-          const pre2 = document.createElement('pre');
-          pre2.textContent = JSON.stringify(apiData, null, 2).substring(0, 500) + '...';
-          resultDiv.appendChild(pre2);
-        } else {
-          while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
-          const err2 = document.createElement('p');
-          err2.className = 'error';
-          err2.textContent = 'API access failed';
-          resultDiv.appendChild(err2);
-          const preErr2 = document.createElement('pre');
-          preErr2.textContent = JSON.stringify(apiData, null, 2);
-          resultDiv.appendChild(preErr2);
+          const apiRes = document.getElementById("apiResult");
+          while (apiRes.firstChild) apiRes.removeChild(apiRes.firstChild);
+          const err = document.createElement("p");
+          err.className = "error";
+          err.textContent = "Please login first to get a token";
+          apiRes.appendChild(err);
+          return;
         }
-      } catch (error) {
-        resultDiv.textContent = `Error: ${error.message}`;
-      }
-    });
-  </script>
-</body>
+
+        const resultDiv = document.getElementById("apiResult");
+        // Show progress
+        while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+        const testingP = document.createElement("p");
+        testingP.textContent = "Testing API access...";
+        resultDiv.appendChild(testingP);
+
+        try {
+          const apiResponse = await fetch("/api/admin/analytics/overview", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          const apiData = await apiResponse.json();
+
+          if (apiResponse.ok) {
+            while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+            const successP2 = document.createElement("p");
+            successP2.className = "success";
+            successP2.textContent = "API access successful!";
+            resultDiv.appendChild(successP2);
+            const mockP = document.createElement("p");
+            mockP.textContent = `Is mock data: ${apiData.isMockData ? "Yes" : "No"}`;
+            resultDiv.appendChild(mockP);
+            const pre2 = document.createElement("pre");
+            pre2.textContent = JSON.stringify(apiData, null, 2).substring(0, 500) + "...";
+            resultDiv.appendChild(pre2);
+          } else {
+            while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+            const err2 = document.createElement("p");
+            err2.className = "error";
+            err2.textContent = "API access failed";
+            resultDiv.appendChild(err2);
+            const preErr2 = document.createElement("pre");
+            preErr2.textContent = JSON.stringify(apiData, null, 2);
+            resultDiv.appendChild(preErr2);
+          }
+        } catch (error) {
+          resultDiv.textContent = `Error: ${error.message}`;
+        }
+      });
+    </script>
+  </body>
 </html>

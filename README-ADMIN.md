@@ -7,6 +7,7 @@ The AutoPromote Admin Dashboard provides a comprehensive view of your promotion 
 ## Features
 
 ### General Features
+
 - **Modern UI**: Clean, responsive design with animated components
 - **Tab-Based Navigation**: Easily switch between different dashboard views
 - **Real-Time Data**: Refresh data with a single click
@@ -15,6 +16,7 @@ The AutoPromote Admin Dashboard provides a comprehensive view of your promotion 
 ### Dashboard Views
 
 #### Overview
+
 - Total users, content, revenue, and promotion statistics
 - Monthly revenue chart
 - Device distribution breakdown
@@ -22,18 +24,21 @@ The AutoPromote Admin Dashboard provides a comprehensive view of your promotion 
 - Recent activity feed
 
 #### User Analytics
+
 - Active user metrics and engagement rates
 - User segmentation analysis
 - Age and geographic distribution
 - Performance metrics including conversion rates, bounce rates, and session duration
 
 #### Content Performance
+
 - Content performance distribution
 - Revenue by content type
 - Content performance progress indicators
 - Detailed content table with status indicators
 
 #### Revenue & Finance
+
 - Revenue per user and projected revenue
 - Promotion completion rates
 - Monthly revenue trends
@@ -42,6 +47,7 @@ The AutoPromote Admin Dashboard provides a comprehensive view of your promotion 
 ## Technical Implementation
 
 ### Components
+
 - **AdminDashboard.js**: Main dashboard component
 - **StatCard.js**: Reusable statistics cards with trend indicators
 - **AdminChart.js**: Flexible chart component supporting bar, line, and pie visualizations
@@ -49,11 +55,13 @@ The AutoPromote Admin Dashboard provides a comprehensive view of your promotion 
 - **ActivityFeed.js**: Component for displaying recent system activity
 
 ### Styling
+
 - **AdminDashboard.css**: Comprehensive CSS with responsive design
 - Custom animations and hover effects
 - Consistent color scheme and typography
 
 ### Data Integration
+
 - Fetches real data from Firestore collections
 - Calculates derived metrics for insights
 - Provides mock data fallback for reliability
@@ -67,11 +75,12 @@ The AutoPromote Admin Dashboard provides a comprehensive view of your promotion 
    - activities
 
 2. Include the dashboard in your app:
+
    ```jsx
-   import AdminDashboard from './AdminDashboard';
-   
+   import AdminDashboard from "./AdminDashboard";
+
    // Then in your component:
-   <AdminDashboard user={currentUser} />
+   <AdminDashboard user={currentUser} />;
    ```
 
 3. Customize the dashboard by editing the component files as needed

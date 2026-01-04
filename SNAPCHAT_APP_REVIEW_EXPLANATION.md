@@ -7,12 +7,14 @@ AutoPromote integrates with Snapchat's Marketing API to enable cross-platform co
 ### 1. OAuth Authentication Flow
 
 **Frontend Implementation:**
+
 - Users click "Connect Snapchat" in the dashboard
 - Frontend calls `POST /api/snapchat/oauth/prepare` to get OAuth URL
 - Opens Snapchat's authorization page in a popup window
 - Handles OAuth callback via postMessage communication
 
 **Backend Implementation:**
+
 - Generates secure OAuth URL with proper parameters:
   - Client ID: Retrieved from environment variables
   - Redirect URI: `https://www.autopromote.org/api/snapchat/auth/callback`
@@ -22,12 +24,14 @@ AutoPromote integrates with Snapchat's Marketing API to enable cross-platform co
 ### 2. Token Exchange & Storage
 
 **Callback Handling:**
+
 - Receives authorization code from Snapchat
 - Exchanges code for access token using Basic Auth
 - Fetches user profile from `/v1/me` endpoint
 - Stores tokens securely in Firebase Firestore
 
 **Security Features:**
+
 - CSRF protection with state validation
 - Token encryption at rest
 - Automatic token refresh handling
@@ -36,17 +40,20 @@ AutoPromote integrates with Snapchat's Marketing API to enable cross-platform co
 ### 3. Content Posting (Future Implementation)
 
 **Creative Creation:**
+
 - Uses Snapchat Marketing API to create ad creatives
 - Supports image and video content
 - Integrates with campaign management
 
 **Analytics Integration:**
+
 - Fetches performance metrics via `/v1/creatives/{id}/stats`
 - Tracks impressions, engagement, and conversions
 
 ### 4. Data Storage Architecture
 
 **Firestore Structure:**
+
 ```
 users/{userId}/connections/snapchat:
 {
@@ -59,6 +66,7 @@ users/{userId}/connections/snapchat:
 ```
 
 **OAuth States:**
+
 ```
 oauth_states/{state}:
 {
@@ -79,12 +87,14 @@ oauth_states/{state}:
 ### 6. Error Handling & Monitoring
 
 **Comprehensive Error Handling:**
+
 - OAuth flow validation
 - Token expiration detection
 - API rate limit management
 - Network failure recovery
 
 **Debug Capabilities:**
+
 - Debug endpoints for OAuth URL validation
 - Comprehensive logging for troubleshooting
 - Environment-based debug modes
@@ -92,12 +102,14 @@ oauth_states/{state}:
 ### 7. Production Readiness
 
 **Environment Configuration:**
+
 - Environment variables for credentials
 - HTTPS-only communication
 - CORS protection
 - Input validation and sanitization
 
 **Security Measures:**
+
 - No hardcoded credentials
 - Secure token storage
 - CSRF protection
@@ -117,17 +129,20 @@ This version introduces the complete Snapchat Marketing API integration:
 ## Technical Implementation Details
 
 **Frontend (React):**
+
 - OAuth popup handling with postMessage communication
 - Connection status display
 - Error message presentation
 
 **Backend (Node.js/Express):**
+
 - OAuth URL generation and validation
 - Token exchange and storage
 - API proxy for Snapchat Marketing API
 - Firebase Firestore integration
 
 **Database (Firestore):**
+
 - Secure token storage with encryption
 - User connection management
 - OAuth state tracking for security

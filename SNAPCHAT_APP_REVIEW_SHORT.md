@@ -17,6 +17,7 @@ AutoPromote integrates with Snapchat's Marketing API to enable cross-platform co
 ## Changes in This Version
 
 This version adds complete Snapchat Marketing API integration including:
+
 - OAuth authentication flow
 - Token exchange and secure storage
 - Creative creation endpoints

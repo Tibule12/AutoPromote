@@ -7,12 +7,15 @@
 }
 
 .content-upload-form {
-  background: white;
+  /* Use a subtle dark-transparent background so the form blends with dark dashboard */
+  background: rgba(8, 10, 12, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
   width: 100%;
   box-sizing: border-box;
+  color: #e6e6e6; /* ensure text remains readable on darker background */
 }
 
 .content-upload-form h3 {
@@ -29,7 +32,7 @@
   .content-upload-container {
     padding: 24px;
   }
-  
+
   .content-upload-form {
     padding: 32px;
   }
@@ -42,7 +45,8 @@
   align-items: start;
 }
 
-.left-column, .right-column {
+.left-column,
+.right-column {
   width: 100%;
 }
 
@@ -53,17 +57,101 @@
   }
 }
 
-.drop-zone { cursor: pointer; transition: border-color .15s, background .15s; }
-.drop-zone.dragging { border-color: #1976d2; background: rgba(25,118,210,0.03); box-shadow: 0 6px 24px rgba(25,118,210,0.08) inset; }
+/* Strong override: make desktop preview match the mobile phone-style view
+   exactly. Uses !important to override earlier conflicting rules. */
+@media (min-width: 1024px) {
+  .content-upload-grid.has-file .preview-area,
+  .content-upload-grid .preview-area,
+  .right-column .preview-area,
+  .preview-area {
+    grid-column: 2 / 3 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
 
-.file-upload { position: relative; }
-.file-upload .form-file-input { position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; }
-.drop-help { color: #666; margin-top:8px; font-size:13px; }
+  .content-upload-grid.has-file .preview-wrapper,
+  .preview-wrapper {
+    width: 320px !important;
+    max-width: 100% !important;
+    aspect-ratio: 9 / 16 !important;
+    padding: 10px !important;
+    border-radius: 18px !important;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.85)) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6) !important;
+    margin: 12px auto !important;
+    position: relative !important;
+    z-index: 6 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
 
-.platform-grid { 
-  display: grid; 
-  grid-template-columns: repeat(2, 1fr); 
-  gap: 8px; 
+  .content-upload-grid.has-file .preview-wrapper .preview-video,
+  .preview-wrapper .preview-video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 12px !important;
+    background: #000 !important;
+    display: block !important;
+  }
+
+  .content-upload-grid.has-file .video-controls,
+  .content-upload-grid.has-file .trim-row,
+  .content-upload-grid.has-file .range-row {
+    max-width: 320px !important;
+    width: 100% !important;
+    margin: 8px auto 0 !important;
+    align-self: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    z-index: 6 !important;
+  }
+}
+
+.drop-zone {
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.drop-zone.dragging {
+  border-color: #1976d2;
+  background: rgba(25, 118, 210, 0.03);
+  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.08) inset;
+}
+
+.file-upload {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+.file-upload .form-file-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.drop-help {
+  color: #666;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.platform-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
 }
 
 @media (min-width: 480px) {
@@ -84,61 +172,88 @@
   }
 }
 
-.platform-tile { 
-  display:flex; 
-  align-items:center; 
-  gap:8px; 
-  padding:10px; 
-  border-radius:12px; 
-  border:2px solid #e5e7eb; 
-  background: #fafafa; 
-  cursor:pointer;
+.platform-tile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #fafafa;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
 .platform-tile:hover {
   border-color: #d1d5db;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.platform-tile:focus { 
-  outline: 3px solid rgba(59, 130, 246, 0.2); 
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+.platform-tile:focus {
+  outline: 3px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.platform-tile:active { 
-  transform: translateY(0); 
+.platform-tile:active {
+  transform: translateY(0);
 }
 
-.platform-tile .platform-icon { 
-  font-weight:700; 
-  width:36px; 
-  height:36px; 
-  display:flex; 
-  align-items:center; 
-  justify-content:center; 
-  border-radius:10px; 
-  background:#fff; 
-  border:1px solid #e5e7eb;
+.platform-tile .platform-icon {
+  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
   flex-shrink: 0;
 }
 
-.platform-tile.selected { 
-  border-color: #3b82f6; 
-  background: linear-gradient(135deg,#eff6ff,#dbeafe); 
+.platform-tile.selected {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
-.platform-tile.selected .platform-icon { 
-  background: linear-gradient(135deg, #3b82f6, #2563eb); 
-  color:#fff; 
-  border-color: transparent; 
+/* Focused platform view styles */
+.platform-focused .platform-focused-layout {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 20px;
+  align-items: start;
+}
+.platform-focused .focus-left {
+  background: #0f1724;
+  padding: 12px;
+  border-radius: 8px;
+}
+.platform-focused .focus-right {
+  padding: 12px;
+}
+.back-btn {
+  background: transparent;
+  border: none;
+  color: #374151;
+  cursor: pointer;
+  font-size: 14px;
+}
+@media (max-width: 768px) {
+  .platform-focused .platform-focused-layout {
+    grid-template-columns: 1fr;
+  }
+}
+.platform-tile.selected .platform-icon {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  border-color: transparent;
 }
 
-.platform-name { 
-  font-weight:600; 
-  font-size: 13px; 
+.platform-name {
+  font-weight: 600;
+  font-size: 13px;
   color: #374151;
 }
 
@@ -160,49 +275,135 @@
   border-radius: 8px;
   cursor: pointer;
 }
-.edit-platform-btn:hover { background: rgba(59,130,246,0.06); }
-
-.platform-expanded { margin-top: 8px; }
-.platform-guideline { font-size: 12px; color: #6b7280; margin-top: 2px; }
-.platform-expanded ul { margin: 8px 0 0 18px; padding: 0; }
-.platform-expanded li { margin-bottom: 6px; }
-.platform-action-row { display:flex; gap:8px; align-items:center; margin-top:8px; }
-.preview-cards { display:flex; gap:1rem; flex-wrap:wrap; margin-top:8px; }
-.quality-check-mini { font-size:13px; color:#374151; margin-top:8px; }
-
-.sr-only { 
-  position:absolute; 
-  left:-9999px; 
-  top:auto; 
-  width:1px; 
-  height:1px; 
-  overflow:hidden; 
+.edit-platform-btn:hover {
+  background: rgba(59, 130, 246, 0.06);
 }
 
-.full-width { grid-column: 1 / -1; }
+/* New card layout for single-platform upload flow */
+.platform-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.platform-card:hover {
+  border-color: #d1d5db;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.platform-card:focus {
+  outline: 3px solid rgba(59, 130, 246, 0.16);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.platform-card.expanded {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  box-shadow: 0 6px 22px rgba(59, 130, 246, 0.12);
+}
+
+.platform-card .platform-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.open-platform-indicator {
+  font-size: 12px;
+  color: #374151;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.platform-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.platform-expanded {
+  margin-top: 8px;
+}
+.platform-guideline {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+.platform-expanded ul {
+  margin: 8px 0 0 18px;
+  padding: 0;
+}
+.platform-expanded li {
+  margin-bottom: 6px;
+}
+.platform-action-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+.preview-cards {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.quality-check-mini {
+  font-size: 13px;
+  color: #374151;
+  margin-top: 8px;
+}
+
+.sr-only {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
 
 /* Dark-mode override when embedded in dashboard */
 .dashboard-mode .content-upload-form {
   background: rgba(7, 10, 17, 0.65);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: none;
   color: #eef2ff;
 }
 .dashboard-mode .form-input,
 .dashboard-mode .form-select,
 .dashboard-mode .form-textarea {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   color: #eef2ff;
 }
 .dashboard-mode .platform-toggles label {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   color: #eef2ff;
 }
-.dashboard-mode .control-btn, .dashboard-mode .apply-template-btn, .dashboard-mode .submit-button {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.04);
+.dashboard-mode .control-btn,
+.dashboard-mode .apply-template-btn,
+.dashboard-mode .submit-button {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   color: #eef2ff;
 }
 
@@ -249,11 +450,74 @@
   cursor: pointer;
 }
 
+/* Make TikTok privacy select stand out: black text and bold */
+.form-group.tiktok-options .form-select,
+.form-group.tiktok-options .form-select option {
+  color: #000000;
+  font-weight: 700;
+  background-color: #ffffff;
+}
+/* Ensure visibility in dashboard-mode (dark theme) */
+.dashboard-mode .form-group.tiktok-options .form-select,
+.dashboard-mode .form-group.tiktok-options .form-select option {
+  color: #000000 !important;
+  font-weight: 700 !important;
+  background-color: #ffffff !important;
+}
+
+/* Banner when creator account cannot publish via third-party apps */
+.tiktok-disabled-banner {
+  background: #fff4f4;
+  color: #b66;
+  border: 1px solid #f0c6c6;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
 .input-with-emoji {
   position: relative;
   display: flex;
   align-items: stretch;
+}
+
+/* Modal styles for Preview Edit and Confirm publish */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1200;
+}
+
+.modal {
+  background: #ffffff;
+  color: #111827;
+  padding: 16px;
+  border-radius: 10px;
+  max-width: 720px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 12px 48px rgba(2, 6, 23, 0.35);
+}
+
+.modal-row {
+  margin-top: 8px;
+}
+
+.modal-actions {
+  display: flex;
   gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.dashboard-mode .modal {
+  background: rgba(7, 10, 17, 0.95);
+  color: #eef2ff;
 }
 
 .input-with-emoji .form-input,
@@ -377,7 +641,7 @@
   .form-textarea {
     font-size: 16px; /* Prevents zoom on iOS */
   }
-  
+
   .emoji-btn {
     width: 44px;
     height: 44px;
@@ -385,18 +649,27 @@
 }
 
 .file-upload {
-  border: 3px dashed #d1d5db;
-  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border: 2px dashed rgba(148, 163, 184, 0.18);
+  background: linear-gradient(135deg, rgba(249, 249, 251, 0.02) 0%, rgba(243, 244, 246, 0.02) 100%);
   border-radius: 16px;
-  padding: 32px 16px;
+  padding: 28px 18px;
   text-align: center;
-  transition: all 0.3s;
+  transition: all 0.25s ease;
+
+  /* Keep the drop zone friendly sized and centered inside the column */
+  width: 100%;
+  max-width: 640px; /* allow a wider preview on desktop */
+  min-height: 140px;
+  margin: 0 auto; /* center within its column */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .file-upload:hover {
   border-color: #3b82f6;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.06) 0%, rgba(219, 234, 254, 0.06) 100%);
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.08);
 }
 
 @media (max-width: 640px) {
@@ -409,6 +682,34 @@
   margin-top: 10px;
   font-size: 14px;
   color: #666;
+  /* Prevent long filenames from wrapping into vertical columns */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
+  max-width: 100%;
+  display: block;
+}
+
+/* Style the inner drop zone content so it doesn't become a narrow vertical strip */
+.file-upload .drop-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 2px dashed rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.01);
+  box-sizing: border-box;
+}
+
+.file-upload .drop-zone.dragging {
+  border-color: #1976d2;
+  background: rgba(25, 118, 210, 0.03);
+  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.06) inset;
 }
 
 .preview-area {
@@ -419,44 +720,185 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e6e6e6;
-  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 6px; /* tighter padding for compact layout */
   border-radius: 6px;
-  background: #fff;
+  background: transparent; /* remove bright white background */
   position: relative;
+  min-height: 140px; /* keep visible but smaller */
+  box-sizing: border-box;
+  width: min(640px, calc(100% - 64px)); /* allow larger preview but stay inside form */
+  min-width: 200px; /* keep readable even in narrow layouts */
+  max-width: 100%;
+  max-height: 360px;
+}
+
+/* Make the inline preview more prominent and readable inside the column */
+.preview-wrapper .preview-video,
+.preview-wrapper .preview-image {
+  width: 100%;
+  max-width: 100%;
+  max-height: 220px; /* reduce video height so it fits inside the compact preview */
+  height: auto;
+  aspect-ratio: 16/9;
+  border-radius: 6px;
+  object-fit: contain;
+  background: transparent; /* ensure video element doesn't show white background */
+}
+
+/* Trim controls: make inputs inline and compact on larger screens */
+@media (min-width: 768px) {
+  .video-controls {
+    align-items: center;
+  }
+  .video-controls label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-right: 12px;
+  }
+  .video-controls input[type="number"] {
+    width: 90px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #111827; /* ensure numbers are visible on light input */
+  }
+  .video-controls input[type="number"]::placeholder {
+    color: #6b7280;
+  }
+}
+
+/* Small screens: keep stacked controls for better spacing */
+@media (max-width: 767px) {
+  .video-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .video-controls input[type="number"] {
+    width: 100%;
+  }
 }
 
 .preview-overlay {
   pointer-events: none;
   position: absolute;
-  left: 0; top: 0; right: 0; bottom: 0;
-  display: flex; align-items: flex-end; justify-content: center; padding: 12px;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
 }
-.preview-overlay .overlay-text { font-weight: 700; color: #fff; background: rgba(0,0,0,0.45); padding: 6px 10px; border-radius: 8px; }
-.preview-overlay.center { align-items: center; }
-.preview-overlay.top { align-items: flex-start; }
-.preview-overlay .overlay-text { font-size: 14px; }
+.preview-overlay .overlay-text {
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.preview-overlay.center {
+  align-items: center;
+}
+.preview-overlay.top {
+  align-items: flex-start;
+}
+.preview-overlay .overlay-text {
+  font-size: 14px;
+}
 
-.preview-video, .preview-image {
+.preview-video,
+.preview-image {
   width: 100%;
-  max-width: 640px;
-  max-height: 360px;
+  max-width: 100%;
   border-radius: 6px;
   object-fit: contain;
+  height: auto;
 }
 
 .preview-controls {
-  margin-top: 8px;
+  margin-top: 12px;
   display: flex;
-  gap: 8px;
+  flex-direction: column; /* stack controls under preview */
+  gap: 12px;
   align-items: center;
-  flex-wrap: wrap;
 }
 
-.pinterest-options { display: grid; gap: .5rem; }
-.pinterest-options select, .pinterest-options input { padding: .5rem; border-radius: 8px; border: 1px solid #ddd; }
+/* Keep video controls compact and centered by default; expand to row on wide screens */
+.video-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+.video-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  width: 100%;
+}
+.video-controls input[type="number"] {
+  width: 110px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+.range-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.range-row input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #e5e7eb;
+  transform: none;
+}
 
-.control-btn, .apply-template-btn {
+@media (min-width: 768px) {
+  .video-controls {
+    flex-direction: row;
+    align-items: center;
+  }
+  .video-controls label {
+    flex-direction: row;
+    align-items: center;
+  }
+  .video-controls input[type="number"] {
+    width: 90px;
+  }
+  .range-row {
+    display: grid;
+    grid-template-columns: repeat(2, 240px);
+    gap: 16px;
+    justify-content: center;
+    max-width: 520px;
+  }
+}
+.pinterest-options select,
+.pinterest-options input {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.control-btn,
+.apply-template-btn {
   background: #fff;
   border: 1px solid #ddd;
   padding: 8px 10px;
@@ -464,16 +906,49 @@
   cursor: pointer;
 }
 
-.control-btn:hover, .apply-template-btn:hover { background: #f7f7f7; }
+.control-btn:hover,
+.apply-template-btn:hover {
+  background: #f7f7f7;
+}
 
-.video-controls label { margin-right: 12px; font-size: 13px; }
-.range-row { display:flex; gap:6px; }
-.template-hint { font-size: 12px; margin-top: 6px; color: #666; }
+.video-controls label {
+  margin-right: 12px;
+  font-size: 13px;
+}
+.range-row {
+  gap: 6px;
+}
+.template-hint {
+  font-size: 12px;
+  margin-top: 6px;
+  color: #666;
+}
 
-.platform-toggles { display:flex; flex-wrap:wrap; gap:8px; }
-.platform-toggles label { display:inline-flex; gap:6px; align-items:center; background: #f8f8f8; padding: 6px 10px; border-radius: 12px; border: 1px solid #eee; font-size: 13px; color: #333; }
-.platform-toggles input[type="checkbox"] { width: 16px; height: 16px; }
-.advanced-options input { padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
+.platform-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.platform-toggles label {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  background: #f8f8f8;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  font-size: 13px;
+  color: #333;
+}
+.platform-toggles input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+.advanced-options input {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
 
 .submit-button {
   background: #1976d2;
@@ -513,9 +988,23 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }
 
 .loading-spinner {
@@ -523,14 +1012,16 @@
   width: 20px;
   height: 20px;
   margin-right: 10px;
-  border: 3px solid rgba(255,255,255,0.3);
+  border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: white;
   animation: spin 1s ease-in-out infinite;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .submit-button,
@@ -625,12 +1116,12 @@
   .content-upload-container {
     padding: 8px;
   }
-  
+
   .content-upload-form {
     padding: 16px;
     border-radius: 12px;
   }
-  
+
   .submit-button,
   .preview-button,
   .quality-check-button {
@@ -638,25 +1129,76 @@
     font-size: 14px;
     min-height: 48px;
   }
-  
+
   .content-upload-form h3 {
     font-size: 20px;
   }
 }
 
+/* Fix: ensure right-column panels (eg. TikTok options, platform tiles)
+   stay visually inside the main form and don't overflow when embedded
+   in the dashboard (dark mode). */
+.right-column .form-group,
+.right-column .platform-grid,
+.right-column .tiktok-options {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 12px;
+}
+
+.tiktok-options {
+  /* keep default visual appearance but ensure containment */
+  background: #fbfbfc;
+  border: 1px solid #efeef0;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* When the form is embedded in dark dashboard mode, make option panels
+   match the dark style so they feel like part of the same card. */
+.dashboard-mode .tiktok-options {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: inherit;
+}
+
+/* Creator badge */
+.creator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  color: #111827;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  margin: 8px 0 12px 0;
+  border: 1px solid rgba(17, 24, 39, 0.04);
+}
+
+.dashboard-mode .creator-badge {
+  background: rgba(255, 255, 255, 0.03);
+  color: #eef2ff;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
 .preview-area {
-  background: #f9fafb;
+  /* Use a subtle dark translucent background so preview lives inside the form */
+  background: rgba(255, 255, 255, 0.02);
   border-radius: 12px;
-  padding: 16px;
-  margin-top: 16px;
+  padding: 12px;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .preview-wrapper {
   position: relative;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  background: #000;
-  margin-bottom: 16px;
+  background: transparent; /* keep the inner element transparent to blend with form */
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .preview-video,
@@ -665,6 +1207,201 @@
   max-height: 400px;
   object-fit: contain;
   border-radius: 12px;
+}
+
+/* Upload history: make cards and thumbnails smaller and friendlier */
+.content-grid {
+  display: grid !important;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.content-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 8px;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  overflow: hidden;
+  min-height: 140px;
+}
+
+.content-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+
+/* Additional cute styles for history cards */
+.cute-card {
+  border-radius: 12px;
+  padding: 8px;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+  box-shadow: 0 6px 20px rgba(50, 50, 93, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.cute-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(50, 50, 93, 0.1);
+}
+
+.cute-video-thumb {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+}
+.cute-video {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+.cute-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.cute-badge {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.cute-meta {
+  padding-top: 8px;
+}
+.cute-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #eef2ff;
+}
+.cute-sub {
+  font-size: 0.8rem;
+  color: #9aa4b2;
+  margin-top: 4px;
+}
+
+/* nav styles */
+.upload-nav {
+  display: flex;
+  gap: 8px;
+}
+.upload-nav-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #9aa4b2;
+  cursor: pointer;
+}
+.upload-nav-btn.active {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+.upload-nav-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+
+.content-card img,
+.content-card video {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.content-card h5 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.content-card p {
+  font-size: 0.85rem;
+  color: #9aa4b2;
+  margin: 0.25rem 0;
+}
+
+.content-card .meta-row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  align-items: center;
+}
+
+/* Small play icon overlay for video thumbnails */
+.content-card > div > div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.6);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  .content-card img,
+  .content-card video,
+  .cute-video {
+    height: 80px;
+  }
+  .content-card {
+    padding: 6px;
+    min-height: 110px;
+  }
+  .cute-meta {
+    padding-top: 6px;
+  }
+  .cute-title {
+    font-size: 0.9rem;
+  }
+  .cute-desc {
+    font-size: 0.75rem;
+    color: #9aa4b2;
+    margin-top: 4px;
+  }
+  .platform-pill {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+  .cute-badge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
 }
 
 .preview-overlay {
@@ -731,40 +1468,66 @@
   width: 80px;
 }
 
+/* Range controls: compact track + small thumb for a professional look */
 .range-row {
   display: flex;
   gap: 12px;
   width: 100%;
+  max-width: 520px;
+  justify-content: center;
 }
 
 .range-row input[type="range"] {
-  flex: 1;
+  width: 100%;
+  min-width: 0;
   height: 6px;
   border-radius: 3px;
   outline: none;
+  appearance: none;
   -webkit-appearance: none;
   background: #e5e7eb;
+  transform: none;
 }
 
+/* WebKit track/thumb */
+.range-row input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+}
 .range-row input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #3b82f6;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  margin-top: -4px; /* vertically center */
 }
 
+/* Firefox */
+.range-row input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+}
 .range-row input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #3b82f6;
-  cursor: pointer;
   border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* IE/Edge */
+.range-row input[type="range"]::-ms-track {
+  height: 6px;
+}
+.range-row input[type="range"]::-ms-thumb {
+  width: 14px;
+  height: 14px;
 }
 
 .file-info {
@@ -882,6 +1645,26 @@
   margin-bottom: 12px;
 }
 
+/* Platform-specific mock previews */
+.platform-preview {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+.platform-tiktok video,
+.platform-tiktok img {
+  background: #000;
+}
+.platform-tiktok {
+  /* simulate vertical phone frame */
+  width: 200px;
+  height: 356px; /* 9:16 */
+}
+.platform-youtube {
+  width: 320px;
+  height: 180px; /* 16:9 */
+}
+
 .preview-card > div {
   margin: 8px 0;
   font-size: 13px;
@@ -894,24 +1677,298 @@
     min-width: 100%;
     max-width: 100%;
   }
-  
+
   .image-controls {
     flex-direction: column;
   }
-  
+
   .image-controls .control-btn {
     width: 100%;
   }
 }
 
-/* Dashboard page override: when the form is used inside the dashboard panel, allow it to span full width
-   so it doesn't remain centered within a narrow max-width container. This keeps the default behavior
-   for other pages while making dashboard upload forms full-width. */
+/* Dashboard page override: when embedded in the dashboard keep the form full-width so it
+   lines up with the dashboard columns and doesn't center itself (which caused a large
+   blank area in the middle). */
 .upload-panel .content-upload-container {
   max-width: none; /* allow it to expand to the parent's width */
-  margin: 0;        /* remove centering */
+  margin: 0; /* remove centering */
   width: 100%;
-  padding: 0;       /* rely on the panel padding to manage spacing */
+  padding: 0 12px; /* small inset for breathing room */
+}
+
+/* Use a predictable column layout that doesn't collapse when content grows.
+   left column uses minmax(0, 1fr) to prevent overflow issues and allow shrinkage. */
+@media (min-width: 1024px) {
+  /* Give the left column even more space and slightly reduce the right column so previews have room */
+  .content-upload-grid {
+    grid-template-columns: 2.2fr 320px; /* wider left column */
+    gap: 24px;
+  }
+  .right-column {
+    width: 320px;
+    flex: 0 0 320px;
+    position: relative;
+    z-index: 1; /* keep controls below the dropzone */
+  }
+  .left-column {
+    min-width: 0; /* allow the left column to shrink properly */
+  }
+
+  /* allow file upload and preview to expand horizontally on desktop */
+  .file-upload,
+  .preview-wrapper,
+  .preview-area {
+    max-width: 100%;
+    min-width: 0; /* allow the elements to shrink to column width and avoid overflow */
+    box-sizing: border-box;
+  }
+  .file-upload {
+    margin: 0 auto; /* center in the column */
+    max-width: 480px; /* prevent it from collapsing to a narrow vertical strip */
+    position: relative; /* create stacking context */
+    z-index: 5; /* stay above adjacent form controls */
+  }
+  .preview-video,
+  .preview-image {
+    max-height: 640px;
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Previously we collapsed to a single column when a file was selected.
+     That caused the preview to expand and overlay other controls which
+     made the form unusable. Keep the two-column layout and instead constrain
+     the preview to its column. */
+  .content-upload-grid.has-file {
+    /* retain standard columns; do not collapse */
+    grid-template-columns: 2.2fr 320px;
+  }
+  .content-upload-grid.has-file .left-column {
+    min-width: 0;
+  }
+
+  /* Ensure preview is centered under the selected file (main column) */
+  .content-upload-grid.has-file .preview-area {
+    align-items: center;
+    justify-content: center;
+  }
+  .content-upload-grid.has-file .preview-wrapper {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  /* Place the preview under the selected file in the left column on desktop */
+  /* Place the live preview in the right column (above templates) on desktop */
+  .content-upload-grid.has-file .preview-area {
+    grid-column: 2 / 3; /* move preview into right column (above Templates) */
+    margin: 8px 0 16px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* center the preview horizontally */
+    gap: 12px;
+    width: 100%;
+    justify-self: center;
+  }
+
+  /* Ensure preview area renders in the right column on desktop even if
+     markup places it elsewhere — we want it above the Templates card. */
+  .content-upload-grid .preview-area,
+  .right-column .preview-area,
+  .preview-area {
+    grid-column: 2 / 3 !important; /* force into right column */
+  }
+
+  .preview-wrapper {
+    /* visible container so the preview doesn't look like an empty black box */
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.42));
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .preview-wrapper .preview-video,
+  .preview-wrapper .preview-image {
+    max-height: 100%;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+  .content-upload-grid.has-file .preview-area > label {
+    width: 100%;
+    text-align: center; /* center the Live Preview label */
+    font-weight: 600;
+    color: inherit;
+    margin-bottom: 6px;
+  }
+  .content-upload-grid.has-file .preview-wrapper {
+    width: 100%;
+    /* On desktop we show a compact phone-style preview similar to mobile */
+    max-width: 300px;
+    margin: 8px auto; /* center inside the column */
+    aspect-ratio: 9 / 16; /* tall phone-like frame */
+    max-height: 520px; /* cap height so it doesn't stretch full viewport */
+    z-index: 3;
+    display: block;
+    padding: 8px;
+    align-self: center;
+  }
+
+  /* Make the inner video match the phone-style container */
+  .content-upload-grid.has-file .preview-wrapper .preview-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.5));
+  }
+
+  /* Ensure controls align to the compact preview width */
+  .content-upload-grid.has-file .video-controls,
+  .content-upload-grid.has-file .trim-row,
+  .content-upload-grid.has-file .range-row {
+    max-width: 280px;
+  }
+  .content-upload-grid.has-file .preview-wrapper .preview-video {
+    width: 100%;
+    aspect-ratio: 16/9;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* Center controls under the preview */
+  .content-upload-grid.has-file .video-controls {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 640px;
+    position: relative;
+    z-index: 10; /* ensure controls sit above platform cards */
+  }
+  .content-upload-grid.has-file .trim-row {
+    max-width: 640px;
+    align-self: center;
+    margin: 8px auto 0;
+    position: relative;
+    z-index: 10;
+  }
+  .content-upload-grid.has-file .range-row {
+    position: relative;
+    z-index: 10;
+    max-width: 640px;
+  }
+
+  /* Mobile / narrow: keep preview spanning full width */
+  @media (max-width: 1023px) {
+    .content-upload-grid.has-file .preview-area {
+      grid-column: 1 / -1;
+      align-items: center;
+    }
+    .content-upload-grid.has-file .preview-wrapper {
+      max-width: 100%;
+      margin: 0 auto;
+      align-self: center;
+    }
+  }
+
+  /* Make number inputs readable on dark backgrounds */
+  .content-upload-grid.has-file .video-controls input[type="number"],
+  .content-upload-grid.has-file .trim-row input[type="number"] {
+    background: #fff;
+    color: #111;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 8px;
+  }
+}
+.content-upload-grid.has-file .video-controls .range-row {
+  width: 100%;
+}
+.content-upload-grid.has-file .range-row {
+  max-width: 320px;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+/* Trim row centered under preview */
+.content-upload-grid.has-file .video-controls {
+  /* Ensure controls stack vertically under the preview on desktop and stay centered */
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+}
+.content-upload-grid.has-file .video-controls .range-row {
+  width: 100%;
+}
+.content-upload-grid.has-file .range-row {
+  max-width: 320px;
+  justify-content: center;
+  margin: 0 auto;
+}
+.trim-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+  margin: 12px auto 0; /* center under preview with some breathing room */
+  position: relative;
+  z-index: 4; /* ensure it sits above neighboring tiles and doesn't overlap visually */
+}
+
+.content-upload-grid.has-file .trim-row label input[type="number"] {
+  width: 64px;
+}
+
+/* When preview spans columns force labels and inputs to be compact */
+.content-upload-grid.has-file .video-controls label {
+  width: auto;
+}
+.content-upload-grid.has-file .trim-row label input[type="number"] {
+  width: 96px;
+  color: #111827; /* ensure compact trim inputs have visible numbers */
+}
+.content-upload-grid.has-file .trim-row label input[type="number"]::placeholder {
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .content-upload-grid.has-file .preview-wrapper {
+    width: 100%;
+    max-width: none;
+  }
+  .trim-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* Ensure right-column form elements don't visually overlap the drop zone */
+.right-column .form-group,
+.right-column .form-select,
+.right-column .platform-grid {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure preview and file upload areas don't expand past their column */
+.file-upload,
+.preview-wrapper,
+.preview-area {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Tighten spacing when a file is selected so the form remains compact */
+.file-info {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* Smooth scroll behavior */
@@ -941,7 +1998,7 @@
   background: white;
   padding: 4px 10px;
   border-radius: 6px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 12px;
   border: 1px solid #e5e7eb;
 }
@@ -952,7 +2009,7 @@
     gap: 8px;
     padding: 10px 12px;
   }
-  
+
   .shortcut-item {
     font-size: 10px;
     padding: 3px 8px;
@@ -965,5 +2022,89 @@
   select,
   input {
     min-height: 44px; /* iOS recommendation for touch targets */
+  }
+}
+
+/* Desktop: enforce a compact phone-style preview that stays inside the
+   left (main) column and does not overlap adjacent tiles or the header. */
+@media (min-width: 1024px) {
+  /* Ensure the grid layout remains predictable */
+  .content-upload-grid {
+    grid-template-columns: 2.2fr 320px;
+    gap: 24px;
+  }
+
+  .right-column {
+    width: 320px;
+    flex: 0 0 320px;
+    position: relative;
+    z-index: 1; /* keep right-column content beneath the preview frame */
+  }
+
+  /* Place preview in the main column and keep it in-flow (no absolute/fixed) */
+  .content-upload-grid.has-file .preview-area {
+    grid-column: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 12px 0 16px 0;
+    width: 100%;
+  }
+
+  /* Compact phone-like frame */
+  .content-upload-grid.has-file .preview-wrapper {
+    width: 300px;
+    max-width: 100%;
+    aspect-ratio: 9 / 16;
+    padding: 10px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.9));
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+    margin: 12px auto;
+    position: relative; /* keep it in the document flow */
+    z-index: 6; /* above right-column tiles but below global header */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 520px; /* prevent full-viewport stretching */
+  }
+
+  /* Video fills the phone frame without escaping */
+  .content-upload-grid.has-file .preview-wrapper .preview-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+    background: #000;
+    display: block;
+  }
+
+  /* Controls centered below the compact preview */
+  .content-upload-grid.has-file .video-controls,
+  .content-upload-grid.has-file .trim-row,
+  .content-upload-grid.has-file .range-row {
+    max-width: 360px;
+    width: 100%;
+    margin: 8px auto 0;
+    align-self: center;
+    justify-content: center;
+    position: relative;
+    z-index: 6;
+  }
+
+  /* Ensure tiles and platform grid sit beneath the preview visually */
+  .platform-grid,
+  .preview-card,
+  .right-column .platform-grid {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Small safeguard: do not allow preview to escape viewport top */
+  .content-upload-grid.has-file .preview-wrapper {
+    margin-top: 24px;
+    max-height: calc(100vh - 160px);
   }
 }

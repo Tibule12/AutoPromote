@@ -12,10 +12,12 @@
 **Location:** us-central1
 
 ### Core Functions
+
 - ✅ `api` - Main Express server handling all REST API endpoints
 - ✅ `helloWorld` - Health check endpoint
 
 ### OAuth Callback Functions
+
 - ✅ `youtubeOAuthCallback` - YouTube OAuth flow
 - ✅ `tiktokOAuthCallback` - TikTok OAuth flow
 - ✅ `facebookOAuthCallback` - Facebook OAuth flow
@@ -29,6 +31,7 @@
 - ✅ `pinterestOAuthCallback` - Pinterest OAuth flow
 
 ### OAuth URL Generation (Callable Functions)
+
 - ✅ `getYouTubeAuthUrl`
 - ✅ `getTikTokAuthUrl`
 - ✅ `getFacebookAuthUrl`
@@ -42,12 +45,14 @@
 - ✅ `getPinterestAuthUrl`
 
 ### Content Management Functions
+
 - ✅ `autoPromoteContent` - Auto-promotion trigger
 - ✅ `createPromotionOnContentCreate` - Firestore trigger on content creation
 - ✅ `createPromotionOnApproval` - Firestore trigger on approval
 - ✅ `uploadVideoToYouTube` - Video upload to YouTube
 
 ### Monetization Functions
+
 - ✅ `generateMonetizedLandingPage` - Landing page generation
 - ✅ `generateSmartLink` - Smart link generator
 - ✅ `smartLinkRedirect` - Smart link redirect handler
@@ -58,12 +63,14 @@
 - ✅ `getReferralStats` - Referral statistics
 
 ### Template & Promotion Functions
+
 - ✅ `createPromotionTemplate` - Template creation
 - ✅ `listPromotionTemplates` - List templates
 - ✅ `attachTemplateToContent` - Attach template to content
 - ✅ `addReferrerToContent` - Referral tracking
 
 ### Messaging Functions
+
 - ✅ `telegramWebhook` - Telegram bot webhook
 
 ---
@@ -76,6 +83,7 @@
 ### Collections (62 total)
 
 #### User & Authentication
+
 - ✅ `users` - User profiles and settings
 - ✅ `admins` - Admin user accounts
 - ✅ `oauth_states` - OAuth state tracking
@@ -84,10 +92,12 @@
 - ✅ `user_credits` - User credit balances
 
 #### Platform Connections (subcollection under users)
+
 - ✅ `users/{uid}/connections/{platform}` - Platform connection status
 - ✅ `users/{uid}/oauth_state/{platform}` - OAuth state per platform
 
 #### Content & Promotions
+
 - ✅ `content` - User uploaded content
 - ✅ `promotion_schedules` - Scheduled promotions
 - ✅ `promotion_tasks` - Promotion execution tasks
@@ -98,10 +108,12 @@
 - ✅ `content_optimizations` - Content optimization suggestions
 
 #### AI Clip Generation
+
 - ✅ `clip_analyses` - Video clip analysis results
 - ✅ `generated_clips` - AI-generated video clips
 
 #### Analytics & Metrics
+
 - ✅ `analytics` - Analytics data
 - ✅ `events` - System events log
 - ✅ `metric_scraping_schedules` - Metric scraping schedules
@@ -110,6 +122,7 @@
 - ✅ `hashtag_generations` - Generated hashtags
 
 #### Monetization
+
 - ✅ `earnings_events` - Earning events log
 - ✅ `payouts` - Payout records
 - ✅ `payments` - Payment transactions
@@ -124,6 +137,7 @@
 - ✅ `influencer_bookings` - Influencer booking records
 
 #### Social Features
+
 - ✅ `referral_invitations` - Referral invitations
 - ✅ `growth_squads` - Growth squad data
 - ✅ `squad_shares` - Squad share tracking
@@ -133,15 +147,18 @@
 - ✅ `leaderboard` - User leaderboard
 
 #### Messaging & Notifications
+
 - ✅ `notifications` - User notifications
 - ✅ `chat_conversations` - Chat conversations
 - ✅ `chat_messages` - Chat messages
 - ✅ `webhook_logs` - Webhook event logs
 
 #### Smart Links & Landing Pages
+
 - ✅ `shortlinks` - Short link tracking
 
 #### System & Admin
+
 - ✅ `system` - System configuration
 - ✅ `system_counters` - System counters
 - ✅ `system_locks` - Distributed locks
@@ -151,6 +168,7 @@
 - ✅ `dead_letter_tasks` - Failed task queue
 
 #### A/B Testing & Optimization
+
 - ✅ `ab_tests` - A/B test configurations
 - ✅ `variant_stats` - A/B test variant statistics
 - ✅ `algorithm_optimizations` - Algorithm optimization data
@@ -158,6 +176,7 @@
 - ✅ `bandit_weight_history` - Bandit weight history
 
 #### Platform-Specific
+
 - ✅ `youtube_uploads` - YouTube upload tracking
 - ✅ `subscription_events` - Subscription event log
 
@@ -168,6 +187,7 @@
 **Status:** ✅ All required indexes deployed
 
 ### Composite Indexes
+
 1. ✅ `content` - `user_id` (ASC) + `created_at` (DESC)
 2. ✅ `content` - `user_id` (ASC) + `created_at` (ASC)
 3. ✅ `content` - `userId` (ASC) + `createdAt` (DESC)
@@ -187,20 +207,36 @@
 ## 🌐 Deployments
 
 ### Frontend (GitHub Pages)
+
 - **URL:** https://tibule12.github.io/AutoPromote/
 - **Status:** ✅ Deployed
 - **Last Deploy:** Latest commit
 - **Build:** React production build in `/docs`
 
+> Deploy note: For Render or other PaaS deployments that host the backend and static frontend together, ensure the frontend production build runs during deploy (for example: `npm --prefix frontend run build`) so `frontend/build/index.html` is present and the server can serve the SPA. If you use CI, add this to your deploy workflow.
+
+> Snapchat scope: you can control the default OAuth scope from the Render dashboard by adding `SNAPCHAT_DEFAULT_SCOPE` (recommended value for testing: `https://auth.snapchat.com/oauth2/api/user.display_name`).
+>
+> Supported aliases we accept in `test_scope` and `SNAPCHAT_DEFAULT_SCOPE`:
+>
+> - `display_name` → `https://auth.snapchat.com/oauth2/api/user.display_name`
+> - `external_id` → `https://auth.snapchat.com/oauth2/api/user.external_id`
+> - `bitmoji.avatar` → `https://auth.snapchat.com/oauth2/api/user.bitmoji.avatar`
+> - `camkit_lens_push_to_device` → `https://auth.snapchat.com/oauth2/api/camkit_lens_push_to_device` (Camera Kit only)
+>
+> Use the `display_name` URL while you wait for Marketing API approval; once approved you can set `SNAPCHAT_DEFAULT_SCOPE` to the marketing scopes required for your app.
+
 ### Backend API (Render)
+
 - **URL:** https://autopromote.onrender.com
 - **Status:** ✅ Running
 - **Main Domain:** https://www.autopromote.org
 - **Environment:** Production
 
 ### Firebase Hosting
+
 - **Status:** ✅ Configured
-- **Rewrites:** 
+- **Rewrites:**
   - `/api/**` → Firebase Functions (`api`)
   - `**` → `/index.html` (SPA routing)
 
@@ -209,15 +245,18 @@
 ## ⚙️ Configuration Files
 
 ### Firestore
+
 - ✅ `firestore.rules` - Security rules
 - ✅ `firestore.indexes.json` - Composite indexes
 - ✅ Deploy script: `deploy-firestore-indexes.ps1`
 
 ### Firebase
+
 - ✅ `firebase.json` - Firebase project configuration
 - ✅ `storage.rules` - Cloud Storage security rules
 
 ### Functions
+
 - ✅ `autopromote-functions/index.js` - Functions entry point
 - ✅ `autopromote-functions/copy-server.js` - Pre-deploy script
 - ✅ Runtime: Node.js 20
@@ -227,6 +266,7 @@
 ## 🔧 Recent Fixes
 
 ### December 4, 2025
+
 1. ✅ Fixed OAuth 404 errors - Changed POST to GET for platform auth endpoints
 2. ✅ Fixed TikTok auth endpoint - Use `/auth/start` instead of `/auth/prepare`
 3. ✅ Suppressed console errors for 500 responses (clips, analytics, earnings)
@@ -241,15 +281,19 @@
 ## 📋 TODO / Known Issues
 
 ### Backend Endpoints Returning 500
+
 The following endpoints return 500 errors but are **expected** (no data exists yet):
+
 - `/api/clips/user` - No clips generated yet
-- `/api/analytics/user` - No analytics data yet  
+- `/api/analytics/user` - No analytics data yet
 - `/api/monetization/earnings/summary` - No earnings yet
 
 **Frontend handles these gracefully** - errors are caught and suppressed.
 
 ### Missing Implementations
+
 None - all endpoints are implemented. The 500 errors are due to:
+
 1. ✅ **Fixed** - Missing Firestore indexes (deployed)
 2. ⏳ **Expected** - Empty collections (will populate with usage)
 
@@ -258,6 +302,7 @@ None - all endpoints are implemented. The 500 errors are due to:
 ## 🚀 Deployment Commands
 
 ### Deploy Everything
+
 ```bash
 # Deploy Firebase Functions
 firebase deploy --only functions
@@ -284,11 +329,13 @@ git push origin main
 ```
 
 ### Deploy Functions Only
+
 ```bash
 firebase deploy --only functions
 ```
 
 ### Deploy Specific Function
+
 ```bash
 firebase deploy --only functions:api
 firebase deploy --only functions:youtubeOAuthCallback

@@ -5,15 +5,19 @@ function normalizeApiResponse(obj, explicitStatus) {
   if (!obj) return { status: explicitStatus || undefined, body: null };
   let parsed = obj;
   // Accept raw string JSON
-  if (typeof obj === 'string') {
-    try { parsed = JSON.parse(obj); } catch (e) { parsed = null; }
+  if (typeof obj === "string") {
+    try {
+      parsed = JSON.parse(obj);
+    } catch (e) {
+      parsed = null;
+    }
   }
   // If input is a fetch-style response body (e.g., { status, body: { ... } })
-  if (parsed && typeof parsed === 'object' && parsed.body && typeof parsed.body === 'object') {
+  if (parsed && typeof parsed === "object" && parsed.body && typeof parsed.body === "object") {
     return { status: explicitStatus || parsed.status, body: parsed.body };
   }
   // If input is already an API response (flattened)
-  if (parsed && typeof parsed === 'object') {
+  if (parsed && typeof parsed === "object") {
     return { status: explicitStatus || parsed.status, body: parsed };
   }
   return { status: explicitStatus || undefined, body: null };

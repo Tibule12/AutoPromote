@@ -1,7 +1,7 @@
-import React from 'react';
-import '../AdminDashboard.css';
+import React from "react";
+import "../AdminDashboard.css";
 
-const StatCard = ({ title, value, subtitle, color = '#1976d2', icon, trend }) => {
+const StatCard = ({ title, value, subtitle, color = "#1976d2", icon, trend }) => {
   return (
     <div className="stat-card">
       <div className="stat-card-icon-bg" style={{ color }}>
@@ -12,20 +12,20 @@ const StatCard = ({ title, value, subtitle, color = '#1976d2', icon, trend }) =>
       </div>
       <h3 className="stat-card-title">{title}</h3>
       <div className="stat-card-value">
-        {typeof value === 'number' && title.toLowerCase().includes('revenue') 
+        {typeof value === "number" && title.toLowerCase().includes("revenue")
           ? `$${value.toFixed(2)}`
           : value}
       </div>
-      {subtitle && 
+      {subtitle && (
         <div className="stat-card-subtitle">
           {trend !== undefined && (
-            <span className={`trend-indicator ${trend > 0 ? 'trend-up' : 'trend-down'}`}>
-              {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%
+            <span className={`trend-indicator ${trend > 0 ? "trend-up" : "trend-down"}`}>
+              {trend > 0 ? "↑" : "↓"} {Math.abs(trend)}%
             </span>
           )}
           {subtitle}
         </div>
-      }
+      )}
     </div>
   );
 };

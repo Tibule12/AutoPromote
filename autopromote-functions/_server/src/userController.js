@@ -1,4 +1,4 @@
-const { auth, db } = require('./firebaseClient');
+const { auth, db } = require("./firebaseClient");
 
 // Generate JWT
 
@@ -16,19 +16,22 @@ const registerUser = async (req, res) => {
     });
 
     // Store user profile in Firestore
-    await db.collection('users').doc(userRecord.uid).set({
-      name,
-      email,
-      role: role || 'creator',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
+    await db
+      .collection("users")
+      .doc(userRecord.uid)
+      .set({
+        name,
+        email,
+        role: role || "creator",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
 
     res.status(201).json({
       id: userRecord.uid,
       name,
       email,
-      role: role || 'creator',
+      role: role || "creator",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -41,7 +44,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   // Firebase Auth handles login on the client side (frontend)
   // Backend can verify ID tokens if needed
-  res.status(501).json({ message: 'Login is handled by Firebase Auth client SDK.' });
+  res.status(501).json({ message: "Login is handled by Firebase Auth client SDK." });
 };
 
 // @desc    Get user profile
@@ -49,9 +52,9 @@ const loginUser = async (req, res) => {
 // @access  Private
 const getUserProfile = async (req, res) => {
   try {
-    const userDoc = await db.collection('users').doc(req.user.uid).get();
+    const userDoc = await db.collection("users").doc(req.user.uid).get();
     if (!userDoc.exists) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
     res.json({ id: userDoc.id, ...userDoc.data() });
   } catch (error) {
@@ -64,24 +67,24 @@ const getUserProfile = async (req, res) => {
 // @access  Private
 const updateUserProfile = async (req, res) => {
   try {
-    const userRef = db.collection('users').doc(req.user.uid);
+    const userRef = db.collection("users").doc(req.user.uid);
     const currentSnap = await userRef.get();
     const currentData = currentSnap.exists ? currentSnap.data() : {};
-    let updateData = {
+    const updateData = {
       name: req.body.name,
       email: req.body.email,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
       // ...rest of code...
     };
     // Prevent downgrading admin role or isAdmin
-    if (currentData.role === 'admin' || currentData.isAdmin === true) {
-      updateData.role = 'admin';
+    if (currentData.role === "admin" || currentData.isAdmin === true) {
+      updateData.role = "admin";
       updateData.isAdmin = true;
     } else if (req.body.role) {
       updateData.role = req.body.role;
     }
     await userRef.update(updateData);
-    res.json({ message: 'Profile updated' });
+    res.json({ message: "Profile updated" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

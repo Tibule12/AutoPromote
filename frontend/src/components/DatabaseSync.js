@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import DatabaseSyncService from '../utils/dbSchemaSync';
+import { useEffect, useState } from "react";
+import DatabaseSyncService from "../utils/dbSchemaSync";
 
 /**
  * Component that ensures database schema is aligned with admin dashboard requirements
@@ -8,17 +8,17 @@ import DatabaseSyncService from '../utils/dbSchemaSync';
  */
 
 const DatabaseSync = ({ user }) => {
-  const [syncStatus, setSyncStatus] = useState('pending');
+  const [, setSyncStatus] = useState("pending");
 
   useEffect(() => {
     const performDatabaseSync = async () => {
       try {
-        setSyncStatus('syncing');
+        setSyncStatus("syncing");
         const result = await DatabaseSyncService.validateDatabaseSchema(user);
-        setSyncStatus(result ? 'success' : 'error');
+        setSyncStatus(result ? "success" : "error");
       } catch (error) {
-        console.error('Database sync error:', error);
-        setSyncStatus('error');
+        console.error("Database sync error:", error);
+        setSyncStatus("error");
       }
     };
     performDatabaseSync();

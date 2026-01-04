@@ -1,0 +1,16 @@
+# Ignore large/minified JS bundles that cause timeouts
+docs/static/js/*.js
+frontend/docs/static/js/*.js
+frontend/docs/static/js/*.js.map
+
+# Ignore generated/packaged assets and large media
+app_review_package/**
+*.zip
+*.mp4
+
+# Ignore our centralized OpenAI client implementations (explicit)
+**/src/services/openaiClient.js
+**/autopromote-functions/_server/src/services/openaiClient.js
+
+# Misc: ignore build outputs
+frontend/build/**

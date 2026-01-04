@@ -1,15 +1,15 @@
 // fix-failed-fetch.js
 // Script to fix "Failed to fetch" error in AdminLoginForm.js
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const adminLoginFormPath = path.join(__dirname, 'frontend', 'src', 'AdminLoginForm.js');
+const adminLoginFormPath = path.join(__dirname, "frontend", "src", "AdminLoginForm.js");
 
 // Read the AdminLoginForm.js file
-fs.readFile(adminLoginFormPath, 'utf8', (err, data) => {
+fs.readFile(adminLoginFormPath, "utf8", (err, data) => {
   if (err) {
-    console.error('Error reading AdminLoginForm.js:', err);
+    console.error("Error reading AdminLoginForm.js:", err);
     return;
   }
 
@@ -72,11 +72,11 @@ fs.readFile(adminLoginFormPath, 'utf8', (err, data) => {
   );
 
   // Write the updated content back to AdminLoginForm.js
-  fs.writeFile(adminLoginFormPath, finalContent, 'utf8', (writeErr) => {
+  fs.writeFile(adminLoginFormPath, finalContent, "utf8", writeErr => {
     if (writeErr) {
-      console.error('Error writing to AdminLoginForm.js:', writeErr);
+      console.error("Error writing to AdminLoginForm.js:", writeErr);
       return;
     }
-    console.log('✅ Updated AdminLoginForm.js with improved error handling');
+    console.log("✅ Updated AdminLoginForm.js with improved error handling");
   });
 });

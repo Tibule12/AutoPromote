@@ -1,0 +1,202 @@
+/* Footer styles for AutoPromote */
+.ap-footer {
+  width: 100%;
+  padding: 20px 18px;
+  border-top: 1px solid #ece8fa;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #6b6b6b;
+  font-size: 0.95rem;
+  background: transparent;
+}
+
+.ap-footer-main {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.ap-footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ap-logo {
+  font-weight: 800;
+  color: #4f2ff7;
+  font-size: 1.05rem;
+}
+
+.ap-footer-links {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ap-footer-links a {
+  color: #6c4cf7;
+  text-decoration: none;
+}
+
+.ap-footer-links a:focus,
+.ap-footer-links a:hover {
+  text-decoration: underline;
+}
+
+.ap-footer-links .dot {
+  color: #bbb;
+}
+
+.ap-footer-right {
+  display: flex;
+  align-items: center;
+}
+
+.ap-social {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.ap-social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: #6b6b6b;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.ap-social a:hover,
+.ap-social a:focus {
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+}
+
+.ap-footer-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ap-footer-links.ap-legal {
+  color: #666;
+}
+
+.ap-footer-links.ap-company {
+  color: #666;
+}
+
+.ap-lang {
+  display: inline-block;
+}
+
+.ap-lang-select {
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 6px 8px;
+  background: #fff;
+}
+
+.ap-newsletter-toggle {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ap-newsletter-panel {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 0 0;
+}
+
+.ap-newsletter-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ap-newsletter-form input[type="email"] {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.ap-newsletter-form button {
+  background: #6c4cf7;
+  color: #fff;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ap-newsletter-status {
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.ap-footer-copy {
+  color: #888;
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.ap-extra {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: 12px;
+}
+
+.ap-status {
+  color: #6c4cf7;
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.ap-back-to-top {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #6b6b6b;
+}
+
+.ap-back-to-top:hover,
+.ap-back-to-top:focus {
+  background: rgba(99, 102, 241, 0.1);
+  color: #fff;
+}
+
+@media (max-width: 760px) {
+  .ap-footer-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ap-footer-right {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .ap-social a {
+    width: 32px;
+    height: 32px;
+  }
+  .ap-logo {
+    font-size: 0.98rem;
+  }
+}

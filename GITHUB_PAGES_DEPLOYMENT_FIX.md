@@ -20,14 +20,14 @@ Always use absolute URLs (including the full domain) for all API requests:
 
 ```javascript
 // INCORRECT - Will try to access GitHub Pages API
-fetch('/api/auth/login', {
+fetch("/api/auth/login", {
   // ...
-})
+});
 
 // CORRECT - Uses your actual backend
-fetch('https://your-backend-api.com/api/auth/login', {
+fetch("https://your-backend-api.com/api/auth/login", {
   // ...
-})
+});
 ```
 
 ### 2. Create an API Configuration File
@@ -36,7 +36,7 @@ Use a centralized API configuration file (like `apiConfig.js`) to manage all you
 
 ```javascript
 // src/config/apiConfig.js
-const API_BASE_URL = 'https://autopromote.onrender.com';
+const API_BASE_URL = "https://autopromote.onrender.com";
 
 export const ENDPOINTS = {
   login: `${API_BASE_URL}/api/auth/login`,
@@ -48,12 +48,12 @@ export const ENDPOINTS = {
 Then import and use these URLs throughout your application:
 
 ```javascript
-import { ENDPOINTS } from '../config/apiConfig';
+import { ENDPOINTS } from "../config/apiConfig";
 
 // Use in fetch calls
 fetch(ENDPOINTS.login, {
   // ...
-})
+});
 ```
 
 ### 3. Fix CORS Configuration
@@ -62,14 +62,13 @@ Ensure your backend server has proper CORS configuration to accept requests from
 
 ```javascript
 // On your Express backend
-const cors = require('cors');
-app.use(cors({
-  origin: [
-    'https://yourusername.github.io', 
-    'http://localhost:3000'
-  ],
-  credentials: true
-}));
+const cors = require("cors");
+app.use(
+  cors({
+    origin: ["https://yourusername.github.io", "http://localhost:3000"],
+    credentials: true,
+  })
+);
 ```
 
 ### 4. Update Homepage in package.json
@@ -79,7 +78,7 @@ Make sure your `package.json` has the correct homepage setting for GitHub Pages:
 ```json
 {
   "name": "your-app",
-  "homepage": "https://yourusername.github.io/your-repo-name",
+  "homepage": "https://yourusername.github.io/your-repo-name"
   // ...
 }
 ```

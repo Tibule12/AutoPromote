@@ -3,10 +3,10 @@ module.exports = {
   env: {
     browser: true,
     node: true,
-    es2021: true
+    es2021: true,
   },
   rules: {
-    'no-console': 'off',
-    'no-unused-vars': 'off'
-  }
+    "no-console": "off",
+    "no-unused-vars": "off",
+  },
 };

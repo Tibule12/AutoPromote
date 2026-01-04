@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import './DraftManager.css';
+import React, { useState, useEffect } from "react";
+import "./DraftManager.css";
 
 function DraftManager({ onLoadDraft, currentDraft }) {
   const [drafts, setDrafts] = useState([]);
@@ -10,42 +10,42 @@ function DraftManager({ onLoadDraft, currentDraft }) {
   }, []);
 
   const loadDrafts = () => {
-    const saved = localStorage.getItem('contentDrafts');
+    const saved = localStorage.getItem("contentDrafts");
     if (saved) {
       try {
         setDrafts(JSON.parse(saved));
       } catch (e) {
-        console.error('Failed to load drafts:', e);
+        console.error("Failed to load drafts:", e);
       }
     }
   };
 
   const saveDraft = () => {
     if (!currentDraft || !currentDraft.title) {
-      alert('Please add a title before saving draft');
+      alert("Please add a title before saving draft");
       return;
     }
 
     const draft = {
       ...currentDraft,
       id: Date.now(),
-      savedAt: new Date().toISOString()
+      savedAt: new Date().toISOString(),
     };
 
     const updated = [draft, ...drafts].slice(0, 10); // Keep max 10 drafts
-    localStorage.setItem('contentDrafts', JSON.stringify(updated));
+    localStorage.setItem("contentDrafts", JSON.stringify(updated));
     setDrafts(updated);
-    alert('Draft saved! 💾');
+    alert("Draft saved! 💾");
   };
 
-  const loadDraft = (draft) => {
+  const loadDraft = draft => {
     onLoadDraft(draft);
     setShowDrafts(false);
   };
 
-  const deleteDraft = (id) => {
+  const deleteDraft = id => {
     const updated = drafts.filter(d => d.id !== id);
-    localStorage.setItem('contentDrafts', JSON.stringify(updated));
+    localStorage.setItem("contentDrafts", JSON.stringify(updated));
     setDrafts(updated);
   };
 
@@ -64,17 +64,17 @@ function DraftManager({ onLoadDraft, currentDraft }) {
         <div className="drafts-list">
           <div className="drafts-header">
             <h4>Saved Drafts</h4>
-            <button onClick={() => setShowDrafts(false)} className="close-drafts">✕</button>
+            <button onClick={() => setShowDrafts(false)} className="close-drafts">
+              ✕
+            </button>
           </div>
-          {drafts.map((draft) => (
+          {drafts.map(draft => (
             <div key={draft.id} className="draft-item">
               <div className="draft-info">
                 <div className="draft-title">{draft.title}</div>
                 <div className="draft-meta">
                   {draft.type && <span className="draft-type">{draft.type}</span>}
-                  <span className="draft-date">
-                    {new Date(draft.savedAt).toLocaleDateString()}
-                  </span>
+                  <span className="draft-date">{new Date(draft.savedAt).toLocaleDateString()}</span>
                 </div>
               </div>
               <div className="draft-actions-btn">

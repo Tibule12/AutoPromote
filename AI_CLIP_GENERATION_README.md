@@ -1,11 +1,13 @@
 # AI Video Clipping Feature - Opus Clip Style
 
 ## Overview
+
 AutoPromote now includes an AI-powered video clipping system that automatically analyzes long-form videos and generates viral short clips optimized for TikTok, Instagram Reels, YouTube Shorts, and other platforms.
 
 ## Features
 
 ### 🎯 Core Capabilities
+
 - **Automatic Video Analysis**: FFmpeg-based scene detection and shot boundary analysis
 - **AI Transcription**: OpenAI Whisper or Google Speech-to-Text integration
 - **Viral Score Algorithm**: Scores segments based on:
@@ -23,21 +25,23 @@ AutoPromote now includes an AI-powered video clipping system that automatically 
 
 Each video segment is scored 0-100 based on:
 
-| Factor | Points | Description |
-|--------|--------|-------------|
-| Hook Detection | +20 | Clips starting in first 5 seconds |
-| Ideal Length | +15 | 30-60 second duration |
+| Factor              | Points  | Description                                       |
+| ------------------- | ------- | ------------------------------------------------- |
+| Hook Detection      | +20     | Clips starting in first 5 seconds                 |
+| Ideal Length        | +15     | 30-60 second duration                             |
 | Engagement Keywords | +5 each | Words like "amazing", "secret", "how to", "never" |
-| Questions | +10 | Contains question marks |
-| Exclamations | +3 each | Enthusiasm indicators (max +15) |
-| Good Pacing | +10 | 50-150 words in clip |
+| Questions           | +10     | Contains question marks                           |
+| Exclamations        | +3 each | Enthusiasm indicators (max +15)                   |
+| Good Pacing         | +10     | 50-150 words in clip                              |
 
 ## Architecture
 
 ### Backend Services
 
 #### `videoClippingService.js`
+
 Main service handling:
+
 - Video download and metadata extraction
 - FFmpeg scene detection
 - AI transcription (OpenAI/Google)
@@ -45,7 +49,9 @@ Main service handling:
 - Clip rendering with effects
 
 #### `clipRoutes.js`
+
 API endpoints:
+
 - `POST /api/clips/analyze` - Analyze video, generate suggestions
 - `GET /api/clips/analysis/:analysisId` - Retrieve analysis results
 - `POST /api/clips/generate` - Render specific clip
@@ -56,7 +62,9 @@ API endpoints:
 ### Frontend
 
 #### `ClipStudioPanel.js`
+
 Dashboard tab featuring:
+
 - Video selection grid
 - Analysis progress tracking
 - Clip suggestions with viral scores
@@ -67,6 +75,7 @@ Dashboard tab featuring:
 ### Database Schema
 
 #### `clip_analyses` Collection
+
 ```javascript
 {
   userId: string,
@@ -103,6 +112,7 @@ Dashboard tab featuring:
 ```
 
 #### `generated_clips` Collection
+
 ```javascript
 {
   userId: string,
@@ -152,6 +162,7 @@ firebase deploy --only firestore:rules
 ```
 
 New rules added for:
+
 - `clip_analyses` - User-owned analysis results
 - `generated_clips` - User-owned generated clips
 
@@ -242,11 +253,13 @@ Response:
 ## Performance Considerations
 
 ### Processing Times
+
 - 5 min video: ~2-3 minutes analysis
 - 15 min video: ~5-7 minutes analysis
 - 60 min video: ~15-20 minutes analysis
 
 Processing time depends on:
+
 - Video length and resolution
 - Transcription API speed
 - Server CPU for FFmpeg
@@ -263,16 +276,19 @@ Processing time depends on:
 ## Pricing Estimates
 
 ### OpenAI Whisper API
+
 - ~$0.006 per minute of audio
 - 10 minute video = $0.06
 - 60 minute video = $0.36
 
 ### Firebase Storage
+
 - Storage: $0.026/GB/month
 - Bandwidth: $0.12/GB
 - 1 min clip (1080p) ≈ 50MB = $0.006 storage/month + download costs
 
 ### Recommended Pricing Model
+
 - Free tier: 3 clips per month
 - Pro tier: Unlimited clips + priority processing
 - Charge per-clip or subscription model
@@ -280,6 +296,7 @@ Processing time depends on:
 ## Future Enhancements
 
 ### Planned Features
+
 - [ ] Real-time preview during analysis
 - [ ] Manual clip editor (trim, adjust)
 - [ ] Custom branding templates
@@ -292,6 +309,7 @@ Processing time depends on:
 - [ ] Performance analytics per clip
 
 ### Integration Ideas
+
 - Auto-generate clips on long video upload
 - Schedule clips at optimal posting times
 - Cross-platform performance comparison
@@ -302,6 +320,7 @@ Processing time depends on:
 ### Common Issues
 
 **FFmpeg Not Found**
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get update
@@ -316,17 +335,20 @@ brew install ffmpeg
 ```
 
 **Transcription Fails**
+
 - Check API keys are valid
 - Verify audio track exists in video
 - Ensure sufficient API quota/credits
 
 **Slow Processing**
+
 - Upgrade server CPU
 - Implement background job queue
 - Use lower resolution for analysis
 - Cache analysis results
 
 **Storage Issues**
+
 - Check Firebase Storage quotas
 - Implement automatic cleanup
 - Use compression for clips
@@ -342,6 +364,7 @@ brew install ffmpeg
 ## Testing
 
 ### Manual Test Flow
+
 1. Upload test video (use public domain content)
 2. Trigger analysis via dashboard
 3. Verify clips generated with scores
@@ -350,6 +373,7 @@ brew install ffmpeg
 6. Check Firebase Storage files
 
 ### Automated Tests
+
 ```bash
 # Add to test suite
 npm test -- clipRoutes.test.js
@@ -359,6 +383,7 @@ npm test -- videoClippingService.test.js
 ## Support
 
 For issues or questions:
+
 1. Check server logs for errors
 2. Verify FFmpeg installation
 3. Test API keys manually

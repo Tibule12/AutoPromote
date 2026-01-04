@@ -1,16 +1,16 @@
 // ChatWidget.js
 // Floating AI chatbot widget with multilingual support
 
-import React, { useState, useEffect, useRef } from 'react';
-import { auth } from './firebaseClient';
-import { API_BASE_URL } from './config';
-import toast from 'react-hot-toast';
-import './ChatWidget.css';
+import React, { useState, useEffect, useRef } from "react";
+import { auth } from "./firebaseClient";
+import { API_BASE_URL } from "./config";
+import toast from "react-hot-toast";
+import "./ChatWidget.css";
 
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const [conversationId, setConversationId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -21,36 +21,44 @@ const ChatWidget = () => {
       checkChatbotStatus();
       loadSuggestions();
     }
-  }, [isOpen]);
+  }, [isOpen, messages.length]);
 
   const checkChatbotStatus = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chat/health`);
       const data = await response.json();
-      
+
       if (data.configured) {
         // Send welcome message
-        setMessages([{
-          role: 'assistant',
-          content: '👋 Hi! I\'m your AutoPromote AI Assistant. I speak all 11 South African languages! How can I help you today?\n\nSawubona! (Zulu) | Molo! (Xhosa) | Hallo! (Afrikaans)',
-          timestamp: new Date().toISOString()
-        }]);
+        setMessages([
+          {
+            role: "assistant",
+            content:
+              "👋 Hi! I'm your AutoPromote AI Assistant. I speak all 11 South African languages! How can I help you today?\n\nSawubona! (Zulu) | Molo! (Xhosa) | Hallo! (Afrikaans)",
+            timestamp: new Date().toISOString(),
+          },
+        ]);
       } else {
         // Show not configured message
-        setMessages([{
-          role: 'assistant',
-          content: '⚠️ AI Chatbot is currently being configured. Please check back soon or contact support for assistance.',
-          timestamp: new Date().toISOString()
-        }]);
+        setMessages([
+          {
+            role: "assistant",
+            content:
+              "⚠️ AI Chatbot is currently being configured. Please check back soon or contact support for assistance.",
+            timestamp: new Date().toISOString(),
+          },
+        ]);
       }
     } catch (error) {
-      console.error('Failed to check chatbot status:', error);
+      console.error("Failed to check chatbot status:", error);
       // Default welcome message on error
-      setMessages([{
-        role: 'assistant',
-        content: '👋 Hi! I\'m your AutoPromote AI Assistant. How can I help you today?',
-        timestamp: new Date().toISOString()
-      }]);
+      setMessages([
+        {
+          role: "assistant",
+          content: "👋 Hi! I'm your AutoPromote AI Assistant. How can I help you today?",
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     }
   };
 
@@ -59,7 +67,7 @@ const ChatWidget = () => {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const loadSuggestions = async () => {
@@ -68,7 +76,7 @@ const ChatWidget = () => {
       if (!token) return;
 
       const response = await fetch(`${API_BASE_URL}/api/chat/suggestions`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -76,7 +84,7 @@ const ChatWidget = () => {
         setSuggestions(data.suggestions || []);
       }
     } catch (error) {
-      console.error('Failed to load suggestions:', error);
+      console.error("Failed to load suggestions:", error);
     }
   };
 
@@ -84,36 +92,36 @@ const ChatWidget = () => {
     if (!messageText.trim() || loading) return;
 
     const userMessage = {
-      role: 'user',
+      role: "user",
       content: messageText,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
+    setInputMessage("");
     setLoading(true);
 
     try {
       const token = await auth.currentUser?.getIdToken();
-      
+
       const response = await fetch(`${API_BASE_URL}/api/chat/message`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           conversationId,
-          message: messageText
-        })
+          message: messageText,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        throw new Error("Failed to send message");
       }
 
       const data = await response.json();
-      
+
       // Update conversation ID if new
       if (data.conversationId && !conversationId) {
         setConversationId(data.conversationId);
@@ -121,62 +129,66 @@ const ChatWidget = () => {
 
       // Add bot response
       const botMessage = {
-        role: 'assistant',
+        role: "assistant",
         content: data.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       setMessages(prev => [...prev, botMessage]);
-
     } catch (error) {
-      console.error('Chat error:', error);
-      toast.error('Failed to send message');
-      
+      console.error("Chat error:", error);
+      toast.error("Failed to send message");
+
       // Add fallback message
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Sorry, I\'m having trouble responding right now. Please try again in a moment.',
-        timestamp: new Date().toISOString()
-      }]);
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Sorry, I'm having trouble responding right now. Please try again in a moment.",
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const handleKeyPress = e => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
+  const handleSuggestionClick = suggestion => {
     sendMessage(suggestion.text);
   };
 
   const clearChat = () => {
-    setMessages([{
-      role: 'assistant',
-      content: '👋 Chat cleared! How can I help you?',
-      timestamp: new Date().toISOString()
-    }]);
+    setMessages([
+      {
+        role: "assistant",
+        content: "👋 Chat cleared! How can I help you?",
+        timestamp: new Date().toISOString(),
+      },
+    ]);
     setConversationId(null);
   };
 
-  const formatTime = (timestamp) => {
+  const formatTime = timestamp => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" });
   };
 
   return (
     <>
       {/* Floating button */}
       <button
-        className={`chat-widget-button ${isOpen ? 'open' : ''}`}
+        className={`chat-widget-button ${isOpen ? "open" : ""}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Open chat"
       >
-        {isOpen ? '✕' : '💬'}
+        {isOpen ? "✕" : "💬"}
       </button>
 
       {/* Chat panel */}
@@ -201,14 +213,10 @@ const ChatWidget = () => {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`chat-message ${msg.role === 'user' ? 'user' : 'assistant'}`}
+                className={`chat-message ${msg.role === "user" ? "user" : "assistant"}`}
               >
-                <div className="chat-message-content">
-                  {msg.content}
-                </div>
-                <div className="chat-message-time">
-                  {formatTime(msg.timestamp)}
-                </div>
+                <div className="chat-message-content">{msg.content}</div>
+                <div className="chat-message-time">{formatTime(msg.timestamp)}</div>
               </div>
             ))}
 
@@ -247,7 +255,7 @@ const ChatWidget = () => {
           <div className="chat-widget-input">
             <textarea
               value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
+              onChange={e => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message... (Any language)"
               rows={1}
@@ -263,9 +271,7 @@ const ChatWidget = () => {
           </div>
 
           {/* Footer */}
-          <div className="chat-widget-footer">
-            Powered by OpenAI GPT-4o
-          </div>
+          <div className="chat-widget-footer">Powered by OpenAI GPT-4o</div>
         </div>
       )}
     </>

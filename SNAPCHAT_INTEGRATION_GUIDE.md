@@ -27,14 +27,14 @@ When a user clicks "Connect Snapchat" in the dashboard:
 
 ```javascript
 // Frontend calls backend to prepare OAuth
-const response = await fetch('/api/snapchat/oauth/prepare', {
-  method: 'POST',
-  headers: { Authorization: `Bearer ${token}` }
+const response = await fetch("/api/snapchat/oauth/prepare", {
+  method: "POST",
+  headers: { Authorization: `Bearer ${token}` },
 });
 const { authUrl } = await response.json();
 
 // Opens Snapchat OAuth page in popup
-window.open(authUrl, 'snapchat-oauth', 'width=600,height=700');
+window.open(authUrl, "snapchat-oauth", "width=600,height=700");
 ```
 
 ### 2. Backend Prepares OAuth URL
@@ -69,17 +69,17 @@ The `/auth/callback` endpoint:
 
 ```javascript
 // Token exchange request
-const tokenRes = await fetch('https://accounts.snapchat.com/login/oauth2/access_token', {
-  method: 'POST',
+const tokenRes = await fetch("https://accounts.snapchat.com/login/oauth2/access_token", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`
+    "Content-Type": "application/x-www-form-urlencoded",
+    Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
   },
   body: new URLSearchParams({
-    grant_type: 'authorization_code',
+    grant_type: "authorization_code",
     code: authCode,
-    redirect_uri: config.redirect
-  })
+    redirect_uri: config.redirect,
+  }),
 });
 ```
 
@@ -151,6 +151,7 @@ oauth_states/{state}:
 ### 3. Environment Variables
 
 Required environment variables:
+
 - `SNAPCHAT_CLIENT_ID`: OAuth client ID from Snapchat
 - `SNAPCHAT_CLIENT_SECRET`: OAuth client secret
 - `SNAPCHAT_REDIRECT_URI`: OAuth callback URL
@@ -182,28 +183,29 @@ const creativeData = {
   description: content.description,
   media: {
     type: "IMAGE",
-    url: content.mediaUrl
+    url: content.mediaUrl,
   },
-  campaign_id: campaignId
+  campaign_id: campaignId,
 };
 ```
 
 ### 2. API Request
 
 ```javascript
-const response = await fetch('https://adsapi.snapchat.com/v1/adaccounts/{accountId}/creatives', {
-  method: 'POST',
+const response = await fetch("https://adsapi.snapchat.com/v1/adaccounts/{accountId}/creatives", {
+  method: "POST",
   headers: {
-    'Authorization': `Bearer ${accessToken}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
   },
-  body: JSON.stringify(creativeData)
+  body: JSON.stringify(creativeData),
 });
 ```
 
 ### 3. Analytics Tracking
 
 Performance metrics retrieved via:
+
 ```
 GET https://adsapi.snapchat.com/v1/creatives/{creativeId}/stats
 ```
@@ -213,6 +215,7 @@ GET https://adsapi.snapchat.com/v1/creatives/{creativeId}/stats
 ### Debug Mode
 
 Enable debug logging with:
+
 ```bash
 DEBUG_SNAPCHAT_OAUTH=true
 SNAPCHAT_DEBUG_ALLOW=true

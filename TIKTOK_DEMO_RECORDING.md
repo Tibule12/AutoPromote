@@ -20,13 +20,13 @@ Important endpoints (backend):
   GET /api/tiktok/auth/preflight/public
 
 - Prepare (authenticated - frontend uses this):
-  POST /api/tiktok/auth/prepare  (returns `{ authUrl }`)
+  POST /api/tiktok/auth/prepare (returns `{ authUrl }`)
 
 - OAuth click-to-continue page (for UI flow):
   GET /api/tiktok/auth
 
 - Demo upload endpoint (simulated when `TIKTOK_DEMO_MODE=true`):
-  POST /api/tiktok/upload  -> returns a demo success JSON
+  POST /api/tiktok/upload -> returns a demo success JSON
 
 Demo recording recommended steps
 
@@ -42,7 +42,7 @@ $env:TIKTOK_DEMO_MODE = 'true'
 npm run start
 ```
 
-   - On Render/staging: set `TIKTOK_ENV=sandbox` and `TIKTOK_DEMO_MODE=true`; also set sandbox client key/secret and redirect URI.
+- On Render/staging: set `TIKTOK_ENV=sandbox` and `TIKTOK_DEMO_MODE=true`; also set sandbox client key/secret and redirect URI.
 
 2. Optional: show `GET /api/tiktok/auth/preflight/public` in browser to demonstrate constructed auth URL (no secrets returned).
 

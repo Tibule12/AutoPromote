@@ -7,7 +7,7 @@ function showRadicalTransparency(contentId, metrics, actions) {
     contentId,
     metrics,
     actions,
-    transparencyReport: `Your content was boosted at ${actions.boostTime}, repackaged ${actions.repackageCount} times, and reached ${metrics.views} views via ${actions.algorithmTriggers.join(', ')}.`
+    transparencyReport: `Your content was boosted at ${actions.boostTime}, repackaged ${actions.repackageCount} times, and reached ${metrics.views} views via ${actions.algorithmTriggers.join(", ")}.`,
   };
 }
 
@@ -18,7 +18,7 @@ function instantViralBoost(content) {
     boosted: true,
     boostTime: new Date(),
     expectedViews: Math.floor(Math.random() * 50000 + 10000),
-    viralMessage: 'Your content is getting a dream boost!'
+    viralMessage: "Your content is getting a dream boost!",
   };
 }
 
@@ -26,10 +26,10 @@ function aiContentRescue(content) {
   // Diagnose and fix dead content
   return {
     contentId: content.id,
-    diagnosis: 'Low engagement, poor hook, weak thumbnail',
-    fixes: ['Add viral hook', 'Replace thumbnail', 'Inject trending sound'],
+    diagnosis: "Low engagement, poor hook, weak thumbnail",
+    fixes: ["Add viral hook", "Replace thumbnail", "Inject trending sound"],
     rescued: true,
-    rescueTime: new Date()
+    rescueTime: new Date(),
   };
 }
 
@@ -41,7 +41,7 @@ function gamifiedGrowth(userId, metrics) {
     userId,
     milestones: achieved,
     badges: achieved.map(m => `Viral ${m} Views Badge`),
-    leaderboardRank: Math.floor(Math.random() * 100)
+    leaderboardRank: Math.floor(Math.random() * 100),
   };
 }
 
@@ -49,8 +49,8 @@ function predictTrends(content) {
   // Predict and suggest trends for content
   return {
     contentId: content.id,
-    predictedTrends: ['#NextBigThing', '#ViralSoon', '#TrendingNow'],
-    trendScore: Math.random().toFixed(2)
+    predictedTrends: ["#NextBigThing", "#ViralSoon", "#TrendingNow"],
+    trendScore: Math.random().toFixed(2),
   };
 }
 
@@ -59,5 +59,5 @@ module.exports = {
   instantViralBoost,
   aiContentRescue,
   gamifiedGrowth,
-  predictTrends
+  predictTrends,
 };

@@ -41,6 +41,7 @@ ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
 ## Testing Setup
 
 After setting up your `.env` file, test the configuration:
+
 ```bash
 node test-env.js
 node test-firebase-connection.js
