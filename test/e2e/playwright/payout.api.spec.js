@@ -68,7 +68,7 @@ test("API payout request - create payout doc and update user pending earnings", 
 
     // Call payout API
     // POST payout - make the call with a small retry/backoff to reduce transient CI flakes
-    async function postPayoutAttempt() {
+    const postPayoutAttempt = async () => {
       return fetch(`http://127.0.0.1:${mainPort}/api/monetization/earnings/payout/self`, {
         method: "POST",
         headers: {
@@ -79,7 +79,7 @@ test("API payout request - create payout doc and update user pending earnings", 
         },
         body: JSON.stringify({ paymentMethod: "paypal" }),
       });
-    }
+    };
 
     let res = await postPayoutAttempt();
     if (!(res.status === 200 || res.status === 201 || res.status === 202)) {
