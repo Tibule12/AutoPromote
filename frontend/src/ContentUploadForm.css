@@ -150,16 +150,17 @@
 
 .platform-grid {
   display: grid;
-  gap: 12px;
-  /* Use a responsive, wrapping grid so cards don't become overly wide on large screens */
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  /* More compact minimum to fit more cards without overflowing */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  justify-items: stretch;
 }
 
-/* Ensure minimum sensible spacing on small viewports */
+/* Slight adjustment for very small screens */
 @media (max-width: 479px) {
   .platform-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 10px;
   }
 }
 
