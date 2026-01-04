@@ -150,25 +150,16 @@
 
 .platform-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 12px;
+  /* Use a responsive, wrapping grid so cards don't become overly wide on large screens */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
-@media (min-width: 480px) {
-  .platform-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 768px) {
-  .platform-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
+/* Ensure minimum sensible spacing on small viewports */
+@media (max-width: 479px) {
   .platform-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 }
 
@@ -176,12 +167,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px;
+  padding: 8px 10px;
   border-radius: 12px;
   border: 2px solid #e5e7eb;
   background: #fafafa;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .platform-tile:hover {
@@ -284,12 +277,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px;
+  padding: 12px;
   border-radius: 14px;
   border: 1px solid #e5e7eb;
   background: #fff;
   cursor: pointer;
-  transition: all 0.18s;
+  transition: all 0.16s;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 56px;
 }
 
 .platform-card:hover {

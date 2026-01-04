@@ -205,7 +205,10 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
 }
 @media (min-width: 1024px) {
   .dashboard-main {
+    /* Reserve space for the fixed sidebar and keep the main content within viewport.
+       Use a responsive max-width so the frame stays centered and doesn't overflow. */
     margin-left: 300px;
+    max-width: calc(100% - 340px);
   }
 }
 
