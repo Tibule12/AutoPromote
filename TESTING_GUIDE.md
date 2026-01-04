@@ -7,8 +7,10 @@ Complete guide for testing PayPal integration and production readiness before De
 ## 📋 Test Scripts Overview
 
 ### 1. `test-paypal-webhook-local.js`
+
 **Purpose:** Verify PayPal webhook configuration locally  
 **Tests:**
+
 - Environment variables (CLIENT_ID, SECRET, WEBHOOK_ID)
 - PayPal SDK initialization
 - Webhook signature components
@@ -19,8 +21,10 @@ Complete guide for testing PayPal integration and production readiness before De
 ---
 
 ### 2. `test-paypal-integration.js`
+
 **Purpose:** Comprehensive PayPal integration testing  
 **Tests:**
+
 - Environment variables validation
 - Backend health check
 - Payment status endpoint
@@ -36,8 +40,10 @@ Complete guide for testing PayPal integration and production readiness before De
 ---
 
 ### 3. `test-production-flow.js`
+
 **Purpose:** End-to-end production readiness test  
 **Tests:**
+
 - Frontend accessibility
 - Backend API health
 - All payment endpoints
@@ -50,8 +56,10 @@ Complete guide for testing PayPal integration and production readiness before De
 ---
 
 ### 4. `run-tests.bat` (Windows)
+
 **Purpose:** Run all tests in sequence  
 **Runs:**
+
 1. Local webhook configuration test
 2. PayPal integration tests
 3. Production readiness tests
@@ -64,6 +72,7 @@ Complete guide for testing PayPal integration and production readiness before De
 ## 🚀 Quick Start Testing
 
 ### Step 1: Setup Environment
+
 ```bash
 # Make sure you have .env file or environment variables set
 # Required variables:
@@ -78,11 +87,13 @@ NODE_ENV=production
 ```
 
 ### Step 2: Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### Step 3: Run Test Suite
+
 ```bash
 # Windows:
 .\run-tests.bat
@@ -97,8 +108,10 @@ node test-production-flow.js
 There's a new integration scan endpoint which runs a suite of lightweight checks intended to simulate core dashboard workflows (both user and admin). The scan is available at:
 
 ```
+
 GET /api/diagnostics/scan?dashboard=user
-GET /api/diagnostics/scan?dashboard=admin  # admin-only
+GET /api/diagnostics/scan?dashboard=admin # admin-only
+
 ```
 
 - Requesting the Admin scan requires admin privileges — the UI automatically falls back to a user-level scan if the client is non-admin.
@@ -108,8 +121,10 @@ GET /api/diagnostics/scan?dashboard=admin  # admin-only
 Run from the command line using a valid token (or in bypass/test mode with `test-token-for-<uid>`):
 
 ```
+
 curl -H "Authorization: Bearer test-token-for-testUser123" "http://localhost:5000/api/diagnostics/scan?dashboard=user"
 curl -H "Authorization: Bearer test-token-for-adminUser" "http://localhost:5000/api/diagnostics/scan?dashboard=admin&store=1"
+
 ```
 
 The endpoint returns a JSON structure containing per-check results and an overall status (ok/warning/failed). Use the Admin UI to view details and errors.
@@ -119,10 +134,12 @@ The endpoint returns a JSON structure containing per-check results and an overal
 You can have the server run scheduled scans automatically by enabling the following environment variables:
 
 ```
+
 ENABLE_HEALTH_SCANS=true
-HEALTH_SCAN_INTERVAL_MS=3600000  # 1 hour
-HEALTH_SCAN_STORE=true           # Persist scans to `system_scans`
+HEALTH_SCAN_INTERVAL_MS=3600000 # 1 hour
+HEALTH_SCAN_STORE=true # Persist scans to `system_scans`
 SCAN_FAILURE_WEBHOOK=https://hooks.example.com/your-webhook-url
+
 ```
 
 When scheduled scans are enabled, results will be persisted to `system_scans`. If `SCAN_FAILURE_WEBHOOK` is configured, a POST will be sent when a scan fails.
@@ -134,13 +151,17 @@ The diagnostics system also provides remediation suggestions for failing checks,
 To run a remediation for a stored scan:
 
 ```
+
 curl -X POST -H "Authorization: Bearer test-token-for-adminUser" "http://localhost:5000/api/diagnostics/scans/{SCAN_ID}/remediate"
+
 ```
 
 You can also pass a JSON body to target specific checks:
 
 ```
+
 { "checks": ["db", "admin", "leaderboard"] }
+
 ```
 
 Remediations are safe, limited actions intended for testing and recovery; they do not change environment variables. They are logged in `system_scans_remediation` with details and the admin who requested them.
@@ -177,14 +198,17 @@ REACT_APP_FIREBASE_APP_ID=your_app_id
 ## 📊 Understanding Test Results
 
 ### ✅ All Green (100% Pass)
+
 **Meaning:** Platform is production-ready  
 **Action:** Deploy with confidence!
 
 ### ⚠️ 80-99% Pass
+
 **Meaning:** Minor issues present  
 **Action:** Review failed tests, fix non-critical issues, soft launch OK
 
 ### ❌ Below 80% Pass
+
 **Meaning:** Critical issues present  
 **Action:** Fix issues before launching
 
@@ -193,30 +217,37 @@ REACT_APP_FIREBASE_APP_ID=your_app_id
 ## 🔍 Common Test Failures & Fixes
 
 ### Test: "PAYPAL_MODE is not 'live'"
+
 **Problem:** Still in sandbox mode  
 **Fix:** Set `PAYPAL_MODE=live` in Render environment
 
 ### Test: "PAYMENTS_ENABLED must be true"
+
 **Problem:** Payments disabled  
 **Fix:** Set `PAYMENTS_ENABLED=true` in Render
 
 ### Test: "Live calls are BLOCKED"
+
 **Problem:** `ALLOW_LIVE_PAYMENTS` not set  
 **Fix:** Set `ALLOW_LIVE_PAYMENTS=true` and `NODE_ENV=production`
 
 ### Test: "Missing PayPal Plan ID"
+
 **Problem:** Subscription plans not configured  
 **Fix:** Create plans in PayPal dashboard, set IDs in environment:
+
 ```bash
 PAYPAL_PREMIUM_PLAN_ID=P-xxx
 PAYPAL_UNLIMITED_PLAN_ID=P-yyy
 ```
 
 ### Test: "Webhook endpoint not found"
+
 **Problem:** Route not mounted or deployed  
 **Fix:** Verify `paypalWebhookRoutes` is loaded in `server.js`, redeploy
 
 ### Test: "Backend health check failed"
+
 **Problem:** Backend not running or crashed  
 **Fix:** Check Render logs, verify deployment succeeded
 
@@ -227,6 +258,7 @@ PAYPAL_UNLIMITED_PLAN_ID=P-yyy
 After automated tests pass, perform these manual tests:
 
 ### Test 1: User Registration
+
 1. Go to https://www.autopromote.org
 2. Click "Sign Up"
 3. Register with email/password
@@ -240,6 +272,7 @@ After automated tests pass, perform these manual tests:
 ---
 
 ### Test 2: PayPal Subscription
+
 1. Login to dashboard
 2. Click user menu → "Upgrade"
 3. Select "Premium" plan ($9.99/month)
@@ -251,6 +284,7 @@ After automated tests pass, perform these manual tests:
 **Expected:** ✅ Subscription created, payment successful, plan activated
 
 **Verify in:**
+
 - Firestore: `users/{uid}/subscription` document exists
 - PayPal Dashboard: Subscription shows "Active"
 - Render Logs: Webhook event received
@@ -258,6 +292,7 @@ After automated tests pass, perform these manual tests:
 ---
 
 ### Test 3: Platform Connection (YouTube)
+
 1. Click "Connections" tab
 2. Click "Connect YouTube"
 3. Sign in to Google account
@@ -268,12 +303,14 @@ After automated tests pass, perform these manual tests:
 **Expected:** ✅ OAuth successful, tokens stored, channel name displayed
 
 **Verify in:**
+
 - Firestore: `users/{uid}/connections/youtube` document exists
 - Dashboard: YouTube shows connected
 
 ---
 
 ### Test 4: Content Upload & Schedule
+
 1. Click "Upload" tab
 2. Upload a video file (MP4)
 3. Enter title and description
@@ -285,6 +322,7 @@ After automated tests pass, perform these manual tests:
 **Expected:** ✅ Upload successful, schedule created
 
 **Verify in:**
+
 - Firestore: `content/{id}` document exists
 - Firestore: `promotion_schedules/{id}` document exists
 - Dashboard: Schedule appears in "Schedules" tab
@@ -292,6 +330,7 @@ After automated tests pass, perform these manual tests:
 ---
 
 ### Test 5: Platform Posting (Live Test)
+
 1. Create a schedule for 5 minutes from now
 2. Wait for scheduled time
 3. Check platform (Twitter/YouTube)
@@ -300,6 +339,7 @@ After automated tests pass, perform these manual tests:
 **Expected:** ✅ Content posted automatically to selected platforms
 
 **Verify in:**
+
 - Twitter: Tweet appears on your timeline
 - YouTube: Video appears in channel (if YouTube selected)
 - Firestore: `promotion_executions/{id}` status = "completed"
@@ -307,6 +347,7 @@ After automated tests pass, perform these manual tests:
 ---
 
 ### Test 6: Webhook Verification
+
 1. Make a PayPal payment (subscription or test payment)
 2. Check Render logs for webhook event
 3. Check Firestore `payments` collection
@@ -315,6 +356,7 @@ After automated tests pass, perform these manual tests:
 **Expected:** ✅ Webhook received, signature verified, payment recorded
 
 **Verify in:**
+
 - Render Logs: "Webhook received" message
 - Firestore: `payments/{orderId}` status = "captured"
 - Admin Dashboard: Payment shows in revenue
@@ -322,6 +364,7 @@ After automated tests pass, perform these manual tests:
 ---
 
 ### Test 7: Email Notifications
+
 1. Register new user
 2. Check email for verification
 3. Trigger password reset
@@ -332,6 +375,7 @@ After automated tests pass, perform these manual tests:
 **Expected:** ✅ All emails received within 2 minutes
 
 **Verify:**
+
 - Welcome email arrives
 - Verification email arrives
 - Password reset email arrives
@@ -341,6 +385,7 @@ After automated tests pass, perform these manual tests:
 ## 🛠️ Debugging Test Failures
 
 ### Enable Verbose Logging
+
 ```bash
 # In your .env or Render environment:
 DEBUG=true
@@ -348,6 +393,7 @@ LOG_LEVEL=debug
 ```
 
 ### Check Render Logs
+
 ```bash
 # View live logs:
 1. Go to Render Dashboard
@@ -359,37 +405,36 @@ LOG_LEVEL=debug
 ### Test Individual Components
 
 #### Test PayPal Token Generation:
+
 ```javascript
 // test-token.js
-require('dotenv').config();
-const https = require('https');
+require("dotenv").config();
+const https = require("https");
 
 const basic = Buffer.from(
   `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
-).toString('base64');
+).toString("base64");
 
 const options = {
-  hostname: process.env.PAYPAL_MODE === 'live' 
-    ? 'api-m.paypal.com' 
-    : 'api-m.sandbox.paypal.com',
-  path: '/v1/oauth2/token',
-  method: 'POST',
+  hostname: process.env.PAYPAL_MODE === "live" ? "api-m.paypal.com" : "api-m.sandbox.paypal.com",
+  path: "/v1/oauth2/token",
+  method: "POST",
   headers: {
-    'Authorization': `Basic ${basic}`,
-    'Content-Type': 'application/x-www-form-urlencoded'
-  }
+    Authorization: `Basic ${basic}`,
+    "Content-Type": "application/x-www-form-urlencoded",
+  },
 };
 
-const req = https.request(options, (res) => {
-  let data = '';
-  res.on('data', chunk => data += chunk);
-  res.on('end', () => {
-    console.log('Status:', res.statusCode);
-    console.log('Response:', JSON.parse(data));
+const req = https.request(options, res => {
+  let data = "";
+  res.on("data", chunk => (data += chunk));
+  res.on("end", () => {
+    console.log("Status:", res.statusCode);
+    console.log("Response:", JSON.parse(data));
   });
 });
 
-req.write('grant_type=client_credentials');
+req.write("grant_type=client_credentials");
 req.end();
 ```
 
@@ -398,24 +443,25 @@ Run: `node test-token.js`
 ---
 
 #### Test Firestore Connection:
+
 ```javascript
 // test-firestore.js
-require('dotenv').config();
-const { db } = require('./src/firebaseAdmin');
+require("dotenv").config();
+const { db } = require("./src/firebaseAdmin");
 
 async function test() {
   try {
-    const testRef = db.collection('_test').doc('health');
+    const testRef = db.collection("_test").doc("health");
     await testRef.set({ tested: new Date().toISOString() });
-    console.log('✅ Write successful');
-    
+    console.log("✅ Write successful");
+
     const doc = await testRef.get();
-    console.log('✅ Read successful:', doc.data());
-    
+    console.log("✅ Read successful:", doc.data());
+
     await testRef.delete();
-    console.log('✅ Delete successful');
+    console.log("✅ Delete successful");
   } catch (err) {
-    console.error('❌ Error:', err.message);
+    console.error("❌ Error:", err.message);
   }
 }
 
@@ -429,6 +475,7 @@ Run: `node test-firestore.js`
 ## 📈 Performance Testing
 
 ### Load Test Payment Endpoint
+
 ```bash
 # Using Apache Bench (install: choco install apache-bench)
 ab -n 100 -c 10 https://api.autopromote.org/api/payments/status
@@ -440,6 +487,7 @@ ab -n 100 -c 10 https://api.autopromote.org/api/payments/status
 ```
 
 ### Monitor During Testing
+
 ```bash
 # Watch Render metrics:
 1. Go to Render Dashboard
@@ -456,6 +504,7 @@ ab -n 100 -c 10 https://api.autopromote.org/api/payments/status
 ## ✅ Pre-Launch Testing Checklist
 
 ### December 12 (D-3)
+
 - [ ] Run `node test-paypal-webhook-local.js` → 100% pass
 - [ ] Run `node test-paypal-integration.js` → 100% pass
 - [ ] Run `node test-production-flow.js` → 95%+ pass
@@ -464,6 +513,7 @@ ab -n 100 -c 10 https://api.autopromote.org/api/payments/status
 - [ ] Verify webhook received in Render logs
 
 ### December 13 (D-2)
+
 - [ ] Complete all 7 manual tests above
 - [ ] Test on mobile device (iOS or Android)
 - [ ] Test on different browser (Chrome, Firefox, Safari)
@@ -471,6 +521,7 @@ ab -n 100 -c 10 https://api.autopromote.org/api/payments/status
 - [ ] Fix any issues found
 
 ### December 14 (D-1)
+
 - [ ] Re-run all automated tests
 - [ ] Verify beta user feedback addressed
 - [ ] Check Firestore backup exists
@@ -479,6 +530,7 @@ ab -n 100 -c 10 https://api.autopromote.org/api/payments/status
 - [ ] Standby for hotfixes
 
 ### December 15 (Launch Day)
+
 - [ ] Final smoke test (quick manual test)
 - [ ] Monitor logs continuously
 - [ ] Track first 10 signups
@@ -492,14 +544,17 @@ ab -n 100 -c 10 https://api.autopromote.org/api/payments/status
 If critical issues arise post-launch:
 
 1. **Disable Payments** (quick fix):
+
    ```bash
    # In Render environment:
    PAYMENTS_ENABLED=false
    ALLOW_LIVE_PAYMENTS=false
    ```
+
    Redeploy → Payments will be disabled, platform still works
 
 2. **Rollback Deployment**:
+
    ```bash
    # In Render:
    1. Go to "Deploys" tab
@@ -516,15 +571,18 @@ If critical issues arise post-launch:
 ## 📞 Support & Resources
 
 **Documentation:**
+
 - [PayPal Developer Docs](https://developer.paypal.com/docs/)
 - [Render Documentation](https://render.com/docs)
 - [Firebase Documentation](https://firebase.google.com/docs)
 
 **Community:**
+
 - AutoPromote Discord: [link]
 - GitHub Issues: https://github.com/Tibule12/AutoPromote/issues
 
 **Emergency Contacts:**
+
 - Tech Lead: [your email]
 - DevOps: [devops email]
 - Support: thulani@autopromote.org
@@ -534,6 +592,7 @@ If critical issues arise post-launch:
 ## 🎯 Success Criteria
 
 **Platform is ready to launch when:**
+
 - ✅ All automated tests pass (95%+)
 - ✅ All 7 manual tests complete successfully
 - ✅ PayPal payment flow works end-to-end
@@ -544,6 +603,7 @@ If critical issues arise post-launch:
 - ✅ Performance metrics acceptable
 
 **You're ready! 🚀 Let's launch on December 15!**
+
 - Create 20 sample users (including 2 admin users)
 - Generate 30 content items
 - Create 25 promotions
@@ -561,6 +621,7 @@ node checkDatabaseConnection.js
 ```
 
 This script checks:
+
 1. Connection to Firestore
 2. Existence of required collections
 3. Functionality of admin dashboard queries
@@ -647,6 +708,7 @@ npm run test:e2e
 ```
 
 Notes:
+
 - The E2E script uses Puppeteer and will open a headless browser to post an upload to `/api/content/upload`.
 - The test uses the integration bypass token `Bearer test-token-for-testUser123` to avoid needing a full OAuth flow.
 - Ensure Firestore/service account credentials are available in the environment for the test to validate DB writes.
@@ -676,26 +738,26 @@ name: Database Integration Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 0 * * 1' # Run weekly on Mondays
+    - cron: "0 0 * * 1" # Run weekly on Mondays
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-    - run: npm ci
-    - name: Run database connection tests
-      run: node checkDatabaseConnection.js
-      env:
-        FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - run: npm ci
+      - name: Run database connection tests
+        run: node checkDatabaseConnection.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 ```
 
 ## Troubleshooting
@@ -744,4 +806,4 @@ If you encounter persistent issues:
 
 ---
 
-*This testing guide was last updated on June 2023 and applies to the current version of AutoPromote.*
+_This testing guide was last updated on June 2023 and applies to the current version of AutoPromote._

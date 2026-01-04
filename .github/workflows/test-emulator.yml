@@ -1,0 +1,52 @@
+name: Emulator Unit Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+      - 'feat/**'
+
+jobs:
+  emulator-tests:
+    name: Firestore Emulator Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java (required by Firebase Emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          echo "Running npm ci; if it fails due to lockfile mismatch, fall back to npm install"
+          npm ci || (echo "npm ci failed — falling back to npm install" && npm install)
+
+      - name: Install frontend dependencies
+        run: |
+          echo "Installing frontend devDependencies"
+          npm ci --prefix frontend || (echo "frontend npm ci failed — falling back to npm install" && npm install --prefix frontend)
+
+      - name: Run emulator-backed unit tests
+        env:
+          CI: true
+        run: npm run test:emulator
+
+      - name: Note about lockfile
+        if: ${{ failure() }}
+        run: |
+          echo "If workflow failed due to lockfile mismatch, update your local lockfile:"
+          echo "  npm install --package-lock-only"
+          echo "Then commit the updated package-lock.json and push."

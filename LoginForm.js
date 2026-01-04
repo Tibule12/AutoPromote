@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const LoginForm = ({ onLogin, loginUser }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
       await loginUser(email, password);
     } catch (error) {
-      setError(error.message || 'Failed to login');
-      console.error('Login form error:', error);
+      setError(error.message || "Failed to login");
+      console.error("Login form error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -25,35 +25,35 @@ const LoginForm = ({ onLogin, loginUser }) => {
     <div className="login-form-container">
       <form onSubmit={handleSubmit} className="login-form">
         <h2>Login</h2>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <div className="form-group">
           <label htmlFor="email">Email:</label>
-          <input 
-            type="email" 
+          <input
+            type="email"
             id="email"
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            required 
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
             disabled={isLoading}
           />
         </div>
-        
+
         <div className="form-group">
           <label htmlFor="password">Password:</label>
-          <input 
-            type="password" 
+          <input
+            type="password"
             id="password"
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            required 
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
             disabled={isLoading}
           />
         </div>
-        
+
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Logging in...' : 'Login'}
+          {isLoading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>

@@ -1,11 +1,20 @@
 // platformMetricsService.js
 // Phase 3: Fetch metrics for platform posts (skeleton implementations, best-effort)
 
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
 
 async function safeJson(res) {
-  let txt; try { txt = await res.text(); } catch (_) { return {}; }
-  try { return JSON.parse(txt); } catch (_) { return { raw: txt }; }
+  let txt;
+  try {
+    txt = await res.text();
+  } catch (_) {
+    return {};
+  }
+  try {
+    return JSON.parse(txt);
+  } catch (_) {
+    return { raw: txt };
+  }
 }
 
 async function fetchFacebookPostMetrics(externalId) {
@@ -18,20 +27,29 @@ async function fetchFacebookPostMetrics(externalId) {
     const json = await safeJson(res);
     if (!res.ok) return null;
     const metrics = {};
-    (json.data || []).forEach(m => { metrics[m.name] = parseInt(m.values?.[0]?.value || 0, 10); });
+    (json.data || []).forEach(m => {
+      metrics[m.name] = parseInt(m.values?.[0]?.value || 0, 10);
+    });
     return metrics;
-  } catch (_) { return null; }
+  } catch (_) {
+    return null;
+  }
 }
 
 async function fetchTwitterTweetMetrics(tweetId) {
   const BEARER = process.env.TWITTER_BEARER_TOKEN;
   if (!BEARER || !tweetId) return null;
   try {
-    const res = await fetch(`https://api.twitter.com/2/tweets/${tweetId}?tweet.fields=public_metrics`, { headers: { 'Authorization': `Bearer ${BEARER}` } });
+    const res = await fetch(
+      `https://api.twitter.com/2/tweets/${tweetId}?tweet.fields=public_metrics`,
+      { headers: { Authorization: `Bearer ${BEARER}` } }
+    );
     const json = await safeJson(res);
     if (!res.ok) return null;
     return json.data?.public_metrics || null;
-  } catch (_) { return null; }
+  } catch (_) {
+    return null;
+  }
 }
 
 async function fetchInstagramMediaMetrics(mediaId) {
@@ -44,9 +62,13 @@ async function fetchInstagramMediaMetrics(mediaId) {
     const json = await safeJson(res);
     if (!res.ok) return null;
     const metrics = {};
-    (json.data || []).forEach(m => { metrics[m.name] = parseInt(m.values?.[0]?.value || 0, 10); });
+    (json.data || []).forEach(m => {
+      metrics[m.name] = parseInt(m.values?.[0]?.value || 0, 10);
+    });
     return metrics;
-  } catch (_) { return null; }
+  } catch (_) {
+    return null;
+  }
 }
 
 module.exports = { fetchFacebookPostMetrics, fetchTwitterTweetMetrics, fetchInstagramMediaMetrics };

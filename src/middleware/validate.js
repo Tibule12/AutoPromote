@@ -7,20 +7,20 @@ function validateBody(schema) {
     const body = req.body || {};
     for (const [key, rules] of Object.entries(schema)) {
       const val = body[key];
-      if (rules.required && (val === undefined || val === null || val === '')) {
+      if (rules.required && (val === undefined || val === null || val === "")) {
         errors.push(`${key} required`);
         continue;
       }
       if (val === undefined || val === null) continue; // optional absent
-      const t = Array.isArray(val) ? 'array' : typeof val;
+      const t = Array.isArray(val) ? "array" : typeof val;
       if (rules.type && rules.type !== t) {
         errors.push(`${key} expected ${rules.type} got ${t}`);
         continue;
       }
-      if (rules.type === 'string') {
+      if (rules.type === "string") {
         if (rules.maxLength && String(val).length > rules.maxLength) errors.push(`${key} too long`);
       }
-      if (typeof val === 'number') {
+      if (typeof val === "number") {
         if (rules.min !== undefined && val < rules.min) errors.push(`${key} < min`);
         if (rules.max !== undefined && val > rules.max) errors.push(`${key} > max`);
       }
@@ -28,7 +28,10 @@ function validateBody(schema) {
         errors.push(`${key} invalid enum`);
       }
     }
-    if (errors.length) return res.status(400).json({ ok:false, error: { code: 'VALIDATION_FAILED', details: errors } });
+    if (errors.length)
+      return res
+        .status(400)
+        .json({ ok: false, error: { code: "VALIDATION_FAILED", details: errors } });
     next();
   };
 }

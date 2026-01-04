@@ -16,9 +16,7 @@
             "name": "Version A",
             "promotionSettings": {
               "platform": "youtube",
-              "target_audience": [
-                "tech-enthusiasts"
-              ],
+              "target_audience": ["tech-enthusiasts"],
               "budget": 100
             },
             "metrics": {
@@ -33,9 +31,7 @@
             "name": "Version B",
             "promotionSettings": {
               "platform": "facebook",
-              "target_audience": [
-                "general-audience"
-              ],
+              "target_audience": ["general-audience"],
               "budget": 100
             },
             "metrics": {
@@ -282,11 +278,7 @@
         "type": "video",
         "url": "https://firebasestorage.googleapis.com/v0/b/autopromote-464de.firebasestorage.app/o/uploads%2Fvideos%2F1758007070832_WhatsApp%20Video%202025-09-02%20at%2009.54.32.mp4?alt=media&token=c9ce6124-81a5-4f8f-8d35-c4135f724c75",
         "description": "Long Journey",
-        "target_platforms": [
-          "youtube",
-          "tiktok",
-          "instagram"
-        ],
+        "target_platforms": ["youtube", "tiktok", "instagram"],
         "scheduled_promotion_time": null,
         "promotion_frequency": "once",
         "next_promotion_time": null,
@@ -341,10 +333,7 @@
         "platformSpecificSettings": {
           "optimal_time": "09:00-11:00,13:00-15:00",
           "boost_duration": "7d",
-          "targeting": [
-            "interests",
-            "location"
-          ]
+          "targeting": ["interests", "location"]
         },
         "timezone": "UTC",
         "createdAt": "2025-09-03T13:00:56.274Z",
@@ -388,10 +377,7 @@
         "platformSpecificSettings": {
           "optimal_time": "15:00-17:00",
           "target_cpm": 960,
-          "audience_targeting": [
-            "related_content",
-            "demographic"
-          ]
+          "audience_targeting": ["related_content", "demographic"]
         },
         "timezone": "UTC",
         "createdAt": "2025-09-03T12:50:39.489Z",
@@ -402,13 +388,7 @@
       "id": "Xxbd7rajugoF9Wlul91J",
       "data": {
         "isActive": true,
-        "platform": [
-          "facebook",
-          "youtube",
-          "tiktok",
-          "instagram",
-          "twitter"
-        ],
+        "platform": ["facebook", "youtube", "tiktok", "instagram", "twitter"],
         "budget": 0,
         "contentid": "PkplICcj7X4R4lEgnAEk",
         "startTime": {
@@ -429,10 +409,7 @@
         "platformSpecificSettings": {
           "optimal_time": "15:00-17:00",
           "target_cpm": 960,
-          "audience_targeting": [
-            "related_content",
-            "demographic"
-          ]
+          "audience_targeting": ["related_content", "demographic"]
         },
         "timezone": "UTC",
         "createdAt": "2025-09-03T13:00:56.150Z",

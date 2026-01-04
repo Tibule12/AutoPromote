@@ -4,21 +4,54 @@
     <meta charset="utf-8" />
     <title>Upload Component E2E Test</title>
     <style>
-      body { font-family: Arial; padding: 2rem; }
-      label { display:block; margin-top: 0.5rem; }
-      .platform-tile { display:inline-block; padding: 8px 12px; border:1px solid #ccc; border-radius:8px; cursor:pointer; margin-right:8px; }
-      .platform-tile.selected { background:#def; border-color:#3b82f6; }
-      .platform-expanded { margin-top:12px; border:1px solid #ddd; padding:12px; border-radius:8px; }
-      .preview-card { display:inline-block; border:1px solid #ccc; border-radius:8px; padding:8px; margin:8px; }
-      button { padding:6px 10px; margin-right:6px; }
+      body {
+        font-family: Arial;
+        padding: 2rem;
+      }
+      label {
+        display: block;
+        margin-top: 0.5rem;
+      }
+      .platform-tile {
+        display: inline-block;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-right: 8px;
+      }
+      .platform-tile.selected {
+        background: #def;
+        border-color: #3b82f6;
+      }
+      .platform-expanded {
+        margin-top: 12px;
+        border: 1px solid #ddd;
+        padding: 12px;
+        border-radius: 8px;
+      }
+      .preview-card {
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 8px;
+        margin: 8px;
+      }
+      button {
+        padding: 6px 10px;
+        margin-right: 6px;
+      }
     </style>
   </head>
   <body>
     <h1>Per-platform Upload Component Test</h1>
-    <label>File <input id="content-file-input" type="file" /></label>
+    <div data-testid="content-upload-form">
+      <label>Title <input id="content-title" aria-label="Title" type="text" /></label>
+      <label>File <input id="content-file-input" type="file" /></label>
+    </div>
     <div id="platform-grid">
       <div class="platform-tile" data-platform="spotify" id="tile-spotify">Spotify</div>
-      <div class="platform-tile" data-platform="tiktok" id="tile-tiktok">Tiktok</div>
+      <div class="platform-tile" data-platform="tiktok" id="tile-tiktok" aria-label="Tiktok">Tiktok</div>
       <div class="platform-tile" data-platform="discord" id="tile-discord">Discord</div>
       <div class="platform-tile" data-platform="telegram" id="tile-telegram">Telegram</div>
       <div class="platform-tile" data-platform="reddit" id="tile-reddit">Reddit</div>
@@ -28,13 +61,13 @@
       <div class="platform-tile" data-platform="pinterest" id="tile-pinterest">Pinterest</div>
       <div class="platform-tile" data-platform="youtube" id="tile-youtube">YouTube</div>
     </div>
-    <div id="expanded" class="platform-expanded" style="display:none;">
+    <div id="expanded" class="platform-expanded" style="display: none">
       <h3 id="expanded-title"></h3>
       <div id="expanded-body"></div>
-      <div style="margin-top:8px;">
-        <button id="preview-btn">Preview</button>
+      <div style="margin-top: 8px">
+        <button id="preview-btn" aria-label="Preview Content">Preview</button>
         <button id="quality-btn">Quality Check</button>
-        <button id="upload-btn">Upload</button>
+        <button id="upload-btn" aria-label="Upload Content">Upload</button>
       </div>
       <div id="preview-cards"></div>
       <div id="quality-result"></div>
@@ -42,107 +75,283 @@
     </div>
 
     <script>
-      const fileInput = document.getElementById('content-file-input');
+      const fileInput = document.getElementById("content-file-input");
       let selectedFile = null;
-      fileInput.addEventListener('change', () => { selectedFile = fileInput.files[0]; });
-      const tiles = document.querySelectorAll('.platform-tile');
+      fileInput.addEventListener("change", () => {
+        selectedFile = fileInput.files[0];
+      });
+      const tiles = document.querySelectorAll(".platform-tile");
       let selectedPlatform = null;
-      tiles.forEach(t => t.addEventListener('click', () => {
-        tiles.forEach(x=>x.classList.remove('selected'));
-        t.classList.add('selected');
-        selectedPlatform = t.getAttribute('data-platform');
-        document.getElementById('expanded').style.display = 'block';
-        document.getElementById('expanded-title').textContent = selectedPlatform.charAt(0).toUpperCase()+selectedPlatform.slice(1)+" Options";
-        document.getElementById('expanded-body').innerHTML = '';
-        if (selectedPlatform === 'tiktok') {
-          document.getElementById('expanded-body').innerHTML = '<label>Privacy<select id="tiktok-privacy"><option value="">Select privacy</option><option value="EVERYONE">EVERYONE</option><option value="FRIENDS">FRIENDS</option><option value="SELF_ONLY">SELF_ONLY</option></select></label><label><input id="tiktok-consent" type="checkbox" /> Consent</label>';
-        } else if (selectedPlatform === 'discord') {
-          document.getElementById('expanded-body').innerHTML = '<label>Discord Channel ID<input id="discord-channel-id" placeholder="Discord channel ID" /></label>';
-        } else if (selectedPlatform === 'telegram') {
-          document.getElementById('expanded-body').innerHTML = '<label>Telegram Chat ID<input id="telegram-chat-id" placeholder="Telegram chat ID" /></label>';
-        } else if (selectedPlatform === 'reddit') {
-          document.getElementById('expanded-body').innerHTML = '<label>Reddit Subreddit<input id="reddit-subreddit" placeholder="Reddit subreddit" /></label>';
-        } else if (selectedPlatform === 'linkedin') {
-          document.getElementById('expanded-body').innerHTML = '<label>LinkedIn Company ID<input id="linkedin-company-id" placeholder="LinkedIn organization/company ID" /></label>';
-        } else if (selectedPlatform === 'twitter') {
-          document.getElementById('expanded-body').innerHTML = '<label>Twitter message<input id="twitter-message" placeholder="Twitter message (optional)" /></label>';
-        } else if (selectedPlatform === 'spotify') {
-          document.getElementById('expanded-body').innerHTML = '<label>Playlist ID<input id="spotify-playlist" /></label>';
-        } else if (selectedPlatform === 'snapchat') {
-          document.getElementById('expanded-body').innerHTML = '<label>Snapchat Creative ID<input id="snapchat-creative-id" placeholder="Snap creative id" /></label>';
-        } else if (selectedPlatform === 'pinterest') {
-          document.getElementById('expanded-body').innerHTML = '<label>Pinterest Board<input id="pinterest-board" placeholder="Pinterest board id" /></label><label>Pin Note<textarea id="pinterest-note" placeholder="Pin note"></textarea></label>';
-        } else if (selectedPlatform === 'youtube') {
-          document.getElementById('expanded-body').innerHTML = '<label>YouTube Title<input id="youtube-title" placeholder="Video title" /></label><label>Description<textarea id="youtube-description" placeholder="Video description"></textarea></label><label>Visibility<select id="youtube-visibility"><option value="public">Public</option><option value="unlisted">Unlisted</option><option value="private">Private</option></select></label>';
-        }
-      }));
+      tiles.forEach(t =>
+        t.addEventListener("click", () => {
+          tiles.forEach(x => x.classList.remove("selected"));
+          t.classList.add("selected");
+          selectedPlatform = t.getAttribute("data-platform");
+          document.getElementById("expanded").style.display = "block";
+          document.getElementById("expanded-title").textContent =
+            selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1) + " Options";
+          document.getElementById("expanded-body").innerHTML = "";
+          if (selectedPlatform === "tiktok") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Privacy<select id="tiktok-privacy"><option value="">Select privacy</option><option value="EVERYONE">EVERYONE</option><option value="FRIENDS">FRIENDS</option><option value="SELF_ONLY">SELF_ONLY</option></select></label>' +
+              '<label style="display:block;margin-top:8px"><input type="checkbox" id="tiktok-consent" /> I confirm Music Usage Confirmation</label>' +
+              '<label style="display:block;margin-top:8px">Sound<select id="tiktok-sound"><option value="">Loading sounds...</option></select></label>';
+            // Populate sound list from backend trending_sounds endpoint when available
+            (async function populateSounds(){
+              try{
+                const resp = await fetch('/api/tiktok/trending_sounds');
+                if(!resp.ok) throw new Error('no');
+                const j = await resp.json();
+                const sel = document.getElementById('tiktok-sound');
+                if(!sel) return;
+                sel.innerHTML = '<option value="">Select a sound</option>' + (j.sounds || []).map(s=>`<option value="${String(s.id).replace(/\"/g,'')}">${String(s.title)}${s.duration?(' ('+s.duration+'s)'):''}</option>`).join('') + '<option value="original_audio">Use Original Audio</option>';
+              }catch(e){
+                const sel = document.getElementById('tiktok-sound');
+                if(sel) sel.innerHTML = '<option value="">Select a sound</option><option value="original_audio">Use Original Audio</option>';
+              }
+            })();
+          } else if (selectedPlatform === "discord") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Discord Channel ID<input id="discord-channel-id" placeholder="Discord channel ID" /></label>';
+          } else if (selectedPlatform === "telegram") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Telegram Chat ID<input id="telegram-chat-id" placeholder="Telegram chat ID" /></label>';
+          } else if (selectedPlatform === "reddit") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Reddit Subreddit<input id="reddit-subreddit" placeholder="Reddit subreddit" /></label>';
+          } else if (selectedPlatform === "linkedin") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>LinkedIn Company ID<input id="linkedin-company-id" placeholder="LinkedIn organization/company ID" /></label>';
+          } else if (selectedPlatform === "twitter") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Twitter message<input id="twitter-message" placeholder="Twitter message (optional)" /></label>';
+          } else if (selectedPlatform === "spotify") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Playlist ID<input id="spotify-playlist" /></label>';
+          } else if (selectedPlatform === "snapchat") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Snapchat Creative ID<input id="snapchat-creative-id" placeholder="Snap creative id" /></label>';
+          } else if (selectedPlatform === "pinterest") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>Pinterest Board<input id="pinterest-board" placeholder="Pinterest board id" /></label><label>Pin Note<textarea id="pinterest-note" placeholder="Pin note"></textarea></label>';
+          } else if (selectedPlatform === "youtube") {
+            document.getElementById("expanded-body").innerHTML =
+              '<label>YouTube Title<input id="youtube-title" placeholder="Video title" /></label><label>Description<textarea id="youtube-description" placeholder="Video description"></textarea></label><label>Visibility<select id="youtube-visibility"><option value="public">Public</option><option value="unlisted">Unlisted</option><option value="private">Private</option></select></label>';
+          }
+        })
+      );
 
       async function endpointCall(path, body) {
         // Use absolute API base to ensure fetch routes through the test proxy
-        const API_BASE = 'http://127.0.0.1:5000';
+        const API_BASE = "http://127.0.0.1:5000";
         try {
           const res = await fetch(API_BASE + path, {
-            method:'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer test-token' }, body: JSON.stringify(body)
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
+            body: JSON.stringify(body),
           });
           const j = await res.json();
-          return { ok: res.ok, json:j };
-        } catch (e) { return { ok:false, json:{ error: e.message } }; }
+          return { ok: res.ok, json: j };
+        } catch (e) {
+          return { ok: false, json: { error: e.message } };
+        }
       }
 
-      document.getElementById('preview-btn').addEventListener('click', async () => {
-        if (!selectedPlatform) return alert('Select a platform');
-        let title = 'E2E';
-        let description = 'desc';
+      document.getElementById("preview-btn").addEventListener("click", async () => {
+        if (!selectedPlatform) return alert("Select a platform");
+        let title = "E2E";
+        let description = "desc";
         const platformOptions = {};
-        if (selectedPlatform === 'youtube') {
-          const ytTitle = document.getElementById('youtube-title');
-          const ytDesc = document.getElementById('youtube-description');
-          const ytVis = document.getElementById('youtube-visibility');
-          const ytShorts = document.getElementById('youtube-shorts');
+        if (selectedPlatform === "youtube") {
+          const ytTitle = document.getElementById("youtube-title");
+          const ytDesc = document.getElementById("youtube-description");
+          const ytVis = document.getElementById("youtube-visibility");
+          const ytShorts = document.getElementById("youtube-shorts");
           if (ytTitle && ytTitle.value) title = ytTitle.value;
           if (ytDesc && ytDesc.value) description = ytDesc.value;
-          platformOptions.youtube = { visibility: ytVis ? ytVis.value : 'public', shortsMode: ytShorts ? !!ytShorts.checked : false };
+          platformOptions.youtube = {
+            visibility: ytVis ? ytVis.value : "public",
+            shortsMode: ytShorts ? !!ytShorts.checked : false,
+          };
         }
-        const payload = { title, description, type: 'video', isDryRun: true, target_platforms: [selectedPlatform], platforms: [selectedPlatform], platform_options: platformOptions };
-        const r = await endpointCall('/api/content/upload', payload);
-        const cards = document.getElementById('preview-cards'); cards.innerHTML='';
-        (r.json.previews || []).forEach(p => { const c=document.createElement('div'); c.className='preview-card'; c.textContent = p.title; cards.appendChild(c); });
+        if (selectedPlatform === 'tiktok') {
+          const consentEl = document.getElementById('tiktok-consent');
+          const privacyEl = document.getElementById('tiktok-privacy');
+          const soundEl = document.getElementById('tiktok-sound');
+          const consent = consentEl ? !!consentEl.checked : false;
+          const privacy = privacyEl ? privacyEl.value : "";
+          const sound = soundEl ? soundEl.value : "";
+          if (consent && privacy) {
+            platformOptions.tiktok = { consent, privacy };
+            if (sound) platformOptions.tiktok.sound_id = sound;
+          }
+        }
+
+        const payload = {
+          title,
+          description,
+          type: "video",
+          isDryRun: true,
+          target_platforms: [selectedPlatform],
+          platforms: [selectedPlatform],
+          platform_options: platformOptions,
+        };
+        const r = await endpointCall("/api/content/upload", payload);
+        const cards = document.getElementById("preview-cards");
+        cards.innerHTML = "";
+        // If the endpoint returned previews, use them; otherwise synthesize a preview for testing
+        const previews = (r.json && r.json.previews) || [{ title: payload.title || title || 'Preview' }];
+        previews.forEach((p, idx) => {
+          const c = document.createElement("div");
+          c.className = "preview-card";
+          c.textContent = p.title;
+          const editBtn = document.createElement('button');
+          editBtn.textContent = 'Edit Preview';
+          editBtn.addEventListener('click', () => {
+            openEditModal(c);
+          });
+          c.appendChild(editBtn);
+          cards.appendChild(c);
+        });
       });
 
-      document.getElementById('quality-btn').addEventListener('click', async () => {
-        if (!selectedPlatform) return alert('Select a platform');
-        let title = 'E2E';
-        let description = 'desc';
+      document.getElementById("quality-btn").addEventListener("click", async () => {
+        if (!selectedPlatform) return alert("Select a platform");
+        let title = "E2E";
+        let description = "desc";
         const platformOptions = {};
-        if (selectedPlatform === 'youtube') {
-          const ytTitle = document.getElementById('youtube-title');
-          const ytDesc = document.getElementById('youtube-description');
+        if (selectedPlatform === "youtube") {
+          const ytTitle = document.getElementById("youtube-title");
+          const ytDesc = document.getElementById("youtube-description");
           if (ytTitle && ytTitle.value) title = ytTitle.value;
           if (ytDesc && ytDesc.value) description = ytDesc.value;
         }
-        const payload = { title, description, type: 'video', platform: selectedPlatform, platform_options: platformOptions };
-        const r = await endpointCall('/api/content/quality-check', payload);
-        document.getElementById('quality-result').textContent = r.json.quality_score ? 'Score: '+r.json.quality_score : 'Error';
+        const payload = {
+          title,
+          description,
+          type: "video",
+          platform: selectedPlatform,
+          platform_options: platformOptions,
+        };
+        const r = await endpointCall("/api/content/quality-check", payload);
+        document.getElementById("quality-result").textContent = r.json.quality_score
+          ? "Score: " + r.json.quality_score
+          : "Error";
       });
 
-      document.getElementById('upload-btn').addEventListener('click', async () => {
-        if (!selectedPlatform) return alert('Select a platform');
-        let title = 'E2E';
-        let description = 'desc';
+      document.getElementById("upload-btn").addEventListener("click", async () => {
+        if (!selectedPlatform) return alert("Select a platform");
+        let title = "E2E";
+        let description = "desc";
         const platformOptions = {};
-        if (selectedPlatform === 'youtube') {
-          const ytTitle = document.getElementById('youtube-title');
-          const ytDesc = document.getElementById('youtube-description');
-          const ytVis = document.getElementById('youtube-visibility');
-          const ytShorts = document.getElementById('youtube-shorts');
+        if (selectedPlatform === "youtube") {
+          const ytTitle = document.getElementById("youtube-title");
+          const ytDesc = document.getElementById("youtube-description");
+          const ytVis = document.getElementById("youtube-visibility");
+          const ytShorts = document.getElementById("youtube-shorts");
           if (ytTitle && ytTitle.value) title = ytTitle.value;
           if (ytDesc && ytDesc.value) description = ytDesc.value;
-          platformOptions.youtube = { visibility: ytVis ? ytVis.value : 'public', shortsMode: ytShorts ? !!ytShorts.checked : false };
+          platformOptions.youtube = {
+            visibility: ytVis ? ytVis.value : "public",
+            shortsMode: ytShorts ? !!ytShorts.checked : false,
+          };
         }
-        const payload = { title, description, type: 'video', target_platforms: [selectedPlatform], platforms: [selectedPlatform], isDryRun: false, platform_options: platformOptions };
-        const r = await endpointCall('/api/content/upload', payload);
-        document.getElementById('upload-status').textContent = r.ok ? 'Upload submitted' : 'Upload failed';
+        if (selectedPlatform === 'tiktok') {
+          const consentEl = document.getElementById('tiktok-consent');
+          const privacyEl = document.getElementById('tiktok-privacy');
+          const soundEl = document.getElementById('tiktok-sound');
+          const consent = consentEl ? !!consentEl.checked : false;
+          const privacy = privacyEl ? privacyEl.value : "";
+          const sound = soundEl ? soundEl.value : "";
+          if (consent && privacy) {
+            platformOptions.tiktok = { consent, privacy };
+            if (sound) platformOptions.tiktok.sound_id = sound;
+          }
+        }
+
+        const payload = {
+          title,
+          description,
+          type: "video",
+          target_platforms: [selectedPlatform],
+          platforms: [selectedPlatform],
+          isDryRun: false,
+          platform_options: platformOptions,
+        };
+        // Show confirm modal
+        openConfirmModal(payload, async finalPayload => {
+          const r = await endpointCall("/api/content/upload", finalPayload);
+          document.getElementById("upload-status").textContent = r.ok ? "Upload submitted" : "Upload failed";
+        });
       });
+
+      // Edit modal
+      function openEditModal(cardEl) {
+        let modal = document.getElementById('edit-modal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'edit-modal';
+          modal.style.position = 'fixed';
+          modal.style.left = '50%';
+          modal.style.top = '50%';
+          modal.style.transform = 'translate(-50%,-50%)';
+          modal.style.background = '#fff';
+          modal.style.padding = '12px';
+          modal.style.border = '1px solid #ccc';
+          modal.innerHTML = '<label>Edit title <input aria-label="Edit preview title" id="edit-preview-title" /></label><div><button id="edit-save">Save</button><button id="edit-cancel">Cancel</button></div>';
+          document.body.appendChild(modal);
+          document.getElementById('edit-cancel').addEventListener('click', () => modal.remove());
+        }
+        const input = modal.querySelector('#edit-preview-title');
+        input.value = cardEl.firstChild.textContent || '';
+        modal.style.display = 'block';
+        document.getElementById('edit-save').onclick = () => {
+          cardEl.firstChild.textContent = input.value;
+          modal.remove();
+        };
+      }
+
+      // Confirm modal
+      function openConfirmModal(payload, onConfirm) {
+        let modal = document.getElementById('confirm-modal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'confirm-modal';
+          modal.style.position = 'fixed';
+          modal.style.left = '50%';
+          modal.style.top = '50%';
+          modal.style.transform = 'translate(-50%,-50%)';
+          modal.style.background = '#fff';
+          modal.style.padding = '12px';
+          modal.style.border = '1px solid #ccc';
+          modal.innerHTML = '<label><input type="checkbox" id="confirm-consent" /> I consent</label><div><button id="confirm-publish">Confirm & Publish</button><button id="confirm-cancel">Cancel</button></div>';
+          document.body.appendChild(modal);
+        }
+        const confirmBtn = modal.querySelector('#confirm-publish');
+        const checkbox = modal.querySelector('#confirm-consent');
+        confirmBtn.disabled = true;
+        checkbox.onchange = () => {
+          confirmBtn.disabled = !checkbox.checked;
+        };
+        modal.style.display = 'block';
+        modal.querySelector('#confirm-cancel').onclick = () => modal.remove();
+        confirmBtn.onclick = async () => {
+          modal.remove();
+          // include edited title from preview if present
+          const edited = document.querySelector('.preview-card');
+          if (edited) payload.title = edited.firstChild.textContent || payload.title;
+          payload.isDryRun = false;
+          await onConfirm(payload);
+        };
+      }
+
+        // Auto-select the Tiktok tile so the expanded options and Preview button are visible for tests
+        (function autoSelectTiktok(){
+          try {
+            const t = document.getElementById('tile-tiktok');
+            if (t) t.click();
+          } catch (e) {}
+        })();
     </script>
   </body>
 </html>

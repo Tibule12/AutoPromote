@@ -15,7 +15,7 @@
 4. Add a new environment variable:
    - Key: `FIREBASE_SERVICE_ACCOUNT`
    - Value: Paste the ENTIRE contents of your service account JSON file
-   
+
    Make sure to copy ALL of the JSON content, including the opening and closing braces `{ }`.
 
 ## Step 3: Add Other Required Environment Variables

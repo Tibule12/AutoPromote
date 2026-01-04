@@ -10,7 +10,9 @@
 Your platform already has **3 powerful OpenAI integrations** built and ready:
 
 ### 1. ✅ AI Chatbot (GPT-4o)
+
 **File:** `src/services/chatbotService.js`
+
 - **Model:** GPT-4o (latest, best multilingual)
 - **Features:**
   - 11 South African languages support
@@ -22,7 +24,9 @@ Your platform already has **3 powerful OpenAI integrations** built and ready:
 - **Monthly estimate:** $5-20 for 100 users
 
 ### 2. ✅ AI Video Clipping (Whisper API)
+
 **File:** `src/services/videoClippingService.js`
+
 - **Model:** Whisper (speech-to-text)
 - **Features:**
   - Video transcription
@@ -33,7 +37,9 @@ Your platform already has **3 powerful OpenAI integrations** built and ready:
 - **Monthly estimate:** $3-15 for 100 videos
 
 ### 3. ⏳ AI Content Optimization (Not yet implemented)
+
 **Potential features:**
+
 - Generate viral captions
 - Optimize video titles
 - Create engaging thumbnails descriptions
@@ -51,7 +57,8 @@ Your platform already has **3 powerful OpenAI integrations** built and ready:
 4. Copy the key (starts with `sk-proj-...`)
 5. **Save it securely** - you won't see it again!
 
-**Cost:** 
+**Cost:**
+
 - Free tier: $5 credit (expires after 3 months)
 - Pay-as-you-go: Add credit card, pay only for usage
 - Estimated monthly cost: **$10-50** for 100-500 users
@@ -74,6 +81,7 @@ Your platform already has **3 powerful OpenAI integrations** built and ready:
 If using Firebase Functions:
 
 1. Run in terminal:
+
    ```bash
    firebase functions:config:set openai.key="sk-proj-your-actual-key-here"
    ```
@@ -91,11 +99,13 @@ If using Firebase Functions:
 ### Step 4: Verify Configuration ✅
 
 #### Quick Health Check
+
 ```bash
 curl https://api.autopromote.org/api/chat/health
 ```
 
 Expected response if configured:
+
 ```json
 {
   "status": "operational",
@@ -111,11 +121,13 @@ Expected response if configured:
 ```
 
 #### Full System Health Check
+
 ```bash
 curl "https://api.autopromote.org/api/health?verbose=1"
 ```
 
 Look for the `openai` section in diagnostics:
+
 ```json
 {
   "diagnostics": {
@@ -130,6 +142,7 @@ Look for the `openai` section in diagnostics:
 ```
 
 #### Test Chatbot (requires authentication)
+
 ```bash
 curl https://api.autopromote.org/api/chat/message \
   -H "Authorization: Bearer YOUR_FIREBASE_TOKEN" \
@@ -140,6 +153,7 @@ curl https://api.autopromote.org/api/chat/message \
 ```
 
 Expected response:
+
 ```json
 {
   "success": true,
@@ -158,6 +172,7 @@ Expected response:
 ## 📊 Current Status
 
 ### ✅ Fully Operational
+
 - ✅ **API Key Configured** on Render.com
 - ✅ Chatbot service operational (GPT-4o)
 - ✅ Video clipping with transcription ready (Whisper)
@@ -167,13 +182,14 @@ Expected response:
 - ✅ Frontend chat widget integrated
 
 ### 🎯 What's Working Now
-1. **AI Chatbot:** 
+
+1. **AI Chatbot:**
    - Real-time chat widget on dashboard
    - Responds in user's language automatically
    - Remembers conversation history
    - Provides AutoPromote-specific help
 
-2. **Video Clipping:** 
+2. **Video Clipping:**
    - Automatic transcription with Whisper API
    - Scene detection and viral clip suggestions
    - Smart editing recommendations
@@ -189,22 +205,26 @@ Expected response:
 ## 💰 Cost Breakdown
 
 ### GPT-4o (Chatbot)
+
 - **Input:** $0.0025 per 1K tokens (~750 words)
 - **Output:** $0.01 per 1K tokens (~750 words)
 - **Average conversation:** ~500 tokens = $0.0063
 - **100 conversations/day:** ~$0.63/day = **$19/month**
 
 ### Whisper (Video Transcription)
+
 - **Cost:** $0.006 per minute
 - **10-minute video:** $0.06
 - **100 videos/month:** **$6/month**
 
 ### Total Estimated Cost
+
 - **Low usage (100 users):** $10-20/month
 - **Medium usage (1,000 users):** $50-100/month
 - **High usage (10,000 users):** $300-500/month
 
 **Your Revenue vs Cost:**
+
 - 100 Premium users = $2,000/month revenue
 - OpenAI cost = $20/month
 - **Profit margin: 99%** 💰
@@ -214,7 +234,9 @@ Expected response:
 ## 🚀 Optimization Tips
 
 ### 1. Cache Responses
+
 For common questions, cache chatbot responses:
+
 ```javascript
 // Before calling OpenAI
 const cachedResponse = await getCachedResponse(question);
@@ -227,20 +249,23 @@ await cacheResponse(question, response);
 **Savings:** 50-70% reduction in API calls
 
 ### 2. Use Cheaper Models for Simple Tasks
+
 ```javascript
 // For FAQs and simple questions
-model: 'gpt-3.5-turbo' // 10x cheaper than GPT-4o
+model: "gpt-3.5-turbo"; // 10x cheaper than GPT-4o
 
 // For complex troubleshooting
-model: 'gpt-4o' // Better understanding
+model: "gpt-4o"; // Better understanding
 ```
 
 ### 3. Set Token Limits
+
 ```javascript
 max_tokens: 500, // Limit response length
 ```
 
 ### 4. Implement Rate Limiting
+
 ```javascript
 // Per user: 20 messages/hour
 // Per IP: 50 messages/hour
@@ -251,6 +276,7 @@ max_tokens: 500, // Limit response length
 ## 🔒 Security Best Practices
 
 ### ✅ DO:
+
 - Store API key in environment variables only
 - Never commit `.env` file to Git
 - Rotate API keys every 3 months
@@ -258,6 +284,7 @@ max_tokens: 500, // Limit response length
 - Set monthly spending limits
 
 ### ❌ DON'T:
+
 - Hardcode API key in code
 - Expose API key in frontend
 - Share API key publicly
@@ -268,6 +295,7 @@ max_tokens: 500, // Limit response length
 ## 📈 Monitoring & Maintenance
 
 ### Daily Checks
+
 1. **OpenAI Dashboard:** https://platform.openai.com/usage
    - Check daily usage and costs
    - Monitor for unusual spikes
@@ -284,12 +312,14 @@ max_tokens: 500, // Limit response length
    ```
 
 ### Weekly Tasks
+
 - Review total OpenAI spending
 - Check for any failed requests
 - Update spending limits if needed
 - Monitor chatbot conversation quality
 
 ### Monthly Tasks
+
 - Review and optimize prompts
 - Analyze most common user questions
 - Consider implementing caching for FAQs
@@ -300,6 +330,7 @@ max_tokens: 500, // Limit response length
 ## 📈 Feature Roadmap
 
 ### Phase 1: Essential ✅ COMPLETE
+
 - ✅ Add OPENAI_API_KEY to Render.com
 - ✅ Implement error handling and validation
 - ✅ Add health check endpoints
@@ -308,6 +339,7 @@ max_tokens: 500, // Limit response length
 - ✅ Add frontend health checks
 
 ### Phase 2: Optimization (Recommended)
+
 - [ ] Add response caching for common questions
 - [ ] Implement intelligent rate limiting
 - [ ] Add cost monitoring dashboard
@@ -315,6 +347,7 @@ max_tokens: 500, // Limit response length
 - [ ] Add conversation analytics
 
 ### Phase 3: Advanced Features (Future)
+
 - [ ] AI caption generation from video content
 - [ ] AI thumbnail optimization suggestions
 - [ ] AI hashtag suggestions based on trends
@@ -327,16 +360,21 @@ max_tokens: 500, // Limit response length
 ## 🛠️ Troubleshooting
 
 ### Error: "OpenAI API key not configured"
+
 **Solution:** Add `OPENAI_API_KEY` to environment variables
 
 ### Error: "Insufficient quota"
+
 **Solution:** Add credits to OpenAI account at https://platform.openai.com/settings/organization/billing
 
 ### Error: "Rate limit exceeded"
+
 **Solution:** Upgrade OpenAI tier or implement request queuing
 
 ### Error: "Invalid API key"
-**Solution:** 
+
+**Solution:**
+
 1. Verify key starts with `sk-proj-`
 2. Check for extra spaces
 3. Regenerate key if needed
@@ -362,6 +400,7 @@ max_tokens: 500, // Limit response length
 ## 🎯 Quick Reference
 
 ### API Endpoints
+
 ```
 GET  /api/chat/health              # Check if OpenAI is configured
 POST /api/chat/message             # Send message to chatbot
@@ -371,6 +410,7 @@ GET  /api/health?verbose=1         # Full system health (includes OpenAI status)
 ```
 
 ### Environment Variables
+
 ```bash
 # Required
 OPENAI_API_KEY=sk-proj-...         # Your OpenAI API key
@@ -381,12 +421,14 @@ GOOGLE_CLOUD_API_KEY=...           # Fallback for transcription
 ```
 
 ### Key Files
+
 - `src/services/chatbotService.js` - AI chatbot logic
 - `src/services/videoClippingService.js` - Video transcription
 - `src/routes/chatRoutes.js` - Chat API endpoints
 - `frontend/src/ChatWidget.js` - Frontend chat interface
 
 ### Important Links
+
 - OpenAI Dashboard: https://platform.openai.com
 - API Keys: https://platform.openai.com/api-keys
 - Usage Stats: https://platform.openai.com/usage
@@ -400,6 +442,7 @@ GOOGLE_CLOUD_API_KEY=...           # Fallback for transcription
 Your OpenAI integration is fully configured and operational. The AI chatbot and video transcription features are now live for your users. Monitor usage through the OpenAI dashboard and optimize as needed.
 
 **Next Steps:**
+
 1. Test the chatbot on your dashboard
 2. Set up billing alerts on OpenAI
 3. Monitor first week of usage

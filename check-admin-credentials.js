@@ -1,19 +1,19 @@
-const { initializeApp } = require('firebase/app');
-const { getAuth, signInWithEmailAndPassword } = require('firebase/auth');
+const { initializeApp } = require("firebase/app");
+const { getAuth, signInWithEmailAndPassword } = require("firebase/auth");
 
 // Firebase configuration - read from env vars (REACT_APP_... for build-time in CRA)
 function getClientFirebaseConfig() {
   const keys = [
-    'REACT_APP_FIREBASE_API_KEY',
-    'REACT_APP_FIREBASE_AUTH_DOMAIN',
-    'REACT_APP_FIREBASE_PROJECT_ID',
-    'REACT_APP_FIREBASE_STORAGE_BUCKET',
-    'REACT_APP_FIREBASE_MESSAGING_SENDER_ID',
-    'REACT_APP_FIREBASE_APP_ID'
+    "REACT_APP_FIREBASE_API_KEY",
+    "REACT_APP_FIREBASE_AUTH_DOMAIN",
+    "REACT_APP_FIREBASE_PROJECT_ID",
+    "REACT_APP_FIREBASE_STORAGE_BUCKET",
+    "REACT_APP_FIREBASE_MESSAGING_SENDER_ID",
+    "REACT_APP_FIREBASE_APP_ID",
   ];
   const missing = keys.filter(k => !process.env[k]);
   if (missing.length) {
-    console.error('Missing required Firebase client env vars:', missing.join(', '));
+    console.error("Missing required Firebase client env vars:", missing.join(", "));
     process.exit(1);
   }
   return {
@@ -31,14 +31,14 @@ const app = initializeApp(getClientFirebaseConfig());
 const auth = getAuth(app);
 
 async function checkAdminCredentials() {
-  console.log('🔍 Checking admin credentials...\n');
+  console.log("🔍 Checking admin credentials...\n");
 
   const adminCredentials = [
-    { email: 'admin123@gmail.com', password: 'AdminAuto123' },
-    { email: 'testadmin@example.com', password: 'admin123' },
-    { email: 'admin@autopromote.com', password: 'admin123' },
-    { email: 'admin@example.com', password: 'admin123' },
-    { email: 'testadmin@gmail.com', password: 'admin123' }
+    { email: "admin123@gmail.com", password: "AdminAuto123" },
+    { email: "testadmin@example.com", password: "admin123" },
+    { email: "admin@autopromote.com", password: "admin123" },
+    { email: "admin@example.com", password: "admin123" },
+    { email: "testadmin@gmail.com", password: "admin123" },
   ];
 
   for (const creds of adminCredentials) {
@@ -50,30 +50,29 @@ async function checkAdminCredentials() {
       // Get ID token to check custom claims
       const idTokenResult = await userCredential.user.getIdTokenResult();
       console.log(`Admin claim: ${idTokenResult.claims.admin || false}`);
-      console.log(`Role: ${idTokenResult.claims.role || 'none'}\n`);
+      console.log(`Role: ${idTokenResult.claims.role || "none"}\n`);
 
       return creds; // Return working credentials
-
     } catch (error) {
       console.log(`❌ FAILED: ${creds.email} - ${error.message}\n`);
     }
   }
 
-  console.log('No working admin credentials found.');
+  console.log("No working admin credentials found.");
   return null;
 }
 
 async function checkExistingUsers() {
-  console.log('🔍 Checking existing users in Firebase Auth...\n');
+  console.log("🔍 Checking existing users in Firebase Auth...\n");
 
   // This would require admin SDK to list users
   // For now, let's just check if we can find any working credentials
   const workingCreds = await checkAdminCredentials();
 
   if (workingCreds) {
-    console.log('✅ Found working admin credentials:', workingCreds);
+    console.log("✅ Found working admin credentials:", workingCreds);
   } else {
-    console.log('❌ No working admin credentials found. You may need to create an admin user.');
+    console.log("❌ No working admin credentials found. You may need to create an admin user.");
   }
 }
 

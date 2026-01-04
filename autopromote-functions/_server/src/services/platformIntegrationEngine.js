@@ -6,11 +6,11 @@ function integrateWithPlatform(platform, content) {
   return {
     platform,
     contentId: content.id,
-    status: 'integrated',
-    timestamp: new Date()
+    status: "integrated",
+    timestamp: new Date(),
   };
 }
 
 module.exports = {
-  integrateWithPlatform
+  integrateWithPlatform,
 };

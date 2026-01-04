@@ -1,17 +1,16 @@
 // Integration test for /api/content/upload
 // Requires: jest, supertest, and your Express app
 
-const request = require('supertest');
-const app = require('../server');
+const request = require("supertest");
+const app = require("../server");
 let server;
 let agent;
 
 // Optional: Clean up Firestore and timers after tests to avoid Jest teardown errors
-const { db } = require('../firebaseAdmin');
+const { db } = require("../firebaseAdmin");
 
-describe('Content Upload & Promotion Integration', () => {
-
-  beforeAll((done) => {
+describe("Content Upload & Promotion Integration", () => {
+  beforeAll(done => {
     server = app.listen(0, () => {
       agent = request.agent(server);
       done();
@@ -21,52 +20,56 @@ describe('Content Upload & Promotion Integration', () => {
   afterAll(async () => {
     try {
       if (db && db.terminate) {
-        console.log('Terminating Firestore...');
+        console.log("Terminating Firestore...");
         await db.terminate();
-        console.log('Firestore terminated.');
+        console.log("Firestore terminated.");
       }
     } catch (e) {
-      console.error('Error terminating Firestore:', e);
+      console.error("Error terminating Firestore:", e);
     }
     jest.clearAllTimers();
     if (server && server.close) {
-      console.log('Closing Express server...');
-      await new Promise((resolve) => server.close(resolve));
-      console.log('Express server closed.');
+      console.log("Closing Express server...");
+      await new Promise(resolve => server.close(resolve));
+      console.log("Express server closed.");
     }
   }, 30000); // Increase afterAll timeout to 30s
 
-  it('should upload content and create promotion schedules for all platforms', async () => {
-    const testUserId = 'testUser123';
+  it("should upload content and create promotion schedules for all platforms", async () => {
+    const testUserId = "testUser123";
     const payload = {
-      title: 'Test Content',
-      type: 'video',
-      url: 'https://example.com/video.mp4',
-      description: 'This is a test video.',
-      target_platforms: ['youtube', 'tiktok', 'instagram', 'facebook', 'twitter'],
+      title: "Test Content",
+      type: "video",
+      url: "https://example.com/video.mp4",
+      description: "This is a test video.",
+      target_platforms: ["youtube", "tiktok", "instagram", "facebook", "twitter"],
       scheduled_promotion_time: new Date(Date.now() + 3600000).toISOString(),
-      promotion_frequency: 'once',
-      schedule_hint: { when: new Date(Date.now() + 3600000).toISOString(), frequency: 'once', timezone: 'UTC' },
+      promotion_frequency: "once",
+      schedule_hint: {
+        when: new Date(Date.now() + 3600000).toISOString(),
+        frequency: "once",
+        timezone: "UTC",
+      },
       auto_promote: { youtube: { enabled: true }, twitter: { enabled: true } },
-      meta: { trimStart: 0, trimEnd: 10, template: 'youtube' },
+      meta: { trimStart: 0, trimEnd: 10, template: "youtube" },
       quality_score: 95,
       quality_feedback: [],
-      quality_enhanced: true
+      quality_enhanced: true,
     };
 
-    console.log('Starting POST /api/content/upload integration test...');
+    console.log("Starting POST /api/content/upload integration test...");
     let res;
     let status, apiBody;
+    const normalize = require("../../test/utils/normalizeApiResponse");
     try {
       res = await agent
-        .post('/api/content/upload')
-        .set('Authorization', `Bearer test-token-for-${testUserId}`)
+        .post("/api/content/upload")
+        .set("Authorization", `Bearer test-token-for-${testUserId}`)
         .send(payload);
-      const normalize = require('../../test/utils/normalizeApiResponse');
       ({ status, body: apiBody } = normalize(res.body, res.statusCode));
-      console.log('POST /api/content/upload response:', status, apiBody);
+      console.log("POST /api/content/upload response:", status, apiBody);
     } catch (err) {
-      console.error('Error during POST /api/content/upload:', err);
+      console.error("Error during POST /api/content/upload:", err);
       throw err;
     }
 
@@ -74,8 +77,8 @@ describe('Content Upload & Promotion Integration', () => {
     expect(apiBody.content).toBeDefined();
     expect(apiBody.promotion_schedule).toBeDefined();
     expect(apiBody.content.target_platforms.length).toBeGreaterThanOrEqual(5);
-    expect(apiBody.promotion_schedule.schedule_type).toBe('specific');
-    expect(apiBody.content.status).toBe('pending');
+    expect(apiBody.promotion_schedule.schedule_type).toBe("specific");
+    expect(apiBody.content.status).toBe("pending");
     expect(res.body.growth_guarantee_badge).toBeDefined();
     expect(res.body.auto_promotion).toBeDefined();
     // Add more assertions for notifications, tracking, etc. as needed

@@ -33,7 +33,7 @@ export const cachedFetch = async (key, fetchFn, ttl = 30000) => {
       // Store in cache
       cache.set(key, {
         data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       return data;
@@ -45,7 +45,7 @@ export const cachedFetch = async (key, fetchFn, ttl = 30000) => {
 
   // Store pending request
   pendingRequests.set(key, promise);
-  
+
   return promise;
 };
 
@@ -69,19 +69,19 @@ export const clearCache = (key = null) => {
  */
 export const batchWithDelay = async (calls, delayMs = 100) => {
   const results = [];
-  
+
   for (let i = 0; i < calls.length; i++) {
     try {
       results.push(await calls[i]());
     } catch (error) {
       results.push({ error: error.message });
     }
-    
+
     // Add delay between calls (except after last one)
     if (i < calls.length - 1) {
       await new Promise(resolve => setTimeout(resolve, delayMs));
     }
   }
-  
+
   return results;
 };

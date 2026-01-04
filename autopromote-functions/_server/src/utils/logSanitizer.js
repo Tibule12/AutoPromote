@@ -5,12 +5,12 @@ function present(x) {
 
 function tokenInfo(value) {
   if (!value) return { present: false };
-  if (typeof value === 'string') return { present: true, length: value.length };
+  if (typeof value === "string") return { present: true, length: value.length };
   return { present: true };
 }
 
 function objSummary(obj) {
-  if (!obj || typeof obj !== 'object') return null;
+  if (!obj || typeof obj !== "object") return null;
   try {
     const keys = Object.keys(obj || {});
     const tokenKeys = keys.filter(k => /token|access|refresh|id_token/i.test(k));
@@ -33,12 +33,12 @@ function uriSummary(uri) {
 function maskEmail(email) {
   try {
     if (!email) return null;
-    const [local, domain] = String(email).split('@');
-    if (!domain) return '***';
-    const first = local ? local[0] : '';
+    const [local, domain] = String(email).split("@");
+    if (!domain) return "***";
+    const first = local ? local[0] : "";
     return `${first}***@${domain}`;
   } catch (e) {
-    return '***';
+    return "***";
   }
 }
 

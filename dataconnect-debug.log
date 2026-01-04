@@ -1,0 +1,12 @@
+I0103 08:12:29.128677   24044 load.go:31] Reloading schema and connectors...
+I0103 08:12:29.189996   24044 control.go:94] [/emulator/autopromote cda4] UpdateResources(): done
+Main schema: sources: schema\schema.gql [2140B] 
+Connector "default": sources: connector\mutations.gql [1266B] connector\queries.gql [1880B] 
+I0103 08:12:29.264108   24044 collector.go:107] schema extensions wrote into "C:\\Users\\asus\\AutoPromte\\AutoPromote\\dataconnect\\.dataconnect\\schema"
+Generated sources: prelude.gql [73219B] 
+I0103 08:12:29.265108   24044 load.go:109] Finished reloading
+I0103 08:12:29.269121   24044 dev.go:105] Listening on address (HTTP + gRPC): 127.0.0.1:9399
+I0103 08:12:29.271125   24044 dev.go:105] Listening on address (HTTP + gRPC): [::1]:9399
+I0103 08:12:35.893694   24044 control.go:94] [/emulator/autopromote f3f6] UpdateResources(): done
+Main schema: sources: schema\schema.gql [2140B] 
+Connector "default": sources: connector\mutations.gql [1266B] connector\queries.gql [1880B] 

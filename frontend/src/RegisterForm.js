@@ -12,14 +12,17 @@ const RegisterForm = ({ onRegister, onClose }) => {
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = useCallback((event) => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) setError("");
-    if (success) setSuccess("");
-  }, [error, success]);
+  const handleChange = useCallback(
+    event => {
+      const { name, value } = event.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+      if (error) setError("");
+      if (success) setSuccess("");
+    },
+    [error, success]
+  );
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async event => {
     event.preventDefault();
     setError("");
     setSuccess("");
@@ -41,7 +44,9 @@ const RegisterForm = ({ onRegister, onClose }) => {
 
     try {
       await onRegister(name, email, password);
-      setSuccess("Registration successful! Please check your email to verify your account before logging in.");
+      setSuccess(
+        "Registration successful! Please check your email to verify your account before logging in."
+      );
       setFormData({ name: "", email: "", password: "", confirmPassword: "" });
 
       setTimeout(() => {
@@ -159,9 +164,15 @@ const RegisterForm = ({ onRegister, onClose }) => {
           )}
         </button>
 
-        <a href="#" onClick={(event) => { event.preventDefault(); if (onClose) onClose(); }} className="auth-link">
+        <button
+          type="button"
+          onClick={() => {
+            if (onClose) onClose();
+          }}
+          className="auth-link"
+        >
           Already have an account? Sign in
-        </a>
+        </button>
       </form>
     </div>
   );

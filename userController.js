@@ -1,4 +1,4 @@
-const { auth, db } = require('./firebaseClient');
+const { auth, db } = require("./firebaseClient");
 
 // Generate JWT
 
@@ -16,19 +16,22 @@ const registerUser = async (req, res) => {
     });
 
     // Store user profile in Firestore
-    await db.collection('users').doc(userRecord.uid).set({
-      name,
-      email,
-      role: role || 'creator',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
+    await db
+      .collection("users")
+      .doc(userRecord.uid)
+      .set({
+        name,
+        email,
+        role: role || "creator",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
 
     res.status(201).json({
       id: userRecord.uid,
       name,
       email,
-      role: role || 'creator',
+      role: role || "creator",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -44,7 +47,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   // Firebase Auth handles login on the client side (frontend)
   // Backend can verify ID tokens if needed
-  res.status(501).json({ message: 'Login is handled by Firebase Auth client SDK.' });
+  res.status(501).json({ message: "Login is handled by Firebase Auth client SDK." });
 };
 
 // @desc    Get user profile
@@ -55,9 +58,9 @@ const loginUser = async (req, res) => {
 // @access  Private
 const getUserProfile = async (req, res) => {
   try {
-    const userDoc = await db.collection('users').doc(req.user.uid).get();
+    const userDoc = await db.collection("users").doc(req.user.uid).get();
     if (!userDoc.exists) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
     res.json({ id: userDoc.id, ...userDoc.data() });
   } catch (error) {
@@ -77,10 +80,10 @@ const updateUserProfile = async (req, res) => {
       name: req.body.name,
       email: req.body.email,
       role: req.body.role,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
-    await db.collection('users').doc(req.user.uid).update(updateData);
-    const userDoc = await db.collection('users').doc(req.user.uid).get();
+    await db.collection("users").doc(req.user.uid).update(updateData);
+    const userDoc = await db.collection("users").doc(req.user.uid).get();
     res.json({ id: userDoc.id, ...userDoc.data() });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -95,7 +98,7 @@ const updateUserProfile = async (req, res) => {
 // @access  Private/Admin
 const getUsers = async (req, res) => {
   try {
-    const snapshot = await db.collection('users').get();
+    const snapshot = await db.collection("users").get();
     const users = [];
     snapshot.forEach(doc => {
       users.push({ id: doc.id, ...doc.data() });

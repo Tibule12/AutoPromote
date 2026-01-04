@@ -5,6 +5,7 @@ AutoPromote supports three email providers: **Resend**, **SendGrid**, and **Mail
 ## 📧 Email Providers
 
 ### 1. **Resend** (Recommended for Production)
+
 - **Best for**: Modern API, great deliverability, simple setup
 - **Pricing**: Free tier: 3,000 emails/month, then $20/month for 50k emails
 - **Setup**: https://resend.com
@@ -15,6 +16,7 @@ EMAIL_PROVIDER=resend
 ```
 
 ### 2. **SendGrid** (Alternative for Production)
+
 - **Best for**: High volume, established provider
 - **Pricing**: Free tier: 100 emails/day, then $19.95/month for 40k emails
 - **Setup**: https://sendgrid.com
@@ -25,6 +27,7 @@ EMAIL_PROVIDER=sendgrid
 ```
 
 ### 3. **Mailtrap** (Testing Only)
+
 - **Best for**: Development and testing (emails don't actually send)
 - **Pricing**: Free tier available
 - **Setup**: https://mailtrap.io
@@ -78,46 +81,58 @@ node test-email.js
 ### Send Basic Email
 
 ```javascript
-const { sendEmail } = require('./src/services/emailService');
+const { sendEmail } = require("./src/services/emailService");
 
 await sendEmail({
-  to: 'user@example.com',
-  subject: 'Hello from AutoPromote',
-  html: '<h1>Hello!</h1><p>This is a test email.</p>',
-  text: 'Hello! This is a test email.'
+  to: "user@example.com",
+  subject: "Hello from AutoPromote",
+  html: "<h1>Hello!</h1><p>This is a test email.</p>",
+  text: "Hello! This is a test email.",
 });
 ```
 
 ### Send Templated Email
 
 ```javascript
-const { sendTemplatedEmail } = require('./src/services/emailService');
+const { sendTemplatedEmail } = require("./src/services/emailService");
 
-await sendTemplatedEmail('welcome', {
-  name: 'John Doe',
-  loginUrl: 'https://autopromote.org/dashboard'
-}, 'john@example.com');
+await sendTemplatedEmail(
+  "welcome",
+  {
+    name: "John Doe",
+    loginUrl: "https://autopromote.org/dashboard",
+  },
+  "john@example.com"
+);
 ```
 
 ### Send Password Reset
 
 ```javascript
-await sendTemplatedEmail('passwordReset', {
-  name: 'John Doe',
-  resetUrl: 'https://autopromote.org/reset?token=abc123',
-  expiresIn: '1 hour'
-}, 'john@example.com');
+await sendTemplatedEmail(
+  "passwordReset",
+  {
+    name: "John Doe",
+    resetUrl: "https://autopromote.org/reset?token=abc123",
+    expiresIn: "1 hour",
+  },
+  "john@example.com"
+);
 ```
 
 ### Send Payout Notification
 
 ```javascript
-await sendTemplatedEmail('payoutNotification', {
-  name: 'John Doe',
-  amount: '150.00',
-  method: 'PayPal',
-  expectedDate: 'December 10, 2025'
-}, 'john@example.com');
+await sendTemplatedEmail(
+  "payoutNotification",
+  {
+    name: "John Doe",
+    amount: "150.00",
+    method: "PayPal",
+    expectedDate: "December 10, 2025",
+  },
+  "john@example.com"
+);
 ```
 
 ## 🔄 Automatic Fallback

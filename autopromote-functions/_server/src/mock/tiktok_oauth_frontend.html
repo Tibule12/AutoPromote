@@ -1,40 +1,81 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Mock TikTok OAuth Flow (Sandbox)</title>
-  <style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;background:#f9f9f9} .box{background:#fff;padding:16px;border-radius:8px;border:1px solid #e6e6e6;max-width:600px;margin:auto}</style>
-</head>
-<body>
-  <div class="box">
-    <h2>AutoPromote — Mock TikTok OAuth (Sandbox)</h2>
-    <p>This is a local mock to simulate the OAuth flow for recording the demo video. Replace the sandbox client_id and redirect_uri with your app values when doing a real run.</p>
-    <div style="margin:12px 0">
-      <label>Sandbox Client ID: <input id="clientId" value="SANDBOX_CLIENT_ID" style="width:60%"></label>
-    </div>
-    <div style="margin:12px 0">
-  <label>Redirect URI: <input id="redirectUri" value="https://www.autopromote.org/api/tiktok/callback" style="width:60%"></label>
-    </div>
-    <button id="start">Sign in with TikTok (Sandbox)</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Mock TikTok OAuth Flow (Sandbox)</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 20px;
+        background: #f9f9f9;
+      }
+      .box {
+        background: #fff;
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid #e6e6e6;
+        max-width: 600px;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h2>AutoPromote — Mock TikTok OAuth (Sandbox)</h2>
+      <p>
+        This is a local mock to simulate the OAuth flow for recording the demo video. Replace the
+        sandbox client_id and redirect_uri with your app values when doing a real run.
+      </p>
+      <div style="margin: 12px 0">
+        <label
+          >Sandbox Client ID: <input id="clientId" value="SANDBOX_CLIENT_ID" style="width: 60%"
+        /></label>
+      </div>
+      <div style="margin: 12px 0">
+        <label
+          >Redirect URI:
+          <input
+            id="redirectUri"
+            value="https://www.autopromote.org/api/tiktok/callback"
+            style="width: 60%"
+        /></label>
+      </div>
+      <button id="start">Sign in with TikTok (Sandbox)</button>
 
-    <div id="log" style="margin-top:12px;font-family:monospace;white-space:pre-wrap;background:#f7f7f7;padding:8px;border-radius:6px;display:none"></div>
-  </div>
+      <div
+        id="log"
+        style="
+          margin-top: 12px;
+          font-family: monospace;
+          white-space: pre-wrap;
+          background: #f7f7f7;
+          padding: 8px;
+          border-radius: 6px;
+          display: none;
+        "
+      ></div>
+    </div>
 
-  <script>
-    document.getElementById('start').addEventListener('click', ()=>{
-      const clientId = encodeURIComponent(document.getElementById('clientId').value.trim());
-      const redirect = encodeURIComponent(document.getElementById('redirectUri').value.trim());
-      // Example TikTok sandbox authorize URL (mocked)
-      const scope = encodeURIComponent('user.info.profile video.upload video.publish video.data');
-      const state = encodeURIComponent('demo_state_123');
-      // For a real run use TikTok's sandbox authorize endpoint, e.g. https://sandbox.tiktok.com/platform/oauth/authorize?client_key=...&response_type=code&scope=...&redirect_uri=...
-      const authUrl = `https://sandbox.tiktok.com/platform/oauth/authorize?client_key=${clientId}&response_type=code&scope=${scope}&redirect_uri=${redirect}&state=${state}`;
-      // Show the pretend redirect URL so the reviewer can see it in the recording
-      const log = document.getElementById('log'); log.style.display='block'; log.textContent = 'Redirecting to:\n' + authUrl + '\n\n(For demo, you can paste this URL in a browser tab to show the TikTok consent UI in sandbox.)';
-      // Optionally actually navigate to that URL if running publicly
-      // window.location = authUrl;
-    });
-  </script>
-</body>
+    <script>
+      document.getElementById("start").addEventListener("click", () => {
+        const clientId = encodeURIComponent(document.getElementById("clientId").value.trim());
+        const redirect = encodeURIComponent(document.getElementById("redirectUri").value.trim());
+        // Example TikTok sandbox authorize URL (mocked)
+        const scope = encodeURIComponent("user.info.profile video.upload video.publish video.data");
+        const state = encodeURIComponent("demo_state_123");
+        // For a real run use TikTok's sandbox authorize endpoint, e.g. https://sandbox.tiktok.com/platform/oauth/authorize?client_key=...&response_type=code&scope=...&redirect_uri=...
+        const authUrl = `https://sandbox.tiktok.com/platform/oauth/authorize?client_key=${clientId}&response_type=code&scope=${scope}&redirect_uri=${redirect}&state=${state}`;
+        // Show the pretend redirect URL so the reviewer can see it in the recording
+        const log = document.getElementById("log");
+        log.style.display = "block";
+        log.textContent =
+          "Redirecting to:\n" +
+          authUrl +
+          "\n\n(For demo, you can paste this URL in a browser tab to show the TikTok consent UI in sandbox.)";
+        // Optionally actually navigate to that URL if running publicly
+        // window.location = authUrl;
+      });
+    </script>
+  </body>
 </html>

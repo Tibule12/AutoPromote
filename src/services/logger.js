@@ -1,12 +1,14 @@
+/* eslint-disable no-console */
 // logger.js - lightweight structured logger
 // Usage: const logger = require('./logger'); logger.info('task_processed', { taskId });
+// Reason: this module intentionally writes to console for structured logging in container environments.
 
 function base(level, message, meta = {}) {
   const entry = {
     ts: new Date().toISOString(),
     level,
     message,
-    ...meta
+    ...meta,
   };
   try {
     // Avoid crashing on circular structures
@@ -17,7 +19,7 @@ function base(level, message, meta = {}) {
 }
 
 module.exports = {
-  info: (m, meta) => base('info', m, meta),
-  warn: (m, meta) => base('warn', m, meta),
-  error: (m, meta) => base('error', m, meta)
+  info: (m, meta) => base("info", m, meta),
+  warn: (m, meta) => base("warn", m, meta),
+  error: (m, meta) => base("error", m, meta),
 };

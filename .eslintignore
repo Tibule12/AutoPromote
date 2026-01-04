@@ -1,0 +1,13 @@
+node_modules
+build
+frontend/build
+frontend/node_modules
+autopromote-functions/node_modules
+test/e2e/playwright/test-results
+test/e2e/playwright/test-results/**
+**/*.js.map
+docs/static
+logs
+npm-audit.json
+snyk-output.json
+remote-firestore-indexes.json

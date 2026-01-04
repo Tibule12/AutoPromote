@@ -1,22 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithCustomToken } from 'firebase/auth';
-import { app } from './firebaseConfig';
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithCustomToken,
+} from "firebase/auth";
+import { app } from "./firebaseConfig";
 
 // Import all required components
-import ContentUploadForm from './ContentUploadForm';
-import ContentList from './ContentList';
-import LoginForm from './LoginForm';
-import RegisterForm from './RegisterForm';
-import AdminDashboard from './AdminDashboard';
+import ContentUploadForm from "./ContentUploadForm";
+import ContentList from "./ContentList";
+import LoginForm from "./LoginForm";
+import RegisterForm from "./RegisterForm";
+import AdminDashboard from "./AdminDashboard";
 
 // Import API configuration
-import { API_BASE_URL, apiUrl } from './config/apiConfig';
+import { API_BASE_URL, apiUrl } from "./config/apiConfig";
 
 const auth = getAuth(app);
 const storage = getStorage(app);
-const STORAGE_PATH = 'uploads';
+const STORAGE_PATH = "uploads";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -31,10 +36,10 @@ function App() {
   useEffect(() => {
     if (user) {
       // Only set isAdmin true if backend says admin, never downgrade
-      setIsAdmin(user.role === 'admin' || user.isAdmin === true);
+      setIsAdmin(user.role === "admin" || user.isAdmin === true);
       fetchUserProfile();
       fetchUserContent();
-      if (user.role === 'admin' || user.isAdmin === true) {
+      if (user.role === "admin" || user.isAdmin === true) {
         fetchAnalytics();
       }
     }
@@ -46,7 +51,7 @@ function App() {
     try {
       if (!auth.currentUser) return;
       const idToken = await auth.currentUser.getIdToken(true);
-      const res = await fetch(apiUrl('/api/users/profile'), {
+      const res = await fetch(apiUrl("/api/users/profile"), {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -54,10 +59,10 @@ function App() {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
     } catch (error) {
-      console.error('Failed to fetch user profile:', error);
+      console.error("Failed to fetch user profile:", error);
     }
   };
 
@@ -65,7 +70,7 @@ function App() {
     try {
       if (!auth.currentUser) return;
       const idToken = await auth.currentUser.getIdToken(true);
-      const res = await fetch(apiUrl('/api/content/my-content'), {
+      const res = await fetch(apiUrl("/api/content/my-content"), {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -78,7 +83,7 @@ function App() {
         try {
           const body = await res.json();
           // If terms not accepted, surface a UI to accept and then retry
-          if (res.status === 403 && body?.error === 'terms_not_accepted') {
+          if (res.status === 403 && body?.error === "terms_not_accepted") {
             setTermsRequired(true);
             setRequiredTermsVersion(body.requiredVersion || null);
             return;
@@ -86,13 +91,13 @@ function App() {
         } catch (_) {
           /* ignore parse errors */
         }
-        console.error('Failed to fetch content: HTTP', res.status);
+        console.error("Failed to fetch content: HTTP", res.status);
         return;
       }
       const data = await res.json();
       setContent(data.content || []);
     } catch (error) {
-      console.error('Failed to fetch content:', error);
+      console.error("Failed to fetch content:", error);
     }
   };
 
@@ -100,7 +105,7 @@ function App() {
     try {
       if (!auth.currentUser) return;
       const idToken = await auth.currentUser.getIdToken(true);
-      const res = await fetch(apiUrl('/api/admin/analytics/overview'), {
+      const res = await fetch(apiUrl("/api/admin/analytics/overview"), {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -112,19 +117,19 @@ function App() {
       if (!res.ok) {
         try {
           const body = await res.json();
-          if (res.status === 403 && body?.error === 'terms_not_accepted') {
+          if (res.status === 403 && body?.error === "terms_not_accepted") {
             setTermsRequired(true);
             setRequiredTermsVersion(body.requiredVersion || null);
             return;
           }
         } catch (_) {}
-        console.error('Failed to fetch analytics: HTTP', res.status);
+        console.error("Failed to fetch analytics: HTTP", res.status);
         return;
       }
       const data = await res.json();
       setAnalytics(data);
     } catch (error) {
-      console.error('Failed to fetch analytics:', error);
+      console.error("Failed to fetch analytics:", error);
     }
   };
 
@@ -138,9 +143,9 @@ function App() {
         const idToken = await user.getIdToken();
 
         // Send the ID token to the backend
-        const res = await fetch(apiUrl('/api/auth/login'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch(apiUrl("/api/auth/login"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ idToken, email }),
         });
 
@@ -156,9 +161,9 @@ function App() {
       }
 
       // Try backend authentication
-      const res = await fetch(apiUrl('/api/auth/login'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(apiUrl("/api/auth/login"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
@@ -166,15 +171,15 @@ function App() {
         const data = await res.json();
 
         // If backend returns a custom token, exchange it for an ID token
-        if (data.token && !data.token.startsWith('eyJ')) {
+        if (data.token && !data.token.startsWith("eyJ")) {
           try {
             const userCredential = await signInWithCustomToken(auth, data.token);
             const user = userCredential.user;
             const idToken = await user.getIdToken();
             setUser({ ...data.user, token: idToken });
           } catch (tokenExchangeError) {
-            console.error('Failed to exchange custom token:', tokenExchangeError);
-            alert('Login failed: Could not exchange custom token for ID token.');
+            console.error("Failed to exchange custom token:", tokenExchangeError);
+            alert("Login failed: Could not exchange custom token for ID token.");
             return;
           }
         } else {
@@ -185,25 +190,25 @@ function App() {
         setShowLogin(false);
       } else {
         const errorData = await res.json();
-        alert('Login failed: ' + (errorData.error || 'Invalid credentials'));
+        alert("Login failed: " + (errorData.error || "Invalid credentials"));
       }
     } catch (error) {
-      alert('Login error: ' + (error.message || 'Connection error'));
+      alert("Login error: " + (error.message || "Connection error"));
     }
   };
 
-  const handleLogin = (userData) => {
+  const handleLogin = userData => {
     // Never downgrade admin to user
     setUser(prev => {
-      if (prev && (prev.role === 'admin' || prev.isAdmin === true)) {
-        return { ...prev, ...userData, role: 'admin', isAdmin: true };
+      if (prev && (prev.role === "admin" || prev.isAdmin === true)) {
+        return { ...prev, ...userData, role: "admin", isAdmin: true };
       }
       return userData;
     });
     setShowLogin(false);
   };
 
-  const handleRegister = (userData) => {
+  const handleRegister = userData => {
     setUser(userData);
     setShowRegister(false);
   };
@@ -223,17 +228,17 @@ function App() {
       if (!auth.currentUser) return;
       const idToken = await auth.currentUser.getIdToken(true);
       const payload = requiredTermsVersion ? { acceptedTermsVersion: requiredTermsVersion } : {};
-      const res = await fetch(apiUrl('/api/users/me/accept-terms'), {
-        method: 'POST',
+      const res = await fetch(apiUrl("/api/users/me/accept-terms"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        const body = await res.json().catch(()=>({}));
-        alert('Failed to accept terms: ' + (body.error || res.status));
+        const body = await res.json().catch(() => ({}));
+        alert("Failed to accept terms: " + (body.error || res.status));
         return;
       }
       // Hide banner and retry data fetches
@@ -242,23 +247,22 @@ function App() {
       await fetchUserContent();
       if (isAdmin) await fetchAnalytics();
     } catch (e) {
-      console.error('acceptTerms error:', e);
-      alert('Could not record terms acceptance. Please try again.');
+      console.error("acceptTerms error:", e);
+      alert("Could not record terms acceptance. Please try again.");
     }
   };
 
   // Firebase-powered upload
-  const handleUploadContent = async (contentData) => {
+  const handleUploadContent = async contentData => {
     try {
-
       let url;
-      if (contentData.type === 'article') {
+      if (contentData.type === "article") {
         url = contentData.articleText || undefined;
       } else {
         // Upload file to Firebase Storage
         const file = contentData.file;
         if (!file) {
-          alert('No file selected!');
+          alert("No file selected!");
           return;
         }
         const filePath = `${STORAGE_PATH}/${Date.now()}_${file.name}`;
@@ -266,7 +270,7 @@ function App() {
         await uploadBytes(storageRef, file);
         url = await getDownloadURL(storageRef);
         if (!url) {
-          alert('Could not get public URL for uploaded file.');
+          alert("Could not get public URL for uploaded file.");
           return;
         }
       }
@@ -275,16 +279,16 @@ function App() {
       const payload = {
         title: contentData.title,
         type: contentData.type,
-        description: contentData.description || '',
-        ...(url ? { url } : {})
+        description: contentData.description || "",
+        ...(url ? { url } : {}),
       };
 
       if (!auth.currentUser) return;
       const idToken = await auth.currentUser.getIdToken(true);
-      const res = await fetch(apiUrl('/api/content/upload'), {
-        method: 'POST',
+      const res = await fetch(apiUrl("/api/content/upload"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify(payload),
@@ -294,12 +298,12 @@ function App() {
         fetchUserContent();
       } else {
         const error = await res.json();
-        console.error('Failed to upload content', error);
-        alert(error.error || 'Failed to upload content');
+        console.error("Failed to upload content", error);
+        alert(error.error || "Failed to upload content");
       }
     } catch (error) {
-      console.error('Error uploading content:', error);
-      alert('Error uploading content: ' + error.message);
+      console.error("Error uploading content:", error);
+      alert("Error uploading content: " + error.message);
     }
   };
 
@@ -315,8 +319,22 @@ function App() {
             </div>
           ) : (
             <div>
-              <button onClick={() => { setShowLogin(true); setShowRegister(false); }}>Login</button>
-              <button onClick={() => { setShowRegister(true); setShowLogin(false); }}>Register</button>
+              <button
+                onClick={() => {
+                  setShowLogin(true);
+                  setShowRegister(false);
+                }}
+              >
+                Login
+              </button>
+              <button
+                onClick={() => {
+                  setShowRegister(true);
+                  setShowLogin(false);
+                }}
+              >
+                Register
+              </button>
             </div>
           )}
         </nav>
@@ -324,20 +342,40 @@ function App() {
 
       <main>
         {user && termsRequired && (
-          <div style={{
-            background: '#fff3cd',
-            color: '#856404',
-            border: '1px solid #ffeeba',
-            borderRadius: 8,
-            padding: 16,
-            marginBottom: 16
-          }}>
-            <strong>Action required:</strong> Please accept the latest Terms of Service{requiredTermsVersion ? ` (${requiredTermsVersion})` : ''} to continue.
+          <div
+            style={{
+              background: "#fff3cd",
+              color: "#856404",
+              border: "1px solid #ffeeba",
+              borderRadius: 8,
+              padding: 16,
+              marginBottom: 16,
+            }}
+          >
+            <strong>Action required:</strong> Please accept the latest Terms of Service
+            {requiredTermsVersion ? ` (${requiredTermsVersion})` : ""} to continue.
             <div style={{ marginTop: 12 }}>
-              <button onClick={acceptTerms} style={{
-                background: '#856404', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 6, cursor: 'pointer'
-              }}>Accept Terms</button>
-              <a href={apiUrl('/terms')} target="_blank" rel="noreferrer" style={{ marginLeft: 12 }}>View Terms</a>
+              <button
+                onClick={acceptTerms}
+                style={{
+                  background: "#856404",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                }}
+              >
+                Accept Terms
+              </button>
+              <a
+                href={apiUrl("/terms")}
+                target="_blank"
+                rel="noreferrer"
+                style={{ marginLeft: 12 }}
+              >
+                View Terms
+              </a>
             </div>
           </div>
         )}
@@ -351,54 +389,63 @@ function App() {
           </div>
         )}
 
-        {user && isAdmin && (
-          <AdminDashboard analytics={analytics} user={user} />
-        )}
+        {user && isAdmin && <AdminDashboard analytics={analytics} user={user} />}
 
         {!user && !showLogin && !showRegister && (
-          <div className="WelcomeSection" style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '60vh',
-            background: 'linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)',
-            color: '#fff',
-            borderRadius: '16px',
-            boxShadow: '0 8px 32px rgba(25, 118, 210, 0.2)',
-            padding: '48px 24px',
-            margin: '32px auto',
-            maxWidth: '500px',
-          }}>
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="AutoPromote Logo" style={{ width: 80, marginBottom: 24 }} />
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: 16 }}>Welcome to AutoPromote</h2>
-            <p style={{ fontSize: '1.2rem', marginBottom: 32, textAlign: 'center', maxWidth: 400 }}>
-              <span style={{ fontWeight: 500 }}>AI-powered platform</span> for content promotion and monetization.<br />
+          <div
+            className="WelcomeSection"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "60vh",
+              background: "linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)",
+              color: "#fff",
+              borderRadius: "16px",
+              boxShadow: "0 8px 32px rgba(25, 118, 210, 0.2)",
+              padding: "48px 24px",
+              margin: "32px auto",
+              maxWidth: "500px",
+            }}
+          >
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+              alt="AutoPromote Logo"
+              style={{ width: 80, marginBottom: 24 }}
+            />
+            <h2 style={{ fontSize: "2.5rem", fontWeight: 700, marginBottom: 16 }}>
+              Welcome to AutoPromote
+            </h2>
+            <p style={{ fontSize: "1.2rem", marginBottom: 32, textAlign: "center", maxWidth: 400 }}>
+              <span style={{ fontWeight: 500 }}>AI-powered platform</span> for content promotion and
+              monetization.
+              <br />
               Grow your audience, boost your revenue, and automate your success.
             </p>
-            <button 
+            <button
               onClick={() => setShowRegister(true)}
               style={{
-                background: '#fff',
-                color: '#1976d2',
+                background: "#fff",
+                color: "#1976d2",
                 fontWeight: 600,
-                fontSize: '1.1rem',
-                padding: '12px 32px',
-                borderRadius: '8px',
-                border: 'none',
-                boxShadow: '0 2px 8px rgba(25, 118, 210, 0.15)',
-                cursor: 'pointer',
-                transition: 'background 0.2s',
+                fontSize: "1.1rem",
+                padding: "12px 32px",
+                borderRadius: "8px",
+                border: "none",
+                boxShadow: "0 2px 8px rgba(25, 118, 210, 0.15)",
+                cursor: "pointer",
+                transition: "background 0.2s",
               }}
-              onMouseOver={e => e.target.style.background = '#e3f2fd'}
-              onMouseOut={e => e.target.style.background = '#fff'}
+              onMouseOver={e => (e.target.style.background = "#e3f2fd")}
+              onMouseOut={e => (e.target.style.background = "#fff")}
             >
               Get Started
             </button>
           </div>
         )}
       </main>
-   </div>
+    </div>
   );
 }
 

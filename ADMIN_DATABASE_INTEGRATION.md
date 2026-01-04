@@ -34,7 +34,7 @@ The admin dashboard relies on the following collections:
 
 ```javascript
 // User authentication with admin role verification
-const hasAdminClaim = idTokenResult.claims.admin === true || idTokenResult.claims.role === 'admin';
+const hasAdminClaim = idTokenResult.claims.admin === true || idTokenResult.claims.role === "admin";
 ```
 
 ### Firestore Queries
@@ -43,14 +43,11 @@ The admin dashboard uses queries like:
 
 ```javascript
 // Example: Fetch users count
-const usersSnapshot = await getDocs(collection(db, 'users'));
+const usersSnapshot = await getDocs(collection(db, "users"));
 const totalUsers = usersSnapshot.size;
-      
+
 // Example: Fetch new users today
-const newUsersQuery = query(
-  collection(db, 'users'), 
-  where('createdAt', '>=', todayTimestamp)
-);
+const newUsersQuery = query(collection(db, "users"), where("createdAt", ">=", todayTimestamp));
 ```
 
 ### Data Transformation
@@ -100,6 +97,7 @@ To ensure the admin dashboard always has data to display, the system includes a 
 3. Ensures data follows the expected schema pattern
 
 This approach provides:
+
 - Resilient dashboard functionality even with a fresh database
 - Consistent development and testing environment
 - Clear example of expected data structures

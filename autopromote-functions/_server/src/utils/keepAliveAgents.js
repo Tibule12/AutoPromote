@@ -6,20 +6,20 @@
 //   KEEP_ALIVE_FREE_SOCKET_TIMEOUT_MS (default 15000) - free socket keep-alive duration
 // These agents are installed as the Node global agents in server.js for outbound requests.
 
-const http = require('http');
-const https = require('https');
+const http = require("http");
+const https = require("https");
 
-const maxSockets = parseInt(process.env.KEEP_ALIVE_MAX_SOCKETS || '50', 10);
-const maxFreeSockets = parseInt(process.env.KEEP_ALIVE_MAX_FREE_SOCKETS || '10', 10);
-const timeout = parseInt(process.env.KEEP_ALIVE_SOCKET_TIMEOUT_MS || '60000', 10);
-const freeSocketTimeout = parseInt(process.env.KEEP_ALIVE_FREE_SOCKET_TIMEOUT_MS || '15000', 10);
+const maxSockets = parseInt(process.env.KEEP_ALIVE_MAX_SOCKETS || "50", 10);
+const maxFreeSockets = parseInt(process.env.KEEP_ALIVE_MAX_FREE_SOCKETS || "10", 10);
+const timeout = parseInt(process.env.KEEP_ALIVE_SOCKET_TIMEOUT_MS || "60000", 10);
+const freeSocketTimeout = parseInt(process.env.KEEP_ALIVE_FREE_SOCKET_TIMEOUT_MS || "15000", 10);
 
 const httpAgent = new http.Agent({
   keepAlive: true,
   maxSockets,
   maxFreeSockets,
   timeout,
-  freeSocketTimeout
+  freeSocketTimeout,
 });
 
 const httpsAgent = new https.Agent({
@@ -27,23 +27,29 @@ const httpsAgent = new https.Agent({
   maxSockets,
   maxFreeSockets,
   timeout,
-  freeSocketTimeout
+  freeSocketTimeout,
 });
 
 // Lightweight introspection helper (optional usage in diagnostics routes)
-function summarizeAgent(agent){
+function summarizeAgent(agent) {
   try {
     return {
       maxSockets: agent.maxSockets,
-      socketsInUse: Object.values(agent.sockets || {}).reduce((a,arr)=>a+arr.length,0),
-      freeSockets: Object.values(agent.freeSockets || {}).reduce((a,arr)=>a+arr.length,0),
-      requestsQueued: Object.values(agent.requests || {}).reduce((a,arr)=>a+arr.length,0)
+      socketsInUse: Object.values(agent.sockets || {}).reduce((a, arr) => a + arr.length, 0),
+      freeSockets: Object.values(agent.freeSockets || {}).reduce((a, arr) => a + arr.length, 0),
+      requestsQueued: Object.values(agent.requests || {}).reduce((a, arr) => a + arr.length, 0),
     };
-  } catch(_) { return { error: 'summarize_failed' }; }
+  } catch (_) {
+    return { error: "summarize_failed" };
+  }
 }
 
-function destroy(){
-  try { httpAgent.destroy(); } catch(e) {}
-  try { httpsAgent.destroy(); } catch(e) {}
+function destroy() {
+  try {
+    httpAgent.destroy();
+  } catch (e) {}
+  try {
+    httpsAgent.destroy();
+  } catch (e) {}
 }
 module.exports = { httpAgent, httpsAgent, summarizeAgent, destroy };

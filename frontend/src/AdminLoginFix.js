@@ -1,164 +1,163 @@
 // Admin Login Fix
-// This script fixes the admin login issues by providing a direct login option 
+// This script fixes the admin login issues by providing a direct login option
 // and ensuring proper admin routing and authentication.
 
-import React, { useState, useEffect } from 'react';
-import { auth } from './firebaseClient';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { getFirebaseErrorMessage, logFirebaseError } from './firebaseErrorHandler';
-import { API_ENDPOINTS } from './config';
+import React, { useState, useEffect } from "react";
+import { auth } from "./firebaseClient";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { getFirebaseErrorMessage, logFirebaseError } from "./firebaseErrorHandler";
+import { API_ENDPOINTS } from "./config";
 
 function AdminLoginFix() {
   // Do not hard-code admin credentials in source. Start with empty fields.
   const [credentials, setCredentials] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
-  const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
   const [adminData, setAdminData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setCredentials(prev => ({ ...prev, [name]: value }));
   };
 
   const handleLogin = async () => {
-    setStatus('Logging in...');
-    setError('');
+    setStatus("Logging in...");
+    setError("");
     setIsLoading(true);
-    
+
     try {
       // Step 1: Firebase Authentication
-      setStatus('Authenticating with Firebase...');
+      setStatus("Authenticating with Firebase...");
       const userCredential = await signInWithEmailAndPassword(
-        auth, 
-        credentials.email, 
+        auth,
+        credentials.email,
         credentials.password
       );
-      
+
       // Step 2: Get the ID token
-      setStatus('Getting Firebase ID token...');
+      setStatus("Getting Firebase ID token...");
       const idToken = await userCredential.user.getIdToken(true);
-      
+
       // Step 3: Verify with backend server
-      setStatus('Verifying with backend server...');
-      
+      setStatus("Verifying with backend server...");
+
       // First try the deployed backend
       try {
         const response = await fetch(API_ENDPOINTS.LOGIN, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
-          body: JSON.stringify({ idToken })
+          body: JSON.stringify({ idToken }),
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           setAdminData(data.user);
-          
+
           // Step 4: Persist non-sensitive admin metadata only.
           // Do NOT store the ID token in localStorage. The token stays in memory via Firebase
           // and should be re-requested from auth.currentUser.getIdToken() when needed.
-          const safeUser = { ...data.user, isAdmin: true, role: 'admin' };
-          localStorage.setItem('user', JSON.stringify(safeUser));
-          
-          setStatus('Admin login successful! Redirecting to dashboard...');
-          
+          const safeUser = { ...data.user, isAdmin: true, role: "admin" };
+          localStorage.setItem("user", JSON.stringify(safeUser));
+
+          setStatus("Admin login successful! Redirecting to dashboard...");
+
           // Step 5: Redirect to reload the page with the authenticated user
           setTimeout(() => {
             window.location.reload();
           }, 2000);
-          
+
           return;
         } else {
           // Log the failed response for debugging
-          console.warn('Backend server responded with error:', response.status);
+          console.warn("Backend server responded with error:", response.status);
           const errorText = await response.text();
-          console.warn('Error details:', errorText);
+          console.warn("Error details:", errorText);
         }
       } catch (backendError) {
-        console.log('Backend verification failed, trying alternative method', backendError);
+        console.log("Backend verification failed, trying alternative method", backendError);
       }
-      
+
       // If backend verification fails, we'll create a basic admin user object
       const user = userCredential.user;
       const basicAdminUser = {
         uid: user.uid,
         email: user.email,
-        name: user.displayName || 'Admin User',
+        name: user.displayName || "Admin User",
         isAdmin: true,
-        role: 'admin',
-        lastLogin: new Date().toISOString()
+        role: "admin",
+        lastLogin: new Date().toISOString(),
       };
 
       // Persist non-sensitive admin metadata only; do NOT store ID tokens in localStorage.
-      localStorage.setItem('user', JSON.stringify(basicAdminUser));
+      localStorage.setItem("user", JSON.stringify(basicAdminUser));
       setAdminData(basicAdminUser);
-      
-      setStatus('Admin login successful! Redirecting to dashboard...');
-      
+
+      setStatus("Admin login successful! Redirecting to dashboard...");
+
       // Redirect to reload the page with the authenticated user
       setTimeout(() => {
         window.location.reload();
       }, 2000);
-      
     } catch (error) {
-      logFirebaseError(error, 'Admin Login');
+      logFirebaseError(error, "Admin Login");
       setError(`Admin login failed: ${getFirebaseErrorMessage(error)}`);
-      setStatus('');
+      setStatus("");
     } finally {
       setIsLoading(false);
     }
   };
 
   // Function to check token validity
-  const checkTokenValidity = async (token) => {
+  const checkTokenValidity = async token => {
     try {
       // Try to verify the token with your backend
-      const response = await fetch(API_ENDPOINTS.VERIFY_TOKEN || '/api/verify-token', {
-        method: 'POST',
+      const response = await fetch(API_ENDPOINTS.VERIFY_TOKEN || "/api/verify-token", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
-      
+
       return response.ok;
     } catch (error) {
-      console.warn('Token verification failed:', error);
+      console.warn("Token verification failed:", error);
       return false;
     }
   };
 
   useEffect(() => {
     // Check if already logged in
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const userData = JSON.parse(storedUser);
-        if (userData.isAdmin || userData.role === 'admin') {
+        if (userData.isAdmin || userData.role === "admin") {
           // Check if we have a token and it's not expired
           if (userData.token) {
             // Set the admin data from localStorage (no tokens included)
-              setAdminData(userData);
-            setStatus('Already logged in as admin');
-            
-              // We don't persist tokens to localStorage; if background verification is needed
-              // verify using the backend or Firebase SDK instead.
+            setAdminData(userData);
+            setStatus("Already logged in as admin");
+
+            // We don't persist tokens to localStorage; if background verification is needed
+            // verify using the backend or Firebase SDK instead.
             checkTokenValidity(userData.token).then(isValid => {
               if (!isValid) {
-                console.log('Admin token is no longer valid, but proceeding with cached data');
+                console.log("Admin token is no longer valid, but proceeding with cached data");
               }
             });
           }
         }
       } catch (e) {
-        console.error('Error parsing stored user data:', e);
-        localStorage.removeItem('user'); // Clear invalid data
+        console.error("Error parsing stored user data:", e);
+        localStorage.removeItem("user"); // Clear invalid data
       }
     }
   }, []);
@@ -166,81 +165,81 @@ function AdminLoginFix() {
   // Styles
   const styles = {
     container: {
-      maxWidth: '500px',
-      margin: '20px auto',
-      padding: '20px',
-      borderRadius: '8px',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-      backgroundColor: '#fff'
+      maxWidth: "500px",
+      margin: "20px auto",
+      padding: "20px",
+      borderRadius: "8px",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+      backgroundColor: "#fff",
     },
     title: {
-      color: '#d32f2f',
-      marginBottom: '20px'
+      color: "#d32f2f",
+      marginBottom: "20px",
     },
     formGroup: {
-      marginBottom: '15px'
+      marginBottom: "15px",
     },
     label: {
-      display: 'block',
-      marginBottom: '5px',
-      fontWeight: 'bold'
+      display: "block",
+      marginBottom: "5px",
+      fontWeight: "bold",
     },
     input: {
-      width: '100%',
-      padding: '10px',
-      borderRadius: '4px',
-      border: '1px solid #ddd',
-      fontSize: '16px'
+      width: "100%",
+      padding: "10px",
+      borderRadius: "4px",
+      border: "1px solid #ddd",
+      fontSize: "16px",
     },
     button: {
-      backgroundColor: '#d32f2f',
-      color: 'white',
-      border: 'none',
-      padding: '12px 20px',
-      borderRadius: '4px',
-      fontSize: '16px',
-      cursor: 'pointer',
-      width: '100%',
-      marginTop: '10px',
+      backgroundColor: "#d32f2f",
+      color: "white",
+      border: "none",
+      padding: "12px 20px",
+      borderRadius: "4px",
+      fontSize: "16px",
+      cursor: "pointer",
+      width: "100%",
+      marginTop: "10px",
       opacity: isLoading ? 0.7 : 1,
-      pointerEvents: isLoading ? 'none' : 'auto'
+      pointerEvents: isLoading ? "none" : "auto",
     },
     status: {
-      marginTop: '15px',
-      padding: '10px',
-      borderRadius: '4px',
-      backgroundColor: '#e8f5e9',
-      color: '#2e7d32'
+      marginTop: "15px",
+      padding: "10px",
+      borderRadius: "4px",
+      backgroundColor: "#e8f5e9",
+      color: "#2e7d32",
     },
     error: {
-      marginTop: '15px',
-      padding: '10px',
-      borderRadius: '4px',
-      backgroundColor: '#ffebee',
-      color: '#c62828'
-    }
+      marginTop: "15px",
+      padding: "10px",
+      borderRadius: "4px",
+      backgroundColor: "#ffebee",
+      color: "#c62828",
+    },
   };
 
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Direct Admin Login</h2>
-      
+
       {adminData ? (
         <div style={styles.status}>
           <strong>Logged in as admin:</strong> {adminData.email}
-          <p>If you're not seeing the admin dashboard, please refresh the page.</p>
-          <button 
-            style={{...styles.button, backgroundColor: '#1976d2', marginTop: '15px'}}
+          <p>If you are not seeing the admin dashboard, please refresh the page.</p>
+          <button
+            style={{ ...styles.button, backgroundColor: "#1976d2", marginTop: "15px" }}
             onClick={() => window.location.reload()}
           >
             Refresh Page
           </button>
-          <button 
-            style={{...styles.button, backgroundColor: '#ff9800', marginTop: '10px'}}
+          <button
+            style={{ ...styles.button, backgroundColor: "#ff9800", marginTop: "10px" }}
             onClick={() => {
-              localStorage.removeItem('user');
+              localStorage.removeItem("user");
               setAdminData(null);
-              setStatus('');
+              setStatus("");
               window.location.reload();
             }}
           >
@@ -261,7 +260,7 @@ function AdminLoginFix() {
               disabled={isLoading}
             />
           </div>
-          
+
           <div style={styles.formGroup}>
             <label style={styles.label}>Admin Password</label>
             <input
@@ -274,11 +273,11 @@ function AdminLoginFix() {
               disabled={isLoading}
             />
           </div>
-          
+
           <button onClick={handleLogin} style={styles.button} disabled={isLoading}>
-            {isLoading ? 'Signing In...' : 'Sign In as Admin'}
+            {isLoading ? "Signing In..." : "Sign In as Admin"}
           </button>
-          
+
           {status && <div style={styles.status}>{status}</div>}
           {error && <div style={styles.error}>{error}</div>}
         </>

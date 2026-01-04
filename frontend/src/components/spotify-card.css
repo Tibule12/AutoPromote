@@ -1,0 +1,230 @@
+/* Spotify card styles: polished, accessible, and responsive */
+.spotify-card {
+  background: linear-gradient(180deg, #111214 0%, #0f1315 100%);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 6px 18px rgba(10, 12, 14, 0.6);
+  color: #e6eef1;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial;
+}
+.spotify-card .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.spotify-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.spotify-badge svg {
+  fill: #1db954;
+  width: 20px;
+  height: 20px;
+}
+.spotify-card .actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.spotify-card .search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.spotify-card .search-input {
+  flex: 1;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  color: inherit;
+}
+.spotify-card .btn {
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+}
+.btn-primary {
+  background: #1db954;
+  color: #002217;
+  font-weight: 600;
+}
+.btn-secondary {
+  background: transparent;
+  color: #cfeae0;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.results-list {
+  margin-top: 8px;
+  max-height: 240px;
+  overflow: auto;
+  border-radius: 8px;
+}
+.result-item {
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+.result-item.highlighted {
+  background: rgba(255, 255, 255, 0.03);
+  outline: 1px solid rgba(29, 185, 84, 0.08);
+}
+/* Focus-visible styles for accessibility */
+.result-item:focus-visible {
+  outline: 2px solid rgba(29, 185, 84, 0.16);
+  background: rgba(255, 255, 255, 0.02);
+}
+.btn:focus-visible,
+.mini-close:focus-visible,
+.search-input:focus-visible {
+  outline: 2px solid rgba(29, 185, 84, 0.16);
+  outline-offset: 2px;
+}
+.mini-player .mini-close:focus-visible {
+  box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.06);
+}
+.result-art {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #222, #111);
+  display: inline-block;
+}
+.result-meta {
+  flex: 1;
+}
+.result-meta .title {
+  font-weight: 600;
+}
+.result-meta .sub {
+  font-size: 12px;
+  color: #9fcfb9;
+}
+.track-chip {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+.track-chip .remove {
+  background: transparent;
+  border: 0;
+  color: #ffb4b4;
+  cursor: pointer;
+}
+.selected-tracks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.small-muted {
+  color: #9fcfb9;
+  font-size: 12px;
+}
+/* Responsive tweaks */
+@media (max-width: 700px) {
+  .spotify-card {
+    padding: 10px;
+  }
+  .result-art {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Mini player modal */
+.mini-player-modal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+}
+.mini-player {
+  background: linear-gradient(180deg, #0b0c0d, #0f1315);
+  padding: 12px;
+  border-radius: 10px;
+  width: 420px;
+  color: #e6eef1;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+.mini-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.mini-title {
+  font-weight: 700;
+}
+.mini-close {
+  background: transparent;
+  border: 0;
+  color: #ffb4b4;
+}
+.waveform {
+  display: flex;
+  gap: 3px;
+  align-items: end;
+  height: 44px;
+  margin-bottom: 8px;
+}
+.peak {
+  width: 6px;
+  background: linear-gradient(180deg, #1db954, #0f9b4a);
+  border-radius: 2px;
+}
+.controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.mini-seek {
+  flex: 1;
+}
+.time {
+  font-size: 12px;
+  color: #9fcfb9;
+}
+.mini-play {
+  padding: 6px 8px;
+}
+
+/* Screen reader only utility */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}

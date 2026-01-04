@@ -2,21 +2,21 @@
 // AI Chatbot Service with multilingual support (all 11 South African languages)
 // Powered by OpenAI GPT-4o
 
-const axios = require('axios');
-const { logOpenAIUsage } = require('./openaiUsageLogger');
-const { db } = require('../firebaseAdmin');
+const { logOpenAIUsage } = require("./openaiUsageLogger");
+/* eslint-disable no-console */
+const { db } = require("../firebaseAdmin");
 
 class ChatbotService {
   constructor() {
     this.openaiApiKey = process.env.OPENAI_API_KEY;
-    this.model = 'gpt-4o'; // Best for multilingual support
+    this.model = "gpt-4o"; // Best for multilingual support
     this.systemPrompt = this.buildSystemPrompt();
-    
+
     // Validate API key is configured
     if (!this.openaiApiKey) {
-      console.warn('[Chatbot] ⚠️ OPENAI_API_KEY not configured. Chatbot will not work.');
-      console.warn('[Chatbot] 💡 Add OPENAI_API_KEY to your environment variables.');
-      console.warn('[Chatbot] 📖 See OPENAI_SETUP_GUIDE.md for setup instructions.');
+      console.warn("[Chatbot] ⚠️ OPENAI_API_KEY not configured. Chatbot will not work.");
+      console.warn("[Chatbot] 💡 Add OPENAI_API_KEY to your environment variables.");
+      console.warn("[Chatbot] 📖 See OPENAI_SETUP_GUIDE.md for setup instructions.");
     }
   }
 
@@ -78,71 +78,70 @@ IMPORTANT:
     try {
       // Check if API key is configured
       if (!this.openaiApiKey) {
-        throw new Error('AI Chatbot is not configured. Please contact support.');
+        throw new Error("AI Chatbot is not configured. Please contact support.");
       }
-      
+
       // Get conversation history
       const history = await this.getConversationHistory(conversationId);
 
       // Build messages array for OpenAI
-      const messages = [
-        { role: 'system', content: this.systemPrompt }
-      ];
+      const messages = [{ role: "system", content: this.systemPrompt }];
 
       // Add user context if available
       if (userContext.plan || userContext.connectedPlatforms) {
         const contextMsg = this.buildUserContextMessage(userContext);
-        messages.push({ role: 'system', content: contextMsg });
+        messages.push({ role: "system", content: contextMsg });
       }
 
       // Add conversation history
       history.forEach(msg => {
         messages.push({
           role: msg.role,
-          content: msg.content
+          content: msg.content,
         });
       });
 
       // Add current message
       messages.push({
-        role: 'user',
-        content: message
+        role: "user",
+        content: message,
       });
 
-      // Call OpenAI API
-      const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
+      // Call OpenAI API via central client
+      const { chatCompletions } = require("./openaiClient");
+      const response = await chatCompletions(
         {
           model: this.model,
           messages: messages,
           temperature: 0.7,
           max_tokens: 500,
           presence_penalty: 0.6,
-          frequency_penalty: 0.3
+          frequency_penalty: 0.3,
         },
-        {
-          headers: {
-            'Authorization': `Bearer ${this.openaiApiKey}`,
-            'Content-Type': 'application/json'
-          }
-        }
+        { userId }
       );
 
       const botResponse = response.data.choices[0].message.content;
       // Log OpenAI usage for chat
       try {
         const usage = response.data.usage || {};
-        await logOpenAIUsage({ userId, model: this.model, feature: 'chatbot', usage, promptSnippet: messages.slice(-1)[0]?.content?.toString()?.slice(0,300) });
+        await logOpenAIUsage({
+          userId,
+          model: this.model,
+          feature: "chatbot",
+          usage,
+          promptSnippet: messages.slice(-1)[0]?.content?.toString()?.slice(0, 300),
+        });
       } catch (_) {}
 
       // Save messages to database
-      await this.saveMessage(conversationId, 'user', message, userId);
-      await this.saveMessage(conversationId, 'assistant', botResponse, userId);
+      await this.saveMessage(conversationId, "user", message, userId);
+      await this.saveMessage(conversationId, "assistant", botResponse, userId);
 
       // Update conversation metadata
       await this.updateConversation(conversationId, {
         lastMessageAt: new Date().toISOString(),
-        messageCount: history.length + 2
+        messageCount: history.length + 2,
       });
 
       return {
@@ -152,13 +151,12 @@ IMPORTANT:
         usage: {
           promptTokens: response.data.usage.prompt_tokens,
           completionTokens: response.data.usage.completion_tokens,
-          totalTokens: response.data.usage.total_tokens
-        }
+          totalTokens: response.data.usage.total_tokens,
+        },
       };
-
     } catch (error) {
-      console.error('[Chatbot] Error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.error?.message || 'Failed to get chatbot response');
+      console.error("[Chatbot] Error:", error.response?.data || error.message);
+      throw new Error(error.response?.data?.error?.message || "Failed to get chatbot response");
     }
   }
 
@@ -166,25 +164,25 @@ IMPORTANT:
    * Build user context message
    */
   buildUserContextMessage(userContext) {
-    const parts = ['USER CONTEXT:'];
-    
+    const parts = ["USER CONTEXT:"];
+
     if (userContext.plan) {
       parts.push(`- Subscription: ${userContext.plan}`);
     }
-    
+
     if (userContext.connectedPlatforms?.length > 0) {
-      parts.push(`- Connected platforms: ${userContext.connectedPlatforms.join(', ')}`);
+      parts.push(`- Connected platforms: ${userContext.connectedPlatforms.join(", ")}`);
     }
-    
+
     if (userContext.contentCount) {
       parts.push(`- Content uploaded: ${userContext.contentCount} items`);
     }
 
     if (userContext.hasAIClips !== undefined) {
-      parts.push(`- AI Clips access: ${userContext.hasAIClips ? 'Yes' : 'No (suggest upgrade)'}`);
+      parts.push(`- AI Clips access: ${userContext.hasAIClips ? "Yes" : "No (suggest upgrade)"}`);
     }
 
-    return parts.join('\n');
+    return parts.join("\n");
   }
 
   /**
@@ -192,9 +190,10 @@ IMPORTANT:
    */
   async getConversationHistory(conversationId, limit = 20) {
     try {
-      const snapshot = await db.collection('chat_messages')
-        .where('conversationId', '==', conversationId)
-        .orderBy('createdAt', 'asc')
+      const snapshot = await db
+        .collection("chat_messages")
+        .where("conversationId", "==", conversationId)
+        .orderBy("createdAt", "asc")
         .limit(limit)
         .get();
 
@@ -204,13 +203,13 @@ IMPORTANT:
         messages.push({
           role: data.role,
           content: data.content,
-          createdAt: data.createdAt
+          createdAt: data.createdAt,
         });
       });
 
       return messages;
     } catch (error) {
-      console.error('[Chatbot] Error fetching history:', error);
+      console.error("[Chatbot] Error fetching history:", error);
       return [];
     }
   }
@@ -220,15 +219,15 @@ IMPORTANT:
    */
   async saveMessage(conversationId, role, content, userId) {
     try {
-      await db.collection('chat_messages').add({
+      await db.collection("chat_messages").add({
         conversationId,
         userId,
         role,
         content,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       });
     } catch (error) {
-      console.error('[Chatbot] Error saving message:', error);
+      console.error("[Chatbot] Error saving message:", error);
     }
   }
 
@@ -237,12 +236,12 @@ IMPORTANT:
    */
   async createConversation(userId, initialMessage = null) {
     try {
-      const conversationRef = await db.collection('chat_conversations').add({
+      const conversationRef = await db.collection("chat_conversations").add({
         userId,
         createdAt: new Date().toISOString(),
         lastMessageAt: new Date().toISOString(),
         messageCount: 0,
-        active: true
+        active: true,
       });
 
       const conversationId = conversationRef.id;
@@ -254,7 +253,7 @@ IMPORTANT:
 
       return conversationId;
     } catch (error) {
-      console.error('[Chatbot] Error creating conversation:', error);
+      console.error("[Chatbot] Error creating conversation:", error);
       throw error;
     }
   }
@@ -264,12 +263,15 @@ IMPORTANT:
    */
   async updateConversation(conversationId, updates) {
     try {
-      await db.collection('chat_conversations').doc(conversationId).update({
-        ...updates,
-        updatedAt: new Date().toISOString()
-      });
+      await db
+        .collection("chat_conversations")
+        .doc(conversationId)
+        .update({
+          ...updates,
+          updatedAt: new Date().toISOString(),
+        });
     } catch (error) {
-      console.error('[Chatbot] Error updating conversation:', error);
+      console.error("[Chatbot] Error updating conversation:", error);
     }
   }
 
@@ -278,10 +280,11 @@ IMPORTANT:
    */
   async getUserConversations(userId, limit = 10) {
     try {
-      const snapshot = await db.collection('chat_conversations')
-        .where('userId', '==', userId)
-        .where('active', '==', true)
-        .orderBy('lastMessageAt', 'desc')
+      const snapshot = await db
+        .collection("chat_conversations")
+        .where("userId", "==", userId)
+        .where("active", "==", true)
+        .orderBy("lastMessageAt", "desc")
         .limit(limit)
         .get();
 
@@ -289,13 +292,13 @@ IMPORTANT:
       snapshot.forEach(doc => {
         conversations.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         });
       });
 
       return conversations;
     } catch (error) {
-      console.error('[Chatbot] Error fetching conversations:', error);
+      console.error("[Chatbot] Error fetching conversations:", error);
       return [];
     }
   }
@@ -306,20 +309,20 @@ IMPORTANT:
   async deleteConversation(conversationId, userId) {
     try {
       // Verify ownership
-      const convDoc = await db.collection('chat_conversations').doc(conversationId).get();
+      const convDoc = await db.collection("chat_conversations").doc(conversationId).get();
       if (!convDoc.exists || convDoc.data().userId !== userId) {
-        throw new Error('Unauthorized');
+        throw new Error("Unauthorized");
       }
 
       // Mark as inactive instead of deleting
-      await db.collection('chat_conversations').doc(conversationId).update({
+      await db.collection("chat_conversations").doc(conversationId).update({
         active: false,
-        deletedAt: new Date().toISOString()
+        deletedAt: new Date().toISOString(),
       });
 
       return { success: true };
     } catch (error) {
-      console.error('[Chatbot] Error deleting conversation:', error);
+      console.error("[Chatbot] Error deleting conversation:", error);
       throw error;
     }
   }
@@ -333,19 +336,19 @@ IMPORTANT:
     // Always show basics
     prompts.push({
       text: "How do I schedule a post?",
-      icon: "📅"
+      icon: "📅",
     });
 
     prompts.push({
       text: "What platforms are supported?",
-      icon: "🌐"
+      icon: "🌐",
     });
 
     // AI Clips suggestion
     if (userContext.hasVideos && !userContext.hasUsedAIClips) {
       prompts.push({
         text: "What are AI Clips?",
-        icon: "🎬"
+        icon: "🎬",
       });
     }
 
@@ -353,14 +356,14 @@ IMPORTANT:
     if (!userContext.connectedPlatforms || userContext.connectedPlatforms.length === 0) {
       prompts.push({
         text: "How do I connect my TikTok?",
-        icon: "🔗"
+        icon: "🔗",
       });
     }
 
     // Multilingual prompt
     prompts.push({
       text: "Ngicela usizo (Help in Zulu)",
-      icon: "🗣️"
+      icon: "🗣️",
     });
 
     return prompts.slice(0, 4); // Return max 4 suggestions

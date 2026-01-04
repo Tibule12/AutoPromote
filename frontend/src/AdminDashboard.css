@@ -2,7 +2,7 @@
 
 .admin-dashboard {
   padding: 24px;
-  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  font-family: "Segoe UI", "Roboto", sans-serif;
   max-width: 1400px;
   margin: 0 auto;
   color: #333;
@@ -16,7 +16,7 @@
   background-color: white;
   padding: 15px 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .dashboard-title {
@@ -70,7 +70,9 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: background-color 0.3s, opacity 0.3s;
+  transition:
+    background-color 0.3s,
+    opacity 0.3s;
 }
 
 .refresh-button:hover {
@@ -92,7 +94,7 @@
   background-color: white;
   padding: 10px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   justify-content: center;
 }
 
@@ -133,20 +135,22 @@
   background: white;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   flex: 1;
   min-width: 220px;
   margin: 10px;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   cursor: pointer;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .stat-card-icon-bg {
@@ -205,7 +209,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -220,7 +224,11 @@
   max-height: 80vh;
   overflow: auto;
 }
-.modal pre { background: #f4f4f4; padding: 12px; border-radius: 8px; }
+.modal pre {
+  background: #f4f4f4;
+  padding: 12px;
+  border-radius: 8px;
+}
 
 .trend-down {
   color: #d32f2f;
@@ -236,7 +244,7 @@
   background-color: white;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
 
@@ -422,8 +430,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Content Performance Styles */
@@ -438,12 +450,14 @@
   background-color: #f8f9fa;
   border-radius: 8px;
   padding: 15px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .content-metric-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
 .metric-label {
@@ -481,12 +495,14 @@
   background-color: #f8f9fa;
   border-radius: 8px;
   padding: 15px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .recommendation-item:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
 .recommendation-icon {
@@ -523,11 +539,11 @@
   .chart-container {
     flex-direction: column;
   }
-  
+
   .stat-card {
     min-width: calc(50% - 20px);
   }
-  
+
   .tabs-container {
     overflow-x: auto;
   }
@@ -537,11 +553,11 @@
   .stat-card {
     min-width: calc(100% - 20px);
   }
-  
+
   .user-profile {
     padding: 6px 10px;
   }
-  
+
   .refresh-button {
     padding: 6px 10px;
     font-size: 0.8rem;
@@ -556,7 +572,7 @@
   background-color: white;
   padding: 15px 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .dashboard-title {
@@ -610,7 +626,9 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: background-color 0.3s, opacity 0.3s;
+  transition:
+    background-color 0.3s,
+    opacity 0.3s;
 }
 
 .refresh-button:hover {
@@ -632,7 +650,7 @@
   background-color: white;
   padding: 10px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   justify-content: center;
 }
 
@@ -673,20 +691,22 @@
   background: white;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   flex: 1;
   min-width: 220px;
   margin: 10px;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   cursor: pointer;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .stat-card-icon-bg {
@@ -752,7 +772,7 @@
   background-color: white;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
 
@@ -938,8 +958,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive adjustments */
@@ -947,11 +971,11 @@
   .chart-container {
     flex-direction: column;
   }
-  
+
   .stat-card {
     min-width: calc(50% - 20px);
   }
-  
+
   .tabs-container {
     overflow-x: auto;
   }
@@ -961,11 +985,11 @@
   .stat-card {
     min-width: calc(100% - 20px);
   }
-  
+
   .user-profile {
     padding: 6px 10px;
   }
-  
+
   .refresh-button {
     padding: 6px 10px;
     font-size: 0.8rem;
