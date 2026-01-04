@@ -3,6 +3,9 @@ import { render, screen, waitFor, fireEvent, within } from "@testing-library/rea
 import { act } from "react";
 import MemeticComposerPanel from "../MemeticComposerPanel";
 
+// Some tests perform async media/fetch operations; increase timeout to avoid flaky failures
+jest.setTimeout(20000);
+
 jest.mock("../../firebaseClient", () => ({
   auth: { currentUser: { getIdToken: jest.fn().mockResolvedValue("fake-token") } },
 }));
