@@ -1569,6 +1569,43 @@ router.get("/creator_info", authMiddleware, ttPublicLimiter, async (req, res) =>
       } catch (e) {
         console.warn("Failed to write tiktok creator_info audit log", e && e.message);
       }
+
+      // Persist a lightweight cached creator_info/display_name on the user's connection doc
+      try {
+        const connRef = dbRuntime
+          .collection("users")
+          .doc(uid)
+          .collection("connections")
+          .doc("tiktok");
+        // Prefer update (will fail if doc doesn't exist), fall back to set-merge
+        try {
+          await connRef.update({
+            display_name: mapped.display_name,
+            creator_info: mapped,
+            updatedAt: new Date().toISOString(),
+          });
+        } catch (uerr) {
+          // Doc might not exist as a subcollection doc; merge into top-level user.connections
+          try {
+            await dbRuntime
+              .collection("users")
+              .doc(uid)
+              .set(
+                {
+                  connections: {
+                    tiktok: { display_name: mapped.display_name, creator_info: mapped },
+                  },
+                },
+                { merge: true }
+              );
+          } catch (s) {
+            console.warn("Failed to persist tiktok creator_info to user doc", s && s.message);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to persist tiktok creator_info", e && e.message);
+      }
+
       return res.json({ ok: true, creator: mapped });
     } catch (e) {
       // On any failure, return conservative defaults
