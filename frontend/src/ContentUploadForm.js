@@ -407,8 +407,12 @@ function ContentUploadForm({
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      // Fetch creator info only when the TikTok panel is opened (avoid background fetches during headless tests)
-      if (expandedPlatform !== "tiktok" && focusedPlatform !== "tiktok") return;
+      // Fetch creator info when TikTok panel is opened OR when TikTok is selected
+      // (so the creator nickname can be shown in compact views without expanding)
+      const tiktokSelected =
+        Array.isArray(selectedPlatformsVal) && selectedPlatformsVal.includes("tiktok");
+      if (!(expandedPlatform === "tiktok" || focusedPlatform === "tiktok" || tiktokSelected))
+        return;
       try {
         const currentUser = auth && auth.currentUser;
         let headers = { Accept: "application/json" };
