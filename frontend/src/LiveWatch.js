@@ -148,6 +148,44 @@ export default function LiveWatch() {
   const tipPaypalRef = useRef(null);
   const [topTipper, setTopTipper] = useState(null);
 
+  // Helper to create provider order and redirect via POST form
+  async function createAndRedirect(provider, amount) {
+    try {
+      const res = await fetch(`/api/payments/${provider}/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, currency, returnUrl: window.location.href }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || !body.success || !body.order) {
+        throw new Error((body && body.error) || "create_order_failed");
+      }
+
+      const order = body.order;
+      const redirectUrl = order.redirectUrl || order.redirect_url || order.paymentUrl || null;
+      const params = order.params || {};
+      if (!redirectUrl) throw new Error("no_redirect_url_from_provider");
+
+      // Create and submit a hidden form to POST to provider's redirect URL
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = redirectUrl;
+      form.style.display = "none";
+      Object.entries(params).forEach(([k, v]) => {
+        const inp = document.createElement("input");
+        inp.type = "hidden";
+        inp.name = k;
+        inp.value = String(v == null ? "" : v);
+        form.appendChild(inp);
+      });
+      document.body.appendChild(form);
+      form.submit();
+    } catch (e) {
+      console.error(`createAndRedirect(${provider}) error:`, e && e.message ? e.message : e);
+      alert("Payment initiation failed: " + (e && e.message ? e.message : String(e)));
+    }
+  }
+
   // Render PayPal buttons inside tip modal when opened
   useEffect(() => {
     if (!showTipModal || !clientId) return;
@@ -269,6 +307,56 @@ export default function LiveWatch() {
     };
   }, [liveId]);
 
+  // Handle returns from external providers (e.g., PayFast/PayGate)
+  useEffect(() => {
+    try {
+      if (typeof window === "undefined") return;
+      const qp = new URLSearchParams(window.location.search);
+      const provider = qp.get("provider") || qp.get("payment_provider");
+      const status = qp.get("status") || qp.get("payment_status");
+      const orderId = qp.get("orderId") || qp.get("order_id") || qp.get("provider_order_id");
+      if (!provider) return;
+
+      // If provider returned and status indicates success, confirm with server
+      const success =
+        status && ["success", "completed", "ok", "completed"].includes(status.toLowerCase());
+      (async () => {
+        try {
+          const resp = await fetch(`/api/payments/${provider}/confirm`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId, status, liveId, rawQuery: Object.fromEntries(qp) }),
+          });
+          const body = await resp.json().catch(() => ({}));
+          // If server returns a redirect URL (e.g., tokenized live URL), follow it
+          if (resp.ok && body && body.url) {
+            // clean URL params before redirect
+            try {
+              const base = window.location.origin + window.location.pathname;
+              window.history.replaceState({}, document.title, base);
+            } catch (_) {}
+            window.location.href = body.url;
+            return;
+          }
+          if (success) {
+            alert("Payment processed — please wait while we finalize your access.");
+          } else {
+            alert(
+              "Payment status: " + (status || "unknown") + ". If you were charged, contact support."
+            );
+          }
+          // remove query params to keep UX clean
+          try {
+            const base = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, base);
+          } catch (_) {}
+        } catch (e) {
+          console.error("confirm provider return error", e);
+        }
+      })();
+    } catch (e) {}
+  }, [liveId]);
+
   if (loading) return <div style={{ padding: 20 }}>Loading player…</div>;
   if (valid) {
     // Placeholder player — in production replace with HLS/iframe/CDN-signed URL
@@ -309,7 +397,23 @@ export default function LiveWatch() {
                 <button onClick={() => setTipAmount("2.99")}>$2.99</button>
                 <button onClick={() => setTipAmount("4.99")}>$4.99</button>
               </div>
-              <div className="tip-paypal" ref={tipPaypalRef} />
+              <div
+                style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "center" }}
+              >
+                <div className="tip-paypal" ref={tipPaypalRef} />
+                <button
+                  onClick={() => createAndRedirect("payfast", tipAmount)}
+                  className="tip-alt-btn"
+                >
+                  Pay with PayFast
+                </button>
+                <button
+                  onClick={() => createAndRedirect("paygate", tipAmount)}
+                  className="tip-alt-btn"
+                >
+                  Pay with PayGate
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -384,7 +488,22 @@ export default function LiveWatch() {
                     Selected: ${selectedAmount} {currency}
                   </small>
                 </div>
-                <div ref={paypalRef} />
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <div ref={paypalRef} />
+                  <button onClick={() => createAndRedirect("payfast", selectedAmount)}>
+                    Pay with PayFast
+                  </button>
+                  <button onClick={() => createAndRedirect("paygate", selectedAmount)}>
+                    Pay with PayGate
+                  </button>
+                </div>
               </div>
             </div>
           )}

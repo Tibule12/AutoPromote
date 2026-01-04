@@ -76,6 +76,23 @@
   justify-content: center;
 }
 
+.tip-alt-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.preview-alt-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  background: #fff;
+  cursor: pointer;
+}
+
 .confetti-root {
   position: absolute;
   left: 0;
