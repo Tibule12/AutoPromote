@@ -76,6 +76,7 @@ router.get(
       linkedin,
       telegram,
       pinterest,
+      snapchat,
     ] = await Promise.all([
       getConn(uid, "twitter"),
       getConn(uid, "youtube"),
@@ -87,15 +88,32 @@ router.get(
       getConn(uid, "linkedin"),
       getConn(uid, "telegram"),
       getConn(uid, "pinterest"),
+      getConn(uid, "snapchat"),
     ]);
     const summary = {
-      twitter: { connected: twitter.connected, username: twitter.identity?.username },
-      youtube: { connected: youtube.connected, channelTitle: youtube.channel?.snippet?.title },
+      twitter: {
+        connected: twitter.connected,
+        username: twitter.identity?.username,
+        display_name: twitter.display_name || twitter.meta?.display_name || twitter.identity?.name,
+      },
+      youtube: {
+        connected: youtube.connected,
+        channelTitle: youtube.channel?.snippet?.title,
+        display_name: youtube.meta?.display_name || youtube.channel?.snippet?.title,
+      },
       facebook: {
         connected: facebook.connected,
         pages: Array.isArray(facebook.pages) ? facebook.pages.map(p => p.name).slice(0, 3) : [],
+        display_name:
+          facebook.display_name ||
+          facebook.meta?.display_name ||
+          (Array.isArray(facebook.pages) && facebook.pages[0]?.name) ||
+          null,
       },
-      tiktok: { connected: tiktok.connected, display_name: tiktok.display_name },
+      tiktok: {
+        connected: tiktok.connected,
+        display_name: tiktok.display_name || tiktok.meta?.display_name,
+      },
       spotify: {
         connected: spotify.connected,
         display_name: spotify.meta?.display_name,
@@ -103,21 +121,46 @@ router.get(
           ? spotify.meta.playlists.length
           : undefined,
       },
-      reddit: { connected: reddit.connected, name: reddit.meta?.username },
+      reddit: {
+        connected: reddit.connected,
+        name: reddit.meta?.username,
+        display_name: reddit.meta?.display_name || reddit.meta?.username,
+      },
       discord: {
         connected: discord.connected,
         servers: Array.isArray(discord.meta?.guilds)
           ? discord.meta.guilds.map(g => g.name).slice(0, 3)
           : [],
+        display_name:
+          discord.meta?.display_name ||
+          (Array.isArray(discord.meta?.guilds) && discord.meta.guilds[0]?.name),
       },
       linkedin: {
         connected: linkedin.connected,
         organizations: Array.isArray(linkedin.meta?.organizations)
           ? linkedin.meta.organizations.map(o => o.name).slice(0, 3)
           : [],
+        display_name: linkedin.meta?.display_name || null,
       },
-      telegram: { connected: telegram.connected, chatId: telegram.meta?.chatId },
-      pinterest: { connected: pinterest.connected, boards: pinterest.meta?.boards?.length },
+      telegram: {
+        connected: telegram.connected,
+        chatId: telegram.meta?.chatId,
+        display_name: telegram.meta?.display_name || telegram.identity?.name || null,
+      },
+      pinterest: {
+        connected: pinterest.connected,
+        boards: pinterest.meta?.boards?.length,
+        display_name: pinterest.meta?.display_name || null,
+      },
+      snapchat: {
+        connected: snapchat.connected,
+        display_name:
+          snapchat.display_name ||
+          snapchat.meta?.display_name ||
+          snapchat.identity?.name ||
+          snapchat.profile?.displayName ||
+          null,
+      },
     };
     // Minimize token exposure in raw connections; ensure tokens are removed
     const makeSafe = d => {
@@ -145,6 +188,7 @@ router.get(
         linkedin: makeSafe(linkedin),
         telegram: makeSafe(telegram),
         pinterest: makeSafe(pinterest),
+        snapchat: makeSafe(snapchat),
       },
     };
     setCache(cacheKey, payload, 7000);

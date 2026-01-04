@@ -17,6 +17,8 @@ try {
 // Import SSRF protection
 const { safeFetch } = require("../utils/ssrfGuard");
 const { tokenInfo, objSummary } = require("../utils/logSanitizer");
+// Helper to extract/decrypt stored token blobs from connection documents
+const { tokensFromDoc } = require("../services/connectionTokenUtils");
 
 // Rate limiters for TikTok routes (router-level).
 // `rateLimiter` is a facade that uses a distributed limiter when available,
@@ -948,11 +950,9 @@ router.post(
         try {
           if (conn) {
             const tokens =
-              conn.tokens ||
-              (conn.hasEncryption
-                ? null
-                : { access_token: conn.access_token, refresh_token: conn.refresh_token });
-            const accessToken = tokens && (tokens.access_token || tokens);
+              tokensFromDoc(conn) ||
+              (conn.tokens && typeof conn.tokens === "object" ? conn.tokens : null);
+            const accessToken = tokens && tokens.access_token ? tokens.access_token : null;
             if (accessToken) {
               // Attempt to fetch live creator info; if it fails, proceed with defaults
               const infoRes = await safeFetch(
@@ -1496,10 +1496,8 @@ router.get("/creator_info", authMiddleware, ttPublicLimiter, async (req, res) =>
     // fallback to defaults when unavailable.
     try {
       const tokens =
-        conn.tokens ||
-        (conn.hasEncryption
-          ? null
-          : { access_token: conn.access_token, refresh_token: conn.refresh_token });
+        tokensFromDoc(conn) ||
+        (conn.tokens && typeof conn.tokens === "object" ? conn.tokens : null);
       // Consider access token valid only if it's a non-empty string
       const accessToken =
         tokens && typeof tokens.access_token === "string" && tokens.access_token.length > 0
