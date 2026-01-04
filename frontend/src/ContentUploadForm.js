@@ -170,6 +170,7 @@ function ContentUploadForm({
     brandedContent: false,
   });
   const [tiktokConsentChecked, setTiktokConsentChecked] = useState(false);
+  const [tiktokDisclosure, setTiktokDisclosure] = useState(false);
   const uploadLockRef = useRef(false);
   const [error, setError] = useState("");
 
@@ -465,6 +466,16 @@ function ContentUploadForm({
       mounted = false;
     };
   }, [selectedPlatformsVal, expandedPlatform, focusedPlatform]);
+  // Provide a sensible fallback display name for TikTok creator UI when creator_info is not available
+  const tiktokCreatorDisplayName = (() => {
+    if (tiktokCreatorInfo)
+      return tiktokCreatorInfo.display_name || tiktokCreatorInfo.open_id || null;
+    try {
+      const currentUser = auth && auth.currentUser;
+      if (currentUser) return currentUser.displayName || currentUser.email || currentUser.uid;
+    } catch (e) {}
+    return null;
+  })();
   const [discordChannelId, setDiscordChannelId] = useState(
     extPlatformOptions?.discord?.channelId || ""
   );
@@ -500,6 +511,9 @@ function ContentUploadForm({
           yourBrand: !!extPlatformOptions.tiktok.commercial.yourBrand,
           brandedContent: !!extPlatformOptions.tiktok.commercial.brandedContent,
         });
+      }
+      if (typeof extPlatformOptions.tiktok.disclosure !== "undefined") {
+        setTiktokDisclosure(!!extPlatformOptions.tiktok.disclosure);
       }
       if (typeof extPlatformOptions.tiktok.consent !== "undefined") {
         setTiktokConsentChecked(!!extPlatformOptions.tiktok.consent);
@@ -641,6 +655,7 @@ function ContentUploadForm({
                   brandedContent: !!tiktokCommercial.brandedContent,
                 }
               : undefined,
+          disclosure: !!tiktokDisclosure,
           consent: !!tiktokConsentChecked,
         };
       }
@@ -1445,7 +1460,8 @@ function ContentUploadForm({
                   brandedContent: !!tiktokCommercial.brandedContent,
                 }
               : undefined,
-          // Include explicit consent flag so server-side can validate prior to publishing
+          // Include explicit disclosure + consent flags so server-side can validate prior to publishing
+          disclosure: !!tiktokDisclosure,
           consent: !!tiktokConsentChecked,
         };
       }
@@ -1893,8 +1909,64 @@ function ContentUploadForm({
               {expandedPlatform === "tiktok" && (
                 <div style={{ display: "grid", gap: 8 }} className="tiktok-expanded-inline">
                   <div style={{ fontSize: 12, color: "#666" }}>
-                    Creator:{" "}
-                    {tiktokCreatorInfo ? tiktokCreatorInfo.display_name || "—" : "Loading..."}
+                    Creator: {tiktokCreatorDisplayName || "Loading..."}
+                  </div>
+                  {type !== "video" && (
+                    <div
+                      role="status"
+                      className="no-video-disclosure"
+                      style={{ fontSize: 12, color: "#b66" }}
+                    >
+                      This post doesn&apos;t contain a video. TikTok features like Duet and Stitch
+                      require a video — upload one to enable them.
+                    </div>
+                  )}
+                  <div style={{ marginTop: 6 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <input
+                        type="checkbox"
+                        checked={!!tiktokDisclosure}
+                        onChange={e => setTiktokDisclosure(!!e.target.checked)}
+                      />
+                      Disclose video content
+                    </label>
+                    {tiktokDisclosure && (
+                      <div
+                        role="status"
+                        style={{
+                          display: "flex",
+                          gap: 8,
+                          alignItems: "flex-start",
+                          background: "#eef6ff",
+                          padding: 8,
+                          borderRadius: 6,
+                          color: "#075985",
+                          marginTop: 8,
+                          fontSize: 13,
+                        }}
+                      >
+                        <div
+                          aria-hidden
+                          style={{
+                            background: "#dbeafe",
+                            borderRadius: "50%",
+                            width: 28,
+                            height: 28,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#075985",
+                            fontWeight: 700,
+                          }}
+                        >
+                          i
+                        </div>
+                        <div>
+                          Your video will be labeled &quot;Promotional content&quot;. This cannot be
+                          changed once your video is posted.
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {tiktokCreatorInfo && tiktokCreatorInfo.can_post === false && (
                     <div className="tiktok-disabled-banner" role="alert">
@@ -2038,7 +2110,7 @@ function ContentUploadForm({
               TikTok Publish Options
             </label>
             <div style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>
-              Creator: {tiktokCreatorInfo ? tiktokCreatorInfo.display_name || "—" : "Loading..."}
+              Creator: {tiktokCreatorDisplayName || "Not available"}
               {tiktokCreatorInfo && typeof tiktokCreatorInfo.posting_remaining === "number" && (
                 <div style={{ marginTop: 6, fontSize: 12 }}>
                   Posting cap: {tiktokCreatorInfo.posting_cap_per_24h} per 24h • Remaining:{" "}
@@ -2049,6 +2121,24 @@ function ContentUploadForm({
                       account.
                     </div>
                   )}
+                </div>
+              )}
+              {/* Show a clear disclosure when the selected content is not a video */}
+              {type !== "video" && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 12,
+                    color: "#92400e",
+                    background: "#fff7ed",
+                    padding: "8px",
+                    borderRadius: 6,
+                    border: "1px solid #fed7aa",
+                  }}
+                  role="status"
+                >
+                  Video content is not present. TikTok-specific features (Duet / Stitch and other
+                  video-only options) require a video to be selected.
                 </div>
               )}
             </div>
@@ -2914,9 +3004,18 @@ function ContentUploadForm({
                         style={{ display: "grid", gap: 8 }}
                       >
                         <div style={{ fontSize: 12, color: "#666" }}>
-                          Creator:{" "}
-                          {tiktokCreatorInfo ? tiktokCreatorInfo.display_name || "—" : "Loading..."}
+                          Creator: {tiktokCreatorDisplayName || "Loading..."}
                         </div>
+                        {type !== "video" && (
+                          <div
+                            role="status"
+                            className="no-video-disclosure"
+                            style={{ fontSize: 12, color: "#b66" }}
+                          >
+                            This post doesn&apos;t contain a video. TikTok features like Duet and
+                            Stitch require a video — upload one to enable them.
+                          </div>
+                        )}
                         {tiktokCreatorInfo && tiktokCreatorInfo.can_post === false && (
                           <div className="tiktok-disabled-banner" role="alert">
                             This TikTok account cannot publish via third-party apps right now.
@@ -3298,9 +3397,18 @@ function ContentUploadForm({
                   TikTok Publish Options
                 </label>
                 <div style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>
-                  Creator:{" "}
-                  {tiktokCreatorInfo ? tiktokCreatorInfo.display_name || "—" : "Loading..."}
+                  Creator: {tiktokCreatorDisplayName || "Loading..."}
                 </div>
+                {type !== "video" && (
+                  <div
+                    role="status"
+                    className="no-video-disclosure"
+                    style={{ fontSize: 12, color: "#b66", marginBottom: 8 }}
+                  >
+                    This post doesn&apos;t contain a video. TikTok features like Duet and Stitch
+                    require a video — upload one to enable them.
+                  </div>
+                )}
                 <div style={{ display: "grid", gap: 8 }}>
                   <div>
                     <label>Privacy (required)</label>
@@ -3398,6 +3506,51 @@ function ContentUploadForm({
                         flexDirection: "column",
                       }}
                     >
+                      <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <input
+                          type="checkbox"
+                          checked={!!tiktokDisclosure}
+                          onChange={e => setTiktokDisclosure(!!e.target.checked)}
+                        />
+                        Disclose video content
+                      </label>
+                      {tiktokDisclosure && (
+                        <div
+                          role="status"
+                          style={{
+                            display: "flex",
+                            gap: 8,
+                            alignItems: "flex-start",
+                            background: "#eef6ff",
+                            padding: 8,
+                            borderRadius: 6,
+                            color: "#075985",
+                            marginTop: 8,
+                            fontSize: 13,
+                          }}
+                        >
+                          <div
+                            aria-hidden
+                            style={{
+                              background: "#dbeafe",
+                              borderRadius: "50%",
+                              width: 28,
+                              height: 28,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#075985",
+                              fontWeight: 700,
+                            }}
+                          >
+                            i
+                          </div>
+                          <div>
+                            Your video will be labeled &quot;Promotional content&quot;. This cannot
+                            be changed once your video is posted.
+                          </div>
+                        </div>
+                      )}
                       <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <input
                           type="checkbox"
