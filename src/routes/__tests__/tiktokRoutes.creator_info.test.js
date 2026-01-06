@@ -104,4 +104,69 @@ describe("tiktok /creator_info", () => {
     expect(res.body.creator).toBeNull();
     // No debug payload in final route; ensure normal behavior asserted above
   });
+
+  test("fetches creator_info and persists display_name when access token present", async () => {
+    jest.resetModules();
+    // Spy container
+    const updates = [];
+
+    jest.doMock("../../utils/ssrfGuard", () => ({
+      safeFetch: async () => ({
+        ok: true,
+        json: async () => ({
+          data: {
+            display_name: "CreatorName",
+            privacy_level_options: ["EVERYONE"],
+            interactions: { comments: true },
+          },
+        }),
+      }),
+    }));
+
+    jest.doMock("../../firebaseAdmin", () => ({
+      admin: { firestore: { FieldValue: { serverTimestamp: () => Date.now() } } },
+      db: {
+        collection: _name => ({
+          doc: _id => ({
+            collection: _sub => ({
+              doc: _id2 => ({
+                get: async () => ({
+                  exists: true,
+                  data: () => ({ tokens: { access_token: "token" } }),
+                }),
+                update: async obj => {
+                  updates.push({ path: `${_name}/${_id}/${_sub}/${_id2}`, obj });
+                },
+              }),
+            }),
+            get: async () => ({ exists: false, data: () => ({}) }),
+            set: async () => true,
+          }),
+          add: async () => ({ id: "stub" }),
+        }),
+      },
+      auth: () => ({ verifyIdToken: async () => ({ uid: "user123" }) }),
+      storage: {},
+    }));
+
+    const router = require("../../routes/tiktokRoutes");
+    app = express();
+    app.use(bodyParser.json());
+    app.use("/", router);
+
+    const res = await request(app)
+      .get("/creator_info")
+      .set("Authorization", "Bearer test-token-for-user123")
+      .expect(200);
+
+    expect(res.body.ok).toBe(true);
+    expect(res.body.creator).toBeDefined();
+    expect(res.body.creator.display_name).toBe("CreatorName");
+
+    // Ensure update was attempted on the connections doc
+    expect(updates.length).toBeGreaterThan(0);
+    const upd = updates[0].obj;
+    expect(upd.display_name).toBe("CreatorName");
+    expect(upd.creator_info).toBeDefined();
+  });
 });
