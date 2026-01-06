@@ -679,6 +679,42 @@ router.get(
           }
         }
       }
+
+      // Fetch user profile info to store with the connection
+      let profileInfo = {};
+      try {
+        if (tokenData && tokenData.access_token) {
+          // We reuse the logic similar to /status endpoint
+          const infoRes = await safeFetch(
+            "https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url",
+            fetch,
+            {
+              fetchOptions: {
+                method: "GET",
+                headers: { Authorization: `Bearer ${tokenData.access_token}` },
+              },
+              allowHosts: ["open.tiktokapis.com"],
+            }
+          );
+          if (infoRes.ok) {
+            const infoData = await infoRes.json();
+            const u =
+              infoData.data && infoData.data.user ? infoData.data.user : infoData.data || {};
+            if (u.display_name || u.displayName) {
+              profileInfo.display_name = u.display_name || u.displayName;
+            }
+            if (u.avatar_url || u.avatarUrl) {
+              profileInfo.avatar_url = u.avatar_url || u.avatarUrl;
+            }
+            if (DEBUG_TIKTOK_OAUTH) {
+              console.log("[TikTok][callback] Fetched profile info:", profileInfo);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[TikTok][callback] Failed to fetch profile info:", err.message);
+      }
+
       // Store tokens securely under user
       const connRef = db.collection("users").doc(uid).collection("connections").doc("tiktok");
       try {
@@ -690,6 +726,7 @@ router.get(
           expires_in: tokenData.expires_in,
           mode: TIKTOK_ENV,
           obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
+          ...profileInfo,
         };
         if (hasEncryption()) {
           const tokenJson = JSON.stringify({
@@ -1569,6 +1606,43 @@ router.get("/creator_info", authMiddleware, ttPublicLimiter, async (req, res) =>
       } catch (e) {
         console.warn("Failed to write tiktok creator_info audit log", e && e.message);
       }
+
+      // Persist a lightweight cached creator_info/display_name on the user's connection doc
+      try {
+        const connRef = dbRuntime
+          .collection("users")
+          .doc(uid)
+          .collection("connections")
+          .doc("tiktok");
+        // Prefer update (will fail if doc doesn't exist), fall back to set-merge
+        try {
+          await connRef.update({
+            display_name: mapped.display_name,
+            creator_info: mapped,
+            updatedAt: new Date().toISOString(),
+          });
+        } catch (uerr) {
+          // Doc might not exist as a subcollection doc; merge into top-level user.connections
+          try {
+            await dbRuntime
+              .collection("users")
+              .doc(uid)
+              .set(
+                {
+                  connections: {
+                    tiktok: { display_name: mapped.display_name, creator_info: mapped },
+                  },
+                },
+                { merge: true }
+              );
+          } catch (s) {
+            console.warn("Failed to persist tiktok creator_info to user doc", s && s.message);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to persist tiktok creator_info", e && e.message);
+      }
+
       return res.json({ ok: true, creator: mapped });
     } catch (e) {
       // On any failure, return conservative defaults
