@@ -14,7 +14,7 @@ AutoPromote is a free, automated content promotion platform that helps creators 
 
 - Auth & Profiles
   - [x] Firebase Auth with token verification and Firestore user provisioning (`src/authMiddleware.js`)
-  - [ ] Profile defaults API (timezone, preferred windows, default platforms/frequency)
+  - [x] Profile defaults API (timezone, preferred windows, default platforms/frequency)
 
 - Upload & Quality Check
   - [x] Upload API with schedule_hint support and safe URL handling (`src/contentRoutes.js`)

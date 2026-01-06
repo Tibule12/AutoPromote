@@ -1,0 +1,1083 @@
+/* PlatformSettingsOverride.css */
+
+/* Container for the whole section */
+.platform-overrides-container {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.platform-overrides-title {
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 
+   Tab Navigation 
+   We make the tabs look like "Chips" or "Badges" of the brands 
+*/
+.platform-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.platform-tab-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  background: #2a2a2a;
+  color: #888;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.platform-tab-btn:hover {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+/* Active State Branding using dynamic classes */
+.platform-tab-btn.active.tiktok {
+  background: #000;
+  color: #fff;
+  border: 1px solid #fe2c55;
+  box-shadow: 2px 2px 0px #25f4ee;
+}
+
+.platform-tab-btn.active.youtube {
+  background: #fff;
+  color: #f00;
+  border: 1px solid #f00;
+  box-shadow: 0 2px 8px rgba(255, 0, 0, 0.2);
+}
+
+.platform-tab-btn.active.instagram {
+  background: linear-gradient(
+    45deg,
+    #f09433 0%,
+    #e6683c 25%,
+    #dc2743 50%,
+    #cc2366 75%,
+    #bc1888 100%
+  );
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(220, 39, 67, 0.4);
+}
+
+.platform-tab-btn.active.twitter {
+  background: #000;
+  color: #fff;
+  border: 1px solid #333;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+}
+
+.platform-tab-btn.active.linkedin {
+  background: #0077b5;
+  color: #fff;
+  border: 1px solid #004471;
+}
+
+.platform-tab-btn.active.snapchat {
+  background: #fffc00;
+  color: #000;
+  border: 1px solid #e5e200;
+  box-shadow: 0 2px 8px rgba(255, 252, 0, 0.4);
+}
+
+.platform-tab-btn.active.reddit {
+  background: #ff4500;
+  color: #fff;
+  border: 1px solid #cc3700;
+}
+
+.platform-tab-btn.active.pinterest {
+  background: #bd081c;
+  color: #fff;
+  border: 1px solid #a00718;
+}
+
+.platform-tab-btn.active.discord {
+  background: #5865f2;
+  color: #fff;
+  border: 1px solid #4752c4;
+}
+
+.platform-tab-btn.active.telegram {
+  background: #0088cc;
+  color: #fff;
+  border: 1px solid #0077b3;
+}
+
+.platform-tab-btn.active.spotify {
+  background: #1db954;
+  color: #000;
+  border: 1px solid #19a34a;
+}
+
+/* 
+   The Content Card 
+   Transform the container based on the platform 
+*/
+.platform-tab-content {
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* =========================================
+   TIKTOK THEME - "Dark & Neon"
+   ========================================= */
+.platform-theme-tiktok {
+  background: #121212;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 0; /* Let inner panel handle padding */
+  overflow: hidden;
+}
+
+.tiktok-theme-panel {
+  padding: 24px;
+  background: linear-gradient(180deg, rgba(37, 244, 238, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+  position: relative;
+}
+
+.tiktok-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 16px;
+}
+.tiktok-header h4 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
+}
+.tiktok-header .platform-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 5px rgba(254, 44, 85, 0.8));
+}
+
+.tiktok-control-group {
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #333;
+}
+
+.tiktok-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.tiktok-label-stack {
+  display: flex;
+  flex-direction: column;
+}
+.tiktok-label-main {
+  font-weight: 600;
+  font-size: 1rem;
+}
+.tiktok-label-sub {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* Custom TikTok Toggle */
+.tiktok-toggle-wrapper {
+  position: relative;
+  width: 50px;
+  height: 28px;
+}
+.tiktok-toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.tiktok-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #444;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+.tiktok-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+.tiktok-toggle-input:checked + .tiktok-toggle-slider {
+  background-color: #31e080; /* TikTok Green */
+}
+.tiktok-toggle-input:checked + .tiktok-toggle-slider:before {
+  transform: translateX(22px);
+}
+
+.tiktok-info-toast {
+  background: rgba(254, 44, 85, 0.15); /* Red tint */
+  color: #fe2c55;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tiktok-sub-options {
+  margin-top: 16px;
+  padding-left: 12px;
+  border-left: 2px solid #333;
+}
+.tiktok-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.tiktok-checkbox {
+  accent-color: #fe2c55;
+  width: 16px;
+  height: 16px;
+}
+
+/* =========================================
+   YOUTUBE THEME - "Studio White/Red"
+   ========================================= */
+.platform-theme-youtube {
+  background: #f9f9f9;
+  border: 1px solid #e5e5e5;
+  color: #0d0d0d;
+}
+
+.youtube-theme-panel {
+  padding: 24px;
+}
+
+.youtube-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.youtube-header h4 {
+  margin: 0;
+  color: #0d0d0d;
+  font-family: "Roboto", sans-serif;
+  font-weight: 500;
+}
+.youtube-header .platform-icon {
+  color: #ff0000;
+  font-size: 1.4rem;
+}
+
+.youtube-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.youtube-card {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px; /* Slightly squared off like Studio */
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+.youtube-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.youtube-label {
+  font-size: 0.75rem;
+  color: #606060;
+  font-weight: 500;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+/* Radio Group */
+.youtube-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.youtube-radio-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.youtube-radio-item input {
+  accent-color: #065fd4; /* YouTube Link Blue */
+}
+.youtube-radio-text {
+  font-size: 0.9rem;
+  color: #0d0d0d;
+}
+
+/* Select */
+.youtube-select-material {
+  border: none;
+  border-bottom: 1px solid #909090;
+  background: transparent;
+  padding: 8px 0;
+  font-size: 0.95rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.youtube-select-material:focus {
+  border-bottom-color: #065fd4;
+}
+
+/* Material Input */
+.youtube-tags-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 12px;
+  background: #fff;
+}
+.youtube-input-icon {
+  color: #606060;
+  margin-right: 8px;
+  font-weight: bold;
+}
+.youtube-input-material {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+/* =========================================
+   INSTAGRAM THEME - "Gradient & Soft"
+   ========================================= */
+.platform-theme-instagram {
+  background: #fff;
+  border: 1px solid #dbdbdb;
+  color: #262626;
+}
+
+.instagram-theme-panel {
+  padding: 24px;
+}
+
+.instagram-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.instagram-header h4 {
+  margin: 0;
+  /* Instagram Gradient Text */
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.instagram-list-group {
+  border: 1px solid #dbdbdb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.instagram-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #fff;
+  border-bottom: 1px solid #dbdbdb;
+}
+.instagram-list-item:last-child {
+  border-bottom: none;
+}
+
+.instagram-label-stack {
+  display: flex;
+  flex-direction: column;
+}
+.instagram-text-main {
+  font-weight: 500;
+  font-size: 1rem;
+}
+.instagram-text-sub {
+  font-size: 0.8rem;
+  color: #8e8e8e;
+}
+
+/* iOS Style Switch */
+.instagram-toggle-outer {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.instagram-toggle-checkbox {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.instagram-toggle-track {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #dbdbdb;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+.instagram-toggle-track:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.instagram-toggle-checkbox:checked + .instagram-toggle-track {
+  background-color: #0095f6; /* Insta Blue */
+}
+.instagram-toggle-checkbox:checked + .instagram-toggle-track:before {
+  transform: translateX(20px);
+}
+
+.instagram-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #efefef;
+  border-radius: 8px;
+  padding: 6px 12px;
+  width: 200px;
+}
+.instagram-pin-icon {
+  margin-right: 6px;
+  font-size: 0.9rem;
+}
+.instagram-clean-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+/* =========================================
+   TWITTER THEME - "Blue Bird / X"
+   ========================================= */
+.platform-theme-twitter {
+  background: #000; /* Dark Mode X */
+  border: 1px solid #333;
+  color: #fff;
+}
+
+.twitter-theme-panel {
+  padding: 20px;
+}
+
+.twitter-header {
+  color: #1d9bf0;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.twitter-header h4 {
+  margin: 0;
+  color: #fff;
+  font-weight: 700;
+}
+
+.twitter-card {
+  display: flex;
+  gap: 16px;
+}
+.twitter-user-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.twitter-avatar-mock {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #333;
+}
+.twitter-vertical-line {
+  width: 2px;
+  background: #333;
+  flex-grow: 1;
+  margin-top: 8px;
+}
+
+.twitter-content-area {
+  flex-grow: 1;
+  padding-top: 8px;
+}
+.twitter-thread-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #333;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.twitter-thread-option:hover {
+  background: rgba(29, 155, 240, 0.1);
+  border-color: #1d9bf0;
+}
+
+.twitter-text-info {
+  display: flex;
+  flex-direction: column;
+}
+.twitter-bold {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.twitter-faint {
+  color: #536471;
+  font-size: 0.85rem;
+}
+
+.twitter-switch {
+  accent-color: #1d9bf0;
+  width: 18px;
+  height: 18px;
+}
+
+/* =========================================
+   LINKEDIN THEME - "Corporate Professional"
+   ========================================= */
+.platform-theme-linkedin {
+  background: #f3f6f8;
+  border: 1px solid #dce6f1;
+  color: #191919;
+}
+.linkedin-theme-panel {
+  padding: 24px;
+}
+
+.linkedin-header {
+  color: #0a66c2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.linkedin-header h4 {
+  margin: 0;
+  font-weight: 600;
+  color: #191919;
+}
+
+.linkedin-controls {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+}
+.linkedin-block-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.linkedin-segment-control {
+  display: flex;
+  background: #fff;
+  border: 1px solid #0a66c2;
+  border-radius: 20px; /* Pill shape */
+  overflow: hidden;
+  width: fit-content;
+}
+.linkedin-segment-btn {
+  padding: 8px 20px;
+  border: none;
+  background: #fff;
+  color: #0a66c2;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.linkedin-segment-btn.active {
+  background: #0a66c2;
+  color: #fff;
+}
+.linkedin-segment-btn:hover:not(.active) {
+  background: #e2f0fe;
+}
+
+/* =========================================
+   SNAPCHAT THEME - "Yellow Ghost"
+   ========================================= */
+.platform-theme-snapchat {
+  background: #000; /* Contrasts nicely with yellow */
+  border: 2px solid #fffc00;
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+}
+.snapchat-ghost-bg {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(#fffc00 20%, transparent 70%);
+  opacity: 0.1;
+  pointer-events: none;
+}
+.snapchat-theme-panel {
+  padding: 24px;
+}
+
+.snapchat-header {
+  margin-bottom: 24px;
+}
+.snapchat-header h4 {
+  color: #fffc00;
+  font-weight: 800;
+  font-style: italic;
+  font-size: 1.4rem;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.snapchat-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.snapchat-option-card {
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.snapchat-option-card input {
+  display: none;
+}
+.snapchat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.snapchat-emoji {
+  font-size: 2rem;
+}
+.snapchat-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.snapchat-option-card:hover {
+  transform: translateY(-4px);
+  border-color: #fffc00;
+}
+.snapchat-option-card.selected {
+  background: #fffc00;
+  color: #000;
+  border-color: #fffc00;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 252, 0, 0.3);
+}
+
+/* =========================================
+   REDDIT THEME - "Orange Alien"
+   ========================================= */
+.platform-theme-reddit {
+  background: #fff;
+  border: 1px solid #edeff1;
+  color: #1c1c1c;
+}
+.reddit-theme-panel {
+  padding: 20px;
+}
+.reddit-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.reddit-header h4 {
+  margin: 0;
+  color: #1c1c1c;
+  font-weight: 500;
+}
+.reddit-flair-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f6f7f8;
+  border: 1px solid #edeff1;
+  border-radius: 20px;
+  padding: 8px 16px;
+}
+.reddit-flair-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+.reddit-toggles-container {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+.reddit-toggle-btn {
+  border: 1px solid #878a8c;
+  border-radius: 20px;
+  padding: 6px 12px;
+  color: #878a8c;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.reddit-toggle-btn.active-nsfw {
+  border-color: #ff4500;
+  color: #ff4500;
+  background: rgba(255, 69, 0, 0.05);
+}
+.reddit-plus-icon {
+  font-size: 1.1rem;
+}
+
+/* =========================================
+   PINTEREST THEME - "Pinterest Pill"
+   ========================================= */
+.platform-theme-pinterest {
+  background: #fff;
+  border-radius: 32px; /* Very rounded like Pinterest */
+  border: 1px solid #efefef;
+  color: #111;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+.pinterest-theme-panel {
+  padding: 24px;
+}
+.pinterest-header {
+  color: #e60023;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.pinterest-header h4 {
+  margin: 0;
+  font-weight: 600;
+  color: #111;
+}
+
+.pinterest-board-scroller {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+.pinterest-board-card {
+  width: 100px;
+  flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pinterest-board-card .board-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
+  background: #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #555;
+  transition: 0.2s;
+}
+.pinterest-board-card:hover .board-preview {
+  filter: brightness(0.9);
+}
+.pinterest-board-card.selected .board-preview {
+  border: 3px solid #111;
+}
+.pinterest-board-card span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.pinterest-pill-input-wrapper {
+  background: #e9e9e9; /* Gray background */
+  border-radius: 24px; /* Pill */
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pinterest-pill-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 1rem;
+  color: #111;
+}
+.pinterest-pill-input:hover {
+  background: #dcdcdc;
+} /* Slight hover effect on pill */
+.pinterest-tip-bubble {
+  margin-top: 20px;
+  background: #111;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 32px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* =========================================
+   DISCORD THEME - "Blurple"
+   ========================================= */
+.platform-theme-discord {
+  background: #36393f;
+  color: #dcddde;
+  border: 1px solid #202225;
+}
+.discord-theme-panel {
+  padding: 24px;
+}
+.discord-header {
+  color: #5865f2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.discord-dark-box {
+  background: #2f3136;
+  padding: 16px;
+  border-radius: 8px;
+}
+.discord-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #b9bbbe;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.discord-radio-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.discord-radio-row {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+}
+.discord-radio-row:hover {
+  background: #393c43;
+}
+.discord-radio {
+  accent-color: #5865f2;
+  margin-right: 12px;
+}
+
+/* =========================================
+   TELEGRAM THEME
+   ========================================= */
+.platform-theme-telegram {
+  background: #fff;
+  border: 1px solid #cce4f0;
+}
+.telegram-theme-panel {
+  background: #ebf6fa; /* Chat background color */
+  padding: 24px;
+}
+.telegram-bubble {
+  background: #fff;
+  border-radius: 12px 12px 12px 0; /* Message bubble shape */
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  max-width: 300px;
+}
+.telegram-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.telegram-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+.telegram-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.telegram-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+.telegram-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+.telegram-switch input:checked + .telegram-slider {
+  background-color: #0088cc;
+}
+.telegram-switch input:checked + .telegram-slider:before {
+  transform: translateX(16px);
+}
+
+/* =========================================
+   SPOTIFY THEME
+   ========================================= */
+.platform-theme-spotify {
+  background: #121212;
+  color: #b3b3b3;
+}
+.spotify-theme-panel {
+  padding: 24px;
+}
+.spotify-header h4 {
+  color: #fff;
+}
+.spotify-info-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #181818;
+  padding: 16px;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+.spotify-info-card:hover {
+  background: #282828;
+}
+.spotify-art-placeholder {
+  width: 48px;
+  height: 48px;
+  background: #282828;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+.spotify-text-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.spotify-title-line {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+}
+.spotify-sub-line {
+  font-size: 0.85rem;
+}
+
+/* =========================================
+   FACEBOOK THEME
+   ========================================= */
+.platform-theme-facebook {
+  background: #f0f2f5;
+  border: 1px solid #ccd0d5;
+  color: #1c1e21;
+}
+.facebook-theme-panel {
+  padding: 24px;
+}
+.facebook-header {
+  color: #1877f2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.facebook-header h4 {
+  margin: 0;
+  color: #1877f2;
+  font-weight: 700;
+}

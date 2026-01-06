@@ -7,7 +7,7 @@ function AuthSwitcher() {
   const [adminData, setAdminData] = useState(null);
 
   const handleAdminLogin = userData => {
-    console.log("Admin logged in:", userData);
+    console.debug("Admin logged in:", userData);
     setAdminLoggedIn(true);
     setAdminData(userData);
   };

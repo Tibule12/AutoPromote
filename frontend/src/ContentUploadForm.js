@@ -18,6 +18,7 @@ import BestTimeToPost from "./components/BestTimeToPost";
 import ExplainButton from "./components/ExplainButton";
 import PreviewEditModal from "./components/PreviewEditModal";
 import ConfirmPublishModal from "./components/ConfirmPublishModal";
+import PlatformSettingsOverride from "./components/PlatformSettingsOverride";
 
 // Default inline thumbnail (avoids external 404s when thumbnail is missing)
 const DEFAULT_THUMBNAIL = (function () {
@@ -148,6 +149,23 @@ function ContentUploadForm({
     fontWeight: "bold",
     shadow: true,
   });
+
+  // Platform Overrides State
+  const [youtubeSettings, setYoutubeSettings] = useState({
+    privacy: "public",
+    typeOverride: "auto",
+    tags: "",
+  });
+  const [instagramSettings, setInstagramSettings] = useState({ shareToFeed: true, location: "" });
+  const [twitterSettings, setTwitterSettings] = useState({ threadMode: false });
+  const [linkedinSettings, setLinkedinSettings] = useState({ postType: "post" });
+  const [snapchatSettings, setSnapchatSettings] = useState({ placement: "spotlight" });
+  const [redditSettings, setRedditSettings] = useState({ flair: "", nsfw: false });
+  const [pinterestSettings, setPinterestSettings] = useState({ linkUrl: "" });
+  const [discordSettings, setDiscordSettings] = useState({ notify: "none" });
+  const [telegramSettings, setTelegramSettings] = useState({ silent: false });
+  const [spotifySettings, setSpotifySettings] = useState({});
+
   const [isUploading, setIsUploading] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   // TikTok-specific UX state (Direct Post compliance)
@@ -3502,141 +3520,16 @@ function ContentUploadForm({
                   </div>
                   <div>
                     <label>Commercial / Branded Content</label>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        alignItems: "center",
-                        flexDirection: "column",
-                      }}
-                    >
-                      <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <input
-                          type="checkbox"
-                          checked={!!tiktokDisclosure}
-                          onChange={e => setTiktokDisclosure(!!e.target.checked)}
-                        />
-                        Disclose video content
-                      </label>
-                      {tiktokDisclosure && (
-                        <div
-                          role="status"
-                          style={{
-                            display: "flex",
-                            gap: 8,
-                            alignItems: "flex-start",
-                            background: "#eef6ff",
-                            padding: 8,
-                            borderRadius: 6,
-                            color: "#075985",
-                            marginTop: 8,
-                            fontSize: 13,
-                          }}
-                        >
-                          <div
-                            aria-hidden
-                            style={{
-                              background: "#dbeafe",
-                              borderRadius: "50%",
-                              width: 28,
-                              height: 28,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: "#075985",
-                              fontWeight: 700,
-                            }}
-                          >
-                            i
-                          </div>
-                          <div>
-                            Your video will be labeled &quot;Promotional content&quot;. This cannot
-                            be changed once your video is posted.
-                          </div>
-                        </div>
-                      )}
-                      <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <input
-                          type="checkbox"
-                          checked={!!tiktokCommercial.isCommercial}
-                          onChange={e =>
-                            setTiktokCommercial(prev => ({
-                              ...prev,
-                              isCommercial: e.target.checked,
-                            }))
-                          }
-                        />{" "}
-                        This content is commercial or promotional
-                      </label>
-                      {tiktokCommercial.isCommercial && (
-                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <input
-                              type="checkbox"
-                              checked={!!tiktokCommercial.yourBrand}
-                              onChange={e =>
-                                setTiktokCommercial(prev => ({
-                                  ...prev,
-                                  yourBrand: e.target.checked,
-                                }))
-                              }
-                            />{" "}
-                            Your Brand
-                          </label>
-                          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <input
-                              type="checkbox"
-                              checked={!!tiktokCommercial.brandedContent}
-                              onChange={e =>
-                                setTiktokCommercial(prev => ({
-                                  ...prev,
-                                  brandedContent: e.target.checked,
-                                }))
-                              }
-                            />{" "}
-                            Branded Content
-                          </label>
-                        </div>
-                      )}
-                      {tiktokCommercial.isCommercial &&
-                        !tiktokCommercial.yourBrand &&
-                        !tiktokCommercial.brandedContent && (
-                          <div
-                            style={{ fontSize: 12, color: "#b66", marginTop: 6 }}
-                            title="You need to indicate if your content promotes yourself, a third party, or both."
-                          >
-                            You need to indicate if your content promotes yourself, a third party,
-                            or both.
-                          </div>
-                        )}
-                      {tiktokCommercial.isCommercial &&
-                        ((tiktokCommercial.yourBrand && !tiktokCommercial.brandedContent) ||
-                          (tiktokCommercial.brandedContent && !tiktokCommercial.yourBrand) ||
-                          (tiktokCommercial.yourBrand && tiktokCommercial.brandedContent)) && (
-                          <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
-                            {tiktokCommercial.brandedContent &&
-                              !tiktokCommercial.yourBrand &&
-                              "Your photo/video will be labeled as 'Paid partnership'"}
-                            {tiktokCommercial.yourBrand &&
-                              !tiktokCommercial.brandedContent &&
-                              "Your photo/video will be labeled as 'Promotional content'"}
-                            {tiktokCommercial.yourBrand &&
-                              tiktokCommercial.brandedContent &&
-                              "Your photo/video will be labeled as 'Paid partnership'"}
-                          </div>
-                        )}
+                    {/* Replaced with PlatformSettingsOverride logic, but kept placeholder hidden if needed or rely on the new component placed below description. 
+                        Actually, since we want to move it to a specific section below description, we should remove this inline block 
+                        or render ONLY if we want it here. The prompt was "move". 
+                        I will remove this entire block and the "Disclose video content" logic from here as it is now in the overrides component.
+                    */}
+                    <div style={{ fontSize: 13, fontStyle: "italic", color: "#666" }}>
+                      Moved to Platform Settings below description.
                     </div>
                   </div>
-                  <div style={{ fontSize: 13 }}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={tiktokConsentChecked}
-                        onChange={e => setTiktokConsentChecked(e.target.checked)}
-                      />{" "}
-                      {getTikTokDeclaration()}
-                    </label>
-                  </div>
+                  <div style={{ fontSize: 13 }}>{/* Moved to overrides */}</div>
                   {tiktokCreatorInfo && tiktokCreatorInfo.max_video_post_duration_sec && (
                     <div style={{ fontSize: 12, color: "#666" }}>
                       Max allowed video duration for this creator:{" "}
@@ -3719,6 +3612,46 @@ function ContentUploadForm({
           description={description}
           onAddHashtag={handleAddHashtag}
         />
+
+        {/* Platform Specific Overrides */}
+        <PlatformSettingsOverride
+          selectedPlatforms={selectedPlatformsVal}
+          // TikTok
+          tiktokCommercial={tiktokCommercial}
+          setTiktokCommercial={setTiktokCommercial}
+          tiktokDisclosure={tiktokDisclosure}
+          setTiktokDisclosure={setTiktokDisclosure}
+          tiktokConsentChecked={tiktokConsentChecked}
+          setTiktokConsentChecked={setTiktokConsentChecked}
+          tiktokCreatorInfo={tiktokCreatorInfo}
+          getTikTokDeclaration={getTikTokDeclaration}
+          // YouTube
+          youtubeSettings={youtubeSettings}
+          setYoutubeSettings={setYoutubeSettings}
+          // Instagram
+          instagramSettings={instagramSettings}
+          setInstagramSettings={setInstagramSettings}
+          // Twitter
+          twitterSettings={twitterSettings}
+          setTwitterSettings={setTwitterSettings}
+          // LinkedIn
+          linkedinSettings={linkedinSettings}
+          setLinkedinSettings={setLinkedinSettings}
+          // New Platforms
+          snapchatSettings={snapchatSettings}
+          setSnapchatSettings={setSnapchatSettings}
+          redditSettings={redditSettings}
+          setRedditSettings={setRedditSettings}
+          pinterestSettings={pinterestSettings}
+          setPinterestSettings={setPinterestSettings}
+          discordSettings={discordSettings}
+          setDiscordSettings={setDiscordSettings}
+          telegramSettings={telegramSettings}
+          setTelegramSettings={setTelegramSettings}
+          spotifySettings={spotifySettings}
+          setSpotifySettings={setSpotifySettings}
+        />
+
         <div className="form-group">
           <label>🎨 Text Overlay (optional)</label>
           <div className="input-with-emoji">
