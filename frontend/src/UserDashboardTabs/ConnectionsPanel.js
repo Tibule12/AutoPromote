@@ -38,9 +38,11 @@ const ConnectionsPanel = ({
             ? `@${summary.twitter.username}`
             : twitterStatus?.identity?.name || null;
       case "tiktok":
-        return tiktokStatus?.profile?.username
-          ? `@${tiktokStatus.profile.username}`
-          : tiktokStatus?.meta?.display_name || summary.tiktok?.display_name || null;
+        return tiktokStatus?.display_name
+          ? `${tiktokStatus.display_name}`
+          : tiktokStatus?.profile?.username
+            ? `@${tiktokStatus.profile.username}`
+            : tiktokStatus?.meta?.display_name || summary.tiktok?.display_name || null;
       case "facebook":
         return (
           facebookStatus?.profile?.name ||

@@ -679,6 +679,42 @@ router.get(
           }
         }
       }
+
+      // Fetch user profile info to store with the connection
+      let profileInfo = {};
+      try {
+        if (tokenData && tokenData.access_token) {
+          // We reuse the logic similar to /status endpoint
+          const infoRes = await safeFetch(
+            "https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url",
+            fetch,
+            {
+              fetchOptions: {
+                method: "GET",
+                headers: { Authorization: `Bearer ${tokenData.access_token}` },
+              },
+              allowHosts: ["open.tiktokapis.com"],
+            }
+          );
+          if (infoRes.ok) {
+            const infoData = await infoRes.json();
+            const u =
+              infoData.data && infoData.data.user ? infoData.data.user : infoData.data || {};
+            if (u.display_name || u.displayName) {
+              profileInfo.display_name = u.display_name || u.displayName;
+            }
+            if (u.avatar_url || u.avatarUrl) {
+              profileInfo.avatar_url = u.avatar_url || u.avatarUrl;
+            }
+            if (DEBUG_TIKTOK_OAUTH) {
+              console.log("[TikTok][callback] Fetched profile info:", profileInfo);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[TikTok][callback] Failed to fetch profile info:", err.message);
+      }
+
       // Store tokens securely under user
       const connRef = db.collection("users").doc(uid).collection("connections").doc("tiktok");
       try {
@@ -690,6 +726,7 @@ router.get(
           expires_in: tokenData.expires_in,
           mode: TIKTOK_ENV,
           obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
+          ...profileInfo,
         };
         if (hasEncryption()) {
           const tokenJson = JSON.stringify({
