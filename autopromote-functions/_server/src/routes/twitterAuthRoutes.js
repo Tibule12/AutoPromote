@@ -10,8 +10,9 @@ const {
   getValidAccessToken,
 } = require("../services/twitterService");
 const fetch = require("node-fetch");
-const { db, admin } = require("../firebaseAdmin");
+const { db } = require("../firebaseAdmin");
 const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
+const logger = require("../utils/logger");
 
 const router = express.Router();
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
@@ -63,7 +64,7 @@ router.get("/oauth/config", (req, res) => {
 // Helper: log only if DEBUG_TWITTER_OAUTH enabled
 function debugLog(...args) {
   if (process.env.DEBUG_TWITTER_OAUTH) {
-    console.log("[Twitter][routes]", ...args);
+    logger.debug("Twitter.routes", ...args);
   }
 }
 
@@ -83,7 +84,7 @@ router.get("/oauth/preflight", twitterPublicLimiter, (req, res) => {
     // Build a preview URL with placeholder state & PKCE (not persisted)
     let previewAuthUrl = null;
     if (clientId && redirectUri) {
-      const { code_verifier, code_challenge } = generatePkcePair(); // ephemeral
+      const { code_challenge } = generatePkcePair(); // ephemeral (code_verifier not needed for preview)
       previewAuthUrl = buildAuthUrl({
         clientId,
         redirectUri,
@@ -118,12 +119,10 @@ router.get("/oauth/start", authMiddleware, twitterWriteLimiter, async (req, res)
     const { clientId, redirectUri } = resolveTwitterConfig();
     if (!clientId || !redirectUri) {
       debugLog("start missing config", { clientId: !!clientId, redirectUri: !!redirectUri });
-      return res
-        .status(500)
-        .json({
-          error: "twitter_client_config_missing",
-          detail: { clientId: !!clientId, redirectUri: !!redirectUri },
-        });
+      return res.status(500).json({
+        error: "twitter_client_config_missing",
+        detail: { clientId: !!clientId, redirectUri: !!redirectUri },
+      });
     }
     const { code_verifier, code_challenge } = generatePkcePair();
     const state = await createAuthStateDoc({ uid: req.userId || req.user?.uid, code_verifier });
@@ -143,12 +142,10 @@ router.post("/oauth/prepare", authMiddleware, twitterWriteLimiter, async (req, r
     const { clientId, redirectUri } = resolveTwitterConfig();
     if (!clientId || !redirectUri) {
       debugLog("prepare missing config", { clientId: !!clientId, redirectUri: !!redirectUri });
-      return res
-        .status(500)
-        .json({
-          error: "twitter_client_config_missing",
-          detail: { clientId: !!clientId, redirectUri: !!redirectUri },
-        });
+      return res.status(500).json({
+        error: "twitter_client_config_missing",
+        detail: { clientId: !!clientId, redirectUri: !!redirectUri },
+      });
     }
     const { code_verifier, code_challenge } = generatePkcePair();
     const state = await createAuthStateDoc({ uid: req.userId || req.user?.uid, code_verifier });

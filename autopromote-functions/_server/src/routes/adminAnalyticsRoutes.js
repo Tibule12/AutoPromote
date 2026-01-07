@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require("../authMiddleware");
 const adminOnly = require("../middlewares/adminOnly");
 const { db, admin } = require("../firebaseAdmin");
+const logger = require("../utils/logger");
 
 // Get all feature flags
 router.get("/flags", authMiddleware, adminOnly, async (req, res) => {
@@ -233,13 +234,11 @@ router.get("/funnel", authMiddleware, adminOnly, async (req, res) => {
       const linkMatch = (error.message.match(/https:\/\/console\.firebase\.google\.com[^\s]+/) || [
         null,
       ])[0];
-      return res
-        .status(422)
-        .json({
-          success: false,
-          error: "Missing Firestore composite index required by this query",
-          indexLink: linkMatch || null,
-        });
+      return res.status(422).json({
+        success: false,
+        error: "Missing Firestore composite index required by this query",
+        indexLink: linkMatch || null,
+      });
     }
     res.status(500).json({ success: false, error: error.message });
   }
@@ -427,12 +426,14 @@ router.get("/approval/pending", authMiddleware, adminOnly, async (req, res) => {
         ...doc.data(),
       }));
     } catch (queryError) {
-      console.log("No pending content or collection missing:", queryError.message);
+      logger.warn("adminAnalytics.approval.pending.noCollection", { message: queryError.message });
     }
 
     res.json({ success: true, content: pendingContent, count: pendingContent.length });
   } catch (error) {
-    console.error("Error fetching pending approvals:", error);
+    logger.error("adminAnalytics.approval.pending.error", {
+      error: error && error.message ? error.message : error,
+    });
     res.status(500).json({ success: false, error: error.message });
   }
 });

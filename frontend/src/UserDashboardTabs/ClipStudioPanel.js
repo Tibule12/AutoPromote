@@ -36,6 +36,9 @@ const ClipStudioPanel = ({ content = [] }) => {
   // Memetic Composer UI toggle
   const [composerOpen, setComposerOpen] = useState(false);
 
+  // Controls the "Clean Interface" aspect
+  const [showLibrary, setShowLibrary] = useState(false);
+
   // Filter for videos only
   const videoContent = content.filter(c => c.type === "video");
 
@@ -166,15 +169,7 @@ const ClipStudioPanel = ({ content = [] }) => {
   };
 
   // Open export confirmation modal instead of sending immediately
-  const exportClip = async (clipId, platforms) => {
-    setConfirmExport({
-      open: true,
-      clipId,
-      platforms: platforms || ["tiktok"],
-      scheduledTime: new Date(Date.now() + 3600000).toISOString(),
-    });
-    setExportImmediate(false);
-  };
+  // const exportClip = async (clipId, platforms) => { ... } (Removed unused function)
 
   const performExport = async () => {
     if (!confirmExport.clipId || exportingClipId) return;
@@ -273,100 +268,119 @@ const ClipStudioPanel = ({ content = [] }) => {
 
       {!currentAnalysis ? (
         <>
-          {/* Video Selection */}
-          <div className="video-selection-section">
-            <h3>Select a Video to Analyze</h3>
-
-            {videoContent.length === 0 ? (
-              <div className="empty-state">
-                <p>📹 No videos uploaded yet</p>
-                <p className="empty-hint">
-                  Upload a long-form video to get started with AI clip generation
-                </p>
+          {/* Landing State - Clean UI */}
+          {!showLibrary ? (
+            <div className="clip-landing-state">
+              <div className="landing-card-center">
+                <div className="landing-icon-large">✂️</div>
+                <h3>Start a New Clip Project</h3>
+                <p>Select a video from your library to begin analysis.</p>
+                <div className="landing-actions">
+                  <button className="btn-primary" onClick={() => setShowLibrary(true)}>
+                    Select Video from Library
+                  </button>
+                  {/* If we had an upload function passed down, we'd add it here */}
+                </div>
               </div>
-            ) : (
-              <div className="video-grid">
-                {videoContent.map(video => (
-                  <div key={video.id} className="video-card">
-                    {video.url && (
-                      <video
-                        src={video.url}
-                        className="video-thumbnail"
-                        muted
-                        onClick={e => (e.target.paused ? e.target.play() : e.target.pause())}
-                      />
-                    )}
-                    <div className="video-card-info">
-                      <h4>{video.title || "Untitled Video"}</h4>
-                      {video.duration && (
-                        <span className="duration-badge">{formatDuration(video.duration)}</span>
-                      )}
-                      <p className="video-description">
-                        {video.description ? video.description.substring(0, 100) : "No description"}
-                      </p>
 
-                      {video.clipAnalysis?.analyzed ? (
-                        <div className="analysis-status">
-                          <span className="analyzed-badge">✓ Analyzed</span>
-                          <button
-                            className="btn-secondary btn-sm"
-                            onClick={() => loadAnalysis(video.clipAnalysis.analysisId)}
-                          >
-                            View {video.clipAnalysis.clipsGenerated} Clips
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          className="btn-primary"
-                          onClick={() => analyzeVideo(video)}
-                          disabled={analyzing}
-                        >
-                          {analyzing ? "Analyzing..." : "Generate Clips"}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Previously Generated Clips */}
-          {generatedClips.length > 0 && (
-            <div className="generated-clips-section">
-              <h3>📂 Your Generated Clips ({generatedClips.length})</h3>
-              <div className="clips-grid">
-                {generatedClips.map(clip => (
-                  <div key={clip.id} className="generated-clip-card">
-                    <video src={clip.url} className="clip-preview" controls />
-                    <div className="clip-info">
-                      <div className="clip-score">
-                        <span className="score-badge">⚡ {clip.viralScore}</span>
-                      </div>
-                      <p className="clip-caption">{clip.caption}</p>
-                      <p className="clip-meta">
-                        {formatDuration(clip.duration)} • {clip.reason}
-                      </p>
-                      <div className="clip-platforms">
-                        {clip.platforms?.map(p => (
-                          <span key={p} className="platform-tag">
-                            {p}
-                          </span>
-                        ))}
-                      </div>
-                      <button
-                        className="btn-primary btn-sm"
-                        onClick={() => exportClip(clip.id, clip.platforms || ["tiktok"])}
-                        disabled={exportingClipId === clip.id}
+              {/* Show recently generated clips cleanly below if any exist */}
+              {generatedClips.length > 0 && (
+                <div className="landing-recent-clips">
+                  <h4>Recent Clips</h4>
+                  <div className="mini-clips-list">
+                    {generatedClips.slice(0, 4).map(clip => (
+                      <div
+                        key={clip.id}
+                        className="mini-clip-item"
+                        onClick={() => {
+                          /* view logic if needed */
+                        }}
                       >
-                        {exportingClipId === clip.id ? "Scheduling..." : "Export to Platforms"}
-                      </button>
-                    </div>
+                        <span className="mini-clip-score">⚡ {clip.viralScore}</span>
+                        <span className="mini-clip-date">
+                          {new Date(clip.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="video-selection-section">
+              <div
+                className="selection-header-row"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "16px",
+                }}
+              >
+                <h3>Select a Video to Analyze</h3>
+                <button className="btn-secondary" onClick={() => setShowLibrary(false)}>
+                  Cancel
+                </button>
               </div>
+
+              {videoContent.length === 0 ? (
+                <div className="empty-state">
+                  <p>📹 No videos uploaded yet</p>
+                  <p className="empty-hint">Upload a long-form video in the Upload tab first.</p>
+                </div>
+              ) : (
+                <div className="video-grid">
+                  {videoContent.map(video => (
+                    <div key={video.id} className="video-card">
+                      {video.url && (
+                        <video
+                          src={video.url}
+                          className="video-thumbnail"
+                          muted
+                          onClick={e => (e.target.paused ? e.target.play() : e.target.pause())}
+                        />
+                      )}
+                      <div className="video-card-info">
+                        <h4>{video.title || "Untitled Video"}</h4>
+                        {video.duration && (
+                          <span className="duration-badge">{formatDuration(video.duration)}</span>
+                        )}
+                        <p className="video-description">
+                          {video.description
+                            ? video.description.substring(0, 100)
+                            : "No description"}
+                        </p>
+
+                        {video.clipAnalysis?.analyzed ? (
+                          <div className="analysis-status">
+                            <span className="analyzed-badge">✓ Analyzed</span>
+                            <button
+                              className="btn-secondary btn-sm"
+                              onClick={() => loadAnalysis(video.clipAnalysis.analysisId)}
+                            >
+                              View {video.clipAnalysis.clipsGenerated} Clips
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className="btn-primary"
+                            onClick={() => analyzeVideo(video)}
+                            disabled={analyzing}
+                          >
+                            {analyzing ? "Analyzing..." : "Generate Clips"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
+
+          {/* Detailed Generated Clips View - Only show when NOT in landing state or perhaps in a separate tab? 
+              For now keeping it hidden in landing state to reduce clutter as requested.
+          */}
         </>
       ) : (
         <>

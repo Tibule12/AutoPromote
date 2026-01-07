@@ -42,7 +42,12 @@ const authMiddleware = async (req, res, next) => {
 
     // E2E bypass: when Playwright sets the x-playwright-e2e header, treat the request as an admin test user
     // This keeps E2E tests deterministic and avoids hard 401s when using short/mocked tokens.
-    if (req.headers && req.headers["x-playwright-e2e"] === "1") {
+    // SECURED: Restricted to non-production environments
+    if (
+      (process.env.NODE_ENV === "test" || process.env.NODE_ENV === "development") &&
+      req.headers &&
+      req.headers["x-playwright-e2e"] === "1"
+    ) {
       req.userId = "adminUser";
       req.user = {
         uid: "adminUser",
@@ -62,7 +67,12 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // Allow integration test bypass with test tokens of the form 'test-token-for-{uid}'
-    if (typeof token === "string" && token.startsWith("test-token-for-")) {
+    // SECURED: Restricted to non-production environments
+    if (
+      (process.env.NODE_ENV === "test" || process.env.NODE_ENV === "development") &&
+      typeof token === "string" &&
+      token.startsWith("test-token-for-")
+    ) {
       const uid = token.slice("test-token-for-".length);
       req.userId = uid;
       req.user = { uid, email: `${uid}@example.com`, test: true };

@@ -1,10 +1,12 @@
+/* eslint-disable no-console */
 const express = require("express");
 const admin = require("firebase-admin");
 const router = express.Router();
 const { sendVerificationEmail, sendPasswordResetEmail } = require("./services/emailService");
 
 // Middleware to verify Firebase token
-const verifyFirebaseToken = async (req, res, next) => {
+// eslint-disable-next-line no-unused-vars -- kept for potential future use as an exported middleware
+const _verifyFirebaseToken = async (req, res, next) => {
   try {
     const idToken = req.headers.authorization?.split("Bearer ")[1];
     if (!idToken) {
@@ -38,10 +40,10 @@ router.post("/register", async (req, res) => {
     // Store additional user data in Firestore
     const userDocRef = admin.firestore().collection("users").doc(userRecord.uid);
     const userSnap = await userDocRef.get();
-    const currentData = userSnap.exists ? userSnap.data() : {};
+    let currentData = userSnap.exists ? userSnap.data() : {};
     // Only set role/isAdmin to 'user'/false if not already admin
-    const docRole = currentData.role === "admin" ? "admin" : role;
-    const docIsAdmin = currentData.role === "admin" ? true : false;
+    let docRole = currentData.role === "admin" ? "admin" : role;
+    let docIsAdmin = currentData.role === "admin" ? true : false;
     await userDocRef.set({
       name,
       email,
@@ -204,7 +206,8 @@ router.post("/login", async (req, res) => {
         const userRecord = await admin.auth().getUserByEmail(email);
         // We can't verify the password directly with Admin SDK
         // Creating a custom token for the user
-        const customToken = await admin.auth().createCustomToken(userRecord.uid);
+        // eslint-disable-next-line no-unused-vars -- created for potential client-side exchange
+        const _customToken = await admin.auth().createCustomToken(userRecord.uid);
 
         // Instead of directly using this as decoded token, we should provide
         // the custom token to the client and have them exchange it for an ID token
@@ -422,7 +425,7 @@ router.post("/admin-login", async (req, res) => {
       !!(req.body && req.body.idToken),
       !!(req.body && req.body.email)
     );
-    const { idToken, email } = req.body || {};
+    const { idToken } = req.body || {};
 
     if (!idToken) {
       console.log("No idToken provided in admin login request");
@@ -438,7 +441,8 @@ router.post("/admin-login", async (req, res) => {
     let role = "user";
     let isAdmin = false;
     let fromCollection = null;
-    const adminStatusSource = "unknown";
+    // eslint-disable-next-line no-unused-vars -- placeholder for future admin source tracking
+    let _adminStatusSource = "unknown";
 
     // For admin login, check admin claims in token first, then try admins collection
     try {

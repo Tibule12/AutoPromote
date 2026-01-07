@@ -13,18 +13,14 @@ service cloud.firestore {
         request.auth.token.firebase.sign_in_provider == 'service_account';
     }
 
-    function isBackend() {
-      return request.auth == null;
-    }
-
     // Users can read/write their own user document
     match /users/{userId} {
-      allow read, write: if isAdmin() || isServiceAccount() || isBackend() || request.auth.uid == userId;
+      allow read, write: if isAdmin() || isServiceAccount() || request.auth.uid == userId;
     }
 
     // Users can read/write their own content
     match /content/{contentId} {
-      allow read, write: if isAdmin() || isServiceAccount() || isBackend() ||
+      allow read, write: if isAdmin() || isServiceAccount() ||
         (request.auth != null &&
           (
             (request.method == 'create' && request.resource.data.user_id == request.auth.uid) ||
@@ -35,13 +31,13 @@ service cloud.firestore {
 
     // Only admins, service account, or backend can access analytics, promotions, activities
     match /analytics/{docId} {
-      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
+      allow read, write: if isAdmin() || isServiceAccount();
     }
     match /promotions/{docId} {
-      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
+      allow read, write: if isAdmin() || isServiceAccount();
     }
     match /activities/{docId} {
-      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
+      allow read, write: if isAdmin() || isServiceAccount();
     }
 
     // Community posts - authenticated users can read all, create their own, and update their own
@@ -111,12 +107,12 @@ service cloud.firestore {
         get(/databases/$(database)/documents/ads/$(adId)).data.userId == request.auth.uid || 
         isAdmin()
       );
-      allow write: if isAdmin() || isServiceAccount() || isBackend();
+      allow write: if isAdmin() || isServiceAccount();
     }
 
     // All other collections: only admins, service account, or backend
     match /{document=**} {
-      allow read, write: if isAdmin() || isServiceAccount() || isBackend();
+      allow read, write: if isAdmin() || isServiceAccount();
     }
   }
 }

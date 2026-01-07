@@ -21,32 +21,38 @@ describe("SchedulesPanel create schedule", () => {
       />
     );
 
-    // Choose content
-    // The content select has an aria-label of "Select content"
-    fireEvent.change(screen.getByRole("combobox", { name: /Select content/i }), {
-      target: { value: "c1" },
-    });
-    // Set a when
-    fireEvent.change(screen.getByLabelText(/When/i), { target: { value: "2030-01-01T12:00" } });
-    expect(screen.getByLabelText(/When/i).value).toBe("2030-01-01T12:00");
-    // Ensure combobox value changed
-    const combo = screen.getByRole("combobox", { name: /Select content/i });
-    expect(combo.value).toBe("c1");
-    // select one platform
-    fireEvent.click(screen.getByLabelText(/youtube/i));
-    // checkbox should be checked
-    expect(screen.getByLabelText(/youtube/i).checked).toBe(true);
-    // Submit
-    const createBtn = screen.getByRole("button", { name: /Create Schedule/i });
-    fireEvent.click(createBtn);
+    // 1. Open Injector
+    const injectBtn = screen.getByText(/\+ INJECT EVENT/i);
+    fireEvent.click(injectBtn);
 
-    // Wait for async onCreate to be invoked and the state updates to complete
+    // 2. Choose Content
+    const contentSelect = screen.getByLabelText("Select Content");
+    fireEvent.change(contentSelect, { target: { value: "c1" } });
+
+    // 3. Set Date/Time
+    const dateInput = screen.getByLabelText("Schedule Date");
+    const timeInput = screen.getByLabelText("Schedule Time");
+
+    // Set a future date/time
+    fireEvent.change(dateInput, { target: { value: "2030-01-01" } });
+    fireEvent.change(timeInput, { target: { value: "12:00" } });
+
+    // 4. Select Platform
+    const ytBtn = screen.getByRole("button", { name: "YouTube" });
+    fireEvent.click(ytBtn);
+
+    // 5. Submit
+    const submitBtn = screen.getByText(/INITIATE SCHEDULE/i);
+    fireEvent.click(submitBtn);
+
+    // Wait for async onCreate
     await waitFor(() => expect(mockOnCreate).toHaveBeenCalled(), { timeout: 10000 });
+
     const payload = mockOnCreate.mock.calls[0][0];
     expect(payload.contentId).toBe("c1");
+    // The component constructs the ISO string: `2030-01-01T12:00:00.000Z`
+    expect(payload.time).toContain("2030-01-01T12:00");
     expect(Array.isArray(payload.platforms)).toBe(true);
     expect(payload.platforms).toContain("youtube");
   });
 });
-
-export {};

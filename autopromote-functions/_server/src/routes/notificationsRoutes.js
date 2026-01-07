@@ -14,7 +14,7 @@ router.get("/", authMiddleware, async (req, res) => {
   try {
     if (!req.userId) return res.status(401).json({ ok: false, error: "auth_required" });
     const limit = Math.min(parseInt(req.query.limit || "50", 10), 100);
-    const q = db
+    let q = db
       .collection("notifications")
       .where("user_id", "==", req.userId)
       .orderBy("created_at", "desc")

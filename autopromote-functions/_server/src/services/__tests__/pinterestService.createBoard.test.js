@@ -5,13 +5,13 @@ jest.mock("../../firebaseAdmin", () => {
   return {
     db: {
       collection: () => ({
-        doc: uid => ({
+        doc: _uid => ({
           collection: () => ({
-            doc: platform => ({
+            doc: _platform => ({
               get: async () => ({ exists: true, data: () => ({}) }),
               set: async (val, opts) => {
-                sets[uid] = sets[uid] || [];
-                sets[uid].push({ platform, val, opts });
+                sets[_uid] = sets[_uid] || [];
+                sets[_uid].push({ platform: _platform, val, opts });
                 return true;
               },
             }),
@@ -50,9 +50,9 @@ describe("pinterestService.createBoard", () => {
     const db = require("../../firebaseAdmin").db;
     // overwrite get to return a token
     db.collection = () => ({
-      doc: uid => ({
+      doc: _uid => ({
         collection: () => ({
-          doc: platform => ({
+          doc: _platform => ({
             get: async () => ({
               exists: true,
               data: () => ({ tokens: { access_token: "fake-token" }, meta: { boards: [] } }),

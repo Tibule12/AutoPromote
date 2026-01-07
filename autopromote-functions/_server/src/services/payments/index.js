@@ -1,11 +1,27 @@
 // payments/index.js - provider aggregator & status composer
 const { PayPalProvider } = require("./paypalProvider");
 const { ManualProvider } = require("./manualProvider");
+let PayFastProvider;
+let PayGateProvider;
+try {
+  PayFastProvider = require("./payfastProvider").PayFastProvider;
+} catch (e) {
+  PayFastProvider = null;
+}
+try {
+  PayGateProvider = require("./paygateProvider").PayGateProvider;
+} catch (e) {
+  PayGateProvider = null;
+}
 
 const providers = {};
 function initProviders() {
   providers.paypal = new PayPalProvider();
   if (process.env.ENABLE_MANUAL_PROVIDER === "true") providers.manual = new ManualProvider();
+  if (process.env.ENABLE_PAYFAST === "true" && PayFastProvider)
+    providers.payfast = new PayFastProvider();
+  if (process.env.ENABLE_PAYGATE === "true" && PayGateProvider)
+    providers.paygate = new PayGateProvider();
 }
 initProviders();
 

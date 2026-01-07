@@ -1,8 +1,8 @@
 // captionGenerationService.js
 // AI-powered caption generation for social media content
 // Generates platform-optimized, engaging captions with hashtags
+/* eslint-disable no-console */
 
-const axios = require("axios");
 const { logOpenAIUsage } = require("./openaiUsageLogger");
 
 class CaptionGenerationService {
@@ -11,6 +11,7 @@ class CaptionGenerationService {
     this.model = "gpt-4o";
 
     if (!this.openaiApiKey) {
+      /* eslint-disable-next-line no-console */
       console.warn(
         "[CaptionGen] ⚠️ OPENAI_API_KEY not configured. Caption generation will not work."
       );
@@ -53,22 +54,28 @@ class CaptionGenerationService {
         language
       );
 
-      // Call OpenAI API
-      const { chatCompletions } = require('./openaiClient');
-      const aiResp = await chatCompletions({
-        model: this.model,
-        messages: [
-          { role: 'system', content: `You are an expert social media copywriter specializing in ${platform}. You create engaging, viral-worthy captions that drive engagement and conversions.` },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.8,
-        max_tokens: 500,
-      }, { feature: 'caption_generation' });
+      // Call OpenAI via central client
+      const { chatCompletions } = require("./openaiClient");
+      const aiResp = await chatCompletions(
+        {
+          model: this.model,
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert social media copywriter specializing in ${platform}. You create engaging, viral-worthy captions that drive engagement and conversions.`,
+            },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.8,
+          max_tokens: 500,
+        },
+        { feature: "caption_generation" }
+      );
 
       const generatedText = aiResp.choices[0].message.content.trim();
       // Log OpenAI usage (best-effort)
       try {
-        const usage = response.data.usage || {};
+        const usage = aiResp?.data?.usage || {};
         await logOpenAIUsage({
           model: this.model,
           feature: "caption_generation",

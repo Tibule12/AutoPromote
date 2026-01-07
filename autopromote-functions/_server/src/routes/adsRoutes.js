@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
+const logger = require("../utils/logger");
 
 const adsPublicLimiter = rateLimiter({
   capacity: parseInt(process.env.RATE_LIMIT_ADS_PUBLIC || "60", 10),
@@ -35,7 +36,7 @@ router.get("/", authMiddleware, adsPublicLimiter, async (req, res) => {
       count: ads.length,
     });
   } catch (error) {
-    console.error("Error fetching ads:", error);
+    logger.error("Ads.fetchError", { error: error && error.message ? error.message : error });
     res.status(500).json({
       ok: false,
       message: "Failed to fetch ads",
@@ -224,7 +225,8 @@ router.post("/:adId/launch", authMiddleware, adsPublicLimiter, async (req, res) 
 
     // Get user's subscription to check limits
     const userDoc = await db.collection("users").doc(userId).get();
-    const userData = userDoc.data() || {};
+    // eslint-disable-next-line no-unused-vars -- may be referenced in future validations
+    const _userData = userDoc.data() || {};
 
     // Check if user has enough budget (basic validation)
     // In production, integrate with payment system
@@ -244,7 +246,7 @@ router.post("/:adId/launch", authMiddleware, adsPublicLimiter, async (req, res) 
     if (adData.type === "external") {
       // TODO: Integrate with external platform APIs (Facebook, Google, etc.)
       // For now, just log it
-      console.log(`Creating external ${adData.externalPlatform} ad for user ${userId}`);
+      logger.info("Ads.createExternal", { platform: adData.externalPlatform, userId });
     }
 
     res.json({
@@ -459,7 +461,7 @@ router.get("/:adId/analytics", authMiddleware, adsPublicLimiter, async (req, res
 router.post("/:adId/impression", async (req, res) => {
   try {
     const { adId } = req.params;
-    const { viewerId } = req.body;
+    void (req.body && req.body.viewerId);
 
     const adDoc = await db.collection("ads").doc(adId).get();
 
@@ -519,7 +521,9 @@ router.post("/:adId/impression", async (req, res) => {
 
     res.json({ ok: true });
   } catch (error) {
-    console.error("Error recording impression:", error);
+    logger.error("Ads.recordImpressionError", {
+      error: error && error.message ? error.message : error,
+    });
     res.status(500).json({
       ok: false,
       message: "Failed to record impression",
@@ -531,7 +535,7 @@ router.post("/:adId/impression", async (req, res) => {
 router.post("/:adId/click", async (req, res) => {
   try {
     const { adId } = req.params;
-    const { viewerId } = req.body;
+    void (req.body && req.body.viewerId);
 
     const adDoc = await db.collection("ads").doc(adId).get();
 
@@ -591,7 +595,7 @@ router.post("/:adId/click", async (req, res) => {
 
     res.json({ ok: true, targetUrl: adData.targetUrl });
   } catch (error) {
-    console.error("Error recording click:", error);
+    logger.error("Ads.recordClickError", { error: error && error.message ? error.message : error });
     res.status(500).json({
       ok: false,
       message: "Failed to record click",

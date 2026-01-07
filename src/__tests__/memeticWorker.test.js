@@ -25,7 +25,9 @@ describe("memeticWorker", () => {
     });
 
     beforeEach(async () => {
-      const context = testEnv.unauthenticatedContext();
+      const context = testEnv.authenticatedContext("service-account", {
+        firebase: { sign_in_provider: "service_account" },
+      });
       testDb = context.firestore();
       await testDb.collection("memetic_experiments").add({
         plan: [{ variantId: "v1", variant: { hookStrength: 0.6 } }],

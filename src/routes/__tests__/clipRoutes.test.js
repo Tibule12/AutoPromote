@@ -33,7 +33,9 @@ describe("clipRoutes", () => {
     });
 
     beforeEach(async () => {
-      const ctx = testEnv.unauthenticatedContext();
+      const ctx = testEnv.authenticatedContext("service-account", {
+        firebase: { sign_in_provider: "service_account" },
+      });
       testDb = ctx.firestore();
       // expose for tests that use a simple global reference
       global.__testDb = testDb;

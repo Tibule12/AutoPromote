@@ -4,14 +4,14 @@ const bodyParser = require("body-parser");
 // Bypass Firebase Admin initialization in tests
 process.env.FIREBASE_ADMIN_BYPASS = "1";
 const firebaseAdmin = require("../../firebaseAdmin");
-firebaseAdmin.admin.auth = () => ({ verifyIdToken: async token => ({ uid: "test-admin" }) });
+firebaseAdmin.admin.auth = () => ({ verifyIdToken: async _token => ({ uid: "test-admin" }) });
 // Stub collection for ab_tests
-firebaseAdmin.db.collection = name => ({
-  doc: id => ({
+firebaseAdmin.db.collection = _name => ({
+  doc: _id => ({
     get: async () => ({
       exists: true,
       data: () => ({
-        id,
+        id: _id,
         contentId: "content-1",
         autopilot: { enabled: true, confidenceThreshold: 10, minSample: 1 },
         variants: [

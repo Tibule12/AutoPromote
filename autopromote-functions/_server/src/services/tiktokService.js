@@ -1,7 +1,6 @@
 // tiktokService.js - TikTok OAuth 2.0 and Content Posting API integration
 const { db, admin } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
-const crypto = require("crypto");
 
 let fetchFn = global.fetch;
 if (!fetchFn) {
@@ -261,7 +260,7 @@ async function initializeVideoUpload({ accessToken, videoSize, chunkSize = 10485
 /**
  * Upload video chunk
  */
-async function uploadVideoChunk({ uploadUrl, videoBuffer, chunkIndex, totalChunks }) {
+async function uploadVideoChunk({ uploadUrl, videoBuffer, chunkIndex, totalChunks: _totalChunks }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
   const response = await fetch(uploadUrl, {
@@ -291,6 +290,7 @@ async function publishVideo({
   publishId,
   title,
   privacyLevel = "PUBLIC_TO_EVERYONE",
+  soundId,
 }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
@@ -301,6 +301,8 @@ async function publishVideo({
       disable_duet: false,
       disable_comment: false,
       disable_stitch: false,
+      // Optional music/sound metadata forwarded to TikTok when provided
+      ...(soundId ? { music_id: soundId } : {}),
     },
     source_info: {
       source: "FILE_UPLOAD",
@@ -407,11 +409,16 @@ async function uploadTikTokVideo({ contentId, payload, uid }) {
     }
 
     // Publish video
+    const soundId =
+      payload && payload.platform_options && payload.platform_options.tiktok
+        ? payload.platform_options.tiktok.sound_id
+        : undefined;
     const publishResult = await publishVideo({
       accessToken,
       publishId: publish_id,
       title,
       privacyLevel,
+      soundId,
     });
 
     // Store result in Firestore
@@ -453,7 +460,7 @@ async function uploadTikTokVideo({ contentId, payload, uid }) {
 /**
  * Post to TikTok (wrapper for platformPoster integration)
  */
-async function postToTikTok({ contentId, payload, reason, uid }) {
+async function postToTikTok({ contentId, payload, reason: _reason, uid }) {
   return uploadTikTokVideo({ contentId, payload, uid });
 }
 

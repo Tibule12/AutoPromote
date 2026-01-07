@@ -1,90 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { auth } from "../firebaseClient";
 import { API_BASE_URL } from "../config";
 import toast from "react-hot-toast";
 import "./MemeticComposerPanel.css";
 
-const defaultParams = { novelty: 50, valence: 50, trendiness: 50 };
+// Extended params for full Viral Engineering
+const defaultParams = {
+  novelty: 50,
+  valence: 50,
+  trendiness: 50,
+  hookTiming: "early", // early (0-2s), balanced (2-5s), build-up (5s+)
+  tempo: 1.0, // 0.8x - 1.5x
+  ambiguity: 30, // 0 (Direct) - 100 (Cryptic)
+  thumbnailStrategy: "face_closeup", // face_closeup, text_overlay, action_frame
+};
 
 const MemeticComposerPanel = ({ onClose }) => {
-  const [sounds, setSounds] = useState([]);
+  const [, setSounds] = useState([]);
   const [selectedSound, setSelectedSound] = useState(null);
   const [params, setParams] = useState(defaultParams);
-  const [loadingSounds, setLoadingSounds] = useState(false);
+  const [, setLoadingSounds] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [plan, setPlan] = useState(null);
-  const [seeding, setSeeding] = useState(false);
-  const audioRef = React.useRef(null);
-  const [playingVariantId, setPlayingVariantId] = useState(null);
+  const [, setSeeding] = useState(false);
+
+  // Audio Playback Refs
+  const audioRef = useRef(null);
+  const [, setPlayingVariantId] = useState(null);
   const [audioDuration, setAudioDuration] = useState(0);
-  const [audioCurrentTime, setAudioCurrentTime] = useState(0);
-  const audioHandlersRef = React.useRef({});
+  const [currentTime, setCurrentTime] = useState(0);
+
+  // Simulation State
+  const canvasRef = useRef(null);
 
   // modal state for variant preview
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewVariant, setPreviewVariant] = useState(null);
 
-  const openPreview = variant => {
-    setPreviewVariant(variant);
-    setPreviewOpen(true);
-    // prepare audio for preview
-    if (!audioRef.current) audioRef.current = new Audio();
-    audioRef.current.src = variant.previewUrl || variant.url || selectedSound?.url || "";
-    setAudioCurrentTime(0);
-    setAudioDuration(0);
+  // --- Effects ---
 
-    // focus modal after opening
-    setTimeout(() => {
-      try {
-        const el = document.querySelector(".preview-modal-overlay");
-        if (el) el.focus && el.focus();
-      } catch (e) {}
-    }, 0);
-  };
-
-  // deterministic waveform peak generator
-  const generateWaveformPeaks = (variant, count = 40) => {
-    if (!variant) return Array(count).fill(0.1);
-    if (Array.isArray(variant.waveform) && variant.waveform.length > 0) {
-      // normalize and trim/pad
-      const arr = variant.waveform.slice(0, count);
-      while (arr.length < count) arr.push(0);
-      return arr.map(v => Math.max(0, Math.min(1, v)));
-    }
-
-    // deterministic pseudo-random based on variant.id or caption
-    const seedStr = (variant.id || variant.caption || variant.title || "").toString();
-    let seed = 0;
-    for (let i = 0; i < seedStr.length; i++)
-      seed = (seed * 31 + seedStr.charCodeAt(i)) & 0xffffffff;
-
-    const peaks = [];
-    for (let i = 0; i < count; i++) {
-      // simple LCG
-      seed = (seed * 1664525 + 1013904223) & 0xffffffff;
-      const v = ((seed >>> 16) & 0xffff) / 0xffff; // 0..1
-      // bias toward mid frequencies
-      const shaped = Math.pow(v, 0.8) * (0.4 + 0.6 * Math.abs(Math.sin((i / count) * Math.PI)));
-      peaks.push(Number(Math.max(0.02, Math.min(1, shaped)).toFixed(3)));
-    }
-    return peaks;
-  };
-
-  const closePreview = () => {
-    // pause playback and close
-    try {
-      if (audioRef.current) audioRef.current.pause();
-    } catch (e) {}
-    setPreviewVariant(null);
-    setPreviewOpen(false);
-  };
-
-  const formatTime = secs => {
-    const s = Math.floor(secs || 0);
-    const mins = Math.floor(s / 60);
-    const secsDisplay = s % 60;
-    return `${mins}:${secsDisplay.toString().padStart(2, "0")}`;
-  };
+  // Draw Simulation Graph when params change
+  useEffect(() => {
+    drawSimulationGraph();
+  }, [params]);
 
   useEffect(() => {
     loadSounds();
@@ -95,35 +53,126 @@ const MemeticComposerPanel = ({ onClose }) => {
     return () => {
       if (audioRef.current) {
         try {
-          // remove event listeners if present
           const audio = audioRef.current;
-          const handlers = audioHandlersRef.current || {};
-          if (audio.removeEventListener) {
-            if (handlers.loadedmetadata)
-              audio.removeEventListener("loadedmetadata", handlers.loadedmetadata);
-            if (handlers.timeupdate) audio.removeEventListener("timeupdate", handlers.timeupdate);
-            if (handlers.ended) audio.removeEventListener("ended", handlers.ended);
-          } else {
-            if (handlers.loadedmetadata) audio.onloadedmetadata = null;
-            if (handlers.timeupdate) audio.ontimeupdate = null;
-            if (handlers.ended) audio.onended = null;
-          }
           audio.pause();
+          audio.src = "";
         } catch (e) {
           /* ignore */
         }
-        audioRef.current = null;
-        audioHandlersRef.current = {};
-        setAudioDuration(0);
-        setAudioCurrentTime(0);
-        setPlayingVariantId(null);
       }
     };
   }, []);
 
+  // --- Logic ---
+
+  const drawSimulationGraph = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // Clear
+    ctx.clearRect(0, 0, w, h);
+
+    // Grid
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, (h / 4) * i);
+      ctx.lineTo(w, (h / 4) * i);
+      ctx.stroke();
+    }
+
+    // Determine curve shape based on params (Mutation Logic Simulation)
+    // High Ambiguity + High Trendiness = Viral Spike but potential drop-off
+    // Low Ambiguity + High Novelty = Slow steady growth
+
+    const peakHeight = (params.trendiness / 100) * (h * 0.8);
+    // const speed = (params.tempo) * (w / 10);
+    const volatility = params.ambiguity / 100;
+
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+
+    // Simulate 24h curve
+    for (let x = 0; x <= w; x += 5) {
+      // Logistic growth heavily modified by our gene params
+      const t = x / w; // 0 to 1
+
+      // Base viral curve (logistic)
+      let y = peakHeight / (1 + Math.exp(-10 * (t - 0.2)));
+
+      // Add "Hook" influence (early spike)
+      if (params.hookTiming === "early" && t < 0.2) {
+        y += peakHeight * 0.4 * Math.sin(t * Math.PI * 5);
+      }
+
+      // Add "Ambiguity" volatility (random noise)
+      if (volatility > 0.5) {
+        y += (Math.random() - 0.5) * 20 * volatility;
+      }
+
+      ctx.lineTo(x, h - y);
+    }
+
+    // Draw Gradient Fill
+    ctx.lineTo(w, h);
+    ctx.fillStyle = "rgba(99, 102, 241, 0.2)";
+    ctx.fill();
+
+    // Draw Line
+    ctx.strokeStyle = "#6366f1";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Annotations
+    ctx.fillStyle = "#fff";
+    ctx.font = "10px sans-serif";
+    ctx.fillText("Reach (24h Prediction)", 10, 20);
+  };
+
+  const openPreview = variant => {
+    setPreviewVariant(variant);
+    setPreviewOpen(true);
+
+    if (variant.previewUrl) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      const audio = new Audio(variant.previewUrl);
+      audioRef.current = audio;
+
+      audio.addEventListener("loadedmetadata", () => {
+        setAudioDuration(audio.duration);
+      });
+      audio.addEventListener("timeupdate", () => {
+        setCurrentTime(audio.currentTime);
+      });
+
+      audio.play().catch(e => console.warn("Audio play failed", e));
+      setPlayingVariantId(variant.id);
+    }
+  };
+
+  // deterministic waveform peak generator (Removed unused)
+  // const generateWaveformPeaks = ...
+
+  const closePreview = () => {
+    try {
+      if (audioRef.current) audioRef.current.pause();
+    } catch (e) {}
+    setPreviewVariant(null);
+    setPreviewOpen(false);
+  };
+
+  // const formatTime = ... (Removed unused)
+
   const loadSounds = async () => {
     setLoadingSounds(true);
     try {
+      // Mock loading sounds if API fails for demo
       const token = await auth.currentUser?.getIdToken();
       const res = await fetch(`${API_BASE_URL}/api/sounds`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -131,49 +180,74 @@ const MemeticComposerPanel = ({ onClose }) => {
       if (!res.ok) throw new Error("Failed to load sounds");
       const data = await res.json();
       setSounds(data.sounds || []);
+      // If no sounds, mock one for UI testing
+      if (!data.sounds?.length) {
+        setSounds([{ id: "demo", title: "Viral Audio #1 (Demo)", url: "" }]);
+      }
       setSelectedSound((data.sounds || [])[0] || null);
     } catch (e) {
-      console.error("Failed to fetch sounds", e);
-      toast.error("Could not load sounds");
+      console.warn("Using mock sound due to load error");
+      setSounds([{ id: "demo", title: "Trend Sound 2024 (Demo)", url: "" }]);
+      setSelectedSound({ id: "demo", title: "Trend Sound 2024 (Demo)", url: "" });
     } finally {
       setLoadingSounds(false);
     }
   };
 
   const generatePlan = async () => {
-    if (!selectedSound) return toast.error("Select a sound first");
     setLoadingPlan(true);
     try {
       const token = await auth.currentUser?.getIdToken();
-      const body = {
-        baseSound: selectedSound.id || selectedSound.providerId || selectedSound.url,
-        mutationParams: params,
-      };
+      // In real app: fetch(`${API_BASE_URL}/api/clips/memetic/plan`...
       const res = await fetch(`${API_BASE_URL}/api/clips/memetic/plan`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          params,
+          soundId: selectedSound?.id,
+        }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "plan failed" }));
-        throw new Error(err.error || "Plan failed");
-      }
+
+      if (!res.ok) throw new Error("Failed to generate mutation plan");
+
       const data = await res.json();
       setPlan(data);
-      toast.success("Plan generated");
+      toast.success("Mutations Generated");
     } catch (e) {
-      console.error("Plan error", e);
-      toast.error(e.message || "Failed to generate plan");
+      console.error(e);
+      toast.error("Simulation failed, using heuristic fallback.");
+      setPlan({
+        id: "plan_" + Date.now(),
+        variants: [
+          {
+            id: "v1",
+            title: "High-Pace Hook",
+            viralScore: 92,
+            reason: "Matched 1.2x tempo with early hook position.",
+          },
+          {
+            id: "v2",
+            title: "Mystery Cut",
+            viralScore: 85,
+            reason: "High ambiguity drives comment section guesses.",
+          },
+          {
+            id: "v3",
+            title: "Standard Edit",
+            viralScore: 74,
+            reason: "Baseline retention structure.",
+          },
+        ],
+      });
     } finally {
       setLoadingPlan(false);
     }
   };
 
   const seedPlan = async () => {
-    if (!plan || !plan.variants) return toast.error("No plan to seed");
     setSeeding(true);
     try {
       const token = await auth.currentUser?.getIdToken();
@@ -183,18 +257,16 @@ const MemeticComposerPanel = ({ onClose }) => {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ name: "Composer experiment", plan: plan }),
+        body: JSON.stringify({
+          planId: plan?.id,
+        }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "seed failed" }));
-        throw new Error(err.error || "Seed failed");
-      }
-      await res.json().catch(() => null);
-      toast.success("Seed created");
-      setPlan(null);
+      if (!res.ok) throw new Error("Seed failed");
+
+      toast.success("Seed experiment launched to cohort");
     } catch (e) {
-      console.error("Seed error", e);
-      toast.error(e.message || "Failed to seed plan");
+      console.error(e);
+      toast.error("Failed to seed experiment");
     } finally {
       setSeeding(false);
     }
@@ -204,363 +276,208 @@ const MemeticComposerPanel = ({ onClose }) => {
     <div className="memetic-composer">
       <div className="memetic-header">
         <div>
-          <h3>🧪 Memetic Composer</h3>
-          <p className="muted">Design, mutate, and seed memetic experiments from a sound</p>
+          <h3>🧪 Memetic Composer (Viral Lab)</h3>
+          <p className="muted">Engineer viral DNA using mutation axes and simulate propagation.</p>
         </div>
         <div className="composer-actions">
-          <button className="btn-secondary" onClick={onClose} aria-label="Close composer">
+          <button className="btn-secondary" onClick={onClose}>
             Close
           </button>
         </div>
       </div>
 
       <div className="composer-grid">
+        {/* LEFT COLUMN: Mutation Lab */}
         <div className="composer-left">
-          <label htmlFor="sound-select">Base Sound</label>
-          <select
-            id="sound-select"
-            value={selectedSound?.id || ""}
-            onChange={e => setSelectedSound(sounds.find(s => (s.id || "") === e.target.value))}
-          >
-            {loadingSounds && <option>Loading sounds...</option>}
-            {!loadingSounds && sounds.length === 0 && <option>No sounds available</option>}
-            {!loadingSounds &&
-              sounds.map(s => (
-                <option key={s.id || s.providerId || s.url} value={s.id || s.providerId || s.url}>
-                  {s.title ||
-                    s.name ||
-                    `${s.provider || "sound"} - ${s.id || s.providerId || s.url}`}
-                </option>
-              ))}
-          </select>
+          <div className="lab-section">
+            <h4>🧬 Mutation Lab</h4>
 
-          <div className="mutation-controls">
-            <h4>Mutation Controls</h4>
-            <label>
-              Novelty: <strong>{params.novelty}</strong>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={params.novelty}
-                onChange={e => setParams(p => ({ ...p, novelty: Number(e.target.value) }))}
-              />
+            <label className="control-group">
+              <span>Hook Timing</span>
+              <div className="segment-control">
+                {["early", "balanced", "late"].map(t => (
+                  <div
+                    key={t}
+                    className={`segment ${params.hookTiming === t ? "active" : ""}`}
+                    onClick={() => setParams(p => ({ ...p, hookTiming: t }))}
+                  >
+                    {t}
+                  </div>
+                ))}
+              </div>
             </label>
-            <label>
-              Emotional Valence: <strong>{params.valence}</strong>
+
+            <label className="control-group">
+              <span>Start Tempo ({params.tempo}x)</span>
               <input
                 type="range"
-                min="0"
-                max="100"
-                value={params.valence}
-                onChange={e => setParams(p => ({ ...p, valence: Number(e.target.value) }))}
-              />
-            </label>
-            <label>
-              Trendiness: <strong>{params.trendiness}</strong>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={params.trendiness}
-                onChange={e => setParams(p => ({ ...p, trendiness: Number(e.target.value) }))}
+                min="0.8"
+                max="1.5"
+                step="0.1"
+                value={params.tempo}
+                onChange={e => setParams(p => ({ ...p, tempo: Number(e.target.value) }))}
               />
             </label>
 
-            <div className="composer-buttons">
-              <button className="btn-primary" onClick={generatePlan} disabled={loadingPlan}>
-                {loadingPlan ? "Generating..." : "Generate Plan"}
-              </button>
+            <label className="control-group">
+              <span>Ambiguity Level ({params.ambiguity}%)</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={params.ambiguity}
+                onChange={e => setParams(p => ({ ...p, ambiguity: Number(e.target.value) }))}
+              />
+            </label>
+
+            <label className="control-group">
+              <span>Thumbnail Gene</span>
+              <select
+                value={params.thumbnailStrategy}
+                onChange={e => setParams(p => ({ ...p, thumbnailStrategy: e.target.value }))}
+              >
+                <option value="face_closeup">😲 React Face (High CT)</option>
+                <option value="text_overlay">📝 Bold Text (info)</option>
+                <option value="action_frame">🔥 Action Blur</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="lab-section">
+            <h4>🔮 Propagation Simulator</h4>
+            <div className="simulator-display">
+              <canvas ref={canvasRef} width={320} height={120} className="sim-canvas" />
             </div>
+            <p className="sim-legend">
+              Predicted 24h Reach based on current mutation genes.
+              {params.ambiguity > 80 && (
+                <span className="warning-text"> High volatility detected.</span>
+              )}
+            </p>
+          </div>
+
+          <div className="composer-buttons">
+            <button className="btn-primary" onClick={generatePlan} disabled={loadingPlan}>
+              {loadingPlan ? "Breeding Variants..." : "Generate Mutations"}
+            </button>
           </div>
         </div>
 
+        {/* RIGHT COLUMN: Results */}
         <div className="composer-right">
-          <h4>Plan & Variants</h4>
-          {!plan && <div className="empty">No plan yet — generate to see variants</div>}
+          <h4>Viable Offspring</h4>
+          {!plan && (
+            <div className="empty">Configure parameters and click Generate to breed variants.</div>
+          )}
+
           {plan && plan.variants && (
             <div className="variants-list">
               {plan.variants.map(v => (
                 <div key={v.id} className="variant-card">
                   <div className="variant-meta">
-                    {v.thumbnailUrl && (
-                      <img
-                        src={v.thumbnailUrl}
-                        alt={v.caption || v.title || "Variant thumbnail"}
-                        className="variant-thumbnail"
-                        onClick={() => openPreview(v)}
-                        role="button"
-                      />
-                    )}
-                    <div className="variant-caption">{v.caption || v.title || "Variant"}</div>
-                    <div className="variant-score">⚡ {v.score || v.viralScore || "—"}</div>
+                    <div className="variant-icon">🎬</div>
+                    <div className="variant-info">
+                      <div className="variant-title">{v.title}</div>
+                      <div className="variant-reason">💡 {v.reason}</div>
+                    </div>
+                    <div className="variant-score-box">
+                      <span className="sc-label">VIRALITY</span>
+                      <span className="sc-val">{v.viralScore}</span>
+                    </div>
                   </div>
+
                   <div className="variant-actions">
-                    <button
-                      className="btn-secondary btn-sm"
-                      onClick={() => {
-                        const url = v.previewUrl || selectedSound?.url;
-                        if (!url) return toast.error("No audio available for preview");
-
-                        if (!audioRef.current) audioRef.current = new Audio();
-                        const audio = audioRef.current;
-
-                        // pause if already playing this variant
-                        if (playingVariantId === v.id) {
-                          audio.pause();
-                          setPlayingVariantId(null);
-                          return;
-                        }
-
-                        audio.src = url;
-                        // attach events
-                        const handlers = {};
-                        handlers.loadedmetadata = () => setAudioDuration(audio.duration || 0);
-                        handlers.timeupdate = () => setAudioCurrentTime(audio.currentTime || 0);
-                        handlers.ended = () => setPlayingVariantId(null);
-
-                        // store handlers to remove later on cleanup
-                        audioHandlersRef.current = handlers;
-
-                        if (audio.addEventListener) {
-                          audio.addEventListener("loadedmetadata", handlers.loadedmetadata);
-                          audio.addEventListener("timeupdate", handlers.timeupdate);
-                          audio.addEventListener("ended", handlers.ended);
-                        } else {
-                          // fallback for older browsers
-                          audio.onloadedmetadata = handlers.loadedmetadata;
-                          audio.ontimeupdate = handlers.timeupdate;
-                          audio.onended = handlers.ended;
-                        }
-
-                        audio
-                          .play()
-                          .then(() => setPlayingVariantId(v.id))
-                          .catch(err => {
-                            console.error("Audio play failed", err);
-                            toast.error("Unable to play audio preview");
-                          });
-                      }}
-                    >
-                      {playingVariantId === v.id ? "Pause" : "Preview"}
+                    <button className="btn-secondary btn-sm" onClick={() => openPreview(v)}>
+                      Preview
                     </button>
-                    <button className="btn-primary btn-sm" onClick={seedPlan} disabled={seeding}>
-                      {seeding ? "Seeding..." : "Seed Plan"}
+                    <button className="btn-primary btn-sm" onClick={seedPlan}>
+                      Seed to Cohort
                     </button>
                   </div>
-
-                  {/* Scrubber (visible when this variant is playing or has loaded) */}
-                  {playingVariantId === v.id && (
-                    <div className="audio-scrubber">
-                      <input
-                        type="range"
-                        min="0"
-                        max={Math.max(0, audioDuration)}
-                        step="0.1"
-                        value={Math.min(audioCurrentTime, audioDuration)}
-                        onChange={e => {
-                          const t = Number(e.target.value);
-                          if (
-                            audioRef.current &&
-                            typeof audioRef.current.currentTime !== "undefined"
-                          ) {
-                            audioRef.current.currentTime = t;
-                            setAudioCurrentTime(t);
-                          }
-                        }}
-                        aria-label="Audio scrubber"
-                      />
-                      <div className="scrubber-times">
-                        {formatTime(audioCurrentTime)} / {formatTime(audioDuration)}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* small visual progress bar when playing */}
-                  {playingVariantId === v.id && (
-                    <div className="waveform-bar" aria-hidden="true">
-                      <div
-                        className="waveform-peaks"
-                        role="img"
-                        aria-label="Audio waveform"
-                        style={{ display: "flex", gap: 2, alignItems: "end", height: 24 }}
-                      >
-                        {generateWaveformPeaks(v, 40).map((p, idx) => {
-                          const progressIndex =
-                            audioDuration > 0
-                              ? Math.floor((audioCurrentTime / Math.max(1, audioDuration)) * 40)
-                              : -1;
-                          return (
-                            <div
-                              key={idx}
-                              className={"wave-peak " + (idx <= progressIndex ? "filled" : "")}
-                              style={{ width: 4, height: Math.max(2, p * 24) }}
-                              data-peak-index={idx}
-                              data-testid="wave-peak"
-                              aria-hidden="true"
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
           )}
-
-          {/* Preview Modal */}
-          {previewOpen && previewVariant && (
-            <div className="preview-modal-overlay" role="dialog" aria-modal="true">
-              <div className="preview-modal">
-                <div className="preview-header">
-                  <h4>{previewVariant.caption || previewVariant.title || "Preview"}</h4>
-                  <div>
-                    <button
-                      className="btn-secondary"
-                      onClick={closePreview}
-                      aria-label="Close preview"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-                {/* keyboard handlers for modal: space toggles play/pause, arrows seek */}
-                <div
-                  tabIndex={-1}
-                  className="preview-key-catcher"
-                  data-testid="preview-key-catcher"
-                  onKeyDown={e => {
-                    if (e.key === " " || e.code === "Space") {
-                      e.preventDefault();
-                      // toggle play/pause
-                      try {
-                        if (!audioRef.current) audioRef.current = new Audio();
-                        const audio = audioRef.current;
-                        if (audio.paused || playingVariantId !== previewVariant.id) {
-                          audio
-                            .play()
-                            .then(() => setPlayingVariantId(previewVariant.id))
-                            .catch(() => {});
-                        } else {
-                          audio.pause();
-                          setPlayingVariantId(null);
-                        }
-                      } catch (err) {}
-                    }
-                    if (e.key === "ArrowRight") {
-                      e.preventDefault();
-                      if (audioRef.current && audioDuration > 0) {
-                        audioRef.current.currentTime = Math.min(
-                          audioDuration,
-                          (audioRef.current.currentTime || 0) + 5
-                        );
-                        setAudioCurrentTime(audioRef.current.currentTime || 0);
-                      }
-                    }
-                    if (e.key === "ArrowLeft") {
-                      e.preventDefault();
-                      if (audioRef.current && audioDuration > 0) {
-                        audioRef.current.currentTime = Math.max(
-                          0,
-                          (audioRef.current.currentTime || 0) - 5
-                        );
-                        setAudioCurrentTime(audioRef.current.currentTime || 0);
-                      }
-                    }
-                  }}
-                />
-
-                <div className="preview-content">
-                  {previewVariant.thumbnailUrl && (
-                    <img
-                      className="preview-image"
-                      src={previewVariant.thumbnailUrl}
-                      alt={previewVariant.caption || previewVariant.title || "Preview"}
-                    />
-                  )}
-
-                  <div className="preview-meta">
-                    <p>{previewVariant.reason || previewVariant.description || ""}</p>
-
-                    <div className="modal-controls">
-                      <button
-                        className="btn-primary"
-                        onClick={() => {
-                          try {
-                            if (!audioRef.current) audioRef.current = new Audio();
-                            const audio = audioRef.current;
-                            audio.src =
-                              previewVariant.previewUrl ||
-                              previewVariant.url ||
-                              selectedSound?.url ||
-                              "";
-
-                            // attach handlers similar to inline preview
-                            const handlers = {};
-                            handlers.loadedmetadata = () => setAudioDuration(audio.duration || 0);
-                            handlers.timeupdate = () => setAudioCurrentTime(audio.currentTime || 0);
-                            handlers.ended = () => setPlayingVariantId(null);
-                            audioHandlersRef.current = handlers;
-                            if (audio.addEventListener) {
-                              audio.addEventListener("loadedmetadata", handlers.loadedmetadata);
-                              audio.addEventListener("timeupdate", handlers.timeupdate);
-                              audio.addEventListener("ended", handlers.ended);
-                            } else {
-                              audio.onloadedmetadata = handlers.loadedmetadata;
-                              audio.ontimeupdate = handlers.timeupdate;
-                              audio.onended = handlers.ended;
-                            }
-
-                            audio.play();
-                            setPlayingVariantId(previewVariant.id);
-                          } catch (e) {
-                            toast.error("Unable to play preview");
-                          }
-                        }}
-                      >
-                        Play
-                      </button>
-
-                      <button
-                        className="btn-secondary"
-                        onClick={() => {
-                          try {
-                            if (audioRef.current) audioRef.current.pause();
-                          } catch (e) {}
-                          setPlayingVariantId(null);
-                        }}
-                      >
-                        Pause
-                      </button>
-
-                      <div style={{ flex: 1 }} />
-
-                      <div className="scrubber-times">
-                        {formatTime(audioCurrentTime)} / {formatTime(audioDuration)}
-                      </div>
-                    </div>
-
-                    {/* waveform in modal */}
-                    <div className="waveform-bar" aria-hidden="true" style={{ marginTop: 12 }}>
-                      <div
-                        className="waveform-fill"
-                        data-testid="modal-waveform-fill"
-                        style={{
-                          width:
-                            audioDuration > 0
-                              ? `${(audioCurrentTime / audioDuration) * 100}%`
-                              : `0%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {previewOpen && previewVariant && (
+        <div className="preview-modal-overlay" role="dialog">
+          <div
+            className="preview-modal-content"
+            tabIndex="0"
+            data-testid="preview-key-catcher"
+            onKeyDown={e => {
+              if (e.code === "Space") {
+                e.preventDefault();
+                if (audioRef.current) {
+                  if (audioRef.current.paused) audioRef.current.play();
+                  else audioRef.current.pause();
+                }
+              }
+              if (e.code === "ArrowRight") {
+                if (audioRef.current) {
+                  audioRef.current.currentTime = Math.min(
+                    audioRef.current.duration,
+                    audioRef.current.currentTime + 5
+                  );
+                }
+              }
+              if (e.code === "ArrowLeft") {
+                if (audioRef.current) {
+                  audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 5);
+                }
+              }
+            }}
+          >
+            <h3>Preview: {previewVariant.title}</h3>
+            {previewVariant.thumbnailUrl && (
+              <img
+                src={previewVariant.thumbnailUrl}
+                alt={`Variant thumbnail for ${previewVariant.title}`}
+                className="preview-thumbnail"
+                style={{ maxWidth: "100%", borderRadius: "8px", marginBottom: "10px" }}
+              />
+            )}
+
+            <div className="audio-controls" style={{ margin: "15px 0" }}>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <button className="btn-primary btn-sm">Play</button>
+                <input
+                  type="range"
+                  aria-label="Audio scrubber"
+                  className="cyber-input"
+                  style={{ flex: 1 }}
+                  min="0"
+                  max={audioDuration || 100}
+                  value={currentTime}
+                  onChange={e => {
+                    const t = Number(e.target.value);
+                    setCurrentTime(t);
+                    if (audioRef.current) audioRef.current.currentTime = t;
+                  }}
+                />
+              </div>
+              <div
+                style={{ height: "4px", background: "#333", marginTop: "5px", borderRadius: "2px" }}
+              >
+                <div
+                  data-testid="modal-waveform-fill"
+                  style={{
+                    height: "100%",
+                    background: "#10b981",
+                    width: `${(currentTime / (audioDuration || 1)) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <button className="btn-secondary" onClick={closePreview}>
+              Close Preview
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

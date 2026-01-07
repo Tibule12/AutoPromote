@@ -10,6 +10,7 @@ const LEARNING_RATE = parseFloat(process.env.BANDIT_TUNER_LR || "0.05");
 const TARGET_EXPLORATION = parseFloat(process.env.BANDIT_TUNER_TARGET_EXPLORATION || "0.25");
 const ROLLBACK_DROP_PCT = parseFloat(process.env.BANDIT_TUNER_ROLLBACK_PCT || "0.25"); // 25% avg CTR drop
 const ROLLBACK_LOOKBACK_MIN = parseInt(process.env.BANDIT_TUNER_ROLLBACK_LOOKBACK_MIN || "60", 10);
+void TARGET_EXPLORATION;
 
 async function recentCtrAverage(minutes) {
   const sinceIso = new Date(Date.now() - minutes * 60000).toISOString();

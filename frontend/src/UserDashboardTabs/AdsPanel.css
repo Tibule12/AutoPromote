@@ -1,0 +1,240 @@
+/* AdsPanel Reactor Theme */
+
+.ads-reactor-container {
+  padding: 2rem;
+  background: #050510;
+  min-height: 100vh;
+  color: #00ff41;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.reactor-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 10px #00ff41;
+  letter-spacing: 4px;
+}
+
+.reactor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  height: 600px;
+}
+
+.reactor-module {
+  background: rgba(10, 20, 40, 0.8);
+  border: 1px solid #003311;
+  border-radius: 4px;
+  padding: 1.5rem;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.05);
+}
+
+/* Control Core */
+.control-core {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.holographic-input-group label,
+.slider-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  color: #008f11;
+  text-transform: uppercase;
+}
+
+.terminal-input {
+  width: 100%;
+  height: 150px;
+  background: #000;
+  border: 1px solid #00ff41;
+  color: #00ff41;
+  padding: 1rem;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.2);
+}
+
+.terminal-input:focus {
+  box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.4);
+}
+
+/* Sliders */
+.cyber-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #003311;
+  border-radius: 2px;
+}
+
+.cyber-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #00ff41;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00ff41;
+}
+
+/* Ignite Button */
+.ignite-button {
+  width: 100%;
+  padding: 1.5rem;
+  background: transparent;
+  border: 2px solid #00ff41;
+  color: #00ff41;
+  font-size: 1.5rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  text-shadow: 0 0 5px #00ff41;
+}
+
+.ignite-button:hover:not(:disabled) {
+  background: #00ff41;
+  color: #000;
+  box-shadow: 0 0 30px #00ff41;
+}
+
+.ignite-button.stabilizing {
+  border-color: #ffd700;
+  color: #ffd700;
+  text-shadow: 0 0 5px #ffd700;
+  animation: pulse 1s infinite;
+}
+
+/* Simulation */
+.simulation-viewport {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+.particle-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.viewport-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  padding: 1rem;
+}
+
+.stat-corner {
+  position: absolute;
+  font-size: 0.7rem;
+  color: rgba(0, 255, 65, 0.7);
+}
+
+.tl {
+  top: 1rem;
+  left: 1rem;
+}
+.tr {
+  top: 1rem;
+  right: 1rem;
+}
+.bl {
+  bottom: 1rem;
+  left: 1rem;
+}
+.br {
+  bottom: 1rem;
+  right: 1rem;
+}
+
+/* Active List */
+.active-reactions-list {
+  margin-top: 2rem;
+}
+
+.reactions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.reaction-card {
+  background: rgba(0, 20, 0, 0.9);
+  border: 1px solid #004400;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.reaction-card:hover {
+  border-color: #00ff41;
+  transform: translateY(-2px);
+}
+
+.reaction-info h4 {
+  margin: 0;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.reaction-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.5rem;
+}
+
+.reaction-metrics {
+  margin-top: 1rem;
+  text-align: center;
+  background: rgba(0, 255, 65, 0.1);
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.metric-val {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #00ff41;
+}
+
+.metric-label {
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+}
+
+.section-header {
+  border-bottom: 1px solid #003311;
+  padding-bottom: 0.5rem;
+  color: #008f11;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}

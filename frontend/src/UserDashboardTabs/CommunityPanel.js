@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { auth } from "../firebaseClient";
+import { auth, storage } from "../firebaseClient";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL } from "../config";
 import "./CommunityPanel.css";
 import ExplainButton from "../components/ExplainButton";
@@ -7,6 +8,9 @@ import ExplainButton from "../components/ExplainButton";
 function CommunityPanel() {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState({ title: "", content: "", category: "general" });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0); // 0-100 placeholder
   const [loading, setLoading] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [replyText, setReplyText] = useState("");
@@ -74,23 +78,66 @@ function CommunityPanel() {
     tryLoad();
   }, []);
 
+  const handleFileSelect = e => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      // validation for size 50MB
+      if (file.size > 50 * 1024 * 1024) {
+        alert("File too large. Max 50MB.");
+        return;
+      }
+      setSelectedFile(file);
+      setFilePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+  };
+
   // Create new post (via backend to centralize moderation/audit)
   const handleCreatePost = async e => {
     e.preventDefault();
-    if (!newPost.title.trim() || !newPost.content.trim()) {
-      alert("Please fill in both title and content");
+    if (!newPost.title.trim() || (!newPost.content.trim() && !selectedFile)) {
+      alert("Please provide a title and either content or a file.");
       return;
     }
 
     setLoading(true);
+    setUploadProgress(0);
     try {
       const user = auth.currentUser;
       const token = await user.getIdToken();
 
+      let mediaUrl = null;
+      let mediaType = "text";
+
+      // 1. Upload File if present
+      if (selectedFile) {
+        setUploadProgress(20);
+        const fileExt = selectedFile.name.split(".").pop();
+        const fileName = `${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExt}`;
+        const storageRef = ref(storage, `community/${user.uid}/${fileName}`);
+
+        await uploadBytes(storageRef, selectedFile);
+        setUploadProgress(80);
+        mediaUrl = await getDownloadURL(storageRef);
+
+        if (selectedFile.type.startsWith("image/")) mediaType = "image";
+        else if (selectedFile.type.startsWith("video/")) mediaType = "video";
+        else if (selectedFile.type.startsWith("audio/")) mediaType = "audio";
+      }
+      setUploadProgress(90);
+
       // Map local fields to backend API (backend expects type/caption/mediaUrl)
+      // We append category to caption as metadata if backend doesn't support it strictly yet,
+      // but ideally backend should take category. We'll pass it in body and see.
       const payload = {
-        type: "text",
+        type: mediaType,
         caption: `${newPost.title}\n\n${newPost.content}`,
+        mediaUrl: mediaUrl,
+        category: newPost.category,
       };
 
       const res = await fetch(`${API_BASE_URL}/api/community/posts`, {
@@ -111,6 +158,8 @@ function CommunityPanel() {
       }
 
       setNewPost({ title: "", content: "", category: "general" });
+      setSelectedFile(null);
+      setFilePreview(null);
       alert("Post created successfully!");
       // Refresh feed to include new post
       setLastPostId(null);
@@ -120,6 +169,7 @@ function CommunityPanel() {
       alert("Failed to create post");
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -399,6 +449,98 @@ function CommunityPanel() {
                   maxLength={2000}
                 />
               </div>
+
+              <div className="form-group">
+                <label>Attachment (Image, Video, Audio)</label>
+                <div className="file-upload-wrapper">
+                  <input
+                    type="file"
+                    id="community-file"
+                    accept="image/*,video/*,audio/*"
+                    onChange={handleFileSelect}
+                    className="file-input-hidden"
+                    style={{ display: "none" }}
+                  />
+                  <label
+                    htmlFor="community-file"
+                    className="btn-secondary btn-sm"
+                    style={{ cursor: "pointer", display: "inline-block", marginBottom: "8px" }}
+                  >
+                    {selectedFile ? "Change File" : "📷/🎥 Attach Media"}
+                  </label>
+
+                  {selectedFile && (
+                    <div
+                      className="selected-file-preview"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        fontSize: "0.9rem",
+                        color: "#4b5563",
+                      }}
+                    >
+                      <span>
+                        📎 {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(1)}MB)
+                      </span>
+                      <button
+                        type="button"
+                        onClick={removeFile}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#ef4444",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+
+                  {filePreview && (
+                    <div
+                      className="media-preview-box"
+                      style={{
+                        marginTop: "10px",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        border: "1px solid #e5e7eb",
+                      }}
+                    >
+                      <img
+                        src={filePreview}
+                        alt="Preview"
+                        style={{ maxWidth: "100%", maxHeight: "200px", display: "block" }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {loading && uploadProgress > 0 && uploadProgress < 100 && (
+                <div
+                  className="upload-progress-bar"
+                  style={{
+                    height: "4px",
+                    background: "#e5e7eb",
+                    borderRadius: "2px",
+                    margin: "10px 0",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    className="progress-fill"
+                    style={{
+                      width: `${uploadProgress}%`,
+                      height: "100%",
+                      background: "#6366f1",
+                      transition: "width 0.3s ease",
+                    }}
+                  ></div>
+                </div>
+              )}
 
               <button type="submit" disabled={loading} className="post-btn">
                 {loading ? "Posting..." : "📤 Post to Community"}
