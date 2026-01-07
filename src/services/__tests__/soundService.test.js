@@ -19,7 +19,9 @@ describe("soundService", () => {
       testEnv = await initializeTestEnvironmentWithDiscovery("sound-service");
     });
     beforeEach(async () => {
-      const ctx = testEnv.unauthenticatedContext();
+      const ctx = testEnv.authenticatedContext("service-account", {
+        firebase: { sign_in_provider: "service_account" },
+      });
       testDb = ctx.firestore();
       global.__testDb = testDb;
     });
