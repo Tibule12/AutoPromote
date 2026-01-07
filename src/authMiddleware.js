@@ -13,6 +13,10 @@ const authMiddleware = async (req, res, next) => {
       token = req.query.id_token || req.query.idToken || req.query.token || token;
     }
 
+    // SECURITY: Prevent type confusion (CodeQL) - token must be a string
+    if (Array.isArray(token)) token = token[0];
+    if (typeof token !== "string") token = null;
+
     // Instrumentation: record a small request context for diagnostics
     const requestContext = {
       ip:
