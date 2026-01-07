@@ -73,8 +73,6 @@ function AdminDashboard({ analytics, user, onLogout }) {
       return null;
     }
     try {
-      console.debug("Fetching analytics data from Firestore...");
-
       // Get current date for today's metrics
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -541,7 +539,6 @@ function AdminDashboard({ analytics, user, onLogout }) {
         },
       };
 
-      console.debug("Successfully fetched Firestore analytics data");
       setDashboardData(firestoreAnalyticsData);
       setIsLoading(false);
       setRefreshing(false);
@@ -550,7 +547,6 @@ function AdminDashboard({ analytics, user, onLogout }) {
       setError(err.message);
 
       // Fallback to mock data after a short delay
-      console.debug("Falling back to mock analytics data");
       setTimeout(() => {
         setDashboardData(mockAnalyticsData);
         setIsLoading(false);

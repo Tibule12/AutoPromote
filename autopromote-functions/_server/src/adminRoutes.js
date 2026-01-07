@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const express = require("express");
 const { admin, db, auth, storage } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
@@ -209,6 +210,80 @@ router.put("/users/:id/role", authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
+// List users (basic fields) - admin only
+router.get("/users", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit || "100", 10);
+    const snapshot = await db.collection("users").limit(limit).get();
+    const users = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, users });
+  } catch (error) {
+    console.error("Error listing users:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Set or clear KYC verification flag for a user
+router.put("/users/:id/kyc", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { kycVerified } = req.body;
+    if (typeof kycVerified === "undefined")
+      return res.status(400).json({ error: "kycVerified boolean required" });
+
+    const userRef = db.collection("users").doc(userId);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) return res.status(404).json({ error: "User not found" });
+
+    await userRef.update({ kycVerified: !!kycVerified, updatedAt: new Date().toISOString() });
+
+    await db.collection("admin_audit").add({
+      action: "kyc_toggled",
+      adminId: req.user.uid,
+      targetId: userId,
+      kycVerified: !!kycVerified,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    const updated = await userRef.get();
+    res.json({ success: true, user: { id: updated.id, ...updated.data() } });
+  } catch (error) {
+    console.error("Error toggling kyc:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Grant or revoke AfterDark access flag on a user
+router.post("/users/:id/afterdark-access", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { granted } = req.body;
+    if (typeof granted === "undefined")
+      return res.status(400).json({ error: "granted boolean required" });
+
+    const userRef = db.collection("users").doc(userId);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) return res.status(404).json({ error: "User not found" });
+
+    const flags = Object.assign({}, userDoc.data().flags || {}, { afterDarkAccess: !!granted });
+    await userRef.update({ flags, updatedAt: new Date().toISOString() });
+
+    await db.collection("admin_audit").add({
+      action: "afterdark_access_toggled",
+      adminId: req.user.uid,
+      targetId: userId,
+      granted: !!granted,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    const updated = await userRef.get();
+    res.json({ success: true, user: { id: updated.id, ...updated.data() } });
+  } catch (error) {
+    console.error("Error toggling AfterDark access:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Suspend user
 router.post("/users/:id/suspend", authMiddleware, adminOnly, async (req, res) => {
   try {
@@ -348,7 +423,13 @@ router.get("/openai/usage", authMiddleware, adminOnly, async (req, res) => {
     // Aggregate cost
     const totalCost = usage.reduce((sum, u) => sum + (u.cost || 0), 0);
 
-    res.json({ success: true, usage: { totalCost, daily: usage } });
+    // Include a top-level `configured` flag so frontends can easily detect
+    // whether OpenAI is configured in the runtime environment.
+    res.json({
+      success: true,
+      configured: !!process.env.OPENAI_API_KEY,
+      usage: { totalCost, daily: usage },
+    });
   } catch (error) {
     console.error("Error fetching OpenAI usage:", error);
     res.status(500).json({ success: false, error: "Internal server error" });
@@ -405,7 +486,7 @@ router.delete("/users/:id", authMiddleware, adminOnly, async (req, res) => {
 // Get platform analytics
 router.get("/analytics", authMiddleware, adminOnly, async (req, res) => {
   // Make period available to try/catch
-  const period = req.query && req.query.period ? req.query.period : "7d";
+  let period = req.query && req.query.period ? req.query.period : "7d";
   try {
     let days = 7;
 

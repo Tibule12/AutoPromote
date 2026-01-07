@@ -1013,7 +1013,7 @@ const UserDashboard = ({
         }
       } catch (jsonErr) {
         // Not JSON or fetch failed, fall through to direct redirect approach
-        console.log("Two-step auth not available, using direct redirect", jsonErr.message);
+        console.warn("Two-step auth not available, using direct redirect", jsonErr.message);
       }
 
       // Direct redirect flow: append token as query param and open

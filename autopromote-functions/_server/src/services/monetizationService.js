@@ -4,6 +4,7 @@
 
 const { db } = require("../firebaseAdmin");
 const crypto = require("crypto");
+const logger = require("../utils/logger");
 
 class MonetizationService {
   // Premium tier definitions
@@ -118,7 +119,9 @@ class MonetizationService {
         message: `Successfully subscribed to ${tier.name} tier`,
       };
     } catch (error) {
-      console.error("Error subscribing to tier:", error);
+      logger.error("Monetization.subscribeToTierError", {
+        error: error && error.message ? error.message : error,
+      });
       throw error;
     }
   }
@@ -126,7 +129,7 @@ class MonetizationService {
   // Process payment (mock implementation)
   async processPayment(userId, amount, method) {
     // In production, this would integrate with Stripe/PayPal
-    console.log(`💳 Processing payment for user ${userId}: $${amount} via ${method}`);
+    logger.info("Monetization.processPayment", { userId, amount, method });
 
     // Simulate payment processing
     // Use crypto.randomInt to avoid insecure randomness reported by static analyzers
@@ -187,7 +190,9 @@ class MonetizationService {
         suggestedTier: canPerformAction ? null : this.suggestUpgradeTier(subscription.tier, action),
       };
     } catch (error) {
-      console.error("Error checking subscription limits:", error);
+      logger.error("Monetization.checkSubscriptionLimitsError", {
+        error: error && error.message ? error.message : error,
+      });
       throw error;
     }
   }

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Startup Diagnostics - Runs automatically when server starts
  * Logs all critical errors and warnings to console and database
@@ -139,21 +140,50 @@ class StartupDiagnostics {
 
     try {
       // Test Storage
-      const bucket = admin.storage().bucket();
-      const [exists] = await bucket.exists();
-      if (exists) {
-        this.log("success", "firebase", "Firebase Storage connection successful");
-      } else {
-        this.log("error", "firebase", "Firebase Storage bucket not found", {
-          action_required: "Create or configure storage bucket",
-          impact: "File uploads will fail",
+      const configuredBucket =
+        process.env.FIREBASE_STORAGE_BUCKET ||
+        (admin && admin.options && admin.options.storageBucket);
+      if (!configuredBucket) {
+        this.log("warning", "firebase", "Firebase Storage bucket not configured", {
+          action_required:
+            "Set FIREBASE_STORAGE_BUCKET in environment variables (e.g. my-bucket.appspot.com)",
+          impact: "File uploads will be disabled until configured",
         });
+      } else if (!admin || typeof admin.storage !== "function") {
+        this.log("warning", "firebase", "Firebase Storage SDK not available", {
+          action_required: "Ensure firebase-admin has storage enabled in this build",
+          impact: "Storage operations may not work",
+        });
+      } else {
+        const bucket = admin.storage().bucket(configuredBucket);
+        try {
+          const [exists] = await bucket.exists();
+          if (exists) {
+            this.log("success", "firebase", "Firebase Storage connection successful");
+          } else {
+            this.log("error", "firebase", "Firebase Storage bucket not found", {
+              bucket: configuredBucket,
+              action_required:
+                "Create or configure storage bucket with this name, or set FIREBASE_STORAGE_BUCKET to the correct bucket",
+              impact: "File uploads will fail",
+            });
+          }
+        } catch (err) {
+          // Likely permission/credentials issue
+          this.log("error", "firebase", "Firebase Storage connection failed", {
+            error: err && err.message,
+            bucket: configuredBucket,
+            action_required:
+              "Verify service account has Storage permissions (roles/storage.objectViewer or roles/storage.admin) and that FIREBASE_SERVICE_ACCOUNT is valid",
+            impact: "File uploads will fail",
+          });
+        }
       }
     } catch (error) {
-      this.log("error", "firebase", "Firebase Storage connection failed", {
-        error: error.message,
-        action_required: "Check Storage configuration",
-        impact: "File uploads will fail",
+      this.log("error", "firebase", "Firebase Storage check encountered an unexpected error", {
+        error: error && error.message,
+        action_required: "Investigate runtime error during storage verification",
+        impact: "File uploads may be impacted",
       });
     }
   }

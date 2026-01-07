@@ -1,4 +1,39 @@
-// ...existing code...
+/* eslint-disable no-console */
+// Bootstrap: ensure Firebase service account env is materialized as a credentials file
+// This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
+try {
+  const os = require("os");
+  const fs = require("fs");
+  const path = require("path");
+  const svcRaw =
+    process.env.FIREBASE_SERVICE_ACCOUNT_JSON ||
+    (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64
+      ? Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, "base64").toString("utf8")
+      : null);
+  if (svcRaw && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    try {
+      const parsed = JSON.parse(svcRaw);
+      if (parsed && parsed.private_key && typeof parsed.private_key === "string")
+        parsed.private_key = parsed.private_key.replace(/\\n/g, "\n");
+      const tmpPath = path.join(os.tmpdir(), `autopromote-service-account-${Date.now()}.json`);
+      fs.writeFileSync(tmpPath, JSON.stringify(parsed, null, 2), { mode: 0o600 });
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
+      if (!process.env.FIREBASE_PROJECT_ID && parsed && parsed.project_id) {
+        process.env.FIREBASE_PROJECT_ID = parsed.project_id;
+      }
+      console.log(
+        `[startup] Wrote service account JSON to ${tmpPath} and set GOOGLE_APPLICATION_CREDENTIALS`
+      );
+    } catch (e) {
+      console.warn(
+        "[startup] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON/BASE64:",
+        e && e.message
+      );
+    }
+  }
+} catch (e) {
+  /* ignore bootstrap failures */
+}
 
 // Diagnostic: Log google-gax and @grpc/grpc-js versions if present to help debug runtime dependency mismatches
 try {
@@ -145,7 +180,7 @@ const SLOW_REQ_MS = parseInt(process.env.SLOW_REQ_MS || "3000", 10);
 let __printedStartupMissing = false;
 // Latency aggregation (simple ring buffer + percentile calc)
 const LAT_SAMPLE_SIZE = parseInt(process.env.LAT_SAMPLE_SIZE || "500", 10); // keep last 500 by default
-const __latSamples = new Array(LAT_SAMPLE_SIZE);
+let __latSamples = new Array(LAT_SAMPLE_SIZE);
 let __latIndex = 0;
 let __latCount = 0;
 function recordLatency(ms) {
@@ -210,11 +245,10 @@ async function runWarmup(trigger = "auto") {
   const t0 = Date.now();
   try {
     const tasks = [];
-    const taskMeta = [];
     const timeWrap = (label, fn) => {
       const t0 = Date.now();
       return fn()
-        .then(r => ({ status: "fulfilled", took: Date.now() - t0, label }))
+        .then(_r => ({ status: "fulfilled", took: Date.now() - t0, label }))
         .catch(e => ({ status: "rejected", took: Date.now() - t0, label, error: e.message }));
     };
     try {
@@ -589,6 +623,8 @@ try {
   console.log("⚠️ Captions routes not found:", e.message);
   captionsRoutes = express.Router();
 }
+// Intentionally not mounted in this instance; keep available for tests
+void captionsRoutes;
 try {
   adminCacheRoutes = require("./routes/adminCacheRoutes");
   console.log("✅ Admin cache routes loaded");
@@ -790,6 +826,9 @@ try {
 
   // Import initialized Firebase services
   const { admin, db, auth, storage } = require("./firebaseAdmin");
+  void admin; // some deployments don't use these directly in this file
+  void auth;
+  void storage;
 
   const app = express();
   // Attach Sentry request handler if Sentry initialized
@@ -821,7 +860,7 @@ try {
     routeLimiter = require("./middlewares/globalRateLimiter").rateLimiter;
   } catch (e) {
     routeLimiter =
-      (opts = {}) =>
+      (_opts = {}) =>
       (req, res, next) =>
         next();
   }
@@ -1202,6 +1241,12 @@ try {
   app.use("/api/admin/analytics", adminAnalyticsRoutes);
   app.use("/api/engagement", engagementRoutes);
   app.use("/api/monetization", monetizationRoutes);
+  // Internal endpoints (accept lightweight payloads from frontend instrumentation)
+  try {
+    app.use("/api/internal", require("./routes/frontendLogsRoutes"));
+  } catch (e) {
+    logger.warn("Failed to mount /api/internal routes", e && e.message);
+  }
   try {
     app.use("/api/usage", routeLimiter({ windowHint: "usage" }), require("./routes/usageRoutes"));
   } catch (e) {
@@ -1328,6 +1373,22 @@ try {
   } catch (e) {
     console.log("⚠️ Chat routes mount failed:", e.message);
   }
+  // Assistant routes (scaffold) - gated by ASSISTANT_ENABLED env variable
+  try {
+    const assistantRoutes = require("./routes/assistantRoutes");
+    app.use(
+      "/api/assistant",
+      routeLimiter({ windowHint: "assistant" }),
+      codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req, res, next) => next(),
+      authMiddleware,
+      assistantRoutes
+    );
+    console.log(
+      "🚏 Assistant routes mounted at /api/assistant (ASSISTANT_ENABLED must be true to respond)"
+    );
+  } catch (e) {
+    console.log("⚠️ Assistant routes mount failed:", e.message);
+  }
   // Mount generic platform routes under /api so frontend placeholder endpoints like
   // /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
   try {
@@ -1400,6 +1461,8 @@ try {
     console.warn("Content quality check route not available:", e.message);
   }
 
+  // AfterDark (adult) area removed from codebase per repository policy.
+
   // Register optional routes
   app.use("/api/withdrawals", routeLimiter({ windowHint: "withdrawals" }), withdrawalRoutes);
   app.use("/api/monetization", routeLimiter({ windowHint: "monetization" }), monetizationRoutes);
@@ -1429,6 +1492,87 @@ try {
     paymentsExtendedRoutes
   );
   app.use("/api/paypal", paypalWebhookRoutes);
+  // Fallback lightweight status endpoint to avoid 404s from frontends if the
+  // full PayPal router isn't available in a particular deploy variant.
+  try {
+    // Lightweight, tolerant status endpoint: accepts optional Bearer ID token.
+    app.get("/api/paypal-subscriptions/status", async (req, res) => {
+      try {
+        const { db, admin } = require("./firebaseAdmin");
+        let userId = req.userId || (req.user && req.user.uid) || null;
+
+        // If no user from middleware, attempt to verify Authorization Bearer token (if provided)
+        if (!userId) {
+          try {
+            const authHeader =
+              (req.headers && (req.headers.authorization || req.headers.Authorization)) || "";
+            if (authHeader && authHeader.startsWith("Bearer ")) {
+              const idToken = authHeader.slice(7).trim();
+              if (idToken) {
+                try {
+                  const decoded = await admin.auth().verifyIdToken(idToken);
+                  userId = decoded && decoded.uid;
+                } catch (vtErr) {
+                  // token invalid/expired; we'll treat as unauthenticated below
+                }
+              }
+            }
+          } catch (e) {
+            // ignore verification errors
+          }
+        }
+
+        // If still no user, return default free subscription so frontend doesn't 404
+        if (!userId) {
+          return res.json({
+            success: true,
+            subscription: { planId: "free", planName: "Free", status: "active", features: {} },
+          });
+        }
+
+        let subDoc;
+        try {
+          subDoc = await db.collection("user_subscriptions").doc(userId).get();
+        } catch (e) {
+          return res.json({
+            success: true,
+            subscription: { planId: "free", planName: "Free", status: "active", features: {} },
+          });
+        }
+
+        if (!subDoc.exists) {
+          return res.json({
+            success: true,
+            subscription: { planId: "free", planName: "Free", status: "active", features: {} },
+          });
+        }
+
+        const subscription = subDoc.data();
+        return res.json({
+          success: true,
+          subscription: {
+            planId: subscription.planId,
+            planName: subscription.planName,
+            status: subscription.status,
+            amount: subscription.amount,
+            currency: subscription.currency,
+            nextBillingDate: subscription.nextBillingDate,
+            features: subscription.features,
+            cancelledAt: subscription.cancelledAt,
+            expiresAt: subscription.expiresAt,
+          },
+        });
+      } catch (err) {
+        console.error("[PayPal-Fallback] status handler error:", err);
+        return res.status(500).json({ error: "Failed to fetch subscription status" });
+      }
+    });
+  } catch (e) {
+    // If authMiddleware or firebaseAdmin are not available in this runtime,
+    // do nothing; the normal router may be mounted elsewhere.
+    console.warn("PayPal fallback status route not mounted:", e && e.message);
+  }
+
   app.use(
     "/api/paypal-subscriptions",
     routeLimiter({ windowHint: "paypal_subscriptions" }),
@@ -1726,7 +1870,9 @@ try {
     const fs = require("fs");
     const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
     if (!fs.existsSync(frontIndex)) {
-      console.warn(`[startup] Frontend build not found at ${frontIndex}. Static SPA will return 404 for root. Ensure 'npm --prefix frontend run build' runs during deploy.`);
+      console.warn(
+        `[startup] Frontend build not found at ${frontIndex}. Static SPA will return 404 for root. Ensure 'npm --prefix frontend run build' runs during deploy.`
+      );
     }
   } catch (e) {
     /* ignore */
@@ -1763,14 +1909,19 @@ try {
       const fs = require("fs");
       const frontIndexPath = path.join(__dirname, "../frontend/build", "index.html");
       if (!fs.existsSync(frontIndexPath)) {
-        console.warn(`[startup] Frontend build not found at ${frontIndexPath}. Run 'npm --prefix frontend run build' during deploy.`);
+        console.warn(
+          `[startup] Frontend build not found at ${frontIndexPath}. Run 'npm --prefix frontend run build' during deploy.`
+        );
         return res.send(
           "<html><body><h1>Admin Dashboard</h1><p>The actual dashboard is not available.</p></body></html>"
         );
       }
       return res.sendFile(frontIndexPath);
     } catch (error) {
-      console.warn("[startup] admin-dashboard sendFile error:", error && error.message ? error.message : error);
+      console.warn(
+        "[startup] admin-dashboard sendFile error:",
+        error && error.message ? error.message : error
+      );
       res.send(
         "<html><body><h1>Admin Dashboard</h1><p>The actual dashboard is not available.</p></body></html>"
       );
@@ -1783,20 +1934,6 @@ try {
       return res.redirect(302, "/#/pricing");
     } catch (e) {
       console.error("[server] /pricing redirect error", e && e.message ? e.message : e);
-      return res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-    }
-  });
-
-  // Redirect /dashboard to the SPA hash route so PayPal return URLs won't 404
-  app.get(["/dashboard", "/dashboard/*"], (req, res) => {
-    try {
-      const qs =
-        req.originalUrl && req.originalUrl.includes("?")
-          ? req.originalUrl.slice(req.originalUrl.indexOf("?"))
-          : "";
-      return res.redirect(302, "/#/dashboard" + qs);
-    } catch (e) {
-      console.error("[server] /dashboard redirect error", e && e.message ? e.message : e);
       return res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
     }
   });
@@ -1889,7 +2026,27 @@ try {
   // Cache extended diagnostics to avoid repeated heavy Firestore queries.
   let __healthCache = { ts: 0, data: null };
   const HEALTH_CACHE_MS = parseInt(process.env.HEALTH_CACHE_MS || "15000", 10); // 15s default
+
+  // Event loop delay monitoring (node >= 12.17)
+  try {
+    const { monitorEventLoopDelay } = require("perf_hooks");
+    const eld = monitorEventLoopDelay({ resolution: 20 });
+    eld.enable();
+    setInterval(() => {
+      const mean = Math.round(eld.mean / 1e6); // ms
+      const max = Math.round(eld.max / 1e6);
+      if (mean > 50 || max > 200) {
+        console.warn("[perf][event-loop] mean=%dms max=%dms", mean, max);
+      }
+      // reset stats to avoid unbounded memory
+      eld.reset();
+    }, 15_000);
+  } catch (e) {
+    // ignore if perf_hooks not available
+  }
+
   app.get("/api/health", statusPublicLimiter, async (req, res) => {
+    const startMs = Date.now();
     const verbose =
       req.query.verbose === "1" ||
       req.query.full === "1" ||
@@ -1900,9 +2057,27 @@ try {
       timestamp: new Date().toISOString(),
       uptimeSec: Math.round(process.uptime()),
     };
-    if (!verbose) return res.json(base);
+    if (!verbose) {
+      const total = Date.now() - startMs;
+      if (total > 500)
+        console.warn(
+          "[health][slow] took=%dms ip=%s path=%s",
+          total,
+          req.ip || req.headers["x-forwarded-for"] || "unknown",
+          req.originalUrl || req.url
+        );
+      return res.json(base);
+    }
     const now = Date.now();
     if (__healthCache.data && now - __healthCache.ts < HEALTH_CACHE_MS) {
+      const total = Date.now() - startMs;
+      if (total > 500)
+        console.warn(
+          "[health][slow-cache] took=%dms ip=%s path=%s",
+          total,
+          req.ip || req.headers["x-forwarded-for"] || "unknown",
+          req.originalUrl || req.url
+        );
       return res.json(__healthCache.data);
     }
     const extended = { ...base, diagnostics: {} };
@@ -1976,21 +2151,6 @@ try {
         process.env.COMMIT_HASH ||
         process.env.VERCEL_GIT_COMMIT_SHA ||
         null;
-
-      // Frontend build presence check - helps detect deploys missing 'npm --prefix frontend run build'
-      try {
-        const fs = require("fs");
-        const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
-        const frontPresent = fs.existsSync(frontIndex);
-        extended.diagnostics.frontend = { present: frontPresent, path: frontIndex };
-        if (!frontPresent) {
-          extended.diagnostics.frontend.message = "frontend build missing";
-          extended.diagnostics.degraded = true;
-        }
-      } catch (e) {
-        extended.diagnostics.frontendError = e.message;
-        extended.diagnostics.degraded = true;
-      }
       extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === "true";
 
       // OpenAI configuration status
@@ -2020,6 +2180,21 @@ try {
           configured: !!(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
         },
       };
+
+      // Frontend build presence check - helps detect deploys missing 'npm --prefix frontend run build'
+      try {
+        const fs = require("fs");
+        const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
+        const frontPresent = fs.existsSync(frontIndex);
+        extended.diagnostics.frontend = { present: frontPresent, path: frontIndex };
+        if (!frontPresent) {
+          extended.diagnostics.frontend.message = "frontend build missing";
+          extended.diagnostics.degraded = true;
+        }
+      } catch (e) {
+        extended.diagnostics.frontendError = e.message;
+        extended.diagnostics.degraded = true;
+      }
     } catch (e) {
       extended.diagnosticsError = e.message;
     }
@@ -2223,7 +2398,7 @@ try {
         const userData = userSnap.data() || {};
         let contentCount = 0;
         let published = 0;
-        const platforms = new Set();
+        let platforms = new Set();
         contentSnap.forEach(d => {
           const v = d.data() || {};
           contentCount++;
@@ -2262,29 +2437,199 @@ try {
     }
   });
 
+  // Ensure unmatched routes serve the React app
+  app.use((req, res, next) => {
+    // Avoid serving index.html for API, static, or well-known paths
+    if (
+      req.path &&
+      (req.path.startsWith("/static") ||
+        req.path.startsWith("/api") ||
+        req.path.startsWith("/.well-known") ||
+        req.path.startsWith("/favicon") ||
+        req.path.startsWith("/WhatsApp "))
+    ) {
+      return next();
+    }
+    try {
+      const fs = require("fs");
+      const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
+      if (!fs.existsSync(frontIndex)) {
+        console.warn(
+          `[startup] Frontend build not found at ${frontIndex}. Returning 503 placeholder for SPA routes.`
+        );
+        return res.status(503).send(`
+            <!doctype html>
+            <html>
+              <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width,initial-scale=1" />
+                <title>Service Unavailable</title>
+                <style>
+                  body{font-family:Inter,Arial,sans-serif;background:#f6f3ff;margin:0;padding:24px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+                  .card{background:#fff;border-radius:12px;padding:28px;max-width:760px;width:100%;box-shadow:0 12px 40px rgba(79,47,247,0.06);text-align:center}
+                  .foot{margin-top:20px;color:#6b6b6b;font-size:0.95rem}
+                  .foot a{color:#6c4cf7;text-decoration:underline;margin:0 8px}
+                </style>
+              </head>
+              <body>
+                <div class="card">
+                  <h1>Service Unavailable</h1>
+                  <p>Frontend build not found. Please run <code>npm --prefix frontend run build</code> during deploy.</p>
+
+                  <div class="foot">
+                    <div>
+                      <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/terms" target="_blank" rel="noreferrer">Terms of Service</a>
+                      <span>•</span>
+                      <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>
+                    </div>
+                    <div style="margin-top:8px">© ${new Date().getFullYear()} AutoPromote. All rights reserved.</div>
+                  </div>
+                </div>
+              </body>
+            </html>
+          `);
+      }
+      return res.sendFile(frontIndex, err => {
+        if (err) {
+          console.warn(
+            "[startup] sendFile error for SPA route:",
+            err && err.message ? err.message : err
+          );
+          return res.status(503).send(`
+              <!doctype html>
+              <html>
+                <head>
+                  <meta charset="utf-8" />
+                  <meta name="viewport" content="width=device-width,initial-scale=1" />
+                  <title>Service Unavailable</title>
+                  <style>
+                    body{font-family:Inter,Arial,sans-serif;background:#f6f3ff;margin:0;padding:24px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+                    .card{background:#fff;border-radius:12px;padding:28px;max-width:760px;width:100%;box-shadow:0 12px 40px rgba(79,47,247,0.06);text-align:center}
+                    .foot{margin-top:20px;color:#6b6b6b;font-size:0.95rem}
+                    .foot a{color:#6c4cf7;text-decoration:underline;margin:0 8px}
+                  </style>
+                </head>
+                <body>
+                  <div class="card">
+                    <h1>Service Unavailable</h1>
+                    <p>Error serving frontend index. Try rebuilding.</p>
+
+                    <div class="foot">
+                      <div>
+                        <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/terms" target="_blank" rel="noreferrer">Terms of Service</a>
+                        <span>•</span>
+                        <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>
+                      </div>
+                      <div style="margin-top:8px">© ${new Date().getFullYear()} AutoPromote. All rights reserved.</div>
+                    </div>
+                  </div>
+                </body>
+              </html>
+            `);
+        }
+      });
+    } catch (e) {
+      console.warn("[startup] SPA route error:", e && e.message ? e.message : e);
+      return res.status(503).send(`
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8" />
+              <meta name="viewport" content="width=device-width,initial-scale=1" />
+              <title>Service Unavailable</title>
+              <style>
+                body{font-family:Inter,Arial,sans-serif;background:#f6f3ff;margin:0;padding:24px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+                .card{background:#fff;border-radius:12px;padding:28px;max-width:760px;width:100%;box-shadow:0 12px 40px rgba(79,47,247,0.06);text-align:center}
+                .foot{margin-top:20px;color:#6b6b6b;font-size:0.95rem}
+                .foot a{color:#6c4cf7;text-decoration:underline;margin:0 8px}
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <h1>Service Unavailable</h1>
+                <p>Frontend currently unavailable.</p>
+
+                <div class="foot">
+                  <div>
+                    <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/terms" target="_blank" rel="noreferrer">Terms of Service</a>
+                    <span>•</span>
+                    <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>
+                  </div>
+                  <div style="margin-top:8px">© ${new Date().getFullYear()} AutoPromote. All rights reserved.</div>
+                </div>
+              </div>
+            </body>
+          </html>
+        `);
+    }
+  });
+
   // Catch all handler: send back React's index.html file for client-side routing
   app.get("*", (req, res) => {
     try {
       const fs = require("fs");
       const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
       if (!fs.existsSync(frontIndex)) {
-        console.warn(`[startup] Frontend build not found at ${frontIndex}. Returning 503 placeholder.`);
-        return res.status(503).send('<html><body><h1>Service Unavailable</h1><p>Frontend build not found. Please run <code>npm --prefix frontend run build</code> during deploy.</p></body></html>');
+        console.warn(
+          `[startup] Frontend build not found at ${frontIndex}. Returning 503 placeholder.`
+        );
+        return res
+          .status(503)
+          .send(
+            "<html><body><h1>Service Unavailable</h1><p>Frontend build not found. Please run <code>npm --prefix frontend run build</code> during deploy.</p></body></html>"
+          );
       }
       return res.sendFile(frontIndex, err => {
         if (err) {
-          console.warn("[startup] catch-all sendFile error:", err && err.message ? err.message : err);
-          return res.status(503).send('<html><body><h1>Service Unavailable</h1><p>Error serving frontend index. Try rebuilding.</p></body></html>');
+          console.warn(
+            "[startup] catch-all sendFile error:",
+            err && err.message ? err.message : err
+          );
+          return res
+            .status(503)
+            .send(
+              "<html><body><h1>Service Unavailable</h1><p>Error serving frontend index. Try rebuilding.</p></body></html>"
+            );
         }
       });
     } catch (e) {
       console.warn("[startup] catch-all handler error:", e && e.message ? e.message : e);
-      return res.status(503).send('<html><body><h1>Service Unavailable</h1><p>Frontend currently unavailable.</p></body></html>');
+      return res.status(503).send(`
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8" />
+              <meta name="viewport" content="width=device-width,initial-scale=1" />
+              <title>Service Unavailable</title>
+              <style>
+                body{font-family:Inter,Arial,sans-serif;background:#f6f3ff;margin:0;padding:24px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+                .card{background:#fff;border-radius:12px;padding:28px;max-width:760px;width:100%;box-shadow:0 12px 40px rgba(79,47,247,0.06);text-align:center}
+                .foot{margin-top:20px;color:#6b6b6b;font-size:0.95rem}
+                .foot a{color:#6c4cf7;text-decoration:underline;margin:0 8px}
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <h1>Service Unavailable</h1>
+                <p>Frontend currently unavailable.</p>
+
+                <div class="foot">
+                  <div>
+                    <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/terms" target="_blank" rel="noreferrer">Terms of Service</a>
+                    <span>•</span>
+                    <a href="${process.env.PUBLIC_SITE_URL || "https://autopromote.org"}/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>
+                  </div>
+                  <div style="margin-top:8px">© ${new Date().getFullYear()} AutoPromote. All rights reserved.</div>
+                </div>
+              </div>
+            </body>
+          </html>
+        `);
     }
   });
 
   // Error handling middleware
-  app.use((err, req, res, next) => {
+  app.use((err, req, res, _next) => {
     console.log("Server error:", err.message);
 
     // Provide more specific error messages for common errors
@@ -2364,7 +2709,15 @@ try {
   }
 
   if (require.main === module) {
-    const server = app
+    const http = require("http");
+    const server = http.createServer(app);
+    // attach Socket.IO for production/server runs
+    try {
+      if (typeof module.exports.attachSocket === "function") {
+        module.exports.attachSocket(server, {});
+      }
+    } catch (e) {}
+    server
       .listen(PORT, async () => {
         console.log(`🚀 AutoPromote Server is running on port ${PORT}`);
         console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
@@ -2418,7 +2771,7 @@ try {
       "[startup] Detected ENABLE_BACKROUND_JOBS (typo). Mapped to ENABLE_BACKGROUND_JOBS for compatibility."
     );
   }
-  const ENABLE_BACKGROUND = process.env.ENABLE_BACKGROUND_JOBS === "true";
+  let ENABLE_BACKGROUND = process.env.ENABLE_BACKGROUND_JOBS === "true";
   const STATS_POLL_INTERVAL_MS = parseInt(process.env.STATS_POLL_INTERVAL_MS || "180000", 10); // 3 minutes default
   const TASK_PROCESS_INTERVAL_MS = parseInt(process.env.TASK_PROCESS_INTERVAL_MS || "60000", 10); // 1 minute default
   const PLATFORM_STATS_POLL_INTERVAL_MS = parseInt(
@@ -2515,7 +2868,6 @@ try {
       const {
         processNextYouTubeTask,
         processNextPlatformTask,
-        enqueueMediaTransform,
       } = require("./services/promotionTaskQueue");
       const { acquireLock, INSTANCE_ID } = require("./services/workerLockService");
       console.log("🔐 Worker instance id:", INSTANCE_ID);
@@ -2582,10 +2934,9 @@ try {
           for (let i = 0; i < MAX_BATCH; i++) {
             const yt = await processNextYouTubeTask();
             const pf = await processNextPlatformTask();
-            const tf =
-              mt && typeof mt.processNextMediaTransformTask === "function"
-                ? await mt.processNextMediaTransformTask()
-                : null;
+            if (mt && typeof mt.processNextMediaTransformTask === "function") {
+              await mt.processNextMediaTransformTask();
+            }
             if (!yt && !pf) break;
             processed += (yt ? 1 : 0) + (pf ? 1 : 0);
           }
@@ -2935,6 +3286,39 @@ try {
   module.exports.getLatencyStats = getLatencyStats;
   module.exports.runWarmup = runWarmup;
   module.exports.__warmupState = () => __warmupState;
+
+  // Socket helper: attach a Socket.IO server to an existing http.Server
+  module.exports.attachSocket = function attachSocket(httpServer, opts = {}) {
+    try {
+      const { Server } = require("socket.io");
+      const io = new Server(httpServer, {
+        cors: {
+          origin: opts.corsOrigin || process.env.SOCKET_CORS_ORIGIN || "*",
+          methods: ["GET", "POST"],
+        },
+        allowEIO3: true,
+      });
+      // store globally so other modules (e.g. tipPubsub) can emit
+      global.__io = io;
+      io.on("connection", socket => {
+        try {
+          const qs = socket.handshake && socket.handshake.query ? socket.handshake.query : {};
+          if (qs.liveId) socket.join(`live:${qs.liveId}`);
+          socket.on("joinLive", liveId => {
+            if (liveId) socket.join(`live:${liveId}`);
+          });
+        } catch (e) {
+          // ignore
+        }
+      });
+      return io;
+    } catch (e) {
+      console.warn("[attachSocket] failed to initialize Socket.IO:", e && e.message);
+      return null;
+    }
+  };
+
+  module.exports.getIo = () => global.__io || null;
 
   // Export Express app for integration tests
   module.exports = app;

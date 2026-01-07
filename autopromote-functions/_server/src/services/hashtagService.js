@@ -2,9 +2,7 @@
 // AI-powered hashtag generation and optimization
 // Finds trending, relevant hashtags for maximum reach
 
-const axios = require("axios");
-const { logOpenAIUsage } = require("./openaiUsageLogger");
-
+/* eslint-disable no-console */
 class HashtagService {
   constructor() {
     this.openaiApiKey = process.env.OPENAI_API_KEY;
@@ -34,26 +32,34 @@ class HashtagService {
         count = 15,
         mixRatio = { trending: 0.4, niche: 0.4, branded: 0.2 }, // Distribution
         language = "en",
-        includeMetrics = true,
+        includeMetrics: _includeMetrics = true,
       } = options;
+      void _includeMetrics;
 
       // Build prompt
       const prompt = this.buildHashtagPrompt(contentData, platform, count, mixRatio, language);
 
-      // Call OpenAI
-      const { chatCompletions } = require('./openaiClient');
-      const aiResp = await chatCompletions({
-        model: this.model,
-        messages: [
-          { role: 'system', content: 'You are a social media hashtag expert. You understand trending topics, niche communities, and platform-specific hashtag strategies. You generate hashtags that maximize reach and engagement.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 500,
-      }, { feature: 'hashtag_generation' });
+      // Call OpenAI via central openaiClient
+      const { chatCompletions } = require("./openaiClient");
+      const aiResp = await chatCompletions(
+        {
+          model: this.model,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a social media hashtag expert. You understand trending topics, niche communities, and platform-specific hashtag strategies. You generate hashtags that maximize reach and engagement.",
+            },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.7,
+          max_tokens: 500,
+        },
+        { feature: "hashtag_generation" }
+      );
 
       const generatedText = aiResp.choices[0].message.content.trim();
-      // (Logging performed by openaiClient)
+      // (Logging done via openaiClient)
 
       // Parse hashtags
       const parsed = this.parseHashtagResponse(generatedText, count);
@@ -163,7 +169,8 @@ class HashtagService {
     let currentCategory = "trending";
 
     // Extract hashtags and categorize
-    const matches = text.match(/#[\w\u00C0-\u024F\u1E00-\u1EFF]+/g) || [];
+    // previously captured matches (not used directly):
+    void (text.match(/#[\w\u00C0-\u024F\u1E00-\u1EFF]+/g) || []);
 
     // Check for category markers
     const lines = text.split("\n");
@@ -341,16 +348,19 @@ Requirements:
 
 Format: Just list the hashtags separated by spaces, starting with #`;
 
-      const { chatCompletions } = require('./openaiClient');
-      const aiResp = await chatCompletions({
-        model: this.model,
-        messages: [
-          { role: 'system', content: 'You are a social media trends expert.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.3,
-        max_tokens: 300,
-      }, { feature: 'trending_hashtags' });
+      const { chatCompletions } = require("./openaiClient");
+      const aiResp = await chatCompletions(
+        {
+          model: this.model,
+          messages: [
+            { role: "system", content: "You are a social media trends expert." },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.3,
+          max_tokens: 300,
+        },
+        { feature: "trending_hashtags" }
+      );
 
       const text = aiResp.choices[0].message.content.trim();
       const hashtags = (text.match(/#[\w\u00C0-\u024F\u1E00-\u1EFF]+/g) || []).slice(0, count);

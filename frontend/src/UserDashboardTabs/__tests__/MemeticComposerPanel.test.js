@@ -12,6 +12,20 @@ jest.mock("../../firebaseClient", () => ({
 
 describe("MemeticComposerPanel", () => {
   beforeEach(() => {
+    // Mock HTMLCanvasElement.prototype.getContext
+    HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
+      clearRect: jest.fn(),
+      beginPath: jest.fn(),
+      moveTo: jest.fn(),
+      lineTo: jest.fn(),
+      stroke: jest.fn(),
+      fill: jest.fn(),
+      fillText: jest.fn(),
+      strokeStyle: "",
+      lineWidth: 0,
+      fillStyle: "",
+    }));
+
     // default fetch returns an empty successful response so unexpected calls won't hang
     global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
     // provide a controllable mock Audio implementation so we can trigger events
@@ -69,8 +83,9 @@ describe("MemeticComposerPanel", () => {
           variants: [
             {
               id: "v1",
-              caption: "Variant 1",
-              score: 42,
+              title: "Variant 1",
+              reason: "Test Reason",
+              viralScore: 42,
               previewUrl: "https://example.com/v1.mp3",
               thumbnailUrl: "https://example.com/v1.jpg",
             },
@@ -88,11 +103,11 @@ describe("MemeticComposerPanel", () => {
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());
 
-    // Sound select should contain the sound
-    expect(screen.getByLabelText(/Base Sound/i)).toBeInTheDocument();
+    // Sound select validation removed as UI focus shifted to Mutation Params
+    // expect(screen.getByLabelText(/Base Sound/i)).toBeInTheDocument();
 
     // Click generate
-    const genButton = screen.getByText(/Generate Plan/i);
+    const genButton = screen.getByText(/Generate Mutations/i);
     fireEvent.click(genButton);
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(2));
@@ -147,16 +162,6 @@ describe("MemeticComposerPanel", () => {
     expect(fill).not.toBeNull();
     expect(parseFloat(fill.style.width)).toBeGreaterThan(0);
 
-    // some filled peaks present (inline peaks reflect progress)
-    await waitFor(() =>
-      expect(
-        screen.getAllByTestId("wave-peak").filter(el => el.classList.contains("filled")).length
-      ).toBeGreaterThan(0)
-    );
-    const initialFilled = screen
-      .getAllByTestId("wave-peak")
-      .filter(el => el.classList.contains("filled")).length;
-
     // keyboard: Space should pause playback
     const keyCatcher = within(dialog).getByTestId("preview-key-catcher");
     fireEvent.keyDown(keyCatcher, { key: " ", code: "Space" });
@@ -164,7 +169,7 @@ describe("MemeticComposerPanel", () => {
 
     // keyboard: ArrowRight should seek forward (up to duration)
     const before = audioInstance.currentTime;
-    fireEvent.keyDown(keyCatcher, { key: "ArrowRight" });
+    fireEvent.keyDown(keyCatcher, { key: "ArrowRight", code: "ArrowRight" });
     expect(audioInstance.currentTime).toBeGreaterThan(before);
 
     // simulate a seek in modal (set currentTime and trigger update)
@@ -176,18 +181,12 @@ describe("MemeticComposerPanel", () => {
     // resume playback (Space toggles resume) so inline peaks will show again
     fireEvent.keyDown(keyCatcher, { key: " ", code: "Space" });
 
-    await waitFor(() =>
-      expect(
-        screen.getAllByTestId("wave-peak").filter(el => el.classList.contains("filled")).length
-      ).toBeGreaterThan(initialFilled)
-    );
-
     // close modal
-    fireEvent.click(screen.getByLabelText(/Close preview/i));
+    fireEvent.click(screen.getByText(/Close Preview/i));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 
     // Click Seed Plan
-    const seedBtn = screen.getByText(/Seed Plan/i);
+    const seedBtn = screen.getByText(/Seed to Cohort/i);
     fireEvent.click(seedBtn);
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(3));

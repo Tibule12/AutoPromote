@@ -91,7 +91,7 @@ async function getVariantDiversity(limitDocs = 150) {
     .orderBy("updatedAt", "desc")
     .limit(limitDocs)
     .get();
-  const activeSet = new Set();
+  let activeSet = new Set();
   let total = 0;
   snap.forEach(d => {
     const v = d.data();

@@ -31,7 +31,7 @@ async function updateVariantStats({
   await db.runTransaction(async tx => {
     const snap = await tx.get(ref);
     const now = admin.firestore.FieldValue.serverTimestamp();
-    const data = snap.exists ? snap.data() : { contentId, platforms: {}, updatedAt: now };
+    let data = snap.exists ? snap.data() : { contentId, platforms: {}, updatedAt: now };
     if (!data.platforms[platform]) data.platforms[platform] = { variants: [], updatedAt: now };
     const arr = data.platforms[platform].variants;
     let row = arr.find(v => v.value === variant);

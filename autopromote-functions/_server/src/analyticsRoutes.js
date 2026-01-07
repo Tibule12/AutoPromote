@@ -19,7 +19,8 @@ router.get("/content/:id", authMiddleware, async (req, res) => {
 
     // Check if user has permission to view this content's analytics
     if (process.env.DEBUG_AUTH === "true") {
-      console.log(
+      const logger = require("./utils/logger");
+      logger.debug(
         "[analytics] debug: content.userId=%s content.uid=%s req.user=%o",
         content.userId,
         content.uid,
@@ -44,7 +45,8 @@ router.get("/content/:id", authMiddleware, async (req, res) => {
 
     res.json({ analytics });
   } catch (error) {
-    console.error("Error getting content analytics:", error);
+    const logger = require("./utils/logger");
+    logger.error("Error getting content analytics:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -92,7 +94,7 @@ router.get("/user", authMiddleware, async (req, res) => {
 
     // Parse time range
     const now = new Date();
-    const startDate = new Date();
+    let startDate = new Date();
     if (range === "24h") startDate.setHours(now.getHours() - 24);
     else if (range === "7d") startDate.setDate(now.getDate() - 7);
     else if (range === "30d") startDate.setDate(now.getDate() - 30);

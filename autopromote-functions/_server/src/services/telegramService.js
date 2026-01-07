@@ -34,7 +34,6 @@ function verifyTelegramAuth(authData, botToken) {
 /**
  * Get user's Telegram connection
  */
-const { tokensFromDoc } = require("./connectionTokenUtils");
 
 async function getUserTelegramConnection(uid) {
   const snap = await db
@@ -101,7 +100,7 @@ async function storeTelegramAuth({ uid, authData }) {
   };
 }
 
-async function postToTelegram({ contentId, payload = {}, reason, uid }) {
+async function postToTelegram({ contentId, payload = {}, reason: _reason, uid }) {
   try {
     const userRef = uid ? db.collection("users").doc(uid) : null;
     let chatId = null;

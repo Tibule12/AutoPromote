@@ -38,7 +38,7 @@ router.get("/revenue/projection", authMiddleware, async (req, res) => {
     const windowDays = Math.min(parseInt(req.query.days || "30", 10), 90);
     const since = Date.now() - windowDays * 86400000;
     const { getPlans } = require("../services/planService");
-    const plans = getPlans();
+    void getPlans(); // intentionally invoked for potential plan-based hints; not used in this route
     // Pull recent events (cap 5000) - for MVP sampling
     const snap = await db
       .collection("events")
@@ -756,6 +756,7 @@ router.get("/usage/current", authMiddleware, async (req, res) => {
 });
 
 // Utility safe number
+/* eslint-disable-next-line no-unused-vars -- kept for future use in edge-case consolidations */
 function num(v) {
   return typeof v === "number" && !Number.isNaN(v) ? v : 0;
 }
@@ -842,7 +843,7 @@ async function fetchHighVelocityContent(limit = 20) {
   return items;
 }
 
-async function fetchUploadStats(limit = 1) {
+async function fetchUploadStats(_limit = 1) {
   // We just count a small sample to detect presence and approximate. Real cardinality would need a count aggregation or BigQuery export.
   const snap = await db
     .collection("youtube_uploads")

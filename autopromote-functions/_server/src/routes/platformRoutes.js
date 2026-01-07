@@ -6,6 +6,7 @@ const { db } = require("../firebaseAdmin");
 const { encryptToken } = require("../services/secretVault");
 const { tokensFromDoc } = require("../services/connectionTokenUtils");
 const { safeFetch } = require("../utils/ssrfGuard");
+const logger = require("../utils/logger");
 // Engines to warm-up/connect on new platform connections
 const smartDistributionEngine = require("../services/smartDistributionEngine");
 const admin = require("../firebaseAdmin").admin;
@@ -113,10 +114,11 @@ router.get(
       return res.status(404).json({ ok: false, error: "unsupported_platform" });
     const uid = req.userId || req.user?.uid;
     // Ensure we have host and a state token available for OAuth redirect URIs
-    const host = `${req.protocol}://${req.get("host")}`;
+    void `${req.protocol}://${req.get("host")}`; // reserved for future redirect hints
     const crypto = require("crypto");
-    const state =
-      req.query && req.query.state ? req.query.state : crypto.randomBytes(18).toString("base64url");
+    void (req.query && req.query.state
+      ? req.query.state
+      : crypto.randomBytes(18).toString("base64url")); // reserved for future redirect hints
     if (!uid) return res.json({ ok: true, platform, connected: false });
 
     const cacheKey = `${uid}:${platform}`;
@@ -180,6 +182,83 @@ router.get(
 );
 
 // GET /api/:platform/metadata - return helpful metadata for the connected user (playlist lists, org pages, guilds)
+
+// POST /api/:platform/webhook - platform webhook callbacks to update content status
+router.post("/:platform/webhook", platformWebhookLimiter, async (req, res) => {
+  const platform = normalize(req.params.platform);
+  const remote = req.ip || req.headers["x-forwarded-for"] || req.connection?.remoteAddress;
+  try {
+    // Optional secret validation per-platform (e.g., set TIKTOK_WEBHOOK_SECRET in env)
+    const secretHeader = (req.headers["x-platform-webhook-secret"] || "").toString();
+    const configuredSecret = (
+      process.env[`${platform.toUpperCase()}_WEBHOOK_SECRET`] || ""
+    ).toString();
+    if (configuredSecret && configuredSecret !== secretHeader) {
+      console.warn("[webhook] invalid secret for platform=%s from=%s", platform, remote);
+      return res.status(401).json({ ok: false, error: "invalid_webhook_secret" });
+    }
+
+    if (platform !== "tiktok" && platform !== "youtube" && platform !== "facebook") {
+      // For now, support TikTok + common providers; reject unknown platforms to avoid surprise writes
+      return res.status(400).json({ ok: false, error: "unsupported_platform_for_webhook" });
+    }
+
+    const payload = req.body || {};
+    const contentId =
+      payload.content_id || payload.contentId || payload.id || payload.content_id || null;
+    const idempotencyKey = payload.idempotency_key || payload.idempotencyKey || null;
+    const status = payload.status || payload.state || payload.processing_state || null;
+    const published = typeof payload.published !== "undefined" ? !!payload.published : undefined;
+    const platformPostUrl = payload.platform_post_url || payload.share_url || payload.url || null;
+
+    let contentRef = null;
+    if (contentId) {
+      contentRef = db.collection("content").doc(String(contentId));
+      const doc = await contentRef.get();
+      if (!doc.exists) contentRef = null;
+    }
+
+    if (!contentRef && idempotencyKey) {
+      const q = await db
+        .collection("content")
+        .where("idempotency_key", "==", String(idempotencyKey))
+        .limit(1)
+        .get();
+      if (!q.empty) contentRef = q.docs[0].ref;
+    }
+
+    if (!contentRef) {
+      console.warn("[webhook] no matching content found for platform=%s payloadKeys=%o", platform, {
+        contentId,
+        idempotencyKey,
+      });
+      return res.status(404).json({ ok: false, error: "content_not_found" });
+    }
+
+    const updated = {};
+    if (status) updated.status = String(status);
+    if (typeof published !== "undefined") updated.published = !!published;
+    if (platformPostUrl) updated.platform_post_url = String(platformPostUrl);
+    updated[`platform_data.${platform}.lastWebhookAt`] = new Date().toISOString();
+    updated.updatedAt = new Date().toISOString();
+
+    await contentRef.update(updated);
+
+    console.log(
+      "[webhook] updated content",
+      contentRef.id,
+      "platform=",
+      platform,
+      "updates=",
+      Object.keys(updated)
+    );
+    return res.json({ ok: true, updated: Object.keys(updated) });
+  } catch (err) {
+    console.error("[webhook] error", err && err.message);
+    return res.status(500).json({ ok: false, error: "webhook_handler_failed" });
+  }
+});
+
 router.get(
   "/:platform/metadata",
   authMiddleware,
@@ -437,7 +516,7 @@ router.get(
         );
         const url = `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}&scope=${scope}&state=${state}`;
         try {
-          console.log(
+          logger.info(
             "[oauth][prepare][pinterest] authUrlPresent=%s redirectPresent=%s statePresent=%s",
             !!url,
             !!redirectUri,
@@ -1253,7 +1332,7 @@ router.get("/linkedin/auth/callback", platformPublicLimiter, async (req, res) =>
       body,
     });
     const tokenJson = await tokenRes.json();
-    const meta = {};
+    let meta = {};
     // Fetch basic profile if access token acquired
     if (tokenJson.access_token) {
       try {
@@ -1391,12 +1470,11 @@ router.get("/pinterest/auth/callback", platformPublicLimiter, async (req, res) =
     );
     // Avoid logging sensitive OAuth callback parameters; redact full values and only log presence/length info
     try {
-      console.log(
-        "[oauth][pinterest] callback redirectUriPresent=%s queryKeys=%s statePresent=%s",
-        !!redirectUri,
-        Object.keys(req.query || {}).length,
-        !!state
-      );
+      logger.info("oauth.pinterest.callback", {
+        redirectUriPresent: !!redirectUri,
+        queryKeys: Object.keys(req.query || {}).length,
+        statePresent: !!state,
+      });
     } catch (_) {}
     // try { console.log('[oauth][pinterest] callback redirectUri:', redirectUri, 'query:', req.query, 'state:', state); } catch(_){}
     const tokenUrl = "https://api.pinterest.com/v5/oauth/token";
@@ -1415,7 +1493,7 @@ router.get("/pinterest/auth/callback", platformPublicLimiter, async (req, res) =
       body,
     });
     const tokenJson = await tokenRes.json();
-    const meta = {};
+    let meta = {};
     if (tokenJson.access_token) {
       try {
         // fetch user account and boards
@@ -1497,7 +1575,7 @@ router.get("/pinterest/auth/callback", platformPublicLimiter, async (req, res) =
 // Generic placeholder callback for other platforms — keep as a fallback
 // and ensure it's defined after specific platform callback handlers so it
 // doesn't intercept platforms that have a proper implementation.
-router.get("/:platform/auth/callback", platformPublicLimiter, async (req, res, next) => {
+router.get("/:platform/auth/callback", platformPublicLimiter, async (req, res, _next) => {
   const platform = normalize(req.params.platform);
   if (!SUPPORTED_PLATFORMS.includes(platform)) return res.status(404).send("Unsupported platform");
   return sendPlain(res, 200, "Callback placeholder - implement OAuth exchange for " + platform);
@@ -1564,7 +1642,7 @@ router.post("/:platform/boards", authMiddleware, platformWriteLimiter, async (re
     // If user has a token, try to create board using Pinterest API v5
     if (hasAccessToken) {
       try {
-        const accessToken = tokens.access_token;
+        void tokens.access_token; // reserved for potential direct API calls
         const postBody = { name };
         if (description) postBody.description = description;
         // Use service helper to create board to centralize logic & testing
@@ -1842,7 +1920,7 @@ router.post(
       if (!uid) return res.status(401).json({ ok: false, error: "missing_user" });
       const playlistId = String(req.params.id || "").trim();
       if (!playlistId) return res.status(400).json({ ok: false, error: "playlistId_required" });
-      const trackUris = req.body.trackUris || req.body.tracks || null;
+      let trackUris = req.body.trackUris || req.body.tracks || null;
       if (!Array.isArray(trackUris) || trackUris.length === 0)
         return res.status(400).json({ ok: false, error: "trackUris_required" });
       const result = await addTracksToPlaylist({ uid, playlistId, trackUris });

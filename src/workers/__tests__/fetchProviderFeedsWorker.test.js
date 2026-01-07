@@ -18,7 +18,9 @@ describe("fetchProviderFeedsWorker", () => {
       testEnv = await initializeTestEnvironmentWithDiscovery("fetch-provider-worker");
     });
     beforeEach(async () => {
-      const ctx = testEnv.unauthenticatedContext();
+      const ctx = testEnv.authenticatedContext("service-account", {
+        firebase: { sign_in_provider: "service_account" },
+      });
       testDb = ctx.firestore();
     });
     afterEach(async () => {

@@ -13,7 +13,6 @@ function platformConcurrencyLock({
     if (!platform) return next();
     const key = `plock:${platform}`;
     try {
-      const now = Date.now();
       const ttlSec = 60; // auto-release after 60s safety
       const lua = `local k=KEYS[1]\nlocal cap=tonumber(ARGV[1])\nlocal ttl=tonumber(ARGV[2])\nlocal v=redis.call('GET',k)\nif not v then redis.call('SET',k,1,'EX',ttl) return {1,1}\nend\nlocal n=tonumber(v) or 0\nif n>=cap then return {0,n}\nend\nredis.call('INCR',k)\nredis.call('EXPIRE',k,ttl)\nreturn {1,n+1}`;
       const resp = await redis.eval(lua, 1, key, maxPerPlatform, ttlSec);
@@ -30,14 +29,12 @@ function platformConcurrencyLock({
         });
         return next();
       }
-      return res
-        .status(429)
-        .json({
-          error: "platform_concurrency_limit",
-          platform,
-          inFlight: resp[1],
-          max: maxPerPlatform,
-        });
+      return res.status(429).json({
+        error: "platform_concurrency_limit",
+        platform,
+        inFlight: resp[1],
+        max: maxPerPlatform,
+      });
     } catch (e) {
       return next(); // soft fail open
     }

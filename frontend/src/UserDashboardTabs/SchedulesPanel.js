@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import ScheduleCard from "../components/ScheduleCard";
+import "./SchedulesPanel.css";
+import { toast } from "react-hot-toast";
 
 const SchedulesPanel = ({
   schedulesList,
@@ -10,137 +11,396 @@ const SchedulesPanel = ({
   onReschedule,
   onDelete,
 }) => {
-  const [newContentId, setNewContentId] = useState("");
-  const [newWhen, setNewWhen] = useState("");
-  const [newPlatforms, setNewPlatforms] = useState([]);
-  const [newFrequency, setNewFrequency] = useState("once");
-  const [creatingSchedule, setCreatingSchedule] = useState(false);
+  const [viewMode, setViewMode] = useState("orchestrator"); // 'orchestrator' | 'list'
+  const [currentDate] = useState(new Date());
 
-  const toggleNewPlatform = p =>
-    setNewPlatforms(prev => (prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]));
+  // Injection State (Creation)
+  const [showInjector, setShowInjector] = useState(false);
+  const [injectData, setInjectData] = useState({
+    contentId: "",
+    date: new Date().toISOString().split("T")[0],
+    time: "12:00",
+    platforms: [],
+    frequency: "once",
+  });
+  const [isInjecting, setIsInjecting] = useState(false);
 
-  const handleCreate = async e => {
-    e.preventDefault();
-    if (!newContentId) return alert("Select content to schedule");
-    if (creatingSchedule) return;
-    // Confirm if scheduling to many platforms
-    if ((newPlatforms || []).length > 4) {
-      const ok = window.confirm(
-        `You're scheduling to ${(newPlatforms || []).length} platforms. Continue?`
-      );
-      if (!ok) return;
+  // Platform Definitions
+  const platforms = [
+    { id: "youtube", name: "YouTube", color: "#ff0000" },
+    { id: "instagram", name: "Instagram", color: "#E1306C" },
+    { id: "tiktok", name: "TikTok", color: "#00f2ea" },
+    { id: "twitter", name: "Twitter/X", color: "#1DA1F2" },
+    { id: "linkedin", name: "LinkedIn", color: "#0077b5" },
+    { id: "facebook", name: "Facebook", color: "#1877F2" },
+  ];
+
+  // Helper: Get days for the timeline header (Next 7 days)
+  const getTimelineDays = () => {
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(currentDate);
+      d.setDate(d.getDate() + i);
+      days.push(d);
     }
+    return days;
+  };
+
+  const handleInject = async e => {
+    e.preventDefault();
+    if (!injectData.contentId) return toast.error("Select content payload");
+    if (injectData.platforms.length === 0) return toast.error("Target at least one platform");
+
+    setIsInjecting(true);
+    const isoDateTime = `${injectData.date}T${injectData.time}:00.000Z`; // Simple ISO construction
+
     try {
-      setCreatingSchedule(true);
-      (await onCreate) &&
-        onCreate({
-          contentId: newContentId,
-          time: newWhen || new Date().toISOString(),
-          frequency: newFrequency,
-          platforms: newPlatforms,
+      if (onCreate) {
+        await onCreate({
+          contentId: injectData.contentId,
+          time: isoDateTime,
+          frequency: injectData.frequency,
+          platforms: injectData.platforms,
         });
-      setNewContentId("");
-      setNewWhen("");
-      setNewPlatforms([]);
-      setNewFrequency("once");
-    } catch (e) {
-      console.warn(e);
-      alert("Failed to create schedule");
+        toast.success("Payload injected into timeline.");
+        setShowInjector(false);
+        // Reset
+        setInjectData(prev => ({ ...prev, contentId: "", platforms: [] }));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Injection failed.");
     } finally {
-      setCreatingSchedule(false);
+      setIsInjecting(false);
     }
   };
+
+  const togglePlatform = pid => {
+    setInjectData(prev => ({
+      ...prev,
+      platforms: prev.platforms.includes(pid)
+        ? prev.platforms.filter(p => p !== pid)
+        : [...prev.platforms, pid],
+    }));
+  };
+
+  // Helper to position events on the timeline
+  const getEventStyle = scheduleDate => {
+    const eventTime = new Date(scheduleDate);
+    const startOfDay = new Date(currentDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // Calculate offset in days from current view start
+    const diffTime = eventTime - startOfDay;
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+    // If it's outside the 7 day view (negative or > 7), hide or handle
+    if (diffDays < 0 || diffDays >= 7) return null;
+
+    // Calculate percentage left
+    const leftPercent = (diffDays / 7) * 100;
+
+    return {
+      left: `${leftPercent}%`,
+      width: "13%", // Approx width of one day
+    };
+  };
+
   return (
-    <section className="schedules-panel">
-      <h3>My Schedules</h3>
-      <div
-        className="create-schedule"
-        style={{
-          marginBottom: ".75rem",
-          padding: ".75rem",
-          border: "1px solid #e7edf3",
-          borderRadius: 8,
-        }}
-      >
-        <h4>Create Schedule</h4>
-        <form onSubmit={handleCreate} style={{ display: "grid", gap: 8 }}>
-          <select
-            aria-label="Select content"
-            value={newContentId}
-            onChange={e => setNewContentId(e.target.value)}
-          >
-            <option value="">Select content</option>
-            {(contentList || []).map(c => (
-              <option key={c.id} value={c.id}>
-                {c.title || c.id}
-              </option>
-            ))}
-          </select>
-          <input
-            aria-label="When"
-            type="datetime-local"
-            value={newWhen}
-            onChange={e => setNewWhen(e.target.value)}
-          />
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {[
-              "youtube",
-              "tiktok",
-              "instagram",
-              "facebook",
-              "twitter",
-              "linkedin",
-              "reddit",
-              "discord",
-              "telegram",
-              "pinterest",
-              "spotify",
-              "snapchat",
-            ].map(p => (
-              <label key={p}>
-                <input
-                  type="checkbox"
-                  checked={newPlatforms.includes(p)}
-                  onChange={() => toggleNewPlatform(p)}
-                />{" "}
-                {p}
-              </label>
-            ))}
+    <div className="schedules-panel">
+      {/* Header */}
+      <div className="orchestrator-header">
+        <div>
+          <h2 className="orchestrator-title">TEMPORAL ORCHESTRATOR</h2>
+          <div style={{ color: "#64748b", fontSize: "0.9rem" }}>
+            Manage your automated publishing timeline
           </div>
-          <select
-            aria-label="Frequency"
-            value={newFrequency}
-            onChange={e => setNewFrequency(e.target.value)}
+        </div>
+
+        <div className="time-controls">
+          <button
+            className={`control-btn ${viewMode === "orchestrator" ? "active" : ""}`}
+            onClick={() => setViewMode("orchestrator")}
           >
-            <option value="once">Once</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-          </select>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button type="submit" className="btn primary" disabled={creatingSchedule}>
-              {creatingSchedule ? "Creating..." : "Create Schedule"}
-            </button>
-          </div>
-        </form>
+            TIMELINE
+          </button>
+          <button
+            className={`control-btn ${viewMode === "list" ? "active" : ""}`}
+            onClick={() => setViewMode("list")}
+          >
+            DATA LIST
+          </button>
+          <button
+            className="control-btn"
+            style={{ borderColor: "#10b981", color: "#10b981" }}
+            onClick={() => setShowInjector(!showInjector)}
+          >
+            {showInjector ? "CLOSE INJECTOR" : "+ INJECT EVENT"}
+          </button>
+        </div>
       </div>
-      {!schedulesList || schedulesList.length === 0 ? (
-        <div style={{ color: "#9aa4b2" }}>No schedules yet.</div>
-      ) : (
-        <div className="schedules-list" style={{ display: "grid", gap: ".75rem" }}>
-          {schedulesList.map((sch, i) => (
-            <ScheduleCard
-              key={i}
-              schedule={sch}
-              content={contentList.find(c => c.id === sch.contentId) || null}
-              onPause={onPause}
-              onResume={onResume}
-              onReschedule={onReschedule}
-              onDelete={onDelete}
-            />
-          ))}
+
+      {/* Injection Panel (Create Form) */}
+      {showInjector && (
+        <div className="injection-panel">
+          <h4 style={{ marginBottom: "15px", color: "#fff" }}>NEW TRANSMISSION</h4>
+          <form onSubmit={handleInject} className="injection-form">
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "5px",
+                  fontSize: "0.8rem",
+                  color: "#94a3b8",
+                }}
+              >
+                PAYLOAD (CONTENT)
+              </label>
+              <select
+                className="cyber-input"
+                aria-label="Select Content"
+                value={injectData.contentId}
+                onChange={e => setInjectData({ ...injectData, contentId: e.target.value })}
+              >
+                <option value="">Select Content Node...</option>
+                {contentList?.map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.title || "Untitled Node"}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "5px",
+                  fontSize: "0.8rem",
+                  color: "#94a3b8",
+                }}
+              >
+                TARGET VECTOR (DATE/TIME)
+              </label>
+              <div style={{ display: "flex", gap: "5px" }}>
+                <input
+                  type="date"
+                  className="cyber-input"
+                  aria-label="Schedule Date"
+                  value={injectData.date}
+                  onChange={e => setInjectData({ ...injectData, date: e.target.value })}
+                />
+                <input
+                  type="time"
+                  className="cyber-input"
+                  aria-label="Schedule Time"
+                  value={injectData.time}
+                  onChange={e => setInjectData({ ...injectData, time: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "5px",
+                  fontSize: "0.8rem",
+                  color: "#94a3b8",
+                }}
+              >
+                CHANNELS
+              </label>
+              <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
+                {platforms.map(p => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => togglePlatform(p.id)}
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: "4px",
+                      border: "1px solid",
+                      borderColor: injectData.platforms.includes(p.id) ? p.color : "#334155",
+                      background: injectData.platforms.includes(p.id)
+                        ? `${p.color}33`
+                        : "transparent",
+                      color: injectData.platforms.includes(p.id) ? p.color : "#64748b",
+                      cursor: "pointer",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "flex-end" }}>
+              <button
+                type="submit"
+                className="control-btn"
+                style={{
+                  width: "100%",
+                  background: "#10b981",
+                  color: "black",
+                  borderColor: "#10b981",
+                  fontWeight: "bold",
+                }}
+                disabled={isInjecting}
+              >
+                {isInjecting ? "INJECTING..." : "INITIATE SCHEDULE"}
+              </button>
+            </div>
+          </form>
         </div>
       )}
-    </section>
+
+      {/* Main Orchestrator View */}
+      {viewMode === "orchestrator" ? (
+        <div className="chronoline-container">
+          {/* Timeline Header (Days) */}
+          <div className="chronoline-header">
+            <div style={{ width: "120px", borderRight: "1px solid rgba(255,255,255,0.08)" }}></div>
+            {getTimelineDays().map((date, i) => (
+              <div key={i} className={`timeline-column ${i === 0 ? "today" : ""}`}>
+                <div style={{ fontWeight: "bold" }}>
+                  {date.toLocaleDateString("en-US", { weekday: "short" })}
+                </div>
+                <div style={{ fontSize: "0.7rem" }}>
+                  {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Timeline Body (Swimlanes) */}
+          <div className="chronoline-body">
+            {/* Current Time Playhead (Mock) */}
+            <div className="chronoline-playhead" style={{ left: "14%" }}>
+              {" "}
+              {/* 14% is approx partly into first day */}
+              <div className="playhead-label">NOW</div>
+            </div>
+
+            {platforms.map(platform => (
+              <div key={platform.id} className="platform-swimlane">
+                <div className="swimlane-header">
+                  <span
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: platform.color,
+                    }}
+                  ></span>
+                  {platform.name}
+                </div>
+                <div className="swimlane-track">
+                  {/* AI Prime Time Suggestions (Mock) */}
+                  {platform.id === "instagram" && (
+                    <div
+                      className="ai-suggestion-slot"
+                      style={{ left: "35%", width: "5%" }}
+                      title="High Engagement Probability"
+                    >
+                      PRIME
+                    </div>
+                  )}
+
+                  {/* Render Scheduled Events */}
+                  {schedulesList
+                    ?.filter(s =>
+                      Array.isArray(s.platforms) ? s.platforms.includes(platform.id) : false
+                    )
+                    .map((sched, idx) => {
+                      const style = getEventStyle(sched.time);
+                      if (!style) return null;
+
+                      const content = contentList?.find(c => c.id === sched.contentId);
+
+                      return (
+                        <div
+                          key={idx}
+                          className="timeline-event-node"
+                          style={{
+                            ...style,
+                            borderLeft: `3px solid ${platform.color}`,
+                            background: "rgba(30, 41, 59, 0.9)",
+                          }}
+                          onClick={() => toast(`Scheduled: ${content?.title || "Unknown"}`)}
+                        >
+                          {content?.title || "Unknown Payload"}
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* Legacy List View */
+        <div className="schedules-list-legacy">
+          {(!schedulesList || schedulesList.length === 0) && (
+            <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
+              NO ACTIVE TRANSMISSIONS FOUND
+            </div>
+          )}
+          {schedulesList?.map((sch, i) => {
+            const content = contentList?.find(c => c.id === sch.contentId);
+            return (
+              <div
+                key={i}
+                className="control-module"
+                style={{
+                  marginBottom: "10px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: "bold", color: "white" }}>
+                    {content?.title || "Unknown Content"}
+                  </div>
+                  <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
+                    Target: {new Date(sch.time).toLocaleString()} • {sch.frequency}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: "5px" }}>
+                  {sch.platforms?.map(p => (
+                    <span
+                      key={p}
+                      style={{
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        background: "rgba(255,255,255,0.1)",
+                        fontSize: "0.7rem",
+                      }}
+                    >
+                      {p}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  onClick={() => onDelete && onDelete(sch.id)}
+                  className="control-btn"
+                  style={{
+                    padding: "4px 8px",
+                    fontSize: "0.7rem",
+                    borderColor: "#ef4444",
+                    color: "#ef4444",
+                  }}
+                >
+                  ABORT
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -23,7 +23,9 @@ describe("soundRoutes", () => {
       testEnv = await initializeTestEnvironmentWithDiscovery("sound-routes-test");
     });
     beforeEach(async () => {
-      const ctx = testEnv.unauthenticatedContext();
+      const ctx = testEnv.authenticatedContext("service-account", {
+        firebase: { sign_in_provider: "service_account" },
+      });
       testDb = ctx.firestore();
       global.__testDb = testDb;
       originalDb = require("../../../firebaseAdmin").db;

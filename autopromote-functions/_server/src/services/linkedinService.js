@@ -162,7 +162,7 @@ async function postToLinkedIn({
   articleTitle,
   articleDescription,
   contentId,
-  hashtags = [],
+  hashtags: _hashtags = [],
   hashtagString = "",
   companyId = null,
   personId: personIdParam = null,

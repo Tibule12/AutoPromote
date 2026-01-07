@@ -1,6 +1,0 @@
-// Developer scratch file containing service account template. Sanitized to avoid
-// committing credentials into the repository. Use environment variables instead.
-
-module.exports = {
-  info: 'Sanitized: provide credentials via FIREBASE_SERVICE_ACCOUNT_JSON or GOOGLE_APPLICATION_CREDENTIALS'
-};
