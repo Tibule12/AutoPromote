@@ -325,7 +325,7 @@ module.exports = {
 };
 
 // Helper: find hashtag string inside 'payload' like field
-function payloadHashtagString(payload) {
+function _payloadHashtagString(payload) {
   try {
     if (!payload) return "";
     if (typeof payload === "string") return payload;
@@ -335,3 +335,4 @@ function payloadHashtagString(payload) {
   } catch (_) {}
   return "";
 }
+void _payloadHashtagString;

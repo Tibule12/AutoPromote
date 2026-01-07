@@ -2,6 +2,7 @@
 // AutoPromote Referral & Viral Growth Engine
 // Credits for invites, growth squads, viral loops, mutual sharing
 
+/* eslint-disable no-console */
 const { db } = require("../firebaseAdmin");
 
 class ReferralGrowthEngine {

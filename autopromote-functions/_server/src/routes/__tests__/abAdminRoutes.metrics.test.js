@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 // Bypass Firebase Admin initialization
 process.env.FIREBASE_ADMIN_BYPASS = "1";
 const firebaseAdmin = require("../../firebaseAdmin");
-firebaseAdmin.admin.auth = () => ({ verifyIdToken: async token => ({ uid: "test-admin" }) });
+firebaseAdmin.admin.auth = () => ({ verifyIdToken: async _token => ({ uid: "test-admin" }) });
 // Provide stubbed ab_tests and platform_posts
 const samplePlatformPosts = [
   {
@@ -53,7 +53,7 @@ const stubCollection = name => {
   }
   if (name === "platform_posts") {
     return {
-      where: (field, op, value) => ({
+      where: (_field, _op, _value) => ({
         orderBy: () => ({
           get: async () => ({
             empty: false,

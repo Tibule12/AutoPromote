@@ -70,13 +70,14 @@ const VIRAL_SOUND_LIBRARY = {
 class EngagementBoostingService {
   // Generate viral caption with hook, body, and engagement bait
   generateViralCaption(content, platform, options = {}) {
-    const { category, tone, length } = options;
+    const { category, tone: _tone, length: _length } = options;
+    void _length;
 
     // Select hook based on content type
     const hook = this.selectHook(content, category);
 
     // Generate main caption body
-    const body = this.generateCaptionBody(content, platform, tone);
+    const body = this.generateCaptionBody(content, platform, _tone);
 
     // Add engagement bait
     const engagementBait = this.generateEngagementBait(platform);
@@ -119,7 +120,7 @@ class EngagementBoostingService {
   }
 
   // Generate main caption body
-  generateCaptionBody(content, platform, tone) {
+  generateCaptionBody(content, _platform, _tone) {
     const templates = CAPTION_TEMPLATES.viral;
     const template = templates[Math.floor(Math.random() * templates.length)];
 

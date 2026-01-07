@@ -4,7 +4,7 @@ const { db } = require("../firebaseAdmin");
 async function applyShortlinkClick(code, data) {
   try {
     if (!code || !data || !data.contentId) return;
-    const { contentId, variantIndex, usedVariant, platform } = data;
+    const { contentId, variantIndex, usedVariant } = data;
     // Update content doc counters
     const contentRef = db.collection("content").doc(contentId);
     await db.runTransaction(async tx => {

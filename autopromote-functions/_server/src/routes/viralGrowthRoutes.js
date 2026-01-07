@@ -9,6 +9,7 @@ const authMiddleware = require("../authMiddleware");
 const rateLimit = require("../middlewares/simpleRateLimit");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 const codeqlLimiter = require("../middlewares/codeqlRateLimit");
+const logger = require("../services/logger");
 
 const viralPublicLimiter = rateLimiter({
   capacity: parseInt(process.env.RATE_LIMIT_VIRAL_PUBLIC || "120", 10),
@@ -99,7 +100,7 @@ router.post(
         return res.status(400).json({ error: "Content and platforms array required" });
       }
 
-      console.log("🔥 [VIRAL] Running full content optimization...");
+      logger.info("🔥 [VIRAL] Running full content optimization...");
 
       // Generate hashtags
       const hashtagOptimization = await hashtagEngine.generateCustomHashtags({

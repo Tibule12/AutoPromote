@@ -7,7 +7,9 @@ const util = require("util");
 const router = express.Router();
 const upload = multer({ dest: "uploads/", limits: { fileSize: 100 * 1024 * 1024 } }); // 100MB limit
 
-const unlinkAsync = util.promisify(fs.unlink);
+// Reserved for async removal helper; kept for future use
+/* eslint-disable-next-line no-unused-vars -- reserved for potential async unlink usage in future */
+const _unlinkAsync = util.promisify(fs.unlink);
 
 function safeUnlink(path) {
   try {
@@ -22,7 +24,7 @@ function analyzeMetadata(metadata) {
   const height = videoStream ? videoStream.height : 0;
   const videoBitrate = videoStream ? videoStream.bit_rate : 0;
   const audioBitrate = audioStream ? audioStream.bit_rate : 0;
-  const feedback = [];
+  let feedback = [];
   let needsEnhancement = false;
 
   if (width < 1280 || height < 720) {
@@ -84,8 +86,7 @@ router.post("/quality-check", upload.single("file"), async (req, res) => {
       ffmpeg.ffprobe(filePath, (err, data) => (err ? reject(err) : resolve(data)));
     });
 
-    const { feedback, needsEnhancement, width, height, videoBitrate, audioBitrate } =
-      analyzeMetadata(metadata);
+    const { feedback, needsEnhancement } = analyzeMetadata(metadata);
 
     if (needsEnhancement) {
       const enhancedPath = filePath + "_enhanced.mp4";

@@ -76,7 +76,6 @@ router.post(
 // GET /performance/:contentId - Get repost performance summary
 router.get("/performance/:contentId", authMiddleware, repostPublicLimiter, async (req, res) => {
   try {
-    const userId = req.userId;
     const { contentId } = req.params;
 
     const summary = await repostDrivenEngine.getRepostPerformanceSummary(contentId);
@@ -99,7 +98,6 @@ router.get(
   repostPublicLimiter,
   async (req, res) => {
     try {
-      const userId = req.userId;
       const { contentId, platform } = req.params;
 
       const suggestions = await repostDrivenEngine.suggestRepostTiming(contentId, platform);
@@ -121,7 +119,6 @@ router.get(
 // POST /scrape/:repostId - Manually trigger metric scraping
 router.post("/scrape/:repostId", authMiddleware, repostWriteLimiter, async (req, res) => {
   try {
-    const userId = req.userId;
     const { repostId } = req.params;
 
     // Get repost data
@@ -157,7 +154,6 @@ router.post("/scrape/:repostId", authMiddleware, repostWriteLimiter, async (req,
 // POST /actions/trigger/:contentId - Trigger growth actions based on performance
 router.post("/actions/trigger/:contentId", authMiddleware, repostWriteLimiter, async (req, res) => {
   try {
-    const userId = req.userId;
     const { contentId } = req.params;
     const { repostMetrics } = req.body;
 
@@ -181,7 +177,6 @@ router.post("/actions/trigger/:contentId", authMiddleware, repostWriteLimiter, a
 // GET /fingerprint/:contentId - Get content fingerprint for tracking
 router.get("/fingerprint/:contentId", authMiddleware, repostPublicLimiter, async (req, res) => {
   try {
-    const userId = req.userId;
     const { contentId } = req.params;
 
     const fingerprint = repostDrivenEngine.generateContentFingerprint(contentId);
@@ -205,7 +200,6 @@ router.post(
   repostWriteLimiter,
   async (req, res) => {
     try {
-      const userId = req.userId;
       const { contentId, platform } = req.params;
 
       const markers = repostDrivenEngine.generateTrackingMarkers(contentId, platform);

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // Simple logger utility to suppress logs in tests unless DEBUG_TEST_LOGS=1
 function shouldLog() {
   return process.env.DEBUG_TEST_LOGS === "1" || process.env.NODE_ENV !== "test";

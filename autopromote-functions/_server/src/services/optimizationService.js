@@ -1,6 +1,7 @@
 // optimizationService.js - Placeholder AI/variant optimization service
 // Generates simple message variants and records optimization events.
-const { db, admin } = require("../firebaseAdmin");
+const { db, admin: _admin } = require("../firebaseAdmin");
+void _admin;
 
 function generateVariants(base, { hashtags = [], max = 3 } = {}) {
   const variants = [];

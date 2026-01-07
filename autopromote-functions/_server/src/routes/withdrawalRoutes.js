@@ -15,7 +15,7 @@ const withdrawPublicLimiter = rateLimiter({
 });
 // Use consolidated authMiddleware & monetizationService in src
 const authMiddleware = require("../authMiddleware");
-const monetizationService = require("../monetizationService");
+const logger = require("../services/logger");
 
 // NOTE: After this refactor there should be no remaining references to ../../backend/* allowing safe deletion of backend/ directory.
 
@@ -68,7 +68,7 @@ router.post("/request", authMiddleware, withdrawWriteLimiter, async (req, res) =
       },
     });
   } catch (error) {
-    console.error("Error creating withdrawal request:", error);
+    logger.error("Error creating withdrawal request:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

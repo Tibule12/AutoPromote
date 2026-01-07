@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // paypalSubscriptionRoutes.js
 // PayPal subscription management for community monetization
 
@@ -249,74 +250,103 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
     const userDoc = await db.collection("users").doc(userId).get();
     const userData = userDoc.data() || {};
 
-    // Create PayPal subscription - ensure SDK is available
-    if (!paypal || !paypal.subscriptions || !paypal.subscriptions.SubscriptionsCreateRequest) {
-      console.error(
-        "[PayPal] SDK subscriptions API missing:",
-        !!paypal,
-        !!(paypal && paypal.subscriptions)
-      );
-      return res
-        .status(500)
-        .json({
-          error: "PayPal SDK unavailable",
-          message: "PayPal SDK subscriptions API unavailable on server",
+    // Create PayPal subscription - prefer SDK, fall back to REST if SDK missing
+    if (paypal && paypal.subscriptions && paypal.subscriptions.SubscriptionsCreateRequest) {
+      const request = new paypal.subscriptions.SubscriptionsCreateRequest();
+      request.requestBody({
+        plan_id: plan.paypalPlanId,
+        subscriber: {
+          name: {
+            given_name: userData.displayName?.split(" ")[0] || "User",
+            surname: userData.displayName?.split(" ")[1] || "",
+          },
+          email_address: userData.email || req.user?.email,
+        },
+        application_context: {
+          brand_name: "AutoPromote",
+          locale: "en-US",
+          shipping_preference: "NO_SHIPPING",
+          user_action: "SUBSCRIBE_NOW",
+          payment_method: {
+            payer_selected: "PAYPAL",
+            payee_preferred: "IMMEDIATE_PAYMENT_REQUIRED",
+          },
+          return_url: returnUrl || `${process.env.FRONTEND_URL}/dashboard?payment=success`,
+          cancel_url: cancelUrl || `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`,
+        },
+        custom_id: userId,
+      });
+
+      const client = paypalClient.client();
+      const subscription = await client.execute(request);
+
+      // Store subscription intent in Firestore
+      await db.collection("subscription_intents").doc(subscription.result.id).set({
+        userId,
+        planId,
+        paypalSubscriptionId: subscription.result.id,
+        status: "pending",
+        amount: plan.price,
+        createdAt: new Date().toISOString(),
+      });
+
+      audit.log("paypal.subscription.created", {
+        userId,
+        planId,
+        subscriptionId: subscription.result.id,
+      });
+
+      // Get approval URL
+      const approvalLink = subscription.result.links.find(link => link.rel === "approve");
+
+      res.json({
+        success: true,
+        used: "sdk",
+        subscriptionId: subscription.result.id,
+        approvalUrl: approvalLink?.href,
+        planId,
+        amount: plan.price,
+      });
+    } else {
+      // REST fallback
+      try {
+        console.warn("[PayPal] SDK subscriptions API missing; using REST fallback");
+        const rest = await createSubscriptionViaRest({
+          planId: plan.paypalPlanId,
+          userData,
+          returnUrl: returnUrl || `${process.env.FRONTEND_URL}/dashboard?payment=success`,
+          cancelUrl: cancelUrl || `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`,
+          customId: userId,
         });
+        const subscriptionId = rest && (rest.id || rest.subscription_id);
+        await db.collection("subscription_intents").doc(subscriptionId).set({
+          userId,
+          planId,
+          paypalSubscriptionId: subscriptionId,
+          status: "pending",
+          amount: plan.price,
+          createdAt: new Date().toISOString(),
+        });
+        audit.log("paypal.subscription.created", { userId, planId, subscriptionId });
+        const approvalLink =
+          (rest && rest.links && rest.links.find(l => l.rel === "approve")) || null;
+        return res.json({
+          success: true,
+          used: "rest",
+          subscriptionId,
+          approvalUrl: approvalLink?.href,
+          planId,
+          amount: plan.price,
+        });
+      } catch (e) {
+        console.error("[PayPal] Create subscription REST fallback error:", e);
+        audit.log("paypal.subscription.error", {
+          userId: req.userId,
+          error: e.message || String(e),
+        });
+        return res.status(500).json({ error: "Failed to create subscription" });
+      }
     }
-    // Create PayPal subscription
-    const request = new paypal.subscriptions.SubscriptionsCreateRequest();
-    request.requestBody({
-      plan_id: plan.paypalPlanId,
-      subscriber: {
-        name: {
-          given_name: userData.displayName?.split(" ")[0] || "User",
-          surname: userData.displayName?.split(" ")[1] || "",
-        },
-        email_address: userData.email || req.user?.email,
-      },
-      application_context: {
-        brand_name: "AutoPromote",
-        locale: "en-US",
-        shipping_preference: "NO_SHIPPING",
-        user_action: "SUBSCRIBE_NOW",
-        payment_method: {
-          payer_selected: "PAYPAL",
-          payee_preferred: "IMMEDIATE_PAYMENT_REQUIRED",
-        },
-        return_url: returnUrl || `${process.env.FRONTEND_URL}/dashboard?payment=success`,
-        cancel_url: cancelUrl || `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`,
-      },
-      custom_id: userId,
-    });
-
-    const client = paypalClient.client();
-    const subscription = await client.execute(request);
-
-    // Store subscription intent in Firestore
-    await db.collection("subscription_intents").doc(subscription.result.id).set({
-      userId,
-      planId,
-      paypalSubscriptionId: subscription.result.id,
-      status: "pending",
-      amount: plan.price,
-      createdAt: new Date().toISOString(),
-    });
-
-    audit.log("paypal.subscription.created", {
-      userId,
-      planId,
-      subscriptionId: subscription.result.id,
-    });
-
-    // Get approval URL
-    const approvalLink = subscription.result.links.find(link => link.rel === "approve");
-
-    res.json({
-      success: true,
-      used: "sdk",
-      planId,
-      amount: plan.price,
-    });
   } catch (error) {
     console.error("[PayPal] Create subscription error:", error);
     audit.log("paypal.subscription.error", {

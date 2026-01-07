@@ -94,7 +94,7 @@ router.post("/boost/create", authMiddleware, async (req, res) => {
 // GET /influencer/marketplace - Get influencer marketplace
 router.get("/influencer/marketplace", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId;
+    void req.userId;
     const { platform, niche, budget } = req.query;
 
     if (!platform || !niche || !budget) {
@@ -149,7 +149,7 @@ router.post("/influencer/book", authMiddleware, async (req, res) => {
 // GET /roi/:contentId - Calculate ROI for content
 router.get("/roi/:contentId", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId;
+    void req.userId;
     const { contentId } = req.params;
 
     const roi = await monetizationService.calculateROI(contentId);
@@ -225,63 +225,6 @@ router.post("/referral/signup", async (req, res) => {
   } catch (error) {
     console.error("Error processing referral signup:", error);
     res.status(500).json({ error: "Failed to process referral signup" });
-  }
-});
-
-// Admin: list payouts
-router.get("/admin/payouts", authMiddleware, async (req, res) => {
-  try {
-    if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
-    const status = req.query.status || "pending";
-    const limit = Math.min(parseInt(req.query.limit || "50", 10), 200);
-    let snap;
-    try {
-      const q = db
-        .collection("payouts")
-        .where("status", "==", status)
-        .orderBy("requestedAt", "desc")
-        .limit(limit);
-      snap = await q.get();
-    } catch (e) {
-      console.warn("[AdminPayouts] ordered query failed; falling back to simple query", e.message);
-      const q2 = db.collection("payouts").where("status", "==", status).limit(limit);
-      snap = await q2.get();
-    }
-    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    res.json({ success: true, items });
-  } catch (err) {
-    console.error("Error listing payouts:", err);
-    res.status(500).json({ error: "Failed to list payouts" });
-  }
-});
-
-// Admin: get payout by id
-router.get("/admin/payouts/:id", authMiddleware, async (req, res) => {
-  try {
-    if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
-    const id = req.params.id;
-    const doc = await db.collection("payouts").doc(id).get();
-    if (!doc.exists) return res.status(404).json({ error: "Payout not found" });
-    res.json({ success: true, payout: doc.data() });
-  } catch (err) {
-    console.error("Error getting payout:", err);
-    res.status(500).json({ error: "Failed to get payout" });
-  }
-});
-
-// Admin: process a single payout by id
-router.post("/admin/payouts/:id/process", authMiddleware, async (req, res) => {
-  try {
-    if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
-    const id = req.params.id;
-    const doc = await db.collection("payouts").doc(id).get();
-    if (!doc.exists) return res.status(404).json({ error: "Payout not found" });
-    const paypalPayoutService = require("../services/paypalPayoutService");
-    const result = await paypalPayoutService.executePayout(doc);
-    res.json({ success: true, result });
-  } catch (err) {
-    console.error("Error processing payout:", err);
-    res.status(500).json({ error: "Failed to process payout" });
   }
 });
 
@@ -426,6 +369,7 @@ router.post("/viral-bonuses/award", authMiddleware, async (req, res) => {
 
 // Creator Rewards Endpoints
 const creatorRewards = require("../services/creatorRewardsService");
+const paypalPayoutService = require("../services/paypalPayoutService");
 
 // GET /earnings/summary - Get user's earnings summary
 router.get("/earnings/summary", authMiddleware, async (req, res) => {
@@ -448,6 +392,13 @@ router.get("/earnings/summary", authMiddleware, async (req, res) => {
 router.post("/earnings/payout/self", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId;
+    try {
+      console.warn("[E2E] payout endpoint hit by userId=", userId);
+      const checkDoc = await db.collection("users").doc(userId).get();
+      console.warn("[E2E] payout endpoint - userDoc.exists=", !!(checkDoc && checkDoc.exists));
+    } catch (e) {
+      console.warn("[E2E] payout endpoint - could not read user doc:", e && e.message);
+    }
     const { paymentMethod } = req.body;
 
     const result = await creatorRewards.requestPayout(userId, paymentMethod || "paypal");
@@ -462,6 +413,91 @@ router.post("/earnings/payout/self", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Failed to request payout" });
   }
 });
+
+// Admin-only: process pending payouts (trigger manual payout processing)
+router.post("/admin/payouts/process", authMiddleware, async (req, res) => {
+  try {
+    if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
+    const { limit } = req.body;
+    const processed = await paypalPayoutService.processPendingPayouts(limit || 20);
+    res.json({ success: true, processed });
+  } catch (err) {
+    console.error("Error processing payouts:", err);
+    res.status(500).json({ error: "Failed to process payouts" });
+  }
+});
+
+// Admin: list payouts
+router.get("/admin/payouts", authMiddleware, async (req, res) => {
+  try {
+    if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
+    const status = req.query.status || "pending";
+    const limit = Math.min(parseInt(req.query.limit || "50", 10), 200);
+    let snap;
+    try {
+      // Attempt ordered query (may require composite index)
+      const q = db
+        .collection("payouts")
+        .where("status", "==", status)
+        .orderBy("requestedAt", "desc")
+        .limit(limit);
+      snap = await q.get();
+    } catch (e) {
+      // If index missing or ordering fails, fallback to a simpler query
+      console.warn("[AdminPayouts] ordered query failed, falling back to simple query:", e.message);
+      const q2 = db.collection("payouts").where("status", "==", status).limit(limit);
+      snap = await q2.get();
+    }
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, items });
+  } catch (err) {
+    console.error("Error listing payouts:", err);
+    res.status(500).json({ error: "Failed to list payouts" });
+  }
+});
+
+// Admin: get payout by id
+router.get("/admin/payouts/:id", authMiddleware, async (req, res) => {
+  try {
+    if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
+    const id = req.params.id;
+    const doc = await db.collection("payouts").doc(id).get();
+    if (!doc.exists) return res.status(404).json({ error: "Payout not found" });
+    res.json({ success: true, payout: doc.data() });
+  } catch (err) {
+    console.error("Error getting payout:", err);
+    res.status(500).json({ error: "Failed to get payout" });
+  }
+});
+
+// Admin: process a single payout by id
+router.post("/admin/payouts/:id/process", authMiddleware, async (req, res) => {
+  try {
+    if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
+    const id = req.params.id;
+    const doc = await db.collection("payouts").doc(id).get();
+    if (!doc.exists) return res.status(404).json({ error: "Payout not found" });
+    const paypalPayoutService = require("../services/paypalPayoutService");
+    // Ensure payouts enabled or allow dry-run via env
+    const result = await paypalPayoutService.executePayout(doc);
+    res.json({ success: true, result });
+  } catch (err) {
+    console.error("Error processing payout:", err);
+    res.status(500).json({ error: "Failed to process payout" });
+  }
+});
+
+// Mount tipping and promotions sub-routers
+try {
+  router.use("/tips", require("./tippingRoutes"));
+} catch (e) {
+  console.warn("Tipping routes not available:", e && e.message);
+}
+try {
+  router.use("/promotions", require("./promotionRoutes"));
+} catch (e) {
+  console.warn("Promotions routes not available:", e && e.message);
+}
 
 // GET /earnings/leaderboard - Get top earning creators
 router.get("/earnings/leaderboard", async (req, res) => {
@@ -478,6 +514,38 @@ router.get("/earnings/leaderboard", async (req, res) => {
   } catch (error) {
     console.error("Error fetching leaderboard:", error);
     res.status(500).json({ error: "Failed to fetch leaderboard" });
+  }
+});
+
+// GET /earnings/payouts - Get authenticated user's payout history
+router.get("/earnings/payouts", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const status = req.query.status; // optional filter e.g., 'pending' or 'completed'
+    const limit = Math.min(parseInt(req.query.limit || "100", 10), 500);
+
+    let snap;
+    try {
+      let q = db
+        .collection("payouts")
+        .where("uid", "==", userId)
+        .orderBy("requestedAt", "desc")
+        .limit(limit);
+      if (status) q = q.where("status", "==", status);
+      snap = await q.get();
+    } catch (e) {
+      // fallback: if ordering or composite index fails, use a simpler query
+      console.warn("[UserPayouts] ordered query failed, falling back to simple query:", e.message);
+      let q2 = db.collection("payouts").where("uid", "==", userId).limit(limit);
+      if (status) q2 = q2.where("status", "==", status);
+      snap = await q2.get();
+    }
+
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, payouts: items });
+  } catch (err) {
+    console.error("Error listing user payouts:", err);
+    res.status(500).json({ error: "Failed to list payouts" });
   }
 });
 

@@ -8,7 +8,7 @@ const {
   enqueuePlatformPostTask,
   processNextPlatformTask,
 } = require("../services/promotionTaskQueue");
-const { admin } = require("../firebaseAdmin");
+
 const { rateLimit } = require("../middleware/rateLimit");
 const { validateBody } = require("../middleware/validate");
 
@@ -18,11 +18,6 @@ const promotionWriteLimiter = rateLimiter({
   capacity: parseInt(process.env.RATE_LIMIT_PROMO_WRITES || "60", 10),
   refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || "5"),
   windowHint: "promo_writes",
-});
-const promotionPublicLimiter = rateLimiter({
-  capacity: parseInt(process.env.RATE_LIMIT_PROMO_PUBLIC || "120", 10),
-  refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || "10"),
-  windowHint: "promo_public",
 });
 
 // Enqueue a YouTube upload task for a content item

@@ -4,8 +4,10 @@
 const express = require("express");
 const router = express.Router();
 const videoClippingService = require("../services/videoClippingService");
+const crypto = require("crypto");
 const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
+const logger = require("../utils/logger");
 
 // Rate limiting
 const rateLimitMap = new Map();
@@ -31,6 +33,30 @@ function clipRateLimit(req, res, next) {
   next();
 }
 
+// Simple in-memory job store for generation jobs (suitable for testing/demo)
+const generationJobs = new Map();
+
+function createJob(userId, contentId, options) {
+  const jobId = crypto.randomBytes(8).toString("hex");
+  const job = {
+    id: jobId,
+    userId,
+    contentId,
+    options,
+    status: "queued",
+    createdAt: new Date().toISOString(),
+  };
+  generationJobs.set(jobId, job);
+  return job;
+}
+
+function updateJob(jobId, patch) {
+  const job = generationJobs.get(jobId) || {};
+  const updated = { ...job, ...patch };
+  generationJobs.set(jobId, updated);
+  return updated;
+}
+
 /**
  * POST /api/clips/analyze
  * Analyze a video and generate clip suggestions
@@ -39,6 +65,7 @@ function clipRateLimit(req, res, next) {
 router.post("/analyze", authMiddleware, clipRateLimit, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
+    logger.debug("ClipRoutes.incomingRequest", { userId, userPresent: !!req.user });
     const { contentId, videoUrl } = req.body;
 
     if (!contentId || !videoUrl) {
@@ -47,6 +74,7 @@ router.post("/analyze", authMiddleware, clipRateLimit, async (req, res) => {
 
     // Verify user owns this content (support both snake_case and camelCase schemas)
     const contentDoc = await db.collection("content").doc(contentId).get();
+
     if (!contentDoc.exists) {
       return res.status(404).json({ error: "Content not found" });
     }
@@ -54,18 +82,22 @@ router.post("/analyze", authMiddleware, clipRateLimit, async (req, res) => {
     const contentData = contentDoc.data() || {};
     const contentOwner = contentData.userId || contentData.user_id || contentData.user || null;
     if (contentOwner !== userId) {
-      // Helpful debug logging when ownership check fails in production; only log IDs, not full docs
-      console.warn(
-        "[ClipRoutes] Ownership mismatch: contentId=%s owner=%s requester=%s",
-        contentId,
-        contentOwner,
-        userId
-      );
+      logger.warn("ClipRoutes.ownershipMismatch", { contentId, contentOwner, requester: userId });
       return res.status(403).json({ error: "Unauthorized" });
     }
 
     // Start analysis (this may take a while for long videos)
-    const result = await videoClippingService.analyzeVideo(videoUrl, contentId, userId);
+    logger.info("ClipRoutes.startAnalysis", { contentId, userId });
+    let result;
+    try {
+      result = await videoClippingService.analyzeVideo(videoUrl, contentId, userId);
+    } catch (err) {
+      logger.error("ClipRoutes.analyzeVideoError", {
+        message: err && err.message ? err.message : err,
+        stack: err && err.stack,
+      });
+      throw err;
+    }
 
     // Update content document with analysis reference
     await db
@@ -88,6 +120,88 @@ router.post("/analyze", authMiddleware, clipRateLimit, async (req, res) => {
   } catch (error) {
     console.error("[ClipRoutes] Analysis error:", error);
     res.status(500).json({ error: error.message || "Analysis failed" });
+  }
+});
+
+/**
+ * POST /api/clips/generate-and-publish
+ * One-click flow: analyze, generate best clip, and publish/schedule to selected platforms.
+ * Body: { contentId, options }
+ */
+router.post("/generate-and-publish", authMiddleware, clipRateLimit, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    const { contentId, options = {} } = req.body;
+    if (!contentId) return res.status(400).json({ error: "contentId required" });
+
+    const contentDoc = await db.collection("content").doc(contentId).get();
+    if (!contentDoc.exists) return res.status(404).json({ error: "Content not found" });
+    const contentData = contentDoc.data() || {};
+    const contentOwner = contentData.userId || contentData.user_id || contentData.user || null;
+    if (contentOwner !== userId) return res.status(403).json({ error: "Unauthorized" });
+
+    const job = createJob(userId, contentId, options);
+    // Kick off async worker (fire-and-forget)
+    (async () => {
+      try {
+        updateJob(job.id, { status: "analyzing" });
+        const analysisRes = await videoClippingService.analyzeVideo(
+          contentData.videoUrl || contentData.sourceUrl,
+          contentId,
+          userId
+        );
+        updateJob(job.id, { status: "analyzed", analysisId: analysisRes.analysisId });
+
+        // Choose first top clip
+        const top = (analysisRes.topClips && analysisRes.topClips[0]) || null;
+        if (!top) {
+          updateJob(job.id, { status: "failed", error: "No clip suggestions" });
+          return;
+        }
+
+        updateJob(job.id, { status: "generating", clipId: top.id });
+        const genRes = await videoClippingService.generateClip(
+          analysisRes.analysisId,
+          top.id,
+          options
+        );
+
+        updateJob(job.id, { status: "complete", clipResult: genRes });
+      } catch (err) {
+        console.error("[ClipRoutes] generate-and-publish worker error:", err && err.message);
+        updateJob(job.id, { status: "failed", error: err && err.message });
+      }
+    })();
+
+    res.json({ success: true, jobId: job.id });
+  } catch (error) {
+    console.error("[ClipRoutes] generate-and-publish error:", error);
+    res.status(500).json({ error: error.message || "Failed" });
+  }
+});
+
+/**
+ * GET /api/clips/generate-status/:jobId
+ * Polling endpoint to read job status
+ */
+router.get("/generate-status/:jobId", authMiddleware, async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const job = generationJobs.get(jobId);
+    if (!job) return res.status(404).json({ error: "Job not found" });
+    // Only expose limited fields
+    return res.json({
+      success: true,
+      job: {
+        id: job.id,
+        status: job.status,
+        clipResult: job.clipResult || null,
+        error: job.error || null,
+      },
+    });
+  } catch (err) {
+    console.error("[ClipRoutes] status error:", err);
+    res.status(500).json({ error: "Failed to read job status" });
   }
 });
 
@@ -161,6 +275,116 @@ router.post("/generate", authMiddleware, clipRateLimit, async (req, res) => {
   } catch (error) {
     console.error("[ClipRoutes] Generate clip error:", error);
     res.status(500).json({ error: error.message || "Clip generation failed" });
+  }
+});
+
+/**
+ * POST /api/clips/memetic/plan
+ * Create a memetic plan given a base variant or content reference. Returns ranked variants and summaries.
+ * Body: { contentId?, baseVariant?, options?: { count, simulationSteps, seedSize } }
+ */
+router.post("/memetic/plan", authMiddleware, clipRateLimit, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    const { contentId, options = {} } = req.body;
+    let baseVariant = req.body.baseVariant;
+
+    // If contentId provided, verify ownership and optionally derive baseVariant from analysis
+    if (contentId) {
+      const contentDoc = await db.collection("content").doc(contentId).get();
+      if (!contentDoc.exists) return res.status(404).json({ error: "Content not found" });
+      const contentData = contentDoc.data() || {};
+      const owner = contentData.userId || contentData.user_id || contentData.user || null;
+      if (owner !== userId) return res.status(403).json({ error: "Unauthorized" });
+      // Derive a minimal baseVariant if none provided
+      if (!baseVariant) {
+        // Use a lightweight heuristic from content metadata
+        baseVariant = {
+          hookStrength: 0.6,
+          shareability: 0.05,
+          predictedWT: Math.min(0.9, contentData.estimated_watch_through || 0.6),
+          tempo: 1.0,
+        };
+      }
+    }
+
+    if (!baseVariant) return res.status(400).json({ error: "baseVariant or contentId required" });
+
+    // Lazy require to avoid circular deps
+    const { planVariants } = require("../services/memeticPlanner");
+
+    const plan = planVariants(baseVariant, options);
+
+    // Return a summarized version of the plan
+    const summary = plan.map(p => ({
+      variantId: p.v.id,
+      variant: {
+        hookStrength: p.v.hookStrength,
+        shareability: p.v.shareability,
+        ctaIntensity: p.v.ctaIntensity,
+        remixProbability: p.v.remixProbability,
+        tempo: p.v.tempo,
+        captionStyle: p.v.captionStyle,
+        thumbnailStyle: p.v.thumbnailStyle,
+      },
+      modelScore: p.modelScore,
+      resonanceScore: p.sim.resonanceScore,
+      combined: p.combined,
+    }));
+
+    res.json({ success: true, plan: summary });
+  } catch (error) {
+    console.error("[ClipRoutes] memetic plan error:", error);
+    res.status(500).json({ error: error.message || "Memetic plan failed" });
+  }
+});
+
+/**
+ * POST /api/clips/memetic/seed
+ * Create a memetic experiment to seed chosen variants to audiences.
+ * Body: { contentId?, experimentName?, plan: [{ variantId, variant }], options: { seedSize, durationDays } }
+ */
+router.post("/memetic/seed", authMiddleware, clipRateLimit, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    const { contentId, experimentName, plan, options = {} } = req.body;
+
+    if (!Array.isArray(plan) || plan.length === 0) {
+      return res.status(400).json({ error: "plan (array of variants) is required" });
+    }
+
+    // If contentId provided, verify ownership
+    if (contentId) {
+      const contentDoc = await db.collection("content").doc(contentId).get();
+      if (!contentDoc.exists) return res.status(404).json({ error: "Content not found" });
+      const contentData = contentDoc.data() || {};
+      const owner = contentData.userId || contentData.user_id || contentData.user || null;
+      if (owner !== userId) return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    // Persist experiment
+    const experimentDoc = {
+      userId,
+      contentId: contentId || null,
+      name: experimentName || `memetic-${Date.now()}`,
+      plan: plan.map(p => ({ variantId: p.variantId, variant: p.variant })),
+      options: {
+        seedSize: typeof options.seedSize === "number" ? options.seedSize : 200,
+        durationDays: typeof options.durationDays === "number" ? options.durationDays : 3,
+        ...options,
+      },
+      status: "scheduled",
+      createdAt: new Date().toISOString(),
+    };
+
+    const ref = await db.collection("memetic_experiments").add(experimentDoc);
+
+    // For MVP, we do not start background workers here — scheduling will be performed by a separate worker in future
+
+    res.json({ success: true, experimentId: ref.id });
+  } catch (error) {
+    console.error("[ClipRoutes] memetic seed error:", error);
+    res.status(500).json({ error: error.message || "Memetic seed failed" });
   }
 });
 
@@ -264,7 +488,11 @@ router.post("/:clipId/export", authMiddleware, async (req, res) => {
     }
 
     // Create content entry for this clip
-    const contentRef = await db.collection("content").add({
+    // Determine admin status
+    const isAdmin = !!(req.user && (req.user.isAdmin === true || req.user.role === "admin"));
+
+    // Create content entry for this clip
+    const contentPayload = {
       userId,
       title: clipData.caption || `Clip from ${clipData.contentId}`,
       description: clipData.caption || "",
@@ -277,32 +505,59 @@ router.post("/:clipId/export", authMiddleware, async (req, res) => {
       duration: clipData.duration,
       target_platforms: platforms,
       createdAt: new Date().toISOString(),
-    });
+      audit: {
+        createdBy: userId,
+        createdVia: "clip-studio",
+        createdAt: new Date().toISOString(),
+      },
+    };
 
+    // If user is admin, mark content active and create schedule; otherwise mark pending
+    if (isAdmin) {
+      contentPayload.status = "approved";
+    } else {
+      contentPayload.status = "pending_approval";
+    }
+
+    const contentRef = await db.collection("content").add(contentPayload);
     const contentId = contentRef.id;
 
-    // Create promotion schedule
-    const scheduleTime = scheduledTime || new Date(Date.now() + 3600000).toISOString(); // Default: 1 hour from now
+    if (isAdmin) {
+      // Create promotion schedule for admin users only
+      const scheduleTime = scheduledTime || new Date(Date.now() + 3600000).toISOString(); // Default: 1 hour from now
+      await db.collection("promotion_schedules").add({
+        userId,
+        contentId,
+        platforms,
+        scheduledTime: scheduleTime,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
 
-    await db.collection("promotion_schedules").add({
-      userId,
-      contentId,
-      platforms,
-      scheduledTime: scheduleTime,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+      logger.info("ClipRoutes.adminExport", { contentId, platforms });
 
-    res.json({
-      success: true,
-      contentId,
-      message: "Clip scheduled for export",
-      platforms,
-      scheduledTime: scheduleTime,
-    });
+      res.json({
+        success: true,
+        contentId,
+        message: "Clip scheduled for export",
+        platforms,
+        scheduledTime: scheduleTime,
+      });
+    } else {
+      // Non-admin uploads are pending approval — inform the client and do not create schedules
+      logger.info("ClipRoutes.nonAdminExport", { contentId, message: "pending_approval" });
+      res.json({
+        success: true,
+        contentId,
+        message: "Clip created and awaiting admin approval before it can be scheduled for posting.",
+        platforms,
+      });
+    }
   } catch (error) {
-    console.error("[ClipRoutes] Export clip error:", error);
+    logger.error("ClipRoutes.exportError", {
+      error: error && error.message ? error.message : error,
+    });
     res.status(500).json({ error: "Failed to export clip" });
   }
 });

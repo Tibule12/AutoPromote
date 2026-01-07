@@ -1,7 +1,7 @@
 const { dispatchPlatformPost } = require("../platformPoster");
 
 jest.mock("../hashtagEngine", () => ({
-  generateCustomHashtags: jest.fn(async ({ content, platform }) => ({
+  generateCustomHashtags: jest.fn(async ({ _content, platform }) => ({
     hashtags: ["#auto1", "#auto2"],
     hashtagString: platform === "reddit" ? "auto1, auto2" : "#auto1 #auto2",
   })),
@@ -20,9 +20,9 @@ jest.mock("../../firebaseAdmin", () => ({
   },
 }));
 
-jest.mock("../redditService", () => ({ postToReddit: jest.fn(async args => ({ ok: true })) }));
-jest.mock("../linkedinService", () => ({ postToLinkedIn: jest.fn(async args => ({ ok: true })) }));
-jest.mock("../discordService", () => ({ postToDiscord: jest.fn(async args => ({ ok: true })) }));
+jest.mock("../redditService", () => ({ postToReddit: jest.fn(async _args => ({ ok: true })) }));
+jest.mock("../linkedinService", () => ({ postToLinkedIn: jest.fn(async _args => ({ ok: true })) }));
+jest.mock("../discordService", () => ({ postToDiscord: jest.fn(async _args => ({ ok: true })) }));
 
 const mockReddit = require("../redditService");
 const mockLinkedIn = require("../linkedinService");
@@ -35,7 +35,7 @@ describe("platformPoster hashtag injection", () => {
   });
 
   test("dispatchPlatformPost injects hashtags and calls reddit handler", async () => {
-    const res = await dispatchPlatformPost({
+    await dispatchPlatformPost({
       platform: "reddit",
       contentId: "abc",
       payload: { message: "Hello" },
@@ -48,7 +48,7 @@ describe("platformPoster hashtag injection", () => {
   });
 
   test("dispatchPlatformPost injects hashtags and calls linkedin handler with hashtagString", async () => {
-    const res = await dispatchPlatformPost({
+    await dispatchPlatformPost({
       platform: "linkedin",
       contentId: "abc",
       payload: { message: "Hello" },
@@ -60,7 +60,7 @@ describe("platformPoster hashtag injection", () => {
   });
 
   test("dispatchPlatformPost injects hashtags and calls discord handler with hashtag string", async () => {
-    const res = await dispatchPlatformPost({
+    await dispatchPlatformPost({
       platform: "discord",
       contentId: "abc",
       payload: { message: "Hello" },
