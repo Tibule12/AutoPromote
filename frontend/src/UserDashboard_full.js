@@ -20,6 +20,7 @@ import LiveWatch from "./LiveWatch";
 import FloatingActions from "./components/FloatingActions";
 import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
+import VoiceOverGuide from "./components/VoiceOverGuide";
 import AdminKyc from "./AdminKyc";
 import UsageLimitBanner from "./components/UsageLimitBanner";
 import { auth } from "./firebaseClient";
@@ -1049,6 +1050,7 @@ const UserDashboard = ({
         </button>
         <div className="topbar-title">Your Dashboard</div>
         <div className="topbar-user">{user?.name || "Guest"}</div>
+        <VoiceOverGuide activeTab={activeTab} />
       </header>
 
       <aside className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Sidebar">
