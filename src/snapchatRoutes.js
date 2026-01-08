@@ -36,22 +36,23 @@ function canonicalizeRedirectUri(uri) {
 
 // Snapchat only supports production environment
 const _rawRedirectEnv = (process.env.SNAPCHAT_REDIRECT_URI || "").toString().trim();
-const _effectiveRedirect = canonicalizeRedirectUri(
-  _rawRedirectEnv || `https://www.autopromote.org/api/snapchat/auth/callback`
-);
+
+// If explicit env var is set, use it blindly to respect user overrides.
+// Otherwise, fall back to canonical auto-construction.
+const _effectiveRedirect = _rawRedirectEnv
+  ? _rawRedirectEnv
+  : canonicalizeRedirectUri(`https://www.autopromote.org/api/snapchat/auth/callback`);
+
 if (_rawRedirectEnv && _effectiveRedirect !== _rawRedirectEnv) {
+  // Logic path not hit anymore if we use _rawRedirectEnv directly, but keeping structure clean
+} else if (!_rawRedirectEnv) {
+  // Only warn if we are auto-generating
   try {
     const _u = new URL(_effectiveRedirect);
-    console.warn(
-      "snapchat: SNAPCHAT_REDIRECT_URI points to legacy/non-canonical host or path; auto-upgraded to host=%s path=%s",
-      _u.host,
-      _u.pathname
-    );
-  } catch (_) {
-    console.warn(
-      "snapchat: SNAPCHAT_REDIRECT_URI points to legacy/non-canonical host or path; auto-upgraded"
-    );
-  }
+    if (_u.host !== "api.autopromote.org") {
+      // Debug log if needed
+    }
+  } catch (_) {}
 }
 
 // Canonical scope aliases -> official Snapchat OAuth scope URLs
@@ -261,6 +262,15 @@ router.post("/oauth/prepare", authMiddleware, oauthPrepareLimiter, async (req, r
       });
 
     const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
+
+    // Explicitly log the auth parameters to help user debug redirect_uri mismatches
+    console.log(
+      "[Snapchat] OAuth Prepare: client_id=%s redirect_uri=%s scope=%s",
+      clientIdForAuthorize,
+      cfg.redirect,
+      normalized.scope
+    );
+
     let authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(normalized.scope)}&state=${encodeURIComponent(state)}`;
 
     // Perform a quick server-side probe of the auth URL. Some providers
