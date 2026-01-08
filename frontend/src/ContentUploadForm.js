@@ -187,6 +187,7 @@ function ContentUploadForm({
     yourBrand: false,
     brandedContent: false,
   });
+  const [tiktokAIGenerated, setTiktokAIGenerated] = useState(false);
   const [tiktokConsentChecked, setTiktokConsentChecked] = useState(false);
   const [tiktokDisclosure, setTiktokDisclosure] = useState(false);
   const uploadLockRef = useRef(false);
@@ -1483,6 +1484,7 @@ function ContentUploadForm({
                 }
               : undefined,
           // Include explicit disclosure + consent flags so server-side can validate prior to publishing
+          is_aigc: !!tiktokAIGenerated,
           disclosure: !!tiktokDisclosure,
           consent: !!tiktokConsentChecked,
         };
@@ -2261,6 +2263,28 @@ function ContentUploadForm({
                         both.
                       </div>
                     )}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={tiktokAIGenerated}
+                    onChange={e => setTiktokAIGenerated(e.target.checked)}
+                  />{" "}
+                  This content is AI-generated
+                </label>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "#666",
+                    marginTop: 4,
+                    paddingLeft: 24,
+                    paddingBottom: 8,
+                  }}
+                >
+                  Required by TikTok for AI-created or modified content.
                 </div>
               </div>
 
@@ -3477,6 +3501,16 @@ function ContentUploadForm({
                     <div style={{ fontSize: 13, fontStyle: "italic", color: "#666" }}>
                       Moved to Platform Settings below description.
                     </div>
+                  </div>
+                  <div>
+                    <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <input
+                        type="checkbox"
+                        checked={tiktokAIGenerated}
+                        onChange={e => setTiktokAIGenerated(e.target.checked)}
+                      />{" "}
+                      This content is AI-generated
+                    </label>
                   </div>
                   {tiktokCreatorInfo && tiktokCreatorInfo.max_video_post_duration_sec && (
                     <div style={{ fontSize: 12, color: "#666" }}>
