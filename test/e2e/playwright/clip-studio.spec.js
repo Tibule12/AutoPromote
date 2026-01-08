@@ -140,6 +140,13 @@ test("AI Clip Studio: analyze and generate clip (SPA)", async ({ page }) => {
   await page.waitForSelector('nav li:has-text("AI Clips")', { timeout: 60000 });
   await page.click('nav li:has-text("AI Clips")');
 
+  // Click "Select Video from Library" to enter library mode
+  // The UI defaults to a "Clean Landing" state now
+  const selectBtn = page.locator('button:has-text("Select Video from Library")');
+  if (await selectBtn.count() > 0) {
+    await selectBtn.click();
+  }
+
   // Wait for video card and click Generate Clips
   await page.waitForSelector(".video-card");
   await page.click('.video-card .btn-primary:has-text("Generate Clips")');

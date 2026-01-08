@@ -572,7 +572,7 @@ const SecurityPanel = ({ user }) => {
           </div>
         ) : (
           <div className="twofa-setup">
-            {!enrolling2FA && !qrCodeUrl && !verificationId ? (
+            {!qrCodeUrl && !verificationId ? (
               <div className="form-group">
                 <label>Choose MFA Method</label>
                 <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>

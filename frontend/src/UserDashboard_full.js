@@ -672,7 +672,8 @@ const UserDashboard = ({
       try {
         const currentUser = auth.currentUser;
         if (!currentUser) return;
-        const token = await currentUser.getIdToken(true);
+        // Use cached token unless expired to improve reliability
+        const token = await currentUser.getIdToken();
 
         // Load critical data first (with caching)
         await cachedFetch(
