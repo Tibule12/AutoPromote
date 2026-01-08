@@ -1937,59 +1937,13 @@ function ContentUploadForm({
                     <div
                       role="status"
                       className="no-video-disclosure"
-                      style={{ fontSize: 12, color: "#b66" }}
+                      style={{ fontSize: 12, color: "#b66", marginBottom: 6 }}
                     >
                       This post doesn&apos;t contain a video. TikTok features like Duet and Stitch
                       require a video — upload one to enable them.
                     </div>
                   )}
-                  <div style={{ marginTop: 6 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <input
-                        type="checkbox"
-                        checked={!!tiktokDisclosure}
-                        onChange={e => setTiktokDisclosure(!!e.target.checked)}
-                      />
-                      Disclose video content
-                    </label>
-                    {tiktokDisclosure && (
-                      <div
-                        role="status"
-                        style={{
-                          display: "flex",
-                          gap: 8,
-                          alignItems: "flex-start",
-                          background: "#eef6ff",
-                          padding: 8,
-                          borderRadius: 6,
-                          color: "#075985",
-                          marginTop: 8,
-                          fontSize: 13,
-                        }}
-                      >
-                        <div
-                          aria-hidden
-                          style={{
-                            background: "#dbeafe",
-                            borderRadius: "50%",
-                            width: 28,
-                            height: 28,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "#075985",
-                            fontWeight: 700,
-                          }}
-                        >
-                          i
-                        </div>
-                        <div>
-                          Your video will be labeled &quot;Promotional content&quot;. This cannot be
-                          changed once your video is posted.
-                        </div>
-                      </div>
-                    )}
-                  </div>
+
                   {tiktokCreatorInfo && tiktokCreatorInfo.can_post === false && (
                     <div className="tiktok-disabled-banner" role="alert">
                       This TikTok account cannot publish via third-party apps right now. Please try
@@ -3520,16 +3474,10 @@ function ContentUploadForm({
                   </div>
                   <div>
                     <label>Commercial / Branded Content</label>
-                    {/* Replaced with PlatformSettingsOverride logic, but kept placeholder hidden if needed or rely on the new component placed below description. 
-                        Actually, since we want to move it to a specific section below description, we should remove this inline block 
-                        or render ONLY if we want it here. The prompt was "move". 
-                        I will remove this entire block and the "Disclose video content" logic from here as it is now in the overrides component.
-                    */}
                     <div style={{ fontSize: 13, fontStyle: "italic", color: "#666" }}>
                       Moved to Platform Settings below description.
                     </div>
                   </div>
-                  <div style={{ fontSize: 13 }}>{/* Moved to overrides */}</div>
                   {tiktokCreatorInfo && tiktokCreatorInfo.max_video_post_duration_sec && (
                     <div style={{ fontSize: 12, color: "#666" }}>
                       Max allowed video duration for this creator:{" "}

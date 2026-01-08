@@ -19,7 +19,8 @@ const AnalyticsPanel = () => {
         setLoading(false);
         return;
       }
-      const token = await currentUser.getIdToken(true);
+      // Use cached token unless expired to improve reliability
+      const token = await currentUser.getIdToken();
 
       // Fetch user analytics
       const res = await fetch(`${API_ENDPOINTS.ANALYTICS_USER}?range=${timeRange}`, {

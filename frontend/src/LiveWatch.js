@@ -59,7 +59,11 @@ export default function LiveWatch() {
     // fetch paypal config for client id
     const load = async () => {
       try {
-        const res = await fetch("/api/payments/paypal/config");
+        const { API_ENDPOINTS } = require("./config");
+        // Use configured endpoint or relative path if not defined
+        const url =
+          (API_ENDPOINTS && API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG) || "/api/payments/paypal/config";
+        const res = await fetch(url);
         const body = await res.json().catch(() => ({}));
         if (res.ok) {
           setClientId(body.clientId || null);
