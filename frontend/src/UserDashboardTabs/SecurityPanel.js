@@ -305,11 +305,19 @@ const SecurityPanel = ({ user }) => {
         if (!currentUser) throw new Error("No authenticated user");
 
         // Setup reCAPTCHA
-        if (!window.recaptchaVerifier) {
-          window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-            size: "invisible",
-          });
+        // Always recreate the verifier to ensure it binds to the current DOM element
+        if (window.recaptchaVerifier) {
+          try {
+            window.recaptchaVerifier.clear();
+          } catch (e) {
+            // Ignore clear errors if element is already gone
+          }
+          window.recaptchaVerifier = null;
         }
+
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+          size: "invisible",
+        });
 
         const multiFactorSession = await multiFactor(currentUser).getSession();
         const phoneInfoOptions = {
