@@ -62,7 +62,10 @@ export default function LiveWatch() {
         const { API_ENDPOINTS } = require("./config");
         // Use configured endpoint or relative path if not defined
         const url =
-          (API_ENDPOINTS && API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG) || "/api/payments/paypal/config";
+          (API_ENDPOINTS && API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG) ||
+          (process.env.REACT_APP_API_URL
+            ? `${process.env.REACT_APP_API_URL}/api/payments/paypal/config`
+            : "/api/payments/paypal/config");
         const res = await fetch(url);
         const body = await res.json().catch(() => ({}));
         if (res.ok) {
