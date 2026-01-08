@@ -491,6 +491,12 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   }
 }
 
+@media (max-width: 768px) {
+  .dashboard-main {
+    padding-bottom: 80px !important; /* clear fixed bottom nav */
+  }
+}
+
 @media (max-width: 640px) {
   .landing-preview {
     grid-template-columns: 1fr;

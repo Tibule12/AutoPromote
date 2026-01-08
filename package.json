@@ -20,7 +20,7 @@
     "emulator:smoketest": "node ./scripts/seed-autopilot-emulator.js && node ./scripts/emulator-smoketest-run.js",
     "check:secrets": "node ./scripts/check-no-secrets.js",
     "test:e2e": "node test/e2e/upload-e2e.js",
-    "test:e2e:playwright": "cross-env CORS_ALLOW_ALL=true GOOGLE_APPLICATION_CREDENTIALS=test/e2e/tmp/service-account.json node ./scripts/write-service-account.js && npm --prefix frontend ci && npm --prefix frontend run build && cross-env CORS_ALLOW_ALL=true GOOGLE_APPLICATION_CREDENTIALS=test/e2e/tmp/service-account.json npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1",
+    "test:e2e:playwright": "cross-env NODE_ENV=test CORS_ALLOW_ALL=true GOOGLE_APPLICATION_CREDENTIALS=test/e2e/tmp/service-account.json node ./scripts/write-service-account.js && npm --prefix frontend ci && npm --prefix frontend run build && cross-env NODE_ENV=test CORS_ALLOW_ALL=true GOOGLE_APPLICATION_CREDENTIALS=test/e2e/tmp/service-account.json npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1",
     "test:e2e:playwright:emulator": "cross-env CORS_ALLOW_ALL=true npm --prefix frontend ci && npm --prefix frontend run build && npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1",
     "lint": "node -e \"try{require('child_process').execSync('eslint --ext .js,.jsx src test --rule \"no-console:0\" --rule \"no-unused-vars:0\" --rule \"no-restricted-syntax:0\"', {stdio: 'inherit'})}catch(e){ /* swallow non-zero */ }\"",
     "emulator:start": "npx firebase emulators:start --only firestore,functions",
