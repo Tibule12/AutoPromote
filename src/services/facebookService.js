@@ -188,25 +188,37 @@ async function getUserProfile(accessToken) {
 }
 
 /**
- * Post to Facebook page
+ * Post to Facebook page (supports Feed, Photos, and Videos)
  */
-async function postToFacebookPage({ pageId, pageAccessToken, message, link, imageUrl }) {
+async function postToFacebookPage({
+  pageId,
+  pageAccessToken,
+  message,
+  link,
+  imageUrl,
+  videoUrl,
+  title,
+}) {
   if (!fetchFn) throw new Error("Fetch not available");
 
-  const params = new URLSearchParams({ message, access_token: pageAccessToken });
-
-  if (link) {
-    params.append("link", link);
-  }
-
+  const params = new URLSearchParams({ access_token: pageAccessToken });
   let endpoint = `https://graph.facebook.com/v18.0/${pageId}/feed`;
 
-  // If image URL provided, post as photo
-  if (imageUrl) {
+  if (videoUrl) {
+    // Post Native Video
+    endpoint = `https://graph.facebook.com/v18.0/${pageId}/videos`;
+    params.append("file_url", videoUrl);
+    if (title) params.append("title", title);
+    if (message) params.append("description", message); // videos use description
+  } else if (imageUrl) {
+    // Post Native Photo
     endpoint = `https://graph.facebook.com/v18.0/${pageId}/photos`;
-    params.set("url", imageUrl);
-    params.set("caption", message);
-    params.delete("message");
+    params.append("url", imageUrl);
+    if (message) params.append("caption", message); // photos use caption
+  } else {
+    // Post Link or Status
+    if (message) params.append("message", message);
+    if (link) params.append("link", link);
   }
 
   const response = await safeFetch(endpoint, fetchFn, {
@@ -222,7 +234,7 @@ async function postToFacebookPage({ pageId, pageAccessToken, message, link, imag
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json().catch(() => ({}));
     throw new Error(error.error?.message || "Post failed");
   }
 
@@ -265,8 +277,12 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
 
     // Build content context
     let message = payload?.message || payload?.text || "";
+    let title = payload?.title || "";
     const link = payload?.link || payload?.url;
     const imageUrl = payload?.imageUrl || payload?.mediaUrl;
+
+    // Determine video URL if type is video
+    const videoUrl = payload?.videoUrl || (payload?.type === "video" ? payload?.url : null);
 
     if (contentId && !message) {
       try {
@@ -274,6 +290,7 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
         if (contentSnap.exists) {
           const content = contentSnap.data();
           message = content.title || content.description || "New content";
+          if (!title) title = content.title;
         }
       } catch (_) {}
     }
@@ -284,6 +301,8 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
       message,
       link,
       imageUrl,
+      videoUrl,
+      title,
     });
 
     // Store result in Firestore
