@@ -1328,6 +1328,7 @@ const UserDashboard = ({
             setSelectedPlatforms={setSelectedPlatforms}
             spotifySelectedTracks={spotifySelectedTracks}
             setSpotifySelectedTracks={setSpotifySelectedTracks}
+            onNavigate={handleNav}
           />
         )}
 
