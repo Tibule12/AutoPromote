@@ -247,6 +247,10 @@ function App() {
           setShowTermsModal(true);
           return;
         }
+        if (res.status === 403) {
+          // Quietly suppress generic 403s during background fetch to avoid console noise
+          return;
+        }
         return;
       }
       const parsed = await parseJsonSafe(res);
