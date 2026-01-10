@@ -10,7 +10,7 @@ import {
   PhoneMultiFactorGenerator,
   RecaptchaVerifier,
   TotpMultiFactorGenerator,
-  TotpSecret,
+  sendEmailVerification,
 } from "firebase/auth";
 // Firestore helpers intentionally omitted; use backend APIs instead
 import "./SecurityPanel.css";
@@ -264,15 +264,16 @@ const SecurityPanel = ({ user }) => {
     setTwoFactorError("");
     setTwoFactorSuccess("");
 
-    if (mfaMethod === "totp") {
-      // TOTP (Authenticator App) flow
-      setEnrolling2FA(true);
-      try {
-        const currentUser = auth.currentUser;
-        if (!currentUser) throw new Error("No authenticated user");
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("No authenticated user");
 
-        await multiFactor(currentUser).getSession();
-        const totpSecret = await TotpSecret.generate();
+      if (mfaMethod === "totp") {
+        // TOTP (Authenticator App) flow
+        setEnrolling2FA(true);
+
+        const session = await multiFactor(currentUser).getSession();
+        const totpSecret = await TotpMultiFactorGenerator.generateSecret(session);
         setTotpSecret(totpSecret);
 
         // Generate QR code URL for authenticator apps
@@ -284,25 +285,17 @@ const SecurityPanel = ({ user }) => {
         setTwoFactorSuccess(
           "Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)"
         );
-      } catch (error) {
-        console.error("2FA TOTP enrollment error:", error);
-        setTwoFactorError(error.message || "Failed to generate authenticator code");
         setEnrolling2FA(false);
-      }
-    } else {
-      // SMS flow (requires Firebase Console SMS MFA to be enabled)
-      if (!phoneNumber || !phoneNumber.match(/^\+[1-9]\d{1,14}$/)) {
-        setTwoFactorError(
-          "Please enter a valid phone number with country code (e.g., +1234567890)"
-        );
-        return;
-      }
+      } else {
+        // SMS flow (requires Firebase Console SMS MFA to be enabled)
+        if (!phoneNumber || !phoneNumber.match(/^\+[1-9]\d{1,14}$/)) {
+          setTwoFactorError(
+            "Please enter a valid phone number with country code (e.g., +1234567890)"
+          );
+          return;
+        }
 
-      setEnrolling2FA(true);
-
-      try {
-        const currentUser = auth.currentUser;
-        if (!currentUser) throw new Error("No authenticated user");
+        setEnrolling2FA(true);
 
         // Setup reCAPTCHA
         // Always recreate the verifier to ensure it binds to the current DOM element
@@ -333,14 +326,26 @@ const SecurityPanel = ({ user }) => {
 
         setVerificationId(verificationId);
         setTwoFactorSuccess("Verification code sent to your phone!");
-      } catch (error) {
-        console.error("2FA SMS enrollment error:", error);
-        setTwoFactorError(
-          error.message ||
-            "Failed to send verification code. SMS MFA may not be enabled in Firebase Console."
-        );
-      } finally {
         setEnrolling2FA(false);
+      }
+    } catch (error) {
+      console.error("2FA enrollment error:", error);
+      setEnrolling2FA(false);
+      if (error.code === "auth/unverified-email") {
+        setTwoFactorError("Email verification required before enabling 2FA.");
+        const performSend = window.confirm(
+          "Your email address is not verified. Send verification email now?"
+        );
+        if (performSend && auth.currentUser) {
+          try {
+            await sendEmailVerification(auth.currentUser);
+            toast.success("Verification email sent! Check your inbox.");
+          } catch (e) {
+            toast.error("Failed to send verification email: " + e.message);
+          }
+        }
+      } else {
+        setTwoFactorError(error.message || "Failed to enable 2FA");
       }
     }
   };

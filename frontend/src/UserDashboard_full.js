@@ -1041,7 +1041,7 @@ const UserDashboard = ({
         position="top-right"
         toastOptions={{ duration: 4000, style: { background: "#1a1a2e", color: "#fff" } }}
       />
-      <TopNav />
+      {activeTab === "live" && <TopNav />}
       <header className="dashboard-topbar" aria-label="Top navigation">
         <button
           className="hamburger"
