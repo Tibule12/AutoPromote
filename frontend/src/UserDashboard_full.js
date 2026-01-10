@@ -573,6 +573,7 @@ const UserDashboard = ({
           meta: platforms.facebook.meta || null,
           pages: platforms.facebook.pages || null,
           profile: platforms.facebook.profile || null,
+          ig_business_account_id: platforms.facebook.ig_business_account_id || null,
         });
       }
       if (platforms.spotify) {
@@ -1138,12 +1139,14 @@ const UserDashboard = ({
             >
               Connections
             </li>
-            <li
-              className={activeTab === "admin-audit" ? "active" : ""}
-              onClick={() => handleNav("admin-audit")}
-            >
-              Admin Audit
-            </li>
+            {isAdminUser && (
+              <li
+                className={activeTab === "admin-audit" ? "active" : ""}
+                onClick={() => handleNav("admin-audit")}
+              >
+                Admin Audit
+              </li>
+            )}
             {isAdminUser && (
               <li
                 className={activeTab === "admin-kyc" ? "active" : ""}
@@ -1381,7 +1384,7 @@ const UserDashboard = ({
           />
         )}
 
-        {activeTab === "admin-audit" && <AdminAuditViewer />}
+        {activeTab === "admin-audit" && isAdminUser && <AdminAuditViewer />}
 
         {activeTab === "admin-kyc" && isAdminUser && <AdminKyc />}
 

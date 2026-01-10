@@ -213,13 +213,7 @@ const ProfilePanel = ({
                   onChange={() => toggleDefaultPlatform && toggleDefaultPlatform(p)}
                 />{" "}
                 {p.charAt(0).toUpperCase() + p.slice(1)}
-                {p === "tiktok" ||
-                p === "facebook" ||
-                p === "instagram" ||
-                p === "snapchat" ||
-                p === "pinterest"
-                  ? " ⏳"
-                  : " ✅"}
+                {p === "instagram" || p === "snapchat" ? " ⏳" : " ✅"}
               </label>
             ))}
           </div>

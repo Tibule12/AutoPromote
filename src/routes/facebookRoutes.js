@@ -215,18 +215,31 @@ router.get("/callback", async (req, res) => {
     );
     const pagesData = await pagesRes.json();
     const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
-    // Try to get Instagram business account from first page (best-effort)
+    // Try to get Instagram business account from ANY page (iterate until found)
     let igBusinessAccountId = null;
     if (pages.length > 0) {
-      try {
-        const pageId = pages[0].id;
-        const proofP = appsecretProofFor(pages[0].access_token);
-        const igRes = await fetch(
-          `https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account&access_token=${encodeURIComponent(pages[0].access_token)}${proofP ? `&appsecret_proof=${proofP}` : ""}`
-        );
-        const igData = await igRes.json();
-        igBusinessAccountId = igData?.instagram_business_account?.id || null;
-      } catch (_) {}
+      for (const page of pages) {
+        if (igBusinessAccountId) break;
+        try {
+          const pageId = page.id; // use page access token
+          const proofP = appsecretProofFor(page.access_token);
+          const igRes = await fetch(
+            `https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account&access_token=${encodeURIComponent(page.access_token)}${proofP ? `&appsecret_proof=${proofP}` : ""}`
+          );
+          const igData = await igRes.json();
+          // Log specific response for debugging
+          if (igData.error) {
+            console.error(`[FacebookCallback] IG check failed for page ${pageId}:`, igData.error);
+          } else if (igData.instagram_business_account && igData.instagram_business_account.id) {
+            igBusinessAccountId = igData.instagram_business_account.id;
+            console.log(
+              `[FacebookCallback] Found IG Business Account ${igBusinessAccountId} on page ${pageId}`
+            );
+          }
+        } catch (e) {
+          console.error(`[FacebookCallback] Exception checking IG for page ${page.id}:`, e);
+        }
+      }
     }
 
     if (uidFromState) {
