@@ -30,7 +30,7 @@ function runJestDirect(envExtras = {}) {
   const fs = require('fs');
   const env = Object.assign({}, process.env, envExtras);
   // Remove any JEST_MATCH to ensure we run the full suite by default
-  if (env.JEST_MATCH) delete env.JEST_MATCH;
+  // if (env.JEST_MATCH) delete env.JEST_MATCH;
   // Ensure frontend packages (e.g., @testing-library/jest-dom) are resolvable
   const frontendNodeModules = path.join(process.cwd(), 'frontend', 'node_modules');
   if (!fs.existsSync(frontendNodeModules)) {

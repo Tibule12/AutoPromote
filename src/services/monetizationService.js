@@ -5,6 +5,7 @@
 const { db } = require("../firebaseAdmin");
 const crypto = require("crypto");
 const logger = require("../utils/logger");
+const paypalClient = require("./paypal");
 
 class MonetizationService {
   // Premium tier definitions
@@ -85,9 +86,22 @@ class MonetizationService {
         throw new Error("Invalid tier name");
       }
 
-      // Process payment (would integrate with Stripe/PayPal)
+      // Process payment (PayPal)
       const paymentResult = await this.processPayment(userId, tier.price, paymentMethod);
 
+      if (paymentResult.status === "pending_approval") {
+        // Return approval URL to frontend
+        return {
+          success: false,
+          status: "pending_approval",
+          approvalUrl: paymentResult.approvalUrl,
+          orderId: paymentResult.paymentId,
+          message: "Redirect user to PayPal for approval",
+          tier,
+        };
+      }
+
+      // If we ever support auto-capture methods unrelated to PayPal redirect:
       if (!paymentResult.success) {
         throw new Error("Payment processing failed");
       }
@@ -126,22 +140,54 @@ class MonetizationService {
     }
   }
 
-  // Process payment (mock implementation)
+  // Process payment (Real PayPal Integration)
   async processPayment(userId, amount, method) {
-    // In production, this would integrate with Stripe/PayPal
     logger.info("Monetization.processPayment", { userId, amount, method });
 
-    // Simulate payment processing
-    // Use crypto.randomInt to avoid insecure randomness reported by static analyzers
-    const success = crypto.randomInt(100) >= 5; // 95% success rate
+    try {
+      if (method === "paypal") {
+        // Create PayPal Order
+        const order = await paypalClient.createOrder({
+          amount: amount.toFixed(2),
+          currency: "USD",
+        });
 
-    return {
-      success,
-      paymentId: success ? `pay_${Date.now()}_${crypto.randomBytes(6).toString("hex")}` : null,
-      amount,
-      method,
-      processedAt: new Date().toISOString(),
-    };
+        return {
+          success: false, // Payment not yet complete, requires user approval
+          status: "pending_approval",
+          paymentId: order.id,
+          approvalUrl: order.links.find(l => l.rel === "approve")?.href,
+          amount,
+          method,
+          processedAt: new Date().toISOString(),
+        };
+      } else {
+        // Fallback for Stripe (if added later) or other methods
+        // For now, simulate success for 'stripe' purely for dev compatibility if needed,
+        // OR throw error to force PayPal usage as requested.
+        // User requested: "we are using paypal alone for now"
+        throw new Error(
+          "Only PayPal is currently supported. Please select 'paypal' as payment method."
+        );
+      }
+    } catch (error) {
+      logger.error("Monetization.processPaymentFailed", { error: error.message });
+      throw error;
+    }
+  }
+
+  // Complete Payment (Capture Order)
+  async completePayment(orderId) {
+    try {
+      const capture = await paypalClient.captureOrder(orderId);
+      if (capture.status === "COMPLETED") {
+        return { success: true, paymentId: capture.id, status: "completed" };
+      }
+      return { success: false, status: capture.status };
+    } catch (error) {
+      logger.error("Monetization.capturePaymentFailed", { error: error.message });
+      throw error;
+    }
   }
 
   // Check user's subscription status and limits
@@ -338,13 +384,16 @@ class MonetizationService {
       // Calculate boost cost
       const boostCost = this.calculateBoostCost(platform, targetViews, duration);
 
-      // Check if user has enough credits/balance
-      const hasCredits = await this.checkCreditBalance(userId, boostCost);
-      if (!hasCredits) {
-        throw new Error(`Insufficient credits. Need ${boostCost} credits for this boost.`);
-      }
+      // Check if user has enough credits/balance (SKIP for direct PayPal Flow)
+      // const hasCredits = await this.checkCreditBalance(userId, boostCost);
+      // if (!hasCredits) {
+      //   throw new Error(`Insufficient credits. Need ${boostCost} credits for this boost.`);
+      // }
 
-      // Create boost
+      // Process real payment for the boost request immediately (Pay-as-you-go)
+      const paymentResult = await this.processPayment(userId, boostCost, "paypal");
+
+      // Create boost record (pending payment)
       const boost = {
         userId,
         contentId,
@@ -352,9 +401,10 @@ class MonetizationService {
         targetViews,
         duration,
         budget: budget || boostCost,
-        status: "scheduled",
+        status: "pending_payment", // Changed from scheduled to pending
+        paymentOrderId: paymentResult.paymentId,
         createdAt: new Date().toISOString(),
-        scheduledFor: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
+        scheduledFor: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
         progress: {
           views: 0,
           engagements: 0,
@@ -364,18 +414,16 @@ class MonetizationService {
 
       const boostRef = await db.collection("paid_boosts").add(boost);
 
-      // Deduct credits
-      await this.deductCredits(userId, boostCost, `Paid boost for content ${contentId}`);
-
-      // Update usage
-      await this.updateUsage(userId, "boost");
-
-      return {
-        boostId: boostRef.id,
-        ...boost,
-        cost: boostCost,
-        message: `Paid boost created successfully. ${boostCost} credits deducted.`,
-      };
+      // Return approval URL
+      if (paymentResult.status === "pending_approval") {
+        return {
+          success: false,
+          status: "pending_approval",
+          approvalUrl: paymentResult.approvalUrl,
+          boostId: boostRef.id,
+          message: "Please approve PayPal payment to activate boost.",
+        };
+      }
     } catch (error) {
       console.error("Error creating paid boost:", error);
       throw error;

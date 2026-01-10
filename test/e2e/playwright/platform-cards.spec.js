@@ -503,7 +503,7 @@ test("Per-platform card: LinkedIn preview and upload", async ({ page }) => {
   await page.goto(pageUrl);
   await page.waitForSelector("#content-file-input");
   await page.click("#tile-linkedin");
-  await page.fill('input[placeholder="LinkedIn organization/company ID"]', "98765");
+  await page.fill('input[placeholder="LinkedIn Organization ID (optional)"]', "98765");
   await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
@@ -553,7 +553,7 @@ test("Per-platform card: Twitter preview and upload", async ({ page }) => {
   await page.goto(pageUrl);
   await page.waitForSelector("#content-file-input");
   await page.click("#tile-twitter");
-  await page.fill('input[placeholder="Twitter message (optional)"]', "Test tweet");
+  await page.fill('textarea[placeholder="Tweet text..."]', "Test tweet");
   await attachFileForPlatform(page, "test/e2e/playwright/test-assets/test.mp4");
   await page.click("#preview-btn");
   await page.waitForSelector(".preview-card");
@@ -2747,7 +2747,7 @@ test("Per-platform SPA: LinkedIn preview & upload (dashboard)", async ({ page })
   if (!clickedTile) throw new Error('LinkedIn tile not found');
   await page.waitForSelector('.platform-expanded, h3:has-text("Upload to"), #expanded, #upload-view', { timeout: 45000 });
   try {
-    const lSel = '.platform-expanded input[placeholder="LinkedIn organization/company ID"], .platform-expanded input[name="linkedinOrgId"], input[aria-label="LinkedIn organization/company ID"]';
+    const lSel = '.platform-expanded input[placeholder="LinkedIn Organization ID (optional)"], .platform-expanded input[name="linkedinOrgId"], input[aria-label="LinkedIn organization/company ID"]';
     await page.waitForSelector(lSel, { timeout: 10000 });
     await page.fill(lSel, "98765");
   } catch (e) {
@@ -2905,7 +2905,7 @@ test("Per-platform SPA: Twitter preview & upload (dashboard)", async ({ page }) 
   if (!clickedTile) throw new Error('Twitter tile not found');
   await page.waitForSelector('.platform-expanded, h3:has-text("Upload to"), #expanded, #upload-view', { timeout: 45000 });
   try {
-    const tSel = '.platform-expanded input[placeholder="Twitter message (optional)"], .platform-expanded input[name="tweetText"], textarea[name="tweetText"]';
+    const tSel = '.platform-expanded textarea[placeholder="Tweet text..."], .platform-expanded input[name="tweetText"], textarea[name="tweetText"]';
     await page.waitForSelector(tSel, { timeout: 10000 });
     await page.fill(tSel, "Test tweet");
   } catch (e) {

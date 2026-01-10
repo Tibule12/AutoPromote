@@ -73,6 +73,10 @@ const UserDashboard = ({
   const [defaultsFrequency, setDefaultsFrequency] = useState(
     userDefaults?.defaultFrequency || "once"
   );
+  const [paypalEmail, setPaypalEmail] = useState(
+    userDefaults?.paypalEmail || user?.paypalEmail || ""
+  );
+
   const [scheduleContentMap, setScheduleContentMap] = useState({});
   const [discordStatus, setDiscordStatus] = useState({ connected: false, meta: null });
   const [linkedinStatus, setLinkedinStatus] = useState({ connected: false, meta: null });
@@ -774,6 +778,7 @@ const UserDashboard = ({
         timezone: tz,
         defaultPlatforms: defaultsPlatforms,
         defaultFrequency: defaultsFrequency,
+        paypalEmail,
       });
       toast.success("Defaults saved successfully!");
     } catch (e) {
@@ -1235,6 +1240,8 @@ const UserDashboard = ({
             tz={tz}
             defaultsPlatforms={defaultsPlatforms}
             defaultsFrequency={defaultsFrequency}
+            paypalEmail={paypalEmail}
+            setPaypalEmail={setPaypalEmail}
             toggleDefaultPlatform={toggleDefaultPlatform}
             setDefaultsFrequency={setDefaultsFrequency}
             setTz={setTz}

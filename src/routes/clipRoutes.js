@@ -33,6 +33,69 @@ function clipRateLimit(req, res, next) {
   next();
 }
 
+// Plan Quotas (Monthly)
+const PLAN_CLIP_QUOTAS = {
+  free: 3,
+  premium: 50,
+  pro: 200,
+  enterprise: Infinity,
+};
+
+// Quota Middleware
+async function checkClipQuota(req, res, next) {
+  const userId = req.userId || req.user?.uid;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    // 1. Get User Plan
+    const userDoc = await db.collection("users").doc(userId).get();
+    const userData = userDoc.data() || {};
+    // Check both potential locations for plan config
+    const planId =
+      (userData.subscription && userData.subscription.planId) || userData.planId || "free";
+
+    const limit =
+      PLAN_CLIP_QUOTAS[planId] !== undefined ? PLAN_CLIP_QUOTAS[planId] : PLAN_CLIP_QUOTAS.free;
+
+    // Enterprise/Unlimited users bypass check
+    if (limit === Infinity) return next();
+
+    // 2. Count Usage this Month
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+    // Query count of clip analyses created by this user this month
+    // Note: This relies on aggregate queries which are standard in Firestore now
+    const usageSnap = await db
+      .collection("clip_analyses")
+      .where("userId", "==", userId)
+      .where("createdAt", ">=", startOfMonth)
+      .count()
+      .get();
+
+    const used = usageSnap.data().count;
+
+    if (used >= limit) {
+      return res.status(403).json({
+        error: "quota_exceeded",
+        message: `You have used ${used}/${limit} AI credits this month. Upgrade to generate more clips!`,
+        plan: planId,
+        limit,
+        used,
+      });
+    }
+
+    // Attach usage info to request for potential logging
+    req.clipUsage = { used, limit, planId };
+    next();
+  } catch (e) {
+    logger.error("ClipQuotaCheckError", e);
+    // Fail safe - don't block user if DB check fails, but log it
+    // Or fail secure - block user. Choosing fail secure to protect resources.
+    return res.status(500).json({ error: "Failed to verify usage quota" });
+  }
+}
+
 // Simple in-memory job store for generation jobs (suitable for testing/demo)
 const generationJobs = new Map();
 
@@ -62,7 +125,7 @@ function updateJob(jobId, patch) {
  * Analyze a video and generate clip suggestions
  * Body: { contentId, videoUrl }
  */
-router.post("/analyze", authMiddleware, clipRateLimit, async (req, res) => {
+router.post("/analyze", authMiddleware, clipRateLimit, checkClipQuota, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     logger.debug("ClipRoutes.incomingRequest", { userId, userPresent: !!req.user });

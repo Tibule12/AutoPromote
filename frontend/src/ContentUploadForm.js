@@ -2309,6 +2309,29 @@ function ContentUploadForm({
           </div>
         )}
 
+        {p === "spotify" && (
+          <div className="form-group spotify-search-container" style={{ marginTop: 12 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, color: "#1DB954" }}>
+              Search Spotify Tracks & Podcasts
+            </label>
+            <div style={{ fontSize: 13, color: "#666", marginBottom: 12 }}>
+              Use this tool to find tracks or podcasts to add to your playlists or reference.
+              Uploading original content is not supported here.
+            </div>
+
+            <SpotifyTrackSearch
+              selectedTracks={
+                Array.isArray(extSpotifySelectedTracks) ? extSpotifySelectedTracks : spotifyTracks
+              }
+              onChangeTracks={list => {
+                if (typeof extSetSpotifySelectedTracks === "function")
+                  extSetSpotifySelectedTracks(list);
+                else setSpotifyTracks(list);
+              }}
+            />
+          </div>
+        )}
+
         <div style={{ display: "flex", gap: ".5rem", marginTop: ".5rem", flexWrap: "wrap" }}>
           <button
             aria-label="Preview Content"
@@ -2823,15 +2846,37 @@ function ContentUploadForm({
                       />
                     </div>
                     {expandedPlatform === "discord" && (
-                      <input
-                        placeholder="Discord channel ID"
-                        value={discordChannelId}
-                        onChange={e => {
-                          setDiscordChannelId(e.target.value);
-                          if (typeof extSetPlatformOption === "function")
-                            extSetPlatformOption("discord", "channelId", e.target.value);
-                        }}
-                      />
+                      <div style={{ marginTop: 8 }}>
+                        <div
+                          style={{
+                            backgroundColor: "rgba(88, 101, 242, 0.1)",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            fontSize: "12px",
+                            color: "#5865F2",
+                            border: "1px solid rgba(88, 101, 242, 0.2)",
+                          }}
+                        >
+                          <strong>Link & Embed Mode:</strong> Shares content as a rich embed via
+                          Webhook. Attachments are not uploaded directly to Discord.
+                        </div>
+                        <input
+                          placeholder="Discord channel ID"
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                          }}
+                          value={discordChannelId}
+                          onChange={e => {
+                            setDiscordChannelId(e.target.value);
+                            if (typeof extSetPlatformOption === "function")
+                              extSetPlatformOption("discord", "channelId", e.target.value);
+                          }}
+                        />
+                      </div>
                     )}
                     <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
                       <button
@@ -2955,48 +3000,146 @@ function ContentUploadForm({
                       </div>
                     )}
                     {expandedPlatform === "telegram" && (
-                      <input
-                        placeholder="Telegram chat ID"
-                        value={telegramChatId}
-                        onChange={e => {
-                          setTelegramChatId(e.target.value);
-                          if (typeof extSetPlatformOption === "function")
-                            extSetPlatformOption("telegram", "chatId", e.target.value);
-                        }}
-                      />
+                      <div style={{ marginTop: 8 }}>
+                        <div
+                          style={{
+                            backgroundColor: "rgba(0, 136, 204, 0.1)",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            fontSize: "12px",
+                            color: "#0088cc",
+                            border: "1px solid rgba(0, 136, 204, 0.2)",
+                          }}
+                        >
+                          <strong>Native Host:</strong> Supports direct Video, Photo, and Text
+                          messages to your chat/channel.
+                        </div>
+                        <input
+                          placeholder="Telegram chat ID"
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                          }}
+                          value={telegramChatId}
+                          onChange={e => {
+                            setTelegramChatId(e.target.value);
+                            if (typeof extSetPlatformOption === "function")
+                              extSetPlatformOption("telegram", "chatId", e.target.value);
+                          }}
+                        />
+                      </div>
                     )}
                     {expandedPlatform === "reddit" && (
-                      <input
-                        placeholder="Reddit subreddit"
-                        value={redditSubreddit}
-                        onChange={e => {
-                          setRedditSubreddit(e.target.value);
-                          if (typeof extSetPlatformOption === "function")
-                            extSetPlatformOption("reddit", "subreddit", e.target.value);
-                        }}
-                      />
+                      <div style={{ marginTop: 8 }}>
+                        <div
+                          style={{
+                            backgroundColor: "rgba(255, 69, 0, 0.1)",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            fontSize: "12px",
+                            color: "#FF4500",
+                            border: "1px solid rgba(255, 69, 0, 0.2)",
+                          }}
+                        >
+                          <strong>Link & Text Mode:</strong> Shares content as a URL link or
+                          self-text post. Direct video hosting not supported.
+                        </div>
+                        <input
+                          placeholder="Reddit subreddit"
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                          }}
+                          value={redditSubreddit}
+                          onChange={e => {
+                            setRedditSubreddit(e.target.value);
+                            if (typeof extSetPlatformOption === "function")
+                              extSetPlatformOption("reddit", "subreddit", e.target.value);
+                          }}
+                        />
+                      </div>
                     )}
                     {expandedPlatform === "linkedin" && (
-                      <input
-                        placeholder="LinkedIn organization/company ID"
-                        value={linkedinCompanyId}
-                        onChange={e => {
-                          setLinkedinCompanyId(e.target.value);
-                          if (typeof extSetPlatformOption === "function")
-                            extSetPlatformOption("linkedin", "companyId", e.target.value);
-                        }}
-                      />
+                      <div style={{ marginTop: 8 }}>
+                        <div
+                          style={{
+                            backgroundColor: "rgba(0, 119, 181, 0.1)",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            fontSize: "12px",
+                            color: "#0077b5",
+                            border: "1px solid rgba(0, 119, 181, 0.2)",
+                          }}
+                        >
+                          <strong>Native Host:</strong> Supports direct Video and Image uploads.
+                        </div>
+                        <input
+                          placeholder="LinkedIn Organization ID (optional)"
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                          }}
+                          value={linkedinCompanyId}
+                          onChange={e => {
+                            setLinkedinCompanyId(e.target.value);
+                            if (typeof extSetPlatformOption === "function")
+                              extSetPlatformOption("linkedin", "companyId", e.target.value);
+                          }}
+                        />
+                      </div>
                     )}
                     {expandedPlatform === "twitter" && (
-                      <input
-                        placeholder="Twitter message (optional)"
-                        value={twitterMessage}
-                        onChange={e => {
-                          setTwitterMessage(e.target.value);
-                          if (typeof extSetPlatformOption === "function")
-                            extSetPlatformOption("twitter", "message", e.target.value);
-                        }}
-                      />
+                      <div style={{ marginTop: 8 }}>
+                        <div
+                          style={{
+                            backgroundColor: "rgba(29, 161, 242, 0.1)",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            fontSize: "12px",
+                            color: "#1DA1F2",
+                            border: "1px solid rgba(29, 161, 242, 0.2)",
+                          }}
+                        >
+                          <strong>Native Host:</strong> Supports direct Video and Image uploads.
+                        </div>
+                        <textarea
+                          placeholder="Tweet text..."
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                            minHeight: "60px",
+                            fontFamily: "inherit",
+                          }}
+                          value={twitterMessage}
+                          onChange={e => {
+                            setTwitterMessage(e.target.value);
+                            if (typeof extSetPlatformOption === "function")
+                              extSetPlatformOption("twitter", "message", e.target.value);
+                          }}
+                        />
+                        <div
+                          style={{
+                            fontSize: 10,
+                            textAlign: "right",
+                            marginTop: 2,
+                            color: twitterMessage.length > 280 ? "red" : "#666",
+                          }}
+                        >
+                          {twitterMessage.length}/280
+                        </div>
+                      </div>
                     )}
                     {expandedPlatform === "tiktok" && (
                       <div
@@ -3195,16 +3338,59 @@ function ContentUploadForm({
                       </div>
                     )}
                     {expandedPlatform === "spotify" && (
-                      <input
-                        id="spotify-playlist-name"
-                        placeholder="Spotify playlist name or track URIs"
-                        value={spotifyPlaylistName}
-                        onChange={e => {
-                          setSpotifyPlaylistName(e.target.value);
-                          if (typeof extSetPlatformOption === "function")
-                            extSetPlatformOption("spotify", "name", e.target.value);
-                        }}
-                      />
+                      <div className="spotify-search-inline">
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: 12,
+                            fontWeight: 700,
+                            marginBottom: 4,
+                            color: "#1DB954",
+                          }}
+                        >
+                          Search Spotify Catalog
+                        </label>
+                        <SpotifyTrackSearch
+                          selectedTracks={
+                            Array.isArray(extSpotifySelectedTracks)
+                              ? extSpotifySelectedTracks
+                              : spotifyTracks
+                          }
+                          onChangeTracks={list => {
+                            if (typeof extSetSpotifySelectedTracks === "function")
+                              extSetSpotifySelectedTracks(list);
+                            else setSpotifyTracks(list);
+                          }}
+                        />
+                      </div>
+                    )}
+                    {expandedPlatform === "snapchat" && (
+                      <div className="snapchat-feature-inline">
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: 12,
+                            fontWeight: 700,
+                            marginBottom: 4,
+                            color: "#aa9900", // Darker yellow for readability
+                          }}
+                        >
+                          Snapchat Promotions
+                        </label>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "#666",
+                            background: "#fff",
+                            padding: 8,
+                            borderRadius: 6,
+                            border: "1px solid #e5e5e5",
+                          }}
+                        >
+                          Server-side publishing creates <strong>Ads</strong> (Dark Posts/Spotlight)
+                          via Marketing API. To post standard user Stories, use the mobile app.
+                        </div>
+                      </div>
                     )}
                     {expandedPlatform === "youtube" && (
                       <div style={{ display: "grid", gap: 8 }}>
@@ -3733,8 +3919,8 @@ function ContentUploadForm({
             />
           </div>
         </div>
-        {/* Spotify track selection */}
-        <div className="form-group">
+        {/* Spotify track selection - removed from main flow to avoid duplication with card. */}
+        {/* <div className="form-group">
           <label>Spotify Tracks to Add (optional)</label>
           <SpotifyTrackSearch
             selectedTracks={
@@ -3746,7 +3932,7 @@ function ContentUploadForm({
               else setSpotifyTracks(list);
             }}
           />
-        </div>
+        </div> */}
         <div className="form-group">
           <label>Spotify Playlist (optional)</label>
           <div style={{ display: "grid", gap: 8 }}>
