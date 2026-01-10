@@ -651,9 +651,6 @@ const SecurityPanel = ({ user }) => {
                     >
                       {enrolling2FA ? "Sending Code..." : "Send Verification Code"}
                     </button>
-                    <p style={{ fontSize: "0.85rem", color: "#f59e0b", marginTop: "0.5rem" }}>
-                      ⚠️ Note: SMS MFA requires Firebase Console configuration
-                    </p>
                   </div>
                 )}
               </div>
