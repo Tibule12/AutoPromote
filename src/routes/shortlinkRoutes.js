@@ -30,6 +30,32 @@ router.get("/:code", shortlinkPublicLimiter, async (req, res) => {
       const contentSnap = await db.collection("content").doc(data.contentId).get();
       const content = contentSnap.exists ? contentSnap.data() : {};
 
+      // Sanitize inputs for HTML context
+      const escapeHtml = str => {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      };
+
+      const safeTitle = escapeHtml(content.title || "AutoPromote Content");
+      const safeOgTitle = escapeHtml(content.title || "Check this out!");
+      const safeDescription = escapeHtml(content.description || "Powered by AutoPromote");
+      const safeUrl = escapeHtml(content.url || "");
+      const safeThumbnail = escapeHtml(content.thumbnail || "");
+
+      // Sanitize for Script context to prevent Reflected XSS
+      const trackingPayload = JSON.stringify({
+        type: "landing_view",
+        code: code,
+        contentId: data.contentId,
+      });
+      // Escape </script> tag break attempts in JSON string
+      const safeTrackingJson = trackingPayload.replace(/</g, "\\u003c");
+
       // Simple HTML template with AdSense (Placeholder ID) and Affiliate Links
       const html = `
 <!DOCTYPE html>
@@ -37,9 +63,9 @@ router.get("/:code", shortlinkPublicLimiter, async (req, res) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${content.title || "AutoPromote Content"}</title>
-    <meta property="og:title" content="${content.title || "Check this out!"}">
-    <meta property="og:description" content="Powered by AutoPromote">
+    <title>${safeTitle}</title>
+    <meta property="og:title" content="${safeOgTitle}">
+    <meta property="og:description" content="${safeDescription}">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; margin: 0; display: flex; flex-direction: column; align-items: center; }
         .container { max-width: 600px; width: 100%; padding: 20px; background: white; margin-top: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -66,19 +92,19 @@ router.get("/:code", shortlinkPublicLimiter, async (req, res) => {
     </div>
 
     <div class="container">
-        <h1>${content.title || "Exclusive Content"}</h1>
+        <h1>${safeTitle}</h1>
         
         <div class="video-container">
             ${
               content.url
                 ? content.type === "video"
-                  ? `<video src="${content.url}" controls style="max-width:100%; max-height:100%" poster="${content.thumbnail || ""}"></video>`
-                  : `<img src="${content.url}" style="max-width:100%; object-fit:contain" />`
+                  ? `<video src="${safeUrl}" controls style="max-width:100%; max-height:100%" poster="${safeThumbnail}"></video>`
+                  : `<img src="${safeUrl}" style="max-width:100%; object-fit:contain" />`
                 : "<p>Content loading...</p>"
             }
         </div>
 
-        <p>${content.description || ""}</p>
+        <p>${escapeHtml(content.description || "")}</p>
         
         <div style="margin-top:20px; padding:15px; background:#f9f9f9; border-radius:6px;">
             <h3>Recommended Gear</h3>
@@ -105,10 +131,13 @@ router.get("/:code", shortlinkPublicLimiter, async (req, res) => {
 
     <script>
         // Analytics tracking
+        // Safe injection of JSON payload to prevent XSS
+        const trackingPayload = ${safeTrackingJson};
+        
         fetch('/api/events/track', { 
             method: 'POST', 
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ type: 'landing_view', code: '${code}', contentId: '${data.contentId}' })
+            body: JSON.stringify(trackingPayload)
         }).catch(e => {});
     </script>
 </body>

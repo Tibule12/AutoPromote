@@ -24,6 +24,7 @@ import VoiceOverGuide from "./components/VoiceOverGuide";
 import AdminKyc from "./AdminKyc";
 import UsageLimitBanner from "./components/UsageLimitBanner";
 import { auth } from "./firebaseClient";
+import { sendEmailVerification } from "firebase/auth";
 import { API_ENDPOINTS, API_BASE_URL } from "./config";
 import toast, { Toaster } from "react-hot-toast";
 import { cachedFetch, batchWithDelay, clearCache } from "./utils/requestCache";
@@ -118,6 +119,13 @@ const UserDashboard = ({
   );
   const isAdminUser = !!(user && (user.isAdmin || user.role === "admin"));
   const needsKyc = !!(user && !user.kycVerified);
+
+  const [emailVerified, setEmailVerified] = useState(true);
+  useEffect(() => {
+    if (auth.currentUser) {
+      setEmailVerified(auth.currentUser.emailVerified);
+    }
+  }, [user]);
 
   // Toggle dashboard-mode class on mount/unmount so global gradients don't show through dashboard pages
   useEffect(() => {
@@ -1178,6 +1186,52 @@ const UserDashboard = ({
 
       <main className="dashboard-main">
         <UsageLimitBanner />
+        {!emailVerified && (
+          <div
+            className="verification-banner"
+            style={{
+              background: "#fff3cd",
+              color: "#856404",
+              padding: "12px",
+              marginBottom: "16px",
+              borderRadius: "8px",
+              border: "1px solid #ffeeba",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              fontSize: "0.95rem",
+            }}
+          >
+            <span>
+              <strong>Verify your email:</strong> Please check your inbox for a verification link.
+              Verify to access security features.
+            </span>
+            <button
+              onClick={async () => {
+                if (auth.currentUser) {
+                  try {
+                    await sendEmailVerification(auth.currentUser);
+                    toast.success("Verification email sent!");
+                  } catch (e) {
+                    toast.error("Error sending email: " + e.message);
+                  }
+                }
+              }}
+              style={{
+                background: "transparent",
+                border: "1px solid #856404",
+                color: "#856404",
+                padding: "4px 12px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                marginLeft: "12px",
+              }}
+            >
+              Resend Email
+            </button>
+          </div>
+        )}
         {systemHealth && !systemHealth.ok && (
           <div
             style={{

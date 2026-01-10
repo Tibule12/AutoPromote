@@ -8,6 +8,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   updateProfile,
   signOut,
   signInWithCustomToken,
@@ -426,6 +427,14 @@ function App() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
       await updateProfile(firebaseUser, { displayName: name });
+
+      // Auto-send email verification (Soft Verification requirement)
+      try {
+        await sendEmailVerification(firebaseUser);
+      } catch (err) {
+        console.warn("Failed to send verification email on signup:", err);
+      }
+
       const idToken = await firebaseUser.getIdToken();
       const res = await fetch(API_ENDPOINTS.REGISTER, {
         method: "POST",
@@ -440,10 +449,12 @@ function App() {
         const parsed = await parseJsonSafe(res);
         const data = parsed.json || null;
         handleRegister({ ...data.user, token: idToken, uid: firebaseUser.uid });
-        alert("Registration successful! You are now logged in.");
+        alert(
+          "Registration successful! A verification email has been sent. Please verify your email to enable security features."
+        );
       } else {
         handleRegister({ uid: firebaseUser.uid, email, name, token: idToken, role: "user" });
-        alert("Registration partially successful. Some features may be limited.");
+        alert("Registration partially successful. A verification email has been sent to you.");
       }
     } catch (error) {
       alert("Registration failed: " + (error.message || "Unknown error"));

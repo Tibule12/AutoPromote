@@ -331,6 +331,8 @@ const SecurityPanel = ({ user }) => {
     } catch (error) {
       console.error("2FA enrollment error:", error);
       setEnrolling2FA(false);
+
+      // Handle known error codes for better user guidance
       if (error.code === "auth/unverified-email") {
         setTwoFactorError("Email verification required before enabling 2FA.");
         const performSend = window.confirm(
@@ -344,6 +346,14 @@ const SecurityPanel = ({ user }) => {
             toast.error("Failed to send verification email: " + e.message);
           }
         }
+      } else if (error.code === "auth/captcha-check-failed") {
+        setTwoFactorError(
+          "Security check failed. Please ensure this domain is authorized in Firebase Console -> Authentication -> Settings -> Authorized Domains."
+        );
+      } else if (error.code === "auth/too-many-requests") {
+        setTwoFactorError("Too many attempts. Please try again later or verify your device time.");
+      } else if (error.code === "auth/invalid-phone-number") {
+        setTwoFactorError("The phone number entered is invalid.");
       } else {
         setTwoFactorError(error.message || "Failed to enable 2FA");
       }
