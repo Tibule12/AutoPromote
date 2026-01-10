@@ -12,6 +12,10 @@ import {
   updateProfile,
   signOut,
   signInWithCustomToken,
+  getMultiFactorResolver,
+  PhoneAuthProvider,
+  PhoneMultiFactorGenerator,
+  RecaptchaVerifier,
 } from "firebase/auth";
 import {
   doc,
@@ -48,6 +52,13 @@ function App() {
     defaultPlatforms: [],
     defaultFrequency: "once",
   });
+
+  // MFA State
+  const [mfaResolver, setMfaResolver] = useState(null);
+  const [verificationId, setVerificationId] = useState(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [showMfaModal, setShowMfaModal] = useState(false);
+  const [mfaError, setMfaError] = useState("");
   // Feature flag: when true (default unless REACT_APP_DISABLE_IMMEDIATE_POSTS is 'false'),
   // disable direct client-side platform posts and rely on backend queued tasks.
   const DISABLE_IMMEDIATE_POSTS =
@@ -236,6 +247,10 @@ function App() {
           setShowTermsModal(true);
           return;
         }
+        if (res.status === 403) {
+          // Quietly suppress generic 403s during background fetch to avoid console noise
+          return;
+        }
         return;
       }
       const parsed = await parseJsonSafe(res);
@@ -326,72 +341,137 @@ function App() {
     } catch (error) {}
   };
 
+  const processLoginSuccess = async userCredential => {
+    const { user: firebaseUser } = userCredential;
+    const idToken = await firebaseUser.getIdToken();
+    const res = await fetch(API_ENDPOINTS.LOGIN, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+    if (res.ok) {
+      const parsed = await parseJsonSafe(res);
+      const data = parsed.json || null;
+      if (data.customToken) {
+        const customUserCredential = await signInWithCustomToken(auth, data.customToken);
+        const customIdToken = await customUserCredential.user.getIdToken();
+        try {
+          if (localStorage.getItem("tosAgreed") === "true") {
+            const url = `${API_BASE_URL}/api/users/me/accept-terms`;
+            await fetch(url, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${customIdToken}`,
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify({}),
+            }).catch(() => {});
+            localStorage.removeItem("tosAgreed");
+          }
+        } catch (_) {}
+        const userData = { ...data.user, token: customIdToken };
+        const ok = await ensureTermsAccepted(customIdToken, userData, "login");
+        if (ok) handleLogin(userData);
+      } else {
+        try {
+          if (localStorage.getItem("tosAgreed") === "true") {
+            const url = `${API_BASE_URL}/api/users/me/accept-terms`;
+            await fetch(url, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${idToken}`,
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify({}),
+            }).catch(() => {});
+            localStorage.removeItem("tosAgreed");
+          }
+        } catch (_) {}
+        const userData = { ...data.user, token: idToken };
+        const ok = await ensureTermsAccepted(idToken, userData, "login");
+        if (ok) handleLogin(userData);
+      }
+    } else {
+      const parsedErr = await parseJsonSafe(res);
+      const errorBody = parsedErr.json || null;
+      throw new Error(errorBody?.message || "Login failed");
+    }
+  };
+
+  const sendMfaCode = async () => {
+    if (!mfaResolver) return;
+    setMfaError("");
+    const hints = mfaResolver.hints;
+    const phoneInfoOptions = {
+      multiFactorHint: hints[0],
+      session: mfaResolver.session,
+    };
+    const phoneAuthProvider = new PhoneAuthProvider(auth);
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, "mfa-recaptcha-container", {
+        size: "invisible",
+      });
+    }
+    try {
+      const vId = await phoneAuthProvider.verifyPhoneNumber(
+        phoneInfoOptions,
+        window.recaptchaVerifier
+      );
+      setVerificationId(vId);
+    } catch (e) {
+      setMfaError(e.message);
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    }
+  };
+
+  const cancelMfa = () => {
+    setShowMfaModal(false);
+    setMfaResolver(null);
+    setVerificationId(null);
+    setMfaCode("");
+    setMfaError("");
+    if (window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+      } catch (e) {
+        // ignore
+      }
+      window.recaptchaVerifier = null;
+    }
+  };
+
+  const verifyMfaCode = async () => {
+    setMfaError("");
+    try {
+      const cred = PhoneAuthProvider.credential(verificationId, mfaCode);
+      const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(cred);
+      const userCredential = await mfaResolver.resolveSignIn(multiFactorAssertion);
+      await processLoginSuccess(userCredential);
+      setShowMfaModal(false);
+      setMfaResolver(null);
+      setVerificationId(null);
+      setMfaCode("");
+    } catch (e) {
+      setMfaError(e.message);
+    }
+  };
+
   const loginUser = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const { user: firebaseUser } = userCredential;
-      const idToken = await firebaseUser.getIdToken();
-      // Performing login against configured endpoint
-      const res = await fetch(API_ENDPOINTS.LOGIN, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
-      if (res.ok) {
-        const parsed = await parseJsonSafe(res);
-        const data = parsed.json || null;
-        // If backend returns a custom token, exchange it for an ID token
-        if (data.customToken) {
-          // Sign in with custom token (modular API)
-          const customUserCredential = await signInWithCustomToken(auth, data.customToken);
-          const customIdToken = await customUserCredential.user.getIdToken();
-          // If user agreed at login screen, proactively accept terms on server before proceeding
-          try {
-            if (localStorage.getItem("tosAgreed") === "true") {
-              const url = `${API_BASE_URL}/api/users/me/accept-terms`;
-              await fetch(url, {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${customIdToken}`,
-                  "Content-Type": "application/json",
-                  Accept: "application/json",
-                },
-                body: JSON.stringify({}),
-              }).catch(() => {});
-              localStorage.removeItem("tosAgreed");
-            }
-          } catch (_) {}
-          // Before proceeding, ensure ToS accepted (pre-dashboard)
-          const userData = { ...data.user, token: customIdToken };
-          const ok = await ensureTermsAccepted(customIdToken, userData, "login");
-          if (ok) handleLogin(userData);
-        } else {
-          // If user agreed at login screen, proactively accept terms on server before proceeding
-          try {
-            if (localStorage.getItem("tosAgreed") === "true") {
-              const url = `${API_BASE_URL}/api/users/me/accept-terms`;
-              await fetch(url, {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${idToken}`,
-                  "Content-Type": "application/json",
-                  Accept: "application/json",
-                },
-                body: JSON.stringify({}),
-              }).catch(() => {});
-              localStorage.removeItem("tosAgreed");
-            }
-          } catch (_) {}
-          const userData = { ...data.user, token: idToken };
-          const ok = await ensureTermsAccepted(idToken, userData, "login");
-          if (ok) handleLogin(userData);
-        }
-      } else {
-        const parsedErr = await parseJsonSafe(res);
-        const errorBody = parsedErr.json || null;
-        throw new Error(errorBody?.message || "Login failed");
-      }
+      await processLoginSuccess(userCredential);
     } catch (error) {
+      if (error.code === "auth/multi-factor-auth-required") {
+        const resolver = getMultiFactorResolver(auth, error);
+        setMfaResolver(resolver);
+        setShowMfaModal(true);
+        return;
+      }
       alert(error.message || "Login failed");
     }
   };
@@ -450,11 +530,13 @@ function App() {
         const data = parsed.json || null;
         handleRegister({ ...data.user, token: idToken, uid: firebaseUser.uid });
         alert(
-          "Registration successful! A verification email has been sent. Please verify your email to enable security features."
+          "Registration successful! A verification email has been sent. Please check your Inbox and Spam folders. Note: Links in the spam folder are often disabled for security; move the email to your Inbox to click the link."
         );
       } else {
         handleRegister({ uid: firebaseUser.uid, email, name, token: idToken, role: "user" });
-        alert("Registration partially successful. A verification email has been sent to you.");
+        alert(
+          "Registration partially successful. A verification email has to sent. Please check your Spam folder if needed."
+        );
       }
     } catch (error) {
       alert("Registration failed: " + (error.message || "Unknown error"));
@@ -1190,6 +1272,109 @@ function App() {
           }
         })()
       )}
+      {/* MFA Modal */}
+      {showMfaModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              padding: "20px",
+              borderRadius: "8px",
+              maxWidth: "400px",
+              width: "90%",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+            }}
+          >
+            <h3 style={{ marginTop: 0 }}>Two-Factor Authentication</h3>
+            <p>Please verify your identity to continue.</p>
+            {mfaError && <div style={{ color: "red", marginBottom: "10px" }}>{mfaError}</div>}
+
+            {!verificationId ? (
+              <div>
+                <p>
+                  A verification code will be sent to your phone
+                  {mfaResolver?.hints?.[0]?.phoneNumber
+                    ? ` ending in ${mfaResolver.hints[0].phoneNumber.slice(-4)}`
+                    : ""}
+                  .
+                </p>
+                <div id="mfa-recaptcha-container"></div>
+                <div
+                  style={{ marginTop: "20px", display: "flex", justifyContent: "space-between" }}
+                >
+                  <button onClick={cancelMfa} style={{ padding: "8px 16px", cursor: "pointer" }}>
+                    Cancel
+                  </button>
+                  <button
+                    onClick={sendMfaCode}
+                    style={{
+                      padding: "8px 16px",
+                      background: "#007bff",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Send Code
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p>Enter the 6-digit code sent to your phone.</p>
+                <input
+                  type="text"
+                  value={mfaCode}
+                  onChange={e => setMfaCode(e.target.value)}
+                  placeholder="123456"
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    margin: "10px 0",
+                    boxSizing: "border-box",
+                    fontSize: "16px",
+                  }}
+                />
+                <div
+                  style={{ marginTop: "20px", display: "flex", justifyContent: "space-between" }}
+                >
+                  <button onClick={cancelMfa} style={{ padding: "8px 16px", cursor: "pointer" }}>
+                    Cancel
+                  </button>
+                  <button
+                    onClick={verifyMfaCode}
+                    style={{
+                      padding: "8px 16px",
+                      background: "#007bff",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Verify & Sign In
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* AI Chat Widget - only show when user is logged in */}
       {user && <ChatWidget />}
       {/* Optional: show Sentry test UI in non-prod or when explicitly enabled */}

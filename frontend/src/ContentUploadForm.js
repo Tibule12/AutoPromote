@@ -116,6 +116,7 @@ function ContentUploadForm({
   setSpotifySelectedTracks: extSetSpotifySelectedTracks,
   // When true, render only the platform cards (no global form elements)
   platformCardsOnly = false,
+  onNavigate,
 }) {
   const [title, setTitle] = useState("");
   const [type, setType] = useState("video");
@@ -2772,6 +2773,42 @@ function ContentUploadForm({
                     <h4 style={{ margin: "0 0 8px 0" }}>
                       {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)} Options
                     </h4>
+
+                    {onNavigate && (
+                      <div
+                        style={{
+                          background: "#f0f9ff",
+                          border: "1px solid #bae6fd",
+                          padding: "10px",
+                          borderRadius: "6px",
+                          marginBottom: "12px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <span style={{ fontSize: "13px", color: "#0369a1" }}>
+                          💡 Want to upload to more platforms at once? Connect them now!
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => onNavigate("connections")}
+                          style={{
+                            background: "#0284c7",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            padding: "4px 10px",
+                            fontSize: "12px",
+                            cursor: "pointer",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Connect Accounts
+                        </button>
+                      </div>
+                    )}
+
                     {platformGuidelines[expandedPlatform] && (
                       <div style={{ marginBottom: 8, fontSize: 13, color: "#374151" }}>
                         <strong>Quick Guidelines:</strong>
