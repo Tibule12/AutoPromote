@@ -11,6 +11,7 @@ function UploadPanel({
   setSelectedPlatforms,
   spotifySelectedTracks,
   setSpotifySelectedTracks,
+  onNavigate,
 }) {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [activeTab, setActiveTab] = useState("upload");
@@ -87,6 +88,7 @@ function UploadPanel({
           setSelectedPlatforms={setSelectedPlatforms}
           spotifySelectedTracks={spotifySelectedTracks}
           setSpotifySelectedTracks={setSpotifySelectedTracks}
+          onNavigate={onNavigate}
         />
       )}
       {activeTab === "history" && (
