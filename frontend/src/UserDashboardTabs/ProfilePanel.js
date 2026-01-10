@@ -19,6 +19,8 @@ const ProfilePanel = ({
   tz,
   defaultsPlatforms,
   defaultsFrequency,
+  paypalEmail,
+  setPaypalEmail,
   toggleDefaultPlatform,
   setDefaultsFrequency,
   setTz,
@@ -145,6 +147,29 @@ const ProfilePanel = ({
       </div>
 
       <div className="profile-defaults" style={{ marginTop: "1rem" }}>
+        <h4>Payment Settings</h4>
+        <div style={{ display: "grid", gap: ".5rem", maxWidth: 520, marginBottom: "1rem" }}>
+          <label style={{ color: "#9aa4b2" }}>
+            PayPal Email (For Payouts)
+            <input
+              type="email"
+              value={paypalEmail}
+              onChange={e => setPaypalEmail && setPaypalEmail(e.target.value)}
+              placeholder="your-email@example.com"
+              style={{
+                display: "block",
+                width: "100%",
+                marginTop: ".25rem",
+                padding: ".4rem",
+                borderRadius: "8px",
+                border: "1px solid rgba(255,255,255,0.15)",
+                background: "rgba(255,255,255,0.05)",
+                color: "#eef2ff",
+              }}
+            />
+          </label>
+        </div>
+
         <h4>Profile Defaults</h4>
         <div style={{ display: "grid", gap: ".5rem", maxWidth: 520 }}>
           <label style={{ color: "#9aa4b2" }}>

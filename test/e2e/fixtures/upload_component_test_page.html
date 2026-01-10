@@ -121,10 +121,10 @@
               '<label>Reddit Subreddit<input id="reddit-subreddit" placeholder="Reddit subreddit" /></label>';
           } else if (selectedPlatform === "linkedin") {
             document.getElementById("expanded-body").innerHTML =
-              '<label>LinkedIn Company ID<input id="linkedin-company-id" placeholder="LinkedIn organization/company ID" /></label>';
+              '<label>LinkedIn Company ID<input id="linkedin-company-id" placeholder="LinkedIn Organization ID (optional)" /></label>';
           } else if (selectedPlatform === "twitter") {
             document.getElementById("expanded-body").innerHTML =
-              '<label>Twitter message<input id="twitter-message" placeholder="Twitter message (optional)" /></label>';
+              '<label>Twitter message<textarea id="twitter-message" placeholder="Tweet text..."></textarea></label>';
           } else if (selectedPlatform === "spotify") {
             document.getElementById("expanded-body").innerHTML =
               '<label>Playlist ID<input id="spotify-playlist" /></label>';

@@ -36,6 +36,9 @@ export const API_ENDPOINTS = {
   ADMIN_PAYOUTS: `${API_BASE_URL}/api/monetization/admin/payouts`,
   ADMIN_PAYOUT_PROCESS: id => `${API_BASE_URL}/api/monetization/admin/payouts/${id}/process`,
 
+  // Boost endpoints
+  CREATE_BOOST: `${API_BASE_URL}/api/monetization/boost/create`,
+
   // TikTok endpoints
   TIKTOK_AUTH_START: `${API_BASE_URL}/api/tiktok/auth/start`,
   TIKTOK_STATUS: `${API_BASE_URL}/api/tiktok/status`,

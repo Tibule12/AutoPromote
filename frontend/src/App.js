@@ -498,8 +498,13 @@ function App() {
     setShowRegister(false);
   };
 
-  // Save user defaults (timezone, default platforms, frequency)
-  const saveUserDefaults = async ({ timezone, defaultPlatforms, defaultFrequency }) => {
+  // Save user defaults (timezone, default platforms, frequency, paypalEmail)
+  const saveUserDefaults = async ({
+    timezone,
+    defaultPlatforms,
+    defaultFrequency,
+    paypalEmail,
+  }) => {
     try {
       const currentUser = auth.currentUser;
       if (!currentUser) throw new Error("Not authenticated");
@@ -511,7 +516,7 @@ function App() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ timezone, defaultPlatforms, defaultFrequency }),
+        body: JSON.stringify({ timezone, defaultPlatforms, defaultFrequency, paypalEmail }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));

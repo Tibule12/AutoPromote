@@ -397,12 +397,112 @@ router.post("/webhook", async (req, res) => {
     // Handle different update types
     if (update.message) {
       const chatId = update.message.chat.id;
-      const text = update.message.text;
+      const text = update.message.text || "";
+      const fromUser = update.message.from || {};
 
-      // Handle /start command
-      if (text === "/start") {
-        // You can send a welcome message or instructions
-        logger.info(`New chat started with ID: ${chatId}`);
+      // Handle /start command (both plain and deep link)
+      if (text.startsWith("/start")) {
+        // Check if there is a deep link parameter
+        const parts = text.split(" ");
+        if (parts.length > 1) {
+          const token = parts[1].trim();
+          if (token) {
+            // This is a deep link authentication
+            try {
+              const stateDoc = await db.collection("oauth_states").doc(token).get();
+              if (stateDoc.exists) {
+                const stateData = stateDoc.data();
+                // Check expiry
+                if (stateData.expiresAt && stateData.expiresAt > Date.now()) {
+                  const uid = stateData.uid;
+
+                  // Save connection
+                  await db
+                    .collection("users")
+                    .doc(uid)
+                    .collection("connections")
+                    .doc("telegram")
+                    .set(
+                      {
+                        connected: true,
+                        profile: {
+                          id: chatId,
+                          username: fromUser.username || null,
+                          first_name: fromUser.first_name || null,
+                          last_name: fromUser.last_name || null,
+                        },
+                        meta: {
+                          chatId: chatId,
+                          auth_date: Math.floor(Date.now() / 1000),
+                          via: "deep_link",
+                        },
+                        connectedAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                      },
+                      { merge: true }
+                    );
+
+                  // Mark state as used/delete it
+                  await db.collection("oauth_states").doc(token).delete();
+
+                  // Send success message
+                  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      chat_id: chatId,
+                      text: "✅ Successfully connected to AutoPromote! You can now use this bot to manage your content.",
+                    }),
+                  });
+
+                  logger.info(`Telegram connected via deep link for user ${uid}`);
+                  return res.json({ ok: true });
+                } else {
+                  // Expired
+                  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      chat_id: chatId,
+                      text: "⚠️ This connection link has expired. Please try connecting again from the dashboard.",
+                    }),
+                  });
+                }
+              } else {
+                // Invalid or expired (not found)
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    chat_id: chatId,
+                    text: "⚠️ Invalid or expired connection link. Please try again from the dashboard.",
+                  }),
+                });
+              }
+            } catch (err) {
+              logger.error("Error processing Telegram deep link:", err);
+              await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  chat_id: chatId,
+                  text: "❌ An error occurred while connecting. Please contact support.",
+                }),
+              });
+            }
+          }
+        } else {
+          // Regular /start
+          logger.info(`New chat started with ID: ${chatId}`);
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: "👋 Welcome to AutoPromote Bot! To connect your account, please use the 'Connect' button in your AutoPromote dashboard.",
+            }),
+          });
+        }
       }
     }
 

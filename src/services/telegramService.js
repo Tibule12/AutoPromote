@@ -122,12 +122,30 @@ async function postToTelegram({ contentId, payload = {}, reason: _reason, uid })
       return { platform: "telegram", simulated: true, reason: "missing_credentials_or_chatId" };
 
     const text = payload.text || payload.message || `AutoPromote post: ${contentId || ""}`;
+    const videoUrl = payload.videoUrl || (payload.type === "video" ? payload.url : null);
+    const imageUrl = payload.imageUrl || (payload.type === "image" ? payload.url : null);
+
     if (!fetchFn) return { platform: "telegram", simulated: true, reason: "missing_fetch" };
 
-    const res = await fetchFn(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    let method = "sendMessage";
+    let body = { chat_id: chatId };
+
+    if (videoUrl) {
+      method = "sendVideo";
+      body.video = videoUrl;
+      if (text) body.caption = text;
+    } else if (imageUrl) {
+      method = "sendPhoto";
+      body.photo = imageUrl;
+      if (text) body.caption = text;
+    } else {
+      body.text = text;
+    }
+
+    const res = await fetchFn(`https://api.telegram.org/bot${botToken}/${method}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text }),
+      body: JSON.stringify(body),
     });
     let json = null;
     try {
