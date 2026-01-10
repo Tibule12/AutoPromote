@@ -179,17 +179,19 @@ const ConnectionsPanel = ({
           )}
         </div>
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
-          {facebookStatus?.connected ? (
+          {facebookStatus?.ig_business_account_id ? (
             <>
               <span style={{ color: "#cbd5e1" }}>
-                {getPlatformLabel("facebook") || "Instagram connected"}
+                {getPlatformLabel("facebook")
+                  ? `IG for ${getPlatformLabel("facebook")}`
+                  : "Instagram connected"}
               </span>
               <button className="check-quality" onClick={handleConnectFacebook}>
                 Reconnect
               </button>
               {handleDisconnectPlatform && (
                 <button
-                  aria-label="Disconnect Facebook"
+                  aria-label="Disconnect Instagram"
                   className="check-quality"
                   onClick={() => handleDisconnectPlatform("facebook")}
                 >
@@ -200,9 +202,13 @@ const ConnectionsPanel = ({
           ) : (
             <>
               <button className="check-quality" onClick={handleConnectFacebook}>
-                Connect Instagram
+                {facebookStatus?.connected ? "Enable Instagram" : "Connect Instagram"}
               </button>
-              <span style={{ color: "#9aa4b2" }}>Connect to manage Instagram via Facebook.</span>
+              <span style={{ color: "#9aa4b2" }}>
+                {facebookStatus?.connected
+                  ? "Link your Instagram Business account to this Page."
+                  : "Connect to manage Instagram via Facebook."}
+              </span>
             </>
           )}
         </div>

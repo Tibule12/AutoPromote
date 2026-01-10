@@ -62,6 +62,29 @@ const Footer = () => {
               <a href="/contact">Contact</a>
               <span className="dot">•</span>
               <a href="/pricing">Pricing</a>
+              <span className="dot">•</span>
+              <button
+                type="button"
+                className="ap-newsletter-toggle"
+                onClick={() => setShowNewsletter(s => !s)}
+                aria-expanded={showNewsletter}
+                style={{ border: "none", padding: 0 }}
+              >
+                Subscribe
+              </button>
+              <span className="dot">•</span>
+              <button
+                type="button"
+                className="ap-back-to-top"
+                onClick={() => {
+                  if (typeof window !== "undefined")
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                aria-label="Back to top"
+                style={{ border: "none", padding: 0 }}
+              >
+                ↑
+              </button>
             </nav>
 
             <nav className="ap-footer-links ap-legal" aria-label="Footer legal links">
@@ -140,26 +163,6 @@ const Footer = () => {
                 <option value="fr">Français</option>
               </select>
             </div>
-
-            <button
-              type="button"
-              className="ap-newsletter-toggle"
-              onClick={() => setShowNewsletter(s => !s)}
-              aria-expanded={showNewsletter}
-            >
-              Subscribe
-            </button>
-
-            <button
-              type="button"
-              className="ap-back-to-top"
-              onClick={() => {
-                if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              aria-label="Back to top"
-            >
-              ↑
-            </button>
           </div>
         </div>
       </div>

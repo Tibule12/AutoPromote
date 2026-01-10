@@ -583,12 +583,16 @@ const SecurityPanel = ({ user }) => {
       {/* Two-Factor Authentication */}
       <div className="security-card">
         <h3>🔐 Two-Factor Authentication</h3>
-        <p>Add an extra layer of security to your account</p>
+        <p style={{ color: "#222", fontWeight: 500 }}>
+          Add an extra layer of security to your account
+        </p>
 
         {twoFactorEnabled ? (
           <div className="twofa-enabled">
             <div className="success-badge">✓ 2FA Enabled</div>
-            <p>Your account is protected with two-factor authentication</p>
+            <p style={{ color: "#222", fontWeight: 500 }}>
+              Your account is protected with two-factor authentication
+            </p>
             <button className="btn-danger" onClick={handleDisable2FA}>
               Disable 2FA
             </button>
@@ -743,7 +747,9 @@ const SecurityPanel = ({ user }) => {
       {/* Connected Platforms */}
       <div className="security-card">
         <h3>🔗 Connected Platforms</h3>
-        <p>Manage platforms connected to your AutoPromote account</p>
+        <p style={{ color: "#222", fontWeight: 500 }}>
+          Manage platforms connected to your AutoPromote account
+        </p>
 
         {loadingPlatforms ? (
           <div className="loading-platforms">Loading platforms...</div>
