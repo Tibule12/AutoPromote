@@ -193,7 +193,7 @@ router.get("/auth", (req, res) => {
   // Prefer explicit public client id for the browser authorize URL; fall back
   // to the confidential client id if no public id provided (back-compat).
   const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
-  const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(stateRaw)}`;
+  const authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(stateRaw)}`;
 
   if (DEBUG_SNAPCHAT_OAUTH) {
     console.log("Snapchat OAuth URL present=%s", !!authUrl);
@@ -271,7 +271,7 @@ router.post("/oauth/prepare", authMiddleware, oauthPrepareLimiter, async (req, r
       normalized.scope
     );
 
-    let authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(normalized.scope)}&state=${encodeURIComponent(state)}`;
+    let authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(normalized.scope)}&state=${encodeURIComponent(state)}`;
 
     // Perform a quick server-side probe of the auth URL. Some providers
     // return 5xx for certain scope combinations or misconfigurations; when
@@ -289,7 +289,7 @@ router.post("/oauth/prepare", authMiddleware, oauthPrepareLimiter, async (req, r
       probeStatusVar = probe.status;
       if (probe.status >= 500) {
         const fallbackScope = "display_name";
-        const fallbackUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(fallbackScope)}&state=${encodeURIComponent(state)}`;
+        const fallbackUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(fallbackScope)}&state=${encodeURIComponent(state)}`;
         const probe2 = await safeFetch(fallbackUrl, fetch, {
           allowHosts: ["accounts.snapchat.com"],
           requireHttps: true,
@@ -406,7 +406,7 @@ router.get(
       }
 
       const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
-      const url = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(normalized.scope)}&state=${encodeURIComponent(state)}`;
+      const url = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(normalized.scope)}&state=${encodeURIComponent(state)}`;
       let status = null;
       let location = null;
       try {
