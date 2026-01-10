@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebaseClient";
-import { collection, addDoc, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, getDocs, limit } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { toast } from "react-hot-toast";
-import "./AdsPanel.css"; // Ensure we use the new styles
+import { API_ENDPOINTS } from "../config"; // Import config
+import "./AdsPanel.css";
 
 const AdsPanel = () => {
   const [user] = useAuthState(auth);
   const [campaigns, setCampaigns] = useState([]);
+  const [latestContentId, setLatestContentId] = useState(null); // Store latest content ID
   const [, setLoading] = useState(true);
 
   // Reactor State
@@ -37,6 +39,25 @@ const AdsPanel = () => {
       setCampaigns(adsData);
       setLoading(false);
     });
+
+    // Fetch latest content for boost targeting
+    const fetchContent = async () => {
+      try {
+        const contentQ = query(
+          collection(db, "content"),
+          where("userId", "==", user.uid),
+          orderBy("createdAt", "desc"),
+          limit(1)
+        );
+        const snaps = await getDocs(contentQ);
+        if (!snaps.empty) {
+          setLatestContentId(snaps.docs[0].id);
+        }
+      } catch (e) {
+        console.error("Failed to fetch latest content for ads:", e);
+      }
+    };
+    fetchContent();
 
     return () => unsubscribe();
   }, [user]);
@@ -102,44 +123,64 @@ const AdsPanel = () => {
 
     render();
 
-    return () => cancelAnimationFrame(animationFrameId);
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
   }, [powerLevel, frequency]);
 
   const handleIgnite = async () => {
     if (!prompt.trim()) {
-      toast.error("Reactor needs fuel (prompt)!");
+      toast.error("MISSING CATALYST: Please enter a campaign prompt");
       return;
     }
 
     setIsStabilizing(true);
     setReactorState("charging");
 
-    // Simulate "Charging"
+    // Simulate "Spin Up"
     setTimeout(async () => {
       try {
         const budget = powerLevel * 10; // $10 to $1000
         const estimatedReach = Math.floor(budget * (frequency * 0.5) * 12.5);
 
-        await addDoc(collection(db, "ads"), {
-          userId: user.uid,
-          title: prompt.substring(0, 30) + (prompt.length > 30 ? "..." : ""),
-          description: prompt,
-          budget: budget,
-          duration: Math.ceil(frequency / 3), // Days
-          status: "active", // Direct to active for "Ignite" feel
-          createdAt: new Date().toISOString(),
-          type: "flux_campaign",
-          metrics: {
-            impressions: 0,
-            clicks: 0,
-            ctr: 0,
-            projectedReach: estimatedReach,
+        if (!latestContentId) {
+          throw new Error("No content found to promote. Upload content first!");
+        }
+
+        // Call Backend API to create Boost (Real PayPal Integration)
+        let token;
+        if (user) token = await user.getIdToken();
+
+        const response = await fetch(API_ENDPOINTS.CREATE_BOOST, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-          reactorConfig: {
-            powerLevel,
-            frequency,
-          },
+          body: JSON.stringify({
+            contentId: latestContentId,
+            platform: "all", // Promote everywhere
+            targetViews: estimatedReach,
+            duration: Math.ceil(frequency / 3),
+            budget: budget,
+          }),
         });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to ignite campaign");
+        }
+
+        if (data.status === "pending_approval" && data.approvalUrl) {
+          setReactorState("active");
+          toast.success("INITIATING FINANCIAL LINK...", { icon: "🔗" });
+
+          setTimeout(() => {
+            window.location.href = data.approvalUrl;
+          }, 1500);
+          return;
+        }
 
         setReactorState("active");
         toast.success("CAMPAIGN IGNITION SUCCESSFUL", {
@@ -156,7 +197,7 @@ const AdsPanel = () => {
         setTimeout(() => setReactorState("idle"), 2000);
       } catch (error) {
         console.error("Ignition failure:", error);
-        toast.error("Containment Breach: " + error.message);
+        toast.error("CONTAINMENT BREACH: " + error.message);
         setIsStabilizing(false);
         setReactorState("idle");
       }
