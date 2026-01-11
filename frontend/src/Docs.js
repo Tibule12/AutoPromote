@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation, Link } from "react-router-dom";
 import docs from "./docs/content";
 
 const MarkdownRenderer = ({ md }) => {
@@ -40,13 +41,16 @@ const MarkdownRenderer = ({ md }) => {
 };
 
 const Docs = () => {
-  const pathname = typeof window !== "undefined" ? window.location.pathname : "/docs";
-  const slug = pathname.replace(/^\/docs\/?/, "");
+  const location = useLocation();
+  const path = location.pathname;
+  const slug = path.replace(/^\/docs\/?/, "");
+
   if (slug) {
     const doc = docs.find(d => d.slug === slug);
     if (!doc) return <div style={{ padding: 24 }}>Document not found.</div>;
     return (
       <div style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
+        <Link to="/docs">&larr; Back to Docs</Link>
         <h1>{doc.title}</h1>
         <MarkdownRenderer md={doc.content} />
       </div>
@@ -60,7 +64,7 @@ const Docs = () => {
       <ul>
         {docs.map(d => (
           <li key={d.slug}>
-            <a href={`/docs/${d.slug}`}>{d.title}</a>
+            <Link to={`/docs/${d.slug}`}>{d.title}</Link>
           </li>
         ))}
       </ul>

@@ -38,6 +38,31 @@ import { Sentry } from "./sentryClient";
 import TestSentryButton from "./components/TestSentryButton";
 import Footer from "./components/Footer";
 
+// Static Pages
+import About from "./About";
+import Blog from "./Blog";
+import Careers from "./Careers";
+import Contact from "./Contact";
+import Cookies from "./Cookies";
+import Docs from "./Docs";
+import Pricing from "./Pricing";
+import Support from "./Support";
+import Accessibility from "./Accessibility";
+import Features from "./Features";
+import Integrations from "./Integrations";
+import Metrics from "./Metrics";
+import Changelog from "./Changelog";
+import CommunityPage from "./CommunityPage";
+import HelpCenter from "./HelpCenter";
+import ApiDocs from "./ApiDocs";
+import Partners from "./Partners";
+import Security from "./Security";
+import Terms from "./Terms";
+import Privacy from "./Privacy";
+import LiveLanding from "./LiveLanding";
+import LiveWatch from "./LiveWatch";
+import StreamerDashboard from "./StreamerDashboard";
+
 function App() {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -991,389 +1016,347 @@ function App() {
     };
   }, []);
 
-  // Simple static pages routing (Docs, Blog, About, Contact)
-  if (routePathState && routePathState.startsWith("/docs")) {
-    try {
-      const Docs = require("./Docs").default;
-      return <Docs />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Docs page not found.</div>;
-    }
-  }
-  if (routePathState && routePathState.startsWith("/blog")) {
-    try {
-      const Blog = require("./Blog").default;
-      return <Blog />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Blog page not found.</div>;
-    }
-  }
-  if (routePathState && routePathState.startsWith("/about")) {
-    try {
-      const About = require("./About").default;
-      return <About />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>About page not found.</div>;
-    }
-  }
-  if (routePathState && routePathState.startsWith("/contact")) {
-    try {
-      const Contact = require("./Contact").default;
-      return <Contact />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Contact page not found.</div>;
-    }
-  }
-  if (routePathState && routePathState.startsWith("/support")) {
-    try {
-      const Support = require("./Support").default;
-      return <Support />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Support page not found.</div>;
-    }
-  }
-
-  if (routePathState && routePathState.startsWith("/live")) {
-    try {
-      const LiveLanding = require("./LiveLanding").default;
-      return <LiveLanding />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Live landing page not found.</div>;
-    }
-  }
-
-  if (routePathState && routePathState.startsWith("/live/watch")) {
-    try {
-      const LiveWatch = require("./LiveWatch").default;
-      return <LiveWatch />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Live watch page not found.</div>;
-    }
-  }
-
-  if (routePathState && routePathState.startsWith("/streamer")) {
-    try {
-      const StreamerDashboard = require("./StreamerDashboard").default;
-      return <StreamerDashboard />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Streamer dashboard not found.</div>;
-    }
-  }
-  if (routePathState && routePathState.startsWith("/careers")) {
-    try {
-      const Careers = require("./Careers").default;
-      return <Careers />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Careers page not found.</div>;
-    }
-  }
-  if (routePathState && routePathState.startsWith("/accessibility")) {
-    try {
-      const Accessibility = require("./Accessibility").default;
-      return <Accessibility />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Accessibility page not found.</div>;
-    }
-  }
-  if (routePathState && routePathState.startsWith("/cookies")) {
-    try {
-      const Cookies = require("./Cookies").default;
-      return <Cookies />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Cookies page not found.</div>;
-    }
-  }
-
-  if (routePathState && routePathState.startsWith("/pricing")) {
-    try {
-      const Pricing = require("./Pricing").default;
-      return <Pricing />;
-    } catch (e) {
-      return <div style={{ color: "red" }}>Pricing page not found.</div>;
-    }
-  }
+  // No manual hash/routing logic needed with react-router-dom
+  // Existing logic for routes replaced by <Routes> block below
 
   return (
-    <div>
-      {showTermsModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(0,0,0,0.5)",
-            zIndex: 10000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: 16,
-              boxShadow: "0 12px 36px rgba(0,0,0,0.2)",
-              padding: "24px 22px",
-              maxWidth: 560,
-              width: "90%",
-            }}
-          >
-            <h3 style={{ marginTop: 0, marginBottom: 8 }}>Accept Terms of Service</h3>
-            <p style={{ marginTop: 0, color: "#444" }}>
-              Please accept the latest Terms of Service
-              {requiredTermsVersion ? ` (${requiredTermsVersion})` : ""} to continue.
-            </p>
-            <div style={{ display: "flex", gap: 12, marginTop: 16, alignItems: "center" }}>
-              <button
-                onClick={acceptTerms}
-                style={{
-                  background: "#111827",
-                  color: "#fff",
-                  border: "none",
-                  padding: "10px 16px",
-                  borderRadius: 8,
-                  cursor: "pointer",
-                }}
-              >
-                Accept and Continue
-              </button>
-              <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">
-                View Terms
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* If no user, show welcome/login page */}
-      {!user ? (
-        <>
-          {!showLogin &&
-            !showRegister &&
-            (() => {
-              try {
-                const WelcomePage = require("./WelcomePage").default;
-                return (
-                  <WelcomePage
-                    onGetStarted={() => setShowRegister(true)}
-                    onSignIn={() => setShowLogin(true)}
-                  />
-                );
-              } catch (e) {
-                return <div style={{ color: "red" }}>Welcome page not found.</div>;
-              }
-            })()}
-          {/* Show login modal if requested */}
-          {showLogin &&
-            (() => {
-              try {
-                const LoginForm = require("./LoginForm").default;
-                return (
-                  <div
-                    className="modal-overlay"
-                    style={{
-                      position: "fixed",
-                      top: 0,
-                      left: 0,
-                      width: "100vw",
-                      height: "100vh",
-                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                      zIndex: 9999,
-                      overflowY: "auto",
-                    }}
-                  >
-                    <div
-                      style={{
-                        minHeight: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "flex-start",
-                        padding: "3rem 1.25rem",
-                      }}
-                    >
-                      <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
-                    </div>
-                  </div>
-                );
-              } catch (e) {
-                return <div style={{ color: "red" }}>Login form not found.</div>;
-              }
-            })()}
-          {/* Show register modal if requested */}
-          {showRegister &&
-            (() => {
-              try {
-                const RegisterForm = require("./RegisterForm").default;
-                return (
-                  <div
-                    className="modal-overlay"
-                    style={{
-                      position: "fixed",
-                      top: 0,
-                      left: 0,
-                      width: "100vw",
-                      height: "100vh",
-                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                      zIndex: 9999,
-                      overflowY: "auto",
-                    }}
-                  >
-                    <div
-                      style={{
-                        minHeight: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "flex-start",
-                        padding: "3rem 1.25rem",
-                      }}
-                    >
-                      <RegisterForm
-                        onRegister={registerUser}
-                        onClose={() => setShowRegister(false)}
-                      />
-                    </div>
-                  </div>
-                );
-              } catch (e) {
-                return <div style={{ color: "red" }}>Register form not found.</div>;
-              }
-            })()}
-        </>
-      ) : user && (user.role === "admin" || user.isAdmin === true) ? (
-        // Render admin dashboard for admin users
-        (() => {
-          try {
-            const AdminDashboard = require("./AdminDashboard").default;
-            return <AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />;
-          } catch (e) {
-            return <div style={{ color: "red" }}>Admin dashboard not found.</div>;
-          }
-        })()
-      ) : (
-        // Render full user dashboard for normal users
-        (() => {
-          try {
-            const UserDashboard = require("./UserDashboard_full").default;
-            return (
-              <UserDashboard
-                user={user}
-                content={content}
-                userDefaults={userDefaults}
-                onSaveDefaults={saveUserDefaults}
-                onLogout={handleLogout}
-                onUpload={handleContentUpload}
-                mySchedules={mySchedules}
-                onSchedulesChanged={refreshSchedules}
-              />
-            );
-          } catch (e) {
-            return <div style={{ color: "red" }}>User dashboard not found.</div>;
-          }
-        })()
-      )}
-      {/* MFA Modal */}
-      {showMfaModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            zIndex: 10000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              padding: "20px",
-              borderRadius: "8px",
-              maxWidth: "400px",
-              width: "90%",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-            }}
-          >
-            <h3 style={{ marginTop: 0 }}>Two-Factor Authentication</h3>
-            <p>Please verify your identity to continue.</p>
-            {mfaError && <div style={{ color: "red", marginBottom: "10px" }}>{mfaError}</div>}
+    <div className="App">
+      <Routes>
+        {/* Static Content Pages */}
+        <Route path="/about" element={<About />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/cookies" element={<Cookies />} />
+        <Route path="/docs" element={<Docs />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/support" element={<Support />} />
+        <Route path="/accessibility" element={<Accessibility />} />
 
-            {!verificationId ? (
-              <div>
-                <p>
-                  A verification code will be sent to your phone
-                  {mfaResolver?.hints?.[0]?.phoneNumber
-                    ? ` ending in ${mfaResolver.hints[0].phoneNumber.slice(-4)}`
-                    : ""}
-                  .
-                </p>
-                <div id="mfa-recaptcha-container"></div>
+        <Route path="/features" element={<Features />} />
+        <Route path="/integrations" element={<Integrations />} />
+        <Route path="/metrics" element={<Metrics />} />
+        <Route path="/changelog" element={<Changelog />} />
+        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/help" element={<HelpCenter />} />
+        <Route path="/api-docs" element={<ApiDocs />} />
+        <Route path="/partners" element={<Partners />} />
+        <Route path="/security" element={<Security />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+
+        {/* Live Streaming Pages */}
+        <Route path="/live" element={<LiveLanding />} />
+        <Route path="/live/watch" element={<LiveWatch />} />
+        <Route path="/streamer" element={<StreamerDashboard />} />
+
+        {/* Main Application Logic (Welcome / Auth / Dashboard) */}
+        <Route
+          path="*"
+          element={
+            <>
+              {/* Terms Modal */}
+              {showTermsModal && (
                 <div
-                  style={{ marginTop: "20px", display: "flex", justifyContent: "space-between" }}
-                >
-                  <button onClick={cancelMfa} style={{ padding: "8px 16px", cursor: "pointer" }}>
-                    Cancel
-                  </button>
-                  <button
-                    onClick={sendMfaCode}
-                    style={{
-                      padding: "8px 16px",
-                      background: "#007bff",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Send Code
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <p>Enter the 6-digit code sent to your phone.</p>
-                <input
-                  type="text"
-                  value={mfaCode}
-                  onChange={e => setMfaCode(e.target.value)}
-                  placeholder="123456"
                   style={{
-                    width: "100%",
-                    padding: "8px",
-                    margin: "10px 0",
-                    boxSizing: "border-box",
-                    fontSize: "16px",
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    background: "rgba(0,0,0,0.5)",
+                    zIndex: 10000,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
-                />
-                <div
-                  style={{ marginTop: "20px", display: "flex", justifyContent: "space-between" }}
                 >
-                  <button onClick={cancelMfa} style={{ padding: "8px 16px", cursor: "pointer" }}>
-                    Cancel
-                  </button>
-                  <button
-                    onClick={verifyMfaCode}
+                  <div
                     style={{
-                      padding: "8px 16px",
-                      background: "#007bff",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
+                      background: "#fff",
+                      borderRadius: 16,
+                      boxShadow: "0 12px 36px rgba(0,0,0,0.2)",
+                      padding: "24px 22px",
+                      maxWidth: 560,
+                      width: "90%",
                     }}
                   >
-                    Verify & Sign In
-                  </button>
+                    <h3 style={{ marginTop: 0, marginBottom: 8 }}>Accept Terms of Service</h3>
+                    <p style={{ marginTop: 0, color: "#444" }}>
+                      Please accept the latest Terms of Service
+                      {requiredTermsVersion ? ` (${requiredTermsVersion})` : ""} to continue.
+                    </p>
+                    <div style={{ display: "flex", gap: 12, marginTop: 16, alignItems: "center" }}>
+                      <button
+                        onClick={acceptTerms}
+                        style={{
+                          background: "#111827",
+                          color: "#fff",
+                          border: "none",
+                          padding: "10px 16px",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Accept and Continue
+                      </button>
+                      <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">
+                        View Terms
+                      </a>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              )}
+              {/* If no user, show welcome/login page */}
+              {!user ? (
+                <>
+                  {!showLogin &&
+                    !showRegister &&
+                    (() => {
+                      try {
+                        const WelcomePage = require("./WelcomePage").default;
+                        return (
+                          <WelcomePage
+                            onGetStarted={() => setShowRegister(true)}
+                            onSignIn={() => setShowLogin(true)}
+                          />
+                        );
+                      } catch (e) {
+                        return <div style={{ color: "red" }}>Welcome page not found.</div>;
+                      }
+                    })()}
+                  {/* Show login modal if requested */}
+                  {showLogin &&
+                    (() => {
+                      try {
+                        const LoginForm = require("./LoginForm").default;
+                        return (
+                          <div
+                            className="modal-overlay"
+                            style={{
+                              position: "fixed",
+                              top: 0,
+                              left: 0,
+                              width: "100vw",
+                              height: "100vh",
+                              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                              zIndex: 9999,
+                              overflowY: "auto",
+                            }}
+                          >
+                            <div
+                              style={{
+                                minHeight: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "flex-start",
+                                padding: "3rem 1.25rem",
+                              }}
+                            >
+                              <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
+                            </div>
+                          </div>
+                        );
+                      } catch (e) {
+                        return <div style={{ color: "red" }}>Login form not found.</div>;
+                      }
+                    })()}
+                  {/* Show register modal if requested */}
+                  {showRegister &&
+                    (() => {
+                      try {
+                        const RegisterForm = require("./RegisterForm").default;
+                        return (
+                          <div
+                            className="modal-overlay"
+                            style={{
+                              position: "fixed",
+                              top: 0,
+                              left: 0,
+                              width: "100vw",
+                              height: "100vh",
+                              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                              zIndex: 9999,
+                              overflowY: "auto",
+                            }}
+                          >
+                            <div
+                              style={{
+                                minHeight: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "flex-start",
+                                padding: "3rem 1.25rem",
+                              }}
+                            >
+                              <RegisterForm
+                                onRegister={registerUser}
+                                onClose={() => setShowRegister(false)}
+                              />
+                            </div>
+                          </div>
+                        );
+                      } catch (e) {
+                        return <div style={{ color: "red" }}>Register form not found.</div>;
+                      }
+                    })()}
+                </>
+              ) : user && (user.role === "admin" || user.isAdmin === true) ? (
+                // Render admin dashboard for admin users
+                (() => {
+                  try {
+                    const AdminDashboard = require("./AdminDashboard").default;
+                    return (
+                      <AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />
+                    );
+                  } catch (e) {
+                    return <div style={{ color: "red" }}>Admin dashboard not found.</div>;
+                  }
+                })()
+              ) : (
+                // Render full user dashboard for normal users
+                (() => {
+                  try {
+                    const UserDashboard = require("./UserDashboard_full").default;
+                    return (
+                      <UserDashboard
+                        user={user}
+                        content={content}
+                        userDefaults={userDefaults}
+                        onSaveDefaults={saveUserDefaults}
+                        onLogout={handleLogout}
+                        onUpload={handleContentUpload}
+                        mySchedules={mySchedules}
+                        onSchedulesChanged={refreshSchedules}
+                      />
+                    );
+                  } catch (e) {
+                    return <div style={{ color: "red" }}>User dashboard not found.</div>;
+                  }
+                })()
+              )}
+              {/* MFA Modal */}
+              {showMfaModal && (
+                <div
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    zIndex: 10000,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      background: "white",
+                      padding: "20px",
+                      borderRadius: "8px",
+                      maxWidth: "400px",
+                      width: "90%",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <h3 style={{ marginTop: 0 }}>Two-Factor Authentication</h3>
+                    <p>Please verify your identity to continue.</p>
+                    {mfaError && (
+                      <div style={{ color: "red", marginBottom: "10px" }}>{mfaError}</div>
+                    )}
+
+                    {!verificationId ? (
+                      <div>
+                        <p>
+                          A verification code will be sent to your phone
+                          {mfaResolver?.hints?.[0]?.phoneNumber
+                            ? ` ending in ${mfaResolver.hints[0].phoneNumber.slice(-4)}`
+                            : ""}
+                          .
+                        </p>
+                        <div id="mfa-recaptcha-container"></div>
+                        <div
+                          style={{
+                            marginTop: "20px",
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <button
+                            onClick={cancelMfa}
+                            style={{ padding: "8px 16px", cursor: "pointer" }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={sendMfaCode}
+                            style={{
+                              padding: "8px 16px",
+                              background: "#007bff",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Send Code
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <p>Enter the 6-digit code sent to your phone.</p>
+                        <input
+                          type="text"
+                          value={mfaCode}
+                          onChange={e => setMfaCode(e.target.value)}
+                          placeholder="123456"
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            margin: "10px 0",
+                            boxSizing: "border-box",
+                            fontSize: "16px",
+                          }}
+                        />
+                        <div
+                          style={{
+                            marginTop: "20px",
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <button
+                            onClick={cancelMfa}
+                            style={{ padding: "8px 16px", cursor: "pointer" }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={verifyMfaCode}
+                            style={{
+                              padding: "8px 16px",
+                              background: "#007bff",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Verify & Sign In
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          }
+        />
+      </Routes>
 
       {/* AI Chat Widget - only show when user is logged in */}
       {user && <ChatWidget />}
