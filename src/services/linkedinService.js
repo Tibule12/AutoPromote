@@ -279,7 +279,11 @@ async function postToLinkedIn({
   text,
   imageUrl,
   videoUrl,
+  mediaUrl,
   articleUrl,
+  link,
+  url,
+  postType,
   articleTitle,
   articleDescription,
   contentId,
@@ -289,7 +293,26 @@ async function postToLinkedIn({
   personId: personIdParam = null,
 }) {
   if (!uid) throw new Error("uid required");
-  if (!text && !articleUrl && !imageUrl && !videoUrl) throw new Error("content required");
+
+  // Auto-detect media types from generic 'mediaUrl' if specific ones not provided
+  let useVideo = videoUrl;
+  let useImage = imageUrl;
+  if (mediaUrl && !useVideo && !useImage) {
+    if (/\.(mp4|mov|avi|webm)$/i.test(mediaUrl)) {
+      useVideo = mediaUrl;
+    } else {
+      useImage = mediaUrl;
+    }
+  }
+
+  // Auto-detect article/link url
+  let useArticleUrl = articleUrl || link || url;
+
+  // If postType is explicitly 'post' (not article) and we have media,
+  // we might want to ignore the link as an attachment and just put it in text.
+  // But if we have NO media, we should definitely use the link as an attachment (Article).
+
+  if (!text && !useArticleUrl && !useImage && !useVideo) throw new Error("content required");
   if (!fetchFn) throw new Error("Fetch not available");
 
   const accessToken = await getValidAccessToken(uid);
@@ -319,9 +342,9 @@ async function postToLinkedIn({
   };
 
   // Add video if provided (prioritize video over image)
-  if (videoUrl) {
+  if (useVideo) {
     try {
-      const assetUrn = await uploadVideo({ uid, videoUrl });
+      const assetUrn = await uploadVideo({ uid, videoUrl: useVideo });
       sharePayload.specificContent["com.linkedin.ugc.ShareContent"].shareMediaCategory = "VIDEO";
       sharePayload.specificContent["com.linkedin.ugc.ShareContent"].media = [
         {
@@ -336,9 +359,9 @@ async function postToLinkedIn({
     }
   }
   // Add image if provided & no video
-  else if (imageUrl) {
+  else if (useImage) {
     try {
-      const assetUrn = await uploadImage({ uid, imageUrl });
+      const assetUrn = await uploadImage({ uid, imageUrl: useImage });
       sharePayload.specificContent["com.linkedin.ugc.ShareContent"].shareMediaCategory = "IMAGE";
       sharePayload.specificContent["com.linkedin.ugc.ShareContent"].media = [
         {
@@ -353,12 +376,13 @@ async function postToLinkedIn({
   }
 
   // Add article if provided & no media
-  if (!videoUrl && !imageUrl && articleUrl) {
+  // Use 'Article' type if we have a URL and no media, or if explicitly requested and we have a URL
+  if (!useVideo && !useImage && useArticleUrl) {
     sharePayload.specificContent["com.linkedin.ugc.ShareContent"].shareMediaCategory = "ARTICLE";
     sharePayload.specificContent["com.linkedin.ugc.ShareContent"].media = [
       {
         status: "READY",
-        originalUrl: articleUrl,
+        originalUrl: useArticleUrl,
         title: {
           text: articleTitle || "Article",
         },

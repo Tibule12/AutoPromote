@@ -432,6 +432,42 @@ async function getTweetStats({ uid, tweetId }) {
   };
 }
 
+/**
+ * Post a thread of tweets
+ * @param {Object} params
+ * @param {string} params.uid - User ID
+ * @param {Array<string>} params.tweets - Array of tweet strings.
+ * @param {string} [params.contentId] - Content ID
+ */
+async function postThread({ uid, tweets, contentId }) {
+  if (!uid) throw new Error("uid required");
+  if (!tweets || !Array.isArray(tweets) || tweets.length === 0)
+    throw new Error("tweets array required");
+
+  let lastTweetId = null;
+  const posted = [];
+
+  for (let i = 0; i < tweets.length; i++) {
+    const text = tweets[i];
+    // Attach contentId only to the first tweet (the "head" of the thread)
+    const res = await postTweet({
+      uid,
+      text,
+      contentId: i === 0 ? contentId : null,
+      replyToTweetId: lastTweetId,
+    });
+    lastTweetId = res.tweetId;
+    posted.push(res);
+  }
+  return {
+    success: true,
+    platform: "twitter",
+    threadId: posted[0].tweetId,
+    childCount: posted.length - 1,
+    posted,
+  };
+}
+
 module.exports = {
   generatePkcePair,
   createAuthStateDoc,
@@ -442,6 +478,7 @@ module.exports = {
   getValidAccessToken,
   cleanupOldStates,
   postTweet,
+  postThread,
   uploadMedia,
   getTweetStats,
 };
