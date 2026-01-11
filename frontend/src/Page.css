@@ -1,0 +1,144 @@
+.ap-page-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+    "Helvetica Neue", sans-serif;
+  color: #333;
+}
+
+.ap-page-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.ap-page-header h1 {
+  font-size: 2.5rem;
+  color: #1a1a1a;
+  margin-bottom: 15px;
+}
+
+.ap-page-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.ap-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.ap-feature-card {
+  background: #fff;
+  border: 1px solid #eee;
+  padding: 25px;
+  border-radius: 12px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.ap-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.ap-feature-card h3 {
+  margin-top: 0;
+  color: #4f2ff7;
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+}
+
+.ap-feature-card p {
+  color: #555;
+  line-height: 1.6;
+}
+
+.ap-content-section {
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  margin-bottom: 30px;
+}
+
+.ap-content-section h3 {
+  color: #222;
+  margin-top: 25px;
+  margin-bottom: 15px;
+}
+.ap-content-section h3:first-child {
+  margin-top: 0;
+}
+
+.ap-content-section p {
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.ap-list {
+  padding-left: 20px;
+  margin-bottom: 25px;
+}
+
+.ap-list li {
+  margin-bottom: 10px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.ap-changelog-item {
+  border-left: 3px solid #4f2ff7;
+  padding-left: 25px;
+  margin-bottom: 40px;
+}
+
+.ap-changelog-item h3 {
+  margin: 0 0 8px 0;
+  color: #222;
+}
+
+.ap-date {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 15px;
+}
+
+.ap-alert-box {
+  background: #fff8e1;
+  border-left: 4px solid #ffc107;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  color: #856404;
+}
+
+.ap-partners-logos {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  color: #777;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+}
+
+.ap-btn-primary {
+  background-color: #4f2ff7;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.ap-btn-primary:hover {
+  background-color: #3e24c6;
+}
