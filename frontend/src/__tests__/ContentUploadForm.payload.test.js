@@ -97,6 +97,70 @@ describe("ContentUploadForm payloads", () => {
     expect(payload.meta.overlay).toBeDefined();
     expect(payload.meta.overlay.text).toBe("Submit Overlay");
   });
+
+  test("Payload includes Twitter and LinkedIn specific options", async () => {
+    const onUpload = jest.fn(async () => ({}));
+    const { rerender } = render(<ContentUploadForm onUpload={onUpload} />);
+
+    // Select Twitter and LinkedIn
+    rerender(<ContentUploadForm onUpload={onUpload} selectedPlatforms={["twitter", "linkedin"]} />);
+
+    // Twitter Settings
+    const twitterBtns = screen.getAllByRole("button", { name: /Twitter/i });
+    const twitterTile = twitterBtns.find(b => b.classList.contains("platform-card"));
+    expect(twitterTile).toBeDefined();
+    fireEvent.click(twitterTile);
+
+    // Toggle Thread Support (using getByLabelText with regex)
+    const threadCheck = screen.getByLabelText(/Thread Mode/i);
+    fireEvent.click(threadCheck);
+    expect(threadCheck).toBeChecked();
+
+    // Click Back to return to platform list
+    const backBtn = screen.getByRole("button", { name: /Back to platforms/i });
+    fireEvent.click(backBtn);
+
+    // LinkedIn Settings
+    const linkedinBtns = screen.getAllByRole("button", { name: /LinkedIn/i });
+    const linkedinTile = linkedinBtns.find(b => b.classList.contains("platform-card"));
+    expect(linkedinTile).toBeDefined();
+    fireEvent.click(linkedinTile);
+
+    // Select Post Type
+    const postTypeSelect = screen.getByRole("combobox", { name: /Post Type/i });
+    // OR create a more specific query if multiple selects exist.
+    // In LinkedIn view, we just added the select.
+    fireEvent.change(postTypeSelect, { target: { value: "article" } });
+
+    // Supply Company ID
+    const companyIdInput = screen.getByPlaceholderText(/Organization ID/i);
+    fireEvent.change(companyIdInput, { target: { value: "123456" } });
+
+    // Provide file for LinkedIn
+    const file = new File(["dummy"], "test.png", { type: "image/png" });
+    const fileInput = screen.getByLabelText(/Platform file linkedin/i);
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    // Upload
+    const uploadBtn = screen.getByRole("button", { name: /Upload Content/i });
+    fireEvent.click(uploadBtn);
+
+    await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 5000 });
+    const payload = onUpload.mock.calls[0][0];
+
+    expect(payload.platforms).toContain("linkedin");
+    // Twitter may or may not be in platforms if we didn't provide a file for it?
+    // The Main Upload logic iterates over platforms. If a platform has no file, it might skip or use main file.
+    // Here we only provided file for LinkedIn (via per-platform input).
+    // But we selected both in "selectedPlatforms".
+    // Let's check payload.platform_options regardless.
+
+    expect(payload.platform_options.twitter).toBeDefined();
+    expect(payload.platform_options.twitter.threadMode).toBe(true);
+
+    expect(payload.platform_options.linkedin).toBeDefined();
+    expect(payload.platform_options.linkedin.postType).toBe("article");
+  });
 });
 
 export {};
