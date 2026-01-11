@@ -1,6 +1,6 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./Footer.css";
-import { PUBLIC_SITE_URL } from "../config";
 import NewsletterSubscribe from "./NewsletterSubscribe";
 
 const Icon = ({ name }) => {
@@ -26,7 +26,6 @@ const Icon = ({ name }) => {
 };
 
 const Footer = () => {
-  const site = PUBLIC_SITE_URL || "https://autopromote.org";
   const [showNewsletter, setShowNewsletter] = useState(false);
   const [lang, setLang] = useState(() => {
     try {
@@ -49,11 +48,11 @@ const Footer = () => {
         {/* Product Column */}
         <div className="ap-footer-col">
           <div className="ap-footer-header">Product</div>
-          <a href="/features">Features</a>
-          <a href="/pricing">Pricing</a>
-          <a href="/integrations">Integrations</a>
-          <a href="/metrics">Analytics</a>
-          <a href="/changelog">Changelog</a>
+          <Link to="/features">Features</Link>
+          <Link to="/pricing">Pricing</Link>
+          <Link to="/integrations">Integrations</Link>
+          <Link to="/metrics">Analytics</Link>
+          <Link to="/changelog">Changelog</Link>
           <a
             className="ap-status"
             href="https://status.autopromote.org"
@@ -67,34 +66,34 @@ const Footer = () => {
         {/* Resources Column */}
         <div className="ap-footer-col">
           <div className="ap-footer-header">Resources</div>
-          <a href="/docs">Documentation</a>
-          <a href="/blog">Blog</a>
-          <a href="/community">Community</a>
-          <a href="/help">Help Center</a>
-          <a href="/api-docs">API Reference</a>
+          <Link to="/docs">Documentation</Link>
+          <Link to="/blog">Blog</Link>
+          <Link to="/community">Community</Link>
+          <Link to="/help">Help Center</Link>
+          <Link to="/api-docs">API Reference</Link>
         </div>
 
         {/* Company Column */}
         <div className="ap-footer-col">
           <div className="ap-footer-header">Company</div>
-          <a href="/about">About Us</a>
-          <a href="/careers">Careers</a>
-          <a href="/contact">Contact</a>
-          <a href="/accessibility">Accessibility</a>
-          <a href="/partners">Partners</a>
+          <Link to="/about">About Us</Link>
+          <Link to="/careers">Careers</Link>
+          <Link to="/contact">Contact</Link>
+          <Link to="/accessibility">Accessibility</Link>
+          <Link to="/partners">Partners</Link>
         </div>
 
         {/* Legal Column */}
         <div className="ap-footer-col">
           <div className="ap-footer-header">Legal</div>
-          <a href={`${site}/terms`} target="_blank" rel="noopener noreferrer">
+          <Link to="/terms" target="_blank" rel="noopener noreferrer">
             Terms of Service
-          </a>
-          <a href={`${site}/privacy`} target="_blank" rel="noopener noreferrer">
+          </Link>
+          <Link to="/privacy" target="_blank" rel="noopener noreferrer">
             Privacy Policy
-          </a>
-          <a href="/cookies">Cookie Policy</a>
-          <a href="/security">Security</a>
+          </Link>
+          <Link to="/cookies">Cookie Policy</Link>
+          <Link to="/security">Security</Link>
         </div>
 
         {/* Connect / Newsletter Column */}
