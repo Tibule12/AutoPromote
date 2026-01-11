@@ -3,6 +3,7 @@ const multer = require("multer");
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const util = require("util");
+const { checkTextForSafety, checkFileForSafety } = require("./services/contentModerationService");
 
 const router = express.Router();
 const upload = multer({ dest: "uploads/", limits: { fileSize: 100 * 1024 * 1024 } }); // 100MB limit
@@ -42,23 +43,56 @@ function analyzeMetadata(metadata) {
   return { feedback, needsEnhancement, width, height, videoBitrate, audioBitrate };
 }
 
-// Accept JSON preview requests for preview:// URLs (used by frontend preview flow)
-router.post("/quality-check", express.json(), async (req, res) => {
+// Accept JSON preview requests (or text-only checks)
+router.post("/quality-check", express.json(), async (req, res, next) => {
   try {
     const body = req.body || {};
+
+    // Check text safety regardless of file
+    const textToScan = [body.title, body.description].filter(Boolean).join(" ");
+    let textModeration = { safe: true, flags: [] };
+    if (textToScan) {
+      const { checkTextForSafety } = require("./services/contentModerationService");
+      textModeration = checkTextForSafety(textToScan);
+    }
+
     if (body.url && typeof body.url === "string" && body.url.startsWith("preview://")) {
       // Preview: no real file available to analyze; return a conservative OK result
+      const flags = [...textModeration.flags];
       return res.json({
-        qualityScore: 100,
-        feedback: ["Preview content - automated quality checks are skipped for preview."],
+        qualityScore: flags.length > 0 ? 0 : 100,
+        feedback: [
+          "Preview content - automated file quality checks are skipped for preview.",
+          ...(flags.length > 0 ? [`⚠️ Content Flagged: ${flags.join(", ")}`] : []),
+        ],
         enhanced: false,
+        moderation: {
+          safe: flags.length === 0,
+          flags,
+        },
+      });
+    }
+
+    // If just text check (no file, no preview url)
+    if (textToScan && !body.url && !req.headers["content-type"]?.includes("multipart")) {
+      return res.json({
+        qualityScore: textModeration.safe ? 100 : 0,
+        feedback:
+          textModeration.flags.length > 0
+            ? [`⚠️ Content Flagged: ${textModeration.flags.join(", ")}`]
+            : ["Text content looks safe."],
+        enhanced: false,
+        moderation: textModeration,
       });
     }
   } catch (e) {
     // fall through to multipart handler
   }
   // If not a JSON preview request, defer to the multipart handler
-  return res.status(400).json({ error: "No preview url provided" });
+  if (!req.headers["content-type"]?.includes("multipart")) {
+    return res.status(400).json({ error: "No preview url or file provided" });
+  }
+  next(); // Pass to next router
 });
 
 router.post("/quality-check", upload.single("file"), async (req, res) => {
@@ -87,6 +121,21 @@ router.post("/quality-check", upload.single("file"), async (req, res) => {
     });
 
     const { feedback, needsEnhancement } = analyzeMetadata(metadata);
+
+    // Perform Content Moderation (Safety Check)
+    const textSafety = checkTextForSafety(
+      [req.body.title, req.body.description].filter(Boolean).join(" ")
+    );
+    const fileSafety = await checkFileForSafety(filePath);
+
+    const moderation = {
+      safe: textSafety.safe && fileSafety.safe,
+      flags: [...textSafety.flags, ...(fileSafety.reason ? [fileSafety.reason] : [])],
+    };
+
+    if (!moderation.safe) {
+      feedback.push(`⚠️ Content Flagged: ${moderation.flags.join(", ")}`);
+    }
 
     if (needsEnhancement) {
       const enhancedPath = filePath + "_enhanced.mp4";

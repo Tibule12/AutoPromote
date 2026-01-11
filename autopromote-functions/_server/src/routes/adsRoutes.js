@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../authMiddleware");
-const { db } = require("../firebaseAdmin");
+const { db, admin } = require("../firebaseAdmin");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 const logger = require("../utils/logger");
 
@@ -225,11 +225,27 @@ router.post("/:adId/launch", authMiddleware, adsPublicLimiter, async (req, res) 
 
     // Get user's subscription to check limits
     const userDoc = await db.collection("users").doc(userId).get();
-    // eslint-disable-next-line no-unused-vars -- may be referenced in future validations
-    const _userData = userDoc.data() || {};
+    const userData = userDoc.data() || {};
 
-    // Check if user has enough budget (basic validation)
-    // In production, integrate with payment system
+    const availableCredits = userData.adCredits || 0;
+    const requiredBudget = adData.budget || 0;
+
+    if (requiredBudget > availableCredits) {
+      return res.status(402).json({
+        ok: false,
+        message: `Insufficient ad credits. You have $${availableCredits.toFixed(2)} but this ad requires $${requiredBudget.toFixed(2)}. Please add funds.`,
+        currentBalance: availableCredits,
+        required: requiredBudget,
+      });
+    }
+
+    // Deduct credits
+    await db
+      .collection("users")
+      .doc(userId)
+      .update({
+        adCredits: admin.firestore.FieldValue.increment(-requiredBudget),
+      });
 
     const startDate = new Date();
     const endDate = new Date(startDate);
@@ -240,7 +256,22 @@ router.post("/:adId/launch", authMiddleware, adsPublicLimiter, async (req, res) 
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
       updatedAt: new Date().toISOString(),
+      fundedWith: requiredBudget, // track how much was pre-paid
     });
+
+    // Log transaction
+    try {
+      const { recordUsage } = require("../services/usageLedgerService");
+      await recordUsage({
+        type: "ad_spend",
+        userId,
+        amount: -requiredBudget,
+        currency: "USD",
+        meta: { adId, duration: adData.duration },
+      });
+    } catch (_) {
+      /* ignore log error */
+    }
 
     // If external platform ad, create external ad campaign
     if (adData.type === "external") {

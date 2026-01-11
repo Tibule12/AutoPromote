@@ -6,13 +6,15 @@ import React, { useState, useEffect, useRef } from "react";
  * Provides audio explanations for the currently active tab.
  * Uses the Web Speech API (speechSynthesis).
  */
-const VoiceOverGuide = ({ activeTab }) => {
+const VoiceOverGuide = ({ activeTab, scripts: customScripts, theme = "dark" }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   // Ref to keep track of the current utterance so we can cancel it
   const utteranceRef = useRef(null);
 
-  // Script dictionary for each tab
-  const scripts = {
+  const isLight = theme === "light";
+
+  // Default script dictionary for user dashboard
+  const defaultScripts = {
     profile:
       "This is your User Profile. View your aggregate stats, manage your account settings, and customize your avatar.",
     upload:
@@ -25,7 +27,7 @@ const VoiceOverGuide = ({ activeTab }) => {
       "Earn credits by completing tasks and referring friends. Use credits to unlock premium viral features.",
     notifications: "Check your latest alerts, system messages, and engagement notifications here.",
     earnings:
-      "Track your monetization here. See your estimated revenue from ad splits, creator funds, and referral bonuses.",
+      "This is your Earnings Hub. As a subscriber, you can earn exclusive bonuses for high-performing content. For example, reach 30,000 viral views to earn a $3 bonus. Remember provided you are subscribed, these are extra rewards from us on top of what you already earn directly from platforms like YouTube or TikTok.",
     ads: "Manage your paid ad campaigns here to boost your content even further with targeted promotion.",
     connections:
       "In the Connections tab, you can link your social media accounts like TikTok, YouTube, and Instagram. This is required for auto-posting.",
@@ -43,6 +45,8 @@ const VoiceOverGuide = ({ activeTab }) => {
     // Default fallback
     default: "Welcome to AutoPromote. Select a tab to learn more about its features.",
   };
+
+  const scripts = customScripts || defaultScripts;
 
   useEffect(() => {
     // When tab changes, stop any current speech
@@ -102,8 +106,14 @@ const VoiceOverGuide = ({ activeTab }) => {
         display: "flex",
         alignItems: "center",
         padding: "8px 12px",
-        background: isPlaying ? "rgba(99, 102, 241, 0.2)" : "rgba(255, 255, 255, 0.05)",
-        border: "1px solid rgba(255,255,255,0.1)",
+        background: isPlaying
+          ? isLight
+            ? "rgba(25, 118, 210, 0.15)"
+            : "rgba(99, 102, 241, 0.2)"
+          : isLight
+            ? "rgba(0, 0, 0, 0.05)"
+            : "rgba(255, 255, 255, 0.05)",
+        border: isLight ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.1)",
         borderRadius: "20px",
         cursor: "pointer",
         transition: "all 0.2s ease",
@@ -117,7 +127,11 @@ const VoiceOverGuide = ({ activeTab }) => {
     >
       <span style={{ marginRight: "8px", fontSize: "1.2rem" }}>{isPlaying ? "🔊" : "🔈"}</span>
       <span
-        style={{ fontSize: "0.85rem", color: isPlaying ? "#818cf8" : "#94a3b8", fontWeight: 500 }}
+        style={{
+          fontSize: "0.85rem",
+          color: isPlaying ? (isLight ? "#1976d2" : "#818cf8") : isLight ? "#555" : "#94a3b8",
+          fontWeight: 500,
+        }}
       >
         {isPlaying ? "Speaking..." : "Explain This Tab"}
       </span>

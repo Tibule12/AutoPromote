@@ -152,12 +152,133 @@ async function uploadImage({ uid, imageUrl }) {
 }
 
 /**
- * Post to LinkedIn (text, image, or article)
+ * Upload video to LinkedIn
+ */
+async function uploadVideo({ uid, videoUrl }) {
+  const accessToken = await getValidAccessToken(uid);
+  if (!accessToken) throw new Error("No valid LinkedIn access token");
+
+  const personId = await getUserProfile(accessToken);
+
+  // Step 1: Register upload
+  const registerResponse = await safeFetch(
+    "https://api.linkedin.com/v2/assets?action=registerUpload",
+    fetchFn,
+    {
+      fetchOptions: {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          "X-Restli-Protocol-Version": "2.0.0",
+        },
+        body: JSON.stringify({
+          registerUploadRequest: {
+            recipes: ["urn:li:digitalmediaRecipe:feedshare-video"],
+            owner: `urn:li:person:${personId}`,
+            serviceRelationships: [
+              {
+                relationshipType: "OWNER",
+                identifier: "urn:li:userGeneratedContent",
+              },
+            ],
+          },
+        }),
+      },
+      requireHttps: true,
+      allowHosts: ["api.linkedin.com"],
+    }
+  );
+
+  if (!registerResponse.ok) {
+    const err = await registerResponse.text();
+    throw new Error(`Failed to register LinkedIn video upload: ${err}`);
+  }
+
+  const registerData = await registerResponse.json();
+  const uploadUrl =
+    registerData.value.uploadMechanism["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]
+      .uploadUrl;
+  const asset = registerData.value.asset;
+
+  // Step 2: Download video stream
+  const videoResponse = await safeFetch(videoUrl, fetchFn, { requireHttps: true });
+  if (!videoResponse.ok) throw new Error("Failed to download video for upload");
+
+  // Use buffer for compatibility, though stream is preferred for large files
+  // (Assuming files are reasonable size < 50MB for this implementation)
+  const videoBuffer = await videoResponse.buffer();
+
+  // Step 3: Upload video
+  const uploadResponse = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/octet-stream",
+    },
+    body: videoBuffer,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error("Failed to upload video bytes to LinkedIn");
+  }
+
+  // Step 4: Poll for completion
+  return new Promise((resolve, reject) => {
+    let attempts = 0;
+    const maxAttempts = 20;
+    const interval = 2000;
+
+    const poll = async () => {
+      attempts++;
+      try {
+        const statusRes = await safeFetch(`https://api.linkedin.com/v2/assets/${asset}`, fetchFn, {
+          fetchOptions: {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "X-Restli-Protocol-Version": "2.0.0",
+            },
+          },
+          requireHttps: true,
+          allowHosts: ["api.linkedin.com"],
+        });
+
+        if (statusRes.ok) {
+          const statusData = await statusRes.json();
+          const state = statusData.recipes[0].status;
+          if (state === "AVAILABLE") {
+            resolve(asset);
+            return;
+          } else if (state === "CLIENT_ERROR" || state === "PROCESSING_FAILED") {
+            reject(new Error("LinkedIn video processing failed"));
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Polling error", e);
+      }
+
+      if (attempts >= maxAttempts) {
+        // Return asset anyway, it might process eventually
+        console.warn("LinkedIn video processing timed out, proceeding anyway");
+        resolve(asset);
+      } else {
+        setTimeout(poll, interval);
+      }
+    };
+    poll();
+  });
+}
+
+/**
+ * Post to LinkedIn (text, image, video, or article)
  */
 async function postToLinkedIn({
   uid,
   text,
   imageUrl,
+  videoUrl,
   articleUrl,
   articleTitle,
   articleDescription,
@@ -168,7 +289,7 @@ async function postToLinkedIn({
   personId: personIdParam = null,
 }) {
   if (!uid) throw new Error("uid required");
-  if (!text && !articleUrl) throw new Error("text or articleUrl required");
+  if (!text && !articleUrl && !imageUrl && !videoUrl) throw new Error("content required");
   if (!fetchFn) throw new Error("Fetch not available");
 
   const accessToken = await getValidAccessToken(uid);
@@ -197,8 +318,25 @@ async function postToLinkedIn({
     },
   };
 
-  // Add image if provided
-  if (imageUrl) {
+  // Add video if provided (prioritize video over image)
+  if (videoUrl) {
+    try {
+      const assetUrn = await uploadVideo({ uid, videoUrl });
+      sharePayload.specificContent["com.linkedin.ugc.ShareContent"].shareMediaCategory = "VIDEO";
+      sharePayload.specificContent["com.linkedin.ugc.ShareContent"].media = [
+        {
+          status: "READY",
+          media: assetUrn,
+          title: { text: "Video" },
+        },
+      ];
+    } catch (e) {
+      console.warn("[LinkedIn] Video upload failed, posting as text/link:", e.message);
+      // Fallback logic could go here
+    }
+  }
+  // Add image if provided & no video
+  else if (imageUrl) {
     try {
       const assetUrn = await uploadImage({ uid, imageUrl });
       sharePayload.specificContent["com.linkedin.ugc.ShareContent"].shareMediaCategory = "IMAGE";
@@ -206,6 +344,7 @@ async function postToLinkedIn({
         {
           status: "READY",
           media: assetUrn,
+          title: { text: "Image" },
         },
       ];
     } catch (e) {
@@ -213,8 +352,8 @@ async function postToLinkedIn({
     }
   }
 
-  // Add article if provided
-  if (articleUrl) {
+  // Add article if provided & no media
+  if (!videoUrl && !imageUrl && articleUrl) {
     sharePayload.specificContent["com.linkedin.ugc.ShareContent"].shareMediaCategory = "ARTICLE";
     sharePayload.specificContent["com.linkedin.ugc.ShareContent"].media = [
       {

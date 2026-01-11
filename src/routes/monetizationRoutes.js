@@ -215,7 +215,12 @@ router.post("/referral/signup", async (req, res) => {
       return res.status(400).json({ error: "Referral code and new user ID are required" });
     }
 
-    const result = await referralGrowthEngine.processReferralSignup(referralCode, newUserId);
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const result = await referralGrowthEngine.processReferralSignup(
+      referralCode,
+      newUserId,
+      ipAddress
+    );
 
     res.json({
       success: true,

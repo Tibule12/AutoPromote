@@ -13,6 +13,7 @@ try {
 const adminOnly = require("../middlewares/adminOnly");
 const { computeUserBalance } = require("../services/payments/balanceService");
 const { audit } = require("../services/auditLogger");
+const { recordUsage } = require("../services/usageLedgerService");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 
 // Return PayPal client id and currency for frontend SDK
@@ -146,6 +147,60 @@ router.post("/paypal/capture", async (req, res) => {
     }
   } catch (e) {
     console.error("paypal capture error:", e && e.message);
+    return res.status(500).json({ error: "capture_failed", reason: e.message });
+  }
+});
+
+// Capture PayPal order for Ad Credits
+router.post("/paypal/capture-ad-credits", authMiddleware, async (req, res) => {
+  try {
+    const { orderId } = req.body || {};
+    const userId = req.userId || req.user?.uid;
+
+    if (!orderId) return res.status(400).json({ error: "orderId required" });
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const cap = await captureOrder(orderId);
+    if (cap.status !== "COMPLETED") {
+      return res.status(400).json({ error: "capture_not_completed", capture: cap });
+    }
+
+    const pu = (cap.purchase_units && cap.purchase_units[0]) || {};
+    const amountVal =
+      (pu.payments &&
+        pu.payments.captures &&
+        pu.payments.captures[0] &&
+        pu.payments.captures[0].amount &&
+        pu.payments.captures[0].amount.value) ||
+      (pu.amount && pu.amount.value) ||
+      "0";
+    const amount = parseFloat(amountVal);
+
+    if (amount <= 0) return res.status(400).json({ error: "invalid_amount" });
+
+    // 1. Add credits to user
+    await db
+      .collection("users")
+      .doc(userId)
+      .set(
+        {
+          adCredits: admin.firestore.FieldValue.increment(amount),
+        },
+        { merge: true }
+      );
+
+    // 2. Record in ledger
+    await recordUsage({
+      type: "ad_credit_purchase",
+      userId,
+      amount,
+      currency: "USD",
+      meta: { orderId, provider: "paypal" },
+    });
+
+    return res.json({ ok: true, amount, creditsAdded: amount });
+  } catch (e) {
+    console.error("ad credit capture error:", e);
     return res.status(500).json({ error: "capture_failed", reason: e.message });
   }
 });

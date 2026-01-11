@@ -2747,6 +2747,26 @@ function ContentUploadForm({
                           )}
                         </div>
                         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          {/* Quality Check Button on Card */}
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handlePlatformQualityCheck(p);
+                            }}
+                            style={{
+                              fontSize: "10px",
+                              padding: "2px 6px",
+                              border: "1px solid #ddd",
+                              background: "#f9fafb",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              marginRight: "4px",
+                            }}
+                            title="Run automated quality and safety check"
+                          >
+                            🛡️ Check
+                          </button>
                           <div
                             className="open-platform-indicator"
                             style={{ fontSize: 12, color: "#374151" }}
@@ -2945,6 +2965,8 @@ function ContentUploadForm({
                         disabled={
                           !((perPlatformFile && perPlatformFile[expandedPlatform]) || file) ||
                           perPlatformUploading[expandedPlatform] ||
+                          perPlatformQuality[expandedPlatform]?.result?.moderation?.safe ===
+                            false ||
                           (expandedPlatform === "tiktok" &&
                             tiktokCommercial &&
                             tiktokCommercial.isCommercial &&
@@ -3025,7 +3047,26 @@ function ContentUploadForm({
                     {perPlatformQuality[expandedPlatform] &&
                       perPlatformQuality[expandedPlatform].result && (
                         <div style={{ marginTop: 8 }} className="quality-check-mini">
-                          Score: {perPlatformQuality[expandedPlatform].result.quality_score}/100
+                          <div>
+                            Score: {perPlatformQuality[expandedPlatform].result.quality_score}/100
+                          </div>
+                          {perPlatformQuality[expandedPlatform].result.feedback &&
+                            perPlatformQuality[expandedPlatform].result.feedback.length > 0 && (
+                              <ul
+                                style={{
+                                  margin: "4px 0",
+                                  paddingLeft: "20px",
+                                  fontSize: "12px",
+                                  color: "#d97706",
+                                }}
+                              >
+                                {perPlatformQuality[expandedPlatform].result.feedback.map(
+                                  (f, i) => (
+                                    <li key={i}>{f}</li>
+                                  )
+                                )}
+                              </ul>
+                            )}
                         </div>
                       )}
                     {perPlatformUploadStatus[expandedPlatform] && (
