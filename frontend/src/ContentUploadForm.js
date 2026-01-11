@@ -797,9 +797,15 @@ function ContentUploadForm({
       if (pl === "reddit")
         contentData.platform_options.reddit = { subreddit: redditSubreddit || undefined };
       if (pl === "linkedin")
-        contentData.platform_options.linkedin = { companyId: linkedinCompanyId || undefined };
+        contentData.platform_options.linkedin = {
+          companyId: linkedinCompanyId || undefined,
+          postType: (linkedinSettings && linkedinSettings.postType) || "post",
+        };
       if (pl === "twitter")
-        contentData.platform_options.twitter = { message: twitterMessage || undefined };
+        contentData.platform_options.twitter = {
+          message: twitterMessage || undefined,
+          threadMode: !!(twitterSettings && twitterSettings.threadMode),
+        };
       if (pl === "pinterest")
         contentData.platform_options.pinterest =
           pinterestBoard || pinterestNote
@@ -2310,6 +2316,98 @@ function ContentUploadForm({
           </div>
         )}
 
+        {p === "twitter" && (
+          <div
+            className="form-group twitter-options"
+            style={{
+              border: "1px solid #e1e8ed",
+              padding: 12,
+              borderRadius: 8,
+              background: "#fbfbfc",
+              marginTop: 12,
+            }}
+          >
+            <label style={{ display: "flex", alignItems: "center", gap: 8, color: "#1DA1F2" }}>
+              Twitter Options
+            </label>
+            <label
+              style={{
+                fontSize: 13,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                cursor: "pointer",
+                marginTop: 8,
+              }}
+            >
+              <input
+                aria-label="Thread Mode"
+                type="checkbox"
+                checked={!!twitterSettings.threadMode}
+                onChange={e => {
+                  const val = e.target.checked;
+                  setTwitterSettings(prev => ({ ...prev, threadMode: val }));
+                  if (typeof extSetPlatformOption === "function")
+                    extSetPlatformOption("twitter", "threadMode", val);
+                }}
+              />
+              Thread Mode (Auto-reply if too long)
+            </label>
+          </div>
+        )}
+
+        {p === "linkedin" && (
+          <div
+            className="form-group linkedin-options"
+            style={{
+              border: "1px solid #e1e8ed",
+              padding: 12,
+              borderRadius: 8,
+              background: "#fbfbfc",
+              marginTop: 12,
+            }}
+          >
+            <label style={{ display: "flex", alignItems: "center", gap: 8, color: "#0077b5" }}>
+              LinkedIn Options
+            </label>
+            <div style={{ marginTop: 8 }}>
+              <label style={{ fontSize: 13, display: "block", marginBottom: 4 }}>Post Type:</label>
+              <select
+                aria-label="Post Type"
+                value={linkedinSettings.postType || "post"}
+                onChange={e => {
+                  const val = e.target.value;
+                  setLinkedinSettings(prev => ({ ...prev, postType: val }));
+                  if (typeof extSetPlatformOption === "function")
+                    extSetPlatformOption("linkedin", "postType", val);
+                }}
+                className="form-select-small"
+                style={{ width: "100%" }}
+              >
+                <option value="post">Image / Text Post</option>
+                <option value="article">Link / Article</option>
+              </select>
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <input
+                placeholder="Organization ID (required)"
+                style={{
+                  width: "100%",
+                  padding: "6px",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                }}
+                value={linkedinCompanyId}
+                onChange={e => {
+                  setLinkedinCompanyId(e.target.value);
+                  if (typeof extSetPlatformOption === "function")
+                    extSetPlatformOption("linkedin", "companyId", e.target.value);
+                }}
+              />
+            </div>
+          </div>
+        )}
+
         {p === "spotify" && (
           <div className="form-group spotify-search-container" style={{ marginTop: 12 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 8, color: "#1DB954" }}>
@@ -3156,10 +3254,10 @@ function ContentUploadForm({
                             border: "1px solid rgba(0, 119, 181, 0.2)",
                           }}
                         >
-                          <strong>Native Host:</strong> Supports direct Video and Image uploads.
+                          <strong>Platform Capabilities:</strong> Supports Image and Link posts.
                         </div>
                         <input
-                          placeholder="LinkedIn Organization ID (optional)"
+                          placeholder="LinkedIn Organization ID (required)"
                           style={{
                             width: "100%",
                             padding: "8px",
@@ -3173,6 +3271,29 @@ function ContentUploadForm({
                               extSetPlatformOption("linkedin", "companyId", e.target.value);
                           }}
                         />
+                        <div style={{ marginTop: 8 }}>
+                          <label style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
+                            Post Type:
+                          </label>
+                          <select
+                            value={linkedinSettings.postType || "post"}
+                            onChange={e => {
+                              const val = e.target.value;
+                              setLinkedinSettings(prev => ({ ...prev, postType: val }));
+                              if (typeof extSetPlatformOption === "function")
+                                extSetPlatformOption("linkedin", "postType", val);
+                            }}
+                            style={{
+                              width: "100%",
+                              padding: "4px",
+                              borderRadius: "4px",
+                              border: "1px solid #ccc",
+                            }}
+                          >
+                            <option value="post">Image / Text Post</option>
+                            <option value="article">Link / Article</option>
+                          </select>
+                        </div>
                       </div>
                     )}
                     {expandedPlatform === "twitter" && (
@@ -3188,7 +3309,7 @@ function ContentUploadForm({
                             border: "1px solid rgba(29, 161, 242, 0.2)",
                           }}
                         >
-                          <strong>Native Host:</strong> Supports direct Video and Image uploads.
+                          <strong>Platform Capabilities:</strong> Supports Native Video and Image.
                         </div>
                         <textarea
                           placeholder="Tweet text..."
@@ -3216,6 +3337,29 @@ function ContentUploadForm({
                           }}
                         >
                           {twitterMessage.length}/280
+                        </div>
+                        <div style={{ marginTop: 8 }}>
+                          <label
+                            style={{
+                              fontSize: 12,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                              cursor: "pointer",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={!!twitterSettings.threadMode}
+                              onChange={e => {
+                                const val = e.target.checked;
+                                setTwitterSettings(prev => ({ ...prev, threadMode: val }));
+                                if (typeof extSetPlatformOption === "function")
+                                  extSetPlatformOption("twitter", "threadMode", val);
+                              }}
+                            />
+                            Thread Mode (Auto-reply if too long)
+                          </label>
                         </div>
                       </div>
                     )}

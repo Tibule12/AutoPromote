@@ -1,10 +1,15 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import Footer from "../components/Footer";
 
 describe("Footer", () => {
   test("renders links and copyright", () => {
-    render(<Footer />);
+    render(
+      <MemoryRouter>
+        <Footer />
+      </MemoryRouter>
+    );
 
     // Check for column headers
     expect(screen.getByText(/Product/i)).toBeInTheDocument();
