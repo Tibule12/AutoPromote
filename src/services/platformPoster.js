@@ -117,20 +117,6 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
 }
 
 async function postToTwitter({ contentId, payload, reason, uid }) {
-  // Prefer user-context token via twitterService; fallback to env bearer (legacy)
-  let bearer = null;
-  if (uid) {
-    try {
-      const { getValidAccessToken } = require("./twitterService");
-      bearer = await getValidAccessToken(uid);
-    } catch (e) {
-      console.warn("[Twitter] user token fetch failed:", e.message);
-    }
-  }
-  if (!bearer) {
-    bearer = process.env.TWITTER_BEARER_TOKEN || null;
-  }
-  if (!bearer) return { platform: "twitter", simulated: true, reason: "missing_credentials" };
   const ctx = await buildContentContext(contentId);
   let link = payload?.shortlink || payload?.link || ctx.landingPageUrl || "";
   if (link) {
@@ -141,10 +127,68 @@ async function postToTwitter({ contentId, payload, reason, uid }) {
       }
     }
   }
-  // Use safeFetch for SSRF protection
+
+  const rawText = payload?.message || ctx.title || "New content";
+
+  // Priority 1: User-Context (OAuth2) via twitterService
+  // Now supports threads if payload.threadMode is true
+  if (uid) {
+    try {
+      const { postTweet, postThread } = require("./twitterService");
+
+      if (payload?.threadMode) {
+        // Split text into chunks for threading
+        const chunks = [];
+        const words = rawText.split(/\s+/);
+        let current = "";
+        const MAX_LEN = 270; // safety buffer below 280
+
+        for (const w of words) {
+          if (current.length + w.length + 1 > MAX_LEN) {
+            chunks.push(current.trim());
+            current = w + " ";
+          } else {
+            current += w + " ";
+          }
+        }
+        if (current.trim()) chunks.push(current.trim());
+
+        // Append link to last chunk if possible, or make new chunk
+        if (link) {
+          if (chunks.length > 0) {
+            const last = chunks[chunks.length - 1];
+            if (last.length + link.length + 1 <= 280) {
+              chunks[chunks.length - 1] = last + "\n" + link;
+            } else {
+              chunks.push(link);
+            }
+          } else {
+            chunks.push(link);
+          }
+        }
+
+        return await postThread({ uid, tweets: chunks, contentId });
+      } else {
+        // Single Tweet Mode
+        const text = rawText.slice(0, 270) + (link ? `\n${link}` : "");
+        return await postTweet({ uid, text, contentId });
+      }
+    } catch (e) {
+      console.warn("[Twitter] User-context post failed:", e.message);
+      // If we failed on a thread, do not fallback to single env-var tweet (which would be partial content)
+      if (payload?.threadMode) {
+        return { platform: "twitter", success: false, error: e.message };
+      }
+      // If single tweet, allow fallback below
+    }
+  }
+
+  // Priority 2: System/Legacy (Env Vars) - Single Tweet Only
+  let bearer = process.env.TWITTER_BEARER_TOKEN;
+  if (!bearer) return { platform: "twitter", simulated: true, reason: "missing_credentials" };
+
   const { safeFetch } = require("../utils/ssrfGuard");
-  const text =
-    (payload?.message || ctx.title || "New content").slice(0, 270) + (link ? `\n${link}` : "");
+  const text = rawText.slice(0, 270) + (link ? `\n${link}` : "");
   const res = await safeFetch("https://api.twitter.com/2/tweets", fetch, {
     fetchOptions: {
       method: "POST",
