@@ -66,6 +66,8 @@ const AnalyticsPanel = () => {
     ctr: 0,
     topPlatform: "N/A",
     platformBreakdown: {},
+    viralityTracker: { views: 0, nextGoal: 30000, potentialBonus: 3 },
+    referralTracker: { total: 0, nextGoal: 10, potentialBonus: 5 },
   };
 
   return (
@@ -78,7 +80,7 @@ const AnalyticsPanel = () => {
           marginBottom: "1.5rem",
         }}
       >
-        <h3>Analytics</h3>
+        <h3>Analytics</h3> ({timeRange})
         <select
           value={timeRange}
           onChange={e => setTimeRange(e.target.value)}
@@ -96,6 +98,99 @@ const AnalyticsPanel = () => {
           <option value="90d">Last 90 Days</option>
         </select>
       </div>
+
+      {/* --- SALES SHARK PROGRESS TRACKERS --- */}
+      {analytics && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          {/* Virality Progress */}
+          <div
+            style={{
+              background: "var(--card)",
+              padding: "1.5rem",
+              borderRadius: "12px",
+              border: "1px solid #6366f1",
+            }}
+          >
+            <h4 style={{ margin: "0 0 10px 0", fontSize: "0.9rem", color: "#6366f1" }}>
+              🔥 VIRAL BONUS TRACKER
+            </h4>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+              <span>Top Video: {stats.viralityTracker?.views.toLocaleString()} views</span>
+              <span>Goal: {stats.viralityTracker?.nextGoal?.toLocaleString()}</span>
+            </div>
+            <div
+              style={{
+                width: "100%",
+                height: "8px",
+                background: "#333",
+                borderRadius: "4px",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${Math.min(100, (stats.viralityTracker?.views / stats.viralityTracker?.nextGoal) * 100)}%`,
+                  height: "100%",
+                  background: "#6366f1",
+                  transition: "width 0.5s",
+                }}
+              ></div>
+            </div>
+            <p style={{ fontSize: "0.8rem", marginTop: "8px", color: "#9aa4b2" }}>
+              Reach {stats.viralityTracker?.nextGoal?.toLocaleString()} views to unlock{" "}
+              <b>${stats.viralityTracker?.potentialBonus}</b> bonus!
+            </p>
+          </div>
+
+          {/* Referral Progress */}
+          <div
+            style={{
+              background: "var(--card)",
+              padding: "1.5rem",
+              borderRadius: "12px",
+              border: "1px solid #10b981",
+            }}
+          >
+            <h4 style={{ margin: "0 0 10px 0", fontSize: "0.9rem", color: "#10b981" }}>
+              🚀 REFERRAL CASH TRACKER
+            </h4>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+              <span>Referrals: {stats.referralTracker?.total}</span>
+              <span>Goal: {stats.referralTracker?.nextGoal}</span>
+            </div>
+            <div
+              style={{
+                width: "100%",
+                height: "8px",
+                background: "#333",
+                borderRadius: "4px",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${Math.min(100, (stats.referralTracker?.total / stats.referralTracker?.nextGoal) * 100)}%`,
+                  height: "100%",
+                  background: "#10b981",
+                  transition: "width 0.5s",
+                }}
+              ></div>
+            </div>
+            <p style={{ fontSize: "0.8rem", marginTop: "8px", color: "#9aa4b2" }}>
+              Refer {stats.referralTracker?.nextGoal - stats.referralTracker?.total} more friends to
+              unlock <b>${stats.referralTracker?.potentialBonus}</b> cash!
+            </p>
+          </div>
+        </div>
+      )}
+      {/* ------------------------------------- */}
 
       <div
         className="analytics-kpi-grid"

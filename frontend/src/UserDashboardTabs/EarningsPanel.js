@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { auth } from "../firebaseClient";
 import { API_ENDPOINTS } from "../config";
 
-const EarningsPanel = ({ earnings, onClaim }) => {
+const EarningsPanel = ({ earnings, onClaim, onNavigate }) => {
   const [payoutHistory, setPayoutHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -99,6 +99,20 @@ const EarningsPanel = ({ earnings, onClaim }) => {
               {earnings.available < 10 && (
                 <div style={{ fontSize: "0.75rem", color: "var(--muted)", marginTop: "0.5rem" }}>
                   Minimum payout: $10.00
+                  {onNavigate && (
+                    <div
+                      onClick={() => onNavigate("rewards")}
+                      style={{
+                        color: "#4f46e5",
+                        cursor: "pointer",
+                        marginTop: "8px",
+                        fontWeight: "600",
+                        textDecoration: "underline",
+                      }}
+                    >
+                      🚀 Boost earnings with referrals
+                    </div>
+                  )}
                 </div>
               )}
             </div>

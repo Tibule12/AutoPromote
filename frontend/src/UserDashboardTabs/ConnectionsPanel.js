@@ -28,6 +28,39 @@ const ConnectionsPanel = ({
   handleConnectFacebook,
   handleDisconnectPlatform,
 }) => {
+  // --- Network Strength Calculation ---
+  const countConnected = [
+    discordStatus?.connected,
+    spotifyStatus?.connected,
+    redditStatus?.connected,
+    youtubeStatus?.connected,
+    twitterStatus?.connected,
+    tiktokStatus?.connected,
+    facebookStatus?.connected,
+    linkedinStatus?.connected,
+    snapchatStatus?.connected,
+    telegramStatus?.connected,
+    pinterestStatus?.connected,
+  ].filter(Boolean).length;
+
+  const totalPlatforms = 11;
+  const networkStrength = Math.round((countConnected / totalPlatforms) * 100);
+
+  let strengthLabel = "Offline";
+  let strengthColor = "#ef4444"; // red
+  if (countConnected > 0) {
+    strengthLabel = "Weak Signal";
+    strengthColor = "#f59e0b";
+  } // orange
+  if (countConnected > 3) {
+    strengthLabel = "Active Node";
+    strengthColor = "#3b82f6";
+  } // blue
+  if (countConnected > 7) {
+    strengthLabel = "Hyper-Connected";
+    strengthColor = "#10b981";
+  } // green
+
   const getPlatformLabel = platform => {
     const summary = platformSummary?.summary || {};
     switch (platform) {
@@ -111,14 +144,59 @@ const ConnectionsPanel = ({
   };
   return (
     <section className="connections-panel">
-      <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        Connections{" "}
-        <ExplainButton
-          contextSummary={
-            "Explain the Connections panel: shows whether each social platform is connected, how to reconnect, and common causes for disconnection (expired tokens, permission changes)."
-          }
-        />
-      </h3>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1rem",
+        }}
+      >
+        <h3 style={{ display: "flex", alignItems: "center", gap: 8, margin: 0 }}>
+          Connections{" "}
+          <ExplainButton
+            contextSummary={
+              "Explain the Connections panel: shows whether each social platform is connected, how to reconnect, and common causes for disconnection (expired tokens, permission changes)."
+            }
+          />
+        </h3>
+        <div style={{ textAlign: "right" }}>
+          <div
+            style={{
+              fontSize: "0.7rem",
+              color: "#64748b",
+              marginBottom: "2px",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+            }}
+          >
+            Network Strength
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div
+              style={{
+                width: "80px",
+                height: "6px",
+                background: "#e2e8f0",
+                borderRadius: "3px",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${networkStrength}%`,
+                  height: "100%",
+                  background: strengthColor,
+                  transition: "width 1s ease",
+                }}
+              ></div>
+            </div>
+            <span style={{ color: strengthColor, fontWeight: "bold", fontSize: "0.8rem" }}>
+              {strengthLabel}
+            </span>
+          </div>
+        </div>
+      </div>
       <div style={{ display: "grid", gap: ".75rem" }}>
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {twitterStatus?.connected ? (

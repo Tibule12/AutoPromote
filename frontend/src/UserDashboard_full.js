@@ -1188,6 +1188,9 @@ const UserDashboard = ({
       </aside>
 
       <main className="dashboard-main">
+        <div style={{ display: "flex", justifyContent: "flex-end", padding: "10px 20px 0 0" }}>
+          <VoiceOverGuide activeTab={activeTab} />
+        </div>
         <UsageLimitBanner />
         {!emailVerified && (
           <div
@@ -1352,7 +1355,9 @@ const UserDashboard = ({
           <NotificationsPanel notifs={notifs} onMarkAllRead={markAllNotificationsRead} />
         )}
 
-        {activeTab === "earnings" && <EarningsPanel earnings={earnings} onClaim={claimPayout} />}
+        {activeTab === "earnings" && (
+          <EarningsPanel earnings={earnings} onClaim={claimPayout} onNavigate={handleNav} />
+        )}
 
         {activeTab === "ads" && <AdsPanel />}
 

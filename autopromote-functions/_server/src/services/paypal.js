@@ -99,8 +99,50 @@ async function verifyWebhookSignature({
   return j && j.verification_status === "SUCCESS";
 }
 
+async function createPayoutBatch(payoutParams) {
+  // payoutParams: { items: [{ receiver: 'email', amount: '10.00', currency: 'USD', note: '...' }] }
+  const token = await getAccessToken();
+  const url = `${PAYPAL_API_BASE}/v1/payments/payouts`;
+
+  const senderBatchId = `batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+  const body = {
+    sender_batch_header: {
+      sender_batch_id: senderBatchId,
+      email_subject: " You have a payment from AutoPromote",
+      email_message: "You have received a payout! Thanks for using AutoPromote.",
+    },
+    items: payoutParams.items.map((item, idx) => ({
+      recipient_type: "EMAIL",
+      amount: {
+        value: item.amount,
+        currency: item.currency || "USD",
+      },
+      note: item.note || "Payout from AutoPromote",
+      sender_item_id: `${senderBatchId}_item_${idx}`,
+      receiver: item.receiver,
+    })),
+  };
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`payout_failed:${res.status} ${txt}`);
+  }
+  return res.json();
+}
+
 module.exports = {
   createOrder,
   captureOrder,
   verifyWebhookSignature,
+  createPayoutBatch,
 };

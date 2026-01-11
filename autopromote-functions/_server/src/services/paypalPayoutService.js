@@ -1,7 +1,6 @@
-const paypal = require("@paypal/paypal-server-sdk");
-const paypalClient = require("../paypalClient");
+const paypalSimple = require("./paypal");
 const { admin: _admin, db } = require("../firebaseAdmin");
-const logger = require("../services/logger");
+const logger = require("../utils/logger");
 void _admin;
 
 async function executePayout(payoutDoc) {
@@ -12,38 +11,26 @@ async function executePayout(payoutDoc) {
 
   const amount = Number(data.amount || 0).toFixed(2);
   const receiver = data.payee.paypalEmail;
-  const senderBatchId = `payout_${payoutDoc.id}`;
 
   try {
-    const request = new paypal.payouts.PayoutsPostRequest();
-    request.requestBody({
-      sender_batch_header: {
-        sender_batch_id: senderBatchId,
-        email_subject: "AutoPromote payout",
-        email_message: "You have received a payout from AutoPromote",
-      },
-      items: [
-        {
-          recipient_type: "EMAIL",
-          amount: {
-            value: amount,
-            currency: "USD",
-          },
-          receiver,
-          note: "Your payment from AutoPromote",
-          sender_item_id: payoutDoc.id,
-        },
-      ],
-    });
-
     if (!process.env.PAYOUTS_ENABLED || process.env.PAYOUTS_ENABLED !== "true") {
       // Keep it dry-run when not enabled
       return { success: true, mock: true, message: "Payouts disabled, dry run" };
     }
 
-    const client = paypalClient.client();
-    const response = await client.execute(request);
-    const result = response && response.result ? response.result : null;
+    // Use our lightweight simple implementation
+    const result = await paypalSimple.createPayoutBatch({
+      items: [
+        {
+          receiver,
+          amount,
+          currency: "USD",
+          note: "AutoPromote Earnings Payout",
+        },
+      ],
+    });
+
+    const batchId = result.batch_header && result.batch_header.payout_batch_id;
 
     // Update payout doc
     await db
@@ -51,8 +38,7 @@ async function executePayout(payoutDoc) {
       .doc(payoutDoc.id)
       .update({
         status: "completed",
-        externalBatchId:
-          (result && result.batch_header && result.batch_header.payout_batch_id) || null,
+        externalBatchId: batchId || null,
         externalResponse: result,
         processedAt: new Date().toISOString(),
       });
@@ -69,7 +55,7 @@ async function executePayout(payoutDoc) {
 
     return { success: true, result };
   } catch (error) {
-    logger.error("[PayPalPayout] error executing payout", error && error.message);
+    logger.error("[PayPalPayout] error executing payout", { error: error.message });
     await db
       .collection("payouts")
       .doc(payoutDoc.id)

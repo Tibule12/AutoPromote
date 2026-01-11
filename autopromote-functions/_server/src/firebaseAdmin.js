@@ -42,6 +42,17 @@ if (bypass) {
     this._limit = n;
     return this;
   };
+  QueryStub.prototype.count = function () {
+    const self = this;
+    return {
+      get: async function () {
+        const snap = await self.get();
+        return {
+          data: () => ({ count: snap.size }),
+        };
+      },
+    };
+  };
   QueryStub.prototype.get = async function () {
     const docs = [];
     const prefix = this._collPath ? this._collPath + "/" : "";

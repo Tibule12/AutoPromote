@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { auth } from "./firebaseClient";
 import { API_BASE_URL } from "./config";
+import ReactMarkdown from "react-markdown";
 import toast from "react-hot-toast";
 import "./ChatWidget.css";
 
@@ -62,6 +63,16 @@ const ChatWidget = () => {
     }
   };
 
+  const speakMessage = text => {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -116,11 +127,26 @@ const ChatWidget = () => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to send message");
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        // Handle limits specially
+        if (response.status === 403 && data.isUpgradeTrigger) {
+          setMessages(prev => [
+            ...prev,
+            {
+              role: "assistant",
+              content: data.message,
+              timestamp: new Date().toISOString(),
+              isError: true,
+            },
+          ]);
+          // Speak the upgrade prompt
+          speakMessage("Daily limit reached. Please upgrade to continue.");
+          return;
+        }
+        throw new Error(data.error || "Failed to send message");
+      }
 
       // Update conversation ID if new
       if (data.conversationId && !conversationId) {
@@ -215,7 +241,18 @@ const ChatWidget = () => {
                 key={index}
                 className={`chat-message ${msg.role === "user" ? "user" : "assistant"}`}
               >
-                <div className="chat-message-content">{msg.content}</div>
+                <div className="chat-message-content">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  {msg.role === "assistant" && (
+                    <button
+                      className="chat-speak-btn"
+                      onClick={() => speakMessage(msg.content)}
+                      title="Listen to this message"
+                    >
+                      🔊
+                    </button>
+                  )}
+                </div>
                 <div className="chat-message-time">{formatTime(msg.timestamp)}</div>
               </div>
             ))}

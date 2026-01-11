@@ -45,71 +45,73 @@ const Footer = () => {
 
   return (
     <footer className="ap-footer" role="contentinfo">
-      <div className="ap-footer-main">
-        <div className="ap-footer-left">
+      <div className="ap-footer-columns">
+        {/* Product Column */}
+        <div className="ap-footer-col">
+          <div className="ap-footer-header">Product</div>
+          <a href="/features">Features</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/integrations">Integrations</a>
+          <a href="/metrics">Analytics</a>
+          <a href="/changelog">Changelog</a>
+          <a
+            className="ap-status"
+            href="https://status.autopromote.org"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Status
+          </a>
+        </div>
+
+        {/* Resources Column */}
+        <div className="ap-footer-col">
+          <div className="ap-footer-header">Resources</div>
+          <a href="/docs">Documentation</a>
+          <a href="/blog">Blog</a>
+          <a href="/community">Community</a>
+          <a href="/help">Help Center</a>
+          <a href="/api-docs">API Reference</a>
+        </div>
+
+        {/* Company Column */}
+        <div className="ap-footer-col">
+          <div className="ap-footer-header">Company</div>
+          <a href="/about">About Us</a>
+          <a href="/careers">Careers</a>
+          <a href="/contact">Contact</a>
+          <a href="/accessibility">Accessibility</a>
+          <a href="/partners">Partners</a>
+        </div>
+
+        {/* Legal Column */}
+        <div className="ap-footer-col">
+          <div className="ap-footer-header">Legal</div>
+          <a href={`${site}/terms`} target="_blank" rel="noopener noreferrer">
+            Terms of Service
+          </a>
+          <a href={`${site}/privacy`} target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </a>
+          <a href="/cookies">Cookie Policy</a>
+          <a href="/security">Security</a>
+        </div>
+
+        {/* Connect / Newsletter Column */}
+        <div className="ap-footer-col ap-col-newsletter">
           <div className="ap-logo" aria-label="AutoPromote logo">
             AutoPromote
           </div>
+          <p className="ap-newsletter-desc">Subscribe to our newsletter for the latest updates.</p>
+          <button
+            type="button"
+            className="ap-newsletter-toggle-btn"
+            onClick={() => setShowNewsletter(s => !s)}
+            aria-expanded={showNewsletter}
+          >
+            Subscribe
+          </button>
 
-          <div className="ap-footer-group">
-            <nav className="ap-footer-links" aria-label="Footer primary links">
-              <a href="/docs">Docs</a>
-              <span className="dot">•</span>
-              <a href="/blog">Blog</a>
-              <span className="dot">•</span>
-              <a href="/about">About</a>
-              <span className="dot">•</span>
-              <a href="/contact">Contact</a>
-              <span className="dot">•</span>
-              <a href="/pricing">Pricing</a>
-              <span className="dot">•</span>
-              <button
-                type="button"
-                className="ap-newsletter-toggle"
-                onClick={() => setShowNewsletter(s => !s)}
-                aria-expanded={showNewsletter}
-                style={{ border: "none", padding: 0 }}
-              >
-                Subscribe
-              </button>
-              <span className="dot">•</span>
-              <button
-                type="button"
-                className="ap-back-to-top"
-                onClick={() => {
-                  if (typeof window !== "undefined")
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                aria-label="Back to top"
-                style={{ border: "none", padding: 0 }}
-              >
-                ↑
-              </button>
-            </nav>
-
-            <nav className="ap-footer-links ap-legal" aria-label="Footer legal links">
-              <a href={`${site}/terms`} target="_blank" rel="noopener noreferrer">
-                Terms of Service
-              </a>
-              <span className="dot">•</span>
-              <a href={`${site}/privacy`} target="_blank" rel="noopener noreferrer">
-                Privacy Policy
-              </a>
-              <span className="dot">•</span>
-              <a href="/accessibility">Accessibility</a>
-              <span className="dot">•</span>
-              <a href="/cookies">Cookies</a>
-            </nav>
-
-            <nav className="ap-footer-links ap-company" aria-label="Company links">
-              <a href="/careers">Careers</a>
-              <span className="dot">•</span>
-              <a href="/support">Support</a>
-            </nav>
-          </div>
-        </div>
-
-        <div className="ap-footer-right">
           <div className="ap-social" aria-label="Follow AutoPromote">
             <a
               href="https://github.com/AutoPromote"
@@ -137,32 +139,21 @@ const Footer = () => {
             </a>
           </div>
 
-          <div className="ap-extra">
-            <a
-              className="ap-status"
-              href="https://status.autopromote.org"
-              target="_blank"
-              rel="noopener noreferrer"
+          <div className="ap-lang-wrapper">
+            <label htmlFor="ap-lang-select" className="sr-only">
+              Language
+            </label>
+            <select
+              id="ap-lang-select"
+              value={lang}
+              onChange={e => setLanguage(e.target.value)}
+              className="ap-lang-select"
+              aria-label="Select language"
             >
-              Status
-            </a>
-
-            <div className="ap-lang">
-              <label htmlFor="ap-lang-select" className="sr-only">
-                Language
-              </label>
-              <select
-                id="ap-lang-select"
-                value={lang}
-                onChange={e => setLanguage(e.target.value)}
-                className="ap-lang-select"
-                aria-label="Select language"
-              >
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-              </select>
-            </div>
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+            </select>
           </div>
         </div>
       </div>
@@ -173,8 +164,20 @@ const Footer = () => {
         </div>
       )}
 
-      <div className="ap-footer-copy">
-        © {new Date().getFullYear()} AutoPromote. All rights reserved.
+      <div className="ap-footer-bottom">
+        <div className="ap-footer-copy">
+          © {new Date().getFullYear()} AutoPromote. All rights reserved.
+        </div>
+        <button
+          type="button"
+          className="ap-back-to-top"
+          onClick={() => {
+            if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          aria-label="Back to top"
+        >
+          Back to Top ↑
+        </button>
       </div>
     </footer>
   );

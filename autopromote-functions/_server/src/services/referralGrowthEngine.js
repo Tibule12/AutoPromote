@@ -60,7 +60,7 @@ class ReferralGrowthEngine {
   }
 
   // Process referral signup
-  async processReferralSignup(referralCode, newUserId) {
+  async processReferralSignup(referralCode, newUserId, ipAddress) {
     try {
       // Find the invitation
       const invitationQuery = await db
@@ -81,12 +81,47 @@ class ReferralGrowthEngine {
         throw new Error("Referral code has expired");
       }
 
+      // --- FRAUD CHECK: IP Address Collision ---
+      if (ipAddress) {
+        // Check if the INVITER created the invitation from the same IP (if we tracked it)
+        // Or simpler: Check if this IP has already been used for a referral for this inviter recently
+        const potentialFraud = await db
+          .collection("referral_invitations")
+          .where("inviterId", "==", invitation.inviterId)
+          .where("completedIp", "==", ipAddress)
+          .get();
+
+        if (!potentialFraud.empty) {
+          console.warn(
+            `[Anti-Fraud] Blocked referral from IP ${ipAddress} for inviter ${invitation.inviterId}`
+          );
+          throw new Error("Referral not eligible: Multiple signups from same network detected.");
+        }
+      }
+      // -----------------------------------------
+
       // Update invitation status
-      await db.collection("referral_invitations").doc(invitationDoc.id).update({
-        status: "completed",
-        inviteeId: newUserId,
-        completedAt: new Date().toISOString(),
-      });
+      await db
+        .collection("referral_invitations")
+        .doc(invitationDoc.id)
+        .update({
+          status: "completed",
+          inviteeId: newUserId,
+          completedAt: new Date().toISOString(),
+          completedIp: ipAddress || "unknown",
+        });
+
+      // --- PERSIST INVITER LINK ON USER ACCOUNT ---
+      // This is crucial for tracking future upgrades
+      await db.collection("users").doc(newUserId).set(
+        {
+          referredBy: invitation.inviterId,
+          referredAt: new Date().toISOString(),
+          referralCodeUsed: referralCode,
+        },
+        { merge: true }
+      );
+      // ---------------------------------------------
 
       // Award credits to inviter
       await this.awardReferralCredits(invitation.inviterId, invitation.creditsOffered, newUserId);
@@ -114,11 +149,13 @@ class ReferralGrowthEngine {
       const creditsDoc = await creditsRef.get();
 
       const currentCredits = creditsDoc.exists ? creditsDoc.data().balance || 0 : 0;
+      const totalReferrals = (creditsDoc.data()?.totalReferrals || 0) + 1; // Increment referral count
 
       await creditsRef.set(
         {
           balance: currentCredits + credits,
           totalEarned: (creditsDoc.data()?.totalEarned || 0) + credits,
+          totalReferrals: totalReferrals,
           transactions: [
             ...(creditsDoc.data()?.transactions || []),
             {
@@ -135,9 +172,173 @@ class ReferralGrowthEngine {
       );
 
       console.log(`✅ Awarded ${credits} referral credits to user ${userId}`);
+
+      // --- REFERRAL MILESTONES ---
+
+      // LEVEL 1: 10 PAID Referrals -> $5 (Handled in `checkPaidReferralBonus`)
+      // We removed the code here because we only pay Level 1 if the referrals UPGRADE.
+
+      // LEVEL 2: 20 FREE Referrals -> $15 (Ambassador Logic)
+      // Quantity over Quality, BUT the Inviter MUST be subscribed.
+      // We check this every single time they get a signup, just in case they hit 20.
+      if (totalReferrals === 20) {
+        await this.checkAmbassadorBonus(userId);
+      }
+      // ----------------------------
     } catch (error) {
       console.error("Error awarding referral credits:", error);
       throw error;
+    }
+  }
+
+  // New Method: Award Cash Bonus for 10 Referrals
+  async awardLaunchpadCashBonus(userId) {
+    try {
+      // 1. Add $5 to their earnings
+      const userRef = db.collection("users").doc(userId);
+      const { admin } = require("../firebaseAdmin");
+
+      await userRef.set(
+        {
+          totalEarnings: admin.firestore.FieldValue.increment(5.0),
+          pendingEarnings: admin.firestore.FieldValue.increment(5.0), // Available for payout
+          lastEarningAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+
+      // 2. Log the earnings event
+      await db.collection("earnings_events").add({
+        userId,
+        contentId: "referral_bonus_10",
+        type: "referral_milestone_bonus", // Special type
+        amount: 5.0,
+        description: "Bonus for referring 10 subscribers",
+        createdAt: new Date().toISOString(),
+      });
+
+      // 3. Notify them
+      await db.collection("notifications").add({
+        userId,
+        type: "cash_bonus_unlocked",
+        title: "💰 $5 BONUS UNLOCKED!",
+        message:
+          "You did it! You referred 10 subscribers. We've added $5 cash to your earnings balance.",
+        read: false,
+        createdAt: new Date().toISOString(),
+      });
+
+      console.log(`✅ User ${userId} hit 10 referrals and got $5 cash.`);
+    } catch (err) {
+      console.error("Failed to award launchpad bonus:", err);
+    }
+  }
+
+  // New Method: Check Ambassador Bonus (20 Referrals)
+  async checkAmbassadorBonus(userId) {
+    try {
+      // Check subscription status
+      const subDoc = await db.collection("user_subscriptions").doc(userId).get();
+      const isSubscribed = subDoc.exists && subDoc.data().status === "active";
+
+      if (isSubscribed) {
+        await this.awardAmbassadorCash(userId);
+      } else {
+        // Send the "Hook" Notification
+        await db.collection("notifications").add({
+          userId,
+          type: "upsell_ambassador",
+          title: "🔒 $15 CASH UNLOCKED (Action Required)",
+          message:
+            "You just hit 20 Referrals! A $15 Cash Reward is waiting for you. Subscribe to any plan to instantly unlock and withdraw this money.",
+          data: {
+            reward: 15.0,
+            milestone: 20,
+            isAmbassadorTrigger: true,
+          },
+          read: false,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    } catch (err) {
+      console.error("Error checking ambassador bonus:", err);
+    }
+  }
+
+  // New: Payout Helper (Prevents duplicates)
+  async awardAmbassadorCash(userId) {
+    try {
+      const { admin } = require("../firebaseAdmin");
+
+      // Prevent double pay
+      const check = await db
+        .collection("earnings_events")
+        .where("userId", "==", userId)
+        .where("type", "==", "ambassador_bonus_20")
+        .get();
+
+      if (!check.empty) return;
+
+      await db
+        .collection("users")
+        .doc(userId)
+        .set(
+          {
+            totalEarnings: admin.firestore.FieldValue.increment(15.0),
+            pendingEarnings: admin.firestore.FieldValue.increment(15.0),
+            lastEarningAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+
+      await db.collection("earnings_events").add({
+        userId,
+        contentId: "referral_ambassador_20",
+        type: "ambassador_bonus_20",
+        amount: 15.0,
+        description: "Ambassador Reward: 20 Fresh Users",
+        createdAt: new Date().toISOString(),
+      });
+
+      await db.collection("notifications").add({
+        userId,
+        type: "cash_bonus_unlocked",
+        title: "🏆 AMBASSADOR REWARD PAID!",
+        message: "Boom! $15 has been added to your earnings balance for hitting 20 referrals.",
+        read: false,
+        createdAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error("Failed to pay ambassador bonus:", err);
+    }
+  }
+
+  // New Method: Check for Paid Referral Bonus (10 Subscribers)
+  async checkPaidReferralBonus(inviterId) {
+    try {
+      // Count how many users referred by this person have active subscriptions
+      // 1. Get all users referred by inviter
+      const referralsSnap = await db.collection("users").where("referredBy", "==", inviterId).get();
+
+      let paidReferralCount = 0;
+      const referralIds = [];
+      referralsSnap.forEach(doc => referralIds.push(doc.id));
+
+      // 2. Check their subscriptions (batch check might be hard, so loop for now or improved query)
+      // Simple loop for V1 stability:
+      for (const refUserId of referralIds) {
+        const subDoc = await db.collection("user_subscriptions").doc(refUserId).get();
+        if (subDoc.exists && subDoc.data().status === "active") {
+          paidReferralCount++;
+        }
+      }
+
+      if (paidReferralCount === 10) {
+        // Exact hit
+        await this.awardLaunchpadCashBonus(inviterId);
+      }
+    } catch (err) {
+      console.error("Error checking paid referral bonus:", err);
     }
   }
 
