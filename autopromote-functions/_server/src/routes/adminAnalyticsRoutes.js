@@ -170,7 +170,7 @@ router.get("/funnel", authMiddleware, adminOnly, async (req, res) => {
     }
 
     const startTimestamp = admin.firestore.Timestamp.fromDate(startDate);
-    
+
     // --- ATTEMPT REAL DATA ---
     try {
       // Get users who signed up in timeframe
@@ -232,23 +232,29 @@ router.get("/funnel", authMiddleware, adminOnly, async (req, res) => {
       ];
 
       return res.json({ success: true, funnel, timeframe });
-      
     } catch (dbError) {
-       console.warn("⚠️ Funnel Real-Data Query Failed (likely missing index). Falling back to Mock Data.", dbError.message);
-       // FALLTHROUGH TO MOCK DATA BELOW
+      console.warn(
+        "⚠️ Funnel Real-Data Query Failed (likely missing index). Falling back to Mock Data.",
+        dbError.message
+      );
+      // FALLTHROUGH TO MOCK DATA BELOW
     }
 
     // --- MOCK DATA FALLBACK ---
     // (Used if Firestore indexes are missing)
     const mockFunnel = [
-       { stage: "Visit (Mock)", count: 1200, percentage: 100 },
-       { stage: "Sign Up", count: 350, percentage: 29 },
-       { stage: "Upload Content", count: 180, percentage: 15 },
-       { stage: "Subscribe", count: 45, percentage: 3.75 },
+      { stage: "Visit (Mock)", count: 1200, percentage: 100 },
+      { stage: "Sign Up", count: 350, percentage: 29 },
+      { stage: "Upload Content", count: 180, percentage: 15 },
+      { stage: "Subscribe", count: 45, percentage: 3.75 },
     ];
-    
-    res.json({ success: true, funnel: mockFunnel, timeframe, note: "Data is mocked (Missing Firestore Index)" });
 
+    res.json({
+      success: true,
+      funnel: mockFunnel,
+      timeframe,
+      note: "Data is mocked (Missing Firestore Index)",
+    });
   } catch (error) {
     console.error("Error fetching conversion funnel:", error.message || error);
     res.status(500).json({ success: false, error: error.message });

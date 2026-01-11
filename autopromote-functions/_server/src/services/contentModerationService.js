@@ -23,7 +23,7 @@ const BANNED_KEYWORDS = [
  */
 function checkTextForSafety(text) {
   if (!text) return { safe: true, flags: [] };
-  
+
   const lower = text.toLowerCase();
   const flags = [];
 
@@ -38,7 +38,7 @@ function checkTextForSafety(text) {
 
   return {
     safe: flags.length === 0,
-    flags
+    flags,
   };
 }
 
@@ -57,7 +57,7 @@ async function checkFileForSafety(filePath) {
 
   // 3. (Mock) If filename contains 'unsafe', fail it.
   if (filePath.toLowerCase().includes("unsafe") || filePath.toLowerCase().includes("adult")) {
-      return { safe: false, reason: "Automated visual analysis detected restricted content." };
+    return { safe: false, reason: "Automated visual analysis detected restricted content." };
   }
 
   // Default: Pass
@@ -66,5 +66,5 @@ async function checkFileForSafety(filePath) {
 
 module.exports = {
   checkTextForSafety,
-  checkFileForSafety
+  checkFileForSafety,
 };

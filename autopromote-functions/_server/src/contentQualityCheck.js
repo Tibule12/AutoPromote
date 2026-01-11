@@ -47,7 +47,7 @@ function analyzeMetadata(metadata) {
 router.post("/quality-check", express.json(), async (req, res, next) => {
   try {
     const body = req.body || {};
-    
+
     // Check text safety regardless of file
     const textToScan = [body.title, body.description].filter(Boolean).join(" ");
     let textModeration = { safe: true, flags: [] };
@@ -63,31 +63,34 @@ router.post("/quality-check", express.json(), async (req, res, next) => {
         qualityScore: flags.length > 0 ? 0 : 100,
         feedback: [
           "Preview content - automated file quality checks are skipped for preview.",
-          ...(flags.length > 0 ? [`⚠️ Content Flagged: ${flags.join(", ")}`] : [])
+          ...(flags.length > 0 ? [`⚠️ Content Flagged: ${flags.join(", ")}`] : []),
         ],
         enhanced: false,
         moderation: {
-            safe: flags.length === 0,
-            flags
-        }
+          safe: flags.length === 0,
+          flags,
+        },
       });
     }
-    
+
     // If just text check (no file, no preview url)
     if (textToScan && !body.url && !req.headers["content-type"]?.includes("multipart")) {
-         return res.json({
-            qualityScore: textModeration.safe ? 100 : 0,
-            feedback: textModeration.flags.length > 0 ? [`⚠️ Content Flagged: ${textModeration.flags.join(", ")}`] : ["Text content looks safe."],
-            enhanced: false,
-            moderation: textModeration
-        });
+      return res.json({
+        qualityScore: textModeration.safe ? 100 : 0,
+        feedback:
+          textModeration.flags.length > 0
+            ? [`⚠️ Content Flagged: ${textModeration.flags.join(", ")}`]
+            : ["Text content looks safe."],
+        enhanced: false,
+        moderation: textModeration,
+      });
     }
   } catch (e) {
     // fall through to multipart handler
   }
   // If not a JSON preview request, defer to the multipart handler
   if (!req.headers["content-type"]?.includes("multipart")) {
-      return res.status(400).json({ error: "No preview url or file provided" });
+    return res.status(400).json({ error: "No preview url or file provided" });
   }
   next(); // Pass to next router
 });

@@ -216,7 +216,11 @@ router.post("/referral/signup", async (req, res) => {
     }
 
     const ipAddress = req.ip || req.connection.remoteAddress;
-    const result = await referralGrowthEngine.processReferralSignup(referralCode, newUserId, ipAddress);
+    const result = await referralGrowthEngine.processReferralSignup(
+      referralCode,
+      newUserId,
+      ipAddress
+    );
 
     res.json({
       success: true,

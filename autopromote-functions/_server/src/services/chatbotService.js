@@ -176,32 +176,36 @@ IMPORTANT:
 
     // Earnings
     if (userContext.earnings) {
-        parts.push(`- Wallet Balance: $${userContext.earnings.total || 0} `);
-        parts.push(`- Pending (Withdrawable): $${userContext.earnings.pending || 0}`);
-        if ((userContext.earnings.pending || 0) > 0 && userContext.plan === "free") {
-            parts.push(`  ⚠️ ALERT: User has pending money but is on FREE plan. TELL THEM TO SUBSCRIBE TO WITHDRAW.`);
-        }
+      parts.push(`- Wallet Balance: $${userContext.earnings.total || 0} `);
+      parts.push(`- Pending (Withdrawable): $${userContext.earnings.pending || 0}`);
+      if ((userContext.earnings.pending || 0) > 0 && userContext.plan === "free") {
+        parts.push(
+          `  ⚠️ ALERT: User has pending money but is on FREE plan. TELL THEM TO SUBSCRIBE TO WITHDRAW.`
+        );
+      }
     }
 
     // Referrals
     if (userContext.referrals) {
-        parts.push(`- Referral Count: ${userContext.referrals.total || 0} signups`);
-        parts.push(`- Credits Balance: ${userContext.referrals.balance || 0}`);
-        
-        const count = userContext.referrals.total || 0;
-        if (count >= 20 && userContext.plan === "free") {
-             parts.push(`  🏆 CRITICAL OPPORTUNITY: User hit 20 referrals! Tell them they unlocked the $15 Ambassador Reward but MUST SUBSCRIBE to claim it.`);
-        } else if (count >= 10 && count < 20) {
-             parts.push(`  🚀 PROGRESS: User has ${count} referrals. Tell them 20 unlocks $15 Cash.`);
-        } else {
-             parts.push(`  🌱 GROWTH: User has ${count} referrals. Encourage them to invite more.`);
-        }
+      parts.push(`- Referral Count: ${userContext.referrals.total || 0} signups`);
+      parts.push(`- Credits Balance: ${userContext.referrals.balance || 0}`);
+
+      const count = userContext.referrals.total || 0;
+      if (count >= 20 && userContext.plan === "free") {
+        parts.push(
+          `  🏆 CRITICAL OPPORTUNITY: User hit 20 referrals! Tell them they unlocked the $15 Ambassador Reward but MUST SUBSCRIBE to claim it.`
+        );
+      } else if (count >= 10 && count < 20) {
+        parts.push(`  🚀 PROGRESS: User has ${count} referrals. Tell them 20 unlocks $15 Cash.`);
+      } else {
+        parts.push(`  🌱 GROWTH: User has ${count} referrals. Encourage them to invite more.`);
+      }
     }
 
     // Notifications
     if (userContext.notifications && userContext.notifications.unread > 0) {
-        parts.push(`- Unread Alerts: ${userContext.notifications.unread}`);
-        parts.push(`- Recent Alert Titles: ${userContext.notifications.recent.join(", ")}`);
+      parts.push(`- Unread Alerts: ${userContext.notifications.unread}`);
+      parts.push(`- Recent Alert Titles: ${userContext.notifications.recent.join(", ")}`);
     }
 
     if (userContext.connectedPlatforms?.length > 0) {
@@ -213,7 +217,7 @@ IMPORTANT:
     if (userContext.contentCount !== undefined) {
       parts.push(`- Content uploaded: ${userContext.contentCount} items`);
       if (userContext.contentCount === 0) {
-          parts.push(`  ⚠️ User has uploaded NOTHING. Guide them to the 'Upload' tab.`);
+        parts.push(`  ⚠️ User has uploaded NOTHING. Guide them to the 'Upload' tab.`);
       }
     }
 

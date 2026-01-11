@@ -137,39 +137,39 @@ router.get("/user", authMiddleware, async (req, res) => {
     // --- REVENUE & REFERRAL TRACKING INJECTION ---
     // Inject current progress towards bonuses so frontend can display "Sales Shark" trackers
     const { db } = require("./firebaseAdmin"); // Re-import to be safe or use scope
-    
+
     // 1. Viral Bonus Progress (Logic from creatorRewardsService: 30k = $3, 100k = $8)
     // Find best performing content to show proximity to next tier
     let bestContent = { views: 0, nextGoal: 30000, potentialBonus: 3 };
     contentSnapshot.forEach(doc => {
-         const c = doc.data();
-         if ((c.views || 0) > bestContent.views) {
-             const v = c.views || 0;
-             if (v < 30000) bestContent = { views: v, nextGoal: 30000, potentialBonus: 3 };
-             else if (v < 100000) bestContent = { views: v, nextGoal: 100000, potentialBonus: 8 };
-             else bestContent = { views: v, nextGoal: 500000, potentialBonus: 20 }; // Max tier view
-         }
+      const c = doc.data();
+      if ((c.views || 0) > bestContent.views) {
+        const v = c.views || 0;
+        if (v < 30000) bestContent = { views: v, nextGoal: 30000, potentialBonus: 3 };
+        else if (v < 100000) bestContent = { views: v, nextGoal: 100000, potentialBonus: 8 };
+        else bestContent = { views: v, nextGoal: 500000, potentialBonus: 20 }; // Max tier view
+      }
     });
 
     // 2. Referral Progress (Logic from referralGrowthEngine: 10 friends = $5, 20 = $15)
     let referralStats = { total: 0, nextGoal: 10, potentialBonus: 5 };
     let referralCode = "";
     try {
-        const [creds, userDoc] = await Promise.all([
-          db.collection("user_credits").doc(uid).get(),
-          db.collection("users").doc(uid).get()
-        ]);
-        
-        if (creds.exists) {
-            const count = creds.data().totalReferrals || 0;
-            if (count < 10) referralStats = { total: count, nextGoal: 10, potentialBonus: 5 };
-            else if (count < 20) referralStats = { total: count, nextGoal: 20, potentialBonus: 15 };
-            else referralStats = { total: count, nextGoal: 100, potentialBonus: 50 }; // Made up cap
-        }
-        if (userDoc.exists) {
-          referralCode = userDoc.data().referralCode || "";
-        }
-    } catch(e) {}
+      const [creds, userDoc] = await Promise.all([
+        db.collection("user_credits").doc(uid).get(),
+        db.collection("users").doc(uid).get(),
+      ]);
+
+      if (creds.exists) {
+        const count = creds.data().totalReferrals || 0;
+        if (count < 10) referralStats = { total: count, nextGoal: 10, potentialBonus: 5 };
+        else if (count < 20) referralStats = { total: count, nextGoal: 20, potentialBonus: 15 };
+        else referralStats = { total: count, nextGoal: 100, potentialBonus: 50 }; // Made up cap
+      }
+      if (userDoc.exists) {
+        referralCode = userDoc.data().referralCode || "";
+      }
+    } catch (e) {}
 
     res.json({
       range,
@@ -181,7 +181,7 @@ router.get("/user", authMiddleware, async (req, res) => {
       byPlatform: contentByPlatform,
       viralityTracker: bestContent, // New!
       referralTracker: referralStats, // New!
-      referralCode // New!
+      referralCode, // New!
     });
   } catch (error) {
     console.error("Error getting user analytics:", error);

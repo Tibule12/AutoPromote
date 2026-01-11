@@ -107,7 +107,7 @@ async function calculateContentRewards(contentId, userId) {
     // Check if user has active subscription
     const userDoc = await db.collection("users").doc(userId).get();
     if (!userDoc.exists) return { error: "User not found" };
-    
+
     const userData = userDoc.data();
     const isSubscribed = userData.subscriptionStatus === "active" || userData.isPremium === true;
 
@@ -147,12 +147,12 @@ async function calculateContentRewards(contentId, userId) {
         title: "Claim Your Viral Bonus!",
         message: `Your content hit the ${performanceTier.badge} tier! You are eligible for a $${performanceTier.reward} bonus. Subscribe now to claim these rewards!`,
         data: {
-            contentId: contentId,
-            potentialReward: performanceTier.reward,
-            tier: performanceTier.tier
+          contentId: contentId,
+          potentialReward: performanceTier.reward,
+          tier: performanceTier.tier,
         },
         read: false,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       });
       return { message: "Rewards are only available for subscribed members" };
     }
@@ -197,17 +197,17 @@ async function calculateContentRewards(contentId, userId) {
     // --- REFERRAL CHALLENGE "LURE" ---
     // User just got paid. Now lure them to multiply it.
     await db.collection("notifications").add({
-        userId,
-        type: "referral_challenge",
-        title: "🚀 Referral Lure: Need an extra $5?",
-        message: `Congrats on your $${performanceTier.reward} earnings! Want an extra $5? Refer 10 subscribers and we'll add a $5 bonus to your account immediately.`,
-        data: {
-            challengeId: "10_subs_bonus",
-            reward: 5.0,
-            requiredReferrals: 10
-        },
-        read: false,
-        createdAt: new Date().toISOString()
+      userId,
+      type: "referral_challenge",
+      title: "🚀 Referral Lure: Need an extra $5?",
+      message: `Congrats on your $${performanceTier.reward} earnings! Want an extra $5? Refer 10 subscribers and we'll add a $5 bonus to your account immediately.`,
+      data: {
+        challengeId: "10_subs_bonus",
+        reward: 5.0,
+        requiredReferrals: 10,
+      },
+      read: false,
+      createdAt: new Date().toISOString(),
     });
     // ---------------------------------
 

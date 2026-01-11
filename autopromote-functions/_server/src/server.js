@@ -1373,14 +1373,14 @@ try {
   } catch (e) {
     console.log("⚠️ Chat routes mount failed:", e.message);
   }
-  
+
   // PayPal routes
   try {
-      const paypalRoutes = require("./routes/paypalRoutes");
-      app.use("/api/paypal-subscriptions", paypalRoutes);
-      console.log("🚏 PayPal subscription routes mounted at /api/paypal-subscriptions");
-  } catch(e) {
-      console.log("⚠️ PayPal routes mount failed:", e.message);
+    const paypalRoutes = require("./routes/paypalRoutes");
+    app.use("/api/paypal-subscriptions", paypalRoutes);
+    console.log("🚏 PayPal subscription routes mounted at /api/paypal-subscriptions");
+  } catch (e) {
+    console.log("⚠️ PayPal routes mount failed:", e.message);
   }
 
   // Assistant routes (scaffold) - gated by ASSISTANT_ENABLED env variable

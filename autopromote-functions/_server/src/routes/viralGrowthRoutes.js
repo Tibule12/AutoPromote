@@ -28,7 +28,7 @@ const smartDistributionEngine = require("../services/smartDistributionEngine");
 const boostChainEngine = require("../services/boostChainEngine");
 const viralImpactEngine = require("../services/viralImpactEngine");
 const algorithmExploitationEngine = require("../services/algorithmExploitationEngine");
-const viralBonusService = require("../services/viralBonusService"); 
+const viralBonusService = require("../services/viralBonusService");
 
 // Helper function to clean objects
 function cleanObject(obj) {
@@ -45,10 +45,10 @@ router.post("/check-bonus/:contentId", authMiddleware, viralWriteLimiter, async 
     const userId = req.userId || req.user?.uid;
 
     if (!contentId) return res.status(400).json({ error: "Missing contentId" });
-    
+
     // Check and award
     const result = await viralBonusService.checkAndAwardBonuses(contentId, userId);
-    
+
     res.json(result);
   } catch (error) {
     logger.error(`[ViralBonus] Failed for content ${req.params.contentId}`, error);

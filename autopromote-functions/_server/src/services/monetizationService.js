@@ -130,17 +130,17 @@ class MonetizationService {
       try {
         const userDoc = await db.collection("users").doc(userId).get();
         const referredBy = userDoc.exists ? userDoc.data().referredBy : null;
-        
+
         if (referredBy) {
-             const referralEngine = require("./referralGrowthEngine");
-             // Award bonus to the INVITER because their friend just Upgraded!
-             await referralEngine.awardReferralCredits(referredBy, 100, userId); // 100 credits for upgrading
-             
-             // Check if this upgrade triggers the "10 Paid Referrals" cash bonus
-             await referralEngine.checkPaidReferralBonus(referredBy);
+          const referralEngine = require("./referralGrowthEngine");
+          // Award bonus to the INVITER because their friend just Upgraded!
+          await referralEngine.awardReferralCredits(referredBy, 100, userId); // 100 credits for upgrading
+
+          // Check if this upgrade triggers the "10 Paid Referrals" cash bonus
+          await referralEngine.checkPaidReferralBonus(referredBy);
         }
       } catch (err) {
-         console.error("Failed to process referral reward on upgrade:", err);
+        console.error("Failed to process referral reward on upgrade:", err);
       }
       // ----------------------------------------------
 
