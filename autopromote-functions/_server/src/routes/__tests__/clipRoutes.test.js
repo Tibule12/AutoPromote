@@ -33,8 +33,11 @@ describe("clipRoutes", () => {
     });
 
     beforeEach(async () => {
-      const ctx = testEnv.unauthenticatedContext();
+      const ctx = testEnv.authenticatedContext("service-account", {
+        firebase: { sign_in_provider: "service_account" },
+      });
       testDb = ctx.firestore();
+      console.log("DEBUG_TEST_DB_COLLECTION:", typeof testDb.collection);
       // expose for tests that use a simple global reference
       global.__testDb = testDb;
     });
@@ -83,7 +86,40 @@ describe("clipRoutes", () => {
       const cdoc = await global.__testDb.collection("content").add({ user_id: "testUser123" });
       // inject emulator db into runtime
       const originalDb = require("../../firebaseAdmin").db;
-      require("../../firebaseAdmin").db = global.__testDb;
+      // Wrap global.__testDb to add .count() support
+      const realTestDb = global.__testDb;
+      const wrapQuery = query => ({
+        where: (...args) => wrapQuery(query.where(...args)),
+        orderBy: (...args) => wrapQuery(query.orderBy(...args)),
+        limit: (...args) => wrapQuery(query.limit(...args)),
+        get: () => query.get(),
+        count: () => ({
+          get: async () => {
+            const snap = await query.get();
+            return { data: () => ({ count: snap.size }) };
+          },
+        }),
+      });
+      const dbWrapper = {
+        collection: name => {
+          const col = realTestDb.collection(name);
+          return {
+            doc: id => col.doc(id),
+            add: data => col.add(data),
+            where: (...args) => wrapQuery(col.where(...args)),
+            orderBy: (...args) => wrapQuery(col.orderBy(...args)),
+            limit: (...args) => wrapQuery(col.limit(...args)),
+            get: () => col.get(),
+            count: () => ({
+              get: async () => {
+                const snap = await col.get();
+                return { data: () => ({ count: snap.size }) };
+              },
+            }),
+          };
+        },
+      };
+      require("../../firebaseAdmin").db = dbWrapper;
 
       // Stub analyzeVideo to avoid heavy work
       const videoClippingService = require("../../services/videoClippingService");
@@ -159,7 +195,40 @@ describe("clipRoutes", () => {
       // seed content owned by otherUser
       const cdoc = await global.__testDb.collection("content").add({ user_id: "otherUser" });
       const originalDb = require("../../firebaseAdmin").db;
-      require("../../firebaseAdmin").db = global.__testDb;
+      // Wrap global.__testDb to add .count() support
+      const realTestDb2 = global.__testDb;
+      const wrapQuery2 = query => ({
+        where: (...args) => wrapQuery2(query.where(...args)),
+        orderBy: (...args) => wrapQuery2(query.orderBy(...args)),
+        limit: (...args) => wrapQuery2(query.limit(...args)),
+        get: () => query.get(),
+        count: () => ({
+          get: async () => {
+            const snap = await query.get();
+            return { data: () => ({ count: snap.size }) };
+          },
+        }),
+      });
+      const dbWrapper2 = {
+        collection: name => {
+          const col = realTestDb2.collection(name);
+          return {
+            doc: id => col.doc(id),
+            add: data => col.add(data),
+            where: (...args) => wrapQuery2(col.where(...args)),
+            orderBy: (...args) => wrapQuery2(col.orderBy(...args)),
+            limit: (...args) => wrapQuery2(col.limit(...args)),
+            get: () => col.get(),
+            count: () => ({
+              get: async () => {
+                const snap = await col.get();
+                return { data: () => ({ count: snap.size }) };
+              },
+            }),
+          };
+        },
+      };
+      require("../../firebaseAdmin").db = dbWrapper2;
 
       const app = express();
       app.use(bodyParser.json());

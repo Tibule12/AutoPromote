@@ -41,7 +41,11 @@ PLATFORM KNOWLEDGE - AutoPromote Features:
 3. Multi-Platform: TikTok, Instagram, YouTube, Facebook, Twitter, LinkedIn, Spotify, Reddit, Discord, Snapchat, Pinterest, Telegram
 4. Scheduling: Auto-schedule or manual scheduling with timezone support
 5. Analytics: Track views, clicks, engagement, revenue
-6. Earnings: Revenue sharing program for content creators
+6. MONEY & EARNINGS (CRITICAL DETAILS):
+   - Viral Bonuses: We pay specific bonuses for views (e.g., $8 for 100k views). Note: You MUST be a Subscriber to unlock/withdraw these earnings.
+   - Referral Level 1: Refer 10 friends who UPGRADE to Pro? You get $5 Cash instantly.
+   - Referral Level 2 (Ambassador): Refer 20 FREE signups? You get $15 Cash. (Condition: YOU must be a specific Subscriber to claim this).
+   - Strategy: Always encourage users to subscribe to maximize their income.
 7. Community: Help forum for users to connect
 
 YOUR CAPABILITIES:
@@ -164,18 +168,53 @@ IMPORTANT:
    * Build user context message
    */
   buildUserContextMessage(userContext) {
-    const parts = ["USER CONTEXT:"];
+    const parts = ["USER CONTEXT (REAL-TIME DASHBOARD DATA):"];
 
     if (userContext.plan) {
-      parts.push(`- Subscription: ${userContext.plan}`);
+      parts.push(`- Subscription: ${userContext.plan} Plan`);
+    }
+
+    // Earnings
+    if (userContext.earnings) {
+        parts.push(`- Wallet Balance: $${userContext.earnings.total || 0} `);
+        parts.push(`- Pending (Withdrawable): $${userContext.earnings.pending || 0}`);
+        if ((userContext.earnings.pending || 0) > 0 && userContext.plan === "free") {
+            parts.push(`  ⚠️ ALERT: User has pending money but is on FREE plan. TELL THEM TO SUBSCRIBE TO WITHDRAW.`);
+        }
+    }
+
+    // Referrals
+    if (userContext.referrals) {
+        parts.push(`- Referral Count: ${userContext.referrals.total || 0} signups`);
+        parts.push(`- Credits Balance: ${userContext.referrals.balance || 0}`);
+        
+        const count = userContext.referrals.total || 0;
+        if (count >= 20 && userContext.plan === "free") {
+             parts.push(`  🏆 CRITICAL OPPORTUNITY: User hit 20 referrals! Tell them they unlocked the $15 Ambassador Reward but MUST SUBSCRIBE to claim it.`);
+        } else if (count >= 10 && count < 20) {
+             parts.push(`  🚀 PROGRESS: User has ${count} referrals. Tell them 20 unlocks $15 Cash.`);
+        } else {
+             parts.push(`  🌱 GROWTH: User has ${count} referrals. Encourage them to invite more.`);
+        }
+    }
+
+    // Notifications
+    if (userContext.notifications && userContext.notifications.unread > 0) {
+        parts.push(`- Unread Alerts: ${userContext.notifications.unread}`);
+        parts.push(`- Recent Alert Titles: ${userContext.notifications.recent.join(", ")}`);
     }
 
     if (userContext.connectedPlatforms?.length > 0) {
       parts.push(`- Connected platforms: ${userContext.connectedPlatforms.join(", ")}`);
+    } else {
+      parts.push(`- Connected platforms: NONE. (Urge them to connect at least one!)`);
     }
 
-    if (userContext.contentCount) {
+    if (userContext.contentCount !== undefined) {
       parts.push(`- Content uploaded: ${userContext.contentCount} items`);
+      if (userContext.contentCount === 0) {
+          parts.push(`  ⚠️ User has uploaded NOTHING. Guide them to the 'Upload' tab.`);
+      }
     }
 
     if (userContext.hasAIClips !== undefined) {

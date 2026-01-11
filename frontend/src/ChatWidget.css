@@ -340,3 +340,46 @@
     font-size: 22px;
   }
 }
+
+/* Markdown & Voice Features */
+.chat-message-content {
+  white-space: normal; /* Markdown handles spacing */
+}
+
+.chat-message-content p {
+  margin: 0 0 8px 0;
+}
+
+.chat-message-content p:last-child {
+  margin-bottom: 0;
+}
+
+.chat-message-content ul,
+.chat-message-content ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.chat-message-content code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.chat-speak-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  margin-left: 8px;
+  opacity: 0.6;
+  transition: all 0.2s;
+  float: right; /* Position it nicely */
+}
+
+.chat-speak-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}

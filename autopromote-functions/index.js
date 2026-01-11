@@ -27,16 +27,23 @@ function getServerApp() {
     console.warn("[index] Could not require autopromote-server package:", e.message);
     try {
       // Lazy load express only if needed
-      const express = require("express");
-      const fallbackApp = express();
-      fallbackApp.use((req, res) => res.status(503).send("Service initializing"));
-      _serverApp = fallbackApp;
-    } catch (expressErr) {
-      console.error(
-        "[index] Could not create fallback express app:",
-        expressErr && expressErr.message
-      );
-      throw e; // fallback unavailable - rethrow original error
+      // Fallback to local _server copy (copied by copy-server.js)
+      _serverApp = require("./_server/src/server");
+      console.log("[index] Loaded local _server fallback");
+    } catch (localErr) {
+      console.warn("[index] Could not load local _server:", localErr.message);
+      try {
+        const express = require("express");
+        const fallbackApp = express();
+        fallbackApp.use((req, res) => res.status(503).send("Service initializing (Server Code Missing)"));
+        _serverApp = fallbackApp;
+      } catch (expressErr) {
+        console.error(
+          "[index] Could not create fallback express app:",
+          expressErr && expressErr.message
+        );
+        throw e; // fallback unavailable - rethrow original error
+      }
     }
   }
   return _serverApp;

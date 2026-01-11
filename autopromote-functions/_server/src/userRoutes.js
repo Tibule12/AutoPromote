@@ -537,6 +537,17 @@ router.get("/connections", authMiddleware, publicLimiter, async (req, res) => {
     snapshot.forEach(doc => {
       connections[doc.id] = doc.data();
     });
+
+    // Artificially inject Instagram if Facebook connection has linked IG account
+    if (connections["facebook"] && connections["facebook"].ig_business_account_id) {
+      connections["instagram"] = {
+        provider: "instagram",
+        obtainedAt: connections["facebook"].obtainedAt,
+        mode: "active",
+        scope: "via_facebook",
+      };
+    }
+
     return res.json({ ok: true, connections });
   } catch (e) {
     console.error("Error fetching connections:", e);

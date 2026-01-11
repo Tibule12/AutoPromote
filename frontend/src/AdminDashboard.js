@@ -18,8 +18,9 @@ import AdminPayoutsPanel from "./components/AdminPayoutsPanel";
 import AdminAuditViewer from "./AdminAuditViewer";
 import StatCard from "./components/StatCard";
 import ActivityFeed from "./components/ActivityFeed";
+import VoiceOverGuide from "./components/VoiceOverGuide";
+import SupportPanel from "./components/SupportPanel";
 import {
-  SupportPanel,
   ModerationPanel,
   OpenAIUsagePanel,
   NotificationManagementPanel,
@@ -33,6 +34,41 @@ function AdminDashboard({ analytics, user, onLogout }) {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [refreshing, setRefreshing] = useState(false);
+
+  // Voice Over Scripts for Admin Dashboard
+  const adminScripts = {
+    overview:
+      "Welcome to the Admin Overview. This dashboard provides a high-level summary of system performance. You can see total active users, ongoing A/B tests, and real-time revenue stats. Use the buttons above to export data or refresh metrics.",
+    users:
+      "This is the User Management panel. Here you can search for users via email or ID, view their detailed profiles, check their subscription status, and manage their permissions. You can also assume their identity for debugging.",
+    content:
+      "The Content Management table shows all videos and posts ever uploaded. Use this to track viral potential, debug failed uploads, or manually approve flagged content.",
+    revenue:
+      "The Revenue Dashboard tracks all income streams. Analyze monthly revenue, subscription retention, and transaction trends to optimize monetization strategies.",
+    ads: "The Ads Management System lets you oversee all advertising campaigns running on the platform. Monitor impressions, clicks, and budgets, and pause or delete underperforming ads.",
+    community:
+      "This is the Community Moderation interface. Review flagged comments and posts to ensure a safe environment for all users.",
+    approval:
+      "Content Approval Queue. Review user-submitted content before it goes live. Approve safe content or reject violations with a reason.",
+    analytics:
+      "Advanced Analytics provides deep dives into user behavior, retention cohorts, and platform-specific performance metrics.",
+    system:
+      "System Health Monitoring. View real-time status of all backend services, database connections, and third-party API integrations like OpenAI and PayPal.",
+    audit:
+      "The Audit Log records every administrative action for security compliance. Use this to trace who changed what and when.",
+    support: "Support Ticket Management. View and respond to user inquiries and bug reports.",
+    moderation:
+      "Detailed Moderation Tools. Apply bans, mutes, or warnings to users violating the terms of service.",
+    subscriptions:
+      "PayPal Subscription Manager. View active recurring payments, cancel subscriptions, and handle refunds.",
+    payouts:
+      "Creator Payouts. Process withdrawals for monetized creators and view transaction history.",
+    openai:
+      "OpenAI Usage Tracking. Monitor token consumption and costs associated with AI features.",
+    notifications:
+      "Notification Center. Manage email templates and send broadcast messages to all users.",
+    default: "Select a tab to hear a detailed explanation of its function.",
+  };
 
   // New feature states
   const [searchTerm, setSearchTerm] = useState("");
@@ -3477,6 +3513,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
       >
         <h1 style={{ color: "#333", margin: 0 }}>Admin Dashboard</h1>
         <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={{ marginRight: "16px" }}>
+            <VoiceOverGuide activeTab={activeTab} scripts={adminScripts} theme="light" />
+          </div>
           <button
             onClick={() => {
               const dataToExport =

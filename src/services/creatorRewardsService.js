@@ -4,24 +4,21 @@
 
 const { admin, db } = require("../firebaseAdmin");
 
-// Reward thresholds and payouts
+// Reward thresholds and payouts - Modified for subscription bonus only
 const PERFORMANCE_TIERS = {
-  viral: { minViews: 100000, minEngagement: 0.05, reward: 50.0, badge: "🔥 Viral" },
-  trending: { minViews: 50000, minEngagement: 0.04, reward: 25.0, badge: "📈 Trending" },
-  popular: { minViews: 10000, minEngagement: 0.03, reward: 10.0, badge: "⭐ Popular" },
-  rising: { minViews: 5000, minEngagement: 0.02, reward: 5.0, badge: "🌟 Rising" },
-  good: { minViews: 1000, minEngagement: 0.01, reward: 1.0, badge: "👍 Good" },
+  // Bonus structure for subscribed users on external platforms
+  // Only highly engaged content gets small bonus rewards
+  viral: { minViews: 30000, minEngagement: 0.05, reward: 3.0, badge: "🔥 Viral Bonus" }, // 30k views -> $3
+  trending: { minViews: 100000, minEngagement: 0.04, reward: 8.0, badge: "📈 Mega Bonus" }, // 100k views -> $8
 };
 
 const MILESTONE_BONUSES = {
-  1000000: 500.0, // 1M views
-  500000: 200.0, // 500K views
-  100000: 50.0, // 100K views
-  50000: 20.0, // 50K views
-  10000: 5.0, // 10K views
+  1000000: 40.0, // 1M views -> $40
+  500000: 20.0, // 500K views -> $20
+  100000: 8.0, // 100K views -> $8
 };
 
-const MIN_PAYOUT_THRESHOLD = 10.0; // Minimum $10 to claim payout
+const MIN_PAYOUT_THRESHOLD = 50.0; // Higher payout threshold since these are bonuses
 
 /**
  * Calculate engagement rate
@@ -107,6 +104,17 @@ async function checkMilestoneBonus(contentId, userId, currentViews) {
  */
 async function calculateContentRewards(contentId, userId) {
   try {
+    // Check if user has active subscription
+    const userDoc = await db.collection("users").doc(userId).get();
+    if (!userDoc.exists) return { error: "User not found" };
+
+    const userData = userDoc.data();
+    const isSubscribed = userData.subscriptionStatus === "active" || userData.isPremium === true;
+
+    if (!isSubscribed) {
+      return { message: "Rewards are only available for subscribed members" };
+    }
+
     const contentRef = db.collection("content").doc(contentId);
     const contentDoc = await contentRef.get();
 
@@ -118,7 +126,7 @@ async function calculateContentRewards(contentId, userId) {
     const views = content.views || 0;
     const engagementRate = calculateEngagementRate(content);
 
-    // Check if already rewarded for this tier
+    // Check performance tier
     const currentTier = content.rewardTier || null;
     const performanceTier = getPerformanceTier(views, engagementRate);
 
@@ -129,6 +137,24 @@ async function calculateContentRewards(contentId, userId) {
     // Only award if reaching new tier (prevent duplicate rewards)
     if (currentTier === performanceTier.tier) {
       return { message: "Already rewarded for this tier", tier: currentTier };
+    }
+
+    if (!isSubscribed) {
+      // Create a notification for the user to upsell subscription
+      await db.collection("notifications").add({
+        userId,
+        type: "upsell_reward",
+        title: "Claim Your Viral Bonus!",
+        message: `Your content hit the ${performanceTier.badge} tier! You are eligible for a $${performanceTier.reward} bonus. Subscribe now to claim these rewards!`,
+        data: {
+          contentId: contentId,
+          potentialReward: performanceTier.reward,
+          tier: performanceTier.tier,
+        },
+        read: false,
+        createdAt: new Date().toISOString(),
+      });
+      return { message: "Rewards are only available for subscribed members" };
     }
 
     // Award performance reward
@@ -167,6 +193,23 @@ async function calculateContentRewards(contentId, userId) {
       },
       { merge: true }
     );
+
+    // --- REFERRAL CHALLENGE "LURE" ---
+    // User just got paid. Now lure them to multiply it.
+    await db.collection("notifications").add({
+      userId,
+      type: "referral_challenge",
+      title: "🚀 Referral Lure: Need an extra $5?",
+      message: `Congrats on your $${performanceTier.reward} earnings! Want an extra $5? Refer 10 subscribers and we'll add a $5 bonus to your account immediately.`,
+      data: {
+        challengeId: "10_subs_bonus",
+        reward: 5.0,
+        requiredReferrals: 10,
+      },
+      read: false,
+      createdAt: new Date().toISOString(),
+    });
+    // ---------------------------------
 
     return {
       success: true,
