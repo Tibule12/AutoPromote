@@ -335,7 +335,11 @@ function ContentUploadForm({
   const [perPlatformQuality, setPerPlatformQuality] = useState({});
   const [perPlatformUploading, setPerPlatformUploading] = useState({});
   const [perPlatformUploadStatus, setPerPlatformUploadStatus] = useState({});
+  const [perPlatformUploadResponse, setPerPlatformUploadResponse] = useState({});
   const [perPlatformFile, setPerPlatformFile] = useState({});
+  const [facebookPages, setFacebookPages] = useState([]);
+  const [facebookLoading, setFacebookLoading] = useState(false);
+  const [lastUploadResult, setLastUploadResult] = useState(null);
   const [perPlatformTitle, setPerPlatformTitle] = useState({});
   const [perPlatformDescription, setPerPlatformDescription] = useState({});
   // Per-platform quick guidelines and details to help users adhere to platform UX constraints
@@ -422,6 +426,44 @@ function ContentUploadForm({
       }
     }
   }, [extSelectedPlatforms]);
+
+  // Load Facebook pages when Facebook is selected so the UI can show Page names and IDs
+  useEffect(() => {
+    let mounted = true;
+    const loadFb = async () => {
+      if (!Array.isArray(selectedPlatformsVal) || !selectedPlatformsVal.includes("facebook")) {
+        setFacebookPages([]);
+        return;
+      }
+      setFacebookLoading(true);
+      try {
+        let headers = { Accept: "application/json" };
+        try {
+          const currentUser = auth && auth.currentUser;
+          if (currentUser) {
+            const token = await currentUser.getIdToken(true).catch(() => null);
+            if (token) headers.Authorization = `Bearer ${token}`;
+          }
+        } catch (_) {}
+        const res = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, { headers });
+        if (!mounted) return;
+        if (!res.ok) {
+          setFacebookPages([]);
+          return;
+        }
+        const json = await res.json();
+        setFacebookPages(json.pages || []);
+      } catch (e) {
+        setFacebookPages([]);
+      } finally {
+        if (mounted) setFacebookLoading(false);
+      }
+    };
+    loadFb();
+    return () => {
+      mounted = false;
+    };
+  }, [selectedPlatformsVal]);
 
   // Fetch TikTok creator info when TikTok is selected so the UI can enforce rules
   useEffect(() => {
@@ -1144,6 +1186,13 @@ function ContentUploadForm({
       setPerPlatformUploadStatus(prev => ({ ...prev, [platform]: "Publishing to platform..." }));
       const resp = await onUpload(contentData);
       console.log("[Upload] onUpload response:", resp);
+      // Store the raw response so reviewers can inspect/copy it in the UI
+      setPerPlatformUploadResponse(prev => ({ ...prev, [platform]: resp || null }));
+      // Surface response for reviewer/debugging (e.g., postId)
+      setPerPlatformUploadStatus(prev => ({
+        ...prev,
+        [platform]: `✓ Upload submitted. Response: ${JSON.stringify(resp || {})}`,
+      }));
       // If backend created a content record, try to poll for its processing status
       try {
         const maybeKey = idempotencyKey || (resp && (resp.idempotency_key || resp.id));
@@ -1156,7 +1205,9 @@ function ContentUploadForm({
       }
       setPerPlatformUploadStatus(prev => ({
         ...prev,
-        [platform]: "✓ Upload submitted. It may take a few minutes to process.",
+        [platform]: prev[platform]
+          ? `${prev[platform]} It may take a few minutes to process.`
+          : "✓ Upload submitted. It may take a few minutes to process.",
       }));
       // Clear per-platform inputs for this platform only
       setPerPlatformFile(prev => ({ ...prev, [platform]: null }));
@@ -1177,6 +1228,21 @@ function ContentUploadForm({
   const openPreviewEdit = p => {
     setPreviewToEdit(p);
     setShowPreviewEditModal(true);
+  };
+
+  const copyUploadResponse = async platform => {
+    try {
+      const resp = perPlatformUploadResponse && perPlatformUploadResponse[platform];
+      if (!resp) return;
+      const text = typeof resp === "string" ? resp : JSON.stringify(resp, null, 2);
+      await navigator.clipboard.writeText(text);
+      try {
+        // eslint-disable-next-line no-console
+        console.log("Upload response copied to clipboard");
+      } catch (_) {}
+    } catch (e) {
+      // ignore clipboard errors
+    }
   };
 
   const handleSavePreviewEdits = edited => {
@@ -1869,6 +1935,26 @@ function ContentUploadForm({
       <div className="content-upload-container">
         <div className="form-group">
           <label>🎯 Target Platforms</label>
+          {/* Show Facebook Pages and IDs when available to make Page selection explicit for reviewers */}
+          {facebookLoading ? (
+            <div style={{ fontSize: 12, color: "#64748b", marginBottom: 8 }}>
+              Loading Facebook pages...
+            </div>
+          ) : facebookPages && facebookPages.length > 0 ? (
+            <div style={{ fontSize: 12, color: "#0f172a", marginBottom: 8 }}>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                Facebook Pages (will be used for posting)
+              </div>
+              <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
+                {facebookPages.map(p => (
+                  <div key={p.id} style={{ color: "#334155", fontSize: "0.95rem" }}>
+                    {p.name || "(Unnamed Page)"}{" "}
+                    <span style={{ color: "#64748b", fontSize: "0.85rem" }}>(ID: {p.id})</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <div className="platform-grid">
             {platforms.map(p => {
               const disabled =
@@ -1983,6 +2069,26 @@ function ContentUploadForm({
           </button>
           <h3 style={{ margin: 0 }}>Upload to {p.charAt(0).toUpperCase() + p.slice(1)}</h3>
         </div>
+        {p === "facebook" && (
+          <div style={{ marginTop: 8, marginBottom: 8, fontSize: 13, color: "#334155" }}>
+            <div style={{ fontWeight: 700 }}>Posting Page</div>
+            {facebookLoading ? (
+              <div style={{ color: "#64748b" }}>Loading pages...</div>
+            ) : facebookPages && facebookPages.length > 0 ? (
+              <div>
+                <div style={{ fontWeight: 600 }}>{facebookPages[0].name || "(Unnamed Page)"}</div>
+                <div style={{ color: "#64748b", fontSize: 12 }}>ID: {facebookPages[0].id}</div>
+                <div style={{ fontSize: 12, color: "#475569", marginTop: 6 }}>
+                  This Page will be used for Facebook posts when you publish from this form.
+                </div>
+              </div>
+            ) : (
+              <div style={{ color: "#64748b" }}>
+                No connected Pages found. Connect Facebook first.
+              </div>
+            )}
+          </div>
+        )}
         {error && <div className="error-message">{error}</div>}
 
         <div className="form-group full-width">
@@ -3173,6 +3279,48 @@ function ContentUploadForm({
                         className="platform-upload-status"
                       >
                         {perPlatformUploadStatus[expandedPlatform]}
+                      </div>
+                    )}
+                    {perPlatformUploadResponse[expandedPlatform] && (
+                      <div
+                        style={{
+                          marginTop: 8,
+                          padding: 8,
+                          background: "#f3f4f6",
+                          borderRadius: 6,
+                          border: "1px solid #e5e7eb",
+                          fontSize: 13,
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                          <strong style={{ fontSize: 13 }}>Platform Response</strong>
+                          <button
+                            onClick={() => copyUploadResponse(expandedPlatform)}
+                            style={{
+                              background: "#111827",
+                              color: "#fff",
+                              border: "none",
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              cursor: "pointer",
+                              fontSize: 12,
+                            }}
+                          >
+                            Copy
+                          </button>
+                        </div>
+                        <pre
+                          style={{
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-word",
+                            marginTop: 8,
+                            maxHeight: 160,
+                            overflow: "auto",
+                            fontSize: 12,
+                          }}
+                        >
+                          {JSON.stringify(perPlatformUploadResponse[expandedPlatform], null, 2)}
+                        </pre>
                       </div>
                     )}
                     {expandedPlatform === "telegram" && (
