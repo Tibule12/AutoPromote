@@ -1,4 +1,5 @@
 import React from "react";
+import toast from "react-hot-toast";
 // API_ENDPOINTS not needed here
 import ExplainButton from "../components/ExplainButton";
 
@@ -346,6 +347,43 @@ const ConnectionsPanel = ({
             </>
           )}
         </div>
+        {/* Show explicit list of connected Pages with IDs so reviewers can match selection -> outcome */}
+        {facebookStatus?.pages &&
+          Array.isArray(facebookStatus.pages) &&
+          facebookStatus.pages.length > 0 && (
+            <div style={{ fontSize: 12, color: "#94a3b8", marginLeft: 4 }}>
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>Connected Pages</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {facebookStatus.pages.map(p => (
+                  <div key={p.id} style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
+                    <div style={{ fontWeight: 600 }}>{p.name || "(Unnamed Page)"}</div>
+                    <div style={{ color: "#64748b", fontSize: "0.85rem" }}>(ID: {p.id})</div>
+                    <button
+                      onClick={() => {
+                        try {
+                          navigator.clipboard.writeText(String(p.id));
+                          toast.success("Page ID copied");
+                        } catch (e) {
+                          // silent
+                        }
+                      }}
+                      style={{
+                        marginLeft: 8,
+                        padding: "4px 8px",
+                        fontSize: "0.8rem",
+                        borderRadius: 4,
+                        border: "1px solid #e2e8f0",
+                        background: "#fff",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Copy ID
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {youtubeStatus?.connected ? (
             <>
