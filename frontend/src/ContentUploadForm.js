@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-env browser, es6 */
 import React, { useState, useRef, useEffect } from "react";
+import toast from "react-hot-toast";
 import "./ContentUploadForm.css";
 import { storage, auth } from "./firebaseClient";
 import { API_ENDPOINTS } from "./config";
@@ -339,6 +340,7 @@ function ContentUploadForm({
   const [perPlatformFile, setPerPlatformFile] = useState({});
   const [facebookPages, setFacebookPages] = useState([]);
   const [facebookLoading, setFacebookLoading] = useState(false);
+  const [selectedFacebookPageId, setSelectedFacebookPageId] = useState(null);
   const [lastUploadResult, setLastUploadResult] = useState(null);
   const [perPlatformTitle, setPerPlatformTitle] = useState({});
   const [perPlatformDescription, setPerPlatformDescription] = useState({});
@@ -464,6 +466,17 @@ function ContentUploadForm({
       mounted = false;
     };
   }, [selectedPlatformsVal]);
+
+  // When facebook pages load, default to the first page if none selected
+  useEffect(() => {
+    if (
+      (!selectedFacebookPageId || selectedFacebookPageId === null) &&
+      facebookPages &&
+      facebookPages.length
+    ) {
+      setSelectedFacebookPageId(facebookPages[0].id);
+    }
+  }, [facebookPages]);
 
   // Fetch TikTok creator info when TikTok is selected so the UI can enforce rules
   useEffect(() => {
@@ -842,6 +855,13 @@ function ContentUploadForm({
         contentData.platform_options.linkedin = {
           companyId: linkedinCompanyId || undefined,
           postType: (linkedinSettings && linkedinSettings.postType) || "post",
+        };
+      if (pl === "facebook")
+        contentData.platform_options.facebook = {
+          pageId:
+            selectedFacebookPageId ||
+            (facebookPages && facebookPages[0] && facebookPages[0].id) ||
+            undefined,
         };
       if (pl === "twitter")
         contentData.platform_options.twitter = {
@@ -1239,6 +1259,7 @@ function ContentUploadForm({
       try {
         // eslint-disable-next-line no-console
         console.log("Upload response copied to clipboard");
+        toast.success("Response copied to clipboard");
       } catch (_) {}
     } catch (e) {
       // ignore clipboard errors
@@ -2076,10 +2097,28 @@ function ContentUploadForm({
               <div style={{ color: "#64748b" }}>Loading pages...</div>
             ) : facebookPages && facebookPages.length > 0 ? (
               <div>
-                <div style={{ fontWeight: 600 }}>{facebookPages[0].name || "(Unnamed Page)"}</div>
-                <div style={{ color: "#64748b", fontSize: 12 }}>ID: {facebookPages[0].id}</div>
-                <div style={{ fontSize: 12, color: "#475569", marginTop: 6 }}>
-                  This Page will be used for Facebook posts when you publish from this form.
+                <div style={{ marginBottom: 6 }}>
+                  <label style={{ fontWeight: 600, display: "block", marginBottom: 4 }}>
+                    Select Page to post from
+                  </label>
+                  <select
+                    value={selectedFacebookPageId || ""}
+                    onChange={e => {
+                      setSelectedFacebookPageId(e.target.value || null);
+                      if (typeof extSetPlatformOption === "function")
+                        extSetPlatformOption("facebook", "pageId", e.target.value || null);
+                    }}
+                    style={{ padding: "6px 8px", borderRadius: 4, border: "1px solid #d1d5db" }}
+                  >
+                    {facebookPages.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name || "(Unnamed Page)"} — {p.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ fontSize: 12, color: "#475569" }}>
+                  The selected Page will be used for Facebook posts when you publish from this form.
                 </div>
               </div>
             ) : (
