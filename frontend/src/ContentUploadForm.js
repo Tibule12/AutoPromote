@@ -2117,6 +2117,46 @@ function ContentUploadForm({
                     ))}
                   </select>
                 </div>
+                {selectedFacebookPageId &&
+                  (() => {
+                    const sel = facebookPages.find(x => x.id === selectedFacebookPageId) || null;
+                    if (!sel) return null;
+                    return (
+                      <div style={{ marginTop: 8, display: "flex", gap: 12, alignItems: "center" }}>
+                        {sel.ig_business_account_id && (
+                          <div
+                            style={{
+                              color: "#475569",
+                              fontSize: 13,
+                              display: "flex",
+                              gap: 8,
+                              alignItems: "center",
+                            }}
+                          >
+                            <strong style={{ fontSize: 13 }}>IG Business ID:</strong>
+                            <span>{sel.ig_business_account_id}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                try {
+                                  navigator.clipboard.writeText(String(sel.ig_business_account_id));
+                                } catch (e) {}
+                              }}
+                              style={{
+                                padding: "4px 8px",
+                                borderRadius: 4,
+                                border: "1px solid #e2e8f0",
+                                background: "#fff",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Copy IG
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 <div style={{ fontSize: 12, color: "#475569" }}>
                   The selected Page will be used for Facebook posts when you publish from this form.
                 </div>

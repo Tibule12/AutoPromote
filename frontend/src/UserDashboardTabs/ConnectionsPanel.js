@@ -260,11 +260,50 @@ const ConnectionsPanel = ({
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {facebookStatus?.ig_business_account_id ? (
             <>
-              <span style={{ color: "#cbd5e1" }}>
-                {getPlatformLabel("facebook")
-                  ? `IG for ${getPlatformLabel("facebook")}`
-                  : "Instagram connected"}
-              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "#cbd5e1" }}>
+                  {getPlatformLabel("facebook")
+                    ? `IG for ${getPlatformLabel("facebook")}`
+                    : "Instagram connected"}
+                </span>
+                {facebookStatus?.ig_business_account_id && (
+                  <div
+                    style={{
+                      color: "#94a3b8",
+                      fontSize: 12,
+                      display: "flex",
+                      gap: 8,
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>IG ID: {facebookStatus.ig_business_account_id}</span>
+                    <button
+                      onClick={() => {
+                        try {
+                          navigator.clipboard.writeText(
+                            String(facebookStatus.ig_business_account_id)
+                          );
+                          // show a minimal toast without importing heavy libs here
+                          try {
+                            window.toastr &&
+                              window.toastr.success &&
+                              window.toastr.success("IG ID copied");
+                          } catch (e) {}
+                        } catch (e) {}
+                      }}
+                      style={{
+                        background: "#fff",
+                        border: "1px solid #e2e8f0",
+                        padding: "4px 6px",
+                        borderRadius: 4,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Copy IG ID
+                    </button>
+                  </div>
+                )}
+              </div>
               <button className="check-quality" onClick={handleConnectFacebook}>
                 Reconnect
               </button>
@@ -355,7 +394,10 @@ const ConnectionsPanel = ({
               <div style={{ fontWeight: 700, marginBottom: 6 }}>Connected Pages</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {facebookStatus.pages.map(p => (
-                  <div key={p.id} style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
+                  <div
+                    key={p.id}
+                    style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap" }}
+                  >
                     <div style={{ fontWeight: 600 }}>{p.name || "(Unnamed Page)"}</div>
                     <div style={{ color: "#64748b", fontSize: "0.85rem" }}>(ID: {p.id})</div>
                     <button
@@ -379,6 +421,37 @@ const ConnectionsPanel = ({
                     >
                       Copy ID
                     </button>
+                    {p.ig_business_account_id && (
+                      <div
+                        style={{
+                          marginLeft: 8,
+                          color: "#94a3b8",
+                          fontSize: "0.85rem",
+                          display: "flex",
+                          gap: 8,
+                          alignItems: "center",
+                        }}
+                      >
+                        <span>IG: {p.ig_business_account_id}</span>
+                        <button
+                          onClick={() => {
+                            try {
+                              navigator.clipboard.writeText(String(p.ig_business_account_id));
+                              toast.success("IG ID copied");
+                            } catch (e) {}
+                          }}
+                          style={{
+                            padding: "4px 6px",
+                            borderRadius: 4,
+                            border: "1px solid #e2e8f0",
+                            background: "#fff",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Copy IG
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
