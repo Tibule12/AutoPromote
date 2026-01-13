@@ -215,6 +215,28 @@ router.get("/callback", async (req, res) => {
     );
     const pagesData = await pagesRes.json();
     const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
+
+    // Debugging: if no pages returned, log the raw response and attempt a debug_token call
+    if (!pages || pages.length === 0) {
+      try {
+        console.warn("[FacebookCallback] /me/accounts returned no pages:", pagesData);
+      } catch (_) {}
+      try {
+        const appAccessToken = `${FB_CLIENT_ID}|${FB_CLIENT_SECRET}`;
+        const dbgRes = await fetch(
+          `https://graph.facebook.com/debug_token?input_token=${encodeURIComponent(tokenData.access_token)}&access_token=${encodeURIComponent(appAccessToken)}`
+        );
+        const dbgJson = await dbgRes.json();
+        // Log debug info for investigation (do NOT print raw tokens)
+        console.warn("[FacebookCallback] debug_token result:", dbgJson);
+      } catch (e) {
+        console.warn(
+          "[FacebookCallback] debug_token fetch failed:",
+          e && e.message ? e.message : e
+        );
+      }
+    }
+
     // Try to get Instagram business account from ANY page (iterate until found)
     let igBusinessAccountId = null;
     if (pages.length > 0) {
@@ -337,6 +359,38 @@ router.get(
           pages: (data.pages || []).map(p => ({ id: p.id, name: p.name })),
           ig_business_account_id: data.ig_business_account_id || null,
         };
+
+        // If no pages are present, attach a short diagnostic hint and attempt to inspect token scopes if an unsecured token is available
+        if (!data.pages || data.pages.length === 0) {
+          out.diagnostic = {
+            message:
+              "No Pages found for this Facebook connection. Consider reconnecting and ensure Page permissions (e.g., pages_show_list) were granted and that you are a Page admin.",
+            needs_reconnect: true,
+          };
+          try {
+            if (data.user_access_token) {
+              const appAccessToken = `${FB_CLIENT_ID}|${FB_CLIENT_SECRET}`;
+              const dbgRes = await fetch(
+                `https://graph.facebook.com/debug_token?input_token=${encodeURIComponent(
+                  data.user_access_token
+                )}&access_token=${encodeURIComponent(appAccessToken)}`
+              );
+              const dbgJson = await dbgRes.json();
+              console.warn(`[FacebookStatus] debug_token for uid ${uid}:`, dbgJson);
+              if (dbgJson && dbgJson.data && Array.isArray(dbgJson.data.scopes)) {
+                if (!dbgJson.data.scopes.includes("pages_show_list")) {
+                  out.diagnostic.missing_scopes = ["pages_show_list"];
+                }
+              }
+            }
+          } catch (e) {
+            console.warn(
+              "[FacebookStatus] debug_token fetch failed:",
+              e && e.message ? e.message : e
+            );
+          }
+        }
+
         setCache(cacheKey, out, 7000);
         return out;
       });
