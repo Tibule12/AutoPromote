@@ -1,6 +1,8 @@
 import React from "react";
 import toast from "react-hot-toast";
-// API_ENDPOINTS not needed here
+import { auth } from "../firebaseClient";
+import { API_ENDPOINTS } from "../config";
+// API_ENDPOINTS used for debug fetch
 import ExplainButton from "../components/ExplainButton";
 
 const ConnectionsPanel = ({
@@ -392,6 +394,39 @@ const ConnectionsPanel = ({
           facebookStatus.pages.length > 0 && (
             <div style={{ fontSize: 12, color: "#94a3b8", marginLeft: 4 }}>
               <div style={{ fontWeight: 700, marginBottom: 6 }}>Connected Pages</div>
+              <div style={{ marginBottom: 8 }}>
+                <button
+                  className="check-quality"
+                  onClick={async () => {
+                    try {
+                      const cur = auth.currentUser;
+                      if (!cur) return toast.error("Not signed in");
+                      const token = await cur.getIdToken(true);
+                      const res = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, {
+                        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+                      });
+                      if (!res.ok) {
+                        toast.error(`Status fetch failed: ${res.status}`);
+                        return;
+                      }
+                      const json = await res.json();
+                      const w = window.open();
+                      if (w) {
+                        w.document.body.style.fontFamily = "monospace, monospace";
+                        w.document.body.innerText = JSON.stringify(json, null, 2);
+                      } else {
+                        console.log(json);
+                        toast.success("Status opened in new window or console");
+                      }
+                    } catch (e) {
+                      console.error(e);
+                      toast.error("Failed to fetch Facebook status");
+                    }
+                  }}
+                >
+                  View raw FB status
+                </button>
+              </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {facebookStatus.pages.map(p => (
                   <div
