@@ -350,11 +350,17 @@ const UserDashboard = ({
       const res = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, {
         headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       });
-      if (!res.ok) return setFacebookStatus({ connected: false });
+      if (!res.ok) return setFacebookStatus({ connected: false, pages: [] });
       const d = await res.json();
-      setFacebookStatus({ connected: !!d.connected, meta: d.meta || null });
+      setFacebookStatus({
+        connected: !!d.connected,
+        meta: d.meta || null,
+        pages: d.pages || [],
+        profile: d.profile || null,
+        ig_business_account_id: d.ig_business_account_id || null,
+      });
     } catch (_) {
-      setFacebookStatus({ connected: false });
+      setFacebookStatus({ connected: false, pages: [], meta: null });
     }
   };
 
