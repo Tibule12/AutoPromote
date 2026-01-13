@@ -997,43 +997,58 @@ const UserDashboard = ({
       }
 
       // First, check if this is a two-step flow (returns JSON with prepareUrl) or direct redirect
-      // Try GET first to see what we get
+      // Only attempt the `fetch` probe when the endpoint is same-origin to avoid CORS issues
       try {
-        const checkRes = await fetch(endpointUrl, {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const contentType = checkRes.headers.get("content-type");
-        if (contentType?.includes("application/json")) {
-          // Two-step flow: GET returns JSON with prepareUrl, then POST to prepare
-          const data = await checkRes.json();
-          if (data.prepareUrl) {
-            // POST to prepare endpoint to get the actual auth URL
-            const prepareRes = await fetch(data.prepareUrl, {
-              method: "POST",
-              headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-            });
-            const prepareData = await prepareRes.json();
-            if (!prepareRes.ok) {
-              const msg =
-                prepareData && (prepareData.error || prepareData.details || prepareData.message)
-                  ? prepareData.error || prepareData.details || prepareData.message
-                  : "Auth prepare failed";
-              toast.error(msg);
-              return;
-            }
-            if (!prepareData?.authUrl) {
-              toast.error("Auth prepare failed: no authUrl returned");
-              return;
-            }
-            toast.success("Opening authentication window...");
-            if (isMobile) window.location.href = prepareData.authUrl;
-            else window.open(prepareData.authUrl, "_blank");
-            return;
+        const sameOrigin = (() => {
+          try {
+            const u = new URL(endpointUrl, window.location.href);
+            return u.origin === window.location.origin;
+          } catch (e) {
+            return false;
           }
+        })();
+
+        if (sameOrigin) {
+          // Try GET first to see if the provider uses a two-step flow (returns JSON)
+          const checkRes = await fetch(endpointUrl, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const contentType = checkRes.headers.get("content-type");
+          if (contentType?.includes("application/json")) {
+            // Two-step flow: GET returns JSON with prepareUrl, then POST to prepare
+            const data = await checkRes.json();
+            if (data.prepareUrl) {
+              // POST to prepare endpoint to get the actual auth URL
+              const prepareRes = await fetch(data.prepareUrl, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+              });
+              const prepareData = await prepareRes.json();
+              if (!prepareRes.ok) {
+                const msg =
+                  prepareData && (prepareData.error || prepareData.details || prepareData.message)
+                    ? prepareData.error || prepareData.details || prepareData.message
+                    : "Auth prepare failed";
+                toast.error(msg);
+                return;
+              }
+              if (!prepareData?.authUrl) {
+                toast.error("Auth prepare failed: no authUrl returned");
+                return;
+              }
+              toast.success("Opening authentication window...");
+              if (isMobile) window.location.href = prepareData.authUrl;
+              else window.open(prepareData.authUrl, "_blank");
+              return;
+            }
+          }
+        } else {
+          // Skip probing cross-origin auth endpoints to avoid CORS redirect errors.
+          console.debug("Skipping cross-origin auth probe for", endpointUrl);
         }
       } catch (jsonErr) {
-        // Not JSON or fetch failed, fall through to direct redirect approach
+        // Not JSON or fetch failed; fall through to direct redirect approach
         console.warn("Two-step auth not available, using direct redirect", jsonErr.message);
       }
 
