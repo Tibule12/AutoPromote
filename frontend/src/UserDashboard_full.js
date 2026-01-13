@@ -576,7 +576,7 @@ const UserDashboard = ({
         setFacebookStatus({
           connected: !!platforms.facebook.connected,
           meta: platforms.facebook.meta || null,
-          pages: platforms.facebook.pages || null,
+          pages: platforms.facebook.pages || [],
           profile: platforms.facebook.profile || null,
           ig_business_account_id: platforms.facebook.ig_business_account_id || null,
         });
