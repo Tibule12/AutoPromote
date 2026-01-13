@@ -265,12 +265,31 @@ router.get("/callback", async (req, res) => {
     }
 
     if (uidFromState) {
+      // Fetch existing connection doc so we do not accidentally overwrite previously-discovered pages
+      const connRef = db
+        .collection("users")
+        .doc(uidFromState)
+        .collection("connections")
+        .doc("facebook");
+      const existingSnap = await connRef.get();
+      const existingData = existingSnap.exists ? existingSnap.data() : null;
+
+      // Decide which pages to store: prefer returned pages, but preserve existing pages if the callback returned none
+      const pagesToStore =
+        pages && pages.length > 0
+          ? pages
+          : existingData && Array.isArray(existingData.pages)
+            ? existingData.pages
+            : [];
+      const igToStore =
+        igBusinessAccountId || (existingData && existingData.ig_business_account_id) || null;
+
       let stored = {
         provider: "facebook",
         token_type: tokenData.token_type,
         expires_in: tokenData.expires_in,
-        pages,
-        ig_business_account_id: igBusinessAccountId,
+        pages: pagesToStore,
+        ig_business_account_id: igToStore,
         obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
       };
       try {
@@ -286,12 +305,35 @@ router.get("/callback", async (req, res) => {
       } catch (e) {
         stored.user_access_token = tokenData.access_token; // fallback
       }
-      await db
-        .collection("users")
-        .doc(uidFromState)
-        .collection("connections")
-        .doc("facebook")
-        .set(stored, { merge: true });
+
+      // If we preserved pages because callback returned empty, write an audit entry for future debugging
+      if (
+        pages &&
+        pages.length === 0 &&
+        existingData &&
+        Array.isArray(existingData.pages) &&
+        existingData.pages.length > 0
+      ) {
+        try {
+          await connRef.collection("audits").add({
+            event: "preserve_pages_on_empty_callback",
+            oldPages: existingData.pages || [],
+            newPages: pages || [],
+            reason: "callback returned no pages",
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          console.warn(
+            `[FacebookCallback] preserved existing pages for uid ${uidFromState} because callback returned empty pages`
+          );
+        } catch (e) {
+          console.warn(
+            "[FacebookCallback] failed to write pages-preserve audit:",
+            e && e.message ? e.message : e
+          );
+        }
+      }
+
+      await connRef.set(stored, { merge: true });
       const url = new URL(DASHBOARD_URL);
       url.searchParams.set("facebook", "connected");
       return res.redirect(url.toString());
