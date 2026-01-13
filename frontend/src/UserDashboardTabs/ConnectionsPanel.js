@@ -378,6 +378,13 @@ const ConnectionsPanel = ({
                   Disconnect
                 </button>
               )}
+              {/* Show helpful hint when connected but no pages were found */}
+              {(!facebookStatus.pages || facebookStatus.pages.length === 0) && (
+                <div style={{ color: "#f59e0b", fontSize: 12, marginLeft: 8 }}>
+                  No Facebook Pages found for this account. Try reconnecting and make sure you grant
+                  Page access (e.g., <code>pages_show_list</code>), and that you are a Page admin.
+                </div>
+              )}
             </>
           ) : (
             <>
