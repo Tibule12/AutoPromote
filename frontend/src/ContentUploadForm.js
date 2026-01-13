@@ -2163,7 +2163,22 @@ function ContentUploadForm({
               </div>
             ) : (
               <div style={{ color: "#64748b" }}>
-                No connected Pages found. Connect Facebook first.
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <div>
+                    No connected Pages found. You may need to reconnect and grant Page access.
+                  </div>
+                  <button
+                    type="button"
+                    className="check-quality"
+                    onClick={() => (onNavigate ? onNavigate("connections") : null)}
+                  >
+                    Reconnect
+                  </button>
+                </div>
+                <div style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>
+                  If reconnecting does not help, ensure you accepted Page permissions (e.g.,{" "}
+                  <code>pages_show_list</code>) and that you are a Page admin.
+                </div>
               </div>
             )}
           </div>
