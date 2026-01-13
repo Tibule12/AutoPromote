@@ -352,12 +352,7 @@ const UserDashboard = ({
       });
       if (!res.ok) return setFacebookStatus({ connected: false });
       const d = await res.json();
-      setFacebookStatus({
-        connected: !!d.connected,
-        pages: d.pages || [],
-        ig_business_account_id: d.ig_business_account_id || null,
-        meta: d.meta || null,
-      });
+      setFacebookStatus({ connected: !!d.connected, meta: d.meta || null });
     } catch (_) {
       setFacebookStatus({ connected: false });
     }
