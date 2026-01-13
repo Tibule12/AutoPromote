@@ -492,6 +492,42 @@ const ConnectionsPanel = ({
               </div>
             </div>
           )}
+        {/* Debug: always show button to inspect raw /api/facebook/status */}
+        {facebookStatus && (
+          <div style={{ marginLeft: 4, marginBottom: 8 }}>
+            <button
+              className="check-quality"
+              onClick={async () => {
+                try {
+                  const cur = auth.currentUser;
+                  if (!cur) return toast.error("Not signed in");
+                  const token = await cur.getIdToken(true);
+                  const res = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, {
+                    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+                  });
+                  if (!res.ok) {
+                    toast.error(`Status fetch failed: ${res.status}`);
+                    return;
+                  }
+                  const json = await res.json();
+                  const w = window.open();
+                  if (w) {
+                    w.document.body.style.fontFamily = "monospace, monospace";
+                    w.document.body.innerText = JSON.stringify(json, null, 2);
+                  } else {
+                    console.log(json);
+                    toast.success("Status opened in new window or console");
+                  }
+                } catch (e) {
+                  console.error(e);
+                  toast.error("Failed to fetch Facebook status");
+                }
+              }}
+            >
+              View raw FB status
+            </button>
+          </div>
+        )}
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {youtubeStatus?.connected ? (
             <>
