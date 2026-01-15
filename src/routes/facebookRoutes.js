@@ -251,15 +251,18 @@ router.get("/callback", async (req, res) => {
           const igData = await igRes.json();
           // Log specific response for debugging
           if (igData.error) {
-            console.error(`[FacebookCallback] IG check failed for page ${pageId}:`, igData.error);
+            console.error("[FacebookCallback] IG check failed for page:", pageId, igData.error);
           } else if (igData.instagram_business_account && igData.instagram_business_account.id) {
             igBusinessAccountId = igData.instagram_business_account.id;
             console.log(
-              `[FacebookCallback] Found IG Business Account ${igBusinessAccountId} on page ${pageId}`
+              "[FacebookCallback] Found IG Business Account",
+              igBusinessAccountId,
+              "on page",
+              pageId
             );
           }
         } catch (e) {
-          console.error(`[FacebookCallback] Exception checking IG for page ${page.id}:`, e);
+          console.error("[FacebookCallback] Exception checking IG for page:", page.id, e);
         }
       }
     }
@@ -419,7 +422,7 @@ router.get(
               );
               const dbgJson = await dbgRes.json();
               const safeUid = typeof uid === "string" ? uid.replace(/[^\w-]/g, "") : "";
-              console.warn(`[FacebookStatus] debug_token for uid ${safeUid}:`, dbgJson);
+              console.warn("[FacebookStatus] debug_token for uid:", safeUid, dbgJson);
               if (dbgJson && dbgJson.data && Array.isArray(dbgJson.data.scopes)) {
                 if (!dbgJson.data.scopes.includes("pages_show_list")) {
                   out.diagnostic.missing_scopes = ["pages_show_list"];
