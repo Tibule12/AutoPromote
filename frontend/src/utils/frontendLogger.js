@@ -1,5 +1,5 @@
 // Lightweight frontend logger that forwards logs to backend when enabled
-async function send(level, message, meta) {
+export async function send(level, message, meta) {
   const enabled = process.env.REACT_APP_ENABLE_FRONTEND_LOGGING === "1";
   if (!enabled) {
     // Fallback to console for local/dev without backend configured
@@ -19,4 +19,5 @@ async function send(level, message, meta) {
   }
 }
 
-module.exports = { send };
+const frontendLogger = { send };
+export default frontendLogger;
