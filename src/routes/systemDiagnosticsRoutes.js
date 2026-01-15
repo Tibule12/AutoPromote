@@ -380,7 +380,7 @@ function checkPlatformCredentials() {
   console.log("---[DIAGNOSTICS ENV DEBUG]---");
   Object.keys(process.env).forEach(k => {
     if (k.includes("CLIENT") || k.includes("SECRET") || k.includes("TOKEN")) {
-      console.log(`${k}: ${process.env[k] ? "[SET]" : "[NOT SET]"}`);
+      console.log(k + ":", process.env[k] ? "[SET]" : "[NOT SET]");
     }
   });
   console.log("-----------------------------");
