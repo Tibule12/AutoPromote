@@ -418,7 +418,8 @@ router.get(
                 )}&access_token=${encodeURIComponent(appAccessToken)}`
               );
               const dbgJson = await dbgRes.json();
-              console.warn(`[FacebookStatus] debug_token for uid ${uid}:`, dbgJson);
+              const safeUid = typeof uid === "string" ? uid.replace(/[^\w-]/g, "") : "";
+              console.warn(`[FacebookStatus] debug_token for uid ${safeUid}:`, dbgJson);
               if (dbgJson && dbgJson.data && Array.isArray(dbgJson.data.scopes)) {
                 if (!dbgJson.data.scopes.includes("pages_show_list")) {
                   out.diagnostic.missing_scopes = ["pages_show_list"];

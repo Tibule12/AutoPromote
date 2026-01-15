@@ -1,0 +1,90 @@
+.tiktok-share-modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 420px;
+  margin: 0 auto;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+  font-family: inherit;
+}
+.tiktok-share-modal h2 {
+  margin-top: 0;
+}
+.preview-section {
+  margin-bottom: 16px;
+  text-align: center;
+}
+.edit-section label {
+  display: block;
+  margin-bottom: 8px;
+}
+.edit-section input {
+  width: 100%;
+  margin-top: 2px;
+  margin-bottom: 8px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.disclosure-section {
+  margin: 16px 0 8px 0;
+}
+.disclosure-options label {
+  display: inline-block;
+  margin-right: 16px;
+  position: relative;
+}
+.privacy-section {
+  margin: 16px 0 8px 0;
+}
+.privacy-section label {
+  margin-right: 16px;
+  position: relative;
+}
+.declaration-section {
+  margin: 12px 0 8px 0;
+  font-size: 0.98em;
+}
+.notice-section {
+  margin: 12px 0 8px 0;
+  color: #666;
+  font-size: 0.95em;
+}
+.actions {
+  margin-top: 18px;
+  text-align: right;
+}
+.actions button {
+  margin-left: 8px;
+  padding: 7px 18px;
+  border-radius: 4px;
+  border: none;
+  background: #0f0f0f;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+}
+.actions button:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+}
+.prompt {
+  margin-top: 8px;
+  color: #0f0f0f;
+  font-weight: 500;
+}
+.tooltip {
+  position: absolute;
+  left: 0;
+  top: 110%;
+  background: #222;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.95em;
+  white-space: pre-line;
+  z-index: 10;
+  min-width: 180px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
