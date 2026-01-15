@@ -34,6 +34,25 @@ jest.mock("./firebaseClient", () => ({
   storage: {},
 }));
 
+// Provide a lightweight stub for ContentUploadForm during tests to avoid
+// (Removed test-only stub for ContentUploadForm; use real component in tests)
+
+// Provide a minimal mock of react-router-dom for Jest environment
+try {
+  jest.mock("react-router-dom", () => {
+    const React = require("react");
+    return {
+      MemoryRouter: ({ children }) => React.createElement("div", null, children),
+      Link: ({ to, children, ...rest }) =>
+        React.createElement("a", { href: to, ...rest }, children),
+      NavLink: ({ to, children, ...rest }) =>
+        React.createElement("a", { href: to, ...rest }, children),
+    };
+  });
+} catch (e) {
+  // noop when jest isn't available
+}
+
 // jsdom doesn't implement URL.createObjectURL by default; stub it for preview generation & tests
 if (typeof global.URL.createObjectURL !== "function") {
   global.URL.createObjectURL = obj => `blob://${(obj && obj.name) || "mock"}`;
