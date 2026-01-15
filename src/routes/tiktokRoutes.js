@@ -1091,6 +1091,36 @@ router.post(
           }
         }
 
+        // If commercial content is enabled, require at least one of yourBrand or brandedContent
+        if (
+          tiktokOpts &&
+          tiktokOpts.commercial &&
+          tiktokOpts.commercial.yourBrand === false &&
+          tiktokOpts.commercial.brandedContent === false
+        ) {
+          try {
+            await db.collection("admin_audit").add({
+              type: "tiktok_publish_attempt",
+              uid,
+              outcome: "rejected",
+              reason: "commercial_content_missing_selection",
+              details: { commercial: tiktokOpts.commercial },
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              ip: req.ip,
+            });
+          } catch (e) {
+            console.warn(
+              "Failed to write tiktok publish audit (commercial selection)",
+              e && e.message
+            );
+          }
+          return res.status(400).json({
+            error: "tiktok_commercial_content_missing_selection",
+            message:
+              "At least one of 'Your Brand' or 'Branded Content' must be selected for commercial content.",
+          });
+        }
+
         // Branded content cannot be private: enforce invariant server-side as well
         if (
           tiktokOpts &&

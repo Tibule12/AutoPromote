@@ -12,8 +12,10 @@
     "autopromote-server": "file:..",
     "expo": "~53.0.22",
     "expo-status-bar": "~2.2.3",
+    "hono": "^4.11.4",
     "react": "19.0.0",
-    "react-native": "0.79.6"
+    "react-native": "0.79.6",
+    "undici": "^7.18.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
