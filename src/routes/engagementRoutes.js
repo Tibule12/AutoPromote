@@ -19,7 +19,7 @@ router.post("/track", async (req, res) => {
     // Basic validation
     if (!type || !target) return res.status(400).json({ ok: false, error: "missing_fields" });
     // For now: accept and acknowledge. Downstream systems (analytics) may ingest these.
-    console.log(`[engagement] track: type=${type} target=${target} id=${id || "-"}`);
+    console.log("[engagement] track:", { type, target, id: id || "-" });
     return res.json({ ok: true });
   } catch (e) {
     console.error("[engagement] track error", e);

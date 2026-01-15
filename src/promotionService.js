@@ -32,7 +32,7 @@ class PromotionService {
   // Schedule a promotion for content with advanced algorithms
   async schedulePromotion(contentId, _scheduleData) {
     try {
-      console.log(`📊 Scheduling promotion for content ID: ${contentId}`);
+      console.log("📊 Scheduling promotion for content ID:", contentId);
       console.log("📋 Schedule data:", _scheduleData);
 
       // Get content details for optimization
@@ -180,7 +180,10 @@ class PromotionService {
         const occurrenceCount = await this.getOccurrenceCount(schedule.id);
         if (occurrenceCount >= schedule.maxOccurrences) {
           console.log(
-            `⏹️ Max occurrences (${schedule.maxOccurrences}) reached for schedule ${schedule.id}`
+            "⏹️ Max occurrences:",
+            schedule.maxOccurrences,
+            "reached for schedule",
+            schedule.id
           );
           return null;
         }
@@ -188,7 +191,7 @@ class PromotionService {
 
       const ref = await db.collection("promotion_schedules").add(nextScheduleData);
       const created = { id: ref.id, ...nextScheduleData };
-      console.log(`✅ Created next recurrence for schedule ${schedule.id}:`, created);
+      console.log("✅ Created next recurrence for schedule:", schedule.id, created);
       return created;
     } catch (error) {
       console.error("Error in createNextRecurrence:", error);
@@ -429,7 +432,7 @@ class PromotionService {
         }
       }
 
-      console.log(`✅ Processed ${completedPromotions.length} completed promotions`);
+      console.log("✅ Processed", completedPromotions.length, "completed promotions");
       return completedPromotions.length;
     } catch (error) {
       console.error("Error processing completed promotions:", error);
