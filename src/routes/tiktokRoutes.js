@@ -1147,6 +1147,118 @@ router.post(
           });
         }
 
+        // Validate disclosure flags for AIGC and commercial content
+        if (tiktokOpts) {
+          // Ensure disclosure is a boolean when provided
+          if (
+            typeof tiktokOpts.disclosure !== "undefined" &&
+            typeof tiktokOpts.disclosure !== "boolean"
+          ) {
+            try {
+              await db.collection("admin_audit").add({
+                type: "tiktok_publish_attempt",
+                uid,
+                outcome: "rejected",
+                reason: "disclosure_invalid_type",
+                details: { disclosure: tiktokOpts.disclosure },
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                ip: req.ip,
+              });
+            } catch (e) {
+              console.warn(
+                "Failed to write tiktok publish audit (disclosure type)",
+                e && e.message
+              );
+            }
+            return res.status(400).json({
+              error: "tiktok_disclosure_invalid",
+              message: "The TikTok disclosure flag must be a boolean value.",
+            });
+          }
+
+          // Require disclosure when content is marked as AI-generated
+          if (tiktokOpts.is_aigc) {
+            if (!tiktokOpts.disclosure) {
+              try {
+                await db.collection("admin_audit").add({
+                  type: "tiktok_publish_attempt",
+                  uid,
+                  outcome: "rejected",
+                  reason: "aigc_missing_disclosure",
+                  details: { is_aigc: tiktokOpts.is_aigc, disclosure: tiktokOpts.disclosure },
+                  createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                  ip: req.ip,
+                });
+              } catch (e) {
+                console.warn(
+                  "Failed to write tiktok publish audit (aigc disclosure)",
+                  e && e.message
+                );
+              }
+              return res.status(400).json({
+                error: "tiktok_aigc_missing_disclosure",
+                message:
+                  "AI-generated content must include a disclosure before publishing to TikTok.",
+              });
+            }
+          }
+
+          // Require disclosure when any commercial/branded flag is selected
+          if (
+            tiktokOpts.commercial &&
+            (tiktokOpts.commercial.yourBrand || tiktokOpts.commercial.brandedContent)
+          ) {
+            if (!tiktokOpts.disclosure) {
+              try {
+                await db.collection("admin_audit").add({
+                  type: "tiktok_publish_attempt",
+                  uid,
+                  outcome: "rejected",
+                  reason: "commercial_missing_disclosure",
+                  details: { commercial: tiktokOpts.commercial, disclosure: tiktokOpts.disclosure },
+                  createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                  ip: req.ip,
+                });
+              } catch (e) {
+                console.warn(
+                  "Failed to write tiktok publish audit (commercial disclosure)",
+                  e && e.message
+                );
+              }
+              return res.status(400).json({
+                error: "tiktok_commercial_missing_disclosure",
+                message: "Commercial or branded content must include an explicit disclosure.",
+              });
+            }
+          }
+        }
+
+        // Branded content cannot be private: enforce invariant server-side as well
+        if (
+          tiktokOpts &&
+          tiktokOpts.commercial &&
+          tiktokOpts.commercial.brandedContent &&
+          tiktokOpts.privacy === "SELF_ONLY"
+        ) {
+          try {
+            await db.collection("admin_audit").add({
+              type: "tiktok_publish_attempt",
+              uid,
+              outcome: "rejected",
+              reason: "branded_content_requires_public",
+              details: { commercial: tiktokOpts.commercial, privacy: tiktokOpts.privacy },
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              ip: req.ip,
+            });
+          } catch (e) {
+            console.warn("Failed to write tiktok publish audit (branded)", e && e.message);
+          }
+          return res.status(400).json({
+            error: "tiktok_branded_content_requires_public",
+            message: "Branded content cannot be private. Please choose a public privacy option.",
+          });
+        }
+
         // Enforce posting cap per 24 hours if provided
         if (creator && typeof creator.posting_cap_per_24h === "number") {
           try {
