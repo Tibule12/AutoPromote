@@ -2696,10 +2696,12 @@ function ContentUploadForm({
               >
                 <strong>Preview of TikTok UX behavior:</strong>
                 <div style={{ marginTop: 6 }}>
-                  <strong>Privacy: {tiktokPrivacy || "Not selected"}</strong>
+                  <strong style={{ fontWeight: 700, color: "#111" }}>
+                    Privacy: {tiktokPrivacy || "Not selected"}
+                  </strong>
                 </div>
                 <div>
-                  <strong>
+                  <strong style={{ fontWeight: 700, color: "#111" }}>
                     Disclosure:{" "}
                     {tiktokDisclosureEnabled
                       ? tiktokYourBrand && tiktokBrandedContent
