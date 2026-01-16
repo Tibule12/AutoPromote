@@ -2694,7 +2694,9 @@ function ContentUploadForm({
                   fontSize: 13,
                 }}
               >
-                <strong>Preview of TikTok UX behavior:</strong>
+                <strong style={{ fontWeight: 700, color: "#111" }}>
+                  Preview of TikTok UX behavior:
+                </strong>
                 <div style={{ marginTop: 6 }}>
                   <strong style={{ fontWeight: 700, color: "#111" }}>
                     Privacy: {tiktokPrivacy || "Not selected"}
