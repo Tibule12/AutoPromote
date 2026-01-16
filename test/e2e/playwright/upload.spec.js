@@ -7,6 +7,8 @@ const fetch = require("node-fetch");
 async function startServers() {
   // Start main server with test-friendly env
   process.env.CORS_ALLOW_ALL = "true";
+  // Ensure server sees test environment so auth middleware enables test bypasses
+  process.env.NODE_ENV = process.env.NODE_ENV || "test";
   // Ensure the server uses the provided service account (set via env) if present
   const app = require("../../../src/server");
   const mainServer = app.listen(0);
