@@ -68,6 +68,23 @@ async function main() {
     if (Array.isArray(data.pages) && data.pages.length > 0) {
       console.log('Sample page keys:', Object.keys(data.pages[0] || {}));
     }
+    // Print recent audits if any
+    try {
+      const auditsCol = docRef.collection('audits');
+      const auditsSnap = await auditsCol.orderBy
+        ? await auditsCol.orderBy('createdAt', 'desc').limit(5).get()
+        : await auditsCol.get();
+      if (auditsSnap && auditsSnap.docs && auditsSnap.docs.length > 0) {
+        console.log('\nRecent audits:');
+        for (const a of auditsSnap.docs) {
+          console.log('-', a.id, a.data ? a.data() : a);
+        }
+      } else {
+        console.log('\nNo audits found.');
+      }
+    } catch (e) {
+      console.warn('Could not read audits:', e && e.message ? e.message : e);
+    }
   } catch (e) {
     console.error('Error during debug run:', e && e.message ? e.message : e);
     process.exit(3);

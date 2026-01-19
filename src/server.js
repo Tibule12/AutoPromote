@@ -22,7 +22,9 @@ try {
         process.env.FIREBASE_PROJECT_ID = parsed.project_id;
       }
       console.log(
-        `[startup] Wrote service account JSON to ${tmpPath} and set GOOGLE_APPLICATION_CREDENTIALS`
+        "[startup] Wrote service account JSON to",
+        tmpPath,
+        "and set GOOGLE_APPLICATION_CREDENTIALS"
       );
     } catch (e) {
       console.warn(
@@ -80,7 +82,7 @@ try {
     } catch (e) {
       grpcInfo = `@grpc/grpc-js missing (${e && e.message})`;
     }
-    console.log(`[diagnostic] google-gax@${gaxPkg.version} at ${gaxResolved}; ${grpcInfo}`);
+    console.log("[diagnostic] google-gax@", gaxPkg.version, "at", gaxResolved + ";", grpcInfo);
   } catch (e) {
     console.warn("[diagnostic] google-gax not found:", e && e.message);
   }
@@ -149,7 +151,11 @@ try {
   });
   if (process.env.KEEP_ALIVE_LOG !== "0") {
     console.log(
-      `[startup] Keep-alive agents enabled (max=${httpAgent.maxSockets}, free=${httpAgent.maxFreeSockets})`
+      "[startup] Keep-alive agents enabled (max=",
+      httpAgent.maxSockets,
+      ", free=",
+      httpAgent.maxFreeSockets,
+      ")"
     );
   }
 } catch (e) {
@@ -305,11 +311,17 @@ async function runWarmup(trigger = "auto") {
   __warmupState.at = new Date().toISOString();
   if (!__warmupState.error) {
     console.log(
-      `[warmup] completed in ${__warmupState.tookMs}ms (trigger=${__warmupState.triggeredBy})`
+      "[warmup] completed in",
+      __warmupState.tookMs + "ms",
+      "(trigger=",
+      __warmupState.triggeredBy,
+      ")"
     );
   } else {
     console.log(
-      `[warmup] completed with error in ${__warmupState.tookMs}ms: ${__warmupState.error}`
+      "[warmup] completed with error in",
+      __warmupState.tookMs + "ms:",
+      __warmupState.error
     );
   }
 }
@@ -379,7 +391,7 @@ function slowRequestLogger(req, res, next) {
     const dur = Date.now() - started;
     recordLatency(dur);
     if (dur >= SLOW_REQ_MS) {
-      logger.warn(`[slow] ${req.method} ${req.originalUrl} ${dur}ms status=${res.statusCode}`);
+      logger.warn("[slow]", req.method, req.originalUrl, dur + "ms", "status=", res.statusCode);
     }
   });
   next();
@@ -445,7 +457,7 @@ function instrumentHandler(fn, routeId) {
       if (ms > m.maxMs) m.maxMs = ms;
       __routeMetrics[routeId] = m;
       if (ms > parseInt(process.env.SLOW_STATUS_THRESHOLD_MS || "4000", 10)) {
-        console.warn(`[status-slow] route=${routeId} ${ms}ms`);
+        console.warn("[status-slow] route=", routeId, ms + "ms");
       }
     }
     res.once("finish", finalize);
@@ -933,7 +945,27 @@ try {
             "";
           const ua = req.headers["user-agent"] || "";
           const ts = new Date().toISOString();
-          const line = `[ACCESS] ts=${ts} ${req.method} ${req.originalUrl} status=${res.statusCode} requestID="${req.requestId || ""}" clientIP="${ip}" responseTimeMS=${duration} responseBytes=${bytes} userAgent="${ua.replace(/"/g, "")}"`;
+          const uaClean = ua.replace(/"/g, "");
+          const line =
+            "[ACCESS] ts=" +
+            ts +
+            " " +
+            req.method +
+            " " +
+            req.originalUrl +
+            " status=" +
+            res.statusCode +
+            ' requestID="' +
+            (req.requestId || "") +
+            '" clientIP="' +
+            ip +
+            '" responseTimeMS=' +
+            duration +
+            " responseBytes=" +
+            bytes +
+            ' userAgent="' +
+            uaClean +
+            '"';
           logger.info(line);
           // Optional: write access log line to a daily file for security evidence (enable with LOG_EVENTS_TO_FILE=true)
           try {
@@ -2685,7 +2717,7 @@ try {
   express.response.send = function (body) {
     const route = this.req.originalUrl;
     if (route.includes("/api/admin")) {
-      console.log(`\n[DEBUG] Response for ${route}:`);
+      console.log("\n[DEBUG] Response for", route + ":");
       console.log("Status:", this.statusCode);
       try {
         // Log request headers for admin routes
@@ -2729,9 +2761,9 @@ try {
     } catch (e) {}
     server
       .listen(PORT, async () => {
-        console.log(`🚀 AutoPromote Server is running on port ${PORT}`);
-        console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
-        console.log(`🔗 API endpoints available at: http://localhost:${PORT}/api/`);
+        console.log("🚀 AutoPromote Server is running on port", PORT);
+        console.log("📊 Health check available at:", "http://localhost:" + PORT + "/api/health");
+        console.log("🔗 API endpoints available at:", "http://localhost:" + PORT + "/api/");
 
         // Run startup diagnostics to catch configuration issues immediately
         try {
@@ -2757,7 +2789,7 @@ try {
       .on("error", err => {
         console.log("❌ Server startup error:", err.message);
         if (err.code === "EADDRINUSE") {
-          console.log(`Port ${PORT} is already in use by another application.`);
+          console.log("Port", PORT, "is already in use by another application.");
           console.log(
             "Try changing the PORT environment variable or closing the other application."
           );
@@ -2903,7 +2935,7 @@ try {
             batchSize: 5,
           });
           if (result.processed) {
-            console.log(`[BG][stats] Updated ${result.processed} content docs`);
+            console.log("[BG][stats] Updated", result.processed, "content docs");
             try {
               require("./services/metricsRecorder").incrCounter("statsPoller.runs");
             } catch (_) {}
@@ -2951,7 +2983,7 @@ try {
             processed += (yt ? 1 : 0) + (pf ? 1 : 0);
           }
           if (processed) {
-            console.log(`[BG][tasks] Processed ${processed} queued tasks`);
+            console.log("[BG][tasks] Processed", processed, "queued tasks");
             try {
               require("./services/metricsRecorder").incrCounter(
                 "promotionTasks.processed",
@@ -2990,7 +3022,7 @@ try {
           if (jitter) await new Promise(r => setTimeout(r, jitter));
           const r = await pollPlatformPostMetricsBatch({ batchSize: 5 });
           if (r.processed)
-            console.log(`[BG][platform-metrics] Updated ${r.processed} platform post metrics`);
+            console.log("[BG][platform-metrics] Updated", r.processed, "platform post metrics");
           if (r.processed) {
             try {
               require("./services/metricsRecorder").incrCounter(
@@ -3024,7 +3056,7 @@ try {
         setInterval(async () => {
           try {
             const removed = await cleanupOldStates(30); // older than 30 minutes
-            if (removed) console.log(`[BG][oauth-states] cleaned ${removed} stale records`);
+            if (removed) console.log("[BG][oauth-states] cleaned", removed, "stale records");
             if (removed) {
               try {
                 require("./services/metricsRecorder").incrCounter("oauthStates.cleaned", removed);
@@ -3067,7 +3099,11 @@ try {
             const r = await aggregateUnprocessed({ batchSize: 300 });
             if (r.processedEvents)
               console.log(
-                `[BG][earnings] aggregated ${r.processedEvents} events for ${r.usersUpdated} users`
+                "[BG][earnings] aggregated",
+                r.processedEvents,
+                "events for",
+                r.usersUpdated,
+                "users"
               );
             if (r.processedEvents) {
               try {
@@ -3114,7 +3150,7 @@ try {
           });
           if (removed) {
             await batch.commit();
-            console.log(`[BG][locks] cleaned ${removed} stale locks`);
+            console.log("[BG][locks] cleaned", removed, "stale locks");
           }
           try {
             require("./services/statusRecorder").recordRun("lockCleanup", {
@@ -3227,7 +3263,7 @@ try {
             try {
               const processed = await paypalPayoutService.processPendingPayouts(50);
               if (processed && processed.processed)
-                console.log(`[BG][payouts] processed ${processed.processed} pending payouts`);
+                console.log("[BG][payouts] processed", processed.processed, "pending payouts");
               try {
                 require("./services/metricsRecorder").incrCounter(
                   "payouts.processed",

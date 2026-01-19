@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { PUBLIC_SITE_URL } from "../config";
 import "./Footer.css";
 import NewsletterSubscribe from "./NewsletterSubscribe";
 
@@ -86,12 +87,12 @@ const Footer = () => {
         {/* Legal Column */}
         <div className="ap-footer-col">
           <div className="ap-footer-header">Legal</div>
-          <Link to="/terms" target="_blank" rel="noopener noreferrer">
+          <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noopener noreferrer">
             Terms of Service
-          </Link>
-          <Link to="/privacy" target="_blank" rel="noopener noreferrer">
+          </a>
+          <a href={`${PUBLIC_SITE_URL}/privacy`} target="_blank" rel="noopener noreferrer">
             Privacy Policy
-          </Link>
+          </a>
           <Link to="/cookies">Cookie Policy</Link>
           <Link to="/security">Security</Link>
         </div>
