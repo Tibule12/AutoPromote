@@ -92,9 +92,12 @@ class ReferralGrowthEngine {
           .get();
 
         if (!potentialFraud.empty) {
-          console.warn(
-            `[Anti-Fraud] Blocked referral from IP ${ipAddress} for inviter ${invitation.inviterId}`
-          );
+              console.warn(
+                "[Anti-Fraud] Blocked referral from IP",
+                ipAddress,
+                "for inviter",
+                invitation.inviterId
+              );
           throw new Error("Referral not eligible: Multiple signups from same network detected.");
         }
       }
@@ -171,7 +174,7 @@ class ReferralGrowthEngine {
         { merge: true }
       );
 
-      console.log(`✅ Awarded ${credits} referral credits to user ${userId}`);
+      console.log("✅ Awarded", credits, "referral credits to user", userId);
 
       // --- REFERRAL MILESTONES ---
 
@@ -228,7 +231,7 @@ class ReferralGrowthEngine {
         createdAt: new Date().toISOString(),
       });
 
-      console.log(`✅ User ${userId} hit 10 referrals and got $5 cash.`);
+      console.log("✅ User", userId, "hit 10 referrals and got $5 cash.");
     } catch (err) {
       console.error("Failed to award launchpad bonus:", err);
     }
@@ -360,7 +363,7 @@ class ReferralGrowthEngine {
         lastUpdated: new Date().toISOString(),
       });
 
-      console.log(`✅ Awarded ${credits} signup bonus to new user ${userId}`);
+      console.log("✅ Awarded", credits, "signup bonus to new user", userId);
     } catch (error) {
       console.error("Error awarding signup bonus:", error);
       throw error;
@@ -517,7 +520,7 @@ class ReferralGrowthEngine {
 
       // Notify other squad members (would integrate with notification service)
       const otherMembers = squad.members.filter(id => id !== userId);
-      console.log(`📢 Notifying ${otherMembers.length} squad members about new content share`);
+      console.log("📢 Notifying", otherMembers.length, "squad members about new content share");
 
       return {
         shareId: shareRef.id,

@@ -15,11 +15,11 @@ async function updateContentStatus(contentId, newStatus) {
   const contentRef = db.collection("content").doc(contentId);
   const doc = await contentRef.get();
   if (!doc.exists) {
-    console.log(`Content with ID ${contentId} does not exist.`);
+    console.log("Content with ID", contentId, "does not exist.");
     return;
   }
   await contentRef.update({ status: newStatus });
-  console.log(`Status for content ${contentId} updated to '${newStatus}'.`);
+  console.log("Status for content", contentId, "updated to '", newStatus, "'.");
 }
 
 const [, , contentId, newStatus] = process.argv;

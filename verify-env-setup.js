@@ -36,10 +36,10 @@ console.log("\n🔧 Checking required environment variables:");
 
 let missingVars = [];
 requiredVars.forEach(varName => {
-  if (process.env[varName]) {
-    console.log(`✅ ${varName}: Set`);
+    if (process.env[varName]) {
+    console.log("✅", varName + ": Set");
   } else {
-    console.log(`❌ ${varName}: Missing`);
+    console.log("❌", varName + ": Missing");
     missingVars.push(varName);
   }
 });
@@ -47,7 +47,7 @@ requiredVars.forEach(varName => {
 if (missingVars.length > 0) {
   console.log("\n❌ Missing environment variables:");
   missingVars.forEach(varName => {
-    console.log(`   - ${varName}`);
+    console.log("   -", varName);
   });
   console.log("\n📝 Please add these variables to your .env file");
 } else {
@@ -59,8 +59,8 @@ if (process.env.FIREBASE_PRIVATE_KEY_JSON) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_PRIVATE_KEY_JSON);
     console.log("\n🔑 Firebase Service Account:");
-    console.log(`   Project ID: ${serviceAccount.project_id}`);
-    console.log(`   Client Email: ${serviceAccount.client_email}`);
+    console.log("   Project ID:", serviceAccount.project_id);
+    console.log("   Client Email:", serviceAccount.client_email);
     console.log("✅ Service account key is valid JSON");
   } catch (error) {
     console.log("\n❌ Firebase Service Account: Invalid JSON format");

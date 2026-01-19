@@ -43,7 +43,7 @@ class VideoClippingService {
    */
   async analyzeVideo(videoUrl, contentId, userId) {
     try {
-      console.log(`[VideoClipping] Starting analysis for ${contentId}`);
+      console.log("[VideoClipping] Starting analysis for", contentId);
 
       // 1. Download video to temp location
       const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "video-analysis-"));
@@ -53,7 +53,7 @@ class VideoClippingService {
 
       // 2. Extract video metadata
       const metadata = await this.extractMetadata(videoPath);
-      console.log(`[VideoClipping] Video duration: ${metadata.duration}s`);
+      console.log("[VideoClipping] Video duration:", metadata.duration + "s");
 
       // 3. Generate transcript
       const transcript = await this.generateTranscript(videoPath);
