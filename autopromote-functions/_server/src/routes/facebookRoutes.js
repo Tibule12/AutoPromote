@@ -229,15 +229,13 @@ router.get("/callback", async (req, res) => {
           const igData = await igRes.json();
           // Log specific response for debugging
           if (igData.error) {
-            console.error(`[FacebookCallback] IG check failed for page ${pageId}:`, igData.error);
+            console.error("[FacebookCallback] IG check failed for page", pageId + ":", igData.error);
           } else if (igData.instagram_business_account && igData.instagram_business_account.id) {
             igBusinessAccountId = igData.instagram_business_account.id;
-            console.log(
-              `[FacebookCallback] Found IG Business Account ${igBusinessAccountId} on page ${pageId}`
-            );
+            console.log("[FacebookCallback] Found IG Business Account", igBusinessAccountId, "on page", pageId);
           }
-        } catch (e) {
-          console.error(`[FacebookCallback] Exception checking IG for page ${page.id}:`, e);
+          } catch (e) {
+          console.error("[FacebookCallback] Exception checking IG for page", page.id + ":", e);
         }
       }
     }

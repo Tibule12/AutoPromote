@@ -12,7 +12,7 @@ import { API_ENDPOINTS } from "./config";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 // Temporarily comment out component imports for isolation
 // TODO: revert after diagnostics
-// import SpotifyTrackSearch from "./components/SpotifyTrackSearch";
+import SpotifyTrackSearch from "./components/SpotifyTrackSearch";
 // import ImageCropper from "./components/ImageCropper";
 // import AudioWaveformTrimmer from "./components/AudioWaveformTrimmer";
 // import EmojiPicker from "./components/EmojiPicker";

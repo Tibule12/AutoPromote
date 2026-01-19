@@ -12,7 +12,7 @@ function renderTemplate(tpl, vars) {
 
 async function sendEmail({ to, subject, html, text, headers }) {
   if (!ENABLE_EMAIL) {
-    console.log(`[emailService] disabled -> ${subject} to ${maskEmail(to)}`);
+    console.log("[emailService] disabled ->", subject, "to", maskEmail(to));
     return { ok: false, disabled: true };
   }
   const provider = getEmailProvider();

@@ -15,7 +15,7 @@ const CONTENT_URL =
   "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg";
 
 function log(h, m) {
-  console.log(`[${h}]`, m || "");
+  console.log("[" + h + "]", m || "");
 }
 
 async function getHealth() {
