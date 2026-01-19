@@ -326,7 +326,9 @@ router.get("/callback", async (req, res) => {
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
           });
           console.warn(
-            `[FacebookCallback] preserved existing pages for uid ${uidFromState} because callback returned empty pages`
+            "[FacebookCallback] preserved existing pages for uid",
+            uidFromState,
+            "because callback returned empty pages"
           );
         } catch (e) {
           console.warn(

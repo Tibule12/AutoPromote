@@ -191,7 +191,7 @@ const authMiddleware = async (req, res, next) => {
         !!verifyErr && !!verifyErr.message
       );
       const took = Date.now() - startMs;
-      if (took > 500) console.warn(`[auth][slow-verify] took=${took}ms ip=${requestContext.ip}`);
+      if (took > 500) console.warn("[auth][slow-verify] took=", took + "ms ip=", requestContext.ip);
       if (verifyErr && verifyErr.code === "auth/id-token-expired")
         return res.status(401).json({ error: "Token expired" });
       return res.status(401).json({ error: "Invalid token" });

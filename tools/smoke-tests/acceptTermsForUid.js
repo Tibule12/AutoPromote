@@ -85,7 +85,7 @@ async function main() {
     };
 
     await userRef.set(update, { merge: true });
-    console.log(`Wrote lastAcceptedTerms.version=${version} for uid=${uid}`);
+    console.log("Wrote lastAcceptedTerms.version=", version, "for uid=", uid);
     process.exit(0);
   } catch (err) {
     console.error("Error:", err && err.message ? err.message : err);

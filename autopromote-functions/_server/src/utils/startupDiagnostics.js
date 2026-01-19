@@ -36,7 +36,7 @@ class StartupDiagnostics {
               ? "ℹ️"
               : "✅";
 
-    console.log(`${icon} [${category.toUpperCase()}] ${message}`);
+    console.log(icon + " [" + category.toUpperCase() + "]", message);
     if (Object.keys(details).length > 0) {
       console.log("   Details:", details);
     }
@@ -155,7 +155,7 @@ class StartupDiagnostics {
           impact: "Storage operations may not work",
         });
       } else {
-        const bucket = admin.storage().bucket(configuredBucket);
+          console.log("[DIAGNOSTICS][PLATFORM]", platform.toUpperCase(), "no env vars detected");
         try {
           const [exists] = await bucket.exists();
           if (exists) {
@@ -256,11 +256,9 @@ class StartupDiagnostics {
       // Debug log for detected env keys per platform
       const present = vars.filter(v => !!process.env[v]);
       if (present.length > 0) {
-        console.log(
-          `[DIAGNOSTICS][PLATFORM] ${platform.toUpperCase()} detected envs: ${present.join(", ")}`
-        );
+        console.log("[DIAGNOSTICS][PLATFORM]", platform.toUpperCase(), "detected envs:", present.join(", "));
       } else {
-        console.log(`[DIAGNOSTICS][PLATFORM] ${platform.toUpperCase()} no env vars detected`);
+        console.log("[DIAGNOSTICS][PLATFORM]", platform.toUpperCase(), "no env vars detected");
       }
       // Platform-specific variant checks
       if (platform === "instagram") {
@@ -494,22 +492,22 @@ class StartupDiagnostics {
     console.log("\n" + "=".repeat(60));
     console.log("📊 STARTUP DIAGNOSTICS SUMMARY");
     console.log("=".repeat(60));
-    console.log(`⏱️  Duration: ${duration}s`);
-    console.log(`🚨 Critical Errors: ${this.criticalErrors.length}`);
-    console.log(`❌ Errors: ${this.errors.length}`);
-    console.log(`⚠️  Warnings: ${this.warnings.length}`);
+    console.log("⏱️  Duration:", duration + "s");
+    console.log("🚨 Critical Errors:", this.criticalErrors.length);
+    console.log("❌ Errors:", this.errors.length);
+    console.log("⚠️  Warnings:", this.warnings.length);
     console.log("=".repeat(60));
 
     if (this.criticalErrors.length > 0) {
       console.log("\n🚨 CRITICAL ERRORS THAT MUST BE FIXED:");
       this.criticalErrors.forEach((err, idx) => {
-        console.log(`\n${idx + 1}. ${err.message}`);
-        console.log(`   Category: ${err.category}`);
+        console.log("\n" + (idx + 1) + ".", err.message);
+        console.log("   Category:", err.category);
         if (err.details.action_required) {
-          console.log(`   Action: ${err.details.action_required}`);
+          console.log("   Action:", err.details.action_required);
         }
         if (err.details.impact) {
-          console.log(`   Impact: ${err.details.impact}`);
+          console.log("   Impact:", err.details.impact);
         }
       });
     }
@@ -517,10 +515,10 @@ class StartupDiagnostics {
     if (this.errors.length > 0) {
       console.log("\n❌ ERRORS THAT SHOULD BE FIXED:");
       this.errors.forEach((err, idx) => {
-        console.log(`\n${idx + 1}. ${err.message}`);
-        console.log(`   Category: ${err.category}`);
+        console.log("\n" + (idx + 1) + ".", err.message);
+        console.log("   Category:", err.category);
         if (err.details.action_required) {
-          console.log(`   Action: ${err.details.action_required}`);
+          console.log("   Action:", err.details.action_required);
         }
       });
     }
@@ -528,7 +526,7 @@ class StartupDiagnostics {
     if (this.warnings.length > 0) {
       console.log("\n⚠️  WARNINGS (Optional Improvements):");
       this.warnings.forEach((warn, idx) => {
-        console.log(`${idx + 1}. ${warn.message}`);
+        console.log((idx + 1) + ".", warn.message);
       });
     }
 
