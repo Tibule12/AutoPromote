@@ -146,8 +146,10 @@ router.post(
           (hostHeader && (hostHeader.includes("127.0.0.1") || hostHeader.includes("localhost"))));
       if (isE2ETest && !req.body.isDryRun) {
         const fakeId = `e2e-fake-${Date.now()}`;
-        const status = req.user && req.user.isAdmin ? "approved" : "pending_approval";
-        return res.status(201).json({ content: { id: fakeId, status } });
+        const isAdminTest = req.user && (req.user.isAdmin === true || req.user.role === "admin");
+        const status = isAdminTest ? "approved" : "pending_approval";
+        const approvalStatus = isAdminTest ? "approved" : "pending";
+        return res.status(201).json({ content: { id: fakeId, status, approvalStatus } });
       }
       if (!userId) {
         return res.status(401).json({ error: "Unauthorized" });
@@ -213,6 +215,8 @@ router.post(
             : undefined,
         user_id: userId,
         created_at: new Date(),
+        // Approval status used by admin UI/routes. Keep in sync with `status` for compatibility.
+        approvalStatus: isAdmin ? "approved" : "pending",
         // default to pending_approval for non-admin uploads; admins are auto-approved
         status: isAdmin ? "approved" : "pending_approval",
         viral_optimized: true,
@@ -551,6 +555,7 @@ router.post(
           content: {
             id: contentRef.id,
             status: "pending_approval",
+            approvalStatus: "pending",
           },
           message: "Content uploaded and queued for promotion; awaiting admin approval.",
         });
