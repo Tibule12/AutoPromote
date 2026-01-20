@@ -31,6 +31,67 @@ if (bypass) {
 
   const firestoreStub = () => ({ collection: (name) => new CollectionStub(name) });
 
+  // Provide minimal FieldValue/Timestamp helpers expected by code/tests
+  firestoreStub.FieldValue = { serverTimestamp: () => new Date(), delete: () => null };
+  firestoreStub.Timestamp = {
+    fromDate: d => (d instanceof Date ? d : new Date(d)),
+    now: () => new Date(),
+  };
+
+  // Basic Query stub to support .where/.orderBy/.limit/.get used in tests
+  function QueryStub(collPath) {
+    this._collPath = collPath || "";
+    this._wheres = [];
+    this._order = null;
+    this._limit = null;
+  }
+  QueryStub.prototype.where = function(field, op, value) {
+    this._wheres.push({ field, op, value });
+    return this;
+  };
+  QueryStub.prototype.orderBy = function(field) {
+    this._order = field;
+    return this;
+  };
+  QueryStub.prototype.limit = function(n) {
+    this._limit = n;
+    return this;
+  };
+  QueryStub.prototype.get = async function() {
+    const docs = [];
+    const prefix = this._collPath ? this._collPath + '/' : '';
+    for (const [key, v] of __inMemoryDB.entries()) {
+      if (!key.startsWith(prefix)) continue;
+      const rel = key.slice(prefix.length);
+      if (rel.includes('/')) continue;
+      const data = v.data || {};
+      let include = true;
+      for (const w of this._wheres) {
+        const val = data[w.field];
+        if (w.op === '==' && val !== w.value) include = false;
+        if (w.op === 'in' && (!Array.isArray(w.value) || !w.value.includes(val))) include = false;
+        if (w.op === '>=' && !(typeof val === 'number' && val >= w.value)) include = false;
+      }
+      if (include) {
+        const fullPath = prefix + rel;
+        docs.push({ id: rel, data: () => data, ref: { path: fullPath } });
+      }
+    }
+    if (this._order) {
+      docs.sort((a, b) => {
+        const av = a.data()[this._order] || 0;
+        const bv = b.data()[this._order] || 0;
+        return av > bv ? 1 : av < bv ? -1 : 0;
+      });
+    }
+    if (this._limit) docs.splice(this._limit);
+    return { empty: docs.length === 0, docs, size: docs.length, forEach: cb => docs.forEach(d => cb(d)) };
+  };
+
+  CollectionStub.prototype.get = async function() {
+    return new QueryStub(this._name).get();
+  };
+
   const admin = { apps: ['stub'], firestore: firestoreStub, auth: () => ({ verifyIdToken: async () => ({ uid: 'stub-uid' }), listUsers: async () => ({ users: [] }) }) };
   const db = admin.firestore();
   const auth = admin.auth();

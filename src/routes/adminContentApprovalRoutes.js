@@ -84,7 +84,7 @@ router.post("/:contentId/approve", authMiddleware, adminOnly, async (req, res) =
       approvedBy: req.user.uid,
       approvedAt: admin.firestore.FieldValue.serverTimestamp(),
       approvalNotes: notes || null,
-      status: "active",
+      status: "approved",
     });
 
     // Notify user
@@ -108,6 +108,45 @@ router.post("/:contentId/approve", authMiddleware, adminOnly, async (req, res) =
       notes,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
     });
+
+    // Auto-enqueue platform posts for this content based on its target_platforms
+    (async () => {
+      try {
+        const c = await contentRef.get();
+        if (c.exists) {
+          const data = c.data() || {};
+          const targets = Array.isArray(data.target_platforms)
+            ? data.target_platforms
+            : Array.isArray(data.platforms)
+              ? data.platforms
+              : [];
+          if (targets.length) {
+            const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
+            for (const platform of targets) {
+              try {
+                await enqueuePlatformPostTask({
+                  contentId,
+                  uid: data.userId || null,
+                  platform,
+                  reason: "approved",
+                  payload: {
+                    url: data.url,
+                    title: data.title,
+                    description: data.description,
+                    platformOptions: data.platformOptions || {},
+                    hashtags: data.hashtags || [],
+                  },
+                });
+              } catch (e) {
+                console.warn("enqueuePlatformPostTask failed for", contentId, platform, e.message);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("auto-enqueue after approval failed:", err.message || err);
+      }
+    })();
 
     res.json({ success: true, message: "Content approved successfully" });
   } catch (error) {
@@ -241,7 +280,7 @@ router.post("/bulk-approve", authMiddleware, adminOnly, async (req, res) => {
         approvalStatus: "approved",
         approvedBy: req.user.uid,
         approvedAt: timestamp,
-        status: "active",
+        status: "approved",
       });
     }
 
@@ -255,6 +294,48 @@ router.post("/bulk-approve", authMiddleware, adminOnly, async (req, res) => {
       count: contentIds.length,
       timestamp,
     });
+
+    // Auto-enqueue platform posts for each approved content (best-effort, async)
+    (async () => {
+      try {
+        const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
+        for (const cid of contentIds) {
+          try {
+            const cSnap = await db.collection("content").doc(cid).get();
+            if (!cSnap.exists) continue;
+            const data = cSnap.data() || {};
+            const targets = Array.isArray(data.target_platforms)
+              ? data.target_platforms
+              : Array.isArray(data.platforms)
+                ? data.platforms
+                : [];
+            for (const platform of targets) {
+              try {
+                await enqueuePlatformPostTask({
+                  contentId: cid,
+                  uid: data.userId || null,
+                  platform,
+                  reason: "approved",
+                  payload: {
+                    url: data.url,
+                    title: data.title,
+                    description: data.description,
+                    platformOptions: data.platformOptions || {},
+                    hashtags: data.hashtags || [],
+                  },
+                });
+              } catch (e) {
+                console.warn("bulk enqueue failed for", cid, platform, e && e.message);
+              }
+            }
+          } catch (e) {
+            console.warn("bulk enqueue content fetch failed for", cid, e && e.message);
+          }
+        }
+      } catch (err) {
+        console.warn("bulk auto-enqueue failed:", err && err.message);
+      }
+    })();
 
     res.json({
       success: true,
