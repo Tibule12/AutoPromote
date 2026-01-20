@@ -106,7 +106,9 @@ function sanitizeConnectionForApi(doc) {
 // GET /api/:platform/status
 router.get(
   "/:platform/status",
-  authMiddleware,
+  // NOTE: allow unauthenticated requests here so clients can check connection status
+  // without requiring an ID token. The handler itself will return connected:false when
+  // no user is present. Do not apply authMiddleware which would return 401.
   rateLimit({ max: 50, windowMs: 60000, key: r => r.userId || r.ip }),
   async (req, res) => {
     const platform = normalize(req.params.platform);
