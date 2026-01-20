@@ -9,6 +9,7 @@ function ContentApprovalPanel() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedContent, setSelectedContent] = useState([]);
+  const [indexLink, setIndexLink] = useState(null);
   // filter not used yet; left for future enhancement
 
   useEffect(() => {
@@ -37,14 +38,21 @@ function ContentApprovalPanel() {
       const contentData = contentParsed.json || null;
       const statsData = statsParsed.json || null;
 
-      if (contentParsed.ok && contentData && contentData.success)
+      if (contentParsed.ok && contentData && contentData.success) {
         setContent(contentData.content || contentData.pending || []);
-      else if (!contentParsed.ok) {
+        setIndexLink(null);
+      } else if (!contentParsed.ok) {
         console.warn("Content approval pending endpoint returned non-OK status", {
           status: contentParsed.status,
           preview: contentParsed.textPreview || contentParsed.error,
+          json: contentData,
         });
-        toast.error("Content approval service unavailable (pending list)");
+        if (contentData && contentData.indexLink) {
+          setIndexLink(contentData.indexLink);
+          toast.error("Content approval query requires a Firestore index; see admin link");
+        } else {
+          toast.error("Content approval service unavailable (pending list)");
+        }
       }
 
       if (statsParsed.ok && statsData && statsData.success) setStats(statsData.stats);
@@ -203,6 +211,27 @@ function ContentApprovalPanel() {
           <button onClick={handleBulkApprove} style={successButtonStyle}>
             Bulk Approve ({selectedContent.length})
           </button>
+        </div>
+      )}
+
+      {/* Index warning if present */}
+      {indexLink && (
+        <div
+          style={{
+            padding: 12,
+            backgroundColor: "#fff3e0",
+            border: "1px solid #ffd180",
+            borderRadius: 6,
+            marginBottom: 12,
+          }}
+        >
+          <strong style={{ color: "#bf360c" }}>Notice:</strong> Administrator query requires a
+          Firestore composite index to show pending content.
+          <div style={{ marginTop: 8 }}>
+            <a href={indexLink} target="_blank" rel="noopener noreferrer">
+              Open index creation link in Firebase Console
+            </a>
+          </div>
         </div>
       )}
 

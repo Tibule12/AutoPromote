@@ -9,6 +9,7 @@ function SpotifyTrackSearch({ selectedTracks = [], onChangeTracks }) {
   const debounceRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
+  const [errorMessage, setErrorMessage] = useState(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef(null);
 
@@ -41,14 +42,17 @@ function SpotifyTrackSearch({ selectedTracks = [], onChangeTracks }) {
       if (r.ok && data && data.results) {
         setResults(data.results);
         setHighlightedIndex(-1);
+        setErrorMessage(null);
       } else {
         setResults([]);
         setHighlightedIndex(-1);
+        setErrorMessage(data && data.error ? data.error : "spotify_search_failed");
       }
     } catch (e) {
       console.error("Spotify search error", e);
       setResults([]);
       setHighlightedIndex(-1);
+      setErrorMessage("network_error");
     } finally {
       setLoading(false);
     }
@@ -73,6 +77,24 @@ function SpotifyTrackSearch({ selectedTracks = [], onChangeTracks }) {
 
   const [previewTrack, setPreviewTrack] = React.useState(null);
   const [liveMessage, setLiveMessage] = React.useState("");
+  const [connected, setConnected] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const r = await fetch(API_ENDPOINTS.SPOTIFY_STATUS);
+        const d = await r.json().catch(() => null);
+        if (!mounted) return;
+        setConnected(Boolean(r.ok && d && (d.connected || d.status === "connected")));
+      } catch (e) {
+        // ignore
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="spotify-card" aria-label="Spotify card">
@@ -83,7 +105,18 @@ function SpotifyTrackSearch({ selectedTracks = [], onChangeTracks }) {
           </svg>
           <span>Spotify</span>
         </div>
-        <div className="small-muted">Connected</div>
+        <div className="small-muted">
+          {connected === null ? "Checking..." : connected ? "Connected" : "Not connected"}{" "}
+          {connected === false && (
+            <button
+              className="btn"
+              style={{ marginLeft: 8 }}
+              onClick={() => window.open(API_ENDPOINTS.SPOTIFY_AUTH_START, "_blank")}
+            >
+              Connect
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="actions">
@@ -139,6 +172,29 @@ function SpotifyTrackSearch({ selectedTracks = [], onChangeTracks }) {
           {loading ? "Searching..." : "Search"}
         </button>
       </div>
+
+      {errorMessage === "spotify_not_connected" && (
+        <div
+          className="small-muted"
+          style={{ padding: 8, display: "flex", gap: 8, alignItems: "center" }}
+        >
+          <div>
+            Spotify not connected.{" "}
+            <button
+              className="btn btn-secondary"
+              onClick={() => window.open(API_ENDPOINTS.SPOTIFY_AUTH_START, "_blank")}
+            >
+              Connect Spotify
+            </button>
+          </div>
+        </div>
+      )}
+
+      {errorMessage && errorMessage !== "spotify_not_connected" && (
+        <div className="small-muted" style={{ padding: 8 }}>
+          Error: {errorMessage}
+        </div>
+      )}
 
       <div
         className="results-list"
