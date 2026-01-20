@@ -34,21 +34,10 @@ process.env.PAYFAST_NOTIFY_URL = process.env.PAYFAST_NOTIFY_URL || "https://api.
       item_name: params.item_name,
     };
 
-    // Compute signature the same way provider does
+    // Compute signature using exported helper
     const { buildPayfastSignature } = require('../src/services/payments/payfastProvider');
-    // If buildPayfastSignature is not exported, recompute here
-    let sig;
-    if (typeof buildPayfastSignature === 'function') {
-      sig = buildPayfastSignature(ipn, process.env.PAYFAST_PASSPHRASE);
-    } else {
-      const crypto = require('crypto');
-      const keys = Object.keys(ipn).filter(k=>ipn[k]!==undefined&&ipn[k]!==null&&ipn[k]!=='').sort();
-      const pieces = keys.map(k=>`${k}=${ipn[k]}`);
-      let str = pieces.join('&');
-      if (process.env.PAYFAST_PASSPHRASE) str = str + `&passphrase=${process.env.PAYFAST_PASSPHRASE}`;
-      sig = crypto.createHash('md5').update(str,'utf8').digest('hex');
-    }
-    ipn.signature = sig;
+    const sig = buildPayfastSignature(ipn, process.env.PAYFAST_PASSPHRASE);
+    ipn.signature = sig; 
 
     // Simulate express request
     const fakeReq = { body: ipn };

@@ -65,8 +65,8 @@ class RepostDrivenEngine {
 
   // Generate content fingerprint for tracking
   generateContentFingerprint(contentId) {
-    // Simple fingerprint based on content ID and timestamp - use safe string formatting
-    const hash = crypto.createHash("md5");
+    // Use SHA-256 for fingerprints (stronger than MD5); truncate for compactness
+    const hash = crypto.createHash("sha256");
     hash.update(`${contentId}${Date.now()}`);
     return hash.digest("hex").substring(0, 16);
   }
