@@ -15,11 +15,24 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
       query = query.where("type", "==", type);
     }
 
-    const snapshot = await query
+    let snapshot = await query
       .orderBy("createdAt", "desc")
       .limit(parseInt(limit))
       .offset(parseInt(offset))
       .get();
+
+    // Fallback for older documents that use snake_case fields (`created_at`)
+    if (!snapshot || snapshot.empty) {
+      try {
+        snapshot = await query
+          .orderBy("created_at", "desc")
+          .limit(parseInt(limit))
+          .offset(parseInt(offset))
+          .get();
+      } catch (e) {
+        // If this also fails (no index or other), ignore and continue with empty results
+      }
+    }
 
     const content = [];
     for (const doc of snapshot.docs) {
@@ -27,12 +40,13 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
 
       // Get user info
       let userData = null;
-      if (contentData.userId) {
-        const userDoc = await db.collection("users").doc(contentData.userId).get();
+      const userIdForLookup = contentData.userId || contentData.user_id;
+      if (userIdForLookup) {
+        const userDoc = await db.collection("users").doc(userIdForLookup).get();
         if (userDoc.exists) {
           const user = userDoc.data();
           userData = {
-            id: contentData.userId,
+            id: userIdForLookup,
             name: user.name,
             email: user.email,
             plan: user.plan,
@@ -44,7 +58,13 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
         id: doc.id,
         ...contentData,
         user: userData,
-        createdAt: contentData.createdAt?.toDate?.() || contentData.createdAt,
+        // Support both camelCase and snake_case timestamp fields
+        createdAt: contentData.createdAt?.toDate?.()
+          ? contentData.createdAt.toDate()
+          : contentData.createdAt ||
+            (contentData.created_at?.toDate?.()
+              ? contentData.created_at.toDate()
+              : contentData.created_at),
       });
     }
 
@@ -422,18 +442,26 @@ router.get("/stats", authMiddleware, adminOnly, async (req, res) => {
     today.setHours(0, 0, 0, 0);
     const todayTimestamp = admin.firestore.Timestamp.fromDate(today);
 
-    const [approvedTodaySnapshot, rejectedTodaySnapshot] = await Promise.all([
+    // Use single-field queries and filter in-memory to avoid requiring a composite index
+    const [approvedAtSnap, rejectedAtSnap] = await Promise.all([
       db
         .collection("content")
-        .where("approvalStatus", "==", "approved")
         .where("approvedAt", ">=", todayTimestamp)
-        .get(),
+        .get()
+        .catch(() => ({ docs: [] })),
       db
         .collection("content")
-        .where("approvalStatus", "==", "rejected")
         .where("rejectedAt", ">=", todayTimestamp)
-        .get(),
+        .get()
+        .catch(() => ({ docs: [] })),
     ]);
+
+    const approvedTodaySnapshot = {
+      size: (approvedAtSnap.docs || []).filter(d => d.data().approvalStatus === "approved").length,
+    };
+    const rejectedTodaySnapshot = {
+      size: (rejectedAtSnap.docs || []).filter(d => d.data().approvalStatus === "rejected").length,
+    };
 
     res.json({
       success: true,
