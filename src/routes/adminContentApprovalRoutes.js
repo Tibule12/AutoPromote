@@ -15,11 +15,24 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
       query = query.where("type", "==", type);
     }
 
-    const snapshot = await query
+    let snapshot = await query
       .orderBy("createdAt", "desc")
       .limit(parseInt(limit))
       .offset(parseInt(offset))
       .get();
+
+    // Fallback for older documents that use snake_case fields (`created_at`)
+    if (!snapshot || snapshot.empty) {
+      try {
+        snapshot = await query
+          .orderBy("created_at", "desc")
+          .limit(parseInt(limit))
+          .offset(parseInt(offset))
+          .get();
+      } catch (e) {
+        // If this also fails (no index or other), ignore and continue with empty results
+      }
+    }
 
     const content = [];
     for (const doc of snapshot.docs) {
@@ -27,12 +40,13 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
 
       // Get user info
       let userData = null;
-      if (contentData.userId) {
-        const userDoc = await db.collection("users").doc(contentData.userId).get();
+      const userIdForLookup = contentData.userId || contentData.user_id;
+      if (userIdForLookup) {
+        const userDoc = await db.collection("users").doc(userIdForLookup).get();
         if (userDoc.exists) {
           const user = userDoc.data();
           userData = {
-            id: contentData.userId,
+            id: userIdForLookup,
             name: user.name,
             email: user.email,
             plan: user.plan,
@@ -44,8 +58,74 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
         id: doc.id,
         ...contentData,
         user: userData,
-        createdAt: contentData.createdAt?.toDate?.() || contentData.createdAt,
+        // Support both camelCase and snake_case timestamp fields
+        createdAt: contentData.createdAt?.toDate?.()
+          ? contentData.createdAt.toDate()
+          : contentData.createdAt ||
+            (contentData.created_at?.toDate?.()
+              ? contentData.created_at.toDate()
+              : contentData.created_at),
       });
+    }
+
+    // If debug flag present, include additional diagnostic info (counts & recent docs)
+    if (String(req.query.debug || "").toLowerCase() === "1") {
+      try {
+        const statuses = ["pending", "approved", "rejected", "flagged", "changes_requested"];
+        const counts = {};
+        await Promise.all(
+          statuses.map(async s => {
+            try {
+              const snap = await db.collection("content").where("approvalStatus", "==", s).get();
+              counts[s] = snap.size;
+            } catch (e) {
+              counts[s] = null;
+            }
+          })
+        );
+
+        const recentSnap = await db
+          .collection("content")
+          .orderBy("created_at", "desc")
+          .limit(20)
+          .get()
+          .catch(() => ({ docs: [] }));
+        const recent = (recentSnap.docs || []).map(d => ({
+          id: d.id,
+          approvalStatus: d.data().approvalStatus,
+          title: d.data().title,
+          user_id: d.data().user_id,
+          created_at: d.data().created_at,
+        }));
+
+        const recentPendingSnap = await db
+          .collection("content")
+          .where("approvalStatus", "==", "pending")
+          .orderBy("created_at", "desc")
+          .limit(20)
+          .get()
+          .catch(() => ({ docs: [] }));
+        const recentPending = (recentPendingSnap.docs || []).map(d => ({
+          id: d.id,
+          approvalStatus: d.data().approvalStatus,
+          title: d.data().title,
+          user_id: d.data().user_id,
+          created_at: d.data().created_at,
+        }));
+
+        return res.json({
+          success: true,
+          content,
+          total: content.length,
+          debug: { counts, recent, recentPending },
+        });
+      } catch (err) {
+        console.error(
+          "[admin/pending][debug] Failed to gather debug info:",
+          err && err.stack ? err.stack : err
+        );
+        // Fall through to return the normal response below
+      }
     }
 
     res.json({ success: true, content, total: content.length });
@@ -362,18 +442,26 @@ router.get("/stats", authMiddleware, adminOnly, async (req, res) => {
     today.setHours(0, 0, 0, 0);
     const todayTimestamp = admin.firestore.Timestamp.fromDate(today);
 
-    const [approvedTodaySnapshot, rejectedTodaySnapshot] = await Promise.all([
+    // Use single-field queries and filter in-memory to avoid requiring a composite index
+    const [approvedAtSnap, rejectedAtSnap] = await Promise.all([
       db
         .collection("content")
-        .where("approvalStatus", "==", "approved")
         .where("approvedAt", ">=", todayTimestamp)
-        .get(),
+        .get()
+        .catch(() => ({ docs: [] })),
       db
         .collection("content")
-        .where("approvalStatus", "==", "rejected")
         .where("rejectedAt", ">=", todayTimestamp)
-        .get(),
+        .get()
+        .catch(() => ({ docs: [] })),
     ]);
+
+    const approvedTodaySnapshot = {
+      size: (approvedAtSnap.docs || []).filter(d => d.data().approvalStatus === "approved").length,
+    };
+    const rejectedTodaySnapshot = {
+      size: (rejectedAtSnap.docs || []).filter(d => d.data().approvalStatus === "rejected").length,
+    };
 
     res.json({
       success: true,
