@@ -18,8 +18,24 @@ router.get("/revenue-analytics", authMiddleware, async (req, res) => {
 
     res.json(analytics);
   } catch (error) {
-    console.error("Error fetching revenue analytics:", error);
-    res.status(500).json({ error: "Internal server error" });
+    // Log stack for deeper insight into the failure
+    console.error("Error fetching revenue analytics:", error && error.stack ? error.stack : error);
+
+    // Safe fallback response: return zeroed analytics to keep UI functional
+    const defaultAnalytics = {
+      totalRevenue: 0,
+      dailyBreakdown: [],
+      totalTransactions: 0,
+      averageRevenuePerTransaction: 0,
+      revenueByMonth: [],
+      byContentType: {},
+      transactionTrends: {},
+      // Flag that this is a fallback response
+      _fallback: true,
+      error: "service_unavailable",
+    };
+
+    return res.status(200).json(defaultAnalytics);
   }
 });
 

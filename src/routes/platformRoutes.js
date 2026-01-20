@@ -1980,8 +1980,27 @@ router.get(
       const q = String(req.query.q || req.query.query || "").trim();
       if (!q) return res.status(400).json({ ok: false, error: "query_required" });
       const limit = Math.min(parseInt(req.query.limit || "10", 10) || 10, 50);
-      const results = await searchTracks({ uid, query: q, limit });
-      return res.json({ ok: true, query: q, results: results.tracks || [] });
+      try {
+        const results = await searchTracks({ uid, query: q, limit });
+        return res.json({ ok: true, query: q, results: results.tracks || [] });
+      } catch (e) {
+        // Provide clearer error codes for common failure modes so frontend can guide the user
+        const msg = (e && e.message) || "spotify_search_failed";
+        console.warn("[Spotify][search] failed", { uid, query: q, error: msg });
+        if (msg.includes("No valid Spotify access token")) {
+          return res.status(403).json({ ok: false, error: "spotify_not_connected" });
+        }
+        if (msg.includes("client credentials")) {
+          return res.status(500).json({ ok: false, error: "spotify_client_credentials_missing" });
+        }
+        if (msg.includes("Spotify token refresh failed")) {
+          return res.status(502).json({ ok: false, error: "spotify_token_refresh_failed" });
+        }
+        if (msg.includes("Spotify search failed")) {
+          return res.status(502).json({ ok: false, error: "spotify_search_failed" });
+        }
+        return res.status(500).json({ ok: false, error: msg });
+      }
     } catch (e) {
       return res.status(500).json({ ok: false, error: e.message || "spotify_search_failed" });
     }

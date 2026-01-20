@@ -88,4 +88,43 @@ describe("Spotify search route", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.ok).toBeDefined();
   });
+
+  it("returns 403 when user has no spotify connection", async () => {
+    searchTracks.mockImplementation(async () => {
+      throw new Error("No valid Spotify access token");
+    });
+    const res = await agent
+      .get("/api/spotify/search")
+      .set("Authorization", "Bearer test-token-for-user1")
+      .query({ q: "beatles" });
+    expect(res.statusCode).toBe(403);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.error).toBe("spotify_not_connected");
+  });
+
+  it("returns 502 when token refresh fails", async () => {
+    searchTracks.mockImplementation(async () => {
+      throw new Error("Spotify token refresh failed");
+    });
+    const res = await agent
+      .get("/api/spotify/search")
+      .set("Authorization", "Bearer test-token-for-user1")
+      .query({ q: "beatles" });
+    expect(res.statusCode).toBe(502);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.error).toBe("spotify_token_refresh_failed");
+  });
+
+  it("returns 500 when spotify client credentials are missing", async () => {
+    searchTracks.mockImplementation(async () => {
+      throw new Error("Spotify client credentials not configured");
+    });
+    const res = await agent
+      .get("/api/spotify/search")
+      .set("Authorization", "Bearer test-token-for-user1")
+      .query({ q: "beatles" });
+    expect(res.statusCode).toBe(500);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.error).toBe("spotify_client_credentials_missing");
+  });
 });
