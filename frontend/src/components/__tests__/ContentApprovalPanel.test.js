@@ -25,6 +25,7 @@ beforeEach(() => {
             },
           ],
         }),
+        headers: { get: () => "application/json" },
       });
     }
     if (url.endsWith("/api/admin/approval/stats")) {
@@ -34,12 +35,17 @@ beforeEach(() => {
           success: true,
           stats: { pending: 1, approved: 0, rejected: 0, approvedToday: 0, rejectedToday: 0 },
         }),
+        headers: { get: () => "application/json" },
       });
     }
     // Media fetch
     if (url === "https://example.com/video.mp4") {
       const blob = new Blob(["dummy"], { type: "video/mp4" });
-      return Promise.resolve({ ok: true, blob: async () => blob });
+      return Promise.resolve({
+        ok: true,
+        blob: async () => blob,
+        headers: { get: () => "video/mp4" },
+      });
     }
     return Promise.resolve({ ok: false });
   });
@@ -52,9 +58,9 @@ afterEach(() => {
 test("opens viewer modal and shows a video element when View Content clicked", async () => {
   render(<ContentApprovalPanel />);
 
-  // Wait for content to load
-  await screen.findByText(/Pending Approval/i);
-  expect(screen.getByText("Video")).toBeInTheDocument();
+  // Wait for content header and the item title to appear
+  await screen.findByRole("heading", { name: /Pending Approval/i });
+  await screen.findByText("Video");
 
   const viewBtn = screen.getByText(/View Content →/i);
   fireEvent.click(viewBtn);
