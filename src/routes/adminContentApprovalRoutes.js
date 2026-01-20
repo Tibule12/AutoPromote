@@ -409,6 +409,51 @@ router.get("/stats", authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
+// Quick debug endpoint to inspect recent approval activity and recent approved/pending content
+router.get("/debug", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    // Last 50 approval audit logs
+    const logsSnap = await db
+      .collection("audit_logs")
+      .where("action", "==", "approve_content")
+      .orderBy("timestamp", "desc")
+      .limit(50)
+      .get();
+    const approvals = logsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Recent approved and pending content (last 50 each)
+    const [approvedSnap, pendingSnap] = await Promise.all([
+      db
+        .collection("content")
+        .where("approvalStatus", "==", "approved")
+        .orderBy("approvedAt", "desc")
+        .limit(50)
+        .get()
+        .catch(() => ({ docs: [] })),
+      db
+        .collection("content")
+        .where("approvalStatus", "==", "pending")
+        .orderBy("createdAt", "desc")
+        .limit(50)
+        .get()
+        .catch(() => ({ docs: [] })),
+    ]);
+
+    const approved = approvedSnap.docs
+      ? approvedSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+      : [];
+    const pending = pendingSnap.docs ? pendingSnap.docs.map(d => ({ id: d.id, ...d.data() })) : [];
+
+    res.json({ success: true, approvals, approved, pending });
+  } catch (err) {
+    console.error(
+      "[admin/debug] Error fetching approval debug data:",
+      err && err.stack ? err.stack : err
+    );
+    res.status(500).json({ success: false, error: "Failed to fetch debug info" });
+  }
+});
+
 // Auto-moderation scan (NSFW/harmful content detection)
 router.post("/:contentId/scan", authMiddleware, adminOnly, async (req, res) => {
   try {
