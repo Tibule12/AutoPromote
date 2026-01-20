@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import SpotifyTrackSearch from "../SpotifyTrackSearch";
 
 beforeEach(() => {
@@ -8,6 +8,18 @@ beforeEach(() => {
 afterEach(() => {
   jest.useRealTimers();
   jest.restoreAllMocks();
+});
+
+test("calls /api/spotify/status on mount", async () => {
+  // Mock the /api/spotify/status call that runs on mount
+  global.fetch = jest
+    .fn()
+    .mockResolvedValue({ ok: true, json: async () => ({ connected: true, status: "connected" }) });
+  render(<SpotifyTrackSearch selectedTracks={[]} onChangeTracks={() => {}} />);
+  // Wait for the effect to call the status endpoint
+  await waitFor(() =>
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/api/spotify/status"))
+  );
 });
 
 test("debounces input and performs search after 200ms", async () => {
@@ -22,8 +34,8 @@ test("debounces input and performs search after 200ms", async () => {
   const input = screen.getByLabelText(/Search Spotify tracks/i);
   fireEvent.change(input, { target: { value: "Track" } });
 
-  // Not called immediately due to debounce
-  expect(global.fetch).not.toHaveBeenCalled();
+  // Not called immediately due to debounce (there may be an initial /api/spotify/status call)
+  expect(global.fetch).not.toHaveBeenCalledWith(expect.stringContaining("/api/spotify/search"));
 
   // Advance timer to trigger debounce
   act(() => jest.advanceTimersByTime(200));
