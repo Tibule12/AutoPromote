@@ -2,6 +2,18 @@ const { PaymentProvider } = require("./providerInterface");
 const { db } = require("../../firebaseAdmin");
 const crypto = require("crypto");
 
+/**
+ * Build PayFast signature string using MD5 hash.
+ *
+ * NOTE: PayFast's legacy integration uses MD5 signatures for compatibility. This
+ * use of MD5 is intentional and limited to computing an external service
+ * signature (not used for password storage or any internal authentication).
+ * Do NOT use MD5 for password hashing or sensitive internal storage.
+ *
+ * @param {Object} params - Key/value payload to include in signature
+ * @param {string} passphrase - Optional merchant passphrase
+ * @returns {string} hexadecimal MD5 signature
+ */
 function buildPayfastSignature(params = {}, passphrase) {
   // Build string of params in alphabetical order of keys
   const keys = Object.keys(params)
@@ -10,6 +22,7 @@ function buildPayfastSignature(params = {}, passphrase) {
   const pieces = keys.map(k => `${k}=${params[k]}`);
   let str = pieces.join("&");
   if (passphrase) str = str + `&passphrase=${passphrase}`;
+  // Intentionally using MD5 per PayFast spec (external signature), not for passwords
   return crypto.createHash("md5").update(str, "utf8").digest("hex");
 }
 
@@ -131,4 +144,4 @@ class PayFastProvider extends PaymentProvider {
   }
 }
 
-module.exports = { PayFastProvider };
+module.exports = { PayFastProvider, buildPayfastSignature };

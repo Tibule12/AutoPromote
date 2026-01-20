@@ -51,6 +51,10 @@ async function getValidAccessToken(uid) {
       return refreshed.access_token;
     } catch (e) {
       console.warn("[Spotify] Token refresh failed:", e.message);
+      // If client credentials are not configured, bubble up to surface a clear error
+      if (e.message && e.message.includes("client credentials")) {
+        throw e;
+      }
     }
   }
 
