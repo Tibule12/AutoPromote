@@ -10,6 +10,10 @@ function ContentApprovalPanel() {
   const [loading, setLoading] = useState(true);
   const [selectedContent, setSelectedContent] = useState([]);
   const [indexLink, setIndexLink] = useState(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerSrc, setViewerSrc] = useState(null);
+  const [viewerType, setViewerType] = useState(null);
+  const [viewerLoading, setViewerLoading] = useState(false);
   // filter not used yet; left for future enhancement
 
   useEffect(() => {
@@ -279,14 +283,37 @@ function ContentApprovalPanel() {
 
                 {item.url && (
                   <div style={{ margin: "10px 0" }}>
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: "#1976d2" }}
+                    <button
+                      onClick={async () => {
+                        try {
+                          setViewerLoading(true);
+                          setViewerOpen(true);
+                          setViewerType(item.type || "video");
+
+                          // Fetch as blob to ensure inline playback (avoids download Content-Disposition)
+                          const res = await fetch(item.url, { mode: "cors" });
+                          if (!res.ok) throw new Error("Failed to fetch media");
+                          const blob = await res.blob();
+                          const url = URL.createObjectURL(blob);
+                          setViewerSrc(url);
+                        } catch (err) {
+                          console.error("Failed to open content viewer:", err);
+                          setViewerSrc(item.url); // fallback to using remote URL
+                        } finally {
+                          setViewerLoading(false);
+                        }
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        padding: 0,
+                        color: "#1976d2",
+                        cursor: "pointer",
+                        fontSize: "0.95rem",
+                      }}
                     >
                       View Content →
-                    </a>
+                    </button>
                   </div>
                 )}
 
@@ -328,6 +355,101 @@ function ContentApprovalPanel() {
         {content.length === 0 && (
           <div style={{ padding: 40, textAlign: "center", color: "#666" }}>
             No content pending approval
+          </div>
+        )}
+
+        {/* Viewer Modal */}
+        {viewerOpen && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: "fixed",
+              inset: 0,
+              backgroundColor: "rgba(0,0,0,0.6)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 10000,
+              padding: 20,
+            }}
+            onClick={() => {
+              // clicking backdrop closes
+              setViewerOpen(false);
+              if (viewerSrc && viewerSrc.startsWith("blob:")) URL.revokeObjectURL(viewerSrc);
+              setViewerSrc(null);
+              setViewerType(null);
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                maxWidth: "90%",
+                maxHeight: "90%",
+                background: "white",
+                padding: 12,
+                borderRadius: 8,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <strong>Preview</strong>
+                <button
+                  aria-label="Close preview"
+                  onClick={() => {
+                    setViewerOpen(false);
+                    if (viewerSrc && viewerSrc.startsWith("blob:")) URL.revokeObjectURL(viewerSrc);
+                    setViewerSrc(null);
+                    setViewerType(null);
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                {viewerLoading ? (
+                  <div>Loading...</div>
+                ) : viewerType === "video" ? (
+                  <video
+                    data-testid="viewer-video"
+                    src={viewerSrc}
+                    controls
+                    style={{ maxWidth: "100%", maxHeight: "70vh" }}
+                  />
+                ) : viewerType === "image" ? (
+                  <img
+                    data-testid="viewer-image"
+                    src={viewerSrc}
+                    alt="content preview"
+                    style={{ maxWidth: "100%", maxHeight: "70vh" }}
+                  />
+                ) : viewerType === "audio" ? (
+                  <audio
+                    data-testid="viewer-audio"
+                    src={viewerSrc}
+                    controls
+                    style={{ width: "100%" }}
+                  />
+                ) : (
+                  <a href={viewerSrc} target="_blank" rel="noopener noreferrer">
+                    Open content
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
