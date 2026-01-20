@@ -48,6 +48,66 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
       });
     }
 
+    // If debug flag present, include additional diagnostic info (counts & recent docs)
+    if (String(req.query.debug || "").toLowerCase() === "1") {
+      try {
+        const statuses = ["pending", "approved", "rejected", "flagged", "changes_requested"];
+        const counts = {};
+        await Promise.all(
+          statuses.map(async s => {
+            try {
+              const snap = await db.collection("content").where("approvalStatus", "==", s).get();
+              counts[s] = snap.size;
+            } catch (e) {
+              counts[s] = null;
+            }
+          })
+        );
+
+        const recentSnap = await db
+          .collection("content")
+          .orderBy("created_at", "desc")
+          .limit(20)
+          .get()
+          .catch(() => ({ docs: [] }));
+        const recent = (recentSnap.docs || []).map(d => ({
+          id: d.id,
+          approvalStatus: d.data().approvalStatus,
+          title: d.data().title,
+          user_id: d.data().user_id,
+          created_at: d.data().created_at,
+        }));
+
+        const recentPendingSnap = await db
+          .collection("content")
+          .where("approvalStatus", "==", "pending")
+          .orderBy("created_at", "desc")
+          .limit(20)
+          .get()
+          .catch(() => ({ docs: [] }));
+        const recentPending = (recentPendingSnap.docs || []).map(d => ({
+          id: d.id,
+          approvalStatus: d.data().approvalStatus,
+          title: d.data().title,
+          user_id: d.data().user_id,
+          created_at: d.data().created_at,
+        }));
+
+        return res.json({
+          success: true,
+          content,
+          total: content.length,
+          debug: { counts, recent, recentPending },
+        });
+      } catch (err) {
+        console.error(
+          "[admin/pending][debug] Failed to gather debug info:",
+          err && err.stack ? err.stack : err
+        );
+        // Fall through to return the normal response below
+      }
+    }
+
     res.json({ success: true, content, total: content.length });
   } catch (error) {
     console.error("Error fetching pending content:", error.message || error);
