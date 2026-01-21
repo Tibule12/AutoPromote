@@ -8,18 +8,42 @@ const COUNTERS_DOC = "global_counters";
 
 async function inc(field, amount = 1) {
   try {
-    await db
-      .collection("system")
-      .doc(COUNTERS_DOC)
-      .set(
-        {
-          [field]: admin.firestore.FieldValue.increment(amount),
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        { merge: true }
-      );
+    const FieldValue = admin && admin.firestore && admin.firestore.FieldValue;
+    if (FieldValue && typeof FieldValue.increment === "function") {
+      await db
+        .collection("system")
+        .doc(COUNTERS_DOC)
+        .set(
+          {
+            [field]: FieldValue.increment(amount),
+            updatedAt: FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+    } else {
+      // Fallback: use transaction to increment numerically when FieldValue.increment unavailable (emulator/compat issues)
+      const ref = db.collection("system").doc(COUNTERS_DOC);
+      await db.runTransaction(async tx => {
+        const snap = await tx.get(ref);
+        const cur = snap.exists && typeof snap.data()[field] === "number" ? snap.data()[field] : 0;
+        tx.set(
+          ref,
+          {
+            [field]: cur + amount,
+            updatedAt:
+              FieldValue && FieldValue.serverTimestamp
+                ? FieldValue.serverTimestamp()
+                : new Date().toISOString(),
+          },
+          { merge: true }
+        );
+      });
+    }
   } catch (e) {
     // swallow errors to avoid side-effects breaking main flow
+    try {
+      console.warn("[aggregationService][inc] failed:", e && e.message);
+    } catch (_) {}
   }
 }
 
@@ -58,6 +82,19 @@ async function recordRateLimitEvent(platform) {
   await inc(`rate_limit_${platform || "generic"}`);
 }
 
+async function recordLockTakeoverAttempt(platform) {
+  await inc("lock_takeover_attempt_total");
+  await inc(`lock_takeover_attempt_${platform || "generic"}`);
+}
+async function recordLockTakeoverSuccess(platform) {
+  await inc("lock_takeover_success_total");
+  await inc(`lock_takeover_success_${platform || "generic"}`);
+}
+async function recordLockTakeoverFailure(platform) {
+  await inc("lock_takeover_failure_total");
+  await inc(`lock_takeover_failure_${platform || "generic"}`);
+}
+
 async function getCounters() {
   const snap = await db.collection("system").doc(COUNTERS_DOC).get();
   return snap.exists ? snap.data() : {};
@@ -74,5 +111,8 @@ module.exports = {
   recordPlatformDecayEvent,
   recordPlatformReactivationEvent,
   recordRateLimitEvent,
+  recordLockTakeoverAttempt,
+  recordLockTakeoverSuccess,
+  recordLockTakeoverFailure,
   getCounters,
 };
