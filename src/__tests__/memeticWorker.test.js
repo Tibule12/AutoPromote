@@ -11,6 +11,9 @@ try {
   // not available in this environment (offline or not installed)
   hasRulesUnitTesting = false;
 }
+if (!process.env.FIRESTORE_EMULATOR_HOST) {
+  hasRulesUnitTesting = false;
+}
 
 const firebaseAdmin = require("../../firebaseAdmin");
 
