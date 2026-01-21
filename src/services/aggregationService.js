@@ -38,6 +38,10 @@ async function recordUploadDuplicate(skipped) {
 async function recordPlatformPostDuplicate(skipped) {
   await inc(skipped ? "duplicate_post_hits" : "duplicate_post_misses");
 }
+
+async function recordTaskEnqueued() {
+  await inc("tasks_enqueued");
+}
 async function recordPlatformAmplifyTrigger() {
   await inc("platform_amplify_triggers");
 }
@@ -64,6 +68,7 @@ module.exports = {
   recordVelocityTrigger,
   recordUploadDuplicate,
   recordPlatformPostDuplicate,
+  recordTaskEnqueued,
   recordPlatformAmplifyTrigger,
   recordPlatformAccelerationTrigger,
   recordPlatformDecayEvent,

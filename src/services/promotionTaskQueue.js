@@ -456,8 +456,9 @@ async function enqueuePlatformPostTask({
   } catch (_) {}
   await ref.set(task);
   try {
-    const { recordPlatformPostDuplicate } = require("./aggregationService");
+    const { recordPlatformPostDuplicate, recordTaskEnqueued } = require("./aggregationService");
     recordPlatformPostDuplicate(false);
+    recordTaskEnqueued();
   } catch (_) {}
   return { id: ref.id, ...task };
 }
