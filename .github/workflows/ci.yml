@@ -99,9 +99,12 @@ jobs:
           CI_ROUTE_IMPORTS=1 npm run test:routes
 
       - name: Integration Tests
+        env:
+          FIREBASE_ADMIN_BYPASS: 1
+          JEST_JUNIT_OUTPUT: test-results/junit.xml
         run: |
-          # Ensure Firebase admin bypass so tests use local shim
-          cross-env FIREBASE_ADMIN_BYPASS=1 JEST_JUNIT_OUTPUT=test-results/junit.xml npx jest --runInBand --testTimeout=30000 --reporters=default --reporters=jest-junit "src/**/__tests__/*.integration.test.js" -i
+          # Run integration tests using the installed jest and env vars provided above
+          npx jest --runInBand --testTimeout=30000 --reporters=default --reporters=jest-junit "src/**/__tests__/*.integration.test.js" -i
 
       - name: Upload test-results artifact
         if: always()
