@@ -1,5 +1,11 @@
 ﻿name: CI
 
+# Explicit permissions so reporter can create Check Runs for internal PRs
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
 on:
   workflow_dispatch: # Allow manual runs for debugging and CI rechecks
   push:
@@ -117,7 +123,7 @@ jobs:
       - name: Annotate PR with test results (internal PRs only)
         # Only run reporter for pull requests originating from this repository (not forks)
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: JEST Tests
           path: test-results/junit.xml
