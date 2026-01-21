@@ -105,7 +105,7 @@ jobs:
         run: |
           # Run integration tests using the installed jest and env vars provided above
           # Use --testPathPattern to avoid shell/glob misinterpretation and ensure Jest selects only integration tests
-          npx jest --runInBand --testTimeout=30000 --reporters=default --reporters=jest-junit --testPathPattern "src/.*/__tests__/.*\\.integration\\.test\\.js$" -i
+          npx jest --runInBand --testTimeout=30000 --reporters=default --reporters=jest-junit --testPathPatterns "src/.*/__tests__/.*\\.integration\\.test\\.js$" -i
 
       - name: Upload test-results artifact
         if: always()
