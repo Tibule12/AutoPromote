@@ -7,6 +7,9 @@ try {
 } catch (e) {
   hasRulesUnitTesting = false;
 }
+if (!process.env.FIRESTORE_EMULATOR_HOST) {
+  hasRulesUnitTesting = false;
+}
 
 // Allow more time for emulator startup and Firestore operations
 jest.setTimeout(30000);

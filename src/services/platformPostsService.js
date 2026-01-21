@@ -30,6 +30,24 @@ async function recordPlatformPost({
   shortlinkCode,
 }) {
   if (!platform || !contentId) throw new Error("platform & contentId required");
+  // If a postHash is present, avoid creating duplicate successful records
+  if (postHash) {
+    try {
+      const dupSnap = await db
+        .collection("platform_posts")
+        .where("postHash", "==", postHash)
+        .where("success", "==", true)
+        .limit(1)
+        .get()
+        .catch(() => ({ empty: true }));
+      if (!dupSnap.empty) {
+        // Return existing record id to indicate deduplication
+        const existing = dupSnap.docs[0].data();
+        return { id: dupSnap.docs[0].id, success: true, existing: existing };
+      }
+    } catch (_) {}
+  }
+
   const ref = db.collection("platform_posts").doc();
   const success = outcome.success !== false; // treat missing flag as success (unless explicitly false)
   const externalId =
@@ -128,4 +146,163 @@ function sanitizeOutcome(outcome) {
   return clone;
 }
 
-module.exports = { recordPlatformPost };
+async function tryCreatePlatformPostLock({
+  platform,
+  postHash,
+  contentId,
+  uid,
+  reason,
+  payload,
+  taskId,
+  shortlinkCode,
+}) {
+  if (!platform || !postHash) throw new Error("platform & postHash required");
+  const id = `${platform}_${postHash}`;
+  const ref = db.collection("platform_posts").doc(id);
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const doc = {
+    platform,
+    contentId,
+    uid: uid || null,
+    reason: reason || "unspecified",
+    taskId: taskId || null,
+    postHash,
+    success: null,
+    simulated: false,
+    externalId: null,
+    payload: payload || {},
+    rawOutcome: null,
+    shortlinkCode: shortlinkCode || null,
+    createdAt: now,
+    updatedAt: now,
+  };
+  try {
+    // Use create() which will fail if doc exists — atomic create-if-not-exists
+    await ref.create(doc);
+    return { created: true, id };
+  } catch (err) {
+    try {
+      const snap = await ref.get();
+      return { created: false, id, existing: snap.exists ? snap.data() : null };
+    } catch (_) {
+      return { created: false, id, existing: null };
+    }
+  }
+}
+
+async function finalizePlatformPostById(
+  id,
+  {
+    outcome = {},
+    success = null,
+    externalId = null,
+    usedVariant = null,
+    variantIndex = null,
+    payload = null,
+    uid = null,
+    taskId = null,
+    reason = null,
+    shortlinkCode = null,
+  }
+) {
+  if (!id) throw new Error("id required");
+  const ref = db.collection("platform_posts").doc(id);
+  const update = {
+    rawOutcome: sanitizeOutcome(outcome),
+    success: success === null ? outcome && outcome.success !== false : success,
+    externalId:
+      externalId ||
+      outcome.externalId ||
+      outcome.postId ||
+      outcome.tweetId ||
+      outcome.mediaId ||
+      null,
+    usedVariant: usedVariant || (outcome && outcome.usedVariant) || null,
+    variantIndex:
+      typeof variantIndex === "number"
+        ? variantIndex
+        : outcome && typeof outcome.variantIndex === "number"
+          ? outcome.variantIndex
+          : null,
+    payload: payload || undefined,
+    uid: uid || undefined,
+    taskId: taskId || undefined,
+    reason: reason || undefined,
+    shortlinkCode: shortlinkCode || undefined,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  // Clean undefined keys (don't overwrite existing with undefined)
+  Object.keys(update).forEach(k => update[k] === undefined && delete update[k]);
+  await ref.set(update, { merge: true });
+  const snap = await ref.get();
+  return snap.exists ? snap.data() : null;
+}
+
+async function tryTakeoverPlatformPostLock({
+  platform,
+  postHash,
+  newTaskId,
+  takeoverThresholdMs = 300000,
+}) {
+  if (!platform || !postHash || !newTaskId)
+    throw new Error("platform, postHash & newTaskId required");
+  const id = `${platform}_${postHash}`;
+  const ref = db.collection("platform_posts").doc(id);
+  try {
+    // metrics: record attempt
+    try {
+      const { recordLockTakeoverAttempt } = require("./aggregationService");
+      await recordLockTakeoverAttempt(platform);
+    } catch (_) {}
+
+    const result = await db.runTransaction(async tx => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) return { taken: false, reason: "not_exists" };
+      const data = snap.data();
+      if (data.success === true) return { taken: false, reason: "already_success", existing: data };
+      if (data.taskId === newTaskId) return { taken: false, reason: "already_owned" };
+      // Normalize updatedAt (could be Firestore Timestamp, ISO string, or number)
+      let updatedMs = 0;
+      if (data.updatedAt && typeof data.updatedAt.toMillis === "function")
+        updatedMs = data.updatedAt.toMillis();
+      else if (typeof data.updatedAt === "string") updatedMs = Date.parse(data.updatedAt);
+      else if (data.updatedAt && typeof data.updatedAt === "number") updatedMs = data.updatedAt;
+      else if (data.updatedAt && data.updatedAt.seconds) updatedMs = data.updatedAt.seconds * 1000;
+      if (Date.now() - updatedMs < takeoverThresholdMs)
+        return { taken: false, reason: "not_expired" };
+      tx.update(ref, {
+        taskId: newTaskId,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      return { taken: true, id };
+    });
+
+    // metrics: record success/failure based on result
+    try {
+      const {
+        recordLockTakeoverSuccess,
+        recordLockTakeoverFailure,
+      } = require("./aggregationService");
+      if (result && result.taken) {
+        await recordLockTakeoverSuccess(platform);
+      } else {
+        await recordLockTakeoverFailure(platform);
+      }
+    } catch (_) {}
+
+    return result;
+  } catch (err) {
+    try {
+      const { recordLockTakeoverFailure } = require("./aggregationService");
+      await recordLockTakeoverFailure(platform);
+    } catch (_) {}
+    return { taken: false, error: err && err.message };
+  }
+}
+
+module.exports = {
+  recordPlatformPost,
+  tryCreatePlatformPostLock,
+  finalizePlatformPostById,
+  tryTakeoverPlatformPostLock,
+};

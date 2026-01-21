@@ -960,6 +960,70 @@ router.get(
         fetchTopPlatformPosts(),
         fetchTopContentUnified(),
       ]);
+
+      // Build lock takeover summary from counters
+      const lockTakeover = {
+        attempts: counters.lock_takeover_attempt_total || 0,
+        successes: counters.lock_takeover_success_total || 0,
+        failures: counters.lock_takeover_failure_total || 0,
+        perPlatform: {},
+      };
+      Object.entries(counters || {}).forEach(([k, v]) => {
+        let m = k.match(/^lock_takeover_attempt_(.+)$/);
+        if (m) {
+          const p = m[1];
+          lockTakeover.perPlatform[p] = lockTakeover.perPlatform[p] || {};
+          lockTakeover.perPlatform[p].attempts = v;
+        }
+        m = k.match(/^lock_takeover_success_(.+)$/);
+        if (m) {
+          const p = m[1];
+          lockTakeover.perPlatform[p] = lockTakeover.perPlatform[p] || {};
+          lockTakeover.perPlatform[p].successes = v;
+        }
+        m = k.match(/^lock_takeover_failure_(.+)$/);
+        if (m) {
+          const p = m[1];
+          lockTakeover.perPlatform[p] = lockTakeover.perPlatform[p] || {};
+          lockTakeover.perPlatform[p].failures = v;
+        }
+      });
+
+      // Simple alerting: flag high failure rate (configurable)
+      const alerts = [];
+      try {
+        const attemptCount = lockTakeover.attempts || 0;
+        const failureCount = lockTakeover.failures || 0;
+        const failureRate = attemptCount > 0 ? failureCount / attemptCount : 0;
+        const threshold = parseFloat(process.env.PLATFORM_LOCK_TAKEOVER_ALERT_RATE || "0.3");
+        if (attemptCount > 0 && failureRate >= threshold) {
+          const alert = {
+            type: "lock_takeover_failure_rate",
+            rate: failureRate,
+            threshold,
+            message: "High lock takeover failure rate",
+          };
+          alerts.push(alert);
+          // best-effort: write an event for dashboards/alerting
+          try {
+            const ev = {
+              type: "lock_takeover_alert",
+              rate: failureRate,
+              threshold,
+              at: new Date().toISOString(),
+            };
+            await db.collection("events").add(ev);
+            // Send to Slack if enabled (best-effort)
+            try {
+              const { sendSlackAlert } = require("../services/slackAlertService");
+              const text = `:warning: *AutoPromote Alert:* High lock takeover failure rate (${(failureRate * 100).toFixed(1)}%) - threshold ${(threshold * 100).toFixed(0)}%`;
+              // call but don't block dashboard generation (fire-and-forget)
+              sendSlackAlert({ text, severity: "warning", extra: ev }).catch(() => {});
+            } catch (_) {}
+          } catch (_) {}
+        }
+      } catch (_) {}
+
       return res.json({
         ok: true,
         taskQueue,
@@ -967,6 +1031,8 @@ router.get(
         highVelocityContent: highVelocity,
         uploadStats,
         aggregated: counters,
+        lockTakeover,
+        alerts,
         platformPosts,
         topPlatformPosts: topPosts,
         topContentUnified: topContent,
@@ -1061,6 +1127,31 @@ router.get(
         });
       });
       return res.json({ ok: true, posts: rows, analyticsCount: analytics.length, analytics });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: e.message });
+    }
+  }
+);
+
+// Admin-protected test endpoint to send a Slack alert (useful to validate webhook & envs)
+router.post(
+  "/test-alert",
+  authMiddleware,
+  (req, res, next) => {
+    if (METRICS_REQUIRE_ADMIN) return adminOnly(req, res, next);
+    return next();
+  },
+  async (req, res) => {
+    try {
+      const { text } = req.body || {};
+      const { sendSlackAlert } = require("../services/slackAlertService");
+      if (String(process.env.ENABLE_SLACK_ALERTS || "false").toLowerCase() !== "true")
+        return res.status(400).json({ ok: false, error: "slack alerts disabled" });
+      if (!process.env.SLACK_ALERT_WEBHOOK_URL)
+        return res.status(400).json({ ok: false, error: "no webhook configured" });
+      const msg = text || `Test alert from AutoPromote at ${new Date().toISOString()}`;
+      const out = await sendSlackAlert({ text: msg, severity: "info" });
+      return res.json({ ok: true, sent: out });
     } catch (e) {
       return res.status(500).json({ ok: false, error: e.message });
     }

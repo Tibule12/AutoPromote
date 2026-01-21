@@ -1,5 +1,11 @@
 ﻿name: CI
 
+# Explicit permissions so reporter can create Check Runs for internal PRs
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
 on:
   workflow_dispatch: # Allow manual runs for debugging and CI rechecks
   push:
@@ -97,6 +103,54 @@ jobs:
       - name: Route Import Tests
         run: |
           CI_ROUTE_IMPORTS=1 npm run test:routes
+
+      - name: Integration Tests
+        env:
+          FIREBASE_ADMIN_BYPASS: 1
+          JEST_JUNIT_OUTPUT: test-results/junit.xml
+        run: |
+          # Run integration tests using the installed jest and env vars provided above
+          # Use --testPathPattern to avoid shell/glob misinterpretation and ensure Jest selects only integration tests
+          npx jest --runInBand --testTimeout=30000 --reporters=default --reporters=jest-junit --testPathPatterns "src/.*/__tests__/.*\\.integration\\.test\\.js$" -i
+
+      - name: Upload test-results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-test-results
+          path: test-results/junit.xml
+
+      - name: Annotate PR with test results (internal PRs only)
+        # Only run reporter for pull requests originating from this repository (not forks)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: dorny/test-reporter@v2
+        with:
+          name: JEST Tests
+          path: test-results/junit.xml
+          reporter: jest-junit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify Slack on CI failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_ALERT_WEBHOOK_URL }}
+        run: |
+          echo "Preparing Slack notification..."
+          if [ -z "$SLACK_WEBHOOK" ]; then
+            echo "No SLACK_ALERT_WEBHOOK_URL configured; skipping Slack notification"
+            exit 0
+          fi
+          JOB_NAME="${{ github.job }}"
+          REPO="${{ github.repository }}"
+          RUN_ID="${{ github.run_id }}"
+          ACTOR="${{ github.actor }}"
+          STATUS_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          PAYLOAD=$(cat <<EOF
+          {"text":":rotating_light: *CI Failure* in ${REPO} \nJob: ${JOB_NAME} \nTriggered by: ${ACTOR} \nRun: <${STATUS_URL}|#${RUN_ID}>"}
+          EOF
+          )
+          curl -s -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK" || echo "Slack notify failed"
 
   lint:
     name: Lint codebase (non-blocking)
