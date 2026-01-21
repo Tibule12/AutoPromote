@@ -114,13 +114,13 @@ jobs:
           name: junit-test-results
           path: test-results/junit.xml
 
-      - name: Annotate PR with JUnit results
+      - name: Annotate PR with test results
         if: ${{ github.event_name == 'pull_request' }}
         uses: dorny/test-reporter@v1
         with:
-          name: junit
+          name: JEST Tests
           path: test-results/junit.xml
-          reporter: junit
+          reporter: jest-junit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
