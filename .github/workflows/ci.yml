@@ -114,8 +114,9 @@ jobs:
           name: junit-test-results
           path: test-results/junit.xml
 
-      - name: Annotate PR with test results
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: Annotate PR with test results (internal PRs only)
+        # Only run reporter for pull requests originating from this repository (not forks)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
         uses: dorny/test-reporter@v1
         with:
           name: JEST Tests
