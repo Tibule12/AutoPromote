@@ -48,6 +48,7 @@ jobs:
           fi
     if: always()
   build-and-test:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     # Make required encryption keys available to the job from repository secrets.
     # Note: secrets are NOT provided to workflows triggered by forked PRs for security.
@@ -113,12 +114,20 @@ jobs:
           # Use --testPathPattern to avoid shell/glob misinterpretation and ensure Jest selects only integration tests
           npx jest --runInBand --testTimeout=30000 --reporters=default --reporters=jest-junit --testPathPatterns "src/.*/__tests__/.*\\.integration\\.test\\.js$" -i
 
+      - name: List test-results directory (debug)
+        if: always()
+        run: |
+          echo "Listing test-results dir"
+          ls -la test-results || true
+          echo "Dumping junit.xml head (if present)"
+          head -n 200 test-results/junit.xml || true
+
       - name: Upload test-results artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: junit-test-results
-          path: test-results/junit.xml
+          path: test-results/**
 
       - name: Annotate PR with test results (internal PRs only)
         # Only run reporter for pull requests originating from this repository (not forks)
