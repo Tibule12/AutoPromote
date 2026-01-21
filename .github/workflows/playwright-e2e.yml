@@ -72,7 +72,7 @@ jobs:
           GCLOUD_PROJECT: autopromote-cc6d3
         run: |
           # Use firebase emulators:exec to ensure the emulator environment variables are set for the child process
-          npx firebase emulators:exec --only firestore --project autopromote-cc6d3 --quiet "node ./scripts/seed-autopilot-emulator.js && npm run test:e2e:playwright:emulator"
+          npx firebase emulators:exec --only firestore --project autopromote-cc6d3 "node ./scripts/seed-autopilot-emulator.js && npm run test:e2e:playwright:emulator"
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
