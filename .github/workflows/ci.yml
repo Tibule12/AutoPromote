@@ -98,6 +98,49 @@ jobs:
         run: |
           CI_ROUTE_IMPORTS=1 npm run test:routes
 
+      - name: Integration Tests
+        run: |
+          # Ensure Firebase admin bypass so tests use local shim
+          cross-env FIREBASE_ADMIN_BYPASS=1 JEST_JUNIT_OUTPUT=test-results/junit.xml npx jest --runInBand --testTimeout=30000 --reporters=default --reporters=jest-junit "src/**/__tests__/*.integration.test.js" -i
+
+      - name: Upload test-results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-test-results
+          path: test-results/junit.xml
+
+      - name: Annotate PR with JUnit results
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: dorny/test-reporter@v1
+        with:
+          name: junit
+          path: test-results/junit.xml
+          reporter: junit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify Slack on CI failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_ALERT_WEBHOOK_URL }}
+        run: |
+          echo "Preparing Slack notification..."
+          if [ -z "$SLACK_WEBHOOK" ]; then
+            echo "No SLACK_ALERT_WEBHOOK_URL configured; skipping Slack notification"
+            exit 0
+          fi
+          JOB_NAME="${{ github.job }}"
+          REPO="${{ github.repository }}"
+          RUN_ID="${{ github.run_id }}"
+          ACTOR="${{ github.actor }}"
+          STATUS_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          PAYLOAD=$(cat <<EOF
+          {"text":":rotating_light: *CI Failure* in ${REPO} \nJob: ${JOB_NAME} \nTriggered by: ${ACTOR} \nRun: <${STATUS_URL}|#${RUN_ID}>"}
+          EOF
+          )
+          curl -s -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK" || echo "Slack notify failed"
+
   lint:
     name: Lint codebase (non-blocking)
     runs-on: ubuntu-latest
