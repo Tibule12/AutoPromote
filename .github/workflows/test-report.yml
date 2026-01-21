@@ -1,0 +1,29 @@
+name: Test Report
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download test-results artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: junit-test-results
+          path: ./test-results
+
+      - name: Create test report
+        uses: dorny/test-reporter@v2
+        with:
+          artifact: junit-test-results
+          name: "JEST Tests"
+          path: "**/*.xml"
+          reporter: jest-junit
