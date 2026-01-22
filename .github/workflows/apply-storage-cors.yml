@@ -1,0 +1,66 @@
+name: Apply Firebase Storage CORS
+
+on:
+  workflow_dispatch:
+    inputs:
+      bucket:
+        description: 'Bucket to apply CORS (gs://... or bucket name)'
+        required: false
+        default: 'autopromote-cc6d3.appspot.com'
+
+permissions:
+  contents: read
+
+jobs:
+  apply-cors:
+    name: Apply CORS to Firebase Storage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: autopromote-cc6d3
+
+      - name: Create cors.json
+        run: |
+          cat > cors.json <<'CORS'
+          [
+            {
+              "origin": ["https://autopromote.org","https://www.autopromote.org"],
+              "method": ["GET", "HEAD", "OPTIONS"],
+              "responseHeader": ["Content-Type","Content-Length","ETag","x-goog-meta-*"],
+              "maxAgeSeconds": 3600
+            }
+          ]
+          CORS
+
+      - name: Apply CORS to bucket
+        env:
+          BUCKET: ${{ github.event.inputs.bucket || 'autopromote-cc6d3.appspot.com' }}
+        run: |
+          echo "Applying CORS to gs://$BUCKET"
+          gsutil cors set cors.json gs://$BUCKET
+
+      - name: Verify CORS
+        env:
+          BUCKET: ${{ github.event.inputs.bucket || 'autopromote-cc6d3.appspot.com' }}
+        run: |
+          echo "CORS for gs://$BUCKET:"
+          gsutil cors get gs://$BUCKET || true
+
+      - name: Quick HTTP check (optional)
+        run: |
+          # This attempts to fetch headers of an example upload but will not fail the job on 403/404.
+          echo "Attempting to fetch headers for a sample stored object (may be private):"
+          curl -I -s "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/uploads%2Fvideos%2F1768940915125_Direct%20Post%20API.mov?alt=media&token=209e7636-9844-46be-9d6e-ebaa2c0a0097" || true
+
+      - name: Finished
+        run: echo "CORS apply job completed. If you want me to verify playback in the admin UI I can run manual checks next."
