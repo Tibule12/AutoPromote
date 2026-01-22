@@ -12,6 +12,7 @@ function ContentApprovalPanel() {
   const [indexLink, setIndexLink] = useState(null);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerSrc, setViewerSrc] = useState(null);
+  const [viewerFallbackUrl, setViewerFallbackUrl] = useState(null);
   const [viewerType, setViewerType] = useState(null);
   const [viewerLoading, setViewerLoading] = useState(false);
   // filter not used yet; left for future enhancement
@@ -311,6 +312,7 @@ function ContentApprovalPanel() {
                               "Content file is too small to preview (possibly incomplete upload)"
                             );
                             setViewerSrc(null);
+                            setViewerFallbackUrl(item.url);
                             return;
                           }
 
@@ -340,7 +342,8 @@ function ContentApprovalPanel() {
                                 "Unable to preview this file in the browser (file may be missing or not a media file)"
                               );
                               // Provide fallback: let user open remote URL in a new tab
-                              setViewerSrc(item.url);
+                              setViewerFallbackUrl(item.url);
+                              setViewerSrc(null);
                               return;
                             }
                           }
@@ -350,7 +353,8 @@ function ContentApprovalPanel() {
                         } catch (err) {
                           console.error("Failed to open content viewer:", err);
                           toast.error("Failed to load media for preview");
-                          setViewerSrc(item.url); // fallback to using remote URL
+                          setViewerFallbackUrl(item.url); // fallback: show remote link if preview can't be created
+                          setViewerSrc(null);
                         } finally {
                           setViewerLoading(false);
                         }
@@ -430,6 +434,7 @@ function ContentApprovalPanel() {
               setViewerOpen(false);
               if (viewerSrc && viewerSrc.startsWith("blob:")) URL.revokeObjectURL(viewerSrc);
               setViewerSrc(null);
+              setViewerFallbackUrl(null);
               setViewerType(null);
             }}
           >
@@ -458,6 +463,7 @@ function ContentApprovalPanel() {
                     setViewerOpen(false);
                     if (viewerSrc && viewerSrc.startsWith("blob:")) URL.revokeObjectURL(viewerSrc);
                     setViewerSrc(null);
+                    setViewerFallbackUrl(null);
                     setViewerType(null);
                   }}
                   style={{
@@ -474,6 +480,20 @@ function ContentApprovalPanel() {
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                 {viewerLoading ? (
                   <div>Loading...</div>
+                ) : viewerFallbackUrl ? (
+                  <div style={{ textAlign: "center", padding: 20 }}>
+                    <div style={{ marginBottom: 8 }}>Preview not available.</div>
+                    <div>
+                      <a
+                        href={viewerFallbackUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#1976d2" }}
+                      >
+                        Open original file in a new tab
+                      </a>
+                    </div>
+                  </div>
                 ) : viewerType === "video" ? (
                   <video
                     data-testid="viewer-video"
