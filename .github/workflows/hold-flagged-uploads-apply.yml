@@ -1,0 +1,107 @@
+name: Hold Flagged Uploads (manual apply)
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Max number of recent content docs to inspect'
+        required: false
+        default: '500'
+      since_days:
+        description: 'Only inspect content created within this many days'
+        required: false
+        default: '365'
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Prepare report (dry-run)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Export flagged items
+        run: |
+          mkdir -p reports tmp
+          node ./scripts/export-flagged-uploads.js --limit=${{ github.event.inputs.limit }} --format=json
+
+      - name: Dry-run hold (show intended updates)
+        run: |
+          node ./scripts/bulk-hold-flagged.js --limit=${{ github.event.inputs.limit }} --status=held
+
+      - name: Upload flagged report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flagged-uploads-report
+          path: tmp/flagged-uploads-*.json
+
+  apply:
+    name: Apply holds (requires manual approval)
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment: 'hold-flagged' # configure protection rules in repo -> Settings -> Environments to require reviewers
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Apply holds
+        run: |
+          # Apply holds and write an audit file to tmp/
+          node ./scripts/bulk-hold-flagged.js --limit=${{ github.event.inputs.limit }} --apply --status=held
+
+      - name: Upload audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: hold-audit
+          path: tmp/hold-applied-*.json
+
+      - name: Read audit count
+        id: audit
+        run: |
+          set -e
+          file=$(ls tmp/hold-applied-*.json 2>/dev/null | head -n1 || true)
+          if [ -z "$file" ]; then echo "applied_count=0" >> $GITHUB_OUTPUT; exit 0; fi
+          count=$(node -e "const fs=require('fs'); const p=process.argv[1]; const j=JSON.parse(fs.readFileSync(p,'utf8')); console.log((j.applied||[]).length)" "$file")
+          echo "applied_count=$count" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack
+        if: env.SLACK_ALERT_WEBHOOK_URL != ''
+        env:
+          SLACK_ALERT_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK_URL }}
+        run: |
+          set -e
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          count="${{ steps.audit.outputs.applied_count }}"
+          repo="${{ github.repository }}"
+          payload=$(printf '{"text":"Hold applied on %s. Applied count: %s. Run: %s"}' "$repo" "$count" "$run_url")
+          curl -s -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_ALERT_WEBHOOK_URL" || echo "Slack notify failed"
