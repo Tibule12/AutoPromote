@@ -1,0 +1,48 @@
+name: Scan Small Uploads
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Max number of recent content docs to inspect'
+        required: false
+        default: '500'
+      since_days:
+        description: 'Only inspect content created within this many days'
+        required: false
+        default: '365'
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run scan
+        run: |
+          mkdir -p reports
+          node ./scripts/scan-small-uploads.js --limit=${{ github.event.inputs.limit }} --since-days=${{ github.event.inputs.since_days }}
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: small-upload-scan
+          path: scripts/scan-small-uploads-results-*.json
