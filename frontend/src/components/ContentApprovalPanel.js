@@ -290,14 +290,66 @@ function ContentApprovalPanel() {
                           setViewerOpen(true);
                           setViewerType(item.type || "video");
 
+                          // First try a lightweight HEAD to inspect content-type and size
+                          let contentType = null;
+                          let contentLength = null;
+                          try {
+                            const head = await fetch(item.url, { mode: "cors", method: "HEAD" });
+                            if (head && head.ok) {
+                              contentType = head.headers.get("content-type");
+                              contentLength =
+                                parseInt(head.headers.get("content-length"), 10) || null;
+                            }
+                          } catch (e) {
+                            // HEAD may be blocked on some storage hosts; fall back to GET
+                            console.warn("HEAD request failed for media, will try GET:", e);
+                          }
+
+                          // If content length looks suspiciously small, avoid creating a blob URL and show a helpful message
+                          if (contentLength !== null && contentLength > 0 && contentLength < 1024) {
+                            toast.error(
+                              "Content file is too small to preview (possibly incomplete upload)"
+                            );
+                            setViewerSrc(null);
+                            return;
+                          }
+
                           // Fetch as blob to ensure inline playback (avoids download Content-Disposition)
                           const res = await fetch(item.url, { mode: "cors" });
                           if (!res.ok) throw new Error("Failed to fetch media");
                           const blob = await res.blob();
+
+                          // If blob size is tiny or type is missing/unknown, treat as not previewable
+                          if (
+                            (blob.size && blob.size < 1024) ||
+                            !blob.type ||
+                            blob.type === "application/octet-stream"
+                          ) {
+                            // If content-type suggests an image/audio/video we can still try, otherwise warn
+                            const guessed = contentType || blob.type || "unknown";
+                            if (
+                              !guessed.startsWith("image/") &&
+                              !guessed.startsWith("audio/") &&
+                              !guessed.startsWith("video/")
+                            ) {
+                              console.warn("Non-playable media detected", {
+                                guessed,
+                                size: blob.size,
+                              });
+                              toast.error(
+                                "Unable to preview this file in the browser (file may be missing or not a media file)"
+                              );
+                              // Provide fallback: let user open remote URL in a new tab
+                              setViewerSrc(item.url);
+                              return;
+                            }
+                          }
+
                           const url = URL.createObjectURL(blob);
                           setViewerSrc(url);
                         } catch (err) {
                           console.error("Failed to open content viewer:", err);
+                          toast.error("Failed to load media for preview");
                           setViewerSrc(item.url); // fallback to using remote URL
                         } finally {
                           setViewerLoading(false);
@@ -427,6 +479,10 @@ function ContentApprovalPanel() {
                     data-testid="viewer-video"
                     src={viewerSrc}
                     controls
+                    onError={() => {
+                      console.error("Video playback error", viewerSrc);
+                      toast.error("Unable to play video");
+                    }}
                     style={{ maxWidth: "100%", maxHeight: "70vh" }}
                   />
                 ) : viewerType === "image" ? (
