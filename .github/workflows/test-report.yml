@@ -14,16 +14,42 @@ jobs:
   report:
     runs-on: ubuntu-latest
     steps:
+      - name: Check for junit-test-results artifact
+        id: check_artifact
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const runId = context.payload.workflow_run && context.payload.workflow_run.id;
+            if (!runId) {
+              core.info('No workflow_run.id found on event payload; assuming no artifacts.');
+              return false;
+            }
+            const res = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+            });
+            const names = (res.data.artifacts || []).map(a => a.name);
+            core.info('Artifacts available for this run: ' + names.join(', '));
+            return names.includes('junit-test-results');
+
       - name: Download test-results artifact
+        if: steps.check_artifact.outputs.result == 'true'
         uses: actions/download-artifact@v4
         with:
           name: junit-test-results
           path: ./test-results
 
       - name: Create test report
+        if: steps.check_artifact.outputs.result == 'true'
         uses: dorny/test-reporter@v2
         with:
           artifact: junit-test-results
           name: "JEST Tests"
           path: "**/*.xml"
           reporter: jest-junit
+
+      - name: No test-results artifact found - skip report
+        if: steps.check_artifact.outputs.result != 'true'
+        run: |
+          echo "No 'junit-test-results' artifact found for this CI run. Skipping test report generation."
