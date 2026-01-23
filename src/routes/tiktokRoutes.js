@@ -185,7 +185,10 @@ const DEFAULT_TIKTOK_SCOPES = "user.info.profile video.list";
 const REQUIRED_PROFILE_SCOPE = "user.info.profile";
 
 function configuredScopes() {
-  return (process.env.TIKTOK_OAUTH_SCOPES || DEFAULT_TIKTOK_SCOPES).trim();
+  // Accept both comma-separated and space-separated lists in the env var.
+  // Normalize to a single space-separated string so downstream code can split on whitespace.
+  const raw = process.env.TIKTOK_OAUTH_SCOPES || DEFAULT_TIKTOK_SCOPES;
+  return String(raw).replace(/,/g, " ").trim().replace(/\s+/g, " ");
 }
 
 function scopeStringIncludes(scopeString, scope) {
