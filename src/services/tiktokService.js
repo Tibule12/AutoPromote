@@ -181,6 +181,11 @@ async function getValidAccessToken(uid) {
   const tokens = connection.tokens;
   const now = Date.now();
 
+  // If tokens is a raw string (legacy encrypted single-token), treat it as an access token
+  if (tokens.raw && typeof tokens.raw === "string") {
+    return tokens.raw;
+  }
+
   // Check if token is still valid (TikTok tokens typically last 24 hours)
   if (tokens.expires_in && tokens.access_token) {
     const expiresAt = (connection.updatedAt?._seconds || 0) * 1000 + tokens.expires_in * 1000;
@@ -200,7 +205,7 @@ async function getValidAccessToken(uid) {
     }
   }
 
-  return tokens.access_token;
+  return tokens.access_token || null;
 }
 
 /**
