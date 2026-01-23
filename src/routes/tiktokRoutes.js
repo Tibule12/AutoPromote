@@ -213,7 +213,14 @@ function constructAuthUrl(cfg, state, scope = configuredScopes()) {
     TIKTOK_ENV === "production"
       ? "https://www.tiktok.com/v2/auth/authorize/"
       : "https://sandbox.tiktok.com/platform/oauth/authorize";
-  return `${base}?client_key=${encodeURIComponent(key)}&response_type=code&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}`;
+  // TikTok expects the scope parameter to match the Developer Portal format (comma-separated).
+  // Normalize any spaces or commas into a comma-separated list for the URL while keeping the
+  // internal configuredScopes() normalized to whitespace for checks.
+  const scopeForUrl = String(scope)
+    .split(/[,\s]+/)
+    .filter(Boolean)
+    .join(",");
+  return `${base}?client_key=${encodeURIComponent(key)}&response_type=code&scope=${encodeURIComponent(scopeForUrl)}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}`;
 }
 
 // Diagnostics: quick config visibility with sandbox/production breakdown
