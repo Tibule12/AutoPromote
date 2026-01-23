@@ -506,7 +506,7 @@ router.get("/auth/preflight", authMiddleware, ttPublicLimiter, async (req, res) 
   const crypto = require("crypto");
   const fakeState = "preflight." + crypto.randomBytes(8).toString("hex"); // Use cryptographically secure random
   const scope = configuredScopes();
-  const scopeList = scope.split(/\s+/).filter(Boolean);
+  const scopeList = scope.split(/[,\s]+/).filter(Boolean);
   const url = constructAuthUrl(cfg, fakeState, scope);
   const issues = [];
   if (/\s/.test(cfg.key || "")) issues.push("client_key_contains_whitespace");
@@ -540,7 +540,7 @@ router.get("/auth/preflight/public", ttPublicLimiter, async (req, res) => {
     const crypto = require("crypto");
     const fakeState = "preflight.public." + crypto.randomBytes(8).toString("hex");
     const scope = configuredScopes();
-    const scopeList = scope.split(/\s+/).filter(Boolean);
+    const scopeList = scope.split(/[,\s]+/).filter(Boolean);
     const url = constructAuthUrl(cfg, fakeState, scope);
     const issues = [];
     if (/\s/.test(cfg.key || "")) issues.push("client_key_contains_whitespace");
