@@ -111,6 +111,9 @@ router.head("/media/:id", async (req, res) => {
 router.get("/media/:id", async (req, res) => {
   try {
     const id = req.params.id;
+    const remoteAddr = req.headers["x-forwarded-for"] || (req.socket && req.socket.remoteAddress);
+    console.log(`[media] GET request id=${id} remote=${remoteAddr} ua=${req.get("user-agent")}`);
+
     const snap = await db.collection("content").doc(id).get();
     if (!snap.exists) return res.status(404).send("Not found");
     const content = snap.data();
@@ -123,6 +126,14 @@ router.get("/media/:id", async (req, res) => {
       allowHosts: [host],
       requireHttps: true,
     });
+
+    // Log origin fetch result so we can debug TikTok download issues
+    const fetchedLength = fetchRes.headers.get
+      ? fetchRes.headers.get("content-length")
+      : fetchRes.headers && fetchRes.headers["content-length"];
+    console.log(
+      `[media] fetched host=${host} status=${fetchRes.status} content-length=${fetchedLength}`
+    );
 
     // Copy a small set of headers from origin
     ["content-type", "content-length", "accept-ranges", "content-range", "last-modified"].forEach(
@@ -137,13 +148,18 @@ router.get("/media/:id", async (req, res) => {
     res.status(fetchRes.status);
 
     // If there is no body, end with the status
-    if (!fetchRes.body) return res.end();
+    if (!fetchRes.body) {
+      console.log("[media] origin had no body");
+      return res.end();
+    }
 
     const nodeStream = toNodeStream(fetchRes.body) || Readable.from(fetchRes.body);
 
     pipeline(nodeStream, res, err => {
       if (err) {
         console.error("[media] stream pipeline error", err && (err.stack || err.message || err));
+      } else {
+        console.log(`[media] stream pipeline completed id=${id}`);
       }
     });
   } catch (e) {
