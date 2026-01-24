@@ -73,8 +73,54 @@ router.head("/media/:id", async (req, res) => {
     const snap = await db.collection("content").doc(id).get();
     if (!snap.exists) return res.status(404).send("Not found");
     const content = snap.data();
-    const url = content && (content.url || content.mediaUrl || content.videoUrl);
+    let url = content && (content.url || content.mediaUrl || content.videoUrl);
     if (!url) return res.status(404).send("No media URL");
+
+    // If the stored URL points to our own domain (proxy loop), try to resolve a signed GCS URL
+    const myHosts = ["api.autopromote.org", "autopromote.onrender.com"];
+    try {
+      const parsed = new URL(url);
+      if (myHosts.includes(parsed.hostname)) {
+        // Try to find storagePath on the content doc
+        if (content.storagePath) {
+          const { Storage } = require("@google-cloud/storage");
+          const storage = new Storage();
+          const file = storage
+            .bucket(process.env.FIREBASE_STORAGE_BUCKET)
+            .file(content.storagePath);
+          const [signed] = await file.getSignedUrl({
+            version: "v4",
+            action: "read",
+            expires: Date.now() + 60 * 60 * 1000,
+          });
+          url = signed;
+        } else {
+          // Try to infer by listing uploads/videos and matching title or id
+          const { Storage } = require("@google-cloud/storage");
+          const storage = new Storage();
+          const [files] = await storage
+            .bucket(process.env.FIREBASE_STORAGE_BUCKET)
+            .getFiles({ prefix: "uploads/videos/", maxResults: 200 });
+          const match = files.find(
+            f => f.name.includes(content.title || id) || f.name.includes(id)
+          );
+          if (match) {
+            const [signed] = await storage
+              .bucket(process.env.FIREBASE_STORAGE_BUCKET)
+              .file(match.name)
+              .getSignedUrl({
+                version: "v4",
+                action: "read",
+                expires: Date.now() + 60 * 60 * 1000,
+              });
+            url = signed;
+          }
+        }
+      }
+    } catch (e) {
+      // ignore URL parsing or storage errors here — we'll surface later if fetch fails
+      console.error("[media] HEAD signed-url fallback error", e && (e.stack || e.message || e));
+    }
 
     const host = new URL(url).host;
     const initRes = await safeFetch(url, global.fetch || require("node-fetch"), {
