@@ -18,6 +18,31 @@ function toNodeStream(webStream) {
   }
 }
 
+// Verification file under /media/ for TikTok prefix verification
+router.head("/media/tiktok-developers-site-verification.txt", async (req, res) => {
+  try {
+    const token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
+    if (!token) return res.status(404).send("Not found");
+    res.setHeader("content-type", "text/plain; charset=utf-8");
+    return res.status(200).end();
+  } catch (e) {
+    console.error("[media] verification HEAD error", e && (e.stack || e.message || e));
+    return res.status(500).json({ error: "internal_error" });
+  }
+});
+
+router.get("/media/tiktok-developers-site-verification.txt", async (req, res) => {
+  try {
+    const token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
+    if (!token) return res.status(404).send("Not found");
+    res.setHeader("content-type", "text/plain; charset=utf-8");
+    return res.status(200).send(`tiktok-developers-site-verification=${token}`);
+  } catch (e) {
+    console.error("[media] verification GET error", e && (e.stack || e.message || e));
+    return res.status(500).json({ error: "internal_error" });
+  }
+});
+
 // HEAD handler - returns headers only
 router.head("/media/:id", async (req, res) => {
   try {
