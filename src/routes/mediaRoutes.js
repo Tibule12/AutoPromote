@@ -220,13 +220,14 @@ router.head("/media/:id", async (req, res) => {
 
       return res.status(initRes.status).end();
     } catch (err) {
-      // Record error to debug collection
+      // Record error to debug collection with stack for better debugging
       try {
         db.collection("debug_media_fetches")
           .add({
             contentId: id,
             originHost: new URL(url).host || null,
             originError: (err && (err.message || String(err))) || "unknown",
+            originStack: (err && err.stack) || null,
             ts: new Date(),
           })
           .catch(e =>
@@ -333,11 +334,36 @@ router.get("/media/:id", async (req, res) => {
     }
 
     const host = new URL(url).host;
-    const fetchRes = await safeFetch(url, global.fetch || require("node-fetch"), {
-      fetchOptions: { method: "GET" },
-      allowHosts: [host],
-      requireHttps: true,
-    });
+    let fetchRes;
+    try {
+      fetchRes = await safeFetch(url, global.fetch || require("node-fetch"), {
+        fetchOptions: { method: "GET" },
+        allowHosts: [host],
+        requireHttps: true,
+      });
+    } catch (err) {
+      console.error("[media] error fetching origin URL", err && (err.stack || err.message || err));
+      try {
+        db.collection("debug_media_fetches")
+          .add({
+            contentId: id,
+            originHost: host,
+            originError: (err && (err.message || String(err))) || "unknown",
+            originStack: (err && err.stack) || null,
+            ts: new Date(),
+          })
+          .catch(e =>
+            console.error(
+              "[media] failed to write fetch error debug",
+              e && (e.stack || e.message || e)
+            )
+          );
+      } catch (e) {
+        console.error("[media] fetch error debug write failure", e && (e.stack || e.message || e));
+      }
+      // Return 502 to indicate upstream fetch failed
+      return res.status(502).json({ error: "origin_fetch_failed" });
+    }
 
     // Log origin fetch result so we can debug TikTok download issues
     const fetchedLength = fetchRes.headers.get
@@ -418,6 +444,24 @@ router.get("/media/:id", async (req, res) => {
     pipeline(nodeStream, res, err => {
       if (err) {
         console.error("[media] stream pipeline error", err && (err.stack || err.message || err));
+        // Persist pipeline error to debug collection for correlation with TikTok failure
+        try {
+          db.collection("debug_media_fetches")
+            .add({
+              contentId: id,
+              pipelineError: (err && (err.message || String(err))) || "unknown",
+              pipelineStack: (err && err.stack) || null,
+              ts: new Date(),
+            })
+            .catch(e =>
+              console.error(
+                "[media] failed to write pipeline error debug",
+                e && (e.stack || e.message || e)
+              )
+            );
+        } catch (e) {
+          console.error("[media] pipeline debug write failed", e && (e.stack || e.message || e));
+        }
       } else {
         console.log(`[media] stream pipeline completed id=${id}`);
       }
