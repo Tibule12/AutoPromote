@@ -215,10 +215,45 @@ async function postToInstagram({ contentId, payload, reason }) {
 }
 
 async function postToTikTok({ contentId, payload, reason, uid }) {
+  // Feature flag: if TikTok is disabled and the UID is not in the canary set, skip posting
+  try {
+    const enabled = String(process.env.TIKTOK_ENABLED || "false").toLowerCase() === "true";
+    const canary = (process.env.TIKTOK_CANARY_UIDS || "")
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (!enabled && !(uid && canary.includes(uid))) {
+      try {
+        require("./metricsRecorder").incrCounter("tiktok.dispatch.skipped.disabled");
+      } catch (_) {}
+      return {
+        platform: "tiktok",
+        success: false,
+        skipped: true,
+        reason: "disabled_by_feature_flag",
+      };
+    }
+  } catch (e) {
+    // ignore gating errors and proceed
+  }
+
   try {
     const { postToTikTok: tiktokPost } = require("./tiktokService");
-    return await tiktokPost({ contentId, payload, reason, uid });
+    const res = await tiktokPost({ contentId, payload, reason, uid });
+    if (res && res.success) {
+      try {
+        require("./metricsRecorder").incrCounter("tiktok.dispatch.success");
+      } catch (_) {}
+    } else {
+      try {
+        require("./metricsRecorder").incrCounter("tiktok.dispatch.failure");
+      } catch (_) {}
+    }
+    return res;
   } catch (e) {
+    try {
+      require("./metricsRecorder").incrCounter("tiktok.dispatch.error");
+    } catch (_) {}
     return {
       platform: "tiktok",
       success: false,
