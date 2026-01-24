@@ -31,9 +31,31 @@ router.head("/media/tiktok-developers-site-verification.txt", async (req, res) =
   }
 });
 
+const fs = require("fs");
+const path = require("path");
+
 router.get("/media/tiktok-developers-site-verification.txt", async (req, res) => {
   try {
-    const token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
+    let token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
+
+    // Fallback: read from the committed static file if env var not set or empty
+    if (!token) {
+      try {
+        const filePath = path.resolve(
+          __dirname,
+          "..",
+          "..",
+          "public",
+          "tiktok-developers-site-verification.txt"
+        );
+        const content = fs.readFileSync(filePath, "utf8");
+        const match = content.match(/tiktok-developers-site-verification=(\S+)/);
+        if (match) token = match[1];
+      } catch (err) {
+        // ignore file read errors
+      }
+    }
+
     if (!token) return res.status(404).send("Not found");
     res.setHeader("content-type", "text/plain; charset=utf-8");
     return res.status(200).send(`tiktok-developers-site-verification=${token}`);
