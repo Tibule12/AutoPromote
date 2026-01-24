@@ -123,28 +123,83 @@ router.head("/media/:id", async (req, res) => {
     }
 
     const host = new URL(url).host;
-    const initRes = await safeFetch(url, global.fetch || require("node-fetch"), {
-      fetchOptions: { method: "HEAD" },
-      allowHosts: [host],
-      requireHttps: true,
-    });
+    try {
+      const initRes = await safeFetch(url, global.fetch || require("node-fetch"), {
+        fetchOptions: { method: "HEAD" },
+        allowHosts: [host],
+        requireHttps: true,
+      });
 
-    // Copy selected headers
-    const headersToCopy = [
-      "content-type",
-      "content-length",
-      "accept-ranges",
-      "content-range",
-      "last-modified",
-    ];
-    headersToCopy.forEach(h => {
-      const v = initRes.headers.get
-        ? initRes.headers.get(h)
-        : initRes.headers && initRes.headers[h];
-      if (v) res.setHeader(h, v);
-    });
+      // Copy selected headers
+      const headersToCopy = [
+        "content-type",
+        "content-length",
+        "accept-ranges",
+        "content-range",
+        "last-modified",
+      ];
+      headersToCopy.forEach(h => {
+        const v = initRes.headers.get
+          ? initRes.headers.get(h)
+          : initRes.headers && initRes.headers[h];
+        if (v) res.setHeader(h, v);
+      });
 
-    return res.status(initRes.status).end();
+      // Record debug info about the origin response
+      try {
+        const originBody =
+          initRes && initRes.text
+            ? await Promise.race([initRes.text(), new Promise(r => setTimeout(() => r(""), 500))])
+            : "";
+        db.collection("debug_media_fetches")
+          .add({
+            contentId: id,
+            originHost: host,
+            originStatus: initRes.status,
+            originBodySnippet: originBody && originBody.slice ? originBody.slice(0, 2000) : "",
+            contentLength:
+              (initRes.headers &&
+                (initRes.headers.get
+                  ? initRes.headers.get("content-length")
+                  : initRes.headers && initRes.headers["content-length"])) ||
+              null,
+            ts: new Date(),
+          })
+          .catch(err =>
+            console.error(
+              "[media] failed to write fetch debug",
+              err && (err.stack || err.message || err)
+            )
+          );
+      } catch (err) {
+        console.error(
+          "[media] failed to capture origin body for HEAD",
+          err && (err.stack || err.message || err)
+        );
+      }
+
+      return res.status(initRes.status).end();
+    } catch (err) {
+      // Record error to debug collection
+      try {
+        db.collection("debug_media_fetches")
+          .add({
+            contentId: id,
+            originHost: new URL(url).host || null,
+            originError: (err && (err.message || String(err))) || "unknown",
+            ts: new Date(),
+          })
+          .catch(e =>
+            console.error(
+              "[media] failed to write fetch error debug",
+              e && (e.stack || e.message || e)
+            )
+          );
+      } catch (e) {
+        console.error("[media] error debug write failure", e && (e.stack || e.message || e));
+      }
+      throw err;
+    }
   } catch (e) {
     if (e && String(e).includes("ssrf_blocked"))
       return res.status(403).json({ error: "ssrf_blocked" });
@@ -198,6 +253,34 @@ router.get("/media/:id", async (req, res) => {
     console.log(
       `[media] fetched host=${host} status=${fetchRes.status} content-length=${fetchedLength}`
     );
+
+    // Record fetch result and any body snippet for debugging
+    try {
+      const bodySnippet =
+        fetchRes && fetchRes.text
+          ? await Promise.race([fetchRes.text(), new Promise(r => setTimeout(() => r(""), 500))])
+          : "";
+      db.collection("debug_media_fetches")
+        .add({
+          contentId: id,
+          originHost: host,
+          originStatus: fetchRes.status,
+          originBodySnippet: bodySnippet && bodySnippet.slice ? bodySnippet.slice(0, 2000) : "",
+          contentLength: fetchedLength || null,
+          ts: new Date(),
+        })
+        .catch(err =>
+          console.error(
+            "[media] failed to write fetch debug",
+            err && (err.stack || err.message || err)
+          )
+        );
+    } catch (err) {
+      console.error(
+        "[media] fetch debug body read error",
+        err && (err.stack || err.message || err)
+      );
+    }
 
     // Temporary: record origin fetch status to Firestore to verify TikTok can reach the signed URL
     try {
