@@ -34,37 +34,42 @@ router.head("/media/tiktok-developers-site-verification.txt", async (req, res) =
 const fs = require("fs");
 const path = require("path");
 
-router.get("/media/tiktok-developers-site-verification.txt", async (req, res) => {
-  try {
-    let token;
-
-    // Prefer the committed static file if present (so deployments that update the file are effective immediately)
+// Serve verification file and also support the prefix root (/media/) so verifiers that request the prefix still find the token
+router.get(
+  ["/media/tiktok-developers-site-verification.txt", "/media", "/media/"],
+  async (req, res) => {
     try {
-      const filePath = path.resolve(
-        __dirname,
-        "..",
-        "..",
-        "public",
-        "tiktok-developers-site-verification.txt"
-      );
-      const content = fs.readFileSync(filePath, "utf8");
-      const match = content.match(/tiktok-developers-site-verification=(\S+)/);
-      if (match) token = match[1];
-    } catch (err) {
-      // ignore file read errors
+      let token;
+
+      // Prefer the committed static file if present (so deployments that update the file are effective immediately)
+      try {
+        const filePath = path.resolve(
+          __dirname,
+          "..",
+          "..",
+          "public",
+          "tiktok-developers-site-verification.txt"
+        );
+        const content = fs.readFileSync(filePath, "utf8");
+        const match = content.match(/tiktok-developers-site-verification=(\S+)/);
+        if (match) token = match[1];
+      } catch (err) {
+        // ignore file read errors
+      }
+
+      // Fallback: environment variable
+      if (!token) token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
+
+      if (!token) return res.status(404).send("Not found");
+      res.setHeader("content-type", "text/plain; charset=utf-8");
+      // Return plain token line so verifiers can find it either by requesting /media/ or the explicit filename
+      return res.status(200).send(`tiktok-developers-site-verification=${token}`);
+    } catch (e) {
+      console.error("[media] verification GET error", e && (e.stack || e.message || e));
+      return res.status(500).json({ error: "internal_error" });
     }
-
-    // Fallback: environment variable
-    if (!token) token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
-
-    if (!token) return res.status(404).send("Not found");
-    res.setHeader("content-type", "text/plain; charset=utf-8");
-    return res.status(200).send(`tiktok-developers-site-verification=${token}`);
-  } catch (e) {
-    console.error("[media] verification GET error", e && (e.stack || e.message || e));
-    return res.status(500).json({ error: "internal_error" });
   }
-});
+);
 
 // HEAD handler - returns headers only
 router.head("/media/:id", async (req, res) => {
@@ -114,14 +119,11 @@ router.head("/media/:id", async (req, res) => {
             url = signed;
             // Persist storagePath and mediaUrl back to content doc so subsequent requests don't need to list
             try {
-              await db
-                .collection("content")
-                .doc(id)
-                .update({
-                  storagePath: match.name,
-                  mediaUrl: signed,
-                  urlSignedAt: new Date().toISOString(),
-                });
+              await db.collection("content").doc(id).update({
+                storagePath: match.name,
+                mediaUrl: signed,
+                urlSignedAt: new Date().toISOString(),
+              });
             } catch (err) {
               console.error(
                 "[media] failed to update content doc with storagePath",
@@ -288,14 +290,11 @@ router.get("/media/:id", async (req, res) => {
             });
             url = signed;
             try {
-              await db
-                .collection("content")
-                .doc(id)
-                .update({
-                  storagePath: match.name,
-                  mediaUrl: signed,
-                  urlSignedAt: new Date().toISOString(),
-                });
+              await db.collection("content").doc(id).update({
+                storagePath: match.name,
+                mediaUrl: signed,
+                urlSignedAt: new Date().toISOString(),
+              });
             } catch (err) {
               console.error(
                 "[media] failed to update content doc with storagePath",
