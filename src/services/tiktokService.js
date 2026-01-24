@@ -227,13 +227,18 @@ async function getValidAccessToken(uid) {
 /**
  * Initialize video upload - returns upload URL and video ID
  */
-async function initializeVideoUpload({ accessToken, videoSize, chunkSize = DEFAULT_CHUNK_SIZE }) {
+async function initializeVideoUpload({
+  accessToken,
+  videoSize,
+  chunkSize = DEFAULT_CHUNK_SIZE,
+  privacyLevel = "SELF_ONLY",
+}) {
   if (!fetchFn) throw new Error("Fetch not available");
 
   const body = {
     post_info: {
       title: "",
-      privacy_level: "SELF_ONLY", // Will be updated when publishing
+      privacy_level: privacyLevel, // Set by caller (admin-approved publishes default PUBLIC)
       disable_duet: false,
       disable_comment: false,
       disable_stitch: false,
@@ -247,32 +252,57 @@ async function initializeVideoUpload({ accessToken, videoSize, chunkSize = DEFAU
     },
   };
 
-  const response = await safeFetch(
-    "https://open.tiktokapis.com/v2/post/publish/video/init/",
-    fetchFn,
-    {
+  const callInit = async bodyToSend =>
+    safeFetch("https://open.tiktokapis.com/v2/post/publish/video/init/", fetchFn, {
       fetchOptions: {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(bodyToSend),
       },
       requireHttps: true,
       allowHosts: ["open.tiktokapis.com"],
-    }
-  );
+    });
 
+  // initial attempt
+  let response = await callInit(body);
+
+  // If TikTok complains about chunk params, retry with single-chunk (chunk_size = videoSize)
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`TikTok upload init failed: ${error}`);
+    const errorText = await response.text().catch(() => "");
+    if (errorText && /chunk|total chunk/i.test(errorText)) {
+      try {
+        const retryBody = {
+          post_info: body.post_info,
+          source_info: {
+            source: "FILE_UPLOAD",
+            video_size: videoSize,
+            chunk_size: videoSize,
+            total_chunk_count: 1,
+          },
+        };
+        const retryRes = await callInit(retryBody);
+        if (retryRes.ok) {
+          response = retryRes;
+        } else {
+          const err2 = await retryRes.text().catch(() => "");
+          throw new Error(`TikTok upload init failed (retry): ${err2 || "<no body>"}`);
+        }
+      } catch (e) {
+        throw new Error(`TikTok upload init failed: ${errorText || e.message || e}`);
+      }
+    } else {
+      throw new Error(`TikTok upload init failed: ${errorText || "<no body>"}`);
+    }
   }
 
-  const data = await response.json();
+  const data = await response.json().catch(() => null);
 
-  if (data.error || !data.data) {
-    throw new Error(data.error?.message || "Upload initialization failed");
+  if (!data || (data.error && data.error.code !== "ok") || !data.data) {
+    console.error("[tiktok] init returned invalid data", data);
+    throw new Error((data && data.error && data.error.message) || "Upload initialization failed");
   }
 
   return data.data; // { publish_id, upload_url }
@@ -311,32 +341,16 @@ async function uploadVideoChunk({
 /**
  * Publish the uploaded video
  */
-async function publishVideo({
-  accessToken,
-  publishId,
-  title,
-  privacyLevel = "PUBLIC_TO_EVERYONE",
-  soundId,
-}) {
+async function publishVideo({ accessToken, publishId, title, privacyLevel = undefined, soundId }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
-  const body = {
-    post_info: {
-      title: title || "New Video",
-      privacy_level: privacyLevel,
-      disable_duet: false,
-      disable_comment: false,
-      disable_stitch: false,
-      // Optional music/sound metadata forwarded to TikTok when provided
-      ...(soundId ? { music_id: soundId } : {}),
-    },
-    source_info: {
-      source: "FILE_UPLOAD",
-    },
-  };
+  // Allow caller to override privacy when finalizing the publish
+  const body = privacyLevel
+    ? { publish_id: publishId, post_info: { privacy_level: privacyLevel } }
+    : { publish_id: publishId };
 
   const response = await safeFetch(
-    `https://open.tiktokapis.com/v2/post/publish/status/fetch/?publish_id=${publishId}`,
+    "https://open.tiktokapis.com/v2/post/publish/status/fetch/",
     fetchFn,
     {
       fetchOptions: {
@@ -354,12 +368,14 @@ async function publishVideo({
 
   if (!response.ok) {
     const error = await response.text();
+    console.error("[tiktok] publish status fetch failed", response.status, error);
     throw new Error(`TikTok publish failed: ${error}`);
   }
 
   const data = await response.json();
 
-  if (data.error) {
+  if (data.error && data.error.code !== "ok") {
+    console.error("[tiktok] publish response error", data);
     throw new Error(data.error.message || "Publish failed");
   }
 
@@ -369,7 +385,88 @@ async function publishVideo({
 /**
  * Upload TikTok video - full implementation
  */
-async function uploadTikTokVideo({ contentId, payload, uid }) {
+async function pullFromUrlPublish({
+  accessToken,
+  videoUrl,
+  contentId,
+  privacyLevel = undefined,
+  maxWaitMs = 120000,
+}) {
+  if (!fetchFn) throw new Error("Fetch not available");
+  // Init PULL_FROM_URL
+  const initBody = {
+    post_info: { title: "", privacy_level: privacyLevel || "SELF_ONLY" },
+    source_info: { source: "PULL_FROM_URL", video_url: videoUrl },
+  };
+
+  const initRes = await safeFetch(
+    "https://open.tiktokapis.com/v2/post/publish/video/init/",
+    fetchFn,
+    {
+      fetchOptions: {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify(initBody),
+      },
+      requireHttps: true,
+      allowHosts: ["open.tiktokapis.com"],
+    }
+  );
+
+  if (!initRes.ok) {
+    const txt = await initRes.text().catch(() => "");
+    return { success: false, error: `init_failed: ${txt}` };
+  }
+
+  const initJson = await initRes.json().catch(() => ({}));
+  const publishId = initJson?.data?.publish_id;
+  if (!publishId) return { success: false, error: `no_publish_id` };
+
+  const start = Date.now();
+  let lastDownloaded = -1;
+  while (Date.now() - start < maxWaitMs) {
+    await new Promise(r => setTimeout(r, 4000));
+    const statusRes = await safeFetch(
+      "https://open.tiktokapis.com/v2/post/publish/status/fetch/",
+      fetchFn,
+      {
+        fetchOptions: {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ publish_id: publishId }),
+        },
+        requireHttps: true,
+        allowHosts: ["open.tiktokapis.com"],
+      }
+    );
+    let statusJson = await statusRes.json().catch(() => ({}));
+    const s = statusJson && statusJson.data ? statusJson.data : null;
+    if (s) {
+      // If download is in progress, check progress
+      if (s.downloaded_bytes && s.downloaded_bytes > lastDownloaded)
+        lastDownloaded = s.downloaded_bytes;
+      if (s.status === "SUCCESS" || s.status === "PUBLISH_COMPLETE") {
+        return { success: true, publishId, status: s.status, data: s };
+      }
+      if (s.status === "FAILED") {
+        return {
+          success: false,
+          publishId,
+          status: "FAILED",
+          reason: s.fail_reason || null,
+          data: s,
+        };
+      }
+    }
+    // If we have seen no progress after several polls, consider stalled
+    if (Date.now() - start > 30000 && lastDownloaded === 0) {
+      return { success: false, publishId, status: "stalled", reason: "download_stalled" };
+    }
+  }
+  return { success: false, publishId, reason: "timeout" };
+}
+
+async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
   const bypass =
     process.env.CI_ROUTE_IMPORTS === "1" ||
     process.env.FIREBASE_ADMIN_BYPASS === "1" ||
@@ -394,16 +491,113 @@ async function uploadTikTokVideo({ contentId, payload, uid }) {
     return { platform: "tiktok", success: false, error: "not_authenticated" };
   }
 
-  const videoUrl = payload?.videoUrl || payload?.mediaUrl;
+  // Determine video URL from payload or content doc
+  let videoUrl = payload?.videoUrl || payload?.mediaUrl || payload?.url || payload?.video_url;
   const title = payload?.title || payload?.message || "AutoPromote Video";
-  const privacyLevel = payload?.privacy || "PUBLIC_TO_EVERYONE";
+  // Default privacy: make approved publishes public, otherwise can be overridden by payload.privacy
+  const privacyLevel =
+    payload?.privacy || (reason === "approved" ? "PUBLIC_TO_EVERYONE" : "SELF_ONLY");
+
+  // If we have a contentId, prefer a fresh signed URL from content doc
+  if (contentId) {
+    try {
+      const cSnap = await db.collection("content").doc(contentId).get();
+      if (cSnap.exists) {
+        const c = cSnap.data();
+        // prefer storagePath if present for deterministic signed URL
+        let storagePath = c.storagePath || null;
+        if (!storagePath && c.url) {
+          try {
+            const u = new URL(c.url);
+            const parts = u.pathname.split("/").filter(Boolean);
+            if (parts.length >= 2) {
+              // strip leading bucket name if present
+              if (parts[0] === (process.env.FIREBASE_STORAGE_BUCKET || "")) parts.shift();
+              storagePath = parts.join("/");
+            }
+          } catch (e) {
+            /* ignore */
+          }
+        }
+        if (storagePath) {
+          const { Storage } = require("@google-cloud/storage");
+          const storage = new Storage();
+          try {
+            const file = storage.bucket(process.env.FIREBASE_STORAGE_BUCKET).file(storagePath);
+            const [signed] = await file.getSignedUrl({
+              version: "v4",
+              action: "read",
+              expires: Date.now() + 60 * 60 * 1000,
+            });
+            videoUrl = signed;
+            // persist fresh URL
+            try {
+              await db
+                .collection("content")
+                .doc(contentId)
+                .update({ mediaUrl: signed, urlSignedAt: new Date().toISOString() });
+            } catch (_) {}
+          } catch (e) {
+            console.warn(
+              "[tiktok] failed to generate signed url from storagePath",
+              e && (e.message || e)
+            );
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[tiktok] failed to refresh signed url for content", e && (e.message || e));
+    }
+  }
 
   if (!videoUrl) {
     return { platform: "tiktok", success: false, error: "video_url_required" };
   }
 
   try {
-    // Download video
+    // If possible, try PULL_FROM_URL first (cheaper). If it stalls/fails, fallback to FILE_UPLOAD
+    let triedPull = false;
+    if (contentId && videoUrl && !process.env.TIKTOK_FORCE_FILE_UPLOAD) {
+      triedPull = true;
+      const pullResult = await pullFromUrlPublish({
+        accessToken,
+        videoUrl,
+        contentId,
+        privacyLevel,
+      });
+      if (pullResult && pullResult.success) {
+        // Record in Firestore
+        try {
+          await db
+            .collection("content")
+            .doc(contentId)
+            .set(
+              {
+                tiktok: {
+                  publishId: pullResult.publishId,
+                  videoId: pullResult.publishId,
+                  status: pullResult.status,
+                  postedAt: new Date().toISOString(),
+                },
+              },
+              { merge: true }
+            );
+        } catch (_) {}
+        return {
+          platform: "tiktok",
+          success: true,
+          publishId: pullResult.publishId,
+          status: pullResult.status,
+        };
+      }
+      // If pull failed and is a transient stall, proceed to file upload fallback
+      console.warn(
+        "[tiktok] PULL_FROM_URL failed or stalled, falling back to FILE_UPLOAD",
+        pullResult && (pullResult.reason || pullResult.error || pullResult.status)
+      );
+    }
+
+    // Download video for FILE_UPLOAD fallback
     const videoResponse = await safeFetch(videoUrl, fetchFn, {
       requireHttps: true,
     });
@@ -415,10 +609,11 @@ async function uploadTikTokVideo({ contentId, payload, uid }) {
     const videoBuffer = await videoResponse.arrayBuffer();
     const videoSize = videoBuffer.byteLength;
 
-    // Initialize upload
+    // Initialize upload (FILE_UPLOAD)
     const { publish_id, upload_url } = await initializeVideoUpload({
       accessToken,
       videoSize,
+      privacyLevel,
     });
 
     // Upload video chunks
@@ -476,6 +671,7 @@ async function uploadTikTokVideo({ contentId, payload, uid }) {
       status: publishResult.status,
     };
   } catch (e) {
+    console.error("[tiktok] uploadTikTokVideo failed:", e && (e.stack || e.message || e));
     return {
       platform: "tiktok",
       success: false,
@@ -487,8 +683,9 @@ async function uploadTikTokVideo({ contentId, payload, uid }) {
 /**
  * Post to TikTok (wrapper for platformPoster integration)
  */
-async function postToTikTok({ contentId, payload, reason: _reason, uid }) {
-  return uploadTikTokVideo({ contentId, payload, uid });
+async function postToTikTok({ contentId, payload, reason, uid }) {
+  // Forward reason so upload flow can default privacy (e.g. 'approved' -> PUBLIC)
+  return uploadTikTokVideo({ contentId, payload, uid, reason });
 }
 
 module.exports = {
