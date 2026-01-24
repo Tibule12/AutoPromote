@@ -31,3 +31,17 @@ test("GET /media/:id returns 404 when content has no url", async () => {
   const res = await request(app).get("/media/hasno");
   expect(res.status).toBe(404);
 });
+
+test("GET /media/tiktok-developers-site-verification.txt returns token", async () => {
+  process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION = "TESTTOKEN";
+  const res = await request(app).get("/media/tiktok-developers-site-verification.txt");
+  expect(res.status).toBe(200);
+  expect(res.headers["content-type"]).toMatch(/text\/plain/);
+  expect(res.text).toBe("tiktok-developers-site-verification=TESTTOKEN");
+});
+
+test("HEAD /media/tiktok-developers-site-verification.txt returns 200", async () => {
+  process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION = "TESTTOKEN";
+  const res = await request(app).head("/media/tiktok-developers-site-verification.txt");
+  expect(res.status).toBe(200);
+});
