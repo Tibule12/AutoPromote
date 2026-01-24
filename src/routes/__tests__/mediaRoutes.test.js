@@ -32,12 +32,16 @@ test("GET /media/:id returns 404 when content has no url", async () => {
   expect(res.status).toBe(404);
 });
 
-test("GET /media/tiktok-developers-site-verification.txt returns token from env", async () => {
-  process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION = "TESTTOKEN";
+test("GET /media/tiktok-developers-site-verification.txt returns token from file when present", async () => {
+  process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION = "ENV";
+  jest
+    .spyOn(require("fs"), "readFileSync")
+    .mockImplementation(() => "tiktok-developers-site-verification=FILETOKEN");
   const res = await request(app).get("/media/tiktok-developers-site-verification.txt");
   expect(res.status).toBe(200);
   expect(res.headers["content-type"]).toMatch(/text\/plain/);
-  expect(res.text).toBe("tiktok-developers-site-verification=TESTTOKEN");
+  expect(res.text).toBe("tiktok-developers-site-verification=FILETOKEN");
+  require("fs").readFileSync.mockRestore();
 });
 
 test("GET /media/tiktok-developers-site-verification.txt falls back to file", async () => {
