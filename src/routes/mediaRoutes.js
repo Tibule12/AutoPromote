@@ -39,26 +39,25 @@ router.get(
   ["/media/tiktok-developers-site-verification.txt", "/media", "/media/"],
   async (req, res) => {
     try {
-      let token;
+      // Prefer the environment variable first (tests set this quickly), then fall back to the committed static file
+      let token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
 
-      // Prefer the committed static file if present (so deployments that update the file are effective immediately)
-      try {
-        const filePath = path.resolve(
-          __dirname,
-          "..",
-          "..",
-          "public",
-          "tiktok-developers-site-verification.txt"
-        );
-        const content = fs.readFileSync(filePath, "utf8");
-        const match = content.match(/tiktok-developers-site-verification=(\S+)/);
-        if (match) token = match[1];
-      } catch (err) {
-        // ignore file read errors
+      if (!token) {
+        try {
+          const filePath = path.resolve(
+            __dirname,
+            "..",
+            "..",
+            "public",
+            "tiktok-developers-site-verification.txt"
+          );
+          const content = fs.readFileSync(filePath, "utf8");
+          const match = content.match(/tiktok-developers-site-verification=(\S+)/);
+          if (match) token = match[1];
+        } catch (err) {
+          // ignore file read errors
+        }
       }
-
-      // Fallback: environment variable
-      if (!token) token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
 
       if (!token) return res.status(404).send("Not found");
       res.setHeader("content-type", "text/plain; charset=utf-8");
