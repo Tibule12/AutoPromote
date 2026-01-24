@@ -1,0 +1,63 @@
+name: "One-off: Publish Train Video (YouTube)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      content_id:
+        description: 'Content doc ID to publish'
+        required: true
+        default: 'mihKvcKe2Rmsi5KH7vR4'
+      file_path:
+        description: 'Storage file path (uploads/videos/...)'
+        required: true
+        default: 'uploads/videos/1769084440850_Train Video.mp4'
+      uid:
+        description: 'User UID to attribute the task'
+        required: true
+        default: 'bf04dPKELvVMivWoUyLsAVyw2sg2'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      SSRF_ALLOW_UNRESTRICTED: '1'
+      YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+      YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+      YT_REDIRECT_URI: ${{ secrets.YT_REDIRECT_URI }}
+      FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+      GOOGLE_APPLICATION_CREDENTIALS: service-account-key.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write service account file
+        if: env.FIREBASE_ADMIN_SERVICE_ACCOUNT != ''
+        run: |
+          echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GOOGLE_APPLICATION_CREDENTIALS
+
+      - name: Verify env
+        run: |
+          echo "YT_CLIENT_ID set: ${YT_CLIENT_ID:+yes}"
+          echo "SSRF allow unrestricted: $SSRF_ALLOW_UNRESTRICTED"
+
+      - name: Run publish script (create content/enqueue/process)
+        run: |
+          node ./scripts/create-and-publish-train-video.js --uid="${{ github.event.inputs.uid }}" --file="${{ github.event.inputs.file_path }}"
+        env:
+          NODE_ENV: production
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-train-video-logs
+          path: |
+            ./logs || true

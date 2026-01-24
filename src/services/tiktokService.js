@@ -14,6 +14,8 @@ if (!fetchFn) {
 const TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/";
 const AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/";
 
+const DEFAULT_CHUNK_SIZE = parseInt(process.env.TIKTOK_CHUNK_SIZE || "5242880", 10); // 5MB default
+
 /**
  * Get user's TikTok connection tokens
  */
@@ -54,6 +56,7 @@ async function exchangeCodeForToken({ code, redirectUri }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
   const clientKey = process.env.TIKTOK_CLIENT_KEY;
+
   const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
 
   if (!clientKey || !clientSecret) {
@@ -101,6 +104,7 @@ async function refreshToken(uid, refreshToken) {
   if (!fetchFn) throw new Error("Fetch not available");
 
   const clientKey = process.env.TIKTOK_CLIENT_KEY;
+  const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
 
   if (!clientKey) {
     throw new Error("TikTok client key not configured");
@@ -112,29 +116,41 @@ async function refreshToken(uid, refreshToken) {
     refresh_token: refreshToken,
   };
 
+  const params = new URLSearchParams();
+  params.append("client_key", clientKey);
+  if (clientSecret) params.append("client_secret", clientSecret);
+  params.append("grant_type", "refresh_token");
+  params.append("refresh_token", refreshToken);
+
   const response = await safeFetch(TOKEN_URL, fetchFn, {
     fetchOptions: {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: JSON.stringify(body),
+      body: params.toString(),
     },
     requireHttps: true,
     allowHosts: ["open.tiktokapis.com"],
   });
 
   if (!response.ok) {
-    throw new Error("TikTok token refresh failed");
+    const txt = await response.text().catch(() => "<no-body>");
+    console.error("[TikTok] refresh response not ok:", txt);
+    throw new Error(`TikTok token refresh failed: ${txt}`);
   }
 
   const data = await response.json();
-
-  if (data.error || !data.data) {
-    throw new Error(data.error_description || "Token refresh failed");
+  // Support APIs that return tokens at top-level or under { data: { ... } }
+  const tokens = data && data.data ? data.data : data;
+  if (!tokens || !tokens.access_token) {
+    try {
+      console.error("[TikTok] refresh response json:", JSON.stringify(data));
+    } catch (_) {}
+    throw new Error(
+      (data && data.error_description) || JSON.stringify(data) || "Token refresh failed"
+    );
   }
-
-  const tokens = data.data;
 
   // Store refreshed tokens
   const ref = db.collection("users").doc(uid).collection("connections").doc("tiktok");
@@ -211,7 +227,7 @@ async function getValidAccessToken(uid) {
 /**
  * Initialize video upload - returns upload URL and video ID
  */
-async function initializeVideoUpload({ accessToken, videoSize, chunkSize = 10485760 }) {
+async function initializeVideoUpload({ accessToken, videoSize, chunkSize = DEFAULT_CHUNK_SIZE }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
   const body = {
@@ -265,19 +281,24 @@ async function initializeVideoUpload({ accessToken, videoSize, chunkSize = 10485
 /**
  * Upload video chunk
  */
-async function uploadVideoChunk({ uploadUrl, videoBuffer, chunkIndex, totalChunks: _totalChunks }) {
+async function uploadVideoChunk({
+  uploadUrl,
+  videoBuffer,
+  chunkIndex,
+  totalChunks: _totalChunks,
+  chunkSize = DEFAULT_CHUNK_SIZE,
+}) {
   if (!fetchFn) throw new Error("Fetch not available");
 
+  const start = chunkIndex * chunkSize;
+  const end = Math.min((chunkIndex + 1) * chunkSize - 1, videoBuffer.length - 1);
   const response = await fetch(uploadUrl, {
     method: "PUT",
     headers: {
       "Content-Type": "video/mp4",
-      "Content-Range": `bytes ${chunkIndex * 10485760}-${Math.min((chunkIndex + 1) * 10485760 - 1, videoBuffer.length - 1)}/${videoBuffer.length}`,
+      "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
     },
-    body: videoBuffer.slice(
-      chunkIndex * 10485760,
-      Math.min((chunkIndex + 1) * 10485760, videoBuffer.length)
-    ),
+    body: videoBuffer.slice(start, Math.min((chunkIndex + 1) * chunkSize, videoBuffer.length)),
   });
 
   if (!response.ok) {
@@ -401,7 +422,7 @@ async function uploadTikTokVideo({ contentId, payload, uid }) {
     });
 
     // Upload video chunks
-    const chunkSize = 10485760; // 10MB
+    const chunkSize = DEFAULT_CHUNK_SIZE;
     const totalChunks = Math.ceil(videoSize / chunkSize);
 
     for (let i = 0; i < totalChunks; i++) {
@@ -410,6 +431,7 @@ async function uploadTikTokVideo({ contentId, payload, uid }) {
         videoBuffer: Buffer.from(videoBuffer),
         chunkIndex: i,
         totalChunks,
+        chunkSize,
       });
     }
 

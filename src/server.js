@@ -1789,6 +1789,16 @@ try {
     console.warn("⚠️ Mock TikTok OAuth frontend route not available:", e.message);
   }
 
+  // Media proxy route: serves signed media URLs under the site's domain so third-party services
+  // (e.g., TikTok) can verify and fetch media using a domain you control.
+  try {
+    const mediaRoutes = require("./routes/mediaRoutes");
+    app.use(mediaRoutes);
+    console.log("✅ Media proxy routes mounted (e.g. /media/:id)");
+  } catch (e) {
+    console.warn("⚠️ Media proxy routes not available:", e.message);
+  }
+
   // Explicit root-level routes for TikTok verification variations
   const sendFirstExisting = (res, candidates) => {
     const fs = require("fs");

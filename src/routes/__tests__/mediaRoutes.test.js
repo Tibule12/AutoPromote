@@ -1,7 +1,7 @@
 const request = require("supertest");
 const express = require("express");
 
-jest.mock("../../src/firebaseAdmin", () => {
+jest.mock("../../firebaseAdmin", () => {
   return {
     db: {
       collection: jest.fn().mockReturnThis(),
@@ -11,7 +11,7 @@ jest.mock("../../src/firebaseAdmin", () => {
   };
 });
 
-const { db } = require("../../src/firebaseAdmin");
+const { db } = require("../../firebaseAdmin");
 const mediaRoutes = require("../mediaRoutes");
 
 let app;
