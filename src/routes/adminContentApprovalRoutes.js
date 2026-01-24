@@ -204,18 +204,27 @@ router.post("/:contentId/approve", authMiddleware, adminOnly, async (req, res) =
             const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
             for (const platform of targets) {
               try {
+                const pPayload = {
+                  url: data.url,
+                  title: data.title,
+                  description: data.description,
+                  platformOptions: data.platformOptions || {},
+                  hashtags: data.hashtags || [],
+                };
+                // For TikTok, default approved publishes to PUBLIC
+                if (platform === "tiktok") {
+                  if (!pPayload.privacy) pPayload.privacy = "PUBLIC_TO_EVERYONE";
+                  // helpful flag for consumers
+                  pPayload.platformOptions = pPayload.platformOptions || {};
+                  pPayload.platformOptions.tiktok = pPayload.platformOptions.tiktok || {};
+                  pPayload.platformOptions.tiktok.approved_publish = true;
+                }
                 await enqueuePlatformPostTask({
                   contentId,
                   uid: data.userId || null,
                   platform,
                   reason: "approved",
-                  payload: {
-                    url: data.url,
-                    title: data.title,
-                    description: data.description,
-                    platformOptions: data.platformOptions || {},
-                    hashtags: data.hashtags || [],
-                  },
+                  payload: pPayload,
                 });
               } catch (e) {
                 console.warn("enqueuePlatformPostTask failed for", contentId, platform, e.message);
