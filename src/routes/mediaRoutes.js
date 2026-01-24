@@ -153,6 +153,26 @@ router.get("/media/:id", async (req, res) => {
       `[media] fetched host=${host} status=${fetchRes.status} content-length=${fetchedLength}`
     );
 
+    // Temporary: record origin fetch status to Firestore to verify TikTok can reach the signed URL
+    try {
+      db.collection("debug_media_fetches")
+        .add({
+          contentId: id,
+          originHost: host,
+          originStatus: fetchRes.status,
+          contentLength: fetchedLength || null,
+          ts: new Date(),
+        })
+        .catch(err =>
+          console.error(
+            "[media] failed to write fetch debug",
+            err && (err.stack || err.message || err)
+          )
+        );
+    } catch (err) {
+      console.error("[media] fetch debug write error", err && (err.stack || err.message || err));
+    }
+
     // Copy a small set of headers from origin
     ["content-type", "content-length", "accept-ranges", "content-range", "last-modified"].forEach(
       h => {
