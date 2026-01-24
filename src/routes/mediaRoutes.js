@@ -39,10 +39,15 @@ router.get(
   ["/media/tiktok-developers-site-verification.txt", "/media", "/media/"],
   async (req, res) => {
     try {
-      // Prefer the environment variable first (tests set this quickly), then fall back to the committed static file
-      let token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
+      // Behavior:
+      // - If request is for the explicit filename, prefer the committed static file (so verification by filename is exact)
+      // - If request is for the prefix (/media or /media/), prefer the environment variable (tests and dynamic overrides typically set this)
+      let token;
+      const isExplicitFile =
+        req.path && req.path.endsWith("tiktok-developers-site-verification.txt");
 
-      if (!token) {
+      if (isExplicitFile) {
+        // Try file first, then env var
         try {
           const filePath = path.resolve(
             __dirname,
@@ -56,6 +61,26 @@ router.get(
           if (match) token = match[1];
         } catch (err) {
           // ignore file read errors
+        }
+        if (!token) token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
+      } else {
+        // Prefix request (/media) - prefer env then file
+        token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
+        if (!token) {
+          try {
+            const filePath = path.resolve(
+              __dirname,
+              "..",
+              "..",
+              "public",
+              "tiktok-developers-site-verification.txt"
+            );
+            const content = fs.readFileSync(filePath, "utf8");
+            const match = content.match(/tiktok-developers-site-verification=(\S+)/);
+            if (match) token = match[1];
+          } catch (err) {
+            // ignore file read errors
+          }
         }
       }
 
