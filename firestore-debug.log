@@ -149,3 +149,112 @@ INFO: Detected HTTP/2 connection.
 Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
 Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
 Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:06:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:06:35 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Jan 24, 2026 8:06:35 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:06:52 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:06:52 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:06:56 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:06:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID fetch-provider-worker, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID fetch-provider-worker, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID fetch-provider-worker, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:06:58 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:13:14 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:13:14 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:13:31 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:13:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:13:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:13:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:13:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:13:43 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID fetch-provider-worker, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID fetch-provider-worker, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID fetch-provider-worker, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:18:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:18:45 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-seed-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:18:46 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID memetic-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:19:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:19:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-routes-test, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:19:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID sound-service, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Jan 24, 2026 8:19:13 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Multiple projectIds are not recommended in single project mode. Requested project ID fetch-provider-worker, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID fetch-provider-worker, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+Multiple projectIds are not recommended in single project mode. Requested project ID fetch-provider-worker, but the emulator is configured for autopromote-cc6d3. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
