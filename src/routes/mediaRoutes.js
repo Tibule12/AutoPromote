@@ -113,7 +113,25 @@ router.get("/media/:id", async (req, res) => {
     const id = req.params.id;
     const remoteAddr = req.headers["x-forwarded-for"] || (req.socket && req.socket.remoteAddress);
     console.log(`[media] GET request id=${id} remote=${remoteAddr} ua=${req.get("user-agent")}`);
-
+    // Temporary: record incoming request to Firestore for debugging TikTok download attempts
+    try {
+      db.collection("debug_media_requests")
+        .add({
+          contentId: id,
+          path: req.originalUrl,
+          remoteAddr,
+          userAgent: req.get("user-agent"),
+          ts: new Date(),
+        })
+        .catch(err =>
+          console.error(
+            "[media] failed to write debug log",
+            err && (err.stack || err.message || err)
+          )
+        );
+    } catch (err) {
+      console.error("[media] debug log write error", err && (err.stack || err.message || err));
+    }
     const snap = await db.collection("content").doc(id).get();
     if (!snap.exists) return res.status(404).send("Not found");
     const content = snap.data();
