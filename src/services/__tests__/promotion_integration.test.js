@@ -116,6 +116,38 @@ describe("Promotion integration (mocked platforms)", () => {
     signer.verifySignature.mockRestore();
   });
 
+  test("tiktok enqueue respects feature flag (skips when disabled)", async () => {
+    const platform = "tiktok";
+    // Ensure flag is false and canary is empty
+    process.env.TIKTOK_ENABLED = "false";
+    process.env.TIKTOK_CANARY_UIDS = "";
+
+    const res = await enqueuePlatformPostTask({
+      contentId,
+      uid,
+      platform,
+      reason: "approved",
+      payload: {},
+    });
+    expect(res).toHaveProperty("skipped");
+    expect(res.skipped).toBe(true);
+    expect(res.reason).toBe("disabled_by_feature_flag");
+
+    // Now allow this uid via canary
+    process.env.TIKTOK_CANARY_UIDS = uid;
+    const res2 = await enqueuePlatformPostTask({
+      contentId,
+      uid,
+      platform,
+      reason: "approved",
+      payload: {},
+    });
+    expect(res2).toHaveProperty("id");
+
+    // Clean up
+    process.env.TIKTOK_CANARY_UIDS = "";
+  });
+
   test("duplicate pending prevented", async () => {
     const platform = "twitter";
     // First enqueue
