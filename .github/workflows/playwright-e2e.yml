@@ -89,4 +89,7 @@ jobs:
           echo "Cleaned up test/e2e/tmp/service-account.json"
       - name: Run smoke tests (daily)
         if: github.event_name == 'schedule'
-        run: node ./tools/smoke-tests/runSmokeTests.js
+        run: |
+          node ./tools/smoke-tests/runSmokeTests.js
+          echo "Running Jest canary smoke tests (TikTok gating)"
+          npx jest src/services/__tests__/promotion_canary.test.js --runInBand --silent
