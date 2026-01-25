@@ -14,7 +14,7 @@ if (!process.env.FIRESTORE_EMULATOR_HOST) {
 }
 
 // Allow extra time for emulator startup
-jest.setTimeout(30000);
+jest.setTimeout(60000);
 
 const firebaseAdmin = require("../../../firebaseAdmin");
 
