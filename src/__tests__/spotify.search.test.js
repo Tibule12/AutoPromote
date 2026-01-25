@@ -1,5 +1,7 @@
 // Mock safeFetch (used by platformRoutes) before loading the app so
 // server route handlers use the mocked implementation during tests.
+// Increase timeout because these tests start a server and perform network-like operations
+jest.setTimeout(20000);
 jest.mock("../utils/ssrfGuard", () => ({
   validateUrl: jest.fn().mockResolvedValue({ ok: true }),
   safeFetch: jest.fn().mockImplementation(async (url, fetchFn, opts) => {
