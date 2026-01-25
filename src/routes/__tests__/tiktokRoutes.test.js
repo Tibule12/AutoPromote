@@ -35,6 +35,21 @@ firebaseAdmin.admin.firestore.FieldValue = {
 firebaseAdmin.admin.firestore.Timestamp = {
   fromDate: d => (d instanceof Date ? d : new Date(d)),
 };
+// Monkey patch safeFetch early so when we require tiktokRoutes it captures our stubbed implementation
+const ssrf = require("../../../src/utils/ssrfGuard");
+ssrf.safeFetch = (_url, _fetchFn, _opts) => {
+  return Promise.resolve({
+    ok: true,
+    json: async () => ({
+      access_token: "TEST_A",
+      refresh_token: "TEST_R",
+      open_id: "open_1",
+      expires_in: 3600,
+      scope: "scope",
+    }),
+  });
+};
+
 const app = express();
 app.use(bodyParser.json());
 app.use("/api/tiktok", require("../tiktokRoutes"));
@@ -96,21 +111,6 @@ describe("tiktokRoutes", () => {
       .collection("oauth_state")
       .doc("tiktok")
       .set({ nonce: "123456", isPopup: false });
-
-    // Monkey patch safeFetch to return token info
-    const ssrf = require("../../../src/utils/ssrfGuard");
-    ssrf.safeFetch = (_url, _fetchFn, _opts) => {
-      return Promise.resolve({
-        ok: true,
-        json: async () => ({
-          access_token: "TEST_A",
-          refresh_token: "TEST_R",
-          open_id: "open_1",
-          expires_in: 3600,
-          scope: "scope",
-        }),
-      });
-    };
 
     // Make the request; ensure we include a state so the route uses a known uid
     const state = "testUser123.123456";
