@@ -260,6 +260,31 @@ async function enqueuePlatformPostTask({
     process.env.NODE_ENV === "test" ||
     typeof process.env.JEST_WORKER_ID !== "undefined"
   ) {
+    // Enforce feature-flag gating even in fast-path test mode for TikTok so tests can verify gating behavior
+    if (String(platform).toLowerCase() === "tiktok") {
+      try {
+        const enabled = String(process.env.TIKTOK_ENABLED || "false").toLowerCase() === "true";
+        const canary = (process.env.TIKTOK_CANARY_UIDS || "")
+          .split(",")
+          .map(s => s.trim())
+          .filter(Boolean);
+        if (!enabled && !(uid && canary.includes(uid))) {
+          try {
+            require("./metricsRecorder").incrCounter("tiktok.enqueue.skipped.disabled");
+          } catch (_) {}
+          return {
+            skipped: true,
+            reason: "disabled_by_feature_flag",
+            platform,
+            contentId,
+            _testStub: true,
+          };
+        }
+      } catch (e) {
+        /* ignore feature-gate failures and proceed */
+      }
+    }
+
     const ref = db.collection("promotion_tasks").doc();
     const baseTask = {
       type: "platform_post",
@@ -292,6 +317,25 @@ async function enqueuePlatformPostTask({
     return { id: ref.id, ...baseTask };
   }
   if (!contentId || !uid || !platform) throw new Error("contentId, uid, platform required");
+
+  // Feature-flag gating: allow TikTok only if enabled or the UID is in the canary list
+  if (String(platform).toLowerCase() === "tiktok") {
+    try {
+      const enabled = String(process.env.TIKTOK_ENABLED || "false").toLowerCase() === "true";
+      const canary = (process.env.TIKTOK_CANARY_UIDS || "")
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+      if (!enabled && !(uid && canary.includes(uid))) {
+        try {
+          require("./metricsRecorder").incrCounter("tiktok.enqueue.skipped.disabled");
+        } catch (_) {}
+        return { skipped: true, reason: "disabled_by_feature_flag", platform, contentId };
+      }
+    } catch (e) {
+      /* ignore feature-gate failures and proceed */
+    }
+  }
   // Quota enforcement (monthly task quota based on plan)
   try {
     const userRef = db.collection("users").doc(uid);

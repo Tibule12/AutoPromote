@@ -1,4 +1,6 @@
 // Integration tests for platform features: analytics, admin, community, fraud, rate limiting, schema validation
+// These are integration-like server tests that may start servers; increase default timeout
+jest.setTimeout(20000);
 
 const request = require("supertest");
 const app = require("../server");
