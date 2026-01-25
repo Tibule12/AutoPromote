@@ -607,10 +607,13 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
 
     const titleInput = screen.getByLabelText(/Platform title TikTok/i);
     fireEvent.change(titleInput, { target: { value: "Platform Title" } });
+    // Ensure the input value has propagated to state before proceeding
+    await screen.findByDisplayValue("Platform Title");
 
     // Click Preview inside the expanded panel (use aria-label to avoid ambiguous matches)
     const previewBtn = screen.getByLabelText(/Preview Content/i);
     fireEvent.click(previewBtn);
+
     // We expect the per-platform preview card to show the given title after fallback
     const matches = await screen.findAllByText(/Platform Title/, { timeout: 10000 });
     expect(matches.length).toBeGreaterThan(0);

@@ -163,8 +163,10 @@ test("preview button opens mini-player and play toggles", async () => {
   expect(dialog).toBeInTheDocument();
 
   const play = screen.getByRole("button", { name: /Play preview/i });
+  // Click and wait for play() to be called to avoid fake-timer race
   fireEvent.click(play);
-  expect(global._lastAudio.play).toHaveBeenCalled();
+  await waitFor(() => expect(global._lastAudio.play).toHaveBeenCalled(), { timeout: 2000 });
+
   // cleanup mock instance and restore global Audio
   delete global._lastAudio;
   global.Audio = _realAudio;
