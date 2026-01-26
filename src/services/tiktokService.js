@@ -608,10 +608,13 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
     // Download video for FILE_UPLOAD fallback
     const videoResponse = await safeFetch(videoUrl, fetchFn, {
       requireHttps: true,
+      fetchOptions: { redirect: "follow" },
     });
 
     if (!videoResponse.ok) {
-      throw new Error("Failed to download video");
+      const statusText =
+        videoResponse && videoResponse.status ? `status=${videoResponse.status}` : "";
+      throw new Error(`Failed to download video ${statusText}`);
     }
 
     const videoBuffer = await videoResponse.arrayBuffer();
