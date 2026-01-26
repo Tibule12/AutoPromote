@@ -393,6 +393,14 @@ async function uploadVideoChunk({
         "Content-Length": `${chunk.length}`,
       },
     },
+    {
+      name: "put-video-mp4-no-range",
+      method: "PUT",
+      headers: {
+        "Content-Type": "video/mp4",
+        "Content-Length": `${chunk.length}`,
+      },
+    },
   ];
 
   let lastErr = null;
