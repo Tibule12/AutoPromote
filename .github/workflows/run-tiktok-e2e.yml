@@ -1,0 +1,58 @@
+name: "Run TikTok E2E Pull Test"
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Public video URL to PULL_FROM_URL'
+        required: true
+        default: ''
+      uid:
+        description: 'TikTok owner uid to use for publish'
+        required: true
+        default: 'bf04dPKELvVMivWoUyLsAVyw2sg2'
+
+jobs:
+  run-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Firebase service account
+        env:
+          FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_ADMIN_SERVICE_ACCOUNT" ]; then
+            echo "FIREBASE_ADMIN_SERVICE_ACCOUNT secret is not set. Aborting.";
+            exit 1;
+          fi
+          echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
+
+      - name: Run TikTok PULL_FROM_URL E2E test
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+          TEST_UID: ${{ github.event.inputs.uid }}
+        run: |
+          echo "Running E2E with url=${{ github.event.inputs.url }} uid=${{ github.event.inputs.uid }}"
+          node -r dotenv/config scripts/create-content-and-run-pull.js --url "${{ github.event.inputs.url }}" --uid "${{ github.event.inputs.uid }}" | tee e2e-tiktok-pull.log
+
+      - name: Upload E2E log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tiktok-e2e-pull-logs
+          path: |
+            tmp-service-account.json
+            e2e-tiktok-pull.log
+            *.log || true
