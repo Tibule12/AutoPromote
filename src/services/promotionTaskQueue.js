@@ -124,6 +124,9 @@ async function enqueueYouTubeUploadTask({
     task = attachSignature(baseTask);
   } catch (_) {}
   await ref.set(task);
+  try {
+    require("./metricsRecorder").incrCounter("tiktok.enqueue.succeeded");
+  } catch (_) {}
   return { id: ref.id, ...task };
 }
 
