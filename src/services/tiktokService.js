@@ -333,6 +333,7 @@ async function uploadVideoChunk({
   const variants = [
     {
       name: "default",
+      method: "PUT",
       headers: {
         ...baseHeaders,
         "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
@@ -341,6 +342,7 @@ async function uploadVideoChunk({
     },
     {
       name: "no-content-length",
+      method: "PUT",
       headers: {
         ...baseHeaders,
         "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
@@ -348,6 +350,7 @@ async function uploadVideoChunk({
     },
     {
       name: "no-content-range",
+      method: "PUT",
       headers: {
         ...baseHeaders,
         "Content-Length": `${chunk.length}`,
@@ -355,8 +358,37 @@ async function uploadVideoChunk({
     },
     {
       name: "video-mp4",
+      method: "PUT",
       headers: {
         "Content-Type": "video/mp4",
+        "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
+        "Content-Length": `${chunk.length}`,
+      },
+    },
+    {
+      name: "post-range",
+      method: "POST",
+      headers: {
+        ...baseHeaders,
+        "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
+        "Content-Length": `${chunk.length}`,
+      },
+    },
+    {
+      name: "range-no-total",
+      method: "PUT",
+      headers: {
+        ...baseHeaders,
+        "Content-Range": `bytes ${start}-${end}`,
+        "Content-Length": `${chunk.length}`,
+      },
+    },
+    {
+      name: "accept-any",
+      method: "PUT",
+      headers: {
+        ...baseHeaders,
+        Accept: "*/*",
         "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
         "Content-Length": `${chunk.length}`,
       },
@@ -383,28 +415,42 @@ async function uploadVideoChunk({
       );
 
       const res = await fetch(uploadUrl, {
-        method: "PUT",
+        method: v.method || "PUT",
         headers: v.headers,
         body: chunk,
       });
 
       const bodyText = await res.text().catch(() => null);
+      // collect response headers for diagnostics (may be empty in some environments)
+      const resHeadersObj = {};
+      try {
+        if (res && res.headers && typeof res.headers.forEach === "function") {
+          res.headers.forEach((val, k) => {
+            resHeadersObj[k] = val;
+          });
+        } else if (res && res.headers && typeof res.headers.entries === "function") {
+          for (const [k, v2] of res.headers.entries()) resHeadersObj[k] = v2;
+        }
+      } catch (_) {}
+
       if (res.ok) {
         console.log(
-          `[tiktok] chunk upload succeeded attempt=%d variant=%s status=%d`,
+          `[tiktok] chunk upload succeeded attempt=%d variant=%s status=%d headers=%o`,
           attempt,
           v.name,
-          res.status
+          res.status,
+          resHeadersObj
         );
         return { success: true };
       }
 
       console.warn(
-        `[tiktok] chunk upload attempt failed attempt=%d variant=%s status=%d body=%s`,
+        `[tiktok] chunk upload attempt failed attempt=%d variant=%s status=%d body=%s headers=%o`,
         attempt,
         v.name,
         res.status,
-        bodyText || "<no-body>"
+        bodyText || "<no-body>",
+        resHeadersObj
       );
 
       lastErr = new Error(
