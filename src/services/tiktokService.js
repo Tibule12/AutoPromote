@@ -16,6 +16,35 @@ const AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/";
 
 const DEFAULT_CHUNK_SIZE = parseInt(process.env.TIKTOK_CHUNK_SIZE || "5242880", 10); // 5MB default
 
+// Compute candidate chunk sizes following TikTok Media Transfer Guide
+function computeChunkCandidates(videoSize) {
+  const MB = 1024 * 1024;
+  const minChunk = 5 * MB;
+  const maxChunk = 64 * MB;
+  const candidates = [];
+
+  if (videoSize < minChunk) {
+    // Must upload whole file
+    return [videoSize];
+  }
+
+  // Try larger chunk sizes first to minimize total chunks
+  for (let cs = maxChunk; cs >= minChunk; cs -= MB) {
+    const totalChunks = Math.floor(videoSize / cs);
+    if (totalChunks < 1 || totalChunks > 1000) continue;
+    const leftover = videoSize - cs * totalChunks;
+    const lastChunkSize = leftover === 0 ? cs : leftover >= 5 * MB ? leftover : cs + leftover;
+    if (lastChunkSize < 5 * MB) continue;
+    if (lastChunkSize > 128 * MB) continue;
+    candidates.push(cs);
+  }
+
+  // Always include the TCP-friendly 5MB as a fallback
+  if (!candidates.includes(minChunk)) candidates.push(minChunk);
+
+  return candidates;
+}
+
 const fs = require("fs");
 const path = require("path");
 const TIKTOK_CAPTURE_DIR =
@@ -1105,8 +1134,13 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       }
     }
 
-    // Initialize upload (FILE_UPLOAD) and attempt upload with progressively smaller chunk sizes if needed
-    const chunkSizeCandidates = [DEFAULT_CHUNK_SIZE, Math.min(DEFAULT_CHUNK_SIZE, 262144), 65536]; // try default, then 256KB, then 64KB
+    // Initialize upload (FILE_UPLOAD).
+    // Compute chunk_size candidates using the Media Transfer Guide and try them (larger chunks first).
+    const computedCandidates = computeChunkCandidates(videoSize);
+    // Append a few conservative fallbacks (DEFAULT_CHUNK_SIZE and a couple of small sizes) ensuring uniqueness
+    const fallbackCandidates = [DEFAULT_CHUNK_SIZE, Math.min(DEFAULT_CHUNK_SIZE, 262144), 65536];
+    const chunkSizeCandidates = Array.from(new Set([...computedCandidates, ...fallbackCandidates]));
+
     let publish_id = null;
     let upload_url = null;
     let uploadSucceeded = false;
@@ -1114,6 +1148,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
     for (let csIndex = 0; csIndex < chunkSizeCandidates.length; csIndex++) {
       const cs = chunkSizeCandidates[csIndex];
       try {
+        console.log("[tiktok] trying chunk_size candidate=%d", cs);
         const initData = await initializeVideoUpload({
           accessToken,
           videoSize,
