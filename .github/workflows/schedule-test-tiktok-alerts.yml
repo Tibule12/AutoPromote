@@ -37,6 +37,26 @@ jobs:
           fi
           echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
 
+      - name: Apply TikTok alerting defaults
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+        run: |
+          # Ensure alert thresholds and enabled events for TikTok are applied
+          node scripts/set-tiktok-alerting-defaults.js || true
+
+      - name: Set Slack webhook in config (if provided)
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+          SLACK_ALERT_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK_URL }}
+        run: |
+          # If the secret isn't set, skip gracefully to avoid expression-context errors
+          if [ -z "${SLACK_ALERT_WEBHOOK_URL}" ]; then
+            echo "SLACK_ALERT_WEBHOOK_URL not set; skipping Slack webhook setup.";
+          else
+            # Writes Slack webhook into runtime config and sends an optional test alert
+            node scripts/set-slack-webhook.js || true
+          fi
+
       - name: Run TikTok alerts test
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
