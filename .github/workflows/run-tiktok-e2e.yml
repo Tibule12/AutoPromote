@@ -40,12 +40,12 @@ jobs:
           echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
 
       - name: Inspect TikTok connection (optional)
-        if: ${{ github.event.inputs.inspectUid != '' }}
+        if: ${{ github.event.inputs.url == '__inspect_only__' }}
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
         run: |
-          echo "Inspecting connections for uid=${{ github.event.inputs.inspectUid }}"
-          node -r dotenv/config scripts/inspectUserConnections.js --uid "${{ github.event.inputs.inspectUid }}" | tee inspect-tiktok-connection.log
+          echo "Inspecting connections for uid=${{ github.event.inputs.uid }}"
+          node -r dotenv/config scripts/inspectUserConnections.js --uid "${{ github.event.inputs.uid }}" | tee inspect-tiktok-connection.log
 
       - name: Run TikTok PULL_FROM_URL E2E test
         env:
