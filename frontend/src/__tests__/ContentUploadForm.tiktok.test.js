@@ -12,7 +12,25 @@ jest.mock("firebase/storage", () => {
   return {
     ...actual,
     ref: jest.fn(() => ({})),
+    // Legacy helper (kept for tests that reference uploadBytes)
     uploadBytes: jest.fn(async () => ({ success: true })),
+    // Resumable upload mock: returns an object with .on(event, progressCb, errorCb, successCb)
+    uploadBytesResumable: jest.fn(() => {
+      return {
+        on: (event, progressCb, errorCb, successCb) => {
+          // Simulate upload progress then complete asynchronously
+          setTimeout(() => {
+            try {
+              progressCb({ bytesTransferred: 50, totalBytes: 100 });
+              progressCb({ bytesTransferred: 100, totalBytes: 100 });
+              successCb();
+            } catch (e) {
+              if (typeof errorCb === "function") errorCb(e);
+            }
+          }, 0);
+        },
+      };
+    }),
     getDownloadURL: jest.fn(async () => "https://example.com/test.mp4"),
   };
 });
