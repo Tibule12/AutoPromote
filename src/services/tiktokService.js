@@ -317,6 +317,7 @@ async function uploadVideoChunk({
   chunkIndex,
   totalChunks: _totalChunks,
   chunkSize = DEFAULT_CHUNK_SIZE,
+  maxAttempts = 3,
 }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
@@ -326,23 +327,105 @@ async function uploadVideoChunk({
     start,
     Math.min((chunkIndex + 1) * chunkSize, videoBuffer.length)
   );
-  const headers = { "Content-Type": "application/octet-stream" };
-  // Include both Content-Range and Content-Length (some endpoints require both even for single-chunk)
-  headers["Content-Range"] = `bytes ${start}-${end}/${videoBuffer.length}`;
-  headers["Content-Length"] = `${chunk.length}`;
 
-  const response = await fetch(uploadUrl, {
-    method: "PUT",
-    headers,
-    body: chunk,
-  });
+  // Prepare header permutations to try when the endpoint rejects certain header shapes
+  const baseHeaders = { "Content-Type": "application/octet-stream" };
+  const variants = [
+    {
+      name: "default",
+      headers: {
+        ...baseHeaders,
+        "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
+        "Content-Length": `${chunk.length}`,
+      },
+    },
+    {
+      name: "no-content-length",
+      headers: {
+        ...baseHeaders,
+        "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
+      },
+    },
+    {
+      name: "no-content-range",
+      headers: {
+        ...baseHeaders,
+        "Content-Length": `${chunk.length}`,
+      },
+    },
+    {
+      name: "video-mp4",
+      headers: {
+        "Content-Type": "video/mp4",
+        "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
+        "Content-Length": `${chunk.length}`,
+      },
+    },
+  ];
 
-  if (!response.ok) {
-    const body = await response.text().catch(() => "<no-body>");
-    throw new Error(`Chunk upload failed: status=${response.status} body=${body}`);
+  let lastErr = null;
+  const tries = Math.min(maxAttempts, variants.length);
+
+  for (let attempt = 0; attempt < tries; attempt++) {
+    const v = variants[attempt];
+    try {
+      // Mask query for logs to avoid exposing tokens
+      const urlForLog = uploadUrl.split("?")[0];
+      console.log(
+        `[tiktok] chunk upload attempt=%d variant=%s url=%s start=%d end=%d chunkLen=%d hexPrefix=%s`,
+        attempt,
+        v.name,
+        urlForLog,
+        start,
+        end,
+        chunk.length,
+        chunk.slice(0, 16).toString("hex")
+      );
+
+      const res = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: v.headers,
+        body: chunk,
+      });
+
+      const bodyText = await res.text().catch(() => null);
+      if (res.ok) {
+        console.log(
+          `[tiktok] chunk upload succeeded attempt=%d variant=%s status=%d`,
+          attempt,
+          v.name,
+          res.status
+        );
+        return { success: true };
+      }
+
+      console.warn(
+        `[tiktok] chunk upload attempt failed attempt=%d variant=%s status=%d body=%s`,
+        attempt,
+        v.name,
+        res.status,
+        bodyText || "<no-body>"
+      );
+
+      lastErr = new Error(
+        `Chunk upload failed: status=${res.status} body=${bodyText || "<no-body>"}`
+      );
+
+      // Only retry for 415/416 which typically indicate header/byte-range issues
+      if (![415, 416].includes(res.status)) {
+        break;
+      }
+
+      // small backoff before next variant
+      await new Promise(r => setTimeout(r, 250 * (attempt + 1)));
+    } catch (e) {
+      lastErr = e;
+      console.warn("[tiktok] chunk upload exception", e && (e.message || e));
+      await new Promise(r => setTimeout(r, 250 * (attempt + 1)));
+    }
   }
 
-  return { success: true };
+  throw lastErr || new Error("Chunk upload failed: unknown error");
 }
 
 /**
@@ -672,6 +755,15 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
           const uploadUrl = uploadData && uploadData.data && uploadData.data.upload_url;
           const videoId = uploadData && uploadData.data && uploadData.data.video_id;
           if (uploadUrl) {
+            console.log(
+              "[tiktok] simple upload -> PUT url=%s size=%d headers=%o",
+              uploadUrl,
+              videoSize,
+              {
+                "Content-Type": "video/mp4",
+                "Content-Length": `${videoSize}`,
+              }
+            );
             const uploadToTikTokRes = await safeFetch(uploadUrl, fetchFn, {
               fetchOptions: {
                 method: "PUT",
@@ -681,6 +773,12 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
               requireHttps: true,
               allowHosts: ["open.tiktokapis.com", "sandbox.tiktokapis.com"],
             });
+            console.log(
+              "[tiktok] simple upload PUT status=%s",
+              uploadToTikTokRes && uploadToTikTokRes.status
+            );
+            const uploadToTikTokBody = await uploadToTikTokRes.text().catch(() => "<no-body>");
+            console.log("[tiktok] simple upload PUT body=%s", uploadToTikTokBody);
             if (uploadToTikTokRes.ok) {
               // Finalize publish
               const createRes = await safeFetch(
