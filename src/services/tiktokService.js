@@ -892,25 +892,58 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       }
     }
 
-    // Initialize upload (FILE_UPLOAD)
-    const { publish_id, upload_url } = await initializeVideoUpload({
-      accessToken,
-      videoSize,
-      privacyLevel,
-    });
+    // Initialize upload (FILE_UPLOAD) and attempt upload with progressively smaller chunk sizes if needed
+    const chunkSizeCandidates = [DEFAULT_CHUNK_SIZE, Math.min(DEFAULT_CHUNK_SIZE, 262144), 65536]; // try default, then 256KB, then 64KB
+    let publish_id = null;
+    let upload_url = null;
+    let uploadSucceeded = false;
 
-    // Upload video chunks
-    const chunkSize = DEFAULT_CHUNK_SIZE;
-    const totalChunks = Math.ceil(videoSize / chunkSize);
+    for (let csIndex = 0; csIndex < chunkSizeCandidates.length; csIndex++) {
+      const cs = chunkSizeCandidates[csIndex];
+      try {
+        const initData = await initializeVideoUpload({
+          accessToken,
+          videoSize,
+          privacyLevel,
+          chunkSize: cs,
+        });
+        publish_id = initData.publish_id;
+        upload_url = initData.upload_url;
 
-    for (let i = 0; i < totalChunks; i++) {
-      await uploadVideoChunk({
-        uploadUrl: upload_url,
-        videoBuffer: Buffer.from(videoBuffer),
-        chunkIndex: i,
-        totalChunks,
-        chunkSize,
-      });
+        const totalChunks = Math.ceil(videoSize / cs);
+        for (let i = 0; i < totalChunks; i++) {
+          await uploadVideoChunk({
+            uploadUrl: upload_url,
+            videoBuffer: Buffer.from(videoBuffer),
+            chunkIndex: i,
+            totalChunks,
+            chunkSize: cs,
+          });
+        }
+
+        uploadSucceeded = true;
+        console.log(
+          "[tiktok] upload completed with chunkSize=%d totalChunks=%d",
+          cs,
+          Math.ceil(videoSize / cs)
+        );
+        break;
+      } catch (e) {
+        console.warn(
+          "[tiktok] upload attempt failed with chunkSize=%d: %s",
+          cs,
+          e && (e.message || e)
+        );
+        // If this is the last candidate, rethrow so outer catch handles it
+        if (csIndex === chunkSizeCandidates.length - 1) {
+          throw e;
+        }
+        // otherwise continue to next smaller chunk size
+      }
+    }
+
+    if (!uploadSucceeded) {
+      throw new Error("Failed to upload video after trying multiple chunk sizes");
     }
 
     // Publish video
