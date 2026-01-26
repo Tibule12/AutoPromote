@@ -322,13 +322,22 @@ async function uploadVideoChunk({
 
   const start = chunkIndex * chunkSize;
   const end = Math.min((chunkIndex + 1) * chunkSize - 1, videoBuffer.length - 1);
+  const chunk = videoBuffer.slice(
+    start,
+    Math.min((chunkIndex + 1) * chunkSize, videoBuffer.length)
+  );
+  const headers = { "Content-Type": "application/octet-stream" };
+  // For single-chunk uploads some upload endpoints expect no Content-Range
+  if (_totalChunks && _totalChunks > 1) {
+    headers["Content-Range"] = `bytes ${start}-${end}/${videoBuffer.length}`;
+  } else {
+    headers["Content-Length"] = `${chunk.length}`;
+  }
+
   const response = await fetch(uploadUrl, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/octet-stream",
-      "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
-    },
-    body: videoBuffer.slice(start, Math.min((chunkIndex + 1) * chunkSize, videoBuffer.length)),
+    headers,
+    body: chunk,
   });
 
   if (!response.ok) {
