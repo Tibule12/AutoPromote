@@ -646,6 +646,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         const conn = await getUserTikTokConnection(uid);
         const openId = conn && (conn.open_id || (conn.meta && conn.meta.open_id));
         if (openId) {
+          console.log("[tiktok] simple upload candidate openId=%s size=%d", openId, videoSize);
           const uploadRes = await safeFetch(
             "https://open.tiktokapis.com/v2/video/upload/",
             fetchFn,
@@ -662,7 +663,12 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
               allowHosts: ["open.tiktokapis.com"],
             }
           );
+          console.log("[tiktok] video/upload status=%s", uploadRes && uploadRes.status);
           const uploadData = await uploadRes.json().catch(() => null);
+          console.log(
+            "[tiktok] video/upload dataKeys=%o",
+            uploadData && Object.keys(uploadData || {})
+          );
           const uploadUrl = uploadData && uploadData.data && uploadData.data.upload_url;
           const videoId = uploadData && uploadData.data && uploadData.data.video_id;
           if (uploadUrl) {
