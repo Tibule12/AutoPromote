@@ -31,8 +31,20 @@ Usage: node -r dotenv/config scripts/tiktok-file-upload-fallback.js <contentId>
 
     // First, perform an explicit init test to observe TikTok response in this runtime
     const fetch = global.fetch || require('node-fetch');
-    const head = await fetch(videoUrl, { method: 'HEAD' });
-    const size = parseInt(head.headers.get('content-length'), 10);
+    // Try HEAD to get content-length; if missing, do a GET to compute size
+    let size = null;
+    try {
+      const head = await fetch(videoUrl, { method: 'HEAD' });
+      size = parseInt(head.headers.get('content-length'), 10);
+    } catch (e) {
+      // ignore and try GET below
+    }
+    if (!size || Number.isNaN(size)) {
+      console.log('No content-length from HEAD; downloading to compute size');
+      const resp = await fetch(videoUrl, { method: 'GET' });
+      const buf = await resp.arrayBuffer();
+      size = buf.byteLength;
+    }
     console.log('Video size:', size);
 
     const token = await require('../src/services/tiktokService').getValidAccessToken(uid);
