@@ -629,7 +629,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
     return { platform: "tiktok", success: false, error: "uid_required" };
   }
 
-  const accessToken = await getValidAccessToken(uid);
+  let accessToken = await getValidAccessToken(uid);
 
   if (!accessToken) {
     return { platform: "tiktok", success: false, error: "not_authenticated" };
@@ -705,12 +705,44 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
     let triedPull = false;
     if (contentId && videoUrl && !process.env.TIKTOK_FORCE_FILE_UPLOAD) {
       triedPull = true;
-      const pullResult = await pullFromUrlPublish({
+      let pullResult = await pullFromUrlPublish({
         accessToken,
         videoUrl,
         contentId,
         privacyLevel,
       });
+
+      // If token is invalid, attempt a server-side refresh and retry once
+      if (pullResult && pullResult.error && /access_token_invalid|401/i.test(pullResult.error)) {
+        console.log(
+          "[tiktok] pull init reported token invalid - attempting server-side refresh for uid=%s",
+          uid
+        );
+        try {
+          const conn = await getUserTikTokConnection(uid);
+          const refreshTok =
+            conn &&
+            conn.tokens &&
+            (conn.tokens.refresh_token || conn.tokens.refreshToken || conn.tokens.refresh);
+          if (refreshTok) {
+            const refreshed = await refreshToken(uid, refreshTok);
+            accessToken =
+              refreshed && refreshed.access_token ? refreshed.access_token : accessToken;
+            console.log("[tiktok] refresh succeeded, retrying PULL_FROM_URL with new token");
+            pullResult = await pullFromUrlPublish({
+              accessToken,
+              videoUrl,
+              contentId,
+              privacyLevel,
+            });
+          } else {
+            console.warn("[tiktok] no refresh token available for uid=%s", uid);
+          }
+        } catch (e) {
+          console.warn("[tiktok] server-side refresh failed:", e && (e.message || e));
+        }
+      }
+
       if (pullResult && pullResult.success) {
         // Record in Firestore
         try {
@@ -739,6 +771,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
           status: pullResult.status,
         };
       }
+
       // If pull failed and is a transient stall, proceed to file upload fallback
       console.warn(
         "[tiktok] PULL_FROM_URL failed or stalled, falling back to FILE_UPLOAD",
