@@ -1,0 +1,50 @@
+name: "Test TikTok Alerts (manual)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Mode to run (publish-failure | fallback-high | both)'
+        required: true
+        default: 'publish-failure'
+
+jobs:
+  run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Firebase service account
+        env:
+          FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_ADMIN_SERVICE_ACCOUNT" ]; then
+            echo "FIREBASE_ADMIN_SERVICE_ACCOUNT secret is not set. Aborting.";
+            exit 1;
+          fi
+          echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
+
+      - name: Run TikTok alerts test
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+        run: |
+          node scripts/test-tiktok-alerts.js ${{ github.event.inputs.mode }}
+
+      - name: Upload test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-tiktok-alerts-logs
+          path: |
+            tmp-service-account.json
+            # Include any logs produced by the test script if present
+            *.log || true
