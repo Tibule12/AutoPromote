@@ -137,10 +137,83 @@ async function recordEmailFailure(meta) {
   });
 }
 
+async function checkTikTokMetrics() {
+  try {
+    const cfg = await getConfig();
+    const keys = [
+      "tiktok.publish.success",
+      "tiktok.publish.failure",
+      "tiktok.upload.fallback.file_upload",
+      "tiktok.enqueue.skipped.disabled",
+      "tiktok.enqueue.succeeded",
+    ];
+    const snaps = await Promise.all(keys.map(k => db.collection("system_counters").doc(k).get()));
+    const current = {};
+    keys.forEach((k, i) => {
+      current[k] = snaps[i].exists ? snaps[i].data().value || 0 : 0;
+    });
+
+    if (!global.__tiktokLastSnapshot) {
+      global.__tiktokLastSnapshot = { ts: Date.now(), counters: current };
+      return { skipped: true };
+    }
+
+    const prev = global.__tiktokLastSnapshot.counters;
+    const periodMs = Date.now() - global.__tiktokLastSnapshot.ts;
+    const delta = {};
+    keys.forEach(k => {
+      delta[k] = (current[k] || 0) - (prev[k] || 0);
+    });
+    global.__tiktokLastSnapshot = { ts: Date.now(), counters: current };
+
+    // Publish failure rate alert
+    const publishes =
+      (delta["tiktok.publish.success"] || 0) + (delta["tiktok.publish.failure"] || 0);
+    const minSamples = (cfg.alerting && cfg.alerting.tiktokPublishMinSamples) || 10;
+    const failThreshold = (cfg.alerting && cfg.alerting.tiktokPublishFailureRateThreshold) || 0.1;
+    if (publishes >= minSamples) {
+      const failureRate = (delta["tiktok.publish.failure"] || 0) / publishes;
+      if (failureRate >= failThreshold) {
+        await sendAlert({
+          type: "tiktok_publish_failure_rate_high",
+          severity: "warning",
+          message: `TikTok publish failure rate ${(failureRate * 100).toFixed(1)}% over last ${Math.round(periodMs / 1000)}s`,
+          meta: { failureRate, publishes, periodMs, delta },
+        });
+        return { alerted: true, failureRate, publishes };
+      }
+    }
+
+    // File upload fallback alert
+    const enqueues = delta["tiktok.enqueue.succeeded"] || 0;
+    const fallbacks = delta["tiktok.upload.fallback.file_upload"] || 0;
+    const minEnqueues = (cfg.alerting && cfg.alerting.tiktokFallbackMinEnqueues) || 10;
+    const fallbackThreshold = (cfg.alerting && cfg.alerting.tiktokFallbackRatioThreshold) || 0.2;
+    const minFallbackCount = (cfg.alerting && cfg.alerting.tiktokFallbackMinCount) || 5;
+    if (enqueues >= minEnqueues && fallbacks >= minFallbackCount) {
+      const fallbackRatio = enqueues ? fallbacks / enqueues : 0;
+      if (fallbackRatio >= fallbackThreshold) {
+        await sendAlert({
+          type: "tiktok_upload_fallback_high",
+          severity: "warning",
+          message: `TikTok upload fallback ratio ${(fallbackRatio * 100).toFixed(1)}% (${fallbacks}/${enqueues}) over last ${Math.round(periodMs / 1000)}s`,
+          meta: { fallbacks, enqueues, periodMs, delta },
+        });
+        return { alerted: true, fallbackRatio, fallbacks, enqueues };
+      }
+    }
+
+    return { ok: true, delta, periodMs };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
 async function runAlertChecks() {
   const r1 = await checkExplorationDrift();
   const r2 = await checkDiversity();
-  return { exploration: r1, diversity: r2 };
+  const r3 = await checkTikTokMetrics();
+  return { exploration: r1, diversity: r2, tiktok: r3 };
 }
 
 module.exports = {

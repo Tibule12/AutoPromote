@@ -583,6 +583,9 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
               { merge: true }
             );
         } catch (_) {}
+        try {
+          require("./metricsRecorder").incrCounter("tiktok.publish.success");
+        } catch (_) {}
         return {
           platform: "tiktok",
           success: true,
@@ -595,6 +598,9 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         "[tiktok] PULL_FROM_URL failed or stalled, falling back to FILE_UPLOAD",
         pullResult && (pullResult.reason || pullResult.error || pullResult.status)
       );
+      try {
+        require("./metricsRecorder").incrCounter("tiktok.upload.fallback.file_upload");
+      } catch (_) {}
     }
 
     // Download video for FILE_UPLOAD fallback
@@ -663,6 +669,10 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       } catch (_) {}
     }
 
+    try {
+      require("./metricsRecorder").incrCounter("tiktok.publish.success");
+    } catch (_) {}
+
     return {
       platform: "tiktok",
       success: true,
@@ -672,6 +682,9 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
     };
   } catch (e) {
     console.error("[tiktok] uploadTikTokVideo failed:", e && (e.stack || e.message || e));
+    try {
+      require("./metricsRecorder").incrCounter("tiktok.publish.failure");
+    } catch (_) {}
     return {
       platform: "tiktok",
       success: false,
