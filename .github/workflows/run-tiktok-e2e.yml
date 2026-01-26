@@ -15,6 +15,9 @@ on:
 jobs:
   run-e2e:
     runs-on: ubuntu-latest
+    env:
+      GENERIC_TOKEN_ENCRYPTION_KEY: ${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}
+      TWITTER_TOKEN_ENCRYPTION_KEY: ${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
