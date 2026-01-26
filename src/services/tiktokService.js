@@ -640,6 +640,100 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       videoSize = videoBuffer.byteLength;
     }
 
+    // For small videos, try the simpler single-PUT upload endpoint which is less error-prone
+    if (videoSize <= DEFAULT_CHUNK_SIZE) {
+      try {
+        const conn = await getUserTikTokConnection(uid);
+        const openId = conn && (conn.open_id || (conn.meta && conn.meta.open_id));
+        if (openId) {
+          const uploadRes = await safeFetch(
+            "https://open.tiktokapis.com/v2/video/upload/",
+            fetchFn,
+            {
+              fetchOptions: {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ open_id: openId }),
+              },
+              requireHttps: true,
+              allowHosts: ["open.tiktokapis.com"],
+            }
+          );
+          const uploadData = await uploadRes.json().catch(() => null);
+          const uploadUrl = uploadData && uploadData.data && uploadData.data.upload_url;
+          const videoId = uploadData && uploadData.data && uploadData.data.video_id;
+          if (uploadUrl) {
+            const uploadToTikTokRes = await safeFetch(uploadUrl, fetchFn, {
+              fetchOptions: {
+                method: "PUT",
+                headers: { "Content-Type": "video/mp4", "Content-Length": `${videoSize}` },
+                body: Buffer.from(videoBuffer),
+              },
+              requireHttps: true,
+              allowHosts: ["open.tiktokapis.com", "sandbox.tiktokapis.com"],
+            });
+            if (uploadToTikTokRes.ok) {
+              // Finalize publish
+              const createRes = await safeFetch(
+                "https://open.tiktokapis.com/v2/video/publish/",
+                fetchFn,
+                {
+                  fetchOptions: {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${accessToken}`,
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ open_id: openId, video_id: videoId, title }),
+                  },
+                  requireHttps: true,
+                  allowHosts: ["open.tiktokapis.com"],
+                }
+              );
+              if (createRes.ok) {
+                const createData = await createRes.json().catch(() => null);
+                const publishId =
+                  (createData && createData.data && createData.data.video_id) || videoId || null;
+                const status =
+                  (createData && createData.data && createData.data.status) || "PUBLISH_COMPLETE";
+                // Store result in Firestore
+                if (contentId) {
+                  try {
+                    await db
+                      .collection("content")
+                      .doc(contentId)
+                      .set(
+                        {
+                          tiktok: {
+                            publishId: publishId,
+                            videoId: publishId,
+                            status: status,
+                            postedAt: new Date().toISOString(),
+                          },
+                        },
+                        { merge: true }
+                      );
+                  } catch (_) {}
+                }
+                try {
+                  require("./metricsRecorder").incrCounter("tiktok.publish.success");
+                } catch (_) {}
+                return { platform: "tiktok", success: true, publishId, status };
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn(
+          "[tiktok] simple upload attempt failed, falling back to chunked upload",
+          e && (e.message || e)
+        );
+      }
+    }
+
     // Initialize upload (FILE_UPLOAD)
     const { publish_id, upload_url } = await initializeVideoUpload({
       accessToken,
