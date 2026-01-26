@@ -152,11 +152,57 @@ const UserDashboard = ({
 
     document.documentElement?.classList?.add("dashboard-mode");
     document.body?.classList?.add("dashboard-mode");
+
+    // Poll notifications periodically so users see admin feedback promptly (mobile friendly)
+    let pollTimer = null;
+    const pollNotifications = async () => {
+      try {
+        const currentUser = auth?.currentUser;
+        if (!currentUser) return;
+        const token = await currentUser.getIdToken(true);
+        const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTIFICATIONS_LIST}?limit=10`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        const incoming = Array.isArray(json.notifications) ? json.notifications : [];
+        // Determine new notifications not already present
+        const existingIds = new Set((notifs || []).map(n => n.id));
+        const newOnes = incoming.filter(n => !existingIds.has(n.id));
+        if (newOnes && newOnes.length) {
+          // show toast for each new unread notification
+          newOnes.forEach(n => {
+            if (!n.read) {
+              try {
+                toast.info(n.message || n.title || "You have a new notification");
+              } catch (_) {}
+            }
+          });
+          setNotifs(prev => [...newOnes, ...(prev || [])].slice(0, 200));
+        }
+      } catch (e) {
+        // ignore polling errors
+      }
+    };
+    // Start a timer and also poll on visibility change to catch when mobile resumes
+    pollTimer = setInterval(pollNotifications, 10000);
+    const handleVisibility = () => {
+      if (!document.hidden) {
+        pollNotifications();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    // initial poll
+    pollNotifications();
+
     return () => {
+      if (pollTimer) clearInterval(pollTimer);
+      document.removeEventListener("visibilitychange", handleVisibility);
       document.documentElement?.classList?.remove("dashboard-mode");
       document.body?.classList?.remove("dashboard-mode");
     };
-  }, []);
+  }, [notifs]);
 
   const handleNav = tab => {
     setActiveTab(tab);
