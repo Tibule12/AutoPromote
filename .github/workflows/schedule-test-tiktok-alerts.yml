@@ -1,0 +1,55 @@
+name: "Scheduled TikTok Alerts Smoke"
+
+on:
+  schedule:
+    # Weekly on Monday at 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch: {}
+
+concurrency:
+  group: scheduled-tiktok-alerts
+  cancel-in-progress: true
+
+jobs:
+  run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Firebase service account
+        env:
+          FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_ADMIN_SERVICE_ACCOUNT" ]; then
+            echo "FIREBASE_ADMIN_SERVICE_ACCOUNT secret is not set. Aborting.";
+            exit 1;
+          fi
+          echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
+
+      - name: Run TikTok alerts test
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+          SLACK_ALERT_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK_URL }}
+        run: |
+          # Run both checks (publish-failure + fallback-high)
+          node scripts/test-tiktok-alerts.js both
+
+      - name: Upload test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scheduled-test-tiktok-alerts-logs
+          path: |
+            tmp-service-account.json
+            *.log || true
