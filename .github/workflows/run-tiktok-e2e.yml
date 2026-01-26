@@ -72,6 +72,11 @@ jobs:
           echo "Running E2E with url=${{ github.event.inputs.url }} uid=${{ github.event.inputs.uid }} force_file_upload=${{ github.event.inputs.force_file_upload }}"
           node -r dotenv/config scripts/create-content-and-run-pull.js --url "${{ github.event.inputs.url }}" --uid "${{ github.event.inputs.uid }}" | tee e2e-tiktok-pull.log
 
+      - name: List tmp capture dir
+        if: always()
+        run: |
+          echo "tmp listing:"; ls -la tmp || true; echo "tiktok capture listing:"; ls -la tmp/tiktok-chunk-captures || true; echo "find tmp:"; find tmp -maxdepth 3 -type f -exec ls -la {} \; || true
+
       - name: Upload E2E log
         if: always()
         uses: actions/upload-artifact@v4
