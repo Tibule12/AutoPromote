@@ -170,11 +170,14 @@ router.post("/:contentId/approve", authMiddleware, adminOnly, async (req, res) =
     // Notify user
     const content = contentDoc.data();
     if (content.userId) {
+      const msg = notes
+        ? `Your content has been approved and is now live! Admin note: ${notes}`
+        : "Your content has been approved and is now live!";
       await db.collection("notifications").add({
         userId: content.userId,
         type: "content_approved",
         contentId,
-        message: "Your content has been approved and is now live!",
+        message: msg,
         read: false,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });

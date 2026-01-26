@@ -113,6 +113,44 @@
   color: #667eea;
 }
 
+/* Fullscreen variant for mobile — makes progress unmissable */
+.progress-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 0 !important;
+  padding: 24px !important;
+  z-index: 99999;
+}
+
+.progress-fullscreen .progress-bar-container {
+  width: 80%;
+  margin: 16px auto;
+}
+
+.progress-fullscreen .progress-title {
+  color: #fff;
+}
+
+.progress-cancel {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
 @media (max-width: 640px) {
   .progress-indicator {
     bottom: 10px;

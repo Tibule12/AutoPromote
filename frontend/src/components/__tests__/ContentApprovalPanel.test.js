@@ -70,3 +70,66 @@ test("opens viewer modal and shows a video element when View Content clicked", a
   const video = await screen.findByTestId("viewer-video");
   expect(video).toBeInTheDocument();
 });
+
+test("opens viewer modal and shows an image element when View Content clicked for image", async () => {
+  // Override fetch to return an image content
+  global.fetch = jest.fn((url, opts = {}) => {
+    if (url.endsWith("/api/admin/approval/pending")) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          success: true,
+          content: [
+            {
+              id: "c2",
+              title: "Image",
+              url: "https://example.com/image.png",
+              type: "image",
+              user: { name: "ImageTester", email: "i@test.com" },
+            },
+          ],
+        }),
+        headers: { get: () => "application/json" },
+      });
+    }
+    if (url.endsWith("/api/admin/approval/stats")) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          success: true,
+          stats: { pending: 1, approved: 0, rejected: 0, approvedToday: 0, rejectedToday: 0 },
+        }),
+        headers: { get: () => "application/json" },
+      });
+    }
+    // HEAD request
+    if (url === "https://example.com/image.png" && opts && opts.method === "HEAD") {
+      return Promise.resolve({
+        ok: true,
+        headers: { get: k => (k.toLowerCase() === "content-type" ? "image/png" : null) },
+      });
+    }
+    // GET image
+    if (url === "https://example.com/image.png") {
+      const blob = new Blob(["dummyimage"], { type: "image/png" });
+      return Promise.resolve({
+        ok: true,
+        blob: async () => blob,
+        headers: { get: () => "image/png" },
+      });
+    }
+    return Promise.resolve({ ok: false });
+  });
+
+  render(<ContentApprovalPanel />);
+
+  await screen.findByRole("heading", { name: /Pending Approval/i });
+  await screen.findByText("Image");
+
+  const viewBtn = screen.getByText(/View Content →/i);
+  fireEvent.click(viewBtn);
+
+  await screen.findByRole("dialog");
+  const img = await screen.findByTestId("viewer-image");
+  expect(img).toBeInTheDocument();
+});

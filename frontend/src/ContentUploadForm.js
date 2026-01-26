@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import "./ContentUploadForm.css";
 import { storage, auth } from "./firebaseClient";
 import { API_ENDPOINTS } from "./config";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 // Temporarily comment out component imports for isolation
 // TODO: revert after diagnostics
 import SpotifyTrackSearch from "./components/SpotifyTrackSearch";
@@ -207,6 +207,7 @@ function ContentUploadForm({
   const [tiktokConsentChecked, setTiktokConsentChecked] = useState(false);
   const [tiktokDisclosure, setTiktokDisclosure] = useState(false);
   const uploadLockRef = useRef(false);
+  const uploadTaskRef = useRef(null);
   const [error, setError] = useState("");
 
   // Keep legacy `tiktokCommercial` in sync with the newer disclosure state
@@ -1558,13 +1559,51 @@ function ContentUploadForm({
         const storageRef = ref(storage, filePath);
         console.log("[Upload] Storage ref created:", storageRef);
         try {
-          setUploadProgress(30);
-          const uploadResult = await uploadBytes(storageRef, file);
-          console.log("[Upload] uploadBytes result:", uploadResult);
-          setUploadProgress(60);
-          setUploadStatus("Processing file...");
-          url = await getDownloadURL(storageRef);
-          setUploadProgress(80);
+          // Use resumable upload to provide real progress events and better UX on slow networks
+          setUploadProgress(5);
+          setUploadStatus("Uploading to cloud (starting)...");
+          const uploadTask = uploadBytesResumable(storageRef, file);
+          // keep a ref so we can cancel from UI if needed
+          if (typeof uploadTaskRef !== "undefined") uploadTaskRef.current = uploadTask;
+          // show a toast for long-running uploads
+          const toastId = toast.loading("Upload started...");
+          await new Promise((resolve, reject) => {
+            uploadTask.on(
+              "state_changed",
+              snapshot => {
+                try {
+                  const pct = snapshot.totalBytes
+                    ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                    : Math.min(95, uploadProgress + 10);
+                  setUploadProgress(pct);
+                  setUploadStatus(`Uploading to cloud... ${pct}%`);
+                } catch (e) {
+                  console.warn("upload progress handler error", e && e.message);
+                }
+              },
+              err => {
+                toast.error("Upload failed");
+                console.error("[Upload] Error uploading to Firebase Storage:", err);
+                reject(err);
+              },
+              async () => {
+                try {
+                  setUploadStatus("Finalizing...");
+                  setUploadProgress(95);
+                  const urlRes = await getDownloadURL(storageRef);
+                  toast.success("Upload complete");
+                  toast.dismiss(toastId);
+                  url = urlRes;
+                  // clear task ref
+                  if (uploadTaskRef && uploadTaskRef.current) uploadTaskRef.current = null;
+                  resolve();
+                } catch (e) {
+                  toast.error("Failed to finalize upload");
+                  reject(e);
+                }
+              }
+            );
+          });
         } catch (uploadErr) {
           console.error("[Upload] Error uploading to Firebase Storage:", uploadErr);
           throw uploadErr;
@@ -1681,6 +1720,17 @@ function ContentUploadForm({
       const resp = await onUpload(contentData);
       console.log("[Upload] onUpload response:", resp);
       console.log("[Upload] onUpload callback completed");
+
+      // Provide clear toast feedback for users on mobile
+      if (resp && resp.previews && resp.previews.length) {
+        toast.success("Preview generated — review before publishing");
+      } else if (resp && resp.id) {
+        toast.success("Upload enqueued for processing");
+      } else if (resp && resp.skipped) {
+        toast("Upload skipped: " + (resp.reason || ""));
+      } else {
+        toast.success("Upload submitted");
+      }
 
       setUploadProgress(100);
       if (selectedPlatformsVal.includes("tiktok")) {
@@ -4783,6 +4833,21 @@ function ContentUploadForm({
             progress={uploadProgress}
             status={uploadStatus}
             fileName={file?.name}
+            fullScreen={typeof window !== "undefined" && window.innerWidth <= 640}
+            onCancel={() => {
+              try {
+                if (uploadTaskRef && uploadTaskRef.current && uploadTaskRef.current.cancel) {
+                  uploadTaskRef.current.cancel();
+                }
+              } catch (e) {
+                console.warn("cancel upload failed", e && e.message);
+              }
+              setShowProgress(false);
+              setIsUploading(false);
+              setUploadStatus("Upload cancelled");
+              setUploadProgress(0);
+              toast("Upload cancelled");
+            }}
           />
         )}
         {/* Render quality check results */}
