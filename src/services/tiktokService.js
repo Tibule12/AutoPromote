@@ -605,20 +605,33 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       } catch (_) {}
     }
 
-    // Download video for FILE_UPLOAD fallback
-    const videoResponse = await safeFetch(videoUrl, fetchFn, {
-      requireHttps: true,
-      fetchOptions: { redirect: "follow" },
-    });
+    // Download video for FILE_UPLOAD fallback (unless caller supplied a buffer)
+    let videoBuffer;
+    let videoSize;
+    if (payload && payload.videoBuffer) {
+      // Accept a Buffer or base64 string supplied by the caller to avoid a second download
+      if (typeof payload.videoBuffer === "string") {
+        videoBuffer = Buffer.from(payload.videoBuffer, "base64");
+      } else {
+        videoBuffer = Buffer.from(payload.videoBuffer);
+      }
+      videoSize = videoBuffer.byteLength;
+    } else {
+      const videoResponse = await safeFetch(videoUrl, fetchFn, {
+        requireHttps: true,
+        fetchOptions: { redirect: "follow" },
+      });
 
-    if (!videoResponse.ok) {
-      const statusText =
-        videoResponse && videoResponse.status ? `status=${videoResponse.status}` : "";
-      throw new Error(`Failed to download video ${statusText}`);
+      if (!videoResponse.ok) {
+        const statusText =
+          videoResponse && videoResponse.status ? `status=${videoResponse.status}` : "";
+        throw new Error(`Failed to download video ${statusText}`);
+      }
+
+      const ab = await videoResponse.arrayBuffer();
+      videoBuffer = Buffer.from(ab);
+      videoSize = videoBuffer.byteLength;
     }
-
-    const videoBuffer = await videoResponse.arrayBuffer();
-    const videoSize = videoBuffer.byteLength;
 
     // Initialize upload (FILE_UPLOAD)
     const { publish_id, upload_url } = await initializeVideoUpload({

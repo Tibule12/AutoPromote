@@ -33,6 +33,7 @@ Usage: node -r dotenv/config scripts/tiktok-file-upload-fallback.js <contentId>
     const fetch = global.fetch || require('node-fetch');
     // Try HEAD to get content-length; if missing, do a GET to compute size
     let size = null;
+    let payloadBuffer;
     try {
       const head = await fetch(videoUrl, { method: 'HEAD' });
       size = parseInt(head.headers.get('content-length'), 10);
@@ -42,8 +43,9 @@ Usage: node -r dotenv/config scripts/tiktok-file-upload-fallback.js <contentId>
     if (!size || Number.isNaN(size)) {
       console.log('No content-length from HEAD; downloading to compute size');
       const resp = await fetch(videoUrl, { method: 'GET' });
-      const buf = await resp.arrayBuffer();
+      const buf = Buffer.from(await resp.arrayBuffer());
       size = buf.byteLength;
+      payloadBuffer = buf;
     }
     console.log('Video size:', size);
 
@@ -66,7 +68,9 @@ Usage: node -r dotenv/config scripts/tiktok-file-upload-fallback.js <contentId>
 
     // If init succeeded, proceed to full upload via existing helper
     if (initRes.ok) {
-      const res = await uploadTikTokVideo({ contentId, payload: { videoUrl }, uid });
+      const payload = { videoUrl };
+      if (typeof payloadBuffer !== 'undefined') payload.videoBuffer = payloadBuffer;
+      const res = await uploadTikTokVideo({ contentId, payload, uid });
       console.log('Result:', res);
       process.exit(0);
     } else {
