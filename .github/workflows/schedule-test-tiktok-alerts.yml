@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.head_ref || github.ref }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -37,13 +37,33 @@ jobs:
           fi
           echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
 
+      - name: Apply TikTok alerting defaults
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+        run: |
+          # Ensure alert thresholds and enabled events for TikTok are applied
+          node scripts/set-tiktok-alerting-defaults.js || true
+
+      - name: Set Slack webhook in config (if provided)
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+          SLACK_ALERT_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK_URL }}
+        run: |
+          # If the secret isn't set, skip gracefully to avoid expression-context errors
+          if [ -z "${SLACK_ALERT_WEBHOOK_URL}" ]; then
+            echo "SLACK_ALERT_WEBHOOK_URL not set; skipping Slack webhook setup.";
+          else
+            # Writes Slack webhook into runtime config and sends an optional test alert
+            node scripts/set-slack-webhook.js || true
+          fi
+
       - name: Run TikTok alerts test
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
           SLACK_ALERT_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK_URL }}
         run: |
-          # Run both checks (publish-failure + fallback-high)
-          node scripts/test-tiktok-alerts.js both
+          # Run both checks (publish-failure + fallback-high) and persist output
+          node scripts/test-tiktok-alerts.js both | tee test-tiktok-result.log
 
       - name: Upload test log
         if: always()
@@ -52,4 +72,14 @@ jobs:
           name: scheduled-test-tiktok-alerts-logs
           path: |
             tmp-service-account.json
+            test-tiktok-result.log
             *.log || true
+
+      - name: Post Slack summary (direct)
+        if: always()
+        env:
+          SLACK_ALERT_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK_URL }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # Run a direct alert check and post a concise Slack summary (no-op if webhook missing)
+          node scripts/post-tiktok-smoke-summary-direct.js || true
