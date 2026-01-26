@@ -37,4 +37,10 @@ service-account-key.json
 
 # Traces and temporary Playwright artifacts
 tmp/
+
+# Local tmp service account used by E2E tests (do not commit)
+tmp-service-account.json
+
+# Artifacts produced by E2E runs (generated locally)
+artifacts/
 frontend/prototypes/futuristic-card/tmp/
