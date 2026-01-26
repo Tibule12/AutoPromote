@@ -16,6 +16,11 @@ const AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/";
 
 const DEFAULT_CHUNK_SIZE = parseInt(process.env.TIKTOK_CHUNK_SIZE || "5242880", 10); // 5MB default
 
+const fs = require("fs");
+const path = require("path");
+const TIKTOK_CAPTURE_DIR =
+  process.env.TIKTOK_CAPTURE_DIR || path.join(process.cwd(), "tmp", "tiktok-chunk-captures");
+
 /**
  * Get user's TikTok connection tokens
  */
@@ -225,6 +230,44 @@ async function getValidAccessToken(uid) {
 }
 
 /**
+ * Save upload init capture for diagnostics
+ */
+async function saveInitCapture({
+  publishId = null,
+  initBody = null,
+  status = null,
+  resHeaders = null,
+  resBody = null,
+  error = null,
+}) {
+  try {
+    await fs.promises.mkdir(TIKTOK_CAPTURE_DIR, { recursive: true });
+    const id = Date.now().toString() + "-init-" + Math.random().toString(36).slice(2, 8);
+    const dir = path.join(TIKTOK_CAPTURE_DIR, id);
+    await fs.promises.mkdir(dir);
+    const meta = {
+      timestamp: new Date().toISOString(),
+      publishId: publishId || null,
+      status: status || null,
+      resHeaders: resHeaders || null,
+      resBody: resBody || null,
+      error: error ? error.message || String(error) : null,
+    };
+    await fs.promises.writeFile(path.join(dir, "meta.json"), JSON.stringify(meta, null, 2));
+    if (initBody) {
+      await fs.promises.writeFile(
+        path.join(dir, "init-body.json"),
+        JSON.stringify(initBody, null, 2)
+      );
+    }
+    console.log(`[tiktok] saved init capture to ${dir}`);
+    return dir;
+  } catch (e) {
+    console.warn("[tiktok] failed to save init capture", e && (e.message || e));
+  }
+}
+
+/**
  * Initialize video upload - returns upload URL and video ID
  */
 async function initializeVideoUpload({
@@ -269,9 +312,32 @@ async function initializeVideoUpload({
   // initial attempt
   let response = await callInit(body);
 
+  // gather response headers for diagnostics
+  const initResHeaders = {};
+  try {
+    if (response && response.headers && typeof response.headers.forEach === "function") {
+      response.headers.forEach((val, k) => {
+        initResHeaders[k] = val;
+      });
+    } else if (response && response.headers && typeof response.headers.entries === "function") {
+      for (const [k, v2] of response.headers.entries()) initResHeaders[k] = v2;
+    }
+  } catch (_) {}
+
   // If TikTok complains about chunk params, retry with single-chunk (chunk_size = videoSize)
   if (!response.ok) {
     const errorText = await response.text().catch(() => "");
+
+    // Save init capture for triage
+    try {
+      await saveInitCapture({
+        initBody: body,
+        status: response.status,
+        resHeaders: initResHeaders,
+        resBody: errorText || null,
+      });
+    } catch (_) {}
+
     if (errorText && /chunk|total chunk/i.test(errorText)) {
       try {
         const retryBody = {
@@ -284,10 +350,34 @@ async function initializeVideoUpload({
           },
         };
         const retryRes = await callInit(retryBody);
+
+        const retryResHeaders = {};
+        try {
+          if (retryRes && retryRes.headers && typeof retryRes.headers.forEach === "function") {
+            retryRes.headers.forEach((val, k) => {
+              retryResHeaders[k] = val;
+            });
+          } else if (
+            retryRes &&
+            retryRes.headers &&
+            typeof retryRes.headers.entries === "function"
+          ) {
+            for (const [k, v2] of retryRes.headers.entries()) retryResHeaders[k] = v2;
+          }
+        } catch (_) {}
+
         if (retryRes.ok) {
           response = retryRes;
         } else {
           const err2 = await retryRes.text().catch(() => "");
+          try {
+            await saveInitCapture({
+              initBody: retryBody,
+              status: retryRes.status,
+              resHeaders: retryResHeaders,
+              resBody: err2 || null,
+            });
+          } catch (_) {}
           throw new Error(`TikTok upload init failed (retry): ${err2 || "<no body>"}`);
         }
       } catch (e) {
@@ -309,6 +399,53 @@ async function initializeVideoUpload({
 }
 
 /**
+ * Save chunk capture for replay/diagnostics
+ */
+async function saveChunkCapture({
+  publishId = null,
+  uploadUrl,
+  method = "PUT",
+  headers = {},
+  chunk = null,
+  attempt = 0,
+  variant = "default",
+  status = null,
+  resHeaders = null,
+  resBody = null,
+  error = null,
+}) {
+  try {
+    await fs.promises.mkdir(TIKTOK_CAPTURE_DIR, { recursive: true });
+    const id = Date.now().toString() + "-" + Math.random().toString(36).slice(2, 8);
+    const dir = path.join(TIKTOK_CAPTURE_DIR, id);
+    await fs.promises.mkdir(dir);
+    const meta = {
+      timestamp: new Date().toISOString(),
+      publishId: publishId || null,
+      uploadUrl,
+      method,
+      headers,
+      attempt,
+      variant,
+      status: status || null,
+      resHeaders: resHeaders || null,
+      resBody: resBody || null,
+      error: error ? error.message || String(error) : null,
+      chunkLength: chunk ? chunk.length : 0,
+      chunkHexPrefix: chunk ? chunk.slice(0, 16).toString("hex") : null,
+    };
+    await fs.promises.writeFile(path.join(dir, "meta.json"), JSON.stringify(meta, null, 2));
+    if (chunk) {
+      await fs.promises.writeFile(path.join(dir, `chunk-${attempt}-${variant}.bin`), chunk);
+    }
+    console.log(`[tiktok] saved chunk capture to ${dir}`);
+    return dir;
+  } catch (e) {
+    console.warn("[tiktok] failed to save chunk capture", e && (e.message || e));
+  }
+}
+
+/**
  * Upload video chunk
  */
 async function uploadVideoChunk({
@@ -318,6 +455,7 @@ async function uploadVideoChunk({
   totalChunks: _totalChunks,
   chunkSize = DEFAULT_CHUNK_SIZE,
   maxAttempts = 3,
+  publishId = null,
 }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
@@ -461,6 +599,22 @@ async function uploadVideoChunk({
         resHeadersObj
       );
 
+      // Save capture for diagnostics
+      try {
+        await saveChunkCapture({
+          publishId,
+          uploadUrl,
+          method: v.method || "PUT",
+          headers: v.headers,
+          chunk,
+          attempt,
+          variant: v.name,
+          status: res.status,
+          resHeaders: resHeadersObj,
+          resBody: bodyText || null,
+        });
+      } catch (_) {}
+
       lastErr = new Error(
         `Chunk upload failed: status=${res.status} body=${bodyText || "<no-body>"}`
       );
@@ -475,9 +629,35 @@ async function uploadVideoChunk({
     } catch (e) {
       lastErr = e;
       console.warn("[tiktok] chunk upload exception", e && (e.message || e));
+      try {
+        await saveChunkCapture({
+          publishId,
+          uploadUrl,
+          method: v && v.method ? v.method : "PUT",
+          headers: v && v.headers ? v.headers : {},
+          chunk,
+          attempt,
+          variant: v && v.name ? v.name : "exception",
+          error: e,
+        });
+      } catch (_) {}
       await new Promise(r => setTimeout(r, 250 * (attempt + 1)));
     }
   }
+
+  // Final capture if all attempts failed
+  try {
+    await saveChunkCapture({
+      publishId,
+      uploadUrl,
+      method: "FINAL",
+      headers: {},
+      chunk,
+      attempt: tries - 1,
+      variant: "final-failed",
+      error: lastErr,
+    });
+  } catch (_) {}
 
   throw lastErr || new Error("Chunk upload failed: unknown error");
 }
@@ -946,6 +1126,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         const totalChunks = Math.ceil(videoSize / cs);
         for (let i = 0; i < totalChunks; i++) {
           await uploadVideoChunk({
+            publishId: publish_id,
             uploadUrl: upload_url,
             videoBuffer: Buffer.from(videoBuffer),
             chunkIndex: i,

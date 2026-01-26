@@ -80,4 +80,5 @@ jobs:
           path: |
             tmp-service-account.json
             e2e-tiktok-pull.log
+            tmp/tiktok-chunk-captures/**
             *.log || true
