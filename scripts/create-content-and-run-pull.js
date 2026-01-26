@@ -33,9 +33,14 @@ if (!url || !uid) {
     console.log('Running pull-from-url test (SELF_ONLY privacy)');
     const { execFileSync } = require('child_process');
     try {
-      execFileSync(process.execPath, ['scripts/tiktok-pull-from-url.js', contentId], { stdio: 'inherit' });
+      if (process.env.TIKTOK_FORCE_FILE_UPLOAD === '1') {
+        console.log('TIKTOK_FORCE_FILE_UPLOAD=1 -> running file-upload fallback instead of pull');
+        execFileSync(process.execPath, ['scripts/tiktok-file-upload-fallback.js', contentId], { stdio: 'inherit' });
+      } else {
+        execFileSync(process.execPath, ['scripts/tiktok-pull-from-url.js', contentId], { stdio: 'inherit' });
+      }
     } catch (e) {
-      console.error('Pull-from-url script failed:', e && (e.message || e));
+      console.error('Pull-from-url (or fallback) script failed:', e && (e.message || e));
       // Fetch doc to show any partial status
       try {
         const snap = await db.collection('content').doc(contentId).get();
