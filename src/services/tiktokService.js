@@ -353,7 +353,7 @@ async function initializeVideoUpload({
     }
   } catch (_) {}
 
-  // If TikTok complains about chunk params, retry with single-chunk (chunk_size = videoSize)
+  // If TikTok complains about chunk params, consider a single-chunk retry only for small videos (<= 5MB)
   if (!response.ok) {
     const errorText = await response.text().catch(() => "");
 
@@ -368,49 +368,59 @@ async function initializeVideoUpload({
     } catch (_) {}
 
     if (errorText && /chunk|total chunk/i.test(errorText)) {
-      try {
-        const retryBody = {
-          post_info: body.post_info,
-          source_info: {
-            source: "FILE_UPLOAD",
-            video_size: videoSize,
-            chunk_size: videoSize,
-            total_chunk_count: 1,
-          },
-        };
-        const retryRes = await callInit(retryBody);
-
-        const retryResHeaders = {};
+      const MIN_CHUNK_BYTES = 5 * 1024 * 1024;
+      if (videoSize <= MIN_CHUNK_BYTES) {
         try {
-          if (retryRes && retryRes.headers && typeof retryRes.headers.forEach === "function") {
-            retryRes.headers.forEach((val, k) => {
-              retryResHeaders[k] = val;
-            });
-          } else if (
-            retryRes &&
-            retryRes.headers &&
-            typeof retryRes.headers.entries === "function"
-          ) {
-            for (const [k, v2] of retryRes.headers.entries()) retryResHeaders[k] = v2;
-          }
-        } catch (_) {}
+          const retryBody = {
+            post_info: body.post_info,
+            source_info: {
+              source: "FILE_UPLOAD",
+              video_size: videoSize,
+              chunk_size: videoSize,
+              total_chunk_count: 1,
+            },
+          };
+          const retryRes = await callInit(retryBody);
 
-        if (retryRes.ok) {
-          response = retryRes;
-        } else {
-          const err2 = await retryRes.text().catch(() => "");
+          const retryResHeaders = {};
           try {
-            await saveInitCapture({
-              initBody: retryBody,
-              status: retryRes.status,
-              resHeaders: retryResHeaders,
-              resBody: err2 || null,
-            });
+            if (retryRes && retryRes.headers && typeof retryRes.headers.forEach === "function") {
+              retryRes.headers.forEach((val, k) => {
+                retryResHeaders[k] = val;
+              });
+            } else if (
+              retryRes &&
+              retryRes.headers &&
+              typeof retryRes.headers.entries === "function"
+            ) {
+              for (const [k, v2] of retryRes.headers.entries()) retryResHeaders[k] = v2;
+            }
           } catch (_) {}
-          throw new Error(`TikTok upload init failed (retry): ${err2 || "<no body>"}`);
+
+          if (retryRes.ok) {
+            response = retryRes;
+          } else {
+            const err2 = await retryRes.text().catch(() => "");
+            try {
+              await saveInitCapture({
+                initBody: retryBody,
+                status: retryRes.status,
+                resHeaders: retryResHeaders,
+                resBody: err2 || null,
+              });
+            } catch (_) {}
+            throw new Error(`TikTok upload init failed (retry): ${err2 || "<no body>"}`);
+          }
+        } catch (e) {
+          throw new Error(`TikTok upload init failed: ${errorText || e.message || e}`);
         }
-      } catch (e) {
-        throw new Error(`TikTok upload init failed: ${errorText || e.message || e}`);
+      } else {
+        // For larger videos, do not retry with single-chunk since Media Transfer Guide requires chunks >= 5MB and <=64MB
+        console.warn(
+          "[tiktok] init error indicates chunk params, but videoSize > 5MB; not retrying single-chunk. error=%s",
+          errorText || "<no-body>"
+        );
+        throw new Error(`TikTok upload init failed: ${errorText || "<no body>"}`);
       }
     } else {
       throw new Error(`TikTok upload init failed: ${errorText || "<no body>"}`);
