@@ -47,6 +47,14 @@ jobs:
           echo "Inspecting connections for uid=${{ github.event.inputs.uid }}"
           node -r dotenv/config scripts/inspectUserConnections.js --uid "${{ github.event.inputs.uid }}" | tee inspect-tiktok-connection.log
 
+      - name: Refresh TikTok access token (optional)
+        if: ${{ github.event.inputs.url == '__refresh_token__' }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+        run: |
+          echo "Refreshing TikTok token for uid=${{ github.event.inputs.uid }}"
+          node -r dotenv/config scripts/refresh-tiktok-token.js --uid "${{ github.event.inputs.uid }}" | tee refresh-tiktok-token.log
+
       - name: Run TikTok PULL_FROM_URL E2E test
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
