@@ -64,6 +64,29 @@ Usage: node -r dotenv/config scripts/tiktok-file-upload-fallback.js <contentId>
     });
 
     const initText = await initRes.text();
+
+    // Save fallback init capture for diagnostics
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const captureDir = process.env.TIKTOK_CAPTURE_DIR || path.join(process.cwd(), 'tmp', 'tiktok-chunk-captures');
+      await fs.promises.mkdir(captureDir, { recursive: true });
+      const id = Date.now().toString() + "-fallback-init-" + Math.random().toString(36).slice(2, 8);
+      const dir = path.join(captureDir, id);
+      await fs.promises.mkdir(dir);
+      const meta = {
+        timestamp: new Date().toISOString(),
+        videoUrl,
+        requestBody: body,
+        status: initRes.status,
+        resBody: initText || null,
+      };
+      await fs.promises.writeFile(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 2));
+      console.log(`[tiktok] saved fallback init capture to ${dir}`);
+    } catch (e) {
+      console.warn('[tiktok] failed to save fallback init capture', e && (e.message || e));
+    }
+
     console.log('init status=', initRes.status, 'body=', initText);
 
     // If init succeeded, proceed to full upload via existing helper
