@@ -7,6 +7,10 @@ on:
         description: 'Mode to run (publish-failure | fallback-high | both)'
         required: true
         default: 'publish-failure'
+      ref:
+        description: 'Branch or ref to checkout (e.g. feature/tiktok-auto-publish)'
+        required: false
+        default: 'feature/tiktok-auto-publish'
 
 jobs:
   run-test:
@@ -14,6 +18,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
