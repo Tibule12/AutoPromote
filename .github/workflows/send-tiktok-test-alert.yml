@@ -1,0 +1,55 @@
+name: "Send TikTok Slack Test Alert"
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or ref to checkout (e.g. main)'
+        required: false
+        default: 'main'
+      type:
+        description: 'Alert type to send (default: tiktok_upload_fallback_high)'
+        required: false
+        default: 'tiktok_upload_fallback_high'
+
+jobs:
+  send-alert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Firebase service account
+        env:
+          FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_ADMIN_SERVICE_ACCOUNT" ]; then
+            echo "FIREBASE_ADMIN_SERVICE_ACCOUNT secret is not set. Aborting.";
+            exit 1;
+          fi
+          echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
+
+      - name: Run test alert
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+          SLACK_ALERT_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK_URL }}
+        run: |
+          node scripts/send-tiktok-test-alert.js
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: send-tiktok-test-alert-logs
+          path: |
+            tmp-service-account.json
