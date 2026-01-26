@@ -1,0 +1,64 @@
+name: Run TikTok E2E Pull Test (signed asset)
+
+on:
+  workflow_dispatch:
+    inputs:
+      uid:
+        description: 'TikTok UID to test against'
+        required: true
+
+jobs:
+  run-signed-pull:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          GENERIC_TOKEN_ENCRYPTION_KEY: ${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}
+          TWITTER_TOKEN_ENCRYPTION_KEY: ${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}
+
+      - name: Write Firebase service account (safe)
+        run: |
+          if [ -z "${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}" ]; then
+            echo "FIREBASE_ADMIN_SERVICE_ACCOUNT not set; skipping"
+          else
+            echo "${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}" > $GITHUB_WORKSPACE/tmp-service-account.json
+          fi
+        env:
+          GENERIC_TOKEN_ENCRYPTION_KEY: ${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}
+          TWITTER_TOKEN_ENCRYPTION_KEY: ${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}
+
+      - name: Create signed test asset
+        env:
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+        run: |
+          node scripts/create-signed-tiktok-test-asset.js --source "https://filesamples.com/samples/video/mp4/sample_640x360.mp4" > signed-output.txt
+          grep -Eo 'SIGNED_URL=\S+' signed-output.txt | cut -d= -f2 > signed-url.txt
+          cat signed-output.txt
+
+      - name: Run E2E pull with signed URL
+        env:
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          GENERIC_TOKEN_ENCRYPTION_KEY: ${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}
+          TWITTER_TOKEN_ENCRYPTION_KEY: ${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+        run: |
+          URL=$(cat signed-url.txt)
+          echo "Using signed URL: $URL"
+          node -r dotenv/config scripts/create-content-and-run-pull.js --url "$URL" --uid "${{ github.event.inputs.uid }}"
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: tikto-k-e2e-pull-logs
+          path: e2e-tiktok-pull.log
+          if-no-files-found: warn
