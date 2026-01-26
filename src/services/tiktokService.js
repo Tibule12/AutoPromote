@@ -325,7 +325,7 @@ async function uploadVideoChunk({
   const response = await fetch(uploadUrl, {
     method: "PUT",
     headers: {
-      "Content-Type": "video/mp4",
+      "Content-Type": "application/octet-stream",
       "Content-Range": `bytes ${start}-${end}/${videoBuffer.length}`,
     },
     body: videoBuffer.slice(start, Math.min((chunkIndex + 1) * chunkSize, videoBuffer.length)),
