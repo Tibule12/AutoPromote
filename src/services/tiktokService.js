@@ -332,7 +332,8 @@ async function uploadVideoChunk({
   });
 
   if (!response.ok) {
-    throw new Error(`Chunk upload failed: ${response.statusText}`);
+    const body = await response.text().catch(() => "<no-body>");
+    throw new Error(`Chunk upload failed: status=${response.status} body=${body}`);
   }
 
   return { success: true };
