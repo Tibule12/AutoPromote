@@ -1,0 +1,50 @@
+name: "Apply TikTok Alerting Defaults"
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch/ref to checkout (e.g. feature/tiktok-auto-publish)'
+        required: false
+        default: 'feature/tiktok-auto-publish'
+
+jobs:
+  apply-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Firebase service account
+        env:
+          FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_ADMIN_SERVICE_ACCOUNT" ]; then
+            echo "FIREBASE_ADMIN_SERVICE_ACCOUNT secret is not set. Aborting.";
+            exit 1;
+          fi
+          echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
+
+      - name: Apply TikTok alerting defaults
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+        run: |
+          node scripts/set-tiktok-alerting-defaults.js
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apply-tiktok-alert-config-logs
+          path: |
+            tmp-service-account.json
