@@ -1,19 +1,15 @@
-name: "Test TikTok Alerts (manual)"
+name: "Apply TikTok Alerting Defaults"
 
 on:
   workflow_dispatch:
     inputs:
-      mode:
-        description: 'Mode to run (publish-failure | fallback-high | both)'
-        required: true
-        default: 'publish-failure'
       ref:
-        description: 'Branch or ref to checkout (e.g. feature/tiktok-auto-publish)'
+        description: 'Branch/ref to checkout (e.g. feature/tiktok-auto-publish)'
         required: false
         default: 'feature/tiktok-auto-publish'
 
 jobs:
-  run-test:
+  apply-config:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,18 +35,16 @@ jobs:
           fi
           echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
 
-      - name: Run TikTok alerts test
+      - name: Apply TikTok alerting defaults
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
         run: |
-          node scripts/test-tiktok-alerts.js ${{ github.event.inputs.mode }}
+          node scripts/set-tiktok-alerting-defaults.js
 
-      - name: Upload test log
+      - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-tiktok-alerts-logs
+          name: apply-tiktok-alert-config-logs
           path: |
             tmp-service-account.json
-            # Include any logs produced by the test script if present
-            *.log || true
