@@ -11,6 +11,10 @@ on:
         description: 'TikTok owner uid to use for publish'
         required: true
         default: 'bf04dPKELvVMivWoUyLsAVyw2sg2'
+      force_file_upload:
+        description: 'Set to "1" to force FILE_UPLOAD fallback instead of PULL_FROM_URL'
+        required: false
+        default: '0'
 
 jobs:
   run-e2e:
@@ -62,8 +66,9 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
           TEST_UID: ${{ github.event.inputs.uid }}
+          TIKTOK_FORCE_FILE_UPLOAD: ${{ github.event.inputs.force_file_upload }}
         run: |
-          echo "Running E2E with url=${{ github.event.inputs.url }} uid=${{ github.event.inputs.uid }}"
+          echo "Running E2E with url=${{ github.event.inputs.url }} uid=${{ github.event.inputs.uid }} force_file_upload=${{ github.event.inputs.force_file_upload }}"
           node -r dotenv/config scripts/create-content-and-run-pull.js --url "${{ github.event.inputs.url }}" --uid "${{ github.event.inputs.uid }}" | tee e2e-tiktok-pull.log
 
       - name: Upload E2E log
