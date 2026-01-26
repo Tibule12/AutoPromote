@@ -519,29 +519,31 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
             /* ignore */
           }
         }
-        if (storagePath) {
-          const { Storage } = require("@google-cloud/storage");
-          const storage = new Storage();
-          try {
-            const file = storage.bucket(process.env.FIREBASE_STORAGE_BUCKET).file(storagePath);
-            const [signed] = await file.getSignedUrl({
-              version: "v4",
-              action: "read",
-              expires: Date.now() + 60 * 60 * 1000,
-            });
-            videoUrl = signed;
-            // persist fresh URL
+        if (!process.env.TIKTOK_FORCE_FILE_UPLOAD) {
+          if (storagePath) {
+            const { Storage } = require("@google-cloud/storage");
+            const storage = new Storage();
             try {
-              await db
-                .collection("content")
-                .doc(contentId)
-                .update({ mediaUrl: signed, urlSignedAt: new Date().toISOString() });
-            } catch (_) {}
-          } catch (e) {
-            console.warn(
-              "[tiktok] failed to generate signed url from storagePath",
-              e && (e.message || e)
-            );
+              const file = storage.bucket(process.env.FIREBASE_STORAGE_BUCKET).file(storagePath);
+              const [signed] = await file.getSignedUrl({
+                version: "v4",
+                action: "read",
+                expires: Date.now() + 60 * 60 * 1000,
+              });
+              videoUrl = signed;
+              // persist fresh URL
+              try {
+                await db
+                  .collection("content")
+                  .doc(contentId)
+                  .update({ mediaUrl: signed, urlSignedAt: new Date().toISOString() });
+              } catch (_) {}
+            } catch (e) {
+              console.warn(
+                "[tiktok] failed to generate signed url from storagePath",
+                e && (e.message || e)
+              );
+            }
           }
         }
       }
