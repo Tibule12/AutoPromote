@@ -26,7 +26,8 @@ async function main() {
   const file = bucket.file(destPath);
 
   console.log('Uploading to:', `${bucketName}/${destPath}`);
-  await file.save(buf, { contentType: 'video/mp4', resumable: false });
+  const { saveFileSafely } = require('../src/utils/storageGuard');
+  await saveFileSafely(file, buf, { contentType: 'video/mp4', resumable: false });
 
   const [signedUrl] = await file.getSignedUrl({
     version: 'v4',

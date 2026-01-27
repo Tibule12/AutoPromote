@@ -40,7 +40,8 @@ async function testFirebaseConnection() {
     const testFilePath = `test/test-${Date.now()}.txt`;
     const file = bucket.file(testFilePath);
 
-    await file.save("Test content", {
+    const { saveFileSafely } = require('./src/utils/storageGuard');
+    await saveFileSafely(file, "Test content", {
       contentType: "text/plain",
     });
     console.log("✅ Storage write successful");
