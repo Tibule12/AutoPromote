@@ -11,10 +11,17 @@ on:
         description: 'TikTok owner uid to use for publish'
         required: true
         default: 'bf04dPKELvVMivWoUyLsAVyw2sg2'
+      force_file_upload:
+        description: 'Set to "1" to force FILE_UPLOAD fallback instead of PULL_FROM_URL'
+        required: false
+        default: '0'
 
 jobs:
   run-e2e:
     runs-on: ubuntu-latest
+    env:
+      GENERIC_TOKEN_ENCRYPTION_KEY: ${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}
+      TWITTER_TOKEN_ENCRYPTION_KEY: ${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,13 +46,36 @@ jobs:
           fi
           echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
 
+      - name: Inspect TikTok connection (optional)
+        if: ${{ github.event.inputs.url == '__inspect_only__' }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+        run: |
+          echo "Inspecting connections for uid=${{ github.event.inputs.uid }}"
+          node -r dotenv/config scripts/inspectUserConnections.js --uid "${{ github.event.inputs.uid }}" | tee inspect-tiktok-connection.log
+
+      - name: Refresh TikTok access token (optional)
+        if: ${{ github.event.inputs.url == '__refresh_token__' }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+        run: |
+          echo "Refreshing TikTok token for uid=${{ github.event.inputs.uid }}"
+          node -r dotenv/config scripts/refresh-tiktok-token.js --uid "${{ github.event.inputs.uid }}" | tee refresh-tiktok-token.log
+
       - name: Run TikTok PULL_FROM_URL E2E test
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
           TEST_UID: ${{ github.event.inputs.uid }}
+          TIKTOK_FORCE_FILE_UPLOAD: ${{ github.event.inputs.force_file_upload }}
+          SSRF_ALLOW_UNRESTRICTED: ${{ github.event.inputs.force_file_upload }}
         run: |
-          echo "Running E2E with url=${{ github.event.inputs.url }} uid=${{ github.event.inputs.uid }}"
+          echo "Running E2E with url=${{ github.event.inputs.url }} uid=${{ github.event.inputs.uid }} force_file_upload=${{ github.event.inputs.force_file_upload }}"
           node -r dotenv/config scripts/create-content-and-run-pull.js --url "${{ github.event.inputs.url }}" --uid "${{ github.event.inputs.uid }}" | tee e2e-tiktok-pull.log
+
+      - name: List tmp capture dir
+        if: always()
+        run: |
+          echo "tmp listing:"; ls -la tmp || true; echo "tiktok capture listing:"; ls -la tmp/tiktok-chunk-captures || true; echo "find tmp:"; find tmp -maxdepth 3 -type f -exec ls -la {} \; || true
 
       - name: Upload E2E log
         if: always()
@@ -55,4 +85,5 @@ jobs:
           path: |
             tmp-service-account.json
             e2e-tiktok-pull.log
+            tmp/tiktok-chunk-captures/**
             *.log || true

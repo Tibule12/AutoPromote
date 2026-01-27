@@ -9,7 +9,8 @@ async function testStorage() {
     const testFileContent = "This is a test file for Firebase Storage";
 
     const file = bucket.file(testFileName);
-    await file.save(testFileContent, {
+    const { saveFileSafely } = require('./src/utils/storageGuard');
+    await saveFileSafely(file, testFileContent, {
       contentType: "text/plain",
       metadata: {
         createdAt: new Date().toISOString(),

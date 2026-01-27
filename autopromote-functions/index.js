@@ -346,7 +346,8 @@ exports.handleLandingPageIntent = functions
 
       const bucket = admin.storage().bucket("autopromote-cc6d3.firebasestorage.app");
       const file = bucket.file(`landing-pages/${contentId}-${uuidv4()}.html`);
-      await file.save(html, { contentType: "text/html" });
+      const { saveFileSafely } = require('../src/utils/storageGuard');
+      await saveFileSafely(file, html, { contentType: "text/html" });
       let signedUrl;
       try {
         const res = await file.getSignedUrl({

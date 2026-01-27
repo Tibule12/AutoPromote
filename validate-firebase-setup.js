@@ -32,7 +32,8 @@ async function validateFirebaseSetup() {
     try {
       const bucket = storage.bucket();
       const file = bucket.file("_test_/test.txt");
-      await file.save("test");
+      const { saveFileSafely } = require('./src/utils/storageGuard');
+      await saveFileSafely(file, "test");
       await file.delete();
       console.log("✅ Firebase Storage connection successful\n");
     } catch (error) {

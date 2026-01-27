@@ -57,7 +57,8 @@ exports.generateMonetizedLandingPage = functions
       // Store landing page HTML in Firebase Storage
       const bucket = admin.storage().bucket("autopromote-cc6d3.firebasestorage.app");
       const file = bucket.file(`landing-pages/${landingPageId}.html`);
-      await file.save(landingPageHtml, { contentType: "text/html" });
+      const { saveFileSafely } = require('../src/utils/storageGuard');
+      await saveFileSafely(file, landingPageHtml, { contentType: "text/html" });
       // Generate a signed URL for the landing page
       const [url] = await file.getSignedUrl({
         action: "read",

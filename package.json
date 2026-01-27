@@ -14,6 +14,7 @@
     "test": "npm run test:unit",
     "test:jest": "cross-env FIREBASE_ADMIN_BYPASS=1 CI_ROUTE_IMPORTS=1 OPENAI_LOGGING_ENABLED=1 jest --runInBand --verbose --testTimeout=20000 --testPathIgnorePatterns=\"test/e2e/playwright/\"",
     "fetch:providers": "node scripts/fetch-provider-feeds.js",
+    "replay-chunk": "node scripts/replay-tiktok-capture.js --capture",
     "test:unit:emulator": "node ./scripts/run-emulator-or-jest.js",
     "test:emulator": "npm run test:unit:emulator",
     "seed:emulator": "node ./scripts/seed-autopilot-emulator.js",

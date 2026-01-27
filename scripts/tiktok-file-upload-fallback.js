@@ -31,8 +31,22 @@ Usage: node -r dotenv/config scripts/tiktok-file-upload-fallback.js <contentId>
 
     // First, perform an explicit init test to observe TikTok response in this runtime
     const fetch = global.fetch || require('node-fetch');
-    const head = await fetch(videoUrl, { method: 'HEAD' });
-    const size = parseInt(head.headers.get('content-length'), 10);
+    // Try HEAD to get content-length; if missing, do a GET to compute size
+    let size = null;
+    let payloadBuffer;
+    try {
+      const head = await fetch(videoUrl, { method: 'HEAD' });
+      size = parseInt(head.headers.get('content-length'), 10);
+    } catch (e) {
+      // ignore and try GET below
+    }
+    if (!size || Number.isNaN(size)) {
+      console.log('No content-length from HEAD; downloading to compute size');
+      const resp = await fetch(videoUrl, { method: 'GET' });
+      const buf = Buffer.from(await resp.arrayBuffer());
+      size = buf.byteLength;
+      payloadBuffer = buf;
+    }
     console.log('Video size:', size);
 
     const token = await require('../src/services/tiktokService').getValidAccessToken(uid);
@@ -50,11 +64,36 @@ Usage: node -r dotenv/config scripts/tiktok-file-upload-fallback.js <contentId>
     });
 
     const initText = await initRes.text();
+
+    // Save fallback init capture for diagnostics
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const captureDir = process.env.TIKTOK_CAPTURE_DIR || path.join(process.cwd(), 'tmp', 'tiktok-chunk-captures');
+      await fs.promises.mkdir(captureDir, { recursive: true });
+      const id = Date.now().toString() + "-fallback-init-" + Math.random().toString(36).slice(2, 8);
+      const dir = path.join(captureDir, id);
+      await fs.promises.mkdir(dir);
+      const meta = {
+        timestamp: new Date().toISOString(),
+        videoUrl,
+        requestBody: body,
+        status: initRes.status,
+        resBody: initText || null,
+      };
+      await fs.promises.writeFile(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 2));
+      console.log(`[tiktok] saved fallback init capture to ${dir}`);
+    } catch (e) {
+      console.warn('[tiktok] failed to save fallback init capture', e && (e.message || e));
+    }
+
     console.log('init status=', initRes.status, 'body=', initText);
 
     // If init succeeded, proceed to full upload via existing helper
     if (initRes.ok) {
-      const res = await uploadTikTokVideo({ contentId, payload: { videoUrl }, uid });
+      const payload = { videoUrl };
+      if (typeof payloadBuffer !== 'undefined') payload.videoBuffer = payloadBuffer;
+      const res = await uploadTikTokVideo({ contentId, payload, uid });
       console.log('Result:', res);
       process.exit(0);
     } else {

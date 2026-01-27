@@ -1,0 +1,53 @@
+name: "Inspect TikTok Connection"
+
+on:
+  workflow_dispatch:
+    inputs:
+      uid:
+        description: 'User UID to inspect'
+        required: true
+        default: 'bf04dPKELvVMivWoUyLsAVyw2sg2'
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Firebase service account
+        env:
+          FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_ADMIN_SERVICE_ACCOUNT" ]; then
+            echo "FIREBASE_ADMIN_SERVICE_ACCOUNT secret is not set. Aborting.";
+            exit 1;
+          fi
+          echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT" > $GITHUB_WORKSPACE/tmp-service-account.json
+
+      - name: Inspect TikTok connections
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tmp-service-account.json
+        run: |
+          echo "Inspecting connections for uid=${{ github.event.inputs.uid }}"
+          node -r dotenv/config scripts/inspectUserConnections.js --uid "${{ github.event.inputs.uid }}" | tee inspect-tiktok-connection.log
+
+      - name: Upload inspect log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: inspect-tiktok-connection-log
+          path: |
+            tmp-service-account.json
+            inspect-tiktok-connection.log
+            *.log || true
