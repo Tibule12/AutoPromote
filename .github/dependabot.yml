@@ -12,3 +12,29 @@ updates:
       - "dependencies"
       - "auto-update"
     reviewers: []
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    insecure-external-code: deny
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "auto-update"
+    reviewers: []
+
+  - package-ecosystem: "npm"
+    directory: "/TodoApp"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    insecure-external-code: deny
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "auto-update"
+    reviewers: []
