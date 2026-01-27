@@ -1381,17 +1381,37 @@ router.get("/linkedin/auth/callback", platformPublicLimiter, async (req, res) =>
     // Fetch basic profile if access token acquired
     if (tokenJson.access_token) {
       try {
-        const profileRes = await fetchFn("https://api.linkedin.com/v2/me", {
-          headers: { Authorization: `Bearer ${tokenJson.access_token}` },
+        // Use safeFetch with X-Restli protocol header to avoid me.GET.NO_VERSION errors
+        const profileRes = await safeFetch("https://api.linkedin.com/v2/me", fetchFn, {
+          fetchOptions: {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${tokenJson.access_token}`,
+              "X-Restli-Protocol-Version": "2.0.0",
+            },
+          },
+          requireHttps: true,
+          allowHosts: ["api.linkedin.com"],
         });
         if (profileRes.ok) meta.profile = await profileRes.json();
-        const emailRes = await fetchFn(
+        const emailRes = await safeFetch(
           "https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))",
-          { headers: { Authorization: `Bearer ${tokenJson.access_token}` } }
+          fetchFn,
+          {
+            fetchOptions: {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${tokenJson.access_token}`,
+                "X-Restli-Protocol-Version": "2.0.0",
+              },
+            },
+            requireHttps: true,
+            allowHosts: ["api.linkedin.com"],
+          }
         );
         if (emailRes.ok) meta.email = await emailRes.json();
-      } catch (_) {
-        /* non-fatal */
+      } catch (e) {
+        console.warn("[oauth][linkedin] profile fetch failed", e && e.message);
       }
     }
     // Resolve user from stored state mapping
