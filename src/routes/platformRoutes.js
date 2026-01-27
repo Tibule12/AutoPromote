@@ -669,6 +669,49 @@ router.get("/:platform/auth/start", platformPublicLimiter, async (req, res) => {
   // Return the prepare URL (client should POST to prepare when authenticated), or a callback placeholder.
   const prepareUrl = `${req.protocol}://${req.get("host")}/api/${platform}/auth/prepare`;
   const callbackUrl = `${req.protocol}://${req.get("host")}/api/${platform}/auth/callback`;
+
+  // Convenience: if the start endpoint is opened directly in a browser with an id_token
+  // (e.g., when the frontend is cross-origin and appends id_token in the query),
+  // perform the prepare POST server-side and redirect the user to the provider URL
+  // instead of returning JSON that would display in the browser.
+  const idToken = req.query && req.query.id_token;
+  if (idToken) {
+    try {
+      const fetch = global.fetch || require("node-fetch");
+      const prepareRes = await fetch(prepareUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ popup: !!req.query.popup }),
+      });
+      const prepareData = await prepareRes.json().catch(() => null);
+      if (prepareRes.ok && prepareData && prepareData.authUrl) {
+        // Return a small HTML page that auto-redirects (and provides a clickable link as fallback)
+        const html =
+          `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
+          `<title>Continue to ${platform}</title>` +
+          `</head><body><p>If you are not redirected automatically, <a href="${prepareData.authUrl}">click here to continue</a>.</p>` +
+          `<script>location.href=${JSON.stringify(prepareData.authUrl)};</script></body></html>`;
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        return res.send(html);
+      }
+      // Fallback: return the usual JSON (useful for debugging)
+      return res.json({
+        ok: true,
+        platform,
+        prepareUrl,
+        callbackUrl,
+        note: "use_prepare_post_with_auth",
+        prepareData,
+      });
+    } catch (e) {
+      return res.status(500).json({ ok: false, platform, error: e.message || "internal_error" });
+    }
+  }
+
   return res.json({
     ok: true,
     platform,
