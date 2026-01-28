@@ -228,6 +228,50 @@ const ConnectionsPanel = ({
               <span style={{ color: "#9aa4b2" }}>Connect to post tweets and schedule posts.</span>
             </>
           )}
+          {/* Show OAuth1 missing banner when server indicates native media uploads require OAuth1 */}
+          {twitterStatus?.oauth1_missing && (
+            <div
+              style={{
+                marginTop: 8,
+                padding: 10,
+                borderRadius: 6,
+                background: "#fff7ed",
+                border: "1px solid #f59e0b",
+                color: "#92400e",
+              }}
+            >
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>Video uploads require OAuth1</div>
+              <div style={{ marginBottom: 8 }}>
+                Your account needs to be reconnected using the OAuth1 flow to enable native video
+                uploads. Click the button to reconnect and then retry posting the video.
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  className="check-quality"
+                  onClick={() => {
+                    try {
+                      handleConnectTwitter();
+                    } catch (e) {
+                      toast.error("Failed to start OAuth1 connect");
+                    }
+                  }}
+                >
+                  Reconnect (OAuth1)
+                </button>
+                <button
+                  className="check-quality"
+                  onClick={() => {
+                    try {
+                      // Open docs/help or support link if available
+                      window.open("/docs/twitter-oauth1", "_blank");
+                    } catch (e) {}
+                  }}
+                >
+                  Learn more
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {tiktokStatus?.connected ? (
