@@ -534,131 +534,121 @@ router.get(
   }
 );
 
+// Helper: generate auth start/url (extracted to avoid SSRF when invoked server-side)
+async function generateAuthStart({ platform, uid = null, wantsPopup = false, host = null }) {
+  const crypto = require("crypto");
+  const baseState = crypto.randomBytes(18).toString("base64url");
+  const state = wantsPopup ? `${baseState}:popup` : baseState;
+  const now = Date.now();
+  const expiresAt = new Date(now + 5 * 60 * 1000).toISOString(); // 5 minutes
+  // Persist state (best-effort)
+  try {
+    await db
+      .collection("oauth_states")
+      .doc(state)
+      .set(
+        { uid: uid || null, platform, createdAt: new Date(now).toISOString(), expiresAt },
+        { merge: false }
+      );
+  } catch (e) {
+    console.warn("[oauth] failed to persist state mapping", e && e.message);
+  }
+
+  const baseHost = host || `${process.env.API_HOST || "https://api.autopromote.org"}`;
+
+  if (platform === "reddit") {
+    const clientId = process.env.REDDIT_CLIENT_ID;
+    const { canonicalizeRedirect } = require("../utils/redirectUri");
+    const redirectUri = canonicalizeRedirect(`${baseHost}/api/reddit/auth/callback`, {
+      requiredPath: "/api/reddit/auth/callback",
+    });
+    const scope = encodeURIComponent("identity read submit save");
+    const url = `https://www.reddit.com/api/v1/authorize?client_id=${clientId}&response_type=code&state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}&duration=permanent&scope=${scope}`;
+    return { ok: true, platform, authUrl: url, state, redirect: redirectUri };
+  }
+
+  if (platform === "discord") {
+    const clientId = process.env.DISCORD_CLIENT_ID;
+    const redirectUri = process.env.DISCORD_REDIRECT_URI || `${baseHost}/api/discord/auth/callback`;
+    const scope = encodeURIComponent("identify guilds");
+    const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${encodeURIComponent(state)}`;
+    return { ok: true, platform, authUrl: url, state };
+  }
+
+  if (platform === "pinterest") {
+    const clientId = process.env.PINTEREST_CLIENT_ID;
+    const { canonicalizeRedirect } = require("../utils/redirectUri");
+    const redirectUri = canonicalizeRedirect(
+      process.env.PINTEREST_REDIRECT_URI || `${baseHost}/api/pinterest/auth/callback`,
+      { requiredPath: "/api/pinterest/auth/callback" }
+    );
+    const scope = encodeURIComponent(
+      (process.env.PINTEREST_SCOPES || "pins:read,pins:write,boards:read").split(",").join(",")
+    );
+    const url = `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}&scope=${scope}&state=${state}`;
+    return { ok: true, platform, authUrl: url, state, redirect: redirectUri };
+  }
+
+  if (platform === "spotify") {
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const { canonicalizeRedirect } = require("../utils/redirectUri");
+    const redirectUri = canonicalizeRedirect(`${baseHost}/api/spotify/auth/callback`, {
+      requiredPath: "/api/spotify/auth/callback",
+    });
+    const scope = encodeURIComponent(
+      "user-read-email playlist-modify-public playlist-modify-private"
+    );
+    const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&show_dialog=true`;
+    return { ok: true, platform, authUrl: url, state, redirect: redirectUri };
+  }
+
+  if (platform === "telegram") {
+    const botUser = process.env.TELEGRAM_BOT_USERNAME || process.env.TELEGRAM_BOT_NAME;
+    if (!botUser) return { ok: false, error: "telegram_bot_not_configured" };
+    const webUrl = `https://t.me/${botUser}?start=${encodeURIComponent(state)}`;
+    const appUrl = `tg://resolve?domain=${encodeURIComponent(botUser)}&start=${encodeURIComponent(state)}`;
+    return { ok: true, platform, authUrl: webUrl, appUrl, state };
+  }
+
+  if (platform === "linkedin") {
+    const clientId = process.env.LINKEDIN_CLIENT_ID;
+    const { canonicalizeRedirect } = require("../utils/redirectUri");
+    const redirectUri = canonicalizeRedirect(`${baseHost}/api/linkedin/auth/callback`, {
+      requiredPath: "/api/linkedin/auth/callback",
+    });
+    const rawScopes = process.env.LINKEDIN_SCOPES || process.env.LINKEDIN_SCOPE;
+    const defaultScopes = ["r_liteprofile", "r_emailaddress"];
+    if (
+      process.env.LINKEDIN_ENABLE_SHARING === "true" ||
+      process.env.LINKEDIN_REQUIRE_W_MEMBER_SOCIAL === "true"
+    ) {
+      defaultScopes.push("w_member_social");
+    }
+    const scopes = rawScopes ? rawScopes.split(/\s+/).filter(Boolean) : defaultScopes;
+    const scope = encodeURIComponent(scopes.join(" "));
+    const url = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=${scope}`;
+    return { ok: true, platform, authUrl: url, state, redirect: redirectUri, scopes };
+  }
+
+  const callbackUrl = `${baseHost}/api/${platform}/auth/callback`;
+  return { ok: true, platform, authUrl: callbackUrl, state, note: "placeholder_auth_start" };
+}
+
 // POST /api/:platform/auth/prepare
 // Auth required endpoint that returns an OAuth start URL (authUrl) for the frontend to open.
 // Stores a random state token in Firestore at `oauth_states/{state}` mapping to uid/platform for later validation.
 router.post("/:platform/auth/prepare", authMiddleware, platformWriteLimiter, async (req, res) => {
-  const platform = normalize(req.params.platform);
-  if (!SUPPORTED_PLATFORMS.includes(platform))
-    return res.status(404).json({ ok: false, error: "unsupported_platform" });
-  try {
-    const host = `${req.protocol}://${req.get("host")}`;
-    const uid = req.userId || req.user?.uid || null;
-    const crypto = require("crypto");
-    const baseState = crypto.randomBytes(18).toString("base64url");
-    // Support popup flows by appending a marker to the state when requested by the client.
-    const wantsPopup = !!(req.body && req.body.popup);
-    const state = wantsPopup ? `${baseState}:popup` : baseState;
-    const now = Date.now();
-    const expiresAt = new Date(now + 5 * 60 * 1000).toISOString(); // 5 minutes
-
-    // persist state mapping (best-effort)
-    try {
-      await db
-        .collection("oauth_states")
-        .doc(state)
-        .set(
-          { uid: uid || null, platform, createdAt: new Date(now).toISOString(), expiresAt },
-          { merge: false }
-        );
-    } catch (e) {
-      console.warn("[oauth] failed to persist state mapping", e && e.message);
-      // continue — we still return a state token but callbacks will fallback to legacy parsing
-    }
-
-    if (platform === "reddit") {
-      const clientId = process.env.REDDIT_CLIENT_ID;
-      const { canonicalizeRedirect } = require("../utils/redirectUri");
-      const redirectUri = canonicalizeRedirect(`${host}/api/reddit/auth/callback`, {
-        requiredPath: "/api/reddit/auth/callback",
-      });
-      // Scopes: adjust as needed
-      const scope = encodeURIComponent("identity read submit save");
-      const url = `https://www.reddit.com/api/v1/authorize?client_id=${clientId}&response_type=code&state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}&duration=permanent&scope=${scope}`;
-      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
-    }
-    if (platform === "discord") {
-      const clientId = process.env.DISCORD_CLIENT_ID;
-      // Prefer an explicit DISCORD_REDIRECT_URI env var when present (avoids host-guessing mismatches)
-      const redirectUri = process.env.DISCORD_REDIRECT_URI || `${host}/api/discord/auth/callback`;
-      const scope = encodeURIComponent("identify guilds");
-      const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${encodeURIComponent(state)}`;
-      return res.json({ ok: true, platform, authUrl: url, state });
-    }
-
-    if (platform === "pinterest") {
-      const clientId = process.env.PINTEREST_CLIENT_ID;
-      const { canonicalizeRedirect } = require("../utils/redirectUri");
-      const redirectUri = canonicalizeRedirect(
-        process.env.PINTEREST_REDIRECT_URI || `${host}/api/pinterest/auth/callback`,
-        { requiredPath: "/api/pinterest/auth/callback" }
-      );
-      const scope = encodeURIComponent(
-        (process.env.PINTEREST_SCOPES || "pins:read,pins:write,boards:read").split(",").join(",")
-      );
-      const url = `https://www.pinterest.com/oauth/?response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}&scope=${scope}&state=${state}`;
-      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
-    }
-
-    if (platform === "spotify") {
-      const clientId = process.env.SPOTIFY_CLIENT_ID;
-      const { canonicalizeRedirect } = require("../utils/redirectUri");
-      const redirectUri = canonicalizeRedirect(`${host}/api/spotify/auth/callback`, {
-        requiredPath: "/api/spotify/auth/callback",
-      });
-      // scopes: adjust later as needed when you register the app
-      const scope = encodeURIComponent(
-        "user-read-email playlist-modify-public playlist-modify-private"
-      );
-      const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&show_dialog=true`;
-      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri });
-    }
-
-    if (platform === "telegram") {
-      // For Telegram we use the t.me/<bot>?start=<state> pattern.
-      // The frontend will open this URL and the user must press Start in the bot.
-      const botUser = process.env.TELEGRAM_BOT_USERNAME || process.env.TELEGRAM_BOT_NAME;
-      if (!botUser)
-        return res.status(500).json({ ok: false, error: "telegram_bot_not_configured" });
-      const webUrl = `https://t.me/${botUser}?start=${encodeURIComponent(state)}`;
-      // Native app deep link (tg://) — useful to try opening the Telegram app directly
-      const appUrl = `tg://resolve?domain=${encodeURIComponent(botUser)}&start=${encodeURIComponent(state)}`;
-      return res.json({ ok: true, platform, authUrl: webUrl, appUrl, state });
-    }
-
-    if (platform === "linkedin") {
-      const clientId = process.env.LINKEDIN_CLIENT_ID;
-      const { canonicalizeRedirect } = require("../utils/redirectUri");
-      const redirectUri = canonicalizeRedirect(`${host}/api/linkedin/auth/callback`, {
-        requiredPath: "/api/linkedin/auth/callback",
-      });
-      const rawScopes = process.env.LINKEDIN_SCOPES || process.env.LINKEDIN_SCOPE;
-      const defaultScopes = ["r_liteprofile", "r_emailaddress"];
-      // Only request member social if explicitly enabled to avoid unauthorized_scope_error before approval
-      if (
-        process.env.LINKEDIN_ENABLE_SHARING === "true" ||
-        process.env.LINKEDIN_REQUIRE_W_MEMBER_SOCIAL === "true"
-      ) {
-        defaultScopes.push("w_member_social");
-      }
-      const scopes = rawScopes ? rawScopes.split(/\s+/).filter(Boolean) : defaultScopes;
-      const scope = encodeURIComponent(scopes.join(" "));
-      const url = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=${scope}`;
-      return res.json({ ok: true, platform, authUrl: url, state, redirect: redirectUri, scopes });
-    }
-
-    // Default: return placeholder callback URL so frontend can open something
-    const callbackUrl = `${req.protocol}://${req.get("host")}/api/${platform}/auth/callback`;
-    return res.json({
-      ok: true,
-      platform,
-      authUrl: callbackUrl,
-      state,
-      note: "placeholder_auth_start",
-    });
-  } catch (e) {
-    return res.status(500).json({ ok: false, platform, error: e.message });
-  }
+  const result = await generateAuthStart({
+    platform: normalize(req.params.platform),
+    uid: req.userId || req.user?.uid || null,
+    wantsPopup: !!(req.body && req.body.popup),
+    host: `${req.protocol}://${req.get("host")}`,
+  });
+  if (!result || result.ok === false)
+    return res
+      .status(500)
+      .json({ ok: false, error: result && result.error ? result.error : "failed" });
+  return res.json(result);
 });
 
 // GET /api/:platform/auth/start (public) - returns a URL the frontend can open.
@@ -677,35 +667,43 @@ router.get("/:platform/auth/start", platformPublicLimiter, async (req, res) => {
   const idToken = req.query && req.query.id_token;
   if (idToken) {
     try {
-      const fetch = global.fetch || require("node-fetch");
-      const prepareRes = await fetch(prepareUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ popup: !!req.query.popup }),
-      });
-      const prepareData = await prepareRes.json().catch(() => null);
-      if (prepareRes.ok && prepareData && prepareData.authUrl) {
-        // Return a small HTML page that auto-redirects (and provides a clickable link as fallback)
-        const html =
-          `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
-          `<title>Continue to ${platform}</title>` +
-          `</head><body><p>If you are not redirected automatically, <a href="${prepareData.authUrl}">click here to continue</a>.</p>` +
-          `<script>location.href=${JSON.stringify(prepareData.authUrl)};</script></body></html>`;
-        res.setHeader("Content-Type", "text/html; charset=utf-8");
-        return res.send(html);
+      // Verify the id_token server-side to get a uid (avoid making HTTP requests back to this server to prevent SSRF)
+      let verifiedUid = null;
+      try {
+        const decoded = await admin.auth().verifyIdToken(String(idToken));
+        verifiedUid = decoded && decoded.uid ? decoded.uid : null;
+      } catch (e) {
+        // Token invalid or expired — fall through and return JSON guidance
+        console.warn("[auth][id_token] verification failed", e && e.message);
       }
-      // Fallback: return the usual JSON (useful for debugging)
+
+      if (verifiedUid) {
+        const wantsPopup = !!req.query.popup;
+        const prepareData = await generateAuthStart({
+          platform,
+          uid: verifiedUid,
+          wantsPopup,
+          host: `${req.protocol}://${req.get("host")}`,
+        });
+        if (prepareData && prepareData.ok && prepareData.authUrl) {
+          const html =
+            `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
+            `<title>Continue to ${platform}</title>` +
+            `</head><body><p>If you are not redirected automatically, <a href="${prepareData.authUrl}">click here to continue</a>.</p>` +
+            `<script>location.href=${JSON.stringify(prepareData.authUrl)};</script></body></html>`;
+          res.setHeader("Content-Type", "text/html; charset=utf-8");
+          return res.send(html);
+        }
+        return res.json({ ok: true, platform, prepareData });
+      }
+
+      // If verification failed, don't attempt HTTP fetch to the prepare endpoint — return instruction JSON
       return res.json({
         ok: true,
         platform,
         prepareUrl,
         callbackUrl,
         note: "use_prepare_post_with_auth",
-        prepareData,
       });
     } catch (e) {
       return res.status(500).json({ ok: false, platform, error: e.message || "internal_error" });
