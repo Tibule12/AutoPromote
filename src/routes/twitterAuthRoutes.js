@@ -10,7 +10,7 @@ const {
   getValidAccessToken,
 } = require("../services/twitterService");
 const fetch = require("node-fetch");
-const { db } = require("../firebaseAdmin");
+const { db, admin } = require("../firebaseAdmin");
 const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
 const logger = require("../utils/logger");
 
@@ -198,6 +198,153 @@ router.get("/oauth/callback", twitterPublicLimiter, async (req, res) => {
   }
 });
 
+// -------------------------
+// OAuth1.0a flow (request_token -> authenticate -> access_token)
+// -------------------------
+
+// Prepare OAuth1 (returns authUrl for frontend redirect)
+router.post("/oauth1/prepare", authMiddleware, twitterWriteLimiter, async (req, res) => {
+  try {
+    const consumerKey = process.env.TWITTER_CLIENT_ID || process.env.TWITTER_CONSUMER_KEY;
+    const consumerSecret =
+      process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CONSUMER_SECRET || null;
+    if (!consumerKey || !consumerSecret) {
+      return res.status(500).json({ error: "twitter_consumer_config_missing" });
+    }
+
+    // Build callback URL (same hostname + path)
+    let callbackUrl = process.env.TWITTER_CLIENT_REDIRECT_URI || null;
+    try {
+      const { canonicalizeRedirect } = require("../utils/redirectUri");
+      callbackUrl = canonicalizeRedirect(callbackUrl, {
+        requiredPath: "/api/twitter/oauth1/callback",
+      });
+    } catch (_) {}
+    if (!callbackUrl) {
+      return res.status(500).json({ error: "missing_callback_url" });
+    }
+
+    const requestTokenUrl = "https://api.twitter.com/oauth/request_token";
+    const { buildOauth1Header } = require("../utils/oauth1");
+
+    const extraParams = { oauth_callback: callbackUrl };
+    const authHeader = buildOauth1Header({
+      method: "POST",
+      url: requestTokenUrl,
+      consumerKey,
+      consumerSecret,
+      extraParams,
+    });
+
+    const r = await fetch(requestTokenUrl, {
+      method: "POST",
+      headers: { Authorization: authHeader, "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(extraParams),
+    });
+    const txt = await r.text();
+    if (!r.ok) {
+      debugLog("oauth1 request_token failed", r.status, txt);
+      return res.status(500).json({ error: "request_token_failed", detail: txt });
+    }
+
+    // Parse form-encoded response
+    const resp = Object.fromEntries(new URLSearchParams(txt));
+    if (!resp.oauth_token || !resp.oauth_token_secret) {
+      return res.status(500).json({ error: "invalid_request_token_response", raw: txt });
+    }
+
+    // Store temporary state mapping oauth_token -> secret + uid
+    await db
+      .collection("oauth1_states")
+      .doc(resp.oauth_token)
+      .set({
+        uid: req.userId || req.user?.uid,
+        oauth_token_secret: resp.oauth_token_secret,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+    const authUrl = `https://api.twitter.com/oauth/authenticate?oauth_token=${resp.oauth_token}`;
+    return res.json({ authUrl });
+  } catch (e) {
+    debugLog("oauth1 prepare error", e.message);
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// OAuth1 callback - exchanges request_token + verifier for access token
+router.get("/oauth1/callback", twitterPublicLimiter, async (req, res) => {
+  const { oauth_token, oauth_verifier } = req.query;
+  if (!oauth_token || !oauth_verifier)
+    return res.status(400).send("Missing oauth_token or oauth_verifier");
+
+  try {
+    const doc = await db.collection("oauth1_states").doc(oauth_token).get();
+    if (!doc.exists) return res.status(400).send("Invalid or expired oauth token");
+    const data = doc.data();
+    const requestTokenSecret = data.oauth_token_secret;
+    const uid = data.uid;
+
+    const accessTokenUrl = "https://api.twitter.com/oauth/access_token";
+    const consumerKey = process.env.TWITTER_CLIENT_ID || process.env.TWITTER_CONSUMER_KEY;
+    const consumerSecret =
+      process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CONSUMER_SECRET || null;
+    const { buildOauth1Header } = require("../utils/oauth1");
+
+    const extraParams = { oauth_verifier };
+    const authHeader = buildOauth1Header({
+      method: "POST",
+      url: accessTokenUrl,
+      consumerKey,
+      consumerSecret,
+      token: oauth_token,
+      tokenSecret: requestTokenSecret,
+      extraParams,
+    });
+
+    const r = await fetch(accessTokenUrl, {
+      method: "POST",
+      headers: { Authorization: authHeader, "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(extraParams),
+    });
+    const txt = await r.text();
+    if (!r.ok) {
+      debugLog("oauth1 access_token failed", r.status, txt);
+      return res.status(500).send("Access token exchange failed");
+    }
+
+    const resp = Object.fromEntries(new URLSearchParams(txt));
+    if (!resp.oauth_token || !resp.oauth_token_secret) {
+      return res.status(500).send("Invalid access token response");
+    }
+
+    // Persist OAuth1 access tokens to user's connection doc
+    await require("../services/twitterService").storeUserOAuth1Tokens(
+      uid,
+      resp.oauth_token,
+      resp.oauth_token_secret,
+      {
+        screen_name: resp.screen_name,
+        user_id: resp.user_id,
+      }
+    );
+
+    // Cleanup temporary state
+    await db
+      .collection("oauth1_states")
+      .doc(oauth_token)
+      .delete()
+      .catch(() => {});
+
+    debugLog("oauth1 callback success for uid", uid);
+    return res.send(
+      "<html><body><h2>Twitter (OAuth1) connected successfully.</h2><p>You can close this window.</p></body></html>"
+    );
+  } catch (e) {
+    debugLog("oauth1 callback error", e.message);
+    return res.status(500).send("OAuth1 exchange failed");
+  }
+});
+
 module.exports = router;
 
 // -------------------------------------------------------
@@ -258,6 +405,9 @@ router.get(
           expires_at: data.expires_at || null,
           willRefreshInMs: data.expires_at ? Math.max(0, data.expires_at - Date.now()) : null,
           identity,
+          // Indicate whether OAuth1 reauth is required for native media uploads (e.g., video)
+          oauth1_missing: !!data.oauth1_missing,
+          oauth1_missingAt: data.oauth1_missingAt || null,
         };
       });
       setCache(cacheKey, payload, 7000);

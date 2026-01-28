@@ -851,8 +851,20 @@ const UserDashboard = ({
   const handleConnectTikTok = async () => openProviderAuth(API_ENDPOINTS.TIKTOK_AUTH_START);
   const handleConnectFacebook = async () => openProviderAuth(API_ENDPOINTS.FACEBOOK_AUTH_START);
   const handleConnectYouTube = async () => openProviderAuth(API_ENDPOINTS.YOUTUBE_AUTH_START);
-  const handleConnectTwitter = async () =>
-    openProviderAuth(API_ENDPOINTS.TWITTER_AUTH_PREPARE || API_ENDPOINTS.TWITTER_AUTH_START);
+  const handleConnectTwitter = async () => {
+    // Prompt the user to choose OAuth1 (recommended for native video uploads) or OAuth2 PKCE.
+    const useOauth1 = window.confirm(
+      "Connect with Twitter: click OK to use OAuth1 (recommended for video uploads), or Cancel to use standard OAuth2 PKCE."
+    );
+    const endpoint = useOauth1
+      ? API_ENDPOINTS.TWITTER_AUTH_PREPARE_OAUTH1 ||
+        API_ENDPOINTS.TWITTER_AUTH_PREPARE ||
+        API_ENDPOINTS.TWITTER_AUTH_START
+      : API_ENDPOINTS.TWITTER_AUTH_PREPARE || API_ENDPOINTS.TWITTER_AUTH_START;
+    if (useOauth1) toast.info("Opening OAuth1 authentication (recommended for video uploads)");
+    else toast.info("Opening standard Twitter authentication");
+    await openProviderAuth(endpoint);
+  };
   const handleConnectSnapchat = async () =>
     openProviderAuth(API_ENDPOINTS.SNAPCHAT_AUTH_PREPARE || API_ENDPOINTS.SNAPCHAT_AUTH_START);
   const handleConnectSpotify = async () => openProviderAuth(API_ENDPOINTS.SPOTIFY_AUTH_START);

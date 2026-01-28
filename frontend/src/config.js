@@ -63,6 +63,8 @@ export const API_ENDPOINTS = {
   // Twitter endpoints
   TWITTER_AUTH_START: `${API_BASE_URL}/api/twitter/oauth/start`,
   TWITTER_AUTH_PREPARE: `${API_BASE_URL}/api/twitter/oauth/prepare`,
+  // OAuth1 prepare endpoint (for legacy uploads / native media)
+  TWITTER_AUTH_PREPARE_OAUTH1: `${API_BASE_URL}/api/twitter/oauth1/prepare`,
   TWITTER_STATUS: `${API_BASE_URL}/api/twitter/connection/status`,
   TWITTER_TWEET_TEST: `${API_BASE_URL}/api/twitter/tweet/test`,
   TWITTER_TWEET_IMMEDIATE: `${API_BASE_URL}/api/twitter/tweet/immediate`,
