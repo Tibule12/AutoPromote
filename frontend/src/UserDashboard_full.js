@@ -160,7 +160,7 @@ const UserDashboard = ({
         const currentUser = auth?.currentUser;
         if (!currentUser) return;
         const token = await currentUser.getIdToken(true);
-        const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTIFICATIONS_LIST}?limit=10`, {
+        const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS_LIST}?limit=10`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) return;
@@ -174,7 +174,7 @@ const UserDashboard = ({
           newOnes.forEach(n => {
             if (!n.read) {
               try {
-                toast.info(n.message || n.title || "You have a new notification");
+                toast(n.message || n.title || "You have a new notification");
               } catch (_) {}
             }
           });
@@ -861,8 +861,8 @@ const UserDashboard = ({
         API_ENDPOINTS.TWITTER_AUTH_PREPARE ||
         API_ENDPOINTS.TWITTER_AUTH_START
       : API_ENDPOINTS.TWITTER_AUTH_PREPARE || API_ENDPOINTS.TWITTER_AUTH_START;
-    if (useOauth1) toast.info("Opening OAuth1 authentication (recommended for video uploads)");
-    else toast.info("Opening standard Twitter authentication");
+    if (useOauth1) toast("Opening OAuth1 authentication (recommended for video uploads)");
+    else toast("Opening standard Twitter authentication");
     await openProviderAuth(endpoint);
   };
   const handleConnectSnapchat = async () =>
