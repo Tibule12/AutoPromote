@@ -160,13 +160,26 @@ router.post("/oauth/prepare", authMiddleware, twitterWriteLimiter, async (req, r
 
 // OAuth callback
 router.get("/oauth/callback", twitterPublicLimiter, async (req, res) => {
-  const { state, code, error } = req.query;
+  // Sanitize provider-controlled query params: copy into local vars and remove from req.query
+  const stateRaw = req.query.state;
+  const codeRaw = req.query.code;
+  const errorRaw = req.query.error;
+  const state = stateRaw ? String(stateRaw) : null;
+  const code = codeRaw ? String(codeRaw) : null;
+  const error = errorRaw ? String(errorRaw) : null;
+  try {
+    delete req.query.state;
+    delete req.query.code;
+    delete req.query.error;
+  } catch (_) {}
+
   if (error) {
-    debugLog("callback error param", error);
-    return res.status(400).send(`Twitter auth error: ${error}`);
+    // Avoid reflecting provider text back to the user to prevent leakage or reflected content
+    debugLog("callback error received from provider");
+    return res.status(400).send("Twitter auth error");
   }
   if (!state || !code) {
-    debugLog("callback missing param", { state: !!state, code: !!code });
+    debugLog("callback missing param", { statePresent: !!state, codePresent: !!code });
     return res.status(400).send("Missing state or code");
   }
   try {
