@@ -23,12 +23,13 @@ module.exports = function requireAcceptedTerms(options = {}) {
       const isTestToken =
         typeof authHeader === "string" && authHeader.startsWith("Bearer test-token-for-");
       try {
+        // Avoid logging any part of the Authorization header to prevent token leakage.
         logger.info("requireAcceptedTerms.debug", {
           isE2EHeader: !!isE2EHeader,
           isLocalHost: !!isLocalHost,
           isNodeFetchUA: !!isNodeFetchUA,
           isTestToken: !!isTestToken,
-          authHeaderPreview: authHeader ? authHeader.slice(0, 40) : null,
+          hasAuthHeader: !!authHeader,
         });
       } catch (e) {}
       // Allow runtime bypass for CI or E2E runs via environment
