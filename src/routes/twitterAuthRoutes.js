@@ -218,9 +218,10 @@ router.get("/oauth/callback", twitterPublicLimiter, async (req, res) => {
 // Prepare OAuth1 (returns authUrl for frontend redirect)
 router.post("/oauth1/prepare", authMiddleware, twitterWriteLimiter, async (req, res) => {
   try {
-    const consumerKey = process.env.TWITTER_CLIENT_ID || process.env.TWITTER_CONSUMER_KEY;
+    // Prefer the v1.1 consumer key/secret for OAuth1.0a signing (fall back to client id/secret only if necessary)
+    const consumerKey = process.env.TWITTER_CONSUMER_KEY || process.env.TWITTER_CLIENT_ID;
     const consumerSecret =
-      process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CONSUMER_SECRET || null;
+      process.env.TWITTER_CONSUMER_SECRET || process.env.TWITTER_CLIENT_SECRET || null;
     if (!consumerKey || !consumerSecret) {
       return res.status(500).json({ error: "twitter_consumer_config_missing" });
     }
@@ -259,13 +260,11 @@ router.post("/oauth1/prepare", authMiddleware, twitterWriteLimiter, async (req, 
       const truncated = typeof txt === "string" ? txt.slice(0, 400) : String(txt);
       // Log a server-side warning with truncated response to aid debugging, but do NOT send raw body to client
       logger.warn("oauth1 request_token failed", { status: r.status, bodyPreview: truncated });
-      return res
-        .status(500)
-        .json({
-          error: "request_token_failed",
-          status: r.status,
-          detail: "twitter_request_token_failure",
-        });
+      return res.status(500).json({
+        error: "request_token_failed",
+        status: r.status,
+        detail: "twitter_request_token_failure",
+      });
     }
 
     // Parse form-encoded response
