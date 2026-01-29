@@ -256,8 +256,16 @@ router.post("/oauth1/prepare", authMiddleware, twitterWriteLimiter, async (req, 
     });
     const txt = await r.text();
     if (!r.ok) {
-      debugLog("oauth1 request_token failed", r.status, txt);
-      return res.status(500).json({ error: "request_token_failed", detail: txt });
+      const truncated = typeof txt === "string" ? txt.slice(0, 400) : String(txt);
+      // Log a server-side warning with truncated response to aid debugging, but do NOT send raw body to client
+      logger.warn("oauth1 request_token failed", { status: r.status, bodyPreview: truncated });
+      return res
+        .status(500)
+        .json({
+          error: "request_token_failed",
+          status: r.status,
+          detail: "twitter_request_token_failure",
+        });
     }
 
     // Parse form-encoded response
