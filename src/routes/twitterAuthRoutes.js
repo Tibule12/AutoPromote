@@ -274,7 +274,18 @@ router.post("/oauth1/prepare", authMiddleware, twitterWriteLimiter, async (req, 
 // OAuth1 callback - exchanges request_token + verifier for access token
 router.get("/oauth1/callback", twitterPublicLimiter, async (req, res) => {
   const { oauth_token, oauth_verifier } = req.query;
-  if (!oauth_token || !oauth_verifier)
+  // OAuth1 callback parameters come via query string from Twitter (provider-controlled).
+  // Treat them as sensitive: normalize to local variables and remove them from `req.query` immediately
+  // so they cannot be accidentally logged or serialized by other middleware.
+  const oauthToken = oauth_token ? String(oauth_token) : null;
+  const oauthVerifier = oauth_verifier ? String(oauth_verifier) : null;
+  // Remove sensitive query params to avoid accidental leakage in logs or downstream middleware
+  try {
+    delete req.query.oauth_token;
+    delete req.query.oauth_verifier;
+  } catch (_) {}
+
+  if (!oauthToken || !oauthVerifier)
     return res.status(400).send("Missing oauth_token or oauth_verifier");
 
   try {
@@ -290,13 +301,14 @@ router.get("/oauth1/callback", twitterPublicLimiter, async (req, res) => {
       process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CONSUMER_SECRET || null;
     const { buildOauth1Header } = require("../utils/oauth1");
 
-    const extraParams = { oauth_verifier };
+    // Use the sanitized local variables rather than raw req.query values
+    const extraParams = { oauth_verifier: oauthVerifier };
     const authHeader = buildOauth1Header({
       method: "POST",
       url: accessTokenUrl,
       consumerKey,
       consumerSecret,
-      token: oauth_token,
+      token: oauthToken,
       tokenSecret: requestTokenSecret,
       extraParams,
     });
@@ -328,10 +340,10 @@ router.get("/oauth1/callback", twitterPublicLimiter, async (req, res) => {
       }
     );
 
-    // Cleanup temporary state
+    // Cleanup temporary state (use sanitized oauthToken and ignore delete errors)
     await db
       .collection("oauth1_states")
-      .doc(oauth_token)
+      .doc(oauthToken)
       .delete()
       .catch(() => {});
 
