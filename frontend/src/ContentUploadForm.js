@@ -2291,6 +2291,56 @@ function ContentUploadForm({
                 <div style={{ fontSize: 12, color: "#475569" }}>
                   The selected Page will be used for Facebook posts when you publish from this form.
                 </div>
+
+                {/* Role selector for Facebook */}
+                <div style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "center" }}>
+                  <label style={{ fontWeight: 700, marginRight: 8 }}>Role:</label>
+                  {["creator", "brand", "sponsored", "boosted"].map(r => (
+                    <button
+                      key={r}
+                      type="button"
+                      className={`role-btn ${(extPlatformOptions?.facebook?.role || "creator") === r ? "active" : ""}`}
+                      onClick={() => {
+                        if (typeof extSetPlatformOption === "function")
+                          extSetPlatformOption("facebook", "role", r);
+                      }}
+                    >
+                      {r.charAt(0).toUpperCase() + r.slice(1)}
+                    </button>
+                  ))}
+                </div>
+
+                {/* If sponsor role set, show sponsor input */}
+                {extPlatformOptions?.facebook?.role === "sponsored" && (
+                  <div style={{ marginTop: 12 }}>
+                    <label style={{ fontWeight: 700 }}>Sponsor name</label>
+                    <input
+                      placeholder="Sponsor name"
+                      className="form-input"
+                      onChange={e =>
+                        typeof extSetPlatformOption === "function" &&
+                        extSetPlatformOption("facebook", "sponsor", e.target.value)
+                      }
+                    />
+                  </div>
+                )}
+
+                {/* If boosted role set, show budget */}
+                {extPlatformOptions?.facebook?.role === "boosted" && (
+                  <div style={{ marginTop: 12 }}>
+                    <label style={{ fontWeight: 700 }}>Boost Budget (USD)</label>
+                    <input
+                      placeholder="e.g., 50"
+                      type="number"
+                      min="0"
+                      className="form-input"
+                      onChange={e =>
+                        typeof extSetPlatformOption === "function" &&
+                        extSetPlatformOption("facebook", "boostBudget", Number(e.target.value))
+                      }
+                    />
+                  </div>
+                )}
               </div>
             ) : (
               <div style={{ color: "#64748b" }}>
@@ -4548,6 +4598,10 @@ function ContentUploadForm({
           // YouTube
           youtubeSettings={youtubeSettings}
           setYoutubeSettings={setYoutubeSettings}
+          // Expose a setter so role-specific fields can persist upstream
+          setPlatformOption={
+            typeof extSetPlatformOption === "function" ? extSetPlatformOption : undefined
+          }
           // Instagram
           instagramSettings={instagramSettings}
           setInstagramSettings={setInstagramSettings}

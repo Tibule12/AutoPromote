@@ -15,6 +15,8 @@ const PlatformSettingsOverride = ({
   // YouTube State
   youtubeSettings,
   setYoutubeSettings, // { privacy: "public", tags: [], category: "" }
+  // Optional setter to persist platform-specific options upstream
+  setPlatformOption,
   // Instagram State
   instagramSettings,
   setInstagramSettings, // { shareToFeed: true, location: "" }
@@ -44,6 +46,9 @@ const PlatformSettingsOverride = ({
   setSpotifySettings,
 }) => {
   const [activeTab, setActiveTab] = useState(selectedPlatforms[0] || "");
+  // Role states for role-driven UX per platform
+  const [youtubeRole, setYoutubeRole] = useState("creator"); // 'creator'|'brand'|'sponsored'|'boosted'
+  const [facebookRole, setFacebookRole] = useState("creator");
 
   // Update active tab if selection changes and current tab is no longer valid
   React.useEffect(() => {
@@ -162,6 +167,26 @@ const PlatformSettingsOverride = ({
         <h4>Studio Details</h4>
       </div>
 
+      {/* Role selector for YouTube (Creator / Brand / Sponsored / Boosted) */}
+      <div
+        style={{ marginTop: 8, marginBottom: 12, display: "flex", gap: 8, alignItems: "center" }}
+      >
+        <label style={{ fontWeight: 700, marginRight: 8 }}>Role:</label>
+        {["creator", "brand", "sponsored", "boosted"].map(r => (
+          <button
+            key={r}
+            type="button"
+            className={`role-btn ${youtubeRole === r ? "active" : ""}`}
+            onClick={() => {
+              setYoutubeRole(r);
+              if (typeof setPlatformOption === "function") setPlatformOption("youtube", "role", r);
+            }}
+          >
+            {r.charAt(0).toUpperCase() + r.slice(1)}
+          </button>
+        ))}
+      </div>
+
       <div className="youtube-card-grid">
         <div className="youtube-card">
           <label className="youtube-label">Visibility</label>
@@ -213,6 +238,43 @@ const PlatformSettingsOverride = ({
             />
           </div>
         </div>
+
+        {/* Role-specific fields */}
+        {youtubeRole === "sponsored" && (
+          <div style={{ marginTop: 12 }} className="youtube-card full-width">
+            <label className="youtube-label">Sponsor name</label>
+            <input
+              placeholder="Sponsor name"
+              className="youtube-input-material"
+              onChange={e => {
+                if (typeof setPlatformOption === "function")
+                  setPlatformOption("youtube", "sponsor", e.target.value);
+              }}
+            />
+            <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
+              This will be included in the paid promotion disclosure.
+            </div>
+          </div>
+        )}
+
+        {youtubeRole === "boosted" && (
+          <div style={{ marginTop: 12 }} className="youtube-card full-width">
+            <label className="youtube-label">Boost Budget (USD)</label>
+            <input
+              placeholder="e.g., 25"
+              type="number"
+              min="0"
+              className="youtube-input-material"
+              onChange={e => {
+                if (typeof setPlatformOption === "function")
+                  setPlatformOption("youtube", "boostBudget", Number(e.target.value));
+              }}
+            />
+            <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
+              Set a budget to run a paid boost for this upload (optional).
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -230,6 +292,35 @@ const PlatformSettingsOverride = ({
           <span className="platform-icon">{icon}</span>
           <h4>{title}</h4>
         </div>
+
+        {/* If this is Facebook show role selector (Creator/Brand/Sponsored/Boosted) */}
+        {isFb && (
+          <div
+            style={{
+              marginTop: 8,
+              marginBottom: 12,
+              display: "flex",
+              gap: 8,
+              alignItems: "center",
+            }}
+          >
+            <label style={{ fontWeight: 700, marginRight: 8 }}>Role:</label>
+            {["creator", "brand", "sponsored", "boosted"].map(r => (
+              <button
+                key={r}
+                type="button"
+                className={`role-btn ${facebookRole === r ? "active" : ""}`}
+                onClick={() => {
+                  setFacebookRole(r);
+                  if (typeof setPlatformOption === "function")
+                    setPlatformOption("facebook", "role", r);
+                }}
+              >
+                {r.charAt(0).toUpperCase() + r.slice(1)}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="instagram-list-group">
           <div className="instagram-list-item">
@@ -270,6 +361,43 @@ const PlatformSettingsOverride = ({
             </div>
           </div>
         </div>
+
+        {/* Facebook/Sponsored or Boosted extras (only when viewing Facebook variant) */}
+        {isFb && facebookRole === "sponsored" && (
+          <div style={{ padding: 12, borderTop: "1px solid #eef2f7", marginTop: 12 }}>
+            <label style={{ fontWeight: 700 }}>Sponsor name</label>
+            <input
+              placeholder="Sponsor name"
+              className="instagram-clean-input"
+              onChange={e => {
+                if (typeof setPlatformOption === "function")
+                  setPlatformOption("facebook", "sponsor", e.target.value);
+              }}
+            />
+            <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
+              This will be shown in any sponsor disclosure.
+            </div>
+          </div>
+        )}
+
+        {isFb && facebookRole === "boosted" && (
+          <div style={{ padding: 12, borderTop: "1px solid #eef2f7", marginTop: 12 }}>
+            <label style={{ fontWeight: 700 }}>Boost Budget (USD)</label>
+            <input
+              placeholder="e.g., 50"
+              type="number"
+              min="0"
+              className="instagram-clean-input"
+              onChange={e => {
+                if (typeof setPlatformOption === "function")
+                  setPlatformOption("facebook", "boostBudget", Number(e.target.value));
+              }}
+            />
+            <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
+              Set a budget to promote this post on Facebook.
+            </div>
+          </div>
+        )}
       </div>
     );
   };
