@@ -768,6 +768,23 @@ try {
     rewardsRoutes = express.Router();
     console.log("⚠️ Rewards routes not found");
   }
+  // Credits & Boosts routes for Phase 1
+  let creditsRoutes;
+  try {
+    creditsRoutes = require("./routes/creditsRoutes");
+    console.log("✅ Credits routes loaded");
+  } catch (e) {
+    creditsRoutes = express.Router();
+    console.log("⚠️ Credits routes not found");
+  }
+  let boostsRoutes;
+  try {
+    boostsRoutes = require("./routes/boostRoutes");
+    console.log("✅ Boosts routes loaded");
+  } catch (e) {
+    boostsRoutes = express.Router();
+    console.log("⚠️ Boosts routes not found");
+  }
   try {
     // Stripe integration removed
     // (removed empty try block)
@@ -1651,6 +1668,9 @@ try {
     paypalSubscriptionRoutes
   );
   app.use("/api/viral-boost", routeLimiter({ windowHint: "viral_boost" }), viralBoostRoutes);
+  // Phase 1 mounts
+  app.use("/api/credits", routeLimiter({ windowHint: "payments" }), creditsRoutes);
+  app.use("/api/boosts", routeLimiter({ windowHint: "viral_boost" }), boostsRoutes);
   app.use("/api/rewards", routeLimiter({ windowHint: "rewards" }), rewardsRoutes);
   try {
     const adsRoutes = require("./routes/adsRoutes");
