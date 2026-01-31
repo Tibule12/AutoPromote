@@ -148,6 +148,27 @@ describe("Promotion integration (mocked platforms)", () => {
     process.env.TIKTOK_CANARY_UIDS = "";
   });
 
+  test("sponsored posts are blocked until sponsor approval", async () => {
+    // Mark content as sponsored for youtube without approval
+    await db.collection("content").doc(contentId).update({
+      platform_options: {
+        youtube: { role: "sponsored", sponsor: "Acme" },
+      },
+    });
+
+    const res = await enqueuePlatformPostTask({ contentId, uid, platform: "youtube", reason: "manual", payload: {} });
+    expect(res).toHaveProperty("skipped");
+    expect(res.reason).toBe("sponsor_not_approved");
+
+    // Now set sponsorApproval to approved and try again
+    await db.collection("content").doc(contentId).update({
+      "platform_options.youtube.sponsorApproval": { status: "approved", reviewedBy: "admin-1", reviewedAt: new Date().toISOString(), sponsor: "Acme" },
+    });
+
+    const res2 = await enqueuePlatformPostTask({ contentId, uid, platform: "youtube", reason: "manual", payload: {} });
+    expect(res2).toHaveProperty("id");
+  });
+
   test("duplicate pending prevented", async () => {
     const platform = "twitter";
     // First enqueue

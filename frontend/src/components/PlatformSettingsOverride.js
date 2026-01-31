@@ -59,11 +59,31 @@ const PlatformSettingsOverride = ({
 
   if (!selectedPlatforms || selectedPlatforms.length === 0) return null;
 
+  const [tiktokRole, setTiktokRole] = useState("creator");
+
   const renderTikTokSettings = () => (
     <div className="platform-settings-panel tiktok-theme-panel">
       <div className="platform-header tiktok-header">
         <span className="platform-icon">🎵</span>
         <h4>Post Settings</h4>
+      </div>
+
+      {/* Role selector for TikTok (Creator / Brand / Sponsored / Boosted) */}
+      <div style={{ marginTop: 8, marginBottom: 12, display: "flex", gap: 8, alignItems: "center" }}>
+        <label style={{ fontWeight: 700, marginRight: 8 }}>Role:</label>
+        { ["creator", "brand", "sponsored", "boosted"].map(r => (
+          <button
+            key={r}
+            type="button"
+            className={`role-btn ${tiktokRole === r ? "active" : ""}`}
+            onClick={() => {
+              setTiktokRole(r);
+              if (typeof setPlatformOption === "function") setPlatformOption("tiktok", "role", r);
+            }}
+          >
+            {r.charAt(0).toUpperCase() + r.slice(1)}
+          </button>
+        ))}
       </div>
 
       <div className="tiktok-control-group">
@@ -143,6 +163,41 @@ const PlatformSettingsOverride = ({
           </div>
         )}
       </div>
+
+      {/* Role-specific fields */}
+      {tiktokRole === "sponsored" && (
+        <div style={{ marginTop: 12 }} className="tiktok-card">
+          <label className="tiktok-label">Sponsor name</label>
+          <input
+            placeholder="Sponsor name"
+            className="tiktok-input"
+            onChange={e => {
+              if (typeof setPlatformOption === "function") setPlatformOption("tiktok", "sponsor", e.target.value);
+            }}
+          />
+          <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
+            This will be included in the paid promotion disclosure.
+          </div>
+        </div>
+      )}
+
+      {tiktokRole === "boosted" && (
+        <div style={{ marginTop: 12 }} className="tiktok-card">
+          <label className="tiktok-label">Boost Budget (USD)</label>
+          <input
+            placeholder="e.g., 25"
+            type="number"
+            min="0"
+            className="tiktok-input"
+            onChange={e => {
+              if (typeof setPlatformOption === "function") setPlatformOption("tiktok", "boostBudget", Number(e.target.value));
+            }}
+          />
+          <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
+            Set a budget to run a paid boost for this upload (optional).
+          </div>
+        </div>
+      )}
 
       <div className="tiktok-footer-consent">
         <label className="tiktok-checkbox-row">

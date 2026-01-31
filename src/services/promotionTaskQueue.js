@@ -289,6 +289,28 @@ async function enqueuePlatformPostTask({
       }
     }
 
+    // In test fast-path, also respect sponsor approval guard to keep behavior consistent with production
+    try {
+      const contentSnap = await db.collection("content").doc(contentId).get();
+      if (contentSnap.exists) {
+        const c = contentSnap.data();
+        const options = (c.platform_options && c.platform_options[platform]) || (c.platformOptions && c.platformOptions[platform]) || {};
+        const role = String(options.role || "").toLowerCase();
+        const sponsor = options.sponsor || null;
+        const sponsorApproval = options.sponsorApproval || null;
+        if (role === "sponsored") {
+          if (!sponsor) {
+            return { skipped: true, reason: "sponsor_missing", platform, contentId, _testStub: true };
+          }
+          if (!sponsorApproval || sponsorApproval.status !== "approved") {
+            return { skipped: true, reason: "sponsor_not_approved", platform, contentId, _testStub: true };
+          }
+        }
+      }
+    } catch (e) {
+      /* ignore */
+    }
+
     const ref = db.collection("promotion_tasks").doc();
     const baseTask = {
       type: "platform_post",

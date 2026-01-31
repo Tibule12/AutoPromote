@@ -189,4 +189,12 @@ router.get("/user", authMiddleware, async (req, res) => {
   }
 });
 
+// Mount platform-specific analytics routes (LinkedIn / Reddit / Pinterest)
+try {
+  const platformAnalytics = require("./routes/platformAnalyticsRoutes");
+  router.use("/", platformAnalytics);
+} catch (e) {
+  console.warn("platformAnalyticsRoutes mount failed:", e && e.message);
+}
+
 module.exports = router;

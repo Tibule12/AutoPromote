@@ -1712,6 +1712,12 @@ try {
   }
   try {
     app.use("/api/admin/approval", require("./routes/adminContentApprovalRoutes"));
+    // Sponsor approval admin routes
+    try {
+      app.use("/api/admin/sponsor-approvals", require("./routes/adminSponsorApprovalRoutes"));
+    } catch (e) {
+      console.warn("adminSponsorApprovalRoutes mount failed:", e.message);
+    }
   } catch (e) {
     console.warn("adminContentApprovalRoutes mount failed:", e.message);
   }

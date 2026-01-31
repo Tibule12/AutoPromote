@@ -35,7 +35,7 @@
     "flag:uploads": "node ./scripts/flag-bad-uploads.js",
     "export:flagged": "node ./scripts/export-flagged-uploads.js",
     "hold:flagged": "node ./scripts/bulk-hold-flagged.js",
-    "prepare": "node -e \"const fs=require('fs'), cp=require('child_process'); const tryRun=(p)=>{ if(fs.existsSync(p)){ cp.execFileSync(process.execPath, [p], {stdio:'inherit'}); return true; } return false; }; if(tryRun('./scripts/ensure-husky.js')) process.exit(0); if(tryRun('../scripts/ensure-husky.js')) process.exit(0); if(tryRun('../../scripts/ensure-husky.js')) process.exit(0); console.log('No ensure-husky script found in CWD or parents; skipping husky install');\"",
+    "prepare": "node -e \"const fs=require('fs'), cp=require('child_process'); const tryRun=(p)=>{ if(fs.existsSync(p)){ cp.execFileSync(process.execPath, [p], {stdio:'inherit'}); return true; } return false; }; if(tryRun('./scripts/ensure-husky.js')) process.exit(0); if(tryRun('../scripts/ensure-husky.js')) process.exit(0); if(tryRun('../../scripts/ensure-husky.js')) process.exit(0); console.log('No ensure-husky script found in CWD or parents; skipping husky install');\" && node ./scripts/check-npm-audit.js",
     "verify:frontend-build": "node ./scripts/verify-frontend-build.js",
     "build:frontend": "npm --prefix frontend ci || (npm --prefix frontend install && npm --prefix frontend run build)"
   },
