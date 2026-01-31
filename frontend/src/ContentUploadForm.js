@@ -3495,6 +3495,65 @@ function ContentUploadForm({
                       </div>
                     )}
                     {/* Per-platform inputs: file, title, description (defaults to global if empty) */}
+
+                    {/* YouTube role selector (quick role selection for uploads) */}
+                    {expandedPlatform === "youtube" && (
+                      <div style={{ marginBottom: 8 }}>
+                        <label style={{ fontWeight: 700, display: "block", marginBottom: 6 }}>
+                          Role
+                        </label>
+                        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                          {["creator", "brand", "sponsored", "boosted"].map(r => (
+                            <button
+                              key={r}
+                              type="button"
+                              className={`role-btn ${(extPlatformOptions?.youtube?.role || "creator") === r ? "active" : ""}`}
+                              onClick={() =>
+                                typeof extSetPlatformOption === "function" &&
+                                extSetPlatformOption("youtube", "role", r)
+                              }
+                            >
+                              {r.charAt(0).toUpperCase() + r.slice(1)}
+                            </button>
+                          ))}
+                        </div>
+
+                        {extPlatformOptions?.youtube?.role === "sponsored" && (
+                          <div style={{ marginBottom: 8 }}>
+                            <label style={{ fontWeight: 700 }}>Sponsor name</label>
+                            <input
+                              placeholder="Sponsor name"
+                              className="form-input"
+                              onChange={e =>
+                                typeof extSetPlatformOption === "function" &&
+                                extSetPlatformOption("youtube", "sponsor", e.target.value)
+                              }
+                            />
+                          </div>
+                        )}
+
+                        {extPlatformOptions?.youtube?.role === "boosted" && (
+                          <div style={{ marginBottom: 8 }}>
+                            <label style={{ fontWeight: 700 }}>Boost Budget (USD)</label>
+                            <input
+                              placeholder="e.g., 25"
+                              type="number"
+                              min="0"
+                              className="form-input"
+                              onChange={e =>
+                                typeof extSetPlatformOption === "function" &&
+                                extSetPlatformOption(
+                                  "youtube",
+                                  "boostBudget",
+                                  Number(e.target.value)
+                                )
+                              }
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div
                       className="per-platform-form"
                       style={{ marginTop: 8, display: "grid", gap: 8 }}
