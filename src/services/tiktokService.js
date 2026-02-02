@@ -1210,11 +1210,24 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       payload && payload.platform_options && payload.platform_options.tiktok
         ? payload.platform_options.tiktok.sound_id
         : undefined;
+
+    // Map TikTok commercial toggles
+    let postPrivacyLevel = privacyLevel;
+    if (
+      payload &&
+      payload.platform_options &&
+      payload.platform_options.tiktok &&
+      payload.platform_options.tiktok.is_sponsored
+    ) {
+      // If sponsored/commercial, enforce PUBLIC
+      postPrivacyLevel = "PUBLIC_TO_EVERYONE";
+    }
+
     const publishResult = await publishVideo({
       accessToken,
       publishId: publish_id,
       title,
-      privacyLevel,
+      privacyLevel: postPrivacyLevel,
       soundId,
     });
 
@@ -1270,6 +1283,48 @@ async function postToTikTok({ contentId, payload, reason, uid }) {
   return uploadTikTokVideo({ contentId, payload, uid, reason });
 }
 
+/**
+ * Fetch video metrics (views, likes, comments, shares)
+ */
+async function getVideoMetrics(uid, videoIds) {
+  if (!fetchFn) throw new Error("Fetch not available");
+  const accessToken = await getValidAccessToken(uid);
+  if (!accessToken) throw new Error("No valid TikTok access token");
+
+  const ids = Array.isArray(videoIds) ? videoIds : [videoIds];
+  if (ids.length === 0) return [];
+
+  // TikTok V2 Video Query endpoint
+  const url =
+    "https://open.tiktokapis.com/v2/video/query/?fields=id,title,view_count,like_count,comment_count,share_count";
+
+  const response = await safeFetch(url, fetchFn, {
+    fetchOptions: {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        filters: {
+          video_ids: ids,
+        },
+      }),
+    },
+    requireHttps: true,
+    allowHosts: ["open.tiktokapis.com"],
+  });
+
+  if (!response.ok) {
+    const txt = await response.text();
+    console.warn("[TikTok] Failed to fetch metrics:", txt);
+    return [];
+  }
+
+  const json = await response.json();
+  return json.data?.videos || []; // Returns array of video objects with metrics
+}
+
 module.exports = {
   uploadTikTokVideo,
   postToTikTok,
@@ -1278,4 +1333,5 @@ module.exports = {
   refreshToken,
   getValidAccessToken,
   getUserTikTokConnection,
+  getVideoMetrics,
 };

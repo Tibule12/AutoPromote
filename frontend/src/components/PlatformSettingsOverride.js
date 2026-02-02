@@ -50,6 +50,17 @@ const PlatformSettingsOverride = ({
   const [youtubeRole, setYoutubeRole] = useState("creator"); // 'creator'|'brand'|'sponsored'|'boosted'
   const [facebookRole, setFacebookRole] = useState("creator");
 
+  // Sync TikTok commercial state to platform options
+  React.useEffect(() => {
+    if (typeof setPlatformOption === "function") {
+      setPlatformOption(
+        "tiktok",
+        "is_sponsored",
+        tiktokCommercial?.brandedContent || tiktokCommercial?.isCommercial
+      );
+    }
+  }, [tiktokCommercial, setPlatformOption]);
+
   // Update active tab if selection changes and current tab is no longer valid
   React.useEffect(() => {
     if (selectedPlatforms.length > 0 && !selectedPlatforms.includes(activeTab)) {
@@ -68,22 +79,55 @@ const PlatformSettingsOverride = ({
         <h4>Post Settings</h4>
       </div>
 
-      {/* Role selector for TikTok (Creator / Brand / Sponsored / Boosted) */}
-      <div style={{ marginTop: 8, marginBottom: 12, display: "flex", gap: 8, alignItems: "center" }}>
+      {/* Role selector for TikTok (Creator / Brand / Sponsored) */}
+      <div
+        style={{ marginTop: 8, marginBottom: 12, display: "flex", gap: 8, alignItems: "center" }}
+      >
         <label style={{ fontWeight: 700, marginRight: 8 }}>Role:</label>
-        { ["creator", "brand", "sponsored", "boosted"].map(r => (
+        {["creator", "brand", "sponsored"].map(r => (
           <button
             key={r}
             type="button"
             className={`role-btn ${tiktokRole === r ? "active" : ""}`}
             onClick={() => {
               setTiktokRole(r);
-              if (typeof setPlatformOption === "function") setPlatformOption("tiktok", "role", r);
+              // Map role to backend is_sponsored
+              if (typeof setPlatformOption === "function") {
+                setPlatformOption("tiktok", "role", r);
+                // Auto-set sponsored flag if role is sponsored or brand
+                setPlatformOption("tiktok", "is_sponsored", r === "sponsored" || r === "brand");
+              }
             }}
           >
             {r.charAt(0).toUpperCase() + r.slice(1)}
           </button>
         ))}
+      </div>
+
+      {/* NEW: Niche Selector (Required for Revenue Engine) */}
+      <div className="tiktok-control-group">
+        <label className="tiktok-label" style={{ display: "block", marginBottom: 4 }}>
+          Content Niche
+        </label>
+        <select
+          className="tiktok-input"
+          defaultValue="general"
+          onChange={e => {
+            if (typeof setPlatformOption === "function")
+              setPlatformOption("tiktok", "niche", e.target.value);
+          }}
+        >
+          <option value="general">General</option>
+          <option value="music">Music</option>
+          <option value="fashion">Fashion</option>
+          <option value="tech">Tech</option>
+          <option value="crypto">Crypto</option>
+          <option value="fitness">Fitness</option>
+          <option value="entertainment">Entertainment</option>
+        </select>
+        <div style={{ fontSize: 11, color: "#888", marginTop: 4 }}>
+          Used for calculating engagement revenue rates.
+        </div>
       </div>
 
       <div className="tiktok-control-group">
@@ -172,7 +216,19 @@ const PlatformSettingsOverride = ({
             placeholder="Sponsor name"
             className="tiktok-input"
             onChange={e => {
-              if (typeof setPlatformOption === "function") setPlatformOption("tiktok", "sponsor", e.target.value);
+              if (typeof setPlatformOption === "function")
+                setPlatformOption("tiktok", "sponsor", e.target.value);
+            }}
+          />
+          <label className="tiktok-label" style={{ marginTop: 8 }}>
+            Product/Affiliate Link
+          </label>
+          <input
+            placeholder="https://..."
+            className="tiktok-input"
+            onChange={e => {
+              if (typeof setPlatformOption === "function")
+                setPlatformOption("tiktok", "product_link", e.target.value);
             }}
           />
           <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
@@ -181,25 +237,22 @@ const PlatformSettingsOverride = ({
         </div>
       )}
 
-      {tiktokRole === "boosted" && (
-        <div style={{ marginTop: 12 }} className="tiktok-card">
-          <label className="tiktok-label">Boost Budget (USD)</label>
-          <input
-            placeholder="e.g., 25"
-            type="number"
-            min="0"
-            className="tiktok-input"
-            onChange={e => {
-              if (typeof setPlatformOption === "function") setPlatformOption("tiktok", "boostBudget", Number(e.target.value));
-            }}
-          />
-          <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
-            Set a budget to run a paid boost for this upload (optional).
-          </div>
-        </div>
-      )}
+      {/* Boosted option removed due to no-ads policy */}
 
       <div className="tiktok-footer-consent">
+        <label className="tiktok-checkbox-row" style={{ marginBottom: 8 }}>
+          <input
+            type="checkbox"
+            className="tiktok-checkbox"
+            onChange={e => {
+              if (typeof setPlatformOption === "function")
+                setPlatformOption("tiktok", "commercial_rights", e.target.checked);
+            }}
+          />
+          <span style={{ fontSize: "12px", opacity: 0.8 }}>
+            I have commercial rights to this content
+          </span>
+        </label>
         <label className="tiktok-checkbox-row">
           <input
             type="checkbox"
@@ -222,12 +275,12 @@ const PlatformSettingsOverride = ({
         <h4>Studio Details</h4>
       </div>
 
-      {/* Role selector for YouTube (Creator / Brand / Sponsored / Boosted) */}
+      {/* Role selector for YouTube (Creator / Brand / Sponsored) */}
       <div
         style={{ marginTop: 8, marginBottom: 12, display: "flex", gap: 8, alignItems: "center" }}
       >
         <label style={{ fontWeight: 700, marginRight: 8 }}>Role:</label>
-        {["creator", "brand", "sponsored", "boosted"].map(r => (
+        {["creator", "brand", "sponsored"].map(r => (
           <button
             key={r}
             type="button"
@@ -294,6 +347,37 @@ const PlatformSettingsOverride = ({
           </div>
         </div>
 
+        {/* Compliance Footer for YouTube API Review */}
+        <div
+          style={{
+            marginTop: "1rem",
+            fontSize: "0.75rem",
+            color: "#666",
+            borderTop: "1px solid #eee",
+            paddingTop: "0.5rem",
+          }}
+        >
+          By uploading, you agree to the{" "}
+          <a
+            href="https://www.youtube.com/t/terms"
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: "#d32f2f" }}
+          >
+            YouTube Terms of Service
+          </a>
+          . Reference:{" "}
+          <a
+            href="https://policies.google.com/privacy"
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: "#d32f2f" }}
+          >
+            Google Privacy Policy
+          </a>
+          .
+        </div>
+
         {/* Role-specific fields */}
         {youtubeRole === "sponsored" && (
           <div style={{ marginTop: 12 }} className="youtube-card full-width">
@@ -308,25 +392,6 @@ const PlatformSettingsOverride = ({
             />
             <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
               This will be included in the paid promotion disclosure.
-            </div>
-          </div>
-        )}
-
-        {youtubeRole === "boosted" && (
-          <div style={{ marginTop: 12 }} className="youtube-card full-width">
-            <label className="youtube-label">Boost Budget (USD)</label>
-            <input
-              placeholder="e.g., 25"
-              type="number"
-              min="0"
-              className="youtube-input-material"
-              onChange={e => {
-                if (typeof setPlatformOption === "function")
-                  setPlatformOption("youtube", "boostBudget", Number(e.target.value));
-              }}
-            />
-            <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
-              Set a budget to run a paid boost for this upload (optional).
             </div>
           </div>
         )}
@@ -348,7 +413,7 @@ const PlatformSettingsOverride = ({
           <h4>{title}</h4>
         </div>
 
-        {/* If this is Facebook show role selector (Creator/Brand/Sponsored/Boosted) */}
+        {/* If this is Facebook show role selector (Creator/Brand/Sponsored) */}
         {isFb && (
           <div
             style={{
@@ -360,7 +425,7 @@ const PlatformSettingsOverride = ({
             }}
           >
             <label style={{ fontWeight: 700, marginRight: 8 }}>Role:</label>
-            {["creator", "brand", "sponsored", "boosted"].map(r => (
+            {["creator", "brand", "sponsored"].map(r => (
               <button
                 key={r}
                 type="button"
@@ -417,7 +482,7 @@ const PlatformSettingsOverride = ({
           </div>
         </div>
 
-        {/* Facebook/Sponsored or Boosted extras (only when viewing Facebook variant) */}
+        {/* Facebook/Sponsored extras (only when viewing Facebook variant) */}
         {isFb && facebookRole === "sponsored" && (
           <div style={{ padding: 12, borderTop: "1px solid #eef2f7", marginTop: 12 }}>
             <label style={{ fontWeight: 700 }}>Sponsor name</label>
@@ -434,25 +499,6 @@ const PlatformSettingsOverride = ({
             </div>
           </div>
         )}
-
-        {isFb && facebookRole === "boosted" && (
-          <div style={{ padding: 12, borderTop: "1px solid #eef2f7", marginTop: 12 }}>
-            <label style={{ fontWeight: 700 }}>Boost Budget (USD)</label>
-            <input
-              placeholder="e.g., 50"
-              type="number"
-              min="0"
-              className="instagram-clean-input"
-              onChange={e => {
-                if (typeof setPlatformOption === "function")
-                  setPlatformOption("facebook", "boostBudget", Number(e.target.value));
-              }}
-            />
-            <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
-              Set a budget to promote this post on Facebook.
-            </div>
-          </div>
-        )}
       </div>
     );
   };
@@ -462,6 +508,26 @@ const PlatformSettingsOverride = ({
       <div className="platform-header twitter-header">
         <span className="platform-icon">🐦</span>
         <h4>Compose</h4>
+      </div>
+
+      {/* Role Selector (Added for Consistency) */}
+      <div
+        style={{ marginTop: 8, marginBottom: 12, display: "flex", gap: 8, alignItems: "center" }}
+      >
+        <label style={{ fontWeight: 700, marginRight: 8, color: "#1da1f2" }}>Role:</label>
+        {["creator", "brand", "sponsored"].map(r => (
+          <button
+            key={r}
+            type="button"
+            className={`role-btn ${twitterSettings?.role === r ? "active" : ""}`}
+            onClick={() => {
+              setTwitterSettings({ ...twitterSettings, role: r });
+              if (typeof setPlatformOption === "function") setPlatformOption("twitter", "role", r);
+            }}
+          >
+            {r.charAt(0).toUpperCase() + r.slice(1)}
+          </button>
+        ))}
       </div>
 
       <div className="twitter-card">
@@ -486,6 +552,28 @@ const PlatformSettingsOverride = ({
           </label>
         </div>
       </div>
+
+      {/* X (Twitter) Compliance */}
+      <div
+        style={{
+          marginTop: "1rem",
+          fontSize: "0.75rem",
+          color: "#666",
+          borderTop: "1px solid #e1e8ed",
+          paddingTop: "0.5rem",
+        }}
+      >
+        Posts must comply with the{" "}
+        <a
+          href="https://help.twitter.com/en/rules-and-policies/twitter-rules"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: "#1DA1F2" }}
+        >
+          X Rules
+        </a>{" "}
+        (formerly Twitter Rules). Automated actions are limited to prevent spam.
+      </div>
     </div>
   );
 
@@ -494,6 +582,26 @@ const PlatformSettingsOverride = ({
       <div className="platform-header linkedin-header">
         <span className="platform-icon">💼</span>
         <h4>Create a post</h4>
+      </div>
+
+      {/* Role Selector (Added for Consistency) */}
+      <div
+        style={{ marginTop: 8, marginBottom: 12, display: "flex", gap: 8, alignItems: "center" }}
+      >
+        <label style={{ fontWeight: 700, marginRight: 8, color: "#0077b5" }}>Role:</label>
+        {["creator", "brand", "sponsored"].map(r => (
+          <button
+            key={r}
+            type="button"
+            className={`role-btn ${linkedinSettings?.role === r ? "active" : ""}`}
+            onClick={() => {
+              setLinkedinSettings({ ...linkedinSettings, role: r });
+              if (typeof setPlatformOption === "function") setPlatformOption("linkedin", "role", r);
+            }}
+          >
+            {r.charAt(0).toUpperCase() + r.slice(1)}
+          </button>
+        ))}
       </div>
 
       <div className="linkedin-controls">
@@ -514,6 +622,28 @@ const PlatformSettingsOverride = ({
             📄 Article
           </button>
         </div>
+      </div>
+
+      {/* Compliance / Professional Note */}
+      <div
+        style={{
+          marginTop: "1rem",
+          fontSize: "0.75rem",
+          color: "#666",
+          borderTop: "1px solid #e0e0e0",
+          paddingTop: "0.5rem",
+        }}
+      >
+        Posting as a <strong>Professional Entity</strong>. Content must adhere to{" "}
+        <a
+          href="https://www.linkedin.com/legal/professional-community-policies"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: "#0077b5" }}
+        >
+          Professional Community Policies
+        </a>
+        .
       </div>
     </div>
   );
@@ -584,6 +714,26 @@ const PlatformSettingsOverride = ({
         <h4>Post Settings</h4>
       </div>
 
+      {/* Role Selector (Added for Consistency) */}
+      <div
+        style={{ marginTop: 8, marginBottom: 12, display: "flex", gap: 8, alignItems: "center" }}
+      >
+        <label style={{ fontWeight: 700, marginRight: 8, color: "#ff4500" }}>Role:</label>
+        {["creator", "brand", "sponsored"].map(r => (
+          <button
+            key={r}
+            type="button"
+            className={`role-btn ${redditSettings?.role === r ? "active" : ""}`}
+            onClick={() => {
+              setRedditSettings({ ...redditSettings, role: r });
+              if (typeof setPlatformOption === "function") setPlatformOption("reddit", "role", r);
+            }}
+          >
+            {r.charAt(0).toUpperCase() + r.slice(1)}
+          </button>
+        ))}
+      </div>
+
       <div className="reddit-form-group">
         <label className="reddit-label">ADD FLAIR</label>
         <div className="reddit-flair-input-wrapper">
@@ -615,6 +765,28 @@ const PlatformSettingsOverride = ({
           <span className="reddit-plus-icon">+</span>
         </label>
       </div>
+
+      {/* Reddiquette Compliance */}
+      <div
+        style={{
+          marginTop: "1rem",
+          fontSize: "0.75rem",
+          color: "#666",
+          borderTop: "1px solid #eee",
+          paddingTop: "0.5rem",
+        }}
+      >
+        Ensure your post follows{" "}
+        <a
+          href="https://www.reddit.com/wiki/reddiquette"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: "#ff4500" }}
+        >
+          Reddiquette
+        </a>{" "}
+        and specific subreddit rules. Spamming may result in severe account penalties.
+      </div>
     </div>
   );
 
@@ -623,6 +795,27 @@ const PlatformSettingsOverride = ({
       <div className="platform-header pinterest-header">
         <span className="platform-icon">📌</span>
         <h4>Save to...</h4>
+      </div>
+
+      {/* Role Selector (Added for Consistency) */}
+      <div
+        style={{ marginTop: 8, marginBottom: 12, display: "flex", gap: 8, alignItems: "center" }}
+      >
+        <label style={{ fontWeight: 700, marginRight: 8, color: "#bd081c" }}>Role:</label>
+        {["creator", "brand", "sponsored"].map(r => (
+          <button
+            key={r}
+            type="button"
+            className={`role-btn ${pinterestSettings?.role === r ? "active" : ""}`}
+            onClick={() => {
+              setPinterestSettings({ ...pinterestSettings, role: r });
+              if (typeof setPlatformOption === "function")
+                setPlatformOption("pinterest", "role", r);
+            }}
+          >
+            {r.charAt(0).toUpperCase() + r.slice(1)}
+          </button>
+        ))}
       </div>
 
       {/* Visual Board Selector */}
@@ -665,6 +858,20 @@ const PlatformSettingsOverride = ({
       <div className="pinterest-tip-bubble">
         💡 <strong>Tip:</strong> Vertical images (2:3) stand out here.
       </div>
+
+      {/* Pinterest Copyright Note */}
+      <div style={{ marginTop: "0.5rem", fontSize: "0.75rem", color: "#666", padding: "0 4px" }}>
+        By saving, you confirm you own the rights to this image/video. See{" "}
+        <a
+          href="https://policy.pinterest.com/en/copyright"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: "#e60023" }}
+        >
+          Copyright Policy
+        </a>
+        .
+      </div>
     </div>
   );
 
@@ -697,12 +904,59 @@ const PlatformSettingsOverride = ({
           ))}
         </div>
       </div>
+
+      {/* Embed Style Options */}
+      <div className="discord-dark-box" style={{ marginTop: "10px" }}>
+        <label className="discord-label">EMBED OPTIONS</label>
+        <label
+          className="discord-checkbox-row"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            fontSize: "0.85rem",
+            color: "#dcddde",
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={discordSettings?.useEmbed ?? true}
+            onChange={e => setDiscordSettings({ ...discordSettings, useEmbed: e.target.checked })}
+            style={{ accentColor: "#5865F2" }}
+          />
+          <span>Visual Embed (Card)</span>
+        </label>
+      </div>
+
+      {/* Discord Community Footer */}
+      <div
+        style={{
+          marginTop: "1rem",
+          fontSize: "0.75rem",
+          color: "#72767d",
+          borderTop: "1px solid #2f3136",
+          paddingTop: "0.5rem",
+        }}
+      >
+        Be mindful of your server's{" "}
+        <a
+          href="https://discord.com/guidelines"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: "#5865F2" }}
+        >
+          Community Guidelines
+        </a>
+        . Frequent @everyone pings may cause user churn.
+      </div>
     </div>
   );
 
   const renderTelegramSettings = () => (
     <div className="platform-settings-panel telegram-theme-panel">
       <div className="platform-header telegram-header">
+        <span className="platform-icon">✈️</span>
         <h4>Broadcast</h4>
       </div>
       <div className="telegram-bubble">
@@ -717,6 +971,36 @@ const PlatformSettingsOverride = ({
             <span className="telegram-slider"></span>
           </label>
         </div>
+
+        {/* Pin Message Toggle (High Value Feature) */}
+        <div
+          className="telegram-row"
+          style={{ borderTop: "1px solid #eee", paddingTop: "10px", marginTop: "10px" }}
+        >
+          <span className="telegram-label-text">Pin to Channel</span>
+          <label className="telegram-switch">
+            <input
+              type="checkbox"
+              checked={telegramSettings?.pin || false}
+              onChange={e => setTelegramSettings({ ...telegramSettings, pin: e.target.checked })}
+            />
+            <span className="telegram-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      {/* Telegram Compliance */}
+      <div style={{ marginTop: "1rem", fontSize: "0.75rem", color: "#666", padding: "0 8px" }}>
+        Ensure content adheres to{" "}
+        <a
+          href="https://telegram.org/tos"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: "#2481cc" }}
+        >
+          Telegram ToS
+        </a>
+        . Illegal content will result in channel bans.
       </div>
     </div>
   );

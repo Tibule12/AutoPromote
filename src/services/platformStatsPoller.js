@@ -6,6 +6,9 @@ const {
   fetchFacebookPostMetrics,
   fetchTwitterTweetMetrics,
   fetchInstagramMediaMetrics,
+  fetchTikTokMetrics,
+  fetchLinkedInMetrics,
+  fetchRedditMetrics,
 } = require("./platformMetricsService");
 const {
   recordPlatformAmplifyTrigger,
@@ -41,6 +44,34 @@ function computeNormalizedScore(platform, metrics) {
       if (!impressions) return engagement ? 60 : 0;
       return Math.min(100, (engagement / impressions) * 100 * 2.5);
     }
+    case "tiktok": {
+      // Heuristic: (likes + comments*2 + shares*4) / views * 100
+      const views = metrics.view_count || 0;
+      const likes = metrics.like_count || 0;
+      const comments = metrics.comment_count || 0;
+      const shares = metrics.share_count || 0;
+      if (!views) return 0;
+
+      const score = ((likes + comments * 2 + shares * 4) / Math.max(views, 1)) * 100;
+      return Math.min(100, score * 3.0); // Multiplier to normalize against other platforms
+    }
+    case "linkedin": {
+      // LinkedIn (basic) has no views. Use raw engagement count as proxy for score
+      const likes = metrics.like_count || 0;
+      const comments = metrics.comment_count || 0;
+      // Arbitrary scoring: e.g. 5 points per like, 10 per comment, cap at 100 (for now)
+      const raw = likes * 5 + comments * 10;
+      return Math.min(100, raw);
+    }
+    case "reddit": {
+      // Score, upvote_ratio, comments
+      const score = metrics.score || 0;
+      const comments = metrics.comment_count || 0;
+      // Reddit scores can be negative
+      if (score < 0) return 0;
+      // Heuristic: score + comments*2
+      return Math.min(100, (score + comments * 2) * 0.5);
+    }
     default:
       return null;
   }
@@ -54,13 +85,25 @@ async function fetchMetricsForPost(doc) {
   try {
     switch (platform) {
       case "facebook":
-        return await fetchFacebookPostMetrics(externalId);
+        // Extract pageId from outcome if available, or try to infer from data
+        // platformPostsService stores explicit 'pageId' in some versions, but mostly inside rawOutcome or outcome
+        // But wait, recordPlatformPost stores: externalId, payload, rawOutcome.
+        // In facebookService.js, 'pageId' is returned in the result.
+        // usage: const pageId = data.rawOutcome?.pageId || data.outcome?.pageId;
+        const fbPageId = data.rawOutcome?.pageId || data.pageId;
+        return await fetchFacebookPostMetrics(data.uid, externalId, fbPageId);
       case "twitter":
         return await fetchTwitterTweetMetrics(externalId);
       case "instagram":
         return await fetchInstagramMediaMetrics(externalId);
+      case "tiktok":
+        return await fetchTikTokMetrics(data.uid, externalId);
+      case "linkedin":
+        return await fetchLinkedInMetrics(data.uid, externalId);
+      case "reddit":
+        return await fetchRedditMetrics(data.uid, externalId);
       default:
-        return null; // tik tok placeholder
+        return null;
     }
   } catch (_) {
     return null;
@@ -154,18 +197,16 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5, maxAgeMinutes = 30 
             const decayPct = parseFloat(process.env.PLATFORM_SCORE_DECAY_PCT || "0.3"); // 30%
             if (!d.decayedAt && peak > 0 && normalizedScore < peak * (1 - decayPct)) {
               update.decayedAt = admin.firestore.FieldValue.serverTimestamp();
-              await db
-                .collection("analytics")
-                .add({
-                  type: "platform_score_decay",
-                  platform: d.platform,
-                  contentId: d.contentId,
-                  postId: d.externalId,
-                  normalizedScore,
-                  peak,
-                  decayPct,
-                  createdAt: admin.firestore.FieldValue.serverTimestamp(),
-                });
+              await db.collection("analytics").add({
+                type: "platform_score_decay",
+                platform: d.platform,
+                contentId: d.contentId,
+                postId: d.externalId,
+                normalizedScore,
+                peak,
+                decayPct,
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              });
               try {
                 await recordPlatformDecayEvent();
               } catch (_) {}
@@ -178,17 +219,15 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5, maxAgeMinutes = 30 
               normalizedScore >= peak * (1 - decayPct / 2)
             ) {
               update.reactivatedAt = admin.firestore.FieldValue.serverTimestamp();
-              await db
-                .collection("analytics")
-                .add({
-                  type: "platform_score_reactivation",
-                  platform: d.platform,
-                  contentId: d.contentId,
-                  postId: d.externalId,
-                  normalizedScore,
-                  peak,
-                  createdAt: admin.firestore.FieldValue.serverTimestamp(),
-                });
+              await db.collection("analytics").add({
+                type: "platform_score_reactivation",
+                platform: d.platform,
+                contentId: d.contentId,
+                postId: d.externalId,
+                normalizedScore,
+                peak,
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              });
               try {
                 await recordPlatformReactivationEvent();
               } catch (_) {}

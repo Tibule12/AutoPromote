@@ -796,17 +796,29 @@ function App() {
         alert("Upload failed: missing file URL. Please retry the upload.");
         return { ok: false, error: "missing_url" };
       }
+      // Extract monetization settings from platform options for Revenue Engine
+      const pOps = params.platformOptions || params.platform_options || {};
+      const tiktokOps = pOps.tiktok || {};
+      const monetization_settings = {
+        niche: tiktokOps.niche || "general",
+        is_sponsored: !!tiktokOps.is_sponsored,
+        brand_name: tiktokOps.sponsor || "", // Maps "sponsor" field to brand_name
+        product_link: tiktokOps.product_link || "", // New field
+        commercial_rights: !!tiktokOps.commercial_rights,
+      };
+
       const payload = {
         isDryRun: !!isDryRun,
         title: title || (file ? file.name : ""),
         type: type || "video",
         url: finalUrl,
         description: description || "",
+        monetization_settings, // <--- Added here
         target_platforms:
           platforms && platforms.length
             ? platforms
             : userDefaults.defaultPlatforms || ["youtube", "tiktok", "instagram"],
-        platform_options: params.platformOptions || params.platform_options || {},
+        platform_options: pOps,
         schedule_hint,
         meta: {
           ...(params.meta || {}),

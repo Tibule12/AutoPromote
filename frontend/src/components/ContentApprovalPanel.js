@@ -267,15 +267,35 @@ function ContentApprovalPanel() {
                       By: {item.user?.name} ({item.user?.email})
                     </div>
                   </div>
-                  <span
-                    style={{
-                      ...badgeStyle,
-                      backgroundColor: item.type === "video" ? "#e3f2fd" : "#f3e5f5",
-                      color: item.type === "video" ? "#1976d2" : "#7b1fa2",
-                    }}
-                  >
-                    {item.type}
-                  </span>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                    {/* Viral Bounty Badge */}
+                    {(item.has_bounty || item.viral_bounty_id) && (
+                      <span
+                        style={{
+                          ...badgeStyle,
+                          backgroundColor: "#e8f5e9", // Light Green
+                          color: "#2e7d32", // Dark Green
+                          border: "1px solid #c8e6c9",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                        title={`Niche: ${item.bounty_niche || "General"}`}
+                      >
+                        <span>💰</span>
+                        {item.bounty_pool_amount ? `$${item.bounty_pool_amount}` : "Bounty Active"}
+                      </span>
+                    )}
+                    <span
+                      style={{
+                        ...badgeStyle,
+                        backgroundColor: item.type === "video" ? "#e3f2fd" : "#f3e5f5",
+                        color: item.type === "video" ? "#1976d2" : "#7b1fa2",
+                      }}
+                    >
+                      {item.type}
+                    </span>
+                  </div>
                 </div>
 
                 {item.description && (

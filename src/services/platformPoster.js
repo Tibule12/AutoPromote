@@ -15,6 +15,7 @@ const { postToLinkedIn } = require("./linkedinService");
 const { postToTelegram } = require("./telegramService");
 const { postToPinterest } = require("./pinterestService");
 const { postToSnapchat } = require("./snapchatService");
+const { uploadVideo: postToYouTube } = require("./youtubeService");
 
 // Utility: safe JSON
 async function safeJson(res) {
@@ -308,11 +309,37 @@ async function postToSpotifyHandler(args) {
   }
 }
 
+async function postToYouTubeHandler(args) {
+  // Wrapper to match platformPoster signature
+  // uploadVideo signature: ({ uid, videoUrl, title, description, privacy, tags, contentId })
+  const { contentId, payload, reason, uid } = args;
+  try {
+    const res = await postToYouTube({
+      uid,
+      videoUrl: payload.url || payload.mediaUrl, // Assuming payload has url
+      title: payload.title || payload.message,
+      description: payload.description,
+      privacy: payload.privacy || "public",
+      tags: payload.tags || payload.hashtags,
+      contentId,
+    });
+
+    if (res.success) {
+      return { platform: "youtube", success: true, videoId: res.videoId, reason };
+    } else {
+      return { platform: "youtube", success: false, error: res.error || "Upload failed" };
+    }
+  } catch (e) {
+    return { platform: "youtube", success: false, error: e.message };
+  }
+}
+
 const handlers = {
   facebook: postToFacebook,
   twitter: postToTwitter,
   instagram: postToInstagram,
   tiktok: postToTikTok,
+  youtube: postToYouTubeHandler,
   linkedin: postToLinkedIn,
   pinterest: postToPinterest,
   snapchat: postToSnapchat,
@@ -329,6 +356,41 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
     try {
       const contentSnap = await db.collection("content").doc(contentId).get();
       const content = contentSnap.exists ? contentSnap.data() : {};
+
+      // SPONSORSHIP DISCLOSURE (Greedy Revenue Engine)
+      // Automatically inject disclosure tags, product links, and force public visibility
+      const mon = content.monetization_settings || {};
+      if (mon.is_sponsored) {
+        const disclosure = mon.brand_name
+          ? ` #ad #${mon.brand_name.replace(/\s+/g, "")}`
+          : " #ad #sponsored";
+        const promoLink = mon.product_link ? `\n\nCheck it out here: ${mon.product_link}` : "";
+
+        // 1. Inject into hashtagString (used by Reddit/LinkedIn/Twitter)
+        const currentTags = payload.hashtagString || "";
+        if (!currentTags.includes("#ad") && !currentTags.includes("#sponsored")) {
+          payload.hashtagString = (currentTags + disclosure).trim();
+        }
+
+        // 2. Inject into message/text (used by Facebook/Generic)
+        // Append promoLink here as well
+        const msgKey = payload.message ? "message" : payload.text ? "text" : null;
+        if (msgKey) {
+          if (!payload[msgKey].includes("#ad")) {
+            payload[msgKey] += disclosure;
+          }
+          if (promoLink && !payload[msgKey].includes(mon.product_link)) {
+            payload[msgKey] += promoLink;
+          }
+        } else if (!payload.message && !payload.text) {
+          // If no text yet, start with disclosure and link
+          payload.message = (content.title || "Check this out") + disclosure + promoLink;
+        }
+
+        // 3. Force Public
+        payload.privacyLevel = "PUBLIC";
+      }
+
       const optimization = await hashtagEngine.generateCustomHashtags({
         content,
         platform,

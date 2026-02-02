@@ -83,6 +83,15 @@ function usageLimitMiddleware(options = {}) {
       // Check if user has paid subscription
       const userDoc = await db.collection("users").doc(userId).get();
       const userData = userDoc.data() || {};
+      const createdAt = userData.createdAt
+        ? userData.createdAt.toDate
+          ? userData.createdAt.toDate()
+          : new Date(userData.createdAt)
+        : new Date(0); // fallback if missing
+
+      // Phase 1: Onboarding Logic - Unlimited uploads for first 3 months (90 days)
+      const ONBOARDING_PERIOD_MS = 90 * 24 * 60 * 60 * 1000;
+      const isInOnboarding = Date.now() - createdAt.getTime() < ONBOARDING_PERIOD_MS;
 
       // Check subscription status
       const hasPaidSubscription =
@@ -91,13 +100,15 @@ function usageLimitMiddleware(options = {}) {
         userData.isPaid === true ||
         userData.unlimited === true;
 
-      if (hasPaidSubscription) {
-        // Paid users get unlimited uploads
+      // Allow unlimited if paid OR in onboarding period
+      if (hasPaidSubscription || isInOnboarding) {
         req.userUsage = {
           limit: Infinity,
           used: 0,
           remaining: Infinity,
-          isPaid: true,
+          isPaid: hasPaidSubscription,
+          isInOnboarding: !hasPaidSubscription && isInOnboarding, // Flag for specific UI messaging
+          monthKey: new Date().toISOString().slice(0, 7),
         };
         return next();
       }

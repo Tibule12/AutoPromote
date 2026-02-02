@@ -66,9 +66,13 @@ describe("Admin Sponsor Approval routes", () => {
     const poster = require("../../services/promotionTaskQueue");
     const spy = jest.spyOn(poster, "enqueuePlatformPostTask").mockResolvedValue({ skipped: true });
 
-    const res = await request(app).post(`/api/admin/sponsor-approvals/${approvalId}/approve`).send({ notes: "ok" });
+    const res = await request(app)
+      .post(`/api/admin/sponsor-approvals/${approvalId}/approve`)
+      .send({ notes: "ok" });
     // Debug output on failure
-    if (res.statusCode !== 200) console.error('APPROVE_RES', res.statusCode, res.body);
+    console.error("APPROVE_RES", res.statusCode, res.body);
+    if (res.statusCode !== 200)
+      console.error("APPROVE_RES_BODY", JSON.stringify(res.body, null, 2));
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("success", true);
 
@@ -100,7 +104,9 @@ describe("Admin Sponsor Approval routes", () => {
     });
     const id2 = ref.id;
     const app = makeApp({ uid: "admin-1", isAdmin: true });
-    const res = await request(app).post(`/api/admin/sponsor-approvals/${id2}/reject`).send({ reason: "no" });
+    const res = await request(app)
+      .post(`/api/admin/sponsor-approvals/${id2}/reject`)
+      .send({ reason: "no" });
     expect(res.statusCode).toBe(200);
     const apr = await db.collection("sponsor_approvals").doc(id2).get();
     expect(apr.data().status).toBe("rejected");

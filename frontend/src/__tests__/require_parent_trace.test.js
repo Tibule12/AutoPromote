@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 test("trace require parents for ContentUploadForm", () => {
   require("path");
 

@@ -264,6 +264,7 @@ async function enqueuePlatformPostTask({
     process.env.NODE_ENV === "test" ||
     typeof process.env.JEST_WORKER_ID !== "undefined"
   ) {
+    console.log("[enqueue][fast-path] entry", { contentId, platform, uid });
     // Enforce feature-flag gating even in fast-path test mode for TikTok so tests can verify gating behavior
     if (String(platform).toLowerCase() === "tiktok") {
       try {
@@ -294,16 +295,106 @@ async function enqueuePlatformPostTask({
       const contentSnap = await db.collection("content").doc(contentId).get();
       if (contentSnap.exists) {
         const c = contentSnap.data();
-        const options = (c.platform_options && c.platform_options[platform]) || (c.platformOptions && c.platformOptions[platform]) || {};
+        console.log(
+          "[enqueue][fast-path] content doc snapshot for",
+          contentId,
+          platform,
+          JSON.stringify(c)
+        );
+        const options =
+          (c.platform_options && c.platform_options[platform]) ||
+          (c.platformOptions && c.platformOptions[platform]) ||
+          {};
         const role = String(options.role || "").toLowerCase();
         const sponsor = options.sponsor || null;
-        const sponsorApproval = options.sponsorApproval || null;
+        const sponsorApproval = options.sponsorApproval || options.sponsor_approval || null;
         if (role === "sponsored") {
           if (!sponsor) {
-            return { skipped: true, reason: "sponsor_missing", platform, contentId, _testStub: true };
+            return {
+              skipped: true,
+              reason: "sponsor_missing",
+              platform,
+              contentId,
+              _testStub: true,
+            };
           }
           if (!sponsorApproval || sponsorApproval.status !== "approved") {
-            return { skipped: true, reason: "sponsor_not_approved", platform, contentId, _testStub: true };
+            // Attempt a short read-after-write retry to handle eventual visibility in tests/emulator
+            let foundApproved = false;
+            try {
+              for (let i = 0; i < 8; i++) {
+                // short backoff
+                await new Promise(r => setTimeout(r, 50));
+                const refreshed = await db.collection("content").doc(contentId).get();
+                if (!refreshed.exists) break;
+                const rc = refreshed.data() || {};
+                const ropts =
+                  (rc.platform_options && rc.platform_options[platform]) ||
+                  (rc.platformOptions && rc.platformOptions[platform]) ||
+                  {};
+                const rApproval = ropts.sponsorApproval || ropts.sponsor_approval || null;
+                if (rApproval && rApproval.status === "approved") {
+                  foundApproved = true;
+                  console.log(
+                    "[enqueue][fast-path] sponsorApproval became visible after refresh",
+                    contentId,
+                    platform,
+                    rApproval
+                  );
+                  break;
+                }
+              }
+            } catch (e) {
+              console.warn("[enqueue][fast-path] sponsorApproval refresh failed", e && e.message);
+            }
+
+            if (foundApproved) {
+              // proceed
+            } else {
+              // Fallback: check sponsor_approvals collection for approved entry
+              try {
+                const aprSnap = await db
+                  .collection("sponsor_approvals")
+                  .where("contentId", "==", contentId)
+                  .where("platform", "==", platform)
+                  .where("status", "==", "approved")
+                  .limit(1)
+                  .get();
+                if (!aprSnap.empty) {
+                  console.log(
+                    "[enqueue][fast-path] sponsor approval found in sponsor_approvals collection, allowing",
+                    contentId,
+                    platform
+                  );
+                } else {
+                  console.log(
+                    "[enqueue][fast-path][sponsor_check] blocked for",
+                    contentId,
+                    platform,
+                    { role, sponsor, sponsorApproval }
+                  );
+                  return {
+                    skipped: true,
+                    reason: "sponsor_not_approved",
+                    platform,
+                    contentId,
+                    _testStub: true,
+                  };
+                }
+              } catch (e) {
+                console.warn(
+                  "[enqueue][fast-path] sponsor approval lookup failed, blocking",
+                  e && e.message
+                );
+                return {
+                  skipped: true,
+                  reason: "sponsor_not_approved",
+                  platform,
+                  contentId,
+                  _testStub: true,
+                };
+              }
+            }
           }
         }
       }
@@ -361,6 +452,71 @@ async function enqueuePlatformPostTask({
       }
     } catch (e) {
       /* ignore feature-gate failures and proceed */
+    }
+
+    // Enforce sponsor approval for TikTok (production path) similar to fast-path
+    try {
+      const contentSnap = await db.collection("content").doc(contentId).get();
+      if (contentSnap.exists) {
+        const c = contentSnap.data();
+        const options =
+          (c.platform_options && c.platform_options[platform]) ||
+          (c.platformOptions && c.platformOptions[platform]) ||
+          {};
+        const role = String(options.role || "").toLowerCase();
+        const sponsor = options.sponsor || null;
+        const sponsorApproval = options.sponsorApproval || options.sponsor_approval || null;
+        if (role === "sponsored") {
+          if (!sponsor) {
+            return { skipped: true, reason: "sponsor_missing", platform, contentId };
+          }
+          if (!sponsorApproval || sponsorApproval.status !== "approved") {
+            // short read-after-write retry to account for eventual consistency
+            let found = false;
+            for (let i = 0; i < 6; i++) {
+              await new Promise(r => setTimeout(r, 50));
+              const refreshed = await db.collection("content").doc(contentId).get();
+              if (!refreshed.exists) break;
+              const rc = refreshed.data() || {};
+              const ropts =
+                (rc.platform_options && rc.platform_options[platform]) ||
+                (rc.platformOptions && rc.platformOptions[platform]) ||
+                {};
+              const rApproval = ropts.sponsorApproval || ropts.sponsor_approval || null;
+              if (rApproval && rApproval.status === "approved") {
+                found = true;
+                console.log(
+                  "[enqueue] sponsorApproval visible after refresh for",
+                  contentId,
+                  platform,
+                  rApproval
+                );
+                break;
+              }
+            }
+            if (!found) {
+              // fallback: check sponsor_approvals collection
+              const aprSnap = await db
+                .collection("sponsor_approvals")
+                .where("contentId", "==", contentId)
+                .where("platform", "==", platform)
+                .where("status", "==", "approved")
+                .limit(1)
+                .get();
+              if (aprSnap.empty) {
+                console.log("[enqueue] blocked for sponsor_not_approved", contentId, platform, {
+                  role,
+                  sponsor,
+                  sponsorApproval,
+                });
+                return { skipped: true, reason: "sponsor_not_approved", platform, contentId };
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[enqueue] sponsor approval check failed, allowing safely", e && e.message);
     }
   }
   // Quota enforcement (monthly task quota based on plan)

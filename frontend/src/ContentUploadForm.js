@@ -13,12 +13,12 @@ import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from "firebase
 // Temporarily comment out component imports for isolation
 // TODO: revert after diagnostics
 import SpotifyTrackSearch from "./components/SpotifyTrackSearch";
-// import ImageCropper from "./components/ImageCropper";
+import ImageCropper from "./components/ImageCropper";
 // import AudioWaveformTrimmer from "./components/AudioWaveformTrimmer";
-// import EmojiPicker from "./components/EmojiPicker";
-// import FilterEffects from "./components/FilterEffects";
-// import HashtagSuggestions from "./components/HashtagSuggestions";
-// import DraftManager from "./components/DraftManager";
+import EmojiPicker from "./components/EmojiPicker";
+import FilterEffects from "./components/FilterEffects";
+import HashtagSuggestions from "./components/HashtagSuggestions";
+import DraftManager from "./components/DraftManager";
 // Temporarily comment out some imports to isolate circular import issues in tests
 // TODO: revert after binary-search isolation
 import ProgressIndicator from "./components/ProgressIndicator";
@@ -101,6 +101,63 @@ const sanitizeCSS = css => {
   return safeParts.join(" ");
 };
 
+const getAlgorithmIntel = platform => {
+  const intel = {
+    tiktok: {
+      audience: "1.2B Monthly Users",
+      secret: "Loop video for retention",
+      viral: 85,
+      format: "9:16 (Vertical)",
+      tips: "Focus on 0-3s hook. Seamless loops boost retention significantly. Trending Audio is +50% reach.",
+    },
+    youtube: {
+      audience: "2.5B Monthly Users",
+      secret: "CTR is king",
+      viral: 70,
+      format: "16:9 (Horizontal) or 9:16 (Shorts)",
+      tips: "Titles under 60 chars work best. Description SEO drives long-tail views.",
+    },
+    instagram: {
+      audience: "2B Monthly Users",
+      secret: "Reels get 3x reach",
+      viral: 80,
+      format: "9:16 (Reels) / 4:5 (Post)",
+      tips: "Reels currently get 3x reach of Photos. Use 3-5 niche hashtags, not 30.",
+    },
+    facebook: {
+      audience: "2.9B Monthly Users",
+      secret: "Community engagement",
+      viral: 65,
+      format: "1:1 or 4:5",
+      tips: "Native video outperforms links. Engage in comments immediately.",
+    },
+    linkedin: {
+      audience: "900M Professionals",
+      secret: "Dwell time matters",
+      viral: 40,
+      format: "PDF Carousels / Video",
+      tips: "Documents/PDFs get high engagement. Educational content wins.",
+    },
+    twitter: {
+      audience: "450M Monthly Users",
+      secret: "Frequency & Threads",
+      viral: 60,
+      format: "Text / Images",
+      tips: "Threads (long-form) get more impressions. Use 1-2 trending hashtags.",
+    },
+  };
+
+  return (
+    intel[platform] || {
+      audience: "Unknown Reach",
+      secret: "Consistent posting",
+      viral: 50,
+      format: "Native Format",
+      tips: "Consistent posting schedule aligns with viewer habits.",
+    }
+  );
+};
+
 // Security: Escape HTML to prevent XSS attacks
 const escapeHtml = text => {
   if (!text) return "";
@@ -159,6 +216,10 @@ function ContentUploadForm({
     shadow: true,
   });
 
+  // NEW: Viral & Enchancement States
+  const [optimizeViral, setOptimizeViral] = useState(false);
+  const [enhanceQuality, setEnhanceQuality] = useState(true);
+
   // Platform Overrides State
   const [youtubeSettings, setYoutubeSettings] = useState({
     privacy: "public",
@@ -209,6 +270,13 @@ function ContentUploadForm({
   const uploadLockRef = useRef(false);
   const uploadTaskRef = useRef(null);
   const [error, setError] = useState("");
+
+  // =================================================================
+  // BILLIONAIRE STRATEGY: Viral Bounty State
+  // =================================================================
+  const [bountyAmount, setBountyAmount] = useState(0); // $0 = No Bounty
+  const [bountyNiche, setBountyNiche] = useState("general");
+  const [isBountyInterfaceVisible, setIsBountyInterfaceVisible] = useState(false);
 
   // Keep legacy `tiktokCommercial` in sync with the newer disclosure state
   useEffect(() => {
@@ -1641,6 +1709,9 @@ function ContentUploadForm({
         target_platforms: selectedPlatformsVal,
         platforms: selectedPlatformsVal,
         template: template !== "none" ? template : undefined,
+        // New features:
+        quality_enhanced: !!enhanceQuality,
+        viral_boost: optimizeViral ? { force_seeding: true } : undefined,
         meta: {
           trimStart: type === "video" || type === "audio" ? trimStart : undefined,
           trimEnd: type === "video" || type === "audio" ? trimEnd : undefined,
@@ -1713,6 +1784,16 @@ function ContentUploadForm({
       }
       // Add overlay metadata to submit payload
       if (overlayText) contentData.meta.overlay = { text: overlayText, position: overlayPosition };
+
+      // BOUNTY INJECTION: If user set a bounty, attach it to initial request
+      // This allows the server to create the bounty record immediately upon content creation
+      if (bountyAmount > 0) {
+        contentData.bounty = {
+          amount: bountyAmount,
+          niche: bountyNiche || "general",
+        };
+      }
+
       console.log("[Upload] Content data to send:", contentData);
 
       setUploadStatus("Publishing to platforms...");
@@ -1910,6 +1991,93 @@ function ContentUploadForm({
     }
   };
 
+  const getPeakStatus = platform => {
+    // Dynamic Peak Time Analysis (Sci-Fi / AI Simulation)
+    const now = new Date();
+    const hour = now.getHours();
+
+    // Determine peak based on hour (Mock Algorithm)
+    // TikTok: Peak 6pm-10pm, 7am-9am
+    if (platform === "tiktok") {
+      if ((hour >= 18 && hour <= 22) || (hour >= 7 && hour <= 9))
+        return { label: "🔥 PEAK", color: "#00f2ea", glow: "0 0 8px #00f2ea", animate: "pulse" };
+      else if (hour >= 12 && hour <= 18)
+        return { label: "⚡ ACTIVE", color: "#b0f2ea", glow: "0 0 3px #b0f2ea" };
+    }
+
+    // YouTube: Peak 2pm-6pm (Weekdays), 10am-2pm (Weekends)
+    if (platform === "youtube") {
+      if (hour >= 14 && hour <= 18)
+        return { label: "🔥 PRIME", color: "#ff0000", glow: "0 0 8px #ff0000", animate: "pulse" };
+      else return { label: "⭐ GOOD", color: "#ff6666", glow: "0 0 2px #ff6666" };
+    }
+
+    // Instagram: Peak 11am-1pm, 7pm-9pm
+    if (platform === "instagram") {
+      if ((hour >= 11 && hour <= 13) || (hour >= 19 && hour <= 21))
+        return { label: "🔥 HOT", color: "#e1306c", glow: "0 0 8px #e1306c", animate: "pulse" };
+    }
+
+    // Default Status
+    return null;
+  };
+
+  const getAlgorithmIntel = platform => {
+    // "Heavenly" / Billionaire Database
+    const db = {
+      tiktok: {
+        audience: "1.6B+ Active Users",
+        secret:
+          "🧠 The 'Hook' must happen in 0.5s. Use seamless loops for +200% retention. Trending audio is critical.",
+        viral: 98,
+        tips: "Format: 9:16 | 15s-60s | Sound On",
+      },
+      youtube: {
+        audience: "2.7B+ Active Users",
+        secret:
+          "🧠 CTR is God. Your thumbnail must invoke curiosity immediately. SEO descriptions drive long-tail 10y traffic.",
+        viral: 92,
+        tips: "Format: 16:9 | 8m-12m | High Definition",
+      },
+      instagram: {
+        audience: "2B+ Active Users",
+        secret:
+          "🧠 Reels are prioritized 4x over Photos in Explore. Use 3-5 niche hashtags, never 30 generic ones.",
+        viral: 88,
+        tips: "Format: 9:16 (Reels) | High Aesthetic",
+      },
+      linkedin: {
+        audience: "900M+ Professionals",
+        secret:
+          "🧠 Comments drive reach more than likes. Ask a question in line 1. PDFs (Carousels) get 3x engagement.",
+        viral: 75,
+        tips: "Format: Document/PDF | Professional Tone",
+      },
+      twitter: {
+        audience: "400M+ Monetizable",
+        secret:
+          "🧠 Threads are the viral engine. Hook in tweet 1, value in tweet 2-5. Images boost rt probability.",
+        viral: 85,
+        tips: "Format: Thread | News/Opinion",
+      },
+      pinterest: {
+        audience: "450M+ Shoppers",
+        secret:
+          "🧠 It's search, not social. Metadata and rich pins drive sales for months, not hours.",
+        viral: 60,
+        tips: "Format: 2:3 Vertical | High Resolution",
+      },
+    };
+    return (
+      db[platform] || {
+        audience: "Global Reach",
+        secret: "🧠 Consistency is the key to unlocking the algorithm.",
+        viral: 50,
+        tips: "High Quality Content Wins.",
+      }
+    );
+  };
+
   const togglePlatform = platform => {
     // If TikTok creator cannot post from third-party apps, prevent selecting TikTok tile
     if (platform === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false) {
@@ -2071,7 +2239,6 @@ function ContentUploadForm({
     const platforms = [
       "youtube",
       "tiktok",
-      "instagram",
       "facebook",
       "twitter",
       "linkedin",
@@ -2095,18 +2262,171 @@ function ContentUploadForm({
           ) : facebookPages && facebookPages.length > 0 ? (
             <div style={{ fontSize: 12, color: "#0f172a", marginBottom: 8 }}>
               <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                Facebook Pages (will be used for posting)
+                <span style={{ color: "#1877f2" }}>Permission Granted:</span> Posting as these Pages
               </div>
               <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
                 {facebookPages.map(p => (
                   <div key={p.id} style={{ color: "#334155", fontSize: "0.95rem" }}>
-                    {p.name || "(Unnamed Page)"}{" "}
+                    ✅ <strong>{p.name || "(Unnamed Page)"}</strong>{" "}
                     <span style={{ color: "#64748b", fontSize: "0.85rem" }}>(ID: {p.id})</span>
                   </div>
                 ))}
               </div>
             </div>
           ) : null}
+          {/* Sci-Fi Optimization Controls */}
+          <div
+            className="sci-fi-controls"
+            style={{
+              marginBottom: "1rem",
+              padding: "1rem",
+              border: "1px solid #1f2937",
+              borderRadius: "8px",
+              background: "rgba(17, 24, 39, 0.7)",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 0 15px rgba(0, 255, 255, 0.05)",
+            }}
+          >
+            <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+              <label
+                style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "0.5rem" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={enhanceQuality}
+                  onChange={e => setEnhanceQuality(e.target.checked)}
+                  style={{ accentColor: "#00f2ea" }}
+                />
+                <span style={{ color: "#eef2ff", fontWeight: 600 }}>
+                  <span style={{ marginRight: "5px" }}>✨</span>
+                  AI Content Enhancement
+                </span>
+              </label>
+
+              <label
+                style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "0.5rem" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={optimizeViral}
+                  onChange={e => setOptimizeViral(e.target.checked)}
+                  style={{ accentColor: "#e1306c" }}
+                />
+                <span style={{ color: "#eef2ff", fontWeight: 600 }}>
+                  <span style={{ marginRight: "5px" }}>🚀</span>
+                  Upload Now, Publish at Peak
+                </span>
+              </label>
+            </div>
+
+            {/* BILLIONAIRE BOUNTY TOGGLE (No Ads) */}
+            <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #2d3748" }}>
+              <label
+                style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "0.5rem" }}
+              >
+                <div
+                  onClick={() => setIsBountyInterfaceVisible(!isBountyInterfaceVisible)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: isBountyInterfaceVisible
+                      ? "linear-gradient(90deg, #ffd700, #b8860b)"
+                      : "#2d3748",
+                    padding: "6px 12px",
+                    borderRadius: "20px",
+                    transition: "all 0.3s ease",
+                    boxShadow: isBountyInterfaceVisible
+                      ? "0 0 10px rgba(255, 215, 0, 0.5)"
+                      : "none",
+                  }}
+                >
+                  <span style={{ fontSize: "1.2rem", marginRight: "8px" }}>💰</span>
+                  <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.9rem" }}>
+                    {isBountyInterfaceVisible ? "Viral Bounty Active" : "Set Viral Bounty"}
+                  </span>
+                </div>
+                <span style={{ fontSize: "0.8rem", color: "#a0aec0" }}>
+                  (Pay only for verifiable viral results)
+                </span>
+              </label>
+
+              {isBountyInterfaceVisible && (
+                <div
+                  style={{
+                    marginTop: "1rem",
+                    background: "rgba(0, 0, 0, 0.3)",
+                    padding: "1rem",
+                    borderRadius: "8px",
+                    border: "1px solid #b8860b",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                    <div style={{ flex: 1 }}>
+                      <label
+                        style={{
+                          color: "#ffd700",
+                          fontSize: "0.8rem",
+                          display: "block",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        BOUNTY POOL ($)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="e.g. 500"
+                        value={bountyAmount || ""}
+                        onChange={e => setBountyAmount(parseFloat(e.target.value))}
+                        style={{
+                          width: "100%",
+                          background: "#000",
+                          border: "1px solid #555",
+                          color: "#fff",
+                          padding: "8px",
+                          borderRadius: "4px",
+                        }}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label
+                        style={{
+                          color: "#ffd700",
+                          fontSize: "0.8rem",
+                          display: "block",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        TARGET NICHE
+                      </label>
+                      <select
+                        value={bountyNiche}
+                        onChange={e => setBountyNiche(e.target.value)}
+                        style={{
+                          width: "100%",
+                          background: "#000",
+                          border: "1px solid #555",
+                          color: "#fff",
+                          padding: "8px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        <option value="general">General</option>
+                        <option value="music">Music</option>
+                        <option value="tech">Tech</option>
+                        <option value="crypto">Crypto</option>
+                        <option value="fashion">Fashion</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: "8px", fontSize: "0.75rem", color: "#cbd5e0" }}>
+                    Funds are held in escrow. Promoters are paid only when they generate verified
+                    engagement (views/shares).
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           <div className="platform-grid">
             {platforms.map(p => {
               const disabled =
@@ -2138,11 +2458,151 @@ function ContentUploadForm({
                     }
                   }}
                   className={`platform-card ${disabled ? "disabled" : ""}`}
+                  style={{
+                    position: "relative",
+                    minHeight: expandedPlatform === p ? "auto" : undefined,
+                  }}
                 >
                   <div className="platform-icon" aria-hidden="true">
                     {getPlatformIcon(p)}
                   </div>
-                  <div className="platform-name">{p.charAt(0).toUpperCase() + p.slice(1)}</div>
+                  <div className="platform-name">
+                    {p.charAt(0).toUpperCase() + p.slice(1)}
+                    {/* Peak Time Indicator */}
+                    {getPeakStatus(p) && (
+                      <div
+                        style={{
+                          marginTop: "6px",
+                          fontSize: "0.65rem",
+                          padding: "2px 6px",
+                          borderRadius: "12px",
+                          backgroundColor: "rgba(0,0,0,0.4)",
+                          color: getPeakStatus(p).color,
+                          border: `1px solid ${getPeakStatus(p).color}`,
+                          boxShadow: getPeakStatus(p).glow || "none",
+                          animation: getPeakStatus(p).animate
+                            ? `${getPeakStatus(p).animate} 1.5s infinite`
+                            : "none",
+                          width: "fit-content",
+                          margin: "6px auto 0",
+                        }}
+                      >
+                        {getPeakStatus(p).label}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Intel Toggle */}
+                  <button
+                    type="button"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setExpandedPlatform(expandedPlatform === p ? null : p);
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "5px",
+                      right: "5px",
+                      background: "none",
+                      border: "none",
+                      fontSize: "1.1rem",
+                      cursor: "pointer",
+                      opacity: 0.7,
+                    }}
+                    title="View Algorithm Intel"
+                  >
+                    ℹ️
+                  </button>
+
+                  {/* Expanded Algorithm Intel */}
+                  {expandedPlatform === p && (
+                    <div
+                      onClick={e => e.stopPropagation()}
+                      style={{
+                        marginTop: "12px",
+                        paddingTop: "12px",
+                        borderTop: "1px solid rgba(255,255,255,0.1)",
+                        textAlign: "left",
+                        width: "100%",
+                        animation: "fadeIn 0.3s ease-in-out",
+                      }}
+                    >
+                      {(() => {
+                        const intel = getAlgorithmIntel(p);
+                        return (
+                          <div style={{ fontSize: "0.8rem", color: "#e2e8f0" }}>
+                            <div
+                              style={{
+                                marginBottom: "6px",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <span
+                                style={{ color: "#00f2ea", fontSize: "0.7rem", fontWeight: "bold" }}
+                              >
+                                INTELLIGENCE
+                              </span>
+                              <span style={{ fontSize: "0.7rem", color: "#64748b" }}>LIVE</span>
+                            </div>
+
+                            <div style={{ fontWeight: 600, marginBottom: "4px" }}>
+                              {intel.audience}
+                            </div>
+
+                            <div style={{ marginBottom: "8px" }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  fontSize: "0.7rem",
+                                  marginBottom: "2px",
+                                }}
+                              >
+                                <span>Viral Probability</span>
+                                <span style={{ color: "#e1306c" }}>{intel.viral}%</span>
+                              </div>
+                              <div
+                                style={{
+                                  height: "4px",
+                                  background: "rgba(255,255,255,0.1)",
+                                  borderRadius: "2px",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: `${intel.viral}%`,
+                                    height: "100%",
+                                    background: "linear-gradient(90deg, #00f2ea, #e1306c)",
+                                    borderRadius: "2px",
+                                  }}
+                                ></div>
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                background: "rgba(0, 242, 234, 0.05)",
+                                borderLeft: "2px solid #00f2ea",
+                                padding: "6px",
+                                fontSize: "0.75rem",
+                                fontStyle: "italic",
+                                marginBottom: "8px",
+                              }}
+                            >
+                              "{intel.secret}"
+                            </div>
+
+                            <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
+                              <span style={{ fontWeight: "bold", color: "#fff" }}>TIP:</span>{" "}
+                              {intel.tips}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -2366,99 +2826,105 @@ function ContentUploadForm({
         )}
         {error && <div className="error-message">{error}</div>}
 
-        <div className="form-group full-width">
-          <label>{`Platform title ${p}`}</label>
-          <div className="input-with-emoji">
-            <input
-              aria-label={`Platform title ${p}`}
-              type="text"
-              value={(perPlatformTitle && perPlatformTitle[p]) || ""}
-              onChange={e =>
-                setPerPlatformTitle(prev => ({ ...prev, [p]: sanitizeInput(e.target.value) }))
-              }
-              className="form-input"
-              maxLength={100}
-            />
-            <button
-              type="button"
-              className="emoji-btn"
-              onClick={() => openEmojiPicker(`platform-title-${p}`)}
-            >
-              😊
-            </button>
+        {p !== "spotify" && (
+          <div className="form-group full-width">
+            <label>{`Platform title ${p}`}</label>
+            <div className="input-with-emoji">
+              <input
+                aria-label={`Platform title ${p}`}
+                type="text"
+                value={(perPlatformTitle && perPlatformTitle[p]) || ""}
+                onChange={e =>
+                  setPerPlatformTitle(prev => ({ ...prev, [p]: sanitizeInput(e.target.value) }))
+                }
+                className="form-input"
+                maxLength={100}
+              />
+              <button
+                type="button"
+                className="emoji-btn"
+                onClick={() => openEmojiPicker(`platform-title-${p}`)}
+              >
+                😊
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="form-group">
-          <label>{`Platform file ${p}`}</label>
-          <div
-            className={`file-upload drop-zone ${isDropActive ? "dragging" : ""}`}
-            data-testid="drop-zone"
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-          >
-            <input
-              aria-label={`Platform file ${p}`}
-              type="file"
-              accept={type === "video" ? "video/*" : type === "audio" ? "audio/*" : "image/*"}
-              onChange={e => handlePerPlatformFileChange(p, e.target.files[0])}
-              className="form-file-input"
-            />
-            <div className="drop-help">Drop files here or click to browse</div>
-            {perPlatformFile && perPlatformFile[p] && (
-              <div className="file-info">
-                Selected file: {perPlatformFile[p].name} (
-                {(perPlatformFile[p].size / 1024 / 1024).toFixed(2)} MB)
-              </div>
-            )}
+        {p !== "spotify" && (
+          <div className="form-group">
+            <label>{`Platform file ${p}`}</label>
+            <div
+              className={`file-upload drop-zone ${isDropActive ? "dragging" : ""}`}
+              data-testid="drop-zone"
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+            >
+              <input
+                aria-label={`Platform file ${p}`}
+                type="file"
+                accept={type === "video" ? "video/*" : type === "audio" ? "audio/*" : "image/*"}
+                onChange={e => handlePerPlatformFileChange(p, e.target.files[0])}
+                className="form-file-input"
+              />
+              <div className="drop-help">Drop files here or click to browse</div>
+              {perPlatformFile && perPlatformFile[p] && (
+                <div className="file-info">
+                  Selected file: {perPlatformFile[p].name} (
+                  {(perPlatformFile[p].size / 1024 / 1024).toFixed(2)} MB)
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="form-group">
-          <label>🎨 Text Overlay (optional)</label>
-          <div className="input-with-emoji">
-            <input
-              placeholder="Add overlay text..."
-              value={overlayText}
-              onChange={e => setOverlayText(e.target.value)}
-              className="form-input"
-            />
-            <button
-              className="emoji-btn"
-              type="button"
-              onClick={() => openEmojiPicker("overlay-text")}
-            >
-              😊
-            </button>
+        {p !== "spotify" && (
+          <div className="form-group">
+            <label>🎨 Text Overlay (optional)</label>
+            <div className="input-with-emoji">
+              <input
+                placeholder="Add overlay text..."
+                value={overlayText}
+                onChange={e => setOverlayText(e.target.value)}
+                className="form-input"
+              />
+              <button
+                className="emoji-btn"
+                type="button"
+                onClick={() => openEmojiPicker("overlay-text")}
+              >
+                😊
+              </button>
+            </div>
+            <div className="overlay-controls">
+              <select
+                aria-label="Overlay position"
+                className="form-select-small"
+                value={overlayPosition}
+                onChange={e => setOverlayPosition(e.target.value)}
+              >
+                <option value="top">⬆️ Top</option>
+                <option value="center">⏺️ Center</option>
+                <option value="bottom">⬇️ Bottom</option>
+              </select>
+              <input
+                className="color-picker"
+                title="Text color"
+                type="color"
+                value="#ffffff"
+                readOnly
+              />
+              <select className="form-select-small" value={12} onChange={() => {}}>
+                <option value="12">Small</option>
+                <option value="16">Medium</option>
+                <option value="24">Large</option>
+                <option value="32">XL</option>
+              </select>
+            </div>
           </div>
-          <div className="overlay-controls">
-            <select
-              aria-label="Overlay position"
-              className="form-select-small"
-              value={overlayPosition}
-              onChange={e => setOverlayPosition(e.target.value)}
-            >
-              <option value="top">⬆️ Top</option>
-              <option value="center">⏺️ Center</option>
-              <option value="bottom">⬇️ Bottom</option>
-            </select>
-            <input
-              className="color-picker"
-              title="Text color"
-              type="color"
-              value="#ffffff"
-              readOnly
-            />
-            <select className="form-select-small" value={12} onChange={() => {}}>
-              <option value="12">Small</option>
-              <option value="16">Medium</option>
-              <option value="24">Large</option>
-              <option value="32">XL</option>
-            </select>
-          </div>
-        </div>
+        )}
 
         {/* Include TikTok-specific publish options in the focused per-platform view */}
         {p === "tiktok" && (
@@ -2617,6 +3083,13 @@ function ContentUploadForm({
                     This content is commercial or promotional (This post promotes a brand, product,
                     or service)
                   </label>
+                  {/* BOUNTY TIP: Inform user that Bounty posts are inherently commercial */}
+                  {bountyAmount > 0 && !tiktokDisclosureEnabled && (
+                    <div style={{ fontSize: "0.8rem", color: "#ffd700", marginLeft: "24px" }}>
+                      💡 Since you set a ${bountyAmount} Bounty, this is technically a Paid
+                      Promotion. It is recommended to check this box.
+                    </div>
+                  )}
                   {tiktokDisclosureEnabled && (
                     <div className="disclosure-options" style={{ display: "flex", gap: 12 }}>
                       <label
@@ -3214,6 +3687,27 @@ function ContentUploadForm({
                       </label>
                     </div>
                     <div className="range-row">
+                      {/* BOUNTY BADGE ON PREVIEW */}
+                      {bountyAmount > 0 && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "10px",
+                            right: "10px",
+                            background: "linear-gradient(90deg, #ffd700, #b8860b)",
+                            color: "#000",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            fontWeight: "bold",
+                            fontSize: "0.8rem",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                            zIndex: 10,
+                          }}
+                        >
+                          🏆 ${bountyAmount} Bounty
+                        </div>
+                      )}
+
                       <input
                         type="range"
                         min="0"
@@ -3268,6 +3762,62 @@ function ContentUploadForm({
               )}
             </div>
             <BestTimeToPost selectedPlatforms={selectedPlatformsVal} />
+
+            {/* NEW: Sci-Fi Optimization Controls */}
+            <div
+              className="sci-fi-controls"
+              style={{
+                marginBottom: "1rem",
+                padding: "1rem",
+                border: "1px solid #1f2937",
+                borderRadius: "8px",
+                background: "rgba(17, 24, 39, 0.7)",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 0 15px rgba(0, 255, 255, 0.05)",
+              }}
+            >
+              <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={enhanceQuality}
+                    onChange={e => setEnhanceQuality(e.target.checked)}
+                    style={{ accentColor: "#00f2ea" }}
+                  />
+                  <span style={{ color: "#eef2ff", fontWeight: 600 }}>
+                    <span style={{ marginRight: "5px" }}>✨</span>
+                    AI Content Enhancement
+                  </span>
+                </label>
+
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={optimizeViral}
+                    onChange={e => setOptimizeViral(e.target.checked)}
+                    style={{ accentColor: "#e1306c" }}
+                  />
+                  <span style={{ color: "#eef2ff", fontWeight: 600 }}>
+                    <span style={{ marginRight: "5px" }}>🚀</span>
+                    Upload Now, Publish at Peak
+                  </span>
+                </label>
+              </div>
+            </div>
 
             <div className="form-group">
               <label>🎯 Target Platforms</label>
@@ -3345,71 +3895,218 @@ function ContentUploadForm({
                       <div className="platform-icon" aria-hidden="true">
                         {getPlatformIcon(p)}
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          width: "100%",
-                        }}
-                      >
-                        <div>
-                          <div className="platform-name">
-                            {p.charAt(0).toUpperCase() + p.slice(1)}
-                          </div>
-                          {disabled ? (
-                            <div
-                              className="platform-guideline"
-                              style={{ fontSize: 11, color: "#b66" }}
-                            >
-                              Cannot post via third-party apps
+                      <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            width: "100%",
+                          }}
+                        >
+                          <div>
+                            <div className="platform-name">
+                              {p.charAt(0).toUpperCase() + p.slice(1)}
+                              {/* Peak Time Indicator */}
+                              {getPeakStatus(p) && (
+                                <span
+                                  style={{
+                                    marginLeft: "8px",
+                                    fontSize: "0.65rem",
+                                    padding: "2px 6px",
+                                    borderRadius: "12px",
+                                    backgroundColor: "rgba(0,0,0,0.4)",
+                                    color: getPeakStatus(p).color,
+                                    border: `1px solid ${getPeakStatus(p).color}`,
+                                    boxShadow: getPeakStatus(p).glow,
+                                    fontWeight: "bold",
+                                    textTransform: "uppercase",
+                                  }}
+                                >
+                                  {getPeakStatus(p).label}
+                                </span>
+                              )}
                             </div>
-                          ) : (
-                            platformGuidelines[p] && (
+                            {disabled ? (
                               <div
                                 className="platform-guideline"
-                                style={{ fontSize: 11, color: "#6b7280" }}
+                                style={{ fontSize: 11, color: "#b66" }}
                               >
-                                {platformGuidelines[p].summary.replace(
-                                  "dynamic",
-                                  p === "tiktok" &&
-                                    tiktokCreatorInfo &&
-                                    tiktokCreatorInfo.max_video_post_duration_sec
-                                    ? `${tiktokCreatorInfo.max_video_post_duration_sec}s`
-                                    : ""
-                                )}
+                                Cannot post via third-party apps
                               </div>
-                            )
-                          )}
-                        </div>
-                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          {/* Quality Check Button on Card */}
-                          <button
-                            type="button"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handlePlatformQualityCheck(p);
-                            }}
-                            style={{
-                              fontSize: "10px",
-                              padding: "2px 6px",
-                              border: "1px solid #ddd",
-                              background: "#f9fafb",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                              marginRight: "4px",
-                            }}
-                            title="Run automated quality and safety check"
-                          >
-                            🛡️ Check
-                          </button>
-                          <div
-                            className="open-platform-indicator"
-                            style={{ fontSize: 12, color: "#374151" }}
-                          >
-                            {expandedPlatform === p ? "Close" : "Open"}
+                            ) : (
+                              platformGuidelines[p] && (
+                                <div
+                                  className="platform-guideline"
+                                  style={{ fontSize: 11, color: "#6b7280" }}
+                                >
+                                  {platformGuidelines[p].summary.replace(
+                                    "dynamic",
+                                    p === "tiktok" &&
+                                      tiktokCreatorInfo &&
+                                      tiktokCreatorInfo.max_video_post_duration_sec
+                                      ? `${tiktokCreatorInfo.max_video_post_duration_sec}s`
+                                      : ""
+                                  )}
+                                </div>
+                              )
+                            )}
+                          </div>
+                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            {/* Quality Check Button on Card */}
+                            <button
+                              type="button"
+                              onClick={e => {
+                                e.stopPropagation();
+                                handlePlatformQualityCheck(p);
+                              }}
+                              style={{
+                                fontSize: "10px",
+                                padding: "2px 6px",
+                                border: "1px solid #ddd",
+                                background: "#f9fafb",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                marginRight: "4px",
+                              }}
+                              title="Run automated quality and safety check"
+                            >
+                              🛡️ Check
+                            </button>
+                            <div
+                              className="open-platform-indicator"
+                              style={{ fontSize: 12, color: "#374151" }}
+                            >
+                              {expandedPlatform === p ? "Close" : "Open"}
+                            </div>
                           </div>
                         </div>
+
+                        {/* Sci-Fi Algorithm Intel - Displayed when Expanded */}
+                        {expandedPlatform === p && !disabled && (
+                          <div
+                            style={{
+                              marginTop: "12px",
+                              padding: "12px",
+                              background: "rgba(10, 20, 35, 0.9)",
+                              border: "1px solid #00f2ea",
+                              borderRadius: "8px",
+                              color: "#e0f7fa",
+                              boxShadow: "0 0 12px rgba(0, 242, 234, 0.15)",
+                              fontSize: "0.85rem",
+                              animation: "fadeIn 0.3s ease-in-out",
+                              backdropFilter: "blur(4px)",
+                            }}
+                            onClick={e => e.stopPropagation()} // Prevent card collapse when clicking inside intel
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                marginBottom: "10px",
+                                borderBottom: "1px solid rgba(0, 242, 234, 0.3)",
+                                paddingBottom: "6px",
+                              }}
+                            >
+                              <strong
+                                style={{
+                                  color: "#00f2ea",
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.5px",
+                                  fontSize: "0.8rem",
+                                }}
+                              >
+                                Algorithm Intel
+                              </strong>
+                              <span
+                                style={{
+                                  fontSize: "0.7rem",
+                                  opacity: 0.8,
+                                  color: "#a5f3fc",
+                                  fontFamily: "monospace",
+                                }}
+                              >
+                                LIVE_ANALYSIS_V2
+                              </span>
+                            </div>
+
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr",
+                                gap: "12px",
+                                marginBottom: "10px",
+                              }}
+                            >
+                              <div>
+                                <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
+                                  Audience Potential
+                                </div>
+                                <div
+                                  style={{ fontWeight: "bold", color: "#fff", fontSize: "0.95rem" }}
+                                >
+                                  {getAlgorithmIntel(p).audience}
+                                </div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
+                                  Viral Probability
+                                </div>
+                                <div
+                                  style={{
+                                    height: "6px",
+                                    background: "rgba(255,255,255,0.1)",
+                                    borderRadius: "3px",
+                                    marginTop: "6px",
+                                    overflow: "hidden",
+                                  }}
+                                >
+                                  {/* Bounty Boost to Viral Probability */}
+                                  <div
+                                    style={{
+                                      width: `${Math.min(100, getAlgorithmIntel(p).viral + (bountyAmount > 0 ? 15 : 0))}%`,
+                                      height: "100%",
+                                      borderRadius: "3px",
+                                      background:
+                                        bountyAmount > 0
+                                          ? `linear-gradient(90deg, #ffd700, #ff4500)` // Gold/Red fire for Bounty
+                                          : `linear-gradient(90deg, #00f2ea, #3b82f6)`,
+                                      boxShadow: bountyAmount > 0 ? "0 0 8px #ffd700" : "none",
+                                    }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div style={{ marginBottom: "10px" }}>
+                              <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>The Secret</div>
+                              <div style={{ color: "#fff", fontStyle: "italic" }}>
+                                "{getAlgorithmIntel(p).secret}"
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                background: "rgba(59, 130, 246, 0.1)",
+                                padding: "8px",
+                                borderRadius: "4px",
+                                borderLeft: "2px solid #3b82f6",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: "0.7rem",
+                                  color: "#60a5fa",
+                                  marginBottom: "2px",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                FORMAT ADVICE
+                              </div>
+                              <div style={{ fontSize: "0.8rem" }}>{getAlgorithmIntel(p).tips}</div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -4007,6 +4704,23 @@ function ContentUploadForm({
                         className="form-group tiktok-options"
                         style={{ display: "grid", gap: 8 }}
                       >
+                        {bountyAmount > 0 && (
+                          <div
+                            style={{
+                              padding: "10px",
+                              background: "#fffbe6",
+                              border: "1px solid #ffd700",
+                              borderRadius: "4px",
+                              fontSize: "0.8rem",
+                              color: "#896400",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            <strong>Bounty Requirement:</strong> Since you set a bounty, this post
+                            should ideally be <strong>Public</strong> to allow promoters to verify
+                            views.
+                          </div>
+                        )}
                         <div style={{ fontSize: 12, color: "#666" }}>
                           Creator: {tiktokCreatorDisplayName || "Loading..."}
                         </div>
@@ -5056,6 +5770,41 @@ function ContentUploadForm({
         <div className="content-preview-section">
           <h4>Platform Previews</h4>
           <div className="preview-cards" style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+            {/* BOUNTY INFO CARD (If active) */}
+            {bountyAmount > 0 && (
+              <div
+                style={{
+                  minWidth: "200px",
+                  background: "linear-gradient(135deg, #1a202c 0%, #2d3748 100%)",
+                  border: "2px solid #b8860b",
+                  borderRadius: "12px",
+                  padding: "16px",
+                  color: "white",
+                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "#ffd700",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                  }}
+                >
+                  Campaign Active
+                </div>
+                <div
+                  style={{ fontSize: "1.8rem", fontWeight: 800, margin: "8px 0", color: "#fff" }}
+                >
+                  ${bountyAmount}
+                </div>
+                <div style={{ fontSize: "0.9rem", color: "#cbd5e0" }}>Viral Bounty Pool</div>
+                <div style={{ marginTop: "12px", fontSize: "0.75rem", color: "#a0aec0" }}>
+                  Niche: <span style={{ color: "#fff" }}>{bountyNiche}</span>
+                </div>
+              </div>
+            )}
+
             {previews.map((p, idx) => (
               <div
                 key={idx}

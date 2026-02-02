@@ -209,6 +209,31 @@ async function uploadVideo({
 
   let finalTitle = title;
   let finalDescription = description;
+
+  // SPONSORSHIP CHECK (Enforce Disclosure)
+  if (contentId) {
+    try {
+      const cSnap = await db.collection("content").doc(contentId).get();
+      if (cSnap.exists) {
+        const cData = cSnap.data();
+        const mon = cData.monetization_settings || {};
+        if (mon.is_sponsored) {
+          const disclosure = mon.brand_name
+            ? ` #ad #${mon.brand_name.replace(/\s+/g, "")}`
+            : " #ad #sponsored";
+          const promoLink = mon.product_link ? `\n\nCheck it out here: ${mon.product_link}` : "";
+
+          if (!finalDescription.includes("#ad")) {
+            finalDescription += "\n\n" + disclosure;
+          }
+          if (promoLink && !finalDescription.includes(mon.product_link)) {
+            finalDescription += promoLink;
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
   const optimizer = optimizeMetadata ? require("./metadataOptimizer") : null;
   if (shortsMode) {
     const meta = deriveShortsMetadata({ title: finalTitle, description: finalDescription });

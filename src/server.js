@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
 // This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
 try {
@@ -1290,6 +1290,7 @@ try {
   app.use("/api/admin/analytics", adminAnalyticsRoutes);
   app.use("/api/engagement", engagementRoutes);
   app.use("/api/monetization", monetizationRoutes);
+  app.use("/api/revenue", require("./routes/revenueRoutes"));
   // Internal endpoints (accept lightweight payloads from frontend instrumentation)
   try {
     app.use("/api/internal", require("./routes/frontendLogsRoutes"));
@@ -1421,6 +1422,15 @@ try {
     console.log("🚏 AI Chat routes mounted at /api/chat");
   } catch (e) {
     console.log("⚠️ Chat routes mount failed:", e.message);
+  }
+
+  // PayFast routes
+  try {
+    const payfastRoutes = require("./routes/payfastRoutes");
+    app.use("/api/payfast", payfastRoutes);
+    console.log("🚏 PayFast routes mounted at /api/payfast");
+  } catch (e) {
+    console.log("⚠️ PayFast routes mount failed:", e.message);
   }
 
   // PayPal routes
@@ -3464,6 +3474,47 @@ try {
   module.exports = app;
 } catch (e) {
   console.error(e);
+}
+
+// -------------------------------------------------
+// Real-Time Promotion Scheduler (Added via Edit)
+// -------------------------------------------------
+const PromotionService = require("./promotionService");
+const promotionService = new PromotionService();
+const SCHEDULER_INTERVAL_MS = parseInt(process.env.SCHEDULER_INTERVAL_MS || "60000", 10); // 1 minute
+
+if (process.env.SCHEDULER_ENABLED !== "false") {
+  console.log(
+    `[Scheduler] 🕒 Initializing Real-Time Promotion Scheduler (every ${SCHEDULER_INTERVAL_MS}ms)`
+  );
+
+  // 1. Due Schedules (The Plan)
+  setInterval(async () => {
+    if (!__isLeader && process.env.ENABLE_BACKGROUND_JOBS === "true") return;
+    try {
+      await promotionService.processDueSchedules();
+    } catch (e) {
+      console.error("[Scheduler] ⚠️ Interval Check Failed:", e.message);
+    }
+  }, SCHEDULER_INTERVAL_MS).unref();
+
+  // 2. Repost Optimization (The Persistence) - Every 30 mins
+  // Scans for content with falling views (< 50k goal) and re-queues them
+  if (process.env.ENABLE_BACKGROUND_JOBS === "true") {
+    setInterval(
+      async () => {
+        if (!__isLeader) return;
+        try {
+          const { analyzeAndScheduleReposts } = require("./services/repostSchedulerService");
+          const count = await analyzeAndScheduleReposts({ limit: 10 });
+          if (count > 0) console.log(`[Scheduler] ♻️ Auto-cycled ${count} posts due to view decay`);
+        } catch (e) {
+          console.warn("[Scheduler] ⚠️ Repost analysis failed:", e.message);
+        }
+      },
+      30 * 60 * 1000
+    ).unref();
+  }
 }
 
 // Optional scheduled integration scan runner (outside try-catch to ensure we can log if not enabled)

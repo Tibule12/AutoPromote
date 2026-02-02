@@ -150,23 +150,128 @@ describe("Promotion integration (mocked platforms)", () => {
 
   test("sponsored posts are blocked until sponsor approval", async () => {
     // Mark content as sponsored for youtube without approval
-    await db.collection("content").doc(contentId).update({
-      platform_options: {
-        youtube: { role: "sponsored", sponsor: "Acme" },
-      },
-    });
+    await db
+      .collection("content")
+      .doc(contentId)
+      .update({
+        platform_options: {
+          youtube: { role: "sponsored", sponsor: "Acme" },
+        },
+      });
 
-    const res = await enqueuePlatformPostTask({ contentId, uid, platform: "youtube", reason: "manual", payload: {} });
+    const res = await enqueuePlatformPostTask({
+      contentId,
+      uid,
+      platform: "youtube",
+      reason: "manual",
+      payload: {},
+    });
     expect(res).toHaveProperty("skipped");
     expect(res.reason).toBe("sponsor_not_approved");
 
     // Now set sponsorApproval to approved and try again
-    await db.collection("content").doc(contentId).update({
-      "platform_options.youtube.sponsorApproval": { status: "approved", reviewedBy: "admin-1", reviewedAt: new Date().toISOString(), sponsor: "Acme" },
+    await db
+      .collection("content")
+      .doc(contentId)
+      .update({
+        "platform_options.youtube.sponsorApproval": {
+          status: "approved",
+          reviewedBy: "admin-1",
+          reviewedAt: new Date().toISOString(),
+          sponsor: "Acme",
+        },
+      });
+
+    // Wait for the sponsorApproval to become visible in the doc (poll briefly)
+    const start = Date.now();
+    let seen = null;
+    while (Date.now() - start < 2000) {
+      const s = await db.collection("content").doc(contentId).get();
+      const d = s.data();
+      const opts =
+        (d.platform_options && d.platform_options.youtube) ||
+        (d.platformOptions && d.platformOptions.youtube);
+      if (opts && opts.sponsorApproval && opts.sponsorApproval.status === "approved") {
+        seen = opts.sponsorApproval;
+        break;
+      }
+      // small backoff
+      await new Promise(r => setTimeout(r, 50));
+    }
+    if (!seen) {
+      const s = await db.collection("content").doc(contentId).get();
+      console.error(
+        "TEST DEBUG: sponsorApproval not visible after update",
+        JSON.stringify(s.data())
+      );
+    }
+
+    const res2 = await enqueuePlatformPostTask({
+      contentId,
+      uid,
+      platform: "youtube",
+      reason: "manual",
+      payload: {},
+    });
+    expect(res2).toHaveProperty("id");
+  });
+
+  test("tiktok sponsored posts are blocked until sponsor approval", async () => {
+    // enable tiktok for this test
+    process.env.TIKTOK_ENABLED = "true";
+
+    // Mark content as sponsored for tiktok without approval
+    await db
+      .collection("content")
+      .doc(contentId)
+      .update({
+        platform_options: {
+          tiktok: { role: "sponsored", sponsor: "Acme" },
+        },
+      });
+
+    const res = await enqueuePlatformPostTask({
+      contentId,
+      uid,
+      platform: "tiktok",
+      reason: "manual",
+      payload: {},
+    });
+    expect(res).toHaveProperty("skipped");
+    expect(res.reason).toBe("sponsor_not_approved");
+
+    // Now create an approved sponsor_approvals doc (mimic admin approve flow) and try again
+    await db.collection("sponsor_approvals").add({
+      contentId,
+      platform: "tiktok",
+      sponsor: "Acme",
+      status: "approved",
+      reviewedBy: "admin-test",
+      reviewedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     });
 
-    const res2 = await enqueuePlatformPostTask({ contentId, uid, platform: "youtube", reason: "manual", payload: {} });
+    // Ensure fallback record visible
+    const apr = await db
+      .collection("sponsor_approvals")
+      .where("contentId", "==", contentId)
+      .where("platform", "==", "tiktok")
+      .where("status", "==", "approved")
+      .limit(1)
+      .get();
+    expect(apr.empty).toBe(false);
+
+    const res2 = await enqueuePlatformPostTask({
+      contentId,
+      uid,
+      platform: "tiktok",
+      reason: "manual",
+      payload: {},
+    });
     expect(res2).toHaveProperty("id");
+
+    // cleanup env
+    process.env.TIKTOK_ENABLED = "false";
   });
 
   test("duplicate pending prevented", async () => {
