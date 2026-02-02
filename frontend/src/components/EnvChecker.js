@@ -5,7 +5,7 @@ import { API_BASE_URL } from "../config";
 const EnvChecker = () => {
   // Run once on mount — diagnostic only
   /* mount-only effect (intentional) */
-  // eslint-disable-next-line
+
   useEffect(() => {
     console.log("Environment Variables Check:");
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 test("debug require cache for ContentUploadForm", () => {
   require("path");
   // Try to require the module

@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 const express = require("express");
 const router = express.Router();
 const { db } = require("./firebaseAdmin");
@@ -8,6 +8,7 @@ const Joi = require("joi");
 const path = require("path");
 const sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
 const { usageLimitMiddleware, trackUsage } = require("./middlewares/usageLimitMiddleware");
+const costControlMiddleware = require("./middlewares/costControlMiddleware");
 
 // Enable test bypass for viral optimization when running under CI/test flags
 if (
@@ -22,7 +23,7 @@ if (
 let _engagementBoostingService; // require('./services/engagementBoostingService');
 // eslint-disable-next-line no-unused-vars
 let _growthAssuranceTracker; // require('./services/growthAssuranceTracker');
-// eslint-disable-next-line no-unused-vars
+ 
 let _contentQualityEnhancer; // require('./services/contentQualityEnhancer');
 // eslint-disable-next-line no-unused-vars
 let _repostDrivenEngine; // require('./services/repostDrivenEngine');
@@ -59,6 +60,27 @@ const contentUploadSchema = Joi.object({
   quality_enhanced: Joi.boolean().optional(),
   // Preview-only flag used by the frontend to request a dry-run (do not persist)
   isDryRun: Joi.boolean().optional(),
+
+  // BRAND / PROMOTION SETTINGS (The "TikTok Card" Revenue Linking)
+  monetization_settings: Joi.object({
+    niche: Joi.string()
+      .valid("music", "fashion", "tech", "crypto", "fitness", "general")
+      .default("general"),
+    is_sponsored: Joi.boolean().default(false),
+    brand_name: Joi.string().allow("").optional(), // E.g. "Nike"
+    product_link: Joi.string().uri().allow("").optional(), // Affiliate link
+    commercial_rights: Joi.boolean().default(false), // Does platform have right to sell this engagement?
+  }).optional(),
+
+  // VIRAL BOUNTY (The "No Ads" Revenue Model)
+  bounty: Joi.object({
+    amount: Joi.number().min(0).optional(),
+    niche: Joi.string().default("general"),
+    paymentMethodId: Joi.string().optional(),
+  }).optional(),
+
+  // Injected by costControlMiddleware
+  optimizationFlags: Joi.object().optional(),
 });
 
 function validateBody(schema) {
@@ -108,6 +130,7 @@ router.post(
   "/upload",
   authMiddleware,
   usageLimitMiddleware({ freeLimit: 10 }),
+  costControlMiddleware,
   validateBody(contentUploadSchema),
   rateLimitMiddleware(10, 60000),
   async (req, res) => {
@@ -178,9 +201,11 @@ router.post(
         quality_score,
         quality_feedback,
         quality_enhanced,
+        enhance_quality, // Added flag
         custom_hashtags,
         growth_guarantee,
         viral_boost,
+        monetization_settings, // Added for persistence
       } = req.body;
 
       // Initialize viral engines (lazy-load to avoid import-time side effects during tests)
@@ -205,9 +230,11 @@ router.post(
         quality_score,
         quality_feedback,
         quality_enhanced,
+        enhance_quality,
         custom_hashtags,
         growth_guarantee,
         viral_boost,
+        monetization_settings: monetization_settings || {}, // Persist TikTok/Revenue settings
         meta: req.body.meta,
         duration:
           typeof (req.body.meta && req.body.meta.duration) === "number"
@@ -299,6 +326,68 @@ router.post(
         content = { id: contentRef.id, ...contentDoc.data() };
       }
 
+      // VIRAL BOUNTY CREATION (The "Billionaire" Model)
+      // If user provided a Bounty Pool, we instantiate the Escrow Record immediately.
+      // This routes money into the "Viral Economy" rather than "Ad Inventory".
+      if (req.body.bounty && req.body.bounty.amount > 0) {
+        try {
+          console.log(
+            `[Upload] 💰 Processing Viral Bounty for Content ${content.id}: $${req.body.bounty.amount}`
+          );
+          const revenueEngine = require("./services/revenueEngine");
+          // Use provided payment method or a placeholder for early access/testing
+          const paymentMethod = req.body.bounty.paymentMethodId || "tok_bypass";
+
+          const bountyResult = await revenueEngine.createViralBounty(
+            userId,
+            req.body.bounty.niche || monetization_settings?.niche || "general",
+            req.body.bounty.amount,
+            paymentMethod
+          );
+
+          if (bountyResult.success) {
+            console.log(`[Upload] ✅ Bounty Active: ${bountyResult.bountyId}`);
+            // Link the Bounty to the Content Record
+            await contentRef.update({
+              viral_bounty_id: bountyResult.bountyId,
+              has_bounty: true,
+              bounty_active: true,
+              bounty_pool_amount: req.body.bounty.amount,
+              bounty_niche: req.body.bounty.niche || "general",
+            });
+            // Update local object for response
+            content.viral_bounty_id = bountyResult.bountyId;
+            content.has_bounty = true;
+          }
+        } catch (bountyErr) {
+          console.error("[Upload] ❌ Error creating Viral Bounty:", bountyErr);
+          // Note context: We do NOT fail the upload, but we alert the logs.
+          // In a strict financial system, we might want to roll back, but for "Viral Velocity",
+          // we let the content fly and maybe retry billing later.
+          logger.error("[Upload] Bounty Creation Failed", {
+            error: bountyErr.message,
+            userId,
+            contentId: content.id,
+          });
+        }
+      }
+
+      // AI CONTENT ENHANCEMENT TRIGGER (Sci-Fi Quality Boost)
+      if (enhance_quality) {
+        try {
+          console.log(`[Upload] 🖌️ Enqueuing AI Enhancement for ${content.id}`);
+          const { enqueueMediaTransformTask } = require("./services/mediaTransform");
+          await enqueueMediaTransformTask({
+            contentId: content.id,
+            uid: userId,
+            url: url,
+            meta: { quality_enhanced: true, original_quality: quality_score || "standard" },
+          });
+        } catch (e) {
+          console.warn("[Upload] Failed to queue enhancement:", e.message);
+        }
+      }
+
       // VIRAL OPTIMIZATION: optionally disabled for test/debug via environment
       let hashtagOptimization = { hashtags: [] };
       let distributionStrategy = { platforms: [] };
@@ -358,6 +447,52 @@ router.post(
         },
       });
 
+      // If any platform_options indicate a sponsored role, record a sponsor_approval request
+      try {
+        if (platform_options && typeof platform_options === "object") {
+          for (const [p, opts] of Object.entries(platform_options)) {
+            try {
+              if (opts && String(opts.role || "").toLowerCase() === "sponsored") {
+                // Ensure sponsor is present; if not, leave as-is and validationMiddleware will handle
+                const sponsor = opts.sponsor || null;
+                const sponsorApproval = {
+                  status: sponsor ? "pending" : "missing_sponsor",
+                  requestedBy: userId,
+                  requestedAt: new Date().toISOString(),
+                  sponsor: sponsor || null,
+                };
+                // Update content.platform_options.<p>.sponsorApproval
+                const updateObj = {};
+                updateObj[`platform_options.${p}.sponsorApproval`] = sponsorApproval;
+                await contentRef.update(updateObj);
+
+                // Also create a sponsor_approvals doc for admin review when sponsor provided
+                if (sponsor) {
+                  await db.collection("sponsor_approvals").add({
+                    contentId: contentRef.id,
+                    platform: p,
+                    sponsor,
+                    status: "pending",
+                    requestedBy: userId,
+                    requestedAt: new Date().toISOString(),
+                    createdAt: new Date().toISOString(),
+                  });
+                }
+              }
+            } catch (e) {
+              // Best-effort: log and continue
+              console.warn(
+                "[sponsor-approval] failed to set up sponsorApproval for",
+                p,
+                e && e.message
+              );
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[sponsor-approval] error during sponsorApproval setup", e && e.message);
+      }
+
       // Schedule promotion with viral timing
       const optimalTiming =
         distributionStrategy.platforms?.[0]?.timing?.optimalTime ||
@@ -393,21 +528,22 @@ router.post(
           promotion_schedule.scheduleType || promotion_schedule.schedule_type;
       }
       // Auto-enqueue promotion tasks with viral optimization
-      // If upload included edit metadata, enqueue a media transform task so a worker may process it
+      // If upload included edit metadata OR quality enhancement is requested, enqueue a media transform task
       if (
-        req.body.meta &&
-        (req.body.meta.trimStart ||
-          req.body.meta.trimEnd ||
-          req.body.meta.rotate ||
-          req.body.meta.flipH ||
-          req.body.meta.flipV)
+        quality_enhanced ||
+        (req.body.meta &&
+          (req.body.meta.trimStart ||
+            req.body.meta.trimEnd ||
+            req.body.meta.rotate ||
+            req.body.meta.flipH ||
+            req.body.meta.flipV))
       ) {
         try {
           const { enqueueMediaTransform } = require("./services/promotionTaskQueue");
           await enqueueMediaTransform({
             contentId: contentRef.id,
             uid: userId,
-            meta: req.body.meta,
+            meta: { ...(req.body.meta || {}), quality_enhanced },
             sourceUrl: url,
           });
         } catch (e) {
@@ -556,6 +692,9 @@ router.post(
             id: contentRef.id,
             status: "pending_approval",
             approvalStatus: "pending",
+            viral_bounty_id: content.viral_bounty_id || null,
+            has_bounty: !!content.has_bounty,
+            bounty_active: !!content.bounty_active,
           },
           message: "Content uploaded and queued for promotion; awaiting admin approval.",
         });

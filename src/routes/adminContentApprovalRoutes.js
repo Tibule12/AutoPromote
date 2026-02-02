@@ -207,6 +207,37 @@ router.post("/:contentId/approve", authMiddleware, adminOnly, async (req, res) =
             const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
             for (const platform of targets) {
               try {
+                // Honor sponsor approval for sponsored posts
+                const options = (data.platformOptions && data.platformOptions[platform]) || {};
+                const role = String(options.role || "").toLowerCase();
+                if (role === "sponsored") {
+                  const sponsorApproval = options.sponsorApproval || (data.platform_options && data.platform_options[platform] && data.platform_options[platform].sponsorApproval) || null;
+                  if (!sponsorApproval || sponsorApproval.status !== "approved") {
+                    console.warn("Skipping enqueue: sponsor approval missing or not approved for", contentId, platform);
+                    // Record audit log about skip
+                    await db.collection("audit_logs").add({
+                      action: "skip_enqueue_sponsor_not_approved",
+                      adminId: req.user.uid,
+                      contentId,
+                      platform,
+                      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                    });
+                    // Notify uploader that sponsor approval is pending
+                    if (data.userId) {
+                      await db.collection("notifications").add({
+                        userId: data.userId,
+                        type: "sponsor_pending",
+                        contentId,
+                        platform,
+                        message: `Your sponsored post for ${platform} is pending sponsor approval and will not be published until an admin approves the sponsor.`,
+                        read: false,
+                        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                      });
+                    }
+                    continue; // skip this platform
+                  }
+                }
+
                 const pPayload = {
                   url: data.url,
                   title: data.title,

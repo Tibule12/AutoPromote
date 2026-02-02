@@ -280,6 +280,25 @@ async function enqueuePlatformPostTask({
     return { id: ref.id, ...baseTask };
   }
   if (!contentId || !uid || !platform) throw new Error("contentId, uid, platform required");
+
+  // Prevent enqueuing sponsored posts before sponsor approval
+  try {
+    const contentSnap = await db.collection("content").doc(contentId).get();
+    if (contentSnap.exists) {
+      const c = contentSnap.data();
+      const options = (c.platform_options && c.platform_options[platform]) || (c.platformOptions && c.platformOptions[platform]) || {};
+      const role = String(options.role || "").toLowerCase();
+      if (role === "sponsored") {
+        const sponsorApproval = options.sponsorApproval || null;
+        if (!sponsorApproval || sponsorApproval.status !== "approved") {
+          console.log("[enqueue] blocked: sponsor not approved for", contentId, platform);
+          return { skipped: true, reason: "sponsor_not_approved", platform, contentId };
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[enqueue] sponsor approval check failed, continuing:", e && e.message);
+  }
   // Quota enforcement (monthly task quota based on plan)
   try {
     const userRef = db.collection("users").doc(uid);

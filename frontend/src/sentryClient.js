@@ -42,7 +42,7 @@ export function initSentry() {
     return true;
   } catch (e) {
     // Safe no-op when Sentry package is not installed or init fails
-    // eslint-disable-next-line no-console
+
     console.warn("[Sentry] failed to initialize", e && e.message ? e.message : e);
     return false;
   }

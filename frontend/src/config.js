@@ -36,8 +36,12 @@ export const API_ENDPOINTS = {
   ADMIN_PAYOUTS: `${API_BASE_URL}/api/monetization/admin/payouts`,
   ADMIN_PAYOUT_PROCESS: id => `${API_BASE_URL}/api/monetization/admin/payouts/${id}/process`,
 
-  // Boost endpoints
+  // Boost endpoints (Legacy) / Viral Bounty (New)
   CREATE_BOOST: `${API_BASE_URL}/api/monetization/boost/create`,
+  CREATE_BOUNTY: `${API_BASE_URL}/api/revenue/create-bounty`,
+  BOUNTY_BOARD: `${API_BASE_URL}/api/revenue/bounty-board`,
+  MY_BOUNTIES: `${API_BASE_URL}/api/revenue/my-bounties`,
+  CLAIM_BOUNTY: `${API_BASE_URL}/api/revenue/claim-bounty`,
 
   // TikTok endpoints
   TIKTOK_AUTH_START: `${API_BASE_URL}/api/tiktok/auth/start`,

@@ -354,6 +354,48 @@ router.post(
         },
       });
 
+      // If any platform_options indicate a sponsored role, record a sponsor_approval request
+      try {
+        if (platform_options && typeof platform_options === "object") {
+          for (const [p, opts] of Object.entries(platform_options)) {
+            try {
+              if (opts && String(opts.role || "").toLowerCase() === "sponsored") {
+                // Ensure sponsor is present; if not, leave as-is and validationMiddleware will handle
+                const sponsor = opts.sponsor || null;
+                const sponsorApproval = {
+                  status: sponsor ? "pending" : "missing_sponsor",
+                  requestedBy: userId,
+                  requestedAt: new Date().toISOString(),
+                  sponsor: sponsor || null,
+                };
+                // Update content.platform_options.<p>.sponsorApproval
+                const updateObj = {};
+                updateObj[`platform_options.${p}.sponsorApproval`] = sponsorApproval;
+                await contentRef.update(updateObj);
+
+                // Also create a sponsor_approvals doc for admin review when sponsor provided
+                if (sponsor) {
+                  await db.collection("sponsor_approvals").add({
+                    contentId: contentRef.id,
+                    platform: p,
+                    sponsor,
+                    status: "pending",
+                    requestedBy: userId,
+                    requestedAt: new Date().toISOString(),
+                    createdAt: new Date().toISOString(),
+                  });
+                }
+              }
+            } catch (e) {
+              // Best-effort: log and continue
+              console.warn("[sponsor-approval] failed to set up sponsorApproval for", p, e && e.message);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[sponsor-approval] error during sponsorApproval setup", e && e.message);
+      }
+
       // Schedule promotion with viral timing
       const optimalTiming =
         distributionStrategy.platforms?.[0]?.timing?.optimalTime ||

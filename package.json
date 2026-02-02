@@ -23,7 +23,7 @@
     "test:e2e": "node test/e2e/upload-e2e.js",
     "test:e2e:playwright": "cross-env NODE_ENV=test CORS_ALLOW_ALL=true GOOGLE_APPLICATION_CREDENTIALS=test/e2e/tmp/service-account.json node ./scripts/write-service-account.js && npm --prefix frontend ci && npm --prefix frontend run build && cross-env NODE_ENV=test CORS_ALLOW_ALL=true GOOGLE_APPLICATION_CREDENTIALS=test/e2e/tmp/service-account.json npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1",
     "test:e2e:playwright:emulator": "cross-env CORS_ALLOW_ALL=true npm --prefix frontend ci && npm --prefix frontend run build && npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1",
-    "lint": "node -e \"try{require('child_process').execSync('eslint --ext .js,.jsx src test --rule \"no-console:0\" --rule \"no-unused-vars:0\" --rule \"no-restricted-syntax:0\"', {stdio: 'inherit'})}catch(e){ /* swallow non-zero */ }\"",
+    "lint": "node -e \"try{require('child_process').execSync('eslint src test --rule \\\"no-console:0\\\" --rule \\\"no-unused-vars:0\\\" --rule \\\"no-restricted-syntax:0\\\"', {stdio: 'inherit'})}catch(e){ /* swallow non-zero */ }\"",
     "emulator:start": "npx firebase emulators:start --only firestore,functions",
     "check:grpc-versions": "node -e \"const fs=require('fs'); const out=JSON.parse(require('child_process').execSync('npm ls @grpc/grpc-js --json').toString()||'{}'); const versions=new Set(); function scan(n){ if(!n||!n.dependencies) return; Object.keys(n.dependencies).forEach(k=>{ const d=n.dependencies[k]; if(k==='@grpc/grpc-js'){ versions.add(d.version); } scan(d); }); } scan(out); console.log('grpc versions:', [...versions].join(', ')); if(versions.size>1){ console.error('Multiple versions found'); process.exit(1);} \"",
     "check:grpc-install": "node ./scripts/check-grpc-install.js",
@@ -35,7 +35,7 @@
     "flag:uploads": "node ./scripts/flag-bad-uploads.js",
     "export:flagged": "node ./scripts/export-flagged-uploads.js",
     "hold:flagged": "node ./scripts/bulk-hold-flagged.js",
-    "prepare": "node -e \"const fs=require('fs'), cp=require('child_process'); const tryRun=(p)=>{ if(fs.existsSync(p)){ cp.execFileSync(process.execPath, [p], {stdio:'inherit'}); return true; } return false; }; if(tryRun('./scripts/ensure-husky.js')) process.exit(0); if(tryRun('../scripts/ensure-husky.js')) process.exit(0); if(tryRun('../../scripts/ensure-husky.js')) process.exit(0); console.log('No ensure-husky script found in CWD or parents; skipping husky install');\"",
+    "prepare": "node -e \"const fs=require('fs'), cp=require('child_process'); const tryRun=(p)=>{ if(fs.existsSync(p)){ cp.execFileSync(process.execPath, [p], {stdio:'inherit'}); return true; } return false; }; if(tryRun('./scripts/ensure-husky.js')) process.exit(0); if(tryRun('../scripts/ensure-husky.js')) process.exit(0); if(tryRun('../../scripts/ensure-husky.js')) process.exit(0); console.log('No ensure-husky script found in CWD or parents; skipping husky install');\" && node ./scripts/check-npm-audit.js",
     "verify:frontend-build": "node ./scripts/verify-frontend-build.js",
     "build:frontend": "npm --prefix frontend ci || (npm --prefix frontend install && npm --prefix frontend run build)"
   },
@@ -81,7 +81,9 @@
     "diff": "8.0.3",
     "braces": "3.0.3",
     "micromatch": "4.0.8",
-    "lodash": "^4.17.23"
+    "lodash": "^4.17.23",
+    "tar": "7.5.7",
+    "fast-xml-parser": "5.3.4"
   },
   "devDependencies": {
     "@babel/core": "^7.22.0",
@@ -90,8 +92,9 @@
     "@firebase/rules-unit-testing": "^5.0.0",
     "@playwright/test": "^1.42.0",
     "babel-jest": "^30.2.0",
+    "baseline-browser-mapping": "^2.9.19",
     "cross-env": "^7.0.3",
-    "eslint": "^8.44.0",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "ffmpeg-static": "^5.3.0",
     "firebase-tools": "^15.3.1",

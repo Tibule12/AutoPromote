@@ -3,6 +3,8 @@
 
 const fetch = require("node-fetch");
 
+const { getPostStats: getFacebookPostStats } = require("./facebookService");
+
 async function safeJson(res) {
   let txt;
   try {
@@ -17,21 +19,20 @@ async function safeJson(res) {
   }
 }
 
-async function fetchFacebookPostMetrics(externalId) {
-  const PAGE_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
-  if (!PAGE_TOKEN || !externalId) return null;
+async function fetchFacebookPostMetrics(uid, externalId, pageId) {
+  if (!uid || !externalId) return null;
   try {
-    // Metrics: post_impressions, post_engaged_users
-    const url = `https://graph.facebook.com/${externalId}/insights?metric=post_impressions,post_engaged_users&access_token=${encodeURIComponent(PAGE_TOKEN)}`;
-    const res = await fetch(url);
-    const json = await safeJson(res);
-    if (!res.ok) return null;
-    const metrics = {};
-    (json.data || []).forEach(m => {
-      metrics[m.name] = parseInt(m.values?.[0]?.value || 0, 10);
-    });
-    return metrics;
-  } catch (_) {
+    const stats = await getFacebookPostStats({ uid, postId: externalId, pageId });
+    if (!stats) return null;
+    return {
+      post_impressions: stats.impressions,
+      post_engaged_users: stats.engagedUsers,
+      // map other fields if needed for computing score
+      likes: stats.likes,
+      comments: stats.comments,
+    };
+  } catch (e) {
+    console.warn("[PlatformMetrics] Facebook fetch failed:", e.message);
     return null;
   }
 }
@@ -71,4 +72,66 @@ async function fetchInstagramMediaMetrics(mediaId) {
   }
 }
 
-module.exports = { fetchFacebookPostMetrics, fetchTwitterTweetMetrics, fetchInstagramMediaMetrics };
+const { getVideoMetrics } = require("./tiktokService");
+const { getPostStats: getLinkedInPostStats } = require("./linkedinService");
+const { getPostInfo: getRedditPostInfo } = require("./redditService");
+
+async function fetchTikTokMetrics(uid, externalId) {
+  if (!uid || !externalId) return null;
+  try {
+    const videos = await getVideoMetrics(uid, [externalId]);
+    if (!videos || videos.length === 0) return null;
+
+    const v = videos[0];
+    // Normalize strict typing
+    return {
+      view_count: v.view_count || 0,
+      like_count: v.like_count || 0,
+      comment_count: v.comment_count || 0,
+      share_count: v.share_count || 0,
+    };
+  } catch (e) {
+    console.warn("[PlatformMetrics] TikTok fetch failed for %s: %s", externalId, e.message);
+    return null;
+  }
+}
+
+async function fetchLinkedInMetrics(uid, externalId) {
+  if (!uid || !externalId) return null;
+  try {
+    const stats = await getLinkedInPostStats({ uid, shareId: externalId });
+    return {
+      like_count: stats.likes || 0,
+      comment_count: stats.comments || 0,
+      // LinkedIn API (basic) doesn't give views/impressions easily
+    };
+  } catch (e) {
+    console.warn("[PlatformMetrics] LinkedIn fetch failed:", e.message);
+    return null;
+  }
+}
+
+async function fetchRedditMetrics(uid, externalId) {
+  if (!uid || !externalId) return null;
+  try {
+    const info = await getRedditPostInfo({ uid, postId: externalId });
+    return {
+      score: info.score,
+      upvote_ratio: info.upvoteRatio,
+      comment_count: info.numComments,
+      // Reddit doesn't expose view counts via API generally
+    };
+  } catch (e) {
+    console.warn("[PlatformMetrics] Reddit fetch failed:", e.message);
+    return null;
+  }
+}
+
+module.exports = {
+  fetchFacebookPostMetrics,
+  fetchTwitterTweetMetrics,
+  fetchInstagramMediaMetrics,
+  fetchTikTokMetrics,
+  fetchLinkedInMetrics,
+  fetchRedditMetrics,
+};

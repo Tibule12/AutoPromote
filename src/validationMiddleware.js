@@ -110,6 +110,21 @@ module.exports = {
         )
           return sendBadRequest(res, "`boardId` is recommended for Pinterest promotions.");
         break;
+      case "youtube":
+      case "facebook":
+      case "tiktok":
+        // Enforce role-based requirements if role is provided via platform_options
+        const role = (body.role || (body.platform_options && body.platform_options[platform] && body.platform_options[platform].role) || "").toLowerCase();
+        if (role === "sponsored") {
+          const sponsor = body.sponsor || (body.platform_options && body.platform_options[platform] && body.platform_options[platform].sponsor);
+          if (!sponsor) return sendBadRequest(res, "`sponsor` is required when role=\"sponsored\".");
+        }
+        if (role === "boosted") {
+          const budget = body.boostBudget || (body.platform_options && body.platform_options[platform] && body.platform_options[platform].boostBudget);
+          const target = body.targetViews || (body.platform_options && body.platform_options[platform] && body.platform_options[platform].targetViews);
+          if (!budget && !target) return sendBadRequest(res, "`boostBudget` or `targetViews` is required when role=\"boosted\".");
+        }
+        break;
       case "reddit":
         if (
           !body.subreddit &&
