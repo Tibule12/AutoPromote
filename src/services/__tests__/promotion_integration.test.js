@@ -173,14 +173,23 @@ describe("Promotion integration (mocked platforms)", () => {
     await db
       .collection("content")
       .doc(contentId)
-      .update({
-        "platform_options.youtube.sponsorApproval": {
-          status: "approved",
-          reviewedBy: "admin-1",
-          reviewedAt: new Date().toISOString(),
-          sponsor: "Acme",
+      .set(
+        {
+          platform_options: {
+            youtube: {
+              role: "sponsored",
+              sponsor: "Acme",
+              sponsorApproval: {
+                status: "approved",
+                reviewedBy: "admin-1",
+                reviewedAt: new Date().toISOString(),
+                sponsor: "Acme",
+              },
+            },
+          },
         },
-      });
+        { merge: true }
+      );
 
     // Wait for the sponsorApproval to become visible in the doc (poll briefly)
     const start = Date.now();

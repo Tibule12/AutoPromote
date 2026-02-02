@@ -37,13 +37,13 @@ describe("PlatformSettingsOverride", () => {
       />
     );
 
-    const boostedBtn = screen.getByRole("button", { name: /Boosted/i });
+    const boostedBtn = screen.getByRole("button", { name: /Sponsored/i });
     await userEvent.click(boostedBtn);
 
-    expect(setPlatformOption).toHaveBeenCalledWith("facebook", "role", "boosted");
+    expect(setPlatformOption).toHaveBeenCalledWith("facebook", "role", "sponsored");
 
-    // Boosted role should reveal boost budget input
-    const boostInput = screen.getByPlaceholderText("e.g., 50");
-    expect(boostInput).toBeInTheDocument();
+    // Sponsored role should reveal sponsor input
+    const sponsorInput = screen.getByPlaceholderText("Sponsor name");
+    expect(sponsorInput).toBeInTheDocument();
   });
 });

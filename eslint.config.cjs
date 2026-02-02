@@ -5,6 +5,11 @@ module.exports = [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true
+        }
+      }
     },
     plugins: {},
     // Note: do not use 'extends' in flat config; keep minimal rules for CI

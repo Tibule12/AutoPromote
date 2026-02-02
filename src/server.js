@@ -1,4 +1,3 @@
- 
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
 // This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
 try {
@@ -3479,8 +3478,7 @@ try {
 // -------------------------------------------------
 // Real-Time Promotion Scheduler (Added via Edit)
 // -------------------------------------------------
-const PromotionService = require("./promotionService");
-const promotionService = new PromotionService();
+const promotionService = require("./promotionService");
 const SCHEDULER_INTERVAL_MS = parseInt(process.env.SCHEDULER_INTERVAL_MS || "60000", 10); // 1 minute
 
 if (process.env.SCHEDULER_ENABLED !== "false") {
@@ -3490,7 +3488,8 @@ if (process.env.SCHEDULER_ENABLED !== "false") {
 
   // 1. Due Schedules (The Plan)
   setInterval(async () => {
-    if (!__isLeader && process.env.ENABLE_BACKGROUND_JOBS === "true") return;
+    const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
+    if (!isLeader && process.env.ENABLE_BACKGROUND_JOBS === "true") return;
     try {
       await promotionService.processDueSchedules();
     } catch (e) {
@@ -3503,7 +3502,8 @@ if (process.env.SCHEDULER_ENABLED !== "false") {
   if (process.env.ENABLE_BACKGROUND_JOBS === "true") {
     setInterval(
       async () => {
-        if (!__isLeader) return;
+        const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
+        if (!isLeader) return;
         try {
           const { analyzeAndScheduleReposts } = require("./services/repostSchedulerService");
           const count = await analyzeAndScheduleReposts({ limit: 10 });
