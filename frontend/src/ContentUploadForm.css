@@ -156,12 +156,17 @@
   justify-items: stretch;
 }
 
-/* Slight adjustment for very small screens */
+/* Slight adjustment for very small screens - Force 1 column for better visibility */
 @media (max-width: 479px) {
   .platform-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
+}
+
+/* Ensure expanded cards take full width */
+.platform-card.expanded {
+  grid-column: 1 / -1;
 }
 
 .platform-tile {

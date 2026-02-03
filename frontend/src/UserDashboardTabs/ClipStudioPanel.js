@@ -59,8 +59,8 @@ const ClipStudioPanel = ({ content = [] }) => {
       const user = auth.currentUser;
       if (!user) throw new Error("You must be logged in to upload.");
 
-      // 1. Upload to Storage
-      const storagePath = `uploads/videos/${user.uid}/${Date.now()}_${file.name}`;
+      // 1. Upload to Storage (Temporary folder for cleanup)
+      const storagePath = `temp_sources/${user.uid}/${Date.now()}_${file.name}`;
       const storageRef = ref(storage, storagePath);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
