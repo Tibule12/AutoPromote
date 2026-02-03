@@ -17,6 +17,7 @@ import CommunityFeed from "./CommunityFeed";
 import ClipStudioPanel from "./UserDashboardTabs/ClipStudioPanel";
 import AdsPanel from "./UserDashboardTabs/AdsPanel";
 import LiveWatch from "./LiveWatch";
+import LiveHub from "./LiveHub";
 import FloatingActions from "./components/FloatingActions";
 import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
@@ -1124,147 +1125,205 @@ const UserDashboard = ({
   };
 
   return (
-    <div className="dashboard-root">
+    <div className={`dashboard-root ${activeTab === "live" ? "live-mode" : ""}`}>
       <Toaster
         position="top-right"
         toastOptions={{ duration: 4000, style: { background: "#1a1a2e", color: "#fff" } }}
       />
-      {activeTab === "live" && <TopNav />}
-      <header className="dashboard-topbar" aria-label="Top navigation">
-        <button
-          className="hamburger"
-          aria-label={sidebarOpen ? "Close menu" : "Open menu"}
-          aria-expanded={sidebarOpen}
-          onClick={() => setSidebarOpen(v => !v)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-        <div className="topbar-title">Your Dashboard</div>
-        <div className="topbar-user">{user?.name || "Guest"}</div>
-        <VoiceOverGuide activeTab={activeTab} />
-      </header>
+      {/* TopNav removed for live tab as requested */}
+      {activeTab !== "live" && (
+        <header className="dashboard-topbar" aria-label="Top navigation">
+          <button
+            className="hamburger"
+            aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+            aria-expanded={sidebarOpen}
+            onClick={() => setSidebarOpen(v => !v)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          <div className="topbar-title">Your Dashboard</div>
+          <div className="topbar-user">{user?.name || "Guest"}</div>
+          <VoiceOverGuide activeTab={activeTab} />
+          <button
+            className="topbar-icon-btn"
+            aria-label="Notifications"
+            onClick={() => handleNav("notifications")}
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--text)",
+              marginLeft: "0.5rem",
+            }}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            {notifs.length > 0 && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: "-4px",
+                  right: "-4px",
+                  background: "#ef4444",
+                  color: "white",
+                  fontSize: "10px",
+                  fontWeight: "bold",
+                  minWidth: "16px",
+                  height: "16px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "0 2px",
+                }}
+              >
+                {notifs.length > 9 ? "9+" : notifs.length}
+              </span>
+            )}
+          </button>
+        </header>
+      )}
 
-      <aside className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Sidebar">
-        <div className="profile-section">
-          <img className="profile-avatar" src={user?.avatarUrl || DEFAULT_IMAGE} alt="Avatar" />
-          <h2>{user?.name || "User Name"}</h2>
-          <div className="profile-stats">
-            <div>
-              <strong>Views:</strong> {stats?.views ?? 0}
-            </div>
-            <div>
-              <strong>Clicks:</strong> {stats?.clicks ?? 0}
-            </div>
-            <div>
-              <strong>CTR:</strong> {stats?.ctr ?? 0}%
-            </div>
-            <div>
-              <strong>Revenue:</strong> ${stats?.revenue ?? "0.00"}
+      {activeTab !== "live" && (
+        <aside className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Sidebar">
+          <div className="profile-section">
+            <img className="profile-avatar" src={user?.avatarUrl || DEFAULT_IMAGE} alt="Avatar" />
+            <h2>{user?.name || "User Name"}</h2>
+
+            <div className="profile-stats">
+              <div>
+                <strong>Views:</strong> {stats?.views ?? 0}
+              </div>
+              <div>
+                <strong>Clicks:</strong> {stats?.clicks ?? 0}
+              </div>
+              <div>
+                <strong>CTR:</strong> {stats?.ctr ?? 0}%
+              </div>
+              <div>
+                <strong>Revenue:</strong> ${stats?.revenue ?? "0.00"}
+              </div>
             </div>
           </div>
-        </div>
-        <nav className="dashboard-navbar-vertical" role="navigation">
-          <ul>
-            <li
-              className={activeTab === "profile" ? "active" : ""}
-              onClick={() => handleNav("profile")}
-            >
-              Profile
-            </li>
-            <li
-              className={activeTab === "upload" ? "active" : ""}
-              onClick={() => handleNav("upload")}
-            >
-              Upload
-            </li>
-            <li
-              className={activeTab === "schedules" ? "active" : ""}
-              onClick={() => handleNav("schedules")}
-            >
-              Schedules
-            </li>
-            <li
-              className={activeTab === "analytics" ? "active" : ""}
-              onClick={() => handleNav("analytics")}
-            >
-              Analytics
-            </li>
-            <li
-              className={activeTab === "rewards" ? "active" : ""}
-              onClick={() => handleNav("rewards")}
-            >
-              Rewards
-            </li>
-            <li
-              className={activeTab === "notifications" ? "active" : ""}
-              onClick={() => handleNav("notifications")}
-            >
-              Notifications
-            </li>
-            <li
-              className={activeTab === "earnings" ? "active" : ""}
-              onClick={() => handleNav("earnings")}
-            >
-              Earnings
-            </li>
-            <li className={activeTab === "ads" ? "active" : ""} onClick={() => handleNav("ads")}>
-              📢 Ads
-            </li>
-            <li
-              className={activeTab === "connections" ? "active" : ""}
-              onClick={() => handleNav("connections")}
-            >
-              Connections
-            </li>
-            {isAdminUser && (
+          <nav className="dashboard-navbar-vertical" role="navigation">
+            <ul>
               <li
-                className={activeTab === "admin-audit" ? "active" : ""}
-                onClick={() => handleNav("admin-audit")}
+                className={activeTab === "profile" ? "active" : ""}
+                onClick={() => handleNav("profile")}
               >
-                Admin Audit
+                Profile
               </li>
-            )}
-            {isAdminUser && (
               <li
-                className={activeTab === "admin-kyc" ? "active" : ""}
-                onClick={() => handleNav("admin-kyc")}
+                className={activeTab === "upload" ? "active" : ""}
+                onClick={() => handleNav("upload")}
               >
-                Admin KYC
+                Upload
               </li>
-            )}
-            {/* KYC uploads disabled for live-only AfterDark by design */}
-            <li
-              className={activeTab === "security" ? "active" : ""}
-              onClick={() => handleNav("security")}
-            >
-              Security
-            </li>
-            <li className={activeTab === "feed" ? "active" : ""} onClick={() => handleNav("feed")}>
-              🎥 Feed
-            </li>
-            <li
-              className={activeTab === "community" ? "active" : ""}
-              onClick={() => handleNav("community")}
-            >
-              💬 Forum
-            </li>
-            <li
-              className={activeTab === "clips" ? "active" : ""}
-              onClick={() => handleNav("clips")}
-            >
-              AI Clips
-            </li>
-            <li className={activeTab === "live" ? "active" : ""} onClick={() => handleNav("live")}>
-              Live
-            </li>
-          </ul>
-        </nav>
-        <button className="logout-btn" onClick={onLogout}>
-          Logout
-        </button>
-      </aside>
+              <li
+                className={activeTab === "schedules" ? "active" : ""}
+                onClick={() => handleNav("schedules")}
+              >
+                Schedules
+              </li>
+              <li
+                className={activeTab === "analytics" ? "active" : ""}
+                onClick={() => handleNav("analytics")}
+              >
+                Analytics
+              </li>
+              <li
+                className={activeTab === "rewards" ? "active" : ""}
+                onClick={() => handleNav("rewards")}
+              >
+                Rewards
+              </li>
+              {/* Notifications moved to top bar */}
+              <li
+                className={activeTab === "earnings" ? "active" : ""}
+                onClick={() => handleNav("earnings")}
+              >
+                Earnings
+              </li>
+              <li className={activeTab === "ads" ? "active" : ""} onClick={() => handleNav("ads")}>
+                📢 Ads
+              </li>
+              <li
+                className={activeTab === "connections" ? "active" : ""}
+                onClick={() => handleNav("connections")}
+              >
+                Connections
+              </li>
+              {isAdminUser && (
+                <li
+                  className={activeTab === "admin-audit" ? "active" : ""}
+                  onClick={() => handleNav("admin-audit")}
+                >
+                  Admin Audit
+                </li>
+              )}
+              {isAdminUser && (
+                <li
+                  className={activeTab === "admin-kyc" ? "active" : ""}
+                  onClick={() => handleNav("admin-kyc")}
+                >
+                  Admin KYC
+                </li>
+              )}
+              {/* KYC uploads disabled for live-only AfterDark by design */}
+              <li
+                className={activeTab === "security" ? "active" : ""}
+                onClick={() => handleNav("security")}
+              >
+                Security
+              </li>
+              <li
+                className={activeTab === "feed" ? "active" : ""}
+                onClick={() => handleNav("feed")}
+              >
+                🎥 Feed
+              </li>
+              <li
+                className={activeTab === "community" ? "active" : ""}
+                onClick={() => handleNav("community")}
+              >
+                💬 Forum
+              </li>
+              <li
+                className={activeTab === "clips" ? "active" : ""}
+                onClick={() => handleNav("clips")}
+              >
+                AI Clips
+              </li>
+              <li
+                className={activeTab === "live" ? "active" : ""}
+                onClick={() => handleNav("live")}
+              >
+                Live
+              </li>
+            </ul>
+          </nav>
+          <button className="logout-btn" onClick={onLogout}>
+            Logout
+          </button>
+        </aside>
+      )}
 
       <main className="dashboard-main">
         <div style={{ display: "flex", justifyContent: "flex-end", padding: "10px 20px 0 0" }}>
@@ -1484,12 +1543,12 @@ const UserDashboard = ({
         {activeTab === "clips" && <ClipStudioPanel content={contentList} />}
         {activeTab === "live" && (
           <div className="live-panel">
-            <LiveWatch />
+            <LiveHub user={user} />
           </div>
         )}
       </main>
       {activeTab === "live" && <FloatingActions />}
-      <BottomNav activeTab={activeTab} onNav={handleNav} />
+      <BottomNav activeTab={activeTab} onNav={handleNav} onLogout={onLogout} />
     </div>
   );
 };

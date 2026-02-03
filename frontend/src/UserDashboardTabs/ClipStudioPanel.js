@@ -2,8 +2,10 @@
 // AI Clip Generation Studio (Opus Clip style)
 // Analyze videos and generate viral short clips
 
-import React, { useState, useEffect } from "react";
-import { auth } from "../firebaseClient";
+import React, { useState, useEffect, useRef } from "react";
+import { auth, db, storage } from "../firebaseClient";
+import { doc, setDoc, getDoc } from "firebase/firestore"; // Import Firestore functions
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL } from "../config";
 import toast from "react-hot-toast";
 import "./ClipStudioPanel.css";
@@ -38,9 +40,61 @@ const ClipStudioPanel = ({ content = [] }) => {
 
   // Controls the "Clean Interface" aspect
   const [showLibrary, setShowLibrary] = useState(false);
+  const fileInputRef = useRef(null); // Ref for file upload
 
   // Filter for videos only
   const videoContent = content.filter(c => c.type === "video");
+
+  const handleFileUpload = async event => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("video/")) {
+      toast.error("Please upload a video file.");
+      return;
+    }
+
+    const toastId = toast.loading("Uploading video...");
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error("You must be logged in to upload.");
+
+      // 1. Upload to Storage (Temporary folder for cleanup)
+      const storagePath = `temp_sources/${user.uid}/${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, storagePath);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+
+      // 2. Create Content Document
+      const contentId = `upload-${Date.now()}`; // Generate a temporary ID (or let Firestore auto-gen)
+      // Using a deterministic ID here for simplicity, but doc() without ID auto-generates
+      const newContentRef = doc(db, "content", contentId);
+
+      const newContent = {
+        id: contentId,
+        title: file.name,
+        type: "video",
+        url: url,
+        userId: user.uid,
+        createdAt: new Date().toISOString(),
+        description: "Uploaded via Clip Studio",
+        platform_options: {}, // Initialize empty
+      };
+
+      await setDoc(newContentRef, newContent);
+
+      toast.success("Video uploaded!", { id: toastId });
+
+      // 3. Immediately trigger analysis
+      analyzeVideo(newContent);
+    } catch (error) {
+      console.error("Upload failed", error);
+      toast.error(`Upload failed: ${error.message}`, { id: toastId });
+    } finally {
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   // Run once on mount — dependencies intentionally omitted
   /* mount-only effect (intentional) */
@@ -318,9 +372,25 @@ const ClipStudioPanel = ({ content = [] }) => {
                 }}
               >
                 <h3>Select a Video to Analyze</h3>
-                <button className="btn-secondary" onClick={() => setShowLibrary(false)}>
-                  Cancel
-                </button>
+                <div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    accept="video/*"
+                    onChange={handleFileUpload}
+                  />
+                  <button
+                    className="btn-primary"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ marginRight: "8px" }}
+                  >
+                    Upload New Video
+                  </button>
+                  <button className="btn-secondary" onClick={() => setShowLibrary(false)}>
+                    Cancel
+                  </button>
+                </div>
               </div>
 
               {videoContent.length === 0 ? (

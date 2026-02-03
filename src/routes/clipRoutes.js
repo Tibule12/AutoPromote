@@ -48,8 +48,14 @@ async function checkClipQuota(req, res, next) {
 
   try {
     // 1. Get User Plan
-    const userDoc = await db.collection("users").doc(userId).get();
-    const userData = userDoc.data() || {};
+    let userDoc;
+    try {
+      userDoc = await db.collection("users").doc(userId).get();
+    } catch (e) {
+      // If getting user doc fails (e.g. invalid ID or connection), treat as empty
+      console.warn("ClipQuota: Failed to load user doc", userId, e.message);
+    }
+    const userData = userDoc && userDoc.exists ? userDoc.data() : {};
     // Check both potential locations for plan config
     const planId =
       (userData.subscription && userData.subscription.planId) || userData.planId || "free";
