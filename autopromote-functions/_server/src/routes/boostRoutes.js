@@ -2,11 +2,19 @@ const express = require("express");
 const authMiddleware = require("../authMiddleware");
 const { db, admin } = require("../firebaseAdmin");
 const { recordUsage } = require("../services/usageLedgerService");
+const rateLimit = require("express-rate-limit");
 
 const router = express.Router();
 
+const createRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Create a boost (consumes adCredits or uses free boost if available)
-router.post("/create", authMiddleware, async (req, res) => {
+router.post("/create", authMiddleware, createRateLimiter, async (req, res) => {
   try {
     const uid = req.userId || (req.user && req.user.uid);
     const {
@@ -128,7 +136,7 @@ router.post("/create", authMiddleware, async (req, res) => {
 });
 
 // Get boost report
-router.get("/:id/report", authMiddleware, async (req, res) => {
+router.get("/:id/report", authMiddleware, createRateLimiter, async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) return res.status(400).json({ ok: false, error: "id_required" });
