@@ -15,11 +15,24 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
       query = query.where("type", "==", type);
     }
 
-    const snapshot = await query
+    let snapshot = await query
       .orderBy("createdAt", "desc")
       .limit(parseInt(limit))
       .offset(parseInt(offset))
       .get();
+
+    // Fallback for older documents that use snake_case fields (`created_at`)
+    if (!snapshot || snapshot.empty) {
+      try {
+        snapshot = await query
+          .orderBy("created_at", "desc")
+          .limit(parseInt(limit))
+          .offset(parseInt(offset))
+          .get();
+      } catch (e) {
+        // If this also fails (no index or other), ignore and continue with empty results
+      }
+    }
 
     const content = [];
     for (const doc of snapshot.docs) {
@@ -27,12 +40,13 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
 
       // Get user info
       let userData = null;
-      if (contentData.userId) {
-        const userDoc = await db.collection("users").doc(contentData.userId).get();
+      const userIdForLookup = contentData.userId || contentData.user_id;
+      if (userIdForLookup) {
+        const userDoc = await db.collection("users").doc(userIdForLookup).get();
         if (userDoc.exists) {
           const user = userDoc.data();
           userData = {
-            id: contentData.userId,
+            id: userIdForLookup,
             name: user.name,
             email: user.email,
             plan: user.plan,
@@ -44,8 +58,74 @@ router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
         id: doc.id,
         ...contentData,
         user: userData,
-        createdAt: contentData.createdAt?.toDate?.() || contentData.createdAt,
+        // Support both camelCase and snake_case timestamp fields
+        createdAt: contentData.createdAt?.toDate?.()
+          ? contentData.createdAt.toDate()
+          : contentData.createdAt ||
+            (contentData.created_at?.toDate?.()
+              ? contentData.created_at.toDate()
+              : contentData.created_at),
       });
+    }
+
+    // If debug flag present, include additional diagnostic info (counts & recent docs)
+    if (String(req.query.debug || "").toLowerCase() === "1") {
+      try {
+        const statuses = ["pending", "approved", "rejected", "flagged", "changes_requested"];
+        const counts = {};
+        await Promise.all(
+          statuses.map(async s => {
+            try {
+              const snap = await db.collection("content").where("approvalStatus", "==", s).get();
+              counts[s] = snap.size;
+            } catch (e) {
+              counts[s] = null;
+            }
+          })
+        );
+
+        const recentSnap = await db
+          .collection("content")
+          .orderBy("created_at", "desc")
+          .limit(20)
+          .get()
+          .catch(() => ({ docs: [] }));
+        const recent = (recentSnap.docs || []).map(d => ({
+          id: d.id,
+          approvalStatus: d.data().approvalStatus,
+          title: d.data().title,
+          user_id: d.data().user_id,
+          created_at: d.data().created_at,
+        }));
+
+        const recentPendingSnap = await db
+          .collection("content")
+          .where("approvalStatus", "==", "pending")
+          .orderBy("created_at", "desc")
+          .limit(20)
+          .get()
+          .catch(() => ({ docs: [] }));
+        const recentPending = (recentPendingSnap.docs || []).map(d => ({
+          id: d.id,
+          approvalStatus: d.data().approvalStatus,
+          title: d.data().title,
+          user_id: d.data().user_id,
+          created_at: d.data().created_at,
+        }));
+
+        return res.json({
+          success: true,
+          content,
+          total: content.length,
+          debug: { counts, recent, recentPending },
+        });
+      } catch (err) {
+        console.error(
+          "[admin/pending][debug] Failed to gather debug info:",
+          err && err.stack ? err.stack : err
+        );
+        // Fall through to return the normal response below
+      }
     }
 
     res.json({ success: true, content, total: content.length });
@@ -84,17 +164,20 @@ router.post("/:contentId/approve", authMiddleware, adminOnly, async (req, res) =
       approvedBy: req.user.uid,
       approvedAt: admin.firestore.FieldValue.serverTimestamp(),
       approvalNotes: notes || null,
-      status: "active",
+      status: "approved",
     });
 
     // Notify user
     const content = contentDoc.data();
     if (content.userId) {
+      const msg = notes
+        ? `Your content has been approved and is now live! Admin note: ${notes}`
+        : "Your content has been approved and is now live!";
       await db.collection("notifications").add({
         userId: content.userId,
         type: "content_approved",
         contentId,
-        message: "Your content has been approved and is now live!",
+        message: msg,
         read: false,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
@@ -108,6 +191,85 @@ router.post("/:contentId/approve", authMiddleware, adminOnly, async (req, res) =
       notes,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
     });
+
+    // Auto-enqueue platform posts for this content based on its target_platforms
+    (async () => {
+      try {
+        const c = await contentRef.get();
+        if (c.exists) {
+          const data = c.data() || {};
+          const targets = Array.isArray(data.target_platforms)
+            ? data.target_platforms
+            : Array.isArray(data.platforms)
+              ? data.platforms
+              : [];
+          if (targets.length) {
+            const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
+            for (const platform of targets) {
+              try {
+                // Honor sponsor approval for sponsored posts
+                const options = (data.platformOptions && data.platformOptions[platform]) || {};
+                const role = String(options.role || "").toLowerCase();
+                if (role === "sponsored") {
+                  const sponsorApproval = options.sponsorApproval || (data.platform_options && data.platform_options[platform] && data.platform_options[platform].sponsorApproval) || null;
+                  if (!sponsorApproval || sponsorApproval.status !== "approved") {
+                    console.warn("Skipping enqueue: sponsor approval missing or not approved for", contentId, platform);
+                    // Record audit log about skip
+                    await db.collection("audit_logs").add({
+                      action: "skip_enqueue_sponsor_not_approved",
+                      adminId: req.user.uid,
+                      contentId,
+                      platform,
+                      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                    });
+                    // Notify uploader that sponsor approval is pending
+                    if (data.userId) {
+                      await db.collection("notifications").add({
+                        userId: data.userId,
+                        type: "sponsor_pending",
+                        contentId,
+                        platform,
+                        message: `Your sponsored post for ${platform} is pending sponsor approval and will not be published until an admin approves the sponsor.`,
+                        read: false,
+                        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                      });
+                    }
+                    continue; // skip this platform
+                  }
+                }
+
+                const pPayload = {
+                  url: data.url,
+                  title: data.title,
+                  description: data.description,
+                  platformOptions: data.platformOptions || {},
+                  hashtags: data.hashtags || [],
+                };
+                // For TikTok, default approved publishes to PUBLIC
+                if (platform === "tiktok") {
+                  if (!pPayload.privacy) pPayload.privacy = "PUBLIC_TO_EVERYONE";
+                  // helpful flag for consumers
+                  pPayload.platformOptions = pPayload.platformOptions || {};
+                  pPayload.platformOptions.tiktok = pPayload.platformOptions.tiktok || {};
+                  pPayload.platformOptions.tiktok.approved_publish = true;
+                }
+                await enqueuePlatformPostTask({
+                  contentId,
+                  uid: data.userId || null,
+                  platform,
+                  reason: "approved",
+                  payload: pPayload,
+                });
+              } catch (e) {
+                console.warn("enqueuePlatformPostTask failed for", contentId, platform, e.message);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("auto-enqueue after approval failed:", err.message || err);
+      }
+    })();
 
     res.json({ success: true, message: "Content approved successfully" });
   } catch (error) {
@@ -241,7 +403,7 @@ router.post("/bulk-approve", authMiddleware, adminOnly, async (req, res) => {
         approvalStatus: "approved",
         approvedBy: req.user.uid,
         approvedAt: timestamp,
-        status: "active",
+        status: "approved",
       });
     }
 
@@ -255,6 +417,48 @@ router.post("/bulk-approve", authMiddleware, adminOnly, async (req, res) => {
       count: contentIds.length,
       timestamp,
     });
+
+    // Auto-enqueue platform posts for each approved content (best-effort, async)
+    (async () => {
+      try {
+        const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
+        for (const cid of contentIds) {
+          try {
+            const cSnap = await db.collection("content").doc(cid).get();
+            if (!cSnap.exists) continue;
+            const data = cSnap.data() || {};
+            const targets = Array.isArray(data.target_platforms)
+              ? data.target_platforms
+              : Array.isArray(data.platforms)
+                ? data.platforms
+                : [];
+            for (const platform of targets) {
+              try {
+                await enqueuePlatformPostTask({
+                  contentId: cid,
+                  uid: data.userId || null,
+                  platform,
+                  reason: "approved",
+                  payload: {
+                    url: data.url,
+                    title: data.title,
+                    description: data.description,
+                    platformOptions: data.platformOptions || {},
+                    hashtags: data.hashtags || [],
+                  },
+                });
+              } catch (e) {
+                console.warn("bulk enqueue failed for", cid, platform, e && e.message);
+              }
+            }
+          } catch (e) {
+            console.warn("bulk enqueue content fetch failed for", cid, e && e.message);
+          }
+        }
+      } catch (err) {
+        console.warn("bulk auto-enqueue failed:", err && err.message);
+      }
+    })();
 
     res.json({
       success: true,
@@ -281,18 +485,26 @@ router.get("/stats", authMiddleware, adminOnly, async (req, res) => {
     today.setHours(0, 0, 0, 0);
     const todayTimestamp = admin.firestore.Timestamp.fromDate(today);
 
-    const [approvedTodaySnapshot, rejectedTodaySnapshot] = await Promise.all([
+    // Use single-field queries and filter in-memory to avoid requiring a composite index
+    const [approvedAtSnap, rejectedAtSnap] = await Promise.all([
       db
         .collection("content")
-        .where("approvalStatus", "==", "approved")
         .where("approvedAt", ">=", todayTimestamp)
-        .get(),
+        .get()
+        .catch(() => ({ docs: [] })),
       db
         .collection("content")
-        .where("approvalStatus", "==", "rejected")
         .where("rejectedAt", ">=", todayTimestamp)
-        .get(),
+        .get()
+        .catch(() => ({ docs: [] })),
     ]);
+
+    const approvedTodaySnapshot = {
+      size: (approvedAtSnap.docs || []).filter(d => d.data().approvalStatus === "approved").length,
+    };
+    const rejectedTodaySnapshot = {
+      size: (rejectedAtSnap.docs || []).filter(d => d.data().approvalStatus === "rejected").length,
+    };
 
     res.json({
       success: true,
@@ -325,6 +537,51 @@ router.get("/stats", authMiddleware, adminOnly, async (req, res) => {
       });
     }
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Quick debug endpoint to inspect recent approval activity and recent approved/pending content
+router.get("/debug", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    // Last 50 approval audit logs
+    const logsSnap = await db
+      .collection("audit_logs")
+      .where("action", "==", "approve_content")
+      .orderBy("timestamp", "desc")
+      .limit(50)
+      .get();
+    const approvals = logsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Recent approved and pending content (last 50 each)
+    const [approvedSnap, pendingSnap] = await Promise.all([
+      db
+        .collection("content")
+        .where("approvalStatus", "==", "approved")
+        .orderBy("approvedAt", "desc")
+        .limit(50)
+        .get()
+        .catch(() => ({ docs: [] })),
+      db
+        .collection("content")
+        .where("approvalStatus", "==", "pending")
+        .orderBy("createdAt", "desc")
+        .limit(50)
+        .get()
+        .catch(() => ({ docs: [] })),
+    ]);
+
+    const approved = approvedSnap.docs
+      ? approvedSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+      : [];
+    const pending = pendingSnap.docs ? pendingSnap.docs.map(d => ({ id: d.id, ...d.data() })) : [];
+
+    res.json({ success: true, approvals, approved, pending });
+  } catch (err) {
+    console.error(
+      "[admin/debug] Error fetching approval debug data:",
+      err && err.stack ? err.stack : err
+    );
+    res.status(500).json({ success: false, error: "Failed to fetch debug info" });
   }
 });
 

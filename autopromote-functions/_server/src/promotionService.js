@@ -1,8 +1,9 @@
-/* eslint-disable no-console */
+ 
 const { db } = require("./firebaseAdmin");
 const optimizationService = require("./optimizationService");
 const paypalClient = require("./paypalClient");
 const paypal = require("@paypal/paypal-server-sdk");
+const { dispatchPlatformPost } = require("./services/platformPoster");
 
 class PromotionService {
   // Normalize incoming schedule data (accept snake_case or camelCase) to canonical camelCase
@@ -180,7 +181,10 @@ class PromotionService {
         const occurrenceCount = await this.getOccurrenceCount(schedule.id);
         if (occurrenceCount >= schedule.maxOccurrences) {
           console.log(
-            `⏹️ Max occurrences (${schedule.maxOccurrences}) reached for schedule ${schedule.id}`
+            "⏹️ Max occurrences:",
+            schedule.maxOccurrences,
+            "reached for schedule",
+            schedule.id
           );
           return null;
         }
@@ -188,7 +192,7 @@ class PromotionService {
 
       const ref = await db.collection("promotion_schedules").add(nextScheduleData);
       const created = { id: ref.id, ...nextScheduleData };
-      console.log("✅ Created next recurrence for schedule", schedule.id + ":", created);
+      console.log("✅ Created next recurrence for schedule:", schedule.id, created);
       return created;
     } catch (error) {
       console.error("Error in createNextRecurrence:", error);
@@ -437,6 +441,104 @@ class PromotionService {
     }
   }
 
+  /**
+   * REAL-TIME SCHEDULER: Process due schedules and dispatch to platforms
+   * This bridges the gap between the "Schedules" panel (Db) and "PlatformPoster" (API)
+   */
+  async processDueSchedules() {
+    try {
+      const now = new Date().toISOString();
+      // Find schedules that are active, due, and not yet processing/executed
+      // Note: Firestore composite index required: isActive ASC, startTime ASC
+      const snapshot = await db
+        .collection("promotion_schedules")
+        .where("isActive", "==", true)
+        .where("startTime", "<=", now)
+        .orderBy("startTime")
+        .limit(10) // Process in batches to avoid timeouts
+        .get();
+
+      if (snapshot.empty) return 0;
+
+      let processedCount = 0;
+
+      for (const doc of snapshot.docs) {
+        const schedule = { id: doc.id, ...doc.data() };
+
+        // Skip if already processing (safety check if lock failed)
+        if (schedule.status === "processing" || schedule.status === "executed") continue;
+
+        console.log(`[Scheduler] 🚀 Processing schedule ${schedule.id} for ${schedule.platform}`);
+
+        // 1. Lock
+        await doc.ref.update({ status: "processing", updatedAt: now });
+
+        try {
+          // 2. Dispatch to Platform Poster (Real API Call)
+          // We map the schedule data to the payload expected by platformPoster
+          const payload = {
+            ...schedule.platformSpecificSettings, // platform options like pageId
+            // If message/text not in platformSpecificSettings, check other fields
+            message: schedule.message || schedule.caption || undefined,
+            // Hashtags might be in optimization data
+            hashtagString: schedule.viral_optimization?.hashtags?.join(" ") || "",
+          };
+
+          const result = await dispatchPlatformPost({
+            platform: schedule.platform,
+            contentId: schedule.contentId,
+            uid: schedule.user_id || schedule.userId,
+            payload: payload,
+            reason: "scheduled_event",
+          });
+
+          // 3. Handle Result
+          if (result.success) {
+            console.log(`[Scheduler] ✅ Success ${schedule.id}: ${JSON.stringify(result)}`);
+
+            // Mark done
+            await doc.ref.update({
+              status: "executed",
+              isActive: false, // This instance is done
+              executedAt: new Date().toISOString(),
+              result: result,
+            });
+
+            // Recursion?
+            // If this was a one-time event, we are done.
+            // If it has frequency, we create the next one NOW.
+            if (schedule.frequency && schedule.frequency !== "once") {
+              await this.createNextRecurrence({ ...schedule, id: doc.id });
+            }
+
+            processedCount++;
+          } else {
+            // Failed
+            console.warn(`[Scheduler] ❌ Failed ${schedule.id}: ${result.error}`);
+            await doc.ref.update({
+              status: "failed",
+              isActive: false, // Stop retrying this specific instance for now (or implement retry logic)
+              error: result.error,
+              executedAt: new Date().toISOString(),
+            });
+          }
+        } catch (err) {
+          console.error(`[Scheduler] 💥 Exception ${schedule.id}:`, err);
+          await doc.ref.update({
+            status: "error",
+            error: err.message,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      }
+      return processedCount;
+    } catch (error) {
+      console.error("Error processing due schedules:", error);
+      return 0;
+    }
+  }
+
+  // OLD SIMULATION METHOD (Kept for reference or simulation modes)
   // Execute promotion and update content metrics
   async executePromotion(scheduleId) {
     try {

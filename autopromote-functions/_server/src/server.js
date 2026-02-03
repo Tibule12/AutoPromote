@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
 // This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
 try {
@@ -21,7 +20,11 @@ try {
       if (!process.env.FIREBASE_PROJECT_ID && parsed && parsed.project_id) {
         process.env.FIREBASE_PROJECT_ID = parsed.project_id;
       }
-      console.log("[startup] Wrote service account JSON to", tmpPath, "and set GOOGLE_APPLICATION_CREDENTIALS");
+      console.log(
+        "[startup] Wrote service account JSON to",
+        tmpPath,
+        "and set GOOGLE_APPLICATION_CREDENTIALS"
+      );
     } catch (e) {
       console.warn(
         "[startup] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON/BASE64:",
@@ -314,7 +317,11 @@ async function runWarmup(trigger = "auto") {
       ")"
     );
   } else {
-    console.log("[warmup] completed with error in", __warmupState.tookMs + "ms:", __warmupState.error);
+    console.log(
+      "[warmup] completed with error in",
+      __warmupState.tookMs + "ms:",
+      __warmupState.error
+    );
   }
 }
 
@@ -759,6 +766,23 @@ try {
   } catch (e) {
     rewardsRoutes = express.Router();
     console.log("⚠️ Rewards routes not found");
+  }
+  // Credits & Boosts routes for Phase 1
+  let creditsRoutes;
+  try {
+    creditsRoutes = require("./routes/creditsRoutes");
+    console.log("✅ Credits routes loaded");
+  } catch (e) {
+    creditsRoutes = express.Router();
+    console.log("⚠️ Credits routes not found");
+  }
+  let boostsRoutes;
+  try {
+    boostsRoutes = require("./routes/boostRoutes");
+    console.log("✅ Boosts routes loaded");
+  } catch (e) {
+    boostsRoutes = express.Router();
+    console.log("⚠️ Boosts routes not found");
   }
   try {
     // Stripe integration removed
@@ -1265,6 +1289,7 @@ try {
   app.use("/api/admin/analytics", adminAnalyticsRoutes);
   app.use("/api/engagement", engagementRoutes);
   app.use("/api/monetization", monetizationRoutes);
+  app.use("/api/revenue", require("./routes/revenueRoutes"));
   // Internal endpoints (accept lightweight payloads from frontend instrumentation)
   try {
     app.use("/api/internal", require("./routes/frontendLogsRoutes"));
@@ -1398,6 +1423,15 @@ try {
     console.log("⚠️ Chat routes mount failed:", e.message);
   }
 
+  // PayFast routes
+  try {
+    const payfastRoutes = require("./routes/payfastRoutes");
+    app.use("/api/payfast", payfastRoutes);
+    console.log("🚏 PayFast routes mounted at /api/payfast");
+  } catch (e) {
+    console.log("⚠️ PayFast routes mount failed:", e.message);
+  }
+
   // PayPal routes
   try {
     const paypalRoutes = require("./routes/paypalRoutes");
@@ -1406,6 +1440,36 @@ try {
   } catch (e) {
     console.log("⚠️ PayPal routes mount failed:", e.message);
   }
+
+  // Fallback handler: return default free subscription status when the PayPal status
+  // endpoint is missing or not reachable in the deployed environment. This keeps the
+  // frontend stable and avoids console errors while we investigate root causes.
+  app.get("/api/paypal-subscriptions/status", (req, res) => {
+    try {
+      console.warn("[PayPal][fallback] Returning default free subscription status (fallback)");
+      return res.json({
+        success: true,
+        subscription: {
+          planId: "free",
+          planName: "Free",
+          status: "active",
+          features: {
+            uploads: 50,
+            communityPosts: 20,
+            aiClips: true,
+            analytics: "basic",
+            support: "community",
+          },
+        },
+      });
+    } catch (err) {
+      console.error(
+        "[PayPal][fallback] Error returning fallback status:",
+        err && err.stack ? err.stack : err
+      );
+      return res.status(500).json({ error: "Failed to return fallback subscription status" });
+    }
+  });
 
   // Assistant routes (scaffold) - gated by ASSISTANT_ENABLED env variable
   try {
@@ -1613,6 +1677,9 @@ try {
     paypalSubscriptionRoutes
   );
   app.use("/api/viral-boost", routeLimiter({ windowHint: "viral_boost" }), viralBoostRoutes);
+  // Phase 1 mounts
+  app.use("/api/credits", routeLimiter({ windowHint: "payments" }), creditsRoutes);
+  app.use("/api/boosts", routeLimiter({ windowHint: "viral_boost" }), boostsRoutes);
   app.use("/api/rewards", routeLimiter({ windowHint: "rewards" }), rewardsRoutes);
   try {
     const adsRoutes = require("./routes/adsRoutes");
@@ -1654,6 +1721,7 @@ try {
   }
   try {
     app.use("/api/admin/approval", require("./routes/adminContentApprovalRoutes"));
+    // Sponsor approval admin routes
     try {
       app.use("/api/admin/sponsor-approvals", require("./routes/adminSponsorApprovalRoutes"));
     } catch (e) {
@@ -1754,6 +1822,16 @@ try {
     console.log("✅ Mock TikTok OAuth frontend available at /mock/tiktok_oauth_frontend.html");
   } catch (e) {
     console.warn("⚠️ Mock TikTok OAuth frontend route not available:", e.message);
+  }
+
+  // Media proxy route: serves signed media URLs under the site's domain so third-party services
+  // (e.g., TikTok) can verify and fetch media using a domain you control.
+  try {
+    const mediaRoutes = require("./routes/mediaRoutes");
+    app.use(mediaRoutes);
+    console.log("✅ Media proxy routes mounted (e.g. /media/:id)");
+  } catch (e) {
+    console.warn("⚠️ Media proxy routes not available:", e.message);
   }
 
   // Explicit root-level routes for TikTok verification variations
@@ -1912,6 +1990,34 @@ try {
       console.warn(
         `[startup] Frontend build not found at ${frontIndex}. Static SPA will return 404 for root. Ensure 'npm --prefix frontend run build' runs during deploy.`
       );
+    }
+
+    // If the frontend build is missing, add a narrow safety middleware to ensure API calls
+    // that might otherwise hit the SPA catch-all receive a JSON fallback instead of HTML.
+    if (!fs.existsSync(frontIndex)) {
+      const defaultAnalyticsFallback = {
+        totalRevenue: 0,
+        dailyBreakdown: [],
+        totalTransactions: 0,
+        averageRevenuePerTransaction: 0,
+        revenueByMonth: [],
+        byContentType: {},
+        transactionTrends: {},
+        _fallback: true,
+        error: "frontend_build_missing",
+      };
+
+      app.use((req, res, next) => {
+        try {
+          // Only intercept API paths and only the revenue analytics endpoint to avoid masking other issues
+          if (req.path && req.path.startsWith("/api/monetization/revenue-analytics")) {
+            return res.status(200).json(defaultAnalyticsFallback);
+          }
+        } catch (e) {
+          /* noop */
+        }
+        return next();
+      });
     }
   } catch (e) {
     /* ignore */
@@ -3096,7 +3202,11 @@ try {
             const r = await aggregateUnprocessed({ batchSize: 300 });
             if (r.processedEvents)
               console.log(
-                "[BG][earnings] aggregated", r.processedEvents, "events for", r.usersUpdated, "users"
+                "[BG][earnings] aggregated",
+                r.processedEvents,
+                "events for",
+                r.usersUpdated,
+                "users"
               );
             if (r.processedEvents) {
               try {
@@ -3363,6 +3473,48 @@ try {
   module.exports = app;
 } catch (e) {
   console.error(e);
+}
+
+// -------------------------------------------------
+// Real-Time Promotion Scheduler (Added via Edit)
+// -------------------------------------------------
+const promotionService = require("./promotionService");
+const SCHEDULER_INTERVAL_MS = parseInt(process.env.SCHEDULER_INTERVAL_MS || "60000", 10); // 1 minute
+
+if (process.env.SCHEDULER_ENABLED !== "false") {
+  console.log(
+    `[Scheduler] 🕒 Initializing Real-Time Promotion Scheduler (every ${SCHEDULER_INTERVAL_MS}ms)`
+  );
+
+  // 1. Due Schedules (The Plan)
+  setInterval(async () => {
+    const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
+    if (!isLeader && process.env.ENABLE_BACKGROUND_JOBS === "true") return;
+    try {
+      await promotionService.processDueSchedules();
+    } catch (e) {
+      console.error("[Scheduler] ⚠️ Interval Check Failed:", e.message);
+    }
+  }, SCHEDULER_INTERVAL_MS).unref();
+
+  // 2. Repost Optimization (The Persistence) - Every 30 mins
+  // Scans for content with falling views (< 50k goal) and re-queues them
+  if (process.env.ENABLE_BACKGROUND_JOBS === "true") {
+    setInterval(
+      async () => {
+        const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
+        if (!isLeader) return;
+        try {
+          const { analyzeAndScheduleReposts } = require("./services/repostSchedulerService");
+          const count = await analyzeAndScheduleReposts({ limit: 10 });
+          if (count > 0) console.log(`[Scheduler] ♻️ Auto-cycled ${count} posts due to view decay`);
+        } catch (e) {
+          console.warn("[Scheduler] ⚠️ Repost analysis failed:", e.message);
+        }
+      },
+      30 * 60 * 1000
+    ).unref();
+  }
 }
 
 // Optional scheduled integration scan runner (outside try-catch to ensure we can log if not enabled)

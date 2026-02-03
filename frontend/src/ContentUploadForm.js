@@ -3,10 +3,12 @@
 /* eslint-disable react/jsx-no-undef, react/no-unescaped-entities */
 /* eslint-env browser, es6 */
 import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 // Temporarily comment some top-level imports to isolate module init issues in tests
 // TODO: revert after diagnostics
 import toast from "react-hot-toast";
 import "./ContentUploadForm.css";
+import "./components/PlatformForms/PlatformForms.css";
 import { storage, auth } from "./firebaseClient";
 import { API_ENDPOINTS } from "./config";
 import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -27,6 +29,15 @@ import ExplainButton from "./components/ExplainButton";
 import PreviewEditModal from "./components/PreviewEditModal";
 import ConfirmPublishModal from "./components/ConfirmPublishModal";
 import PlatformSettingsOverride from "./components/PlatformSettingsOverride";
+
+// Professional Platform Forms
+import TikTokForm from "./components/PlatformForms/TikTokForm";
+import YouTubeForm from "./components/PlatformForms/YouTubeForm";
+import FacebookForm from "./components/PlatformForms/FacebookForm";
+import LinkedInForm from "./components/PlatformForms/LinkedInForm";
+import PinterestForm from "./components/PlatformForms/PinterestForm";
+import RedditForm from "./components/PlatformForms/RedditForm";
+import InstagramForm from "./components/PlatformForms/InstagramForm";
 
 // Default inline thumbnail (avoids external 404s when thumbnail is missing)
 const DEFAULT_THUMBNAIL = (function () {
@@ -224,6 +235,7 @@ function ContentUploadForm({
   const [youtubeSettings, setYoutubeSettings] = useState({
     privacy: "public",
     typeOverride: "auto",
+    madeForKids: false,
     tags: "",
   });
   const [instagramSettings, setInstagramSettings] = useState({ shareToFeed: true, location: "" });
@@ -2753,52 +2765,97 @@ function ContentUploadForm({
                 </div>
 
                 {/* Role selector for Facebook */}
-                <div style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "center" }}>
-                  <label style={{ fontWeight: 700, marginRight: 8 }}>Role:</label>
-                  {["creator", "brand", "sponsored", "boosted"].map(r => (
-                    <button
-                      key={r}
-                      type="button"
-                      className={`role-btn ${(extPlatformOptions?.facebook?.role || "creator") === r ? "active" : ""}`}
-                      onClick={() => {
-                        if (typeof extSetPlatformOption === "function")
-                          extSetPlatformOption("facebook", "role", r);
-                      }}
-                    >
-                      {r.charAt(0).toUpperCase() + r.slice(1)}
-                    </button>
-                  ))}
+                <div style={{ marginTop: 12 }}>
+                  <label style={{ fontWeight: 700, display: "block", marginBottom: 8 }}>
+                    Post As / Campaign Type:
+                  </label>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                    {[
+                      { id: "creator", label: "Creator (Standard)" },
+                      { id: "brand", label: "Brand (Official)" },
+                      { id: "sponsored", label: "Sponsored (Partnership)" },
+                    ].map(r => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        className={`role-btn ${
+                          (extPlatformOptions?.facebook?.role || "creator") === r.id ? "active" : ""
+                        }`}
+                        onClick={() => {
+                          if (typeof extSetPlatformOption === "function")
+                            extSetPlatformOption("facebook", "role", r.id);
+                        }}
+                        style={{
+                          padding: "6px 12px",
+                          borderRadius: 20,
+                          border:
+                            (extPlatformOptions?.facebook?.role || "creator") === r.id
+                              ? "1px solid #1877f2"
+                              : "1px solid #e2e8f0",
+                          backgroundColor:
+                            (extPlatformOptions?.facebook?.role || "creator") === r.id
+                              ? "#1877f2"
+                              : "#fff",
+                          color:
+                            (extPlatformOptions?.facebook?.role || "creator") === r.id
+                              ? "#fff"
+                              : "#475569",
+                          cursor: "pointer",
+                          fontSize: 13,
+                        }}
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Context for the selected role */}
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: "#64748b",
+                      marginTop: 8,
+                      background: "#f1f5f9",
+                      padding: 8,
+                      borderRadius: 4,
+                    }}
+                  >
+                    {(() => {
+                      const role = extPlatformOptions?.facebook?.role || "creator";
+                      if (role === "creator")
+                        return "Standard organic post. Best for regular content updates.";
+                      if (role === "brand")
+                        return "Official brand post. Use this for company announcements.";
+                      if (role === "sponsored")
+                        return "Paid Partnership. This post will carry a Branded Content tag.";
+                    })()}
+                  </div>
                 </div>
 
                 {/* If sponsor role set, show sponsor input */}
                 {extPlatformOptions?.facebook?.role === "sponsored" && (
-                  <div style={{ marginTop: 12 }}>
-                    <label style={{ fontWeight: 700 }}>Sponsor name</label>
+                  <div
+                    style={{
+                      marginTop: 12,
+                      padding: 12,
+                      border: "1px solid #e2e8f0",
+                      borderRadius: 6,
+                      background: "#fff",
+                    }}
+                  >
+                    <label style={{ fontWeight: 700, display: "block", marginBottom: 4 }}>
+                      Sponsor Name / Page ID
+                    </label>
                     <input
-                      placeholder="Sponsor name"
+                      placeholder="e.g. 'Nike' or Page ID"
                       className="form-input"
                       onChange={e =>
                         typeof extSetPlatformOption === "function" &&
                         extSetPlatformOption("facebook", "sponsor", e.target.value)
                       }
                     />
-                  </div>
-                )}
-
-                {/* If boosted role set, show budget */}
-                {extPlatformOptions?.facebook?.role === "boosted" && (
-                  <div style={{ marginTop: 12 }}>
-                    <label style={{ fontWeight: 700 }}>Boost Budget (USD)</label>
-                    <input
-                      placeholder="e.g., 50"
-                      type="number"
-                      min="0"
-                      className="form-input"
-                      onChange={e =>
-                        typeof extSetPlatformOption === "function" &&
-                        extSetPlatformOption("facebook", "boostBudget", Number(e.target.value))
-                      }
-                    />
+                    <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>
+                      We will attempt to tag this sponsor in the Branded Content tool.
+                    </div>
                   </div>
                 )}
               </div>
@@ -2822,6 +2879,115 @@ function ContentUploadForm({
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {p === "youtube" && (
+          <div
+            className="form-group youtube-options"
+            style={{
+              border: "1px solid #cc0000",
+              padding: 12,
+              borderRadius: 8,
+              background: "#fbfbfc",
+              marginTop: 12,
+            }}
+          >
+            <label style={{ display: "flex", alignItems: "center", gap: 8, color: "#cc0000" }}>
+              YouTube Options
+            </label>
+            <div style={{ display: "grid", gap: 12, marginTop: 12 }}>
+              <div>
+                <label>Privacy</label>
+                <select
+                  value={youtubeSettings.privacy}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setYoutubeSettings(prev => ({ ...prev, privacy: val }));
+                    if (typeof extSetPlatformOption === "function")
+                      extSetPlatformOption("youtube", "privacy", val);
+                  }}
+                  className="form-select"
+                >
+                  <option value="public">Public</option>
+                  <option value="unlisted">Unlisted</option>
+                  <option value="private">Private</option>
+                </select>
+              </div>
+
+              <div>
+                <label>Content Type</label>
+                <select
+                  value={youtubeSettings.typeOverride}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setYoutubeSettings(prev => ({ ...prev, typeOverride: val }));
+                    if (typeof extSetPlatformOption === "function")
+                      extSetPlatformOption("youtube", "typeOverride", val);
+                  }}
+                  className="form-select"
+                >
+                  <option value="auto">Auto (Detect from aspect ratio)</option>
+                  <option value="video">Standard Video</option>
+                  <option value="shorts">Shorts</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={!!youtubeSettings.madeForKids}
+                    onChange={e => {
+                      const val = e.target.checked;
+                      setYoutubeSettings(prev => ({ ...prev, madeForKids: val }));
+                      if (typeof extSetPlatformOption === "function")
+                        extSetPlatformOption("youtube", "madeForKids", val);
+                    }}
+                  />
+                  Made for Kids
+                </label>
+                <div style={{ fontSize: 11, color: "#666", marginTop: 4, paddingLeft: 24 }}>
+                  Required by COPPA. If your content is specifically made for children, you must
+                  check this.
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={!!youtubeSettings.paidPromotion}
+                    onChange={e => {
+                      const val = e.target.checked;
+                      setYoutubeSettings(prev => ({ ...prev, paidPromotion: val }));
+                      if (typeof extSetPlatformOption === "function")
+                        extSetPlatformOption("youtube", "paidPromotion", val);
+                    }}
+                  />
+                  Contains Paid Promotion
+                </label>
+                <div style={{ fontSize: 11, color: "#666", marginTop: 4, paddingLeft: 24 }}>
+                  Check this if your video contains paid product placements, sponsorships, or
+                  endorsements. YouTube will display a disclosure message to viewers.
+                </div>
+              </div>
+
+              <div>
+                <label>Tags (comma separated)</label>
+                <input
+                  placeholder="tag1, tag2, tag3"
+                  value={youtubeSettings.tags}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setYoutubeSettings(prev => ({ ...prev, tags: val }));
+                    if (typeof extSetPlatformOption === "function")
+                      extSetPlatformOption("youtube", "tags", val);
+                  }}
+                  className="form-input"
+                />
+              </div>
+            </div>
           </div>
         )}
         {error && <div className="error-message">{error}</div>}
@@ -3551,6 +3717,56 @@ function ContentUploadForm({
   // Continue with full form when not in simplified mode
   return (
     <div className="content-upload-container">
+      {/* BILLIONAIRE STRATEGY: Scarcity Banner */}
+      <div
+        className="usage-banner"
+        style={{
+          background: "linear-gradient(90deg, #111, #222)",
+          borderBottom: "1px solid #333",
+          padding: "12px 20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+          borderRadius: "8px",
+          border: "1px solid rgba(255,255,255,0.1)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          <div style={{ color: "#fff", fontSize: "0.9rem" }}>
+            <span style={{ color: "#aaa" }}>Monthly Quota:</span>
+            <strong style={{ marginLeft: "5px", color: "#4CAF50" }}>7/10 Uploads</strong>
+          </div>
+          <div
+            className="progress-bar"
+            style={{ width: "100px", height: "6px", background: "#333", borderRadius: "3px" }}
+          >
+            <div
+              style={{ width: "70%", height: "100%", background: "#4CAF50", borderRadius: "3px" }}
+            ></div>
+          </div>
+        </div>
+
+        <Link
+          to="/marketplace"
+          style={{
+            color: "#FFD700",
+            textDecoration: "none",
+            fontSize: "0.9rem",
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+            border: "1px solid #FFD700",
+            padding: "4px 10px",
+            borderRadius: "4px",
+            background: "rgba(255, 215, 0, 0.1)",
+          }}
+        >
+          🚀 Boost Reach <span style={{ fontSize: "0.8rem" }}>➜</span>
+        </Link>
+      </div>
+
       <form
         onSubmit={handleSubmit}
         onKeyDown={handleFormKeyDown}
@@ -4193,75 +4409,32 @@ function ContentUploadForm({
                     )}
                     {/* Per-platform inputs: file, title, description (defaults to global if empty) */}
 
-                    {/* YouTube role selector (quick role selection for uploads) */}
-                    {expandedPlatform === "youtube" && (
-                      <div style={{ marginBottom: 8 }}>
-                        <label style={{ fontWeight: 700, display: "block", marginBottom: 6 }}>
-                          Role
-                        </label>
-                        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                          {["creator", "brand", "sponsored", "boosted"].map(r => (
-                            <button
-                              key={r}
-                              type="button"
-                              className={`role-btn ${(extPlatformOptions?.youtube?.role || "creator") === r ? "active" : ""}`}
-                              onClick={() =>
-                                typeof extSetPlatformOption === "function" &&
-                                extSetPlatformOption("youtube", "role", r)
-                              }
-                            >
-                              {r.charAt(0).toUpperCase() + r.slice(1)}
-                            </button>
-                          ))}
-                        </div>
-
-                        {extPlatformOptions?.youtube?.role === "sponsored" && (
-                          <div style={{ marginBottom: 8 }}>
-                            <label style={{ fontWeight: 700 }}>Sponsor name</label>
-                            <input
-                              placeholder="Sponsor name"
-                              className="form-input"
-                              onChange={e =>
-                                typeof extSetPlatformOption === "function" &&
-                                extSetPlatformOption("youtube", "sponsor", e.target.value)
-                              }
-                            />
-                          </div>
-                        )}
-
-                        {extPlatformOptions?.youtube?.role === "boosted" && (
-                          <div style={{ marginBottom: 8 }}>
-                            <label style={{ fontWeight: 700 }}>Boost Budget (USD)</label>
-                            <input
-                              placeholder="e.g., 25"
-                              type="number"
-                              min="0"
-                              className="form-input"
-                              onChange={e =>
-                                typeof extSetPlatformOption === "function" &&
-                                extSetPlatformOption(
-                                  "youtube",
-                                  "boostBudget",
-                                  Number(e.target.value)
-                                )
-                              }
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-
+                    {/* Professional Forms Integration */}
+                    {/* Per-platform File Override */}
                     <div
-                      className="per-platform-form"
-                      style={{ marginTop: 8, display: "grid", gap: 8 }}
+                      style={{
+                        marginBottom: 15,
+                        padding: "10px",
+                        background: "#f8f9fa",
+                        borderRadius: "6px",
+                        border: "1px dashed #d1d5db",
+                      }}
                     >
-                      <label style={{ fontWeight: 700 }}>
-                        Upload for{" "}
-                        {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)}
+                      <label
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                          display: "block",
+                          marginBottom: "5px",
+                          color: "#4b5563",
+                        }}
+                      >
+                        Override Media for {expandedPlatform} (Optional)
                       </label>
                       <input
                         aria-label={`Platform file ${expandedPlatform}`}
                         type="file"
+                        className="file-input-small"
                         onChange={e =>
                           handlePerPlatformFileChange(
                             expandedPlatform,
@@ -4269,31 +4442,146 @@ function ContentUploadForm({
                           )
                         }
                       />
-                      <input
-                        aria-label={`Platform title ${expandedPlatform}`}
-                        placeholder="Title"
-                        className="form-input"
-                        value={perPlatformTitle[expandedPlatform] || title}
-                        onChange={e =>
-                          setPerPlatformTitle(prev => ({
-                            ...prev,
-                            [expandedPlatform]: e.target.value,
-                          }))
-                        }
-                      />
-                      <textarea
-                        aria-label={`Platform description ${expandedPlatform}`}
-                        placeholder="Description"
-                        className="form-input"
-                        value={perPlatformDescription[expandedPlatform] || description}
-                        onChange={e =>
-                          setPerPlatformDescription(prev => ({
-                            ...prev,
-                            [expandedPlatform]: e.target.value,
-                          }))
-                        }
-                      />
                     </div>
+
+                    {/* Specialized Forms for Top Platforms */}
+                    {expandedPlatform === "tiktok" ? (
+                      <TikTokForm
+                        onChange={data => {
+                          const { platform, ...vals } = data;
+                          if (typeof extSetPlatformOption === "function") {
+                            Object.entries(vals).forEach(([k, v]) =>
+                              extSetPlatformOption(platform, k, v)
+                            );
+                          }
+                        }}
+                        initialData={extPlatformOptions?.tiktok}
+                        creatorInfo={tiktokCreatorInfo}
+                        globalTitle={title}
+                        globalDescription={description}
+                      />
+                    ) : expandedPlatform === "youtube" ? (
+                      <YouTubeForm
+                        onChange={data => {
+                          const { platform, ...vals } = data;
+                          if (typeof extSetPlatformOption === "function") {
+                            Object.entries(vals).forEach(([k, v]) =>
+                              extSetPlatformOption(platform, k, v)
+                            );
+                          }
+                        }}
+                        initialData={extPlatformOptions?.youtube}
+                        globalTitle={title}
+                        globalDescription={description}
+                      />
+                    ) : expandedPlatform === "facebook" ? (
+                      <FacebookForm
+                        onChange={data => {
+                          const { platform, ...vals } = data;
+                          if (typeof extSetPlatformOption === "function") {
+                            Object.entries(vals).forEach(([k, v]) =>
+                              extSetPlatformOption(platform, k, v)
+                            );
+                          }
+                        }}
+                        initialData={extPlatformOptions?.facebook}
+                        globalTitle={title}
+                        globalDescription={description}
+                        pages={facebookPages || []}
+                      />
+                    ) : expandedPlatform === "linkedin" ? (
+                      <LinkedInForm
+                        onChange={data => {
+                          const { platform, ...vals } = data;
+                          if (typeof extSetPlatformOption === "function") {
+                            Object.entries(vals).forEach(([k, v]) =>
+                              extSetPlatformOption(platform, k, v)
+                            );
+                          }
+                        }}
+                        initialData={extPlatformOptions?.linkedin}
+                        globalTitle={title}
+                        globalDescription={description}
+                      />
+                    ) : expandedPlatform === "pinterest" ? (
+                      <PinterestForm
+                        onChange={data => {
+                          const { platform, ...vals } = data;
+                          if (typeof extSetPlatformOption === "function") {
+                            Object.entries(vals).forEach(([k, v]) =>
+                              extSetPlatformOption(platform, k, v)
+                            );
+                          }
+                        }}
+                        initialData={extPlatformOptions?.pinterest}
+                        globalTitle={title}
+                        globalDescription={description}
+                        boards={pinterestBoards || []}
+                      />
+                    ) : expandedPlatform === "instagram" ? (
+                      <InstagramForm
+                        onChange={data => {
+                          const { platform, ...vals } = data;
+                          if (typeof extSetPlatformOption === "function") {
+                            Object.entries(vals).forEach(([k, v]) =>
+                              extSetPlatformOption(platform, k, v)
+                            );
+                          }
+                        }}
+                        initialData={extPlatformOptions?.instagram}
+                        globalTitle={title}
+                        globalDescription={description}
+                      />
+                    ) : expandedPlatform === "reddit" ? (
+                      <RedditForm
+                        onChange={data => {
+                          const { platform, ...vals } = data;
+                          if (typeof extSetPlatformOption === "function") {
+                            Object.entries(vals).forEach(([k, v]) =>
+                              extSetPlatformOption(platform, k, v)
+                            );
+                          }
+                        }}
+                        initialData={extPlatformOptions?.reddit}
+                        globalTitle={title}
+                        globalDescription={description}
+                      />
+                    ) : (
+                      /* Fallback Generic Form */
+                      <div
+                        className="per-platform-form"
+                        style={{ marginTop: 8, display: "grid", gap: 8 }}
+                      >
+                        <label style={{ fontWeight: 700 }}>
+                          Upload for{" "}
+                          {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)}
+                        </label>
+                        <input
+                          aria-label={`Platform title ${expandedPlatform}`}
+                          placeholder="Title"
+                          className="form-input"
+                          value={perPlatformTitle[expandedPlatform] || title}
+                          onChange={e =>
+                            setPerPlatformTitle(prev => ({
+                              ...prev,
+                              [expandedPlatform]: e.target.value,
+                            }))
+                          }
+                        />
+                        <textarea
+                          aria-label={`Platform description ${expandedPlatform}`}
+                          placeholder="Description"
+                          className="form-input"
+                          value={perPlatformDescription[expandedPlatform] || description}
+                          onChange={e =>
+                            setPerPlatformDescription(prev => ({
+                              ...prev,
+                              [expandedPlatform]: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                    )}
                     {expandedPlatform === "discord" && (
                       <div style={{ marginTop: 8 }}>
                         <div

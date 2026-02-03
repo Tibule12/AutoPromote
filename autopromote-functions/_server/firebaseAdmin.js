@@ -18,21 +18,164 @@ if (bypass) {
   CollectionStub.prototype.doc = function(id) {
     const _id = id || ('stub-' + (crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(4).toString('hex')));
     const fullPath = `${this._name}/${_id}`;
+
+    function applyFields(target, src) {
+      src = src || {};
+      const out = { ...(target || {}) };
+      for (const k of Object.keys(src)) {
+        const v = src[k];
+        if (v && typeof v === 'object' && v.__op === 'increment') {
+          const add = typeof v.v === 'number' ? v.v : 1;
+          out[k] = (typeof out[k] === 'number' ? out[k] : 0) + add;
+        } else {
+          out[k] = v;
+        }
+      }
+      return out;
+    }
+
     return {
       id: _id,
-      set: async (data, opt) => { const existing = __inMemoryDB.get(fullPath) || { id: _id, data: {} }; if (opt && opt.merge) { existing.data = { ...(existing.data||{}), ...(data||{}) }; __inMemoryDB.set(fullPath, existing); } else { __inMemoryDB.set(fullPath, { id: _id, data: data||{} }); } return true; },
-      get: async () => { const doc = __inMemoryDB.get(fullPath); if (doc) return { exists: true, data: () => (doc.data||{}) }; return { exists: false, data: () => ({}) }; },
-      update: async (data) => { const existing = __inMemoryDB.get(fullPath) || { id: _id, data: {} }; existing.data = { ...(existing.data||{}), ...(data||{}) }; __inMemoryDB.set(fullPath, existing); return true; },
+      set: async (data, opt) => {
+        const existing = __inMemoryDB.get(fullPath) || { id: _id, data: {} };
+        if (opt && opt.merge) {
+          const merged = applyFields(existing.data, data);
+          __inMemoryDB.set(fullPath, { id: _id, data: merged });
+        } else {
+          // When setting a full document, resolve increment ops into concrete numbers
+          const resolved = applyFields({}, data);
+          __inMemoryDB.set(fullPath, { id: _id, data: resolved });
+        }
+        return true;
+      },
+      get: async () => {
+        const doc = __inMemoryDB.get(fullPath);
+        if (doc) return { exists: true, data: () => (doc.data || {}) };
+        return { exists: false, data: () => ({}) };
+      },
+      update: async (data) => {
+        const existing = __inMemoryDB.get(fullPath) || { id: _id, data: {} };
+        const merged = applyFields(existing.data, data);
+        __inMemoryDB.set(fullPath, { id: _id, data: merged });
+        return true;
+      },
       delete: async () => { __inMemoryDB.delete(fullPath); return true; },
-      collection: (sub) => new CollectionStub(`${fullPath}/` + (sub||'child'))
+      collection: (sub) => new CollectionStub(`${fullPath}/` + (sub || 'child'))
     };
   };
   CollectionStub.prototype.add = async function(data) { const id = 'stub-' + (crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(5).toString('hex')); const fullPath = `${this._name}/${id}`; __inMemoryDB.set(fullPath, { id, data: data||{} }); return { id, get: async () => ({ exists: true, data: () => (data||{}) }) }; };
 
   const firestoreStub = () => ({ collection: (name) => new CollectionStub(name) });
 
+  // Provide minimal FieldValue/Timestamp helpers expected by code/tests
+  // Support serverTimestamp, delete and increment for unit tests/emulator bypass
+  firestoreStub.FieldValue = {
+    serverTimestamp: () => new Date(),
+    delete: () => null,
+    increment: (n) => ({ __op: 'increment', v: typeof n === 'number' ? n : 1 }),
+  };
+  firestoreStub.Timestamp = {
+    fromDate: d => (d instanceof Date ? d : new Date(d)),
+    now: () => new Date(),
+  };
+
+  // Basic Query stub to support .where/.orderBy/.limit/.get used in tests
+  function QueryStub(collPath) {
+    this._collPath = collPath || "";
+    this._wheres = [];
+    this._order = null;
+    this._limit = null;
+  }
+  QueryStub.prototype.where = function(field, op, value) {
+    this._wheres.push({ field, op, value });
+    return this;
+  };
+  QueryStub.prototype.orderBy = function(field) {
+    this._order = field;
+    return this;
+  };
+  QueryStub.prototype.limit = function(n) {
+    this._limit = n;
+    return this;
+  };
+  QueryStub.prototype.get = async function() {
+    const docs = [];
+    const prefix = this._collPath ? this._collPath + '/' : '';
+    for (const [key, v] of __inMemoryDB.entries()) {
+      if (!key.startsWith(prefix)) continue;
+      const rel = key.slice(prefix.length);
+      if (rel.includes('/')) continue;
+      const data = v.data || {};
+      let include = true;
+      for (const w of this._wheres) {
+        const val = data[w.field];
+        if (w.op === '==' && val !== w.value) include = false;
+        if (w.op === 'in' && (!Array.isArray(w.value) || !w.value.includes(val))) include = false;
+        if (w.op === '>=' && !(typeof val === 'number' && val >= w.value)) include = false;
+      }
+      if (include) {
+        const fullPath = prefix + rel;
+        docs.push({ id: rel, data: () => data, ref: { path: fullPath } });
+      }
+    }
+    if (this._order) {
+      docs.sort((a, b) => {
+        const av = a.data()[this._order] || 0;
+        const bv = b.data()[this._order] || 0;
+        return av > bv ? 1 : av < bv ? -1 : 0;
+      });
+    }
+    if (this._limit) docs.splice(this._limit);
+    return { empty: docs.length === 0, docs, size: docs.length, forEach: cb => docs.forEach(d => cb(d)) };
+  };
+
+  CollectionStub.prototype.get = async function() {
+    return new QueryStub(this._name).get();
+  };
+
   const admin = { apps: ['stub'], firestore: firestoreStub, auth: () => ({ verifyIdToken: async () => ({ uid: 'stub-uid' }), listUsers: async () => ({ users: [] }) }) };
   const db = admin.firestore();
+  // Add a minimal runTransaction implementation for tests that rely on transactions
+  // This is intentionally naive and synchronous; it's sufficient for unit tests
+  // that use transactions as a fallback when FieldValue.increment isn't supported.
+  db.runTransaction = async function (handler) {
+    const tx = {
+      async get(ref) {
+        // ref may be a DocumentReference-like with path or collection/id
+        const path = ref.path || (ref._name ? `${ref._name}/${ref.id}` : null);
+        const doc = path ? __inMemoryDB.get(path) : null;
+        return { exists: !!doc, data: () => (doc && doc.data) || {} };
+      },
+      set(ref, data, opt) {
+        const path = ref.path || (ref._name ? `${ref._name}/${ref.id}` : null);
+        if (!path) throw new Error('Invalid ref in tx.set');
+        // simple merge/replace behavior; support increment markers
+        function applyFields(target, src) {
+          src = src || {};
+          const out = { ...(target || {}) };
+          for (const k of Object.keys(src)) {
+            const v = src[k];
+            if (v && typeof v === 'object' && v.__op === 'increment') {
+              const add = typeof v.v === 'number' ? v.v : 1;
+              out[k] = (typeof out[k] === 'number' ? out[k] : 0) + add;
+            } else {
+              out[k] = v;
+            }
+          }
+          return out;
+        }
+        const existing = __inMemoryDB.get(path) || { id: ref.id || path.split('/').pop(), data: {} };
+        if (opt && opt.merge) {
+          const merged = applyFields(existing.data, data);
+          __inMemoryDB.set(path, { id: existing.id, data: merged });
+        } else {
+          const resolved = applyFields({}, data);
+          __inMemoryDB.set(path, { id: existing.id, data: resolved });
+        }
+      },
+    };
+    return handler(tx);
+  };
   const auth = admin.auth();
   const storage = { bucket: () => ({ file: (p) => ({ name: p, async exists() { return [false]; }, async download() { throw new Error('Storage stub: no file'); }, async save(_buf) { return true; } }), async upload() { throw new Error('Storage stub: upload not implemented'); } }) };
   module.exports = { admin, db, auth, storage };

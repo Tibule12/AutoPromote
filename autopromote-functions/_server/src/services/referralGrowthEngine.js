@@ -92,12 +92,12 @@ class ReferralGrowthEngine {
           .get();
 
         if (!potentialFraud.empty) {
-              console.warn(
-                "[Anti-Fraud] Blocked referral from IP",
-                ipAddress,
-                "for inviter",
-                invitation.inviterId
-              );
+          console.warn(
+            "[Anti-Fraud] Blocked referral from IP",
+            ipAddress,
+            "for inviter",
+            invitation.inviterId
+          );
           throw new Error("Referral not eligible: Multiple signups from same network detected.");
         }
       }

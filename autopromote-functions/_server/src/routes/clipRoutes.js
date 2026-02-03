@@ -48,8 +48,14 @@ async function checkClipQuota(req, res, next) {
 
   try {
     // 1. Get User Plan
-    const userDoc = await db.collection("users").doc(userId).get();
-    const userData = userDoc.data() || {};
+    let userDoc;
+    try {
+      userDoc = await db.collection("users").doc(userId).get();
+    } catch (e) {
+      // If getting user doc fails (e.g. invalid ID or connection), treat as empty
+      console.warn("ClipQuota: Failed to load user doc", userId, e.message);
+    }
+    const userData = userDoc && userDoc.exists ? userDoc.data() : {};
     // Check both potential locations for plan config
     const planId =
       (userData.subscription && userData.subscription.planId) || userData.planId || "free";
@@ -65,15 +71,34 @@ async function checkClipQuota(req, res, next) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
     // Query count of clip analyses created by this user this month
-    // Note: This relies on aggregate queries which are standard in Firestore now
-    const usageSnap = await db
-      .collection("clip_analyses")
-      .where("userId", "==", userId)
-      .where("createdAt", ">=", startOfMonth)
-      .count()
-      .get();
-
-    const used = usageSnap.data().count;
+    // First attempt: use aggregate count() if supported, otherwise fall back to get() and measure size
+    let used = 0;
+    try {
+      const usageSnap = await db
+        .collection("clip_analyses")
+        .where("userId", "==", userId)
+        .where("createdAt", ">=", startOfMonth)
+        .count()
+        .get();
+      used = usageSnap && usageSnap.data && usageSnap.data().count ? usageSnap.data().count : 0;
+    } catch (e) {
+      // Fallback: perform a query get() and rely on snapshot.size
+      try {
+        const snap = await db
+          .collection("clip_analyses")
+          .where("userId", "==", userId)
+          .where("createdAt", ">=", startOfMonth)
+          .get();
+        used =
+          snap && typeof snap.size === "number"
+            ? snap.size
+            : snap && snap.docs
+              ? snap.docs.length
+              : 0;
+      } catch (e2) {
+        throw e; // rethrow original to be caught by outer try
+      }
+    }
 
     if (used >= limit) {
       return res.status(403).json({
@@ -90,9 +115,10 @@ async function checkClipQuota(req, res, next) {
     next();
   } catch (e) {
     logger.error("ClipQuotaCheckError", e);
+    console.error("DBG_QUOTA_ERROR", e && e.message, e && e.stack);
     // Fail safe - don't block user if DB check fails, but log it
     // Or fail secure - block user. Choosing fail secure to protect resources.
-    return res.status(500).json({ error: "Failed to verify usage quota" });
+    return res.status(500).json({ error: "Failed to verify usage quota", detail: e && e.message });
   }
 }
 
@@ -128,6 +154,7 @@ function updateJob(jobId, patch) {
 router.post("/analyze", authMiddleware, clipRateLimit, checkClipQuota, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
+    console.error("DBG_REQ_USER", userId, req.user);
     logger.debug("ClipRoutes.incomingRequest", { userId, userPresent: !!req.user });
     const { contentId, videoUrl } = req.body;
 
@@ -137,8 +164,13 @@ router.post("/analyze", authMiddleware, clipRateLimit, checkClipQuota, async (re
 
     // Verify user owns this content (support both snake_case and camelCase schemas)
     const contentDoc = await db.collection("content").doc(contentId).get();
+    console.error(
+      "DBG_CONTENT_DOC",
+      contentDoc && contentDoc.exists,
+      contentDoc && contentDoc.data && contentDoc.data()
+    );
 
-    if (!contentDoc.exists) {
+    if (!contentDoc || !contentDoc.exists) {
       return res.status(404).json({ error: "Content not found" });
     }
 

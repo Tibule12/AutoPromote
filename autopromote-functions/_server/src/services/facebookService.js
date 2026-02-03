@@ -284,13 +284,35 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
     // Determine video URL if type is video
     const videoUrl = payload?.videoUrl || (payload?.type === "video" ? payload?.url : null);
 
-    if (contentId && !message) {
+    if (contentId) {
       try {
         const contentSnap = await db.collection("content").doc(contentId).get();
         if (contentSnap.exists) {
           const content = contentSnap.data();
-          message = content.title || content.description || "New content";
+          // Fallback message if not provided in payload
+          if (!message) {
+            message = content.title || content.description || "New content";
+          }
           if (!title) title = content.title;
+
+          // SPONSORSHIP DISCLOSURE
+          const mon = content.monetization_settings || {};
+          const fbSettings = mon.facebook || {};
+          const isSponsored = mon.is_sponsored || fbSettings.is_sponsored;
+
+          if (isSponsored) {
+            const disclosure = mon.brand_name
+              ? ` #ad #${mon.brand_name.replace(/\s+/g, "")}`
+              : " #ad #sponsored";
+            const promoLink = mon.product_link ? `\n\nCheck it out here: ${mon.product_link}` : "";
+
+            if (!message.toLowerCase().includes("#ad") && !message.toLowerCase().includes("sponsored")) {
+              message += disclosure;
+            }
+            if (promoLink && !message.includes(mon.product_link)) {
+              message += promoLink;
+            }
+          }
         }
       } catch (_) {}
     }
@@ -342,6 +364,105 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
   }
 }
 
+/**
+ * Get Facebook post value/metrics
+ */
+async function getPostStats({ uid, postId, pageId }) {
+  if (!uid || !postId) throw new Error("uid and postId required");
+  if (!fetchFn) throw new Error("Fetch not available");
+
+  const connection = await getUserFacebookConnection(uid);
+  if (!connection || !connection.tokens) throw new Error("No Facebook connection found");
+
+  let accessToken = null;
+  // If pageId provided, try to find specific page token
+  if (pageId && connection.meta && connection.meta.pages) {
+    const p = connection.meta.pages.find(page => page.id === pageId);
+    if (p) accessToken = p.access_token;
+  }
+  // Fallback to first page if available
+  if (
+    !accessToken &&
+    connection.meta &&
+    connection.meta.pages &&
+    connection.meta.pages.length > 0
+  ) {
+    accessToken = connection.meta.pages[0].access_token;
+  }
+
+  if (!accessToken) accessToken = connection.tokens.access_token;
+
+  // 1. Try fetching Insights (Impressions, Engaged Users) - requires Page Token usually
+  try {
+    const metrics = "post_impressions,post_engaged_users";
+    const url = `https://graph.facebook.com/v18.0/${postId}/insights?metric=${metrics}&access_token=${accessToken}`;
+
+    // safeFetch handles the request
+    const response = await safeFetch(url, fetchFn, {
+      fetchOptions: { method: "GET" },
+      requireHttps: true,
+      allowHosts: ["graph.facebook.com"],
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const values = {};
+      (data.data || []).forEach(item => {
+        values[item.name] = item.values && item.values[0] ? item.values[0].value : 0;
+      });
+
+      // Also fetch basic interactions (likes/comments) separately as they aren't in "insights" metric list easily
+      const basicUrl = `https://graph.facebook.com/v18.0/${postId}?fields=shares,comments.summary(true),likes.summary(true)&access_token=${accessToken}`;
+      const basicRes = await safeFetch(basicUrl, fetchFn, {
+        fetchOptions: { method: "GET" },
+        requireHttps: true,
+        allowHosts: ["graph.facebook.com"],
+      });
+      let likes = 0,
+        comments = 0,
+        shares = 0;
+
+      if (basicRes.ok) {
+        const bData = await basicRes.json();
+        likes = bData.likes?.summary?.total_count || 0;
+        comments = bData.comments?.summary?.total_count || 0;
+        shares = bData.shares?.count || 0;
+      }
+
+      return {
+        postId,
+        impressions: values.post_impressions || 0,
+        engagedUsers: values.post_engaged_users || 0,
+        likes,
+        comments,
+        shares,
+        fetchedAt: new Date().toISOString(),
+      };
+    }
+  } catch (e) {
+    console.warn("[Facebook] Insights fetch failed, falling back to basic:", e.message);
+  }
+
+  // 2. Fallback: Basic Graph Object fields (Likes, Comments)
+  const basicUrl = `https://graph.facebook.com/v18.0/${postId}?fields=shares,comments.summary(true),likes.summary(true)&access_token=${accessToken}`;
+  const response = await safeFetch(basicUrl, fetchFn, {
+    fetchOptions: { method: "GET" },
+    requireHttps: true,
+    allowHosts: ["graph.facebook.com"],
+  });
+
+  if (!response.ok) throw new Error("Failed to fetch Facebook post stats");
+
+  const data = await response.json();
+  return {
+    postId,
+    likes: data.likes?.summary?.total_count || 0,
+    comments: data.comments?.summary?.total_count || 0,
+    shares: data.shares?.count || 0,
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
 module.exports = {
   postToFacebook,
   generateAuthUrl,
@@ -350,4 +471,5 @@ module.exports = {
   getUserPages,
   getUserProfile,
   getUserFacebookConnection,
+  getPostStats,
 };

@@ -62,6 +62,7 @@ import Privacy from "./Privacy";
 import LiveLanding from "./LiveLanding";
 import LiveWatch from "./LiveWatch";
 import StreamerDashboard from "./StreamerDashboard";
+import EngagementMarketplace from "./EngagementMarketplace";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -799,12 +800,19 @@ function App() {
       // Extract monetization settings from platform options for Revenue Engine
       const pOps = params.platformOptions || params.platform_options || {};
       const tiktokOps = pOps.tiktok || {};
+      const youtubeOps = pOps.youtube || {};
+      const instaOps = pOps.instagram || {};
+
       const monetization_settings = {
         niche: tiktokOps.niche || "general",
-        is_sponsored: !!tiktokOps.is_sponsored,
-        brand_name: tiktokOps.sponsor || "", // Maps "sponsor" field to brand_name
-        product_link: tiktokOps.product_link || "", // New field
-        commercial_rights: !!tiktokOps.commercial_rights,
+        is_sponsored: !!(
+          tiktokOps.commercialContent ||
+          youtubeOps.paidPromotion ||
+          instaOps.isPaidPartnership
+        ),
+        brand_name: tiktokOps.brandName || instaOps.sponsorUser || "",
+        product_link: tiktokOps.product_link || "",
+        commercial_rights: !!tiktokOps.commercialContent,
       };
 
       const payload = {
@@ -1061,6 +1069,7 @@ function App() {
         <Route path="/live" element={<LiveLanding />} />
         <Route path="/live/watch" element={<LiveWatch />} />
         <Route path="/streamer" element={<StreamerDashboard />} />
+        <Route path="/marketplace" element={<EngagementMarketplace />} />
 
         {/* Main Application Logic (Welcome / Auth / Dashboard) */}
         <Route

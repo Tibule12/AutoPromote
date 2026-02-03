@@ -95,7 +95,7 @@ router.post("/message", authMiddleware, chatRateLimit, async (req, res) => {
 
       if (dailyCount >= FREE_LIMIT) {
         // Log attempt
-        console.warn("[Revenue Protection] User", userId, "hit free chat limit.");
+        console.warn(`[Revenue Protection] User ${userId} hit free chat limit.`);
 
         return res.status(403).json({
           error: "Daily Limit Reached",

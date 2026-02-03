@@ -14,14 +14,35 @@ router.get("/", authMiddleware, async (req, res) => {
   try {
     if (!req.userId) return res.status(401).json({ ok: false, error: "auth_required" });
     const limit = Math.min(parseInt(req.query.limit || "50", 10), 100);
-    let q = db
-      .collection("notifications")
-      .where("user_id", "==", req.userId)
-      .orderBy("created_at", "desc")
-      .limit(limit);
-    const snap = await q.get();
-    const out = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    return res.json({ ok: true, notifications: out });
+
+    // Use a short per-process cache to reduce Firestore reads for frequent polls
+    const { getCache, setCache, withCache } = require("../utils/simpleCache");
+    const crypto = require("crypto");
+    const cacheKey = `notifications_${req.userId}_${limit}`;
+
+    const result = await withCache(cacheKey, 3000, async () => {
+      const q = db
+        .collection("notifications")
+        .where("user_id", "==", req.userId)
+        .orderBy("created_at", "desc")
+        .limit(limit);
+      const snap = await q.get();
+      const out = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      // Compute an ETag from the payload to support conditional GETs
+      const etag = crypto.createHash("md5").update(JSON.stringify(out)).digest("hex");
+      return { out, etag };
+    });
+
+    const incomingEtag =
+      req.headers && (req.headers["if-none-match"] || req.headers["If-None-Match"]);
+    if (incomingEtag && incomingEtag === result.etag) {
+      res.status(304).end();
+      return;
+    }
+
+    // Return ETag header and payload
+    res.setHeader("ETag", result.etag);
+    return res.json({ ok: true, notifications: result.out });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
   }

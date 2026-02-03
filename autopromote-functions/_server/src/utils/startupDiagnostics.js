@@ -36,7 +36,7 @@ class StartupDiagnostics {
               ? "ℹ️"
               : "✅";
 
-    console.log(icon + " [" + category.toUpperCase() + "]", message);
+    console.log(icon, "[" + category.toUpperCase() + "]", message);
     if (Object.keys(details).length > 0) {
       console.log("   Details:", details);
     }
@@ -149,13 +149,14 @@ class StartupDiagnostics {
             "Set FIREBASE_STORAGE_BUCKET in environment variables (e.g. my-bucket.appspot.com)",
           impact: "File uploads will be disabled until configured",
         });
-      } else if (!admin || typeof admin.storage !== "function") {
-        this.log("warning", "firebase", "Firebase Storage SDK not available", {
-          action_required: "Ensure firebase-admin has storage enabled in this build",
+        this.log("error", "environment", "Firebase storage bucket not configured", {
+          variable: "FIREBASE_STORAGE_BUCKET",
+          action_required:
+            "Ensure FIREBASE_STORAGE_BUCKET is set or admin.options.storageBucket is configured",
           impact: "Storage operations may not work",
         });
       } else {
-          console.log("[DIAGNOSTICS][PLATFORM]", platform.toUpperCase(), "no env vars detected");
+        const bucket = admin.storage().bucket(configuredBucket);
         try {
           const [exists] = await bucket.exists();
           if (exists) {
@@ -256,7 +257,12 @@ class StartupDiagnostics {
       // Debug log for detected env keys per platform
       const present = vars.filter(v => !!process.env[v]);
       if (present.length > 0) {
-        console.log("[DIAGNOSTICS][PLATFORM]", platform.toUpperCase(), "detected envs:", present.join(", "));
+        console.log(
+          "[DIAGNOSTICS][PLATFORM]",
+          platform.toUpperCase(),
+          "detected envs:",
+          present.join(", ")
+        );
       } else {
         console.log("[DIAGNOSTICS][PLATFORM]", platform.toUpperCase(), "no env vars detected");
       }
@@ -515,7 +521,7 @@ class StartupDiagnostics {
     if (this.errors.length > 0) {
       console.log("\n❌ ERRORS THAT SHOULD BE FIXED:");
       this.errors.forEach((err, idx) => {
-        console.log("\n" + (idx + 1) + ".", err.message);
+        console.log(idx + 1 + ".", err.message);
         console.log("   Category:", err.category);
         if (err.details.action_required) {
           console.log("   Action:", err.details.action_required);
@@ -526,7 +532,7 @@ class StartupDiagnostics {
     if (this.warnings.length > 0) {
       console.log("\n⚠️  WARNINGS (Optional Improvements):");
       this.warnings.forEach((warn, idx) => {
-        console.log((idx + 1) + ".", warn.message);
+        console.log(idx + 1 + ".", warn.message);
       });
     }
 

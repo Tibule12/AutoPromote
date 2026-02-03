@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 const express = require("express");
 const router = express.Router();
 const { db } = require("./firebaseAdmin");
@@ -8,6 +8,7 @@ const Joi = require("joi");
 const path = require("path");
 const sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
 const { usageLimitMiddleware, trackUsage } = require("./middlewares/usageLimitMiddleware");
+const costControlMiddleware = require("./middlewares/costControlMiddleware");
 
 // Enable test bypass for viral optimization when running under CI/test flags
 if (
@@ -22,7 +23,7 @@ if (
 let _engagementBoostingService; // require('./services/engagementBoostingService');
 // eslint-disable-next-line no-unused-vars
 let _growthAssuranceTracker; // require('./services/growthAssuranceTracker');
-// eslint-disable-next-line no-unused-vars
+ 
 let _contentQualityEnhancer; // require('./services/contentQualityEnhancer');
 // eslint-disable-next-line no-unused-vars
 let _repostDrivenEngine; // require('./services/repostDrivenEngine');
@@ -59,6 +60,50 @@ const contentUploadSchema = Joi.object({
   quality_enhanced: Joi.boolean().optional(),
   // Preview-only flag used by the frontend to request a dry-run (do not persist)
   isDryRun: Joi.boolean().optional(),
+
+  // BRAND / PROMOTION SETTINGS (The "TikTok Card" Revenue Linking)
+  monetization_settings: Joi.object({
+    niche: Joi.string()
+      .valid("music", "fashion", "tech", "crypto", "fitness", "general")
+      .default("general"),
+    is_sponsored: Joi.boolean().default(false),
+    brand_name: Joi.string().allow("").optional(), // E.g. "Nike"
+    product_link: Joi.string().uri().allow("").optional(), // Affiliate link
+    commercial_rights: Joi.boolean().default(false), // Does platform have right to sell this engagement?
+    
+    // Platform-specific commercial toggles
+    tiktok: Joi.object({
+      commercial_content_toggle: Joi.boolean(),
+      brand_content_toggle: Joi.boolean(),
+      branded_content_type: Joi.string(),
+      your_brand: Joi.boolean(),
+      partner_brand: Joi.boolean()
+    }).unknown(true).optional(),
+    youtube: Joi.object({
+      paid_promotion: Joi.boolean(),
+      contains_paid_promotion_text: Joi.boolean()
+    }).unknown(true).optional(),
+    facebook: Joi.object({
+      is_sponsored: Joi.boolean(),
+      sponsor_id: Joi.string().allow("").optional()
+    }).unknown(true).optional(),
+    instagram: Joi.object({
+      is_reel: Joi.boolean(),
+      share_to_feed: Joi.boolean(),
+      is_paid_partnership: Joi.boolean(),
+      sponsor_user: Joi.string().allow("").optional()
+    }).unknown(true).optional()
+  }).unknown(true).optional(),
+
+  // VIRAL BOUNTY (The "No Ads" Revenue Model)
+  bounty: Joi.object({
+    amount: Joi.number().min(0).optional(),
+    niche: Joi.string().default("general"),
+    paymentMethodId: Joi.string().optional(),
+  }).optional(),
+
+  // Injected by costControlMiddleware
+  optimizationFlags: Joi.object().optional(),
 });
 
 function validateBody(schema) {
@@ -108,6 +153,7 @@ router.post(
   "/upload",
   authMiddleware,
   usageLimitMiddleware({ freeLimit: 10 }),
+  costControlMiddleware,
   validateBody(contentUploadSchema),
   rateLimitMiddleware(10, 60000),
   async (req, res) => {
@@ -146,8 +192,10 @@ router.post(
           (hostHeader && (hostHeader.includes("127.0.0.1") || hostHeader.includes("localhost"))));
       if (isE2ETest && !req.body.isDryRun) {
         const fakeId = `e2e-fake-${Date.now()}`;
-        const status = req.user && req.user.isAdmin ? "approved" : "pending_approval";
-        return res.status(201).json({ content: { id: fakeId, status } });
+        const isAdminTest = req.user && (req.user.isAdmin === true || req.user.role === "admin");
+        const status = isAdminTest ? "approved" : "pending_approval";
+        const approvalStatus = isAdminTest ? "approved" : "pending";
+        return res.status(201).json({ content: { id: fakeId, status, approvalStatus } });
       }
       if (!userId) {
         return res.status(401).json({ error: "Unauthorized" });
@@ -176,9 +224,11 @@ router.post(
         quality_score,
         quality_feedback,
         quality_enhanced,
+        enhance_quality, // Added flag
         custom_hashtags,
         growth_guarantee,
         viral_boost,
+        monetization_settings, // Added for persistence
       } = req.body;
 
       // Initialize viral engines (lazy-load to avoid import-time side effects during tests)
@@ -203,9 +253,11 @@ router.post(
         quality_score,
         quality_feedback,
         quality_enhanced,
+        enhance_quality,
         custom_hashtags,
         growth_guarantee,
         viral_boost,
+        monetization_settings: monetization_settings || {}, // Persist TikTok/Revenue settings
         meta: req.body.meta,
         duration:
           typeof (req.body.meta && req.body.meta.duration) === "number"
@@ -213,6 +265,8 @@ router.post(
             : undefined,
         user_id: userId,
         created_at: new Date(),
+        // Approval status used by admin UI/routes. Keep in sync with `status` for compatibility.
+        approvalStatus: isAdmin ? "approved" : "pending",
         // default to pending_approval for non-admin uploads; admins are auto-approved
         status: isAdmin ? "approved" : "pending_approval",
         viral_optimized: true,
@@ -293,6 +347,68 @@ router.post(
         contentRef = await db.collection("content").add(cleanObject(contentData));
         const contentDoc = await contentRef.get();
         content = { id: contentRef.id, ...contentDoc.data() };
+      }
+
+      // VIRAL BOUNTY CREATION (The "Billionaire" Model)
+      // If user provided a Bounty Pool, we instantiate the Escrow Record immediately.
+      // This routes money into the "Viral Economy" rather than "Ad Inventory".
+      if (req.body.bounty && req.body.bounty.amount > 0) {
+        try {
+          console.log(
+            `[Upload] 💰 Processing Viral Bounty for Content ${content.id}: $${req.body.bounty.amount}`
+          );
+          const revenueEngine = require("./services/revenueEngine");
+          // Use provided payment method or a placeholder for early access/testing
+          const paymentMethod = req.body.bounty.paymentMethodId || "tok_bypass";
+
+          const bountyResult = await revenueEngine.createViralBounty(
+            userId,
+            req.body.bounty.niche || monetization_settings?.niche || "general",
+            req.body.bounty.amount,
+            paymentMethod
+          );
+
+          if (bountyResult.success) {
+            console.log(`[Upload] ✅ Bounty Active: ${bountyResult.bountyId}`);
+            // Link the Bounty to the Content Record
+            await contentRef.update({
+              viral_bounty_id: bountyResult.bountyId,
+              has_bounty: true,
+              bounty_active: true,
+              bounty_pool_amount: req.body.bounty.amount,
+              bounty_niche: req.body.bounty.niche || "general",
+            });
+            // Update local object for response
+            content.viral_bounty_id = bountyResult.bountyId;
+            content.has_bounty = true;
+          }
+        } catch (bountyErr) {
+          console.error("[Upload] ❌ Error creating Viral Bounty:", bountyErr);
+          // Note context: We do NOT fail the upload, but we alert the logs.
+          // In a strict financial system, we might want to roll back, but for "Viral Velocity",
+          // we let the content fly and maybe retry billing later.
+          logger.error("[Upload] Bounty Creation Failed", {
+            error: bountyErr.message,
+            userId,
+            contentId: content.id,
+          });
+        }
+      }
+
+      // AI CONTENT ENHANCEMENT TRIGGER (Sci-Fi Quality Boost)
+      if (enhance_quality) {
+        try {
+          console.log(`[Upload] 🖌️ Enqueuing AI Enhancement for ${content.id}`);
+          const { enqueueMediaTransformTask } = require("./services/mediaTransform");
+          await enqueueMediaTransformTask({
+            contentId: content.id,
+            uid: userId,
+            url: url,
+            meta: { quality_enhanced: true, original_quality: quality_score || "standard" },
+          });
+        } catch (e) {
+          console.warn("[Upload] Failed to queue enhancement:", e.message);
+        }
       }
 
       // VIRAL OPTIMIZATION: optionally disabled for test/debug via environment
@@ -388,7 +504,11 @@ router.post(
               }
             } catch (e) {
               // Best-effort: log and continue
-              console.warn("[sponsor-approval] failed to set up sponsorApproval for", p, e && e.message);
+              console.warn(
+                "[sponsor-approval] failed to set up sponsorApproval for",
+                p,
+                e && e.message
+              );
             }
           }
         }
@@ -431,21 +551,22 @@ router.post(
           promotion_schedule.scheduleType || promotion_schedule.schedule_type;
       }
       // Auto-enqueue promotion tasks with viral optimization
-      // If upload included edit metadata, enqueue a media transform task so a worker may process it
+      // If upload included edit metadata OR quality enhancement is requested, enqueue a media transform task
       if (
-        req.body.meta &&
-        (req.body.meta.trimStart ||
-          req.body.meta.trimEnd ||
-          req.body.meta.rotate ||
-          req.body.meta.flipH ||
-          req.body.meta.flipV)
+        quality_enhanced ||
+        (req.body.meta &&
+          (req.body.meta.trimStart ||
+            req.body.meta.trimEnd ||
+            req.body.meta.rotate ||
+            req.body.meta.flipH ||
+            req.body.meta.flipV))
       ) {
         try {
           const { enqueueMediaTransform } = require("./services/promotionTaskQueue");
           await enqueueMediaTransform({
             contentId: contentRef.id,
             uid: userId,
-            meta: req.body.meta,
+            meta: { ...(req.body.meta || {}), quality_enhanced },
             sourceUrl: url,
           });
         } catch (e) {
@@ -593,6 +714,10 @@ router.post(
           content: {
             id: contentRef.id,
             status: "pending_approval",
+            approvalStatus: "pending",
+            viral_bounty_id: content.viral_bounty_id || null,
+            has_bounty: !!content.has_bounty,
+            bounty_active: !!content.bounty_active,
           },
           message: "Content uploaded and queued for promotion; awaiting admin approval.",
         });
