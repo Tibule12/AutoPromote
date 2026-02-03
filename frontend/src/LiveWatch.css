@@ -429,3 +429,26 @@
     object-fit: cover;
   }
 }
+
+/* Resize sticky buttons (FABs) on mobile */
+@media (max-width: 768px) {
+  .fab-stack {
+    right: 12px;
+    gap: 10px;
+  }
+  .fab {
+    width: 40px;
+    height: 40px;
+    padding: 6px;
+    font-size: 14px;
+  }
+  .fab.primary {
+    width: 52px;
+    height: 52px;
+    font-size: 18px;
+  }
+  .fab-avatar {
+    width: 44px;
+    height: 44px;
+  }
+}

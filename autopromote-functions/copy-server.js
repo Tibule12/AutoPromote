@@ -38,6 +38,14 @@ async function copyRecursive(src, dest, repoRoot) {
 async function main() {
   const functionsDir = __dirname; // autopromote-functions
   const repoRoot = path.resolve(functionsDir, "..");
+
+  // Check if we are in the correct repository structure by looking for the root package.json
+  // In Cloud Functions environment, the parent directory (root) won't have the project's package.json
+  if (!fs.existsSync(path.join(repoRoot, "package.json"))) {
+    console.log("[copy-server] No package.json found in parent directory. Assuming deployed environment. Skipping copy.");
+    return;
+  }
+
   const sourceDir = path.join(repoRoot, "src");
   const destPkgDir = path.join(functionsDir, "_server");
 

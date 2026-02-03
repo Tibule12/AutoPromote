@@ -492,3 +492,12 @@ exports.autoRewardCreators = functions
       console.error("Error in autoRewardCreators:", error);
     }
   });
+
+
+// Scheduled cleanup for temp clip uploads
+if (!process.env.CI) { // Only load in production/emulator to avoid errors in simplified environments
+  try {
+     const sc = require('./storageCleanup');
+     if (sc && sc.cleanupTempUploads) exports.cleanupTempUploads = sc.cleanupTempUploads;
+  } catch (e) { console.warn("Could not load storageCleanup", e); }
+}

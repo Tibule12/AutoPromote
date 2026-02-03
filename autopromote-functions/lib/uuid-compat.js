@@ -10,11 +10,11 @@ try {
   } else {
     throw new Error("randomUUID not available");
   }
-} catch (_err) {
+} catch {
   try {
     const { v4 } = require("uuid");
     module.exports = { v4 };
-  } catch (err2) {
+  } catch {
     const uuid = require("uuid");
     module.exports = { v4: uuid && (uuid.v4 || (uuid.default && uuid.default.v4)) };
   }

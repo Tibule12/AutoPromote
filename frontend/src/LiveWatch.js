@@ -9,7 +9,7 @@ function useQuery() {
   return new URLSearchParams(window.location.search);
 }
 
-export default function LiveWatch() {
+export default function LiveWatch({ liveId: propLiveId, token: propToken, onExit }) {
   const [valid, setValid] = useState(null);
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,8 +19,10 @@ export default function LiveWatch() {
   const [selectedAmount, setSelectedAmount] = useState("0.99");
   const paypalRef = useRef(null);
   const query = useQuery();
-  const token = query.get("token") || null;
+  // Prefer props, fallback to URL
+  const token = propToken || query.get("token") || null;
   const liveId =
+    propLiveId ||
     (typeof window !== "undefined" &&
       window.location &&
       window.location.pathname &&
@@ -372,6 +374,11 @@ export default function LiveWatch() {
     // Placeholder player — in production replace with HLS/iframe/CDN-signed URL
     return (
       <div style={{ padding: 20 }}>
+        {onExit && (
+          <button onClick={onExit} style={{ marginBottom: 10 }}>
+            &larr; Back to Lobby
+          </button>
+        )}
         <h3>Live stream</h3>
         <p>Stream ID: {info.liveId || "unknown"}</p>
         <div className="player-wrap">
@@ -472,71 +479,7 @@ export default function LiveWatch() {
               Play Preview
             </button>
           )}
-          <FloatingActions
-            onLike={async () => {
-              launchEmotes();
-              try {
-                const token = await auth.currentUser?.getIdToken();
-                await fetch(`/api/engagement/track`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                  },
-                  body: JSON.stringify({ type: "like", target: "live", id: liveId }),
-                });
-              } catch (e) {
-                console.error("like track error", e);
-              }
-            }}
-            onComment={async () => {
-              try {
-                const text = window.prompt("Leave a comment for this live stream:");
-                if (!text) return;
-                const token = await auth.currentUser?.getIdToken();
-                const res = await fetch(`/api/community/posts`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                  },
-                  body: JSON.stringify({ type: "text", caption: text, contentId: liveId }),
-                });
-                if (res.ok) {
-                  toast.success("Comment posted to community feed");
-                } else {
-                  toast.error("Failed to post comment");
-                }
-              } catch (e) {
-                console.error("comment error", e);
-                toast.error("Failed to post comment");
-              }
-            }}
-            onShare={async () => {
-              try {
-                const url = window.location.origin + window.location.pathname;
-                if (navigator.share) {
-                  await navigator.share({ title: "Live stream", url });
-                } else if (navigator.clipboard && navigator.clipboard.writeText) {
-                  await navigator.clipboard.writeText(url);
-                  toast.success("Link copied to clipboard");
-                } else {
-                  window.prompt("Copy link:", url);
-                }
-              } catch (e) {
-                console.error("share error", e);
-                toast.error("Failed to share");
-              }
-            }}
-            onCreate={() => {
-              // Navigate to upload/composer area (dashboard clips)
-              try {
-                window.location.href = "/?tab=clips";
-              } catch (e) {
-                console.error(e);
-              }
-            }}
-          />
+
           {previewDone && (
             <div
               style={{
