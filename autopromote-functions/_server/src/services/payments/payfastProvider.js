@@ -23,6 +23,8 @@ function buildPayfastSignature(params = {}, passphrase) {
   let str = pieces.join("&");
   if (passphrase) str = str + `&passphrase=${passphrase}`;
   // Intentionally using MD5 per PayFast spec (external signature), not for passwords
+  // codeql[js/weak-cryptographic-algorithm] -- MD5 required by PayFast API for signature verification
+  // codeql[js/insufficient-password-hash] -- Not a password, but an API signature
   return crypto.createHash("md5").update(str, "utf8").digest("hex");
 }
 

@@ -13,6 +13,8 @@ const OPTIMAL_TIMES = {
   snapchat: { days: ["Friday", "Saturday", "Sunday"], hours: [19, 20, 21, 22] },
 };
 
+export { OPTIMAL_TIMES };
+
 function BestTimeToPost({ selectedPlatforms }) {
   const [suggestion, setSuggestion] = useState(null);
 

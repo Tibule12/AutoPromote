@@ -4,6 +4,7 @@ const LinkedInForm = ({ onChange, initialData = {}, globalTitle, globalDescripti
   const [visibility, setVisibility] = useState(initialData.visibility || "PUBLIC");
   const [commentary, setCommentary] = useState(initialData.commentary || globalDescription || "");
   const [title, setTitle] = useState(initialData.title || globalTitle || ""); // For articles/videos
+  const [companyId, setCompanyId] = useState(initialData.companyId || "");
 
   useEffect(() => {
     onChange({
@@ -11,8 +12,9 @@ const LinkedInForm = ({ onChange, initialData = {}, globalTitle, globalDescripti
       visibility,
       commentary,
       title,
+      companyId, // Export companyId
     });
-  }, [visibility, commentary, title]);
+  }, [visibility, commentary, title, companyId]);
 
   return (
     <div className="platform-form linkedin-form">
@@ -22,6 +24,20 @@ const LinkedInForm = ({ onChange, initialData = {}, globalTitle, globalDescripti
         </span>{" "}
         LinkedIn Professional
       </h4>
+
+      <div className="form-group-modern">
+        <label>Organization / Company ID (Required)</label>
+        <input
+          type="text"
+          className="modern-input"
+          value={companyId}
+          onChange={e => setCompanyId(e.target.value)}
+          placeholder="e.g. 12345678"
+        />
+        <p className="help-text" style={{ fontSize: "0.75rem", color: "#666", marginTop: "4px" }}>
+          The numeric ID of your LinkedIn Organization page.
+        </p>
+      </div>
 
       <div className="form-group-modern">
         <label>Post Text</label>
