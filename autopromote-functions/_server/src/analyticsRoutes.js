@@ -197,7 +197,7 @@ router.get("/user", authMiddleware, async (req, res) => {
 
     // --- REVENUE & REFERRAL TRACKING INJECTION ---
     // Inject current progress towards bonuses so frontend can display "Sales Shark" trackers
-    const { db } = require("./firebaseAdmin"); // Re-import to be safe or use scope
+    // const { db } = require("./firebaseAdmin"); // Removed shadowing re-import
 
     // 1. Viral Bonus Progress & Content Health Text
     // Logic: Free Tier target is 50k views ("Flaming/Magic").

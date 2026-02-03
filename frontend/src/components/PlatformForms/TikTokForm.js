@@ -7,6 +7,10 @@ const TikTokForm = ({
   creatorInfo,
   globalTitle,
   globalDescription,
+  bountyAmount,
+  setBountyAmount,
+  bountyNiche,
+  setBountyNiche,
 }) => {
   const [privacy, setPrivacy] = useState(initialData.privacy || "PUBLIC_TO_EVERYONE");
   const [allowComments, setAllowComments] = useState(initialData.allowComments !== false);
@@ -154,6 +158,55 @@ const TikTokForm = ({
           </div>
         )}
       </div>
+
+      {/* VIRAL BOUNTY SECTION */}
+      {setBountyAmount && (
+        <div
+          className="form-group-modern"
+          style={{
+            marginTop: "16px",
+            border: "1px solid #ffd700",
+            background: "rgba(255, 215, 0, 0.05)",
+          }}
+        >
+          <label style={{ color: "#d97706", display: "flex", alignItems: "center", gap: "6px" }}>
+            <span>💰</span> Viral Bounty Pool
+          </label>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <div className="input-group">
+              <label style={{ fontSize: "0.75rem" }}>Amount ($)</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="0"
+                className="modern-input"
+                value={bountyAmount || ""}
+                onChange={e => setBountyAmount(parseFloat(e.target.value) || 0)}
+                style={{ borderColor: bountyAmount > 0 ? "#ffd700" : "" }}
+              />
+            </div>
+            <div className="input-group">
+              <label style={{ fontSize: "0.75rem" }}>Target Niche</label>
+              <select
+                className="modern-select"
+                value={bountyNiche || "general"}
+                onChange={e => setBountyNiche && setBountyNiche(e.target.value)}
+              >
+                <option value="general">General</option>
+                <option value="music">Music</option>
+                <option value="tech">Tech</option>
+                <option value="fashion">Fashion</option>
+                <option value="crypto">Crypto</option>
+              </select>
+            </div>
+          </div>
+          {bountyAmount > 0 && (
+            <div style={{ marginTop: "6px", fontSize: "0.7rem", color: "#d97706" }}>
+              * This pool promotes this content across all platforms.
+            </div>
+          )}
+        </div>
+      )}
 
       {creatorInfo && (
         <div className="account-status-bar">
