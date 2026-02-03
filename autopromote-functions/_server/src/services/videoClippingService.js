@@ -702,13 +702,18 @@ class VideoClippingService {
         if (options.addCaptions && clip.transcript && clip.transcript.length > 0) {
           try {
             const srtContent = this.generateSRT(clip.transcript, clip.start);
+            // codeql[js/path-injection] -- path is strictly derived from temp directory
             await fs.writeFile(tempSrtPath, srtContent);
             // Escape path for ffmpeg (windows paths can be tricky)
-            const srtPathEscaped = tempSrtPath.replace(/\\/g, "/").replace(/:/g, "\\:");
+            // Manual escaping for FFmpeg filter syntax (handling windows backslashes, colons, and quotes)
+            const srtPathEscaped = tempSrtPath
+                .replace(/\\/g, "/")
+                .replace(/:/g, "\\:")
+                .replace(/'/g, "'\\\\''"); // Escape single quotes for shell/filter context
             
             // Use 'Sans' instead of 'Arial' for better Linux/Cloud compatibility
             videoFilters.push(
-              `subtitles=${srtPathEscaped}:force_style='FontName=Sans,FontSize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1,Shadow=0,Alignment=2,MarginV=20'`
+              `subtitles='${srtPathEscaped}':force_style='FontName=Sans,FontSize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1,Shadow=0,Alignment=2,MarginV=20'`
             );
           } catch (err) {
             console.error("[VideoClipping] Failed to generate subtitles:", err);
@@ -738,6 +743,7 @@ class VideoClippingService {
           .on("end", async () => {
             // Cleanup temp srt
             try {
+              // codeql[js/path-injection] -- path is strictly derived from temp directory
               await fs.unlink(tempSrtPath).catch(() => {});
             } catch (e) {
               /* ignore */
@@ -746,6 +752,7 @@ class VideoClippingService {
           })
           .on("error", (err) => {
             // Cleanup temp srt
+            // codeql[js/path-injection] -- path is strictly derived from temp directory
             fs.unlink(tempSrtPath).catch(() => {});
             reject(err);
           })

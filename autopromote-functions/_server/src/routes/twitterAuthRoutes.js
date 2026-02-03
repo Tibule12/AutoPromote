@@ -293,6 +293,7 @@ router.post("/oauth1/prepare", authMiddleware, twitterWriteLimiter, async (req, 
 
 // OAuth1 callback - exchanges request_token + verifier for access token
 router.get("/oauth1/callback", twitterPublicLimiter, async (req, res) => {
+  // codeql[js/sensitive-get-query] -- OAuth1 callback params are required in query string by protocol
   const { oauth_token, oauth_verifier } = req.query;
   // OAuth1 callback parameters come via query string from Twitter (provider-controlled).
   // Treat them as sensitive: normalize to local variables and remove them from `req.query` immediately

@@ -24,7 +24,7 @@ import DraftManager from "./components/DraftManager";
 // Temporarily comment out some imports to isolate circular import issues in tests
 // TODO: revert after binary-search isolation
 import ProgressIndicator from "./components/ProgressIndicator";
-import BestTimeToPost from "./components/BestTimeToPost";
+import BestTimeToPost, { OPTIMAL_TIMES } from "./components/BestTimeToPost";
 import ExplainButton from "./components/ExplainButton";
 import PreviewEditModal from "./components/PreviewEditModal";
 import ConfirmPublishModal from "./components/ConfirmPublishModal";
@@ -1941,6 +1941,33 @@ function ContentUploadForm({
     }
   };
 
+  const renderBestTimeForPlatform = platform => {
+    const times = OPTIMAL_TIMES[platform];
+    if (!times) return null;
+    return (
+      <div
+        style={{
+          fontSize: "11px",
+          color: "#059669",
+          marginTop: "8px",
+          padding: "6px 8px",
+          backgroundColor: "#ecfdf5",
+          borderRadius: "4px",
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          border: "1px solid #a7f3d0",
+        }}
+      >
+        <span style={{ fontSize: "14px" }}>⏰</span>
+        <span>
+          <strong>Best time to post:</strong> {times.days.slice(0, 2).join(", ")} @{" "}
+          {times.hours[0] > 12 ? times.hours[0] - 12 + "PM" : times.hours[0] + "AM"}
+        </span>
+      </div>
+    );
+  };
+
   const handleDrop = ev => {
     ev.preventDefault();
     ev.stopPropagation();
@@ -2251,6 +2278,7 @@ function ContentUploadForm({
     const platforms = [
       "youtube",
       "tiktok",
+      "instagram",
       "facebook",
       "twitter",
       "linkedin",
@@ -4446,106 +4474,191 @@ function ContentUploadForm({
 
                     {/* Specialized Forms for Top Platforms */}
                     {expandedPlatform === "tiktok" ? (
-                      <TikTokForm
-                        onChange={data => {
-                          const { platform, ...vals } = data;
-                          if (typeof extSetPlatformOption === "function") {
-                            Object.entries(vals).forEach(([k, v]) =>
-                              extSetPlatformOption(platform, k, v)
-                            );
-                          }
-                        }}
-                        initialData={extPlatformOptions?.tiktok}
-                        creatorInfo={tiktokCreatorInfo}
-                        globalTitle={title}
-                        globalDescription={description}
-                      />
+                      <>
+                        <TikTokForm
+                          onChange={data => {
+                            const { platform, ...vals } = data;
+                            if (typeof extSetPlatformOption === "function") {
+                              Object.entries(vals).forEach(([k, v]) =>
+                                extSetPlatformOption(platform, k, v)
+                              );
+                            }
+                            // Local state sync for upload logic
+                            if (vals.privacy) setTiktokPrivacy(vals.privacy);
+                            setTiktokInteractions(prev => ({
+                              ...prev,
+                              comments: vals.allowComments ?? prev.comments,
+                              duet: vals.allowDuet ?? prev.duet,
+                              stitch: vals.allowStitch ?? prev.stitch,
+                            }));
+                            if (vals.commercialContent !== undefined) {
+                              setTiktokCommercial(prev => ({
+                                ...prev,
+                                isCommercial: vals.commercialContent,
+                                brandedContent: vals.commercialContent,
+                              }));
+                            }
+                          }}
+                          initialData={extPlatformOptions?.tiktok}
+                          creatorInfo={tiktokCreatorInfo}
+                          globalTitle={title}
+                          globalDescription={description}
+                        />
+                        {renderBestTimeForPlatform("tiktok")}
+                      </>
                     ) : expandedPlatform === "youtube" ? (
-                      <YouTubeForm
-                        onChange={data => {
-                          const { platform, ...vals } = data;
-                          if (typeof extSetPlatformOption === "function") {
-                            Object.entries(vals).forEach(([k, v]) =>
-                              extSetPlatformOption(platform, k, v)
-                            );
-                          }
-                        }}
-                        initialData={extPlatformOptions?.youtube}
-                        globalTitle={title}
-                        globalDescription={description}
-                      />
+                      <>
+                        <YouTubeForm
+                          onChange={data => {
+                            const { platform, ...vals } = data;
+                            if (typeof extSetPlatformOption === "function") {
+                              Object.entries(vals).forEach(([k, v]) =>
+                                extSetPlatformOption(platform, k, v)
+                              );
+                            }
+                          }}
+                          initialData={extPlatformOptions?.youtube}
+                          globalTitle={title}
+                          globalDescription={description}
+                        />
+                        {renderBestTimeForPlatform("youtube")}
+                      </>
                     ) : expandedPlatform === "facebook" ? (
-                      <FacebookForm
-                        onChange={data => {
-                          const { platform, ...vals } = data;
-                          if (typeof extSetPlatformOption === "function") {
-                            Object.entries(vals).forEach(([k, v]) =>
-                              extSetPlatformOption(platform, k, v)
-                            );
-                          }
-                        }}
-                        initialData={extPlatformOptions?.facebook}
-                        globalTitle={title}
-                        globalDescription={description}
-                        pages={facebookPages || []}
-                      />
+                      <>
+                        <FacebookForm
+                          onChange={data => {
+                            const { platform, ...vals } = data;
+                            if (typeof extSetPlatformOption === "function") {
+                              Object.entries(vals).forEach(([k, v]) =>
+                                extSetPlatformOption(platform, k, v)
+                              );
+                            }
+                          }}
+                          initialData={extPlatformOptions?.facebook}
+                          globalTitle={title}
+                          globalDescription={description}
+                          pages={facebookPages || []}
+                        />
+                        {renderBestTimeForPlatform("facebook")}
+                      </>
                     ) : expandedPlatform === "linkedin" ? (
-                      <LinkedInForm
-                        onChange={data => {
-                          const { platform, ...vals } = data;
-                          if (typeof extSetPlatformOption === "function") {
-                            Object.entries(vals).forEach(([k, v]) =>
-                              extSetPlatformOption(platform, k, v)
-                            );
-                          }
-                        }}
-                        initialData={extPlatformOptions?.linkedin}
-                        globalTitle={title}
-                        globalDescription={description}
-                      />
+                      <>
+                        <LinkedInForm
+                          onChange={data => {
+                            const { platform, ...vals } = data;
+                            if (typeof extSetPlatformOption === "function") {
+                              Object.entries(vals).forEach(([k, v]) =>
+                                extSetPlatformOption(platform, k, v)
+                              );
+                            }
+                            // Local State Sync
+                            if (vals.companyId) setLinkedinCompanyId(vals.companyId);
+                            if (vals.commentary)
+                              setPerPlatformDescription(prev => ({
+                                ...prev,
+                                linkedin: vals.commentary,
+                              }));
+                            if (vals.title)
+                              setPerPlatformTitle(prev => ({ ...prev, linkedin: vals.title }));
+                            if (vals.visibility)
+                              setLinkedinSettings(prev => ({
+                                ...prev,
+                                visibility: vals.visibility,
+                              }));
+                          }}
+                          initialData={{
+                            ...extPlatformOptions?.linkedin,
+                            companyId: linkedinCompanyId,
+                          }}
+                          globalTitle={title}
+                          globalDescription={description}
+                        />
+                        {renderBestTimeForPlatform("linkedin")}
+                      </>
                     ) : expandedPlatform === "pinterest" ? (
-                      <PinterestForm
-                        onChange={data => {
-                          const { platform, ...vals } = data;
-                          if (typeof extSetPlatformOption === "function") {
-                            Object.entries(vals).forEach(([k, v]) =>
-                              extSetPlatformOption(platform, k, v)
-                            );
-                          }
-                        }}
-                        initialData={extPlatformOptions?.pinterest}
-                        globalTitle={title}
-                        globalDescription={description}
-                        boards={pinterestBoards || []}
-                      />
+                      <>
+                        <PinterestForm
+                          onChange={data => {
+                            const { platform, ...vals } = data;
+                            if (typeof extSetPlatformOption === "function") {
+                              Object.entries(vals).forEach(([k, v]) =>
+                                extSetPlatformOption(platform, k, v)
+                              );
+                            }
+                            // Local Sync
+                            if (vals.boardId) setPinterestBoard(vals.boardId);
+                            if (vals.title)
+                              setPerPlatformTitle(prev => ({ ...prev, pinterest: vals.title }));
+                            if (vals.description)
+                              setPerPlatformDescription(prev => ({
+                                ...prev,
+                                pinterest: vals.description,
+                              }));
+                            if (vals.link)
+                              setPinterestSettings(prev => ({ ...prev, linkUrl: vals.link }));
+                          }}
+                          initialData={{
+                            ...extPlatformOptions?.pinterest,
+                            boardId: pinterestBoard || extPlatformOptions?.pinterest?.boardId,
+                          }}
+                          globalTitle={title}
+                          globalDescription={description}
+                          boards={pinterestBoards || []}
+                        />
+                        {renderBestTimeForPlatform("pinterest")}
+                      </>
                     ) : expandedPlatform === "instagram" ? (
-                      <InstagramForm
-                        onChange={data => {
-                          const { platform, ...vals } = data;
-                          if (typeof extSetPlatformOption === "function") {
-                            Object.entries(vals).forEach(([k, v]) =>
-                              extSetPlatformOption(platform, k, v)
-                            );
-                          }
-                        }}
-                        initialData={extPlatformOptions?.instagram}
-                        globalTitle={title}
-                        globalDescription={description}
-                      />
+                      <>
+                        <InstagramForm
+                          onChange={data => {
+                            const { platform, ...vals } = data;
+                            if (typeof extSetPlatformOption === "function") {
+                              Object.entries(vals).forEach(([k, v]) =>
+                                extSetPlatformOption(platform, k, v)
+                              );
+                            }
+                            // Local Sync
+                            if (vals.caption)
+                              setPerPlatformTitle(prev => ({ ...prev, instagram: vals.caption }));
+                            setInstagramSettings(prev => ({
+                              ...prev,
+                              location: vals.location,
+                              shareToFeed: vals.shareToFeed,
+                            }));
+                          }}
+                          initialData={extPlatformOptions?.instagram}
+                          globalTitle={title}
+                          globalDescription={description}
+                        />
+                        {renderBestTimeForPlatform("instagram")}
+                      </>
                     ) : expandedPlatform === "reddit" ? (
-                      <RedditForm
-                        onChange={data => {
-                          const { platform, ...vals } = data;
-                          if (typeof extSetPlatformOption === "function") {
-                            Object.entries(vals).forEach(([k, v]) =>
-                              extSetPlatformOption(platform, k, v)
-                            );
-                          }
-                        }}
-                        initialData={extPlatformOptions?.reddit}
-                        globalTitle={title}
-                        globalDescription={description}
-                      />
+                      <>
+                        <RedditForm
+                          onChange={data => {
+                            const { platform, ...vals } = data;
+                            if (typeof extSetPlatformOption === "function") {
+                              Object.entries(vals).forEach(([k, v]) =>
+                                extSetPlatformOption(platform, k, v)
+                              );
+                            }
+                            // Local state sync
+                            if (vals.subreddit) setRedditSubreddit(vals.subreddit);
+                            if (vals.title)
+                              setPerPlatformTitle(prev => ({ ...prev, reddit: vals.title }));
+                            setRedditSettings(prev => ({
+                              ...prev,
+                              flair: vals.flairId ?? prev.flair,
+                              nsfw: vals.isNSFW ?? prev.nsfw,
+                              spoiler: vals.isSpoiler ?? prev.spoiler,
+                            }));
+                          }}
+                          initialData={extPlatformOptions?.reddit}
+                          globalTitle={title}
+                          globalDescription={description}
+                        />
+                        {renderBestTimeForPlatform("reddit")}
+                      </>
                     ) : (
                       /* Fallback Generic Form */
                       <div
@@ -4556,6 +4669,7 @@ function ContentUploadForm({
                           Upload for{" "}
                           {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)}
                         </label>
+                        {renderBestTimeForPlatform(expandedPlatform)}
                         <input
                           aria-label={`Platform title ${expandedPlatform}`}
                           placeholder="Title"
@@ -4832,94 +4946,7 @@ function ContentUploadForm({
                         />
                       </div>
                     )}
-                    {expandedPlatform === "reddit" && (
-                      <div style={{ marginTop: 8 }}>
-                        <div
-                          style={{
-                            backgroundColor: "rgba(255, 69, 0, 0.1)",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            marginBottom: "8px",
-                            fontSize: "12px",
-                            color: "#FF4500",
-                            border: "1px solid rgba(255, 69, 0, 0.2)",
-                          }}
-                        >
-                          <strong>Link & Text Mode:</strong> Shares content as a URL link or
-                          self-text post. Direct video hosting not supported.
-                        </div>
-                        <input
-                          placeholder="Reddit subreddit"
-                          style={{
-                            width: "100%",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            border: "1px solid #ccc",
-                          }}
-                          value={redditSubreddit}
-                          onChange={e => {
-                            setRedditSubreddit(e.target.value);
-                            if (typeof extSetPlatformOption === "function")
-                              extSetPlatformOption("reddit", "subreddit", e.target.value);
-                          }}
-                        />
-                      </div>
-                    )}
-                    {expandedPlatform === "linkedin" && (
-                      <div style={{ marginTop: 8 }}>
-                        <div
-                          style={{
-                            backgroundColor: "rgba(0, 119, 181, 0.1)",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            marginBottom: "8px",
-                            fontSize: "12px",
-                            color: "#0077b5",
-                            border: "1px solid rgba(0, 119, 181, 0.2)",
-                          }}
-                        >
-                          <strong>Platform Capabilities:</strong> Supports Image and Link posts.
-                        </div>
-                        <input
-                          placeholder="LinkedIn Organization ID (required)"
-                          style={{
-                            width: "100%",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            border: "1px solid #ccc",
-                          }}
-                          value={linkedinCompanyId}
-                          onChange={e => {
-                            setLinkedinCompanyId(e.target.value);
-                            if (typeof extSetPlatformOption === "function")
-                              extSetPlatformOption("linkedin", "companyId", e.target.value);
-                          }}
-                        />
-                        <div style={{ marginTop: 8 }}>
-                          <label style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
-                            Post Type:
-                          </label>
-                          <select
-                            value={linkedinSettings.postType || "post"}
-                            onChange={e => {
-                              const val = e.target.value;
-                              setLinkedinSettings(prev => ({ ...prev, postType: val }));
-                              if (typeof extSetPlatformOption === "function")
-                                extSetPlatformOption("linkedin", "postType", val);
-                            }}
-                            style={{
-                              width: "100%",
-                              padding: "4px",
-                              borderRadius: "4px",
-                              border: "1px solid #ccc",
-                            }}
-                          >
-                            <option value="post">Image / Text Post</option>
-                            <option value="article">Link / Article</option>
-                          </select>
-                        </div>
-                      </div>
-                    )}
+
                     {expandedPlatform === "twitter" && (
                       <div style={{ marginTop: 8 }}>
                         <div
@@ -4987,219 +5014,7 @@ function ContentUploadForm({
                         </div>
                       </div>
                     )}
-                    {expandedPlatform === "tiktok" && (
-                      <div
-                        className="form-group tiktok-options"
-                        style={{ display: "grid", gap: 8 }}
-                      >
-                        {bountyAmount > 0 && (
-                          <div
-                            style={{
-                              padding: "10px",
-                              background: "#fffbe6",
-                              border: "1px solid #ffd700",
-                              borderRadius: "4px",
-                              fontSize: "0.8rem",
-                              color: "#896400",
-                              marginBottom: "8px",
-                            }}
-                          >
-                            <strong>Bounty Requirement:</strong> Since you set a bounty, this post
-                            should ideally be <strong>Public</strong> to allow promoters to verify
-                            views.
-                          </div>
-                        )}
-                        <div style={{ fontSize: 12, color: "#666" }}>
-                          Creator: {tiktokCreatorDisplayName || "Loading..."}
-                        </div>
-                        {type !== "video" && (
-                          <div
-                            role="status"
-                            className="no-video-disclosure"
-                            style={{ fontSize: 12, color: "#b66" }}
-                          >
-                            This post doesn&apos;t contain a video. TikTok features like Duet and
-                            Stitch require a video — upload one to enable them.
-                          </div>
-                        )}
-                        {tiktokCreatorInfo && tiktokCreatorInfo.can_post === false && (
-                          <div className="tiktok-disabled-banner" role="alert">
-                            This TikTok account cannot publish via third-party apps right now.
-                            Please try again later.
-                          </div>
-                        )}
-                        <div>
-                          <label style={{ fontWeight: 700, color: "#000" }}>
-                            Privacy (required)
-                          </label>
-                          <select
-                            value={tiktokPrivacy}
-                            onChange={e => setTiktokPrivacy(e.target.value)}
-                            className="form-select privacy-select"
-                            aria-label="TikTok privacy selection"
-                          >
-                            <option value="">Select privacy</option>
-                            {(tiktokCreatorInfo &&
-                            Array.isArray(tiktokCreatorInfo.privacy_level_options)
-                              ? tiktokCreatorInfo.privacy_level_options
-                              : ["EVERYONE", "FRIENDS", "SELF_ONLY"]
-                            ).map(p => (
-                              <option
-                                key={p}
-                                value={p}
-                                disabled={
-                                  tiktokCommercial &&
-                                  tiktokCommercial.brandedContent &&
-                                  p === "SELF_ONLY"
-                                }
-                                title={
-                                  tiktokCommercial &&
-                                  tiktokCommercial.brandedContent &&
-                                  p === "SELF_ONLY"
-                                    ? "Branded content visibility cannot be set to private."
-                                    : undefined
-                                }
-                              >
-                                {p}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label>Interactions</label>
-                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                            <label>
-                              <input
-                                type="checkbox"
-                                checked={!!tiktokInteractions.comments}
-                                onChange={e =>
-                                  setTiktokInteractions(prev => ({
-                                    ...prev,
-                                    comments: e.target.checked,
-                                  }))
-                                }
-                                disabled={tiktokInteractionDisabled.comments}
-                                title={
-                                  tiktokInteractionDisabled.comments
-                                    ? "Comments disabled by creator"
-                                    : undefined
-                                }
-                                aria-disabled={tiktokInteractionDisabled.comments}
-                              />{" "}
-                              Comments
-                            </label>
-                            {type === "video" && (
-                              <>
-                                <label>
-                                  <input
-                                    type="checkbox"
-                                    checked={!!tiktokInteractions.duet}
-                                    onChange={e =>
-                                      setTiktokInteractions(prev => ({
-                                        ...prev,
-                                        duet: e.target.checked,
-                                      }))
-                                    }
-                                    disabled={tiktokInteractionDisabled.duet}
-                                    title={
-                                      tiktokInteractionDisabled.duet
-                                        ? "Duet disabled by creator"
-                                        : undefined
-                                    }
-                                    aria-disabled={tiktokInteractionDisabled.duet}
-                                  />{" "}
-                                  Duet
-                                </label>
-                                <label>
-                                  <input
-                                    type="checkbox"
-                                    checked={!!tiktokInteractions.stitch}
-                                    onChange={e =>
-                                      setTiktokInteractions(prev => ({
-                                        ...prev,
-                                        stitch: e.target.checked,
-                                      }))
-                                    }
-                                    disabled={tiktokInteractionDisabled.stitch}
-                                    title={
-                                      tiktokInteractionDisabled.stitch
-                                        ? "Stitch disabled by creator"
-                                        : undefined
-                                    }
-                                    aria-disabled={tiktokInteractionDisabled.stitch}
-                                  />{" "}
-                                  Stitch
-                                </label>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        {perPlatformPreviews["tiktok"] && (
-                          <div style={{ marginTop: 8 }} className="preview-cards">
-                            {perPlatformPreviews["tiktok"].map((p, idx) => (
-                              <div
-                                key={idx}
-                                className="preview-card"
-                                style={{
-                                  border: "1px solid #ccc",
-                                  borderRadius: 8,
-                                  padding: "1rem",
-                                  minWidth: 220,
-                                  maxWidth: 320,
-                                  background: "#f9fafb",
-                                }}
-                              >
-                                <h5>
-                                  {p.platform
-                                    ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
-                                    : "Preview"}
-                                </h5>
-                                {p.mediaType === "video" ? (
-                                  <video
-                                    aria-label="Preview media"
-                                    src={p.mediaUrl || p.thumbnail}
-                                    controls
-                                    style={{
-                                      width: "100%",
-                                      height: 120,
-                                      objectFit: "cover",
-                                      borderRadius: 6,
-                                    }}
-                                  />
-                                ) : (
-                                  <img
-                                    aria-label="Preview media"
-                                    src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
-                                    onError={e => {
-                                      e.target.onerror = null;
-                                      e.target.src = DEFAULT_THUMBNAIL;
-                                    }}
-                                    alt="Preview Thumbnail"
-                                    style={{
-                                      width: "100%",
-                                      height: 120,
-                                      objectFit: "cover",
-                                      borderRadius: 6,
-                                    }}
-                                  />
-                                )}
-                                <div>
-                                  <strong>Title:</strong> {p.title}
-                                </div>
-                                <div>
-                                  <strong>Description:</strong> {p.description}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {perPlatformQuality["tiktok"] && perPlatformQuality["tiktok"].result && (
-                          <div style={{ marginTop: 8 }} className="quality-check-mini">
-                            Score: {perPlatformQuality["tiktok"].result.quality_score}/100
-                          </div>
-                        )}
-                      </div>
-                    )}
+
                     {expandedPlatform === "spotify" && (
                       <div className="spotify-search-inline">
                         <label
