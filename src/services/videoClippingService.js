@@ -2,7 +2,6 @@
 // AI-powered video clipping service (Opus Clip style)
 // Analyzes long-form videos and generates viral short clips
 
- 
 const ffmpeg = require("fluent-ffmpeg");
 const { db, storage } = require("../firebaseAdmin");
 const axios = require("axios");
@@ -700,12 +699,14 @@ class VideoClippingService {
           try {
             const srtContent = this.generateSRT(clip.transcript, clip.start);
             await fs.writeFile(tempSrtPath, srtContent);
-            // Escape path for ffmpeg (windows paths can be tricky)
-            const srtPathEscaped = tempSrtPath.replace(/\\/g, "/").replace(/:/g, "\\:");
+            // Escape path for ffmpeg (windows paths can be tricky).
+            // Use path.posix.join style forward slashes, and escape colons for FFmpeg filter syntax.
+            const srtPathEscaped = tempSrtPath.replace(/\\/g, "/").replace(/:/g, "\\\\:");
 
             // Use 'Sans' instead of 'Arial' for better Linux/Cloud compatibility
+            // Quote the path string for safety against spaces/special chars
             videoFilters.push(
-              `subtitles=${srtPathEscaped}:force_style='FontName=Sans,FontSize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1,Shadow=0,Alignment=2,MarginV=20'`
+              `subtitles='${srtPathEscaped}':force_style='FontName=Sans,FontSize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1,Shadow=0,Alignment=2,MarginV=20'`
             );
           } catch (err) {
             console.error("[VideoClipping] Failed to generate subtitles:", err);

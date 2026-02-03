@@ -2,12 +2,20 @@ const express = require("express");
 const authMiddleware = require("../authMiddleware");
 const { db, admin } = require("../firebaseAdmin");
 const { createOrder } = require("../services/paypal");
+const rateLimit = require("express-rate-limit");
 
 const router = express.Router();
 const crypto = require("crypto");
 
+const creditsRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Limit creation of orders to prevent spam
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Create PayPal order for ad credits
-router.post("/create-order", authMiddleware, async (req, res) => {
+router.post("/create-order", authMiddleware, creditsRateLimiter, async (req, res) => {
   try {
     const { amount = 1.0, currency = "USD" } = req.body || {};
     if (typeof amount !== "number" || amount <= 0)

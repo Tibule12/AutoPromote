@@ -36,7 +36,7 @@ router.get("/price", async (req, res) => {
 // @route   POST /api/revenue/create-bounty
 // @desc    Creator sets a viral bounty (No Ads model)
 // @access  Authenticated (Brand/Creator)
-router.post("/create-bounty", authMiddleware, async (req, res) => {
+router.post("/create-bounty", authMiddleware, createRateLimiter, async (req, res) => {
   try {
     const brandId = req.userId;
     const { niche, amount, paymentMethodId } = req.body;
@@ -62,7 +62,7 @@ router.post("/create-bounty", authMiddleware, async (req, res) => {
 // @route   POST /api/revenue/claim-bounty
 // @desc    Promoter claims bounty payout
 // @access  Authenticated (Promoter)
-router.post("/claim-bounty", authMiddleware, async (req, res) => {
+router.post("/claim-bounty", authMiddleware, createRateLimiter, async (req, res) => {
   try {
     const promoterId = req.userId;
     const { bountyId, proofMetrics } = req.body;
@@ -78,7 +78,7 @@ router.post("/claim-bounty", authMiddleware, async (req, res) => {
 // @route   POST /api/revenue/purchase-block
 // @desc    [Legacy] Redirects to Bounty Flow for backward compatibility
 // @access  Authenticated (Brand)
-router.post("/purchase-block", authMiddleware, async (req, res) => {
+router.post("/purchase-block", authMiddleware, createRateLimiter, async (req, res) => {
   try {
     // Adapter pattern: Map old 'size' based params to new 'amount' based params
     // Logic: 1000 units roughly equal $10 bounty in the old pricing model
@@ -102,7 +102,7 @@ router.post("/purchase-block", authMiddleware, async (req, res) => {
 // @route   POST /api/revenue/redeem
 // @desc    Creator redeems growth credits (fees applied)
 // @access  Authenticated (Creator)
-router.post("/redeem", authMiddleware, async (req, res) => {
+router.post("/redeem", authMiddleware, createRateLimiter, async (req, res) => {
   try {
     const creatorId = req.userId;
     const { credits } = req.body;
@@ -122,7 +122,7 @@ router.post("/redeem", authMiddleware, async (req, res) => {
 // @route   GET /api/revenue/bounty-board
 // @desc    List all active viral bounties for Promoters to find
 // @access  Authenticated
-router.get("/bounty-board", authMiddleware, async (req, res) => {
+router.get("/bounty-board", authMiddleware, createRateLimiter, async (req, res) => {
   try {
     const { niche } = req.query;
     let query = db
