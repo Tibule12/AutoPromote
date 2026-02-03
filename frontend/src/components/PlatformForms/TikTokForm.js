@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../ContentUploadForm.css"; // Reuse existing styles or define new ones
+import "../../ContentUploadForm.css"; // Reuse existing styles or define new ones
 
 const TikTokForm = ({
   onChange,
