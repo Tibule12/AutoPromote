@@ -2358,114 +2358,7 @@ function ContentUploadForm({
                 </span>
               </label>
             </div>
-
-            {/* BILLIONAIRE BOUNTY TOGGLE (No Ads) */}
-            <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #2d3748" }}>
-              <label
-                style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "0.5rem" }}
-              >
-                <div
-                  onClick={() => setIsBountyInterfaceVisible(!isBountyInterfaceVisible)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    background: isBountyInterfaceVisible
-                      ? "linear-gradient(90deg, #ffd700, #b8860b)"
-                      : "#2d3748",
-                    padding: "6px 12px",
-                    borderRadius: "20px",
-                    transition: "all 0.3s ease",
-                    boxShadow: isBountyInterfaceVisible
-                      ? "0 0 10px rgba(255, 215, 0, 0.5)"
-                      : "none",
-                  }}
-                >
-                  <span style={{ fontSize: "1.2rem", marginRight: "8px" }}>💰</span>
-                  <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.9rem" }}>
-                    {isBountyInterfaceVisible ? "Viral Bounty Active" : "Set Viral Bounty"}
-                  </span>
-                </div>
-                <span style={{ fontSize: "0.8rem", color: "#a0aec0" }}>
-                  (Pay only for verifiable viral results)
-                </span>
-              </label>
-
-              {isBountyInterfaceVisible && (
-                <div
-                  style={{
-                    marginTop: "1rem",
-                    background: "rgba(0, 0, 0, 0.3)",
-                    padding: "1rem",
-                    borderRadius: "8px",
-                    border: "1px solid #b8860b",
-                  }}
-                >
-                  <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                    <div style={{ flex: 1 }}>
-                      <label
-                        style={{
-                          color: "#ffd700",
-                          fontSize: "0.8rem",
-                          display: "block",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        BOUNTY POOL ($)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="e.g. 500"
-                        value={bountyAmount || ""}
-                        onChange={e => setBountyAmount(parseFloat(e.target.value))}
-                        style={{
-                          width: "100%",
-                          background: "#000",
-                          border: "1px solid #555",
-                          color: "#fff",
-                          padding: "8px",
-                          borderRadius: "4px",
-                        }}
-                      />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <label
-                        style={{
-                          color: "#ffd700",
-                          fontSize: "0.8rem",
-                          display: "block",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        TARGET NICHE
-                      </label>
-                      <select
-                        value={bountyNiche}
-                        onChange={e => setBountyNiche(e.target.value)}
-                        style={{
-                          width: "100%",
-                          background: "#000",
-                          border: "1px solid #555",
-                          color: "#fff",
-                          padding: "8px",
-                          borderRadius: "4px",
-                        }}
-                      >
-                        <option value="general">General</option>
-                        <option value="music">Music</option>
-                        <option value="tech">Tech</option>
-                        <option value="crypto">Crypto</option>
-                        <option value="fashion">Fashion</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div style={{ marginTop: "8px", fontSize: "0.75rem", color: "#cbd5e0" }}>
-                    Funds are held in escrow. Promoters are paid only when they generate verified
-                    engagement (views/shares).
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* VIRAL BOUNTY (Moved to per-platform forms) */}
           </div>
           <div className="platform-grid">
             {platforms.map(p => {
@@ -4503,6 +4396,10 @@ function ContentUploadForm({
                           creatorInfo={tiktokCreatorInfo}
                           globalTitle={title}
                           globalDescription={description}
+                          bountyAmount={bountyAmount}
+                          setBountyAmount={setBountyAmount}
+                          bountyNiche={bountyNiche}
+                          setBountyNiche={setBountyNiche}
                         />
                         {renderBestTimeForPlatform("tiktok")}
                       </>
@@ -4520,6 +4417,10 @@ function ContentUploadForm({
                           initialData={extPlatformOptions?.youtube}
                           globalTitle={title}
                           globalDescription={description}
+                          bountyAmount={bountyAmount}
+                          setBountyAmount={setBountyAmount}
+                          bountyNiche={bountyNiche}
+                          setBountyNiche={setBountyNiche}
                         />
                         {renderBestTimeForPlatform("youtube")}
                       </>
@@ -4629,6 +4530,10 @@ function ContentUploadForm({
                           initialData={extPlatformOptions?.instagram}
                           globalTitle={title}
                           globalDescription={description}
+                          bountyAmount={bountyAmount}
+                          setBountyAmount={setBountyAmount}
+                          bountyNiche={bountyNiche}
+                          setBountyNiche={setBountyNiche}
                         />
                         {renderBestTimeForPlatform("instagram")}
                       </>
