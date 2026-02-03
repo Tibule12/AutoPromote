@@ -86,6 +86,58 @@ async function postToPinterest({ contentId, payload, reason, uid }) {
   }
 }
 
+// Get Pinterest pin info (metrics)
+async function getPinInfo({ uid, pinId }) {
+  if (!pinId) throw new Error('pinId required');
+  // Try user tokens first
+  let userTokens = null;
+  if (uid) {
+    try {
+      const snap = await db.collection('users').doc(uid).collection('connections').doc('pinterest').get();
+      if (snap.exists) {
+        const d = snap.data() || {};
+        const { tokensFromDoc } = require('./connectionTokenUtils');
+        userTokens = tokensFromDoc(d) || null;
+      }
+    } catch (_) {}
+  }
+  const accessToken = userTokens ? userTokens.access_token : null;
+  if (!accessToken) {
+    // If no user token, but server credentials exist, we could use app-level calls (not implemented) -> simulate
+    return { simulated: true, reason: 'missing_credentials', pinId };
+  }
+  try {
+    const response = await safeFetch(`https://api.pinterest.com/v5/pins/${encodeURIComponent(pinId)}`, fetchFn, {
+      fetchOptions: {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+      requireHttps: true,
+      allowHosts: ['api.pinterest.com'],
+    });
+    if (!response.ok) {
+      const txt = await response.text().catch(()=>'');
+      return { success: false, error: `pin_fetch_failed:${response.status}`, raw: txt };
+    }
+    const j = await response.json();
+    // Extract common metrics where available
+    const metrics = {
+      id: j.id,
+      board_id: j.board_id,
+      note: j.note,
+      link: j.link,
+      media: j.media || null,
+      created_at: j.created_at,
+      // Pinterest may provide impressions/engagement in enterprise APIs; include raw if present
+      raw: j,
+    };
+    return { success: true, metrics };
+  } catch (e) {
+    return { success: false, error: e.message || 'pin_fetch_error' };
+  }
+}
+
+module.exports = { postToPinterest, createBoard, getPinInfo }
 async function createBoard({ name, description, uid }) {
   if (!name || !String(name).trim()) return { ok: false, error: "name_required" };
   const userRef = db.collection("users").doc(uid);

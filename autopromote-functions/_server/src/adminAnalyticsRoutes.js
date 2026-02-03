@@ -358,7 +358,7 @@ router.get("/users", adminLimiter, authMiddleware, async (req, res) => {
 
           contentCount = contentSnapshot.size;
         } catch (error) {
-          console.log("Error fetching content for user", userDoc.id + ":", error.message);
+          console.log("Error fetching content for user:", userDoc.id, error.message);
         }
 
         users.push({
@@ -410,7 +410,7 @@ router.get("/content", adminLimiter, authMiddleware, async (req, res) => {
           const userDoc = await db.collection("users").doc(contentData.userId).get();
           userData = userDoc.exists ? userDoc.data() : null;
         } catch (error) {
-          console.log("Error fetching user for content", contentDoc.id + ":", error.message);
+          console.log("Error fetching user for content:", contentDoc.id, error.message);
         }
 
         content.push({

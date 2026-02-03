@@ -49,6 +49,19 @@ class RevenueEngine {
       { merge: true }
     );
 
+    // 3. IMMEDIATE REWARD: Credit the Creator's Wallet (Greedy Game Loop)
+    // Every log earns credits instantly to addict the user.
+    if (creatorId) {
+        const userRef = db.collection("users").doc(creatorId);
+        batch.set(userRef, {
+            growthCredits: admin.firestore.FieldValue.increment(value),
+            // Track total lifetime earnings for "Status" (Leaderboards)
+            wallet: {
+                totalEarned: admin.firestore.FieldValue.increment(value)
+            }
+        }, { merge: true });
+    }
+
     await batch.commit();
     return { success: true, logId: logRef.id };
   }
@@ -165,23 +178,48 @@ class RevenueEngine {
    * Creator wants to cash out their credits.
    */
   async redeemCredits(creatorId, creditsToRedeem) {
-    // 1. Check balance
     const userRef = db.collection("users").doc(creatorId);
-    // ... fetch balance ...
 
-    // 2. Apply Retention Fee (Greedy Platform Fee)
-    const feeAmount = creditsToRedeem * RETENTION_FEE_PERCENT;
-    const netPayout = creditsToRedeem - feeAmount;
+    return db.runTransaction(async (transaction) => {
+        // 1. Check balance
+        const userDoc = await transaction.get(userRef);
+        if (!userDoc.exists) {
+            throw new Error("User does not exist.");
+        }
 
-    // 3. Process Payout
-    // ... Payout Logic ...
+        const currentCredits = userDoc.data().growthCredits || 0;
+        if (currentCredits < creditsToRedeem) {
+            throw new Error(`Insufficient Growth Credits. Balance: ${currentCredits}`);
+        }
 
-    return {
-      redeemed: creditsToRedeem,
-      fee: feeAmount,
-      payout: netPayout,
-      currency: "USD", // Assuming 1 credit = $1 for simplicity in this draft
-    };
+        // 2. Apply Retention Fee (Greedy Platform Fee)
+        const feeAmount = Math.ceil(creditsToRedeem * RETENTION_FEE_PERCENT); // Round up fee
+        const netRedeemed = creditsToRedeem - feeAmount;
+
+        // 3. Deduct Credits
+        transaction.update(userRef, {
+            growthCredits: admin.firestore.FieldValue.increment(-creditsToRedeem)
+        });
+
+        // 4. Log Transaction (Audit Trail)
+        const auditRef = db.collection("credit_ledger").doc();
+        transaction.set(auditRef, {
+            userId: creatorId,
+            type: "REDEMPTION",
+            amount: -creditsToRedeem,
+            netAction: netRedeemed,
+            fee: feeAmount,
+            timestamp: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        return {
+            success: true,
+            redeemed: creditsToRedeem,
+            fee: feeAmount,
+            netActionPoints: netRedeemed, 
+            message: `Redeemed ${creditsToRedeem} credits. Fee: ${feeAmount}.`
+        };
+    });
   }
 }
 

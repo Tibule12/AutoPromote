@@ -10,7 +10,7 @@ const {
   getValidAccessToken,
 } = require("../services/twitterService");
 const fetch = require("node-fetch");
-const { db } = require("../firebaseAdmin");
+const { db, admin } = require("../firebaseAdmin");
 const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
 const logger = require("../utils/logger");
 
@@ -160,13 +160,26 @@ router.post("/oauth/prepare", authMiddleware, twitterWriteLimiter, async (req, r
 
 // OAuth callback
 router.get("/oauth/callback", twitterPublicLimiter, async (req, res) => {
-  const { state, code, error } = req.query;
+  // Sanitize provider-controlled query params: copy into local vars and remove from req.query
+  const stateRaw = req.query.state;
+  const codeRaw = req.query.code;
+  const errorRaw = req.query.error;
+  const state = stateRaw ? String(stateRaw) : null;
+  const code = codeRaw ? String(codeRaw) : null;
+  const error = errorRaw ? String(errorRaw) : null;
+  try {
+    delete req.query.state;
+    delete req.query.code;
+    delete req.query.error;
+  } catch (_) {}
+
   if (error) {
-    debugLog("callback error param", error);
-    return res.status(400).send(`Twitter auth error: ${error}`);
+    // Avoid reflecting provider text back to the user to prevent leakage or reflected content
+    debugLog("callback error received from provider");
+    return res.status(400).send("Twitter auth error");
   }
   if (!state || !code) {
-    debugLog("callback missing param", { state: !!state, code: !!code });
+    debugLog("callback missing param", { statePresent: !!state, codePresent: !!code });
     return res.status(400).send("Missing state or code");
   }
   try {
@@ -195,6 +208,172 @@ router.get("/oauth/callback", twitterPublicLimiter, async (req, res) => {
     // Avoid reflecting error messages into HTML to prevent reflected XSS.
     debugLog("callback exchange error", e.message);
     return res.status(500).send("Exchange failed");
+  }
+});
+
+// -------------------------
+// OAuth1.0a flow (request_token -> authenticate -> access_token)
+// -------------------------
+
+// Prepare OAuth1 (returns authUrl for frontend redirect)
+router.post("/oauth1/prepare", authMiddleware, twitterWriteLimiter, async (req, res) => {
+  try {
+    // Prefer the v1.1 consumer key/secret for OAuth1.0a signing (fall back to client id/secret only if necessary)
+    const consumerKey = process.env.TWITTER_CONSUMER_KEY || process.env.TWITTER_CLIENT_ID;
+    const consumerSecret =
+      process.env.TWITTER_CONSUMER_SECRET || process.env.TWITTER_CLIENT_SECRET || null;
+    if (!consumerKey || !consumerSecret) {
+      return res.status(500).json({ error: "twitter_consumer_config_missing" });
+    }
+
+    // Build callback URL (same hostname + path)
+    let callbackUrl = process.env.TWITTER_CLIENT_REDIRECT_URI || null;
+    try {
+      const { canonicalizeRedirect } = require("../utils/redirectUri");
+      callbackUrl = canonicalizeRedirect(callbackUrl, {
+        requiredPath: "/api/twitter/oauth1/callback",
+      });
+    } catch (_) {}
+    if (!callbackUrl) {
+      return res.status(500).json({ error: "missing_callback_url" });
+    }
+
+    const requestTokenUrl = "https://api.twitter.com/oauth/request_token";
+    const { buildOauth1Header } = require("../utils/oauth1");
+
+    const extraParams = { oauth_callback: callbackUrl };
+    const authHeader = buildOauth1Header({
+      method: "POST",
+      url: requestTokenUrl,
+      consumerKey,
+      consumerSecret,
+      extraParams,
+    });
+
+    const r = await fetch(requestTokenUrl, {
+      method: "POST",
+      headers: { Authorization: authHeader, "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(extraParams),
+    });
+    const txt = await r.text();
+    if (!r.ok) {
+      const truncated = typeof txt === "string" ? txt.slice(0, 400) : String(txt);
+      // Log a server-side warning with truncated response to aid debugging, but do NOT send raw body to client
+      logger.warn("oauth1 request_token failed", { status: r.status, bodyPreview: truncated });
+      return res.status(500).json({
+        error: "request_token_failed",
+        status: r.status,
+        detail: "twitter_request_token_failure",
+      });
+    }
+
+    // Parse form-encoded response
+    const resp = Object.fromEntries(new URLSearchParams(txt));
+    if (!resp.oauth_token || !resp.oauth_token_secret) {
+      return res.status(500).json({ error: "invalid_request_token_response", raw: txt });
+    }
+
+    // Store temporary state mapping oauth_token -> secret + uid
+    await db
+      .collection("oauth1_states")
+      .doc(resp.oauth_token)
+      .set({
+        uid: req.userId || req.user?.uid,
+        oauth_token_secret: resp.oauth_token_secret,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+    const authUrl = `https://api.twitter.com/oauth/authenticate?oauth_token=${resp.oauth_token}`;
+    return res.json({ authUrl });
+  } catch (e) {
+    debugLog("oauth1 prepare error", e.message);
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// OAuth1 callback - exchanges request_token + verifier for access token
+router.get("/oauth1/callback", twitterPublicLimiter, async (req, res) => {
+  const { oauth_token, oauth_verifier } = req.query;
+  // OAuth1 callback parameters come via query string from Twitter (provider-controlled).
+  // Treat them as sensitive: normalize to local variables and remove them from `req.query` immediately
+  // so they cannot be accidentally logged or serialized by other middleware.
+  const oauthToken = oauth_token ? String(oauth_token) : null;
+  const oauthVerifier = oauth_verifier ? String(oauth_verifier) : null;
+  // Remove sensitive query params to avoid accidental leakage in logs or downstream middleware
+  try {
+    delete req.query.oauth_token;
+    delete req.query.oauth_verifier;
+  } catch (_) {}
+
+  if (!oauthToken || !oauthVerifier)
+    return res.status(400).send("Missing oauth_token or oauth_verifier");
+
+  try {
+    const doc = await db.collection("oauth1_states").doc(oauth_token).get();
+    if (!doc.exists) return res.status(400).send("Invalid or expired oauth token");
+    const data = doc.data();
+    const requestTokenSecret = data.oauth_token_secret;
+    const uid = data.uid;
+
+    const accessTokenUrl = "https://api.twitter.com/oauth/access_token";
+    const consumerKey = process.env.TWITTER_CLIENT_ID || process.env.TWITTER_CONSUMER_KEY;
+    const consumerSecret =
+      process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CONSUMER_SECRET || null;
+    const { buildOauth1Header } = require("../utils/oauth1");
+
+    // Use the sanitized local variables rather than raw req.query values
+    const extraParams = { oauth_verifier: oauthVerifier };
+    const authHeader = buildOauth1Header({
+      method: "POST",
+      url: accessTokenUrl,
+      consumerKey,
+      consumerSecret,
+      token: oauthToken,
+      tokenSecret: requestTokenSecret,
+      extraParams,
+    });
+
+    const r = await fetch(accessTokenUrl, {
+      method: "POST",
+      headers: { Authorization: authHeader, "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(extraParams),
+    });
+    const txt = await r.text();
+    if (!r.ok) {
+      debugLog("oauth1 access_token failed", r.status, txt);
+      return res.status(500).send("Access token exchange failed");
+    }
+
+    const resp = Object.fromEntries(new URLSearchParams(txt));
+    if (!resp.oauth_token || !resp.oauth_token_secret) {
+      return res.status(500).send("Invalid access token response");
+    }
+
+    // Persist OAuth1 access tokens to user's connection doc
+    await require("../services/twitterService").storeUserOAuth1Tokens(
+      uid,
+      resp.oauth_token,
+      resp.oauth_token_secret,
+      {
+        screen_name: resp.screen_name,
+        user_id: resp.user_id,
+      }
+    );
+
+    // Cleanup temporary state (use sanitized oauthToken and ignore delete errors)
+    await db
+      .collection("oauth1_states")
+      .doc(oauthToken)
+      .delete()
+      .catch(() => {});
+
+    debugLog("oauth1 callback success for uid", uid);
+    return res.send(
+      "<html><body><h2>Twitter (OAuth1) connected successfully.</h2><p>You can close this window.</p></body></html>"
+    );
+  } catch (e) {
+    debugLog("oauth1 callback error", e.message);
+    return res.status(500).send("OAuth1 exchange failed");
   }
 });
 
@@ -258,6 +437,9 @@ router.get(
           expires_at: data.expires_at || null,
           willRefreshInMs: data.expires_at ? Math.max(0, data.expires_at - Date.now()) : null,
           identity,
+          // Indicate whether OAuth1 reauth is required for native media uploads (e.g., video)
+          oauth1_missing: !!data.oauth1_missing,
+          oauth1_missingAt: data.oauth1_missingAt || null,
         };
       });
       setCache(cacheKey, payload, 7000);

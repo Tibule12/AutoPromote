@@ -15,6 +15,7 @@ const { postToLinkedIn } = require("./linkedinService");
 const { postToTelegram } = require("./telegramService");
 const { postToPinterest } = require("./pinterestService");
 const { postToSnapchat } = require("./snapchatService");
+const { uploadVideo: postToYouTube } = require("./youtubeService");
 
 // Utility: safe JSON
 async function safeJson(res) {
@@ -117,20 +118,6 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
 }
 
 async function postToTwitter({ contentId, payload, reason, uid }) {
-  // Prefer user-context token via twitterService; fallback to env bearer (legacy)
-  let bearer = null;
-  if (uid) {
-    try {
-      const { getValidAccessToken } = require("./twitterService");
-      bearer = await getValidAccessToken(uid);
-    } catch (e) {
-      console.warn("[Twitter] user token fetch failed:", e.message);
-    }
-  }
-  if (!bearer) {
-    bearer = process.env.TWITTER_BEARER_TOKEN || null;
-  }
-  if (!bearer) return { platform: "twitter", simulated: true, reason: "missing_credentials" };
   const ctx = await buildContentContext(contentId);
   let link = payload?.shortlink || payload?.link || ctx.landingPageUrl || "";
   if (link) {
@@ -141,10 +128,68 @@ async function postToTwitter({ contentId, payload, reason, uid }) {
       }
     }
   }
-  // Use safeFetch for SSRF protection
+
+  const rawText = payload?.message || ctx.title || "New content";
+
+  // Priority 1: User-Context (OAuth2) via twitterService
+  // Now supports threads if payload.threadMode is true
+  if (uid) {
+    try {
+      const { postTweet, postThread } = require("./twitterService");
+
+      if (payload?.threadMode) {
+        // Split text into chunks for threading
+        const chunks = [];
+        const words = rawText.split(/\s+/);
+        let current = "";
+        const MAX_LEN = 270; // safety buffer below 280
+
+        for (const w of words) {
+          if (current.length + w.length + 1 > MAX_LEN) {
+            chunks.push(current.trim());
+            current = w + " ";
+          } else {
+            current += w + " ";
+          }
+        }
+        if (current.trim()) chunks.push(current.trim());
+
+        // Append link to last chunk if possible, or make new chunk
+        if (link) {
+          if (chunks.length > 0) {
+            const last = chunks[chunks.length - 1];
+            if (last.length + link.length + 1 <= 280) {
+              chunks[chunks.length - 1] = last + "\n" + link;
+            } else {
+              chunks.push(link);
+            }
+          } else {
+            chunks.push(link);
+          }
+        }
+
+        return await postThread({ uid, tweets: chunks, contentId });
+      } else {
+        // Single Tweet Mode
+        const text = rawText.slice(0, 270) + (link ? `\n${link}` : "");
+        return await postTweet({ uid, text, contentId });
+      }
+    } catch (e) {
+      console.warn("[Twitter] User-context post failed:", e.message);
+      // If we failed on a thread, do not fallback to single env-var tweet (which would be partial content)
+      if (payload?.threadMode) {
+        return { platform: "twitter", success: false, error: e.message };
+      }
+      // If single tweet, allow fallback below
+    }
+  }
+
+  // Priority 2: System/Legacy (Env Vars) - Single Tweet Only
+  let bearer = process.env.TWITTER_BEARER_TOKEN;
+  if (!bearer) return { platform: "twitter", simulated: true, reason: "missing_credentials" };
+
   const { safeFetch } = require("../utils/ssrfGuard");
-  const text =
-    (payload?.message || ctx.title || "New content").slice(0, 270) + (link ? `\n${link}` : "");
+  const text = rawText.slice(0, 270) + (link ? `\n${link}` : "");
   const res = await safeFetch("https://api.twitter.com/2/tweets", fetch, {
     fetchOptions: {
       method: "POST",
@@ -161,20 +206,55 @@ async function postToTwitter({ contentId, payload, reason, uid }) {
   return { platform: "twitter", success: true, tweetId: json.data?.id, reason };
 }
 
-async function postToInstagram({ contentId, payload, reason }) {
+async function postToInstagram({ contentId, payload, reason, uid }) {
   try {
     const { publishInstagram } = require("./instagramPublisher");
-    return await publishInstagram({ contentId, payload, reason });
+    return await publishInstagram({ contentId, payload, reason, uid });
   } catch (e) {
     return { platform: "instagram", simulated: true, error: e.message, reason };
   }
 }
 
 async function postToTikTok({ contentId, payload, reason, uid }) {
+  // Feature flag: if TikTok is disabled and the UID is not in the canary set, skip posting
+  try {
+    const enabled = String(process.env.TIKTOK_ENABLED || "false").toLowerCase() === "true";
+    const canary = (process.env.TIKTOK_CANARY_UIDS || "")
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (!enabled && !(uid && canary.includes(uid))) {
+      try {
+        require("./metricsRecorder").incrCounter("tiktok.dispatch.skipped.disabled");
+      } catch (_) {}
+      return {
+        platform: "tiktok",
+        success: false,
+        skipped: true,
+        reason: "disabled_by_feature_flag",
+      };
+    }
+  } catch (e) {
+    // ignore gating errors and proceed
+  }
+
   try {
     const { postToTikTok: tiktokPost } = require("./tiktokService");
-    return await tiktokPost({ contentId, payload, reason, uid });
+    const res = await tiktokPost({ contentId, payload, reason, uid });
+    if (res && res.success) {
+      try {
+        require("./metricsRecorder").incrCounter("tiktok.dispatch.success");
+      } catch (_) {}
+    } else {
+      try {
+        require("./metricsRecorder").incrCounter("tiktok.dispatch.failure");
+      } catch (_) {}
+    }
+    return res;
   } catch (e) {
+    try {
+      require("./metricsRecorder").incrCounter("tiktok.dispatch.error");
+    } catch (_) {}
     return {
       platform: "tiktok",
       success: false,
@@ -229,11 +309,37 @@ async function postToSpotifyHandler(args) {
   }
 }
 
+async function postToYouTubeHandler(args) {
+  // Wrapper to match platformPoster signature
+  // uploadVideo signature: ({ uid, videoUrl, title, description, privacy, tags, contentId })
+  const { contentId, payload, reason, uid } = args;
+  try {
+    const res = await postToYouTube({
+      uid,
+      videoUrl: payload.url || payload.mediaUrl, // Assuming payload has url
+      title: payload.title || payload.message,
+      description: payload.description,
+      privacy: payload.privacy || "public",
+      tags: payload.tags || payload.hashtags,
+      contentId,
+    });
+
+    if (res.success) {
+      return { platform: "youtube", success: true, videoId: res.videoId, reason };
+    } else {
+      return { platform: "youtube", success: false, error: res.error || "Upload failed" };
+    }
+  } catch (e) {
+    return { platform: "youtube", success: false, error: e.message };
+  }
+}
+
 const handlers = {
   facebook: postToFacebook,
   twitter: postToTwitter,
   instagram: postToInstagram,
   tiktok: postToTikTok,
+  youtube: postToYouTubeHandler,
   linkedin: postToLinkedIn,
   pinterest: postToPinterest,
   snapchat: postToSnapchat,
@@ -250,6 +356,41 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
     try {
       const contentSnap = await db.collection("content").doc(contentId).get();
       const content = contentSnap.exists ? contentSnap.data() : {};
+
+      // SPONSORSHIP DISCLOSURE (Greedy Revenue Engine)
+      // Automatically inject disclosure tags, product links, and force public visibility
+      const mon = content.monetization_settings || {};
+      if (mon.is_sponsored) {
+        const disclosure = mon.brand_name
+          ? ` #ad #${mon.brand_name.replace(/\s+/g, "")}`
+          : " #ad #sponsored";
+        const promoLink = mon.product_link ? `\n\nCheck it out here: ${mon.product_link}` : "";
+
+        // 1. Inject into hashtagString (used by Reddit/LinkedIn/Twitter)
+        const currentTags = payload.hashtagString || "";
+        if (!currentTags.includes("#ad") && !currentTags.includes("#sponsored")) {
+          payload.hashtagString = (currentTags + disclosure).trim();
+        }
+
+        // 2. Inject into message/text (used by Facebook/Generic)
+        // Append promoLink here as well
+        const msgKey = payload.message ? "message" : payload.text ? "text" : null;
+        if (msgKey) {
+          if (!payload[msgKey].includes("#ad")) {
+            payload[msgKey] += disclosure;
+          }
+          if (promoLink && !payload[msgKey].includes(mon.product_link)) {
+            payload[msgKey] += promoLink;
+          }
+        } else if (!payload.message && !payload.text) {
+          // If no text yet, start with disclosure and link
+          payload.message = (content.title || "Check this out") + disclosure + promoLink;
+        }
+
+        // 3. Force Public
+        payload.privacyLevel = "PUBLIC";
+      }
+
       const optimization = await hashtagEngine.generateCustomHashtags({
         content,
         platform,

@@ -215,6 +215,28 @@ router.get("/callback", async (req, res) => {
     );
     const pagesData = await pagesRes.json();
     const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
+
+    // Debugging: if no pages returned, log the raw response and attempt a debug_token call
+    if (!pages || pages.length === 0) {
+      try {
+        console.warn("[FacebookCallback] /me/accounts returned no pages:", pagesData);
+      } catch (_) {}
+      try {
+        const appAccessToken = `${FB_CLIENT_ID}|${FB_CLIENT_SECRET}`;
+        const dbgRes = await fetch(
+          `https://graph.facebook.com/debug_token?input_token=${encodeURIComponent(tokenData.access_token)}&access_token=${encodeURIComponent(appAccessToken)}`
+        );
+        const dbgJson = await dbgRes.json();
+        // Log debug info for investigation (do NOT print raw tokens)
+        console.warn("[FacebookCallback] debug_token result:", dbgJson);
+      } catch (e) {
+        console.warn(
+          "[FacebookCallback] debug_token fetch failed:",
+          e && e.message ? e.message : e
+        );
+      }
+    }
+
     // Try to get Instagram business account from ANY page (iterate until found)
     let igBusinessAccountId = null;
     if (pages.length > 0) {
@@ -229,24 +251,48 @@ router.get("/callback", async (req, res) => {
           const igData = await igRes.json();
           // Log specific response for debugging
           if (igData.error) {
-            console.error("[FacebookCallback] IG check failed for page", pageId + ":", igData.error);
+            console.error("[FacebookCallback] IG check failed for page:", pageId, igData.error);
           } else if (igData.instagram_business_account && igData.instagram_business_account.id) {
             igBusinessAccountId = igData.instagram_business_account.id;
-            console.log("[FacebookCallback] Found IG Business Account", igBusinessAccountId, "on page", pageId);
+            console.log(
+              "[FacebookCallback] Found IG Business Account",
+              igBusinessAccountId,
+              "on page",
+              pageId
+            );
           }
-          } catch (e) {
-          console.error("[FacebookCallback] Exception checking IG for page", page.id + ":", e);
+        } catch (e) {
+          console.error("[FacebookCallback] Exception checking IG for page:", page.id, e);
         }
       }
     }
 
     if (uidFromState) {
+      // Fetch existing connection doc so we do not accidentally overwrite previously-discovered pages
+      const connRef = db
+        .collection("users")
+        .doc(uidFromState)
+        .collection("connections")
+        .doc("facebook");
+      const existingSnap = await connRef.get();
+      const existingData = existingSnap.exists ? existingSnap.data() : null;
+
+      // Decide which pages to store: prefer returned pages, but preserve existing pages if the callback returned none
+      const pagesToStore =
+        pages && pages.length > 0
+          ? pages
+          : existingData && Array.isArray(existingData.pages)
+            ? existingData.pages
+            : [];
+      const igToStore =
+        igBusinessAccountId || (existingData && existingData.ig_business_account_id) || null;
+
       let stored = {
         provider: "facebook",
         token_type: tokenData.token_type,
         expires_in: tokenData.expires_in,
-        pages,
-        ig_business_account_id: igBusinessAccountId,
+        pages: pagesToStore,
+        ig_business_account_id: igToStore,
         obtainedAt: admin.firestore.FieldValue.serverTimestamp(),
       };
       try {
@@ -262,12 +308,37 @@ router.get("/callback", async (req, res) => {
       } catch (e) {
         stored.user_access_token = tokenData.access_token; // fallback
       }
-      await db
-        .collection("users")
-        .doc(uidFromState)
-        .collection("connections")
-        .doc("facebook")
-        .set(stored, { merge: true });
+
+      // If we preserved pages because callback returned empty, write an audit entry for future debugging
+      if (
+        pages &&
+        pages.length === 0 &&
+        existingData &&
+        Array.isArray(existingData.pages) &&
+        existingData.pages.length > 0
+      ) {
+        try {
+          await connRef.collection("audits").add({
+            event: "preserve_pages_on_empty_callback",
+            oldPages: existingData.pages || [],
+            newPages: pages || [],
+            reason: "callback returned no pages",
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          console.warn(
+            "[FacebookCallback] preserved existing pages for uid",
+            uidFromState,
+            "because callback returned empty pages"
+          );
+        } catch (e) {
+          console.warn(
+            "[FacebookCallback] failed to write pages-preserve audit:",
+            e && e.message ? e.message : e
+          );
+        }
+      }
+
+      await connRef.set(stored, { merge: true });
       const url = new URL(DASHBOARD_URL);
       url.searchParams.set("facebook", "connected");
       return res.redirect(url.toString());
@@ -335,6 +406,39 @@ router.get(
           pages: (data.pages || []).map(p => ({ id: p.id, name: p.name })),
           ig_business_account_id: data.ig_business_account_id || null,
         };
+
+        // If no pages are present, attach a short diagnostic hint and attempt to inspect token scopes if an unsecured token is available
+        if (!data.pages || data.pages.length === 0) {
+          out.diagnostic = {
+            message:
+              "No Pages found for this Facebook connection. Consider reconnecting and ensure Page permissions (e.g., pages_show_list) were granted and that you are a Page admin.",
+            needs_reconnect: true,
+          };
+          try {
+            if (data.user_access_token) {
+              const appAccessToken = `${FB_CLIENT_ID}|${FB_CLIENT_SECRET}`;
+              const dbgRes = await fetch(
+                `https://graph.facebook.com/debug_token?input_token=${encodeURIComponent(
+                  data.user_access_token
+                )}&access_token=${encodeURIComponent(appAccessToken)}`
+              );
+              const dbgJson = await dbgRes.json();
+              const safeUid = typeof uid === "string" ? uid.replace(/[^\w-]/g, "") : "";
+              console.warn("[FacebookStatus] debug_token for uid:", safeUid, dbgJson);
+              if (dbgJson && dbgJson.data && Array.isArray(dbgJson.data.scopes)) {
+                if (!dbgJson.data.scopes.includes("pages_show_list")) {
+                  out.diagnostic.missing_scopes = ["pages_show_list"];
+                }
+              }
+            }
+          } catch (e) {
+            console.warn(
+              "[FacebookStatus] debug_token fetch failed:",
+              e && e.message ? e.message : e
+            );
+          }
+        }
+
         setCache(cacheKey, out, 7000);
         return out;
       });

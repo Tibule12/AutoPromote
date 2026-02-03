@@ -65,6 +65,26 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
       const contentSnap = await db.collection("content").doc(t.contentId).get();
       const uid = contentSnap.exists ? contentSnap.data().user_id || contentSnap.data().uid : null;
       if (!uid) continue;
+
+      // VISUAL FIX: Create a "schedule" entry so it appears on the Dashboard Timeline
+      try {
+        const nextTime = new Date(Date.now() + 1000 * 60 * 5).toISOString(); // 5 mins
+        db.collection("promotion_schedules")
+          .add({
+            contentId: t.contentId,
+            user_id: uid,
+            platform: t.platform,
+            startTime: nextTime,
+            scheduleType: "auto_repost",
+            isActive: true,
+            status: "processing", // Mark as processing since we are queueing task immediately
+            reason: "view_decay_detected",
+            message: "Auto-Promote Decay Cycle",
+            createdAt: new Date().toISOString(),
+          })
+          .catch(() => {});
+      } catch (_) {}
+
       await enqueuePlatformPostTask({
         contentId: t.contentId,
         uid,
