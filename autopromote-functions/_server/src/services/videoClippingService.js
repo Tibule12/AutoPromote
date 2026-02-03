@@ -533,6 +533,7 @@ class VideoClippingService {
         duration: clipEnd - segment.start,
         viralScore: segment.viralScore,
         text: segment.text,
+        transcript: segment.transcript,
         reason: this.getClipReason(segment),
         platforms: this.suggestPlatforms(segment),
         captionSuggestion: this.generateCaption(segment.text),
@@ -586,6 +587,9 @@ class VideoClippingService {
    * Generate a specific clip from suggestions
    */
   async generateClip(analysisId, clipId, options = {}) {
+    if (!clipId || /[^a-zA-Z0-9-_]/.test(clipId)) {
+      throw new Error("Invalid clipId string");
+    }
     try {
       // Retrieve analysis data
       const analysisDoc = await db.collection("clip_analyses").doc(analysisId).get();
@@ -668,35 +672,135 @@ class VideoClippingService {
   /**
    * Render clip using FFmpeg with effects
    */
-  renderClip(sourcePath, outputPath, clip, options) {
-    return new Promise((resolve, reject) => {
-      let command = ffmpeg(sourcePath)
-        .setStartTime(clip.start)
-        .setDuration(clip.end - clip.start);
+  async renderClip(sourcePath, outputPath, clip, options) {
+    const tempSrtPath = outputPath.replace(".mp4", ".srt");
 
-      // Apply aspect ratio conversion if requested
-      if (options.aspectRatio === "9:16") {
-        command = command.videoFilters([
-          "scale=1080:1920:force_original_aspect_ratio=increase",
-          "crop=1080:1920",
-        ]);
-      }
+    try {
+      return await new Promise(async (resolve, reject) => {
+        let command = ffmpeg(sourcePath)
+          .setStartTime(clip.start)
+          .setDuration(clip.end - clip.start);
 
-      // Add captions if requested
-      if (options.addCaptions && clip.text) {
-        // TODO: Generate SRT file and burn in subtitles
-        // This requires subtitle generation logic
-      }
+        const videoFilters = [];
+        const audioFilters = [];
 
-      command
-        .output(outputPath)
-        .videoCodec("libx264")
-        .audioCodec("aac")
-        .outputOptions(["-preset fast", "-crf 23"])
-        .on("end", resolve)
-        .on("error", reject)
-        .run();
+        // Apply aspect ratio conversion if requested
+        if (options.aspectRatio === "9:16") {
+          // Smart crop to center (could require face detection coords in future)
+          // Scale first, then crop
+          // TUNE: Using 720p (720x1280) instead of 1080p to fit within Cloud Function timeout limits and ensure completion
+          videoFilters.push("scale=720:1280:force_original_aspect_ratio=increase");
+          videoFilters.push("crop=720:1280");
+        }
+
+        // TUNE: Add Dynamic Audio Normalization for professional "viral" loudness
+        audioFilters.push("dynaudnorm");
+
+        // CRITICAL: Add captions BEFORE changing speed/tempo.
+        // If we change speed first, the video timestamps shrink, but the SRT file
+        // still has original timestamps, causing massive desync.
+        if (options.addCaptions && clip.transcript && clip.transcript.length > 0) {
+          try {
+            const srtContent = this.generateSRT(clip.transcript, clip.start);
+            await fs.writeFile(tempSrtPath, srtContent);
+            // Escape path for ffmpeg (windows paths can be tricky)
+            const srtPathEscaped = tempSrtPath.replace(/\\/g, "/").replace(/:/g, "\\:");
+            
+            // Use 'Sans' instead of 'Arial' for better Linux/Cloud compatibility
+            videoFilters.push(
+              `subtitles=${srtPathEscaped}:force_style='FontName=Sans,FontSize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1,Shadow=0,Alignment=2,MarginV=20'`
+            );
+          } catch (err) {
+            console.error("[VideoClipping] Failed to generate subtitles:", err);
+          }
+        }
+
+        // Apply Tempo/Speed LAST (Memetic Composer feature)
+        if (options.tempo && options.tempo !== 1.0) {
+          // video speed = 1/tempo (setpts), audio speed = tempo (atempo)
+          videoFilters.push(`setpts=${1 / options.tempo}*PTS`);
+          audioFilters.push(`atempo=${options.tempo}`);
+        }
+
+        if (videoFilters.length > 0) {
+          command = command.videoFilters(videoFilters);
+        }
+
+        if (audioFilters.length > 0) {
+          command = command.audioFilters(audioFilters);
+        }
+
+        command
+          .output(outputPath)
+          .videoCodec("libx264")
+          .audioCodec("aac")
+          .outputOptions(["-preset fast", "-crf 23"])
+          .on("end", async () => {
+            // Cleanup temp srt
+            try {
+              await fs.unlink(tempSrtPath).catch(() => {});
+            } catch (e) {
+              /* ignore */
+            }
+            resolve();
+          })
+          .on("error", (err) => {
+            // Cleanup temp srt
+            fs.unlink(tempSrtPath).catch(() => {});
+            reject(err);
+          })
+          .run();
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Helper to generate SRT content from transcript
+   */
+  generateSRT(transcript, offsetTime) {
+    let srt = "";
+    transcript.forEach((entry, index) => {
+      // Each entry ideally has words. If not, we use the segment text.
+      // If we have detailed word-level timestamps, we use them.
+      // Fallback to segment level if entry.words is missing.
+
+      const items = entry.words || [
+        { start: entry.start, end: entry.end, word: entry.text },
+      ];
+
+      items.forEach((wordItem, wordIndex) => {
+        // Adjust time relative to clip start
+        const relativeStart = Math.max(0, wordItem.start - offsetTime);
+        const relativeEnd = Math.max(0, wordItem.end - offsetTime);
+
+        // Skip if word is outside the clip range
+        if (relativeEnd <= 0) return;
+
+        const startTime = this.formatSRTTime(relativeStart);
+        const endTime = this.formatSRTTime(relativeEnd);
+
+        // Simple sequential index
+        srt += `${index * 1000 + wordIndex + 1}\n`;
+        srt += `${startTime} --> ${endTime}\n`;
+        srt += `${wordItem.word}\n\n`;
+      });
     });
+    return srt;
+  }
+
+  /**
+   * Format seconds to SRT time string (HH:MM:SS,ms)
+   */
+  formatSRTTime(seconds) {
+    const pad = (num, size) => ("000" + num).slice(size * -1);
+    const date = new Date(seconds * 1000);
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const ms = Math.floor((seconds % 1) * 1000);
+    return `${pad(hours, 2)}:${pad(mins, 2)}:${pad(secs, 2)},${pad(ms, 3)}`;
   }
 }
 

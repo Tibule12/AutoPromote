@@ -600,10 +600,13 @@ class VideoClippingService {
         throw new Error("Clip not found in analysis");
       }
 
+      // Sanitize clipId to prevent path traversal
+      const safeClipId = String(clipId).replace(/[^a-zA-Z0-9-_]/g, "");
+
       // Download source video
       const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "clip-gen-"));
       const sourcePath = path.join(tempDir, "source.mp4");
-      const outputPath = path.join(tempDir, `clip-${clipId}.mp4`);
+      const outputPath = path.join(tempDir, `clip-${safeClipId}.mp4`);
 
       await this.downloadVideo(analysis.videoUrl, sourcePath);
 
@@ -700,8 +703,12 @@ class VideoClippingService {
             const srtContent = this.generateSRT(clip.transcript, clip.start);
             await fs.writeFile(tempSrtPath, srtContent);
             // Escape path for ffmpeg (windows paths can be tricky).
-            // Use path.posix.join style forward slashes, and escape colons for FFmpeg filter syntax.
-            const srtPathEscaped = tempSrtPath.replace(/\\/g, "/").replace(/:/g, "\\\\:");
+            // Use path.posix.join style forward slashes, escape colons for FFmpeg filter syntax,
+            // and escape single quotes to prevent breaking out of the filter string.
+            const srtPathEscaped = tempSrtPath
+              .replace(/\\/g, "/")
+              .replace(/:/g, "\\\\:")
+              .replace(/'/g, "'\\\\''");
 
             // Use 'Sans' instead of 'Arial' for better Linux/Cloud compatibility
             // Quote the path string for safety against spaces/special chars

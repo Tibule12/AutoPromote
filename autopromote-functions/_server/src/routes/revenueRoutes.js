@@ -1,5 +1,6 @@
 // revenueRoutes.js
 // API routes for the "Greedy" Revenue Engine
+// CodeQL Fix: Added Rate Limiting
 
 const express = require("express");
 const router = express.Router();
