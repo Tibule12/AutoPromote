@@ -6,6 +6,7 @@ const RedditForm = ({ onChange, initialData = {}, globalTitle, globalDescription
   const [flairId, setFlairId] = useState(initialData.flairId || "");
   const [isNSFW, setIsNSFW] = useState(initialData.isNSFW || false);
   const [isSpoiler, setIsSpoiler] = useState(initialData.isSpoiler || false);
+  const [isPromotional, setIsPromotional] = useState(initialData.isPromotional || false);
 
   // Mock flairs for now, in real app would fetch based on subreddit
   const [availableFlairs, setAvailableFlairs] = useState([]);
@@ -18,8 +19,9 @@ const RedditForm = ({ onChange, initialData = {}, globalTitle, globalDescription
       flairId,
       isNSFW,
       isSpoiler,
+      isPromotional,
     });
-  }, [subreddit, title, flairId, isNSFW, isSpoiler]);
+  }, [subreddit, title, flairId, isNSFW, isSpoiler, isPromotional]);
 
   return (
     <div className="platform-form reddit-form">
@@ -55,6 +57,24 @@ const RedditForm = ({ onChange, initialData = {}, globalTitle, globalDescription
           maxLength={300}
         />
         <div className="char-count">{title.length}/300</div>
+      </div>
+
+      <div className="commercial-section">
+        <label className="checkbox-modern">
+          <input
+            type="checkbox"
+            checked={isPromotional}
+            onChange={e => setIsPromotional(e.target.checked)}
+          />
+          <span className="checkmark"></span>
+          <span className="label-text">Promotional / Partner Content</span>
+        </label>
+        {isPromotional && (
+          <div style={{ fontSize: "0.8rem", color: "#ff4500", marginTop: "4px" }}>
+            ⚠️ Ensure you follow the specific rules of <b>r/{subreddit || "..."}</b> regarding
+            self-promotion.
+          </div>
+        )}
       </div>
 
       {/* Flair selection would go here if we fetched them */}

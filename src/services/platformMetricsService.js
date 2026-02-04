@@ -75,6 +75,7 @@ async function fetchInstagramMediaMetrics(mediaId) {
 const { getVideoMetrics } = require("./tiktokService");
 const { getPostStats: getLinkedInPostStats } = require("./linkedinService");
 const { getPostInfo: getRedditPostInfo } = require("./redditService");
+const { getTracksBatch } = require("./spotifyService");
 
 async function fetchTikTokMetrics(uid, externalId) {
   if (!uid || !externalId) return null;
@@ -127,6 +128,86 @@ async function fetchRedditMetrics(uid, externalId) {
   }
 }
 
+/**
+ * Validated Cost-Efficient Architecture: Batch Fetching
+ * Maps to user requirement: fetch_engagement_batch
+ */
+async function fetchBatchMetrics(platform, items) {
+  // items: array of { id: string, uid: string }
+  if (!items || items.length === 0) return {};
+
+  // 1. TikTok Optimized Batching
+  if (platform === "tiktok") {
+    // Group by UID because TikTok token is per-user
+    const byUid = {};
+    items.forEach(i => {
+      if (!byUid[i.uid]) byUid[i.uid] = [];
+      byUid[i.uid].push(i.id);
+    });
+
+    const results = {};
+    for (const [uid, ids] of Object.entries(byUid)) {
+      try {
+        const videos = await getVideoMetrics(uid, ids);
+        videos.forEach(v => {
+          results[v.id] = {
+            view_count: v.view_count || 0,
+            like_count: v.like_count || 0,
+            comment_count: v.comment_count || 0,
+            share_count: v.share_count || 0,
+          };
+        });
+      } catch (e) {
+        console.warn("[PlatformMetrics] TikTok batch fetch failed for uid=%s", uid);
+      }
+    }
+    return results;
+  }
+
+  // 3. Spotify Batching
+  if (platform === "spotify") {
+    // items: array of { id: trackId, uid: string }
+    // Spotify batching is by Token, so we group by UID
+    const byUid = {};
+    items.forEach(i => {
+      if (!byUid[i.uid]) byUid[i.uid] = [];
+      byUid[i.uid].push(i.id);
+    });
+
+    const results = {};
+    for (const [uid, ids] of Object.entries(byUid)) {
+      try {
+        const tracks = await getTracksBatch({ uid, trackIds: ids });
+        tracks.forEach(t => {
+          results[t.id] = {
+            popularity: t.popularity || 0,
+            url: t.url, // useful for reference
+          };
+        });
+      } catch (e) {
+        console.warn("[PlatformMetrics] Spotify batch fetch failed for uid=%s", uid);
+      }
+    }
+    return results;
+  }
+
+  // 2. Fallback for others (Parallel execution)
+  const results = {};
+  await Promise.all(
+    items.map(async item => {
+      let metrics = null;
+      if (platform === "facebook")
+        metrics = await fetchFacebookPostMetrics(item.uid, item.id, item.pageId);
+      else if (platform === "instagram") metrics = await fetchInstagramMediaMetrics(item.id);
+      else if (platform === "twitter") metrics = await fetchTwitterTweetMetrics(item.id);
+      else if (platform === "linkedin") metrics = await fetchLinkedInMetrics(item.uid, item.id);
+
+      if (metrics) results[item.id] = metrics;
+    })
+  );
+  return results;
+}
+
 module.exports = {
   fetchFacebookPostMetrics,
   fetchTwitterTweetMetrics,
@@ -134,4 +215,5 @@ module.exports = {
   fetchTikTokMetrics,
   fetchLinkedInMetrics,
   fetchRedditMetrics,
+  fetchBatchMetrics,
 };

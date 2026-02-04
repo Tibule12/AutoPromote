@@ -35,9 +35,18 @@ async function getUserLinkedInConnection(uid) {
  */
 async function getValidAccessToken(uid) {
   const connection = await getUserLinkedInConnection(uid);
-  if (!connection || !connection.tokens) return null;
+  if (!connection || !connection.tokens) {
+    console.warn(`[LinkedIn] No connection/tokens for ${uid}`);
+    return null;
+  }
 
   const tokens = connection.tokens;
+  
+  // Backward compatibility: If tokens is just a string, assume it IS the access token (legacy/manual set)
+  if (typeof tokens === 'string' && !tokens.access_token) {
+     return tokens; // Return the raw string as the access token
+  }
+
   const now = Date.now();
 
   // Check if token is still valid (LinkedIn tokens typically last 60 days)

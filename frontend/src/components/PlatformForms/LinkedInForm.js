@@ -5,6 +5,7 @@ const LinkedInForm = ({ onChange, initialData = {}, globalTitle, globalDescripti
   const [commentary, setCommentary] = useState(initialData.commentary || globalDescription || "");
   const [title, setTitle] = useState(initialData.title || globalTitle || ""); // For articles/videos
   const [companyId, setCompanyId] = useState(initialData.companyId || "");
+  const [isPromotional, setIsPromotional] = useState(initialData.isPromotional || false);
 
   useEffect(() => {
     onChange({
@@ -13,8 +14,9 @@ const LinkedInForm = ({ onChange, initialData = {}, globalTitle, globalDescripti
       commentary,
       title,
       companyId, // Export companyId
+      isPromotional,
     });
-  }, [visibility, commentary, title, companyId]);
+  }, [visibility, commentary, title, companyId, isPromotional]);
 
   return (
     <div className="platform-form linkedin-form">
@@ -59,6 +61,18 @@ const LinkedInForm = ({ onChange, initialData = {}, globalTitle, globalDescripti
           onChange={e => setTitle(e.target.value)}
           placeholder="Professional Video Title"
         />
+      </div>
+
+      <div className="commercial-section">
+        <label className="checkbox-modern">
+          <input
+            type="checkbox"
+            checked={isPromotional}
+            onChange={e => setIsPromotional(e.target.checked)}
+          />
+          <span className="checkmark"></span>
+          <span className="label-text">Promotional Content (Sponsored)</span>
+        </label>
       </div>
 
       <div className="form-group-modern">

@@ -56,6 +56,48 @@ const YouTubeForm = ({
         YouTube Studio
       </h4>
 
+      <div
+        className="scope-info-box"
+        style={{
+          marginBottom: "16px",
+          padding: "12px",
+          background: "#fff9f9",
+          borderRadius: "8px",
+          border: "1px solid #ffecec",
+          fontSize: "0.85rem",
+        }}
+      >
+        <div
+          style={{
+            fontWeight: "600",
+            marginBottom: "4px",
+            color: "#cc0000",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>🔐</span> Google Permissions
+        </div>
+        <p style={{ margin: 0, color: "#444", lineHeight: "1.4" }}>
+          We use{" "}
+          <code
+            style={{
+              background: "#fff",
+              padding: "2px 4px",
+              borderRadius: "3px",
+              border: "1px solid #ffcccc",
+              fontFamily: "monospace",
+              color: "#c00",
+            }}
+          >
+            youtube.upload
+          </code>{" "}
+          to manage your videos. We do not delete your existing videos or manage your account
+          settings.
+        </p>
+      </div>
+
       <div className="form-group-modern">
         <label>Video Title</label>
         <input

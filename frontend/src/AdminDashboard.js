@@ -14,6 +14,7 @@ import AdminDiagnosticsButton from "./components/AdminDiagnosticsButton";
 import ContentApprovalPanel from "./components/ContentApprovalPanel";
 import AdvancedAnalyticsPanel from "./components/AdvancedAnalyticsPanel";
 import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
+import PlatformHealthPanel from "./components/PlatformHealthPanel"; // NEW
 import AdminPayoutsPanel from "./components/AdminPayoutsPanel";
 import AdminAuditViewer from "./AdminAuditViewer";
 import StatCard from "./components/StatCard";
@@ -3435,7 +3436,12 @@ function AdminDashboard({ analytics, user, onLogout }) {
         return <AdvancedAnalyticsPanel />;
 
       case "system":
-        return <SystemHealthPanel />;
+        return (
+          <div className="space-y-8">
+            <PlatformHealthPanel />
+            <SystemHealthPanel />
+          </div>
+        );
 
       case "audit":
         return <AdminAuditViewer />;

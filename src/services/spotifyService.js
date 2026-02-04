@@ -289,6 +289,64 @@ async function addTracksToPlaylist({ uid, playlistId, trackUris }) {
 }
 
 /**
+ * Fetch track metadata and analytics (popularity) in batch
+ * Maps to user requirement: fetch_spotify_track_data
+ */
+async function getTracksBatch({ uid, trackIds }) {
+  if (!uid) throw new Error("uid required");
+  if (!trackIds || !Array.isArray(trackIds) || trackIds.length === 0) return [];
+  if (!fetchFn) throw new Error("Fetch not available");
+
+  const accessToken = await getValidAccessToken(uid);
+  if (!accessToken) throw new Error("No valid Spotify access token");
+
+  // Spotify batch limit is 50
+  const chunks = [];
+  for (let i = 0; i < trackIds.length; i += 50) {
+    chunks.push(trackIds.slice(i, i + 50));
+  }
+
+  const allTracks = [];
+
+  for (const chunk of chunks) {
+    try {
+      const idsParam = chunk.join(",");
+      const response = await safeFetch(
+        `https://api.spotify.com/v1/tracks?ids=${idsParam}`,
+        fetchFn,
+        {
+          fetchOptions: {
+            method: "GET",
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+          requireHttps: true,
+          allowHosts: ["api.spotify.com"],
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.tracks) {
+          allTracks.push(...data.tracks.filter(Boolean));
+        }
+      }
+    } catch (e) {
+      console.warn("[Spotify] Batch fetch failed:", e.message);
+    }
+  }
+
+  // Map to simplified metric object
+  return allTracks.map(t => ({
+    id: t.id,
+    name: t.name,
+    popularity: t.popularity, // 0-100 proxy for streams/engagement
+    artist: t.artists.map(a => a.name).join(", "),
+    album: t.album.name,
+    url: t.external_urls.spotify,
+  }));
+}
+
+/**
  * Search for tracks on Spotify
  */
 async function searchTracks({ uid, query, limit = 10 }) {
@@ -405,4 +463,5 @@ module.exports = {
   searchTracks,
   getPlaylist,
   postToSpotify,
+  getTracksBatch,
 };

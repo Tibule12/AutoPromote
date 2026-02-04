@@ -13,6 +13,9 @@ const PinterestForm = ({
     initialData.description || globalDescription || ""
   );
   const [link, setLink] = useState(initialData.link || "");
+  const [isPaidPartnership, setIsPaidPartnership] = useState(
+    initialData.isPaidPartnership || false
+  );
 
   useEffect(() => {
     onChange({
@@ -21,8 +24,9 @@ const PinterestForm = ({
       title,
       description,
       link,
+      isPaidPartnership,
     });
-  }, [boardId, title, description, link]);
+  }, [boardId, title, description, link, isPaidPartnership]);
 
   return (
     <div className="platform-form pinterest-form">
@@ -91,6 +95,18 @@ const PinterestForm = ({
             placeholder="https://your-site.com"
           />
         </div>
+      </div>
+
+      <div className="commercial-section">
+        <label className="checkbox-modern">
+          <input
+            type="checkbox"
+            checked={isPaidPartnership}
+            onChange={e => setIsPaidPartnership(e.target.checked)}
+          />
+          <span className="checkmark"></span>
+          <span className="label-text">Paid Partnership</span>
+        </label>
       </div>
     </div>
   );

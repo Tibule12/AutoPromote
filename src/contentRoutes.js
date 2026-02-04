@@ -1,4 +1,3 @@
- 
 const express = require("express");
 const router = express.Router();
 const { db } = require("./firebaseAdmin");
@@ -9,6 +8,9 @@ const path = require("path");
 const sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
 const { usageLimitMiddleware, trackUsage } = require("./middlewares/usageLimitMiddleware");
 const costControlMiddleware = require("./middlewares/costControlMiddleware");
+// NEW: Services for Engagement-as-Currency Architecture
+const billingService = require("./services/billingService");
+const complianceService = require("./services/complianceService");
 
 // Enable test bypass for viral optimization when running under CI/test flags
 if (
@@ -23,7 +25,7 @@ if (
 let _engagementBoostingService; // require('./services/engagementBoostingService');
 // eslint-disable-next-line no-unused-vars
 let _growthAssuranceTracker; // require('./services/growthAssuranceTracker');
- 
+
 let _contentQualityEnhancer; // require('./services/contentQualityEnhancer');
 // eslint-disable-next-line no-unused-vars
 let _repostDrivenEngine; // require('./services/repostDrivenEngine');
@@ -214,7 +216,83 @@ router.post(
       const viralImpactEngine = require("./services/viralImpactEngine");
       const algorithmExploitationEngine = require("./services/algorithmExploitationEngine");
 
+      // Helper function to determine content intent based on platform flags
+      function determineContentIntent(platformOptions) {
+        if (!platformOptions) return "organic";
+        let tier = "organic";
+
+        // Check each platform's options
+        const platforms = Object.keys(platformOptions);
+        for (const p of platforms) {
+          const opts = platformOptions[p];
+          if (!opts) continue;
+
+          // SPONSORED SIGNS (Highest Priority)
+          if (
+            (p === "tiktok" &&
+              opts.commercial &&
+              (opts.commercial.yourBrand || opts.commercial.brandedContent)) || // TikTok Brand (Updated structure)
+            (p === "instagram" && opts.isPaidPartnership) || // IG Paid Partnership
+            (p === "facebook" && opts.isPaidPartnership) || // Facebook Paid Partnership
+            (p === "pinterest" && opts.isPaidPartnership) || // Pinterest Paid Partnership
+            (p === "youtube" && opts.paidPromotion) // YT Paid Promotion usually implies sponsorship
+          ) {
+            return "sponsored";
+          }
+
+          // COMMERCIAL SIGNS (Medium Priority)
+          if (
+            (p === "tiktok" &&
+              (opts.commercialContent || (opts.commercial && opts.commercial.isCommercial))) || // TikTok Commercial flag
+            (p === "linkedin" && opts.isPromotional) || // LinkedIn Promotional
+            (p === "reddit" && opts.isPromotional) // Reddit Promotional
+          ) {
+            tier = "commercial";
+          }
+        }
+        return tier;
+      }
+
       const isAdmin = !!(req.user && (req.user.isAdmin === true || req.user.role === "admin"));
+      const detectedIntent = determineContentIntent(platform_options);
+
+      // 1. COMPLIANCE CHECK (The "Lawyer" Layer)
+      // Ensures content meets platform-specific legal/ToS requirements before processing
+      try {
+        if (platform_options) {
+          for (const [plat, opts] of Object.entries(platform_options)) {
+            complianceService.checkPlatformCompliance(plat, opts, detectedIntent);
+          }
+        }
+      } catch (err) {
+        logger.warn(`[Compliance] Blocked upload for user ${userId}: ${err.message}`);
+        return res.status(400).json({
+          error: err.message,
+          code: "COMPLIANCE_VIOLATION",
+          field: "platform_options",
+        });
+      }
+
+      // 2. BILLING & TIER CHECK (The "Accountant" Layer)
+      // Enforces upload caps, calculates potential charges, and checks subscription status
+      try {
+        // We pass empty features array for now, functionality to extract features from req.body can be added later
+        const charge = await billingService.calculateCreatorCharge(userId, detectedIntent, []);
+
+        // If there's a monetary charge (e.g. Creator has no credits), we would process it here.
+        // For MVP, we primarily rely on the function throwing an error if Upgrade is required (Caps hit).
+        if (charge.requiresPayment) {
+          logger.info(`[Billing] Charge calculated: $${charge.amount} for user ${userId}`);
+          // In full implementation: await billingService.processPayment(userId, charge.amount);
+        }
+      } catch (err) {
+        logger.warn(`[Billing] Limit reached for user ${userId}: ${err.message}`);
+        return res.status(403).json({
+          error: err.message,
+          code: "TIER_LIMIT_EXCEEDED",
+          upgrade_required: true,
+        });
+      }
 
       const contentData = {
         title,
@@ -223,6 +301,7 @@ router.post(
         description,
         target_platforms,
         platform_options,
+        intent: detectedIntent, // Persist the calculated intent
         scheduled_promotion_time,
         promotion_frequency,
         schedule_hint,
@@ -243,9 +322,9 @@ router.post(
         user_id: userId,
         created_at: new Date(),
         // Approval status used by admin UI/routes. Keep in sync with `status` for compatibility.
-        approvalStatus: isAdmin ? "approved" : "pending",
-        // default to pending_approval for non-admin uploads; admins are auto-approved
-        status: isAdmin ? "approved" : "pending_approval",
+        // IMMEDIATE PUBLISH MODE: All users are auto-approved per user request.
+        approvalStatus: "approved",
+        status: "approved",
         viral_optimized: true,
       };
 
@@ -324,6 +403,12 @@ router.post(
         contentRef = await db.collection("content").add(cleanObject(contentData));
         const contentDoc = await contentRef.get();
         content = { id: contentRef.id, ...contentDoc.data() };
+
+        // Track Usage (Increment upload counter)
+        // Fire-and-forget to not block response
+        billingService
+          .trackUploadUsage(userId)
+          .catch(err => console.error(`[Billing] Failed to track usage for ${userId}:`, err));
       }
 
       // VIRAL BOUNTY CREATION (The "Billionaire" Model)
@@ -501,8 +586,10 @@ router.post(
 
       // If uploader is not an admin, do not create promotion schedules or enqueue platform posts here.
       // Firestore triggers (createPromotionOnApproval) will run when an admin changes status to 'approved'.
+      // UPDATE: Immediate Publish Mode enabled for all users.
       let promotion_schedule = null;
-      if (isAdmin) {
+      if (true) {
+        // Was if (isAdmin)
         const scheduleData = {
           contentId: contentRef.id,
           user_id: userId,
@@ -557,7 +644,9 @@ router.post(
       const platformTasks = [];
 
       // Only enqueue platform tasks immediately when the uploader is an admin (auto-approved)
-      if (isAdmin && Array.isArray(target_platforms)) {
+      // UPDATE: Immediate Publish Mode enabled for all users.
+      if (Array.isArray(target_platforms)) {
+        // Was if (isAdmin && Array.isArray(target_platforms))
         for (const platform of target_platforms) {
           try {
             const optionsForPlatform =

@@ -1,14 +1,13 @@
 // redditService.js - Reddit submission API integration
 const { db, admin } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
+const FormData = require("form-data");
 
-let fetchFn = global.fetch;
-if (!fetchFn) {
-  try {
-    fetchFn = require("node-fetch");
-  } catch (e) {
-    fetchFn = null;
-  }
+let fetchFn;
+try {
+  fetchFn = require("node-fetch");
+} catch (e) {
+  fetchFn = global.fetch;
 }
 
 /**
@@ -133,6 +132,99 @@ async function refreshToken(uid, refreshToken) {
 }
 
 /**
+ * Upload media to Reddit's S3 bucket
+ * Returns: { s3Url, asset_id } (or just s3Url for now)
+ */
+async function uploadRedditMedia(uid, contentUrl, mimeType) {
+  if (!contentUrl) return null;
+  const accessToken = await getValidAccessToken(uid);
+  if (!accessToken) throw new Error("No valid Reddit access token for upload");
+
+  // 1. Fetch content stream/buffer
+  const filename = contentUrl.split("/").pop().split("?")[0] || "media_file";
+  // Determine mimeType if not provided? For now assume caller provides or we default
+  // Ideally we inspect file, but simple default is okay:
+  if (!mimeType) {
+    if (filename.endsWith(".mp4")) mimeType = "video/mp4";
+    else if (filename.endsWith(".mov")) mimeType = "video/quicktime";
+    else mimeType = "video/mp4";
+  }
+
+  const contentRes = await safeFetch(contentUrl, fetchFn);
+  if (!contentRes.ok) throw new Error(`Failed to fetch media from ${contentUrl}`);
+
+  let buffer;
+  if (typeof contentRes.buffer === "function") {
+    buffer = await contentRes.buffer();
+  } else {
+    buffer = Buffer.from(await contentRes.arrayBuffer());
+  }
+
+  // 2. Get Upload Lease
+  const leaseBody = new URLSearchParams({
+    filepath: filename,
+    mimetype: mimeType,
+  });
+
+  const leaseRes = await safeFetch("https://oauth.reddit.com/api/media/asset.json", fetchFn, {
+    fetchOptions: {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "User-Agent": "AutoPromote/1.0",
+      },
+      body: leaseBody,
+    },
+    requireHttps: true,
+    allowHosts: ["oauth.reddit.com"],
+  });
+
+  if (!leaseRes.ok) {
+    const err = await leaseRes.text();
+    throw new Error(`Reddit Lease failed: ${err}`);
+  }
+
+  const leaseData = await leaseRes.json();
+  const s3Url = `https:${leaseData.args.action}`;
+  const fields = leaseData.args.fields;
+
+  // 3. Upload to S3
+  const form = new FormData();
+  for (const field of fields) {
+    form.append(field.name, field.value);
+  }
+  form.append("file", buffer, { filename, contentType: mimeType });
+
+  // Parse host from s3Url for allowHosts (usually reddit-uploaded-*.s3.amazonaws.com)
+  const s3Host = s3Url.replace("https://", "").split("/")[0];
+
+  const uploadRes = await safeFetch(s3Url, fetchFn, {
+    fetchOptions: {
+      method: "POST",
+      body: form,
+      headers: form.getHeaders(),
+    },
+    requireHttps: true,
+    allowHosts: [s3Host, "amazonaws.com"],
+  });
+
+  if (!uploadRes.ok) {
+    const errorText = await uploadRes.text();
+    console.error("S3 Upload Error Body:", errorText);
+    throw new Error(`S3 Upload failed: ${uploadRes.statusText}`);
+  }
+
+  // Construct final URL
+  const keyInfo = fields.find(f => f.name === "key");
+  const finalUrl = `${s3Url}/${keyInfo.value}`;
+
+  return {
+    url: finalUrl,
+    assetId: leaseData.asset ? leaseData.asset.asset_id : null,
+  };
+}
+
+/**
  * Submit a post to Reddit
  */
 async function postToReddit({
@@ -145,21 +237,61 @@ async function postToReddit({
   kind = "self",
   hashtags = [],
   hashtagString = "",
+  videoUrl,
+  thumbnailUrl,
 }) {
   if (!uid) throw new Error("uid required");
   if (!subreddit) throw new Error("subreddit required");
   if (!title) throw new Error("title required");
   if (kind === "self" && !text) throw new Error("text required for self posts");
   if (kind === "link" && !url) throw new Error("url required for link posts");
+  if (kind === "video" && !(url || videoUrl)) throw new Error("video url required for video posts");
   if (!fetchFn) throw new Error("Fetch not available");
 
   const accessToken = await getValidAccessToken(uid);
   if (!accessToken) throw new Error("No valid Reddit access token");
 
+  // Handle Video Upload (Native)
+  let finalVideoUrl = null;
+  let finalPosterUrl = null;
+
+  if (kind === "video") {
+    // 1. Upload Video
+    const vSource = videoUrl || url;
+    try {
+      // console.log("Uploading video to standard Reddit S3...");
+      const vResult = await uploadRedditMedia(uid, vSource, "video/mp4");
+      finalVideoUrl = vResult.url;
+    } catch (e) {
+      throw new Error(`Failed to upload video to Reddit: ${e.message}`);
+    }
+
+    // 2. Upload Thumbnail (if provided, else default)
+    let posterSource = thumbnailUrl;
+    if (!posterSource) {
+      // Use a default thumbnail if none provided (Reddit requires video_poster_url)
+      posterSource =
+        "https://raw.githubusercontent.com/reddit/reddit/master/r2/r2/static/images/snoo-placeholder.png";
+      // Or any public reliable image.
+      // Better: https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-120x120.png or similar.
+      posterSource = "https://www.redditstatic.com/icon.png";
+    }
+
+    if (posterSource) {
+      try {
+        const tResult = await uploadRedditMedia(uid, posterSource, "image/png");
+        finalPosterUrl = tResult.url;
+      } catch (e) {
+        console.warn("Failed to upload thumbnail:", e.message);
+      }
+    }
+  }
+
   // Build submission payload
   const payload = new URLSearchParams({
+    api_type: "json", // Request standard JSON response
     sr: subreddit,
-    kind: kind, // 'self' for text, 'link' for URL, 'image' for image
+    kind: kind, // 'self', 'link', 'video'
     title: title.substring(0, 300), // Reddit title limit
     sendreplies: "true",
     resubmit: "false",
@@ -179,6 +311,11 @@ async function postToReddit({
     payload.append("url", url);
     // Append hashtags to title for link posts
     if (hashtagString) payload.append("title", `${title} ${hashtagString}`.substring(0, 300));
+  } else if (kind === "video") {
+    payload.append("url", finalVideoUrl);
+    if (finalPosterUrl) {
+      payload.append("video_poster_url", finalPosterUrl);
+    }
   }
 
   // Submit post
@@ -207,6 +344,11 @@ async function postToReddit({
   if (!response.ok) {
     const errorMsg = responseData.message || responseData.error || "Reddit posting failed";
     throw new Error(`Reddit posting failed: ${errorMsg}`);
+  }
+
+  if (responseData.json && responseData.json.errors && responseData.json.errors.length > 0) {
+    const errs = responseData.json.errors.map(e => e[1]).join(", ");
+    throw new Error(`Reddit API Error: ${errs}`);
   }
 
   // Reddit returns data in json.data.url format

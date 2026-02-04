@@ -2,7 +2,7 @@
   "$schema": "./package.schema.json",
   "name": "autopromote-server",
   "main": "src/server.js",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "scripts": {
     "preflight": "node ./scripts/preflight-critical-files.js && node ./scripts/check-encryption-env.js && node ./autopromote-functions/validate-imports.js",
     "preflight:local": "node ./scripts/preflight-critical-files.js && node ./autopromote-functions/validate-imports.js",
@@ -40,7 +40,7 @@
     "build:frontend": "npm --prefix frontend ci || (npm --prefix frontend install && npm --prefix frontend run build)"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=18"
   },
   "dependencies": {
     "@paypal/paypal-server-sdk": "^0.6.0",

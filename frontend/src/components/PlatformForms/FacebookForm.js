@@ -10,6 +10,10 @@ const FacebookForm = ({
   const [pageId, setPageId] = useState(initialData.pageId || pages[0]?.id || "");
   const [message, setMessage] = useState(initialData.message || globalDescription || "");
   const [postType, setPostType] = useState(initialData.postType || "feed"); // feed, story, reel
+  const [isPaidPartnership, setIsPaidPartnership] = useState(
+    initialData.isPaidPartnership || false
+  );
+  const [sponsorUser, setSponsorUser] = useState(initialData.sponsorUser || "");
 
   useEffect(() => {
     onChange({
@@ -17,8 +21,10 @@ const FacebookForm = ({
       pageId,
       message,
       postType,
+      isPaidPartnership,
+      sponsorUser,
     });
-  }, [pageId, message, postType]);
+  }, [pageId, message, postType, isPaidPartnership, sponsorUser]);
 
   return (
     <div className="platform-form facebook-form">
@@ -35,7 +41,7 @@ const FacebookForm = ({
         </div>
       ) : (
         <div className="form-group-modern">
-          <label>Post As</label>
+          <label>Post As (Identity)</label>
           <select
             className="modern-select"
             value={pageId}
@@ -43,10 +49,99 @@ const FacebookForm = ({
           >
             {pages.map(p => (
               <option key={p.id} value={p.id}>
-                {p.name}
+                {p.name} (ID: {p.id})
               </option>
             ))}
           </select>
+          <p className="legal-hint" style={{ marginTop: "4px" }}>
+            <span style={{ color: "#888" }}>Page ID: {pageId}</span>
+          </p>
+
+          <div
+            className="scope-info-box"
+            style={{
+              marginTop: "8px",
+              padding: "12px",
+              background: "#f0f2f5",
+              borderRadius: "8px",
+              border: "1px solid #e1e3e8",
+              fontSize: "0.85rem",
+            }}
+          >
+            <div
+              style={{
+                fontWeight: "600",
+                marginBottom: "6px",
+                color: "#1877F2",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <span>🔒</span> Data Access & Permissions
+            </div>
+            <p style={{ margin: 0, color: "#444", lineHeight: "1.4" }}>
+              <strong>Why we need this:</strong>
+            </p>
+            <ul style={{ margin: "6px 0 0 20px", padding: 0, color: "#444", lineHeight: "1.4" }}>
+              <li>
+                <code
+                  style={{
+                    background: "#e4e6eb",
+                    padding: "2px 4px",
+                    borderRadius: "4px/2px",
+                    fontFamily: "monospace",
+                    color: "#333",
+                  }}
+                >
+                  pages_show_list
+                </code>
+                : Used to display the list of Pages you manage in the dropdown above, so you can
+                select where to post.
+              </li>
+              <li>
+                <code
+                  style={{
+                    background: "#e4e6eb",
+                    padding: "2px 4px",
+                    borderRadius: "4px/2px",
+                    fontFamily: "monospace",
+                    color: "#333",
+                  }}
+                >
+                  pages_manage_posts
+                </code>
+                : Used solely to publish this specific post to your selected Page timeline.
+              </li>
+              <li>
+                <code
+                  style={{
+                    background: "#e4e6eb",
+                    padding: "2px 4px",
+                    borderRadius: "4px/2px",
+                    fontFamily: "monospace",
+                    color: "#333",
+                  }}
+                >
+                  pages_read_engagement
+                </code>
+                : Used to display the likes and comments this post receives on your dashboard.
+              </li>
+            </ul>
+            <p
+              style={{
+                margin: "8px 0 0 0",
+                color: "#65676b",
+                fontSize: "0.8rem",
+                fontStyle: "italic",
+                borderTop: "1px solid #e1e3e8",
+                paddingTop: "6px",
+              }}
+            >
+              <strong>User Privacy:</strong> We do not access your personal profile's private
+              messages or modify your Page's admin settings.
+            </p>
+          </div>
         </div>
       )}
 
@@ -90,26 +185,34 @@ const FacebookForm = ({
       </div>
 
       <div className="commercial-section">
-        <div className="form-group-modern">
-          <label className="checkbox-modern">
-            <input
-              type="checkbox"
-              // Mock state for now as FB API for branded content is complex
-              // but UI needs to show it.
-              onChange={e => {
-                if (e.target.checked)
-                  alert(
-                    "To use Branded Content on Facebook, please verify your page eligibility in Business Manager first."
-                  );
-              }}
-            />
-            <span className="checkmark"></span>
-            <span className="label-text">Tag Sponsor (Branded Content)</span>
-          </label>
-          <p className="legal-hint">
-            Required for paid partnerships. Handshake tool must be enabled on your Page.
-          </p>
-        </div>
+        <label className="checkbox-modern">
+          <input
+            type="checkbox"
+            checked={isPaidPartnership}
+            onChange={e => setIsPaidPartnership(e.target.checked)}
+          />
+          <span className="checkmark"></span>
+          <span className="label-text">Tag Sponsor (Branded Content)</span>
+        </label>
+
+        {isPaidPartnership && (
+          <div className="sub-settings fade-in">
+            <div className="form-group-modern" style={{ marginTop: "10px" }}>
+              <label>Sponsor Name / Page URL</label>
+              <input
+                type="text"
+                className="modern-input"
+                placeholder="e.g. Nike"
+                value={sponsorUser}
+                onChange={e => setSponsorUser(e.target.value)}
+              />
+            </div>
+          </div>
+        )}
+
+        <p className="legal-hint">
+          Required for paid partnerships. Handshake tool must be enabled on your Page.
+        </p>
       </div>
     </div>
   );

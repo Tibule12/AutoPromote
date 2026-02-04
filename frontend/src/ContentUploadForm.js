@@ -38,6 +38,7 @@ import LinkedInForm from "./components/PlatformForms/LinkedInForm";
 import PinterestForm from "./components/PlatformForms/PinterestForm";
 import RedditForm from "./components/PlatformForms/RedditForm";
 import InstagramForm from "./components/PlatformForms/InstagramForm";
+import SpotifyForm from "./components/PlatformForms/SpotifyForm";
 
 // Default inline thumbnail (avoids external 404s when thumbnail is missing)
 const DEFAULT_THUMBNAIL = (function () {
@@ -1711,6 +1712,62 @@ function ContentUploadForm({
         missing.push("Spotify playlist or track");
       if (missing.length) throw new Error("Missing: " + missing.join(", "));
 
+      // Prepare platform options by merging external state (from child forms) with local state
+      const finalPlatformOptions = {};
+      selectedPlatformsVal.forEach(p => {
+        // 1. Start with external options (Source of Truth for Modern Forms)
+        let opts = extPlatformOptions && extPlatformOptions[p] ? { ...extPlatformOptions[p] } : {};
+
+        // 2. Apply Local Overrides/Legacy Logic
+        if (p === "pinterest") {
+          if (pinterestBoard) opts.boardId = pinterestBoard;
+          if (pinterestNote) opts.note = pinterestNote;
+        } else if (p === "linkedin") {
+          if (linkedinCompanyId) opts.companyId = linkedinCompanyId;
+        } else if (p === "reddit") {
+          if (redditSubreddit) opts.subreddit = redditSubreddit;
+        } else if (p === "spotify") {
+          if ((spotifyTracks && spotifyTracks.length) || spotifyPlaylistId || spotifyPlaylistName) {
+            opts.trackUris =
+              spotifyTracks && spotifyTracks.length ? spotifyTracks.map(t => t.uri) : undefined;
+            opts.playlistId = spotifyPlaylistId || undefined;
+            opts.name = spotifyPlaylistName || undefined;
+          }
+        } else if (p === "discord") {
+          if (discordChannelId) opts.channelId = discordChannelId;
+        } else if (p === "telegram") {
+          if (telegramChatId) opts.chatId = telegramChatId;
+        } else if (p === "twitter") {
+          if (twitterMessage) opts.message = twitterMessage;
+        } else if (p === "tiktok") {
+          const localTiktok = {
+            privacy: tiktokPrivacy || undefined,
+            interactions: tiktokInteractions || undefined,
+            is_aigc: !!tiktokAIGenerated,
+            disclosure: !!tiktokDisclosureEnabled,
+            consent: !!tiktokConsentChecked,
+          };
+          // Handle Commercial Logic
+          if (tiktokDisclosureEnabled) {
+            localTiktok.commercial = {
+              yourBrand: !!tiktokYourBrand,
+              brandedContent: !!tiktokBrandedContent,
+            };
+          } else if (tiktokCommercial && tiktokCommercial.isCommercial) {
+            localTiktok.commercial = {
+              yourBrand: !!tiktokCommercial.yourBrand,
+              brandedContent: !!tiktokCommercial.brandedContent,
+            };
+          }
+          opts = { ...opts, ...localTiktok };
+        } else if (p === "youtube") {
+          if (youtubeVisibility) opts.visibility = youtubeVisibility;
+          opts.shortsMode = !!youtubeShorts;
+        }
+
+        finalPlatformOptions[p] = opts;
+      });
+
       const contentData = {
         title: finalTitle,
         type,
@@ -1734,66 +1791,8 @@ function ContentUploadForm({
           crop: cropMeta || undefined,
           template: template !== "none" ? template : undefined,
         },
-        platform_options: {
-          pinterest:
-            pinterestBoard || pinterestNote
-              ? { boardId: pinterestBoard || undefined, note: pinterestNote || undefined }
-              : undefined,
-          spotify:
-            (spotifyTracks && spotifyTracks.length) || spotifyPlaylistId || spotifyPlaylistName
-              ? {
-                  trackUris:
-                    spotifyTracks && spotifyTracks.length
-                      ? spotifyTracks.map(t => t.uri)
-                      : undefined,
-                  playlistId: spotifyPlaylistId || undefined,
-                  name: spotifyPlaylistName || undefined,
-                }
-              : undefined,
-          discord: selectedPlatformsVal.includes("discord")
-            ? { channelId: discordChannelId || undefined }
-            : undefined,
-          telegram: selectedPlatformsVal.includes("telegram")
-            ? { chatId: telegramChatId || undefined }
-            : undefined,
-          reddit: selectedPlatformsVal.includes("reddit")
-            ? { subreddit: redditSubreddit || undefined }
-            : undefined,
-          linkedin: selectedPlatformsVal.includes("linkedin")
-            ? { companyId: linkedinCompanyId || undefined }
-            : undefined,
-          twitter: selectedPlatformsVal.includes("twitter")
-            ? { message: twitterMessage || undefined }
-            : undefined,
-        },
+        platform_options: finalPlatformOptions,
       };
-      // Add TikTok platform options if TikTok is selected
-      if (selectedPlatformsVal.includes("tiktok")) {
-        contentData.platform_options = contentData.platform_options || {};
-        contentData.platform_options.tiktok = {
-          privacy: tiktokPrivacy || undefined,
-          interactions: tiktokInteractions || undefined,
-          commercial:
-            tiktokCommercial && tiktokCommercial.isCommercial
-              ? {
-                  yourBrand: !!tiktokCommercial.yourBrand,
-                  brandedContent: !!tiktokCommercial.brandedContent,
-                }
-              : undefined,
-          // Include explicit disclosure + consent flags so server-side can validate prior to publishing
-          is_aigc: !!tiktokAIGenerated,
-          disclosure: !!tiktokDisclosure,
-          consent: !!tiktokConsentChecked,
-        };
-      }
-      // Add YouTube platform options if YouTube is selected
-      if (selectedPlatformsVal.includes("youtube")) {
-        contentData.platform_options = contentData.platform_options || {};
-        contentData.platform_options.youtube = {
-          visibility: youtubeVisibility || undefined,
-          shortsMode: !!youtubeShorts,
-        };
-      }
       // Add overlay metadata to submit payload
       if (overlayText) contentData.meta.overlay = { text: overlayText, position: overlayPosition };
 
@@ -4563,6 +4562,46 @@ function ContentUploadForm({
                           globalDescription={description}
                         />
                         {renderBestTimeForPlatform("reddit")}
+                      </>
+                    ) : expandedPlatform === "spotify" ? (
+                      <>
+                        <SpotifyForm
+                          data={extPlatformOptions?.spotify || spotifySettings}
+                          onChange={(key, val) => {
+                            if (typeof extSetPlatformOption === "function") {
+                              extSetPlatformOption("spotify", key, val);
+                            } else {
+                              setSpotifySettings(prev => ({ ...prev, [key]: val }));
+                            }
+                          }}
+                          selectedTracks={extSpotifySelectedTracks || spotifyTracks}
+                          onTrackSelect={track => {
+                            if (extSetSpotifySelectedTracks) {
+                              extSetSpotifySelectedTracks(prev => {
+                                // Prevent duplicates
+                                if (prev.some(t => t.id === track.id)) return prev;
+                                return [...prev, track];
+                              });
+                            } else {
+                              setSpotifyTracks(prev => {
+                                if (prev.some(t => t.id === track.id)) return prev;
+                                return [...prev, track];
+                              });
+                            }
+                          }}
+                          onTrackRemove={trackId => {
+                            if (extSetSpotifySelectedTracks) {
+                              extSetSpotifySelectedTracks(prev =>
+                                prev.filter(t => t.id !== trackId)
+                              );
+                            } else {
+                              setSpotifyTracks(prev => prev.filter(t => t.id !== trackId));
+                            }
+                          }}
+                          // In upload flow, campaign mode might be relevant if user wants to promote
+                          campaignMode={true}
+                        />
+                        {renderBestTimeForPlatform("spotify")}
                       </>
                     ) : (
                       /* Fallback Generic Form */

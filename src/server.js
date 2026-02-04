@@ -604,6 +604,14 @@ try {
   console.log("⚠️ Snapchat routes not found:", e.message);
   snapchatRoutes = express.Router();
 }
+let spotifyRoutes;
+try {
+  spotifyRoutes = require("./routes/spotifyRoutes");
+  console.log("✅ Spotify routes loaded");
+} catch (e) {
+  console.log("⚠️ Spotify routes not found:", e.message);
+  spotifyRoutes = express.Router();
+}
 // Generic platform routes (status/auth placeholders for spotify, reddit, discord, linkedin, telegram, pinterest)
 let platformRoutes = express.Router(); // default fallback
 try {
@@ -1365,6 +1373,13 @@ try {
   );
   console.log("🚏 Snapchat routes mounted at /api/snapchat");
   app.use(
+    "/api/spotify",
+    routeLimiter({ windowHint: "spotify" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req, res, next) => next(),
+    spotifyRoutes
+  );
+  console.log("🚏 Spotify routes mounted at /api/spotify");
+  app.use(
     "/api/platform",
     routeLimiter({ windowHint: "platform" }),
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req, res, next) => next(),
@@ -1706,6 +1721,7 @@ try {
   }
   try {
     app.use("/api/admin/system", require("./routes/adminSystemRoutes"));
+    app.use("/api/admin/platforms", require("./routes/platformHealthRoutes")); // NEW: Platform Health Checks
   } catch (e) {
     console.warn("adminSystemRoutes mount failed:", e.message);
   }
