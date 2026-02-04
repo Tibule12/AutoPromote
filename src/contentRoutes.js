@@ -408,7 +408,9 @@ router.post(
         // Fire-and-forget to not block response
         billingService
           .trackUploadUsage(userId)
-          .catch(err => console.error(`[Billing] Failed to track usage for ${userId}:`, err));
+          // Security Fix: Prevent externally-controlled format string vulnerability (CodeQL #960)
+          // Move userId out of the first argument to console.error
+          .catch(err => console.error("[Billing] Failed to track usage for user:", userId, err));
       }
 
       // VIRAL BOUNTY CREATION (The "Billionaire" Model)
