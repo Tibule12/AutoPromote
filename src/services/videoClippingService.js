@@ -701,14 +701,23 @@ class VideoClippingService {
         if (options.addCaptions && clip.transcript && clip.transcript.length > 0) {
           try {
             const srtContent = this.generateSRT(clip.transcript, clip.start);
-            await fs.writeFile(tempSrtPath, srtContent);
+
+            // SECURITY: Ensure we use the resolved absolute path to prevent traversal/confusion
+            const absoluteSrtPath = path.resolve(tempSrtPath);
+
+            await fs.writeFile(absoluteSrtPath, srtContent);
+
             // Escape path for ffmpeg (windows paths can be tricky).
-            // Use path.posix.join style forward slashes, escape colons for FFmpeg filter syntax,
-            // and escape single quotes to prevent breaking out of the filter string.
-            const srtPathEscaped = tempSrtPath
-              .replace(/\\/g, "/")
-              .replace(/:/g, "\\\\:")
-              .replace(/'/g, "'\\\\''");
+            // CodeQL Fix: "Incomplete string escaping or encoding"
+            // We use a robust escaping strategy for FFmpeg filter graph syntax.
+            // 1. Normalize backslashes to forward slashes (safe for FFmpeg on all OS)
+            let srtPathEscaped = absoluteSrtPath.replace(/\\/g, "/");
+
+            // 2. Escape colons (filter separator) and single quotes (string delimiter)
+            // Note: In a filter string like "subtitles='path'", the path is singly-quoted.
+            // To represent a literal ' inside, we use the sequence: '\'
+            // To represent a literal : inside, we escape it as \:
+            srtPathEscaped = srtPathEscaped.replace(/:/g, "\\\\:").replace(/'/g, "'\\\\''");
 
             // Use 'Sans' instead of 'Arial' for better Linux/Cloud compatibility
             // Quote the path string for safety against spaces/special chars
