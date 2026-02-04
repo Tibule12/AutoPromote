@@ -808,3 +808,120 @@ form,
     white-space: normal;
   }
 }
+
+/* Modern Platform Forms */
+.platform-form {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.youtube-form {
+  border-left: 5px solid #ff0000;
+}
+.tiktok-form {
+  border-left: 5px solid #000000;
+}
+.instagram-form {
+  border-left: 5px solid #e1306c;
+}
+.facebook-form {
+  border-left: 5px solid #1877f2;
+}
+.linkedin-form {
+  border-left: 5px solid #0a66c2;
+}
+.twitter-form {
+  border-left: 5px solid #1da1f2;
+}
+.pinterest-form {
+  border-left: 5px solid #e60023;
+}
+.reddit-form {
+  border-left: 5px solid #ff4500;
+}
+.spotify-form {
+  border-left: 5px solid #1db954;
+}
+
+.platform-form-header {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-group-modern {
+  margin-bottom: 20px;
+}
+
+.form-group-modern label {
+  display: block;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.modern-input,
+.modern-textarea,
+.modern-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background-color: #f8fafc;
+  color: #1a202c;
+}
+
+.modern-input:focus,
+.modern-textarea:focus,
+.modern-select:focus {
+  border-color: #667eea;
+  background-color: white;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.modern-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.modern-helper-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.checkbox-group-modern {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.checkbox-group-modern input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #667eea;
+}
+
+.checkbox-group-modern label {
+  margin-bottom: 0;
+  cursor: pointer;
+}
