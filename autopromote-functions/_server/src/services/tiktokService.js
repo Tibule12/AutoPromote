@@ -304,29 +304,34 @@ async function initializeVideoUpload({
   videoSize,
   chunkSize = DEFAULT_CHUNK_SIZE,
   privacyLevel = "SELF_ONLY",
-  commercialContent = false,
-  brandContentToggle = false,
-  brandOrganicToggle = false,
+  // New flags for Commercial/Branded Content
+  isCommercial = false,
+  brandOrganic = false,
+  brandedContent = false,
 }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
-  const post_info = {
-    title: "",
-    privacy_level: privacyLevel, // Set by caller (admin-approved publishes default PUBLIC)
-    disable_duet: false,
-    disable_comment: false,
-    disable_stitch: false,
-    video_cover_timestamp_ms: 1000,
-  };
-
-  // Add Commercial Content Toggles if enabled
-  if (commercialContent) {
-    post_info.brand_content_toggle = brandContentToggle;
-    post_info.brand_organic_toggle = brandOrganicToggle;
-  }
-
   const body = {
-    post_info,
+    post_info: {
+      title: "",
+      privacy_level: privacyLevel, // Set by caller (admin-approved publishes default PUBLIC)
+      disable_duet: false,
+      disable_comment: false,
+      disable_stitch: false,
+      video_cover_timestamp_ms: 1000,
+      // Inject Commercial Content flags if present
+      ...(isCommercial
+        ? {
+            // TikTok API structure for disclosure
+            commercial_content_type: brandOrganic
+              ? "BRAND_ORGANIC"
+              : brandedContent
+                ? "BRANDED_CONTENT"
+                : "NONE",
+            is_disclosed: true,
+          }
+        : {}),
+    },
     source_info: {
       source: "FILE_UPLOAD",
       video_size: videoSize,
@@ -715,45 +720,15 @@ async function uploadVideoChunk({
 /**
  * Publish the uploaded video
  */
-async function publishVideo({ 
-    accessToken, 
-    publishId, 
-    title, 
-    privacyLevel = undefined, 
-    soundId,
-    commercialContent = false,
-    brandContentToggle = false,
-    brandOrganicToggle = false
-}) {
+async function publishVideo({ accessToken, publishId, title, privacyLevel = undefined, soundId }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
   // Allow caller to override privacy when finalizing the publish
-  const post_info = {};
-  if (privacyLevel) post_info.privacy_level = privacyLevel;
-  if (title) post_info.title = title;
-  
-  // Commercial Content Flags (New 2026 Compliance)
-  if (commercialContent) post_info.brand_content_toggle = brandContentToggle;
-  if (brandOrganicToggle) post_info.brand_organic_toggle = true;
-
-  const body = { 
-     publish_id: publishId,
-     ...(Object.keys(post_info).length > 0 ? { post_info } : {})
-  };
+  const body = privacyLevel
+    ? { publish_id: publishId, post_info: { privacy_level: privacyLevel } }
+    : { publish_id: publishId };
 
   const response = await safeFetch(
-    "https://open.tiktokapis.com/v2/post/publish/video/status/", // CORRECT ENDPOINT? 
-    // Wait, the original code called `post/publish/status/fetch/` which is for checking status, not FINALIZING.
-    // The previous code seemed confused or `pullFromUrl` does it all.
-    // Let's assume this function effectively just "checks status" or finalized based on context.
-    // Actually, `INIT` creates the post info. `publishVideo` might be misnamed if it's just checking status.
-    // BUT if we look at `video/publish/` vs `publish/status/fetch`.
-    
-    // Actually, looking at lines 1091 in previous grep, there is a `video/publish/` call.
-    // The function `publishVideo` I am editing right now (lines 707) points to `post/publish/status/fetch/`.
-    // That endpoint DOES NOT ACCEPT post_info updates usually.
-    
-    // I need to find the `init` call.
     "https://open.tiktokapis.com/v2/post/publish/status/fetch/",
     fetchFn,
     {
@@ -795,26 +770,20 @@ async function pullFromUrlPublish({
   contentId,
   privacyLevel = undefined,
   maxWaitMs = 120000,
-  commercialContent = false,
-  brandContentToggle = false,
-  brandOrganicToggle = false,
+  isCommercial = false,
+  brandOrganic = false,
+  brandedContent = false,
 }) {
   if (!fetchFn) throw new Error("Fetch not available");
-  
-  const post_info = { 
-    title: "", 
-    privacy_level: privacyLevel || "SELF_ONLY" 
-  };
-  
-  // Add Commercial Content Toggles
-  if (commercialContent) {
-    post_info.brand_content_toggle = brandContentToggle;
-    post_info.brand_organic_toggle = brandOrganicToggle;
-  }
-
   // Init PULL_FROM_URL
   const initBody = {
-    post_info,
+    post_info: {
+      title: "",
+      privacy_level: privacyLevel || "SELF_ONLY",
+      is_commercial_content: isCommercial,
+      brand_content_toggle: brandedContent,
+      brand_organic_toggle: brandOrganic,
+    },
     source_info: { source: "PULL_FROM_URL", video_url: videoUrl },
   };
 
@@ -917,20 +886,14 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
   let privacyLevel =
     payload?.privacy || (reason === "approved" ? "PUBLIC_TO_EVERYONE" : "SELF_ONLY");
 
-  // Extract separate commercial/branding settings from unified source
-  const tkSettings = (payload && payload.monetization_settings && payload.monetization_settings.tiktok) || 
-                     (payload && payload.platform_options && payload.platform_options.tiktok) || {};
-  
-  const commercialContent = tkSettings.commercial_content_toggle === true || tkSettings.is_sponsored === true;
-  const brandContentType = tkSettings.branded_content_type; // 'yourself' or 'partner'
-  
-  // Logic: explicit flag OR implied by type if commercial is on
-  const brandContentToggle = tkSettings.brand_content_toggle === true || (commercialContent && brandContentType === 'partner');
-  const brandOrganicToggle = tkSettings.brand_organic_toggle === true || (commercialContent && brandContentType === 'yourself');
+  // Extract commercial content metrics
+  const opts = payload?.platform_options?.tiktok || {};
+  const isCommercial = opts.is_commercial_content || opts.commercial || false;
+  const brandOrganic = opts.brand_organic_toggle || opts.brandOrganic || false;
+  const brandedContent = opts.brand_content_toggle || opts.brandedContent || false;
 
-  // If commercial content is active, enforce Public privacy
-  if (commercialContent) {
-      privacyLevel = "PUBLIC_TO_EVERYONE";
+  if (isCommercial || brandOrganic || brandedContent) {
+    privacyLevel = "PUBLIC_TO_EVERYONE";
   }
 
   // If we have a contentId, prefer a fresh signed URL from content doc
@@ -1001,9 +964,9 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         videoUrl,
         contentId,
         privacyLevel,
-        commercialContent,
-        brandContentToggle,
-        brandOrganicToggle,
+        isCommercial,
+        brandOrganic,
+        brandedContent,
       });
 
       // If token is invalid, attempt a server-side refresh and retry once
@@ -1028,9 +991,9 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
               videoUrl,
               contentId,
               privacyLevel,
-              commercialContent,
-              brandContentToggle,
-              brandOrganicToggle,
+              isCommercial,
+              brandOrganic,
+              brandedContent,
             });
           } else {
             console.warn("[tiktok] no refresh token available for uid=%s", uid);
@@ -1242,9 +1205,9 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
           videoSize,
           privacyLevel,
           chunkSize: cs,
-          commercialContent,
-          brandContentToggle,
-          brandOrganicToggle,
+          isCommercial,
+          brandOrganic,
+          brandedContent,
         });
         publish_id = initData.publish_id;
         upload_url = initData.upload_url;

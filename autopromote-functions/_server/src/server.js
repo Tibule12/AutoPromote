@@ -604,6 +604,14 @@ try {
   console.log("⚠️ Snapchat routes not found:", e.message);
   snapchatRoutes = express.Router();
 }
+let spotifyRoutes;
+try {
+  spotifyRoutes = require("./routes/spotifyRoutes");
+  console.log("✅ Spotify routes loaded");
+} catch (e) {
+  console.log("⚠️ Spotify routes not found:", e.message);
+  spotifyRoutes = express.Router();
+}
 // Generic platform routes (status/auth placeholders for spotify, reddit, discord, linkedin, telegram, pinterest)
 let platformRoutes = express.Router(); // default fallback
 try {
@@ -1365,6 +1373,13 @@ try {
   );
   console.log("🚏 Snapchat routes mounted at /api/snapchat");
   app.use(
+    "/api/spotify",
+    routeLimiter({ windowHint: "spotify" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req, res, next) => next(),
+    spotifyRoutes
+  );
+  console.log("🚏 Spotify routes mounted at /api/spotify");
+  app.use(
     "/api/platform",
     routeLimiter({ windowHint: "platform" }),
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req, res, next) => next(),
@@ -1706,6 +1721,7 @@ try {
   }
   try {
     app.use("/api/admin/system", require("./routes/adminSystemRoutes"));
+    app.use("/api/admin/platforms", require("./routes/platformHealthRoutes")); // NEW: Platform Health Checks
   } catch (e) {
     console.warn("adminSystemRoutes mount failed:", e.message);
   }
@@ -3514,6 +3530,24 @@ if (process.env.SCHEDULER_ENABLED !== "false") {
       },
       30 * 60 * 1000
     ).unref();
+  }
+
+  // 3. Storage Cleanup (Daily)
+  // Replaces the paid Firebase Cloud Function 'cleanupTempUploads'
+  if (process.env.ENABLE_BACKGROUND_JOBS === "true") {
+    setInterval(
+      async () => {
+        const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
+        if (!isLeader) return;
+        try {
+          const { cleanupTempUploads } = require("./services/storageCleanupService");
+          await cleanupTempUploads();
+        } catch (e) {
+          console.error("[Scheduler] ⚠️ Storage cleanup failed:", e.message);
+        }
+      },
+      24 * 60 * 60 * 1000
+    ).unref(); // Every 24 hours
   }
 }
 

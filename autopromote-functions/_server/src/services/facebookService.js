@@ -297,16 +297,13 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
 
           // SPONSORSHIP DISCLOSURE
           const mon = content.monetization_settings || {};
-          const fbSettings = mon.facebook || {};
-          const isSponsored = mon.is_sponsored || fbSettings.is_sponsored;
-
-          if (isSponsored) {
+          if (mon.is_sponsored) {
             const disclosure = mon.brand_name
               ? ` #ad #${mon.brand_name.replace(/\s+/g, "")}`
               : " #ad #sponsored";
             const promoLink = mon.product_link ? `\n\nCheck it out here: ${mon.product_link}` : "";
 
-            if (!message.toLowerCase().includes("#ad") && !message.toLowerCase().includes("sponsored")) {
+            if (!message.includes("#ad") && !message.includes("#sponsored")) {
               message += disclosure;
             }
             if (promoLink && !message.includes(mon.product_link)) {

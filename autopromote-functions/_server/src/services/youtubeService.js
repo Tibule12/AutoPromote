@@ -36,8 +36,14 @@ async function getUserYouTubeConnection(uid) {
   return d;
 }
 
-function buildOAuthClient(tokens) {
-  const { access_token, refresh_token, scope, token_type, expires_in, expiry_date } = tokens || {};
+function buildOAuthClient(connectionData) {
+  // Handle connection data that handles tokens either at root or in .tokens (decrypted)
+  const tokens =
+    connectionData && connectionData.tokens
+      ? { ...connectionData, ...connectionData.tokens }
+      : connectionData || {};
+
+  const { access_token, refresh_token, scope, token_type, expires_in, expiry_date } = tokens;
 
   const client = new google.auth.OAuth2(
     process.env.YT_CLIENT_ID,
@@ -54,7 +60,13 @@ function buildOAuthClient(tokens) {
   return client;
 }
 
-async function ensureFreshTokens(oauth2Client, tokens, uid) {
+async function ensureFreshTokens(oauth2Client, connectionData, uid) {
+  // Flatten tokens for checks
+  const tokens =
+    connectionData && connectionData.tokens
+      ? { ...connectionData, ...connectionData.tokens }
+      : connectionData || {};
+
   // If token is near expiry (within 2 minutes), refresh.
   const expiry = oauth2Client.credentials.expiry_date;
   if (expiry && Date.now() < expiry - 120000) return oauth2Client; // still valid
@@ -64,7 +76,12 @@ async function ensureFreshTokens(oauth2Client, tokens, uid) {
     try {
       const { encryptToken, hasEncryption } = require("./secretVault");
       const ref = db.collection("users").doc(uid).collection("connections").doc("youtube");
+
+      // Merge credentials into the flat token object
       const tokenObj = { ...tokens, ...credentials };
+      // Remove self-referential nested properties if any
+      delete tokenObj.tokens;
+
       if (hasEncryption()) {
         await ref.set(
           {
@@ -81,19 +98,9 @@ async function ensureFreshTokens(oauth2Client, tokens, uid) {
         );
       }
     } catch (e) {
-      await db
-        .collection("users")
-        .doc(uid)
-        .collection("connections")
-        .doc("youtube")
-        .set(
-          {
-            ...tokens,
-            ...credentials,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
+      // Fallback or error logging
+      console.warn("[YouTube] Error saving refreshed token", e);
+      // Try verify legacy save if needed or just skip
     }
     oauth2Client.setCredentials(credentials);
   } catch (err) {
@@ -139,6 +146,7 @@ async function uploadVideo({
   contentTags = [],
   forceReupload = false,
   skipIfDuplicate = true,
+  payload = {},
 }) {
   if (!uid) throw new Error("uid required");
   if (!title) throw new Error("title required");
@@ -217,17 +225,13 @@ async function uploadVideo({
       if (cSnap.exists) {
         const cData = cSnap.data();
         const mon = cData.monetization_settings || {};
-        const ytSettings = mon.youtube || {};
-        const isSponsored = mon.is_sponsored || ytSettings.paid_promotion;
-
-        if (isSponsored) {
+        if (mon.is_sponsored) {
           const disclosure = mon.brand_name
             ? ` #ad #${mon.brand_name.replace(/\s+/g, "")}`
             : " #ad #sponsored";
           const promoLink = mon.product_link ? `\n\nCheck it out here: ${mon.product_link}` : "";
 
-          // Only append if not already present
-          if (!finalDescription.toLowerCase().includes("#ad") && !finalDescription.toLowerCase().includes("sponsored")) {
+          if (!finalDescription.includes("#ad")) {
             finalDescription += "\n\n" + disclosure;
           }
           if (promoLink && !finalDescription.includes(mon.product_link)) {
@@ -261,11 +265,22 @@ async function uploadVideo({
 
   const videoBuffer = await downloadVideoBuffer(fileUrl);
 
+  const privacyStatus = payload.privacy || "public";
+  const ytOptions = (payload && payload.platform_options && payload.platform_options.youtube) || {};
+  const selfDeclaredMadeForKids = !!ytOptions.made_for_kids;
+
   const insertRes = await youtube.videos.insert({
     part: "snippet,status",
     requestBody: {
-      snippet: { title: finalTitle, description: finalDescription },
-      status: { privacyStatus: "public" },
+      snippet: {
+        title: finalTitle,
+        description: finalDescription,
+        tags: contentTags,
+      },
+      status: {
+        privacyStatus,
+        selfDeclaredMadeForKids,
+      },
     },
     media: { mimeType, body: streamifier.createReadStream(videoBuffer) },
   });

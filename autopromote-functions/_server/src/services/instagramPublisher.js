@@ -7,6 +7,7 @@
 
 const fetch = require("node-fetch");
 const { db } = require("../firebaseAdmin");
+const { getUserFacebookConnection } = require("./facebookService");
 
 async function buildContentContext(contentId) {
   if (!contentId) return {};
@@ -85,77 +86,31 @@ async function publishCarousel({ igUserId, accessToken, mediaUrls, caption }) {
 }
 
 async function publishInstagram({ contentId, payload, reason, uid }) {
-  if (!uid) {
-    return { platform: "instagram", simulated: true, reason: "missing_uid" };
-  }
+  let IG_USER_ID = process.env.IG_USER_ID;
+  let ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
 
-  // Multi-tenant: Fetch credentials from user's Facebook connection
-  let IG_USER_ID, ACCESS_TOKEN;
-  try {
-    const fbSnap = await db.collection("users").doc(uid).collection("connections").doc("facebook").get();
-    if (!fbSnap.exists) {
-        return { platform: "instagram", simulated: true, reason: "facebook_not_connected" };
+  // Load user credentials if uid provided
+  if (uid) {
+    try {
+      const conn = await getUserFacebookConnection(uid);
+      if (conn && conn.accessToken) {
+        ACCESS_TOKEN = conn.accessToken;
+        // Try to find IG Business ID in connection data
+        if (conn.instagramBusinessAccountId) IG_USER_ID = conn.instagramBusinessAccountId;
+        else if (conn.instagramId) IG_USER_ID = conn.instagramId;
+        else if (conn.metadata && conn.metadata.instagram_business_account_id)
+          IG_USER_ID = conn.metadata.instagram_business_account_id;
+      }
+    } catch (e) {
+      console.warn("[Instagram] Failed to resolve user credentials:", e.message);
     }
-    const data = fbSnap.data();
-    IG_USER_ID = data.ig_business_account_id;
-    
-    // We need a page access token. We can try the first page, or a specific page if specified in payload.
-    // Ideally the user selected a page in the UI.
-    const selectedPageId = payload?.pageId || payload?.platform_options?.facebook?.pageId;
-    if (selectedPageId && Array.isArray(data.pages)) {
-        const p = data.pages.find(page => page.id === selectedPageId);
-        if (p) ACCESS_TOKEN = p.access_token;
-    } 
-    
-    // Fallback: Use the first page's token if available, or the generic one if stored (though FB Graph usually requires page token)
-    if (!ACCESS_TOKEN && Array.isArray(data.pages) && data.pages.length > 0) {
-        ACCESS_TOKEN = data.pages[0].access_token;
-    }
-    
-    // Fallback Legacy: process.env (only for single-tenant / admin operations)
-    if (!IG_USER_ID && process.env.IG_USER_ID) IG_USER_ID = process.env.IG_USER_ID;
-    if (!ACCESS_TOKEN && process.env.FACEBOOK_PAGE_ACCESS_TOKEN) ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
-
-  } catch (e) {
-      console.error("[InstagramPublisher] Credential fetch failed", e);
-      return { platform: "instagram",  success: false, error: "credential_error" };
   }
 
   if (!IG_USER_ID || !ACCESS_TOKEN) {
     return { platform: "instagram", simulated: true, reason: "missing_credentials" };
   }
   const ctx = await buildContentContext(contentId);
-  let captionBase = payload?.caption || payload?.message || ctx.title || "New post";
-  
-  // SPONSORSHIP DISCLOSURE/CONFIG
-  let isReel = false;
-  if (contentId) {
-    try {
-      const snap = await db.collection("content").doc(contentId).get();
-      if (snap.exists) {
-        const cData = snap.data();
-        const mon = cData.monetization_settings || {};
-        const igSettings = mon.instagram || {};
-        
-        // Reel Config
-        if (igSettings.is_reel) isReel = true;
-
-        // Disclosure Config
-        const isSponsored = mon.is_sponsored || igSettings.is_paid_partnership;
-        if (isSponsored) {
-           const partner = igSettings.sponsor_user || mon.brand_name || "";
-           const disclosure = partner 
-            ? ` #ad @${partner.replace(/^@/, '')}` 
-            : " #ad #sponsored";
-           
-           if (!captionBase.toLowerCase().includes("#ad") && !captionBase.toLowerCase().includes("sponsored")) {
-             captionBase += "\n\n" + disclosure;
-           }
-        }
-      }
-    } catch (_) {}
-  }
-
+  const captionBase = payload?.caption || payload?.message || ctx.title || "New post";
   const hashtags = (ctx.tags || [])
     .slice(0, 5)
     .map(t => `#${String(t).replace(/[^a-zA-Z0-9]/g, "")}`)
@@ -191,10 +146,8 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
         caption,
       });
       if (isVideo) {
-        // Enforce Reel type if requested (REELS or VIDEO)
-        params.append("media_type", isReel ? "REELS" : "VIDEO"); 
+        params.append("media_type", "VIDEO");
         params.append("video_url", mediaUrl);
-        if (isReel) params.append("share_to_feed", "true"); // Default to sharing to feed for growth
       } else {
         params.append("image_url", mediaUrl);
       }

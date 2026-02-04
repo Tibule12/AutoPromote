@@ -322,6 +322,7 @@ async function postToYouTubeHandler(args) {
       privacy: payload.privacy || "public",
       tags: payload.tags || payload.hashtags,
       contentId,
+      payload, // Pass full payload for advanced options (sponsorships, kids)
     });
 
     if (res.success) {
