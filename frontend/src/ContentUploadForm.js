@@ -2793,7 +2793,8 @@ function ContentUploadForm({
         )}
         {error && <div className="error-message">{error}</div>}
 
-        <div style={{ display: "flex", gap: ".5rem", marginTop: ".5rem", flexWrap: "wrap" }}>
+        <div style={{ display: "none" }}>
+          {/* Hiding individual platform buttons to move them to a consolidated bottom bar */}
           <button
             aria-label="Preview Content"
             className="preview-button"
@@ -2895,6 +2896,45 @@ function ContentUploadForm({
           onClose={() => setShowPreviewEditModal(false)}
           onSave={handleSavePreviewEdits}
         />
+
+        {/* Consolidated Action Bar (Focused View) */}
+        <div style={{ height: 100 }}></div>
+        <div
+          className="consolidated-actions-bar-focused"
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: isDark ? "#1a202c" : "#fff",
+            borderTop: "1px solid #ccc",
+            padding: "16px 24px",
+            zIndex: 999,
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            boxShadow: "0 -4px 6px -1px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <button
+            className="btn btn-primary"
+            type="button"
+            style={{ fontWeight: "bold", fontSize: "1.1em", minWidth: 200 }}
+            disabled={isUploading || (focusedPlatform === "tiktok" && !tiktokConsentChecked)}
+            onClick={() => {
+              if (focusedPlatform === "tiktok" && !tiktokConsentChecked) {
+                setConfirmTargetPlatform(focusedPlatform);
+                setShowConfirmPublishModal(true);
+              } else {
+                handlePlatformUpload(focusedPlatform);
+              }
+            }}
+          >
+            {isUploading
+              ? "Uploading..."
+              : `🚀 Publish to ${focusedPlatform.charAt(0).toUpperCase() + focusedPlatform.slice(1)}`}
+          </button>
+        </div>
       </div>
     );
   }
@@ -4756,6 +4796,44 @@ function ContentUploadForm({
         onClose={() => setShowConfirmPublishModal(false)}
         onConfirm={submitFromConfirmed}
       />
+
+      {/* Consolidated Action Bar (Main Dashboard) */}
+      <div style={{ height: 100 }}></div>
+      <div
+        className="consolidated-actions-bar-main"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: isDark ? "#1a202c" : "#fff",
+          borderTop: "1px solid #ccc",
+          padding: "16px 24px",
+          zIndex: 999,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          boxShadow: "0 -4px 6px -1px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <div style={{ fontSize: "14px", color: isDark ? "#A0AEC0" : "#4A5568" }}>
+          <b>{selectedPlatformsVal.length}</b> platform
+          {selectedPlatformsVal.length !== 1 ? "s" : ""} selected
+        </div>
+        <button
+          className="btn btn-primary"
+          style={{
+            fontWeight: "bold",
+            fontSize: "1.1em",
+            padding: "12px 24px",
+            minWidth: 200,
+          }}
+          onClick={handleSubmit}
+          disabled={isUploading || selectedPlatformsVal.length === 0}
+        >
+          {isUploading ? "Uploading..." : "🚀 Publish Everywhere"}
+        </button>
+      </div>
     </div>
   );
 }

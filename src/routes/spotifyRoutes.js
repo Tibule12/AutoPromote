@@ -8,8 +8,34 @@ const {
   createPlaylist,
   postToSpotify,
   addTracksToPlaylist,
+  getValidAccessToken,
 } = require("../services/spotifyService");
 const { createSpotifyCampaign } = require("../services/communityEngine");
+
+// GET /status - Check connection
+router.get("/status", authMiddleware, async (req, res) => {
+  try {
+    const uid = req.userId || req.user.uid;
+    const userRef = db.collection("users").doc(uid);
+    const snap = await userRef.collection("connections").doc("spotify").get();
+
+    if (!snap.exists) {
+      return res.json({ connected: false });
+    }
+
+    // Quick token validity check
+    try {
+      const t = await getValidAccessToken(uid);
+      if (!t) return res.json({ connected: false });
+    } catch (e) {
+      return res.json({ connected: false });
+    }
+
+    res.json({ connected: true });
+  } catch (e) {
+    res.json({ connected: false });
+  }
+});
 
 // GET /search?q=query
 router.get("/search", authMiddleware, async (req, res) => {
@@ -18,11 +44,11 @@ router.get("/search", authMiddleware, async (req, res) => {
     const { q } = req.query;
     if (!q) return res.status(400).json({ error: "Query required" });
 
-    const results = await searchTracks({ uid, query: q });
-    // Normalize format for frontend
+    const searchData = await searchTracks({ uid, query: q });
+    // Normalize format for frontend (searchData now returns mixed results in .results)
     res.json({
       ok: true,
-      results: results.tracks || [],
+      results: searchData.results || [],
     });
   } catch (e) {
     console.error("Spotify search error:", e);

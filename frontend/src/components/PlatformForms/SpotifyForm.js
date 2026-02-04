@@ -89,18 +89,23 @@ const SpotifyForm = ({
 
     // Normalize track object
     const trackObj = {
-      uri,
-      id: t.id,
-      name: t.name,
-      artists: t.artists,
-      preview_url: t.preview_url,
-      popularity: t.popularity,
+      ...t,
+      // Ensure key props are preserved
+      image: t.image,
+      type: t.type || "track",
     };
 
     if (onTrackSelect) {
       onTrackSelect(trackObj);
     }
-    setLiveMessage(`${t.name} added to selection`);
+    const labelMap = {
+      album: "Album",
+      playlist: "Playlist",
+      show: "Podcast",
+      episode: "Episode",
+      track: "Track",
+    };
+    setLiveMessage(`${labelMap[t.type] || "Item"} ${t.name} added`);
   };
 
   const removeTrack = (uri, id) => {
@@ -196,8 +201,8 @@ const SpotifyForm = ({
                 setResults([]);
               }
             }}
-            placeholder="Search by Song or Artist..."
-            aria-label="Search Spotify tracks"
+            placeholder="Search for Songs, Albums, Playlists, or Podcasts..."
+            aria-label="Search Spotify"
             role="combobox"
             aria-autocomplete="list"
             aria-controls="spotify-search-results"
@@ -271,13 +276,48 @@ const SpotifyForm = ({
                 }
               }}
             >
-              <div className="result-img">
-                <span style={{ fontSize: "20px" }}>🎵</span>
+              <div className="result-img" style={r.image ? { padding: 0 } : {}}>
+                {r.image ? (
+                  <img
+                    src={r.image}
+                    alt=""
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <span style={{ fontSize: "20px" }}>🎵</span>
+                )}
               </div>
               <div className="result-meta">
                 <div className="title">{r.name}</div>
                 <div className="sub">
-                  {Array.isArray(r.artists) ? r.artists.join(", ") : r.artist}
+                  <span
+                    className="badge"
+                    style={{
+                      fontSize: "0.7em",
+                      padding: "2px 4px",
+                      borderRadius: "3px",
+                      background: "#333",
+                      color: "#fff",
+                      marginRight: "6px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {r.type}
+                  </span>
+                  {(() => {
+                    switch (r.type) {
+                      case "playlist":
+                        return `by ${r.owner}`;
+                      case "show":
+                        return `Host: ${r.publisher}`;
+                      case "episode":
+                        return `from ${r.show_name}`;
+                      case "album":
+                      case "track":
+                      default:
+                        return Array.isArray(r.artists) ? r.artists.join(", ") : r.artist;
+                    }
+                  })()}
                 </div>
               </div>
               <div>
@@ -287,7 +327,7 @@ const SpotifyForm = ({
                     e.stopPropagation();
                     addTrack(r);
                   }}
-                  aria-label={`Add ${r.name} to selected tracks`}
+                  aria-label={`Add ${r.name}`}
                 >
                   Add
                 </button>
@@ -323,13 +363,51 @@ const SpotifyForm = ({
 
         {selectedTracks.length > 0 && (
           <div className="selected-tracks-container" style={{ marginTop: "15px" }}>
-            <h5 style={{ fontSize: "14px", marginBottom: "8px" }}>Selected Tracks</h5>
+            <h5 style={{ fontSize: "14px", marginBottom: "8px" }}>Selected Items</h5>
             <div className="selected-tracks" aria-live="polite">
               {selectedTracks.map(st => (
                 <div key={st.id || st.uri} className="track-chip">
-                  <div style={{ fontWeight: 600 }}>{st.name}</div>
-                  <div style={{ fontSize: 12, color: "#9fcfb9" }}>
-                    {Array.isArray(st.artists) ? st.artists.join(", ") : st.artist || ""}
+                  {st.image && (
+                    <img
+                      src={st.image}
+                      alt=""
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 4,
+                        marginRight: 8,
+                        objectFit: "cover",
+                      }}
+                    />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
+                    <div style={{ fontWeight: 600 }}>{st.name}</div>
+                    <div style={{ fontSize: 12, color: "#9fcfb9" }}>
+                      <span
+                        style={{
+                          textTransform: "uppercase",
+                          fontSize: "0.85em",
+                          opacity: 0.7,
+                          marginRight: 4,
+                        }}
+                      >
+                        {st.type || "track"}
+                      </span>
+                      {(() => {
+                        switch (st.type) {
+                          case "playlist":
+                            return st.owner;
+                          case "show":
+                            return st.publisher;
+                          case "episode":
+                            return st.show_name;
+                          default:
+                            return Array.isArray(st.artists)
+                              ? st.artists.join(", ")
+                              : st.artist || "";
+                        }
+                      })()}
+                    </div>
                   </div>
                   <button
                     className="remove"
