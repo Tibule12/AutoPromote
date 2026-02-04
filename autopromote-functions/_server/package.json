@@ -1,5 +1,5 @@
 {
   "name": "autopromote-server",
   "main": "src/server.js",
-  "version": "1.0.0"
+  "version": "1.2.0"
 }

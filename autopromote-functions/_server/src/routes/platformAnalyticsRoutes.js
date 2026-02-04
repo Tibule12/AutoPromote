@@ -4,19 +4,11 @@ const { postToPinterest } = require('../services/pinterestService');
 const { getPostStats: getLinkedInPostStats } = require('../services/linkedinService');
 const { getPostInfo: getRedditPostInfo } = require('../services/redditService');
 const { getPinInfo } = require('../services/pinterestService');
-const rateLimit = require('express-rate-limit');
 
 const router = express.Router();
 
-const analyticsRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 // LinkedIn post stats: provide shareId
-router.get('/linkedin/post/:shareId/stats', authMiddleware, analyticsRateLimiter, async (req, res) => {
+router.get('/linkedin/post/:shareId/stats', authMiddleware, async (req, res) => {
   try {
     const { shareId } = req.params;
     if (!shareId) return res.status(400).json({ ok: false, error: 'shareId_required' });
@@ -30,7 +22,7 @@ router.get('/linkedin/post/:shareId/stats', authMiddleware, analyticsRateLimiter
 });
 
 // Reddit post info
-router.get('/reddit/post/:postId', authMiddleware, analyticsRateLimiter, async (req, res) => {
+router.get('/reddit/post/:postId', authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params;
     if (!postId) return res.status(400).json({ ok: false, error: 'postId_required' });
@@ -44,7 +36,7 @@ router.get('/reddit/post/:postId', authMiddleware, analyticsRateLimiter, async (
 });
 
 // Pinterest pin info
-router.get('/pinterest/pin/:pinId', authMiddleware, analyticsRateLimiter, async (req, res) => {
+router.get('/pinterest/pin/:pinId', authMiddleware, async (req, res) => {
   try {
     const { pinId } = req.params;
     if (!pinId) return res.status(400).json({ ok: false, error: 'pinId_required' });

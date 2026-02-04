@@ -4,6 +4,7 @@
 
 const { db, admin } = require("../firebaseAdmin");
 const logger = require("../utils/logger");
+const { sendTelegramAlert, getUserTelegramConnection } = require("./telegramService");
 
 // Pricing Constants
 const BASE_PRICE_PER_UNIT = 0.01; // $0.01 per engagement unit (e.g. share)
@@ -11,6 +12,106 @@ const SURGE_THRESHOLD = 500; // units/minute to trigger surge
 const RETENTION_FEE_PERCENT = 0.1; // 10% fee on redemption
 
 class RevenueEngine {
+  /**
+   * Award Growth Credits to a user
+   * @param {string} userId
+   * @param {number} amount
+   * @param {string} source - 'engagement_reward', 'bonus', etc.
+   */
+  async awardGrowthCredits(userId, amount, source = "engagement_reward") {
+    const userCreditsRef = db.collection("user_credits").doc(userId);
+
+    // Transactional update
+    await db.runTransaction(async t => {
+      const doc = await t.get(userCreditsRef);
+      const current = doc.exists ? doc.data().growth_credits || 0 : 0;
+      const newBalance = current + amount;
+
+      t.set(
+        userCreditsRef,
+        {
+          growth_credits: newBalance,
+          last_awarded_at: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      // Log ledger entry
+      const ledgerRef = db.collection("credit_ledger").doc();
+      t.set(ledgerRef, {
+        userId,
+        amount,
+        type: "credit",
+        source,
+        balance_after: newBalance,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    });
+
+    // Notify user via Telegram (fire and forget)
+    if (amount > 1) {
+      // Only notify for significant amounts
+      try {
+        const conn = await getUserTelegramConnection(userId);
+        if (conn && conn.meta && conn.meta.chatId) {
+          await sendTelegramAlert(
+            conn.meta.chatId,
+            `🚀 You earned ${amount.toFixed(2)} growth credits! (Source: ${source})`
+          );
+        }
+      } catch (e) {
+        // Ignore notification errors
+      }
+    }
+
+    return amount;
+  }
+
+  /**
+   * Redeem Growth Credits
+   * Applies redemption fee (retention model)
+   */
+  async redeemGrowthCredits(userId, amountToRedeem) {
+    const userCreditsRef = db.collection("user_credits").doc(userId);
+
+    return db.runTransaction(async t => {
+      const doc = await t.get(userCreditsRef);
+      if (!doc.exists) throw new Error("User has no credit record");
+
+      const current = doc.data().growth_credits || 0;
+      if (current < amountToRedeem) {
+        throw new Error("Insufficient growth credits");
+      }
+
+      const fee = amountToRedeem * RETENTION_FEE_PERCENT;
+      const netValue = amountToRedeem - fee;
+      const newBalance = current - amountToRedeem;
+
+      t.set(
+        userCreditsRef,
+        {
+          growth_credits: newBalance,
+          last_redeem_at: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      // Log ledger
+      const ledgerRef = db.collection("credit_ledger").doc();
+      t.set(ledgerRef, {
+        userId,
+        amount: -amountToRedeem,
+        type: "debit",
+        fee,
+        net_value: netValue,
+        balance_after: newBalance,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return { success: true, netValue, fee };
+    });
+  }
+
   /**
    * Log an Engagement Unit
    * @param {string} creatorId - User ID of the content creator
@@ -48,19 +149,6 @@ class RevenueEngine {
       },
       { merge: true }
     );
-
-    // 3. IMMEDIATE REWARD: Credit the Creator's Wallet (Greedy Game Loop)
-    // Every log earns credits instantly to addict the user.
-    if (creatorId) {
-        const userRef = db.collection("users").doc(creatorId);
-        batch.set(userRef, {
-            growthCredits: admin.firestore.FieldValue.increment(value),
-            // Track total lifetime earnings for "Status" (Leaderboards)
-            wallet: {
-                totalEarned: admin.firestore.FieldValue.increment(value)
-            }
-        }, { merge: true });
-    }
 
     await batch.commit();
     return { success: true, logId: logRef.id };
@@ -178,48 +266,23 @@ class RevenueEngine {
    * Creator wants to cash out their credits.
    */
   async redeemCredits(creatorId, creditsToRedeem) {
+    // 1. Check balance
     const userRef = db.collection("users").doc(creatorId);
+    // ... fetch balance ...
 
-    return db.runTransaction(async (transaction) => {
-        // 1. Check balance
-        const userDoc = await transaction.get(userRef);
-        if (!userDoc.exists) {
-            throw new Error("User does not exist.");
-        }
+    // 2. Apply Retention Fee (Greedy Platform Fee)
+    const feeAmount = creditsToRedeem * RETENTION_FEE_PERCENT;
+    const netPayout = creditsToRedeem - feeAmount;
 
-        const currentCredits = userDoc.data().growthCredits || 0;
-        if (currentCredits < creditsToRedeem) {
-            throw new Error(`Insufficient Growth Credits. Balance: ${currentCredits}`);
-        }
+    // 3. Process Payout
+    // ... Payout Logic ...
 
-        // 2. Apply Retention Fee (Greedy Platform Fee)
-        const feeAmount = Math.ceil(creditsToRedeem * RETENTION_FEE_PERCENT); // Round up fee
-        const netRedeemed = creditsToRedeem - feeAmount;
-
-        // 3. Deduct Credits
-        transaction.update(userRef, {
-            growthCredits: admin.firestore.FieldValue.increment(-creditsToRedeem)
-        });
-
-        // 4. Log Transaction (Audit Trail)
-        const auditRef = db.collection("credit_ledger").doc();
-        transaction.set(auditRef, {
-            userId: creatorId,
-            type: "REDEMPTION",
-            amount: -creditsToRedeem,
-            netAction: netRedeemed,
-            fee: feeAmount,
-            timestamp: admin.firestore.FieldValue.serverTimestamp()
-        });
-
-        return {
-            success: true,
-            redeemed: creditsToRedeem,
-            fee: feeAmount,
-            netActionPoints: netRedeemed, 
-            message: `Redeemed ${creditsToRedeem} credits. Fee: ${feeAmount}.`
-        };
-    });
+    return {
+      redeemed: creditsToRedeem,
+      fee: feeAmount,
+      payout: netPayout,
+      currency: "USD", // Assuming 1 credit = $1 for simplicity in this draft
+    };
   }
 }
 

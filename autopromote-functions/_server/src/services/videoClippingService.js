@@ -2,7 +2,6 @@
 // AI-powered video clipping service (Opus Clip style)
 // Analyzes long-form videos and generates viral short clips
 
-/* eslint-disable no-console */
 const ffmpeg = require("fluent-ffmpeg");
 const { db, storage } = require("../firebaseAdmin");
 const axios = require("axios");
@@ -587,9 +586,6 @@ class VideoClippingService {
    * Generate a specific clip from suggestions
    */
   async generateClip(analysisId, clipId, options = {}) {
-    if (!clipId || /[^a-zA-Z0-9-_]/.test(clipId)) {
-      throw new Error("Invalid clipId string");
-    }
     try {
       // Retrieve analysis data
       const analysisDoc = await db.collection("clip_analyses").doc(analysisId).get();
@@ -604,10 +600,13 @@ class VideoClippingService {
         throw new Error("Clip not found in analysis");
       }
 
+      // Sanitize clipId to prevent path traversal
+      const safeClipId = String(clipId).replace(/[^a-zA-Z0-9-_]/g, "");
+
       // Download source video
       const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "clip-gen-"));
       const sourcePath = path.join(tempDir, "source.mp4");
-      const outputPath = path.join(tempDir, `clip-${clipId}.mp4`);
+      const outputPath = path.join(tempDir, `clip-${safeClipId}.mp4`);
 
       await this.downloadVideo(analysis.videoUrl, sourcePath);
 
@@ -702,23 +701,26 @@ class VideoClippingService {
         if (options.addCaptions && clip.transcript && clip.transcript.length > 0) {
           try {
             const srtContent = this.generateSRT(clip.transcript, clip.start);
+
             // SECURITY: Ensure we use the resolved absolute path to prevent traversal/confusion
             const absoluteSrtPath = path.resolve(tempSrtPath);
-            
+
             await fs.writeFile(absoluteSrtPath, srtContent);
-            
+
             // Escape path for ffmpeg (windows paths can be tricky).
             // CodeQL Fix: "Incomplete string escaping or encoding"
             // We use a robust escaping strategy for FFmpeg filter graph syntax.
             // 1. Normalize backslashes to forward slashes (safe for FFmpeg on all OS)
             let srtPathEscaped = absoluteSrtPath.replace(/\\/g, "/");
-            
+
             // 2. Escape colons (filter separator) and single quotes (string delimiter)
-            srtPathEscaped = srtPathEscaped
-              .replace(/:/g, "\\\\:")
-              .replace(/'/g, "'\\\\''");
-            
+            // Note: In a filter string like "subtitles='path'", the path is singly-quoted.
+            // To represent a literal ' inside, we use the sequence: '\'
+            // To represent a literal : inside, we escape it as \:
+            srtPathEscaped = srtPathEscaped.replace(/:/g, "\\\\:").replace(/'/g, "'\\\\''");
+
             // Use 'Sans' instead of 'Arial' for better Linux/Cloud compatibility
+            // Quote the path string for safety against spaces/special chars
             videoFilters.push(
               `subtitles='${srtPathEscaped}':force_style='FontName=Sans,FontSize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1,Shadow=0,Alignment=2,MarginV=20'`
             );
@@ -750,16 +752,14 @@ class VideoClippingService {
           .on("end", async () => {
             // Cleanup temp srt
             try {
-              // codeql[js/path-injection] -- path is strictly derived from temp directory
               await fs.unlink(tempSrtPath).catch(() => {});
             } catch (e) {
               /* ignore */
             }
             resolve();
           })
-          .on("error", (err) => {
+          .on("error", err => {
             // Cleanup temp srt
-            // codeql[js/path-injection] -- path is strictly derived from temp directory
             fs.unlink(tempSrtPath).catch(() => {});
             reject(err);
           })
@@ -780,9 +780,7 @@ class VideoClippingService {
       // If we have detailed word-level timestamps, we use them.
       // Fallback to segment level if entry.words is missing.
 
-      const items = entry.words || [
-        { start: entry.start, end: entry.end, word: entry.text },
-      ];
+      const items = entry.words || [{ start: entry.start, end: entry.end, word: entry.text }];
 
       items.forEach((wordItem, wordIndex) => {
         // Adjust time relative to clip start

@@ -2,15 +2,7 @@ const express = require("express");
 const { db } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
 const { Readable, pipeline } = require("stream");
-const rateLimit = require("express-rate-limit");
 const router = express.Router();
-
-const mediaRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100, // Higher limit for media/verification checks
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 // Helper to convert Web/WHATWG stream to Node Readable if needed
 function toNodeStream(webStream) {
@@ -27,7 +19,7 @@ function toNodeStream(webStream) {
 }
 
 // Verification file under /media/ for TikTok prefix verification
-router.head("/media/tiktok-developers-site-verification.txt", mediaRateLimiter, async (req, res) => {
+router.head("/media/tiktok-developers-site-verification.txt", async (req, res) => {
   try {
     const token = process.env.TIKTOK_DEVELOPERS_SITE_VERIFICATION;
     if (!token) return res.status(404).send("Not found");
@@ -45,7 +37,6 @@ const path = require("path");
 // Serve verification file and also support the prefix root (/media/) so verifiers that request the prefix still find the token
 router.get(
   ["/media/tiktok-developers-site-verification.txt", "/media", "/media/"],
-  mediaRateLimiter,
   async (req, res) => {
     try {
       // Behavior:

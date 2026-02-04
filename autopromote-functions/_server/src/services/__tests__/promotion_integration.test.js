@@ -494,11 +494,11 @@ describe("Promotion integration (mocked platforms)", () => {
       await db.collection("platform_posts").doc(lockId).set({ taskId: r1.id }, { merge: true });
     }
 
-    // make lock appear stale by setting updatedAt to past (1 hour ago to satisfy default 5m timeout too)
+    // make lock appear stale by setting updatedAt to past
     await db
       .collection("platform_posts")
       .doc(lockId)
-      .update({ updatedAt: new Date(Date.now() - 3600000).toISOString() });
+      .update({ updatedAt: new Date(Date.now() - 60000).toISOString() });
 
     // verify lock doc state
     const lockSnap = await db.collection("platform_posts").doc(lockId).get();
