@@ -382,3 +382,36 @@ input:checked + .toggle-slider:before {
     transform: translateY(0);
   }
 }
+
+/* YouTube High Contrast & Visibility Overrides */
+.youtube-form,
+.youtube-form label,
+.youtube-form span,
+.youtube-form p,
+.youtube-form div,
+.youtube-form h4,
+.youtube-form h5 {
+  color: #000000 !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
+}
+
+.youtube-form input,
+.youtube-form textarea,
+.youtube-form select {
+  font-weight: 700 !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  background-color: #ffffff !important;
+}
+
+.youtube-form input::placeholder,
+.youtube-form textarea::placeholder {
+  color: #444444 !important;
+  font-weight: 600 !important;
+}
+
+.youtube-form .scope-info-box {
+  background-color: #fff0f0 !important;
+  border-color: #ff0000 !important;
+}
