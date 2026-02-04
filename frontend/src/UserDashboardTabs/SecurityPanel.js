@@ -354,6 +354,10 @@ const SecurityPanel = ({ user }) => {
         setTwoFactorError("Too many attempts. Please try again later or verify your device time.");
       } else if (error.code === "auth/invalid-phone-number") {
         setTwoFactorError("The phone number entered is invalid.");
+      } else if (error.code === "auth/operation-not-allowed") {
+        setTwoFactorError(
+          "2FA/MFA is not enabled in the backend. Please contact support or enable TOTP/Phone Auth in Firebase Console."
+        );
       } else {
         setTwoFactorError(error.message || "Failed to enable 2FA");
       }
