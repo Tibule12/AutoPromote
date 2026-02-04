@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
   // Auth endpoints
   LOGIN: `${API_BASE_URL}/api/auth/login`,
   REGISTER: `${API_BASE_URL}/api/auth/register`,
+  REQUEST_RESET: `${API_BASE_URL}/api/auth/request-password-reset`,
   ADMIN_LOGIN: `${API_BASE_URL}/api/auth/admin-login`,
   VERIFY_TOKEN: `${API_BASE_URL}/api/auth/verify`,
 

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import "./Auth.css";
 
-const RegisterForm = ({ onRegister, onClose }) => {
+const RegisterForm = ({ onRegister, onClose, onLogin }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -45,17 +45,15 @@ const RegisterForm = ({ onRegister, onClose }) => {
     try {
       await onRegister(name, email, password);
       setSuccess(
-        "Registration successful! Please check your email to verify your account before logging in."
+        "Registration successful! A verification email has been sent. Please check your Inbox and Spam folders. You will be redirected to login."
       );
       setFormData({ name: "", email: "", password: "", confirmPassword: "" });
 
       setTimeout(() => {
-        try {
-          if (typeof window !== "undefined") {
-            window.location.href = "/";
-          }
-        } catch (_) {
-          // ignore navigation errors
+        if (onLogin) {
+          onLogin();
+        } else {
+          onClose();
         }
       }, 4000);
     } catch (submitError) {
