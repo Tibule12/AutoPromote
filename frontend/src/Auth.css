@@ -217,3 +217,16 @@
   animation: spin 0.6s linear infinite;
   margin-right: 0.5rem;
 }
+
+.link-like {
+  background: none;
+  border: none;
+  color: #2563eb;
+  padding: 0;
+  font-size: 0.9em;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-like:hover {
+  color: #1d4ed8;
+}

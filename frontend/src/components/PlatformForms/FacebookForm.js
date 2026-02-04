@@ -6,6 +6,8 @@ const FacebookForm = ({
   globalTitle,
   globalDescription,
   pages = [],
+  onFileChange,
+  currentFile,
 }) => {
   const [pageId, setPageId] = useState(initialData.pageId || pages[0]?.id || "");
   const [message, setMessage] = useState(initialData.message || globalDescription || "");
@@ -34,6 +36,22 @@ const FacebookForm = ({
         </span>{" "}
         Facebook Manager
       </h4>
+
+      <div className="form-group-modern">
+        <label className="form-label-bold">Media File</label>
+        <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
+          {currentFile
+            ? `Selected: ${currentFile.name}`
+            : "Use global file or select unique file for Facebook"}
+        </div>
+        <input
+          type="file"
+          accept="video/*,image/*"
+          onChange={e => onFileChange && onFileChange(e.target.files[0])}
+          className="modern-input"
+          style={{ padding: 8 }}
+        />
+      </div>
 
       {pages.length === 0 ? (
         <div className="alert-box warning">

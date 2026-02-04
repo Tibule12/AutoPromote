@@ -534,12 +534,7 @@ function App() {
       const firebaseUser = userCredential.user;
       await updateProfile(firebaseUser, { displayName: name });
 
-      // Auto-send email verification (Soft Verification requirement)
-      try {
-        await sendEmailVerification(firebaseUser);
-      } catch (err) {
-        console.warn("Failed to send verification email on signup:", err);
-      }
+      // Backend handles email verification
 
       const idToken = await firebaseUser.getIdToken();
       const res = await fetch(API_ENDPOINTS.REGISTER, {
@@ -551,21 +546,20 @@ function App() {
         },
         body: JSON.stringify({ name, email, uid: firebaseUser.uid, idToken }),
       });
+
+      // Sign out immediately so they have to login after verification
+      await signOut(auth);
+
       if (res.ok) {
-        const parsed = await parseJsonSafe(res);
-        const data = parsed.json || null;
-        handleRegister({ ...data.user, token: idToken, uid: firebaseUser.uid });
-        alert(
-          "Registration successful! A verification email has been sent. Please check your Inbox and Spam folders. Note: Links in the spam folder are often disabled for security; move the email to your Inbox to click the link."
-        );
+        // Success - RegisterForm will show message and switch to login
+        return;
       } else {
-        handleRegister({ uid: firebaseUser.uid, email, name, token: idToken, role: "user" });
-        alert(
-          "Registration partially successful. A verification email has to sent. Please check your Spam folder if needed."
-        );
+        throw new Error("Registration failed on server.");
       }
     } catch (error) {
+      await signOut(auth); // Ensure signed out on error
       alert("Registration failed: " + (error.message || "Unknown error"));
+      throw error;
     }
   };
 
@@ -821,7 +815,15 @@ function App() {
         type: type || "video",
         url: finalUrl,
         description: description || "",
-        monetization_settings, // <--- Added here
+        monetization_settings,
+        // Pass through Viral/Bounty/Quality fields from ContentUploadForm
+        bounty: params.bounty,
+        viral_boost: params.viral_boost,
+        quality_enhanced: params.quality_enhanced,
+        enhance_quality: params.quality_enhanced, // alias for backend
+        custom_hashtags: params.custom_hashtags,
+        growth_guarantee: params.growth_guarantee,
+
         target_platforms:
           platforms && platforms.length
             ? platforms
@@ -1213,6 +1215,10 @@ function App() {
                               <RegisterForm
                                 onRegister={registerUser}
                                 onClose={() => setShowRegister(false)}
+                                onLogin={() => {
+                                  setShowRegister(false);
+                                  setShowLogin(true);
+                                }}
                               />
                             </div>
                           </div>

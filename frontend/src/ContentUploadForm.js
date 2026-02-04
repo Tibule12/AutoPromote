@@ -2565,6 +2565,8 @@ function ContentUploadForm({
 
         {p === "youtube" && (
           <YouTubeForm
+            onFileChange={f => handlePerPlatformFileChange("youtube", f)}
+            currentFile={perPlatformFile?.youtube}
             onChange={data => {
               const { platform, ...vals } = data;
               if (typeof extSetPlatformOption === "function") {
@@ -2590,6 +2592,8 @@ function ContentUploadForm({
 
         {p === "tiktok" && (
           <TikTokForm
+            onFileChange={f => handlePerPlatformFileChange("tiktok", f)}
+            currentFile={perPlatformFile?.tiktok}
             type={type}
             onChange={data => {
               const { platform, ...vals } = data;
@@ -2626,6 +2630,9 @@ function ContentUploadForm({
 
         {p === "instagram" && (
           <InstagramForm
+            onFileChange={f => handlePerPlatformFileChange("instagram", f)}
+            currentFile={perPlatformFile?.instagram}
+            facebookPages={facebookPages || []}
             onChange={data => {
               const { platform, ...vals } = data;
               if (typeof extSetPlatformOption === "function") {
@@ -2659,6 +2666,8 @@ function ContentUploadForm({
 
         {p === "pinterest" && (
           <PinterestForm
+            onFileChange={f => handlePerPlatformFileChange("pinterest", f)}
+            currentFile={perPlatformFile?.pinterest}
             onChange={data => {
               const { platform, ...vals } = data;
               if (typeof extSetPlatformOption === "function") {
@@ -2724,21 +2733,27 @@ function ContentUploadForm({
         )}
 
         {p === "twitter" && (
-          <div className="platform-form twitter-form">
-            <div className="form-group-modern">
-              <label>Twitter Message</label>
-              <textarea
-                className="modern-input"
-                placeholder="Tweet text..."
-                value={twitterMessage}
-                onChange={e => {
-                  setTwitterMessage(e.target.value);
-                  if (typeof extSetPlatformOption === "function")
-                    extSetPlatformOption("twitter", "message", e.target.value);
-                }}
-              />
-            </div>
-          </div>
+          <TwitterForm
+            onFileChange={f => handlePerPlatformFileChange("twitter", f)}
+            currentFile={perPlatformFile?.twitter}
+            onChange={data => {
+              const { platform, ...vals } = data;
+              if (typeof extSetPlatformOption === "function") {
+                if (vals.message !== undefined)
+                  extSetPlatformOption("twitter", "message", vals.message);
+                if (vals.threadMode !== undefined)
+                  extSetPlatformOption("twitter", "threadMode", vals.threadMode);
+              }
+              // Local Sync
+              if (vals.message !== undefined) setTwitterMessage(vals.message);
+              if (vals.threadMode !== undefined)
+                setTwitterSettings(prev => ({ ...prev, threadMode: vals.threadMode }));
+            }}
+            initialData={{
+              message: twitterMessage,
+              threadMode: twitterSettings.threadMode,
+            }}
+          />
         )}
 
         {p === "discord" && (
@@ -3580,45 +3595,15 @@ function ContentUploadForm({
                     {/* Per-platform inputs: file, title, description (defaults to global if empty) */}
 
                     {/* Professional Forms Integration */}
-                    {/* Per-platform File Override */}
-                    <div
-                      style={{
-                        marginBottom: 15,
-                        padding: "10px",
-                        background: "#f8f9fa",
-                        borderRadius: "6px",
-                        border: "1px dashed #d1d5db",
-                      }}
-                    >
-                      <label
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          display: "block",
-                          marginBottom: "5px",
-                          color: "#4b5563",
-                        }}
-                      >
-                        Override Media for {expandedPlatform} (Optional)
-                      </label>
-                      <input
-                        aria-label={`Platform file ${expandedPlatform}`}
-                        type="file"
-                        className="file-input-small"
-                        onChange={e =>
-                          handlePerPlatformFileChange(
-                            expandedPlatform,
-                            e.target.files && e.target.files[0]
-                          )
-                        }
-                      />
-                    </div>
+                    {/* File Override is now handled inside the specific PlatformForm components */}
 
                     {/* Specialized Forms for Top Platforms */}
                     {expandedPlatform === "tiktok" ? (
                       <>
                         <TikTokForm
                           type={type}
+                          onFileChange={f => handlePerPlatformFileChange("tiktok", f)}
+                          currentFile={perPlatformFile?.tiktok}
                           onChange={data => {
                             const { platform, ...vals } = data;
                             if (typeof extSetPlatformOption === "function") {
@@ -3657,6 +3642,9 @@ function ContentUploadForm({
                     ) : expandedPlatform === "youtube" ? (
                       <>
                         <YouTubeForm
+                          creatorInfo={extPlatformMetadata?.youtube}
+                          onFileChange={f => handlePerPlatformFileChange("youtube", f)}
+                          currentFile={perPlatformFile?.youtube}
                           onChange={data => {
                             const { platform, ...vals } = data;
                             if (typeof extSetPlatformOption === "function") {
@@ -3685,6 +3673,8 @@ function ContentUploadForm({
                     ) : expandedPlatform === "facebook" ? (
                       <>
                         <FacebookForm
+                          onFileChange={f => handlePerPlatformFileChange("facebook", f)}
+                          currentFile={perPlatformFile?.facebook}
                           onChange={data => {
                             const { platform, ...vals } = data;
                             if (typeof extSetPlatformOption === "function") {
@@ -3737,6 +3727,8 @@ function ContentUploadForm({
                     ) : expandedPlatform === "pinterest" ? (
                       <>
                         <PinterestForm
+                          onFileChange={f => handlePerPlatformFileChange("pinterest", f)}
+                          currentFile={perPlatformFile?.pinterest}
                           onChange={data => {
                             const { platform, ...vals } = data;
                             if (typeof extSetPlatformOption === "function") {
@@ -3769,6 +3761,9 @@ function ContentUploadForm({
                     ) : expandedPlatform === "instagram" ? (
                       <>
                         <InstagramForm
+                          onFileChange={f => handlePerPlatformFileChange("instagram", f)}
+                          currentFile={perPlatformFile?.instagram}
+                          facebookPages={facebookPages || []}
                           onChange={data => {
                             const { platform, ...vals } = data;
                             if (typeof extSetPlatformOption === "function") {
@@ -4112,6 +4107,8 @@ function ContentUploadForm({
 
                     {expandedPlatform === "twitter" && (
                       <TwitterForm
+                        onFileChange={f => handlePerPlatformFileChange("twitter", f)}
+                        currentFile={perPlatformFile?.twitter}
                         onChange={data => {
                           const { platform, ...vals } = data;
                           if (typeof extSetPlatformOption === "function") {

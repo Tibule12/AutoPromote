@@ -255,32 +255,29 @@ function App() {
   // Firebase-powered upload
   const handleUploadContent = async contentData => {
     try {
-      let url;
-      if (contentData.type === "article") {
-        url = contentData.articleText || undefined;
-      } else {
-        // Upload file to Firebase Storage
+      let url = contentData.url;
+
+      // Compatibility: If logic didn't upload file yet (Legacy), do it here
+      if (!url && contentData.file && contentData.type !== "article") {
         const file = contentData.file;
-        if (!file) {
-          alert("No file selected!");
-          return;
-        }
         const filePath = `${STORAGE_PATH}/${Date.now()}_${file.name}`;
         const storageRef = ref(storage, filePath);
         await uploadBytes(storageRef, file);
         url = await getDownloadURL(storageRef);
-        if (!url) {
-          alert("Could not get public URL for uploaded file.");
-          return;
-        }
+      } else if (contentData.type === "article") {
+        url = contentData.articleText || undefined;
+      }
+      
+      if (!url && contentData.type !== "text" && !contentData.description) {
+         // Check if this is a text-only post (e.g. Twitter/status)
+         // If no URL and no text, it might be invalid, but let backend Validation handle it
       }
 
-      // Only include url if valid
+      // Construct Payload: Pass ALL metadata (platform_options, bounty, meta, etc.)
       const payload = {
-        title: contentData.title,
-        type: contentData.type,
-        description: contentData.description || "",
-        ...(url ? { url } : {}),
+        ...contentData,
+        url: url || contentData.url, // Use the one we just got or the one passed in
+        file: undefined, // Do not send file object JSON
       };
 
       if (!auth.currentUser) return;
@@ -295,15 +292,19 @@ function App() {
       });
 
       if (res.ok) {
+        const result = await res.json();
         fetchUserContent();
+        return result; // Return result for ContentUploadForm
       } else {
         const error = await res.json();
         console.error("Failed to upload content", error);
         alert(error.error || "Failed to upload content");
+        return { error: error.error || "Upload failed" };
       }
     } catch (error) {
       console.error("Error uploading content:", error);
       alert("Error uploading content: " + error.message);
+      return { error: error.message };
     }
   };
 

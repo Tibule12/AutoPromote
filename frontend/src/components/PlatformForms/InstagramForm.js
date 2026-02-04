@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from "react";
+import EmojiPicker from "../EmojiPicker";
+import HashtagSuggestions from "../HashtagSuggestions";
+import { OPTIMAL_TIMES } from "../BestTimeToPost";
+import FilterEffects from "../FilterEffects";
+import ImageCropper from "../ImageCropper";
 
 const InstagramForm = ({
   onChange,
@@ -10,6 +15,8 @@ const InstagramForm = ({
   setBountyAmount,
   bountyNiche,
   setBountyNiche,
+  onFileChange,
+  currentFile,
 }) => {
   const [caption, setCaption] = useState(
     initialData.caption || globalTitle + "\n\n" + globalDescription
@@ -21,6 +28,24 @@ const InstagramForm = ({
   const [selectedPageId, setSelectedPageId] = useState(
     initialData.pageId || facebookPages[0]?.id || ""
   );
+
+  // Image Editing State
+  const [showCrop, setShowCrop] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    if (currentFile && currentFile.type.startsWith("image/")) {
+      const url = URL.createObjectURL(currentFile);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [currentFile]);
+
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const handleInsertEmoji = emoji => setCaption(prev => prev + emoji.native);
 
   // Branded Content / Partnership
   const [isPaidPartnership, setIsPaidPartnership] = useState(
@@ -57,6 +82,112 @@ const InstagramForm = ({
         </span>{" "}
         Instagram Creator
       </h4>
+      {OPTIMAL_TIMES.instagram && (
+        <div
+          style={{
+            fontSize: "11px",
+            color: "#059669",
+            marginBottom: "12px",
+            padding: "8px 10px",
+            backgroundColor: "#ecfdf5",
+            borderRadius: "6px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            border: "1px solid #a7f3d0",
+          }}
+        >
+          <span style={{ fontSize: "14px" }}>⏰</span>
+          <span>
+            <strong>Best time to upload:</strong>{" "}
+            {OPTIMAL_TIMES.instagram.days.slice(0, 2).join(", ")} @{" "}
+            {OPTIMAL_TIMES.instagram.hours[0]}:00.
+          </span>
+        </div>
+      )}
+
+      <div className="form-group-modern">
+        <label className="form-label-bold">Media File</label>
+        <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
+          {currentFile
+            ? `Selected: ${currentFile.name}`
+            : "Use global file or select unique file for Instagram"}
+        </div>
+        <input
+          type="file"
+          accept="video/*,image/*"
+          onChange={e => onFileChange && onFileChange(e.target.files[0])}
+          className="modern-input"
+          style={{ padding: 8 }}
+        />
+        {previewUrl && (
+          <div style={{ marginTop: 10, display: "flex", gap: 10 }}>
+            <button
+              type="button"
+              className="action-link"
+              style={{
+                fontSize: 13,
+                cursor: "pointer",
+                background: "none",
+                border: "none",
+                color: "#E1306C",
+                fontWeight: 600,
+              }}
+              onClick={() => setShowCrop(true)}
+            >
+              ✂️ Crop Image
+            </button>
+            <button
+              type="button"
+              className="action-link"
+              style={{
+                fontSize: 13,
+                cursor: "pointer",
+                background: "none",
+                border: "none",
+                color: "#833AB4",
+                fontWeight: 600,
+              }}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              🎨 Filters
+            </button>
+          </div>
+        )}
+
+        {showFilters && previewUrl && (
+          <div style={{ marginTop: 10 }}>
+            <FilterEffects
+              imageUrl={previewUrl}
+              onApplyFilter={f => console.log("Filter applied:", f.name)}
+            />
+          </div>
+        )}
+
+        {showCrop && previewUrl && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0,0,0,0.8)",
+              zIndex: 9999,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ background: "white", padding: 20, borderRadius: 8 }}>
+              <ImageCropper imageUrl={previewUrl} onClose={() => setShowCrop(false)} />
+              <button onClick={() => setShowCrop(false)} style={{ marginTop: 10 }}>
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* IDENTITY SECTION: CRITICAL FOR REVIEWERS */}
       <div className="form-group-modern">
@@ -169,15 +300,44 @@ const InstagramForm = ({
 
       <div className="form-group-modern">
         <label>Caption</label>
-        <textarea
-          className="modern-input"
-          value={caption}
-          onChange={e => setCaption(e.target.value)}
-          placeholder="Write a caption..."
-          rows={4}
-          maxLength={2200}
-        />
+        <div style={{ position: "relative" }}>
+          <textarea
+            className="modern-input"
+            value={caption}
+            onChange={e => setCaption(e.target.value)}
+            placeholder="Write a caption..."
+            rows={4}
+            maxLength={2200}
+          />
+          <button
+            type="button"
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "12px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              opacity: 0.7,
+            }}
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          >
+            😊
+          </button>
+          {showEmojiPicker && (
+            <div style={{ position: "absolute", zIndex: 10, top: "100%", right: 0 }}>
+              <EmojiPicker onSelect={handleInsertEmoji} onClose={() => setShowEmojiPicker(false)} />
+            </div>
+          )}
+        </div>
         <div className="char-count">{caption.length}/2200</div>
+        <HashtagSuggestions
+          contentType="image"
+          title={caption}
+          description=""
+          onAddHashtag={tag => setCaption(prev => prev + " #" + tag)}
+        />
       </div>
 
       <div className="form-row-modern">

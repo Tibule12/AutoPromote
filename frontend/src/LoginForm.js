@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import "./Auth.css";
-import { PUBLIC_SITE_URL } from "./config";
+import { PUBLIC_SITE_URL, API_ENDPOINTS } from "./config";
 
 const LoginForm = ({ onLogin, onClose }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -91,14 +91,11 @@ const LoginForm = ({ onLogin, onClose }) => {
     }
 
     try {
-      const response = await fetch(
-        (process.env.REACT_APP_API_BASE || "") + "/api/auth/request-password-reset",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await fetch(API_ENDPOINTS.REQUEST_RESET, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
       const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
