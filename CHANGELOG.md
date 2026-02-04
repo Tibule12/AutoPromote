@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-02-04
+
+### Added
+
+- **Native Reddit Video Support**: Full implementation including S3 leasing and thumbnail generation.
+- **Immediate Publish Mode**: Auto-approval workflow for content.
+- **Token Auth Improvements**: Enhanced YouTube/LinkedIn token handling.
+
 ## [1.1.0] - 2026-02-04
 
 ### Added
