@@ -39,6 +39,10 @@ import PinterestForm from "./components/PlatformForms/PinterestForm";
 import RedditForm from "./components/PlatformForms/RedditForm";
 import InstagramForm from "./components/PlatformForms/InstagramForm";
 import SpotifyForm from "./components/PlatformForms/SpotifyForm";
+import DiscordForm from "./components/PlatformForms/DiscordForm";
+import TelegramForm from "./components/PlatformForms/TelegramForm";
+import SnapchatForm from "./components/PlatformForms/SnapchatForm";
+import TwitterForm from "./components/PlatformForms/TwitterForm";
 
 // Default inline thumbnail (avoids external 404s when thumbnail is missing)
 const DEFAULT_THUMBNAIL = (function () {
@@ -2614,919 +2618,234 @@ function ContentUploadForm({
           <h3 style={{ margin: 0 }}>Upload to {p.charAt(0).toUpperCase() + p.slice(1)}</h3>
         </div>
         {p === "facebook" && (
-          <div style={{ marginTop: 8, marginBottom: 8, fontSize: 13, color: "#334155" }}>
-            <div style={{ fontWeight: 700 }}>Posting Page</div>
-            {facebookLoading ? (
-              <div style={{ color: "#64748b" }}>Loading pages...</div>
-            ) : facebookPages && facebookPages.length > 0 ? (
-              <div>
-                <div style={{ marginBottom: 6 }}>
-                  <label style={{ fontWeight: 600, display: "block", marginBottom: 4 }}>
-                    Select Page to post from
-                  </label>
-                  <select
-                    value={selectedFacebookPageId || ""}
-                    onChange={e => {
-                      setSelectedFacebookPageId(e.target.value || null);
-                      if (typeof extSetPlatformOption === "function")
-                        extSetPlatformOption("facebook", "pageId", e.target.value || null);
-                    }}
-                    style={{ padding: "6px 8px", borderRadius: 4, border: "1px solid #d1d5db" }}
-                  >
-                    {facebookPages.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name || "(Unnamed Page)"} — {p.id}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {selectedFacebookPageId &&
-                  (() => {
-                    const sel = facebookPages.find(x => x.id === selectedFacebookPageId) || null;
-                    if (!sel) return null;
-                    return (
-                      <div style={{ marginTop: 8, display: "flex", gap: 12, alignItems: "center" }}>
-                        {sel.ig_business_account_id && (
-                          <div
-                            style={{
-                              color: "#475569",
-                              fontSize: 13,
-                              display: "flex",
-                              gap: 8,
-                              alignItems: "center",
-                            }}
-                          >
-                            <strong style={{ fontSize: 13 }}>IG Business ID:</strong>
-                            <span>{sel.ig_business_account_id}</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                try {
-                                  navigator.clipboard.writeText(String(sel.ig_business_account_id));
-                                } catch (e) {}
-                              }}
-                              style={{
-                                padding: "4px 8px",
-                                borderRadius: 4,
-                                border: "1px solid #e2e8f0",
-                                background: "#fff",
-                                cursor: "pointer",
-                              }}
-                            >
-                              Copy IG
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                <div style={{ fontSize: 12, color: "#475569" }}>
-                  The selected Page will be used for Facebook posts when you publish from this form.
-                </div>
-
-                {/* Role selector for Facebook */}
-                <div style={{ marginTop: 12 }}>
-                  <label style={{ fontWeight: 700, display: "block", marginBottom: 8 }}>
-                    Post As / Campaign Type:
-                  </label>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                    {[
-                      { id: "creator", label: "Creator (Standard)" },
-                      { id: "brand", label: "Brand (Official)" },
-                      { id: "sponsored", label: "Sponsored (Partnership)" },
-                    ].map(r => (
-                      <button
-                        key={r.id}
-                        type="button"
-                        className={`role-btn ${
-                          (extPlatformOptions?.facebook?.role || "creator") === r.id ? "active" : ""
-                        }`}
-                        onClick={() => {
-                          if (typeof extSetPlatformOption === "function")
-                            extSetPlatformOption("facebook", "role", r.id);
-                        }}
-                        style={{
-                          padding: "6px 12px",
-                          borderRadius: 20,
-                          border:
-                            (extPlatformOptions?.facebook?.role || "creator") === r.id
-                              ? "1px solid #1877f2"
-                              : "1px solid #e2e8f0",
-                          backgroundColor:
-                            (extPlatformOptions?.facebook?.role || "creator") === r.id
-                              ? "#1877f2"
-                              : "#fff",
-                          color:
-                            (extPlatformOptions?.facebook?.role || "creator") === r.id
-                              ? "#fff"
-                              : "#475569",
-                          cursor: "pointer",
-                          fontSize: 13,
-                        }}
-                      >
-                        {r.label}
-                      </button>
-                    ))}
-                  </div>
-                  {/* Context for the selected role */}
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: "#64748b",
-                      marginTop: 8,
-                      background: "#f1f5f9",
-                      padding: 8,
-                      borderRadius: 4,
-                    }}
-                  >
-                    {(() => {
-                      const role = extPlatformOptions?.facebook?.role || "creator";
-                      if (role === "creator")
-                        return "Standard organic post. Best for regular content updates.";
-                      if (role === "brand")
-                        return "Official brand post. Use this for company announcements.";
-                      if (role === "sponsored")
-                        return "Paid Partnership. This post will carry a Branded Content tag.";
-                    })()}
-                  </div>
-                </div>
-
-                {/* If sponsor role set, show sponsor input */}
-                {extPlatformOptions?.facebook?.role === "sponsored" && (
-                  <div
-                    style={{
-                      marginTop: 12,
-                      padding: 12,
-                      border: "1px solid #e2e8f0",
-                      borderRadius: 6,
-                      background: "#fff",
-                    }}
-                  >
-                    <label style={{ fontWeight: 700, display: "block", marginBottom: 4 }}>
-                      Sponsor Name / Page ID
-                    </label>
-                    <input
-                      placeholder="e.g. 'Nike' or Page ID"
-                      className="form-input"
-                      onChange={e =>
-                        typeof extSetPlatformOption === "function" &&
-                        extSetPlatformOption("facebook", "sponsor", e.target.value)
-                      }
-                    />
-                    <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>
-                      We will attempt to tag this sponsor in the Branded Content tool.
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div style={{ color: "#64748b" }}>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <div>
-                    No connected Pages found. You may need to reconnect and grant Page access.
-                  </div>
-                  <button
-                    type="button"
-                    className="check-quality"
-                    onClick={() => (onNavigate ? onNavigate("connections") : null)}
-                  >
-                    Reconnect
-                  </button>
-                </div>
-                <div style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>
-                  If reconnecting does not help, ensure you accepted Page permissions (e.g.,{" "}
-                  <code>pages_show_list</code>) and that you are a Page admin.
-                </div>
-              </div>
-            )}
-          </div>
+          <FacebookForm
+            onChange={data => {
+              const { platform, ...vals } = data;
+              if (typeof extSetPlatformOption === "function") {
+                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+              }
+            }}
+            initialData={extPlatformOptions?.facebook}
+            globalTitle={title}
+            globalDescription={description}
+            pages={facebookPages || []}
+          />
         )}
 
         {p === "youtube" && (
-          <div
-            className="form-group youtube-options"
-            style={{
-              border: "1px solid #cc0000",
-              padding: 12,
-              borderRadius: 8,
-              background: "#fbfbfc",
-              marginTop: 12,
+          <YouTubeForm
+            onChange={data => {
+              const { platform, ...vals } = data;
+              if (typeof extSetPlatformOption === "function") {
+                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+              }
+              // Local Sync
+              if (vals.shortsMode !== undefined) setYoutubeShorts(vals.shortsMode);
+              if (vals.privacy) setYoutubeVisibility(vals.privacy);
             }}
-          >
-            <label style={{ display: "flex", alignItems: "center", gap: 8, color: "#cc0000" }}>
-              YouTube Options
-            </label>
-            <div style={{ display: "grid", gap: 12, marginTop: 12 }}>
-              <div>
-                <label>Privacy</label>
-                <select
-                  value={youtubeSettings.privacy}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setYoutubeSettings(prev => ({ ...prev, privacy: val }));
-                    if (typeof extSetPlatformOption === "function")
-                      extSetPlatformOption("youtube", "privacy", val);
-                  }}
-                  className="form-select"
-                >
-                  <option value="public">Public</option>
-                  <option value="unlisted">Unlisted</option>
-                  <option value="private">Private</option>
-                </select>
-              </div>
-
-              <div>
-                <label>Content Type</label>
-                <select
-                  value={youtubeSettings.typeOverride}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setYoutubeSettings(prev => ({ ...prev, typeOverride: val }));
-                    if (typeof extSetPlatformOption === "function")
-                      extSetPlatformOption("youtube", "typeOverride", val);
-                  }}
-                  className="form-select"
-                >
-                  <option value="auto">Auto (Detect from aspect ratio)</option>
-                  <option value="video">Standard Video</option>
-                  <option value="shorts">Shorts</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <input
-                    type="checkbox"
-                    checked={!!youtubeSettings.madeForKids}
-                    onChange={e => {
-                      const val = e.target.checked;
-                      setYoutubeSettings(prev => ({ ...prev, madeForKids: val }));
-                      if (typeof extSetPlatformOption === "function")
-                        extSetPlatformOption("youtube", "madeForKids", val);
-                    }}
-                  />
-                  Made for Kids
-                </label>
-                <div style={{ fontSize: 11, color: "#666", marginTop: 4, paddingLeft: 24 }}>
-                  Required by COPPA. If your content is specifically made for children, you must
-                  check this.
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <input
-                    type="checkbox"
-                    checked={!!youtubeSettings.paidPromotion}
-                    onChange={e => {
-                      const val = e.target.checked;
-                      setYoutubeSettings(prev => ({ ...prev, paidPromotion: val }));
-                      if (typeof extSetPlatformOption === "function")
-                        extSetPlatformOption("youtube", "paidPromotion", val);
-                    }}
-                  />
-                  Contains Paid Promotion
-                </label>
-                <div style={{ fontSize: 11, color: "#666", marginTop: 4, paddingLeft: 24 }}>
-                  Check this if your video contains paid product placements, sponsorships, or
-                  endorsements. YouTube will display a disclosure message to viewers.
-                </div>
-              </div>
-
-              <div>
-                <label>Tags (comma separated)</label>
-                <input
-                  placeholder="tag1, tag2, tag3"
-                  value={youtubeSettings.tags}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setYoutubeSettings(prev => ({ ...prev, tags: val }));
-                    if (typeof extSetPlatformOption === "function")
-                      extSetPlatformOption("youtube", "tags", val);
-                  }}
-                  className="form-input"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-        {error && <div className="error-message">{error}</div>}
-
-        {p !== "spotify" && (
-          <div className="form-group full-width">
-            <label>{`Platform title ${p}`}</label>
-            <div className="input-with-emoji">
-              <input
-                aria-label={`Platform title ${p}`}
-                type="text"
-                value={(perPlatformTitle && perPlatformTitle[p]) || ""}
-                onChange={e =>
-                  setPerPlatformTitle(prev => ({ ...prev, [p]: sanitizeInput(e.target.value) }))
-                }
-                className="form-input"
-                maxLength={100}
-              />
-              <button
-                type="button"
-                className="emoji-btn"
-                onClick={() => openEmojiPicker(`platform-title-${p}`)}
-              >
-                😊
-              </button>
-            </div>
-          </div>
+            initialData={{
+              ...extPlatformOptions?.youtube,
+              shortsMode: youtubeSettings.shortsMode || youtubeShorts,
+              privacy: youtubeSettings.privacy || youtubeVisibility,
+            }}
+            globalTitle={title}
+            globalDescription={description}
+            bountyAmount={bountyAmount}
+            setBountyAmount={setBountyAmount}
+            bountyNiche={bountyNiche}
+            setBountyNiche={setBountyNiche}
+          />
         )}
 
-        {p !== "spotify" && (
-          <div className="form-group">
-            <label>{`Platform file ${p}`}</label>
-            <div
-              className={`file-upload drop-zone ${isDropActive ? "dragging" : ""}`}
-              data-testid="drop-zone"
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-            >
-              <input
-                aria-label={`Platform file ${p}`}
-                type="file"
-                accept={type === "video" ? "video/*" : type === "audio" ? "audio/*" : "image/*"}
-                onChange={e => handlePerPlatformFileChange(p, e.target.files[0])}
-                className="form-file-input"
-              />
-              <div className="drop-help">Drop files here or click to browse</div>
-              {perPlatformFile && perPlatformFile[p] && (
-                <div className="file-info">
-                  Selected file: {perPlatformFile[p].name} (
-                  {(perPlatformFile[p].size / 1024 / 1024).toFixed(2)} MB)
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {p !== "spotify" && (
-          <div className="form-group">
-            <label>🎨 Text Overlay (optional)</label>
-            <div className="input-with-emoji">
-              <input
-                placeholder="Add overlay text..."
-                value={overlayText}
-                onChange={e => setOverlayText(e.target.value)}
-                className="form-input"
-              />
-              <button
-                className="emoji-btn"
-                type="button"
-                onClick={() => openEmojiPicker("overlay-text")}
-              >
-                😊
-              </button>
-            </div>
-            <div className="overlay-controls">
-              <select
-                aria-label="Overlay position"
-                className="form-select-small"
-                value={overlayPosition}
-                onChange={e => setOverlayPosition(e.target.value)}
-              >
-                <option value="top">⬆️ Top</option>
-                <option value="center">⏺️ Center</option>
-                <option value="bottom">⬇️ Bottom</option>
-              </select>
-              <input
-                className="color-picker"
-                title="Text color"
-                type="color"
-                value="#ffffff"
-                readOnly
-              />
-              <select className="form-select-small" value={12} onChange={() => {}}>
-                <option value="12">Small</option>
-                <option value="16">Medium</option>
-                <option value="24">Large</option>
-                <option value="32">XL</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        {/* Include TikTok-specific publish options in the focused per-platform view */}
         {p === "tiktok" && (
-          <div
-            className="form-group tiktok-options"
-            style={{
-              border: "1px solid #efeef0",
-              padding: 12,
-              borderRadius: 8,
-              background: "#fbfbfc",
-              marginTop: 12,
+          <TikTokForm
+            type={type}
+            onChange={data => {
+              const { platform, ...vals } = data;
+              if (typeof extSetPlatformOption === "function") {
+                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+              }
+              // Local state sync for upload logic
+              if (vals.privacy) setTiktokPrivacy(vals.privacy);
+              setTiktokInteractions(prev => ({
+                ...prev,
+                comments: vals.allowComments ?? prev.comments,
+                duet: vals.allowDuet ?? prev.duet,
+                stitch: vals.allowStitch ?? prev.stitch,
+              }));
+              if (vals.commercialContent !== undefined) {
+                setTiktokDisclosureEnabled(vals.commercialContent);
+                setTiktokYourBrand(vals.yourBrand || false);
+                setTiktokBrandedContent(vals.brandedContent || false);
+              }
+              if (vals.consentChecked !== undefined) {
+                setTiktokConsentChecked(vals.consentChecked);
+              }
             }}
-          >
-            <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              TikTok Publish Options
-            </label>
-            <div style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>
-              Creator: {tiktokCreatorDisplayName || "Not available"}
-              {tiktokCreatorInfo && typeof tiktokCreatorInfo.posting_remaining === "number" && (
-                <div style={{ marginTop: 6, fontSize: 12 }}>
-                  Posting cap: {tiktokCreatorInfo.posting_cap_per_24h} per 24h • Remaining:{" "}
-                  {tiktokCreatorInfo.posting_remaining}
-                  {tiktokCreatorInfo.posting_remaining <= 0 && (
-                    <div style={{ marginTop: 8, color: "#b91c1c", fontWeight: "bold" }}>
-                      Posting cap reached — uploading to TikTok is currently disabled for this
-                      account.
-                    </div>
-                  )}
-                </div>
-              )}
-              {/* Show a clear disclosure when the selected content is not a video */}
-              {type !== "video" && (
-                <div
-                  style={{
-                    marginTop: 8,
-                    fontSize: 12,
-                    color: "#92400e",
-                    background: "#fff7ed",
-                    padding: "8px",
-                    borderRadius: 6,
-                    border: "1px solid #fed7aa",
-                  }}
-                  role="status"
-                >
-                  Video content is not present. TikTok-specific features (Duet / Stitch and other
-                  video-only options) require a video to be selected.
-                </div>
-              )}
-            </div>
-            <div style={{ display: "grid", gap: 8 }}>
-              <div>
-                <label>Privacy (required)</label>
-                <select
-                  value={tiktokPrivacy}
-                  onChange={e => setTiktokPrivacy(e.target.value)}
-                  className="form-select"
-                >
-                  <option value="">Select privacy</option>
-                  {(tiktokCreatorInfo && Array.isArray(tiktokCreatorInfo.privacy_level_options)
-                    ? tiktokCreatorInfo.privacy_level_options
-                    : ["EVERYONE", "FRIENDS", "SELF_ONLY"]
-                  ).map(pv => (
-                    <option
-                      key={pv}
-                      value={pv}
-                      disabled={
-                        tiktokCommercial && tiktokCommercial.brandedContent && pv === "SELF_ONLY"
-                      }
-                      title={
-                        tiktokCommercial && tiktokCommercial.brandedContent && pv === "SELF_ONLY"
-                          ? "Branded content visibility cannot be set to private."
-                          : undefined
-                      }
-                    >
-                      {pv}
-                    </option>
-                  ))}
-                </select>
-                {privacyAutoSwitched && (
-                  <div style={{ fontSize: 12, color: "#b66", marginTop: 6 }}>
-                    Branded content cannot be private — visibility has been changed to “EVERYONE”.
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label>Interactions</label>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <label
-                    title={
-                      tiktokInteractionDisabled.comments
-                        ? "Comments disabled by creator"
-                        : undefined
-                    }
-                  >
-                    <input
-                      type="checkbox"
-                      checked={!!tiktokInteractions.comments}
-                      onChange={e =>
-                        setTiktokInteractions(prev => ({ ...prev, comments: e.target.checked }))
-                      }
-                      disabled={tiktokInteractionDisabled.comments}
-                      title={
-                        tiktokInteractionDisabled.comments
-                          ? "Comments disabled by creator"
-                          : undefined
-                      }
-                    />{" "}
-                    Comments
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={!!tiktokInteractions.duet}
-                      onChange={e =>
-                        setTiktokInteractions(prev => ({ ...prev, duet: e.target.checked }))
-                      }
-                      disabled={tiktokInteractionDisabled.duet}
-                    />{" "}
-                    Duet
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={!!tiktokInteractions.stitch}
-                      onChange={e =>
-                        setTiktokInteractions(prev => ({ ...prev, stitch: e.target.checked }))
-                      }
-                      disabled={tiktokInteractionDisabled.stitch}
-                      title={
-                        tiktokInteractionDisabled.stitch ? "Stitch disabled by creator" : undefined
-                      }
-                      aria-disabled={tiktokInteractionDisabled.stitch}
-                    />{" "}
-                    Stitch
-                  </label>
-                </div>
-              </div>
-
-              {/* TikTok Commercial Content Disclosure (2026 guideline) */}
-              <div>
-                <label>Commercial Content Disclosure</label>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <input
-                      type="checkbox"
-                      checked={tiktokDisclosureEnabled}
-                      onChange={e => {
-                        setTiktokDisclosureEnabled(e.target.checked);
-                        if (!e.target.checked) {
-                          setTiktokYourBrand(false);
-                          setTiktokBrandedContent(false);
-                        }
-                      }}
-                    />
-                    This content is commercial or promotional (This post promotes a brand, product,
-                    or service)
-                  </label>
-                  {/* BOUNTY TIP: Inform user that Bounty posts are inherently commercial */}
-                  {bountyAmount > 0 && !tiktokDisclosureEnabled && (
-                    <div style={{ fontSize: "0.8rem", color: "#ffd700", marginLeft: "24px" }}>
-                      💡 Since you set a ${bountyAmount} Bounty, this is technically a Paid
-                      Promotion. It is recommended to check this box.
-                    </div>
-                  )}
-                  {tiktokDisclosureEnabled && (
-                    <div className="disclosure-options" style={{ display: "flex", gap: 12 }}>
-                      <label
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                          position: "relative",
-                        }}
-                        onMouseEnter={() => setShowBrandTooltip(true)}
-                        onMouseLeave={() => setShowBrandTooltip(false)}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={tiktokYourBrand}
-                          onChange={e => setTiktokYourBrand(e.target.checked)}
-                        />
-                        Your Brand
-                        {showBrandTooltip && (
-                          <span
-                            className="tooltip"
-                            style={{
-                              position: "absolute",
-                              left: 0,
-                              top: "110%",
-                              background: "#222",
-                              color: "#fff",
-                              padding: "6px 12px",
-                              borderRadius: 4,
-                              fontSize: "0.95em",
-                              zIndex: 10,
-                              minWidth: 180,
-                            }}
-                          >
-                            You are promoting yourself or your own business. This content will be
-                            classified as Brand Organic.
-                          </span>
-                        )}
-                      </label>
-                      <label
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                          position: "relative",
-                        }}
-                        onMouseEnter={() => setShowBrandedTooltip(true)}
-                        onMouseLeave={() => setShowBrandedTooltip(false)}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={tiktokBrandedContent}
-                          onChange={e => setTiktokBrandedContent(e.target.checked)}
-                          disabled={tiktokPrivacy === "SELF_ONLY"}
-                        />
-                        Branded Content
-                        {showBrandedTooltip && (
-                          <span
-                            className="tooltip"
-                            style={{
-                              position: "absolute",
-                              left: 0,
-                              top: "110%",
-                              background: "#222",
-                              color: "#fff",
-                              padding: "6px 12px",
-                              borderRadius: 4,
-                              fontSize: "0.95em",
-                              zIndex: 10,
-                              minWidth: 180,
-                            }}
-                          >
-                            You are promoting another brand or a third party. This content will be
-                            classified as Branded Content.
-                          </span>
-                        )}
-                        {tiktokPrivacy === "SELF_ONLY" && (
-                          <span
-                            className="tooltip"
-                            style={{
-                              position: "absolute",
-                              left: 0,
-                              top: "110%",
-                              background: "#222",
-                              color: "#fff",
-                              padding: "6px 12px",
-                              borderRadius: 4,
-                              fontSize: "0.95em",
-                              zIndex: 10,
-                              minWidth: 180,
-                            }}
-                          >
-                            Branded content cannot be set to private.
-                          </span>
-                        )}
-                      </label>
-                      {tiktokDisclosureEnabled && !tiktokYourBrand && !tiktokBrandedContent && (
-                        <span
-                          className="tooltip"
-                          style={{
-                            background: "#222",
-                            color: "#fff",
-                            padding: "6px 12px",
-                            borderRadius: 4,
-                            fontSize: "0.95em",
-                            zIndex: 10,
-                            minWidth: 180,
-                          }}
-                        >
-                          You need to indicate if your content promotes yourself, a third party, or
-                          both.
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  {/* Prompt per guideline */}
-                  {tiktokDisclosureEnabled && (
-                    <div
-                      className="prompt"
-                      style={{ marginTop: 8, color: "#0f0f0f", fontWeight: 500 }}
-                    >
-                      {(tiktokYourBrand && tiktokBrandedContent) || tiktokBrandedContent
-                        ? "Your photo/video will be labeled as &apos;Paid partnership&apos;"
-                        : tiktokYourBrand
-                          ? "Your photo/video will be labeled as &apos;Promotional content&apos;"
-                          : null}
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* End TikTok Commercial Content Disclosure */}
-
-              <div>
-                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <input
-                    type="checkbox"
-                    checked={tiktokAIGenerated}
-                    onChange={e => setTiktokAIGenerated(e.target.checked)}
-                  />{" "}
-                  This content is AI-generated
-                </label>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: "#666",
-                    marginTop: 4,
-                    paddingLeft: 24,
-                    paddingBottom: 8,
-                  }}
-                >
-                  Required by TikTok for AI-created or modified content.
-                </div>
-              </div>
-
-              {/* TikTok Declaration with clickable links */}
-              <div className="declaration-section" style={{ fontSize: 13, marginTop: 12 }}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={tiktokConsentChecked}
-                    onChange={e => setTiktokConsentChecked(e.target.checked)}
-                  />{" "}
-                  {getTikTokDeclarationJSX()}
-                </label>
-              </div>
-
-              {/* Behavior summary for reviewer: clearly show how privacy + disclosure selections affect the post */}
-              <div
-                className="tiktok-behavior-summary"
-                style={{
-                  marginTop: 10,
-                  background: "#f9f9f9",
-                  padding: 10,
-                  borderRadius: 6,
-                  fontSize: 13,
-                }}
-              >
-                <strong style={{ fontWeight: 700, color: "#111" }}>
-                  Preview of TikTok UX behavior:
-                </strong>
-                <div style={{ marginTop: 6 }}>
-                  <strong style={{ fontWeight: 700, color: "#111" }}>
-                    Privacy: {tiktokPrivacy || "Not selected"}
-                  </strong>
-                </div>
-                <div>
-                  <strong style={{ fontWeight: 700, color: "#111" }}>
-                    Disclosure:{" "}
-                    {tiktokDisclosureEnabled
-                      ? tiktokYourBrand && tiktokBrandedContent
-                        ? "Your Brand + Branded"
-                        : tiktokYourBrand
-                          ? "Your Brand"
-                          : tiktokBrandedContent
-                            ? "Branded Content"
-                            : "Commercial"
-                      : "None"}
-                  </strong>
-                </div>
-                <div style={{ marginTop: 8, color: "#444" }}>
-                  {tiktokPrivacy === "SELF_ONLY" && tiktokBrandedContent ? (
-                    <span>
-                      Branded content cannot be private — the app prevents this selection and will
-                      require a public privacy setting.
-                    </span>
-                  ) : null}
-                  {tiktokDisclosureEnabled && (tiktokYourBrand || tiktokBrandedContent) ? (
-                    <div>
-                      Result: Your post will be labeled appropriately (e.g. "Paid partnership") and
-                      must include disclosure. A post may take a few minutes to process before
-                      appearing on your profile.
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              {/* TikTok Processing Notice */}
-              <div
-                className="notice-section"
-                style={{ marginTop: 8, color: "#666", fontSize: "0.95em" }}
-              >
-                <small>
-                  Note: After publishing, it may take a few minutes for your content to process and
-                  be visible on your TikTok profile.
-                </small>
-              </div>
-
-              {tiktokCreatorInfo && tiktokCreatorInfo.max_video_post_duration_sec && (
-                <div style={{ fontSize: 12, color: "#666" }}>
-                  Max allowed video duration for this creator:{" "}
-                  {tiktokCreatorInfo.max_video_post_duration_sec} seconds
-                </div>
-              )}
-            </div>
-          </div>
+            initialData={extPlatformOptions?.tiktok}
+            creatorInfo={tiktokCreatorInfo}
+            globalTitle={title}
+            globalDescription={description}
+            bountyAmount={bountyAmount}
+            setBountyAmount={setBountyAmount}
+            bountyNiche={bountyNiche}
+            setBountyNiche={setBountyNiche}
+          />
         )}
 
-        {p === "twitter" && (
-          <div
-            className="form-group twitter-options"
-            style={{
-              border: "1px solid #e1e8ed",
-              padding: 12,
-              borderRadius: 8,
-              background: "#fbfbfc",
-              marginTop: 12,
+        {p === "instagram" && (
+          <InstagramForm
+            onChange={data => {
+              const { platform, ...vals } = data;
+              if (typeof extSetPlatformOption === "function") {
+                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+              }
             }}
-          >
-            <label style={{ display: "flex", alignItems: "center", gap: 8, color: "#1DA1F2" }}>
-              Twitter Options
-            </label>
-            <label
-              style={{
-                fontSize: 13,
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                cursor: "pointer",
-                marginTop: 8,
-              }}
-            >
-              <input
-                aria-label="Thread Mode"
-                type="checkbox"
-                checked={!!twitterSettings.threadMode}
-                onChange={e => {
-                  const val = e.target.checked;
-                  setTwitterSettings(prev => ({ ...prev, threadMode: val }));
-                  if (typeof extSetPlatformOption === "function")
-                    extSetPlatformOption("twitter", "threadMode", val);
-                }}
-              />
-              Thread Mode (Auto-reply if too long)
-            </label>
-          </div>
+            initialData={extPlatformOptions?.instagram}
+            globalTitle={title}
+            globalDescription={description}
+            bountyAmount={bountyAmount}
+            setBountyAmount={setBountyAmount}
+            bountyNiche={bountyNiche}
+            setBountyNiche={setBountyNiche}
+          />
         )}
 
         {p === "linkedin" && (
-          <div
-            className="form-group linkedin-options"
-            style={{
-              border: "1px solid #e1e8ed",
-              padding: 12,
-              borderRadius: 8,
-              background: "#fbfbfc",
-              marginTop: 12,
+          <LinkedInForm
+            onChange={data => {
+              const { platform, ...vals } = data;
+              if (typeof extSetPlatformOption === "function") {
+                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+              }
+              if (vals.companyId) setLinkedinCompanyId(vals.companyId);
             }}
-          >
-            <label style={{ display: "flex", alignItems: "center", gap: 8, color: "#0077b5" }}>
-              LinkedIn Options
-            </label>
-            <div style={{ marginTop: 8 }}>
-              <label style={{ fontSize: 13, display: "block", marginBottom: 4 }}>Post Type:</label>
-              <select
-                aria-label="Post Type"
-                value={linkedinSettings.postType || "post"}
-                onChange={e => {
-                  const val = e.target.value;
-                  setLinkedinSettings(prev => ({ ...prev, postType: val }));
-                  if (typeof extSetPlatformOption === "function")
-                    extSetPlatformOption("linkedin", "postType", val);
-                }}
-                className="form-select-small"
-                style={{ width: "100%" }}
-              >
-                <option value="post">Image / Text Post</option>
-                <option value="article">Link / Article</option>
-              </select>
-            </div>
-            <div style={{ marginTop: 8 }}>
-              <input
-                placeholder="Organization ID (required)"
-                style={{
-                  width: "100%",
-                  padding: "6px",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                }}
-                value={linkedinCompanyId}
-                onChange={e => {
-                  setLinkedinCompanyId(e.target.value);
-                  if (typeof extSetPlatformOption === "function")
-                    extSetPlatformOption("linkedin", "companyId", e.target.value);
-                }}
-              />
-            </div>
-          </div>
+            initialData={{ ...extPlatformOptions?.linkedin, companyId: linkedinCompanyId }}
+            globalTitle={title}
+            globalDescription={description}
+          />
+        )}
+
+        {p === "pinterest" && (
+          <PinterestForm
+            onChange={data => {
+              const { platform, ...vals } = data;
+              if (typeof extSetPlatformOption === "function") {
+                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+              }
+              if (vals.boardId) setPinterestBoard(vals.boardId);
+            }}
+            initialData={{ ...extPlatformOptions?.pinterest, boardId: pinterestBoard }}
+            globalTitle={title}
+            globalDescription={description}
+            boards={pinterestBoards || []}
+          />
+        )}
+
+        {p === "reddit" && (
+          <RedditForm
+            onChange={data => {
+              const { platform, ...vals } = data;
+              if (typeof extSetPlatformOption === "function") {
+                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+              }
+              if (vals.subreddit) setRedditSubreddit(vals.subreddit);
+            }}
+            initialData={extPlatformOptions?.reddit}
+            globalTitle={title}
+            globalDescription={description}
+          />
         )}
 
         {p === "spotify" && (
-          <div className="form-group spotify-search-container" style={{ marginTop: 12 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, color: "#1DB954" }}>
-              Search Spotify Tracks & Podcasts
-            </label>
-            <div style={{ fontSize: 13, color: "#666", marginBottom: 12 }}>
-              Use this tool to find tracks or podcasts to add to your playlists or reference.
-              Uploading original content is not supported here.
-            </div>
-
-            <SpotifyTrackSearch
+          <div className="platform-form spotify-form">
+            <SpotifyForm
+              data={extPlatformOptions?.spotify || spotifySettings}
+              onChange={(key, val) => {
+                if (typeof extSetPlatformOption === "function") {
+                  extSetPlatformOption("spotify", key, val);
+                } else {
+                  setSpotifySettings(prev => ({ ...prev, [key]: val }));
+                }
+              }}
               selectedTracks={
                 Array.isArray(extSpotifySelectedTracks) ? extSpotifySelectedTracks : spotifyTracks
               }
-              onChangeTracks={list => {
-                if (typeof extSetSpotifySelectedTracks === "function")
-                  extSetSpotifySelectedTracks(list);
-                else setSpotifyTracks(list);
+              onTrackSelect={track => {
+                const setter =
+                  typeof extSetSpotifySelectedTracks === "function"
+                    ? extSetSpotifySelectedTracks
+                    : setSpotifyTracks;
+                setter(prev => {
+                  if (prev.some(t => t.id === track.id)) return prev;
+                  return [...prev, track];
+                });
+              }}
+              onTrackRemove={trackId => {
+                const setter =
+                  typeof extSetSpotifySelectedTracks === "function"
+                    ? extSetSpotifySelectedTracks
+                    : setSpotifyTracks;
+                setter(prev => prev.filter(t => t.id !== trackId));
               }}
             />
           </div>
         )}
+
+        {p === "twitter" && (
+          <div className="platform-form twitter-form">
+            <div className="form-group-modern">
+              <label>Twitter Message</label>
+              <textarea
+                className="modern-input"
+                placeholder="Tweet text..."
+                value={twitterMessage}
+                onChange={e => {
+                  setTwitterMessage(e.target.value);
+                  if (typeof extSetPlatformOption === "function")
+                    extSetPlatformOption("twitter", "message", e.target.value);
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {p === "discord" && (
+          <div className="platform-form discord-form">
+            <div className="form-group-modern">
+              <label>Discord Channel ID</label>
+              <input
+                className="modern-input"
+                placeholder="Channel ID"
+                value={discordChannelId}
+                onChange={e => {
+                  setDiscordChannelId(e.target.value);
+                  if (typeof extSetPlatformOption === "function")
+                    extSetPlatformOption("discord", "channelId", e.target.value);
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {p === "telegram" && (
+          <div className="platform-form telegram-form">
+            <div className="form-group-modern">
+              <label>Telegram Chat ID</label>
+              <input
+                className="modern-input"
+                placeholder="Chat ID"
+                value={telegramChatId}
+                onChange={e => {
+                  setTelegramChatId(e.target.value);
+                  if (typeof extSetPlatformOption === "function")
+                    extSetPlatformOption("telegram", "chatId", e.target.value);
+                }}
+              />
+            </div>
+          </div>
+        )}
+        {error && <div className="error-message">{error}</div>}
 
         <div style={{ display: "flex", gap: ".5rem", marginTop: ".5rem", flexWrap: "wrap" }}>
           <button
@@ -4368,6 +3687,7 @@ function ContentUploadForm({
                     {expandedPlatform === "tiktok" ? (
                       <>
                         <TikTokForm
+                          type={type}
                           onChange={data => {
                             const { platform, ...vals } = data;
                             if (typeof extSetPlatformOption === "function") {
@@ -4384,11 +3704,12 @@ function ContentUploadForm({
                               stitch: vals.allowStitch ?? prev.stitch,
                             }));
                             if (vals.commercialContent !== undefined) {
-                              setTiktokCommercial(prev => ({
-                                ...prev,
-                                isCommercial: vals.commercialContent,
-                                brandedContent: vals.commercialContent,
-                              }));
+                              setTiktokDisclosureEnabled(vals.commercialContent);
+                              setTiktokYourBrand(vals.yourBrand || false);
+                              setTiktokBrandedContent(vals.brandedContent || false);
+                            }
+                            if (vals.consentChecked !== undefined) {
+                              setTiktokConsentChecked(vals.consentChecked);
                             }
                           }}
                           initialData={extPlatformOptions?.tiktok}
@@ -4648,37 +3969,17 @@ function ContentUploadForm({
                       </div>
                     )}
                     {expandedPlatform === "discord" && (
-                      <div className="platform-form discord-form" style={{ marginTop: 8 }}>
-                        <div
-                          style={{
-                            backgroundColor: "rgba(88, 101, 242, 0.1)",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            marginBottom: "8px",
-                            fontSize: "12px",
-                            color: "#5865F2",
-                            border: "1px solid rgba(88, 101, 242, 0.2)",
-                          }}
-                        >
-                          <strong>Link & Embed Mode:</strong> Shares content as a rich embed via
-                          Webhook. Attachments are not uploaded directly to Discord.
-                        </div>
-                        <input
-                          placeholder="Discord channel ID"
-                          style={{
-                            width: "100%",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            border: "1px solid #ccc",
-                          }}
-                          value={discordChannelId}
-                          onChange={e => {
-                            setDiscordChannelId(e.target.value);
-                            if (typeof extSetPlatformOption === "function")
-                              extSetPlatformOption("discord", "channelId", e.target.value);
-                          }}
-                        />
-                      </div>
+                      <DiscordForm
+                        onChange={data => {
+                          const { platform, ...vals } = data;
+                          if (typeof extSetPlatformOption === "function") {
+                            extSetPlatformOption(platform, "channelId", vals.channelId);
+                          }
+                          // Local Sync
+                          if (vals.channelId !== undefined) setDiscordChannelId(vals.channelId);
+                        }}
+                        initialData={{ channelId: discordChannelId }}
+                      />
                     )}
                     <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
                       <button
@@ -4865,105 +4166,39 @@ function ContentUploadForm({
                       </div>
                     )}
                     {expandedPlatform === "telegram" && (
-                      <div className="platform-form telegram-form" style={{ marginTop: 8 }}>
-                        <div
-                          style={{
-                            backgroundColor: "rgba(0, 136, 204, 0.1)",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            marginBottom: "8px",
-                            fontSize: "12px",
-                            color: "#0088cc",
-                            border: "1px solid rgba(0, 136, 204, 0.2)",
-                          }}
-                        >
-                          <strong>Native Host:</strong> Supports direct Video, Photo, and Text
-                          messages to your chat/channel.
-                        </div>
-                        <input
-                          placeholder="Telegram chat ID"
-                          style={{
-                            width: "100%",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            border: "1px solid #ccc",
-                          }}
-                          value={telegramChatId}
-                          onChange={e => {
-                            setTelegramChatId(e.target.value);
-                            if (typeof extSetPlatformOption === "function")
-                              extSetPlatformOption("telegram", "chatId", e.target.value);
-                          }}
-                        />
-                      </div>
+                      <TelegramForm
+                        onChange={data => {
+                          const { platform, ...vals } = data;
+                          if (typeof extSetPlatformOption === "function") {
+                            extSetPlatformOption(platform, "chatId", vals.chatId);
+                          }
+                          // Local Sync
+                          if (vals.chatId !== undefined) setTelegramChatId(vals.chatId);
+                        }}
+                        initialData={{ chatId: telegramChatId }}
+                      />
                     )}
 
                     {expandedPlatform === "twitter" && (
-                      <div style={{ marginTop: 8 }}>
-                        <div
-                          style={{
-                            backgroundColor: "rgba(29, 161, 242, 0.1)",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            marginBottom: "8px",
-                            fontSize: "12px",
-                            color: "#1DA1F2",
-                            border: "1px solid rgba(29, 161, 242, 0.2)",
-                          }}
-                        >
-                          <strong>Platform Capabilities:</strong> Supports Native Video and Image.
-                        </div>
-                        <textarea
-                          placeholder="Tweet text..."
-                          style={{
-                            width: "100%",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            border: "1px solid #ccc",
-                            minHeight: "60px",
-                            fontFamily: "inherit",
-                          }}
-                          value={twitterMessage}
-                          onChange={e => {
-                            setTwitterMessage(e.target.value);
-                            if (typeof extSetPlatformOption === "function")
-                              extSetPlatformOption("twitter", "message", e.target.value);
-                          }}
-                        />
-                        <div
-                          style={{
-                            fontSize: 10,
-                            textAlign: "right",
-                            marginTop: 2,
-                            color: twitterMessage.length > 280 ? "red" : "#666",
-                          }}
-                        >
-                          {twitterMessage.length}/280
-                        </div>
-                        <div style={{ marginTop: 8 }}>
-                          <label
-                            style={{
-                              fontSize: 12,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 6,
-                              cursor: "pointer",
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={!!twitterSettings.threadMode}
-                              onChange={e => {
-                                const val = e.target.checked;
-                                setTwitterSettings(prev => ({ ...prev, threadMode: val }));
-                                if (typeof extSetPlatformOption === "function")
-                                  extSetPlatformOption("twitter", "threadMode", val);
-                              }}
-                            />
-                            Thread Mode (Auto-reply if too long)
-                          </label>
-                        </div>
-                      </div>
+                      <TwitterForm
+                        onChange={data => {
+                          const { platform, ...vals } = data;
+                          if (typeof extSetPlatformOption === "function") {
+                            if (vals.message !== undefined)
+                              extSetPlatformOption(platform, "message", vals.message);
+                            if (vals.threadMode !== undefined)
+                              extSetPlatformOption(platform, "threadMode", vals.threadMode);
+                          }
+                          // Local Sync
+                          if (vals.message !== undefined) setTwitterMessage(vals.message);
+                          if (vals.threadMode !== undefined)
+                            setTwitterSettings(prev => ({ ...prev, threadMode: vals.threadMode }));
+                        }}
+                        initialData={{
+                          message: twitterMessage,
+                          threadMode: twitterSettings.threadMode,
+                        }}
+                      />
                     )}
 
                     {expandedPlatform === "spotify" && (
@@ -4993,34 +4228,7 @@ function ContentUploadForm({
                         />
                       </div>
                     )}
-                    {expandedPlatform === "snapchat" && (
-                      <div className="snapchat-feature-inline">
-                        <label
-                          style={{
-                            display: "block",
-                            fontSize: 12,
-                            fontWeight: 700,
-                            marginBottom: 4,
-                            color: "#aa9900", // Darker yellow for readability
-                          }}
-                        >
-                          Snapchat Promotions
-                        </label>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            color: "#666",
-                            background: "#fff",
-                            padding: 8,
-                            borderRadius: 6,
-                            border: "1px solid #e5e5e5",
-                          }}
-                        >
-                          Server-side publishing creates <strong>Ads</strong> (Dark Posts/Spotlight)
-                          via Marketing API. To post standard user Stories, use the mobile app.
-                        </div>
-                      </div>
-                    )}
+                    {expandedPlatform === "snapchat" && <SnapchatForm onChange={() => {}} />}
                     {expandedPlatform === "youtube" && (
                       <div style={{ display: "grid", gap: 8 }}>
                         {perPlatformPreviews["youtube"] && (
@@ -5093,221 +4301,8 @@ function ContentUploadForm({
                 )}
               </div>
             </div>
-            {/* Per-platform options are also available here when a platform is selected */}
-            {selectedPlatformsVal.includes("discord") && (
-              <div className="form-group platform-form discord-form">
-                <label>Discord Channel ID</label>
-                <input
-                  placeholder="Discord channel ID"
-                  value={discordChannelId}
-                  onChange={e => {
-                    setDiscordChannelId(e.target.value);
-                    if (typeof extSetPlatformOption === "function")
-                      extSetPlatformOption("discord", "channelId", e.target.value);
-                  }}
-                  className="form-input"
-                />
-              </div>
-            )}
-            {selectedPlatformsVal.includes("telegram") && (
-              <div className="form-group platform-form telegram-form">
-                <label>Telegram Chat ID</label>
-                <input
-                  placeholder="Telegram chat ID"
-                  value={telegramChatId}
-                  onChange={e => {
-                    setTelegramChatId(e.target.value);
-                    if (typeof extSetPlatformOption === "function")
-                      extSetPlatformOption("telegram", "chatId", e.target.value);
-                  }}
-                  className="form-input"
-                />
-              </div>
-            )}
-            {selectedPlatformsVal.includes("reddit") && (
-              <div className="form-group platform-form reddit-form">
-                <label>Reddit Subreddit</label>
-                <input
-                  placeholder="Reddit subreddit"
-                  value={redditSubreddit}
-                  onChange={e => {
-                    setRedditSubreddit(e.target.value);
-                    if (typeof extSetPlatformOption === "function")
-                      extSetPlatformOption("reddit", "subreddit", e.target.value);
-                  }}
-                  className="form-input"
-                />
-              </div>
-            )}
-            {selectedPlatformsVal.includes("linkedin") && (
-              <div className="form-group platform-form linkedin-form">
-                <label>LinkedIn Organization ID</label>
-                <input
-                  placeholder="LinkedIn organization/company ID"
-                  value={linkedinCompanyId}
-                  onChange={e => {
-                    setLinkedinCompanyId(e.target.value);
-                    if (typeof extSetPlatformOption === "function")
-                      extSetPlatformOption("linkedin", "companyId", e.target.value);
-                  }}
-                  className="form-input"
-                />
-              </div>
-            )}
-            {selectedPlatformsVal.includes("twitter") && (
-              <div className="form-group">
-                <label>Twitter Message (optional)</label>
-                <input
-                  placeholder="Twitter message (optional)"
-                  value={twitterMessage}
-                  onChange={e => {
-                    setTwitterMessage(e.target.value);
-                    if (typeof extSetPlatformOption === "function")
-                      extSetPlatformOption("twitter", "message", e.target.value);
-                  }}
-                  className="form-input"
-                />
-              </div>
-            )}
-            {/* TikTok-specific publish options required for Direct Post API compliance */}
-            {selectedPlatformsVal.includes("tiktok") && (
-              <div
-                className="form-group tiktok-options platform-form tiktok-form"
-                style={{
-                  border: "1px solid #efeef0",
-                  padding: 12,
-                  borderRadius: 8,
-                  background: "#fbfbfc",
-                }}
-              >
-                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  TikTok Publish Options
-                </label>
-                <div style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>
-                  Creator: {tiktokCreatorDisplayName || "Loading..."}
-                </div>
-                {type !== "video" && (
-                  <div
-                    role="status"
-                    className="no-video-disclosure"
-                    style={{ fontSize: 12, color: "#b66", marginBottom: 8 }}
-                  >
-                    This post doesn&apos;t contain a video. TikTok features like Duet and Stitch
-                    require a video — upload one to enable them.
-                  </div>
-                )}
-                <div style={{ display: "grid", gap: 8 }}>
-                  <div>
-                    <label>Privacy (required)</label>
-                    <select
-                      value={tiktokPrivacy}
-                      onChange={e => setTiktokPrivacy(e.target.value)}
-                      className="form-select"
-                    >
-                      <option value="">Select privacy</option>
-                      {(tiktokCreatorInfo && Array.isArray(tiktokCreatorInfo.privacy_level_options)
-                        ? tiktokCreatorInfo.privacy_level_options
-                        : ["EVERYONE", "FRIENDS", "SELF_ONLY"]
-                      ).map(p => (
-                        <option
-                          key={p}
-                          value={p}
-                          disabled={
-                            tiktokCommercial && tiktokCommercial.brandedContent && p === "SELF_ONLY"
-                          }
-                          title={
-                            tiktokCommercial && tiktokCommercial.brandedContent && p === "SELF_ONLY"
-                              ? "Branded content visibility cannot be set to private."
-                              : undefined
-                          }
-                        >
-                          {p}
-                        </option>
-                      ))}
-                    </select>
-                    {privacyAutoSwitched && (
-                      <div style={{ fontSize: 12, color: "#b66", marginTop: 6 }}>
-                        Branded content cannot be private — visibility has been changed to
-                        &apos;EVERYONE&apos;.
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <label>Interactions</label>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={!!tiktokInteractions.comments}
-                          onChange={e =>
-                            setTiktokInteractions(prev => ({ ...prev, comments: e.target.checked }))
-                          }
-                          disabled={tiktokInteractionDisabled.comments}
-                        />{" "}
-                        Comments
-                      </label>
-                      {type === "video" && (
-                        <>
-                          <label>
-                            <input
-                              type="checkbox"
-                              checked={!!tiktokInteractions.duet}
-                              onChange={e =>
-                                setTiktokInteractions(prev => ({ ...prev, duet: e.target.checked }))
-                              }
-                              disabled={tiktokInteractionDisabled.duet}
-                            />{" "}
-                            Duet
-                          </label>
-                          <label>
-                            <input
-                              type="checkbox"
-                              checked={!!tiktokInteractions.stitch}
-                              onChange={e =>
-                                setTiktokInteractions(prev => ({
-                                  ...prev,
-                                  stitch: e.target.checked,
-                                }))
-                              }
-                              disabled={tiktokInteractionDisabled.stitch}
-                              title={
-                                tiktokInteractionDisabled.stitch
-                                  ? "Stitch disabled by creator"
-                                  : undefined
-                              }
-                              aria-disabled={tiktokInteractionDisabled.stitch}
-                            />{" "}
-                            Stitch
-                          </label>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <label>Commercial / Branded Content</label>
-                    <div style={{ fontSize: 13, fontStyle: "italic", color: "#666" }}>
-                      Moved to Platform Settings below description.
-                    </div>
-                  </div>
-                  <div>
-                    <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <input
-                        type="checkbox"
-                        checked={tiktokAIGenerated}
-                        onChange={e => setTiktokAIGenerated(e.target.checked)}
-                      />{" "}
-                      This content is AI-generated
-                    </label>
-                  </div>
-                  {tiktokCreatorInfo && tiktokCreatorInfo.max_video_post_duration_sec && (
-                    <div style={{ fontSize: 12, color: "#666" }}>
-                      Max allowed video duration for this creator:{" "}
-                      {tiktokCreatorInfo.max_video_post_duration_sec} seconds
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+
+            {/* Per-platform options moved to expanded card view or PlatformSettingsOverride */}
           </div>
         </div>
         <div className="form-group full-width">
@@ -5479,109 +4474,9 @@ function ContentUploadForm({
           />
         )}
 
-        {/* Pinterest options (board selection + note) */}
-        <div className="form-group">
-          <label>Pinterest Options (optional)</label>
-          <div style={{ display: "grid", gap: ".5rem" }}>
-            {pinterestBoards && pinterestBoards.length > 0 ? (
-              <select
-                value={pinterestBoard}
-                onChange={e => {
-                  setPinterestBoard(e.target.value);
-                  if (typeof extSetPlatformOption === "function")
-                    extSetPlatformOption("pinterest", "boardId", e.target.value);
-                }}
-                style={{ padding: ".5rem", borderRadius: 8 }}
-              >
-                <option value="">Select a board</option>
-                {pinterestBoards.map(b => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                placeholder="Pinterest board id (or leave blank)"
-                value={pinterestBoard}
-                onChange={e => {
-                  setPinterestBoard(e.target.value);
-                  if (typeof extSetPlatformOption === "function")
-                    extSetPlatformOption("pinterest", "boardId", e.target.value);
-                }}
-                style={{ padding: ".5rem", borderRadius: 8 }}
-              />
-            )}
-            <input
-              placeholder="Pin note (optional)"
-              value={pinterestNote}
-              onChange={e => {
-                setPinterestNote(e.target.value);
-                if (typeof extSetPlatformOption === "function")
-                  extSetPlatformOption("pinterest", "note", e.target.value);
-              }}
-              style={{ padding: ".5rem", borderRadius: 8 }}
-            />
-          </div>
-        </div>
-        {/* Spotify track selection - removed from main flow to avoid duplication with card. */}
-        {/* <div className="form-group">
-          <label>Spotify Tracks to Add (optional)</label>
-          <SpotifyTrackSearch
-            selectedTracks={
-              Array.isArray(extSpotifySelectedTracks) ? extSpotifySelectedTracks : spotifyTracks
-            }
-            onChangeTracks={list => {
-              if (typeof extSetSpotifySelectedTracks === "function")
-                extSetSpotifySelectedTracks(list);
-              else setSpotifyTracks(list);
-            }}
-          />
-        </div> */}
-        <div className="form-group">
-          <label>Spotify Playlist (optional)</label>
-          <div style={{ display: "grid", gap: 8 }}>
-            {spotifyPlaylists && spotifyPlaylists.length > 0 ? (
-              <select
-                value={spotifyPlaylistId}
-                onChange={e => {
-                  setSpotifyPlaylistId(e.target.value);
-                  if (typeof extSetPlatformOption === "function")
-                    extSetPlatformOption("spotify", "playlistId", e.target.value);
-                }}
-                style={{ padding: ".5rem", borderRadius: 8 }}
-              >
-                <option value="">Select existing playlist</option>
-                {spotifyPlaylists.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                placeholder="Existing playlist id (optional)"
-                value={spotifyPlaylistId}
-                onChange={e => {
-                  setSpotifyPlaylistId(e.target.value);
-                  if (typeof extSetPlatformOption === "function")
-                    extSetPlatformOption("spotify", "playlistId", e.target.value);
-                }}
-                style={{ padding: ".5rem", borderRadius: 8 }}
-              />
-            )}
-            <input
-              placeholder="Or create new playlist name (optional)"
-              value={spotifyPlaylistName}
-              onChange={e => {
-                setSpotifyPlaylistName(e.target.value);
-                if (typeof extSetPlatformOption === "function")
-                  extSetPlatformOption("spotify", "name", e.target.value);
-              }}
-              style={{ padding: ".5rem", borderRadius: 8 }}
-            />
-          </div>
-        </div>
+        {/* Pinterest options moved to PlatformForms */}
+
+        {/* Spotify options moved to PlatformForms */}
 
         <div style={{ display: "flex", gap: ".5rem", marginTop: ".5rem", flexWrap: "wrap" }}>
           <button

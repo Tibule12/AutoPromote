@@ -385,6 +385,58 @@ input:checked + .toggle-slider:before {
 
 /* High Contrast & Visibility Overrides (All Platforms) */
 
+/* Buttons */
+.youtube-form button,
+.youtube-form .btn,
+.tiktok-form button,
+.tiktok-form .btn,
+.instagram-form button,
+.instagram-form .btn,
+.facebook-form button,
+.facebook-form .btn,
+.linkedin-form button,
+.linkedin-form .btn,
+.pinterest-form button,
+.pinterest-form .btn,
+.reddit-form button,
+.reddit-form .btn,
+.spotify-form button,
+.spotify-form .btn,
+.discord-form button,
+.discord-form .btn,
+.telegram-form button,
+.telegram-form .btn {
+  background-color: #000000 !important;
+  color: #ffffff !important; /* White text on black button for contrast */
+  border: 2px solid #000000 !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+}
+
+.youtube-form button:hover,
+.youtube-form .btn:hover,
+.tiktok-form button:hover,
+.tiktok-form .btn:hover,
+.instagram-form button:hover,
+.instagram-form .btn:hover,
+.facebook-form button:hover,
+.facebook-form .btn:hover,
+.linkedin-form button:hover,
+.linkedin-form .btn:hover,
+.pinterest-form button:hover,
+.pinterest-form .btn:hover,
+.reddit-form button:hover,
+.reddit-form .btn:hover,
+.spotify-form button:hover,
+.spotify-form .btn:hover,
+.discord-form button:hover,
+.discord-form .btn:hover,
+.telegram-form button:hover,
+.telegram-form .btn:hover {
+  background-color: #333333 !important;
+  border-color: #000000 !important;
+}
+
 /* Labels, Text, Headers */
 .youtube-form label,
 .youtube-form span,
