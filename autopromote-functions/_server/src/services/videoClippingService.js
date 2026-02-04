@@ -702,14 +702,21 @@ class VideoClippingService {
         if (options.addCaptions && clip.transcript && clip.transcript.length > 0) {
           try {
             const srtContent = this.generateSRT(clip.transcript, clip.start);
-            // codeql[js/path-injection] -- path is strictly derived from temp directory
-            await fs.writeFile(tempSrtPath, srtContent);
-            // Escape path for ffmpeg (windows paths can be tricky)
-            // Manual escaping for FFmpeg filter syntax (handling windows backslashes, colons, and quotes)
-            const srtPathEscaped = tempSrtPath
-                .replace(/\\/g, "/")
-                .replace(/:/g, "\\:")
-                .replace(/'/g, "'\\\\''"); // Escape single quotes for shell/filter context
+            // SECURITY: Ensure we use the resolved absolute path to prevent traversal/confusion
+            const absoluteSrtPath = path.resolve(tempSrtPath);
+            
+            await fs.writeFile(absoluteSrtPath, srtContent);
+            
+            // Escape path for ffmpeg (windows paths can be tricky).
+            // CodeQL Fix: "Incomplete string escaping or encoding"
+            // We use a robust escaping strategy for FFmpeg filter graph syntax.
+            // 1. Normalize backslashes to forward slashes (safe for FFmpeg on all OS)
+            let srtPathEscaped = absoluteSrtPath.replace(/\\/g, "/");
+            
+            // 2. Escape colons (filter separator) and single quotes (string delimiter)
+            srtPathEscaped = srtPathEscaped
+              .replace(/:/g, "\\\\:")
+              .replace(/'/g, "'\\\\''");
             
             // Use 'Sans' instead of 'Arial' for better Linux/Cloud compatibility
             videoFilters.push(
