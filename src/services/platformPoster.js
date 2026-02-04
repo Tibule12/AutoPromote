@@ -206,10 +206,10 @@ async function postToTwitter({ contentId, payload, reason, uid }) {
   return { platform: "twitter", success: true, tweetId: json.data?.id, reason };
 }
 
-async function postToInstagram({ contentId, payload, reason }) {
+async function postToInstagram({ contentId, payload, reason, uid }) {
   try {
     const { publishInstagram } = require("./instagramPublisher");
-    return await publishInstagram({ contentId, payload, reason });
+    return await publishInstagram({ contentId, payload, reason, uid });
   } catch (e) {
     return { platform: "instagram", simulated: true, error: e.message, reason };
   }
@@ -322,6 +322,7 @@ async function postToYouTubeHandler(args) {
       privacy: payload.privacy || "public",
       tags: payload.tags || payload.hashtags,
       contentId,
+      payload, // Pass full payload for advanced options (sponsorships, kids)
     });
 
     if (res.success) {

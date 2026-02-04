@@ -146,6 +146,7 @@ async function uploadVideo({
   contentTags = [],
   forceReupload = false,
   skipIfDuplicate = true,
+  payload = {},
 }) {
   if (!uid) throw new Error("uid required");
   if (!title) throw new Error("title required");
@@ -264,11 +265,22 @@ async function uploadVideo({
 
   const videoBuffer = await downloadVideoBuffer(fileUrl);
 
+  const privacyStatus = payload.privacy || "public";
+  const ytOptions = (payload && payload.platform_options && payload.platform_options.youtube) || {};
+  const selfDeclaredMadeForKids = !!ytOptions.made_for_kids;
+
   const insertRes = await youtube.videos.insert({
     part: "snippet,status",
     requestBody: {
-      snippet: { title: finalTitle, description: finalDescription },
-      status: { privacyStatus: "public" },
+      snippet: {
+        title: finalTitle,
+        description: finalDescription,
+        tags: contentTags,
+      },
+      status: {
+        privacyStatus,
+        selfDeclaredMadeForKids,
+      },
     },
     media: { mimeType, body: streamifier.createReadStream(videoBuffer) },
   });

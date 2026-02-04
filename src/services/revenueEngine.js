@@ -4,6 +4,7 @@
 
 const { db, admin } = require("../firebaseAdmin");
 const logger = require("../utils/logger");
+const { sendTelegramAlert, getUserTelegramConnection } = require("./telegramService");
 
 // Pricing Constants
 const BASE_PRICE_PER_UNIT = 0.01; // $0.01 per engagement unit (e.g. share)
@@ -11,6 +12,106 @@ const SURGE_THRESHOLD = 500; // units/minute to trigger surge
 const RETENTION_FEE_PERCENT = 0.1; // 10% fee on redemption
 
 class RevenueEngine {
+  /**
+   * Award Growth Credits to a user
+   * @param {string} userId
+   * @param {number} amount
+   * @param {string} source - 'engagement_reward', 'bonus', etc.
+   */
+  async awardGrowthCredits(userId, amount, source = "engagement_reward") {
+    const userCreditsRef = db.collection("user_credits").doc(userId);
+
+    // Transactional update
+    await db.runTransaction(async t => {
+      const doc = await t.get(userCreditsRef);
+      const current = doc.exists ? doc.data().growth_credits || 0 : 0;
+      const newBalance = current + amount;
+
+      t.set(
+        userCreditsRef,
+        {
+          growth_credits: newBalance,
+          last_awarded_at: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      // Log ledger entry
+      const ledgerRef = db.collection("credit_ledger").doc();
+      t.set(ledgerRef, {
+        userId,
+        amount,
+        type: "credit",
+        source,
+        balance_after: newBalance,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    });
+
+    // Notify user via Telegram (fire and forget)
+    if (amount > 1) {
+      // Only notify for significant amounts
+      try {
+        const conn = await getUserTelegramConnection(userId);
+        if (conn && conn.meta && conn.meta.chatId) {
+          await sendTelegramAlert(
+            conn.meta.chatId,
+            `🚀 You earned ${amount.toFixed(2)} growth credits! (Source: ${source})`
+          );
+        }
+      } catch (e) {
+        // Ignore notification errors
+      }
+    }
+
+    return amount;
+  }
+
+  /**
+   * Redeem Growth Credits
+   * Applies redemption fee (retention model)
+   */
+  async redeemGrowthCredits(userId, amountToRedeem) {
+    const userCreditsRef = db.collection("user_credits").doc(userId);
+
+    return db.runTransaction(async t => {
+      const doc = await t.get(userCreditsRef);
+      if (!doc.exists) throw new Error("User has no credit record");
+
+      const current = doc.data().growth_credits || 0;
+      if (current < amountToRedeem) {
+        throw new Error("Insufficient growth credits");
+      }
+
+      const fee = amountToRedeem * RETENTION_FEE_PERCENT;
+      const netValue = amountToRedeem - fee;
+      const newBalance = current - amountToRedeem;
+
+      t.set(
+        userCreditsRef,
+        {
+          growth_credits: newBalance,
+          last_redeem_at: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      // Log ledger
+      const ledgerRef = db.collection("credit_ledger").doc();
+      t.set(ledgerRef, {
+        userId,
+        amount: -amountToRedeem,
+        type: "debit",
+        fee,
+        net_value: netValue,
+        balance_after: newBalance,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return { success: true, netValue, fee };
+    });
+  }
+
   /**
    * Log an Engagement Unit
    * @param {string} creatorId - User ID of the content creator

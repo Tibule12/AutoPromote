@@ -7,6 +7,7 @@
 
 const fetch = require("node-fetch");
 const { db } = require("../firebaseAdmin");
+const { getUserFacebookConnection } = require("./facebookService");
 
 async function buildContentContext(contentId) {
   if (!contentId) return {};
@@ -84,9 +85,27 @@ async function publishCarousel({ igUserId, accessToken, mediaUrls, caption }) {
   return carouselJson.id;
 }
 
-async function publishInstagram({ contentId, payload, reason }) {
-  const IG_USER_ID = process.env.IG_USER_ID;
-  const ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN; // Re-use page token if it has IG perms
+async function publishInstagram({ contentId, payload, reason, uid }) {
+  let IG_USER_ID = process.env.IG_USER_ID;
+  let ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+
+  // Load user credentials if uid provided
+  if (uid) {
+    try {
+      const conn = await getUserFacebookConnection(uid);
+      if (conn && conn.accessToken) {
+        ACCESS_TOKEN = conn.accessToken;
+        // Try to find IG Business ID in connection data
+        if (conn.instagramBusinessAccountId) IG_USER_ID = conn.instagramBusinessAccountId;
+        else if (conn.instagramId) IG_USER_ID = conn.instagramId;
+        else if (conn.metadata && conn.metadata.instagram_business_account_id)
+          IG_USER_ID = conn.metadata.instagram_business_account_id;
+      }
+    } catch (e) {
+      console.warn("[Instagram] Failed to resolve user credentials:", e.message);
+    }
+  }
+
   if (!IG_USER_ID || !ACCESS_TOKEN) {
     return { platform: "instagram", simulated: true, reason: "missing_credentials" };
   }

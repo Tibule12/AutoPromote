@@ -17,6 +17,10 @@ const InstagramForm = ({
   const [location, setLocation] = useState(initialData.location || "");
   const [isReel, setIsReel] = useState(initialData.isReel !== false); // Default to Reel in 2026
   const [shareToFeed, setShareToFeed] = useState(initialData.shareToFeed !== false);
+  // Default to first available page ID if provided, ensuring the user knows which account is target
+  const [selectedPageId, setSelectedPageId] = useState(
+    initialData.pageId || facebookPages[0]?.id || ""
+  );
 
   // Branded Content / Partnership
   const [isPaidPartnership, setIsPaidPartnership] = useState(
@@ -33,8 +37,9 @@ const InstagramForm = ({
       shareToFeed,
       isPaidPartnership,
       sponsorUser,
+      pageId: selectedPageId, // Include identity in payload
     });
-  }, [caption, location, isReel, shareToFeed, isPaidPartnership, sponsorUser]);
+  }, [caption, location, isReel, shareToFeed, isPaidPartnership, sponsorUser, selectedPageId]);
 
   return (
     <div className="platform-form instagram-form">
@@ -52,6 +57,115 @@ const InstagramForm = ({
         </span>{" "}
         Instagram Creator
       </h4>
+
+      {/* IDENTITY SECTION: CRITICAL FOR REVIEWERS */}
+      <div className="form-group-modern">
+        <label>Publishing to Account (Identity)</label>
+        {facebookPages.length > 0 ? (
+          <select
+            className="modern-select"
+            value={selectedPageId}
+            onChange={e => setSelectedPageId(e.target.value)}
+          >
+            {facebookPages.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.name}{" "}
+                {p.instagram_business_account
+                  ? `(IG: ${p.instagram_business_account.id})`
+                  : "(Linked Page)"}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <div className="alert-box warning" style={{ fontSize: "0.85rem" }}>
+            No connected Instagram Accounts found. Ensure your Facebook Page has an Instagram
+            Business account linked.
+          </div>
+        )}
+        <p className="legal-hint" style={{ marginTop: "4px" }}>
+          <span style={{ color: "#888" }}>
+            IG ID:{" "}
+            {facebookPages.find(p => p.id === selectedPageId)?.instagram_business_account?.id ||
+              "N/A"}
+          </span>
+        </p>
+
+        <div
+          className="scope-info-box"
+          style={{
+            marginTop: "8px",
+            padding: "12px",
+            background: "linear-gradient(to right, #fff0f5, #fff5f8)",
+            borderRadius: "8px",
+            border: "1px solid #fce7f3",
+            fontSize: "0.85rem",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: "600",
+              marginBottom: "6px",
+              color: "#cc2366",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <span>📸</span> Instagram Permissions
+          </div>
+          <p style={{ margin: 0, color: "#444", lineHeight: "1.4" }}>
+            <strong>Why we need this:</strong>
+          </p>
+          <ul style={{ margin: "6px 0 0 20px", padding: 0, color: "#444", lineHeight: "1.4" }}>
+            <li>
+              <code
+                style={{
+                  background: "#fff",
+                  padding: "2px 4px",
+                  borderRadius: "3px",
+                  border: "1px solid #fbcfe8",
+                  fontFamily: "monospace",
+                  color: "#be185d",
+                }}
+              >
+                instagram_basic
+              </code>
+              : Used to display the Instagram account name and ID in the dropdown above, confirming
+              which account you are targeting.
+            </li>
+            <li>
+              <code
+                style={{
+                  background: "#fff",
+                  padding: "2px 4px",
+                  borderRadius: "3px",
+                  border: "1px solid #fbcfe8",
+                  fontFamily: "monospace",
+                  color: "#be185d",
+                }}
+              >
+                instagram_content_publish
+              </code>
+              : Used to securely upload your media (Reels/Photos) to the selected Professional
+              Account.
+            </li>
+          </ul>
+          <p
+            style={{
+              margin: "8px 0 0 0",
+              color: "#831843",
+              fontSize: "0.8rem",
+              fontStyle: "italic",
+              borderTop: "1px solid #fce7f3",
+              paddingTop: "6px",
+            }}
+          >
+            <strong>Privacy Guarantee:</strong> We cannot access your Direct Messages (DMs) or view
+            your private personal profile data. We only interact with the specific business assets
+            you authorize.
+          </p>
+        </div>
+      </div>
 
       <div className="form-group-modern">
         <label>Caption</label>

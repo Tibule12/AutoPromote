@@ -178,9 +178,30 @@ async function postToTelegram({ contentId, payload = {}, reason: _reason, uid })
   }
 }
 
+/**
+ * Send a generic notification/alert to a Telegram user (for growth alerts, etc.)
+ * Maps to user requirement: send_creator_alert
+ */
+async function sendTelegramAlert(chatId, text) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken || !chatId) return { success: false, error: "missing_config" };
+
+  try {
+    const res = await fetchFn(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "Markdown" }),
+    });
+    return { success: res.ok };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
 module.exports = {
   postToTelegram,
   verifyTelegramAuth,
   storeTelegramAuth,
   getUserTelegramConnection,
+  sendTelegramAlert,
 };
