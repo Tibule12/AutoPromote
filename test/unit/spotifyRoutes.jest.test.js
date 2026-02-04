@@ -56,7 +56,10 @@ describe('Spotify Routes', () => {
 
       const res = await request(app).get('/api/spotify/search?q=test');
       expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual(mockResults);
+      expect(res.body).toEqual({
+        ok: true,
+        results: mockResults.tracks
+      });
       expect(spotifyService.searchTracks).toHaveBeenCalledWith({
         uid: 'test-user-id',
         query: 'test'

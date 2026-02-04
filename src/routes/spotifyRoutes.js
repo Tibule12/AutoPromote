@@ -19,8 +19,24 @@ router.get("/search", authMiddleware, async (req, res) => {
     if (!q) return res.status(400).json({ error: "Query required" });
 
     const results = await searchTracks({ uid, query: q });
-    res.json(results);
+    // Normalize format for frontend
+    res.json({
+      ok: true,
+      results: results.tracks || [],
+    });
   } catch (e) {
+    console.error("Spotify search error:", e);
+
+    if (e.message.includes("No valid Spotify access token")) {
+      return res.status(403).json({ ok: false, error: "spotify_not_connected" });
+    }
+    if (e.message.includes("Spotify token refresh failed")) {
+      return res.status(502).json({ ok: false, error: "spotify_token_refresh_failed" });
+    }
+    if (e.message.includes("client credentials")) {
+      return res.status(500).json({ ok: false, error: "spotify_client_credentials_missing" });
+    }
+
     res.status(500).json({ error: e.message });
   }
 });
