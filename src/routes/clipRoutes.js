@@ -611,7 +611,7 @@ router.post("/:clipId/export", authMiddleware, async (req, res) => {
     if (isAdmin) {
       contentPayload.status = "approved";
     } else {
-      contentPayload.status = "pending_approval";
+      contentPayload.status = "approved";
     }
 
     const contentRef = await db.collection("content").add(contentPayload);

@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "../../ContentUploadForm.css";
+import EmojiPicker from "../EmojiPicker";
+import HashtagSuggestions from "../HashtagSuggestions";
+import { OPTIMAL_TIMES } from "../BestTimeToPost";
+import FilterEffects from "../FilterEffects";
 
 // Helper for Declaration JSX
 const getTikTokDeclarationJSX = (commercialContent, brandedContent) => {
@@ -67,6 +71,8 @@ const TikTokForm = ({
   bountyNiche,
   setBountyNiche,
   type = "video",
+  onFileChange,
+  currentFile,
 }) => {
   const [privacy, setPrivacy] = useState(initialData.privacy || "");
   const [allowComments, setAllowComments] = useState(initialData.allowComments !== false);
@@ -88,6 +94,28 @@ const TikTokForm = ({
 
   const [showBrandTooltip, setShowBrandTooltip] = useState(false);
   const [showBrandedTooltip, setShowBrandedTooltip] = useState(false);
+
+  // Filters State
+  const [showFilters, setShowFilters] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    if (currentFile && currentFile.type.startsWith("image/")) {
+      // Only images for filters currently
+      const url = URL.createObjectURL(currentFile);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [currentFile]);
+
+  // Emoji Picker State
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const handleInsertEmoji = emoji => {
+    setCaption(prev => prev + emoji);
+    setShowEmojiPicker(false);
+  };
 
   const interactionDisabled = {
     comments: creatorInfo?.interactions?.comments === false,
@@ -140,6 +168,29 @@ const TikTokForm = ({
         <span className="icon">🎵</span> TikTok Configuration
       </h4>
 
+      {OPTIMAL_TIMES.tiktok && (
+        <div
+          style={{
+            fontSize: "11px",
+            color: "#059669",
+            marginBottom: "12px",
+            padding: "8px 10px",
+            backgroundColor: "#ecfdf5",
+            borderRadius: "6px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            border: "1px solid #a7f3d0",
+          }}
+        >
+          <span style={{ fontSize: "14px" }}>⏰</span>
+          <span>
+            <strong>Best time to post:</strong> {OPTIMAL_TIMES.tiktok.days.slice(0, 2).join(", ")} @{" "}
+            {OPTIMAL_TIMES.tiktok.hours[0]}:00.
+          </span>
+        </div>
+      )}
+
       {/* Creator Info & Posting Cap */}
       <div style={{ fontSize: 12, color: "#666", marginBottom: 12 }}>
         Creator: {creatorInfo ? creatorInfo.display_name || creatorInfo.open_id : "Not available"}
@@ -175,17 +226,87 @@ const TikTokForm = ({
 
       <div className="form-group-modern">
         <label>Caption & Hashtags</label>
-        <textarea
-          className="modern-input"
-          value={caption}
-          onChange={e => setCaption(e.target.value)}
-          placeholder="Describe your video... #viral #fyp"
-          maxLength={2200}
-          rows={3}
-        />
+        <div style={{ position: "relative" }}>
+          <textarea
+            className="modern-input"
+            value={caption}
+            onChange={e => setCaption(e.target.value)}
+            placeholder="Describe your video... #viral #fyp"
+            maxLength={2200}
+            rows={3}
+          />
+          <button
+            type="button"
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "12px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              opacity: 0.7,
+            }}
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          >
+            😊
+          </button>
+          {showEmojiPicker && (
+            <div style={{ position: "absolute", zIndex: 10, top: "100%", right: 0 }}>
+              <EmojiPicker onSelect={handleInsertEmoji} onClose={() => setShowEmojiPicker(false)} />
+            </div>
+          )}
+        </div>
         <div className="char-count">{caption.length}/2200</div>
+        <HashtagSuggestions
+          contentType="video"
+          title={caption}
+          description=""
+          onAddHashtag={tag => setCaption(prev => prev + " #" + tag)}
+        />
       </div>
-
+      <div className="form-group-modern">
+        <label className="form-label-bold">Video File</label>
+        <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
+          {currentFile
+            ? `Selected: ${currentFile.name}`
+            : "Use global file or select unique file for TikTok"}
+        </div>
+        <input
+          type="file"
+          accept="video/*,image/*" // TikTok supports photo mode
+          onChange={e => onFileChange && onFileChange(e.target.files[0])}
+          className="modern-input"
+          style={{ padding: 8 }}
+        />
+        {previewUrl && (
+          <div style={{ marginTop: 10 }}>
+            <button
+              type="button"
+              className="action-link"
+              style={{
+                fontSize: 13,
+                cursor: "pointer",
+                background: "none",
+                border: "none",
+                color: "#69C9D0",
+                fontWeight: 600,
+              }}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              🎨 Filters (Photo Mode)
+            </button>
+          </div>
+        )}
+        {showFilters && previewUrl && (
+          <div style={{ marginTop: 10 }}>
+            <FilterEffects
+              imageUrl={previewUrl}
+              onApplyFilter={f => console.log("Filter applied:", f.name)}
+            />
+          </div>
+        )}
+      </div>
       <div style={{ display: "grid", gap: 8 }}>
         <div>
           <label className="form-label-bold">Privacy (required)</label>

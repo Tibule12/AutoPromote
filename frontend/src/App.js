@@ -821,7 +821,15 @@ function App() {
         type: type || "video",
         url: finalUrl,
         description: description || "",
-        monetization_settings, // <--- Added here
+        monetization_settings,
+        // Pass through Viral/Bounty/Quality fields from ContentUploadForm
+        bounty: params.bounty,
+        viral_boost: params.viral_boost,
+        quality_enhanced: params.quality_enhanced,
+        enhance_quality: params.quality_enhanced, // alias for backend
+        custom_hashtags: params.custom_hashtags,
+        growth_guarantee: params.growth_guarantee,
+
         target_platforms:
           platforms && platforms.length
             ? platforms

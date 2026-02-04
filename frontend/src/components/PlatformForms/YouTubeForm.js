@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from "react";
+import EmojiPicker from "../EmojiPicker";
+import HashtagSuggestions from "../HashtagSuggestions";
+import { OPTIMAL_TIMES } from "../BestTimeToPost";
 
 const YouTubeForm = ({
   onChange,
   initialData = {},
+  creatorInfo,
   globalTitle,
   globalDescription,
   bountyAmount,
   setBountyAmount,
   bountyNiche,
   setBountyNiche,
+  onFileChange,
+  currentFile,
 }) => {
   const [title, setTitle] = useState(initialData.title || globalTitle || "");
   const [description, setDescription] = useState(
@@ -20,6 +26,18 @@ const YouTubeForm = ({
   const [category, setCategory] = useState(initialData.category || "22"); // 22 = People & Blogs
   const [paidPromotion, setPaidPromotion] = useState(initialData.paidPromotion || false);
   const [shortsMode, setShortsMode] = useState(initialData.shortsMode || false);
+
+  // States for Emoji Picker
+  const [showEmojiPicker, setShowEmojiPicker] = useState({ field: null, visible: false });
+
+  const handleInsertEmoji = emoji => {
+    if (showEmojiPicker.field === "title") {
+      setTitle(prev => prev + emoji);
+    } else if (showEmojiPicker.field === "description") {
+      setDescription(prev => prev + emoji);
+    }
+    setShowEmojiPicker({ field: null, visible: false });
+  };
 
   useEffect(() => {
     onChange({
@@ -58,6 +76,67 @@ const YouTubeForm = ({
         YouTube Studio
       </h4>
 
+      {/* Identity Identity Block for Reviewers */}
+      {creatorInfo && (
+        <div
+          style={{
+            fontSize: "13px",
+            color: "#444",
+            marginBottom: "12px",
+            padding: "8px",
+            background: "#f9f9f9",
+            borderRadius: "6px",
+            border: "1px solid #eee",
+          }}
+        >
+          Posting as:{" "}
+          <strong>{creatorInfo.title || creatorInfo.channelTitle || "Connected Channel"}</strong>
+          {creatorInfo.customUrl && (
+            <span style={{ marginLeft: "6px", color: "#666" }}>({creatorInfo.customUrl})</span>
+          )}
+        </div>
+      )}
+
+      {OPTIMAL_TIMES.youtube && (
+        <div
+          style={{
+            fontSize: "11px",
+            color: "#059669",
+            marginBottom: "12px",
+            padding: "8px 10px",
+            backgroundColor: "#ecfdf5",
+            borderRadius: "6px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            border: "1px solid #a7f3d0",
+          }}
+        >
+          <span style={{ fontSize: "14px" }}>⏰</span>
+          <span>
+            <strong>Best time to upload:</strong>{" "}
+            {OPTIMAL_TIMES.youtube.days.slice(0, 2).join(", ")} @ {OPTIMAL_TIMES.youtube.hours[0]}
+            :00. Consider scheduling your video for maximum reach.
+          </span>
+        </div>
+      )}
+
+      <div className="form-group-modern">
+        <label className="form-label-bold">Video File</label>
+        <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
+          {currentFile
+            ? `Selected: ${currentFile.name}`
+            : "Use global file or select unique file for YouTube"}
+        </div>
+        <input
+          type="file"
+          accept="video/*"
+          onChange={e => onFileChange && onFileChange(e.target.files[0])}
+          className="modern-input"
+          style={{ padding: 8 }}
+        />
+      </div>
+
       <div
         className="scope-info-box"
         style={{
@@ -94,33 +173,109 @@ const YouTubeForm = ({
             }}
           >
             youtube.upload
+          </code>
+          {" and "}
+          <code
+            style={{
+              background: "#fff",
+              padding: "2px 4px",
+              borderRadius: "3px",
+              border: "1px solid #ffcccc",
+              fontFamily: "monospace",
+              color: "#c00",
+            }}
+          >
+            youtube.readonly
           </code>{" "}
           to manage your videos. We do not delete your existing videos or manage your account
-          settings.
+          settings. The <code>readonly</code> permission allows us to check channel status and
+          analytics to optimize your upload times.
         </p>
       </div>
 
       <div className="form-group-modern">
         <label>Video Title</label>
-        <input
-          type="text"
-          className="modern-input"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          maxLength={100}
-          placeholder="Create a title that hooks viewers"
-        />
+        <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+          <input
+            type="text"
+            className="modern-input"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            maxLength={100}
+            placeholder="Create a title that hooks viewers"
+            style={{ paddingRight: "40px" }}
+          />
+          <button
+            type="button"
+            style={{
+              position: "absolute",
+              right: "8px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              opacity: 0.7,
+            }}
+            onClick={() =>
+              setShowEmojiPicker({ field: "title", visible: !showEmojiPicker.visible })
+            }
+          >
+            😊
+          </button>
+          {showEmojiPicker.visible && showEmojiPicker.field === "title" && (
+            <div style={{ position: "absolute", zIndex: 10, top: "100%", right: 0 }}>
+              <EmojiPicker
+                onSelect={handleInsertEmoji}
+                onClose={() => setShowEmojiPicker({ field: null, visible: false })}
+              />
+            </div>
+          )}
+        </div>
         <div className="char-count">{title.length}/100</div>
       </div>
 
       <div className="form-group-modern">
         <label>Description</label>
-        <textarea
-          className="modern-input"
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          placeholder="Tell viewers about your video..."
-          rows={5}
+        <div style={{ position: "relative" }}>
+          <textarea
+            className="modern-input"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder="Tell viewers about your video..."
+            rows={5}
+          />
+          <button
+            type="button"
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "12px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              opacity: 0.7,
+            }}
+            onClick={() =>
+              setShowEmojiPicker({ field: "description", visible: !showEmojiPicker.visible })
+            }
+          >
+            😊
+          </button>
+          {showEmojiPicker.visible && showEmojiPicker.field === "description" && (
+            <div style={{ position: "absolute", zIndex: 10, top: "100%", right: 0 }}>
+              <EmojiPicker
+                onSelect={handleInsertEmoji}
+                onClose={() => setShowEmojiPicker({ field: null, visible: false })}
+              />
+            </div>
+          )}
+        </div>
+        <HashtagSuggestions
+          contentType="video"
+          title={title}
+          description={description}
+          onAddHashtag={tag => setDescription(prev => prev + " #" + tag)}
         />
       </div>
 

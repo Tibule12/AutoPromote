@@ -44,11 +44,12 @@ function cleanObject(obj) {
 // Content upload schema
 const contentUploadSchema = Joi.object({
   title: Joi.string().required(),
-  type: Joi.string().valid("video", "image", "audio").required(),
+  type: Joi.string().valid("video", "image", "audio", "text", "article").required(),
   url: Joi.alternatives()
     .try(Joi.string().uri(), Joi.string().pattern(/^preview:\/\//))
-    .required(),
-  description: Joi.string().max(500).allow(""),
+    .allow(null, "")
+    .optional(),
+  description: Joi.string().max(5000).allow(""),
   target_platforms: Joi.array().items(Joi.string()).optional(),
   // Per-platform options map: { <platform>: { <key>: <value>, ... } }
   platform_options: Joi.object().pattern(Joi.string(), Joi.object()).optional(),
@@ -83,7 +84,7 @@ const contentUploadSchema = Joi.object({
 
   // Injected by costControlMiddleware
   optimizationFlags: Joi.object().optional(),
-});
+}).unknown(true); // Allow additional fields passed by updated frontend (e.g. viral_boost, custom_hashtags)
 
 function validateBody(schema) {
   return (req, res, next) => {
@@ -172,8 +173,8 @@ router.post(
       if (isE2ETest && !req.body.isDryRun) {
         const fakeId = `e2e-fake-${Date.now()}`;
         const isAdminTest = req.user && (req.user.isAdmin === true || req.user.role === "admin");
-        const status = isAdminTest ? "approved" : "pending_approval";
-        const approvalStatus = isAdminTest ? "approved" : "pending";
+        const status = "approved";
+        const approvalStatus = "approved";
         return res.status(201).json({ content: { id: fakeId, status, approvalStatus } });
       }
       if (!userId) {
@@ -781,8 +782,8 @@ router.post(
         return res.status(201).json({
           content: {
             id: contentRef.id,
-            status: "pending_approval",
-            approvalStatus: "pending",
+            status: "approved",
+            approvalStatus: "approved",
             viral_bounty_id: content.viral_bounty_id || null,
             has_bounty: !!content.has_bounty,
             bounty_active: !!content.bounty_active,

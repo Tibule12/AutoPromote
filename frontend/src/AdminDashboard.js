@@ -33,7 +33,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("content");
   const [refreshing, setRefreshing] = useState(false);
 
   // Voice Over Scripts for Admin Dashboard
@@ -148,6 +148,36 @@ function AdminDashboard({ analytics, user, onLogout }) {
       );
       const newContentSnapshot = await getDocs(newContentQuery);
       const newContentToday = newContentSnapshot.size;
+
+      // Calculate real content performance buckets & revenue type distribution
+      let perfHigh = 0;
+      let perfMedium = 0;
+      let perfLow = 0;
+      let calculatedRevenueByType = { Video: 0, Image: 0, Audio: 0, Article: 0, Other: 0 };
+
+      contentSnapshot.docs.forEach(doc => {
+        const d = doc.data();
+        const v = d.views || 0;
+        if (v >= 1000) perfHigh++;
+        else if (v >= 100) perfMedium++;
+        else perfLow++;
+
+        let type = d.type || "Other";
+        // Capitalize first letter
+        if (type && type.length > 0) {
+          type = type.charAt(0).toUpperCase() + type.slice(1);
+        } else {
+          type = "Other";
+        }
+
+        const val = Number(d.revenue) || v * 0.002; // Fallback estimation
+
+        if (calculatedRevenueByType[type] !== undefined) {
+          calculatedRevenueByType[type] += val;
+        } else {
+          calculatedRevenueByType.Other = (calculatedRevenueByType.Other || 0) + val;
+        }
+      });
 
       // Fetch promotion schedules
       // Fetch revenue by platform from analytics collection
@@ -384,12 +414,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
                   month: new Date(day.date).toLocaleDateString("en-US", { month: "short" }),
                   revenue: day.revenue,
                 })) || [],
-              revenueByContentType: {
-                Article: 42,
-                Video: 28,
-                Image: 18,
-                Audio: 12,
-              },
+              revenueByContentType: calculatedRevenueByType,
               transactionTrends: {
                 averageOrderValue: 38.72,
                 conversionRate: 2.8,
@@ -462,9 +487,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
           total: totalUsers,
         },
         contentPerformance: {
-          high: Math.round(totalContent * 0.2),
-          medium: Math.round(totalContent * 0.6),
-          low: Math.round(totalContent * 0.2),
+          high: perfHigh,
+          medium: perfMedium,
+          low: perfLow,
         },
         avgRevenuePerContent: revenueData.avgRevenuePerContent,
         avgRevenuePerUser: revenueData.avgRevenuePerUser,
@@ -3056,6 +3081,21 @@ function AdminDashboard({ analytics, user, onLogout }) {
       case "users":
         return (
           <>
+            <div
+              style={{
+                padding: "20px",
+                background: "#fff3e0",
+                borderRadius: "8px",
+                marginBottom: "20px",
+              }}
+            >
+              <h3 style={{ margin: 0, color: "#e65100" }}>👥 User Database</h3>
+              <p>
+                Monitor user growth, subscription tiers, and engagement. Manual actions are
+                audit-logged.
+              </p>
+            </div>
+
             <div style={{ marginTop: 24 }}>
               <div style={{ display: "flex", flexWrap: "wrap", margin: "-10px" }}>
                 <StatCard
@@ -3205,6 +3245,18 @@ function AdminDashboard({ analytics, user, onLogout }) {
       case "content":
         return (
           <>
+            <div
+              style={{
+                padding: "20px",
+                background: "#e8f5e9",
+                borderRadius: "8px",
+                marginBottom: "20px",
+              }}
+            >
+              <h3 style={{ margin: 0, color: "#2e7d32" }}>📄 Content Performance</h3>
+              <p>Track the viral success of auto-published content across all platforms.</p>
+            </div>
+
             <div style={{ marginTop: 24 }}>
               <div style={{ display: "flex", flexWrap: "wrap", margin: "-10px" }}>
                 <StatCard
@@ -3337,6 +3389,18 @@ function AdminDashboard({ analytics, user, onLogout }) {
       case "revenue":
         return (
           <>
+            <div
+              style={{
+                padding: "20px",
+                background: "#f3e5f5",
+                borderRadius: "8px",
+                marginBottom: "20px",
+              }}
+            >
+              <h3 style={{ margin: 0, color: "#7b1fa2" }}>💰 Financial Overview</h3>
+              <p>Real-time tracking of generated value, subscription income, and ROI.</p>
+            </div>
+
             <div style={{ marginTop: 24 }}>
               <div style={{ display: "flex", flexWrap: "wrap", margin: "-10px" }}>
                 <StatCard
@@ -3426,43 +3490,30 @@ function AdminDashboard({ analytics, user, onLogout }) {
           </>
         );
 
-      case "community":
-        return <CommunityModerationPanel />;
-
-      case "approval":
-        return <ContentApprovalPanel />;
-
-      case "analytics":
-        return <AdvancedAnalyticsPanel />;
+      // Removed Tabs: community, approval, moderation, etc.
 
       case "system":
         return (
           <div className="space-y-8">
+            <div
+              style={{
+                padding: "20px",
+                background: "#e3f2fd",
+                borderRadius: "8px",
+                marginBottom: "20px",
+              }}
+            >
+              <h3 style={{ margin: 0, color: "#1565c0" }}>🤖 Automation Active</h3>
+              <p>All platforms are running. Content checks are automated.</p>
+            </div>
             <PlatformHealthPanel />
             <SystemHealthPanel />
           </div>
         );
 
-      case "audit":
-        return <AdminAuditViewer />;
+      /* Removed Audit */
 
-      case "support":
-        return <SupportPanel />;
-
-      case "moderation":
-        return <ModerationPanel dashboardData={dashboardData} />;
-
-      case "payouts":
-        return <AdminPayoutsPanel />;
-
-      case "subscriptions":
-        return <PayPalSubscriptionPanel />;
-
-      case "openai":
-        return <OpenAIUsagePanel dashboardData={dashboardData} openAIUsage={openAIUsage} />;
-
-      case "notifications":
-        return <NotificationManagementPanel dashboardData={dashboardData} />;
+      // Removed: Support, Moderation, Payouts, Subscriptions, OpenAI, Notifications
 
       case "ads":
         return <AdsManagementPanel dashboardData={dashboardData} />;
@@ -3628,22 +3679,10 @@ function AdminDashboard({ analytics, user, onLogout }) {
         </div>
       </div>
       <div style={{ marginBottom: "24px", display: "flex", flexWrap: "wrap" }}>
-        <TabButton name="overview" label="Overview" icon="📊" />
-        <TabButton name="users" label="Users" icon="👥" />
         <TabButton name="content" label="Content" icon="📄" />
         <TabButton name="revenue" label="Revenue" icon="💰" />
-        <TabButton name="ads" label="Ads" icon="📢" />
-        <TabButton name="community" label="Community" icon="🎭" />
-        <TabButton name="approval" label="Content Approval" icon="✅" />
-        <TabButton name="analytics" label="Advanced Analytics" icon="📈" />
-        <TabButton name="system" label="System Health" icon="⚡" />
-        <TabButton name="audit" label="Audit Logs" icon="📜" />
-        <TabButton name="support" label="Support" icon="🎧" />
-        <TabButton name="moderation" label="Moderation" icon="🛡️" />
-        <TabButton name="subscriptions" label="Subscriptions" icon="💳" />
-        <TabButton name="payouts" label="Payouts" icon="💸" />
-        <TabButton name="openai" label="AI Usage" icon="🤖" />
-        <TabButton name="notifications" label="Notifications" icon="📧" />
+        <TabButton name="users" label="Users" icon="👥" />
+        <TabButton name="system" label="Automation Status" icon="🤖" />
       </div>
       {error && (
         <div
