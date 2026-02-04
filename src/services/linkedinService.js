@@ -35,9 +35,18 @@ async function getUserLinkedInConnection(uid) {
  */
 async function getValidAccessToken(uid) {
   const connection = await getUserLinkedInConnection(uid);
-  if (!connection || !connection.tokens) return null;
+  if (!connection || !connection.tokens) {
+    console.warn(`[LinkedIn] No connection/tokens for ${uid}`);
+    return null;
+  }
 
   const tokens = connection.tokens;
+
+  // Backward compatibility: If tokens is just a string, assume it IS the access token (legacy/manual set)
+  if (typeof tokens === "string" && !tokens.access_token) {
+    return tokens; // Return the raw string as the access token
+  }
+
   const now = Date.now();
 
   // Check if token is still valid (LinkedIn tokens typically last 60 days)
@@ -60,6 +69,7 @@ async function getValidAccessToken(uid) {
 async function getUserProfile(accessToken) {
   if (!fetchFn) throw new Error("Fetch not available");
 
+  // Try v2/me (Classic / r_liteprofile)
   const response = await safeFetch("https://api.linkedin.com/v2/me", fetchFn, {
     fetchOptions: {
       method: "GET",
@@ -71,6 +81,38 @@ async function getUserProfile(accessToken) {
     requireHttps: true,
     allowHosts: ["api.linkedin.com"],
   });
+
+  if (response.ok) {
+    const profile = await response.json();
+    return profile.id; // Returns the person URN ID
+  }
+
+  // Fallback: Try /v2/userinfo (OIDC / profile)
+  // New tokens often only have 'profile' scope which doesn't allow /v2/me
+  if (response.status === 403) {
+    try {
+      const oidcConn = await safeFetch("https://api.linkedin.com/v2/userinfo", fetchFn, {
+        fetchOptions: {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            // OIDC endpoint might not need X-Restli-Protocol-Version, but it shouldn't hurt or can be omitted
+          },
+        },
+        requireHttps: true,
+        allowHosts: ["api.linkedin.com"],
+      });
+
+      if (oidcConn.ok) {
+        const oidcProfile = await oidcConn.json();
+        if (oidcProfile.sub) {
+          return oidcProfile.sub; // OIDC subject ID matches person URN ID
+        }
+      }
+    } catch (e) {
+      console.warn("LinkedIn OIDC fallback failed:", e.message);
+    }
+  }
 
   if (!response.ok) {
     const error = await response.text();
@@ -133,7 +175,10 @@ async function uploadImage({ uid, imageUrl }) {
   // Step 2: Download image
   const imageResponse = await safeFetch(imageUrl, fetchFn, { requireHttps: true });
   if (!imageResponse.ok) throw new Error("Failed to download image");
-  const imageBuffer = await imageResponse.buffer();
+  const imageBuffer =
+    typeof imageResponse.buffer === "function"
+      ? await imageResponse.buffer()
+      : Buffer.from(await imageResponse.arrayBuffer());
 
   // Step 3: Upload image
   const uploadResponse = await fetch(uploadUrl, {
@@ -205,9 +250,11 @@ async function uploadVideo({ uid, videoUrl }) {
   const videoResponse = await safeFetch(videoUrl, fetchFn, { requireHttps: true });
   if (!videoResponse.ok) throw new Error("Failed to download video for upload");
 
-  // Use buffer for compatibility, though stream is preferred for large files
-  // (Assuming files are reasonable size < 50MB for this implementation)
-  const videoBuffer = await videoResponse.buffer();
+  // Use buffer for compatibility
+  const videoBuffer =
+    typeof videoResponse.buffer === "function"
+      ? await videoResponse.buffer()
+      : Buffer.from(await videoResponse.arrayBuffer());
 
   // Step 3: Upload video
   const uploadResponse = await fetch(uploadUrl, {

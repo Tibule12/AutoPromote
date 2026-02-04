@@ -1,4 +1,3 @@
- 
 const express = require("express");
 const router = express.Router();
 const { db } = require("./firebaseAdmin");
@@ -23,7 +22,7 @@ if (
 let _engagementBoostingService; // require('./services/engagementBoostingService');
 // eslint-disable-next-line no-unused-vars
 let _growthAssuranceTracker; // require('./services/growthAssuranceTracker');
- 
+
 let _contentQualityEnhancer; // require('./services/contentQualityEnhancer');
 // eslint-disable-next-line no-unused-vars
 let _repostDrivenEngine; // require('./services/repostDrivenEngine');
@@ -243,9 +242,9 @@ router.post(
         user_id: userId,
         created_at: new Date(),
         // Approval status used by admin UI/routes. Keep in sync with `status` for compatibility.
-        approvalStatus: isAdmin ? "approved" : "pending",
-        // default to pending_approval for non-admin uploads; admins are auto-approved
-        status: isAdmin ? "approved" : "pending_approval",
+        // IMMEDIATE PUBLISH MODE: All users are auto-approved per user request.
+        approvalStatus: "approved",
+        status: "approved",
         viral_optimized: true,
       };
 
@@ -501,8 +500,10 @@ router.post(
 
       // If uploader is not an admin, do not create promotion schedules or enqueue platform posts here.
       // Firestore triggers (createPromotionOnApproval) will run when an admin changes status to 'approved'.
+      // UPDATE: Immediate Publish Mode enabled for all users.
       let promotion_schedule = null;
-      if (isAdmin) {
+      if (true) {
+        // Was if (isAdmin)
         const scheduleData = {
           contentId: contentRef.id,
           user_id: userId,
@@ -557,7 +558,9 @@ router.post(
       const platformTasks = [];
 
       // Only enqueue platform tasks immediately when the uploader is an admin (auto-approved)
-      if (isAdmin && Array.isArray(target_platforms)) {
+      // UPDATE: Immediate Publish Mode enabled for all users.
+      if (Array.isArray(target_platforms)) {
+        // Was if (isAdmin && Array.isArray(target_platforms))
         for (const platform of target_platforms) {
           try {
             const optionsForPlatform =
