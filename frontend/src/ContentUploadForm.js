@@ -263,18 +263,10 @@ function ContentUploadForm({
     duet: false,
     stitch: false,
   });
-  // Track which interactions should be disabled (based on creator_info)
-  const [tiktokInteractionDisabled, setTiktokInteractionDisabled] = useState({
-    comments: false,
-    duet: false,
-    stitch: false,
-  });
   // TikTok Commercial Content Disclosure (2026 guideline) state
   const [tiktokDisclosureEnabled, setTiktokDisclosureEnabled] = useState(false);
   const [tiktokYourBrand, setTiktokYourBrand] = useState(false);
   const [tiktokBrandedContent, setTiktokBrandedContent] = useState(false);
-  const [showBrandTooltip, setShowBrandTooltip] = useState(false);
-  const [showBrandedTooltip, setShowBrandedTooltip] = useState(false);
   // Legacy: keep tiktokCommercial for backward compatibility if used elsewhere
   const [tiktokCommercial, setTiktokCommercial] = useState({
     isCommercial: false,
@@ -368,62 +360,6 @@ function ContentUploadForm({
     if (yourBrand && !branded)
       return "By posting, you agree to TikTok&apos;s Music Usage Confirmation.";
     return "By posting, you agree to TikTok&apos;s Branded Content Policy and Music Usage Confirmation.";
-  };
-
-  const getTikTokDeclarationJSX = () => {
-    const isCommercial = tiktokCommercial && tiktokCommercial.isCommercial;
-    const branded = tiktokCommercial && tiktokCommercial.brandedContent;
-    if (!isCommercial) {
-      return (
-        <>
-          By posting, you agree to{" "}
-          <a
-            href="https://www.tiktok.com/legal/music-usage-policy"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            TikTok's Music Usage Confirmation
-          </a>
-          .
-        </>
-      );
-    }
-    if (branded) {
-      return (
-        <>
-          By posting, you agree to{" "}
-          <a
-            href="https://www.tiktok.com/community-guidelines/en/branded-content/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            TikTok's Branded Content Policy
-          </a>{" "}
-          and{" "}
-          <a
-            href="https://www.tiktok.com/legal/music-usage-policy"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Music Usage Confirmation
-          </a>
-          .
-        </>
-      );
-    }
-    return (
-      <>
-        By posting, you agree to{" "}
-        <a
-          href="https://www.tiktok.com/legal/music-usage-policy"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          TikTok's Music Usage Confirmation
-        </a>
-        .
-      </>
-    );
   };
 
   useEffect(() => {
@@ -684,11 +620,6 @@ function ContentUploadForm({
           setTiktokPrivacy("");
           // Respect suggested interactions only for enabling/disabling; do NOT auto-check interactions.
           if (json.creator.interactions) {
-            setTiktokInteractionDisabled({
-              comments: json.creator.interactions.comments === false,
-              duet: json.creator.interactions.duet === false,
-              stitch: json.creator.interactions.stitch === false,
-            });
             // Ensure disabled interactions are unchecked
             setTiktokInteractions(prev => ({
               comments: json.creator.interactions.comments === false ? false : prev.comments,
