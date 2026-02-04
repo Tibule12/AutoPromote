@@ -28,7 +28,8 @@ const AdsPanel = () => {
     const q = query(
       collection(db, "ads"),
       where("userId", "==", user.uid),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
+      limit(50)
     );
 
     const unsubscribe = onSnapshot(q, snapshot => {

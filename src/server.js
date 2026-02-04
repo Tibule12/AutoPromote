@@ -3531,6 +3531,24 @@ if (process.env.SCHEDULER_ENABLED !== "false") {
       30 * 60 * 1000
     ).unref();
   }
+
+  // 3. Storage Cleanup (Daily)
+  // Replaces the paid Firebase Cloud Function 'cleanupTempUploads'
+  if (process.env.ENABLE_BACKGROUND_JOBS === "true") {
+    setInterval(
+      async () => {
+        const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
+        if (!isLeader) return;
+        try {
+          const { cleanupTempUploads } = require("./services/storageCleanupService");
+          await cleanupTempUploads();
+        } catch (e) {
+          console.error("[Scheduler] ⚠️ Storage cleanup failed:", e.message);
+        }
+      },
+      24 * 60 * 60 * 1000
+    ).unref(); // Every 24 hours
+  }
 }
 
 // Optional scheduled integration scan runner (outside try-catch to ensure we can log if not enabled)
