@@ -615,6 +615,20 @@
     },
     {
       "collectionGroup": "promotion_schedules",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startTime",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "promotion_schedules",
       "queryScope": "COLLECTION",
       "fields": [
         {
