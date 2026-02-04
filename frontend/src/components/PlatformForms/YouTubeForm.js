@@ -19,6 +19,7 @@ const YouTubeForm = ({
   const [tags, setTags] = useState(initialData.tags || "");
   const [category, setCategory] = useState(initialData.category || "22"); // 22 = People & Blogs
   const [paidPromotion, setPaidPromotion] = useState(initialData.paidPromotion || false);
+  const [shortsMode, setShortsMode] = useState(initialData.shortsMode || false);
 
   useEffect(() => {
     onChange({
@@ -30,8 +31,9 @@ const YouTubeForm = ({
       tags,
       category,
       paidPromotion,
+      shortsMode,
     });
-  }, [title, description, privacy, madeForKids, tags, category, paidPromotion]);
+  }, [title, description, privacy, madeForKids, tags, category, paidPromotion, shortsMode]);
 
   const categories = [
     { id: "1", name: "Film & Animation" },
@@ -188,6 +190,21 @@ const YouTubeForm = ({
           />
           <span className="checkmark"></span>
           <span className="label-text">Includes Paid Promotion</span>
+        </label>
+
+        <label className="checkbox-modern">
+          <input
+            type="checkbox"
+            checked={shortsMode}
+            onChange={e => setShortsMode(e.target.checked)}
+          />
+          <span className="checkmark"></span>
+          <span className="label-text">
+            Shorts (Portrait &lt;60s)
+            <span className="tooltip-icon" title="Upload as YouTube Short">
+              ?
+            </span>
+          </span>
         </label>
       </div>
 

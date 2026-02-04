@@ -4412,8 +4412,15 @@ function ContentUploadForm({
                                 extSetPlatformOption(platform, k, v)
                               );
                             }
+                            // Local Sync
+                            if (vals.shortsMode !== undefined) setYoutubeShorts(vals.shortsMode);
+                            if (vals.privacy) setYoutubeVisibility(vals.privacy);
                           }}
-                          initialData={extPlatformOptions?.youtube}
+                          initialData={{
+                            ...extPlatformOptions?.youtube,
+                            shortsMode: youtubeShorts,
+                            privacy: youtubeVisibility || extPlatformOptions?.youtube?.privacy,
+                          }}
                           globalTitle={title}
                           globalDescription={description}
                           bountyAmount={bountyAmount}
@@ -4641,7 +4648,7 @@ function ContentUploadForm({
                       </div>
                     )}
                     {expandedPlatform === "discord" && (
-                      <div style={{ marginTop: 8 }}>
+                      <div className="platform-form discord-form" style={{ marginTop: 8 }}>
                         <div
                           style={{
                             backgroundColor: "rgba(88, 101, 242, 0.1)",
@@ -4858,7 +4865,7 @@ function ContentUploadForm({
                       </div>
                     )}
                     {expandedPlatform === "telegram" && (
-                      <div style={{ marginTop: 8 }}>
+                      <div className="platform-form telegram-form" style={{ marginTop: 8 }}>
                         <div
                           style={{
                             backgroundColor: "rgba(0, 136, 204, 0.1)",
@@ -5016,34 +5023,6 @@ function ContentUploadForm({
                     )}
                     {expandedPlatform === "youtube" && (
                       <div style={{ display: "grid", gap: 8 }}>
-                        <label>YouTube Visibility</label>
-                        <select
-                          id="youtube-visibility"
-                          value={youtubeVisibility}
-                          onChange={e => {
-                            setYoutubeVisibility(e.target.value);
-                            if (typeof extSetPlatformOption === "function")
-                              extSetPlatformOption("youtube", "visibility", e.target.value);
-                          }}
-                          className="form-select"
-                        >
-                          <option value="public">Public</option>
-                          <option value="unlisted">Unlisted</option>
-                          <option value="private">Private</option>
-                        </select>
-                        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <input
-                            id="youtube-shorts"
-                            type="checkbox"
-                            checked={youtubeShorts}
-                            onChange={e => {
-                              setYoutubeShorts(e.target.checked);
-                              if (typeof extSetPlatformOption === "function")
-                                extSetPlatformOption("youtube", "shortsMode", e.target.checked);
-                            }}
-                          />{" "}
-                          Shorts (short-form)
-                        </label>
                         {perPlatformPreviews["youtube"] && (
                           <div style={{ marginTop: 8 }} className="preview-cards">
                             {perPlatformPreviews["youtube"].map((p, idx) => (
@@ -5116,7 +5095,7 @@ function ContentUploadForm({
             </div>
             {/* Per-platform options are also available here when a platform is selected */}
             {selectedPlatformsVal.includes("discord") && (
-              <div className="form-group">
+              <div className="form-group platform-form discord-form">
                 <label>Discord Channel ID</label>
                 <input
                   placeholder="Discord channel ID"
@@ -5131,7 +5110,7 @@ function ContentUploadForm({
               </div>
             )}
             {selectedPlatformsVal.includes("telegram") && (
-              <div className="form-group">
+              <div className="form-group platform-form telegram-form">
                 <label>Telegram Chat ID</label>
                 <input
                   placeholder="Telegram chat ID"
@@ -5146,7 +5125,7 @@ function ContentUploadForm({
               </div>
             )}
             {selectedPlatformsVal.includes("reddit") && (
-              <div className="form-group">
+              <div className="form-group platform-form reddit-form">
                 <label>Reddit Subreddit</label>
                 <input
                   placeholder="Reddit subreddit"
@@ -5161,7 +5140,7 @@ function ContentUploadForm({
               </div>
             )}
             {selectedPlatformsVal.includes("linkedin") && (
-              <div className="form-group">
+              <div className="form-group platform-form linkedin-form">
                 <label>LinkedIn Organization ID</label>
                 <input
                   placeholder="LinkedIn organization/company ID"
@@ -5193,7 +5172,7 @@ function ContentUploadForm({
             {/* TikTok-specific publish options required for Direct Post API compliance */}
             {selectedPlatformsVal.includes("tiktok") && (
               <div
-                className="form-group tiktok-options"
+                className="form-group tiktok-options platform-form tiktok-form"
                 style={{
                   border: "1px solid #efeef0",
                   padding: 12,

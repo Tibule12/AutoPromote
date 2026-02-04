@@ -382,3 +382,139 @@ input:checked + .toggle-slider:before {
     transform: translateY(0);
   }
 }
+
+/* High Contrast & Visibility Overrides (All Platforms) */
+
+/* Labels, Text, Headers */
+.youtube-form label,
+.youtube-form span,
+.youtube-form p,
+.youtube-form div,
+.youtube-form h4,
+.youtube-form h5,
+.tiktok-form label,
+.tiktok-form span,
+.tiktok-form p,
+.tiktok-form div,
+.tiktok-form h4,
+.tiktok-form h5,
+.instagram-form label,
+.instagram-form span,
+.instagram-form p,
+.instagram-form div,
+.instagram-form h4,
+.instagram-form h5,
+.facebook-form label,
+.facebook-form span,
+.facebook-form p,
+.facebook-form div,
+.facebook-form h4,
+.facebook-form h5,
+.linkedin-form label,
+.linkedin-form span,
+.linkedin-form p,
+.linkedin-form div,
+.linkedin-form h4,
+.linkedin-form h5,
+.pinterest-form label,
+.pinterest-form span,
+.pinterest-form p,
+.pinterest-form div,
+.pinterest-form h4,
+.pinterest-form h5,
+.reddit-form label,
+.reddit-form span,
+.reddit-form p,
+.reddit-form div,
+.reddit-form h4,
+.reddit-form h5,
+.spotify-form label,
+.spotify-form span,
+.spotify-form p,
+.spotify-form div,
+.spotify-form h4,
+.spotify-form h5,
+.discord-form label,
+.discord-form span,
+.discord-form p,
+.discord-form div,
+.discord-form h4,
+.discord-form h5,
+.telegram-form label,
+.telegram-form span,
+.telegram-form p,
+.telegram-form div,
+.telegram-form h4,
+.telegram-form h5 {
+  color: #000000 !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
+}
+
+/* Inputs */
+.youtube-form input,
+.youtube-form textarea,
+.youtube-form select,
+.tiktok-form input,
+.tiktok-form textarea,
+.tiktok-form select,
+.instagram-form input,
+.instagram-form textarea,
+.instagram-form select,
+.facebook-form input,
+.facebook-form textarea,
+.facebook-form select,
+.linkedin-form input,
+.linkedin-form textarea,
+.linkedin-form select,
+.pinterest-form input,
+.pinterest-form textarea,
+.pinterest-form select,
+.reddit-form input,
+.reddit-form textarea,
+.reddit-form select,
+.spotify-form input,
+.spotify-form textarea,
+.spotify-form select,
+.discord-form input,
+.discord-form textarea,
+.discord-form select,
+.telegram-form input,
+.telegram-form textarea,
+.telegram-form select {
+  font-weight: 700 !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Placeholders */
+.youtube-form input::placeholder,
+.youtube-form textarea::placeholder,
+.tiktok-form input::placeholder,
+.tiktok-form textarea::placeholder,
+.instagram-form input::placeholder,
+.instagram-form textarea::placeholder,
+.facebook-form input::placeholder,
+.facebook-form textarea::placeholder,
+.linkedin-form input::placeholder,
+.linkedin-form textarea::placeholder,
+.pinterest-form input::placeholder,
+.pinterest-form textarea::placeholder,
+.reddit-form input::placeholder,
+.reddit-form textarea::placeholder,
+.spotify-form input::placeholder,
+.spotify-form textarea::placeholder,
+.discord-form input::placeholder,
+.discord-form textarea::placeholder,
+.telegram-form input::placeholder,
+.telegram-form textarea::placeholder {
+  color: #444444 !important;
+  font-weight: 600 !important;
+}
+
+/* Scope info box specific for youtube but kept for consistency if reused */
+.youtube-form .scope-info-box {
+  background-color: #fff0f0 !important;
+  border-color: #ff0000 !important;
+}
