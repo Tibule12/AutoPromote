@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import { auth } from "../firebaseClient";
-import "./AdminDashboard.css"; // Reuse card styles
+import "../AdminDashboard.css"; // Reuse card styles
 
 function PlatformHealthPanel() {
   const [platforms, setPlatforms] = useState(null);
