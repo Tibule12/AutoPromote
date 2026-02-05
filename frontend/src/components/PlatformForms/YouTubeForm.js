@@ -122,13 +122,16 @@ const YouTubeForm = ({
       )}
 
       <div className="form-group-modern">
-        <label className="form-label-bold">Video File</label>
+        <label htmlFor="youtube-file-input" className="form-label-bold">
+          Video File
+        </label>
         <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
           {currentFile
             ? `Selected: ${currentFile.name}`
             : "Use global file or select unique file for YouTube"}
         </div>
         <input
+          id="youtube-file-input"
           type="file"
           accept="video/*"
           onChange={e => onFileChange && onFileChange(e.target.files[0])}
@@ -194,9 +197,10 @@ const YouTubeForm = ({
       </div>
 
       <div className="form-group-modern">
-        <label>Video Title</label>
+        <label htmlFor="youtube-title-input">Video Title</label>
         <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
           <input
+            id="youtube-title-input"
             type="text"
             className="modern-input"
             value={title}

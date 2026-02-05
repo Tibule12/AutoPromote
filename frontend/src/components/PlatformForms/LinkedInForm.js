@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 
-const LinkedInForm = ({ onChange, initialData = {}, globalTitle, globalDescription }) => {
+const LinkedInForm = ({
+  onChange,
+  initialData = {},
+  globalTitle,
+  globalDescription,
+  currentFile,
+  onFileChange,
+}) => {
   const [visibility, setVisibility] = useState(initialData.visibility || "PUBLIC");
   const [commentary, setCommentary] = useState(initialData.commentary || globalDescription || "");
   const [title, setTitle] = useState(initialData.title || globalTitle || ""); // For articles/videos
@@ -28,8 +35,9 @@ const LinkedInForm = ({ onChange, initialData = {}, globalTitle, globalDescripti
       </h4>
 
       <div className="form-group-modern">
-        <label>Organization / Company ID (Required)</label>
+        <label htmlFor="linkedin-company-id">Organization / Company ID (Required)</label>
         <input
+          id="linkedin-company-id"
           type="text"
           className="modern-input"
           value={companyId}
@@ -39,6 +47,25 @@ const LinkedInForm = ({ onChange, initialData = {}, globalTitle, globalDescripti
         <p className="help-text" style={{ fontSize: "0.75rem", color: "#666", marginTop: "4px" }}>
           The numeric ID of your LinkedIn Organization page.
         </p>
+      </div>
+
+      <div className="form-group-modern">
+        <label htmlFor="linkedin-file-input" className="form-label-bold">
+          Video File
+        </label>
+        <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
+          {currentFile
+            ? `Selected: ${currentFile.name}`
+            : "Use global file or select unique file for LinkedIn"}
+        </div>
+        <input
+          id="linkedin-file-input"
+          type="file"
+          accept="video/*"
+          onChange={e => onFileChange && onFileChange(e.target.files[0])}
+          className="modern-input"
+          style={{ padding: 8 }}
+        />
       </div>
 
       <div className="form-group-modern">
