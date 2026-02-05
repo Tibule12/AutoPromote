@@ -1681,6 +1681,15 @@ function ContentUploadForm({
         throw new Error("Please select a file to upload.");
       }
 
+      // 🛑 COST CONTROL: 100MB Limit per file for Free Tier (Everyone)
+      // This protects your Firebase Storage bill.
+      const MAX_SIZE_MB = 100;
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        throw new Error(
+          `File too large. Free tier limit is ${MAX_SIZE_MB}MB. Please compress your video.`
+        );
+      }
+
       // TikTok-specific client-side checks (Direct Post compliance)
       if (selectedPlatformsVal.includes("tiktok")) {
         // Require explicit consent checkbox
