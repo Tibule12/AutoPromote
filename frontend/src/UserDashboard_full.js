@@ -1540,7 +1540,7 @@ const UserDashboard = ({
 
         {activeTab === "community" && <CommunityPanel />}
 
-        {activeTab === "clips" && <ClipStudioPanel content={contentList} />}
+        {activeTab === "clips" && <ClipStudioPanel content={contentList} onRefresh={onUpload} />}
         {activeTab === "live" && (
           <div className="live-panel">
             <LiveHub user={user} />

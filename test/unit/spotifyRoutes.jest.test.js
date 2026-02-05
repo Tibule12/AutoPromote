@@ -51,14 +51,14 @@ describe('Spotify Routes', () => {
     });
 
     it('should return results when search is successful', async () => {
-      const mockResults = { tracks: [{ id: '1', name: 'Song' }] };
+      const mockResults = { results: [{ id: '1', name: 'Song' }] };
       spotifyService.searchTracks.mockResolvedValue(mockResults);
 
       const res = await request(app).get('/api/spotify/search?q=test');
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
         ok: true,
-        results: mockResults.tracks
+        results: mockResults.results
       });
       expect(spotifyService.searchTracks).toHaveBeenCalledWith({
         uid: 'test-user-id',

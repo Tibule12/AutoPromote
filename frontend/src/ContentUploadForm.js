@@ -297,6 +297,172 @@ function ContentUploadForm({
     }));
   }, [tiktokDisclosureEnabled, tiktokYourBrand, tiktokBrandedContent]);
 
+  const handleTikTokChange = React.useCallback(
+    data => {
+      const { platform, ...vals } = data;
+      if (typeof extSetPlatformOption === "function") {
+        Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+      }
+      // Local state sync for upload logic
+      if (vals.privacy) setTiktokPrivacy(vals.privacy);
+      setTiktokInteractions(prev => ({
+        ...prev,
+        comments: vals.allowComments ?? prev.comments,
+        duet: vals.allowDuet ?? prev.duet,
+        stitch: vals.allowStitch ?? prev.stitch,
+      }));
+      if (vals.commercialContent !== undefined) {
+        setTiktokDisclosureEnabled(vals.commercialContent);
+        setTiktokYourBrand(vals.yourBrand || false);
+        setTiktokBrandedContent(vals.brandedContent || false);
+      }
+      if (vals.consentChecked !== undefined) {
+        setTiktokConsentChecked(vals.consentChecked);
+      }
+    },
+    [extSetPlatformOption]
+  );
+
+  const handleFacebookChange = React.useCallback(
+    data => {
+      const { platform, ...vals } = data;
+      if (typeof extSetPlatformOption === "function") {
+        Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+      }
+    },
+    [extSetPlatformOption]
+  );
+
+  const handleInstagramChange = React.useCallback(
+    data => {
+      const { platform, ...vals } = data;
+      if (typeof extSetPlatformOption === "function") {
+        Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+      }
+      // Local Sync
+      if (vals.caption) setPerPlatformTitle(prev => ({ ...prev, instagram: vals.caption }));
+      setInstagramSettings(prev => ({
+        ...prev,
+        location: vals.location,
+        shareToFeed: vals.shareToFeed,
+      }));
+    },
+    [extSetPlatformOption]
+  );
+
+  const handleYouTubeChange = React.useCallback(
+    data => {
+      const { platform, ...vals } = data;
+      if (typeof extSetPlatformOption === "function") {
+        Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+      }
+      // Local Sync
+      if (vals.shortsMode !== undefined) setYoutubeShorts(vals.shortsMode);
+      if (vals.privacy) setYoutubeVisibility(vals.privacy);
+    },
+    [extSetPlatformOption]
+  );
+
+  const handleLinkedInChange = React.useCallback(
+    data => {
+      const { platform, ...vals } = data;
+      if (typeof extSetPlatformOption === "function") {
+        Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+      }
+      if (vals.companyId) setLinkedinCompanyId(vals.companyId);
+      if (vals.commentary)
+        setPerPlatformDescription(prev => ({ ...prev, linkedin: vals.commentary }));
+      if (vals.title) setPerPlatformTitle(prev => ({ ...prev, linkedin: vals.title }));
+      if (vals.visibility) setLinkedinSettings(prev => ({ ...prev, visibility: vals.visibility }));
+    },
+    [extSetPlatformOption]
+  );
+
+  const handlePinterestChange = React.useCallback(
+    data => {
+      const { platform, ...vals } = data;
+      if (typeof extSetPlatformOption === "function") {
+        Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+      }
+      if (vals.boardId) setPinterestBoard(vals.boardId);
+      if (vals.title) setPerPlatformTitle(prev => ({ ...prev, pinterest: vals.title }));
+      if (vals.description)
+        setPerPlatformDescription(prev => ({ ...prev, pinterest: vals.description }));
+      if (vals.link) setPinterestSettings(prev => ({ ...prev, linkUrl: vals.link }));
+    },
+    [extSetPlatformOption]
+  );
+
+  const handleRedditChange = React.useCallback(
+    data => {
+      const { platform, ...vals } = data;
+      if (typeof extSetPlatformOption === "function") {
+        Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+      }
+      if (vals.subreddit) setRedditSubreddit(vals.subreddit);
+      if (vals.title) setPerPlatformTitle(prev => ({ ...prev, reddit: vals.title }));
+      setRedditSettings(prev => ({
+        ...prev,
+        flair: vals.flairId ?? prev.flair,
+        nsfw: vals.isNSFW ?? prev.nsfw,
+        spoiler: vals.isSpoiler ?? prev.spoiler,
+      }));
+    },
+    [extSetPlatformOption]
+  );
+
+  const handleTwitterChange = React.useCallback(
+    data => {
+      const { platform, ...vals } = data;
+      if (typeof extSetPlatformOption === "function") {
+        if (vals.message !== undefined) extSetPlatformOption("twitter", "message", vals.message);
+        if (vals.threadMode !== undefined)
+          extSetPlatformOption("twitter", "threadMode", vals.threadMode);
+      }
+      // Local Sync
+      if (vals.message !== undefined) setTwitterMessage(vals.message);
+      if (vals.threadMode !== undefined)
+        setTwitterSettings(prev => ({ ...prev, threadMode: vals.threadMode }));
+    },
+    [extSetPlatformOption]
+  );
+
+  const handleSpotifyChange = React.useCallback(
+    (key, val) => {
+      if (typeof extSetPlatformOption === "function") {
+        extSetPlatformOption("spotify", key, val);
+      } else {
+        setSpotifySettings(prev => ({ ...prev, [key]: val }));
+      }
+    },
+    [extSetPlatformOption]
+  );
+
+  const handleSpotifyTrackSelect = React.useCallback(
+    track => {
+      const setter =
+        typeof extSetSpotifySelectedTracks === "function"
+          ? extSetSpotifySelectedTracks
+          : setSpotifyTracks;
+      setter(prev => {
+        if (prev.some(t => t.id === track.id)) return prev;
+        return [...prev, track];
+      });
+    },
+    [extSetSpotifySelectedTracks]
+  );
+
+  const handleSpotifyTrackRemove = React.useCallback(
+    trackId => {
+      const setter =
+        typeof extSetSpotifySelectedTracks === "function"
+          ? extSetSpotifySelectedTracks
+          : setSpotifyTracks;
+      setter(prev => prev.filter(t => t.id !== trackId));
+    },
+    [extSetSpotifySelectedTracks]
+  );
+
   // Preview / Confirm modal state
   const [showPreviewEditModal, setShowPreviewEditModal] = useState(false);
   // Keep track of created object URLs (so we can revoke them on unmount)
@@ -2550,12 +2716,7 @@ function ContentUploadForm({
         </div>
         {p === "facebook" && (
           <FacebookForm
-            onChange={data => {
-              const { platform, ...vals } = data;
-              if (typeof extSetPlatformOption === "function") {
-                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
-              }
-            }}
+            onChange={handleFacebookChange}
             initialData={extPlatformOptions?.facebook}
             globalTitle={title}
             globalDescription={description}
@@ -2567,15 +2728,7 @@ function ContentUploadForm({
           <YouTubeForm
             onFileChange={f => handlePerPlatformFileChange("youtube", f)}
             currentFile={perPlatformFile?.youtube}
-            onChange={data => {
-              const { platform, ...vals } = data;
-              if (typeof extSetPlatformOption === "function") {
-                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
-              }
-              // Local Sync
-              if (vals.shortsMode !== undefined) setYoutubeShorts(vals.shortsMode);
-              if (vals.privacy) setYoutubeVisibility(vals.privacy);
-            }}
+            onChange={handleYouTubeChange}
             initialData={{
               ...extPlatformOptions?.youtube,
               shortsMode: youtubeSettings.shortsMode || youtubeShorts,
@@ -2595,28 +2748,7 @@ function ContentUploadForm({
             onFileChange={f => handlePerPlatformFileChange("tiktok", f)}
             currentFile={perPlatformFile?.tiktok}
             type={type}
-            onChange={data => {
-              const { platform, ...vals } = data;
-              if (typeof extSetPlatformOption === "function") {
-                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
-              }
-              // Local state sync for upload logic
-              if (vals.privacy) setTiktokPrivacy(vals.privacy);
-              setTiktokInteractions(prev => ({
-                ...prev,
-                comments: vals.allowComments ?? prev.comments,
-                duet: vals.allowDuet ?? prev.duet,
-                stitch: vals.allowStitch ?? prev.stitch,
-              }));
-              if (vals.commercialContent !== undefined) {
-                setTiktokDisclosureEnabled(vals.commercialContent);
-                setTiktokYourBrand(vals.yourBrand || false);
-                setTiktokBrandedContent(vals.brandedContent || false);
-              }
-              if (vals.consentChecked !== undefined) {
-                setTiktokConsentChecked(vals.consentChecked);
-              }
-            }}
+            onChange={handleTikTokChange}
             initialData={extPlatformOptions?.tiktok}
             creatorInfo={tiktokCreatorInfo}
             globalTitle={title}
@@ -2633,12 +2765,7 @@ function ContentUploadForm({
             onFileChange={f => handlePerPlatformFileChange("instagram", f)}
             currentFile={perPlatformFile?.instagram}
             facebookPages={facebookPages || []}
-            onChange={data => {
-              const { platform, ...vals } = data;
-              if (typeof extSetPlatformOption === "function") {
-                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
-              }
-            }}
+            onChange={handleInstagramChange}
             initialData={extPlatformOptions?.instagram}
             globalTitle={title}
             globalDescription={description}
@@ -2651,13 +2778,9 @@ function ContentUploadForm({
 
         {p === "linkedin" && (
           <LinkedInForm
-            onChange={data => {
-              const { platform, ...vals } = data;
-              if (typeof extSetPlatformOption === "function") {
-                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
-              }
-              if (vals.companyId) setLinkedinCompanyId(vals.companyId);
-            }}
+            onFileChange={f => handlePerPlatformFileChange("linkedin", f)}
+            currentFile={perPlatformFile?.linkedin}
+            onChange={handleLinkedInChange}
             initialData={{ ...extPlatformOptions?.linkedin, companyId: linkedinCompanyId }}
             globalTitle={title}
             globalDescription={description}
@@ -2668,13 +2791,7 @@ function ContentUploadForm({
           <PinterestForm
             onFileChange={f => handlePerPlatformFileChange("pinterest", f)}
             currentFile={perPlatformFile?.pinterest}
-            onChange={data => {
-              const { platform, ...vals } = data;
-              if (typeof extSetPlatformOption === "function") {
-                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
-              }
-              if (vals.boardId) setPinterestBoard(vals.boardId);
-            }}
+            onChange={handlePinterestChange}
             initialData={{ ...extPlatformOptions?.pinterest, boardId: pinterestBoard }}
             globalTitle={title}
             globalDescription={description}
@@ -2684,13 +2801,7 @@ function ContentUploadForm({
 
         {p === "reddit" && (
           <RedditForm
-            onChange={data => {
-              const { platform, ...vals } = data;
-              if (typeof extSetPlatformOption === "function") {
-                Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
-              }
-              if (vals.subreddit) setRedditSubreddit(vals.subreddit);
-            }}
+            onChange={handleRedditChange}
             initialData={extPlatformOptions?.reddit}
             globalTitle={title}
             globalDescription={description}
@@ -2701,33 +2812,12 @@ function ContentUploadForm({
           <div className="platform-form spotify-form">
             <SpotifyForm
               data={extPlatformOptions?.spotify || spotifySettings}
-              onChange={(key, val) => {
-                if (typeof extSetPlatformOption === "function") {
-                  extSetPlatformOption("spotify", key, val);
-                } else {
-                  setSpotifySettings(prev => ({ ...prev, [key]: val }));
-                }
-              }}
+              onChange={handleSpotifyChange}
               selectedTracks={
                 Array.isArray(extSpotifySelectedTracks) ? extSpotifySelectedTracks : spotifyTracks
               }
-              onTrackSelect={track => {
-                const setter =
-                  typeof extSetSpotifySelectedTracks === "function"
-                    ? extSetSpotifySelectedTracks
-                    : setSpotifyTracks;
-                setter(prev => {
-                  if (prev.some(t => t.id === track.id)) return prev;
-                  return [...prev, track];
-                });
-              }}
-              onTrackRemove={trackId => {
-                const setter =
-                  typeof extSetSpotifySelectedTracks === "function"
-                    ? extSetSpotifySelectedTracks
-                    : setSpotifyTracks;
-                setter(prev => prev.filter(t => t.id !== trackId));
-              }}
+              onTrackSelect={handleSpotifyTrackSelect}
+              onTrackRemove={handleSpotifyTrackRemove}
             />
           </div>
         )}
@@ -2736,19 +2826,7 @@ function ContentUploadForm({
           <TwitterForm
             onFileChange={f => handlePerPlatformFileChange("twitter", f)}
             currentFile={perPlatformFile?.twitter}
-            onChange={data => {
-              const { platform, ...vals } = data;
-              if (typeof extSetPlatformOption === "function") {
-                if (vals.message !== undefined)
-                  extSetPlatformOption("twitter", "message", vals.message);
-                if (vals.threadMode !== undefined)
-                  extSetPlatformOption("twitter", "threadMode", vals.threadMode);
-              }
-              // Local Sync
-              if (vals.message !== undefined) setTwitterMessage(vals.message);
-              if (vals.threadMode !== undefined)
-                setTwitterSettings(prev => ({ ...prev, threadMode: vals.threadMode }));
-            }}
+            onChange={handleTwitterChange}
             initialData={{
               message: twitterMessage,
               threadMode: twitterSettings.threadMode,
@@ -2906,7 +2984,7 @@ function ContentUploadForm({
             bottom: 0,
             left: 0,
             right: 0,
-            background: isDark ? "#1a202c" : "#fff",
+            background: "#fff",
             borderTop: "1px solid #ccc",
             padding: "16px 24px",
             zIndex: 999,
@@ -2920,7 +2998,14 @@ function ContentUploadForm({
             className="btn btn-primary"
             type="button"
             style={{ fontWeight: "bold", fontSize: "1.1em", minWidth: 200 }}
-            disabled={isUploading || (focusedPlatform === "tiktok" && !tiktokConsentChecked)}
+            disabled={
+              isUploading ||
+              (focusedPlatform === "tiktok" &&
+                (!tiktokConsentChecked ||
+                  (extPlatformOptions?.tiktok?.commercialContent &&
+                    !extPlatformOptions?.tiktok?.yourBrand &&
+                    !extPlatformOptions?.tiktok?.brandedContent)))
+            }
             onClick={() => {
               if (focusedPlatform === "tiktok" && !tiktokConsentChecked) {
                 setConfirmTargetPlatform(focusedPlatform);
@@ -3644,30 +3729,7 @@ function ContentUploadForm({
                           type={type}
                           onFileChange={f => handlePerPlatformFileChange("tiktok", f)}
                           currentFile={perPlatformFile?.tiktok}
-                          onChange={data => {
-                            const { platform, ...vals } = data;
-                            if (typeof extSetPlatformOption === "function") {
-                              Object.entries(vals).forEach(([k, v]) =>
-                                extSetPlatformOption(platform, k, v)
-                              );
-                            }
-                            // Local state sync for upload logic
-                            if (vals.privacy) setTiktokPrivacy(vals.privacy);
-                            setTiktokInteractions(prev => ({
-                              ...prev,
-                              comments: vals.allowComments ?? prev.comments,
-                              duet: vals.allowDuet ?? prev.duet,
-                              stitch: vals.allowStitch ?? prev.stitch,
-                            }));
-                            if (vals.commercialContent !== undefined) {
-                              setTiktokDisclosureEnabled(vals.commercialContent);
-                              setTiktokYourBrand(vals.yourBrand || false);
-                              setTiktokBrandedContent(vals.brandedContent || false);
-                            }
-                            if (vals.consentChecked !== undefined) {
-                              setTiktokConsentChecked(vals.consentChecked);
-                            }
-                          }}
+                          onChange={handleTikTokChange}
                           initialData={extPlatformOptions?.tiktok}
                           creatorInfo={tiktokCreatorInfo}
                           globalTitle={title}
@@ -3685,17 +3747,7 @@ function ContentUploadForm({
                           creatorInfo={extPlatformMetadata?.youtube}
                           onFileChange={f => handlePerPlatformFileChange("youtube", f)}
                           currentFile={perPlatformFile?.youtube}
-                          onChange={data => {
-                            const { platform, ...vals } = data;
-                            if (typeof extSetPlatformOption === "function") {
-                              Object.entries(vals).forEach(([k, v]) =>
-                                extSetPlatformOption(platform, k, v)
-                              );
-                            }
-                            // Local Sync
-                            if (vals.shortsMode !== undefined) setYoutubeShorts(vals.shortsMode);
-                            if (vals.privacy) setYoutubeVisibility(vals.privacy);
-                          }}
+                          onChange={handleYouTubeChange}
                           initialData={{
                             ...extPlatformOptions?.youtube,
                             shortsMode: youtubeShorts,
@@ -3715,14 +3767,7 @@ function ContentUploadForm({
                         <FacebookForm
                           onFileChange={f => handlePerPlatformFileChange("facebook", f)}
                           currentFile={perPlatformFile?.facebook}
-                          onChange={data => {
-                            const { platform, ...vals } = data;
-                            if (typeof extSetPlatformOption === "function") {
-                              Object.entries(vals).forEach(([k, v]) =>
-                                extSetPlatformOption(platform, k, v)
-                              );
-                            }
-                          }}
+                          onChange={handleFacebookChange}
                           initialData={extPlatformOptions?.facebook}
                           globalTitle={title}
                           globalDescription={description}
@@ -3733,28 +3778,9 @@ function ContentUploadForm({
                     ) : expandedPlatform === "linkedin" ? (
                       <>
                         <LinkedInForm
-                          onChange={data => {
-                            const { platform, ...vals } = data;
-                            if (typeof extSetPlatformOption === "function") {
-                              Object.entries(vals).forEach(([k, v]) =>
-                                extSetPlatformOption(platform, k, v)
-                              );
-                            }
-                            // Local State Sync
-                            if (vals.companyId) setLinkedinCompanyId(vals.companyId);
-                            if (vals.commentary)
-                              setPerPlatformDescription(prev => ({
-                                ...prev,
-                                linkedin: vals.commentary,
-                              }));
-                            if (vals.title)
-                              setPerPlatformTitle(prev => ({ ...prev, linkedin: vals.title }));
-                            if (vals.visibility)
-                              setLinkedinSettings(prev => ({
-                                ...prev,
-                                visibility: vals.visibility,
-                              }));
-                          }}
+                          onFileChange={f => handlePerPlatformFileChange("linkedin", f)}
+                          currentFile={perPlatformFile?.linkedin}
+                          onChange={handleLinkedInChange}
                           initialData={{
                             ...extPlatformOptions?.linkedin,
                             companyId: linkedinCompanyId,
@@ -3769,25 +3795,7 @@ function ContentUploadForm({
                         <PinterestForm
                           onFileChange={f => handlePerPlatformFileChange("pinterest", f)}
                           currentFile={perPlatformFile?.pinterest}
-                          onChange={data => {
-                            const { platform, ...vals } = data;
-                            if (typeof extSetPlatformOption === "function") {
-                              Object.entries(vals).forEach(([k, v]) =>
-                                extSetPlatformOption(platform, k, v)
-                              );
-                            }
-                            // Local Sync
-                            if (vals.boardId) setPinterestBoard(vals.boardId);
-                            if (vals.title)
-                              setPerPlatformTitle(prev => ({ ...prev, pinterest: vals.title }));
-                            if (vals.description)
-                              setPerPlatformDescription(prev => ({
-                                ...prev,
-                                pinterest: vals.description,
-                              }));
-                            if (vals.link)
-                              setPinterestSettings(prev => ({ ...prev, linkUrl: vals.link }));
-                          }}
+                          onChange={handlePinterestChange}
                           initialData={{
                             ...extPlatformOptions?.pinterest,
                             boardId: pinterestBoard || extPlatformOptions?.pinterest?.boardId,
@@ -3804,22 +3812,7 @@ function ContentUploadForm({
                           onFileChange={f => handlePerPlatformFileChange("instagram", f)}
                           currentFile={perPlatformFile?.instagram}
                           facebookPages={facebookPages || []}
-                          onChange={data => {
-                            const { platform, ...vals } = data;
-                            if (typeof extSetPlatformOption === "function") {
-                              Object.entries(vals).forEach(([k, v]) =>
-                                extSetPlatformOption(platform, k, v)
-                              );
-                            }
-                            // Local Sync
-                            if (vals.caption)
-                              setPerPlatformTitle(prev => ({ ...prev, instagram: vals.caption }));
-                            setInstagramSettings(prev => ({
-                              ...prev,
-                              location: vals.location,
-                              shareToFeed: vals.shareToFeed,
-                            }));
-                          }}
+                          onChange={handleInstagramChange}
                           initialData={extPlatformOptions?.instagram}
                           globalTitle={title}
                           globalDescription={description}
@@ -3833,24 +3826,7 @@ function ContentUploadForm({
                     ) : expandedPlatform === "reddit" ? (
                       <>
                         <RedditForm
-                          onChange={data => {
-                            const { platform, ...vals } = data;
-                            if (typeof extSetPlatformOption === "function") {
-                              Object.entries(vals).forEach(([k, v]) =>
-                                extSetPlatformOption(platform, k, v)
-                              );
-                            }
-                            // Local state sync
-                            if (vals.subreddit) setRedditSubreddit(vals.subreddit);
-                            if (vals.title)
-                              setPerPlatformTitle(prev => ({ ...prev, reddit: vals.title }));
-                            setRedditSettings(prev => ({
-                              ...prev,
-                              flair: vals.flairId ?? prev.flair,
-                              nsfw: vals.isNSFW ?? prev.nsfw,
-                              spoiler: vals.isSpoiler ?? prev.spoiler,
-                            }));
-                          }}
+                          onChange={handleRedditChange}
                           initialData={extPlatformOptions?.reddit}
                           globalTitle={title}
                           globalDescription={description}
@@ -3861,38 +3837,10 @@ function ContentUploadForm({
                       <>
                         <SpotifyForm
                           data={extPlatformOptions?.spotify || spotifySettings}
-                          onChange={(key, val) => {
-                            if (typeof extSetPlatformOption === "function") {
-                              extSetPlatformOption("spotify", key, val);
-                            } else {
-                              setSpotifySettings(prev => ({ ...prev, [key]: val }));
-                            }
-                          }}
+                          onChange={handleSpotifyChange}
                           selectedTracks={extSpotifySelectedTracks || spotifyTracks}
-                          onTrackSelect={track => {
-                            if (extSetSpotifySelectedTracks) {
-                              extSetSpotifySelectedTracks(prev => {
-                                // Prevent duplicates
-                                if (prev.some(t => t.id === track.id)) return prev;
-                                return [...prev, track];
-                              });
-                            } else {
-                              setSpotifyTracks(prev => {
-                                if (prev.some(t => t.id === track.id)) return prev;
-                                return [...prev, track];
-                              });
-                            }
-                          }}
-                          onTrackRemove={trackId => {
-                            if (extSetSpotifySelectedTracks) {
-                              extSetSpotifySelectedTracks(prev =>
-                                prev.filter(t => t.id !== trackId)
-                              );
-                            } else {
-                              setSpotifyTracks(prev => prev.filter(t => t.id !== trackId));
-                            }
-                          }}
-                          // In upload flow, campaign mode might be relevant if user wants to promote
+                          onTrackSelect={handleSpotifyTrackSelect}
+                          onTrackRemove={handleSpotifyTrackRemove}
                           campaignMode={true}
                         />
                         {renderBestTimeForPlatform("spotify")}
@@ -4149,19 +4097,7 @@ function ContentUploadForm({
                       <TwitterForm
                         onFileChange={f => handlePerPlatformFileChange("twitter", f)}
                         currentFile={perPlatformFile?.twitter}
-                        onChange={data => {
-                          const { platform, ...vals } = data;
-                          if (typeof extSetPlatformOption === "function") {
-                            if (vals.message !== undefined)
-                              extSetPlatformOption(platform, "message", vals.message);
-                            if (vals.threadMode !== undefined)
-                              extSetPlatformOption(platform, "threadMode", vals.threadMode);
-                          }
-                          // Local Sync
-                          if (vals.message !== undefined) setTwitterMessage(vals.message);
-                          if (vals.threadMode !== undefined)
-                            setTwitterSettings(prev => ({ ...prev, threadMode: vals.threadMode }));
-                        }}
+                        onChange={handleTwitterChange}
                         initialData={{
                           message: twitterMessage,
                           threadMode: twitterSettings.threadMode,
@@ -4534,12 +4470,11 @@ function ContentUploadForm({
             imageUrl={previewUrl}
             onChangeCrop={rect => {
               setCropMeta(rect);
-              setShowCropper(false);
+              // Don't close immediately allow user to see result or click apply
             }}
             onClose={() => setShowCropper(false)}
           />
         )}
-
         {showEmojiPicker && (
           <EmojiPicker onSelect={handleEmojiSelect} onClose={() => setShowEmojiPicker(false)} />
         )}

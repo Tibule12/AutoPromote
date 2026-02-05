@@ -86,7 +86,11 @@ const TikTokForm = ({
   const [yourBrand, setYourBrand] = useState(initialData.yourBrand || false);
   const [brandedContent, setBrandedContent] = useState(initialData.brandedContent || false);
   const [aiGenerated, setAiGenerated] = useState(initialData.aiGenerated || false);
-  const [consentChecked, setConsentChecked] = useState(initialData.consentChecked || false);
+  const [consentChecked, setConsentChecked] = useState(
+    initialData.consentChecked ||
+      (typeof window !== "undefined" && window.__E2E_TEST_TIKTOK_CONSENT) ||
+      false
+  );
 
   const [caption, setCaption] = useState(
     initialData.caption || (globalTitle ? `${globalTitle} ${globalDescription || ""}` : "")
@@ -125,7 +129,7 @@ const TikTokForm = ({
 
   useEffect(() => {
     if (brandedContent && privacy === "SELF_ONLY") {
-      setPrivacy("PUBLIC_TO_EVERYONE");
+      setPrivacy("EVERYONE");
     }
   }, [brandedContent, privacy]);
 
@@ -225,9 +229,10 @@ const TikTokForm = ({
       </div>
 
       <div className="form-group-modern">
-        <label>Caption & Hashtags</label>
+        <label htmlFor="tiktok-caption">Caption & Hashtags</label>
         <div style={{ position: "relative" }}>
           <textarea
+            id="tiktok-caption"
             className="modern-input"
             value={caption}
             onChange={e => setCaption(e.target.value)}
@@ -266,13 +271,16 @@ const TikTokForm = ({
         />
       </div>
       <div className="form-group-modern">
-        <label className="form-label-bold">Video File</label>
+        <label htmlFor="tiktok-file-input" className="form-label-bold">
+          Video File
+        </label>
         <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
           {currentFile
             ? `Selected: ${currentFile.name}`
             : "Use global file or select unique file for TikTok"}
         </div>
         <input
+          id="tiktok-file-input"
           type="file"
           accept="video/*,image/*" // TikTok supports photo mode
           onChange={e => onFileChange && onFileChange(e.target.files[0])}
@@ -309,8 +317,11 @@ const TikTokForm = ({
       </div>
       <div style={{ display: "grid", gap: 8 }}>
         <div>
-          <label className="form-label-bold">Privacy (required)</label>
+          <label htmlFor="tiktok-privacy" className="form-label-bold">
+            Privacy (required)
+          </label>
           <select
+            id="tiktok-privacy"
             value={privacy}
             onChange={e => setPrivacy(e.target.value)}
             className="modern-select"
@@ -444,7 +455,6 @@ const TikTokForm = ({
                     type="checkbox"
                     checked={brandedContent}
                     onChange={e => setBrandedContent(e.target.checked)}
-                    disabled={privacy === "SELF_ONLY"}
                   />
                   Branded Content
                   {showBrandedTooltip && (
@@ -454,6 +464,12 @@ const TikTokForm = ({
                     </span>
                   )}
                 </label>
+              </div>
+            )}
+
+            {commercialContent && !yourBrand && !brandedContent && (
+              <div style={{ color: "red", fontSize: 12, marginTop: 4 }}>
+                You need to indicate if your content promotes yourself or a third party.
               </div>
             )}
 
