@@ -1967,7 +1967,16 @@ function ContentUploadForm({
       }, 1500);
     } catch (err) {
       console.error("[Upload] Upload error:", err);
-      setError(err.message || "Failed to upload content. Please try again.");
+
+      // GAMIFIED ERROR HANDLING ("The Dojo")
+      // If backend sends the specific cap error, we parse it to show the "Special Offer"
+      if (err.message && err.message.includes("GAMIFIED_CAP_REACHED")) {
+        // We might parse the "context" if we had structured error response, but for now we parse the string or just show the UI
+        setError("GAMIFIED_CAP_REACHED");
+      } else {
+        setError(err.message || "Failed to upload content. Please try again.");
+      }
+
       setShowProgress(false);
     } finally {
       uploadLockRef.current = false;
@@ -2890,7 +2899,76 @@ function ContentUploadForm({
             </div>
           </div>
         )}
-        {error && <div className="error-message">{error}</div>}
+
+        {/* GAMIFIED ERROR UI (THE DOJO) */}
+        {error === "GAMIFIED_CAP_REACHED" ? (
+          <div
+            className="gamified-cap-modal"
+            style={{
+              background: "#1a1a2e",
+              border: "2px solid #e94560",
+              padding: "20px",
+              borderRadius: "12px",
+              textAlign: "center",
+              color: "white",
+              margin: "20px 0",
+            }}
+          >
+            <h3 style={{ color: "#e94560", fontSize: "1.5rem" }}>🥋 DOJO MODE ACTIVATED</h3>
+            <p style={{ margin: "10px 0", fontSize: "1.1rem" }}>
+              Your free uploads (5/5) are depleted correctly.
+              <br />
+              <em>"Limitation breeds creativity."</em>
+            </p>
+            <div
+              style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "15px" }}
+            >
+              <button
+                type="button"
+                onClick={() => window.open("/dojo/trend-analyzer", "_blank")} // Placeholder Dojo Link
+                style={{
+                  background: "#e94560",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                Enter Training Dojo (Analyze Trends)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  // Mock mechanism to "Spend Coins" - In real app this calls an API
+                  // For now, we simulate success and re-submit after 1s
+                  setError("");
+                  setUploadStatus("Using Viral Coins to Unlock Slot...");
+                  setTimeout(() => {
+                    uploadLockRef.current = false; // Reset lock
+                    // Re-trigger submit logic or ask user to click upload again
+                    alert("Slot Unlocked! Click 'Schedule' again to post.");
+                  }, 1000);
+                }}
+                style={{
+                  background: "linear-gradient(45deg, #ffd700, #f59e0b)",
+                  color: "black",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                Use 50 Viral Coins to Unlock 🔓
+              </button>
+            </div>
+          </div>
+        ) : (
+          error && <div className="error-message">{error}</div>
+        )}
 
         <div style={{ display: "none" }}>
           {/* Hiding individual platform buttons to move them to a consolidated bottom bar */}
