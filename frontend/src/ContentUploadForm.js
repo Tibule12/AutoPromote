@@ -4534,12 +4534,11 @@ function ContentUploadForm({
             imageUrl={previewUrl}
             onChangeCrop={rect => {
               setCropMeta(rect);
-              setShowCropper(false);
+              // Don't close immediately allow user to see result or click apply
             }}
             onClose={() => setShowCropper(false)}
           />
         )}
-
         {showEmojiPicker && (
           <EmojiPicker onSelect={handleEmojiSelect} onClose={() => setShowEmojiPicker(false)} />
         )}

@@ -84,19 +84,25 @@ async function checkClipQuota(req, res, next) {
     } catch (e) {
       // Fallback: perform a query get() and rely on snapshot.size
       try {
+        // Use in-memory filtering by userId to avoid composite index requirement
         const snap = await db
           .collection("clip_analyses")
           .where("userId", "==", userId)
-          .where("createdAt", ">=", startOfMonth)
           .get();
-        used =
-          snap && typeof snap.size === "number"
-            ? snap.size
-            : snap && snap.docs
-              ? snap.docs.length
-              : 0;
+
+        used = 0;
+        if (snap) {
+          snap.forEach(doc => {
+            const d = doc.data();
+            // Check if created this month
+            if (d.createdAt && d.createdAt >= startOfMonth) {
+              used++;
+            }
+          });
+        }
       } catch (e2) {
-        throw e; // rethrow original to be caught by outer try
+        // If fallback also fails, rethrow the original error
+        throw e;
       }
     }
 

@@ -1,58 +1,80 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useCallback } from "react";
+import Cropper from "react-easy-crop";
+
+function getCroppedImg(imageSrc, pixelCrop) {
+  const createImage = url =>
+    new Promise((resolve, reject) => {
+      const image = new Image();
+      image.addEventListener("load", () => resolve(image));
+      image.addEventListener("error", error => reject(error));
+      image.setAttribute("crossOrigin", "anonymous");
+      image.src = url;
+    });
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const image = await createImage(imageSrc);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        return reject(new Error("No 2d context"));
+      }
+
+      // set canvas size to match the bounding box
+      canvas.width = pixelCrop.width;
+      canvas.height = pixelCrop.height;
+
+      // draw the image
+      ctx.drawImage(
+        image,
+        pixelCrop.x,
+        pixelCrop.y,
+        pixelCrop.width,
+        pixelCrop.height,
+        0,
+        0,
+        pixelCrop.width,
+        pixelCrop.height
+      );
+
+      // As Base64 string
+      // resolve(canvas.toDataURL('image/jpeg'));
+
+      // As Blob (better for larger images)
+      canvas.toBlob(blob => {
+        resolve(blob);
+      }, "image/jpeg");
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
 
 function ImageCropper({ imageUrl, onChangeCrop, onClose }) {
-  const canvasRef = useRef(null);
-  const [img, setImg] = useState(null);
-  const [dragging, setDragging] = useState(false);
-  const [rect, setRect] = useState({ x: 20, y: 20, w: 160, h: 160 });
-  const startRef = useRef(null);
-  useEffect(() => {
-    const i = new Image();
-    i.crossOrigin = "anonymous";
-    i.onload = () => setImg(i);
-    i.src = imageUrl;
-  }, [imageUrl]);
-  useEffect(() => {
-    if (!img) return;
-    draw();
-  }, [img, rect]);
-  function draw() {
-    const canvas = canvasRef.current;
-    if (!canvas || !img) return;
-    const ctx = canvas.getContext("2d");
-    canvas.width = Math.min(img.width, 800);
-    canvas.height = Math.min(img.height, 600);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Fit image
-    const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-    const iw = img.width * scale;
-    const ih = img.height * scale;
-    ctx.drawImage(img, 0, 0, iw, ih);
-    // Draw crop rect
-    ctx.strokeStyle = "rgba(255,0,0,0.9)";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-  }
-  function clientToCanvas(e) {
-    const r = canvasRef.current.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
-  }
-  function onDown(e) {
-    setDragging(true);
-    startRef.current = clientToCanvas(e);
-  }
-  function onMove(e) {
-    if (!dragging) return;
-    const p = clientToCanvas(e);
-    const dx = p.x - startRef.current.x;
-    const dy = p.y - startRef.current.y;
-    setRect(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
-    startRef.current = p;
-  }
-  function onUp() {
-    setDragging(false);
-    if (onChangeCrop) onChangeCrop(rect);
-  }
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [completedCrop, setCompletedCrop] = useState(null);
+
+  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setCompletedCrop(croppedAreaPixels);
+  }, []);
+
+  const handleApply = useCallback(() => {
+    // Pass the actual pixel crop values back to the parent
+    // The parent (ContentUploadForm) currently expects {x, y, w, h}
+    // react-easy-crop returns {x, y, width, height}
+    if (completedCrop && onChangeCrop) {
+      onChangeCrop({
+        x: completedCrop.x,
+        y: completedCrop.y,
+        w: completedCrop.width,
+        h: completedCrop.height,
+      });
+    }
+    onClose();
+  }, [completedCrop, onChangeCrop, onClose]);
+
   return (
     <div
       style={{
@@ -61,45 +83,63 @@ function ImageCropper({ imageUrl, onChangeCrop, onClose }) {
         left: 0,
         width: "100vw",
         height: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.5)",
+        background: "rgba(0,0,0,0.85)",
         zIndex: 9999,
+        display: "flex",
+        flexDirection: "column",
       }}
     >
+      <div style={{ position: "relative", flex: 1, width: "100%" }}>
+        <Cropper
+          image={imageUrl}
+          crop={crop}
+          zoom={zoom}
+          aspect={1} // Default square, can make configurable if needed
+          onCropChange={setCrop}
+          onCropComplete={onCropComplete}
+          onZoomChange={setZoom}
+        />
+      </div>
+
       <div
         style={{
-          background: "#fff",
-          borderRadius: 8,
-          padding: 16,
-          maxWidth: "90vw",
-          maxHeight: "90vh",
+          padding: 20,
+          background: "white",
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          alignItems: "center",
         }}
       >
-        <canvas
-          ref={canvasRef}
-          style={{ border: "1px solid #ddd", display: "block" }}
-          onMouseDown={onDown}
-          onMouseMove={onMove}
-          onMouseUp={onUp}
-        />
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
-          <button
-            onClick={() => {
-              if (onChangeCrop) onChangeCrop(null);
-              onClose && onClose();
+        <div
+          style={{ width: "80%", maxWidth: 400, display: "flex", alignItems: "center", gap: 10 }}
+        >
+          <span>Zoom:</span>
+          <input
+            type="range"
+            value={zoom}
+            min={1}
+            max={3}
+            step={0.1}
+            aria-labelledby="Zoom"
+            onChange={e => {
+              setZoom(e.target.value);
             }}
-          >
+            className="zoom-range"
+            style={{ flex: 1 }}
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: 12 }}>
+          <button onClick={onClose} className="btn btn-secondary" style={{ minWidth: 100 }}>
             Cancel
           </button>
           <button
-            onClick={() => {
-              onChangeCrop(rect);
-              onClose && onClose();
-            }}
+            onClick={handleApply}
+            className="btn btn-primary"
+            style={{ fontWeight: "bold", minWidth: 100 }}
           >
-            Apply
+            Apply Crop
           </button>
         </div>
       </div>

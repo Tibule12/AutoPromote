@@ -12,7 +12,7 @@ import "./ClipStudioPanel.css";
 import MemeticComposerPanel from "./MemeticComposerPanel";
 import GeneratePublishModal from "./GeneratePublishModal";
 
-const ClipStudioPanel = ({ content = [] }) => {
+const ClipStudioPanel = ({ content = [], onRefresh }) => {
   const [selectedContent, setSelectedContent] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [currentAnalysis, setCurrentAnalysis] = useState(null);
@@ -42,8 +42,16 @@ const ClipStudioPanel = ({ content = [] }) => {
   const [showLibrary, setShowLibrary] = useState(false);
   const fileInputRef = useRef(null); // Ref for file upload
 
-  // Filter for videos only
-  const videoContent = content.filter(c => c.type === "video");
+  // Filter for videos only, and exclude generated AI clips to keep the library clean
+  // Updated: Only show videos explicitly uploaded via Clip Studio (source_context = clip_studio) to separate from general uploads
+  const videoContent = content.filter(
+    c =>
+      c.type === "video" &&
+      c.sourceType !== "ai_clip" &&
+      !c.sourceAnalysisId &&
+      !c.sourceClipId &&
+      c.sourceContext === "clip_studio"
+  );
 
   const handleFileUpload = async event => {
     const file = event.target.files[0];
@@ -79,14 +87,18 @@ const ClipStudioPanel = ({ content = [] }) => {
         createdAt: new Date().toISOString(),
         description: "Uploaded via Clip Studio",
         platform_options: {}, // Initialize empty
+        sourceContext: "clip_studio", // TAG: Mark as Clip Studio Source
       };
 
       await setDoc(newContentRef, newContent);
 
-      toast.success("Video uploaded!", { id: toastId });
+      toast.success("Video uploaded! Select it from the list to analyze.", { id: toastId });
 
-      // 3. Immediately trigger analysis
-      analyzeVideo(newContent);
+      // 3. Refresh Parent Content List
+      if (onRefresh) onRefresh();
+
+      // 4. Ensure we are showing the library view
+      setShowLibrary(true);
     } catch (error) {
       console.error("Upload failed", error);
       toast.error(`Upload failed: ${error.message}`, { id: toastId });

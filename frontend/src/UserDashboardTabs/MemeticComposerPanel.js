@@ -198,7 +198,20 @@ const MemeticComposerPanel = ({ onClose }) => {
     setLoadingPlan(true);
     try {
       const token = await auth.currentUser?.getIdToken();
-      // In real app: fetch(`${API_BASE_URL}/api/clips/memetic/plan`...
+
+      // Construct baseVariant for backend using our UI params
+      // Map UI sliders (0-100) to backend normalized factors (0.0-1.0)
+      const baseVariant = {
+        hookStrength:
+          params.hookTiming === "early" ? 0.8 : params.hookTiming === "balanced" ? 0.6 : 0.4,
+        shareability: params.novelty / 100, // Novelty drives shares
+        ctaIntensity: params.valence / 100, // High valence (emotion) often acts as implicit CTA
+        remixProbability: params.trendiness / 100, // Trendiness drives remixes
+        tempo: params.tempo,
+        ambiguity: params.ambiguity / 100,
+        thumbnailStrategy: params.thumbnailStrategy,
+      };
+
       const res = await fetch(`${API_BASE_URL}/api/clips/memetic/plan`, {
         method: "POST",
         headers: {
@@ -206,7 +219,8 @@ const MemeticComposerPanel = ({ onClose }) => {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          params,
+          baseVariant,
+          options: { count: 6 }, // Generate 6 variants
           soundId: selectedSound?.id,
         }),
       });
