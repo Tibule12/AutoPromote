@@ -281,11 +281,15 @@ function ContentUploadForm({
   const [error, setError] = useState("");
 
   // =================================================================
-  // BILLIONAIRE STRATEGY: Viral Bounty State
+  // BILLIONAIRE STRATEGY: Viral Bounty State & Protocol 7 (Insurance)
   // =================================================================
-  const [bountyAmount, setBountyAmount] = useState(0); // $0 = No Bounty
+  const [bountyAmount, setBountyAmount] = useState(0); // $0 = No Bounty (Virtual Stake)
   const [bountyNiche, setBountyNiche] = useState("general");
   const [isBountyInterfaceVisible, setIsBountyInterfaceVisible] = useState(false);
+
+  // Protocol 7: The Self-Healing Safety Net
+  const [protocol7Enabled, setProtocol7Enabled] = useState(false);
+  const [protocol7Volatility, setProtocol7Volatility] = useState("standard"); // standard | surgical | chaos
 
   // Keep legacy `tiktokCommercial` in sync with the newer disclosure state
   useEffect(() => {
@@ -1903,6 +1907,14 @@ function ContentUploadForm({
         contentData.bounty = {
           amount: bountyAmount,
           niche: bountyNiche || "general",
+        };
+      }
+
+      // PROTOCOL 7 (Viral Insurance) INJECTION
+      if (protocol7Enabled) {
+        contentData.protocol7 = {
+          enabled: true,
+          volatility: protocol7Volatility || "standard",
         };
       }
 
@@ -3738,6 +3750,10 @@ function ContentUploadForm({
                           setBountyAmount={setBountyAmount}
                           bountyNiche={bountyNiche}
                           setBountyNiche={setBountyNiche}
+                          protocol7Enabled={protocol7Enabled}
+                          setProtocol7Enabled={setProtocol7Enabled}
+                          protocol7Volatility={protocol7Volatility}
+                          setProtocol7Volatility={setProtocol7Volatility}
                         />
                         {renderBestTimeForPlatform("tiktok")}
                       </>

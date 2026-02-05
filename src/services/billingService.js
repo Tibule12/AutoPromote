@@ -6,29 +6,31 @@ const { db, admin } = require("../firebaseAdmin");
 const TIERS = {
   FREE: {
     id: "free",
-    monthly_upload_cap: 10,
+    monthly_upload_cap: 5, // SCARCITY STRATEGY: Low cap to build hunger
     monthly_price: 0,
-    features: ["organic_upload"],
+    features: ["organic_upload", "basic_analytics", "viral_dojo_access"],
   },
+  // Future tiers (currently inactive/free in "Beta Mode")
   BASIC: {
     id: "basic",
     monthly_upload_cap: 50,
-    monthly_price: 20,
+    monthly_price: 0,
     features: ["organic_upload", "basic_analytics"],
   },
   PRO: {
     id: "pro",
     monthly_upload_cap: Infinity,
-    monthly_price: 50,
+    monthly_price: 0,
     features: ["organic_upload", "advanced_analytics", "priority_scheduling", "commercial_tools"],
   },
 };
 
 const FEATURE_PRICES = {
-  engagement_blocks: 0.01, // Base price multiplier handled in revenueEngine
-  priority_distribution: 5.0, // Flat fee
-  campaign_management: 25.0,
-  processing_fee_percent: 0.1,
+  // All prices 0 during "Addiction Phase"
+  engagement_blocks: 0.0,
+  priority_distribution: 0.0,
+  campaign_management: 0.0,
+  processing_fee_percent: 0.0,
 };
 
 /**

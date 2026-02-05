@@ -15,6 +15,10 @@ const InstagramForm = ({
   setBountyAmount,
   bountyNiche,
   setBountyNiche,
+  protocol7Enabled,
+  setProtocol7Enabled,
+  protocol7Volatility,
+  setProtocol7Volatility,
   onFileChange,
   currentFile,
 }) => {
@@ -437,48 +441,28 @@ const InstagramForm = ({
             marginTop: "16px",
             border: "1px solid #ffd700",
             background: "rgba(255, 215, 0, 0.05)",
-            padding: "10px",
-            borderRadius: "8px",
           }}
         >
-          <label
-            style={{
-              color: "#d97706",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              fontWeight: "bold",
-            }}
-          >
+          <label style={{ color: "#d97706", display: "flex", alignItems: "center", gap: "6px" }}>
             <span>💰</span> Viral Bounty Pool
           </label>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "10px",
-              marginTop: "8px",
-            }}
-          >
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label style={{ fontSize: "0.75rem", display: "block" }}>Amount ($)</label>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <div>
+              <label style={{ fontSize: "0.75rem" }}>Virtual Stake ($)</label>
               <input
                 type="number"
                 min="0"
-                placeholder="0"
                 className="modern-input"
                 value={bountyAmount || ""}
                 onChange={e => setBountyAmount(parseFloat(e.target.value) || 0)}
-                style={{ borderColor: bountyAmount > 0 ? "#ffd700" : "" }}
               />
             </div>
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label style={{ fontSize: "0.75rem", display: "block" }}>Target Niche</label>
+            <div>
+              <label style={{ fontSize: "0.75rem" }}>Target Niche</label>
               <select
                 className="modern-select"
                 value={bountyNiche || "general"}
                 onChange={e => setBountyNiche && setBountyNiche(e.target.value)}
-                style={{ height: "38px" }}
               >
                 <option value="general">General</option>
                 <option value="music">Music</option>
@@ -488,6 +472,77 @@ const InstagramForm = ({
               </select>
             </div>
           </div>
+          <div style={{ fontSize: "0.75rem", color: "#b45309", marginTop: "8px" }}>
+            * This is a simulation wager. Higher values increase internal priority.
+          </div>
+        </div>
+      )}
+
+      {setProtocol7Enabled && (
+        <div
+          className="protocol-7-card"
+          style={{
+            marginTop: "16px",
+            border: "1px solid #7c3aed",
+            background: "rgba(124, 58, 237, 0.05)",
+            borderRadius: "8px",
+            padding: "12px",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <strong style={{ color: "#6d28d9", display: "flex", alignItems: "center", gap: "6px" }}>
+              🛡️ Protocol 7 (Viral Insurance)
+            </strong>
+            <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={protocol7Enabled}
+                onChange={e => setProtocol7Enabled(e.target.checked)}
+                style={{ cursor: "pointer", width: "16px", height: "16px" }}
+              />
+            </label>
+          </div>
+          <p style={{ fontSize: "0.8rem", color: "#5b21b6", marginTop: "8px", lineHeight: "1.4" }}>
+            If this post underperforms in the first 7 hours, AutoPromote will automatically generate
+            and post optimized AI remixes to correct the engagement trajectory.
+          </p>
+          {protocol7Enabled && setProtocol7Volatility && (
+            <div style={{ marginTop: "10px" }}>
+              <label style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#4c1d95" }}>
+                Remix Strategy
+              </label>
+              <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+                {["standard", "surgical", "chaos"].map(mode => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setProtocol7Volatility(mode)}
+                    style={{
+                      flex: 1,
+                      padding: "4px 8px",
+                      fontSize: "0.75rem",
+                      borderRadius: "4px",
+                      border: "1px solid",
+                      cursor: "pointer",
+                      backgroundColor: protocol7Volatility === mode ? "#8b5cf6" : "transparent",
+                      color: protocol7Volatility === mode ? "white" : "#6d28d9",
+                      borderColor: "#8b5cf6",
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+              <div style={{ fontSize: "0.7rem", color: "#6d28d9", marginTop: "4px" }}>
+                {protocol7Volatility === "standard"
+                  ? "Balanced remixing."
+                  : protocol7Volatility === "surgical"
+                    ? "Metadata & title optimization only."
+                    : "High-variance, divergent edits (A/B testing)."}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
