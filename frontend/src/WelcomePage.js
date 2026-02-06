@@ -14,6 +14,33 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
     <div className="new-welcome-root">
       <div className="new-welcome-bg-gradient" />
       <main className="new-welcome-content hp-container">
+        {/* Desktop Table of Contents */}
+        <nav className="hp-toc" aria-label="Page sections">
+          <h4 className="toc-title">On this page</h4>
+          <ul>
+            <li>
+              <a href="#what-is">What is AutoPromote?</a>
+            </li>
+            <li>
+              <a href="#philosophy">Core Philosophy</a>
+            </li>
+            <li>
+              <a href="#how-it-works">How It Works</a>
+            </li>
+            <li>
+              <a href="#not">What AutoPromote Is NOT</a>
+            </li>
+            <li>
+              <a href="#trust">User Trust & Consent</a>
+            </li>
+            <li>
+              <a href="#growth">Growth & Amplification</a>
+            </li>
+            <li>
+              <a href="#why">Why This Matters</a>
+            </li>
+          </ul>
+        </nav>
         <header className="hp-header">
           <div className="hp-brand">
             <img src="/image.png" alt="AutoPromote Logo" className="new-welcome-logo" />
@@ -148,6 +175,12 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
           <Footer />
         </footer>
       </main>
+      {/* Floating mobile CTA */}
+      <div className="floating-cta">
+        <button className="new-welcome-btn primary" onClick={onGetStarted}>
+          Get Started
+        </button>
+      </div>
     </div>
   );
 };
