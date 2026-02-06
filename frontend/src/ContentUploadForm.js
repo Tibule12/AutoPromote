@@ -2936,7 +2936,7 @@ function ContentUploadForm({
                   fontWeight: "bold",
                 }}
               >
-                Enter Training Dojo (Analyze Trends)
+                Enter Dojo (Train or Buy Coins)
               </button>
 
               <button

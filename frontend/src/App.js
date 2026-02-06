@@ -2,6 +2,7 @@
 /* eslint-disable no-console, no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
+import DojoPage from "./DojoPage";
 import "./App.css";
 import { auth, db, storage } from "./firebaseClient";
 import {
@@ -1054,6 +1055,9 @@ function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/support" element={<Support />} />
         <Route path="/accessibility" element={<Accessibility />} />
+
+        {/* GAMIFICATION / DOJO */}
+        <Route path="/dojo/trend-analyzer" element={<DojoPage />} />
 
         <Route path="/features" element={<Features />} />
         <Route path="/integrations" element={<Integrations />} />
