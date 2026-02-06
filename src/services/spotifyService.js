@@ -354,7 +354,7 @@ async function searchTracks({ uid, query, limit = 10 }) {
   if (!query) throw new Error("query required");
   if (!fetchFn) throw new Error("Fetch not available");
 
-  const accessToken = await getValidAccessToken(uid);
+  const accessToken = await module.exports.getValidAccessToken(uid);
   if (!accessToken) throw new Error("No valid Spotify access token");
 
   const params = new URLSearchParams({
