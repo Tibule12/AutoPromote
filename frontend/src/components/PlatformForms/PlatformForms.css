@@ -570,3 +570,120 @@ input:checked + .toggle-slider:before {
   background-color: #fff0f0 !important;
   border-color: #ff0000 !important;
 }
+
+/* Platform action buttons (Preview / Publish) */
+.platform-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.btn-preview,
+.btn-publish {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-preview {
+  background: #ffffff;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+.btn-publish {
+  color: #ffffff;
+  text-transform: none;
+}
+
+/* Brand variants */
+.tiktok-form .btn-publish {
+  background: #e94560;
+  border-color: #b43b50;
+}
+.youtube-form .btn-publish {
+  background: #ff0000;
+  border-color: #cc0000;
+}
+.instagram-form .btn-publish {
+  background: linear-gradient(45deg, #feda75, #d62976);
+  border-color: #d62976;
+}
+.facebook-form .btn-publish {
+  background: #1877f2;
+  border-color: #145db8;
+}
+.linkedin-form .btn-publish {
+  background: #0a66c2;
+  border-color: #084f9a;
+}
+.pinterest-form .btn-publish {
+  background: #e60023;
+  border-color: #b2001a;
+}
+.reddit-form .btn-publish {
+  background: #ff4500;
+  border-color: #cc3700;
+}
+.twitter-form .btn-publish {
+  background: #1da1f2;
+  border-color: #1586d6;
+}
+
+.btn-publish:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Inline platform status indicators */
+.platform-status {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  min-width: 48px;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-top-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+.status-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.status-msg {
+  font-size: 0.8rem;
+  color: #6b7280;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

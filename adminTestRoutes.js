@@ -184,4 +184,16 @@ router.post("/auth/login-test", async (req, res) => {
   }
 });
 
+// Trigger Protocol 7 Watchdog (Manual Cron)
+router.post("/run-protocol-7-watchdog", async (req, res) => {
+  try {
+    const viralInsuranceService = require('./src/services/viralInsuranceService');
+    const results = await viralInsuranceService.runWatchdog();
+    res.json({ success: true, results });
+  } catch (error) {
+    console.error("Watchdog failed:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

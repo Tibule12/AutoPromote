@@ -63,7 +63,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     // Click preview to trigger onUpload
-    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    const previewBtn = screen.getByRole("button", { name: /Preview Tiktok/i });
     fireEvent.click(previewBtn);
 
     await waitFor(() => expect(onUpload).toHaveBeenCalled(), { timeout: 5000 });
@@ -212,7 +212,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     // Wait for the creator info to arrive which indicates the check has completed
     await screen.findByText(/NoPost Creator/i, { timeout: 10000 });
 
-    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    const previewBtn = screen.getByRole("button", { name: /Preview Tiktok/i });
     const uploadBtn = screen.getByRole("button", { name: /Publish to Tiktok/i }); // Button label updated
 
     expect(previewBtn).toBeDisabled();
@@ -252,7 +252,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     // Click preview to trigger onUpload
-    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    const previewBtn = screen.getByRole("button", { name: /Preview Tiktok/i });
     fireEvent.click(previewBtn);
 
     // Expect the preview card to render a stringified title containing "origTitle"
@@ -290,7 +290,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     // Generate preview
-    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    const previewBtn = screen.getByRole("button", { name: /Preview Tiktok/i });
     fireEvent.click(previewBtn);
 
     // Wait for preview card and Edit button
@@ -455,7 +455,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     // Generate preview
-    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    const previewBtn = screen.getByRole("button", { name: /Preview/i });
     fireEvent.click(previewBtn);
 
     // Wait for preview card and ensure the preview media is shown
@@ -599,7 +599,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     await screen.findByDisplayValue("Platform Title");
 
     // Click Preview inside the expanded panel (use aria-label to avoid ambiguous matches)
-    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    const previewBtn = screen.getByRole("button", { name: /Preview/i });
     fireEvent.click(previewBtn);
 
     // We expect the per-platform preview card to show the given title after fallback
@@ -629,7 +629,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(screen.getByLabelText(/Privacy/i), { target: { value: "EVERYONE" } });
 
     // Click preview - backend provides no preview, so UI should use object URL and render a <video>
-    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    const previewBtn = screen.getByRole("button", { name: /Preview/i });
     await waitFor(() => expect(previewBtn).not.toBeDisabled());
     fireEvent.click(previewBtn);
 
@@ -674,7 +674,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     }));
 
     // Click preview - backend returned empty preview thumbnail, UI should fallback to blob URL and render <video>
-    const previewBtn2 = screen.getByLabelText(/Preview Content/i);
+    const previewBtn2 = screen.getByRole("button", { name: /Preview/i });
     await waitFor(() => expect(previewBtn2).not.toBeDisabled());
     fireEvent.click(previewBtn2);
 

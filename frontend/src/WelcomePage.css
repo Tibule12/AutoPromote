@@ -25,21 +25,20 @@
   border-radius: 36px;
   box-shadow: 0 12px 48px rgba(79, 47, 247, 0.18);
   padding: 3.2rem 2.2rem;
-  max-width: 480px;
-  width: 98vw;
+  max-width: 980px;
+  width: 96vw;
   min-height: calc(100vh - 48px);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 1.7rem;
-  justify-content: space-between; /* push footer to bottom */
+  justify-content: flex-start; /* allow natural flow */
 }
 .new-welcome-logo-row {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.7rem;
-  margin-bottom: 1.2rem;
+  gap: 0.9rem;
+  margin-bottom: 0.6rem;
 }
 .new-welcome-logo {
   width: 90px;
@@ -56,20 +55,60 @@
   letter-spacing: -1px;
   text-align: center;
 }
-.new-welcome-headline {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #4f2ff7;
-  margin-bottom: 0.7rem;
-  text-align: center;
-  letter-spacing: -0.5px;
+.hp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
 }
-.new-welcome-tagline {
-  font-size: 1.08rem;
-  color: #222;
-  margin-bottom: 1.5rem;
-  text-align: center;
+.hp-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+.new-welcome-headline {
+  display: none;
+}
+.new-welcome-tagline-small {
+  margin: 0;
+  color: #374151;
+  font-weight: 600;
+}
+
+.hp-section {
+  margin-top: 18px;
+  padding: 18px 10px;
+  border-radius: 10px;
+  background: transparent;
+}
+.hp-section-title {
+  font-size: 1.15rem;
+  color: #111827;
+  margin: 0 0 8px 0;
+  font-weight: 800;
+}
+.hp-section-body {
+  color: #374151;
   line-height: 1.6;
+  font-size: 1rem;
+}
+.hp-list {
+  list-style: disc;
+  padding-left: 20px;
+  margin: 8px 0 0 0;
+}
+.hp-steps {
+  list-style: decimal;
+  padding-left: 20px;
+  margin: 8px 0 0 0;
+}
+.hp-steps li {
+  margin-bottom: 12px;
+}
+.muted {
+  color: #6b7280;
+  margin-top: 8px;
 }
 .new-welcome-btn-row {
   display: flex;
@@ -142,39 +181,123 @@
   color: #333;
   font-size: 1rem;
 }
+
+.hp-footer {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+.hp-northstar {
+  font-weight: 800;
+  text-align: center;
+  color: #111827;
+}
+.hp-footer-ctas {
+  display: flex;
+  gap: 12px;
+}
+/* Table of Contents (desktop) */
+.hp-toc {
+  display: none;
+}
+.hp-toc .toc-title {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 700;
+}
+.hp-toc ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hp-toc a {
+  color: #374151;
+  text-decoration: none;
+  font-weight: 600;
+}
+.hp-toc a:hover {
+  text-decoration: underline;
+}
+
+/* Floating CTA for mobile */
+.floating-cta {
+  display: none;
+}
+.floating-cta .new-welcome-btn {
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-size: 1rem;
+}
 @media (max-width: 600px) {
   .new-welcome-content {
-    padding: 1.2rem 0.5rem;
+    padding: 1.2rem 0.9rem;
     margin: 1.2rem 0.2rem;
     max-width: 99vw;
     gap: 1.1rem;
     min-height: calc(100vh - 36px);
-    justify-content: space-between;
+    justify-content: flex-start;
   }
   .new-welcome-logo {
     width: 54px;
     height: 54px;
   }
   .new-welcome-title {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
   }
-  .new-welcome-headline {
-    font-size: 1.08rem;
-    margin-bottom: 0.5rem;
-  }
-  .new-welcome-tagline {
-    font-size: 0.98rem;
-    margin-bottom: 1.1rem;
+  .new-welcome-tagline-small {
+    font-size: 0.95rem;
   }
   .new-welcome-btn {
     padding: 0.7rem 1.2rem;
     font-size: 1.05rem;
-    margin-top: 0.7rem;
-    width: 100%;
   }
   .feature-card {
     font-size: 0.98rem;
     padding: 0.7rem 1rem;
     min-width: 120px;
+  }
+  .hp-toc {
+    display: none;
+  }
+  .floating-cta {
+    display: flex;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 18px;
+    z-index: 9999;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 900px) {
+  .hp-container {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 24px;
+    align-items: start;
+  }
+  .hp-toc {
+    display: block;
+    position: sticky;
+    top: 120px;
+    align-self: start;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #eef2ff;
+    box-shadow: 0 6px 20px rgba(79, 47, 247, 0.06);
+  }
+  .hp-toc ul {
+    gap: 10px;
+  }
+  .floating-cta {
+    display: none;
   }
 }

@@ -82,6 +82,12 @@ const contentUploadSchema = Joi.object({
     paymentMethodId: Joi.string().optional(),
   }).optional(),
 
+  // PROTOCOL 7 (Viral Insurance)
+  protocol7: Joi.object({
+    enabled: Joi.boolean().default(false),
+    volatility: Joi.string().valid("standard", "surgical", "chaos").default("standard"),
+  }).optional(),
+
   // Injected by costControlMiddleware
   optimizationFlags: Joi.object().optional(),
 }).unknown(true); // Allow additional fields passed by updated frontend (e.g. viral_boost, custom_hashtags)
@@ -209,6 +215,7 @@ router.post(
         growth_guarantee,
         viral_boost,
         monetization_settings, // Added for persistence
+        protocol7, // Protocol 7
       } = req.body;
 
       // Initialize viral engines (lazy-load to avoid import-time side effects during tests)
@@ -216,6 +223,13 @@ router.post(
       const smartDistributionEngine = require("./services/smartDistributionEngine");
       const viralImpactEngine = require("./services/viralImpactEngine");
       const algorithmExploitationEngine = require("./services/algorithmExploitationEngine");
+      // Lazy load Protocol 7 Service
+      let viralInsuranceService;
+      try {
+        viralInsuranceService = require("./services/viralInsuranceService");
+      } catch (e) {
+        console.warn("[Protocol 7] Service not found (optional)", e.message);
+      }
 
       // Helper function to determine content intent based on platform flags
       function determineContentIntent(platformOptions) {
@@ -315,6 +329,7 @@ router.post(
         growth_guarantee,
         viral_boost,
         monetization_settings: monetization_settings || {}, // Persist TikTok/Revenue settings
+        protocol7: protocol7 || {}, // Persist Protocol 7 settings
         meta: req.body.meta,
         duration:
           typeof (req.body.meta && req.body.meta.duration) === "number"
@@ -473,6 +488,28 @@ router.post(
           });
         } catch (e) {
           console.warn("[Upload] Failed to queue enhancement:", e.message);
+        }
+      }
+
+      // PROTOCOL 7: REGISTER INSURANCE CLAIM
+      // If the user demanded Viral Insurance, we start the Watchdog now.
+      if (protocol7 && protocol7.enabled && viralInsuranceService) {
+        try {
+          const primaryPlatform =
+            Array.isArray(target_platforms) && target_platforms.length
+              ? target_platforms[0]
+              : "tiktok";
+
+          console.log(`[Protocol 7] 🛡️ Registering Watchdog for Content ${content.id}`);
+          await viralInsuranceService.registerClaim(
+            userId,
+            content.id,
+            primaryPlatform,
+            url,
+            protocol7.volatility
+          );
+        } catch (p7Err) {
+          console.error("[Protocol 7] ❌ Registration failed", p7Err);
         }
       }
 
