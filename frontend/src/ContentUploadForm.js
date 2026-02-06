@@ -2402,6 +2402,32 @@ function ContentUploadForm({
     }
   };
 
+  // Small publish icons (used inline next to publish buttons)
+  const getPlatformPublishIcon = platform => {
+    switch (platform) {
+      case "youtube":
+        return "📺";
+      case "tiktok":
+        return "🎵";
+      case "instagram":
+        return "📸";
+      case "facebook":
+        return "👥";
+      case "linkedin":
+        return "💼";
+      case "pinterest":
+        return "📌";
+      case "reddit":
+        return "👽";
+      case "twitter":
+        return "🐦";
+      case "spotify":
+        return "🎧";
+      default:
+        return "🚀";
+    }
+  };
+
   // By default render a simplified view that only shows platform cards.
   // Clicking a card will set `focusedPlatform` and reveal the per-platform form.
   if (!focusedPlatform) {
@@ -2972,48 +2998,86 @@ function ContentUploadForm({
 
         <div className="platform-actions">
           {/* Per-platform Preview and Publish buttons (brand-styled) */}
-          <button
-            aria-label="Preview Content"
-            className="btn-preview"
-            type="button"
-            disabled={
-              isPreviewing ||
-              (p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false)
-            }
-            onClick={() => handlePlatformPreview(p)}
-          >
-            ⚡ Preview
-          </button>
-          <button
-            aria-label="Upload Content"
-            className="btn-publish"
-            type="button"
-            disabled={
-              isUploading ||
-              (p === "tiktok" && !tiktokConsentChecked) ||
-              (p === "tiktok" &&
-                tiktokCommercial &&
-                tiktokCommercial.isCommercial &&
-                !tiktokCommercial.yourBrand &&
-                !tiktokCommercial.brandedContent) ||
-              (p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false) ||
-              (p === "tiktok" &&
-                tiktokCreatorInfo &&
-                typeof tiktokCreatorInfo.posting_remaining === "number" &&
-                tiktokCreatorInfo.posting_remaining <= 0)
-            }
-            onClick={() => {
-              if (p === "tiktok" && !tiktokConsentChecked) {
-                setConfirmTargetPlatform(p);
-                setShowConfirmPublishModal(true);
-              } else {
-                // If consent already given (or not a TikTok upload), proceed immediately
-                handlePlatformUpload(p);
-              }
-            }}
-          >
-            🚀 Upload
-          </button>
+          {(() => {
+            const pretty = p.charAt(0).toUpperCase() + p.slice(1);
+            const previewLabel = `Preview ${pretty}`;
+            const publishLabel = p === "youtube" ? `Publish to YouTube` : `Publish to ${pretty}`;
+            return (
+              <>
+                <button
+                  aria-label={previewLabel}
+                  title={previewLabel}
+                  className="btn-preview"
+                  type="button"
+                  disabled={
+                    isPreviewing ||
+                    (p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false)
+                  }
+                  onClick={() => handlePlatformPreview(p)}
+                >
+                  🔎 {previewLabel}
+                </button>
+
+                <button
+                  aria-label={publishLabel}
+                  title={publishLabel}
+                  className="btn-publish"
+                  type="button"
+                  disabled={
+                    isUploading ||
+                    p === "spotify" || // Spotify is not a publish target
+                    (p === "tiktok" && !tiktokConsentChecked) ||
+                    (p === "tiktok" &&
+                      tiktokCommercial &&
+                      tiktokCommercial.isCommercial &&
+                      !tiktokCommercial.yourBrand &&
+                      !tiktokCommercial.brandedContent) ||
+                    (p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false) ||
+                    (p === "tiktok" &&
+                      tiktokCreatorInfo &&
+                      typeof tiktokCreatorInfo.posting_remaining === "number" &&
+                      tiktokCreatorInfo.posting_remaining <= 0)
+                  }
+                  onClick={() => {
+                    if (p === "tiktok" && !tiktokConsentChecked) {
+                      setConfirmTargetPlatform(p);
+                      setShowConfirmPublishModal(true);
+                    } else {
+                      // Spotify is handled via playlist/share flow (not a publish). Prevent accidental publish.
+                      if (p === "spotify") {
+                        setError(
+                          "Spotify tracks are shared via playlists — use the Spotify panel to add tracks."
+                        );
+                        return;
+                      }
+                      // If consent already given (or not a TikTok upload), proceed immediately
+                      handlePlatformUpload(p);
+                    }
+                  }}
+                >
+                  {typeof getPlatformPublishIcon === "function" ? getPlatformPublishIcon(p) : "🚀"}{" "}
+                  {p === "spotify" ? "Add to Playlist" : publishLabel}
+                </button>
+              </>
+            );
+          })()}
+
+          {/* Inline status indicator: spinner while uploading, success check or message */}
+          <span className="platform-status" aria-hidden="true">
+            {perPlatformUploading && perPlatformUploading[p] ? (
+              <span className="spinner" aria-label="Uploading" title="Uploading"></span>
+            ) : perPlatformUploadResponse &&
+              perPlatformUploadResponse[p] &&
+              perPlatformUploadResponse[p].success ? (
+              <span className="status-success" title="Published">
+                ✓
+              </span>
+            ) : perPlatformUploadStatus && perPlatformUploadStatus[p] ? (
+              <span className="status-msg" title={perPlatformUploadStatus[p]}>
+                {perPlatformUploadStatus[p]}
+              </span>
+            ) : null}
+          </span>
         </div>
 
         {perPlatformPreviews[p] && (
@@ -3074,51 +3138,7 @@ function ContentUploadForm({
           onSave={handleSavePreviewEdits}
         />
 
-        {/* Consolidated Action Bar (Focused View) */}
-        <div style={{ height: 100 }}></div>
-        <div
-          className="consolidated-actions-bar-focused"
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: "#fff",
-            borderTop: "1px solid #ccc",
-            padding: "16px 24px",
-            zIndex: 999,
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            boxShadow: "0 -4px 6px -1px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <button
-            className="btn btn-primary"
-            type="button"
-            style={{ fontWeight: "bold", fontSize: "1.1em", minWidth: 200 }}
-            disabled={
-              isUploading ||
-              (focusedPlatform === "tiktok" &&
-                (!tiktokConsentChecked ||
-                  (extPlatformOptions?.tiktok?.commercialContent &&
-                    !extPlatformOptions?.tiktok?.yourBrand &&
-                    !extPlatformOptions?.tiktok?.brandedContent)))
-            }
-            onClick={() => {
-              if (focusedPlatform === "tiktok" && !tiktokConsentChecked) {
-                setConfirmTargetPlatform(focusedPlatform);
-                setShowConfirmPublishModal(true);
-              } else {
-                handlePlatformUpload(focusedPlatform);
-              }
-            }}
-          >
-            {isUploading
-              ? "Uploading..."
-              : `🚀 Publish to ${focusedPlatform.charAt(0).toUpperCase() + focusedPlatform.slice(1)}`}
-          </button>
-        </div>
+        {/* Removed consolidated fixed footer to keep per-platform controls only */}
       </div>
     );
   }

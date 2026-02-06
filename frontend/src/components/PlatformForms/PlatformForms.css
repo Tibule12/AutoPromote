@@ -640,3 +640,50 @@ input:checked + .toggle-slider:before {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Inline platform status indicators */
+.platform-status {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  min-width: 48px;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-top-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+.status-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.status-msg {
+  font-size: 0.8rem;
+  color: #6b7280;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
