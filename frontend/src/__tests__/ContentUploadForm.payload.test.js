@@ -42,8 +42,8 @@ describe("ContentUploadForm payloads", () => {
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
-    // Click preview button
-    const previewBtn = screen.getByLabelText(/Preview Content/i);
+    // Click preview button (match any platform-specific preview label)
+    const previewBtn = screen.getByRole("button", { name: /Preview/i });
     fireEvent.click(previewBtn);
 
     // Wait for onUpload to be called (increased timeout for CI reliability)

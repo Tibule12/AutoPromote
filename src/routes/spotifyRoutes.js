@@ -42,28 +42,34 @@ router.get("/search", authMiddleware, async (req, res) => {
   try {
     const uid = req.userId || req.user.uid;
     const { q } = req.query;
-    if (!q) return res.status(400).json({ error: "Query required" });
+    if (!q) return res.status(400).json({ ok: false, error: "Query required" });
 
-    const searchData = await searchTracks({ uid, query: q });
+    // Ensure string and trim
+    const query = String(q || "").trim();
+    if (!query) return res.status(400).json({ ok: false, error: "query_required" });
+
+    const searchData = await searchTracks({ uid, query });
     // Normalize format for frontend (searchData now returns mixed results in .results)
-    res.json({
-      ok: true,
-      results: searchData.results || [],
-    });
+    return res.json({ ok: true, results: searchData.results || [] });
   } catch (e) {
-    console.error("Spotify search error:", e);
+    console.error("[spotifyRoutes] /search error:", e && e.stack ? e.stack : e);
 
-    if (e.message.includes("No valid Spotify access token")) {
+    const msg = (e && e.message) || "";
+    if (msg.includes("No valid Spotify access token")) {
       return res.status(403).json({ ok: false, error: "spotify_not_connected" });
     }
-    if (e.message.includes("Spotify token refresh failed")) {
+    if (msg.includes("Spotify token refresh failed")) {
       return res.status(502).json({ ok: false, error: "spotify_token_refresh_failed" });
     }
-    if (e.message.includes("client credentials")) {
+    if (
+      msg.toLowerCase().includes("client credentials") ||
+      msg.toLowerCase().includes("spotify client credentials")
+    ) {
       return res.status(500).json({ ok: false, error: "spotify_client_credentials_missing" });
     }
 
-    res.status(500).json({ error: e.message });
+    // Generic failure: preserve 500 for backwards compatibility with tests/frontend
+    return res.status(500).json({ ok: false, error: msg || "spotify_search_failed" });
   }
 });
 
