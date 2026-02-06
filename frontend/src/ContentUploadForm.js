@@ -2970,11 +2970,11 @@ function ContentUploadForm({
           error && <div className="error-message">{error}</div>
         )}
 
-        <div style={{ display: "none" }}>
-          {/* Hiding individual platform buttons to move them to a consolidated bottom bar */}
+        <div className="platform-actions">
+          {/* Per-platform Preview and Publish buttons (brand-styled) */}
           <button
             aria-label="Preview Content"
-            className="preview-button"
+            className="btn-preview"
             type="button"
             disabled={
               isPreviewing ||
@@ -2986,7 +2986,7 @@ function ContentUploadForm({
           </button>
           <button
             aria-label="Upload Content"
-            className="submit-button"
+            className="btn-publish"
             type="button"
             disabled={
               isUploading ||
