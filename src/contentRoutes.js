@@ -432,7 +432,22 @@ router.post(
       // VIRAL BOUNTY CREATION (The "Billionaire" Model)
       // If user provided a Bounty Pool, we instantiate the Escrow Record immediately.
       // This routes money into the "Viral Economy" rather than "Ad Inventory".
-      if (req.body.bounty && req.body.bounty.amount > 0) {
+      // NOTE: Bounties are not allowed for certain platforms (TikTok, YouTube, Instagram).
+      const requestedPlatforms = Array.isArray(req.body.target_platforms)
+        ? req.body.target_platforms
+        : Array.isArray(req.body.platforms)
+          ? req.body.platforms
+          : [];
+      const disabledBountyPlatforms = ["tiktok", "youtube", "instagram"];
+      const onlyDisabled =
+        requestedPlatforms.length > 0 &&
+        requestedPlatforms.every(p => disabledBountyPlatforms.includes(p));
+
+      if (onlyDisabled) {
+        console.log(
+          `[Upload] 🔇 Skipping Viral Bounty for Content ${content.id} because target platforms do not support bounty: ${requestedPlatforms.join(", ")}`
+        );
+      } else if (req.body.bounty && req.body.bounty.amount > 0) {
         try {
           console.log(
             `[Upload] 💰 Processing Viral Bounty for Content ${content.id}: $${req.body.bounty.amount}`

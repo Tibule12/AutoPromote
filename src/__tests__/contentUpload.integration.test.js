@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 // Integration test for /api/content/upload
 // Requires: jest, supertest, and your Express app
 
@@ -88,4 +88,27 @@ describe("Content Upload & Promotion Integration", () => {
     expect(res.body.auto_promotion).toBeDefined();
     // Add more assertions for notifications, tracking, etc. as needed
   }, 30000); // Set timeout to 30 seconds
+
+  it("should ignore bounty when target platforms are TikTok-only", async () => {
+    const testUserId = "adminUserBounty";
+    const payload = {
+      title: "Bounty Test",
+      type: "video",
+      url: "https://example.com/video.mp4",
+      description: "Bounty should be ignored for TikTok-only",
+      target_platforms: ["tiktok"],
+      bounty: { amount: 100, niche: "music", paymentMethodId: "tok_bypass" },
+    };
+
+    const res = await agent
+      .post("/api/content/upload")
+      .set("Authorization", `Bearer test-token-for-${testUserId}`)
+      .set("Host", "example.com")
+      .send(payload);
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.content).toBeDefined();
+    expect(res.body.content.has_bounty).toBeFalsy();
+    expect(res.body.content.viral_bounty_id).toBeFalsy();
+  }, 30000);
 });
