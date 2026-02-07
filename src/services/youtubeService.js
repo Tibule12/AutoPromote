@@ -43,19 +43,46 @@ function buildOAuthClient(connectionData) {
       ? { ...connectionData, ...connectionData.tokens }
       : connectionData || {};
 
-  const { access_token, refresh_token, scope, token_type, expires_in, expiry_date } = tokens;
+  const { access_token, refresh_token, scope, token_type, expires_in, expiry_date, obtainedAt } =
+    tokens;
 
   const client = new google.auth.OAuth2(
     process.env.YT_CLIENT_ID,
     process.env.YT_CLIENT_SECRET,
     process.env.YT_REDIRECT_URI
   );
+
+  // Calculate strict expiry based on when the token was actually obtained
+  let finalExpiry = expiry_date;
+  if (!finalExpiry && expires_in) {
+    let obtainedTime = 0;
+    if (obtainedAt) {
+      if (typeof obtainedAt.toMillis === "function") {
+        obtainedTime = obtainedAt.toMillis();
+      } else if (obtainedAt instanceof Date) {
+        obtainedTime = obtainedAt.getTime();
+      } else if (typeof obtainedAt === "object" && obtainedAt.seconds) {
+        obtainedTime = obtainedAt.seconds * 1000;
+      } else if (Number.isFinite(obtainedAt)) {
+        obtainedTime = obtainedAt;
+      }
+    }
+
+    // If we have a valid obtained time, us it. Otherwise assume expired.
+    if (obtainedTime > 0) {
+      finalExpiry = obtainedTime + expires_in * 1000;
+    } else {
+      console.warn("[YouTube] Token missing expiry_date and valid obtainedAt. Marking as expired.");
+      finalExpiry = Date.now() - 1000; // Force refresh
+    }
+  }
+
   client.setCredentials({
     access_token,
     refresh_token,
     scope,
     token_type,
-    expiry_date: expiry_date || Date.now() + (expires_in ? expires_in * 1000 : 0),
+    expiry_date: finalExpiry || Date.now() - 1000,
   });
   return client;
 }
@@ -112,6 +139,7 @@ async function ensureFreshTokens(oauth2Client, connectionData, uid) {
     oauth2Client.setCredentials(credentials);
   } catch (err) {
     console.warn("[YouTube] Refresh token failed:", err.message);
+    throw new Error(`Unable to refresh YouTube token: ${err.message}`);
   }
   return oauth2Client;
 }
