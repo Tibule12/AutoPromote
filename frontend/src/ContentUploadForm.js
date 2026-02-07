@@ -706,7 +706,11 @@ function ContentUploadForm({
   useEffect(() => {
     let mounted = true;
     const loadFb = async () => {
-      if (!Array.isArray(selectedPlatformsVal) || !selectedPlatformsVal.includes("facebook")) {
+      // Load FB pages if either Facebook OR Instagram is selected (since IG uses FB pages for identity)
+      if (
+        !Array.isArray(selectedPlatformsVal) ||
+        (!selectedPlatformsVal.includes("facebook") && !selectedPlatformsVal.includes("instagram"))
+      ) {
         setFacebookPages([]);
         return;
       }
