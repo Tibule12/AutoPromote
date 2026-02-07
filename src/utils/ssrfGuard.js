@@ -95,19 +95,29 @@ async function validateUrl(urlString, opts = {}) {
     // Security posture: require an explicit allowlist by default.
     // Callers must pass `opts.allowHosts` or set `SSRF_ALLOW_UNRESTRICTED=1`
     // in the environment to permit outbound requests to arbitrary hosts.
+    // We also include a default list of trusted generic infrastructure hosts (Google/Firebase)
+    const DEFAULT_TRUSTED_HOSTS = [
+      "firebasestorage.googleapis.com",
+      "storage.googleapis.com",
+      "www.googleapis.com",
+      "accounts.google.com",
+    ];
+
     const allowUnrestricted =
       process.env.SSRF_ALLOW_UNRESTRICTED === "1" ||
       process.env.SSRF_ALLOW_UNRESTRICTED === "true" ||
       process.env.NODE_ENV === "test";
-    if (
-      !(opts.allowHosts && Array.isArray(opts.allowHosts) && opts.allowHosts.length) &&
-      !allowUnrestricted
-    ) {
+
+    const effectiveAllowed = (
+      opts.allowHosts && Array.isArray(opts.allowHosts) ? opts.allowHosts : []
+    ).concat(DEFAULT_TRUSTED_HOSTS);
+
+    if (!effectiveAllowed.length && !allowUnrestricted) {
       return { ok: false, reason: "host_not_whitelisted" };
     }
 
-    if (opts.allowHosts && Array.isArray(opts.allowHosts) && opts.allowHosts.length) {
-      const matched = opts.allowHosts.some(h => h === host || host.endsWith("." + h));
+    if (!allowUnrestricted) {
+      const matched = effectiveAllowed.some(h => h === host || host.endsWith("." + h));
       if (!matched) return { ok: false, reason: "host_not_whitelisted" };
     }
 
