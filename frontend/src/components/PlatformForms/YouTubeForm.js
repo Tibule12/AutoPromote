@@ -3,6 +3,20 @@ import EmojiPicker from "../EmojiPicker";
 import HashtagSuggestions from "../HashtagSuggestions";
 import { OPTIMAL_TIMES } from "../BestTimeToPost";
 
+const categories = [
+  { id: "1", name: "Film & Animation" },
+  { id: "2", name: "Autos & Vehicles" },
+  { id: "10", name: "Music" },
+  { id: "15", name: "Pets & Animals" },
+  { id: "17", name: "Sports" },
+  { id: "20", name: "Gaming" },
+  { id: "22", name: "People & Blogs" },
+  { id: "23", name: "Comedy" },
+  { id: "24", name: "Entertainment" },
+  { id: "28", name: "Science & Technology" },
+  { id: "27", name: "Education" },
+];
+
 const YouTubeForm = ({
   onChange,
   initialData = {},
@@ -57,49 +71,136 @@ const YouTubeForm = ({
     });
   }, [title, description, privacy, madeForKids, tags, category, paidPromotion, shortsMode]);
 
-  const categories = [
-    { id: "1", name: "Film & Animation" },
-    { id: "2", name: "Autos & Vehicles" },
-    { id: "10", name: "Music" },
-    { id: "15", name: "Pets & Animals" },
-    { id: "17", name: "Sports" },
-    { id: "20", name: "Gaming" },
-    { id: "22", name: "People & Blogs" },
-    { id: "23", name: "Comedy" },
-    { id: "24", name: "Entertainment" },
-    { id: "28", name: "Science & Technology" },
-    { id: "27", name: "Education" },
-  ];
-
   return (
     <div className="platform-form youtube-form">
       <h4 className="platform-form-header">
-        <span className="icon" style={{ color: "red" }}>
+        <span className="icon" style={{ color: "#FF0000" }}>
           ▶
         </span>{" "}
         YouTube Studio
       </h4>
 
-      {/* Identity Identity Block for Reviewers */}
-      {creatorInfo && (
-        <div
-          style={{
-            fontSize: "13px",
-            color: "#444",
-            marginBottom: "12px",
-            padding: "8px",
-            background: "#f9f9f9",
-            borderRadius: "6px",
-            border: "1px solid #eee",
-          }}
-        >
-          Posting as:{" "}
-          <strong>{creatorInfo.title || creatorInfo.channelTitle || "Connected Channel"}</strong>
-          {creatorInfo.customUrl && (
-            <span style={{ marginLeft: "6px", color: "#666" }}>({creatorInfo.customUrl})</span>
-          )}
+      {/* IDENTITY: Show Channel Name if Available (Added for Audit) */}
+      {creatorInfo ? (
+        <div className="identity-badge" style={{ marginBottom: "16px" }}>
+          <img
+            src={creatorInfo.snippet?.thumbnails?.default?.url}
+            alt="Channel"
+            style={{ width: 24, height: 24, borderRadius: "50%", verticalAlign: "middle" }}
+          />
+          <span style={{ marginLeft: 8, fontWeight: "600" }}>
+            {creatorInfo.snippet?.title || "Unknown Channel"}
+          </span>
+        </div>
+      ) : (
+        <div className="alert-box warning">
+          Could not load channel info. Ensure you are connected.
         </div>
       )}
+
+      {/* SCOPE EXPLANATION: Essential for Audit */}
+      <div
+        className="scope-info-box"
+        style={{
+          marginBottom: "16px",
+          padding: "12px",
+          background: "#fff5f5",
+          borderRadius: "8px",
+          border: "1px solid #fee2e2",
+          fontSize: "0.85rem",
+        }}
+      >
+        <div
+          style={{
+            fontWeight: "600",
+            marginBottom: "6px",
+            color: "#b91c1c",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>🔒</span> Data Access & Permissions
+        </div>
+        <p style={{ margin: 0, color: "#444", lineHeight: "1.4" }}>
+          <strong>Why we need this:</strong>
+        </p>
+        <ul style={{ margin: "6px 0 0 20px", padding: 0, color: "#444", lineHeight: "1.4" }}>
+          <li>
+            <code
+              style={{
+                background: "#fff",
+                padding: "2px 4px",
+                borderRadius: "3px",
+                border: "1px solid #fecaca",
+                fontFamily: "monospace",
+                color: "#991b1b",
+              }}
+            >
+              youtube.upload
+            </code>
+            : Used solely to upload this video file to the channel listed above.
+          </li>
+          <li>
+            <code
+              style={{
+                background: "#fff",
+                padding: "2px 4px",
+                borderRadius: "3px",
+                border: "1px solid #fecaca",
+                fontFamily: "monospace",
+                color: "#991b1b",
+              }}
+            >
+              youtube.readonly
+            </code>
+            : Used to verify your channel name/avatar (displayed above) so you know which account
+            you are posting to.
+          </li>
+        </ul>
+        <p
+          style={{
+            margin: "8px 0 0 0",
+            color: "#7f1d1d",
+            fontSize: "0.8rem",
+            fontStyle: "italic",
+            borderTop: "1px solid #fee2e2",
+            paddingTop: "6px",
+          }}
+        >
+          <strong>Privacy Guarantee:</strong> We cannot delete videos, manage comments, or access
+          your viewing history.
+        </p>
+      </div>
+
+      <div className="form-group-modern">
+        <label>Title</label>
+        <div style={{ position: "relative" }}>
+          <input
+            type="text"
+            className="modern-input"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="Video Title"
+          />
+          <button
+            className="emoji-trigger-btn"
+            onClick={() =>
+              setShowEmojiPicker({
+                field: "title",
+                visible: !showEmojiPicker.visible || showEmojiPicker.field !== "title",
+              })
+            }
+          >
+            😊
+          </button>
+          {showEmojiPicker.visible && showEmojiPicker.field === "title" && (
+            <div className="emoji-popover-container">
+              <EmojiPicker onSelect={handleInsertEmoji} />
+            </div>
+          )}
+        </div>
+      </div>
 
       {OPTIMAL_TIMES.youtube && (
         <div
