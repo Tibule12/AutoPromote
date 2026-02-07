@@ -311,12 +311,12 @@ async function postToSpotifyHandler(args) {
 
 async function postToYouTubeHandler(args) {
   // Wrapper to match platformPoster signature
-  // uploadVideo signature: ({ uid, videoUrl, title, description, privacy, tags, contentId })
+  // uploadVideo signature: ({ uid, fileUrl | videoUrl, title, description, privacy, tags, contentId })
   const { contentId, payload, reason, uid } = args;
   try {
     const res = await postToYouTube({
       uid,
-      videoUrl: payload.url || payload.mediaUrl, // Assuming payload has url
+      fileUrl: payload.url || payload.mediaUrl, // Use `fileUrl` key required by `uploadVideo`
       title: payload.title || payload.message,
       description: payload.description,
       privacy: payload.privacy || "public",

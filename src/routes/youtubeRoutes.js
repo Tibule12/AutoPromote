@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 const express = require("express");
 const fetch = require("node-fetch");
 const { admin, db } = require("../../firebaseAdmin");
@@ -22,6 +22,13 @@ const ytPublicLimiter = rateLimiter({
   capacity: parseInt(process.env.RATE_LIMIT_YT_PUBLIC || "120", 10),
   refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || "10"),
   windowHint: "youtube_public",
+});
+
+// Multer for optional direct file uploads (single file field: 'file')
+const multer = require("multer");
+const upload = multer({
+  dest: "uploads/",
+  limits: { fileSize: parseInt(process.env.YT_MAX_VIDEO_BYTES || "52428800", 10) },
 });
 
 const YT_CLIENT_ID = process.env.YT_CLIENT_ID;
@@ -332,23 +339,72 @@ router.post("/stats/poll", authMiddleware, ytWriteLimiter, async (req, res) => {
   }
 });
 
-// Upload a video to YouTube given a file URL (Phase 1 unified service)
-router.post("/upload", authMiddleware, ytWriteLimiter, async (req, res) => {
+// Upload a video to YouTube given either: (1) a file upload (multipart 'file'), (2) a contentId that points to a stored asset, or (3) an external URL
+router.post("/upload", authMiddleware, ytWriteLimiter, upload.single("file"), async (req, res) => {
   try {
     const {
       title,
       description,
-      videoUrl,
-      mimeType,
+      videoUrl, // legacy alias
+      fileUrl, // explicit file url
       contentId,
+      mimeType,
       shortsMode,
       optimizeMetadata = true,
       forceReupload = false,
       skipIfDuplicate = true,
     } = req.body || {};
-    if (!title || !videoUrl)
-      return res.status(400).json({ error: "title and videoUrl are required" });
+
+    // Determine the final file URL to upload
+    let resolvedFileUrl = fileUrl || videoUrl;
+
+    // 1) If client uploaded a file directly (multipart), store it to GCS and use signed URL
+    if (req.file) {
+      try {
+        const bucket = admin.storage().bucket();
+        const dest = `uploads/youtube/${req.userId || (req.user && req.user.uid) || "unknown"}/${Date.now()}_${req.file.originalname || req.file.filename}`;
+        await bucket.upload(req.file.path, {
+          destination: dest,
+          metadata: { contentType: req.file.mimetype || "video/mp4" },
+        });
+        const uploadedFile = bucket.file(dest);
+        const signedUrls = await uploadedFile.getSignedUrl({
+          action: "read",
+          expires: "01-01-2500",
+        });
+        resolvedFileUrl =
+          signedUrls && signedUrls[0] ? signedUrls[0] : `gs://${bucket.name}/${dest}`;
+      } catch (e) {
+        // Clean up local temp file if present and rethrow
+        try {
+          require("fs").unlinkSync(req.file.path);
+        } catch (_) {}
+        throw e;
+      }
+      // Remove local temp file
+      try {
+        require("fs").unlinkSync(req.file.path);
+      } catch (_) {}
+    }
+
+    // 2) If a contentId was provided and we still don't have a file URL, read from the content doc
+    if (!resolvedFileUrl && contentId) {
+      try {
+        const snap = await db.collection("content").doc(String(contentId)).get();
+        if (snap.exists) {
+          const cData = snap.data();
+          resolvedFileUrl = cData.processedUrl || cData.url || cData.fileUrl || null;
+        }
+      } catch (_) {}
+    }
+
+    if (!title || !resolvedFileUrl)
+      return res
+        .status(400)
+        .json({ error: "title and video file (file/contentId/url) are required" });
+
     const uid = req.userId || req.user?.uid;
+
     let tags = [];
     if (contentId) {
       const snap = await db.collection("content").doc(String(contentId)).get();
@@ -357,12 +413,13 @@ router.post("/upload", authMiddleware, ytWriteLimiter, async (req, res) => {
         if (Array.isArray(cData.tags)) tags = cData.tags;
       }
     }
+
     const { uploadVideo } = require("../services/youtubeService");
     const outcome = await uploadVideo({
       uid,
       title,
       description: description || "",
-      fileUrl: videoUrl,
+      fileUrl: resolvedFileUrl,
       mimeType: mimeType || "video/mp4",
       contentId: contentId || null,
       shortsMode: !!shortsMode,
@@ -370,6 +427,7 @@ router.post("/upload", authMiddleware, ytWriteLimiter, async (req, res) => {
       contentTags: tags,
       forceReupload: !!forceReupload,
       skipIfDuplicate: !!skipIfDuplicate,
+      payload: { platform_options: { youtube: { made_for_kids: req.body.made_for_kids } } },
     });
     return res.json(outcome);
   } catch (e) {

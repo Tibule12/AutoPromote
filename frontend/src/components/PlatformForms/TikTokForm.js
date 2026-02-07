@@ -564,48 +564,6 @@ const TikTokForm = ({
         )}
       </div>
 
-      {setBountyAmount && (
-        <div
-          className="form-group-modern"
-          style={{
-            marginTop: "16px",
-            border: "1px solid #ffd700",
-            background: "rgba(255, 215, 0, 0.05)",
-          }}
-        >
-          <label style={{ color: "#d97706", display: "flex", alignItems: "center", gap: "6px" }}>
-            <span>💰</span> Viral Bounty Pool
-          </label>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-            <div>
-              <label style={{ fontSize: "0.75rem" }}>Virtual Stake ($)</label>
-              <input
-                type="number"
-                min="0"
-                className="modern-input"
-                value={bountyAmount || ""}
-                onChange={e => setBountyAmount(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: "0.75rem" }}>Target Niche</label>
-              <select
-                className="modern-select"
-                value={bountyNiche || "general"}
-                onChange={e => setBountyNiche && setBountyNiche(e.target.value)}
-              >
-                <option value="general">General</option>
-                <option value="music">Music</option>
-                <option value="tech">Tech</option>
-              </select>
-            </div>
-          </div>
-          <div style={{ fontSize: "0.75rem", color: "#b45309", marginTop: "8px" }}>
-            * This is a simulation wager. Higher values increase internal priority.
-          </div>
-        </div>
-      )}
-
       {setProtocol7Enabled && (
         <div
           className="protocol-7-card"

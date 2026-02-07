@@ -139,6 +139,7 @@ async function uploadVideo({
   title,
   description = "",
   fileUrl,
+  videoUrl, // legacy alias (backwards compatibility)
   mimeType = "video/mp4",
   contentId,
   shortsMode,
@@ -148,6 +149,8 @@ async function uploadVideo({
   skipIfDuplicate = true,
   payload = {},
 }) {
+  // Support legacy callers that pass `videoUrl` instead of `fileUrl`
+  if (!fileUrl && typeof videoUrl === "string") fileUrl = videoUrl;
   if (!uid) throw new Error("uid required");
   if (!title) throw new Error("title required");
   if (!fileUrl) throw new Error("fileUrl required");

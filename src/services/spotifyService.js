@@ -354,7 +354,7 @@ async function searchTracks({ uid, query, limit = 10 }) {
   if (!query) throw new Error("query required");
   if (!fetchFn) throw new Error("Fetch not available");
 
-  const accessToken = await getValidAccessToken(uid);
+  const accessToken = await module.exports.getValidAccessToken(uid);
   if (!accessToken) throw new Error("No valid Spotify access token");
 
   const params = new URLSearchParams({
@@ -380,62 +380,69 @@ async function searchTracks({ uid, query, limit = 10 }) {
 
   const data = await response.json();
 
-  const tracks = (data.tracks?.items || []).map(track => ({
+  return formatSearchResults(data);
+}
+
+/**
+ * Normalize raw Spotify search response into results array
+ */
+function formatSearchResults(data) {
+  const tracks = (data.tracks?.items || []).filter(Boolean).map(track => ({
     type: "track",
     id: track.id,
     uri: track.uri,
     name: track.name,
-    artists: track.artists.map(a => a.name),
-    album: track.album.name,
-    url: track.external_urls.spotify,
-    preview_url: track.preview_url,
-    popularity: track.popularity,
-    image: track.album.images?.[0]?.url || null,
+    artists: (track.artists || []).map(a => a.name),
+    album: track.album?.name || null,
+    url: track.external_urls?.spotify || null,
+    preview_url: track.preview_url || null,
+    popularity: track.popularity || 0,
+    image: track.album?.images?.[0]?.url || null,
   }));
 
-  const albums = (data.albums?.items || []).map(album => ({
+  const albums = (data.albums?.items || []).filter(Boolean).map(album => ({
     type: "album",
     id: album.id,
     uri: album.uri,
     name: album.name,
-    artists: album.artists.map(a => a.name),
-    url: album.external_urls.spotify,
+    artists: (album.artists || []).map(a => a.name),
+    url: album.external_urls?.spotify || null,
     image: album.images?.[0]?.url || null,
-    release_date: album.release_date,
+    release_date: album.release_date || null,
   }));
 
-  const playlists = (data.playlists?.items || []).map(playlist => ({
+  const playlists = (data.playlists?.items || []).filter(Boolean).map(playlist => ({
     type: "playlist",
     id: playlist.id,
     uri: playlist.uri,
     name: playlist.name,
-    owner: playlist.owner.display_name,
-    url: playlist.external_urls.spotify,
+    owner: playlist.owner?.display_name || null,
+    url: playlist.external_urls?.spotify || null,
     image: playlist.images?.[0]?.url || null,
-    total_tracks: playlist.tracks?.total,
+    total_tracks: playlist.tracks?.total || 0,
   }));
 
-  const shows = (data.shows?.items || []).map(show => ({
+  const shows = (data.shows?.items || []).filter(Boolean).map(show => ({
     type: "show",
     id: show.id,
     uri: show.uri,
     name: show.name,
-    publisher: show.publisher,
-    url: show.external_urls.spotify,
+    publisher: show.publisher || null,
+    url: show.external_urls?.spotify || null,
     image: show.images?.[0]?.url || null,
-    total_episodes: show.total_episodes,
+    total_episodes: show.total_episodes || 0,
   }));
 
-  const episodes = (data.episodes?.items || []).map(episode => ({
+  const episodes = (data.episodes?.items || []).filter(Boolean).map(episode => ({
     type: "episode",
     id: episode.id,
     uri: episode.uri,
     name: episode.name,
     show_name: episode.show?.name || "Podcast Episode",
-    url: episode.external_urls.spotify,
+    url: episode.external_urls?.spotify || null,
     image: episode.images?.[0]?.url || null,
-    release_date: episode.release_date,
-    duration_ms: episode.duration_ms,
+    release_date: episode.release_date || null,
+    duration_ms: episode.duration_ms || 0,
   }));
 
   return {
@@ -512,6 +519,7 @@ module.exports = {
   createPlaylist,
   addTracksToPlaylist,
   searchTracks,
+  formatSearchResults,
   getPlaylist,
   postToSpotify,
   getTracksBatch,
