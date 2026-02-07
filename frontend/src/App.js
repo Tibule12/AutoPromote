@@ -1020,6 +1020,7 @@ function App() {
       alert(
         "Content uploaded and queued for promotion. It will be published to selected platforms after approval."
       );
+      return result;
     } catch (error) {
       alert("Error uploading content: " + error.message);
     }
