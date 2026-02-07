@@ -206,7 +206,9 @@ const InstagramForm = ({
               <option key={p.id} value={p.id}>
                 {p.name}{" "}
                 {p.instagram_business_account
-                  ? `(IG: ${p.instagram_business_account.id})`
+                  ? p.instagram_business_account.username
+                    ? `(@${p.instagram_business_account.username})`
+                    : `(IG: ${p.instagram_business_account.id})`
                   : "(Linked Page)"}
               </option>
             ))}
@@ -219,9 +221,13 @@ const InstagramForm = ({
         )}
         <p className="legal-hint" style={{ marginTop: "4px" }}>
           <span style={{ color: "#888" }}>
-            IG ID:{" "}
-            {facebookPages.find(p => p.id === selectedPageId)?.instagram_business_account?.id ||
-              "N/A"}
+            {(() => {
+              const selectedPage = facebookPages.find(p => p.id === selectedPageId);
+              const ig = selectedPage?.instagram_business_account;
+              if (ig && ig.username) return `IG User: @${ig.username} (ID: ${ig.id})`;
+              if (ig && ig.id) return `IG ID: ${ig.id}`;
+              return "IG ID: N/A";
+            })()}
           </span>
         </p>
 
