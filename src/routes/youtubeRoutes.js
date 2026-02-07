@@ -1,4 +1,3 @@
- 
 const express = require("express");
 const fetch = require("node-fetch");
 const { admin, db } = require("../../firebaseAdmin");
@@ -377,13 +376,26 @@ router.post("/upload", authMiddleware, ytWriteLimiter, upload.single("file"), as
       } catch (e) {
         // Clean up local temp file if present and rethrow
         try {
-          require("fs").unlinkSync(req.file.path);
+          // Security: Resolve and validate path to prevent traversal before deletion
+          const fs = require("fs");
+          const path = require("path");
+          const safeBase = path.resolve("uploads");
+          const resolvedPath = path.resolve(req.file.path);
+          if (resolvedPath.startsWith(safeBase)) {
+            fs.unlinkSync(resolvedPath);
+          }
         } catch (_) {}
         throw e;
       }
       // Remove local temp file
       try {
-        require("fs").unlinkSync(req.file.path);
+        const fs = require("fs");
+        const path = require("path");
+        const safeBase = path.resolve("uploads");
+        const resolvedPath = path.resolve(req.file.path);
+        if (resolvedPath.startsWith(safeBase)) {
+          fs.unlinkSync(resolvedPath);
+        }
       } catch (_) {}
     }
 

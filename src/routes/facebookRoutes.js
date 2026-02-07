@@ -245,8 +245,9 @@ router.get("/callback", async (req, res) => {
         try {
           const pageId = page.id; // use page access token
           const proofP = appsecretProofFor(page.access_token);
+          // Fetch username and name for better UI display
           const igRes = await fetch(
-            `https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account&access_token=${encodeURIComponent(page.access_token)}${proofP ? `&appsecret_proof=${proofP}` : ""}`
+            `https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account{id,username,name,profile_picture_url}&access_token=${encodeURIComponent(page.access_token)}${proofP ? `&appsecret_proof=${proofP}` : ""}`
           );
           const igData = await igRes.json();
           // Log specific response for debugging
