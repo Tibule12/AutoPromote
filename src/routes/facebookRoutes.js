@@ -237,11 +237,11 @@ router.get("/callback", async (req, res) => {
       }
     }
 
-    // Try to get Instagram business account from ANY page (iterate until found)
+    // Try to get Instagram business account from pages
     let igBusinessAccountId = null;
     if (pages.length > 0) {
+      // Check all pages to populate dropdowns accurately
       for (const page of pages) {
-        if (igBusinessAccountId) break;
         try {
           const pageId = page.id; // use page access token
           const proofP = appsecretProofFor(page.access_token);
@@ -253,13 +253,19 @@ router.get("/callback", async (req, res) => {
           if (igData.error) {
             console.error("[FacebookCallback] IG check failed for page:", pageId, igData.error);
           } else if (igData.instagram_business_account && igData.instagram_business_account.id) {
-            igBusinessAccountId = igData.instagram_business_account.id;
-            console.log(
-              "[FacebookCallback] Found IG Business Account",
-              igBusinessAccountId,
-              "on page",
-              pageId
-            );
+            // Attach to page object so it is stored and sent to frontend
+            page.instagram_business_account = igData.instagram_business_account;
+
+            // Set primary ID if not yet found
+            if (!igBusinessAccountId) {
+              igBusinessAccountId = igData.instagram_business_account.id;
+              console.log(
+                "[FacebookCallback] Found IG Business Account",
+                igBusinessAccountId,
+                "on page",
+                pageId
+              );
+            }
           }
         } catch (e) {
           console.error("[FacebookCallback] Exception checking IG for page:", page.id, e);
@@ -403,7 +409,11 @@ router.get(
         }
         const out = {
           connected: true,
-          pages: (data.pages || []).map(p => ({ id: p.id, name: p.name })),
+          pages: (data.pages || []).map(p => ({
+            id: p.id,
+            name: p.name,
+            instagram_business_account: p.instagram_business_account,
+          })),
           ig_business_account_id: data.ig_business_account_id || null,
         };
 
