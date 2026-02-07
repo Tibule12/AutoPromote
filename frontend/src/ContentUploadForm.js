@@ -1751,6 +1751,28 @@ function ContentUploadForm({
         }
       }
 
+      // Validate file integrity before upload
+      if (file.size && file.size < 100) {
+        // Attempt to read file to check for "undefined" string
+        try {
+          const text = await file.text();
+          if (text.includes("undefined")) {
+            throw new Error(
+              "The selected file is corrupt (contains 'undefined'). Please re-select the file or use a different browser."
+            );
+          }
+        } catch (e) {
+          /* ignore read errors if safe */
+        }
+
+        // Still warn generally
+        if (file.size < 20) {
+          throw new Error(
+            "The selected file is too small (empty or corrupt). Please check the file."
+          );
+        }
+      }
+
       console.log("[Upload] File selected:", file);
       setUploadProgress(10);
       setUploadStatus("Uploading to cloud...");
