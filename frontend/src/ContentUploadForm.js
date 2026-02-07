@@ -3121,10 +3121,10 @@ function ContentUploadForm({
                   )}
                 </div>
                 <div>
-                  <strong>Title:</strong> {pv.title}
+                  <strong>Title:</strong> {pv.title || title || (file ? file.name : "Untitled")}
                 </div>
                 <div>
-                  <strong>Description:</strong> {pv.description}
+                  <strong>Description:</strong> {pv.description || description || "No description"}
                 </div>
                 <div style={{ marginTop: 8 }}>
                   <button
@@ -4119,10 +4119,12 @@ function ContentUploadForm({
                               />
                             )}
                             <div>
-                              <strong>Title:</strong> {p.title}
+                              <strong>Title:</strong>{" "}
+                              {p.title || title || (file ? file.name : "Untitled")}
                             </div>
                             <div>
-                              <strong>Description:</strong> {p.description}
+                              <strong>Description:</strong>{" "}
+                              {p.description || description || "No description"}
                             </div>
                             <div style={{ marginTop: 8 }}>
                               <button
@@ -4319,10 +4321,12 @@ function ContentUploadForm({
                                   />
                                 )}
                                 <div>
-                                  <strong>Title:</strong> {p.title}
+                                  <strong>Title:</strong>{" "}
+                                  {p.title || title || (file ? file.name : "Untitled")}
                                 </div>
                                 <div>
-                                  <strong>Description:</strong> {p.description}
+                                  <strong>Description:</strong>{" "}
+                                  {p.description || description || "No description"}
                                 </div>
                               </div>
                             ))}

@@ -437,9 +437,19 @@ class ContentQualityEnhancer {
       const previews = {};
 
       for (const platform of platforms) {
+        const optimizedCaptionObj = await this.optimizeCaption(
+          content.description || "",
+          platform,
+          content
+        );
+        const optimizedCaptionText =
+          optimizedCaptionObj.improved || optimizedCaptionObj.original || content.description || "";
+
         previews[platform] = {
+          title: content.title || "",
+          description: optimizedCaptionText,
           thumbnail: await this.generateThumbnailSuggestions(content, platform),
-          caption: await this.optimizeCaption(content.description || "", platform, content),
+          caption: optimizedCaptionObj, // Keep full object for detailed analysis if needed
           hashtags: await this.generateOptimalHashtags(content, platform),
           timing: this.getOptimalPostingTime(platform),
           expectedPerformance: this.predictPerformance(content, platform),
