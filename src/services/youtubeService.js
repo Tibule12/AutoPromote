@@ -67,10 +67,17 @@ async function ensureFreshTokens(oauth2Client, connectionData, uid) {
       ? { ...connectionData, ...connectionData.tokens }
       : connectionData || {};
 
-  // If token is near expiry (within 2 minutes), refresh.
+  // Force refresh if expiry is missing, invalid, or expired
   const expiry = oauth2Client.credentials.expiry_date;
-  if (expiry && Date.now() < expiry - 120000) return oauth2Client; // still valid
-  if (!tokens.refresh_token) return oauth2Client; // nothing to refresh with
+  const isExpiredOrInvalid = !expiry || isNaN(expiry) || Date.now() >= expiry - 120000;
+
+  if (!isExpiredOrInvalid) return oauth2Client; // still valid
+
+  if (!tokens.refresh_token) {
+    console.warn("YouTube token expired but no refresh_token available.");
+    return oauth2Client;
+  }
+
   try {
     const { credentials } = await oauth2Client.refreshAccessToken();
     try {
