@@ -15,8 +15,9 @@ const { spawnSync, spawn } = require('child_process');
 const { EOL } = require('os');
 
 function tryRunFirebaseExec() {
-  console.log('[run-emulator-or-jest] Attempting: npx firebase emulators:exec --only firestore node ./scripts/exec-jest.js');
-  const res = spawnSync('npx', ['firebase', 'emulators:exec', '--only', 'firestore', 'node', './scripts/exec-jest.js'], {
+  console.log('[run-emulator-or-jest] Attempting: npx firebase emulators:exec --only firestore "node ./scripts/exec-jest.js"');
+  // Combine the command and script into a single argument for the script parameter
+  const res = spawnSync('npx', ['firebase', 'emulators:exec', '--only', 'firestore', 'node ./scripts/exec-jest.js'], {
     stdio: 'inherit',
     env: process.env,
     shell: true,

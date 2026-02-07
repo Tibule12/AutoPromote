@@ -406,19 +406,29 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
 
   const handler = handlers[platform];
   if (!handler) return { platform, success: false, error: "unsupported_platform" };
-  // Ensure payload.mediaUrl is present (prefer processedUrl if available)
+
+  // Ensure essential fields (mediaUrl, title, description) are present by fetching original content
   try {
-    if (
-      contentId &&
-      !(payload && (payload.mediaUrl || payload.videoUrl || payload.imageUrl || payload.url))
-    ) {
+    const missingMedia =
+      !payload || !(payload.mediaUrl || payload.videoUrl || payload.imageUrl || payload.url);
+    const missingTitle = !payload || !payload.title;
+    const missingDesc = !payload || !payload.description;
+
+    if (contentId && (missingMedia || missingTitle || missingDesc)) {
       const ctx = await buildContentContext(contentId);
-      const mediaUrl = ctx.processedUrl || ctx.url || ctx.landingPageUrl || null;
-      if (mediaUrl) {
-        payload = { ...(payload || {}), mediaUrl };
+      payload = payload || {}; // Ensure payload object exists
+
+      if (missingMedia) {
+        // Prefer processed/optimized URL, then raw upload URL, then link
+        const mediaUrl = ctx.processedUrl || ctx.url || ctx.landingPageUrl || null;
+        if (mediaUrl) payload.mediaUrl = mediaUrl;
       }
+      if (missingTitle && ctx.title) payload.title = ctx.title;
+      if (missingDesc && ctx.description) payload.description = ctx.description;
     }
-  } catch (_) {}
+  } catch (err) {
+    console.warn("[platformPoster] Context hydration failed:", err.message);
+  }
   // Spread `payload` into top-level for services that expect plain args
   // (e.g., redditService expects title/text/url at top-level), while
   // still providing `payload` for handlers that prefer the object.
