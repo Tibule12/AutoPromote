@@ -208,10 +208,10 @@ router.get("/callback", async (req, res) => {
         });
       }
     }
-    // Fetch managed pages
+    // Fetch managed pages AND their linked Instagram accounts in one optimized call
     const proof = appsecretProofFor(tokenData.access_token);
     const pagesRes = await fetch(
-      `https://graph.facebook.com/v19.0/me/accounts?access_token=${encodeURIComponent(tokenData.access_token)}${proof ? `&appsecret_proof=${proof}` : ""}`
+      `https://graph.facebook.com/v19.0/me/accounts?fields=name,access_token,id,instagram_business_account{id,username,name,profile_picture_url}&access_token=${encodeURIComponent(tokenData.access_token)}${proof ? `&appsecret_proof=${proof}` : ""}`
     );
     const pagesData = await pagesRes.json();
     const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
@@ -237,39 +237,20 @@ router.get("/callback", async (req, res) => {
       }
     }
 
-    // Try to get Instagram business account from pages
+    // Identify primary Instagram business account
     let igBusinessAccountId = null;
     if (pages.length > 0) {
-      // Check all pages to populate dropdowns accurately
       for (const page of pages) {
-        try {
-          const pageId = page.id; // use page access token
-          const proofP = appsecretProofFor(page.access_token);
-          // Fetch username and name for better UI display
-          const igRes = await fetch(
-            `https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account{id,username,name,profile_picture_url}&access_token=${encodeURIComponent(page.access_token)}${proofP ? `&appsecret_proof=${proofP}` : ""}`
-          );
-          const igData = await igRes.json();
-          // Log specific response for debugging
-          if (igData.error) {
-            console.error("[FacebookCallback] IG check failed for page:", pageId, igData.error);
-          } else if (igData.instagram_business_account && igData.instagram_business_account.id) {
-            // Attach to page object so it is stored and sent to frontend
-            page.instagram_business_account = igData.instagram_business_account;
-
-            // Set primary ID if not yet found
-            if (!igBusinessAccountId) {
-              igBusinessAccountId = igData.instagram_business_account.id;
-              console.log(
-                "[FacebookCallback] Found IG Business Account",
-                igBusinessAccountId,
-                "on page",
-                pageId
-              );
-            }
+        if (page.instagram_business_account && page.instagram_business_account.id) {
+          if (!igBusinessAccountId) {
+            igBusinessAccountId = page.instagram_business_account.id;
+            console.log(
+              "[FacebookCallback] Found IG Business Account (Direct)",
+              igBusinessAccountId,
+              "on page",
+              page.id
+            );
           }
-        } catch (e) {
-          console.error("[FacebookCallback] Exception checking IG for page:", page.id, e);
         }
       }
     }
