@@ -159,6 +159,15 @@ async function downloadVideoBuffer(fileUrl) {
   const buf = await res.buffer();
   if (buf && buf.length > MAX_BYTES)
     throw new Error("Downloaded video exceeds maximum allowed size");
+
+  if (buf && buf.length < 100) {
+    const preview = buf.toString("utf8");
+    if (preview.includes("undefined")) {
+      throw new Error("Downloaded video is corrupt (contains 'undefined'). Client upload failed.");
+    }
+    throw new Error("Downloaded video is too small (<100 bytes). Invalid file.");
+  }
+
   return buf;
 }
 
