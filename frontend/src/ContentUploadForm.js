@@ -308,6 +308,8 @@ function ContentUploadForm({
         Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
       }
       // Local state sync for upload logic
+      if (vals.caption !== undefined)
+        setPerPlatformTitle(prev => ({ ...prev, tiktok: vals.caption }));
       if (vals.privacy) setTiktokPrivacy(vals.privacy);
       setTiktokInteractions(prev => ({
         ...prev,
@@ -333,6 +335,8 @@ function ContentUploadForm({
       if (typeof extSetPlatformOption === "function") {
         Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
       }
+      if (vals.message !== undefined)
+        setPerPlatformTitle(prev => ({ ...prev, facebook: vals.message }));
     },
     [extSetPlatformOption]
   );
@@ -361,6 +365,9 @@ function ContentUploadForm({
         Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
       }
       // Local Sync
+      if (vals.title !== undefined) setPerPlatformTitle(prev => ({ ...prev, youtube: vals.title }));
+      if (vals.description !== undefined)
+        setPerPlatformDescription(prev => ({ ...prev, youtube: vals.description }));
       if (vals.shortsMode !== undefined) setYoutubeShorts(vals.shortsMode);
       if (vals.privacy) setYoutubeVisibility(vals.privacy);
     },

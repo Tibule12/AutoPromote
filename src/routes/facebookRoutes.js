@@ -389,6 +389,61 @@ router.get(
             /* ignore */
           }
         }
+
+        // AUTO-HEAL: If pages are stale (missing username/IG info) and we have a valid token, refresh them.
+        let accessToken = data.user_access_token;
+        if (!accessToken && data.encrypted_user_access_token) {
+          try {
+            const { decryptToken } = require("../services/secretVault");
+            accessToken = decryptToken(data.encrypted_user_access_token);
+          } catch (e) {
+            /* ignore decryption failure */
+          }
+        }
+
+        const pagesAreStale = (data.pages || []).some(
+          p =>
+            !p.instagram_business_account ||
+            (p.instagram_business_account && !p.instagram_business_account.username)
+        );
+
+        if (accessToken && pagesAreStale) {
+          try {
+            const proof = appsecretProofFor(accessToken);
+            const refreshRes = await fetch(
+              `https://graph.facebook.com/v19.0/me/accounts?fields=name,access_token,id,instagram_business_account{id,username,name,profile_picture_url}&access_token=${encodeURIComponent(
+                accessToken
+              )}${proof ? `&appsecret_proof=${proof}` : ""}`
+            );
+            const refreshData = await refreshRes.json();
+            if (refreshData && !refreshData.error && Array.isArray(refreshData.data)) {
+              console.log(`[FacebookStatus] Auto-healed stale pages for uid ${uid}`);
+              data.pages = refreshData.data; // Update local variable for response
+
+              // Helper to find IG ID if missing
+              let newIgId = data.ig_business_account_id;
+              if (!newIgId) {
+                const withIg = data.pages.find(p => p.instagram_business_account?.id);
+                if (withIg) newIgId = withIg.instagram_business_account.id;
+              }
+
+              // Update Firestore in background
+              await snap.ref.set(
+                {
+                  pages: data.pages,
+                  ig_business_account_id: newIgId || null,
+                  lastRefreshedAt: admin.firestore.FieldValue.serverTimestamp(),
+                },
+                { merge: true }
+              );
+              // Update local ID for response
+              if (newIgId) data.ig_business_account_id = newIgId;
+            }
+          } catch (err) {
+            console.warn("[FacebookStatus] Auto-heal failed:", err.message);
+          }
+        }
+
         const out = {
           connected: true,
           pages: (data.pages || []).map(p => ({

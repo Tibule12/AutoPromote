@@ -2,7 +2,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-const { db } = require('./autopromote-functions/_server/src/firebaseAdmin');
+const { db } = require('./src/firebaseAdmin');
 const { tokensFromDoc } = require('./src/services/connectionTokenUtils'); // Import this
 
 // IMPORTANT: Mock the environment for services if needed
