@@ -3497,7 +3497,10 @@ try {
 const promotionService = require("./promotionService");
 const SCHEDULER_INTERVAL_MS = parseInt(process.env.SCHEDULER_INTERVAL_MS || "60000", 10); // 1 minute
 
-if (process.env.SCHEDULER_ENABLED !== "false") {
+// Disable scheduler automatically in test environment to prevent tear-down errors
+const isTestEnv = process.env.NODE_ENV === "test" || process.env.JEST_WORKER_ID;
+
+if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
   console.log(
     `[Scheduler] 🕒 Initializing Real-Time Promotion Scheduler (every ${SCHEDULER_INTERVAL_MS}ms)`
   );
