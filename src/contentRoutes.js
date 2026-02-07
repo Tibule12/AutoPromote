@@ -576,20 +576,31 @@ router.post(
           // Create Schedule in DB (Background)
           if (true) {
             // Immediate Publish Mode
-            const scheduleData = {
-              contentId: contentRef.id,
-              user_id: userId,
-              platform: "all",
-              startTime: optimalTiming,
-              status: "pending",
-              isActive: true,
-              platformSpecificSettings: platform_options || {},
-            };
-            await db.collection("promotion_schedules").add(scheduleData);
+            // FIX: Enforce single-platform scheduling as requested.
+            // multi-platform selection is not supported in the UI to ensure professional, platform-specific optimization.
+            // We prioritize the primary platform chosen by the user.
+            const selectedPlatform =
+              Array.isArray(target_platforms) && target_platforms.length > 0
+                ? target_platforms[0]
+                : null;
 
-            // Dispatch Queue Tasks (Background)
-            if (Array.isArray(target_platforms)) {
-              for (const platform of target_platforms) {
+            if (selectedPlatform) {
+              const scheduleData = {
+                contentId: contentRef.id,
+                user_id: userId,
+                platform: selectedPlatform,
+                startTime: optimalTiming,
+                status: "pending",
+                isActive: true,
+                platformSpecificSettings: platform_options || {},
+              };
+              await db.collection("promotion_schedules").add(scheduleData);
+
+              // Dispatch Queue Tasks (Background)
+              if (true) {
+                // Ensure we only process for the selected single platform
+                const platform = selectedPlatform;
+
                 // ... platform specific dispatching ...
                 // We need to replicate the dispatch logic here or call a helper
                 // To minimize code duplication and complexity in this specialized fix,
@@ -601,7 +612,12 @@ router.post(
                   // But for "fast load", relying on the robust Scheduler is safer and cleaner than duplicating dispatch logic inside this async block.
                 }
               }
+            } else {
+              console.warn(
+                "[Schedule] No target platform selected. Skipping automatic promotion schedule."
+              );
             }
+            // } <-- Loop removed, so we remove one closing brace level
           }
         } catch (err) {
           console.error("[ViralOptimization] Background process failed:", err);
