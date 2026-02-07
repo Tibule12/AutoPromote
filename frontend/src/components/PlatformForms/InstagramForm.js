@@ -33,6 +33,13 @@ const InstagramForm = ({
     initialData.pageId || facebookPages[0]?.id || ""
   );
 
+  // Auto-select first page when pages load if none selected
+  useEffect(() => {
+    if (!selectedPageId && facebookPages && facebookPages.length > 0) {
+      setSelectedPageId(facebookPages[0].id);
+    }
+  }, [facebookPages, selectedPageId]);
+
   // Image Editing State
   const [showCrop, setShowCrop] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
