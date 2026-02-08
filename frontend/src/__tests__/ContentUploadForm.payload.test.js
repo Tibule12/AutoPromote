@@ -13,6 +13,7 @@ jest.mock("firebase/storage", () => {
     ref: jest.fn(() => ({})),
     uploadBytes: jest.fn(async () => ({ success: true })),
     getDownloadURL: jest.fn(async () => "https://example.com/test.mp4"),
+    getMetadata: jest.fn(async () => ({ size: 1024, contentType: "video/mp4" })),
   };
 });
 
@@ -38,7 +39,8 @@ describe("ContentUploadForm payloads", () => {
     fireEvent.change(screen.getByLabelText(/Video Title/i), {
       target: { value: "Test Title" },
     });
-    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const validContent = new Uint8Array(200).fill(65);
+    const file = new File([validContent], "test.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -67,8 +69,9 @@ describe("ContentUploadForm payloads", () => {
     expect(youtubeTile).toBeDefined();
     fireEvent.click(youtubeTile);
 
-    // Provide a file in the focused view and click the per-platform Upload button
-    const file2 = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    // Provide a valid file (>= 100 bytes) in the focused view and click the per-platform Upload button
+    const validContent = new Uint8Array(200).fill(65); // 200 bytes of 'A'
+    const file2 = new File([validContent], "test.mp4", { type: "video/mp4" });
     const fileInput2 = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput2, { target: { files: [file2] } });
 
@@ -116,8 +119,9 @@ describe("ContentUploadForm payloads", () => {
     const companyIdInput = screen.getByLabelText(/Organization \/ Company ID/i);
     fireEvent.change(companyIdInput, { target: { value: "123456" } });
 
-    // Provide a file for LinkedIn validation (required to avoid "Please select a file")
-    const linkedinFile = new File(["dummy_linkedin"], "linkedin_test.mp4", { type: "video/mp4" });
+    // Provide a valid file (>= 100 bytes) for LinkedIn validation
+    const validContent = new Uint8Array(200).fill(65); // 200 bytes of 'A'
+    const linkedinFile = new File([validContent], "linkedin_test.mp4", { type: "video/mp4" });
     const linkedinFileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(linkedinFileInput, { target: { files: [linkedinFile] } });
 

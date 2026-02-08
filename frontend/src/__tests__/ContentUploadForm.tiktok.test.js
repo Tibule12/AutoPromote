@@ -32,6 +32,7 @@ jest.mock("firebase/storage", () => {
       };
     }),
     getDownloadURL: jest.fn(async () => "https://example.com/test.mp4"),
+    getMetadata: jest.fn(async () => ({ size: 1024, contentType: "video/mp4" })),
   };
 });
 
@@ -58,7 +59,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(screen.getByLabelText(/Caption/i), {
       target: { value: "TikTok Consent Test" },
     });
-    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const file = new File([new Uint8Array(200)], "test.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -101,7 +102,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(screen.getByLabelText(/Caption/i), {
       target: { value: "Overlay Test" },
     });
-    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const file = new File([new Uint8Array(200)], "test.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -170,7 +171,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(screen.getByLabelText(/Caption/i), {
       target: { value: "Branded Test" },
     });
-    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const file = new File([new Uint8Array(200)], "test.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -247,7 +248,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(screen.getByLabelText(/Caption/i), {
       target: { value: "Preview Obj" },
     });
-    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const file = new File([new Uint8Array(200)], "test.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -285,7 +286,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(screen.getByLabelText(/Caption/i), {
       target: { value: "Hashtag Test" },
     });
-    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const file = new File([new Uint8Array(200)], "test.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -450,7 +451,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.change(screen.getByLabelText(/Caption/i), {
       target: { value: "Initial Title" },
     });
-    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const file = new File([new Uint8Array(200)], "test.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -514,7 +515,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(tiktokTile);
 
     // Provide file
-    const file = new File(["dummy"], "test.mp4", { type: "video/mp4" });
+    const file = new File([new Uint8Array(200)], "test.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -589,7 +590,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     await screen.findByRole("heading", { name: /Upload to TikTok/i });
 
     // Provide per-platform file and title using accessible labels
-    const pf = new File(["abc"], "platform.mp4", { type: "video/mp4" });
+    const pf = new File([new Uint8Array(200)], "platform.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [pf] } });
 
@@ -621,7 +622,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(tile);
 
     // Select a video file
-    const file = new File(["data"], "video.mp4", { type: "video/mp4" });
+    const file = new File([new Uint8Array(200)], "video.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -652,7 +653,7 @@ describe("ContentUploadForm TikTok UX enforcement", () => {
     fireEvent.click(tile2);
 
     // Select a video file
-    const file = new File(["data"], "video.mp4", { type: "video/mp4" });
+    const file = new File([new Uint8Array(200)], "video.mp4", { type: "video/mp4" });
     const fileInput = screen.getByLabelText(/Video File/i);
     fireEvent.change(fileInput, { target: { files: [file] } });
 
