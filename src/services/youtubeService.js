@@ -163,9 +163,12 @@ async function downloadVideoBuffer(fileUrl) {
   if (buf && buf.length < 100) {
     const preview = buf.toString("utf8");
     if (preview.includes("undefined")) {
-      throw new Error("Downloaded video is corrupt (contains 'undefined'). Client upload failed.");
+      // It seems the client sent a string "undefined" or a file with that text as content
+      throw new Error(
+        `Downloaded video is corrupt (contains 'undefined'). URL: ${fileUrl}. Client upload failed.`
+      );
     }
-    throw new Error("Downloaded video is too small (<100 bytes). Invalid file.");
+    throw new Error(`Downloaded video is too small (<100 bytes). Invalid file. URL: ${fileUrl}`);
   }
 
   return buf;

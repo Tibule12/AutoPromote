@@ -1484,9 +1484,30 @@ function ContentUploadForm({
         // E2E bypass: don't call real Firebase Storage; use placeholder URL
         url = `https://example.com/e2e-${platform}.mp4`;
       } else {
+        // Validate file integrity before upload
+        if (fileToUse.size && fileToUse.size < 100) {
+          throw new Error(
+            "The selected file is too small (empty or corrupt). Please check the file."
+          );
+        }
+
         const filePath = `uploads/${type}s/${Date.now()}_${fileToUse.name}`;
         const storageRef = ref(storage, filePath);
         await uploadBytes(storageRef, fileToUse);
+
+        // 🔎 VERIFY UPLOAD INTEGRITY BEFORE SENDING TO BACKEND
+        const metadata = await getMetadata(storageRef);
+        console.log(`[Upload][${platform}] Cloud metadata:`, metadata);
+
+        if (metadata.size < 100) {
+          throw new Error(
+            `Upload verification failed: Target file is too small (${metadata.size} bytes). Possible network corruption.`
+          );
+        }
+        if (metadata.size === 9) {
+          throw new Error("Upload verification failed: File stored as 'undefined'.");
+        }
+
         url = await getDownloadURL(storageRef);
       }
 
