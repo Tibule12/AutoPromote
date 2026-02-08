@@ -68,9 +68,14 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
       if (!user) throw new Error("You must be logged in to upload.");
 
       // 1. Upload to Storage (Temporary folder for cleanup)
+      if (file.size < 100) throw new Error("File too small/corrupted.");
+
       const storagePath = `temp_sources/${user.uid}/${Date.now()}_${file.name}`;
       const storageRef = ref(storage, storagePath);
-      await uploadBytes(storageRef, file);
+
+      const uploadResult = await uploadBytes(storageRef, file);
+      if (uploadResult.metadata.size < 100) throw new Error("Upload corrupted.");
+
       const url = await getDownloadURL(storageRef);
 
       // 2. Create Content Document

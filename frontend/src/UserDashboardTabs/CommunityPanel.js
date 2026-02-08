@@ -115,12 +115,15 @@ function CommunityPanel() {
 
       // 1. Upload File if present
       if (selectedFile) {
+        if (selectedFile.size < 100) throw new Error("File too small.");
         setUploadProgress(20);
         const fileExt = selectedFile.name.split(".").pop();
         const fileName = `${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExt}`;
         const storageRef = ref(storage, `community/${user.uid}/${fileName}`);
 
-        await uploadBytes(storageRef, selectedFile);
+        const uploadResult = await uploadBytes(storageRef, selectedFile);
+        if (uploadResult.metadata.size < 100) throw new Error("Upload corrupted.");
+
         setUploadProgress(80);
         mediaUrl = await getDownloadURL(storageRef);
 

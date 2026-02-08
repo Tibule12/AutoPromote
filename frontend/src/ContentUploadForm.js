@@ -1785,6 +1785,9 @@ function ContentUploadForm({
       }
 
       // Validate file integrity before upload
+      if (!file || !(file instanceof Blob)) {
+        throw new Error("Invalid file object selected. Please re-select the file.");
+      }
       if (file.size && file.size < 100) {
         // Attempt to read file to check for "undefined" string
         try {
