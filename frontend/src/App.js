@@ -1032,7 +1032,9 @@ function App() {
       );
       return result;
     } catch (error) {
+      console.error("handleContentUpload error:", error);
       alert("Error uploading content: " + error.message);
+      throw error;
     }
   };
 
