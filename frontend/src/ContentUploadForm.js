@@ -1485,7 +1485,7 @@ function ContentUploadForm({
         url = `https://example.com/e2e-${platform}.mp4`;
       } else {
         // Validate file integrity before upload
-        if (fileToUse.size && fileToUse.size < 100) {
+        if (!fileToUse.size || fileToUse.size < 100) {
           throw new Error(
             "The selected file is too small (empty or corrupt). Please check the file."
           );
@@ -1499,12 +1499,13 @@ function ContentUploadForm({
         const metadata = await getMetadata(storageRef);
         console.log(`[Upload][${platform}] Cloud metadata:`, metadata);
 
-        if (metadata.size < 100) {
+        const uploadedSize = Number(metadata.size);
+        if (isNaN(uploadedSize) || uploadedSize < 100) {
           throw new Error(
             `Upload verification failed: Target file is too small (${metadata.size} bytes). Possible network corruption.`
           );
         }
-        if (metadata.size === 9) {
+        if (uploadedSize === 9) {
           throw new Error("Upload verification failed: File stored as 'undefined'.");
         }
 
@@ -1857,14 +1858,15 @@ function ContentUploadForm({
                     const metadata = await getMetadata(storageRef);
                     console.log("[Upload] Cloud metadata:", metadata);
 
-                    if (metadata.size < 100) {
+                    const uploadedSize = Number(metadata.size);
+                    if (isNaN(uploadedSize) || uploadedSize < 100) {
                       throw new Error(
                         `Upload verification failed: Target file is too small (${metadata.size} bytes). Possible network corruption.`
                       );
                     }
 
                     // Double check against 'undefined' corruption specifically if size is suspiciously small (though <100 catches it)
-                    if (metadata.size === 9) {
+                    if (uploadedSize === 9) {
                       // length of "undefined"
                       throw new Error("Upload verification failed: File stored as 'undefined'.");
                     }
