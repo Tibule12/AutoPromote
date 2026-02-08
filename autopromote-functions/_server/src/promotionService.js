@@ -512,6 +512,10 @@ class PromotionService {
             }
 
             processedCount++;
+          } else if (result.skipped) {
+            // Skipped but not error
+            console.log(`[Scheduler] ⏭ Skipped ${schedule.id}: ${result.reason}`);
+            await doc.ref.update({ status: "skipped", isActive: false, note: result.reason, executedAt: new Date().toISOString() });
           } else {
             // Failed
             console.warn(`[Scheduler] ❌ Failed ${schedule.id}: ${result.error}`);

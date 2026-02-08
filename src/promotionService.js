@@ -1,4 +1,3 @@
- 
 const { db } = require("./firebaseAdmin");
 const optimizationService = require("./optimizationService");
 const paypalClient = require("./paypalClient");
@@ -512,6 +511,17 @@ class PromotionService {
             }
 
             processedCount++;
+          } else if (result.skipped) {
+            // Skipped (e.g. disabled feature flag)
+            console.log(
+              `[Scheduler] ⏭ Skipped ${schedule.id}: ${result.reason || "reason unknown"}`
+            );
+            await doc.ref.update({
+              status: "skipped",
+              isActive: false,
+              error: result.reason,
+              executedAt: new Date().toISOString(),
+            });
           } else {
             // Failed
             console.warn(`[Scheduler] ❌ Failed ${schedule.id}: ${result.error}`);

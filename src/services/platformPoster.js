@@ -218,7 +218,8 @@ async function postToInstagram({ contentId, payload, reason, uid }) {
 async function postToTikTok({ contentId, payload, reason, uid }) {
   // Feature flag: if TikTok is disabled and the UID is not in the canary set, skip posting
   try {
-    const enabled = String(process.env.TIKTOK_ENABLED || "false").toLowerCase() === "true";
+    // Default to TRUE if not set, so users can post without touching .env
+    const enabled = String(process.env.TIKTOK_ENABLED || "true").toLowerCase() === "true";
     const canary = (process.env.TIKTOK_CANARY_UIDS || "")
       .split(",")
       .map(s => s.trim())
@@ -232,6 +233,7 @@ async function postToTikTok({ contentId, payload, reason, uid }) {
         success: false,
         skipped: true,
         reason: "disabled_by_feature_flag",
+        error: "TikTok posting is disabled by feature flag (TIKTOK_ENABLED=false)",
       };
     }
   } catch (e) {
