@@ -7,6 +7,13 @@ const BASE = `http://localhost:${STATIC_PORT}`;
 let serverProcess;
 
 async function attachFileForPlatform(page, filePath) {
+  // Wait for at least one file input to appear to avoid race conditions
+  try {
+    await page.waitForSelector('input[type="file"]', { state: 'attached', timeout: 5000 });
+  } catch (e) {
+    // ignore timeout, proceed to checks
+  }
+
   // Prefer per-platform file input inside expanded card
   const perFile = page.locator('.platform-expanded input[type="file"]');
   if ((await perFile.count()) > 0) {
