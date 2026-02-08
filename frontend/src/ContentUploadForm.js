@@ -1106,7 +1106,9 @@ function ContentUploadForm({
       type,
       description: finalDescription,
       url: fileForPlatform ? `preview://${fileForPlatform.name}` : "",
-      file: fileForPlatform ? { name: fileForPlatform.name } : undefined,
+      // Do NOT send the file object, as the main handler will upload it separately or use the provided URL.
+      // passing a plain object avoids logic in App.js trying to upload 'fileForPlatform' as if it were a Blob
+      file: undefined,
       idempotency_key: idempotencyKey || undefined,
       target_platforms:
         Array.isArray(selectedPlatformsVal) && selectedPlatformsVal.length
