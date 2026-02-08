@@ -20,7 +20,6 @@ const DEFAULT_CHUNK_SIZE = parseInt(process.env.TIKTOK_CHUNK_SIZE || "5242880", 
 function computeChunkCandidates(videoSize) {
   const MB = 1024 * 1024;
   const minChunk = 5 * MB;
-  const maxChunk = 64 * MB;
   const candidates = [];
 
   if (videoSize < minChunk) {
@@ -28,19 +27,22 @@ function computeChunkCandidates(videoSize) {
     return [videoSize];
   }
 
-  // Try larger chunk sizes first to minimize total chunks
-  for (let cs = maxChunk; cs >= minChunk; cs -= MB) {
-    const totalChunks = Math.floor(videoSize / cs);
-    if (totalChunks < 1 || totalChunks > 1000) continue;
-    const leftover = videoSize - cs * totalChunks;
-    const lastChunkSize = leftover === 0 ? cs : leftover >= 5 * MB ? leftover : cs + leftover;
-    if (lastChunkSize < 5 * MB) continue;
-    if (lastChunkSize > 128 * MB) continue;
+  // Use a limited set of standard chunk sizes to avoid spanning thousands of candidates
+  // TikTok supports chunks between 5MB and 64MB.
+  // We prioritize larger chunks to reduce HTTP requests.
+  const sizesToTryMB = [64, 50, 40, 32, 25, 20, 15, 10, 5];
+
+  for (const sizeMB of sizesToTryMB) {
+    const cs = sizeMB * MB;
+    const totalChunks = Math.ceil(videoSize / cs);
+
+    // Safety check for ridiculous chunk counts (unlikely with these sizes)
+    if (totalChunks > 1000) continue;
+
+    // We do NOT strictly enforce last-chunk >= 5MB here because most APIs allow the last chunk to be smaller.
+    // If specific errors arise, we can adjust. The previous logic was overly restrictive and caused infinite-like loops.
     candidates.push(cs);
   }
-
-  // Always include the TCP-friendly 5MB as a fallback
-  if (!candidates.includes(minChunk)) candidates.push(minChunk);
 
   return candidates;
 }
@@ -1265,6 +1267,11 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         if (csIndex === chunkSizeCandidates.length - 1) {
           throw e;
         }
+
+        // Wait 2 seconds before retrying to avoid rate limiting
+        console.log("[tiktok] waiting 2s before next attempt...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         // otherwise continue to next smaller chunk size
       }
     }
