@@ -335,7 +335,7 @@ async function initializeVideoUpload({
     source_info: {
       source: "FILE_UPLOAD",
       video_size: videoSize,
-      chunk_size: chunkSize,
+      chunk_size: videoSize === chunkSize ? videoSize : chunkSize,
       total_chunk_count: Math.ceil(videoSize / chunkSize),
     },
   };
