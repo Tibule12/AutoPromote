@@ -1070,7 +1070,13 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         console.error(`[tiktok] Download failed for URL: ${videoUrl}`);
         const statusText =
           videoResponse && videoResponse.status ? `status=${videoResponse.status}` : "";
-        throw new Error(`Failed to download video ${statusText}`);
+        let errorBody = "";
+        try {
+          errorBody = await videoResponse.text();
+        } catch (_) {}
+        throw new Error(
+          `Failed to download video ${statusText} from ${videoUrl}. Body: ${errorBody}`
+        );
       }
 
       const ab = await videoResponse.arrayBuffer();
@@ -1078,7 +1084,13 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       videoSize = videoBuffer.byteLength;
 
       if (videoSize < 100) {
-        throw new Error(`Video file corrupted (too small: ${videoSize} bytes). Please re-upload.`);
+        let snippet = "";
+        try {
+          snippet = videoBuffer.toString("utf8").replace(/\n/g, " ");
+        } catch (_) {}
+        throw new Error(
+          `Video file corrupted (too small: ${videoSize} bytes) from ${videoUrl}. Content: "${snippet}". Please re-upload.`
+        );
       }
     }
 
