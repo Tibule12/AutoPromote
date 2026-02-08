@@ -4,6 +4,7 @@ const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
 const BASE = `http://localhost:${STATIC_PORT}`;
 
 test("AI Clip Studio: analyze and generate clip (SPA)", async ({ page }) => {
+  test.setTimeout(120000); // Increase test timeout
   await page.setExtraHTTPHeaders({ "x-playwright-e2e": "1" });
 
   // Stub common endpoints
@@ -35,6 +36,7 @@ test("AI Clip Studio: analyze and generate clip (SPA)", async ({ page }) => {
             url: `${BASE}/test-assets/test.mp4`,
             duration: 60,
             type: "video",
+            sourceContext: "clip_studio",
           },
         ],
       }),

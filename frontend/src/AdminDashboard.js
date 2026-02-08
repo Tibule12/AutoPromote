@@ -3448,47 +3448,39 @@ function AdminDashboard({ analytics, user, onLogout }) {
                 <div
                   style={{
                     backgroundColor: "white",
-                    borderRadius: "12px",
                     padding: "20px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                    marginBottom: "24px",
+                    borderRadius: "12px",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                    height: "100%",
                   }}
                 >
-                  <h3 style={{ marginTop: 0, marginBottom: "20px", color: "#333" }}>
-                    Transaction Trends
-                  </h3>
-                  <div style={{ display: "flex", flexWrap: "wrap" }}>
-                    <div style={{ flex: "1 0 50%", padding: "10px" }}>
-                      <div style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>
-                        Average Order Value
+                  <h4 style={{ margin: "0 0 15px 0", color: "#666" }}>Subscription Status</h4>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "calc(100% - 40px)",
+                    }}
+                  >
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#1976d2" }}>
+                        {safeNum(dashboardData.activeSubscriptions)}
                       </div>
-                      <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#1976d2" }}>
-                        ${dashboardData.financialMetrics?.transactionTrends?.averageOrderValue || 0}
-                      </div>
-                    </div>
-                    <div style={{ flex: "1 0 50%", padding: "10px" }}>
-                      <div style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>
-                        Conversion Rate
-                      </div>
-                      <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#2e7d32" }}>
-                        {dashboardData.financialMetrics?.transactionTrends?.conversionRate || 0}%
-                      </div>
-                    </div>
-                    <div style={{ flex: "1 0 50%", padding: "10px" }}>
-                      <div style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>
-                        Repeat Purchase Rate
-                      </div>
-                      <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#5e35b1" }}>
-                        {dashboardData.financialMetrics?.transactionTrends?.repeatPurchaseRate || 0}
-                        %
-                      </div>
+                      <div style={{ color: "#666" }}>Active Subscribers</div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* PayPal Subscription Management */}
+            <PayPalSubscriptionPanel />
           </>
         );
+
+      case "payouts":
+        return <AdminPayoutsPanel token={user?.accessToken} />;
 
       // Removed Tabs: community, approval, moderation, etc.
 
@@ -3682,6 +3674,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
         <TabButton name="content" label="Content" icon="📄" />
         <TabButton name="revenue" label="Revenue" icon="💰" />
         <TabButton name="users" label="Users" icon="👥" />
+        <TabButton name="payouts" label="Payouts" icon="💸" />
         <TabButton name="system" label="Automation Status" icon="🤖" />
       </div>
       {error && (

@@ -1209,7 +1209,7 @@ function ContentUploadForm({
     console.log("[E2E] handlePlatformPreview called for platform:", platform);
     const fileToUse = (perPlatformFile && perPlatformFile[platform]) || file;
     try {
-      if (!fileToUse) throw new Error("Please select a file to preview.");
+      if (!fileToUse && platform !== "spotify") throw new Error("Please select a file to preview.");
       const contentData = buildContentDataForPlatform(platform, true);
       console.log("[E2E] handlePlatformPreview contentData", contentData);
       const result = await onUpload({ ...contentData, isDryRun: true });
@@ -2840,6 +2840,37 @@ function ContentUploadForm({
             ← Back
           </button>
           <h3 style={{ margin: 0 }}>Upload to {p.charAt(0).toUpperCase() + p.slice(1)}</h3>
+        </div>
+
+        {/* Global file input for focused platform mode */}
+        <div
+          className="form-group"
+          style={{
+            marginTop: 16,
+            marginBottom: 16,
+            padding: 12,
+            border: "1px dashed #ccc",
+            borderRadius: 8,
+            backgroundColor: "#fafafa",
+          }}
+        >
+          <label
+            htmlFor="content-file-input"
+            style={{ display: "block", marginBottom: 8, fontWeight: 600 }}
+          >
+            Source File
+          </label>
+          <input
+            type="file"
+            id="content-file-input"
+            accept={type === "video" ? "video/*" : type === "audio" ? "audio/*" : "image/*"}
+            onChange={e => handleFileChange(e.target.files[0])}
+            className="form-file-input"
+            style={{ display: "block", width: "100%" }}
+          />
+          {file && (
+            <div style={{ fontSize: 13, marginTop: 4, color: "#666" }}>Selected: {file.name}</div>
+          )}
         </div>
         {p === "facebook" && (
           <FacebookForm
