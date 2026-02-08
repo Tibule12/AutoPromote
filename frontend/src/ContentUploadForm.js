@@ -248,6 +248,11 @@ function ContentUploadForm({
   const [linkedinSettings, setLinkedinSettings] = useState({ postType: "post" });
   const [snapchatSettings, setSnapchatSettings] = useState({ placement: "spotlight" });
   const [redditSettings, setRedditSettings] = useState({ flair: "", nsfw: false });
+
+  // Debug version stamp
+  useEffect(() => {
+    console.log("ContentUploadForm v2.2: Protection Active - 2026-02-08");
+  }, []);
   const [pinterestSettings, setPinterestSettings] = useState({ linkUrl: "" });
   const [discordSettings, setDiscordSettings] = useState({ notify: "none" });
   const [telegramSettings, setTelegramSettings] = useState({ silent: false });
