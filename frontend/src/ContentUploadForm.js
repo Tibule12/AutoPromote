@@ -11,7 +11,13 @@ import "./ContentUploadForm.css";
 import "./components/PlatformForms/PlatformForms.css";
 import { storage, auth } from "./firebaseClient";
 import { API_ENDPOINTS } from "./config";
-import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import {
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
+  getDownloadURL,
+  getMetadata,
+} from "firebase/storage";
 // Temporarily comment out component imports for isolation
 // TODO: revert after diagnostics
 import SpotifyTrackSearch from "./components/SpotifyTrackSearch";
@@ -251,7 +257,7 @@ function ContentUploadForm({
 
   // Debug version stamp
   useEffect(() => {
-    console.log("ContentUploadForm v2.2: Protection Active - 2026-02-08");
+    console.log("ContentUploadForm v2.3: Upload Verification Added - 2026-02-08");
   }, []);
   const [pinterestSettings, setPinterestSettings] = useState({ linkUrl: "" });
   const [discordSettings, setDiscordSettings] = useState({ notify: "none" });
@@ -1823,10 +1829,37 @@ function ContentUploadForm({
                 try {
                   setUploadStatus("Finalizing...");
                   setUploadProgress(95);
-                  const urlRes = await getDownloadURL(storageRef);
+
+                  // 🔎 VERIFY UPLOAD INTEGRITY BEFORE SENDING TO BACKEND
+                  let finalUrl = "";
+                  try {
+                    const metadata = await getMetadata(storageRef);
+                    console.log("[Upload] Cloud metadata:", metadata);
+
+                    if (metadata.size < 100) {
+                      throw new Error(
+                        `Upload verification failed: Target file is too small (${metadata.size} bytes). Possible network corruption.`
+                      );
+                    }
+
+                    // Double check against 'undefined' corruption specifically if size is suspiciously small (though <100 catches it)
+                    if (metadata.size === 9) {
+                      // length of "undefined"
+                      throw new Error("Upload verification failed: File stored as 'undefined'.");
+                    }
+
+                    const urlRes = await getDownloadURL(storageRef);
+                    finalUrl = urlRes;
+                  } catch (verifyErr) {
+                    console.error("[Upload] Verification failed:", verifyErr);
+                    throw verifyErr;
+                  }
+
                   toast.success("Upload complete");
                   toast.dismiss(toastId);
-                  url = urlRes;
+
+                  // Proceed with processing
+                  url = finalUrl;
                   // clear task ref
                   if (uploadTaskRef && uploadTaskRef.current) uploadTaskRef.current = null;
                   resolve();
