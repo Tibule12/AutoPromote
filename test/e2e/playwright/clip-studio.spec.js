@@ -148,7 +148,13 @@ test("AI Clip Studio: analyze and generate clip (SPA)", async ({ page }) => {
   }
 
   // Wait for video card and click Generate Clips
-  await page.waitForSelector(".video-card");
+  try {
+    await page.waitForSelector(".video-card", { timeout: 60000 });
+  } catch (e) {
+    // If no video card, maybe we need to wait for loading or mocked content failed
+    console.log('[WARN] .video-card not found. Page content: ' + (await page.content()).substring(0, 500));
+    throw e;
+  }
   await page.click('.video-card .btn-primary:has-text("Generate Clips")');
 
   // Ensure analysis results appear

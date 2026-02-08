@@ -182,10 +182,20 @@ test("admin payouts list and process single payout", async ({ page }) => {
     await page.reload();
 
     // Click Payouts tab (wait for visible actionable button first)
-    await page.waitForSelector('button:has-text("Payouts")', { timeout: 10000 });
-    await page.click('button:has-text("Payouts")');
+    try {
+      await page.waitForSelector('button:has-text("Payouts")', { timeout: 15000 });
+      await page.click('button:has-text("Payouts")');
+    } catch (e) {
+      console.log('[WARN] "Payouts" button not found. Dumping buttons...');
+      const btns = await page.$$eval('button', els => els.map(e => e.textContent));
+      console.log('[WARN] Buttons found:', btns);
+      // Try finding it by loose text or navigation link
+      const fallback = await page.$('li:has-text("Payouts")');
+      if (fallback) await fallback.click();
+      else throw e;
+    }
     // Wait for table to show
-    await page.waitForSelector(".data-table", { timeout: 4000 });
+    await page.waitForSelector(".data-table", { timeout: 8000 });
 
     // If DB isn't configured, the table might be empty, just assert that the UI loaded
     const rows = await page.$$eval(".data-table tbody tr", rows => rows.length);

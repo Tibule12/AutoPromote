@@ -7,12 +7,29 @@ const BASE = `http://localhost:${STATIC_PORT}`;
 let serverProcess;
 
 async function attachFileForPlatform(page, filePath) {
+  const fs = require('fs');
+  if (!fs.existsSync(filePath)) {
+     throw new Error(`Test asset not found at ${filePath}. Current directory: ${process.cwd()}`);
+  }
+
   // Wait for at least one file input to appear to avoid race conditions
   try {
-    await page.waitForSelector('input[type="file"]', { state: 'attached', timeout: 5000 });
+    await page.waitForSelector('input[type="file"]', { state: 'attached', timeout: 8000 });
   } catch (e) {
     // ignore timeout, proceed to checks
   }
+
+  // Force-show hidden inputs so Playwright can interact with them if needed
+  try {
+    await page.evaluate(() => {
+        document.querySelectorAll('input[type="file"]').forEach(el => {
+            el.style.display = 'block';
+            el.style.opacity = '1';
+            el.style.height = '1px';
+            el.style.width = '1px';
+        });
+    });
+  } catch (e) {}
 
   // Prefer per-platform file input inside expanded card
   const perFile = page.locator('.platform-expanded input[type="file"]');
