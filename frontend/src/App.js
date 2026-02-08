@@ -776,9 +776,19 @@ function App() {
       } else {
         // Only upload file for real submissions (not dry-run)
         if ((type === "video" || type === "image" || type === "audio") && file) {
+          if (file.size < 100) {
+            throw new Error("File too small. Please check the file.");
+          }
           const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
           const storageRef = ref(storage, filePath);
-          await uploadBytes(storageRef, file);
+          const uploadResult = await uploadBytes(storageRef, file);
+
+          if (uploadResult.metadata.size < 100) {
+            throw new Error(
+              `Upload failed: File corrupted (size: ${uploadResult.metadata.size} bytes).`
+            );
+          }
+
           finalUrl = await getDownloadURL(storageRef);
         }
       }

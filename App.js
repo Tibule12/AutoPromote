@@ -260,9 +260,15 @@ function App() {
       // Compatibility: If logic didn't upload file yet (Legacy), do it here
       if (!url && contentData.file && contentData.type !== "article") {
         const file = contentData.file;
+        if (file.size < 100) {
+            throw new Error("File too small to upload.");
+        }
         const filePath = `${STORAGE_PATH}/${Date.now()}_${file.name}`;
         const storageRef = ref(storage, filePath);
-        await uploadBytes(storageRef, file);
+        const uploadRes = await uploadBytes(storageRef, file);
+        if (uploadRes.metadata.size < 100) {
+             throw new Error("Upload corrupted (file too small).");
+        }
         url = await getDownloadURL(storageRef);
       } else if (contentData.type === "article") {
         url = contentData.articleText || undefined;
