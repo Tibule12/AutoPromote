@@ -907,11 +907,18 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         if (!storagePath && c.url) {
           try {
             const u = new URL(c.url);
-            const parts = u.pathname.split("/").filter(Boolean);
-            if (parts.length >= 2) {
-              // strip leading bucket name if present
-              if (parts[0] === (process.env.FIREBASE_STORAGE_BUCKET || "")) parts.shift();
-              storagePath = parts.join("/");
+            if (u.hostname.includes("firebasestorage.googleapis.com")) {
+              const match = u.pathname.match(/\/o\/(.+)$/);
+              if (match && match[1]) {
+                storagePath = decodeURIComponent(match[1]);
+              }
+            } else {
+              const parts = u.pathname.split("/").filter(Boolean);
+              if (parts.length >= 2) {
+                // strip leading bucket name if present
+                if (parts[0] === (process.env.FIREBASE_STORAGE_BUCKET || "")) parts.shift();
+                storagePath = parts.join("/");
+              }
             }
           } catch (e) {
             /* ignore */
@@ -1068,6 +1075,10 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       const ab = await videoResponse.arrayBuffer();
       videoBuffer = Buffer.from(ab);
       videoSize = videoBuffer.byteLength;
+      
+      if (videoSize < 100) {
+        throw new Error(`Video file corrupted (too small: ${videoSize} bytes). Please re-upload.`);
+      }
     }
 
     // For small videos, try the simpler single-PUT upload endpoint which is less error-prone
