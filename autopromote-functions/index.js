@@ -90,10 +90,17 @@ if (corsAllowAll) {
     allowedHeaders: ["Content-Type", "Authorization"],
   };
 } else {
-  // Conservative default: do not allow cross-origin browser requests.
+  // Conservative default: allow requests from known production domains
   corsOptions = {
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
+      const builtInAllowed = [
+        "https://autopromote.org",
+        "https://www.autopromote.org",
+        "https://autopromote-cc6d3.web.app",
+        "https://autopromote-cc6d3.firebaseapp.com",
+      ];
+      if (builtInAllowed.includes(origin)) return callback(null, true);
       return callback(new Error("Not allowed by CORS"), false);
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
