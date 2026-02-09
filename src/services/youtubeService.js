@@ -332,8 +332,11 @@ async function uploadVideo({
 
   const videoBuffer = await downloadVideoBuffer(fileUrl);
 
-  const privacyStatus = payload.privacy || "public";
   const ytOptions = (payload && payload.platform_options && payload.platform_options.youtube) || {};
+
+  // Logic: Prefer top-level 'privacy', then platform-specific 'visibility', then default 'public'
+  const privacyStatus = payload.privacy || ytOptions.visibility || "public";
+
   const selfDeclaredMadeForKids = !!ytOptions.made_for_kids;
 
   const insertRes = await youtube.videos.insert({

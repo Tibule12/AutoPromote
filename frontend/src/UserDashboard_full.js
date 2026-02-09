@@ -1261,9 +1261,7 @@ const UserDashboard = ({
               >
                 Earnings
               </li>
-              <li className={activeTab === "ads" ? "active" : ""} onClick={() => handleNav("ads")}>
-                📢 Ads
-              </li>
+
               <li
                 className={activeTab === "connections" ? "active" : ""}
                 onClick={() => handleNav("connections")}
