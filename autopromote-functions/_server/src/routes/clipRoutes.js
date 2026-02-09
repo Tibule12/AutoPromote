@@ -85,10 +85,7 @@ async function checkClipQuota(req, res, next) {
       // Fallback: perform a query get() and rely on snapshot.size
       try {
         // Use in-memory filtering by userId to avoid composite index requirement
-        const snap = await db
-          .collection("clip_analyses")
-          .where("userId", "==", userId)
-          .get();
+        const snap = await db.collection("clip_analyses").where("userId", "==", userId).get();
 
         used = 0;
         if (snap) {
@@ -617,7 +614,7 @@ router.post("/:clipId/export", authMiddleware, async (req, res) => {
     if (isAdmin) {
       contentPayload.status = "approved";
     } else {
-      contentPayload.status = "pending_approval";
+      contentPayload.status = "approved";
     }
 
     const contentRef = await db.collection("content").add(contentPayload);

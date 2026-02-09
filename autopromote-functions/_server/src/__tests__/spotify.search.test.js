@@ -36,7 +36,15 @@ describe("Spotify search route", () => {
 
   it("returns search results for authenticated user", async () => {
     searchTracks.mockImplementation(async () => ({
-      tracks: [{ id: "t1", uri: "spotify:track:t1", name: "Track 1", artists: ["Artist 1"] }],
+      results: [
+        {
+          type: "track",
+          id: "t1",
+          uri: "spotify:track:t1",
+          name: "Track 1",
+          artists: ["Artist 1"],
+        },
+      ],
     }));
     const res = await agent
       .get("/api/spotify/search")

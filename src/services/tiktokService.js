@@ -925,7 +925,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         if (!storagePath && c.url) {
           try {
             const u = new URL(c.url);
-            if (u.hostname.includes("firebasestorage.googleapis.com")) {
+            if (u.hostname === "firebasestorage.googleapis.com") {
               const match = u.pathname.match(/\/o\/(.+)$/);
               if (match && match[1]) {
                 storagePath = decodeURIComponent(match[1]);

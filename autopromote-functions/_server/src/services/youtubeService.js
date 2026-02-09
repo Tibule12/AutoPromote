@@ -43,7 +43,8 @@ function buildOAuthClient(connectionData) {
       ? { ...connectionData, ...connectionData.tokens }
       : connectionData || {};
 
-  const { access_token, refresh_token, scope, token_type, expires_in, expiry_date, obtainedAt } = tokens;
+  const { access_token, refresh_token, scope, token_type, expires_in, expiry_date, obtainedAt } =
+    tokens;
 
   const client = new google.auth.OAuth2(
     process.env.YT_CLIENT_ID,
@@ -66,10 +67,10 @@ function buildOAuthClient(connectionData) {
         obtainedTime = obtainedAt;
       }
     }
-    
+
     // If we have a valid obtained time, us it. Otherwise assume expired.
     if (obtainedTime > 0) {
-      finalExpiry = obtainedTime + (expires_in * 1000);
+      finalExpiry = obtainedTime + expires_in * 1000;
     } else {
       console.warn("[YouTube] Token missing expiry_date and valid obtainedAt. Marking as expired.");
       finalExpiry = Date.now() - 1000; // Force refresh
@@ -101,7 +102,7 @@ async function ensureFreshTokens(oauth2Client, connectionData, uid) {
 
   if (!tokens.refresh_token) {
     console.warn("YouTube token expired but no refresh_token available.");
-    return oauth2Client; 
+    return oauth2Client;
   }
 
   try {
@@ -158,15 +159,18 @@ async function downloadVideoBuffer(fileUrl) {
   const buf = await res.buffer();
   if (buf && buf.length > MAX_BYTES)
     throw new Error("Downloaded video exceeds maximum allowed size");
-    
+
   if (buf && buf.length < 100) {
-    const preview = buf.toString('utf8');
+    const preview = buf.toString("utf8");
     if (preview.includes("undefined")) {
-        throw new Error("Downloaded video is corrupt (contains 'undefined'). Client upload failed.");
+      // It seems the client sent a string "undefined" or a file with that text as content
+      throw new Error(
+        `Downloaded video is corrupt (contains 'undefined'). URL: ${fileUrl}. Client upload failed.`
+      );
     }
-    throw new Error("Downloaded video is too small (<100 bytes). Invalid file.");
+    throw new Error(`Downloaded video is too small (<100 bytes). Invalid file. URL: ${fileUrl}`);
   }
-  
+
   return buf;
 }
 
@@ -182,6 +186,7 @@ async function uploadVideo({
   title,
   description = "",
   fileUrl,
+  videoUrl, // legacy alias (backwards compatibility)
   mimeType = "video/mp4",
   contentId,
   shortsMode,
@@ -191,6 +196,8 @@ async function uploadVideo({
   skipIfDuplicate = true,
   payload = {},
 }) {
+  // Support legacy callers that pass `videoUrl` instead of `fileUrl`
+  if (!fileUrl && typeof videoUrl === "string") fileUrl = videoUrl;
   if (!uid) throw new Error("uid required");
   if (!title) throw new Error("title required");
   if (!fileUrl) throw new Error("fileUrl required");
@@ -261,6 +268,23 @@ async function uploadVideo({
   let finalTitle = title;
   let finalDescription = description;
 
+  // Append user-provided hashtags to description if not present
+  // payload.hashtags might come from the top application layer
+  const userHashtags = payload?.hashtags || [];
+  const userHashtagString = payload?.hashtagString || "";
+
+  let tagsToAppend = "";
+  if (userHashtagString) {
+    if (!finalDescription.includes(userHashtagString)) tagsToAppend = userHashtagString;
+  } else if (Array.isArray(userHashtags) && userHashtags.length > 0) {
+    const joined = userHashtags.map(t => (t.startsWith("#") ? t : `#${t}`)).join(" ");
+    if (!finalDescription.includes(joined)) tagsToAppend = joined;
+  }
+
+  if (tagsToAppend) {
+    finalDescription += `\n\n${tagsToAppend}`;
+  }
+
   // SPONSORSHIP CHECK (Enforce Disclosure)
   if (contentId) {
     try {
@@ -308,8 +332,11 @@ async function uploadVideo({
 
   const videoBuffer = await downloadVideoBuffer(fileUrl);
 
-  const privacyStatus = payload.privacy || "public";
   const ytOptions = (payload && payload.platform_options && payload.platform_options.youtube) || {};
+
+  // Logic: Prefer top-level 'privacy', then platform-specific 'visibility', then default 'public'
+  const privacyStatus = payload.privacy || ytOptions.visibility || "public";
+
   const selfDeclaredMadeForKids = !!ytOptions.made_for_kids;
 
   const insertRes = await youtube.videos.insert({

@@ -111,14 +111,34 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
   }
   const ctx = await buildContentContext(contentId);
   const captionBase = payload?.caption || payload?.message || ctx.title || "New post";
-  const hashtags = (ctx.tags || [])
-    .slice(0, 5)
-    .map(t => `#${String(t).replace(/[^a-zA-Z0-9]/g, "")}`)
+
+  // Hashtag Logic: Prefer payload (user edits) > payload.hashtags > ctx.tags (db)
+  let rawTags = [];
+  if (payload?.hashtagString) {
+    // Already formatted string
+    if (!captionBase.includes(payload.hashtagString)) {
+      rawTags = [payload.hashtagString];
+    }
+  } else if (payload?.hashtags && Array.isArray(payload.hashtags)) {
+    rawTags = payload.hashtags;
+  } else {
+    rawTags = ctx.tags || [];
+  }
+
+  // Format tags if they form an array (simplify if it's already a string)
+  const finalHashtagStr = rawTags
+    .map(t => {
+      if (t.startsWith && t.startsWith("#")) return t; // already a hashtag
+      if (t.startsWith && t.includes(" ")) return t; // likely a string of tags
+      return `#${String(t).replace(/[^a-zA-Z0-9]/g, "")}`;
+    })
     .join(" ");
-  const caption = [captionBase, hashtags].filter(Boolean).join("\n");
+
+  const caption = [captionBase, finalHashtagStr].filter(Boolean).join("\n\n");
 
   // Check if carousel (multiple images)
   const mediaUrls = payload?.mediaUrls || ctx.mediaUrls || [];
+
   const isCarousel = mediaUrls.length > 1;
 
   let creationId;

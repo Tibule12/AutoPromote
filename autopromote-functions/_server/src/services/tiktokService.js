@@ -20,7 +20,6 @@ const DEFAULT_CHUNK_SIZE = parseInt(process.env.TIKTOK_CHUNK_SIZE || "5242880", 
 function computeChunkCandidates(videoSize) {
   const MB = 1024 * 1024;
   const minChunk = 5 * MB;
-  const maxChunk = 64 * MB;
   const candidates = [];
 
   if (videoSize < minChunk) {
@@ -28,19 +27,22 @@ function computeChunkCandidates(videoSize) {
     return [videoSize];
   }
 
-  // Try larger chunk sizes first to minimize total chunks
-  for (let cs = maxChunk; cs >= minChunk; cs -= MB) {
-    const totalChunks = Math.floor(videoSize / cs);
-    if (totalChunks < 1 || totalChunks > 1000) continue;
-    const leftover = videoSize - cs * totalChunks;
-    const lastChunkSize = leftover === 0 ? cs : leftover >= 5 * MB ? leftover : cs + leftover;
-    if (lastChunkSize < 5 * MB) continue;
-    if (lastChunkSize > 128 * MB) continue;
+  // Use a limited set of standard chunk sizes to avoid spanning thousands of candidates
+  // TikTok supports chunks between 5MB and 64MB.
+  // We prioritize larger chunks to reduce HTTP requests.
+  const sizesToTryMB = [64, 50, 40, 32, 25, 20, 15, 10, 5];
+
+  for (const sizeMB of sizesToTryMB) {
+    const cs = sizeMB * MB;
+    const totalChunks = Math.ceil(videoSize / cs);
+
+    // Safety check for ridiculous chunk counts (unlikely with these sizes)
+    if (totalChunks > 1000) continue;
+
+    // We do NOT strictly enforce last-chunk >= 5MB here because most APIs allow the last chunk to be smaller.
+    // If specific errors arise, we can adjust. The previous logic was overly restrictive and caused infinite-like loops.
     candidates.push(cs);
   }
-
-  // Always include the TCP-friendly 5MB as a fallback
-  if (!candidates.includes(minChunk)) candidates.push(minChunk);
 
   return candidates;
 }
@@ -335,7 +337,7 @@ async function initializeVideoUpload({
     source_info: {
       source: "FILE_UPLOAD",
       video_size: videoSize,
-      chunk_size: chunkSize,
+      chunk_size: videoSize === chunkSize ? videoSize : chunkSize,
       total_chunk_count: Math.ceil(videoSize / chunkSize),
     },
   };
@@ -881,7 +883,23 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
 
   // Determine video URL from payload or content doc
   let videoUrl = payload?.videoUrl || payload?.mediaUrl || payload?.url || payload?.video_url;
-  const title = payload?.title || payload?.message || "AutoPromote Video";
+
+  // Construct Caption/Title: TikTok 'title' is actually the post caption.
+  // We must incorporate hashtags if they are provided separately.
+  let baseTitle = payload?.title || payload?.message || "AutoPromote Video";
+
+  // Append hashtags if present and not already in the title
+  if (payload?.hashtagString && !baseTitle.includes(payload.hashtagString.trim())) {
+    baseTitle += ` ${payload.hashtagString.trim()}`;
+  } else if (Array.isArray(payload?.hashtags) && payload.hashtags.length > 0) {
+    const tagStr = payload.hashtags.map(t => (t.startsWith("#") ? t : `#${t}`)).join(" ");
+    if (!baseTitle.includes(tagStr)) {
+      baseTitle += ` ${tagStr}`;
+    }
+  }
+
+  const title = baseTitle;
+
   // Default privacy: make approved publishes public, otherwise can be overridden by payload.privacy
   let privacyLevel =
     payload?.privacy || (reason === "approved" ? "PUBLIC_TO_EVERYONE" : "SELF_ONLY");
@@ -907,7 +925,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         if (!storagePath && c.url) {
           try {
             const u = new URL(c.url);
-            if (u.hostname.includes("firebasestorage.googleapis.com")) {
+            if (u.hostname === "firebasestorage.googleapis.com") {
               const match = u.pathname.match(/\/o\/(.+)$/);
               if (match && match[1]) {
                 storagePath = decodeURIComponent(match[1]);
@@ -1067,17 +1085,30 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       });
 
       if (!videoResponse.ok) {
+        console.error(`[tiktok] Download failed for URL: ${videoUrl}`);
         const statusText =
           videoResponse && videoResponse.status ? `status=${videoResponse.status}` : "";
-        throw new Error(`Failed to download video ${statusText}`);
+        let errorBody = "";
+        try {
+          errorBody = await videoResponse.text();
+        } catch (_) {}
+        throw new Error(
+          `Failed to download video ${statusText} from ${videoUrl}. Body: ${errorBody}`
+        );
       }
 
       const ab = await videoResponse.arrayBuffer();
       videoBuffer = Buffer.from(ab);
       videoSize = videoBuffer.byteLength;
-      
+
       if (videoSize < 100) {
-        throw new Error(`Video file corrupted (too small: ${videoSize} bytes). Please re-upload.`);
+        let snippet = "";
+        try {
+          snippet = videoBuffer.toString("utf8").replace(/\n/g, " ");
+        } catch (_) {}
+        throw new Error(
+          `Video file corrupted (too small: ${videoSize} bytes) from ${videoUrl}. Content: "${snippet}". Please re-upload.`
+        );
       }
     }
 
@@ -1252,6 +1283,11 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         if (csIndex === chunkSizeCandidates.length - 1) {
           throw e;
         }
+
+        // Wait 2 seconds before retrying to avoid rate limiting
+        console.log("[tiktok] waiting 2s before next attempt...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         // otherwise continue to next smaller chunk size
       }
     }

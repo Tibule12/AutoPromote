@@ -1,4 +1,4 @@
-/* eslint-disable no-console -- this module intentionally logs to console when using the built-in console provider for local testing */
+ 
 // emailProviders.js - provider registry & factory
 // Supports: console (default), sendgrid (API key), mailgun (API key + domain),
 //           resend (API key), mailtrap (SMTP)
@@ -99,6 +99,47 @@ const providers = {
         } catch (e) {
           console.warn("[email][mailtrap] error", e.message);
           return { ok: false, error: e.message, provider: "mailtrap" };
+        }
+      },
+    };
+  },
+  smtp: () => {
+    const host = process.env.SMTP_HOST;
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+    if (!host || !user || !pass) throw new Error("missing SMTP_HOST/SMTP_USER/SMTP_PASS");
+    let nodemailer;
+    try {
+      nodemailer = require("nodemailer");
+    } catch (e) {
+      throw new Error("nodemailer package not installed");
+    }
+    const port = parseInt(process.env.SMTP_PORT || "587", 10);
+    const secure = process.env.SMTP_SECURE === "true" || port === 465;
+
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: { user, pass },
+    });
+
+    return {
+      name: "smtp",
+      async send({ to, subject, html, text, headers }) {
+        try {
+          await transporter.sendMail({
+            from: process.env.EMAIL_FROM || user, // Default to auth user if no sender set
+            to,
+            subject,
+            html,
+            text,
+            headers,
+          });
+          return { ok: true, provider: "smtp" };
+        } catch (e) {
+          console.warn("[email][smtp] error", e.message);
+          return { ok: false, error: e.message, provider: "smtp" };
         }
       },
     };

@@ -79,6 +79,18 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
   }
   const ctx = await buildContentContext(contentId);
   const messageBase = payload?.message || ctx.title || "New content";
+
+  // Append hashtags if provided and not already in message
+  let finalMessage = messageBase;
+  const tagStr =
+    payload?.hashtagString ||
+    (Array.isArray(payload?.hashtags)
+      ? payload.hashtags.map(t => (t.startsWith("#") ? t : `#${t}`)).join(" ")
+      : "");
+  if (tagStr && !finalMessage.includes(tagStr.trim())) {
+    finalMessage += `\n\n${tagStr}`;
+  }
+
   let link = payload?.shortlink || payload?.link || ctx.landingPageUrl || "";
   if (link) {
     if (!/\/s\//.test(link)) {
@@ -92,7 +104,7 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
   // Use safeFetch for SSRF protection
   const { safeFetch } = require("../utils/ssrfGuard");
   const body = new URLSearchParams({
-    message: link ? `${messageBase}\n${link}` : messageBase,
+    message: link ? `${finalMessage}\n${link}` : finalMessage,
     access_token: PAGE_TOKEN,
   });
   const res = await safeFetch(`https://graph.facebook.com/${PAGE_ID}/feed`, fetch, {
@@ -218,7 +230,7 @@ async function postToInstagram({ contentId, payload, reason, uid }) {
 async function postToTikTok({ contentId, payload, reason, uid }) {
   // Feature flag: if TikTok is disabled and the UID is not in the canary set, skip posting
   try {
-    // Default to TRUE to allow posting without env var
+    // Default to TRUE if not set, so users can post without touching .env
     const enabled = String(process.env.TIKTOK_ENABLED || "true").toLowerCase() === "true";
     const canary = (process.env.TIKTOK_CANARY_UIDS || "")
       .split(",")
@@ -233,7 +245,7 @@ async function postToTikTok({ contentId, payload, reason, uid }) {
         success: false,
         skipped: true,
         reason: "disabled_by_feature_flag",
-        error: "TikTok posting is disabled by feature flag",
+        error: "TikTok posting is disabled by feature flag (TIKTOK_ENABLED=false)",
       };
     }
   } catch (e) {
@@ -313,12 +325,12 @@ async function postToSpotifyHandler(args) {
 
 async function postToYouTubeHandler(args) {
   // Wrapper to match platformPoster signature
-  // uploadVideo signature: ({ uid, videoUrl, title, description, privacy, tags, contentId })
+  // uploadVideo signature: ({ uid, fileUrl | videoUrl, title, description, privacy, tags, contentId })
   const { contentId, payload, reason, uid } = args;
   try {
     const res = await postToYouTube({
       uid,
-      videoUrl: payload.url || payload.mediaUrl, // Assuming payload has url
+      fileUrl: payload.url || payload.mediaUrl, // Use `fileUrl` key required by `uploadVideo`
       title: payload.title || payload.message,
       description: payload.description,
       privacy: payload.privacy || "public",
@@ -408,19 +420,29 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
 
   const handler = handlers[platform];
   if (!handler) return { platform, success: false, error: "unsupported_platform" };
-  // Ensure payload.mediaUrl is present (prefer processedUrl if available)
+
+  // Ensure essential fields (mediaUrl, title, description) are present by fetching original content
   try {
-    if (
-      contentId &&
-      !(payload && (payload.mediaUrl || payload.videoUrl || payload.imageUrl || payload.url))
-    ) {
+    const missingMedia =
+      !payload || !(payload.mediaUrl || payload.videoUrl || payload.imageUrl || payload.url);
+    const missingTitle = !payload || !payload.title;
+    const missingDesc = !payload || !payload.description;
+
+    if (contentId && (missingMedia || missingTitle || missingDesc)) {
       const ctx = await buildContentContext(contentId);
-      const mediaUrl = ctx.processedUrl || ctx.url || ctx.landingPageUrl || null;
-      if (mediaUrl) {
-        payload = { ...(payload || {}), mediaUrl };
+      payload = payload || {}; // Ensure payload object exists
+
+      if (missingMedia) {
+        // Prefer processed/optimized URL, then raw upload URL, then link
+        const mediaUrl = ctx.processedUrl || ctx.url || ctx.landingPageUrl || null;
+        if (mediaUrl) payload.mediaUrl = mediaUrl;
       }
+      if (missingTitle && ctx.title) payload.title = ctx.title;
+      if (missingDesc && ctx.description) payload.description = ctx.description;
     }
-  } catch (_) {}
+  } catch (err) {
+    console.warn("[platformPoster] Context hydration failed:", err.message);
+  }
   // Spread `payload` into top-level for services that expect plain args
   // (e.g., redditService expects title/text/url at top-level), while
   // still providing `payload` for handlers that prefer the object.
