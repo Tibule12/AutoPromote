@@ -79,6 +79,18 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
   }
   const ctx = await buildContentContext(contentId);
   const messageBase = payload?.message || ctx.title || "New content";
+
+  // Append hashtags if provided and not already in message
+  let finalMessage = messageBase;
+  const tagStr =
+    payload?.hashtagString ||
+    (Array.isArray(payload?.hashtags)
+      ? payload.hashtags.map(t => (t.startsWith("#") ? t : `#${t}`)).join(" ")
+      : "");
+  if (tagStr && !finalMessage.includes(tagStr.trim())) {
+    finalMessage += `\n\n${tagStr}`;
+  }
+
   let link = payload?.shortlink || payload?.link || ctx.landingPageUrl || "";
   if (link) {
     if (!/\/s\//.test(link)) {
@@ -92,7 +104,7 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
   // Use safeFetch for SSRF protection
   const { safeFetch } = require("../utils/ssrfGuard");
   const body = new URLSearchParams({
-    message: link ? `${messageBase}\n${link}` : messageBase,
+    message: link ? `${finalMessage}\n${link}` : finalMessage,
     access_token: PAGE_TOKEN,
   });
   const res = await safeFetch(`https://graph.facebook.com/${PAGE_ID}/feed`, fetch, {

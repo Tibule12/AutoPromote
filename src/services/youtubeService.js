@@ -268,6 +268,23 @@ async function uploadVideo({
   let finalTitle = title;
   let finalDescription = description;
 
+  // Append user-provided hashtags to description if not present
+  // payload.hashtags might come from the top application layer
+  const userHashtags = payload?.hashtags || [];
+  const userHashtagString = payload?.hashtagString || "";
+
+  let tagsToAppend = "";
+  if (userHashtagString) {
+    if (!finalDescription.includes(userHashtagString)) tagsToAppend = userHashtagString;
+  } else if (Array.isArray(userHashtags) && userHashtags.length > 0) {
+    const joined = userHashtags.map(t => (t.startsWith("#") ? t : `#${t}`)).join(" ");
+    if (!finalDescription.includes(joined)) tagsToAppend = joined;
+  }
+
+  if (tagsToAppend) {
+    finalDescription += `\n\n${tagsToAppend}`;
+  }
+
   // SPONSORSHIP CHECK (Enforce Disclosure)
   if (contentId) {
     try {

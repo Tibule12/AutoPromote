@@ -883,7 +883,23 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
 
   // Determine video URL from payload or content doc
   let videoUrl = payload?.videoUrl || payload?.mediaUrl || payload?.url || payload?.video_url;
-  const title = payload?.title || payload?.message || "AutoPromote Video";
+
+  // Construct Caption/Title: TikTok 'title' is actually the post caption.
+  // We must incorporate hashtags if they are provided separately.
+  let baseTitle = payload?.title || payload?.message || "AutoPromote Video";
+
+  // Append hashtags if present and not already in the title
+  if (payload?.hashtagString && !baseTitle.includes(payload.hashtagString.trim())) {
+    baseTitle += ` ${payload.hashtagString.trim()}`;
+  } else if (Array.isArray(payload?.hashtags) && payload.hashtags.length > 0) {
+    const tagStr = payload.hashtags.map(t => (t.startsWith("#") ? t : `#${t}`)).join(" ");
+    if (!baseTitle.includes(tagStr)) {
+      baseTitle += ` ${tagStr}`;
+    }
+  }
+
+  const title = baseTitle;
+
   // Default privacy: make approved publishes public, otherwise can be overridden by payload.privacy
   let privacyLevel =
     payload?.privacy || (reason === "approved" ? "PUBLIC_TO_EVERYONE" : "SELF_ONLY");
