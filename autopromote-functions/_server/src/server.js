@@ -1031,6 +1031,10 @@ try {
     // Canonical custom domain (www + apex)
     "https://www.autopromote.org",
     "https://autopromote.org",
+    // Legacy/onrender domains kept for backward compatibility during transition
+    "https://autopromote-1.onrender.com",
+    "https://autopromote.onrender.com",
+    process.env.NODE_ENV === "development" ? "http://localhost:3000" : null,
   ].filter(Boolean);
   const envAllowed = (process.env.CORS_ALLOWED_ORIGINS || "")
     .split(",")
