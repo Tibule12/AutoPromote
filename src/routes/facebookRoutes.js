@@ -517,12 +517,23 @@ router.post("/upload", authMiddleware, async (req, res) => {
     if (!snap.exists) return res.status(400).json({ error: "Facebook not connected" });
     const data = snap.data();
     const page = (data.pages || []).find(p => p.id === pageId);
-    if (!page || !page.access_token)
-      return res.status(400).json({ error: "Page not found or missing access token" });
+    if (!page) return res.status(400).json({ error: "Page not found" });
+
+    // Handle encrypted page tokens
+    let pageToken = page.access_token;
+    if (!pageToken && page.encrypted_access_token) {
+      try {
+        const { decryptToken } = require("../services/secretVault");
+        pageToken = decryptToken(page.encrypted_access_token);
+      } catch (e) {
+        /* ignore */
+      }
+    }
+    if (!pageToken) return res.status(400).json({ error: "Missing page access token" });
 
     // Build endpoint/body
     let endpoint = `https://graph.facebook.com/${encodeURIComponent(pageId)}/feed`;
-    let body = { access_token: page.access_token };
+    let body = { access_token: pageToken };
     if (content.type === "image" && content.url) {
       endpoint = `https://graph.facebook.com/${encodeURIComponent(pageId)}/photos`;
       body.url = content.url;
@@ -537,7 +548,7 @@ router.post("/upload", authMiddleware, async (req, res) => {
       if (content.url && !body.message.includes(content.url)) body.message += `\n${content.url}`;
     }
     // Add appsecret_proof for page access token safety (if we have secret)
-    const proofP = appsecretProofFor(page.access_token);
+    const proofP = appsecretProofFor(pageToken);
     const finalEndpoint = proofP
       ? `${endpoint}${endpoint.includes("?") ? "&" : "?"}appsecret_proof=${proofP}`
       : endpoint;
