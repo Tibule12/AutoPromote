@@ -631,6 +631,7 @@ function ContentUploadForm({
   const [perPlatformFile, setPerPlatformFile] = useState({});
   const [facebookPages, setFacebookPages] = useState([]);
   const [facebookLoading, setFacebookLoading] = useState(false);
+  const [instagramBusinessAccountId, setInstagramBusinessAccountId] = useState(null);
   const [selectedFacebookPageId, setSelectedFacebookPageId] = useState(null);
   const [lastUploadResult, setLastUploadResult] = useState(null);
   const [perPlatformTitle, setPerPlatformTitle] = useState({});
@@ -746,12 +747,15 @@ function ContentUploadForm({
         if (!mounted) return;
         if (!res.ok) {
           setFacebookPages([]);
+          setInstagramBusinessAccountId(null);
           return;
         }
         const json = await res.json();
         setFacebookPages(json.pages || []);
+        setInstagramBusinessAccountId(json.ig_business_account_id || null);
       } catch (e) {
         setFacebookPages([]);
+        setInstagramBusinessAccountId(null);
       } finally {
         if (mounted) setFacebookLoading(false);
       }
@@ -2951,6 +2955,7 @@ function ContentUploadForm({
             onFileChange={f => handlePerPlatformFileChange("instagram", f)}
             currentFile={perPlatformFile?.instagram}
             facebookPages={facebookPages || []}
+            instagramBusinessAccountId={instagramBusinessAccountId}
             onChange={handleInstagramChange}
             initialData={extPlatformOptions?.instagram}
             globalTitle={title}
@@ -4065,6 +4070,7 @@ function ContentUploadForm({
                           onFileChange={f => handlePerPlatformFileChange("instagram", f)}
                           currentFile={perPlatformFile?.instagram}
                           facebookPages={facebookPages || []}
+                          instagramBusinessAccountId={instagramBusinessAccountId}
                           onChange={handleInstagramChange}
                           initialData={extPlatformOptions?.instagram}
                           globalTitle={title}

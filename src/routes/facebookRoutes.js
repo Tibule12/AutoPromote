@@ -416,7 +416,14 @@ router.get(
               )}${proof ? `&appsecret_proof=${proof}` : ""}`
             );
             const refreshData = await refreshRes.json();
-            if (refreshData && !refreshData.error && Array.isArray(refreshData.data)) {
+            // SECURITY PATCH: Only update if we received a valid non-empty list.
+            // Prevents wiping existing pages if the API returns ephemeral errors or empty lists.
+            if (
+              refreshData &&
+              !refreshData.error &&
+              Array.isArray(refreshData.data) &&
+              refreshData.data.length > 0
+            ) {
               console.log(`[FacebookStatus] Auto-healed stale pages for uid ${uid}`);
               data.pages = refreshData.data; // Update local variable for response
 

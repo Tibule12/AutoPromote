@@ -11,6 +11,7 @@ const InstagramForm = ({
   globalTitle,
   globalDescription,
   facebookPages = [], // Instagram business accounts often linked to FB Pages
+  instagramBusinessAccountId,
   bountyAmount,
   setBountyAmount,
   bountyNiche,
@@ -220,6 +221,25 @@ const InstagramForm = ({
               </option>
             ))}
           </select>
+        ) : instagramBusinessAccountId ? (
+          <div
+            className="alert-box success"
+            style={{ fontSize: "0.85rem", background: "#f0fdf4", color: "#166534" }}
+          >
+            ✅ Direct Instagram Connection Active (ID: {instagramBusinessAccountId})
+          </div>
+        ) : instagramBusinessAccountId ? (
+          <div
+            className="alert-box success"
+            style={{
+              fontSize: "0.85rem",
+              background: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              color: "#166534",
+            }}
+          >
+            Instagram Connected via Facebook (ID: {instagramBusinessAccountId})
+          </div>
         ) : (
           <div className="alert-box warning" style={{ fontSize: "0.85rem" }}>
             No connected Instagram Accounts found. Ensure your Facebook Page has an Instagram
@@ -233,6 +253,7 @@ const InstagramForm = ({
               const ig = selectedPage?.instagram_business_account;
               if (ig && ig.username) return `IG User: @${ig.username} (ID: ${ig.id})`;
               if (ig && ig.id) return `IG ID: ${ig.id}`;
+              if (instagramBusinessAccountId) return `IG ID: ${instagramBusinessAccountId}`;
               return "IG ID: N/A";
             })()}
           </span>

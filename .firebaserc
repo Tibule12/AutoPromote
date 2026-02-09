@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "autopromote-cc6d3"
-  }
+  },
+  "targets": {
+    "autopromote-cc6d3": {
+      "hosting": {
+        "autopromote-org": [
+          "autopromote-org"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
