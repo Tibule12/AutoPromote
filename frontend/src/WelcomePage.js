@@ -22,7 +22,13 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
             <div>
               <h1 className="new-welcome-title">AutoPromote</h1>
               <p className="new-welcome-tagline-small">
-                Turn every upload into a smarter opportunity.
+                Turn every upload into a smarter decision.
+              </p>
+              <p
+                className="new-welcome-subline"
+                style={{ marginTop: "0.5rem", opacity: 0.9, fontSize: "1.1rem" }}
+              >
+                Test content performance before you scale it across platforms.
               </p>
             </div>
           </div>
@@ -44,11 +50,25 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
         <div className="hp-main">
           <Section id="what-is" title="What is AutoPromote?">
             <p>
-              AutoPromote is a content intelligence platform that helps creators and businesses
-              <strong> test, learn, and improve content performance before scaling it</strong>{" "}
-              across external platforms. Instead of blindly posting or promoting content,
-              AutoPromote observes early performance, runs controlled improvements (AI clips), and
-              delivers clear feedback so creators understand what actually works for their audience.
+              AutoPromote is a content intelligence platform for creators and businesses who already
+              publish content and want clearer signals before scaling it.
+            </p>
+            <p>
+              Instead of blindly posting or promoting content everywhere, AutoPromote lets you run a
+              controlled first publish, observe early performance, and improve presentation before
+              wider amplification.
+            </p>
+            <p
+              className="highlight-text"
+              style={{
+                fontWeight: 500,
+                marginTop: "1rem",
+                borderLeft: "3px solid var(--primary)",
+                paddingLeft: "1rem",
+              }}
+            >
+              AutoPromote helps creators test, learn, and improve content performance using real
+              outcomes — not assumptions.
             </p>
           </Section>
 
@@ -57,7 +77,7 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
               <li>Test before you scale</li>
               <li>Learn from real outcomes, not assumptions</li>
               <li>Improve presentation before amplification</li>
-              <li>Every action requires user consent</li>
+              <li>Every action requires explicit user consent</li>
               <li>Confidence comes from evidence, not promises</li>
             </ul>
             <p className="muted">
@@ -67,35 +87,52 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
           </Section>
 
           <Section id="how-it-works" title="How It Works">
+            <p style={{ marginBottom: "1.5rem", fontStyle: "italic" }}>
+              Every step is opt-in. Nothing is published, tested, or changed without user approval.
+            </p>
             <ol className="hp-steps">
               <li>
                 <strong>Upload Once</strong>
                 <p>
-                  Users upload their original content and select the platforms they want to publish
-                  to.
+                  Users upload original content to AutoPromote and choose a single platform or
+                  limited audience for an initial test publish.
+                </p>
+                <p className="small-note" style={{ fontSize: "0.9em", color: "#666" }}>
+                  No mass distribution. No amplification. Just an early signal.
                 </p>
               </li>
               <li>
                 <strong>Observe Performance</strong>
                 <p>
-                  The platform monitors early performance during a defined observation window (e.g.
-                  3–7 hours depending on platform).
+                  The platform monitors early performance during a short observation window
+                  (typically 3–7 hours, depending on platform), focusing on initial engagement
+                  signals such as retention, interaction, and response velocity.
                 </p>
               </li>
               <li>
                 <strong>Improve When Needed</strong>
                 <p>
                   If content underperforms and the user has given consent, AutoPromote generates 1–2
-                  AI-optimized clips focused on stronger hooks, better pacing, and platform-native
-                  formatting.
+                  optional AI-assisted variations.
+                </p>
+                <p>
+                  These improvements focus on stronger hooks, better pacing, and platform-native
+                  formatting — while preserving the creator’s original voice and intent.
                 </p>
               </li>
               <li>
                 <strong>Learn & Compare</strong>
                 <p>
-                  AutoPromote compares original performance vs AI clips and provides clear,
-                  human-readable feedback: what improved, what didn’t, and what to try next.
+                  AutoPromote compares original performance against AI-assisted variations and
+                  provides clear, human-readable feedback:
                 </p>
+                <div style={{ marginLeft: "1rem", marginTop: "0.5rem", marginBottom: "0.5rem" }}>
+                  • what improved
+                  <br />
+                  • what didn’t
+                  <br />• what to try next
+                </div>
+                <p>The goal is learning, not guessing.</p>
               </li>
             </ol>
           </Section>
@@ -103,30 +140,44 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
           <Section id="not" title="What AutoPromote Is NOT">
             <ul className="hp-list">
               <li>Not an ad platform</li>
-              <li>Not a guarantee of reach</li>
+              <li>Not a guarantee of reach or virality</li>
               <li>Not a replacement for creativity</li>
               <li>Not automation without permission</li>
             </ul>
             <p className="muted">
-              AutoPromote is a learning and optimization layer on top of existing platforms.
+              AutoPromote is a learning and optimization layer built on top of existing platforms.
             </p>
           </Section>
 
           <Section id="trust" title="User Trust & Consent">
             <ul className="hp-list">
               <li>No content is published without explicit user approval</li>
-              <li>AI clips are optional and opt-in</li>
-              <li>Scheduling and testing behavior is transparent</li>
+              <li>AI-assisted variations are optional and opt-in</li>
+              <li>Testing and scheduling behavior is transparent</li>
               <li>All actions align with external platform policies</li>
             </ul>
+          </Section>
+
+          <Section id="who-is-it-for" title="Who AutoPromote Is For">
+            <p>AutoPromote is for creators and teams who:</p>
+            <ul className="hp-list" style={{ marginTop: "0.5rem" }}>
+              <li>already publish content regularly</li>
+              <li>want clearer feedback before scaling or boosting</li>
+              <li>care about learning and consistency, not one-off virality</li>
+            </ul>
+            <p className="muted" style={{ marginTop: "1rem" }}>
+              It is not built for spam, mass posting, or shortcut growth.
+            </p>
           </Section>
 
           <Section id="growth" title="Growth & Amplification (Future-Ready)">
             <p>
               AutoPromote is designed so that amplification — organic or paid — happens{" "}
-              <strong>after</strong> content proves itself. When amplification features are
-              introduced, they will be optional, informed by performance data, and apply only to
-              content that has already shown positive signals.
+              <strong>after</strong> content proves itself.
+            </p>
+            <p>
+              When amplification features are introduced, they will be optional, informed by
+              performance data, and applied only to content that has already shown positive signals.
             </p>
           </Section>
 
@@ -134,7 +185,10 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
             <p>
               Most creators fail not because their content is bad, but because they don’t know{" "}
               <strong>what part failed</strong>. AutoPromote reduces guesswork and replaces it with
-              insight. Every upload should have a fairer chance, teach the creator something, and
+              insight.
+            </p>
+            <p>
+              Every upload should have a fairer chance, teach the creator something useful, and
               increase confidence over time.
             </p>
           </Section>
