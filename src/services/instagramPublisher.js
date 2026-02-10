@@ -206,7 +206,7 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
         params.append("image_url", mediaUrl);
       }
 
-      const createRes = await fetch(creationEndpoint, { method: "POST", body: params });
+      const createRes = await fetch(createEndpoint, { method: "POST", body: params });
       const createJson = await createRes.json();
       if (!createRes.ok || !createJson.id) {
         return {
@@ -225,7 +225,7 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
           await sleep(2000); // Increased from 1500ms to 2000ms
           try {
             const statusRes = await fetch(
-              `https://graph.facebook.com/v18.0/${creationId}?fields=status_code&access_token=${ACCESS_TOKEN}`
+              `https://graph.facebook.com/v19.0/${creationId}?fields=status_code&access_token=${ACCESS_TOKEN}`
             );
             const statusJson = await statusRes.json();
             if (statusJson.status_code === "FINISHED") break;
@@ -248,7 +248,7 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
   // Publish the media
   try {
     const publishRes = await fetch(
-      `https://graph.facebook.com/v18.0/${IG_USER_ID}/media_publish?access_token=${ACCESS_TOKEN}`,
+      `https://graph.facebook.com/v19.0/${IG_USER_ID}/media_publish?access_token=${ACCESS_TOKEN}`,
       {
         method: "POST",
         body: new URLSearchParams({ creation_id: creationId }),
