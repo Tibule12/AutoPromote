@@ -94,14 +94,6 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
     try {
       const conn = await getUserFacebookConnection(uid);
       if (conn) {
-        // Resolve access token (handle legacy or encrypted/refreshed token)
-        if (conn.tokens && conn.tokens.access_token) {
-          ACCESS_TOKEN = conn.tokens.access_token;
-        } else if (conn.accessToken) {
-          // Legacy plain text
-          ACCESS_TOKEN = conn.accessToken;
-        }
-
         // Try to find IG Business ID in connection data
         // Priority: 1. snake_case (saved by routes.js) 2. camelCase (legacy) 3. metadata
         if (conn.ig_business_account_id) IG_USER_ID = conn.ig_business_account_id;
@@ -109,6 +101,39 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
         else if (conn.instagramId) IG_USER_ID = conn.instagramId;
         else if (conn.metadata && conn.metadata.instagram_business_account_id)
           IG_USER_ID = conn.metadata.instagram_business_account_id;
+
+        // Resolve access token (UPDATED: Look for Page-Specific token first)
+        let resolvedToken = null;
+        if (IG_USER_ID && conn.pages && Array.isArray(conn.pages)) {
+          // Find page owning this IG account
+          const p = conn.pages.find(
+            pg => pg.instagram_business_account && pg.instagram_business_account.id === IG_USER_ID
+          );
+          // Or fallback to first page if only one
+          const targetPage = p || (conn.pages.length === 1 ? conn.pages[0] : null);
+
+          if (targetPage) {
+            if (targetPage.access_token) {
+              resolvedToken = targetPage.access_token;
+            } else if (targetPage.encrypted_access_token) {
+              try {
+                const { decryptToken } = require("./secretVault");
+                resolvedToken = decryptToken(targetPage.encrypted_access_token);
+              } catch (e) {
+                /* ignore */
+              }
+            }
+          }
+        }
+
+        if (resolvedToken) {
+          ACCESS_TOKEN = resolvedToken;
+        } else if (conn.tokens && conn.tokens.access_token) {
+          ACCESS_TOKEN = conn.tokens.access_token;
+        } else if (conn.accessToken) {
+          // Legacy plain text
+          ACCESS_TOKEN = conn.accessToken;
+        }
       }
     } catch (e) {
       console.warn("[Instagram] Failed to resolve user credentials:", e.message);
