@@ -220,16 +220,22 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
 
       // For video we should poll status
       if (isVideo) {
-        for (let i = 0; i < 5; i++) {
-          // Increased from 2 to 5 attempts
-          await sleep(2000); // Increased from 1500ms to 2000ms
+        let isReady = false;
+        for (let i = 0; i < 15; i++) {
+          // Increased poll loops significantly (30s+ wait)
           try {
             const statusRes = await fetch(
-              `https://graph.facebook.com/v19.0/${creationId}?fields=status_code&access_token=${ACCESS_TOKEN}`
+              `https://graph.facebook.com/v19.0/${creationId}?fields=status_code,status&access_token=${ACCESS_TOKEN}`
             );
             const statusJson = await statusRes.json();
-            if (statusJson.status_code === "FINISHED") break;
-            if (statusJson.status_code === "ERROR") {
+            // IG can return status_code OR status depending on version/object type
+            const code = statusJson.status_code || statusJson.status;
+
+            if (code === "FINISHED") {
+              isReady = true;
+              break;
+            }
+            if (code === "ERROR") {
               return {
                 platform: "instagram",
                 success: false,
@@ -238,6 +244,17 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
               };
             }
           } catch (_) {}
+          // Wait 3s between polls
+          await sleep(3000);
+        }
+
+        if (!isReady) {
+          return {
+            platform: "instagram",
+            success: false,
+            stage: "processing",
+            error: "VIDEO_PROCESSING_TIMEOUT",
+          };
         }
       }
     }
