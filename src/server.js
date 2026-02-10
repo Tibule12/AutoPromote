@@ -1993,7 +1993,15 @@ try {
   });
 
   // Serve static files from the React app build directory
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
+  // ADDED: HEADERS FOR FFmpeg WASM / SHARED ARRAY BUFFER
+  app.use(
+    express.static(path.join(__dirname, "../frontend/build"), {
+      setHeaders: (res, path) => {
+        res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+        res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+      },
+    })
+  );
 
   // Warn if the frontend build is missing (helps diagnose deploys like Render where build step may be omitted)
   try {

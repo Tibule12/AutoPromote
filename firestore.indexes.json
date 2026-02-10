@@ -1,6 +1,20 @@
 {
   "indexes": [
     {
+      "collectionGroup": "platform_posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "success",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "content",
       "queryScope": "COLLECTION",
       "fields": [
