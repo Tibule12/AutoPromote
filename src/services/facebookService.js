@@ -261,18 +261,45 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
 
     // Get selected page from payload or use default from connection
     const pageId =
-      payload?.pageId || payload?.platformOptions?.facebook?.pageId || meta.selectedPageId;
+      payload?.pageId ||
+      payload?.platformOptions?.facebook?.pageId ||
+      meta.selectedPageId ||
+      connection.selectedPageId;
 
     if (!pageId) {
-      return { platform: "facebook", success: false, error: "page_id_required" };
+      // If we only have one page, default to it
+      const allPages = connection.pages || meta.pages || [];
+      if (allPages.length === 1) {
+        // Proceed with the only page we have
+      } else {
+        return { platform: "facebook", success: false, error: "page_id_required" };
+      }
     }
 
     // Find page access token
-    const pages = meta.pages || [];
-    const selectedPage = pages.find(p => p.id === pageId);
+    const pages = connection.pages || meta.pages || [];
+    // If pageId was not provided/resolved but we have pages, pick the first one as default
+    const targetPageId = pageId || (pages.length > 0 ? pages[0].id : null);
 
-    if (!selectedPage || !selectedPage.access_token) {
+    if (!targetPageId) {
+      return { platform: "facebook", success: false, error: "no_pages_linked" };
+    }
+
+    const selectedPage = pages.find(p => p.id === targetPageId);
+
+    if (!selectedPage || (!selectedPage.access_token && !selectedPage.encrypted_access_token)) {
       return { platform: "facebook", success: false, error: "page_token_not_found" };
+    }
+
+    let pageToken = selectedPage.access_token;
+    // Handle encrypted page token
+    if (!pageToken && selectedPage.encrypted_access_token) {
+      try {
+        const { decryptToken } = require("./secretVault");
+        pageToken = decryptToken(selectedPage.encrypted_access_token);
+      } catch (e) {
+        return { platform: "facebook", success: false, error: "page_token_decryption_failed" };
+      }
     }
 
     // Build content context
@@ -315,8 +342,8 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
     }
 
     const result = await postToFacebookPage({
-      pageId,
-      pageAccessToken: selectedPage.access_token,
+      pageId: targetPageId,
+      pageAccessToken: pageToken,
       message,
       link,
       imageUrl,
@@ -334,7 +361,7 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
             {
               facebook: {
                 postId: result.id,
-                pageId,
+                pageId: targetPageId,
                 pageName: selectedPage.name,
                 postedAt: new Date().toISOString(),
               },
@@ -348,7 +375,7 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
       platform: "facebook",
       success: true,
       postId: result.id,
-      pageId,
+      pageId: targetPageId,
       pageName: selectedPage.name,
       reason,
     };

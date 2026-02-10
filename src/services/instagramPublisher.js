@@ -93,10 +93,19 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
   if (uid) {
     try {
       const conn = await getUserFacebookConnection(uid);
-      if (conn && conn.accessToken) {
-        ACCESS_TOKEN = conn.accessToken;
+      if (conn) {
+        // Resolve access token (handle legacy or encrypted/refreshed token)
+        if (conn.tokens && conn.tokens.access_token) {
+          ACCESS_TOKEN = conn.tokens.access_token;
+        } else if (conn.accessToken) {
+          // Legacy plain text
+          ACCESS_TOKEN = conn.accessToken;
+        }
+
         // Try to find IG Business ID in connection data
-        if (conn.instagramBusinessAccountId) IG_USER_ID = conn.instagramBusinessAccountId;
+        // Priority: 1. snake_case (saved by routes.js) 2. camelCase (legacy) 3. metadata
+        if (conn.ig_business_account_id) IG_USER_ID = conn.ig_business_account_id;
+        else if (conn.instagramBusinessAccountId) IG_USER_ID = conn.instagramBusinessAccountId;
         else if (conn.instagramId) IG_USER_ID = conn.instagramId;
         else if (conn.metadata && conn.metadata.instagram_business_account_id)
           IG_USER_ID = conn.metadata.instagram_business_account_id;
