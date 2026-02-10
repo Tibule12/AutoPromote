@@ -202,17 +202,17 @@ async function postToFacebookPage({
   if (!fetchFn) throw new Error("Fetch not available");
 
   const params = new URLSearchParams({ access_token: pageAccessToken });
-  let endpoint = `https://graph.facebook.com/v18.0/${pageId}/feed`;
+  let endpoint = `https://graph.facebook.com/v19.0/${pageId}/feed`;
 
   if (videoUrl) {
     // Post Native Video
-    endpoint = `https://graph.facebook.com/v18.0/${pageId}/videos`;
+    endpoint = `https://graph.facebook.com/v19.0/${pageId}/videos`;
     params.append("file_url", videoUrl);
     if (title) params.append("title", title);
     if (message) params.append("description", message); // videos use description
   } else if (imageUrl) {
     // Post Native Photo
-    endpoint = `https://graph.facebook.com/v18.0/${pageId}/photos`;
+    endpoint = `https://graph.facebook.com/v19.0/${pageId}/photos`;
     params.append("url", imageUrl);
     if (message) params.append("caption", message); // photos use caption
   } else {
@@ -235,6 +235,7 @@ async function postToFacebookPage({
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
+    console.error("[Facebook] API Error response:", JSON.stringify(error, null, 2));
     throw new Error(error.error?.message || "Post failed");
   }
 
@@ -326,11 +327,10 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
     // Build content context
     let message = payload?.message || payload?.text || "";
     let title = payload?.title || "";
-    const link = payload?.link || payload?.url;
-    const imageUrl = payload?.imageUrl || payload?.mediaUrl;
-
-    // Determine video URL if type is video
-    const videoUrl = payload?.videoUrl || (payload?.type === "video" ? payload?.url : null);
+    let link = payload?.link || payload?.url;
+    let imageUrl = payload?.imageUrl || payload?.mediaUrl;
+    let videoUrl = payload?.videoUrl;
+    let contentType = payload?.type; // Capture type from payload if present
 
     if (contentId) {
       try {
@@ -342,6 +342,20 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
             message = content.title || content.description || "New content";
           }
           if (!title) title = content.title;
+
+          // Fetch type from content if not in payload
+          if (!contentType && content.type) contentType = content.type;
+
+          // Hydrate URLs from content if missing
+          if (contentType === "video" && !videoUrl) {
+            videoUrl = content.url || content.mediaUrl;
+          }
+          if ((contentType === "image" || contentType === "photo") && !imageUrl) {
+            imageUrl = content.url || content.mediaUrl;
+          }
+          if (!link) {
+            link = content.url || content.smartLink || content.landingPageUrl;
+          }
 
           // SPONSORSHIP DISCLOSURE
           const mon = content.monetization_settings || {};
