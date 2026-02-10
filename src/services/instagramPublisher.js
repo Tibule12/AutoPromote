@@ -194,13 +194,13 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
       }
       const isVideo = /\.mp4($|\?|#)/i.test(mediaUrl) || ctx.type === "video";
 
-      const creationEndpoint = `https://graph.facebook.com/v18.0/${IG_USER_ID}/media`;
+      const createEndpoint = `https://graph.facebook.com/v19.0/${IG_USER_ID}/media`;
       const params = new URLSearchParams({
         access_token: ACCESS_TOKEN,
         caption,
       });
       if (isVideo) {
-        params.append("media_type", "VIDEO");
+        params.append("media_type", "REELS"); // UPDATED: Default to REELS for modern IG Video
         params.append("video_url", mediaUrl);
       } else {
         params.append("image_url", mediaUrl);
