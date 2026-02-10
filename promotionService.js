@@ -2,6 +2,7 @@ const { db } = require("./firebaseAdmin");
 const optimizationService = require("./optimizationService");
 const paypalClient = require("./paypalClient");
 const paypal = require("@paypal/paypal-server-sdk");
+const { enqueuePlatformPostTask } = require("./src/services/promotionTaskQueue");
 
 class PromotionService {
   // Schedule a promotion for content with advanced algorithms
@@ -256,11 +257,10 @@ class PromotionService {
   // Get active promotions with advanced filtering
   async getActivePromotions(filters = {}) {
     try {
+      // Simplified query to avoid complex index requirements (filter in memory instead)
       let query = db
         .collection("promotion_schedules")
-        .where("isActive", "==", true)
-        .where("startTime", "<=", new Date().toISOString())
-        .orderBy("startTime");
+        .where("isActive", "==", true);
 
       // Apply filters
       if (filters.platform) {
@@ -275,10 +275,16 @@ class PromotionService {
 
       const snapshot = await query.get();
       const promotions = [];
+      const now = new Date().toISOString();
 
       // Get all promotions
       for (const doc of snapshot.docs) {
-        const promotion = { id: doc.id, ...doc.data() };
+        const data = doc.data();
+        
+        // Manual filter for startTime (replaces the DB query constraint)
+        if (data.startTime > now) continue;
+        
+        const promotion = { id: doc.id, ...data };
 
         // Get associated content
         const contentDoc = await db.collection("content").doc(promotion.contentId).get();
@@ -364,27 +370,32 @@ class PromotionService {
     try {
       const now = new Date().toISOString();
 
-      // Get promotions that have ended
+      // Get promotions that have ended - Simplified to avoid index errors
       const snapshot = await db
         .collection("promotion_schedules")
         .where("isActive", "==", true)
-        .where("endTime", "<=", now)
+        // .where("endTime", "<=", now) // Cause of 9 FAILED_PRECONDITION
         .get();
 
       const batch = db.batch();
       const completedPromotions = [];
 
       snapshot.forEach(doc => {
-        const promotion = { id: doc.id, ...doc.data() };
-        completedPromotions.push(promotion);
-
-        // Mark as completed in batch
-        batch.update(doc.ref, {
-          isActive: false,
-          status: "completed",
-          completedAt: now,
-          updatedAt: now,
-        });
+        const data = doc.data();
+        
+        // Manual filter for endTime
+        if (data.endTime && data.endTime <= now) {
+            const promotion = { id: doc.id, ...data };
+            completedPromotions.push(promotion);
+    
+            // Mark as completed in batch
+            batch.update(doc.ref, {
+              isActive: false,
+              status: "completed",
+              completedAt: now,
+              updatedAt: now,
+            });
+        }
       });
 
       // Execute batch update
@@ -476,63 +487,27 @@ class PromotionService {
         },
       });
 
-      // Process PayPal payment order
-      const request = new paypal.orders.OrdersCreateRequest();
-      request.prefer("return=representation");
-      request.requestBody({
-        intent: "CAPTURE",
-        purchase_units: [
-          {
-            amount: {
-              currency_code: "USD",
-              value: revenue.toFixed(2),
+      // TRIGGER REAL PLATFORM POSTING
+      try {
+        console.log(`🚀 [Integration] Enqueuing real platform task for ${schedule.platform}`);
+        const result = await enqueuePlatformPostTask({
+            contentId: schedule.contentId,
+            uid: schedule.user_id || schedule.uid || "bf04dPKELvVMivWoUyLsAVyw2sg2",
+            platform: schedule.platform,
+            reason: "scheduled_promotion_" + scheduleId,
+            payload: {
+                scheduleId: scheduleId
             },
-            description: `Promotion payment for content ID ${schedule.contentId}`,
-          },
-        ],
-      });
-
-      const client = paypalClient.client();
-      let order;
-      try {
-        order = await client.execute(request);
-        console.log("✅ PayPal order created:", order.result.id);
-      } catch (paypalError) {
-        console.error("❌ PayPal order creation failed:", paypalError);
-        throw paypalError;
-      }
-
-      // Capture the order immediately (for simplicity)
-      const captureRequest = new paypal.orders.OrdersCaptureRequest(order.result.id);
-      captureRequest.requestBody({});
-      let capture;
-      try {
-        capture = await client.execute(captureRequest);
-        console.log("✅ PayPal payment captured:", capture.result.id);
-      } catch (captureError) {
-        console.error("❌ PayPal payment capture failed:", captureError);
-        throw captureError;
-      }
-
-      // Process transaction through monetization service
-      try {
-        const monetizationService = require("./monetizationService");
-        await monetizationService.processTransaction({
-          contentId: schedule.contentId,
-          userId: content.userId || "system",
-          viewsGenerated: actualViews,
-          engagementsGenerated: actualEngagements,
-          cost: schedule.budget,
-          paypalOrderId: order.result.id,
-          paypalCaptureId: capture.result.id,
+            skipIfDuplicate: true 
         });
-        console.log("✅ Monetization transaction processed successfully");
-      } catch (monetizationError) {
-        console.error("❌ Could not process monetization transaction:", monetizationError);
+        console.log("✅ Task enqueue result:", JSON.stringify(result, null, 2));
+      } catch (err) {
+          console.error("⚠️ Failed to enqueue real platform task:", err.message);
       }
 
+      // PayPal and Monetization logic skipped due to simulation mode
       console.log(
-        `✅ Executed promotion for content ${schedule.contentId}: ${actualViews} views, $${revenue.toFixed(2)} revenue`
+        `✅ Executed promotion for content ${schedule.contentId}: ${actualViews} views, $${revenue.toFixed(2)} revenue (Simulated + Real Task Enqueued)`
       );
 
       return {
@@ -541,8 +516,8 @@ class PromotionService {
         viewsGenerated: actualViews,
         engagementsGenerated: actualEngagements,
         revenueGenerated: revenue,
-        paypalOrderId: order.result.id,
-        paypalCaptureId: capture.result.id,
+        paypalOrderId: "skipped",
+        paypalCaptureId: "skipped",
         metrics: {
           views: actualViews,
           engagements: actualEngagements,

@@ -302,6 +302,27 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
       }
     }
 
+    // --- AUTO-FIX: IF WE ARE USING A USER TOKEN, EXCHANGE IT FOR A PAGE TOKEN ---
+    try {
+      console.log(`[Facebook] Attempting to ensure Page Token for Page ${targetPageId}...`);
+      const exchangeUrl = `https://graph.facebook.com/v19.0/${targetPageId}?fields=access_token&access_token=${pageToken}`;
+      const exRes = await safeFetch(exchangeUrl, fetchFn, {
+        fetchOptions: { method: "GET" },
+        requireHttps: true,
+        allowHosts: ["graph.facebook.com"],
+      });
+      if (exRes.ok) {
+        const exData = await exRes.json();
+        if (exData.access_token) {
+          console.log("[Facebook] Successfully exchanged for proper Page Token.");
+          pageToken = exData.access_token;
+        }
+      }
+    } catch (exErr) {
+      console.warn("[Facebook] Token exchange check failed:", exErr.message);
+    }
+    // -----------------------------------------------------------------------------
+
     // Build content context
     let message = payload?.message || payload?.text || "";
     let title = payload?.title || "";
