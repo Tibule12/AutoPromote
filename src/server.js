@@ -1115,7 +1115,7 @@ try {
     next();
   });
   app.use(cors(corsOptions));
-  app.options("*", cors(corsOptions));
+  app.options(/(.*)/, cors(corsOptions));
 
   // Extra debug: For upload route, log incoming requests and ensure we capture any 403 responses
   app.use((req, res, next) => {
@@ -2095,7 +2095,7 @@ try {
   });
 
   // Redirect /pricing to the SPA hash route so direct navigation doesn't 404
-  app.get(["/pricing", "/pricing/*"], (req, res) => {
+  app.get(["/pricing", /^\/pricing\/.*$/], (req, res) => {
     try {
       return res.redirect(302, "/#/pricing");
     } catch (e) {
@@ -2105,7 +2105,7 @@ try {
   });
 
   // Redirect /dashboard to the SPA hash route so PayPal return URLs won't 404
-  app.get(["/dashboard", "/dashboard/*"], (req, res) => {
+  app.get(["/dashboard", /^\/dashboard\/.*$/], (req, res) => {
     try {
       const qs =
         req.originalUrl && req.originalUrl.includes("?")
@@ -2731,7 +2731,7 @@ try {
   });
 
   // Catch all handler: send back React's index.html file for client-side routing
-  app.get("*", (req, res) => {
+  app.get(/(.*)/, (req, res) => {
     try {
       const fs = require("fs");
       const frontIndex = path.join(__dirname, "../frontend/build", "index.html");
