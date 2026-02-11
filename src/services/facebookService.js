@@ -510,7 +510,18 @@ async function getPostStats({ uid, postId, pageId }) {
     allowHosts: ["graph.facebook.com"],
   });
 
-  if (!response.ok) throw new Error("Failed to fetch Facebook post stats");
+  if (!response.ok) {
+    let errorText = "";
+    try {
+      errorText = await response.text();
+    } catch (e) {
+      errorText = "[Could not read response body]";
+    }
+    console.error(
+      `[Facebook] Stats fetch failed for post ${postId}. Status: ${response.status}. Body: ${errorText}`
+    );
+    throw new Error(`Failed to fetch Facebook post stats: ${errorText}`);
+  }
 
   const data = await response.json();
   return {

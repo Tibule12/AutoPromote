@@ -365,6 +365,9 @@ const handlers = {
 };
 
 async function dispatchPlatformPost({ platform, contentId, payload, reason, uid }) {
+  console.log(
+    `[PlatformPoster] 🚀 Dispatching post to ${platform} for content ${contentId}. Reason: ${reason}`
+  );
   // If no hashtagString provided and we have a contentId, generate platform
   // specific hashtags automatically so posting flows can include them.
   if (!payload.hashtagString && !payload.hashtags && contentId) {

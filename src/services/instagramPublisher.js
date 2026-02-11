@@ -141,6 +141,9 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
   }
 
   if (!IG_USER_ID || !ACCESS_TOKEN) {
+    console.error(
+      `[Instagram] Missing Credentials. IG_USER_ID: ${!!IG_USER_ID}, ACCESS_TOKEN: ${!!ACCESS_TOKEN}`
+    );
     return { platform: "instagram", simulated: true, reason: "missing_credentials" };
   }
   const ctx = await buildContentContext(contentId);
