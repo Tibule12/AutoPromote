@@ -20,7 +20,7 @@ async function checkStatus() {
   const scheduleSnap = await db.collection("promotion_schedules").where("user_id", "==", uid).get();
   console.log(`Promotion schedules: ${scheduleSnap.size}`);
   scheduleSnap.forEach(doc =>
-    console.log("  -", doc.id, doc.data().platform, doc.data().startTime)
+    console.log("  -", doc.id, doc.data().platform, doc.data().startTime, "Active:", doc.data().isActive)
   );
 
   // 3. Promotion tasks

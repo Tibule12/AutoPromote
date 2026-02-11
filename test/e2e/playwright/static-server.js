@@ -39,7 +39,7 @@ if (global.__STATIC_SERVER_STARTED) {
   // Serve e2e fixtures so we can load standalone HTML test pages
   app.use(express.static(path.join(__dirname, "../../fixtures")));
   // Fallback to index.html for SPA
-  app.get("*", (req, res) => {
+  app.get(/(.*)/, (req, res) => {
     res.sendFile(path.join(__dirname, "../../../frontend/build/index.html"));
   });
 

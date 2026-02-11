@@ -27,7 +27,7 @@ async function startServers() {
   });
   fixtures.use(express.static(fixturesPath));
   // Proxy api calls to main server
-  fixtures.all("/api/*", async (req, res) => {
+  fixtures.all(/^\/api\/(.*)/, async (req, res) => {
     try {
       const apiUrl = `http://127.0.0.1:${mainPort}${req.originalUrl}`;
       const headers = { ...req.headers };

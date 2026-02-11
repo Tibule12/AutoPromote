@@ -6,6 +6,19 @@ const BASE = `http://localhost:${STATIC_PORT}`;
 
 let serverProcess;
 
+test.beforeEach(async ({ page }, testInfo) => {
+  if (testInfo.title.includes("Per-platform SPA")) {
+    // Mock status check for all platforms to prevent hitting production APIs
+    await page.route("**/api/*/status", async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ connected: true, authenticated: true }),
+      });
+    });
+  }
+});
+
 async function attachFileForPlatform(page, filePath) {
   const fs = require('fs');
   if (!fs.existsSync(filePath)) {

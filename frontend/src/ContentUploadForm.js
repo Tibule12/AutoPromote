@@ -22,6 +22,7 @@ import {
 // TODO: revert after diagnostics
 import SpotifyTrackSearch from "./components/SpotifyTrackSearch";
 import ImageCropper from "./components/ImageCropper";
+import VideoEditor from "./components/VideoEditor";
 // import AudioWaveformTrimmer from "./components/AudioWaveformTrimmer";
 import EmojiPicker from "./components/EmojiPicker";
 import FilterEffects from "./components/FilterEffects";
@@ -220,6 +221,7 @@ function ContentUploadForm({
   const [duration, setDuration] = useState(0);
   const videoRef = useRef(null);
   const [showCropper, setShowCropper] = useState(false);
+  const [showVideoEditor, setShowVideoEditor] = useState(false);
   const [cropMeta, setCropMeta] = useState(null);
   const [spotifyTracks, setSpotifyTracks] = useState(extSpotifySelectedTracks || []);
   const [overlayText, setOverlayText] = useState("");
@@ -2902,6 +2904,32 @@ function ContentUploadForm({
           />
           {file && (
             <div style={{ fontSize: 13, marginTop: 4, color: "#666" }}>Selected: {file.name}</div>
+          )}
+          {file && type === "video" && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ marginTop: 8 }}
+              onClick={() => setShowVideoEditor(true)}
+            >
+              ✂️ Edit / Trim Video
+            </button>
+          )}
+
+          {showVideoEditor && file && (
+            <div className="modal-overlay">
+              <div className="modal" style={{ maxWidth: "800px", width: "90%" }}>
+                <VideoEditor
+                  file={file}
+                  onSave={newFile => {
+                    handleFileChange(newFile);
+                    setShowVideoEditor(false);
+                    toast.success("Video trimmed successfully!");
+                  }}
+                  onCancel={() => setShowVideoEditor(false)}
+                />
+              </div>
+            </div>
           )}
         </div>
         {p === "facebook" && (
