@@ -22,8 +22,7 @@ function startProcess(name, script, args = [], envVars = {}) {
 
 // Ensure background jobs are enabled for the worker process
 // Also inject telemetry disabling flags to prevent Firestore/gRPC recursion crashes on Render
-const commonEnv = {
-  ENABLE_BACKGROUND_JOBS: "true",
+const telemetryEnv = {
   // Fix for: EnabledTraceUtil.startActiveSpan stack overflow
   GOOGLE_CLOUD_DISABLE_GRPC_GCP_OBSERVABILITY: "true",
   // Disable OpenTelemetry SDK explicitly
@@ -31,12 +30,17 @@ const commonEnv = {
   OTEL_TRACES_EXPORTER: "none", 
 };
 
-// Start Worker
-const worker = startProcess("worker", "worker.js", [], commonEnv);
+// Start Worker (Background Jobs Enabled)
+const worker = startProcess("worker", "worker.js", [], {
+  ...telemetryEnv,
+  ENABLE_BACKGROUND_JOBS: "true"
+});
 
-// Start Server
-// We also pass the env vars to server to protect it from the same crash
-const server = startProcess("server", "src/server.js", [], commonEnv);
+// Start Server (Background Jobs Disabled to prevent duplication)
+const server = startProcess("server", "src/server.js", [], {
+  ...telemetryEnv,
+  ENABLE_BACKGROUND_JOBS: "false"
+});
 
 // Handle termination signals to kill children
 const cleanup = () => {
