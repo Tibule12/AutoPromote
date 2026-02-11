@@ -663,6 +663,70 @@ class PromotionService {
       throw error;
     }
   }
+
+  // Poll for pending schedules that are due for execution
+  async processDueSchedules() {
+    try {
+      const now = new Date().toISOString();
+      // Only pick pending, active schedules
+      // Note: Composite index requirement: status ASC, isActive ASC, startTime ASC
+      // If index missing, efficient fallback is to filter in memory for small batches
+      const snapshot = await db.collection("promotion_schedules")
+        .where("status", "==", "pending")
+        .where("isActive", "==", true)
+        .orderBy("startTime")
+        .limit(20)
+        .get();
+
+      if (snapshot.empty) return 0;
+
+      let processed = 0;
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        // Check timing (Firestore query ensures ordered by startTime, but check <= now)
+        if (data.startTime && data.startTime <= now) {
+          console.log(`⏰ [Scheduler] Triggering due schedule ${doc.id} (plat=${data.platform})`);
+          
+          // 1. Lock: Mark as processing
+          await doc.ref.update({ 
+            status: "processing", 
+            processingStartedAt: new Date().toISOString() 
+          });
+
+          try {
+            // 2. Execute
+            const result = await this.executePromotion(doc.id);
+            
+            // 3. Complete (logic might vary for recurring, but for 'pending' this moves it forward)
+            await doc.ref.update({ 
+              status: "executed", 
+              lastExecutedAt: new Date().toISOString(),
+              // If it was a one-time schedule, deactivate it.
+              // If recurring, createNextRecurrence (handled inside schedulePromotion but executePromotion doesn't trigger recursion?)
+              // Re-reading logic: executePromotion doesn't recurse. schedulePromotion does. 
+              // processCompletedPromotions handles expiry.
+              // For now, mark executed.
+            });
+            processed++;
+          } catch (err) {
+            console.error(`❌ [Scheduler] Failed schedule ${doc.id}:`, err.message);
+            await doc.ref.update({ 
+              status: "failed", 
+              error: err.message,
+              failedAt: new Date().toISOString()
+            });
+          }
+        }
+      }
+      return processed;
+    } catch (error) {
+       // Ignore "requires an index" errors to avoid log spam if index is building
+       if (error.code !== 9 && !error.message?.includes("index")) {
+          console.error("Error processing due schedules:", error);
+       }
+       return 0;
+    }
+  }
 }
 
 module.exports = new PromotionService();

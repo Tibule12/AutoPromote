@@ -5,6 +5,7 @@ const {
   processNextPlatformTask,
   processNextYouTubeTask,
 } = require("./src/services/promotionTaskQueue");
+const promotionService = require("./promotionService");
 let dailyRollup;
 try {
   dailyRollup = require("./src/services/dailyRollupService");
@@ -79,6 +80,14 @@ async function loop() {
       if (res) console.log("[worker] platform_task", res);
     } catch (e) {
       console.warn("[worker] platform_task error:", e.message);
+    }
+
+    // Process pending schedules (NEW)
+    try {
+      const scheduledCount = await promotionService.processDueSchedules();
+      if (scheduledCount > 0) console.log("[worker] scheduled_promotions", scheduledCount);
+    } catch (e) {
+      console.warn("[worker] promotion_schedule error:", e.message);
     }
 
     // Process one YouTube upload task

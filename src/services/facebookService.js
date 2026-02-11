@@ -544,7 +544,18 @@ async function getPostStats({ uid, postId, pageId }) {
       console.debug(
         `[Facebook] Permissions missing for post ${postId} metrics. (pages_read_engagement)`
       );
-      return null; // Return null to indicate no metrics available without error spam
+      // Return partial result (zeros) to proceed with valid status update
+      return {
+        postId,
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        impressions: 0,
+        engagedUsers: 0,
+        fetchedAt: new Date().toISOString(),
+        partial: true,
+        permissionMissing: true,
+      };
     }
 
     console.error(
