@@ -517,6 +517,36 @@ async function getPostStats({ uid, postId, pageId }) {
     } catch (e) {
       errorText = "[Could not read response body]";
     }
+
+    // Handle known non-critical errors gracefully
+    // #100: Tried accessing nonexisting field (shares) on node type (Video) - happens when we query generic post fields on a video object
+    // #10: Permission missing (pages_read_engagement)
+    if (
+      errorText.includes("(#100)") &&
+      errorText.includes("nonexisting field") &&
+      errorText.includes("Video")
+    ) {
+      console.warn(
+        `[Facebook] Post ${postId} is a video; skipping 'shares' field fetch. (Metrics may be partial)`
+      );
+      // Return partial result (zeros) instead of throwing
+      return {
+        postId,
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        fetchedAt: new Date().toISOString(),
+        partial: true,
+      };
+    }
+
+    if (errorText.includes("(#10)") && errorText.includes("permission")) {
+      console.debug(
+        `[Facebook] Permissions missing for post ${postId} metrics. (pages_read_engagement)`
+      );
+      return null; // Return null to indicate no metrics available without error spam
+    }
+
     console.error(
       `[Facebook] Stats fetch failed for post ${postId}. Status: ${response.status}. Body: ${errorText}`
     );

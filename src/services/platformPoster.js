@@ -464,7 +464,31 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
   } catch (_) {
     /* ignore */
   }
-  return handler(baseArgs);
+
+  // Execute handler with logging wrapper
+  try {
+    const start = Date.now();
+    const result = await handler(baseArgs);
+    const took = Date.now() - start;
+
+    if (result && result.success) {
+      console.log(
+        `[PlatformPoster] ✅ Upload SUCCESS for ${platform} (took ${took}ms). PostID: ${
+          result.postId || result.id || "N/A"
+        }`
+      );
+    } else {
+      console.error(
+        `[PlatformPoster] ❌ Upload FAILED for ${platform} (took ${took}ms). Error: ${
+          result?.error || JSON.stringify(result)
+        }`
+      );
+    }
+    return result;
+  } catch (err) {
+    console.error(`[PlatformPoster] 💥 Exception crashing upload for ${platform}: ${err.message}`);
+    throw err;
+  }
 }
 
 module.exports = { dispatchPlatformPost };
