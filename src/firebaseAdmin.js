@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 // Lightweight test bypass: when CI_ROUTE_IMPORTS=1 (route import tests) or FIREBASE_ADMIN_BYPASS=1
 // we avoid real Firebase initialization and return in-memory stubs.
 // When running under jest/CI or with bypass envs, avoid initializing actual Firebase Admin
@@ -297,12 +297,24 @@ if (bypass) {
         );
       }
       try {
+        // Fix for gRPC/Render recursion crash: disable telemetry BEFORE initializing admin
+        process.env.GOOGLE_CLOUD_DISABLE_GRPC_GCP_OBSERVABILITY = "true";
+        process.env.OTEL_SDK_DISABLED = "true";
+        process.env.OTEL_TRACES_EXPORTER = "none";
+
         admin.initializeApp({
           credential: admin.credential.cert(adminConfig),
           databaseURL: process.env.FIREBASE_DATABASE_URL || "",
           storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "",
           projectId: process.env.FIREBASE_PROJECT_ID || adminConfig.project_id,
         });
+
+        // Extra aggressive: Try to patch admin.firestore() to disable settings if possible
+        try {
+          const setup = admin.firestore();
+          setup.settings({ ignoreUndefinedProperties: true });
+        } catch (_) {}
+
         console.log("✅ Firebase Admin initialized with server config");
       } catch (initError) {
         console.error("[firebaseAdmin] Initialization failed:", initError.message);
