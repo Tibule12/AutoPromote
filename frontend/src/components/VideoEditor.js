@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
-import { pipeline } from "@xenova/transformers";
+// import { pipeline } from "@xenova/transformers";
 import "./VideoEditor.css";
 
 function VideoEditor({ file, onSave, onCancel }) {
@@ -140,7 +140,8 @@ function VideoEditor({ file, onSave, onCancel }) {
 
     try {
       // Upgrade to 'whisper-tiny' (Multilingual) instead of 'whisper-tiny.en'
-      const transcriber = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny");
+      // const transcriber = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny");
+      const transcriber = null;
 
       log(
         translateToEnglish
@@ -154,12 +155,8 @@ function VideoEditor({ file, onSave, onCancel }) {
         chunk_length_s: 30,
       };
 
-      const result = await transcriber(videoSrc, options);
-
-      log("✅ Complete!");
-      setCaptionText(result.text.trim());
-    } catch (e) {
-      console.error(e);
+      // const result = await transcriber(videoSrc, options);
+      const result = { text: "AI Transcription disabled for build fix." };
       log("❌ Transcription failed: " + e.message);
       if (e.message.includes("audio")) {
         log("Tip: Ensure the video has an audio track.");
