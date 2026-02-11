@@ -1,5 +1,6 @@
 // worker.js - Background job loop for promotion tasks & stats polling
 require("dotenv").config();
+process.env.GOOGLE_CLOUD_DISABLE_GRPC_GCP_OBSERVABILITY = "true";
 const { db } = require("./src/firebaseAdmin");
 const {
   processNextPlatformTask,

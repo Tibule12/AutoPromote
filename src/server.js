@@ -1,4 +1,5 @@
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
+process.env.GOOGLE_CLOUD_DISABLE_GRPC_GCP_OBSERVABILITY = "true";
 // This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
 try {
   const os = require("os");
