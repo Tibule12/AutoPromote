@@ -565,14 +565,50 @@ class PromotionService {
               executedAt: new Date().toISOString(),
             });
           } else {
-            // Failed
-            console.warn(`[Scheduler] ❌ Failed ${schedule.id}: ${result.error}`);
-            await doc.ref.update({
-              status: "failed",
-              isActive: false, // Stop retrying this specific instance for now (or implement retry logic)
-              error: result.error,
-              executedAt: new Date().toISOString(),
-            });
+            const errorMsg = result.error || "Unknown error";
+            console.warn(`[Scheduler] ❌ Failed ${schedule.id}: ${errorMsg}`);
+
+            // NEW: Handle Rate Limits (Facebook 368 / Spam) gracefully
+            // If we hit a rate limit, don't kill the job. Reschedule it for later.
+            const isRateLimit =
+              errorMsg.includes("limit how often") ||
+              errorMsg.includes("Spam") ||
+              errorMsg.includes("368") ||
+              errorMsg.includes("OAuthException");
+
+            if (isRateLimit) {
+              // Push back 1 hour (plus small random jitter to avoid thundering herd)
+              const delayMs = 60 * 60 * 1000 + Math.random() * 5 * 60 * 1000;
+              const nextAttempt = new Date(Date.now() + delayMs).toISOString();
+
+              console.log(
+                `[Scheduler] ⏳ Rate limit/spam detected for ${schedule.id}. Rescheduling for ~1 hour form now (${nextAttempt}).`
+              );
+
+              await doc.ref.update({
+                status: "rate_limited_retry", // Special status (treated as pending by query if needed, or query needs update. Actually query checks isActive=true, startTime<=now. So we just reset status to something purely informational or back to pending)
+                // We'll use 'pending' or keep it simple. The query looks for status != processing/executed (lines 507).
+                // Actually the query (line 496) is: .where("isActive", "==", true).where("startTime", "<=", now)
+                // So if we update startTime, it won't be picked up until then.
+                // We should set status back to 'pending' or keep it 'rate_limited' if that doesn't block it.
+                // The loop check (line 507) ignores 'processing' and 'executed'.
+                // So 'rate_limited_retry' is fine as long as we reset it potentially.
+                // But to be safe, let's set it to 'pending' so it looks normal.
+                status: "pending",
+                isActive: true,
+                startTime: nextAttempt,
+                lastError: errorMsg,
+                updatedAt: new Date().toISOString(),
+              });
+            } else {
+              // Permanent failure
+              await doc.ref.update({
+                status: "failed",
+                isActive: false, // Stop retrying this specific instance
+                error: errorMsg,
+                executedAt: new Date().toISOString(),
+              });
+            }
           }
         } catch (err) {
           console.error(`[Scheduler] 💥 Exception ${schedule.id}:`, err);
