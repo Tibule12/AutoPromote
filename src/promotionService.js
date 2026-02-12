@@ -1,4 +1,4 @@
-const { db } = require("./firebaseAdmin");
+const { db, admin } = require("./firebaseAdmin");
 const optimizationService = require("./optimizationService");
 const paypalClient = require("./paypalClient");
 const paypal = require("@paypal/paypal-server-sdk");
@@ -441,11 +441,53 @@ class PromotionService {
   }
 
   /**
+   * RECOVERY: Unlock schedules that have been stuck in 'processing' for too long (e.g. server crash)
+   */
+  async recoverStaleLocks() {
+    try {
+      // Recover locks older than 10 minutes
+      const staleThreshold = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      // Note: This query might need an index on status + updatedAt.
+      // If index is missing, this might fail, so we wrap in try/catch and log.
+      const stuck = await db
+        .collection("promotion_schedules")
+        .where("status", "==", "processing")
+        .where("updatedAt", "<", staleThreshold)
+        .limit(50)
+        .get();
+
+      if (!stuck.empty) {
+        console.log(`[Scheduler] ⚠️ Recovering ${stuck.size} stale processing locks...`);
+        const batch = db.batch();
+        stuck.docs.forEach(doc => {
+          batch.update(doc.ref, {
+            status: admin.firestore.FieldValue.delete(),
+            lastRecoveryAt: new Date().toISOString(),
+            previousStatus: "processing",
+          });
+        });
+        await batch.commit();
+        console.log(`[Scheduler] ✅ Recovered ${stuck.size} locks.`);
+      }
+    } catch (err) {
+      // If generic index error, warn but don't crash
+      if (err.code === 9 || err.message.includes("indexes")) {
+        console.warn("[Scheduler] Index missing for lock recovery (status + updatedAt). Skipping.");
+      } else {
+        console.error("Error in recoverStaleLocks:", err);
+      }
+    }
+  }
+
+  /**
    * REAL-TIME SCHEDULER: Process due schedules and dispatch to platforms
    * This bridges the gap between the "Schedules" panel (Db) and "PlatformPoster" (API)
    */
   async processDueSchedules() {
     try {
+      // 0. Auto-recover stuck locks from previous crashes
+      await this.recoverStaleLocks();
+
       const now = new Date().toISOString();
       // Find schedules that are active, due, and not yet processing/executed
       // Note: Firestore composite index required: isActive ASC, startTime ASC
