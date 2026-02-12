@@ -202,17 +202,17 @@ async function postToFacebookPage({
   if (!fetchFn) throw new Error("Fetch not available");
 
   const params = new URLSearchParams({ access_token: pageAccessToken });
-  let endpoint = `https://graph.facebook.com/v18.0/${pageId}/feed`;
+  let endpoint = `https://graph.facebook.com/v19.0/${pageId}/feed`;
 
   if (videoUrl) {
     // Post Native Video
-    endpoint = `https://graph.facebook.com/v18.0/${pageId}/videos`;
+    endpoint = `https://graph.facebook.com/v19.0/${pageId}/videos`;
     params.append("file_url", videoUrl);
     if (title) params.append("title", title);
     if (message) params.append("description", message); // videos use description
   } else if (imageUrl) {
     // Post Native Photo
-    endpoint = `https://graph.facebook.com/v18.0/${pageId}/photos`;
+    endpoint = `https://graph.facebook.com/v19.0/${pageId}/photos`;
     params.append("url", imageUrl);
     if (message) params.append("caption", message); // photos use caption
   } else {
@@ -235,6 +235,7 @@ async function postToFacebookPage({
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
+    console.error("[Facebook] API Error response:", JSON.stringify(error, null, 2));
     throw new Error(error.error?.message || "Post failed");
   }
 
@@ -261,28 +262,75 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
 
     // Get selected page from payload or use default from connection
     const pageId =
-      payload?.pageId || payload?.platformOptions?.facebook?.pageId || meta.selectedPageId;
+      payload?.pageId ||
+      payload?.platformOptions?.facebook?.pageId ||
+      meta.selectedPageId ||
+      connection.selectedPageId;
 
     if (!pageId) {
-      return { platform: "facebook", success: false, error: "page_id_required" };
+      // If we only have one page, default to it
+      const allPages = connection.pages || meta.pages || [];
+      if (allPages.length === 1) {
+        // Proceed with the only page we have
+      } else {
+        return { platform: "facebook", success: false, error: "page_id_required" };
+      }
     }
 
     // Find page access token
-    const pages = meta.pages || [];
-    const selectedPage = pages.find(p => p.id === pageId);
+    const pages = connection.pages || meta.pages || [];
+    // If pageId was not provided/resolved but we have pages, pick the first one as default
+    const targetPageId = pageId || (pages.length > 0 ? pages[0].id : null);
 
-    if (!selectedPage || !selectedPage.access_token) {
+    if (!targetPageId) {
+      return { platform: "facebook", success: false, error: "no_pages_linked" };
+    }
+
+    const selectedPage = pages.find(p => p.id === targetPageId);
+
+    if (!selectedPage || (!selectedPage.access_token && !selectedPage.encrypted_access_token)) {
       return { platform: "facebook", success: false, error: "page_token_not_found" };
     }
+
+    let pageToken = selectedPage.access_token;
+    // Handle encrypted page token
+    if (!pageToken && selectedPage.encrypted_access_token) {
+      try {
+        const { decryptToken } = require("./secretVault");
+        pageToken = decryptToken(selectedPage.encrypted_access_token);
+      } catch (e) {
+        return { platform: "facebook", success: false, error: "page_token_decryption_failed" };
+      }
+    }
+
+    // --- AUTO-FIX: IF WE ARE USING A USER TOKEN, EXCHANGE IT FOR A PAGE TOKEN ---
+    try {
+      console.log(`[Facebook] Attempting to ensure Page Token for Page ${targetPageId}...`);
+      const exchangeUrl = `https://graph.facebook.com/v19.0/${targetPageId}?fields=access_token&access_token=${pageToken}`;
+      const exRes = await safeFetch(exchangeUrl, fetchFn, {
+        fetchOptions: { method: "GET" },
+        requireHttps: true,
+        allowHosts: ["graph.facebook.com"],
+      });
+      if (exRes.ok) {
+        const exData = await exRes.json();
+        if (exData.access_token) {
+          console.log("[Facebook] Successfully exchanged for proper Page Token.");
+          pageToken = exData.access_token;
+        }
+      }
+    } catch (exErr) {
+      console.warn("[Facebook] Token exchange check failed:", exErr.message);
+    }
+    // -----------------------------------------------------------------------------
 
     // Build content context
     let message = payload?.message || payload?.text || "";
     let title = payload?.title || "";
-    const link = payload?.link || payload?.url;
-    const imageUrl = payload?.imageUrl || payload?.mediaUrl;
-
-    // Determine video URL if type is video
-    const videoUrl = payload?.videoUrl || (payload?.type === "video" ? payload?.url : null);
+    let link = payload?.link || payload?.url;
+    let imageUrl = payload?.imageUrl || payload?.mediaUrl;
+    let videoUrl = payload?.videoUrl;
+    let contentType = payload?.type; // Capture type from payload if present
 
     if (contentId) {
       try {
@@ -294,6 +342,20 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
             message = content.title || content.description || "New content";
           }
           if (!title) title = content.title;
+
+          // Fetch type from content if not in payload
+          if (!contentType && content.type) contentType = content.type;
+
+          // Hydrate URLs from content if missing
+          if (contentType === "video" && !videoUrl) {
+            videoUrl = content.url || content.mediaUrl;
+          }
+          if ((contentType === "image" || contentType === "photo") && !imageUrl) {
+            imageUrl = content.url || content.mediaUrl;
+          }
+          if (!link) {
+            link = content.url || content.smartLink || content.landingPageUrl;
+          }
 
           // SPONSORSHIP DISCLOSURE
           const mon = content.monetization_settings || {};
@@ -315,8 +377,8 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
     }
 
     const result = await postToFacebookPage({
-      pageId,
-      pageAccessToken: selectedPage.access_token,
+      pageId: targetPageId,
+      pageAccessToken: pageToken,
       message,
       link,
       imageUrl,
@@ -334,7 +396,7 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
             {
               facebook: {
                 postId: result.id,
-                pageId,
+                pageId: targetPageId,
                 pageName: selectedPage.name,
                 postedAt: new Date().toISOString(),
               },
@@ -348,7 +410,7 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
       platform: "facebook",
       success: true,
       postId: result.id,
-      pageId,
+      pageId: targetPageId,
       pageName: selectedPage.name,
       reason,
     };
@@ -448,7 +510,59 @@ async function getPostStats({ uid, postId, pageId }) {
     allowHosts: ["graph.facebook.com"],
   });
 
-  if (!response.ok) throw new Error("Failed to fetch Facebook post stats");
+  if (!response.ok) {
+    let errorText = "";
+    try {
+      errorText = await response.text();
+    } catch (e) {
+      errorText = "[Could not read response body]";
+    }
+
+    // Handle known non-critical errors gracefully
+    // #100: Tried accessing nonexisting field (shares) on node type (Video) - happens when we query generic post fields on a video object
+    // #10: Permission missing (pages_read_engagement)
+    if (
+      errorText.includes("(#100)") &&
+      errorText.includes("nonexisting field") &&
+      errorText.includes("Video")
+    ) {
+      console.warn(
+        `[Facebook] Post ${postId} is a video; skipping 'shares' field fetch. (Metrics may be partial)`
+      );
+      // Return partial result (zeros) instead of throwing
+      return {
+        postId,
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        fetchedAt: new Date().toISOString(),
+        partial: true,
+      };
+    }
+
+    if (errorText.includes("(#10)") && errorText.includes("permission")) {
+      console.debug(
+        `[Facebook] Permissions missing for post ${postId} metrics. (pages_read_engagement)`
+      );
+      // Return partial result (zeros) to proceed with valid status update
+      return {
+        postId,
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        impressions: 0,
+        engagedUsers: 0,
+        fetchedAt: new Date().toISOString(),
+        partial: true,
+        permissionMissing: true,
+      };
+    }
+
+    console.error(
+      `[Facebook] Stats fetch failed for post ${postId}. Status: ${response.status}. Body: ${errorText}`
+    );
+    throw new Error(`Failed to fetch Facebook post stats: ${errorText}`);
+  }
 
   const data = await response.json();
   return {

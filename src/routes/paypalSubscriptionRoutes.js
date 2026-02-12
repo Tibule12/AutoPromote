@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // paypalSubscriptionRoutes.js
 // PayPal subscription management for community monetization
 

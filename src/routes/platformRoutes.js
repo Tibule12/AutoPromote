@@ -52,7 +52,6 @@ const PLATFORM_STATUS_TTL_MS = parseInt(process.env.PLATFORM_STATUS_TTL_MS || "3
 let fetchFn = global.fetch;
 if (!fetchFn) {
   try {
-    // eslint-disable-next-line global-require
     fetchFn = require("node-fetch");
   } catch (e) {
     fetchFn = null;

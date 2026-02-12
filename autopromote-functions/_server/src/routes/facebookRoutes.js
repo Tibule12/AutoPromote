@@ -214,7 +214,7 @@ router.get("/callback", async (req, res) => {
       `https://graph.facebook.com/v19.0/me/accounts?fields=name,access_token,id,instagram_business_account{id,username,name,profile_picture_url}&access_token=${encodeURIComponent(tokenData.access_token)}${proof ? `&appsecret_proof=${proof}` : ""}`
     );
     const pagesData = await pagesRes.json();
-    const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
+    let pages = Array.isArray(pagesData.data) ? pagesData.data : [];
 
     // Debugging: if no pages returned, log the raw response and attempt a debug_token call
     if (!pages || pages.length === 0) {
@@ -228,10 +228,38 @@ router.get("/callback", async (req, res) => {
         );
         const dbgJson = await dbgRes.json();
         // Log debug info for investigation (do NOT print raw tokens)
-        console.warn("[FacebookCallback] debug_token result:", dbgJson);
+        console.warn("[FacebookCallback] debug_token result received.");
+
+        // RECOVERY: Check granular scopes for specific page IDs
+        const granular = dbgJson.data?.granular_scopes || [];
+        const manageScope = granular.find(
+          s => s.scope === "pages_manage_posts" || s.scope === "pages_show_list"
+        );
+
+        if (manageScope && manageScope.target_ids && manageScope.target_ids.length > 0) {
+          console.log(
+            `[FacebookCallback] Found explicit target IDs: ${manageScope.target_ids.join(", ")}. Fetching individually...`
+          );
+          for (const targetId of manageScope.target_ids) {
+            try {
+              const pRes = await fetch(
+                `https://graph.facebook.com/v19.0/${targetId}?fields=name,access_token,id,instagram_business_account{id,username,name,profile_picture_url}&access_token=${encodeURIComponent(tokenData.access_token)}`
+              );
+              const pData = await pRes.json();
+              if (pData.id) {
+                pages.push(pData);
+              }
+            } catch (err) {
+              console.warn(
+                `[FacebookCallback] Failed to fetch granular page ${targetId}:`,
+                err.message
+              );
+            }
+          }
+        }
       } catch (e) {
         console.warn(
-          "[FacebookCallback] debug_token fetch failed:",
+          "[FacebookCallback] debug_token recovery failed:",
           e && e.message ? e.message : e
         );
       }
@@ -517,12 +545,23 @@ router.post("/upload", authMiddleware, async (req, res) => {
     if (!snap.exists) return res.status(400).json({ error: "Facebook not connected" });
     const data = snap.data();
     const page = (data.pages || []).find(p => p.id === pageId);
-    if (!page || !page.access_token)
-      return res.status(400).json({ error: "Page not found or missing access token" });
+    if (!page) return res.status(400).json({ error: "Page not found" });
+
+    // Handle encrypted page tokens
+    let pageToken = page.access_token;
+    if (!pageToken && page.encrypted_access_token) {
+      try {
+        const { decryptToken } = require("../services/secretVault");
+        pageToken = decryptToken(page.encrypted_access_token);
+      } catch (e) {
+        /* ignore */
+      }
+    }
+    if (!pageToken) return res.status(400).json({ error: "Missing page access token" });
 
     // Build endpoint/body
     let endpoint = `https://graph.facebook.com/${encodeURIComponent(pageId)}/feed`;
-    let body = { access_token: page.access_token };
+    let body = { access_token: pageToken };
     if (content.type === "image" && content.url) {
       endpoint = `https://graph.facebook.com/${encodeURIComponent(pageId)}/photos`;
       body.url = content.url;
@@ -537,7 +576,7 @@ router.post("/upload", authMiddleware, async (req, res) => {
       if (content.url && !body.message.includes(content.url)) body.message += `\n${content.url}`;
     }
     // Add appsecret_proof for page access token safety (if we have secret)
-    const proofP = appsecretProofFor(page.access_token);
+    const proofP = appsecretProofFor(pageToken);
     const finalEndpoint = proofP
       ? `${endpoint}${endpoint.includes("?") ? "&" : "?"}appsecret_proof=${proofP}`
       : endpoint;
@@ -607,6 +646,57 @@ router.post("/deauthorize", express.json(), async (req, res) => {
 router.post("/data-deletion", express.json(), async (req, res) => {
   // Facebook uses same format as deauthorize
   return router.handle({ ...req, method: "POST", url: "/deauthorize" }, res);
+});
+
+// --- TEMPORARY FIX ROUTE ---
+router.get("/fix-connection-custom", async (req, res) => {
+  try {
+    // Find the user (hardcode UID for safety or pass as query)
+    const uid = "bf04dPKELvVMivWoUyLsAVyw2sg2";
+
+    const connRef = db.doc(`users/${uid}/connections/facebook`);
+    const snap = await connRef.get();
+    if (!snap.exists) return res.json({ error: "No connection" });
+
+    const data = snap.data();
+    let token = data.user_access_token;
+
+    // Decrypt if needed
+    if (data.encrypted_user_access_token) {
+      try {
+        const { decryptToken } = require("../services/secretVault");
+        token = decryptToken(data.encrypted_user_access_token);
+      } catch (e) {
+        return res.json({ error: "Decryption failed", details: e.message });
+      }
+    }
+
+    if (!token) return res.json({ error: "No token found" });
+
+    // Use fetch from closure or require
+    const accountsRes = await fetch(
+      `https://graph.facebook.com/v19.0/me/accounts?fields=name,access_token,id,instagram_business_account{id,username}&access_token=${token}`
+    );
+    const accountsJson = await accountsRes.json();
+
+    if (accountsJson.error) {
+      return res.json({ error: "Facebook API Error", details: accountsJson.error });
+    }
+
+    // Update the DB
+    await connRef.set(
+      {
+        pages: accountsJson.data || [],
+        updatedAt: new Date().toISOString(),
+        manuallyFixedServerSide: true,
+      },
+      { merge: true }
+    );
+
+    return res.json({ success: true, pages: accountsJson.data });
+  } catch (e) {
+    return res.json({ error: e.message, stack: e.stack });
+  }
 });
 
 module.exports = router;

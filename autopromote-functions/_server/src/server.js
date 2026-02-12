@@ -1,40 +1,6 @@
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
+require("./bootstrap");
 // This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
-try {
-  const os = require("os");
-  const fs = require("fs");
-  const path = require("path");
-  const svcRaw =
-    process.env.FIREBASE_SERVICE_ACCOUNT_JSON ||
-    (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64
-      ? Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, "base64").toString("utf8")
-      : null);
-  if (svcRaw && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    try {
-      const parsed = JSON.parse(svcRaw);
-      if (parsed && parsed.private_key && typeof parsed.private_key === "string")
-        parsed.private_key = parsed.private_key.replace(/\\n/g, "\n");
-      const tmpPath = path.join(os.tmpdir(), `autopromote-service-account-${Date.now()}.json`);
-      fs.writeFileSync(tmpPath, JSON.stringify(parsed, null, 2), { mode: 0o600 });
-      process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
-      if (!process.env.FIREBASE_PROJECT_ID && parsed && parsed.project_id) {
-        process.env.FIREBASE_PROJECT_ID = parsed.project_id;
-      }
-      console.log(
-        "[startup] Wrote service account JSON to",
-        tmpPath,
-        "and set GOOGLE_APPLICATION_CREDENTIALS"
-      );
-    } catch (e) {
-      console.warn(
-        "[startup] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON/BASE64:",
-        e && e.message
-      );
-    }
-  }
-} catch (e) {
-  /* ignore bootstrap failures */
-}
 
 // Diagnostic: Log google-gax and @grpc/grpc-js versions if present to help debug runtime dependency mismatches
 try {
@@ -1115,7 +1081,7 @@ try {
     next();
   });
   app.use(cors(corsOptions));
-  app.options("*", cors(corsOptions));
+  app.options(/(.*)/, cors(corsOptions));
 
   // Extra debug: For upload route, log incoming requests and ensure we capture any 403 responses
   app.use((req, res, next) => {
@@ -1993,7 +1959,15 @@ try {
   });
 
   // Serve static files from the React app build directory
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
+  // ADDED: HEADERS FOR FFmpeg WASM / SHARED ARRAY BUFFER
+  app.use(
+    express.static(path.join(__dirname, "../frontend/build"), {
+      setHeaders: (res, path) => {
+        res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+        res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+      },
+    })
+  );
 
   // Warn if the frontend build is missing (helps diagnose deploys like Render where build step may be omitted)
   try {
@@ -2087,7 +2061,7 @@ try {
   });
 
   // Redirect /pricing to the SPA hash route so direct navigation doesn't 404
-  app.get(["/pricing", "/pricing/*"], (req, res) => {
+  app.get(["/pricing", /^\/pricing\/.*$/], (req, res) => {
     try {
       return res.redirect(302, "/#/pricing");
     } catch (e) {
@@ -2097,7 +2071,7 @@ try {
   });
 
   // Redirect /dashboard to the SPA hash route so PayPal return URLs won't 404
-  app.get(["/dashboard", "/dashboard/*"], (req, res) => {
+  app.get(["/dashboard", /^\/dashboard\/.*$/], (req, res) => {
     try {
       const qs =
         req.originalUrl && req.originalUrl.includes("?")
@@ -2723,7 +2697,7 @@ try {
   });
 
   // Catch all handler: send back React's index.html file for client-side routing
-  app.get("*", (req, res) => {
+  app.get(/(.*)/, (req, res) => {
     try {
       const fs = require("fs");
       const frontIndex = path.join(__dirname, "../frontend/build", "index.html");

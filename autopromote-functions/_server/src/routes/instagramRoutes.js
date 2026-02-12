@@ -51,12 +51,23 @@ router.post("/upload", authMiddleware, async (req, res) => {
     if (!fbSnap.exists) return res.status(400).json({ error: "Facebook not connected" });
     const data = fbSnap.data();
     const page = (data.pages || []).find(p => p.id === pageId);
-    if (!page || !page.access_token)
-      return res.status(400).json({ error: "Page not found or missing access token" });
+    if (!page) return res.status(400).json({ error: "Page not found" });
+
+    // Handle encrypted page tokens
+    let pageToken = page.access_token;
+    if (!pageToken && page.encrypted_access_token) {
+      try {
+        const { decryptToken } = require("../services/secretVault");
+        pageToken = decryptToken(page.encrypted_access_token);
+      } catch (e) {
+        /* ignore */
+      }
+    }
+    if (!pageToken) return res.status(400).json({ error: "Missing page access token" });
 
     // Retrieve IG Business Account ID for this page
     const igRes = await fetch(
-      `https://graph.facebook.com/v19.0/${encodeURIComponent(pageId)}?fields=instagram_business_account&access_token=${encodeURIComponent(page.access_token)}`
+      `https://graph.facebook.com/v19.0/${encodeURIComponent(pageId)}?fields=instagram_business_account&access_token=${encodeURIComponent(pageToken)}`
     );
     const igData = await igRes.json();
     const igId = igData?.instagram_business_account?.id || data.ig_business_account_id;
@@ -67,7 +78,7 @@ router.post("/upload", authMiddleware, async (req, res) => {
     const isVideo = (mediaType || "").toLowerCase() === "video";
     const createEndpoint = `https://graph.facebook.com/v19.0/${encodeURIComponent(igId)}/media`;
     const createBody = new URLSearchParams();
-    createBody.set("access_token", page.access_token);
+    createBody.set("access_token", pageToken);
     if (isVideo) {
       createBody.set("media_type", "REELS");
       createBody.set("video_url", mediaUrl);
@@ -83,7 +94,7 @@ router.post("/upload", authMiddleware, async (req, res) => {
     // Step 2: Publish media container
     const publishEndpoint = `https://graph.facebook.com/v19.0/${encodeURIComponent(igId)}/media_publish`;
     const pubBody = new URLSearchParams();
-    pubBody.set("access_token", page.access_token);
+    pubBody.set("access_token", pageToken);
     pubBody.set("creation_id", createData.id);
     const publishRes = await fetch(publishEndpoint, { method: "POST", body: pubBody });
     const publishData = await publishRes.json();

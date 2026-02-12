@@ -1,4 +1,4 @@
-const { db } = require("./firebaseAdmin");
+const { db, admin } = require("./firebaseAdmin");
 const optimizationService = require("./optimizationService");
 const paypalClient = require("./paypalClient");
 const paypal = require("@paypal/paypal-server-sdk");
@@ -441,11 +441,53 @@ class PromotionService {
   }
 
   /**
+   * RECOVERY: Unlock schedules that have been stuck in 'processing' for too long (e.g. server crash)
+   */
+  async recoverStaleLocks() {
+    try {
+      // Recover locks older than 10 minutes
+      const staleThreshold = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      // Note: This query might need an index on status + updatedAt.
+      // If index is missing, this might fail, so we wrap in try/catch and log.
+      const stuck = await db
+        .collection("promotion_schedules")
+        .where("status", "==", "processing")
+        .where("updatedAt", "<", staleThreshold)
+        .limit(50)
+        .get();
+
+      if (!stuck.empty) {
+        console.log(`[Scheduler] ⚠️ Recovering ${stuck.size} stale processing locks...`);
+        const batch = db.batch();
+        stuck.docs.forEach(doc => {
+          batch.update(doc.ref, {
+            status: admin.firestore.FieldValue.delete(),
+            lastRecoveryAt: new Date().toISOString(),
+            previousStatus: "processing",
+          });
+        });
+        await batch.commit();
+        console.log(`[Scheduler] ✅ Recovered ${stuck.size} locks.`);
+      }
+    } catch (err) {
+      // If generic index error, warn but don't crash
+      if (err.code === 9 || err.message.includes("indexes")) {
+        console.warn("[Scheduler] Index missing for lock recovery (status + updatedAt). Skipping.");
+      } else {
+        console.error("Error in recoverStaleLocks:", err);
+      }
+    }
+  }
+
+  /**
    * REAL-TIME SCHEDULER: Process due schedules and dispatch to platforms
    * This bridges the gap between the "Schedules" panel (Db) and "PlatformPoster" (API)
    */
   async processDueSchedules() {
     try {
+      // 0. Auto-recover stuck locks from previous crashes
+      await this.recoverStaleLocks();
+
       const now = new Date().toISOString();
       // Find schedules that are active, due, and not yet processing/executed
       // Note: Firestore composite index required: isActive ASC, startTime ASC
@@ -523,14 +565,50 @@ class PromotionService {
               executedAt: new Date().toISOString(),
             });
           } else {
-            // Failed
-            console.warn(`[Scheduler] ❌ Failed ${schedule.id}: ${result.error}`);
-            await doc.ref.update({
-              status: "failed",
-              isActive: false, // Stop retrying this specific instance for now (or implement retry logic)
-              error: result.error,
-              executedAt: new Date().toISOString(),
-            });
+            const errorMsg = result.error || "Unknown error";
+            console.warn(`[Scheduler] ❌ Failed ${schedule.id}: ${errorMsg}`);
+
+            // NEW: Handle Rate Limits (Facebook 368 / Spam) gracefully
+            // If we hit a rate limit, don't kill the job. Reschedule it for later.
+            const isRateLimit =
+              errorMsg.includes("limit how often") ||
+              errorMsg.includes("Spam") ||
+              errorMsg.includes("368") ||
+              errorMsg.includes("OAuthException");
+
+            if (isRateLimit) {
+              // Push back 1 hour (plus small random jitter to avoid thundering herd)
+              const delayMs = 60 * 60 * 1000 + Math.random() * 5 * 60 * 1000;
+              const nextAttempt = new Date(Date.now() + delayMs).toISOString();
+
+              console.log(
+                `[Scheduler] ⏳ Rate limit/spam detected for ${schedule.id}. Rescheduling for ~1 hour form now (${nextAttempt}).`
+              );
+
+              await doc.ref.update({
+                status: "rate_limited_retry", // Special status (treated as pending by query if needed, or query needs update. Actually query checks isActive=true, startTime<=now. So we just reset status to something purely informational or back to pending)
+                // We'll use 'pending' or keep it simple. The query looks for status != processing/executed (lines 507).
+                // Actually the query (line 496) is: .where("isActive", "==", true).where("startTime", "<=", now)
+                // So if we update startTime, it won't be picked up until then.
+                // We should set status back to 'pending' or keep it 'rate_limited' if that doesn't block it.
+                // The loop check (line 507) ignores 'processing' and 'executed'.
+                // So 'rate_limited_retry' is fine as long as we reset it potentially.
+                // But to be safe, let's set it to 'pending' so it looks normal.
+                status: "pending",
+                isActive: true,
+                startTime: nextAttempt,
+                lastError: errorMsg,
+                updatedAt: new Date().toISOString(),
+              });
+            } else {
+              // Permanent failure
+              await doc.ref.update({
+                status: "failed",
+                isActive: false, // Stop retrying this specific instance
+                error: errorMsg,
+                executedAt: new Date().toISOString(),
+              });
+            }
           }
         } catch (err) {
           console.error(`[Scheduler] 💥 Exception ${schedule.id}:`, err);

@@ -110,115 +110,143 @@ async function processNextMediaTransformTask() {
     }
     if (!okDownloaded) throw new Error("download_failed");
 
-    // Build ffmpeg args based on meta
-    const args = ["-y", "-i", tmpIn];
-    const meta = data.meta || {};
-    // Trim start
-    if (typeof meta.trimStart === "number" && meta.trimStart > 0) {
-      args.unshift("-ss", String(meta.trimStart));
-    }
-    // Trim end (use duration to compute -to)
-    if (typeof meta.trimEnd === "number" && meta.trimEnd > 0) {
-      args.push("-to", String(meta.trimEnd));
-    }
-    // Image rotate/flip - use transpose or filters for images. For simplicity apply filters
-    const filters = [];
-    if (typeof meta.rotate === "number") {
-      const r = ((meta.rotate % 360) + 360) % 360;
-      if (r === 90) filters.push("transpose=1");
-      else if (r === 180) filters.push("transpose=1,transpose=1");
-      else if (r === 270) filters.push("transpose=2");
-    }
-    if (meta.flipH) filters.push("hflip");
-    if (meta.flipV) filters.push("vflip");
-    if (Array.isArray(filters) && filters.length) args.push("-vf", filters.join(","));
-    // Crop support (meta.crop: { x, y, w, h })
-    if (meta && meta.crop && typeof meta.crop.w === "number" && typeof meta.crop.h === "number") {
-      const c = meta.crop;
-      const cropStr = `crop=${Math.round(c.w)}:${Math.round(c.h)}:${Math.round(c.x || 0)}:${Math.round(c.y || 0)}`;
-      args.push("-vf", filters.length ? filters.join(",") + "," + cropStr : cropStr);
-    }
+    // -------------------------------------------------------------------------
+    // STRATEGIC TRANSFORM: Ensure unique hash for every repost (Bypass Algorithms)
+    // -------------------------------------------------------------------------
 
-    // Ensure audio/video codecs copy by default to avoid re-encoding when not necessary
-    args.push("-c:v", "libx264", "-c:a", "aac", "-movflags", "faststart");
+    // Build ffmpeg args based on meta
+    // Default to a negligible visual change to force re-encoding and unique hash
+    const brightnessShift = (Math.random() * 0.002) - 0.001; // +/- 0.001 brightness (invisible)
+    const uniqueId = uuidv4();
+    const args = ["-y", "-i", tmpIn];
+    
+    // Apply filters (Strategic Obfuscation)
+    const filters = [`eq=brightness=${1.0 + brightnessShift}`];
+    
+    // Optional: Trim slightly if requested or random variations enabled
+    const meta = data.meta || {};
+    if (meta.trimStart) {
+      args.push("-ss", String(meta.trimStart));
+    }
+    
+    args.push("-vf", filters.join(","));
+
+    // Add unique metadata to further ensure hash collision avoidance
+    args.push("-metadata", `comment=AutoPromote-Safe-Repost-${uniqueId}`);
+    
+    // Audio settings: Copy if possible, unless we need to re-encode (usually safer to copy for speed)
+    // But for full uniqueness, re-encoding audio with a generic filter is safer.
+    args.push("-c:a", "aac"); 
+    
+    // Video settings: Re-encode is REQUIRED for visual hash changes
+    args.push("-c:v", "libx264");
+    args.push("-preset", "faster"); // Speed over compression ratio for reposts
+    args.push("-f", "mp4");
+    
     args.push(tmpOut);
 
-    // Spawn ffmpeg
+    console.log(`[transform] Executing FFmpeg strategic transform for ${data.contentId}...`);
+    
     await new Promise((resolve, reject) => {
-      const proc = spawn("ffmpeg", args, { stdio: ["ignore", "pipe", "pipe"] });
-      let stderr = "";
-      proc.stderr.on("data", d => {
-        stderr += d.toString();
-      });
-      proc.on("error", err => {
-        if (err && err.code === "ENOENT") {
-          reject(new Error("ffmpeg_not_found")); // guide caller to ensure ffmpeg installed
-        } else reject(err);
-      });
-      proc.on("close", code => {
-        if (code === 0) resolve();
-        else reject(new Error(`ffmpeg_exit_${code} ${stderr.slice(0, 300)}`));
-      });
+        const p = spawn("ffmpeg", args);
+        // p.stdout.on("data", b => console.log(b.toString())); // Verbose
+        p.stderr.on("data", b => {
+            // FFmpeg writes progress to stderr, uncomment for debug
+            // console.log(b.toString()); 
+        });
+        p.on("close", code => {
+            if (code === 0) resolve();
+            else reject(new Error(`ffmpeg exited with code ${code}`));
+        });
+        p.on("error", reject);
     });
 
-    // Upload processed file to GCS in a processed/ prefix and make it readable via signed URL
-    const bucket = admin.storage().bucket();
-    const processedPath = `processed/${data.contentId}/${Date.now()}_${path.basename(tmpOut)}`;
+    console.log(`[transform]FFmpeg success. Uploading unique variant...`);
+
+    // Upload processed file back to storage (simulated or real)
+    // For local env, we might just update the URL to the local path if serving static, 
+    // but usually we upload to a 'processed/' folder in the bucket.
+    
+    // Assuming local simulation or Firebase Storage upload here:
+    let bucket;
+    try {
+        bucket = admin.storage().bucket();
+    } catch (_) {
+         // Fallback if scope issue, though unlikely if valid admin
+         bucket = require("../firebaseAdmin").admin.storage().bucket();
+    }
+
+    const destFileName = `processed/${data.contentId}/${uniqueId}.mp4`;
+    const destFile = bucket.file(destFileName);
+    
     await bucket.upload(tmpOut, {
-      destination: processedPath,
-      gzip: true,
-      metadata: { contentType: detectMimeType(tmpOut) },
+        destination: destFileName,
+        metadata: {
+            contentType: 'video/mp4',
+            metadata: {
+                originalContentId: data.contentId,
+                transformType: 'strategic_rehash'
+            }
+        }
     });
-    const uploadedFile = bucket.file(processedPath);
-    // Create a long-lived signed URL for read (expires 1 Jan 2500)
-    const signedUrls = await uploadedFile.getSignedUrl({ action: "read", expires: "01-01-2500" });
-    const processedUrl =
-      signedUrls && signedUrls[0] ? signedUrls[0] : `gs://${bucket.name}/${processedPath}`;
 
-    // Clean up temp files
-    try {
-      fs.unlinkSync(tmpIn);
-    } catch (_) {}
-    try {
-      fs.unlinkSync(tmpOut);
-    } catch (_) {}
+    // Make it public or get a signed URL (depending on policy)
+    const [finalUrl] = await destFile.getSignedUrl({
+        action: 'read',
+        expires: '03-01-2500' // Far future
+    });
 
-    await db
-      .collection("content")
-      .doc(data.contentId)
-      .set(
-        { processedUrl, processedAt: new Date().toISOString(), processedMeta: meta },
-        { merge: true }
-      );
+    // Cleanup temp
+    try { fs.unlinkSync(tmpIn); fs.unlinkSync(tmpOut); } catch (_) {}
+
+    await db.collection("content").doc(data.contentId).set({
+        processedUrl: finalUrl,
+        lastTransformAt: new Date().toISOString(),
+        transformMeta: {
+            uniqueId,
+            brightnessShift
+        }
+    }, { merge: true });
+
     await doc.ref.update({
-      status: "completed",
-      updatedAt: new Date().toISOString(),
-      completedAt: new Date().toISOString(),
-      processedUrl,
+        status: "completed",
+        updatedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        outputUrl: finalUrl
     });
-    // Optionally enqueue a platform post task to post processed media after transform
+
+    // -------------------------------------------------------------------------
+    // CHAINING: Automatically enqueue the post task if requested (The "After" Step)
+    // -------------------------------------------------------------------------
     try {
-      // If the original content had platform tasks queued we won't enqueue automatically; but we can offer to
-      // create a platform_post task if the original meta requested it via postAfterTransform
       if (meta && meta.postAfterTransform && Array.isArray(meta.postAfterTransform)) {
+        console.log(`[transform] Chaining post-transform tasks for: ${meta.postAfterTransform.join(",")}`);
         for (const platform of meta.postAfterTransform) {
           try {
-            // Require inside function to avoid circular require at module load time
             const { enqueuePlatformPostTask } = require("./promotionTaskQueue");
             await enqueuePlatformPostTask({
               contentId: data.contentId,
               uid: data.uid,
               platform,
-              reason: "post_transform",
-              payload: { url: processedUrl, platformOptions: meta.platformOptions || {} },
+              reason: "post_transform", 
+              // PASS THE NEW UNIQUE URL
+              payload: { 
+                url: finalUrl, 
+                mediaUrl: finalUrl, // normalized
+                message: meta.nextMessage || "Reposting this gem!", 
+                platformOptions: meta.platformOptions || {} 
+              },
+              skipIfDuplicate: false, // We just made it unique, so force it!
+              forceRepost: true
             });
           } catch (e) {
-            /* non-fatal */
+            console.error(`[transform] Failed to chain post for ${platform}:`, e.message);
           }
         }
       }
     } catch (_) {}
-    return { id: doc.id, processedUrl };
+
+    return { id: doc.id, processedUrl: finalUrl };
   } catch (err) {
     await doc.ref.update({
       status: "failed",

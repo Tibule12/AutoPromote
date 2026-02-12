@@ -9,7 +9,6 @@ const router = express.Router();
 const upload = multer({ dest: "uploads/", limits: { fileSize: 100 * 1024 * 1024 } }); // 100MB limit
 
 // Reserved for async removal helper; kept for future use
-/* eslint-disable-next-line no-unused-vars -- reserved for potential async unlink usage in future */
 const _unlinkAsync = util.promisify(fs.unlink);
 
 function safeUnlink(path) {

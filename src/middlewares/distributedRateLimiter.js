@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // distributedRateLimiter.js - Redis-backed token bucket with local fallback
 // Usage: const { distributedRateLimiter } = require('./middlewares/distributedRateLimiter');
 // app.use('/api/', distributedRateLimiter({ capacity:800, refillPerSec:5 }));

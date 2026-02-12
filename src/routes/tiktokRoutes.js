@@ -1,5 +1,4 @@
 // TikTok OAuth and API integration (server-side only) with sandbox/production mode support
-/* eslint-disable no-console */
 const express = require("express");
 const fetch = require("node-fetch");
 const router = express.Router();

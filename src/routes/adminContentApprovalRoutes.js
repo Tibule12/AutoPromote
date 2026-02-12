@@ -211,9 +211,18 @@ router.post("/:contentId/approve", authMiddleware, adminOnly, async (req, res) =
                 const options = (data.platformOptions && data.platformOptions[platform]) || {};
                 const role = String(options.role || "").toLowerCase();
                 if (role === "sponsored") {
-                  const sponsorApproval = options.sponsorApproval || (data.platform_options && data.platform_options[platform] && data.platform_options[platform].sponsorApproval) || null;
+                  const sponsorApproval =
+                    options.sponsorApproval ||
+                    (data.platform_options &&
+                      data.platform_options[platform] &&
+                      data.platform_options[platform].sponsorApproval) ||
+                    null;
                   if (!sponsorApproval || sponsorApproval.status !== "approved") {
-                    console.warn("Skipping enqueue: sponsor approval missing or not approved for", contentId, platform);
+                    console.warn(
+                      "Skipping enqueue: sponsor approval missing or not approved for",
+                      contentId,
+                      platform
+                    );
                     // Record audit log about skip
                     await db.collection("audit_logs").add({
                       action: "skip_enqueue_sponsor_not_approved",
@@ -597,7 +606,7 @@ router.post("/:contentId/scan", authMiddleware, adminOnly, async (req, res) => {
       return res.status(404).json({ success: false, error: "Content not found" });
     }
 
-    // eslint-disable-next-line no-unused-vars -- placeholder for future use
+    // placeholder for future use
     const _content = contentDoc.data();
 
     // Simulate content scanning (integrate with OpenAI Moderation API or similar)

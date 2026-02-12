@@ -1,6 +1,5 @@
 // Snapchat OAuth and API integration (server-side only)
 // Note: Snapchat does not have a sandbox environment - only production
-/* eslint-disable no-console */
 const express = require("express");
 const fetch = require("node-fetch");
 const router = express.Router();

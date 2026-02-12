@@ -6,8 +6,18 @@ const { db } = require("../firebaseAdmin");
 const crypto = require("crypto");
 const logger = require("../utils/logger");
 const paypalClient = require("./paypal");
+const performanceValidationEngine = require("./performanceValidationEngine");
 
 class MonetizationService {
+  // Results-Based Pricing Configuration (Cost in Credits)
+  get RESULTS_BASED_CONFIG() {
+    return {
+      BASE_SUCCESS_FEE: 10,     // Any improvement (>0% lift)
+      HIGH_PERFORMANCE_FEE: 25, // >50% lift
+      VIRAL_PERFORMANCE_FEE: 50 // >100% lift
+    };
+  }
+
   // Premium tier definitions
   get PREMIUM_TIERS() {
     return {
@@ -293,6 +303,74 @@ class MonetizationService {
       price: tier.price,
       reason: `Your ${currentTier} tier limit exceeded for ${action}s`,
     };
+  }
+
+  // CORE LOGIC: Results-Based Pricing Charge
+  // Only charges credits if the algorithm actually improved performance
+  async processResultsBasedCharge(userId, validationResult) {
+    if (!validationResult || !validationResult.isImproved) {
+      return { charged: false, amount: 0, reason: "No improvement detected" };
+    }
+
+    try {
+      // 1. Calculate Cost based on Lift
+      const lift = validationResult.lift?.views || 0;
+
+      // FIX: Minimum Threshold for Statistical Significance (10%)
+      // Prevents charging for random organic variance or noise
+      if (lift < 10) {
+        return { charged: false, amount: 0, reason: "Improvement below significance threshold (<10%)" };
+      }
+
+      let cost = this.RESULTS_BASED_CONFIG.BASE_SUCCESS_FEE;
+
+      if (lift > 100) {
+        cost = this.RESULTS_BASED_CONFIG.VIRAL_PERFORMANCE_FEE;
+      } else if (lift > 50) {
+        cost = this.RESULTS_BASED_CONFIG.HIGH_PERFORMANCE_FEE;
+      }
+
+      // 2. Fetch User Credits
+      const creditsRef = db.collection("user_credits").doc(userId);
+      const creditsDoc = await creditsRef.get();
+
+      if (!creditsDoc.exists || (creditsDoc.data().balance || 0) < cost) {
+        // Technically we should have held these credits in escrow, 
+        // but for now we just log a debt or fail.
+        logger.warn(`User ${userId} has insufficient credits for performance charge: ${cost}`);
+        return { charged: false, amount: 0, reason: "Insufficient credits" };
+      }
+
+      const currentBalance = creditsDoc.data().balance || 0;
+
+      // 3. Deduct Credits
+      await creditsRef.update({
+        balance: currentBalance - cost,
+        transactions: admin.firestore.FieldValue.arrayUnion({
+          type: "performance_charge",
+          amount: -cost,
+          contentId: validationResult.originalId,
+          variantId: validationResult.optimizedId,
+          liftPercentage: lift,
+          timestamp: new Date().toISOString(),
+          description: `Performance Fee: +${lift}% View Lift Detected`
+        }),
+        lastUpdated: new Date().toISOString()
+      });
+
+      logger.info(`Charged user ${userId} ${cost} credits for ${lift}% lift`);
+      
+      return { 
+        charged: true, 
+        amount: cost, 
+        lift, 
+        message: `Success! Optimization delivered +${lift}% views. ${cost} credits deducted.` 
+      };
+
+    } catch (error) {
+      logger.error("Error processing results-based charge:", error);
+      throw error;
+    }
   }
 
   // Update usage counters

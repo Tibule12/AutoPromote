@@ -735,6 +735,11 @@ async function enqueueMediaTransform({ contentId, uid, meta, sourceUrl }) {
   }
 
   const { enqueueMediaTransformTask } = require("./mediaTransform");
+  // STRATEGIC: For reposts, force a media transform first to generate a unique hash
+  if (meta.forceVariance || meta.isRepost) {
+     meta.quality_enhanced = true; // Use this flag to trigger the new pipeline
+  }
+
   const task = await enqueueMediaTransformTask({ contentId, uid, meta, url: sourceUrl });
   return task;
 }
@@ -812,6 +817,14 @@ async function processNextPlatformTask() {
   }
   if (!selectedDoc) return null;
   const task = { id: selectedDoc.id, ...selectedData };
+
+  // Debug visibility (User explicitly requested upload logs)
+  console.log(
+    `[Queue] 📥 Picked up task ${task.id} (type=${task.type}, platform=${
+      task.platform || "unknown"
+    }, priority=${bestScore.toFixed(2)}) for processing.`
+  );
+
   // Verify signature before processing (skip for test stubs)
   try {
     if (selectedData && selectedData._testStub) {

@@ -130,12 +130,18 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5, maxAgeMinutes = 30 
     if (lastCheckMs && lastCheckMs > cutoff) continue; // recently checked
     try {
       const metrics = await fetchMetricsForPost(doc);
+
+      // Update check time regardless of success to prevent rapid looping on failures
+      const baseUpdate = {
+        lastMetricsCheck: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
       if (metrics) {
         const normalizedScore = computeNormalizedScore(d.platform, metrics);
         const update = {
+          ...baseUpdate,
           metrics,
           normalizedScore,
-          lastMetricsCheck: admin.firestore.FieldValue.serverTimestamp(),
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         };
         // Attempt to propagate impressions into variant materialized stats
@@ -316,6 +322,13 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5, maxAgeMinutes = 30 
           }
         } catch (_) {}
         processed++;
+      } else {
+        // If metrics fetch failed (e.g. permission error), still update the check time
+        // to avoid hot-looping the same document.
+        try {
+          await doc.ref.set(baseUpdate, { merge: true });
+          processed++;
+        } catch (_) {}
       }
     } catch (_) {
       /* swallow */

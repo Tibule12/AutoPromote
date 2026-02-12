@@ -12,7 +12,7 @@ router.get(
   require("../statusInstrument")("aggregateStatus", async (req, res) => {
     const { getCache, setCache } = require("../utils/simpleCache");
     const { dedupe } = require("../utils/inFlight");
-    // eslint-disable-next-line no-unused-vars -- kept for future instrumentation hooks
+    // kept for future instrumentation hooks
     const _instrument = require("../utils/queryMetrics").instrument;
     const uid = req.userId || req.user?.uid;
     if (!uid) return res.status(401).json({ error: "unauthorized" });

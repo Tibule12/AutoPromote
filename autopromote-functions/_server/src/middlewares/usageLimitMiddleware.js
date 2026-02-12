@@ -1,8 +1,36 @@
 // usageLimitMiddleware.js
 // Enforce monthly content upload limits for free users
 
-const { db } = require("../firebaseAdmin");
+const { db, storage } = require("../firebaseAdmin");
 const logger = require("../utils/logger");
+const url = require("url");
+
+/**
+ * Helper to delete a file from storage if quota is exceeded
+ */
+async function cleanupUnauthorizedUpload(fileUrl) {
+  try {
+    if (!fileUrl || !fileUrl.includes("firebasestorage")) return;
+
+    // Extract path from URL
+    // Format: https://firebasestorage.googleapis.com/v0/b/[bucket]/o/[path]?alt=...
+    const parsed = url.parse(fileUrl);
+    const pathPart = parsed.pathname.split("/o/")[1];
+    if (!pathPart) return;
+
+    const filePath = decodeURIComponent(pathPart);
+    const bucket = storage.bucket();
+    const file = bucket.file(filePath);
+
+    const [exists] = await file.exists();
+    if (exists) {
+      await file.delete();
+      logger.info(`[UsageLimit] Deleted unauthorized upload file: ${filePath}`);
+    }
+  } catch (error) {
+    logger.error(`[UsageLimit] Failed to cleanup unauthorized upload: ${error.message}`);
+  }
+}
 
 /**
  * Check if user has exceeded their monthly upload limit
@@ -146,6 +174,12 @@ function usageLimitMiddleware(options = {}) {
       };
 
       if (usageCount >= freeLimit) {
+        // CLEANUP: If the user uploaded a file but is over quota, delete it immediately.
+        if (req.body && req.body.url) {
+          // Run in background to not delay response, but ensure it runs
+          cleanupUnauthorizedUpload(req.body.url).catch(e => console.error(e));
+        }
+
         return res.status(403).json({
           error: "Monthly upload limit reached",
           message: `You've reached your free tier limit of ${freeLimit} uploads per month. Upgrade to premium for unlimited uploads.`,
@@ -189,6 +223,33 @@ async function trackUsage(userId, type = "upload", metadata = {}) {
     });
 
     logger.debug(`[trackUsage] Tracked ${type} for user ${userId} in month ${monthKey}`);
+
+    // ENFORCE QUOTA: Update user document to block future storage uploads if limit reached
+    try {
+      // Re-check stats after this addition
+      // We need to query purely for the count to be safe, or just rely on what we know + 1?
+      // Calling the exported getUserUsageStats is safest as it handles logic centralized
+      // circular dependency risk if we call the module.exports one? No, it's function in same scope.
+      // But getUserUsageStats is defined below. Hoisting works for function declarations.
+      const stats = await getUserUsageStats(userId);
+
+      // If free user and over limit, block uploads
+      if (!stats.isPaid && stats.used >= stats.limit) {
+        await db.collection("users").doc(userId).set(
+          {
+            uploadBlocked: true,
+            uploadBlockedReason: "limit_reached",
+            lastQuotaCheck: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+        logger.info(
+          `[trackUsage] Blocked uploads for user ${userId} (Limit ${stats.limit} reached)`
+        );
+      }
+    } catch (e) {
+      logger.warn(`[trackUsage] Failed to update user blockage status: ${e.message}`);
+    }
   } catch (error) {
     logger.error("[trackUsage] Error tracking usage", {
       error: error && error.message ? error.message : error,

@@ -23,7 +23,6 @@ describe("snapchat prepare endpoint", () => {
       .set("Authorization", "Bearer test-token-for-testuser")
       .send({ test_scope: "display_name", popup: false });
     // Log for debugging
-    // eslint-disable-next-line no-console
     console.error(
       "prepare res status",
       res.status,

@@ -1,11 +1,9 @@
-/* eslint-disable no-console */
 const express = require("express");
 const admin = require("firebase-admin");
 const router = express.Router();
 const { sendVerificationEmail, sendPasswordResetEmail } = require("./services/emailService");
 
 // Middleware to verify Firebase token
-// eslint-disable-next-line no-unused-vars -- kept for potential future use as an exported middleware
 const _verifyFirebaseToken = async (req, res, next) => {
   try {
     const idToken = req.headers.authorization?.split("Bearer ")[1];
@@ -206,7 +204,6 @@ router.post("/login", async (req, res) => {
         const userRecord = await admin.auth().getUserByEmail(email);
         // We can't verify the password directly with Admin SDK
         // Creating a custom token for the user
-        // eslint-disable-next-line no-unused-vars -- created for potential client-side exchange
         const _customToken = await admin.auth().createCustomToken(userRecord.uid);
 
         // Instead of directly using this as decoded token, we should provide
@@ -441,7 +438,6 @@ router.post("/admin-login", async (req, res) => {
     let role = "user";
     let isAdmin = false;
     let fromCollection = null;
-    // eslint-disable-next-line no-unused-vars -- placeholder for future admin source tracking
     let _adminStatusSource = "unknown";
 
     // For admin login, check admin claims in token first, then try admins collection

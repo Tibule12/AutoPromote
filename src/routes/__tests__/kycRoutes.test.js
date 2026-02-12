@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 // Reworked tests: mock firebaseAdmin and authMiddleware before requiring routes
 const request = require("supertest");
 const express = require("express");

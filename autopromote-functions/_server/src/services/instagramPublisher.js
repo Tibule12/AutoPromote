@@ -93,13 +93,47 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
   if (uid) {
     try {
       const conn = await getUserFacebookConnection(uid);
-      if (conn && conn.accessToken) {
-        ACCESS_TOKEN = conn.accessToken;
+      if (conn) {
         // Try to find IG Business ID in connection data
-        if (conn.instagramBusinessAccountId) IG_USER_ID = conn.instagramBusinessAccountId;
+        // Priority: 1. snake_case (saved by routes.js) 2. camelCase (legacy) 3. metadata
+        if (conn.ig_business_account_id) IG_USER_ID = conn.ig_business_account_id;
+        else if (conn.instagramBusinessAccountId) IG_USER_ID = conn.instagramBusinessAccountId;
         else if (conn.instagramId) IG_USER_ID = conn.instagramId;
         else if (conn.metadata && conn.metadata.instagram_business_account_id)
           IG_USER_ID = conn.metadata.instagram_business_account_id;
+
+        // Resolve access token (UPDATED: Look for Page-Specific token first)
+        let resolvedToken = null;
+        if (IG_USER_ID && conn.pages && Array.isArray(conn.pages)) {
+          // Find page owning this IG account
+          const p = conn.pages.find(
+            pg => pg.instagram_business_account && pg.instagram_business_account.id === IG_USER_ID
+          );
+          // Or fallback to first page if only one
+          const targetPage = p || (conn.pages.length === 1 ? conn.pages[0] : null);
+
+          if (targetPage) {
+            if (targetPage.access_token) {
+              resolvedToken = targetPage.access_token;
+            } else if (targetPage.encrypted_access_token) {
+              try {
+                const { decryptToken } = require("./secretVault");
+                resolvedToken = decryptToken(targetPage.encrypted_access_token);
+              } catch (e) {
+                /* ignore */
+              }
+            }
+          }
+        }
+
+        if (resolvedToken) {
+          ACCESS_TOKEN = resolvedToken;
+        } else if (conn.tokens && conn.tokens.access_token) {
+          ACCESS_TOKEN = conn.tokens.access_token;
+        } else if (conn.accessToken) {
+          // Legacy plain text
+          ACCESS_TOKEN = conn.accessToken;
+        }
       }
     } catch (e) {
       console.warn("[Instagram] Failed to resolve user credentials:", e.message);
@@ -107,6 +141,9 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
   }
 
   if (!IG_USER_ID || !ACCESS_TOKEN) {
+    console.error(
+      `[Instagram] Missing Credentials. IG_USER_ID: ${!!IG_USER_ID}, ACCESS_TOKEN: ${!!ACCESS_TOKEN}`
+    );
     return { platform: "instagram", simulated: true, reason: "missing_credentials" };
   }
   const ctx = await buildContentContext(contentId);
@@ -160,19 +197,19 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
       }
       const isVideo = /\.mp4($|\?|#)/i.test(mediaUrl) || ctx.type === "video";
 
-      const creationEndpoint = `https://graph.facebook.com/v18.0/${IG_USER_ID}/media`;
+      const createEndpoint = `https://graph.facebook.com/v19.0/${IG_USER_ID}/media`;
       const params = new URLSearchParams({
         access_token: ACCESS_TOKEN,
         caption,
       });
       if (isVideo) {
-        params.append("media_type", "VIDEO");
+        params.append("media_type", "REELS"); // UPDATED: Default to REELS for modern IG Video
         params.append("video_url", mediaUrl);
       } else {
         params.append("image_url", mediaUrl);
       }
 
-      const createRes = await fetch(creationEndpoint, { method: "POST", body: params });
+      const createRes = await fetch(createEndpoint, { method: "POST", body: params });
       const createJson = await createRes.json();
       if (!createRes.ok || !createJson.id) {
         return {
@@ -186,16 +223,22 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
 
       // For video we should poll status
       if (isVideo) {
-        for (let i = 0; i < 5; i++) {
-          // Increased from 2 to 5 attempts
-          await sleep(2000); // Increased from 1500ms to 2000ms
+        let isReady = false;
+        for (let i = 0; i < 15; i++) {
+          // Increased poll loops significantly (30s+ wait)
           try {
             const statusRes = await fetch(
-              `https://graph.facebook.com/v18.0/${creationId}?fields=status_code&access_token=${ACCESS_TOKEN}`
+              `https://graph.facebook.com/v19.0/${creationId}?fields=status_code,status&access_token=${ACCESS_TOKEN}`
             );
             const statusJson = await statusRes.json();
-            if (statusJson.status_code === "FINISHED") break;
-            if (statusJson.status_code === "ERROR") {
+            // IG can return status_code OR status depending on version/object type
+            const code = statusJson.status_code || statusJson.status;
+
+            if (code === "FINISHED") {
+              isReady = true;
+              break;
+            }
+            if (code === "ERROR") {
               return {
                 platform: "instagram",
                 success: false,
@@ -204,6 +247,17 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
               };
             }
           } catch (_) {}
+          // Wait 3s between polls
+          await sleep(3000);
+        }
+
+        if (!isReady) {
+          return {
+            platform: "instagram",
+            success: false,
+            stage: "processing",
+            error: "VIDEO_PROCESSING_TIMEOUT",
+          };
         }
       }
     }
@@ -214,7 +268,7 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
   // Publish the media
   try {
     const publishRes = await fetch(
-      `https://graph.facebook.com/v18.0/${IG_USER_ID}/media_publish?access_token=${ACCESS_TOKEN}`,
+      `https://graph.facebook.com/v19.0/${IG_USER_ID}/media_publish?access_token=${ACCESS_TOKEN}`,
       {
         method: "POST",
         body: new URLSearchParams({ creation_id: creationId }),

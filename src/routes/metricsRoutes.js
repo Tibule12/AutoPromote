@@ -756,7 +756,6 @@ router.get("/usage/current", authMiddleware, async (req, res) => {
 });
 
 // Utility safe number
-/* eslint-disable-next-line no-unused-vars -- kept for future use in edge-case consolidations */
 function num(v) {
   return typeof v === "number" && !Number.isNaN(v) ? v : 0;
 }
