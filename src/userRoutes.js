@@ -2,6 +2,9 @@ const express = require("express");
 const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
 const { rateLimiter } = require("./middlewares/globalRateLimiter");
+// Import usage stats helper to auto-unblock users when new month starts
+const { getUserUsageStats } = require("./middlewares/usageLimitMiddleware");
+
 const router = express.Router();
 let codeqlLimiter;
 try {
@@ -120,6 +123,23 @@ router.get("/profile", authMiddleware, publicLimiter, async (req, res) => {
         role: userDoc.data().role || "user",
         isAdmin: userDoc.data().isAdmin || false,
       };
+
+      // AUTO-UNBLOCK LOGIC: Check if quota reset (new month) is needed
+      if (user.uploadBlocked) {
+        try {
+          const stats = await getUserUsageStats(req.userId);
+          // If usage is below limit (e.g. new month started), remove the block
+          if (stats.used < stats.limit) {
+            await db.collection("users").doc(req.userId).update({
+              uploadBlocked: false,
+              uploadBlockedReason: null,
+            });
+            user.uploadBlocked = false;
+          }
+        } catch (e) {
+          console.error("[Profile] Auto-unblock check failed:", e);
+        }
+      }
     } else {
       // If not found, try admins collection
       const adminDoc = await db.collection("admins").doc(req.userId).get();
