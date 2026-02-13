@@ -18,7 +18,7 @@ exports.getFacebookAuthUrl = functions.region(region).https.onRequest((req, res)
     return res.status(500).json({ error: "Facebook client ID or redirect URI not set." });
   }
   const state = req.query.state || require("crypto").randomBytes(8).toString("hex");
-  const scope = "pages_show_list pages_manage_posts pages_read_engagement pages_manage_metadata";
+  const scope = "pages_show_list,pages_manage_posts,pages_read_engagement,pages_manage_metadata,instagram_basic,instagram_content_publish";
   const authUrl =
     `https://www.facebook.com/v19.0/dialog/oauth?client_id=${FB_CLIENT_ID}` +
     `&redirect_uri=${encodeURIComponent(FB_REDIRECT_URI)}` +

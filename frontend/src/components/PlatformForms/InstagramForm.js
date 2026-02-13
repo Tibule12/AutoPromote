@@ -118,6 +118,71 @@ const InstagramForm = ({
         </div>
       )}
 
+      {/* Scope Disclaimer / Permission Box */}
+      {selectedPageId && (
+        <div
+          className="scope-info-box"
+          style={{
+            marginTop: "16px",
+            marginBottom: "16px",
+            padding: "12px",
+            background: "#fff5f5", // Light pinkish for Instagram feel (or just generic light grey)
+            borderRadius: "8px",
+            border: "1px solid #ffdbdb",
+            fontSize: "0.85rem",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: "600",
+              marginBottom: "6px",
+              color: "#E1306C",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <span>🔒</span> Instagram Permissions Used
+          </div>
+          <p style={{ margin: 0, color: "#444", lineHeight: "1.4" }}>
+            To create this post, AutoPromote uses the following Graph API permissions linked to the
+            selected Facebook Page / Instagram Business account:
+          </p>
+          <ul style={{ margin: "6px 0 0 20px", padding: 0, color: "#444", lineHeight: "1.4" }}>
+            <li>
+              <code
+                style={{
+                  background: "#e4e6eb",
+                  padding: "2px 4px",
+                  borderRadius: "4px/2px",
+                  fontFamily: "monospace",
+                  color: "#333",
+                }}
+              >
+                instagram_basic
+              </code>
+              : To identify your Instagram Business account connected to Facbeook Page{" "}
+              <strong>ID: {selectedPageId}</strong>.
+            </li>
+            <li>
+              <code
+                style={{
+                  background: "#e4e6eb",
+                  padding: "2px 4px",
+                  borderRadius: "4px/2px",
+                  fontFamily: "monospace",
+                  color: "#333",
+                }}
+              >
+                instagram_content_publish
+              </code>
+              : Specifically used to upload the photo/video media and publish the container (Reel or
+              Post) to your feed.
+            </li>
+          </ul>
+        </div>
+      )}
+
       <div className="form-group-modern">
         <label className="form-label-bold">Media File</label>
         <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>

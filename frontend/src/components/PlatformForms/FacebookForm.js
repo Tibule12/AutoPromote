@@ -145,6 +145,20 @@ const FacebookForm = ({
                 </code>
                 : Used to display the likes and comments this post receives on your dashboard.
               </li>
+              <li>
+                <code
+                  style={{
+                    background: "#e4e6eb",
+                    padding: "2px 4px",
+                    borderRadius: "4px/2px",
+                    fontFamily: "monospace",
+                    color: "#333",
+                  }}
+                >
+                  pages_manage_metadata
+                </code>
+                : Used to subscribe to page webhooks so we can track post performance automatically.
+              </li>
             </ul>
             <p
               style={{

@@ -57,8 +57,9 @@ class VideoClippingService {
       // 3. Generate transcript
       const transcript = await this.generateTranscript(videoPath);
 
-      // 4. Detect scenes and shot boundaries
-      const scenes = await this.detectScenes(videoPath, metadata.duration);
+      // 4. Detect scenes using Sliding Window (Sentence Aware)
+      // Pass 'transcript' to enable the new logic
+      const scenes = await this.detectScenes(videoPath, metadata.duration, transcript);
 
       // 5. Score segments for viral potential
       const scoredSegments = await this.scoreSegments(scenes, transcript, metadata);
@@ -372,9 +373,97 @@ class VideoClippingService {
   }
 
   /**
-   * Detect scene changes using FFmpeg scene detection
+   * Detect logical segments using Transcript Sentences (Sentence-Aware Sliding Window)
+   * This replaces the naive visual scene detection to ensuring clips start/end on complete thoughts.
    */
-  async detectScenes(videoPath, duration) {
+  async detectScenes(videoPath, duration, transcript) {
+    // If we have no transcript, fall back to visual detection
+    if (!transcript || transcript.length === 0) {
+      console.log(
+        "[VideoClipping] No transcript available. Falling back to visual scene detection."
+      );
+      return this.detectVisualScenes(videoPath, duration);
+    }
+
+    console.log("[VideoClipping] Using Sentence-Aware Segmentation...");
+
+    // 1. Reconstruct Sentences from Word-Level Transcript
+    const sentences = [];
+    let currentSentence = { start: null, end: null, text: "", words: [] };
+
+    // Flatten transcript segments if they are block-level
+    const allWords = transcript.flatMap(
+      t => t.words || [{ start: t.start, end: t.end, word: t.text }]
+    );
+
+    allWords.forEach((wordObj, index) => {
+      const word = wordObj.word.trim();
+      if (!currentSentence.start) currentSentence.start = wordObj.start;
+
+      currentSentence.text += (currentSentence.text ? " " : "") + word;
+      currentSentence.words.push(wordObj);
+      currentSentence.end = wordObj.end;
+
+      // Check for sentence terminators
+      const isEnd = /[.!?]$/.test(word);
+      // Also force break if silence gap > 1.5s
+      const nextWord = allWords[index + 1];
+      const hugeGap = nextWord && nextWord.start - wordObj.end > 1.5;
+
+      if (isEnd || hugeGap || index === allWords.length - 1) {
+        sentences.push(currentSentence);
+        currentSentence = { start: null, end: null, text: "", words: [] };
+      }
+    });
+
+    // 2. Create Sliding Windows (Candidates)
+    // We want candidates between 20s and 60s
+    const candidates = [];
+    const MIN_DUR = 20;
+    const MAX_DUR = 60;
+
+    for (let i = 0; i < sentences.length; i++) {
+      let blockText = "";
+      let startTime = sentences[i].start;
+      let endTime = sentences[i].end;
+      let words = [...sentences[i].words];
+
+      // Extend forward
+      for (let j = i; j < sentences.length; j++) {
+        if (j > i) {
+          endTime = sentences[j].end;
+          blockText += " " + sentences[j].text;
+          words = words.concat(sentences[j].words);
+        } else {
+          blockText = sentences[i].text;
+        }
+
+        const currentDur = endTime - startTime;
+
+        // If valid length, add as candidate
+        if (currentDur >= MIN_DUR && currentDur <= MAX_DUR) {
+          candidates.push({
+            start: startTime,
+            end: endTime,
+            duration: currentDur,
+            text: blockText,
+            transcript: [{ start: startTime, end: endTime, text: blockText, words }], // Mock segment structure
+          });
+        }
+
+        // Stop extending if too long
+        if (currentDur > MAX_DUR) break;
+      }
+    }
+
+    console.log(`[VideoClipping] Generated ${candidates.length} sentence-aligned candidates.`);
+    return candidates;
+  }
+
+  /**
+   * (Legacy) Visual Scene Detection fallback
+   */
+  async detectVisualScenes(videoPath, duration) {
     return new Promise((resolve, _reject) => {
       const scenes = [];
       let lastTimestamp = 0;
@@ -434,72 +523,80 @@ class VideoClippingService {
    */
   async scoreSegments(scenes, transcript, _metadata) {
     return scenes.map((scene, _index) => {
-      // Find transcript segments overlapping this scene
-      const sceneTranscript = transcript.filter(
-        t =>
-          (t.start >= scene.start && t.start < scene.end) ||
-          (t.end > scene.start && t.end <= scene.end)
-      );
-
-      const text = sceneTranscript.map(t => t.text).join(" ");
+      // NOTE: 'scene' now comes from detectScenes which already bundles the text/transcript
+      // But we keep the filter lookup just in case we used the visual fallback
+      const text = scene.text || "";
+      const duration = scene.duration;
 
       // Calculate viral score (0-100)
       let score = 50; // Base score
 
-      // Hook bonus (first 5 seconds get +20)
-      if (scene.start < 5) score += 20;
+      // 1. Pacing Score (Words Per Minute)
+      // Viral content is usually fast: 140-180 wpm
+      const wordCount = scene.wordCount || text.split(/\s+/).length;
+      const wpm = (wordCount / duration) * 60;
 
-      // Length penalty/bonus (30-60s is ideal)
-      const duration = scene.end - scene.start;
-      if (duration >= 30 && duration <= 60) {
-        score += 15;
-      } else if (duration < 15 || duration > 90) {
-        score -= 20;
+      if (wpm > 130 && wpm < 190) {
+        score += 15; // Sweet spot
+      } else if (wpm < 100) {
+        score -= 10; // Too slow
       }
 
-      // Engagement keywords
-      const engagementKeywords = [
-        "amazing",
-        "incredible",
-        "secret",
-        "trick",
-        "how to",
-        "why",
-        "never",
-        "always",
-        "must",
-        "need to know",
-      ];
-      const keywordMatches = engagementKeywords.filter(kw =>
-        text.toLowerCase().includes(kw)
-      ).length;
-      score += keywordMatches * 5;
+      // 2. Hook Strength (Opening Sentence)
+      // Does the first sentence contain a "Power Word"?
+      const firstSentence = text.split(/[.!?]/)[0].toLowerCase();
+      const powerWords = ["you", "secret", "stop", "failed", "money", "why", "how", "never"];
+      const hasHook = powerWords.some(pw => firstSentence.includes(pw));
+      if (hasHook) score += 15;
 
-      // Question detection
-      if (text.includes("?")) score += 10;
+      // 3. Question/Curiosity Gap
+      if (text.includes("?") || text.toLowerCase().includes("wait for")) score += 10;
 
-      // Exclamation detection (enthusiasm)
+      // 4. Emotional Intensity
+      // Heuristic: Exclamations or CAPS (if transcript preserves them)
       const exclamations = (text.match(/!/g) || []).length;
-      score += Math.min(exclamations * 3, 15);
+      score += Math.min(exclamations * 3, 10);
 
-      // Word count (good pacing)
-      const wordCount = text.split(/\s+/).length;
-      if (wordCount >= 50 && wordCount <= 150) score += 10;
+      // 5. Length penalty (Strict)
+      // TikTok/Reels algorithm prefers 30-45s over 55s+
+      if (duration > 55) score -= 5;
+      if (duration < 15) score -= 20;
+
+      // 6. "UM/UH" Penalty (Filler words)
+      // Detect excessive filler words which kill retention
+      const fillerCount = (text.toLowerCase().match(/\b(um|uh|like|sort of)\b/g) || []).length;
+      if (fillerCount > 3) score -= fillerCount * 2;
 
       // Clamp score between 0-100
       score = Math.max(0, Math.min(100, score));
 
       return {
         ...scene,
-        transcript: sceneTranscript,
-        text,
+        text, // Ensure text is carried over
+        transcript: scene.transcript, // Ensure segment data is carried over
         viralScore: Math.round(score),
         wordCount,
         hasQuestion: text.includes("?"),
-        keywordMatches,
+        reason: this.getViralReason(score, hasHook, wpm),
       };
     });
   }
+
+  getViralReason(score, hasHook, wpm) {
+    if (score < 40) return "Low potential";
+    const reasons = [];
+    if (hasHook) reasons.push("Strong Hook");
+    if (wpm > 130) reasons.push("Fast Pacing");
+    if (reasons.length === 0) return "Balanced";
+    return reasons.join(", ");
+  }
+
+  /*
+  // REPLACED BY NEW scoreSegments ABOVE
+  async _legacyScoreSegments(scenes, transcript, _metadata) { 
+   ... 
+  }
+*/
 
   /**
    * Generate clip suggestions from scored segments

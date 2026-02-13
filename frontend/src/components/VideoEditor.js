@@ -1,36 +1,12 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef, useEffect } from "react";
-// import { FFmpeg } from "@ffmpeg/ffmpeg";
-// import { fetchFile, toBlobURL } from "@ffmpeg/util";
-// import { pipeline } from "@xenova/transformers";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile, toBlobURL } from "@ffmpeg/util";
+import { pipeline } from "@xenova/transformers";
 
-// Mock FFmpeg for build debugging
-class FFmpeg {
-  async load() {}
-  async writeFile() {}
-  async readFile() {
-    return new Uint8Array();
-  }
-  async deleteFile() {}
-  async exec() {}
-  on() {}
-}
-const fetchFile = async () => new Blob();
-const toBlobURL = async () => "";
-// import "./VideoEditor.css"; // Comment out CSS import just in case parser issue
+import "./VideoEditor.css";
 
 function VideoEditor({ file, onSave, onCancel }) {
-  // Stub implementation to pass build
-  return (
-    <div className="video-editor-container">
-      <h3>Video Editor Unavailable (Build Fix)</h3>
-      <button onClick={onCancel}>Close</button>
-    </div>
-  );
-}
-/*
-function VideoEditor_Original({ file, onSave, onCancel }) {
-
   const [ffmpeg] = useState(new FFmpeg());
   const [loaded, setLoaded] = useState(false);
   const [videoSrc, setVideoSrc] = useState(null);
@@ -166,8 +142,8 @@ function VideoEditor_Original({ file, onSave, onCancel }) {
 
     try {
       // Upgrade to 'whisper-tiny' (Multilingual) instead of 'whisper-tiny.en'
-      // const transcriber = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny");
-      const transcriber = null;
+      const transcriber = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny");
+      // const transcriber = null;
 
       log(
         translateToEnglish
@@ -181,12 +157,21 @@ function VideoEditor_Original({ file, onSave, onCancel }) {
         chunk_length_s: 30,
       };
 
-      // const result = await transcriber(videoSrc, options);
-      const result = { text: "AI Transcription disabled for build fix." };
+      const result = await transcriber(videoSrc, options);
+
+      console.log("Transcription result:", result);
+      if (result && result.text) {
+        setCaptionText(result.text.trim());
+        log("✅ Transcription Complete!");
+      } else {
+        log("⚠️ No text detected.");
+      }
+    } catch (e) {
       log("❌ Transcription failed: " + e.message);
-      if (e.message.includes("audio")) {
+      if (e && e.message && e.message.includes("audio")) {
         log("Tip: Ensure the video has an audio track.");
       }
+      console.error(e);
     } finally {
       setTranscribing(false);
     }
@@ -567,7 +552,5 @@ function VideoEditor_Original({ file, onSave, onCancel }) {
     </div>
   );
 }
-
-*/
 
 export default VideoEditor;
