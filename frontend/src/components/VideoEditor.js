@@ -9,13 +9,15 @@ const loadFFmpegScript = async () => {
   if (window.FFmpeg) return window.FFmpeg;
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.min.js"; // Use UMD build
+    // Switch to unpkg to match core and avoid jsdelivr tracking blocks
+    script.src = "https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js";
     script.async = true;
+    script.crossOrigin = "anonymous";
     script.onload = () => {
       if (window.FFmpeg) resolve(window.FFmpeg);
       else reject(new Error("FFmpeg not found on window"));
     };
-    script.onerror = reject;
+    script.onerror = () => reject(new Error("Failed to load FFmpeg script"));
     document.head.appendChild(script);
   });
 };
@@ -101,6 +103,7 @@ function VideoEditor({ file, onSave, onCancel }) {
   };
 
   const load = async () => {
+    // Standardize to use unpkg for consistency
     const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
     try {
       // Load ffmpeg.wasm from a CDN (or local public folder if configured)
