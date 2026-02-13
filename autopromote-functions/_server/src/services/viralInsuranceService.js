@@ -1,5 +1,9 @@
 const { db } = require("../firebaseAdmin");
 const videoClippingService = require("./videoClippingService");
+// Platform services for garbage collection
+const youtubeService = require("./youtubeService");
+const tiktokService = require("./tiktokService");
+
 // Optional: import an analytics service if available
 
 class ViralInsuranceService {
@@ -84,14 +88,25 @@ class ViralInsuranceService {
       // 2. Trigger Remediation
       const remixResult = await this.triggerRemix(userId, videoUrl, volatility);
 
+      // 3. Garbage Collection (Auto-Delete Flop)
+      // "If views < threshold ... DELETE the post" logic
+      // We only delete if it's a confirmed flop to keep the profile clean.
+      try {
+        await this.garbageCollectFlop(userId, platform, postId);
+      } catch (gcError) {
+        console.warn(`[Protocol 7] ⚠️ Garbage collection failed for ${postId}:`, gcError.message);
+      }
+
       await doc.ref.update({
         status: "claimed",
         finalViews: currentViews,
         remediatedAt: new Date(),
         remixId: remixResult.clipId || "mock-id",
+        garbageCollected: true, // Mark as deleted/cleaned
         logs: [
           ...data.logs,
           `Triggered remix at ${new Date().toISOString()}. Views: ${currentViews}`,
+          `Garbage collection attempted.`,
         ],
       });
 
@@ -112,6 +127,30 @@ class ViralInsuranceService {
       });
 
       return { postId, outcome: "success" };
+    }
+  }
+
+  /**
+   * Delete the underperforming post from the platform to clean up the user's profile.
+   */
+  async garbageCollectFlop(uid, platform, postId) {
+    console.log(`[Protocol 7] 🧹 Garbage Collecting (Deleting) Flop: ${platform} ${postId}`);
+    if (process.env.ENABLE_GARBAGE_COLLECTOR !== "true") {
+      console.log(`[Protocol 7] 🛑 Garbage Collector disabled via env. Skipping delete.`);
+      return;
+    }
+
+    switch (platform) {
+      case "youtube":
+      case "youtube_shorts":
+        // youtubeService.deleteVideo expects object { uid, videoId }
+        await youtubeService.deleteVideo({ uid, videoId: postId });
+        break;
+      case "tiktok":
+        await tiktokService.deleteTikTokVideo(uid, postId);
+        break;
+      default:
+        console.warn(`[Protocol 7] No garbage collector adapter for ${platform}`);
     }
   }
 

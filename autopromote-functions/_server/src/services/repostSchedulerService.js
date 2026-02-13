@@ -67,11 +67,12 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
     try {
       // -----------------------------------------------------------------------
       // SAFETY CHECK 1: Verify no recent post exists (Direct Query)
-      // The initial snapshot only grabbed 500 records; if traffic is high, 
+      // The initial snapshot only grabbed 500 records; if traffic is high,
       // the "latest" post might have been missed, leading to a false positive for decay.
       // -----------------------------------------------------------------------
       try {
-        const checkSnap = await db.collection("platform_posts")
+        const checkSnap = await db
+          .collection("platform_posts")
           .where("contentId", "==", t.contentId)
           .where("platform", "==", t.platform)
           .orderBy("createdAt", "desc")
@@ -80,18 +81,24 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
 
         if (!checkSnap.empty) {
           const lastPost = checkSnap.docs[0].data();
-          const lastTs = lastPost.createdAt && lastPost.createdAt.toMillis 
-            ? lastPost.createdAt.toMillis() 
-            : (Date.parse(lastPost.createdAt || "") || 0);
+          const lastTs =
+            lastPost.createdAt && lastPost.createdAt.toMillis
+              ? lastPost.createdAt.toMillis()
+              : Date.parse(lastPost.createdAt || "") || 0;
 
           const safeCooldownHours = parseInt(process.env.REPOST_COOLDOWN_HOURS || "6", 10);
           if (Date.now() - lastTs < safeCooldownHours * 3600000) {
-            console.log(`[RepostScheduler] Safety Check Blocked: Found recent post for ${t.contentId} from ${lastPost.createdAt}`);
+            console.log(
+              `[RepostScheduler] Safety Check Blocked: Found recent post for ${t.contentId} from ${lastPost.createdAt}`
+            );
             continue;
           }
         }
       } catch (checkErr) {
-        console.warn(`[RepostScheduler] Safety check failed (index missing?), blocking ${t.contentId} to be safe:`, checkErr.message);
+        console.warn(
+          `[RepostScheduler] Safety check failed (index missing?), blocking ${t.contentId} to be safe:`,
+          checkErr.message
+        );
         continue; // FAIL SAFE: Do not repost if we can't verify history.
       }
 
@@ -99,13 +106,14 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
       // SAFETY CHECK 2: Verify no PENDING task exists
       // If the queue is backed up, we don't want to stack 10 repost requests.
       // -----------------------------------------------------------------------
-      const pendingSnap = await db.collection("promotion_tasks")
+      const pendingSnap = await db
+        .collection("promotion_tasks")
         .where("contentId", "==", t.contentId)
         .where("platform", "==", t.platform)
         .where("status", "in", ["queued", "processing"])
         .limit(1)
         .get();
-      
+
       if (!pendingSnap.empty) {
         console.log(`[RepostScheduler] Skipping ${t.contentId} - Task already pending.`);
         continue;
@@ -140,7 +148,7 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
         "ICYMI: One of our favorites.",
         "Highlight of the week 🌟",
         "Re-sharing this gem for the new followers.",
-        "Still thinking about this one..."
+        "Still thinking about this one...",
       ];
       const randomCaption = strategicCaptions[Math.floor(Math.random() * strategicCaptions.length)];
 
@@ -149,26 +157,30 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
       try {
         const sourceUrl = t.mediaUrl || t.payload?.mediaUrl || t.payload?.url;
         if (sourceUrl) {
-            console.log(`[RepostScheduler] Routing ${t.contentId} through Strategic Transform for safety.`);
-            await enqueueMediaTransform({
-                contentId: t.contentId,
-                uid,
-                sourceUrl,
-                meta: {
-                     // This triggers the chain
-                    postAfterTransform: [t.platform],
-                    nextMessage: randomCaption,
-                    platformOptions: { repost_reason: "decay_optimization" },
-                    // Transform settings
-                    trimStart: 0, // No trim, just brightness shift
-                    quality_enhanced: true 
-                }
-            });
-            scheduled++;
-            continue; // Task queued via transform, move to next
+          console.log(
+            `[RepostScheduler] Routing ${t.contentId} through Strategic Transform for safety.`
+          );
+          await enqueueMediaTransform({
+            contentId: t.contentId,
+            uid,
+            sourceUrl,
+            meta: {
+              // This triggers the chain
+              postAfterTransform: [t.platform],
+              nextMessage: randomCaption,
+              platformOptions: { repost_reason: "decay_optimization" },
+              // Transform settings
+              trimStart: 0, // No trim, just brightness shift
+              quality_enhanced: true,
+            },
+          });
+          scheduled++;
+          continue; // Task queued via transform, move to next
         }
-      } catch(e) {
-          console.warn(`[RepostScheduler] Transform queue failed, falling back to direct post: ${e.message}`);
+      } catch (e) {
+        console.warn(
+          `[RepostScheduler] Transform queue failed, falling back to direct post: ${e.message}`
+        );
       }
 
       await enqueuePlatformPostTask({
@@ -205,13 +217,14 @@ async function scheduleResultVerifications(limit = 5) {
 
     // Query platform_posts where we flagged 'isOptimizationRun' but haven't 'validated'
     // Note: This requires a composite index if we sort, but for now we limit 5
-    const snapshot = await db.collection("platform_posts")
+    const snapshot = await db
+      .collection("platform_posts")
       .where("isOptimizationRun", "==", true)
-      .where("validationStatus", "==", "pending") 
+      .where("validationStatus", "==", "pending")
       .where("createdAt", "<", minAge)
       .limit(limit)
       .get();
-    
+
     if (snapshot.empty) return;
 
     logger.info(`[ValidationOrchestrator] Processing ${snapshot.size} optimization results...`);
@@ -230,26 +243,27 @@ async function scheduleResultVerifications(limit = 5) {
 
       if (!originalPostId) {
         try {
-            // Fetch potential baselines (limit 10 to avoid heavy reads, sort in memory to be safe)
-            const originals = await db.collection("platform_posts")
+          // Fetch potential baselines (limit 10 to avoid heavy reads, sort in memory to be safe)
+          const originals = await db
+            .collection("platform_posts")
             .where("contentId", "==", originalContentId)
             .where("platform", "==", post.platform)
             .get();
-            
-            if (!originals.empty) {
-                // Filter: Must be created BEFORE the variant
-                // Sort: Newest first (to compare against latest performance, not ancient viral hits)
-                const candidates = originals.docs
-                    .map(d => ({ id: d.id, ...d.data() }))
-                    .filter(d => d.id !== variantId && new Date(d.createdAt) < new Date(post.createdAt))
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                
-                if (candidates.length > 0) {
-                    originalPostId = candidates[0].id;
-                }
+
+          if (!originals.empty) {
+            // Filter: Must be created BEFORE the variant
+            // Sort: Newest first (to compare against latest performance, not ancient viral hits)
+            const candidates = originals.docs
+              .map(d => ({ id: d.id, ...d.data() }))
+              .filter(d => d.id !== variantId && new Date(d.createdAt) < new Date(post.createdAt))
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            if (candidates.length > 0) {
+              originalPostId = candidates[0].id;
             }
-        } catch(e) {
-            logger.warn(`[ValidationOrchestrator] Error finding baseline: ${e.message}`);
+          }
+        } catch (e) {
+          logger.warn(`[ValidationOrchestrator] Error finding baseline: ${e.message}`);
         }
       }
 
@@ -262,7 +276,10 @@ async function scheduleResultVerifications(limit = 5) {
       }
 
       // 2. Validate Performance (Did it work?)
-      const validation = await performanceValidationEngine.validatePerformance(originalPostId, variantId);
+      const validation = await performanceValidationEngine.validatePerformance(
+        originalPostId,
+        variantId
+      );
 
       if (!validation || !validation.success) {
         logger.warn(`[ValidationOrchestrator] Validation failed internal error for ${variantId}`);
@@ -271,7 +288,7 @@ async function scheduleResultVerifications(limit = 5) {
 
       // 3. Process Charge (If successful)
       const chargeResult = await monetizationService.processResultsBasedCharge(
-        userId, 
+        userId,
         validation.report // contains { isImproved, lift, etc. }
       );
 
@@ -280,21 +297,23 @@ async function scheduleResultVerifications(limit = 5) {
         validationStatus: "completed",
         validationResult: validation.report,
         chargeResult: chargeResult,
-        validatedAt: new Date().toISOString()
+        validatedAt: new Date().toISOString(),
       });
 
       const lift = validation.report?.lift?.views || 0;
       if (chargeResult.charged) {
-        logger.info(`[ValidationOrchestrator] CHARGED user ${userId} ${chargeResult.amount} credits. Lift: ${lift}%`);
+        logger.info(
+          `[ValidationOrchestrator] CHARGED user ${userId} ${chargeResult.amount} credits. Lift: ${lift}%`
+        );
       } else {
-        logger.info(`[ValidationOrchestrator] NO CHARGE for user ${userId}. Improvement (${lift}%) did not meet threshold.`);
+        logger.info(
+          `[ValidationOrchestrator] NO CHARGE for user ${userId}. Improvement (${lift}%) did not meet threshold.`
+        );
       }
     }
-
   } catch (error) {
     logger.error("Error in scheduleResultVerifications:", error);
   }
 }
-
 
 module.exports = { analyzeAndScheduleReposts };

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // systemDiagnosticsRoutes.js
 // Automated system health check and error detection
 

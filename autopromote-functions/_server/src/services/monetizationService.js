@@ -12,9 +12,9 @@ class MonetizationService {
   // Results-Based Pricing Configuration (Cost in Credits)
   get RESULTS_BASED_CONFIG() {
     return {
-      BASE_SUCCESS_FEE: 10,     // Any improvement (>0% lift)
+      BASE_SUCCESS_FEE: 10, // Any improvement (>0% lift)
       HIGH_PERFORMANCE_FEE: 25, // >50% lift
-      VIRAL_PERFORMANCE_FEE: 50 // >100% lift
+      VIRAL_PERFORMANCE_FEE: 50, // >100% lift
     };
   }
 
@@ -319,7 +319,11 @@ class MonetizationService {
       // FIX: Minimum Threshold for Statistical Significance (10%)
       // Prevents charging for random organic variance or noise
       if (lift < 10) {
-        return { charged: false, amount: 0, reason: "Improvement below significance threshold (<10%)" };
+        return {
+          charged: false,
+          amount: 0,
+          reason: "Improvement below significance threshold (<10%)",
+        };
       }
 
       let cost = this.RESULTS_BASED_CONFIG.BASE_SUCCESS_FEE;
@@ -335,7 +339,7 @@ class MonetizationService {
       const creditsDoc = await creditsRef.get();
 
       if (!creditsDoc.exists || (creditsDoc.data().balance || 0) < cost) {
-        // Technically we should have held these credits in escrow, 
+        // Technically we should have held these credits in escrow,
         // but for now we just log a debt or fail.
         logger.warn(`User ${userId} has insufficient credits for performance charge: ${cost}`);
         return { charged: false, amount: 0, reason: "Insufficient credits" };
@@ -353,20 +357,19 @@ class MonetizationService {
           variantId: validationResult.optimizedId,
           liftPercentage: lift,
           timestamp: new Date().toISOString(),
-          description: `Performance Fee: +${lift}% View Lift Detected`
+          description: `Performance Fee: +${lift}% View Lift Detected`,
         }),
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       });
 
       logger.info(`Charged user ${userId} ${cost} credits for ${lift}% lift`);
-      
-      return { 
-        charged: true, 
-        amount: cost, 
-        lift, 
-        message: `Success! Optimization delivered +${lift}% views. ${cost} credits deducted.` 
-      };
 
+      return {
+        charged: true,
+        amount: cost,
+        lift,
+        message: `Success! Optimization delivered +${lift}% views. ${cost} credits deducted.`,
+      };
     } catch (error) {
       logger.error("Error processing results-based charge:", error);
       throw error;

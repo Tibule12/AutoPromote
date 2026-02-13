@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const express = require("express");
 const { admin, db, auth, storage } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");

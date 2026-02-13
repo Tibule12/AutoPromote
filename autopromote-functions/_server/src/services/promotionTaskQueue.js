@@ -737,7 +737,7 @@ async function enqueueMediaTransform({ contentId, uid, meta, sourceUrl }) {
   const { enqueueMediaTransformTask } = require("./mediaTransform");
   // STRATEGIC: For reposts, force a media transform first to generate a unique hash
   if (meta.forceVariance || meta.isRepost) {
-     meta.quality_enhanced = true; // Use this flag to trigger the new pipeline
+    meta.quality_enhanced = true; // Use this flag to trigger the new pipeline
   }
 
   const task = await enqueueMediaTransformTask({ contentId, uid, meta, url: sourceUrl });

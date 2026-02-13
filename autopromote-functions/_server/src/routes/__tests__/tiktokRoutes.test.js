@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const express = require("express");
 const request = require("supertest");
 const bodyParser = require("body-parser");

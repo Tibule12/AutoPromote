@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // redisClient.js - lazy singleton Redis (ioredis) client. Optional.
 let Redis;
 try {

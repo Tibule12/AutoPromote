@@ -21,19 +21,13 @@ if (
 }
 // Do not require heavy Phase 2 viral services at import time; lazy-load when needed.
 // Intentionally declared placeholders for optional services to keep the lazy-load pattern clear.
-// eslint-disable-next-line no-unused-vars
 let _engagementBoostingService; // require('./services/engagementBoostingService');
-// eslint-disable-next-line no-unused-vars
 let _growthAssuranceTracker; // require('./services/growthAssuranceTracker');
 
 let _contentQualityEnhancer; // require('./services/contentQualityEnhancer');
-// eslint-disable-next-line no-unused-vars
 let _repostDrivenEngine; // require('./services/repostDrivenEngine');
-// eslint-disable-next-line no-unused-vars
 let _referralGrowthEngine; // require('./services/referralGrowthEngine');
-// eslint-disable-next-line no-unused-vars
 let _monetizationService; // require('./services/monetizationService');
-// eslint-disable-next-line no-unused-vars
 let _userSegmentation; // require('./services/userSegmentation');
 
 // Helper function to remove undefined fields from objects

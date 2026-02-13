@@ -2,7 +2,6 @@
 // AI-powered hashtag generation and optimization
 // Finds trending, relevant hashtags for maximum reach
 
-/* eslint-disable no-console */
 class HashtagService {
   constructor() {
     this.openaiApiKey = process.env.OPENAI_API_KEY;

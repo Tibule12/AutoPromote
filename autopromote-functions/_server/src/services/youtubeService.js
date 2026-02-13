@@ -519,4 +519,31 @@ module.exports = {
     }
     return { contentId, videoId: youtubeInfo.videoId, velocity, views, velocityStatus };
   },
+
+  /**
+   * Delete a video from YouTube (Garbage Collection for flops)
+   * @param {string} uid
+   * @param {string} videoId
+   */
+  async deleteVideo({ uid, videoId }) {
+    if (!uid || !videoId) throw new Error("uid and videoId required for deletion");
+    console.log(`[YouTube] 🗑️ Garbage collecting video ${videoId} for user ${uid}`);
+
+    const connectionData = await getUserYouTubeConnection(uid);
+    if (!connectionData) throw new Error("User has no YouTube connection");
+
+    const oauth2Client = buildOAuthClient(connectionData);
+    await ensureFreshTokens(oauth2Client, connectionData, uid);
+
+    const youtube = google.youtube({ version: "v3", auth: oauth2Client });
+    try {
+      await youtube.videos.delete({ id: videoId });
+      console.log(`[YouTube] ✅ Video ${videoId} deleted successfully.`);
+      return true;
+    } catch (e) {
+      console.error(`[YouTube] ❌ Failed to delete video ${videoId}:`, e.message);
+      if (e.code === 404) return true; // Already gone
+      throw e;
+    }
+  },
 };

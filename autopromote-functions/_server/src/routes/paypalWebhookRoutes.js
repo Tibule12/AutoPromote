@@ -21,7 +21,6 @@ try {
   codeqlLimiter = null;
 }
 const { audit } = require("../services/auditLogger");
-/* eslint-disable-next-line no-unused-vars */
 let paypalSdk;
 try {
   paypalSdk = require("@paypal/paypal-server-sdk");

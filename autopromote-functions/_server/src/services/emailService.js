@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // emailService.js - provider-based email abstraction with simple template tokens.
 const { getEmailProvider } = require("./emailProviders");
 const ENABLE_EMAIL = process.env.EMAIL_SENDER_MODE !== "disabled";

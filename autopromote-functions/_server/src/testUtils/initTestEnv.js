@@ -47,7 +47,6 @@ async function initializeTestEnvironmentWithDiscovery(projectId, retries = DEFAU
     // and set FIRESTORE_EMULATOR_HOST so downstream code sees it
     // (this makes direct `jest` runs find a locally-running emulator).
     // This is best-effort and will not start emulators.
-    // eslint-disable-next-line no-await-in-loop
     const found = await discoverEmulatorHost();
     if (found) {
       process.env.FIRESTORE_EMULATOR_HOST = found;
@@ -66,7 +65,6 @@ async function initializeTestEnvironmentWithDiscovery(projectId, retries = DEFAU
     } catch (e) {
       if (attempt === retries) throw e;
       // small backoff
-      // eslint-disable-next-line no-await-in-loop
       await new Promise(r => setTimeout(r, 500));
     }
   }

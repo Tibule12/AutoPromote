@@ -116,103 +116,109 @@ async function processNextMediaTransformTask() {
 
     // Build ffmpeg args based on meta
     // Default to a negligible visual change to force re-encoding and unique hash
-    const brightnessShift = (Math.random() * 0.002) - 0.001; // +/- 0.001 brightness (invisible)
+    const brightnessShift = Math.random() * 0.002 - 0.001; // +/- 0.001 brightness (invisible)
     const uniqueId = uuidv4();
     const args = ["-y", "-i", tmpIn];
-    
+
     // Apply filters (Strategic Obfuscation)
     const filters = [`eq=brightness=${1.0 + brightnessShift}`];
-    
+
     // Optional: Trim slightly if requested or random variations enabled
     const meta = data.meta || {};
     if (meta.trimStart) {
       args.push("-ss", String(meta.trimStart));
     }
-    
+
     args.push("-vf", filters.join(","));
 
     // Add unique metadata to further ensure hash collision avoidance
     args.push("-metadata", `comment=AutoPromote-Safe-Repost-${uniqueId}`);
-    
+
     // Audio settings: Copy if possible, unless we need to re-encode (usually safer to copy for speed)
     // But for full uniqueness, re-encoding audio with a generic filter is safer.
-    args.push("-c:a", "aac"); 
-    
+    args.push("-c:a", "aac");
+
     // Video settings: Re-encode is REQUIRED for visual hash changes
     args.push("-c:v", "libx264");
     args.push("-preset", "faster"); // Speed over compression ratio for reposts
     args.push("-f", "mp4");
-    
+
     args.push(tmpOut);
 
     console.log(`[transform] Executing FFmpeg strategic transform for ${data.contentId}...`);
-    
+
     await new Promise((resolve, reject) => {
-        const p = spawn("ffmpeg", args);
-        // p.stdout.on("data", b => console.log(b.toString())); // Verbose
-        p.stderr.on("data", b => {
-            // FFmpeg writes progress to stderr, uncomment for debug
-            // console.log(b.toString()); 
-        });
-        p.on("close", code => {
-            if (code === 0) resolve();
-            else reject(new Error(`ffmpeg exited with code ${code}`));
-        });
-        p.on("error", reject);
+      const p = spawn("ffmpeg", args);
+      // p.stdout.on("data", b => console.log(b.toString())); // Verbose
+      p.stderr.on("data", b => {
+        // FFmpeg writes progress to stderr, uncomment for debug
+        // console.log(b.toString());
+      });
+      p.on("close", code => {
+        if (code === 0) resolve();
+        else reject(new Error(`ffmpeg exited with code ${code}`));
+      });
+      p.on("error", reject);
     });
 
     console.log(`[transform]FFmpeg success. Uploading unique variant...`);
 
     // Upload processed file back to storage (simulated or real)
-    // For local env, we might just update the URL to the local path if serving static, 
+    // For local env, we might just update the URL to the local path if serving static,
     // but usually we upload to a 'processed/' folder in the bucket.
-    
+
     // Assuming local simulation or Firebase Storage upload here:
     let bucket;
     try {
-        bucket = admin.storage().bucket();
+      bucket = admin.storage().bucket();
     } catch (_) {
-         // Fallback if scope issue, though unlikely if valid admin
-         bucket = require("../firebaseAdmin").admin.storage().bucket();
+      // Fallback if scope issue, though unlikely if valid admin
+      bucket = require("../firebaseAdmin").admin.storage().bucket();
     }
 
     const destFileName = `processed/${data.contentId}/${uniqueId}.mp4`;
     const destFile = bucket.file(destFileName);
-    
+
     await bucket.upload(tmpOut, {
-        destination: destFileName,
+      destination: destFileName,
+      metadata: {
+        contentType: "video/mp4",
         metadata: {
-            contentType: 'video/mp4',
-            metadata: {
-                originalContentId: data.contentId,
-                transformType: 'strategic_rehash'
-            }
-        }
+          originalContentId: data.contentId,
+          transformType: "strategic_rehash",
+        },
+      },
     });
 
     // Make it public or get a signed URL (depending on policy)
     const [finalUrl] = await destFile.getSignedUrl({
-        action: 'read',
-        expires: '03-01-2500' // Far future
+      action: "read",
+      expires: "03-01-2500", // Far future
     });
 
     // Cleanup temp
-    try { fs.unlinkSync(tmpIn); fs.unlinkSync(tmpOut); } catch (_) {}
+    try {
+      fs.unlinkSync(tmpIn);
+      fs.unlinkSync(tmpOut);
+    } catch (_) {}
 
-    await db.collection("content").doc(data.contentId).set({
+    await db.collection("content").doc(data.contentId).set(
+      {
         processedUrl: finalUrl,
         lastTransformAt: new Date().toISOString(),
         transformMeta: {
-            uniqueId,
-            brightnessShift
-        }
-    }, { merge: true });
+          uniqueId,
+          brightnessShift,
+        },
+      },
+      { merge: true }
+    );
 
     await doc.ref.update({
-        status: "completed",
-        updatedAt: new Date().toISOString(),
-        completedAt: new Date().toISOString(),
-        outputUrl: finalUrl
+      status: "completed",
+      updatedAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
+      outputUrl: finalUrl,
     });
 
     // -------------------------------------------------------------------------
@@ -220,7 +226,9 @@ async function processNextMediaTransformTask() {
     // -------------------------------------------------------------------------
     try {
       if (meta && meta.postAfterTransform && Array.isArray(meta.postAfterTransform)) {
-        console.log(`[transform] Chaining post-transform tasks for: ${meta.postAfterTransform.join(",")}`);
+        console.log(
+          `[transform] Chaining post-transform tasks for: ${meta.postAfterTransform.join(",")}`
+        );
         for (const platform of meta.postAfterTransform) {
           try {
             const { enqueuePlatformPostTask } = require("./promotionTaskQueue");
@@ -228,16 +236,16 @@ async function processNextMediaTransformTask() {
               contentId: data.contentId,
               uid: data.uid,
               platform,
-              reason: "post_transform", 
+              reason: "post_transform",
               // PASS THE NEW UNIQUE URL
-              payload: { 
-                url: finalUrl, 
+              payload: {
+                url: finalUrl,
                 mediaUrl: finalUrl, // normalized
-                message: meta.nextMessage || "Reposting this gem!", 
-                platformOptions: meta.platformOptions || {} 
+                message: meta.nextMessage || "Reposting this gem!",
+                platformOptions: meta.platformOptions || {},
               },
               skipIfDuplicate: false, // We just made it unique, so force it!
-              forceRepost: true
+              forceRepost: true,
             });
           } catch (e) {
             console.error(`[transform] Failed to chain post for ${platform}:`, e.message);

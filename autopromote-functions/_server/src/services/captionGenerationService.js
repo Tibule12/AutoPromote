@@ -1,7 +1,6 @@
 // captionGenerationService.js
 // AI-powered caption generation for social media content
 // Generates platform-optimized, engaging captions with hashtags
-/* eslint-disable no-console */
 
 const { logOpenAIUsage } = require("./openaiUsageLogger");
 
@@ -11,7 +10,6 @@ class CaptionGenerationService {
     this.model = "gpt-4o";
 
     if (!this.openaiApiKey) {
-      /* eslint-disable-next-line no-console */
       console.warn(
         "[CaptionGen] ⚠️ OPENAI_API_KEY not configured. Caption generation will not work."
       );

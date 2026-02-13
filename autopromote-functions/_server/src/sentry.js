@@ -15,9 +15,7 @@ function init() {
     return Sentry;
   } catch (e) {
     // If @sentry/node is not installed, just no-op
-    /* eslint-disable no-console */
     console.warn("[Sentry] Skipping initialization: @sentry/node not installed or failed to init");
-    /* eslint-enable no-console */
     return null;
   }
 }

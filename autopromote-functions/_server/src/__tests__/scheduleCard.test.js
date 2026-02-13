@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 let React;
 let _render, _screen, _fireEvent;
 let _ScheduleCard;

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // creatorRewardsService.js
 // Automatic creator rewards based on content performance
 

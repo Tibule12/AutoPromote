@@ -3,7 +3,6 @@
 // Powered by OpenAI GPT-4o
 
 const { logOpenAIUsage } = require("./openaiUsageLogger");
-/* eslint-disable no-console */
 const { db } = require("../firebaseAdmin");
 
 class ChatbotService {

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // Email integration examples for AutoPromote
 // Add these to your existing route handlers
 

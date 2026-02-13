@@ -127,7 +127,7 @@ function VideoEditor({ file, onSave, onCancel }) {
 
   const log = msg => {
     if (messageRef.current) {
-      messageRef.current.innerHTML = msg;
+      messageRef.current.textContent = msg;
     }
     console.log(msg);
   };

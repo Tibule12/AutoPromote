@@ -46,13 +46,14 @@ class PerformanceValidationEngine {
     const m1 = original.metrics || {};
     const m2 = optimized.metrics || {};
 
-    const normalize = (val) => (val ? parseInt(val, 10) : 0);
+    const normalize = val => (val ? parseInt(val, 10) : 0);
 
     const diff = {
       views: normalize(m2.views || m2.view_count) - normalize(m1.views || m1.view_count),
       likes: normalize(m2.likes || m2.like_count) - normalize(m1.likes || m1.like_count),
       shares: normalize(m2.shares || m2.share_count) - normalize(m1.shares || m1.share_count),
-      comments: normalize(m2.comments || m2.comment_count) - normalize(m1.comments || m1.comment_count),
+      comments:
+        normalize(m2.comments || m2.comment_count) - normalize(m1.comments || m1.comment_count),
     };
 
     // Calculate percentage lift (safety check for divide by zero)

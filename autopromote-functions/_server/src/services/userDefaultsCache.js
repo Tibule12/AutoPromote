@@ -1,7 +1,7 @@
 // userDefaultsCache.js - lightweight in-memory cache for user_defaults docs
 // Avoids repeated Firestore reads during bursts of uploads.
 // NOT multi-process safe; acceptable for a single instance or as a best-effort optimization.
-/* eslint-disable no-console */ const { db } = require("../firebaseAdmin");
+const { db } = require("../firebaseAdmin");
 
 const TTL_MS = parseInt(process.env.USER_DEFAULTS_CACHE_TTL_MS || "30000", 10); // 30s default
 const cache = new Map(); // userId -> { data, ts }
