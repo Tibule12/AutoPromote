@@ -235,6 +235,10 @@ function VideoEditor({ file, onSave, onCancel }) {
         // Disable local model checks to prevent 404 errors on autopromote.org
         env.allowLocalModels = false;
         env.useBrowserCache = true;
+        // Suppress ONNX runtime warnings to clean up console
+        if (env.backends && env.backends.onnx) {
+          env.backends.onnx.logLevel = "error";
+        }
       }
 
       if (!pipeline) throw new Error("Transformers pipeline not found in window or module export");
