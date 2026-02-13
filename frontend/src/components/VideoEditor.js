@@ -6,7 +6,7 @@ import "./VideoEditor.css";
 
 // Helper to load FFmpeg
 const loadFFmpegScript = async () => {
-  if (window.FFmpeg) return window.FFmpeg;
+  if (window.FFmpegWASM) return window.FFmpegWASM;
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
     // Switch to unpkg to match core and avoid jsdelivr tracking blocks
@@ -14,8 +14,8 @@ const loadFFmpegScript = async () => {
     script.async = true;
     script.crossOrigin = "anonymous";
     script.onload = () => {
-      if (window.FFmpeg) resolve(window.FFmpeg);
-      else reject(new Error("FFmpeg not found on window"));
+      if (window.FFmpegWASM) resolve(window.FFmpegWASM);
+      else reject(new Error("FFmpegWASM not found on window"));
     };
     script.onerror = () => reject(new Error("Failed to load FFmpeg script"));
     document.head.appendChild(script);
@@ -50,8 +50,8 @@ class FFmpegWrapper {
     this.instance = null;
   }
   async load(config) {
-    if (!window.FFmpeg) await loadFFmpegScript();
-    this.instance = new window.FFmpeg.FFmpeg();
+    if (!window.FFmpegWASM) await loadFFmpegScript();
+    this.instance = new window.FFmpegWASM.FFmpeg();
     await this.instance.load(config);
   }
   async writeFile(name, data) {
