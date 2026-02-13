@@ -17,9 +17,8 @@ describe("component import type checks", () => {
     ];
 
     list.forEach(name => {
-      // require the module directly to avoid ESM interop surprises
-      // const mod = require(`../components/${name}`); // Commented out to avoid Webpack "Critical dependency" warning during build
-      const mod = null; // Skipped for build safety
+      // Dynamic import removed for build safety
+      const mod = null;
       const val = mod && (mod.default || mod);
 
       console.log("IMPORT_TYPE", name, typeof val, val && val.$$typeof ? "react_element" : "");

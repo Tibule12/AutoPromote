@@ -1,16 +1,8 @@
 // Jest DOM custom matchers for testing-library
-// Use a safe require so the package can be resolved when Jest is run from the monorepo root
 try {
-  // prefer ESM style import where supported
   require("@testing-library/jest-dom");
 } catch (e) {
-  try {
-    // Fallback logic removed to prevent Webpack "Critical dependency" warning during build
-    // (The dynamic require(pkgPath) confuses the bundler)
-  } catch (e2) {
-    // If even the fallback fails, continue silently — tests that need jest-dom will fail later with a clearer error
-    /* no-op */
-  }
+  // Parsing fallback removed
 }
 
 // Polyfill TextEncoder/TextDecoder for jsdom (required by newer react-router-dom)
