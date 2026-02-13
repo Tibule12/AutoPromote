@@ -568,6 +568,31 @@ function VideoEditor({ file, onSave, onCancel }) {
               onLoadedMetadata={handleMetadataLoaded}
               width="100%"
             />
+            {captionText && (
+              <div
+                className="caption-preview-overlay"
+                style={{
+                  position: "absolute",
+                  bottom: "15%", // Matches (h-text_h)-150 approx
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  color: captionColor,
+                  fontFamily: "Arial, sans-serif",
+                  fontSize: "clamp(16px, 4vw, 32px)", // Responsive font size
+                  textShadow:
+                    "2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
+                  textAlign: "center",
+                  pointerEvents: "none",
+                  backgroundColor: "rgba(0,0,0,0.6)",
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  maxWidth: "90%",
+                  zIndex: 20,
+                }}
+              >
+                {captionText}
+              </div>
+            )}
             {activeOverlay === "tiktok" && (
               <div className="safe-zone-overlay">
                 <div className="danger-zone tiktok-top">Tabs</div>
