@@ -224,8 +224,8 @@ async function publishInstagram({ contentId, payload, reason, uid }) {
       // For video we should poll status
       if (isVideo) {
         let isReady = false;
-        for (let i = 0; i < 15; i++) {
-          // Increased poll loops significantly (30s+ wait)
+        for (let i = 0; i < 60; i++) {
+          // Increased poll loops significantly (3m wait)
           try {
             const statusRes = await fetch(
               `https://graph.facebook.com/v19.0/${creationId}?fields=status_code,status&access_token=${ACCESS_TOKEN}`

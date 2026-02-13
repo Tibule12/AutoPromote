@@ -539,6 +539,26 @@ const YouTubeForm = ({
           )}
         </div>
       )}
+
+      <div
+        style={{
+          fontSize: "0.85rem",
+          color: "#6b7280",
+          marginTop: "12px",
+          padding: "8px",
+          backgroundColor: "#f3f4f6",
+          borderRadius: "4px",
+          border: "1px solid #e5e7eb",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+        }}
+      >
+        <span>ℹ️</span>
+        <span>
+          Note: Video processing may take a few minutes to reflect on your YouTube Channel.
+        </span>
+      </div>
     </div>
   );
 };

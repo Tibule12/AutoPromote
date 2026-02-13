@@ -5,10 +5,8 @@ try {
   require("@testing-library/jest-dom");
 } catch (e) {
   try {
-    // Fallback: require directly from the frontend node_modules path (makes running from root reliable)
-    const path = require("path");
-    const pkgPath = path.resolve(__dirname, "..", "node_modules", "@testing-library", "jest-dom");
-    require(pkgPath);
+    // Fallback logic removed to prevent Webpack "Critical dependency" warning during build
+    // (The dynamic require(pkgPath) confuses the bundler)
   } catch (e2) {
     // If even the fallback fails, continue silently — tests that need jest-dom will fail later with a clearer error
     /* no-op */
