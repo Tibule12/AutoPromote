@@ -3,6 +3,7 @@ import "./LiveWatch.css";
 import FloatingActions from "./components/FloatingActions";
 import { auth } from "./firebaseClient";
 import toast from "react-hot-toast";
+import { API_ENDPOINTS } from "./config";
 
 function useQuery() {
   if (typeof window === "undefined") return new URLSearchParams("");
@@ -61,7 +62,6 @@ export default function LiveWatch({ liveId: propLiveId, token: propToken, onExit
     // fetch paypal config for client id
     const load = async () => {
       try {
-        const { API_ENDPOINTS } = require("./config");
         // Use configured endpoint or relative path if not defined
         const url =
           (API_ENDPOINTS && API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG) ||

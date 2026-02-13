@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import "./StreamerDashboard.css";
+// const io = () => ({ on: () => {}, off: () => {}, emit: () => {}, disconnect: () => {} }); // Mock removed
 import { useToast } from "./components/ToastProvider";
 
 export default function StreamerDashboard() {

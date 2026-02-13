@@ -1,10 +1,76 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef, useEffect } from "react";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
+// import { FFmpeg } from "@ffmpeg/ffmpeg"; // Commented out to fix build warning, loaded via CDN
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
-import { pipeline } from "@xenova/transformers";
+// Mock FFmpeg class acting as wrapper for CDN loaded instance
+class FFmpegWrapper {
+  constructor() {
+    this.instance = null;
+  }
+  async load(config) {
+    if (!window.FFmpeg) await loadFFmpegScript();
+    this.instance = new window.FFmpeg.FFmpeg();
+    await this.instance.load(config);
+  }
+  async writeFile(name, data) {
+    return this.instance.writeFile(name, data);
+  }
+  async readFile(name) {
+    return this.instance.readFile(name);
+  }
+  async exec(args) {
+    return this.instance.exec(args);
+  }
+  on(event, callback) {
+    if (this.instance) this.instance.on(event, callback);
+  }
+}
+const FFmpeg = FFmpegWrapper;
+
+// import { pipeline } from "@xenova/transformers"; // Removed to fix build warning, loaded via CDN instead
 
 import "./VideoEditor.css";
+
+// Helper to load FFmpeg
+const loadFFmpegScript = async () => {
+  if (window.FFmpeg) return window.FFmpeg;
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.min.js"; // Use UMD build
+    script.async = true;
+    script.onload = () => {
+      if (window.FFmpeg) resolve(window.FFmpeg);
+      else reject(new Error("FFmpeg not found on window"));
+    };
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+};
+
+// Helper to load Xenova dynamically if not present
+const loadXenova = async () => {
+  if (window.pipeline) return { pipeline: window.pipeline }; // Already loaded globally
+  if (window.transformers) return window.transformers;
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src =
+      "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js";
+    script.async = true;
+
+    script.onload = () => {
+      // Check what it exposed
+      if (window.transformers) resolve(window.transformers);
+      else if (window.pipeline) resolve({ pipeline: window.pipeline });
+      // Some builds might expose it differently, let's assume one of these works.
+      // If module based, it might be harder via script tag, but CDN usually provides UMD.
+      // Fallback: Check for esm usage by user, but here we expect UMD.
+      else reject(new Error("Failed to load Xenova transformers: Global variable not found"));
+    };
+    script.onerror = () => reject(new Error("Failed to load Xenova script"));
+    document.head.appendChild(script);
+  });
+};
 
 function VideoEditor({ file, onSave, onCancel }) {
   const [ffmpeg] = useState(new FFmpeg());
@@ -141,6 +207,12 @@ function VideoEditor({ file, onSave, onCancel }) {
     log("🧠 Loading Multilingual AI Model (Whisper)...");
 
     try {
+      // Load library via script tag injection safely (avoids Babel/Webpack dynamic import issues)
+      const transformers = await loadXenova();
+      const pipeline = transformers.pipeline || window.pipeline;
+
+      if (!pipeline) throw new Error("Transformers pipeline not found in window or module export");
+
       // Upgrade to 'whisper-tiny' (Multilingual) instead of 'whisper-tiny.en'
       const transcriber = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny");
       // const transcriber = null;

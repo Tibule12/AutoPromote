@@ -65,6 +65,12 @@ import LiveWatch from "./LiveWatch";
 import StreamerDashboard from "./StreamerDashboard";
 import EngagementMarketplace from "./EngagementMarketplace";
 
+import WelcomePage from "./WelcomePage";
+import LoginForm from "./LoginForm";
+import RegisterForm from "./RegisterForm";
+import AdminDashboard from "./AdminDashboard";
+import UserDashboard from "./UserDashboard_full";
+
 function App() {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -1150,134 +1156,91 @@ function App() {
               {/* If no user, show welcome/login page */}
               {!user ? (
                 <>
-                  {!showLogin &&
-                    !showRegister &&
-                    (() => {
-                      try {
-                        const WelcomePage = require("./WelcomePage").default;
-                        return (
-                          <WelcomePage
-                            onGetStarted={() => setShowRegister(true)}
-                            onSignIn={() => setShowLogin(true)}
-                          />
-                        );
-                      } catch (e) {
-                        return <div style={{ color: "red" }}>Welcome page not found.</div>;
-                      }
-                    })()}
+                  {!showLogin && !showRegister && (
+                    <WelcomePage
+                      onGetStarted={() => setShowRegister(true)}
+                      onSignIn={() => setShowLogin(true)}
+                    />
+                  )}
                   {/* Show login modal if requested */}
-                  {showLogin &&
-                    (() => {
-                      try {
-                        const LoginForm = require("./LoginForm").default;
-                        return (
-                          <div
-                            className="modal-overlay"
-                            style={{
-                              position: "fixed",
-                              top: 0,
-                              left: 0,
-                              width: "100vw",
-                              height: "100vh",
-                              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                              zIndex: 9999,
-                              overflowY: "auto",
-                            }}
-                          >
-                            <div
-                              style={{
-                                minHeight: "100%",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "flex-start",
-                                padding: "3rem 1.25rem",
-                              }}
-                            >
-                              <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
-                            </div>
-                          </div>
-                        );
-                      } catch (e) {
-                        return <div style={{ color: "red" }}>Login form not found.</div>;
-                      }
-                    })()}
+                  {showLogin && (
+                    <div
+                      className="modal-overlay"
+                      style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        width: "100vw",
+                        height: "100vh",
+                        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                        zIndex: 9999,
+                        overflowY: "auto",
+                      }}
+                    >
+                      <div
+                        style={{
+                          minHeight: "100%",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "flex-start",
+                          padding: "3rem 1.25rem",
+                        }}
+                      >
+                        <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
+                      </div>
+                    </div>
+                  )}
                   {/* Show register modal if requested */}
-                  {showRegister &&
-                    (() => {
-                      try {
-                        const RegisterForm = require("./RegisterForm").default;
-                        return (
-                          <div
-                            className="modal-overlay"
-                            style={{
-                              position: "fixed",
-                              top: 0,
-                              left: 0,
-                              width: "100vw",
-                              height: "100vh",
-                              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                              zIndex: 9999,
-                              overflowY: "auto",
-                            }}
-                          >
-                            <div
-                              style={{
-                                minHeight: "100%",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "flex-start",
-                                padding: "3rem 1.25rem",
-                              }}
-                            >
-                              <RegisterForm
-                                onRegister={registerUser}
-                                onClose={() => setShowRegister(false)}
-                                onLogin={() => {
-                                  setShowRegister(false);
-                                  setShowLogin(true);
-                                }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      } catch (e) {
-                        return <div style={{ color: "red" }}>Register form not found.</div>;
-                      }
-                    })()}
+                  {showRegister && (
+                    <div
+                      className="modal-overlay"
+                      style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        width: "100vw",
+                        height: "100vh",
+                        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                        zIndex: 9999,
+                        overflowY: "auto",
+                      }}
+                    >
+                      <div
+                        style={{
+                          minHeight: "100%",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "flex-start",
+                          padding: "3rem 1.25rem",
+                        }}
+                      >
+                        <RegisterForm
+                          onRegister={registerUser}
+                          onClose={() => setShowRegister(false)}
+                          onLogin={() => {
+                            setShowRegister(false);
+                            setShowLogin(true);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : user && (user.role === "admin" || user.isAdmin === true) ? (
                 // Render admin dashboard for admin users
-                (() => {
-                  try {
-                    const AdminDashboard = require("./AdminDashboard").default;
-                    return (
-                      <AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />
-                    );
-                  } catch (e) {
-                    return <div style={{ color: "red" }}>Admin dashboard not found.</div>;
-                  }
-                })()
+                <AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />
               ) : (
                 // Render full user dashboard for normal users
-                (() => {
-                  try {
-                    const UserDashboard = require("./UserDashboard_full").default;
-                    return (
-                      <UserDashboard
-                        user={user}
-                        content={content}
-                        userDefaults={userDefaults}
-                        onSaveDefaults={saveUserDefaults}
-                        onLogout={handleLogout}
-                        onUpload={handleContentUpload}
-                        mySchedules={mySchedules}
-                        onSchedulesChanged={refreshSchedules}
-                      />
-                    );
-                  } catch (e) {
-                    return <div style={{ color: "red" }}>User dashboard not found.</div>;
-                  }
-                })()
+                <UserDashboard
+                  user={user}
+                  content={content}
+                  userDefaults={userDefaults}
+                  onSaveDefaults={saveUserDefaults}
+                  onLogout={handleLogout}
+                  onUpload={handleContentUpload}
+                  mySchedules={mySchedules}
+                  onSchedulesChanged={refreshSchedules}
+                />
               )}
               {/* MFA Modal */}
               {showMfaModal && (
