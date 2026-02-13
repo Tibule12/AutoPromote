@@ -54,8 +54,8 @@ class FFmpegWrapper {
     this.instance = new window.FFmpegWASM.FFmpeg();
 
     // Explicitly load the worker script as a Blob to bypass "SecurityError: Failed to construct 'Worker'"
-    // caused by cross-origin restrictions when loading workers from CDN.
-    const workerURL = "https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js";
+    // We use the ESM version of the worker because providing a classWorkerURL forces the worker into type="module"
+    const workerURL = "https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/814.ffmpeg.js";
     const workerBlobURL = await toBlobURL(workerURL, "text/javascript");
 
     await this.instance.load({
@@ -114,9 +114,8 @@ function VideoEditor({ file, onSave, onCancel }) {
 
   const load = async () => {
     // Standardize to use unpkg for consistency
-    const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
-
-    // Attempt direct URL loading for core/wasm to avoid blob path resolution issues
+    // Use ESM core because the worker is now running as a module
+    const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm";
     // The worker (loaded as blob) can import scripts from unpkg (CORS enabled)
     const coreURL = `${baseURL}/ffmpeg-core.js`;
     const wasmURL = `${baseURL}/ffmpeg-core.wasm`;
