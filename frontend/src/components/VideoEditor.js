@@ -60,6 +60,7 @@ class FFmpegWrapper {
 
     await this.instance.load({
       ...config,
+      // Pass the worker blob URL to bypass security checks
       classWorkerURL: workerBlobURL,
     });
   }
@@ -114,11 +115,16 @@ function VideoEditor({ file, onSave, onCancel }) {
   const load = async () => {
     // Standardize to use unpkg for consistency
     const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
+
+    // Attempt direct URL loading for core/wasm to avoid blob path resolution issues
+    // The worker (loaded as blob) can import scripts from unpkg (CORS enabled)
+    const coreURL = `${baseURL}/ffmpeg-core.js`;
+    const wasmURL = `${baseURL}/ffmpeg-core.wasm`;
+
     try {
-      // Load ffmpeg.wasm from a CDN (or local public folder if configured)
       await ffmpeg.load({
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
+        coreURL: coreURL,
+        wasmURL: wasmURL,
       });
 
       // Load Font for Captions (Roboto Bold)
