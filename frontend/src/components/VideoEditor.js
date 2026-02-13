@@ -28,8 +28,10 @@ const loadXenova = async () => {
     // Import directly from unpkg as an ES Module.
     // This avoids "Uncaught SyntaxError: Unexpected token 'export'" which happens
     // when loading an ESM file via a standard <script> tag.
-    const transformers =
-      await import("https://unpkg.com/@xenova/transformers@2.17.2/dist/transformers.min.js");
+    const transformers = await import(
+      /* webpackIgnore: true */
+      "https://unpkg.com/@xenova/transformers@2.17.2/dist/transformers.min.js"
+    );
     return transformers;
   } catch (error) {
     console.error("Xenova load error:", error);
