@@ -134,8 +134,8 @@ function VideoEditor({ file, onSave, onCancel }) {
         wasmURL: wasmURL,
       });
 
-      // Load Font for Captions (Roboto Bold) - using a different source since GitHub raw is sometimes blocked or 404
-      const fontURL = "https://unpkg.com/@canvas-fonts/roboto@1.0.4/Roboto-Bold.ttf";
+      // Load Font for Captions (Arial from FFmpeg WASM test data - reliable)
+      const fontURL = "https://raw.githubusercontent.com/ffmpegwasm/testdata/master/arial.ttf";
       try {
         await ffmpeg.writeFile("arial.ttf", await fetchFile(fontURL));
         log("Fonts loaded");
@@ -229,6 +229,13 @@ function VideoEditor({ file, onSave, onCancel }) {
       // Load library via script tag injection safely
       const transformers = await loadXenova();
       const pipeline = transformers.pipeline || window.pipeline;
+      const env = transformers.env || window.transformers.env;
+
+      if (env) {
+        // Disable local model checks to prevent 404 errors on autopromote.org
+        env.allowLocalModels = false;
+        env.useBrowserCache = true;
+      }
 
       if (!pipeline) throw new Error("Transformers pipeline not found in window or module export");
 
