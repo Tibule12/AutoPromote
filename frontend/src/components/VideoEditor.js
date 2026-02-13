@@ -22,26 +22,19 @@ const loadFFmpegScript = async () => {
   });
 };
 
-// Helper to load Xenova dynamically if not present
+// Helper to load Xenova dynamically via ESM import
 const loadXenova = async () => {
-  if (window.pipeline) return { pipeline: window.pipeline }; // Already loaded globally
-  if (window.transformers) return window.transformers;
-
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src =
-      "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js";
-    script.async = true;
-
-    script.onload = () => {
-      // Check what it exposed
-      if (window.transformers) resolve(window.transformers);
-      else if (window.pipeline) resolve({ pipeline: window.pipeline });
-      else reject(new Error("Failed to load Xenova transformers: Global variable not found"));
-    };
-    script.onerror = () => reject(new Error("Failed to load Xenova script"));
-    document.head.appendChild(script);
-  });
+  try {
+    // Import directly from unpkg as an ES Module.
+    // This avoids "Uncaught SyntaxError: Unexpected token 'export'" which happens
+    // when loading an ESM file via a standard <script> tag.
+    const transformers =
+      await import("https://unpkg.com/@xenova/transformers@2.17.2/dist/transformers.min.js");
+    return transformers;
+  } catch (error) {
+    console.error("Xenova load error:", error);
+    throw new Error("Failed to load Xenova transformers: " + error.message);
+  }
 };
 
 // Mock FFmpeg class acting as wrapper for CDN loaded instance
@@ -139,9 +132,8 @@ function VideoEditor({ file, onSave, onCancel }) {
         wasmURL: wasmURL,
       });
 
-      // Load Font for Captions (Roboto Bold)
-      const fontURL =
-        "https://raw.githubusercontent.com/google/fonts/main/apache/roboto/Roboto-Bold.ttf";
+      // Load Font for Captions (Roboto Bold) - using a different source since GitHub raw is sometimes blocked or 404
+      const fontURL = "https://unpkg.com/@canvas-fonts/roboto@1.0.4/Roboto-Bold.ttf";
       try {
         await ffmpeg.writeFile("arial.ttf", await fetchFile(fontURL));
         log("Fonts loaded");
