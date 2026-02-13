@@ -20,7 +20,8 @@ router.get("/", authMiddleware, async (req, res) => {
     const crypto = require("crypto");
     const cacheKey = `notifications_${req.userId}_${limit}`;
 
-    const result = await withCache(cacheKey, 3000, async () => {
+    // Reduced cache time to 1s to allow "Read All" to reflect quickly
+    const result = await withCache(cacheKey, 1000, async () => {
       const q = db
         .collection("notifications")
         .where("user_id", "==", req.userId)

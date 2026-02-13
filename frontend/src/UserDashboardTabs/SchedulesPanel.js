@@ -310,11 +310,13 @@ const SchedulesPanel = ({
 
                   {/* Render Scheduled Events */}
                   {schedulesList
-                    ?.filter(s =>
-                      Array.isArray(s.platforms) ? s.platforms.includes(platform.id) : false
-                    )
+                    ?.filter(s => {
+                      const sp = s.platforms || (s.platform ? [s.platform] : []);
+                      return sp.includes(platform.id);
+                    })
                     .map((sched, idx) => {
-                      const style = getEventStyle(sched.time);
+                      const time = sched.startTime || sched.time;
+                      const style = getEventStyle(time);
                       if (!style) return null;
 
                       const content = contentList?.find(c => c.id === sched.contentId);
@@ -349,6 +351,9 @@ const SchedulesPanel = ({
           )}
           {schedulesList?.map((sch, i) => {
             const content = contentList?.find(c => c.id === sch.contentId);
+            const time = sch.startTime || sch.time;
+            const channelList = sch.platforms || (sch.platform ? [sch.platform] : []);
+
             return (
               <div
                 key={i}
@@ -365,11 +370,12 @@ const SchedulesPanel = ({
                     {content?.title || "Unknown Content"}
                   </div>
                   <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
-                    Target: {new Date(sch.time).toLocaleString()} • {sch.frequency}
+                    Target: {time ? new Date(time).toLocaleString() : "Unscheduled"} •{" "}
+                    {sch.frequency}
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: "5px" }}>
-                  {sch.platforms?.map(p => (
+                  {channelList.map(p => (
                     <span
                       key={p}
                       style={{

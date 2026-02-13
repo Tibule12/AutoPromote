@@ -1,0 +1,181 @@
+/* SmartFrameOverlay.css */
+
+.smart-frame-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.smart-content {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* --- TikTok Style --- */
+.frame-tiktok .smart-content {
+  object-fit: cover; /* TikTok fills screen */
+}
+
+/* TikTok UI Simulation (Safe Zones & UI) */
+.tiktok-ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none; /* Let clicks pass through */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.tiktok-sidebar {
+  position: absolute;
+  right: 10px;
+  bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.tiktok-icon {
+  width: 35px;
+  height: 35px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.tiktok-bottom {
+  position: absolute;
+  bottom: 20px;
+  left: 10px;
+  width: 70%;
+  color: white;
+  font-family: sans-serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.tiktok-handle {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.tiktok-desc-line {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  margin-bottom: 4px;
+  width: 80%;
+}
+
+/* --- Instagram Reel Style --- */
+.frame-instagram .smart-content {
+  object-fit: cover;
+}
+
+.instagram-ui-overlay {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+
+.insta-top {
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.insta-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid white;
+}
+
+.insta-bottom {
+  position: absolute;
+  bottom: 20px;
+  left: 15px;
+  right: 60px; /* Space for actions */
+}
+
+.insta-actions {
+  position: absolute;
+  bottom: 20px;
+  right: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* --- YouTube Shorts Style --- */
+.frame-youtube-shorts .smart-content {
+  object-fit: cover;
+}
+
+.yt-shorts-overlay {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+
+.yt-buttons {
+  position: absolute;
+  right: 12px;
+  bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.yt-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+}
+
+/* Quality Badge */
+.quality-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+  color: black;
+  font-weight: bold;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Frame Intelligence Toggle (on parent usually, but styled here) */
+.frame-toggle-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 5px;
+}

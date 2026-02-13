@@ -1384,6 +1384,27 @@ async function processNextPlatformTask() {
           reason: task.reason,
           shortlinkCode: payload.__shortlinkCode || null,
         });
+
+        // Notify user about success
+        if (task.uid) {
+          await db
+            .collection("notifications")
+            .add({
+              user_id: task.uid,
+              type: "promotion_success",
+              title: "Promotion Published",
+              message: `Successfully posted to ${task.platform}`,
+              read: false,
+              created_at: new Date().toISOString(),
+              metadata: {
+                contentId: task.contentId,
+                platform: task.platform,
+                taskId: task.id,
+                result: simulatedResult,
+              },
+            })
+            .catch(() => {});
+        }
       } else {
         await recordPlatformPost({
           platform: task.platform,
@@ -1440,6 +1461,24 @@ async function processNextPlatformTask() {
           .collection("dead_letter_tasks")
           .doc(task.id)
           .set({ ...task, failed });
+
+        // Notify user about failure
+        if (task.uid) {
+          await db.collection("notifications").add({
+            user_id: task.uid,
+            type: "promotion_failed",
+            title: "Promotion Failed",
+            message: `Failed to post to ${task.platform}: ${err.message}`,
+            read: false,
+            created_at: new Date().toISOString(),
+            metadata: {
+              contentId: task.contentId,
+              platform: task.platform,
+              taskId: task.id,
+              error: err.message,
+            },
+          });
+        }
       } catch (_) {}
       await recordTaskCompletion("platform_post", false);
       // Even on terminal failure, record a platform post record for observability

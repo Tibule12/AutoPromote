@@ -2,33 +2,6 @@
 import React, { useState, useRef, useEffect } from "react";
 // import { FFmpeg } from "@ffmpeg/ffmpeg"; // Commented out to fix build warning, loaded via CDN
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
-// Mock FFmpeg class acting as wrapper for CDN loaded instance
-class FFmpegWrapper {
-  constructor() {
-    this.instance = null;
-  }
-  async load(config) {
-    if (!window.FFmpeg) await loadFFmpegScript();
-    this.instance = new window.FFmpeg.FFmpeg();
-    await this.instance.load(config);
-  }
-  async writeFile(name, data) {
-    return this.instance.writeFile(name, data);
-  }
-  async readFile(name) {
-    return this.instance.readFile(name);
-  }
-  async exec(args) {
-    return this.instance.exec(args);
-  }
-  on(event, callback) {
-    if (this.instance) this.instance.on(event, callback);
-  }
-}
-const FFmpeg = FFmpegWrapper;
-
-// import { pipeline } from "@xenova/transformers"; // Removed to fix build warning, loaded via CDN instead
-
 import "./VideoEditor.css";
 
 // Helper to load FFmpeg
@@ -62,15 +35,37 @@ const loadXenova = async () => {
       // Check what it exposed
       if (window.transformers) resolve(window.transformers);
       else if (window.pipeline) resolve({ pipeline: window.pipeline });
-      // Some builds might expose it differently, let's assume one of these works.
-      // If module based, it might be harder via script tag, but CDN usually provides UMD.
-      // Fallback: Check for esm usage by user, but here we expect UMD.
       else reject(new Error("Failed to load Xenova transformers: Global variable not found"));
     };
     script.onerror = () => reject(new Error("Failed to load Xenova script"));
     document.head.appendChild(script);
   });
 };
+
+// Mock FFmpeg class acting as wrapper for CDN loaded instance
+class FFmpegWrapper {
+  constructor() {
+    this.instance = null;
+  }
+  async load(config) {
+    if (!window.FFmpeg) await loadFFmpegScript();
+    this.instance = new window.FFmpeg.FFmpeg();
+    await this.instance.load(config);
+  }
+  async writeFile(name, data) {
+    return this.instance.writeFile(name, data);
+  }
+  async readFile(name) {
+    return this.instance.readFile(name);
+  }
+  async exec(args) {
+    return this.instance.exec(args);
+  }
+  on(event, callback) {
+    if (this.instance) this.instance.on(event, callback);
+  }
+}
+const FFmpeg = FFmpegWrapper;
 
 function VideoEditor({ file, onSave, onCancel }) {
   const [ffmpeg] = useState(new FFmpeg());
@@ -98,6 +93,13 @@ function VideoEditor({ file, onSave, onCancel }) {
   const videoRef = useRef(null);
   const messageRef = useRef(null);
 
+  const log = msg => {
+    if (messageRef.current) {
+      messageRef.current.textContent = msg;
+    }
+    console.log(msg);
+  };
+
   const load = async () => {
     const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
     try {
@@ -123,13 +125,6 @@ function VideoEditor({ file, onSave, onCancel }) {
       console.error(e);
       log("Failed to load FFmpeg: " + e.message);
     }
-  };
-
-  const log = msg => {
-    if (messageRef.current) {
-      messageRef.current.textContent = msg;
-    }
-    console.log(msg);
   };
 
   useEffect(() => {
@@ -207,15 +202,13 @@ function VideoEditor({ file, onSave, onCancel }) {
     log("🧠 Loading Multilingual AI Model (Whisper)...");
 
     try {
-      // Load library via script tag injection safely (avoids Babel/Webpack dynamic import issues)
+      // Load library via script tag injection safely
       const transformers = await loadXenova();
       const pipeline = transformers.pipeline || window.pipeline;
 
       if (!pipeline) throw new Error("Transformers pipeline not found in window or module export");
 
-      // Upgrade to 'whisper-tiny' (Multilingual) instead of 'whisper-tiny.en'
       const transcriber = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny");
-      // const transcriber = null;
 
       log(
         translateToEnglish
@@ -223,7 +216,6 @@ function VideoEditor({ file, onSave, onCancel }) {
           : "👂 Listening (Auto-Detect Language)..."
       );
 
-      // Pass options: language 'id' means auto-detect. task 'translate' forces English output.
       const options = {
         task: translateToEnglish ? "translate" : "transcribe",
         chunk_length_s: 30,
@@ -275,12 +267,9 @@ function VideoEditor({ file, onSave, onCancel }) {
       }
 
       if (captionText) {
-        // Draw text centered at bottom (with safe padding)
-        // Escape single quotes for ffmpeg command string
         const sanitizedText = captionText.replace(/'/g, "");
         const fontColor = captionColor === "yellow" ? "yellow" : "white";
-
-        // Bottom center position: x=(w-tw)/2, y=h-(h*0.15)
+        // Bottom center position check simplified for stability
         videoFilters.push(
           `drawtext=fontfile=/arial.ttf:text='${sanitizedText}':fontcolor=${fontColor}:fontsize=48:box=1:boxcolor=black@0.6:boxborderw=5:x=(w-text_w)/2:y=(h-text_h)-150`
         );
@@ -290,12 +279,9 @@ function VideoEditor({ file, onSave, onCancel }) {
         args.push("-vf", videoFilters.join(","));
       }
 
-      // 2. AUDIO FILTERS (Studio Voice)
+      // 2. AUDIO FILTERS
       if (enhanceAudio) {
-        // Highpass (remove rumble) + Compressor (loudness) + EQ (clarity)
-        // "firequalizer" is often missing in light builds, so uses simple low/high pass + compand
         log("Applying Studio Mic Enhancement...");
-        // Acompressor: threshold -12dB, ratio 4:1 (speech standard), makeup 2dB
         audioFilters.push(
           "highpass=f=80,acompressor=threshold=-12dB:ratio=4:attack=50:release=200"
         );
@@ -307,24 +293,19 @@ function VideoEditor({ file, onSave, onCancel }) {
 
       // --- ENCODING SETTINGS ---
       if (videoFilters.length > 0 || boostQuality) {
-        // Must re-encode if we used filters
         args.push("-c:v", "libx264");
         args.push("-preset", "ultrafast");
-
         if (boostQuality && ["tiktok", "instagram"].includes(activeOverlay)) {
-          // High profile for better quality at same bitrate
           args.push("-profile:v", "high");
           args.push("-b:v", "15M");
         } else if (boostQuality) {
           args.push("-b:v", "15M");
         }
       } else {
-        // No video filters? Stream copy video is fastest
         args.push("-c:v", "copy");
       }
 
       if (audioFilters.length > 0) {
-        // Re-encode audio (AAC default)
         args.push("-c:a", "aac");
       } else {
         args.push("-c:a", "copy");
@@ -332,22 +313,18 @@ function VideoEditor({ file, onSave, onCancel }) {
 
       args.push(outputName);
 
-      // Run command
       await ffmpeg.exec(args);
 
       const data = await ffmpeg.readFile(outputName);
       const newBlob = new Blob([data.buffer], { type: "video/mp4" });
-
-      // Rename if possible
       const newFile = new File([newBlob], `trimmed_${file.name}`, { type: "video/mp4" });
 
       onSave(newFile);
     } catch (err) {
       console.error(err);
-      log("Error processing video");
+      log("Error processing video. Check console.");
     } finally {
       setProcessing(false);
-      // Clean up memory
       try {
         await ffmpeg.deleteFile(inputName);
         await ffmpeg.deleteFile(outputName);

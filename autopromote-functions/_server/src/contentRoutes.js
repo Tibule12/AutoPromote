@@ -414,6 +414,24 @@ router.post(
         const contentDoc = await contentRef.get();
         content = { id: contentRef.id, ...contentDoc.data() };
 
+        // Create success notification
+        try {
+          await db.collection("notifications").add({
+            user_id: userId,
+            type: "content_uploaded",
+            title: "Content Uploaded",
+            message: `Your content "${title}" has been successfully uploaded and scheduled.`,
+            read: false,
+            created_at: new Date().toISOString(),
+            metadata: {
+              contentId: contentRef.id,
+              platform: target_platforms && target_platforms.length > 0 ? target_platforms[0] : "multi"
+            }
+          });
+        } catch (notifErr) {
+          console.warn("[Upload] Failed to create notification:", notifErr.message);
+        }
+
         // Track Usage (Increment upload counter)
         // Fire-and-forget to not block response
         billingService

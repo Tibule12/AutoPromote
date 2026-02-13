@@ -36,6 +36,7 @@ import ExplainButton from "./components/ExplainButton";
 import PreviewEditModal from "./components/PreviewEditModal";
 import ConfirmPublishModal from "./components/ConfirmPublishModal";
 import PlatformSettingsOverride from "./components/PlatformSettingsOverride";
+import SmartFrameOverlay from "./components/SmartFrameOverlay";
 
 // Professional Platform Forms
 import TikTokForm from "./components/PlatformForms/TikTokForm";
@@ -4246,39 +4247,42 @@ function ContentUploadForm({
                                 ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
                                 : "Preview"}
                             </h5>
-                            {p.mediaType === "video" ? (
-                              <video
-                                aria-label="Preview media"
-                                src={p.mediaUrl || p.thumbnail}
-                                controls
-                                style={{
-                                  width: "100%",
-                                  height: 120,
-                                  objectFit: "cover",
-                                  borderRadius: 6,
-                                }}
+                            {/* Smart Frame Intelligence Preview */}
+                            <div
+                              className="smart-frame-wrapper"
+                              style={{
+                                width: "100%",
+                                height: 400 /* Taller for vertical preview */,
+                                marginBottom: 12,
+                                borderRadius: 8,
+                                overflow: "hidden",
+                                background: "#000",
+                                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                              }}
+                            >
+                              <SmartFrameOverlay
+                                src={p.mediaUrl || p.thumbnail || DEFAULT_THUMBNAIL}
+                                mediaType={
+                                  p.mediaType ||
+                                  (file && file.type.startsWith("video") ? "video" : "image")
+                                }
+                                platform={p.platform || expandedPlatform}
+                                showSafeZones={true}
+                                enableHighQuality={enhanceQuality}
                               />
-                            ) : (
-                              <img
-                                aria-label="Preview media"
-                                src={p.thumbnail || DEFAULT_THUMBNAIL}
-                                alt="Preview Thumbnail"
-                                style={{
-                                  width: "100%",
-                                  height: 120,
-                                  objectFit: "cover",
-                                  borderRadius: 6,
-                                }}
-                              />
-                            )}
-                            <div>
-                              <strong>Title:</strong>{" "}
-                              {p.title || title || (file ? file.name : "Untitled")}
                             </div>
-                            <div>
-                              <strong>Description:</strong>{" "}
-                              {p.description || description || "No description"}
+
+                            <div style={{ padding: "0 4px" }}>
+                              <div style={{ marginBottom: 4 }}>
+                                <strong>Title:</strong>{" "}
+                                {p.title || title || (file ? file.name : "Untitled")}
+                              </div>
+                              <div style={{ marginBottom: 8 }}>
+                                <strong>Description:</strong>{" "}
+                                {p.description || description || "No description"}
+                              </div>
                             </div>
+
                             <div style={{ marginTop: 8 }}>
                               <button
                                 type="button"
@@ -4286,7 +4290,7 @@ function ContentUploadForm({
                                 onClick={() => openPreviewEdit(p)}
                                 aria-label={`Edit preview ${p.platform || ""}`}
                               >
-                                Edit Preview
+                                Edit Metadata
                               </button>
                             </div>
                           </div>
