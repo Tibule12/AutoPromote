@@ -52,7 +52,16 @@ class FFmpegWrapper {
   async load(config) {
     if (!window.FFmpegWASM) await loadFFmpegScript();
     this.instance = new window.FFmpegWASM.FFmpeg();
-    await this.instance.load(config);
+
+    // Explicitly load the worker script as a Blob to bypass "SecurityError: Failed to construct 'Worker'"
+    // caused by cross-origin restrictions when loading workers from CDN.
+    const workerURL = "https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js";
+    const workerBlobURL = await toBlobURL(workerURL, "text/javascript");
+
+    await this.instance.load({
+      ...config,
+      classWorkerURL: workerBlobURL,
+    });
   }
   async writeFile(name, data) {
     return this.instance.writeFile(name, data);
