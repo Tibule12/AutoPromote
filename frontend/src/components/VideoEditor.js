@@ -53,14 +53,27 @@ class FFmpegWrapper {
     if (!window.FFmpegWASM) await loadFFmpegScript();
     this.instance = new window.FFmpegWASM.FFmpeg();
 
-    // Explicitly load the worker script as a Blob to bypass "SecurityError: Failed to construct 'Worker'"
-    // We use the ESM version of the worker because providing a classWorkerURL forces the worker into type="module"
-    const workerURL = "https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/814.ffmpeg.js";
-    const workerBlobURL = await toBlobURL(workerURL, "text/javascript");
+    // Explicitly load the worker script, fetch it, and PATCH the imports to be absolute
+    // before creating a Blob. This fixes "404 Not Found" (bad file path) and relative import errors in Blob.
+    const baseURL = "https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm";
+    const workerURL = `${baseURL}/worker.js`;
+
+    // Fetch the worker code
+    const workerResp = await fetch(workerURL);
+    if (!workerResp.ok) throw new Error(`Failed to fetch worker: ${workerURL}`);
+    let workerScript = await workerResp.text();
+
+    // Patch relative imports to absolute URLs so they work in the Blob worker
+    // Replaces: from "./const.js" -> from "https://.../const.js"
+    workerScript = workerScript.replaceAll('from "./', `from "${baseURL}/`);
+
+    // Create the Blob URL
+    const workerBlob = new Blob([workerScript], { type: "text/javascript" });
+    const workerBlobURL = URL.createObjectURL(workerBlob);
 
     await this.instance.load({
       ...config,
-      // Pass the worker blob URL to bypass security checks
+      // Pass the worker blob URL to bypass security checks and load our patched worker
       classWorkerURL: workerBlobURL,
     });
   }
