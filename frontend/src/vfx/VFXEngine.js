@@ -1,37 +1,36 @@
 import * as PIXI from "pixi.js";
 
-// Shader for a "Chromatic Aberration + Scanline" Glitch Effect
-// This is pure GPU code (GLSL) running in the browser for free.
-const glitchShaderFrag = `
+// Shader for a "Cinema Gloss" Effect (Subtle Color Grade + Bloom)
+// Replaces the heavy "Glitch" shader for a premium look
+const cinemaShaderFrag = `
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
 uniform float time;
 uniform vec2 resolution;
 
-float rand(vec2 co) {
-    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
-
 void main(void) {
     vec2 uv = vTextureCoord;
+    vec4 color = texture2D(uSampler, uv);
     
-    // 1. Scanline Distortion (Wobbly VHS)
-    float scanline = sin(uv.y * 800.0 + time * 10.0) * 0.002;
-    uv.x += scanline;
+    // 1. Subtle S-Curve Contrast (Cinematic Look)
+    color.rgb = pow(color.rgb, vec3(1.1)); // Slight contrast boost
     
-    // 2. Chromatic Aberration (RGB Split)
-    // Shift Red/Blue channels based on sin wave
-    float rOffset = 0.005 * sin(time * 3.0);
-    float bOffset = -0.005 * cos(time * 2.5);
+    // 2. Warm/Teal Grade (Teal Shadows, Warm Highlights)
+    vec3 teal = vec3(0.0, 0.1, 0.1);
+    vec3 orange = vec3(0.1, 0.05, 0.0);
+    float luma = dot(color.rgb, vec3(0.299, 0.587, 0.114));
     
-    vec4 r = texture2D(uSampler, vec2(uv.x + rOffset, uv.y));
-    vec4 g = texture2D(uSampler, uv);
-    vec4 b = texture2D(uSampler, vec2(uv.x + bOffset, uv.y));
+    if (luma < 0.5) {
+        color.rgb += teal * (1.0 - luma) * 0.2;
+    } else {
+        color.rgb += orange * luma * 0.15;
+    }
     
-    // 3. Noise Overlay
-    float noise = rand(uv * time) * 0.1;
-    
-    gl_FragColor = vec4(r.r, g.g, b.b, 1.0) + noise;
+    // 3. Vignette (Darken corners)
+    float dist = distance(uv, vec2(0.5));
+    color.rgb *= smoothstep(0.8, 0.4, dist * (resolution.x / resolution.y));
+
+    gl_FragColor = color;
 }
 `;
 
@@ -47,68 +46,40 @@ export async function initVFXEngine(canvas, videoElement) {
   const app = new PIXI.Application();
 
   await app.init({
-    canvas: canvas, // Updated for PixiJS v8+ (was 'view')
+    canvas: canvas,
     width: videoElement.videoWidth || 1080,
     height: videoElement.videoHeight || 1920,
     backgroundColor: 0x000000,
     backgroundAlpha: 0,
     resolution: window.devicePixelRatio || 1,
     autoDensity: true,
+    resizeTo: canvas, // KEY FIX: Auto-resize to match the canvas element size in DOM
   });
 
   // Create Video Texture
-  // Direct creation from DOM element is more robust for Blobs than Assets.load
   const texture = PIXI.Texture.from(videoElement);
   const sprite = new PIXI.Sprite(texture);
 
-  sprite.width = app.screen.width;
-  sprite.height = app.screen.height;
+  // Aspect Ratio Fitting Logic (Covet/Contain)
+  // We want to CONTAIN the video so it is fully visible
+  // User complained about "Cutting", so we use CONTAIN (Letterbox)
 
-  // Center anchor
-  // sprite.anchor.set(0.5);
-  // sprite.x = app.screen.width / 2;
-  // sprite.y = app.screen.height / 2;
+  const screenW = app.screen.width;
+  const screenH = app.screen.height;
+  const videoW = texture.width;
+  const videoH = texture.height;
+
+  const scale = Math.min(screenW / videoW, screenH / videoH);
+  sprite.scale.set(scale);
+
+  // Center it
+  sprite.x = (screenW - videoW * scale) / 2;
+  sprite.y = (screenH - videoH * scale) / 2;
 
   app.stage.addChild(sprite);
 
-  // Apply Custom Shader Filter
-  // PixiJS v8 changed how uniforms are handled. It wraps them in a resources object for WebGPU compatibility.
-  // We need to define the resource structure explicitly or update the uniforms property safely.
-
-  const filter = new PIXI.Filter({
-    glProgram: PIXI.GlProgram.from({
-      vertex: `
-            attribute vec2 aPosition;
-            attribute vec2 aUV;
-            varying vec2 vTextureCoord;
-            uniform mat3 uProjectionMatrix;
-            uniform mat3 uWorldTransformMatrix;
-            uniform mat3 uTransformMatrix;
-
-            void main() {
-                vTextureCoord = (uTransformMatrix * vec3(aUV, 1.0)).xy;
-                gl_Position = vec4((uProjectionMatrix * uWorldTransformMatrix * vec3(aPosition, 1.0)).xy, 0.0, 1.0);
-            }
-        `,
-      fragment: glitchShaderFrag,
-    }),
-    resources: {
-      usb: {
-        time: { value: 0.0, type: "f32" },
-        resolution: { value: [app.screen.width, app.screen.height], type: "vec2<f32>" },
-      },
-    },
-  });
-
-  // Fallback for v7/Standard if the above is too complex for this rapid iteration
-  // The error 'Cannot read properties of undefined (reading 'time')' usually means filter.uniforms is undefined
-  // or the shader failed to compile so the uniforms were never mapped.
-
-  // Let's use the simpler v8 compatible syntax if we are on v8:
-  // v8 uses 'resources' instead of direct uniforms for some pipelines, but .uniforms getter should exist.
-
-  // However, simpler fix for v7/v8 compatibility:
-  const simpleFilter = new PIXI.Filter(undefined, glitchShaderFrag, {
+  // Apply "Cinema Gloss" Shader
+  const simpleFilter = new PIXI.Filter(undefined, cinemaShaderFrag, {
     time: 0.0,
     resolution: [app.screen.width, app.screen.height],
   });
