@@ -733,6 +733,14 @@ try {
     viralBoostRoutes = express.Router();
     console.log("⚠️ Viral boost routes not found");
   }
+  let soundRoutes;
+  try {
+    soundRoutes = require("./routes/soundRoutes");
+    console.log("✅ Sound routes loaded");
+  } catch (e) {
+    soundRoutes = express.Router();
+    console.log("⚠️ Sound routes not found");
+  }
   let rewardsRoutes;
   try {
     rewardsRoutes = require("./routes/rewardsRoutes");
@@ -1254,6 +1262,7 @@ try {
   } else {
     app.use("/api/content", routeLimiter({ windowHint: "content" }), contentRoutes);
   }
+  app.use("/api/sounds", soundRoutes);
   app.use("/api/analytics", routeLimiter({ windowHint: "analytics" }), analyticsRoutes);
   app.use("/api/admin", routeLimiter({ windowHint: "admin" }), adminRoutes);
   app.use("/api/admin/security", adminSecurityRoutes);

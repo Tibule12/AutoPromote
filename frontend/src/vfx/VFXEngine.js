@@ -77,8 +77,8 @@ export async function initVFXEngine(canvas, videoElement) {
   const fitAspectRatio = () => {
     const screenW = app.screen.width;
     const screenH = app.screen.height;
-    const videoW = texture.width; // Should be valid now
-    const videoH = texture.height;
+    const videoW = texture.width || videoElement.videoWidth;
+    const videoH = texture.height || videoElement.videoHeight;
 
     if (videoW && videoH) {
       const scale = Math.min(screenW / videoW, screenH / videoH);
@@ -87,6 +87,9 @@ export async function initVFXEngine(canvas, videoElement) {
       // Center it
       sprite.x = (screenW - videoW * scale) / 2;
       sprite.y = (screenH - videoH * scale) / 2;
+    } else {
+      // Fallback or retry
+      sprite.scale.set(1);
     }
   };
 
@@ -94,6 +97,10 @@ export async function initVFXEngine(canvas, videoElement) {
 
   // Re-calculate on resize
   app.renderer.on("resize", fitAspectRatio);
+  // Also recalculate when texture updates (ensures dimensions are caught if loaded late)
+  texture.source.on("update", fitAspectRatio);
+  // For older Pixi versions or if source wrapper differs
+  texture.on("update", fitAspectRatio);
 
   app.stage.addChild(sprite);
 

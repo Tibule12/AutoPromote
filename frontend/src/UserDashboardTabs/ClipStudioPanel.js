@@ -322,7 +322,13 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
       />
       <div
         className="clip-studio-header"
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "10px",
+        }}
       >
         <div>
           <h2>🎬 AI Clip Studio</h2>
@@ -386,6 +392,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                   justifyContent: "space-between",
                   alignItems: "center",
                   marginBottom: "16px",
+                  flexWrap: "wrap",
+                  gap: "10px",
                 }}
               >
                 <h3>Select a Video to Analyze</h3>
@@ -636,7 +644,15 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
               </label>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 8,
+                marginTop: 16,
+                flexWrap: "wrap",
+              }}
+            >
               <button
                 className="btn-secondary"
                 onClick={() => {

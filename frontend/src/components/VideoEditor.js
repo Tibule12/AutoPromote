@@ -649,24 +649,41 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         : `slideshow_${seoFilename}_${Date.now()}.mp4`;
       const newFile = new File([newBlob], filename, { type: "video/mp4" });
 
-      onSave(newFile);
-    } catch (err) {
-      console.error(err);
-      log("Error processing video. Check console.");
-    } finally {
-      setProcessing(false);
+      // Clean up temp files
       try {
         if (file) await ffmpeg.deleteFile(inputName);
         await ffmpeg.deleteFile(outputName);
-        // Clean up images if they exist
         if (images && images.length > 0) {
-          for (let i = 0; i < images.length; i++) {
-            try {
-              await ffmpeg.deleteFile(`img${String(i).padStart(3, "0")}.jpg`);
-            } catch (e) {}
-          }
+          // cleanup images loop
         }
       } catch (e) {}
+
+      return newFile; // Return file instead of calling onSave immediately
+    } catch (err) {
+      console.error(err);
+      log("Error processing video. Check console.");
+      return null;
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleSaveWrapper = async (mode = "save") => {
+    const resultFile = await handleSave();
+    if (!resultFile) return;
+
+    if (mode === "download") {
+      const url = URL.createObjectURL(resultFile);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = resultFile.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      log("Video downloaded to device!");
+    } else {
+      onSave(resultFile);
     }
   };
 
@@ -679,7 +696,10 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         <div className="loading-state">Loading FFmpeg core...</div>
       ) : (
         <>
-          <div style={{ display: "flex", gap: "20px", marginBottom: "16px" }}>
+          <div
+            className="controls-row"
+            style={{ display: "flex", gap: "20px", marginBottom: "16px" }}
+          >
             <div
               className="virality-hud"
               style={{
@@ -772,7 +792,10 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             }}
           >
             <h4 style={{ margin: "0 0 8px 0" }}>📝 Quick Captions</h4>
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <div
+              className="controls-row"
+              style={{ display: "flex", gap: "10px", alignItems: "center" }}
+            >
               <button
                 onClick={handleAutoTranscribe}
                 disabled={transcribing}
@@ -961,9 +984,11 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   onLoadedMetadata={handleMetadataLoaded}
                   style={{
                     width: "100%",
-                    // When VFX is on, we hide the video visually but keep it for audio/texture source
+                    display: "block", // Removes bottom gap
+                    // Keep relative so it dictates container height
+                    // When VFX is on, we hide it visually (opacity 0) so canvas shows on top
                     opacity: isVFXMode ? 0 : 1,
-                    position: isVFXMode ? "absolute" : "relative",
+                    position: "relative",
                   }}
                   crossOrigin="anonymous"
                 />
@@ -972,10 +997,13 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   <canvas
                     ref={vfxCanvasRef}
                     style={{
+                      // Absolute positioning covering the video exactly
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
                       width: "100%",
                       height: "100%",
-                      position: "relative", // Canvas takes the flow
-                      pointerEvents: "none", // Let clicks pass to video controls if needed, though Opacity 0 makes it tricky
+                      pointerEvents: "none", // Allow clicks to pass through to the video elements
                     }}
                   />
                 )}
@@ -1080,8 +1108,31 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             <button className="btn-cancel" onClick={onCancel} disabled={processing}>
               Cancel
             </button>
-            <button className="btn-save" onClick={handleTrim} disabled={processing}>
-              {processing ? "Processing..." : "Trim & Save"}
+            <button
+              className="btn-download"
+              onClick={() => handleSaveWrapper("download")}
+              disabled={processing}
+              style={{
+                padding: "10px 20px",
+                background: "#10b981", // Green for download
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: processing ? "not-allowed" : "pointer",
+                fontWeight: "bold",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              💾 Download
+            </button>
+            <button
+              className="btn-save"
+              onClick={() => handleSaveWrapper("save")}
+              disabled={processing}
+            >
+              {processing ? `Processing ${progress}%...` : "Trim & Save"}
             </button>
           </div>
           <p ref={messageRef} className="status-log"></p>
