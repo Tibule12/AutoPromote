@@ -68,6 +68,7 @@ export async function initVFXEngine(canvas, videoElement) {
 
   // In PixiJS v8, we should wrap the video element explicitly
   // Update: Using cleaner constructor options for better compatibility
+  // Assets.load fails on blob URLs without extensions, so we use direct VideoSource
   const source = new PIXI.VideoSource({
     resource: videoElement,
     autoPlay: false,
@@ -85,15 +86,12 @@ export async function initVFXEngine(canvas, videoElement) {
   }
 
   // Use Texture.from as a foolproof fallback if manual construction fails context
-  const texture = await PIXI.Assets.load(videoElement.src || videoElement.currentSrc);
-
-  if (!texture) {
-    throw new Error("Failed to load video texture via Assets loader");
-  }
+  // Creating texture directly from source avoids blob URL parsing issues
+  const texture = new PIXI.Texture({ source });
 
   // Ensure valid texture dimensions before creating sprite
   if (!texture.valid || texture.width <= 1) {
-    console.log("WAITING FOR TEXTURE UPDATE (Fallback)...");
+    console.log("WAITING FOR TEXTURE UPDATE (Polling)...");
 
     // Force a tiny seek so the video decodes *something* (often needed on Chrome/Edge)
     if (videoElement.paused && videoElement.currentTime < 0.1) {
@@ -109,7 +107,7 @@ export async function initVFXEngine(canvas, videoElement) {
         }
         // Force update tick
         try {
-          texture.source.update();
+          if (texture.source && texture.source.update) texture.source.update();
         } catch (e) {}
       }, 100);
 
