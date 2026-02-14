@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 // import { FFmpeg } from "@ffmpeg/ffmpeg"; // Commented out to fix build warning, loaded via CDN
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
+import DOMPurify from "dompurify";
 import "./VideoEditor.css";
 
 // Helper to load FFmpeg
@@ -181,19 +182,24 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Security: Sanitize sensitive sinks to prevent XSS (CodeQL #969, #970)
+  // Security: Sanitize sensitive sinks to prevent XSS (CodeQL #969, #970, #971, #973)
   // Although React escapes content, explicit validation satisfies strict scanners.
+  // We use DOMPurify to guarantee no HTML payload exists in the data.
   const safeVideoSrc = React.useMemo(() => {
     if (!videoSrc) return "";
     // Strict Protocol Whitelist
-    if (/^(blob:|data:|https?:)/i.test(videoSrc)) return videoSrc;
+    if (/^(blob:|https?:)/i.test(videoSrc)) return videoSrc;
+    // For data URIs, we ensure they are strictly image/video/audio
+    if (/^data:(image|video|audio)\//i.test(videoSrc)) return videoSrc;
+
     console.warn("Blocked potentially unsafe video source", videoSrc);
     return "";
   }, [videoSrc]);
 
   const safeCaptionText = React.useMemo(() => {
     if (!captionText) return null;
-    return String(captionText); // Explicit string cast
+    // Double-sanitization: Cast to string AND strip HTML tags
+    return DOMPurify.sanitize(String(captionText), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
   }, [captionText]);
 
   // --- VFX Engine ---
