@@ -66,49 +66,59 @@ export async function initVFXEngine(canvas, videoElement) {
     resizeTo: undefined, // DISABLE DOM resizing which causes the drift/crop issues
   });
 
-  // Create Video Source & Texture
   // In PixiJS v8, we should wrap the video element explicitly
+  // Update: Using cleaner constructor options for better compatibility
   const source = new PIXI.VideoSource({
     resource: videoElement,
-    autoPlay: false, // Don't force play, let React handle it
+    autoPlay: false,
     autoLoad: true,
   });
 
-  const texture = new PIXI.Texture({ source });
+  // Wait for the source to be ready before creating texture dependency
+  if (!source.isReady) {
+    console.log("WAITING FOR VIDEO SOURCE READY...");
+    try {
+      await source.load();
+    } catch (e) {
+      console.warn("Video source load warning:", e);
+    }
+  }
 
-  // Force a texture update attempt
-  // Sometimes video textures sleep if not rendered
-  try {
-    source.update();
-  } catch (e) {
-    // Ignore source update errors
+  // Use Texture.from as a foolproof fallback if manual construction fails context
+  const texture = await PIXI.Assets.load(videoElement.src || videoElement.currentSrc);
+
+  if (!texture) {
+    throw new Error("Failed to load video texture via Assets loader");
   }
 
   // Ensure valid texture dimensions before creating sprite
   if (!texture.valid || texture.width <= 1) {
-    console.log("WAITING FOR TEXTURE UPDATE...");
+    console.log("WAITING FOR TEXTURE UPDATE (Fallback)...");
 
-    // 1. Force a tiny seek so the video decodes *something* (often needed on Chrome/Edge)
-    if (videoElement.paused && videoElement.currentTime === 0) {
+    // Force a tiny seek so the video decodes *something* (often needed on Chrome/Edge)
+    if (videoElement.paused && videoElement.currentTime < 0.1) {
       videoElement.currentTime = 0.001;
     }
 
-    await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        console.warn("Texture update timed out!");
-        reject(new Error("GPU Texture Timeout (30s)"));
-      }, 30000); // 30s timeout per user request
+    await new Promise(resolve => {
+      // Shorter check interval instead of just 'once' event which might be missed
+      const checkInterval = setInterval(() => {
+        if (texture.valid && texture.width > 1) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+        // Force update tick
+        try {
+          texture.source.update();
+        } catch (e) {}
+      }, 100);
 
-      texture.once("update", () => {
-        clearTimeout(timeout);
-        resolve();
-      });
-
-      // Failsafe if already updated
-      if (texture.valid) {
-        clearTimeout(timeout);
-        resolve();
-      }
+      // Timeout after 10s (reduced from 30s as polling is more active)
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        console.warn("Texture validation timed out, proceeding anyway.");
+        resolve(); // Don't crash, just try to render what we have
+      }, 10000);
     });
   }
 
