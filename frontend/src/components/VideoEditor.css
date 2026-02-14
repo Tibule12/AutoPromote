@@ -1,22 +1,177 @@
 .video-editor-container {
-  background: #fff;
-  color: #333; /* Ensure text is visible (dark) on the white background */
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  background: #121212; /* Dark Mode Background */
+  color: #e0e0e0; /* Light Text */
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #333;
   margin-top: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   /* Ensure container doesn't overflow horizontally on mobile */
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+/* Preset Buttons Container */
+.presets-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.preset-btn {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.preset-btn:hover {
+  background: #2a2a2a;
+  transform: translateY(-2px);
+}
+
+.preset-btn.active {
+  background: #3b82f6; /* Brand Blue */
+  border-color: #60a5fa;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.preset-icon {
+  font-size: 1.5rem;
+}
+
+/* Section Headers */
+.video-editor-container h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  border-bottom: 1px solid #333;
+  padding-bottom: 12px;
+}
+
+.section-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 8px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+/* Inputs & Controls */
+input[type="text"],
+input[type="number"],
+select {
+  background: #1e1e1e; /* Dark Inputs */
+  border: 1px solid #444;
+  color: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+select:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+/* Checkboxes & Switches */
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle-label:hover {
+  background: #252525;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  accent-color: #3b82f6;
+  transform: scale(1.2);
+}
+
+/* Action Buttons */
+.btn-save {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.btn-download {
+  background: #10b981; /* Green */
+  transition: transform 0.2s;
+}
+
+.btn-download:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.highlight-box {
+  background: #1e293b; /* Dark Blue-Grey */
+  border: 1px solid #334155;
+  color: #e2e8f0;
+}
+
+.virality-hud {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.quality-hud {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
 }
 
 /* --- Mobile Responsiveness --- */
 @media (max-width: 768px) {
   .video-editor-container {
-    padding: 12px;
+    padding: 16px;
     margin-top: 10px;
+    border: none; /* Cleaner look on mobile */
+    border-radius: 0;
   }
 
   .controls-row {
@@ -24,6 +179,7 @@
     align-items: flex-start !important;
     gap: 12px !important;
   }
+  /* ... rest of mobile styles ... */
 
   .time-input {
     width: 100% !important;

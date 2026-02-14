@@ -125,6 +125,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [viralityScore, setViralityScore] = useState(0);
   const [viralityMetrics, setViralityMetrics] = useState([]);
   const [boostQuality, setBoostQuality] = useState(false); // The "Use VP9" Hack
+  const [activePreset, setActivePreset] = useState("custom"); // 'custom', 'podcast', 'gameplay', 'cinematic'
 
   // NEW: Audio & Captions
   const [enhanceAudio, setEnhanceAudio] = useState(false);
@@ -136,6 +137,38 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
   const videoRef = useRef(null);
   const messageRef = useRef(null);
+
+  // --- PRESET LOGIC ---
+  const applyPreset = presetName => {
+    setActivePreset(presetName);
+    log(`Applied ${presetName} preset settings.`);
+
+    switch (presetName) {
+      case "podcast":
+        setEnhanceAudio(true);
+        setIsVFXMode(false);
+        setActiveOverlay("tiktok"); // Standard 9:16 safe zone
+        setBoostQuality(true);
+        if (!captionText) setCaptionText("Podcast Guest Name");
+        break;
+      case "gameplay":
+        setEnhanceAudio(false); // Game audio usually mixed
+        setIsVFXMode(false);
+        setActiveOverlay("youtube");
+        setBoostQuality(true);
+        break;
+      case "cinematic":
+        setEnhanceAudio(true);
+        setIsVFXMode(true); // Enable Gloss Shader
+        setActiveOverlay("none");
+        setBoostQuality(true);
+        break;
+      case "custom":
+      default:
+        // Do not reset everything, just let user toggle
+        break;
+    }
+  };
 
   const log = msg => {
     if (messageRef.current) {
@@ -693,32 +726,76 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     <div className="video-editor-container">
       <h3>Trim Video</h3>
       {!loaded ? (
-        <div className="loading-state">Loading FFmpeg core...</div>
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading Video Engine...</p>
+        </div>
       ) : (
         <>
+          {/* --- VIRAL PRESETS SECTION --- */}
+          <div className="presets-container">
+            <button
+              className={`preset-btn ${activePreset === "custom" ? "active" : ""}`}
+              onClick={() => applyPreset("custom")}
+            >
+              <span className="preset-icon">⚙️</span>
+              Custom
+            </button>
+            <button
+              className={`preset-btn ${activePreset === "podcast" ? "active" : ""}`}
+              onClick={() => applyPreset("podcast")}
+            >
+              <span className="preset-icon">🎙️</span>
+              Podcast Clip
+            </button>
+            <button
+              className={`preset-btn ${activePreset === "gameplay" ? "active" : ""}`}
+              onClick={() => applyPreset("gameplay")}
+            >
+              <span className="preset-icon">🎮</span>
+              Gameplay
+            </button>
+            <button
+              className={`preset-btn ${activePreset === "cinematic" ? "active" : ""}`}
+              onClick={() => applyPreset("cinematic")}
+            >
+              <span className="preset-icon">🎬</span>
+              Cinematic
+            </button>
+          </div>
+
           <div
             className="controls-row"
             style={{ display: "flex", gap: "20px", marginBottom: "16px" }}
           >
             <div
-              className="virality-hud"
+              className={`virality-hud ${viralityScore > 80 ? "high-score" : ""}`}
               style={{
                 flex: 1,
-                background: "#f0fdf4",
-                padding: "10px",
-                borderRadius: "8px",
-                border: "1px solid #bbf7d0",
+                padding: "16px",
+                borderRadius: "12px",
+                border: "1px solid rgba(16, 185, 129, 0.2)",
+                background: "rgba(16, 185, 129, 0.05)",
               }}
             >
-              <h4 style={{ margin: 0, color: "#166534" }}>
-                🚀 Virality Potential: {viralityScore}/100
+              <h4
+                style={{
+                  margin: 0,
+                  color: "#34d399",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <span>🚀</span> Virality Potential: {viralityScore}/100
               </h4>
               <ul
                 style={{
-                  margin: "5px 0 0 0",
+                  margin: "12px 0 0 0",
                   paddingLeft: "20px",
-                  fontSize: "0.8rem",
-                  color: "#15803d",
+                  fontSize: "0.85rem",
+                  color: "#a7f3d0",
+                  lineHeight: "1.5",
                 }}
               >
                 {viralityMetrics.map((m, i) => (
@@ -731,28 +808,27 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               className="quality-hud"
               style={{
                 flex: 1,
-                background: "#eff6ff",
-                padding: "10px",
-                borderRadius: "8px",
-                border: "1px solid #bfdbfe",
+                padding: "16px",
+                borderRadius: "12px",
+                border: "1px solid rgba(59, 130, 246, 0.2)",
+                background: "rgba(59, 130, 246, 0.05)",
               }}
             >
-              <h4 style={{ margin: 0, color: "#1e40af" }}>✨ Quality Guard</h4>
-              <label
+              <h4
                 style={{
+                  margin: 0,
+                  color: "#60a5fa",
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  fontSize: "0.85rem",
-                  marginTop: "5px",
-                  cursor: "pointer",
                 }}
               >
-                <input
-                  type="checkbox"
-                  checked={boostQuality}
-                  onChange={e => setBoostQuality(e.target.checked)}
-                />
+                <span>✨</span> Quality Guard
+              </h4>
+              <label
+                className="toggle-label"
+                style={{ marginTop: "12px", width: "100%", justifyContent: "space-between" }}
+              >
                 <span>
                   {activeOverlay === "youtube"
                     ? "Force 1440p Upscale (VP9 Hack)"
@@ -760,25 +836,28 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                       ? "Crisp 1080p (Prevent Compression)"
                       : "Enhance Bitrate"}
                 </span>
+                <input
+                  type="checkbox"
+                  checked={boostQuality}
+                  onChange={e => {
+                    setBoostQuality(e.target.checked);
+                    setActivePreset("custom");
+                  }}
+                />
               </label>
               <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  fontSize: "0.85rem",
-                  marginTop: "5px",
-                  cursor: "pointer",
-                }}
+                className="toggle-label"
+                style={{ marginTop: "10px", width: "100%", justifyContent: "space-between" }}
               >
+                <span>🎙️ Studio Mic Enhancer</span>
                 <input
                   type="checkbox"
                   checked={enhanceAudio}
-                  onChange={e => setEnhanceAudio(e.target.checked)}
+                  onChange={e => {
+                    setEnhanceAudio(e.target.checked);
+                    setActivePreset("custom");
+                  }}
                 />
-                <span>
-                  <b>🎙️ Studio Mic Enhancer</b> (Compressor + Highpass)
-                </span>
               </label>
             </div>
           </div>
@@ -786,12 +865,13 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           <div
             style={{
               marginBottom: "16px",
-              padding: "10px",
-              border: "1px solid #eee",
-              borderRadius: "8px",
+              padding: "16px",
+              border: "1px solid #333",
+              borderRadius: "12px",
+              background: "#1e1e1e",
             }}
           >
-            <h4 style={{ margin: "0 0 8px 0" }}>📝 Quick Captions</h4>
+            <h4 style={{ margin: "0 0 12px 0", color: "#fff" }}>📝 Quick Captions</h4>
             <div
               className="controls-row"
               style={{ display: "flex", gap: "10px", alignItems: "center" }}
@@ -800,42 +880,38 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 onClick={handleAutoTranscribe}
                 disabled={transcribing}
                 style={{
-                  padding: "8px 12px",
-                  background: transcribing ? "#ddd" : "#8b5cf6",
+                  padding: "10px 16px",
+                  background: transcribing ? "#333" : "#8b5cf6",
                   color: "white",
                   border: "none",
-                  borderRadius: "4px",
+                  borderRadius: "8px",
                   cursor: transcribing ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: "5px",
+                  gap: "8px",
+                  fontWeight: "600",
+                  minWidth: "160px",
+                  justifyContent: "center",
                 }}
                 title="Regenerate captions using AI"
               >
-                {transcribing
-                  ? "👂 Processing..."
-                  : hasTranscribed
-                    ? "🔄 Regenerate"
-                    : "✨ Auto-Transcribe"}
+                {transcribing ? (
+                  <>👂 Processing...</>
+                ) : hasTranscribed ? (
+                  <>🔄 Regenerate</>
+                ) : (
+                  <>✨ Auto-Transcribe</>
+                )}
               </button>
 
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  fontSize: "0.8rem",
-                  cursor: "pointer",
-                  userSelect: "none",
-                }}
-                title="Convert any language to English text"
-              >
+              <label className="toggle-label" style={{ fontSize: "0.9rem" }}>
                 <input
                   type="checkbox"
                   checked={translateToEnglish}
                   onChange={e => setTranslateToEnglish(e.target.checked)}
+                  style={{ marginRight: "8px" }}
                 />
-                <span>Translate to English</span>
+                Translate
               </label>
 
               <input
@@ -849,42 +925,82 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               <select
                 value={captionColor}
                 onChange={e => setCaptionColor(e.target.value)}
-                style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
+                style={{ width: "120px" }}
               >
                 <option value="white">White</option>
                 <option value="yellow">Yellow</option>
+                <option value="#3b82f6">Blue</option>
+                <option value="#ef4444">Red</option>
+                <option value="#10b981">Green</option>
               </select>
             </div>
             {captionText && (
-              <small style={{ color: "#666" }}>
+              <small style={{ color: "#888", display: "block", marginTop: "8px" }}>
                 Preview: Captions will be burned into the bottom center.
               </small>
             )}
           </div>
 
-          <div className="overlay-controls">
-            <span>🛡️ Safe Zone:</span>
+          <div className="overlay-controls" style={{ marginBottom: "16px" }}>
+            <span style={{ color: "#fff", fontWeight: "600", marginRight: "10px" }}>
+              🛡️ Safe Zone:
+            </span>
             <button
               className={`btn-overlay ${activeOverlay === "none" ? "active" : ""}`}
               onClick={() => setActiveOverlay("none")}
+              style={{
+                background: activeOverlay === "none" ? "#3b82f6" : "#333",
+                color: "#fff",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                marginRight: "8px",
+                cursor: "pointer",
+              }}
             >
               Off
             </button>
             <button
               className={`btn-overlay ${activeOverlay === "tiktok" ? "active" : ""}`}
               onClick={() => setActiveOverlay("tiktok")}
+              style={{
+                background: activeOverlay === "tiktok" ? "#3b82f6" : "#333",
+                color: "#fff",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                marginRight: "8px",
+                cursor: "pointer",
+              }}
             >
               TikTok
             </button>
             <button
               className={`btn-overlay ${activeOverlay === "instagram" ? "active" : ""}`}
               onClick={() => setActiveOverlay("instagram")}
+              style={{
+                background: activeOverlay === "instagram" ? "#3b82f6" : "#333",
+                color: "#fff",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                marginRight: "8px",
+                cursor: "pointer",
+              }}
             >
               Reels
             </button>
             <button
               className={`btn-overlay ${activeOverlay === "youtube" ? "active" : ""}`}
               onClick={() => setActiveOverlay("youtube")}
+              style={{
+                background: activeOverlay === "youtube" ? "#3b82f6" : "#333",
+                color: "#fff",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                cursor: "pointer",
+              }}
             >
               Shorts
             </button>
@@ -1073,9 +1189,30 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             )}
           </div>
 
-          <div className="controls-row">
-            <div className="time-input">
-              <label>Start (sec):</label>
+          <div
+            className="controls-row"
+            style={{ display: "flex", gap: "20px", marginBottom: "20px" }}
+          >
+            <div
+              className="time-input"
+              style={{
+                flex: 1,
+                background: "#1e1e1e",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "1px solid #333",
+              }}
+            >
+              <label
+                style={{
+                  color: "#aaa",
+                  fontSize: "0.85rem",
+                  display: "block",
+                  marginBottom: "6px",
+                }}
+              >
+                Start (sec)
+              </label>
               <input
                 type="number"
                 value={startTime}
@@ -1086,10 +1223,36 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   setStartTime(Number(e.target.value));
                   if (videoRef.current) videoRef.current.currentTime = Number(e.target.value);
                 }}
+                style={{
+                  width: "100%",
+                  background: "#000",
+                  color: "#fff",
+                  border: "1px solid #444",
+                  padding: "8px",
+                  borderRadius: "4px",
+                }}
               />
             </div>
-            <div className="time-input">
-              <label>End (sec):</label>
+            <div
+              className="time-input"
+              style={{
+                flex: 1,
+                background: "#1e1e1e",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "1px solid #333",
+              }}
+            >
+              <label
+                style={{
+                  color: "#aaa",
+                  fontSize: "0.85rem",
+                  display: "block",
+                  marginBottom: "6px",
+                }}
+              >
+                End (sec)
+              </label>
               <input
                 type="number"
                 value={endTime}
@@ -1100,12 +1263,41 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   setEndTime(Number(e.target.value));
                   if (videoRef.current) videoRef.current.currentTime = Number(e.target.value);
                 }}
+                style={{
+                  width: "100%",
+                  background: "#000",
+                  color: "#fff",
+                  border: "1px solid #444",
+                  padding: "8px",
+                  borderRadius: "4px",
+                }}
               />
             </div>
           </div>
 
-          <div className="editor-actions">
-            <button className="btn-cancel" onClick={onCancel} disabled={processing}>
+          <div
+            className="editor-actions"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: "10px",
+              marginTop: "20px",
+            }}
+          >
+            <button
+              className="btn-cancel"
+              onClick={onCancel}
+              disabled={processing}
+              style={{
+                background: "#2a2a2a",
+                color: "#fff",
+                border: "1px solid #444",
+                padding: "12px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "600",
+              }}
+            >
               Cancel
             </button>
             <button
@@ -1113,16 +1305,17 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               onClick={() => handleSaveWrapper("download")}
               disabled={processing}
               style={{
-                padding: "10px 20px",
-                background: "#10b981", // Green for download
+                background: "#059669",
                 color: "white",
                 border: "none",
-                borderRadius: "5px",
+                borderRadius: "8px",
+                padding: "12px",
                 cursor: processing ? "not-allowed" : "pointer",
-                fontWeight: "bold",
+                fontWeight: "600",
                 display: "flex",
                 alignItems: "center",
-                gap: "5px",
+                justifyContent: "center",
+                gap: "6px",
               }}
             >
               💾 Download
@@ -1131,8 +1324,21 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               className="btn-save"
               onClick={() => handleSaveWrapper("save")}
               disabled={processing}
+              style={{
+                background: "linear-gradient(45deg, #7c3aed, #db2777)",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                padding: "12px",
+                cursor: processing ? "not-allowed" : "pointer",
+                fontWeight: "bold",
+                boxShadow: "0 0 15px rgba(124, 58, 237, 0.4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              {processing ? `Processing ${progress}%...` : "Trim & Save"}
+              {processing ? `Processing ${progress}%...` : "🚀 Save & Post"}
             </button>
           </div>
           <p ref={messageRef} className="status-log"></p>
