@@ -112,6 +112,9 @@ export async function initVFXEngine(canvas, videoElement) {
 
   sprite.filters = [simpleFilter];
 
+  // ADD TO STAGE (Critical Fix: Sprite must be added to be visible)
+  app.stage.addChild(sprite);
+
   // Animation Loop - Safe Access
   app.ticker.add(delta => {
     // Manually force update video source every frame - fixes black screen on some browsers
