@@ -46,35 +46,54 @@ export async function initVFXEngine(canvas, videoElement) {
   const app = new PIXI.Application();
 
   await app.init({
-    canvas: canvas,
+    canvas: canvas, // Updated for PixiJS v8+ (was 'view')
     width: videoElement.videoWidth || 1080,
     height: videoElement.videoHeight || 1920,
     backgroundColor: 0x000000,
-    backgroundAlpha: 0,
+    backgroundAlpha: 1, // Set to 1 for black bars
     resolution: window.devicePixelRatio || 1,
     autoDensity: true,
-    resizeTo: canvas, // KEY FIX: Auto-resize to match the canvas element size in DOM
+    resizeTo: canvas, // Auto-resize to match the canvas element size in DOM
   });
 
   // Create Video Texture
+  // Using direct DOM element source
   const texture = PIXI.Texture.from(videoElement);
+
+  // Ensure valid texture dimensions before creating sprite
+  if (!texture.valid) {
+    await new Promise(resolve => {
+      texture.once("update", resolve);
+      // Failsafe if already updated
+      if (texture.valid) resolve();
+    });
+  }
+
   const sprite = new PIXI.Sprite(texture);
 
-  // Aspect Ratio Fitting Logic (Covet/Contain)
-  // We want to CONTAIN the video so it is fully visible
-  // User complained about "Cutting", so we use CONTAIN (Letterbox)
+  // Aspect Ratio Fitting Logic (Start with Contain)
+  // We want to CONTAIN the video so it is fully visible (Letterbox style)
 
-  const screenW = app.screen.width;
-  const screenH = app.screen.height;
-  const videoW = texture.width;
-  const videoH = texture.height;
+  const fitAspectRatio = () => {
+    const screenW = app.screen.width;
+    const screenH = app.screen.height;
+    const videoW = texture.width; // Should be valid now
+    const videoH = texture.height;
 
-  const scale = Math.min(screenW / videoW, screenH / videoH);
-  sprite.scale.set(scale);
+    if (videoW && videoH) {
+      const scale = Math.min(screenW / videoW, screenH / videoH);
+      sprite.scale.set(scale);
 
-  // Center it
-  sprite.x = (screenW - videoW * scale) / 2;
-  sprite.y = (screenH - videoH * scale) / 2;
+      // Center it
+      sprite.x = (screenW - videoW * scale) / 2;
+      sprite.y = (screenH - videoH * scale) / 2;
+    }
+  };
+
+  fitAspectRatio();
+
+  // Re-calculate on resize
+  app.renderer.on("resize", fitAspectRatio);
 
   app.stage.addChild(sprite);
 
