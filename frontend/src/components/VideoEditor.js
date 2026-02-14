@@ -120,11 +120,11 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [activeOverlay, setActiveOverlay] = useState("none"); // none, tiktok, instagram, youtube
+  const [activeOverlay, setActiveOverlay] = useState("none"); // Default to clean view
   const [viralityScore, setViralityScore] = useState(0);
   const [viralityMetrics, setViralityMetrics] = useState([]);
   const [boostQuality, setBoostQuality] = useState(false); // The "Use VP9" Hack
-  const [activePreset, setActivePreset] = useState("custom"); // 'custom', 'podcast', 'gameplay', 'cinematic'
+  const [activePreset, setActivePreset] = useState("cinematic"); // Default to Cinematic for best first impression
 
   // NEW: Audio & Captions
   const [enhanceAudio, setEnhanceAudio] = useState(false);
@@ -146,20 +146,20 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       case "podcast":
         setEnhanceAudio(true);
         setIsVFXMode(false);
-        setActiveOverlay("tiktok"); // Standard 9:16 safe zone
+        setActiveOverlay("none"); // Keep it clean
         setBoostQuality(true);
         if (!captionText) setCaptionText("Podcast Guest Name");
         break;
       case "gameplay":
         setEnhanceAudio(false); // Game audio usually mixed
         setIsVFXMode(false);
-        setActiveOverlay("youtube");
+        setActiveOverlay("none");
         setBoostQuality(true);
         break;
       case "cinematic":
         setEnhanceAudio(true);
         setIsVFXMode(true); // Enable Gloss Shader
-        setActiveOverlay("none");
+        setActiveOverlay("none"); // Hide overlay, let the cinema look shine
         setBoostQuality(true);
         break;
       case "custom":
@@ -236,7 +236,8 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   }, [captionText]);
 
   // --- VFX Engine ---
-  const [isVFXMode, setIsVFXMode] = useState(false);
+  // Default to TRUE for full auto-magical experience
+  const [isVFXMode, setIsVFXMode] = useState(true);
   const [vfxLoading, setVfxLoading] = useState(false);
   const vfxCanvasRef = useRef(null);
   const vfxAppRef = useRef(null);
@@ -615,11 +616,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         }
 
         if (captionText) {
-          const sanitizedText = captionText.replace(/'/g, "");
+          const sanitizedText = captionText.replace(/'/g, "").toUpperCase(); // Force UPPERCASE for viral look
           const fontColor = captionColor === "yellow" ? "yellow" : "white";
-          // Bottom center position check simplified for stability
+          // Moved text higher (0.25) to be safe above TikTok/Reels description area without needing red guides
+          const yPos = "(h-text_h)-(h*0.25)";
           videoFilters.push(
-            `drawtext=fontfile=/arial.ttf:text='${sanitizedText}':fontcolor=${fontColor}:fontsize=48:box=1:boxcolor=black@0.6:boxborderw=5:x=(w-text_w)/2:y=(h-text_h)-150`
+            `drawtext=fontfile=/arial.ttf:text='${sanitizedText}':fontcolor=${fontColor}:fontsize=64:box=1:boxcolor=black@0.7:boxborderw=10:x=(w-text_w)/2:y=${yPos}`
           );
         }
 
@@ -761,11 +763,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               Gameplay
             </button>
             <button
+              id="cinematic-preset-btn"
               className={`preset-btn ${activePreset === "cinematic" ? "active" : ""}`}
               onClick={() => applyPreset("cinematic")}
             >
               <span className="preset-icon">🎬</span>
-              Cinematic
+              Cinematic (Viral)
             </button>
           </div>
 
@@ -941,12 +944,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             </div>
             {captionText && (
               <small style={{ color: "#888", display: "block", marginTop: "8px" }}>
-                Preview: Captions will be burned into the bottom center.
+                Preview: Captions are auto-positioned for maximum engagement (Safe Zone Compliant).
               </small>
             )}
           </div>
 
-          <div className="overlay-controls" style={{ marginBottom: "16px" }}>
+          <div className="overlay-controls" style={{ marginBottom: "16px", display: "none" }}>
             <span style={{ color: "#fff", fontWeight: "600", marginRight: "10px" }}>
               🛡️ Safe Zone:
             </span>
@@ -1011,7 +1014,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             </button>
           </div>
 
-          <div className="video-preview">
+          <div className="video-preview" style={{ marginBottom: "0" }}>
             {!file && images && images.length > 0 ? (
               <div
                 className="slideshow-container"
@@ -1149,22 +1152,6 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                     <div>🚀 Initializing GPU...</div>
                   </div>
                 )}
-
-                <div style={{ position: "absolute", top: 10, left: 10, zIndex: 100 }}>
-                  <button
-                    onClick={() => setIsVFXMode(!isVFXMode)}
-                    className="btn btn-secondary"
-                    style={{
-                      background: isVFXMode ? "#ff00ff" : "#444",
-                      border: "1px solid #fff",
-                      color: "#fff",
-                      fontWeight: "bold",
-                      textShadow: "0 0 5px #000",
-                    }}
-                  >
-                    {isVFXMode ? "⚡ VFX ENABLED (GPU)" : "👁️ VFX PREVIEW"}
-                  </button>
-                </div>
               </div>
             )}
             {safeCaptionText && (
@@ -1172,21 +1159,23 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 className="caption-preview-overlay"
                 style={{
                   position: "absolute",
-                  bottom: "15%", // Matches (h-text_h)-150 approx
+                  bottom: "35%", // NEW: Moved much higher to clear buttons/descriptions naturally
                   left: "50%",
                   transform: "translateX(-50%)",
                   color: captionColor,
                   fontFamily: "Arial, sans-serif",
-                  fontSize: "clamp(16px, 4vw, 32px)", // Responsive font size
-                  textShadow:
-                    "2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
+                  fontSize: "clamp(24px, 5vw, 42px)", // Larger, more engaging text
+                  fontWeight: "bold", // Bold for readability
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.9), -1px -1px 0 #000", // Stronger shadow
                   textAlign: "center",
                   pointerEvents: "none",
-                  backgroundColor: "rgba(0,0,0,0.6)",
+                  backgroundColor: "rgba(0,0,0,0.0)", // Transparent background looks more "native"
                   padding: "4px 8px",
                   borderRadius: "4px",
                   maxWidth: "90%",
+                  width: "100%",
                   zIndex: 20,
+                  whiteSpace: "pre-wrap",
                 }}
               >
                 {safeCaptionText}
@@ -1364,7 +1353,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 justifyContent: "center",
               }}
             >
-              {processing ? `Processing ${progress}%...` : "🚀 Save & Post"}
+              {processing ? `Processing ${progress}%...` : "✅ Save Video"}
             </button>
           </div>
           <p ref={messageRef} className="status-log"></p>

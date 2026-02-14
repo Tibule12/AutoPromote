@@ -194,14 +194,7 @@ const FacebookForm = ({
             <span className="emoji">🎬</span>
             <span>Reels</span>
           </div>
-          {/* Story API often limited, but keeping for UI completeness if supported later */}
-          <div
-            className={`card-option ${postType === "story" ? "selected" : ""}`}
-            onClick={() => setPostType("story")}
-          >
-            <span className="emoji">⏱️</span>
-            <span>Story</span>
-          </div>
+          {/* Stories removed as they are not currently implemented in backend */}
         </div>
       </div>
 

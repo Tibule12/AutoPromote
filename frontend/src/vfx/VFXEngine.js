@@ -122,6 +122,14 @@ export async function initVFXEngine(canvas, videoElement) {
       texture.source.update();
     }
 
+    // DEBUG: Check if texture is actually valid
+    if (app.ticker.lastTime % 1000 < 20) {
+      // Log roughly once per second
+      console.log(
+        `VFX Status: Texture Valid=${texture.valid}, Width=${texture.width}, Height=${texture.height}`
+      );
+    }
+
     // Check if uniforms object exists before assigning
     if (simpleFilter.uniforms) {
       simpleFilter.uniforms.time += 0.05 * delta.deltaTime;
