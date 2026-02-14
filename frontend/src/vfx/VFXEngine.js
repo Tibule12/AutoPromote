@@ -66,58 +66,36 @@ export async function initVFXEngine(canvas, videoElement) {
     resizeTo: undefined, // DISABLE DOM resizing which causes the drift/crop issues
   });
 
-  // In PixiJS v8, we should wrap the video element explicitly
-  // Update: Using cleaner constructor options for better compatibility
-  // Assets.load fails on blob URLs without extensions, so we use direct VideoSource
+  // Create VideoSource explicitly to bypass URL parsing (essential for Blob URLs)
   const source = new PIXI.VideoSource({
     resource: videoElement,
-    autoPlay: false,
-    autoLoad: true,
+    autoPlay: true,
+    loop: true,
+    autoLoad: true, // Force load immediately
   });
 
-  // Wait for the source to be ready before creating texture dependency
-  if (!source.isReady) {
-    console.log("WAITING FOR VIDEO SOURCE READY...");
-    try {
-      await source.load();
-    } catch (e) {
-      console.warn("Video source load warning:", e);
-    }
-  }
-
-  // Use Texture.from as a foolproof fallback if manual construction fails context
-  // Creating texture directly from source avoids blob URL parsing issues
+  // Create texture from the source directly - bypassing Assets loader
   const texture = new PIXI.Texture({ source });
 
+  // Wait for the source to be ready with a safety timeout (5 seconds)
+  // This prevents the engine from hanging if the browser delays the video load event
+  try {
+    const loadPromise = source.load();
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Source load timeout")), 5000)
+    );
+    await Promise.race([loadPromise, timeoutPromise]);
+  } catch (e) {
+    console.warn("VFX Engine: Source load warning (proceeding anyway):", e);
+  }
+
   // Ensure valid texture dimensions before creating sprite
-  if (!texture.valid || texture.width <= 1) {
-    console.log("WAITING FOR TEXTURE UPDATE (Polling)...");
+  // NOTE: We don't block here anymore because video textures often require the main loop
+  // to start ticking before they report valid dimensions. The ticker below handles updates.
 
-    // Force a tiny seek so the video decodes *something* (often needed on Chrome/Edge)
-    if (videoElement.paused && videoElement.currentTime < 0.1) {
-      videoElement.currentTime = 0.001;
-    }
-
-    await new Promise(resolve => {
-      // Shorter check interval instead of just 'once' event which might be missed
-      const checkInterval = setInterval(() => {
-        if (texture.valid && texture.width > 1) {
-          clearInterval(checkInterval);
-          resolve();
-        }
-        // Force update tick
-        try {
-          if (texture.source && texture.source.update) texture.source.update();
-        } catch (e) {}
-      }, 100);
-
-      // Timeout after 10s (reduced from 30s as polling is more active)
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        console.warn("Texture validation timed out, proceeding anyway.");
-        resolve(); // Don't crash, just try to render what we have
-      }, 10000);
-    });
+  // Force a tiny seek so the video decodes *something* (often needed on Chrome/Edge)
+  if (videoElement.paused && videoElement.currentTime < 0.1) {
+    videoElement.currentTime = 0.001;
   }
 
   const sprite = new PIXI.Sprite(texture);
@@ -136,6 +114,11 @@ export async function initVFXEngine(canvas, videoElement) {
 
   // Animation Loop - Safe Access
   app.ticker.add(delta => {
+    // Manually force update video source every frame - fixes black screen on some browsers
+    if (texture.source && texture.source.update) {
+      texture.source.update();
+    }
+
     // Check if uniforms object exists before assigning
     if (simpleFilter.uniforms) {
       simpleFilter.uniforms.time += 0.05 * delta.deltaTime;
