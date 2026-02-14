@@ -42,22 +42,31 @@ void main(void) {
 export async function initVFXEngine(canvas, videoElement) {
   if (!canvas || !videoElement) return null;
 
+  // 1. Critical: Ensure we have intrinsic video dimensions
+  // This prevents the "zoom/crop" bug by matching Pixi buffer 1:1 with Video file
+  if (videoElement.readyState < 1) {
+    await new Promise(r => {
+      videoElement.onloadedmetadata = r;
+    });
+  }
+  const vWidth = videoElement.videoWidth || 1280;
+  const vHeight = videoElement.videoHeight || 720;
+
   // Create Pixi Application
   const app = new PIXI.Application();
 
   await app.init({
-    canvas: canvas, // Updated for PixiJS v8+ (was 'view')
-    width: videoElement.videoWidth || 1080,
-    height: videoElement.videoHeight || 1920,
+    canvas: canvas,
+    width: vWidth,
+    height: vHeight,
     backgroundColor: 0x000000,
-    backgroundAlpha: 1, // Set to 1 for black bars
-    resolution: window.devicePixelRatio || 1,
-    autoDensity: true,
-    resizeTo: canvas, // Auto-resize to match the canvas element size in DOM
+    backgroundAlpha: 1,
+    resolution: 1, // Fix resolution to 1 to match video pixels exactly
+    autoDensity: false, // Let CSS handle the UI scaling
+    resizeTo: undefined, // DISABLE DOM resizing which causes the drift/crop issues
   });
 
   // Create Video Texture
-  // Using direct DOM element source
   const texture = PIXI.Texture.from(videoElement);
 
   // Ensure valid texture dimensions before creating sprite
@@ -84,40 +93,11 @@ export async function initVFXEngine(canvas, videoElement) {
 
   const sprite = new PIXI.Sprite(texture);
 
-  // Aspect Ratio Fitting Logic (Start with Contain)
-  // We want to CONTAIN the video so it is fully visible (Letterbox style)
+  // 2. Simple Layout: Fill the Stage
+  // Since stage == video size, this maps 1:1 without complex math
+  sprite.width = vWidth;
+  sprite.height = vHeight;
 
-  const fitAspectRatio = () => {
-    const screenW = app.screen.width;
-    const screenH = app.screen.height;
-    const videoW = texture.width || videoElement.videoWidth;
-    const videoH = texture.height || videoElement.videoHeight;
-
-    if (videoW && videoH) {
-      const scale = Math.min(screenW / videoW, screenH / videoH);
-      sprite.scale.set(scale);
-
-      // Center it
-      sprite.x = (screenW - videoW * scale) / 2;
-      sprite.y = (screenH - videoH * scale) / 2;
-    } else {
-      // Fallback or retry
-      sprite.scale.set(1);
-    }
-  };
-
-  fitAspectRatio();
-
-  // Re-calculate on resize
-  app.renderer.on("resize", fitAspectRatio);
-  // Also recalculate when texture updates (ensures dimensions are caught if loaded late)
-  texture.source.on("update", fitAspectRatio);
-  // For older Pixi versions or if source wrapper differs
-  texture.on("update", fitAspectRatio);
-
-  app.stage.addChild(sprite);
-
-  // Apply "Cinema Gloss" Shader
   const simpleFilter = new PIXI.Filter(undefined, cinemaShaderFrag, {
     time: 0.0,
     resolution: [app.screen.width, app.screen.height],
