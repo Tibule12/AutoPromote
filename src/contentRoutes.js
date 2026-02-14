@@ -508,8 +508,9 @@ router.post(
       // We start this promise but do NOT await it before sending the response.
       const performViralOptimization = async () => {
         try {
-          // AI CONTENT ENHANCEMENT TRIGGER
-          if (enhance_quality) {
+          // AI CONTENT ENHANCEMENT TRIGGER (Sci-Fi Auto-Fix Layer)
+          // Default to TRUE for videos to ensure retention guarantees (Silence trim, Loudness, Aspect)
+          if (type === "video" && enhance_quality !== false) {
             try {
               const { enqueueMediaTransformTask } = require("./services/mediaTransform");
               await enqueueMediaTransformTask({
