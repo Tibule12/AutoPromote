@@ -1,14 +1,24 @@
 const { db, admin } = require("../firebaseAdmin");
-const { spawn } = require("child_process");
+const ffmpeg = require("fluent-ffmpeg");
 const os = require("os");
 const path = require("path");
 const fs = require("fs");
-const { v4: uuidv4 } = require("../../lib/uuid-compat");
+const { v4: uuidv4 } = require("uuid"); // Ensure consistent uuid import
+
+// Configure FFmpeg path (Ensure ffmpeg is installed in environment or docker image)
+try {
+  const ffmpegPath = require("ffmpeg-static");
+  if (ffmpegPath) {
+    ffmpeg.setFfmpegPath(ffmpegPath);
+    console.log(`[MediaTransform] Using ffmpeg-static at ${ffmpegPath}`);
+  }
+} catch (e) {
+  console.warn("[MediaTransform] ffmpeg-static not found, relying on system PATH ffmpeg");
+}
 
 /**
- * Placeholder media transform service.
- * Real implementation should call FFmpeg or use a dedicated transcoding service
- * to trim, rotate, crop, or otherwise modify the media file in Storage.
+ * "Sci-Fi" Media Transform Service
+ * Automatically fixes "Retention Killers" (Silence, Bad Audio, Wrong Aspect Ratio)
  */
 async function enqueueMediaTransformTask({ contentId, uid, meta, url }) {
   if (!contentId) throw new Error("contentId required");
@@ -29,6 +39,106 @@ async function enqueueMediaTransformTask({ contentId, uid, meta, url }) {
   return { id: ref.id, ...baseTask };
 }
 
+/**
+ * FFmpeg Probe Wrapper
+ */
+function probeMedia(filePath) {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(filePath, (err, metadata) => {
+      if (err) return reject(err);
+      resolve(metadata);
+    });
+  });
+}
+
+function processMedia(inputFile, outputFile, options = {}) {
+  return new Promise((resolve, reject) => {
+    const {
+      trimSilence = true,
+      normalizeAudio = true,
+      fixAspectRatio = true,
+      targetAspectRatio = 9 / 16, // Default to TikTok/Reels vertical
+    } = options;
+
+    let command = ffmpeg(inputFile);
+    const complexFilters = [];
+
+    // 1. Retention Guard: Trim Silence at Start
+    // silenceremove=start_periods=1:start_duration=0.5:start_threshold=-40dB
+    if (trimSilence) {
+      // Applied as an audio filter. Note: this shifts audio. Video needs to be synced or we just cut content.
+      // FFmpeg 'silenceremove' only affects audio streams.
+      // To cut VIDEO based on audio silence is complex.
+      // Simplified "Sci-Fi" approach: We just cut the first 1.5s if it's dead silence,
+      // OR we rely on 'silenceremove' and let ffmpeg sync (it usually drops video frames to match).
+      // For safety, we will use a dedicated silence remover that works well.
+      complexFilters.push(
+        "[0:a]silenceremove=start_periods=1:start_duration=0.3:start_threshold=-35dB[a_trimmed]"
+      );
+    } else {
+      complexFilters.push("[0:a]anull[a_trimmed]");
+    }
+
+    // 2. Loudness Equalizer (Spotify/TikTok Standard)
+    // loudnorm=I=-16:TP=-1.5:LRA=11
+    if (normalizeAudio) {
+      // Chain from previous audio output
+      complexFilters.push("[a_trimmed]loudnorm=I=-16:TP=-1.5:LRA=11[a_out]");
+    } else {
+      complexFilters.push("[a_trimmed]anull[a_out]");
+    }
+
+    // 3. Format Defender (Aspect Ratio)
+    if (fixAspectRatio) {
+      // We need to decide if we blur-fill or pass through.
+      // This requires knowing input info, but we can use strict filter logic with 'scale' and 'pad'.
+      // "Blur Fill" Logic for 9:16 target:
+      // Split input -> Stream 1 (Background): Scale to 1080x1920 (Force), BoxBlur
+      // Split input -> Stream 2 (Foreground): Scale to fit 1080x1920 (Keep Aspect)
+      // Overlay Stream 2 on Stream 1.
+
+      // Note: This logic forces everything to 9:16.
+      // We should only do this if the user didn't opt out, or if we are sure it's for vertical platforms.
+      // For now, let's implement the generic "Smart Scale" which fits into 1080x1920 with black bars (pad)
+      // or blur fill. Blur fill is more professional ("Sci-Fi").
+
+      // Complex Filter Graph for Blur Fill:
+      // [0:v]split[v_bg][v_fg];
+      // [v_bg]scale=1080:1920:force_original_aspect_ratio=increase,boxblur=20:10[v_bg_blurred];
+      // [v_bg_blurred]crop=1080:1920[v_bg_cropped];
+      // [v_fg]scale=1080:1920:force_original_aspect_ratio=decrease[v_fg_scaled];
+      // [v_bg_cropped][v_fg_scaled]overlay=(W-w)/2:(H-h)/2[v_out]
+
+      complexFilters.push(`[0:v]split[v_bg][v_fg]`);
+      complexFilters.push(
+        `[v_bg]scale=1080:1920:force_original_aspect_ratio=increase,boxblur=20:10,crop=1080:1920[v_bg_processed]`
+      );
+      complexFilters.push(
+        `[v_fg]scale=1080:1920:force_original_aspect_ratio=decrease[v_fg_processed]`
+      );
+      complexFilters.push(`[v_bg_processed][v_fg_processed]overlay=(W-w)/2:(H-h)/2[v_out]`);
+    } else {
+      complexFilters.push(`[0:v]null[v_out]`);
+    }
+
+    command
+      .complexFilter(complexFilters)
+      .outputOptions([
+        "-map [v_out]",
+        "-map [a_out]",
+        "-c:v libx264",
+        "-preset veryfast", // speed over compression for user feedback loop
+        "-c:a aac",
+        "-b:a 192k",
+        "-pix_fmt yuv420p",
+        "-movflags +faststart", // Web optimization
+      ])
+      .save(outputFile)
+      .on("end", () => resolve())
+      .on("error", err => reject(err));
+  });
+}
+
 async function processNextMediaTransformTask() {
   // Fetch one queued media_transform task
   const snap = await db
@@ -36,138 +146,77 @@ async function processNextMediaTransformTask() {
     .where("type", "==", "media_transform")
     .where("status", "in", ["queued"])
     .orderBy("createdAt")
-    .limit(5)
+    .limit(1) // Process one at a time per worker tick
     .get();
+
   if (snap.empty) return null;
   const doc = snap.docs[0];
   const data = doc.data();
+
   await doc.ref.update({ status: "processing", updatedAt: new Date().toISOString() });
+
+  const tmpDir = os.tmpdir();
+  const tmpIn = path.join(tmpDir, `in-${data.contentId}.mp4`);
+  const tmpOut = path.join(tmpDir, `out-${data.contentId}.mp4`);
+
   try {
-    // If no sourceUrl is present, nothing to do
     if (!data.sourceUrl) throw new Error("sourceUrl missing");
 
-    // Placeholder for AI Quality Enhancement
-    if (data.meta && data.meta.quality_enhanced) {
-      console.log(
-        `[transform] Enhancing quality for content ${data.contentId} using AI-based upscale/denoise...`
-      );
-      // In a real implementation, this would call FFmpeg with specific filters or an external AI service.
-      // For now, we simulate the processing time.
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-
-    // If preview or external non-transformable URL, mirror without transformation
-    if (String(data.sourceUrl || "").startsWith("preview://")) {
-      const processedUrl = data.sourceUrl;
-      await db
-        .collection("content")
-        .doc(data.contentId)
-        .set(
-          { processedUrl, processedAt: new Date().toISOString(), processedMeta: data.meta || {} },
-          { merge: true }
-        );
-      await doc.ref.update({
-        status: "completed",
-        updatedAt: new Date().toISOString(),
-        completedAt: new Date().toISOString(),
-      });
-      return { id: doc.id, processedUrl };
-    }
-
-    // Download source to a temp file
-    const tmpDir = os.tmpdir();
-    const ext = path.extname(new URL(data.sourceUrl).pathname) || "";
-    const tmpIn = path.join(tmpDir, `in-${uuidv4()}${ext}`);
-    const tmpOut = path.join(tmpDir, `out-${uuidv4()}${ext || ".mp4"}`);
-
-    // Use fetch to download file (node-fetch/polyfilled global fetch may be present)
-    let okDownloaded = false;
-    try {
-      const fetchFn = global.fetch || require("node-fetch");
-      const res = await fetchFn(data.sourceUrl);
-      if (!res.ok) throw new Error(`download_failed(${res.status})`);
-      const dest = fs.createWriteStream(tmpIn);
-      await new Promise((resolve, reject) => {
-        res.body.pipe(dest);
-        res.body.on("error", reject);
-        dest.on("finish", resolve);
-        dest.on("error", reject);
-      });
-      okDownloaded = true;
-    } catch (e) {
-      console.warn("[transform] download failed", e && e.message);
-      // Attempt to see if we can read from GCS directly using the firebase-admin SDK
-      try {
-        const bucket = admin.storage().bucket();
-        // Try to convert https://.../o/encoded paths to bucket file path
-        // Fallback: attempt to copy with gs:// path if provided
-        const file = bucket.file(data.sourceUrl.replace(/^https?:\/\/.+?\/o\//, "").split("?")[0]);
-        await file.download({ destination: tmpIn });
-        okDownloaded = true;
-      } catch (e2) {
-        console.error("[transform] gcs download fallback failed", e2 && e2.message);
-      }
-    }
-    if (!okDownloaded) throw new Error("download_failed");
-
-    // -------------------------------------------------------------------------
-    // STRATEGIC TRANSFORM: Ensure unique hash for every repost (Bypass Algorithms)
-    // -------------------------------------------------------------------------
-
-    // Build ffmpeg args based on meta
-    // Default to a negligible visual change to force re-encoding and unique hash
-    const brightnessShift = Math.random() * 0.002 - 0.001; // +/- 0.001 brightness (invisible)
-    const uniqueId = uuidv4();
-    const args = ["-y", "-i", tmpIn];
-
-    // Apply filters (Strategic Obfuscation)
-    const filters = [`eq=brightness=${1.0 + brightnessShift}`];
-
-    // Optional: Trim slightly if requested or random variations enabled
-    const meta = data.meta || {};
-    if (meta.trimStart) {
-      args.push("-ss", String(meta.trimStart));
-    }
-
-    args.push("-vf", filters.join(","));
-
-    // Add unique metadata to further ensure hash collision avoidance
-    args.push("-metadata", `comment=AutoPromote-Safe-Repost-${uniqueId}`);
-
-    // Audio settings: Copy if possible, unless we need to re-encode (usually safer to copy for speed)
-    // But for full uniqueness, re-encoding audio with a generic filter is safer.
-    args.push("-c:a", "aac");
-
-    // Video settings: Re-encode is REQUIRED for visual hash changes
-    args.push("-c:v", "libx264");
-    args.push("-preset", "faster"); // Speed over compression ratio for reposts
-    args.push("-f", "mp4");
-
-    args.push(tmpOut);
-
-    console.log(`[transform] Executing FFmpeg strategic transform for ${data.contentId}...`);
-
+    // 1. Download source
+    console.log(`[MediaTransform] Downloading ${data.contentId}...`);
+    const fetchFn = global.fetch || require("node-fetch");
+    const res = await fetchFn(data.sourceUrl);
+    if (!res.ok) throw new Error(`download_failed(${res.status})`);
+    const fileStream = fs.createWriteStream(tmpIn);
     await new Promise((resolve, reject) => {
-      const p = spawn("ffmpeg", args);
-      // p.stdout.on("data", b => console.log(b.toString())); // Verbose
-      p.stderr.on("data", b => {
-        // FFmpeg writes progress to stderr, uncomment for debug
-        // console.log(b.toString());
-      });
-      p.on("close", code => {
-        if (code === 0) resolve();
-        else reject(new Error(`ffmpeg exited with code ${code}`));
-      });
-      p.on("error", reject);
+      res.body.pipe(fileStream);
+      res.body.on("error", reject);
+      fileStream.on("finish", resolve);
     });
 
-    console.log(`[transform]FFmpeg success. Uploading unique variant...`);
+    // 2. Probe to check current state
+    const metadata = await probeMedia(tmpIn);
+    const videoStream = metadata.streams.find(s => s.codec_type === "video");
+    const width = videoStream ? videoStream.width : 0;
+    const height = videoStream ? videoStream.height : 0;
+    const duration = metadata.format.duration || 0;
 
-    // Upload processed file back to storage (simulated or real)
-    // For local env, we might just update the URL to the local path if serving static,
-    // but usually we upload to a 'processed/' folder in the bucket.
+    // 3. Determine "Auto-Fix" Strategy
+    // Intelligent defaulting:
+    // If it's already vertical (height > width), don't blur-fill, just normalize.
+    // If it's horizontal (width > height) AND duration < 60s, assume it's a Short => APPLY BLUR FILL.
+    // If it's horizontal AND duration > 60s, assume it's Long Form => KEEP RATIO (YouTube).
 
-    // Assuming local simulation or Firebase Storage upload here:
+    let shouldFixRatio = false;
+    const isVertical = height > width;
+    const isShort = duration < 65; // Tolerance for 60s limit
+
+    if (!isVertical && isShort) {
+      console.log(
+        `[MediaTransform] 💡 Auto-Detected Horizontal Short (${duration}s). Applying 9:16 Blur-Fill.`
+      );
+      shouldFixRatio = true;
+    }
+
+    // 4. Run FFmpeg Processing
+    console.log(
+      `[MediaTransform] Processing ${data.contentId} (FixRatio: ${shouldFixRatio}, Normalize: true)...`
+    );
+
+    await processMedia(tmpIn, tmpOut, {
+      trimSilence: true, // Always clean the hook
+      normalizeAudio: true, // Always professional audio
+      fixAspectRatio: shouldFixRatio, // Intelligent formatting
+    });
+
+    // 5. Upload Processed File
+    // In a real app, upload back to storage bucket.
+    // Here we simulate by just logging success and updating the doc with "processedUrl" (mocked as same for demo, or new path)
+    // To make this real, we would upload `tmpOut` to `processed/${data.contentId}.mp4`
+
+    // For specific AutoPromote context, we likely want to overwrite or save as "optimized" version.
+    console.log(`[MediaTransform] Optimization Complete. New file ready.`);
+
     let bucket;
     try {
       bucket = admin.storage().bucket();
@@ -176,6 +225,7 @@ async function processNextMediaTransformTask() {
       bucket = require("../firebaseAdmin").admin.storage().bucket();
     }
 
+    const uniqueId = uuidv4();
     const destFileName = `processed/${data.contentId}/${uniqueId}.mp4`;
     const destFile = bucket.file(destFileName);
 
@@ -185,7 +235,8 @@ async function processNextMediaTransformTask() {
         contentType: "video/mp4",
         metadata: {
           originalContentId: data.contentId,
-          transformType: "strategic_rehash",
+          transformType: "sci_fi_autofix",
+          optimization: "silence_trim,loudness_norm,aspect_fix",
         },
       },
     });
@@ -196,72 +247,41 @@ async function processNextMediaTransformTask() {
       expires: "03-01-2500", // Far future
     });
 
-    // Cleanup temp
-    try {
-      fs.unlinkSync(tmpIn);
-      fs.unlinkSync(tmpOut);
-    } catch (_) {}
-
-    await db.collection("content").doc(data.contentId).set(
-      {
-        processedUrl: finalUrl,
-        lastTransformAt: new Date().toISOString(),
-        transformMeta: {
-          uniqueId,
-          brightnessShift,
-        },
-      },
-      { merge: true }
-    );
-
     await doc.ref.update({
       status: "completed",
       updatedAt: new Date().toISOString(),
       completedAt: new Date().toISOString(),
+      processingLog: `Auto-Fixed: Silence Trimmed, Audio Normalized (-16LUFS)${shouldFixRatio ? ", 9:16 Blur-Fill Applied" : ""}`,
+      wasOptimized: true,
       outputUrl: finalUrl,
     });
 
-    // -------------------------------------------------------------------------
-    // CHAINING: Automatically enqueue the post task if requested (The "After" Step)
-    // -------------------------------------------------------------------------
-    try {
-      if (meta && meta.postAfterTransform && Array.isArray(meta.postAfterTransform)) {
-        console.log(
-          `[transform] Chaining post-transform tasks for: ${meta.postAfterTransform.join(",")}`
-        );
-        for (const platform of meta.postAfterTransform) {
-          try {
-            const { enqueuePlatformPostTask } = require("./promotionTaskQueue");
-            await enqueuePlatformPostTask({
-              contentId: data.contentId,
-              uid: data.uid,
-              platform,
-              reason: "post_transform",
-              // PASS THE NEW UNIQUE URL
-              payload: {
-                url: finalUrl,
-                mediaUrl: finalUrl, // normalized
-                message: meta.nextMessage || "Reposting this gem!",
-                platformOptions: meta.platformOptions || {},
-              },
-              skipIfDuplicate: false, // We just made it unique, so force it!
-              forceRepost: true,
-            });
-          } catch (e) {
-            console.error(`[transform] Failed to chain post for ${platform}:`, e.message);
-          }
-        }
-      }
-    } catch (_) {}
+    // Update Content Document
+    await db.collection("content").doc(data.contentId).set(
+      {
+        processedUrl: finalUrl,
+        lastTransformAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
 
-    return { id: doc.id, processedUrl: finalUrl };
-  } catch (err) {
+    return { id: doc.id, success: true };
+  } catch (e) {
+    console.warn("[MediaTransform] Task Failed", e.message);
     await doc.ref.update({
       status: "failed",
-      error: err.message || "transform_failed",
+      error: e.message,
       updatedAt: new Date().toISOString(),
     });
-    return { id: doc.id, error: err.message || "transform_failed" };
+    return null;
+  } finally {
+    // Cleanup
+    try {
+      if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn);
+      if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut);
+    } catch (cleanupErr) {
+      console.error("Cleanup error", cleanupErr);
+    }
   }
 }
 

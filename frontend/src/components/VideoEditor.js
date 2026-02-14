@@ -179,28 +179,32 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   useEffect(() => {
     if (loaded) {
       if (file) {
-        // Create object URL for preview
+        // Video Mode
         const url = URL.createObjectURL(file);
         setVideoSrc(url);
-        setHasTranscribed(false); // Reset for new file
-        setCaptionText(""); // Clear old captions
+        setHasTranscribed(false);
+        setCaptionText("");
         setStartTime(0);
         setEndTime(0);
         return () => URL.revokeObjectURL(url);
       } else if (images && images.length > 0) {
-        // Slideshow Mode: Preview first image
-        // To be fully functional, this needs a canvas renderer, but for now we preview the first frame.
-        const url = URL.createObjectURL(images[0]);
+        // Slideshow Mode
+        const url = URL.createObjectURL(images[currentImageIndex]);
         setVideoSrc(url);
-        setCaptionText("Slideshow: Add audio to generate captions");
-        log(`🎬 Slideshow Mode: ${images.length} images loaded.`);
+        // Only set default text once
+        if (captionText === "") {
+          setCaptionText("Slideshow: Add audio to generate captions");
+        }
+        log(`🎬 Slideshow Mode: Showing image ${currentImageIndex + 1} of ${images.length}`);
         return () => URL.revokeObjectURL(url);
       }
     }
-  }, [file, images, loaded]);
+  }, [file, images, loaded, currentImageIndex]); // Added currentImageIndex dependency
 
   useEffect(() => {
     // Auto-transcribe once video source is ready
@@ -298,6 +302,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       const options = {
         task: translateToEnglish ? "translate" : "transcribe",
         chunk_length_s: 30,
+        return_timestamps: true, // Critical for Hook Analysis
       };
 
       const result = await transcriber(videoSrc, options);
@@ -306,6 +311,31 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       if (result && result.text) {
         let text = result.text.trim();
         const lower = text.toLowerCase();
+
+        // --- ALGORITHM GUARD: 3-Second Hook Analysis ---
+        // Verify if the first meaningful spoken chunk starts within the first 3 seconds.
+        if (result.chunks && result.chunks.length > 0) {
+          const firstChunk = result.chunks[0];
+          const [start, end] = firstChunk.timestamp;
+
+          // If the first word appears after 3 seconds, it's a retention killer.
+          if (start > 3.0) {
+            log("⚠️ ALGORITHM ALERT: First 3 seconds are silent. This kills retention.");
+            setViralityScore(prev => Math.max(0, prev - 25)); // Heavy penalty
+            setViralityMetrics(prev => [
+              ...prev,
+              "❌ Slow Start (>3s silence) - Cut the beginning!",
+            ]);
+            // Auto-suggest trim if not already set? (Advanced)
+            if (startTime === 0) {
+              setStartTime(start);
+              log(`💡 Auto-suggestion: Trim start to ${start}s`);
+            }
+          } else {
+            log("✅ Hook Check: Audio starts immediately.");
+            setViralityMetrics(prev => [...prev, "✅ Fast Hook (<3s)"]);
+          }
+        }
 
         // Smart Audio Intelligence: Distinguish between Hallucinations and Real Audio Events
         const soundTags = {
@@ -377,76 +407,132 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     const outputName = "output.mp4";
 
     try {
-      // Write file to memory
-      await ffmpeg.writeFile(inputName, await fetchFile(file));
+      if (images && images.length > 0) {
+        // --- SLIDESHOW MODE ---
+        log("🎬 Generating slideshow from images...");
 
-      const args = ["-i", inputName, "-ss", startTime.toString(), "-to", endTime.toString()];
-
-      // --- FILTER CHAINS ---
-      const videoFilters = [];
-      const audioFilters = [];
-
-      // 1. VIDEO FILTERS
-      if (boostQuality) {
-        if (activeOverlay === "youtube") {
-          videoFilters.push("scale=2560:1440:flags=lanczos");
-        } else if (["tiktok", "instagram"].includes(activeOverlay)) {
-          videoFilters.push("scale=1080:-2:flags=lanczos");
+        // 1. Write frames to FS
+        for (let i = 0; i < images.length; i++) {
+          const fname = `img${String(i).padStart(3, "0")}.jpg`;
+          await ffmpeg.writeFile(fname, await fetchFile(images[i]));
         }
-      }
 
-      if (captionText) {
-        const sanitizedText = captionText.replace(/'/g, "");
-        const fontColor = captionColor === "yellow" ? "yellow" : "white";
-        // Bottom center position check simplified for stability
-        videoFilters.push(
-          `drawtext=fontfile=/arial.ttf:text='${sanitizedText}':fontcolor=${fontColor}:fontsize=48:box=1:boxcolor=black@0.6:boxborderw=5:x=(w-text_w)/2:y=(h-text_h)-150`
-        );
-      }
+        // 2. Build FFmpeg command for slideshow
+        // Framerate 1/3 means 1 frame every 3 seconds (3s per slide)
+        // scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2
+        // This ensures all images fit into a 9:16 vertical video (TikTok style) with black bars if needed
+        const args = [
+          "-framerate",
+          "1/3",
+          "-i",
+          "img%03d.jpg",
+          "-vf",
+          "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p",
+          "-c:v",
+          "libx264",
+          "-r",
+          "30", // Output 30fps
+          "-pix_fmt",
+          "yuv420p",
+          outputName,
+        ];
 
-      if (videoFilters.length > 0) {
-        args.push("-vf", videoFilters.join(","));
-      }
+        // Note: Audio muxing logic would go here if we had an audio file
 
-      // 2. AUDIO FILTERS
-      if (enhanceAudio) {
-        log("Applying Studio Mic Enhancement...");
-        audioFilters.push(
-          "highpass=f=80,acompressor=threshold=-12dB:ratio=4:attack=50:release=200"
-        );
-      }
+        log("⏳ Rendering Slideshow...");
+        await ffmpeg.exec(args);
+      } else {
+        // --- VIDEO MODE ---
+        // Write file to memory
+        await ffmpeg.writeFile(inputName, await fetchFile(file));
 
-      if (audioFilters.length > 0) {
-        args.push("-af", audioFilters.join(","));
-      }
+        const args = ["-i", inputName, "-ss", startTime.toString(), "-to", endTime.toString()];
 
-      // --- ENCODING SETTINGS ---
-      if (videoFilters.length > 0 || boostQuality) {
-        args.push("-c:v", "libx264");
-        args.push("-preset", "ultrafast");
-        if (boostQuality && ["tiktok", "instagram"].includes(activeOverlay)) {
-          args.push("-profile:v", "high");
-          args.push("-b:v", "15M");
-        } else if (boostQuality) {
-          args.push("-b:v", "15M");
+        // --- FILTER CHAINS ---
+        const videoFilters = [];
+        const audioFilters = [];
+
+        // 1. VIDEO FILTERS
+        if (boostQuality) {
+          if (activeOverlay === "youtube") {
+            videoFilters.push("scale=2560:1440:flags=lanczos");
+          } else if (["tiktok", "instagram"].includes(activeOverlay)) {
+            videoFilters.push("scale=1080:-2:flags=lanczos");
+          }
         }
-      } else {
-        args.push("-c:v", "copy");
+
+        if (captionText) {
+          const sanitizedText = captionText.replace(/'/g, "");
+          const fontColor = captionColor === "yellow" ? "yellow" : "white";
+          // Bottom center position check simplified for stability
+          videoFilters.push(
+            `drawtext=fontfile=/arial.ttf:text='${sanitizedText}':fontcolor=${fontColor}:fontsize=48:box=1:boxcolor=black@0.6:boxborderw=5:x=(w-text_w)/2:y=(h-text_h)-150`
+          );
+        }
+
+        if (videoFilters.length > 0) {
+          args.push("-vf", videoFilters.join(","));
+        }
+
+        // 2. AUDIO FILTERS
+        if (enhanceAudio) {
+          log("Applying Studio Mic Enhancement + Loudness Normalization...");
+          // Chain: Highpass (Cleanup) -> Compressor (Dynamics) -> Loudnorm (Algorithm Consistency)
+          // loudnorm=I=-16:TP=-1.5:LRA=11 is the standard mobile/social target (slightly louder than broadcast)
+          audioFilters.push(
+            "highpass=f=80,acompressor=threshold=-12dB:ratio=4:attack=50:release=200,loudnorm=I=-16:TP=-1.5:LRA=11"
+          );
+        }
+
+        if (audioFilters.length > 0) {
+          args.push("-af", audioFilters.join(","));
+        }
+
+        // --- ENCODING SETTINGS ---
+        if (videoFilters.length > 0 || boostQuality) {
+          args.push("-c:v", "libx264");
+          args.push("-preset", "ultrafast");
+          if (boostQuality && ["tiktok", "instagram"].includes(activeOverlay)) {
+            args.push("-profile:v", "high");
+            args.push("-b:v", "15M");
+          } else if (boostQuality) {
+            args.push("-b:v", "15M");
+          }
+        } else {
+          args.push("-c:v", "copy");
+        }
+
+        if (audioFilters.length > 0) {
+          args.push("-c:a", "aac");
+        } else {
+          args.push("-c:a", "copy");
+        }
+
+        args.push(outputName);
+
+        await ffmpeg.exec(args);
       }
-
-      if (audioFilters.length > 0) {
-        args.push("-c:a", "aac");
-      } else {
-        args.push("-c:a", "copy");
-      }
-
-      args.push(outputName);
-
-      await ffmpeg.exec(args);
 
       const data = await ffmpeg.readFile(outputName);
       const newBlob = new Blob([data.buffer], { type: "video/mp4" });
-      const newFile = new File([newBlob], `trimmed_${file.name}`, { type: "video/mp4" });
+
+      // SEO Filename Generation: Use first 4-5 words of caption if available for Algorithm SEO
+      let seoFilename = "";
+      if (captionText) {
+        seoFilename = captionText
+          .replace(/[^a-z0-9]/gi, "_")
+          .toLowerCase()
+          .split("_")
+          .filter(w => w.length > 2)
+          .slice(0, 5)
+          .join("_");
+      }
+      if (!seoFilename) seoFilename = "viral_edit";
+
+      const filename = file
+        ? `${seoFilename}_${Date.now()}.mp4`
+        : `slideshow_${seoFilename}_${Date.now()}.mp4`;
+      const newFile = new File([newBlob], filename, { type: "video/mp4" });
 
       onSave(newFile);
     } catch (err) {
@@ -455,8 +541,16 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     } finally {
       setProcessing(false);
       try {
-        await ffmpeg.deleteFile(inputName);
+        if (file) await ffmpeg.deleteFile(inputName);
         await ffmpeg.deleteFile(outputName);
+        // Clean up images if they exist
+        if (images && images.length > 0) {
+          for (let i = 0; i < images.length; i++) {
+            try {
+              await ffmpeg.deleteFile(`img${String(i).padStart(3, "0")}.jpg`);
+            } catch (e) {}
+          }
+        }
       } catch (e) {}
     }
   };
@@ -659,13 +753,99 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           </div>
 
           <div className="video-preview">
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              controls
-              onLoadedMetadata={handleMetadataLoaded}
-              width="100%"
-            />
+            {!file && images && images.length > 0 ? (
+              <div
+                className="slideshow-container"
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  aspectRatio: "9/16",
+                  background: "#000",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <img
+                  src={videoSrc}
+                  alt={`Slide ${currentImageIndex + 1}`}
+                  style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+                />
+
+                {images.length > 1 && (
+                  <div
+                    className="slideshow-controls"
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "0 10px",
+                      pointerEvents: "auto",
+                      transform: "translateY(-50%)",
+                    }}
+                  >
+                    <button
+                      onClick={() => setCurrentImageIndex(prev => Math.max(0, prev - 1))}
+                      disabled={currentImageIndex === 0}
+                      style={{
+                        background: "rgba(0,0,0,0.5)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "50%",
+                        width: "40px",
+                        height: "40px",
+                        cursor: currentImageIndex === 0 ? "default" : "pointer",
+                        opacity: currentImageIndex === 0 ? 0.3 : 1,
+                      }}
+                    >
+                      ◀
+                    </button>
+                    <button
+                      onClick={() =>
+                        setCurrentImageIndex(prev => Math.min(images.length - 1, prev + 1))
+                      }
+                      disabled={currentImageIndex === images.length - 1}
+                      style={{
+                        background: "rgba(0,0,0,0.5)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "50%",
+                        width: "40px",
+                        height: "40px",
+                        cursor: currentImageIndex === images.length - 1 ? "default" : "pointer",
+                        opacity: currentImageIndex === images.length - 1 ? 0.3 : 1,
+                      }}
+                    >
+                      ▶
+                    </button>
+                  </div>
+                )}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    color: "white",
+                    background: "rgba(0,0,0,0.5)",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                  }}
+                >
+                  {currentImageIndex + 1} / {images.length}
+                </div>
+              </div>
+            ) : (
+              <video
+                ref={videoRef}
+                src={videoSrc}
+                controls
+                onLoadedMetadata={handleMetadataLoaded}
+                width="100%"
+              />
+            )}
             {captionText && (
               <div
                 className="caption-preview-overlay"

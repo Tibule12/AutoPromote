@@ -1,6 +1,9 @@
 # Use Node.js 18 Alpine for smaller image size
 FROM node:18-alpine
 
+# Install system dependencies (FFmpeg for media processing)
+RUN apk add --no-cache ffmpeg
+
 # Set working directory
 WORKDIR /app
 
@@ -12,6 +15,10 @@ RUN npm ci --only=production
 
 # Copy source code
 COPY . .
+
+# Build frontend static assets (React)
+# Installs frontend deps, builds, then cleans up to save space
+RUN npm run build:frontend && rm -rf frontend/node_modules
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
