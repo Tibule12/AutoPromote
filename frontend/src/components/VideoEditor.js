@@ -196,6 +196,39 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     return String(captionText); // Explicit string cast
   }, [captionText]);
 
+  // --- VFX Engine ---
+  const [isVFXMode, setIsVFXMode] = useState(false);
+  const vfxCanvasRef = useRef(null);
+  const vfxAppRef = useRef(null);
+
+  useEffect(() => {
+    if (isVFXMode && vfxCanvasRef.current && videoRef.current) {
+      log("Initializing VFX Engine...");
+      // Lazy load to avoid crash if path correct
+      import("../vfx/VFXEngine")
+        .then(({ initVFXEngine }) => {
+          return initVFXEngine(vfxCanvasRef.current, videoRef.current);
+        })
+        .then(app => {
+          vfxAppRef.current = app;
+          log("VFX Engine Active: Cyberpunk Shader Loaded");
+        })
+        .catch(err => {
+          console.error("VFX Init Failed", err);
+          log("VFX Engine Failed: " + err.message);
+          setIsVFXMode(false);
+        });
+
+      return () => {
+        if (vfxAppRef.current) {
+          vfxAppRef.current.destroy();
+          vfxAppRef.current = null;
+        }
+      };
+    }
+  }, [isVFXMode, safeVideoSrc]);
+  // ------------------
+
   useEffect(() => {
     if (loaded) {
       if (file) {
@@ -456,8 +489,69 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
         log("⏳ Rendering Slideshow...");
         await ffmpeg.exec(args);
+      } else if (isVFXMode && vfxCanvasRef.current) {
+        // --- GPU VFX MODE ---
+        // Capture WebGL Canvas + Original Audio + FFmpeg Muxing
+        log("🎬 Starting GPU Render Capture...");
+        const stream = vfxCanvasRef.current.captureStream(30);
+
+        // Use MediaRecorder to capture the visual output
+        const recorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
+        const chunks = [];
+
+        await new Promise((resolve, reject) => {
+          recorder.ondataavailable = e => {
+            if (e.data.size > 0) chunks.push(e.data);
+          };
+          recorder.onstop = resolve;
+          recorder.onerror = reject;
+
+          // Replay video to drive rendering
+          videoRef.current.currentTime = 0;
+          videoRef.current.play();
+          recorder.start();
+
+          videoRef.current.onended = () => {
+            recorder.stop();
+            videoRef.current.onended = null;
+          };
+
+          // Failsafe
+          setTimeout(
+            () => {
+              if (recorder.state === "recording") recorder.stop();
+            },
+            videoRef.current.duration * 1000 + 2000
+          );
+        });
+
+        const vfxBlob = new Blob(chunks, { type: "video/webm" });
+        await ffmpeg.writeFile("vfx_capture.webm", await fetchFile(vfxBlob));
+        await ffmpeg.writeFile(inputName, await fetchFile(file));
+
+        // Mux: Visuals from Capture (0:v), Audio from Original (1:a)
+        // Convert to MP4 for compatibility
+        log("🔄 Muxing Audio & Converting...");
+        await ffmpeg.exec([
+          "-i",
+          "vfx_capture.webm",
+          "-i",
+          inputName,
+          "-map",
+          "0:v",
+          "-map",
+          "1:a",
+          "-c:v",
+          "libx264",
+          "-preset",
+          "ultrafast",
+          "-c:a",
+          "aac",
+          "-shortest",
+          outputName,
+        ]);
       } else {
-        // --- VIDEO MODE ---
+        // --- STANDARD VIDEO MODE ---
         // Write file to memory
         await ffmpeg.writeFile(inputName, await fetchFile(file));
 
@@ -853,13 +947,49 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 </div>
               </div>
             ) : (
-              <video
-                ref={videoRef}
-                src={safeVideoSrc}
-                controls
-                onLoadedMetadata={handleMetadataLoaded}
-                width="100%"
-              />
+              <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                <video
+                  ref={videoRef}
+                  src={safeVideoSrc}
+                  controls
+                  onLoadedMetadata={handleMetadataLoaded}
+                  style={{
+                    width: "100%",
+                    // When VFX is on, we hide the video visually but keep it for audio/texture source
+                    opacity: isVFXMode ? 0 : 1,
+                    position: isVFXMode ? "absolute" : "relative",
+                  }}
+                  crossOrigin="anonymous"
+                />
+
+                {isVFXMode && (
+                  <canvas
+                    ref={vfxCanvasRef}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      position: "relative", // Canvas takes the flow
+                      pointerEvents: "none", // Let clicks pass to video controls if needed, though Opacity 0 makes it tricky
+                    }}
+                  />
+                )}
+
+                <div style={{ position: "absolute", top: 10, left: 10, zIndex: 100 }}>
+                  <button
+                    onClick={() => setIsVFXMode(!isVFXMode)}
+                    className="btn btn-secondary"
+                    style={{
+                      background: isVFXMode ? "#ff00ff" : "#444",
+                      border: "1px solid #fff",
+                      color: "#fff",
+                      fontWeight: "bold",
+                      textShadow: "0 0 5px #000",
+                    }}
+                  >
+                    {isVFXMode ? "⚡ VFX ENABLED (GPU)" : "👁️ VFX PREVIEW"}
+                  </button>
+                </div>
+              </div>
             )}
             {safeCaptionText && (
               <div
