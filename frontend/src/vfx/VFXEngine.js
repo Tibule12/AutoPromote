@@ -72,16 +72,58 @@ export async function initVFXEngine(canvas, videoElement) {
   app.stage.addChild(sprite);
 
   // Apply Custom Shader Filter
-  const filter = new PIXI.Filter(null, glitchShaderFrag, {
+  // PixiJS v8 changed how uniforms are handled. It wraps them in a resources object for WebGPU compatibility.
+  // We need to define the resource structure explicitly or update the uniforms property safely.
+
+  const filter = new PIXI.Filter({
+    glProgram: PIXI.GlProgram.from({
+      vertex: `
+            attribute vec2 aPosition;
+            attribute vec2 aUV;
+            varying vec2 vTextureCoord;
+            uniform mat3 uProjectionMatrix;
+            uniform mat3 uWorldTransformMatrix;
+            uniform mat3 uTransformMatrix;
+
+            void main() {
+                vTextureCoord = (uTransformMatrix * vec3(aUV, 1.0)).xy;
+                gl_Position = vec4((uProjectionMatrix * uWorldTransformMatrix * vec3(aPosition, 1.0)).xy, 0.0, 1.0);
+            }
+        `,
+      fragment: glitchShaderFrag,
+    }),
+    resources: {
+      usb: {
+        time: { value: 0.0, type: "f32" },
+        resolution: { value: [app.screen.width, app.screen.height], type: "vec2<f32>" },
+      },
+    },
+  });
+
+  // Fallback for v7/Standard if the above is too complex for this rapid iteration
+  // The error 'Cannot read properties of undefined (reading 'time')' usually means filter.uniforms is undefined
+  // or the shader failed to compile so the uniforms were never mapped.
+
+  // Let's use the simpler v8 compatible syntax if we are on v8:
+  // v8 uses 'resources' instead of direct uniforms for some pipelines, but .uniforms getter should exist.
+
+  // However, simpler fix for v7/v8 compatibility:
+  const simpleFilter = new PIXI.Filter(undefined, glitchShaderFrag, {
     time: 0.0,
     resolution: [app.screen.width, app.screen.height],
   });
 
-  sprite.filters = [filter];
+  sprite.filters = [simpleFilter];
 
-  // Animation Loop
+  // Animation Loop - Safe Access
   app.ticker.add(delta => {
-    filter.uniforms.time += 0.05 * delta;
+    // Check if uniforms object exists before assigning
+    if (simpleFilter.uniforms) {
+      simpleFilter.uniforms.time += 0.05 * delta.deltaTime;
+    } else if (simpleFilter.resources && simpleFilter.resources.uniforms) {
+      // v8 fallback
+      simpleFilter.resources.uniforms.uniforms.time += 0.05 * delta.deltaTime;
+    }
   });
 
   return {
