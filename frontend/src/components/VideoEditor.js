@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from "react";
 // import { FFmpeg } from "@ffmpeg/ffmpeg"; // Commented out to fix build warning, loaded via CDN
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
-import DOMPurify from "dompurify";
 import "./VideoEditor.css";
 
 // Helper to load FFmpeg
@@ -231,8 +230,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
   const safeCaptionText = React.useMemo(() => {
     if (!captionText) return null;
-    // Double-sanitization: Cast to string AND strip HTML tags
-    return DOMPurify.sanitize(String(captionText), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+    // React escapes children by default, protecting against XSS.
+    // We simply cast to string to be safe.
+    return String(captionText);
   }, [captionText]);
 
   // --- VFX Engine ---
