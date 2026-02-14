@@ -72,11 +72,11 @@ export async function initVFXEngine(canvas, videoElement) {
   // Ensure valid texture dimensions before creating sprite
   if (!texture.valid) {
     console.log("WAITING FOR TEXTURE UPDATE...");
-    await new Promise(resolve => {
+    await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        console.warn("Texture update timed out, forcing resolve");
-        resolve();
-      }, 2000); // 2s timeout
+        console.warn("Texture update timed out!");
+        reject(new Error("GPU Texture Timeout (30s)"));
+      }, 30000); // 30s timeout per user request
 
       texture.once("update", () => {
         clearTimeout(timeout);
