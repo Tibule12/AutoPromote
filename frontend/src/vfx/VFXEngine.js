@@ -59,6 +59,8 @@ export async function initVFXEngine(canvas, videoElement) {
   // Create Video Texture
   // Direct creation from DOM element is more robust for Blobs than Assets.load
   const texture = PIXI.Texture.from(videoElement);
+  const sprite = new PIXI.Sprite(texture);
+
   sprite.width = app.screen.width;
   sprite.height = app.screen.height;
 
