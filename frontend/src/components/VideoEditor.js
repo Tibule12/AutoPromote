@@ -237,12 +237,15 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
   // --- VFX Engine ---
   const [isVFXMode, setIsVFXMode] = useState(false);
+  const [vfxLoading, setVfxLoading] = useState(false);
   const vfxCanvasRef = useRef(null);
   const vfxAppRef = useRef(null);
 
   useEffect(() => {
     if (isVFXMode && vfxCanvasRef.current && videoRef.current) {
-      log("Initializing VFX Engine...");
+      setVfxLoading(true);
+      log("Initializing GPU VFX Engine...");
+
       // Lazy load to avoid crash if path correct
       import("../vfx/VFXEngine")
         .then(({ initVFXEngine }) => {
@@ -250,12 +253,14 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         })
         .then(app => {
           vfxAppRef.current = app;
-          log("VFX Engine Active: Cyberpunk Shader Loaded");
+          setVfxLoading(false);
+          log("VFX Engine Active: Cinematic Shader Loaded");
         })
         .catch(err => {
           console.error("VFX Init Failed", err);
           log("VFX Engine Failed: " + err.message);
           setIsVFXMode(false);
+          setVfxLoading(false);
         });
 
       return () => {
@@ -1102,8 +1107,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                     width: "100%",
                     display: "block", // Removes bottom gap
                     // Keep relative so it dictates container height
-                    // When VFX is on, we hide it visually (opacity 0) so canvas shows on top
-                    opacity: isVFXMode ? 0 : 1,
+                    // When VFX is on AND loaded, we hide original (opacity 0).
+                    // While loading, we keep original visible so screen isn't black.
+                    opacity: isVFXMode && !vfxLoading ? 0 : 1,
                     position: "relative",
                   }}
                   crossOrigin="anonymous"
@@ -1122,6 +1128,26 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                       pointerEvents: "none", // Allow clicks to pass through to the video elements
                     }}
                   />
+                )}
+
+                {vfxLoading && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      background: "rgba(0,0,0,0.8)",
+                      color: "#fff",
+                      padding: "20px",
+                      borderRadius: "12px",
+                      zIndex: 200,
+                      textAlign: "center",
+                    }}
+                  >
+                    <div className="spinner" style={{ margin: "0 auto 10px auto" }}></div>
+                    <div>🚀 Initializing GPU...</div>
+                  </div>
                 )}
 
                 <div style={{ position: "absolute", top: 10, left: 10, zIndex: 100 }}>
