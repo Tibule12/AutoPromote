@@ -47,7 +47,7 @@ export async function initVFXEngine(canvas, videoElement) {
   const app = new PIXI.Application();
 
   await app.init({
-    view: canvas,
+    canvas: canvas, // Updated for PixiJS v8+ (was 'view')
     width: videoElement.videoWidth || 1080,
     height: videoElement.videoHeight || 1920,
     backgroundColor: 0x000000,
@@ -57,13 +57,8 @@ export async function initVFXEngine(canvas, videoElement) {
   });
 
   // Create Video Texture
-  // Note: Modern browsers require user interaction to play video texture sometimes.
-  const texture = await PIXI.Assets.load(videoElement.src);
-  // Or create manually if needed: const texture = PIXI.Texture.from(videoElement);
-
-  const sprite = new PIXI.Sprite(texture);
-
-  // Fit to screen (cover or contain logic)
+  // Direct creation from DOM element is more robust for Blobs than Assets.load
+  const texture = PIXI.Texture.from(videoElement);
   sprite.width = app.screen.width;
   sprite.height = app.screen.height;
 
