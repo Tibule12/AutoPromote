@@ -66,12 +66,33 @@ export async function initVFXEngine(canvas, videoElement) {
     resizeTo: undefined, // DISABLE DOM resizing which causes the drift/crop issues
   });
 
-  // Create Video Texture
-  const texture = PIXI.Texture.from(videoElement);
+  // Create Video Source & Texture
+  // In PixiJS v8, we should wrap the video element explicitly
+  const source = new PIXI.VideoSource({
+    resource: videoElement,
+    autoPlay: false, // Don't force play, let React handle it
+    autoLoad: true,
+  });
+
+  const texture = new PIXI.Texture({ source });
+
+  // Force a texture update attempt
+  // Sometimes video textures sleep if not rendered
+  try {
+    source.update();
+  } catch (e) {
+    // Ignore source update errors
+  }
 
   // Ensure valid texture dimensions before creating sprite
-  if (!texture.valid) {
+  if (!texture.valid || texture.width <= 1) {
     console.log("WAITING FOR TEXTURE UPDATE...");
+
+    // 1. Force a tiny seek so the video decodes *something* (often needed on Chrome/Edge)
+    if (videoElement.paused && videoElement.currentTime === 0) {
+      videoElement.currentTime = 0.001;
+    }
+
     await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         console.warn("Texture update timed out!");
