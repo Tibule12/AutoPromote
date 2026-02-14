@@ -220,6 +220,7 @@ function ContentUploadForm({
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [sourceFiles, setSourceFiles] = useState([]); // Store all uploaded files (images)
   const videoRef = useRef(null);
   const [showCropper, setShowCropper] = useState(false);
   const [showVideoEditor, setShowVideoEditor] = useState(false);
@@ -2149,8 +2150,16 @@ function ContentUploadForm({
     }
   };
 
-  const handleFileChange = selected => {
-    setFile(selected);
+  const handleFileChange = (selected, allFiles = []) => {
+    setFile(selected); // Primary file for preview/thumbnail
+
+    // Store all files for multi-image slideshows
+    const fileList = allFiles.length > 0 ? Array.from(allFiles) : selected ? [selected] : [];
+    setSourceFiles(fileList);
+    if (fileList.length > 1) {
+      toast.success(`Loaded ${fileList.length} images for Slideshow Mode`);
+    }
+
     setRotate(0);
     setFlipH(false);
     setFlipV(false);
@@ -2899,29 +2908,31 @@ function ContentUploadForm({
             type="file"
             id="content-file-input"
             accept={type === "video" ? "video/*" : type === "audio" ? "audio/*" : "image/*"}
-            onChange={e => handleFileChange(e.target.files[0])}
+            multiple={type === "image"}
+            onChange={e => handleFileChange(e.target.files[0], e.target.files)}
             className="form-file-input"
             style={{ display: "block", width: "100%" }}
           />
           {file && (
             <div style={{ fontSize: 13, marginTop: 4, color: "#666" }}>Selected: {file.name}</div>
           )}
-          {file && type === "video" && (
+          {((file && type === "video") || (sourceFiles.length > 0 && type === "image")) && (
             <button
               type="button"
               className="btn btn-secondary"
               style={{ marginTop: 8 }}
               onClick={() => setShowVideoEditor(true)}
             >
-              ✂️ Edit / Trim Video
+              {type === "image" ? "🎬 Create Slideshow" : "✂️ Edit / Trim Video"}
             </button>
           )}
 
-          {showVideoEditor && file && (
+          {showVideoEditor && (file || sourceFiles.length > 0) && (
             <div className="modal-overlay">
               <div className="modal" style={{ maxWidth: "800px", width: "90%" }}>
                 <VideoEditor
                   file={file}
+                  images={sourceFiles}
                   onSave={newFile => {
                     handleFileChange(newFile);
                     setShowVideoEditor(false);

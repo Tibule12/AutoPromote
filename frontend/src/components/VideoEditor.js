@@ -87,7 +87,29 @@ class FFmpegWrapper {
 }
 const FFmpeg = FFmpegWrapper;
 
-function VideoEditor({ file, onSave, onCancel }) {
+function VideoEditor({ file, onSave, onCancel, images = [] }) {
+  // Console noise suppression for ONNX Runtime
+  useEffect(() => {
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      // Filter out technical ONNX warnings that aren't relevant to the user
+      if (
+        args.some(
+          arg =>
+            typeof arg === "string" &&
+            (arg.includes("Removing initializer") ||
+              arg.includes("CleanUnusedInitializersAndNodeArgs"))
+        )
+      ) {
+        return;
+      }
+      originalWarn.apply(console, args);
+    };
+    return () => {
+      console.warn = originalWarn;
+    };
+  }, []);
+
   const [ffmpeg] = useState(new FFmpeg());
   const [loaded, setLoaded] = useState(false);
   const [videoSrc, setVideoSrc] = useState(null);
@@ -109,6 +131,7 @@ function VideoEditor({ file, onSave, onCancel }) {
   const [captionColor, setCaptionColor] = useState("white");
   const [transcribing, setTranscribing] = useState(false);
   const [translateToEnglish, setTranslateToEnglish] = useState(false); // New Translation Toggle
+  const [hasTranscribed, setHasTranscribed] = useState(false); // Prevent loops
 
   const videoRef = useRef(null);
   const messageRef = useRef(null);
@@ -157,13 +180,39 @@ function VideoEditor({ file, onSave, onCancel }) {
   }, []);
 
   useEffect(() => {
-    if (file && loaded) {
-      // Create object URL for preview
-      const url = URL.createObjectURL(file);
-      setVideoSrc(url);
-      return () => URL.revokeObjectURL(url);
+    if (loaded) {
+      if (file) {
+        // Create object URL for preview
+        const url = URL.createObjectURL(file);
+        setVideoSrc(url);
+        setHasTranscribed(false); // Reset for new file
+        setCaptionText(""); // Clear old captions
+        setStartTime(0);
+        setEndTime(0);
+        return () => URL.revokeObjectURL(url);
+      } else if (images && images.length > 0) {
+        // Slideshow Mode: Preview first image
+        // To be fully functional, this needs a canvas renderer, but for now we preview the first frame.
+        const url = URL.createObjectURL(images[0]);
+        setVideoSrc(url);
+        setCaptionText("Slideshow: Add audio to generate captions");
+        log(`🎬 Slideshow Mode: ${images.length} images loaded.`);
+        return () => URL.revokeObjectURL(url);
+      }
     }
-  }, [file, loaded]);
+  }, [file, images, loaded]);
+
+  useEffect(() => {
+    // Auto-transcribe once video source is ready
+    if (videoSrc && !hasTranscribed && !transcribing && loaded) {
+      // Small delay to ensure UI is ready
+      const timer = setTimeout(() => {
+        handleAutoTranscribe();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoSrc, hasTranscribed, loaded]);
 
   const handleMetadataLoaded = e => {
     const dur = e.target.duration;
@@ -223,7 +272,8 @@ function VideoEditor({ file, onSave, onCancel }) {
   const handleAutoTranscribe = async () => {
     if (!videoSrc) return;
     setTranscribing(true);
-    log("🧠 Loading Multilingual AI Model (Whisper)...");
+    // Only show log if manually triggered or first time
+    if (!hasTranscribed) log("✨ Auto-generating Captions...");
 
     try {
       // Load library via script tag injection safely
@@ -237,19 +287,13 @@ function VideoEditor({ file, onSave, onCancel }) {
         env.useBrowserCache = true;
         // Suppress ONNX runtime warnings to clean up console
         if (env.backends && env.backends.onnx) {
-          env.backends.onnx.logLevel = "error";
+          env.backends.onnx.logLevel = "fatal";
         }
       }
 
       if (!pipeline) throw new Error("Transformers pipeline not found in window or module export");
 
       const transcriber = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny");
-
-      log(
-        translateToEnglish
-          ? "👂 Listening & Translating to English..."
-          : "👂 Listening (Auto-Detect Language)..."
-      );
 
       const options = {
         task: translateToEnglish ? "translate" : "transcribe",
@@ -260,19 +304,69 @@ function VideoEditor({ file, onSave, onCancel }) {
 
       console.log("Transcription result:", result);
       if (result && result.text) {
-        setCaptionText(result.text.trim());
-        log("✅ Transcription Complete!");
+        let text = result.text.trim();
+        const lower = text.toLowerCase();
+
+        // Smart Audio Intelligence: Distinguish between Hallucinations and Real Audio Events
+        const soundTags = {
+          "(music)": "🎵 [Music Playing] 🎵",
+          "(laughing)": "😂 [Laughter]",
+          "(laughter)": "😂 [Laughter]",
+          "(applause)": "👏 [Applause]",
+          "(cheering)": "🙌 [Cheering]",
+          "(silence)": "...", // Subtle indicator for silence if desired, or allow filtering
+          "(no speech detected)": "",
+        };
+
+        const bannedHallucinations = [
+          "subtitles by",
+          "captioned by",
+          "amara.org",
+          "thank you",
+          "you",
+        ];
+
+        let formattedText = text;
+        let isHallucination = false;
+        let isSoundEvent = false;
+
+        // 1. Check for Sound Events (Music, Laughter)
+        for (const [tag, replacement] of Object.entries(soundTags)) {
+          if (lower.includes(tag)) {
+            if (replacement === "") {
+              isHallucination = true; // Treat specific tags like (no speech) as invisible
+            } else {
+              formattedText = replacement;
+              isSoundEvent = true;
+            }
+            break;
+          }
+        }
+
+        // 2. Check for common Whisper Hallucinations (only if not a valid sound event)
+        if (!isSoundEvent) {
+          if (bannedHallucinations.some(h => lower.includes(h)) && text.length < 25) {
+            isHallucination = true;
+          }
+          if (text.length < 2) isHallucination = true; // Noise
+        }
+
+        if (isHallucination) {
+          log("ℹ️ Filtered background noise/silence.");
+          setCaptionText("");
+        } else {
+          setCaptionText(formattedText);
+          log(`✅ Smart Caption: ${formattedText}`);
+        }
       } else {
         log("⚠️ No text detected.");
       }
     } catch (e) {
-      log("❌ Transcription failed: " + e.message);
-      if (e && e.message && e.message.includes("audio")) {
-        log("Tip: Ensure the video has an audio track.");
-      }
+      log("❌ Auto-caption failed (silent video?): " + e.message);
       console.error(e);
     } finally {
       setTranscribing(false);
+      setHasTranscribed(true);
     }
   };
 
@@ -367,7 +461,7 @@ function VideoEditor({ file, onSave, onCancel }) {
     }
   };
 
-  if (!file) return null;
+  if (!file && (!images || images.length === 0)) return null;
 
   return (
     <div className="video-editor-container">
@@ -484,9 +578,13 @@ function VideoEditor({ file, onSave, onCancel }) {
                   alignItems: "center",
                   gap: "5px",
                 }}
-                title="Auto-detect speech using AI"
+                title="Regenerate captions using AI"
               >
-                {transcribing ? "👂 Processing..." : "✨ Auto-Transcribe"}
+                {transcribing
+                  ? "👂 Processing..."
+                  : hasTranscribed
+                    ? "🔄 Regenerate"
+                    : "✨ Auto-Transcribe"}
               </button>
 
               <label
