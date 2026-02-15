@@ -250,6 +250,15 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [gsKeyColor, setGsKeyColor] = useState("#00ff00");
   const [gsBgImage, setGsBgImage] = useState(null); // URL for background image
 
+  // Security: Sanitize background image URL preventing XSS (CodeQL #975)
+  const safeGsBgImage = React.useMemo(() => {
+    if (!gsBgImage) return null;
+    if (/^(blob:|https?:)/i.test(gsBgImage)) return gsBgImage;
+    if (/^data:image\//i.test(gsBgImage)) return gsBgImage;
+    console.warn("Blocked potentially unsafe background image", gsBgImage);
+    return null;
+  }, [gsBgImage]);
+
   const hexToRgbNormalized = hex => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
@@ -1336,16 +1345,18 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   aspectRatio: "9/16", // Maintain vertical aspect ratio
                   margin: "0 auto", // Center it
                   // Checkerboard pattern for transparency
-                  backgroundImage: gsBgImage
-                    ? `url(${gsBgImage})`
+                  backgroundImage: safeGsBgImage
+                    ? `url(${safeGsBgImage})`
                     : `
                     linear-gradient(45deg, #222 25%, transparent 25%), 
                     linear-gradient(-45deg, #222 25%, transparent 25%), 
                     linear-gradient(45deg, transparent 75%, #222 75%), 
                     linear-gradient(-45deg, transparent 75%, #222 75%)
                   `,
-                  backgroundSize: gsBgImage ? "cover" : "20px 20px",
-                  backgroundPosition: gsBgImage ? "center" : "0 0, 0 10px, 10px -10px, -10px 0px",
+                  backgroundSize: safeGsBgImage ? "cover" : "20px 20px",
+                  backgroundPosition: safeGsBgImage
+                    ? "center"
+                    : "0 0, 0 10px, 10px -10px, -10px 0px",
                   backgroundColor: "#333",
                   overflow: "hidden",
                 }}
