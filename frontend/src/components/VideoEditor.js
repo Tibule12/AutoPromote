@@ -669,7 +669,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         }
 
         if (captionText) {
-          const sanitizedText = captionText.replace(/'/g, "").toUpperCase(); // Force UPPERCASE for viral look
+          const sanitizedText = captionText.replace(/'/g, ""); // Removed forced UPPERCASE
           const fontColor = captionColor === "yellow" ? "yellow" : "white";
           // Moved text higher (0.25) to be safe above TikTok/Reels description area without needing red guides
           const yPos = "(h-text_h)-(h*0.25)";
@@ -888,19 +888,33 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 >
                   <span>🚀</span> Virality Potential: {viralityScore}/100
                 </h4>
-                <ul
-                  style={{
-                    margin: "12px 0 0 0",
-                    paddingLeft: "20px",
-                    fontSize: "0.85rem",
-                    color: "#a7f3d0",
-                    lineHeight: "1.5",
-                  }}
-                >
-                  {viralityMetrics.map((m, i) => (
-                    <li key={i}>{m}</li>
-                  ))}
-                </ul>
+                <div style={{ marginTop: "12px" }}>
+                  <button
+                    onClick={() => {
+                      applyPreset("cinematic");
+                      setBoostQuality(true);
+                      setEnhanceAudio(true);
+                      // Force a high score locally for feedback
+                      setViralityScore(95);
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      background: "#10b981",
+                      border: "none",
+                      color: "white",
+                      borderRadius: "6px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <span>⚡</span> One-Click Optimize
+                  </button>
+                </div>
               </div>
 
               <div
@@ -1059,48 +1073,65 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                     />
                   </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      alignItems: "center",
-                      marginBottom: "8px",
-                    }}
+                  {/* Collapsed Advanced Settings */}
+                  <details
+                    style={{ marginTop: "12px", borderTop: "1px solid #444", paddingTop: "8px" }}
                   >
-                    <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
-                      Threshold:
-                    </span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="0.5"
-                      step="0.01"
-                      value={gsThreshold}
-                      onChange={e => setGsThreshold(e.target.value)}
-                      style={{ flex: 1 }}
-                    />
-                    <span style={{ color: "white", width: "40px", fontSize: "0.8em" }}>
-                      {(gsThreshold * 100).toFixed(0)}%
-                    </span>
-                  </div>
+                    <summary
+                      style={{
+                        color: "#aaa",
+                        cursor: "pointer",
+                        fontSize: "0.9em",
+                        outline: "none",
+                      }}
+                    >
+                      Pro Settings (Sensitivity)
+                    </summary>
+                    <div style={{ padding: "8px 0" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "10px",
+                          alignItems: "center",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
+                          Threshold:
+                        </span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="0.5"
+                          step="0.01"
+                          value={gsThreshold}
+                          onChange={e => setGsThreshold(e.target.value)}
+                          style={{ flex: 1 }}
+                        />
+                        <span style={{ color: "white", width: "40px", fontSize: "0.8em" }}>
+                          {(gsThreshold * 100).toFixed(0)}%
+                        </span>
+                      </div>
 
-                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
-                      Smoothing:
-                    </span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="0.5"
-                      step="0.01"
-                      value={gsSmoothing}
-                      onChange={e => setGsSmoothing(e.target.value)}
-                      style={{ flex: 1 }}
-                    />
-                    <span style={{ color: "white", width: "40px", fontSize: "0.8em" }}>
-                      {(gsSmoothing * 100).toFixed(0)}%
-                    </span>
-                  </div>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
+                          Smoothing:
+                        </span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="0.5"
+                          step="0.01"
+                          value={gsSmoothing}
+                          onChange={e => setGsSmoothing(e.target.value)}
+                          style={{ flex: 1 }}
+                        />
+                        <span style={{ color: "white", width: "40px", fontSize: "0.8em" }}>
+                          {(gsSmoothing * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+                  </details>
 
                   <div
                     style={{
