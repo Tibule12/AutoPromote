@@ -250,6 +250,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [gsKeyColor, setGsKeyColor] = useState("#00ff00");
   const [gsBgImage, setGsBgImage] = useState(null); // URL for background image
 
+  // Editor Tabs State
+  const [activeTab, setActiveTab] = useState("effects"); // 'effects', 'text', 'adjust', 'overlay'
+
   // Security: Sanitize background image URL preventing XSS (CodeQL #975)
   const safeGsBgImage = React.useMemo(() => {
     if (!gsBgImage) return null;
@@ -789,465 +792,528 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         </div>
       ) : (
         <>
-          {/* --- VIRAL PRESETS SECTION --- */}
-          <div className="presets-container">
+          {/* --- EDITOR TABS --- */}
+          <div className="editor-tabs">
             <button
-              className={`preset-btn ${activePreset === "custom" ? "active" : ""}`}
-              onClick={() => applyPreset("custom")}
+              className={`tab-btn ${activeTab === "overlay" ? "active" : ""}`}
+              onClick={() => setActiveTab("overlay")}
             >
-              <span className="preset-icon">⚙️</span>
-              Custom
+              <span>🛡️</span> Overlay
             </button>
             <button
-              className={`preset-btn ${activePreset === "podcast" ? "active" : ""}`}
-              onClick={() => applyPreset("podcast")}
+              className={`tab-btn ${activeTab === "text" ? "active" : ""}`}
+              onClick={() => setActiveTab("text")}
             >
-              <span className="preset-icon">🎙️</span>
-              Podcast Clip
+              <span>📝</span> Text
             </button>
             <button
-              className={`preset-btn ${activePreset === "gameplay" ? "active" : ""}`}
-              onClick={() => applyPreset("gameplay")}
+              className={`tab-btn ${activeTab === "filters" ? "active" : ""}`}
+              onClick={() => setActiveTab("filters")}
             >
-              <span className="preset-icon">🎮</span>
-              Gameplay
+              <span>✨</span> Filters
             </button>
             <button
-              id="cinematic-preset-btn"
-              className={`preset-btn ${activePreset === "cinematic" ? "active" : ""}`}
-              onClick={() => applyPreset("cinematic")}
+              className={`tab-btn ${activeTab === "adjust" ? "active" : ""}`}
+              onClick={() => setActiveTab("adjust")}
             >
-              <span className="preset-icon">🎬</span>
-              Cinematic (Viral)
+              <span>🎚️</span> Adjust
+            </button>
+            <button
+              className={`tab-btn ${activeTab === "effects" ? "active" : ""}`}
+              onClick={() => setActiveTab("effects")}
+            >
+              <span>🎨</span> Effects
             </button>
           </div>
 
-          <div
-            className="controls-row"
-            style={{ display: "flex", gap: "20px", marginBottom: "16px" }}
-          >
-            <div
-              className={`virality-hud ${viralityScore > 80 ? "high-score" : ""}`}
-              style={{
-                flex: 1,
-                padding: "16px",
-                borderRadius: "12px",
-                border: "1px solid rgba(16, 185, 129, 0.2)",
-                background: "rgba(16, 185, 129, 0.05)",
-              }}
-            >
-              <h4
-                style={{
-                  margin: 0,
-                  color: "#34d399",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <span>🚀</span> Virality Potential: {viralityScore}/100
-              </h4>
-              <ul
-                style={{
-                  margin: "12px 0 0 0",
-                  paddingLeft: "20px",
-                  fontSize: "0.85rem",
-                  color: "#a7f3d0",
-                  lineHeight: "1.5",
-                }}
-              >
-                {viralityMetrics.map((m, i) => (
-                  <li key={i}>{m}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div
-              className="quality-hud"
-              style={{
-                flex: 1,
-                padding: "16px",
-                borderRadius: "12px",
-                border: "1px solid rgba(59, 130, 246, 0.2)",
-                background: "rgba(59, 130, 246, 0.05)",
-              }}
-            >
-              <h4
-                style={{
-                  margin: 0,
-                  color: "#60a5fa",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <span>✨</span> Quality Guard
-              </h4>
-              <label
-                className="toggle-label"
-                style={{ marginTop: "12px", width: "100%", justifyContent: "space-between" }}
-              >
-                <span>
-                  {activeOverlay === "youtube"
-                    ? "Force 1440p Upscale (VP9 Hack)"
-                    : ["tiktok", "instagram"].includes(activeOverlay)
-                      ? "Crisp 1080p (Prevent Compression)"
-                      : "Enhance Bitrate"}
-                </span>
-                <input
-                  type="checkbox"
-                  checked={boostQuality}
-                  onChange={e => {
-                    setBoostQuality(e.target.checked);
-                    setActivePreset("custom");
-                  }}
-                />
-              </label>
-              <label
-                className="toggle-label"
-                style={{ marginTop: "10px", width: "100%", justifyContent: "space-between" }}
-              >
-                <span>🎙️ Studio Mic Enhancer</span>
-                <input
-                  type="checkbox"
-                  checked={enhanceAudio}
-                  onChange={e => {
-                    setEnhanceAudio(e.target.checked);
-                    setActivePreset("custom");
-                  }}
-                />
-              </label>
-            </div>
-          </div>
-
-          {/* VFX Studio UI */}
-          <div
-            style={{
-              marginBottom: "16px",
-              padding: "16px",
-              border: "1px solid #c084fc", // Purple border
-              borderRadius: "12px",
-              background: "rgba(192, 132, 252, 0.05)",
-            }}
-          >
-            <h4
-              style={{
-                margin: "0 0 12px 0",
-                color: "#c084fc",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <span>🎨</span> VFX Studio
-            </h4>
-
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+          {/* --- FILTERS TAB --- */}
+          {activeTab === "filters" && (
+            <div className="presets-container tab-content">
               <button
-                onClick={() => {
-                  const newEffect = activeVFXEffect === "cinema" ? "none" : "cinema";
-                  setActiveVFXEffect(newEffect);
-                  if (newEffect !== "none") setIsVFXMode(true);
-                }}
-                style={{
-                  flex: 1,
-                  padding: "8px",
-                  borderRadius: "8px",
-                  border: activeVFXEffect === "cinema" ? "1px solid #c084fc" : "1px solid #444",
-                  background:
-                    activeVFXEffect === "cinema" ? "rgba(192, 132, 252, 0.2)" : "transparent",
-                  color: "white",
-                  cursor: "pointer",
-                }}
+                className={`preset-btn ${activePreset === "custom" ? "active" : ""}`}
+                onClick={() => applyPreset("custom")}
               >
-                🎬 Cinema Look
+                <span className="preset-icon">⚙️</span>
+                Custom
               </button>
-
               <button
-                onClick={() => {
-                  const newEffect = activeVFXEffect === "green-screen" ? "none" : "green-screen";
-                  setActiveVFXEffect(newEffect);
-                  if (newEffect !== "none") setIsVFXMode(true);
-                }}
-                style={{
-                  flex: 1,
-                  padding: "8px",
-                  borderRadius: "8px",
-                  border:
-                    activeVFXEffect === "green-screen" ? "1px solid #4ade80" : "1px solid #444",
-                  background:
-                    activeVFXEffect === "green-screen" ? "rgba(74, 222, 128, 0.2)" : "transparent",
-                  color: "white",
-                  cursor: "pointer",
-                }}
+                className={`preset-btn ${activePreset === "podcast" ? "active" : ""}`}
+                onClick={() => applyPreset("podcast")}
               >
-                🟩 Green Screen
+                <span className="preset-icon">🎙️</span>
+                Podcast Clip
+              </button>
+              <button
+                className={`preset-btn ${activePreset === "gameplay" ? "active" : ""}`}
+                onClick={() => applyPreset("gameplay")}
+              >
+                <span className="preset-icon">🎮</span>
+                Gameplay
+              </button>
+              <button
+                id="cinematic-preset-btn"
+                className={`preset-btn ${activePreset === "cinematic" ? "active" : ""}`}
+                onClick={() => applyPreset("cinematic")}
+              >
+                <span className="preset-icon">🎬</span>
+                Cinematic (Viral)
               </button>
             </div>
+          )}
 
-            {activeVFXEffect === "green-screen" && (
+          {/* --- ADJUST TAB --- */}
+          {activeTab === "adjust" && (
+            <div
+              className="controls-row tab-content"
+              style={{ display: "flex", gap: "20px", marginBottom: "16px" }}
+            >
               <div
+                className={`virality-hud ${viralityScore > 80 ? "high-score" : ""}`}
                 style={{
-                  marginTop: "12px",
-                  padding: "12px",
-                  background: "#00000040",
-                  borderRadius: "8px",
+                  flex: 1,
+                  padding: "16px",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(16, 185, 129, 0.2)",
+                  background: "rgba(16, 185, 129, 0.05)",
                 }}
               >
-                <div
+                <h4
                   style={{
+                    margin: 0,
+                    color: "#34d399",
                     display: "flex",
-                    gap: "10px",
                     alignItems: "center",
-                    marginBottom: "8px",
+                    gap: "8px",
                   }}
                 >
-                  <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
-                    Key Color:
-                  </span>
-                  <input
-                    type="color"
-                    value={gsKeyColor}
-                    onChange={e => setGsKeyColor(e.target.value)}
-                    style={{ border: "none", height: "30px", width: "100%", cursor: "pointer" }}
-                  />
-                </div>
-
-                <div
+                  <span>🚀</span> Virality Potential: {viralityScore}/100
+                </h4>
+                <ul
                   style={{
-                    display: "flex",
-                    gap: "10px",
-                    alignItems: "center",
-                    marginBottom: "8px",
+                    margin: "12px 0 0 0",
+                    paddingLeft: "20px",
+                    fontSize: "0.85rem",
+                    color: "#a7f3d0",
+                    lineHeight: "1.5",
                   }}
                 >
-                  <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
-                    Threshold:
+                  {viralityMetrics.map((m, i) => (
+                    <li key={i}>{m}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div
+                className="quality-hud"
+                style={{
+                  flex: 1,
+                  padding: "16px",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(59, 130, 246, 0.2)",
+                  background: "rgba(59, 130, 246, 0.05)",
+                }}
+              >
+                <h4
+                  style={{
+                    margin: 0,
+                    color: "#60a5fa",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <span>✨</span> Quality Guard
+                </h4>
+                <label
+                  className="toggle-label"
+                  style={{ marginTop: "12px", width: "100%", justifyContent: "space-between" }}
+                >
+                  <span>
+                    {activeOverlay === "youtube"
+                      ? "Force 1440p Upscale (VP9 Hack)"
+                      : ["tiktok", "instagram"].includes(activeOverlay)
+                        ? "Crisp 1080p (Prevent Compression)"
+                        : "Enhance Bitrate"}
                   </span>
                   <input
-                    type="range"
-                    min="0"
-                    max="0.5"
-                    step="0.01"
-                    value={gsThreshold}
-                    onChange={e => setGsThreshold(e.target.value)}
-                    style={{ flex: 1 }}
+                    type="checkbox"
+                    checked={boostQuality}
+                    onChange={e => {
+                      setBoostQuality(e.target.checked);
+                      setActivePreset("custom");
+                    }}
                   />
-                  <span style={{ color: "white", width: "40px", fontSize: "0.8em" }}>
-                    {(gsThreshold * 100).toFixed(0)}%
-                  </span>
-                </div>
-
-                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                  <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
-                    Smoothing:
-                  </span>
+                </label>
+                <label
+                  className="toggle-label"
+                  style={{ marginTop: "10px", width: "100%", justifyContent: "space-between" }}
+                >
+                  <span>🎙️ Studio Mic Enhancer</span>
                   <input
-                    type="range"
-                    min="0"
-                    max="0.5"
-                    step="0.01"
-                    value={gsSmoothing}
-                    onChange={e => setGsSmoothing(e.target.value)}
-                    style={{ flex: 1 }}
+                    type="checkbox"
+                    checked={enhanceAudio}
+                    onChange={e => {
+                      setEnhanceAudio(e.target.checked);
+                      setActivePreset("custom");
+                    }}
                   />
-                  <span style={{ color: "white", width: "40px", fontSize: "0.8em" }}>
-                    {(gsSmoothing * 100).toFixed(0)}%
-                  </span>
-                </div>
+                </label>
+              </div>
+            </div>
+          )}
 
-                <div style={{ marginTop: "12px", borderTop: "1px solid #444", paddingTop: "8px" }}>
-                  <label
+          {/* --- EFFECTS TAB (VFX Studio) --- */}
+          {activeTab === "effects" && (
+            <div
+              className="tab-content"
+              style={{
+                marginBottom: "16px",
+                padding: "16px",
+                border: "1px solid #c084fc", // Purple border
+                borderRadius: "12px",
+                background: "rgba(192, 132, 252, 0.05)",
+              }}
+            >
+              <h4
+                style={{
+                  margin: "0 0 12px 0",
+                  color: "#c084fc",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <span>🎨</span> VFX Studio
+              </h4>
+
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+                <button
+                  onClick={() => {
+                    const newEffect = activeVFXEffect === "cinema" ? "none" : "cinema";
+                    setActiveVFXEffect(newEffect);
+                    if (newEffect !== "none") setIsVFXMode(true);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: "8px",
+                    borderRadius: "8px",
+                    border: activeVFXEffect === "cinema" ? "1px solid #c084fc" : "1px solid #444",
+                    background:
+                      activeVFXEffect === "cinema" ? "rgba(192, 132, 252, 0.2)" : "transparent",
+                    color: "white",
+                    cursor: "pointer",
+                  }}
+                >
+                  🎬 Cinema Look
+                </button>
+
+                <button
+                  onClick={() => {
+                    const newEffect = activeVFXEffect === "green-screen" ? "none" : "green-screen";
+                    setActiveVFXEffect(newEffect);
+                    if (newEffect !== "none") setIsVFXMode(true);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: "8px",
+                    borderRadius: "8px",
+                    border:
+                      activeVFXEffect === "green-screen" ? "1px solid #4ade80" : "1px solid #444",
+                    background:
+                      activeVFXEffect === "green-screen"
+                        ? "rgba(74, 222, 128, 0.2)"
+                        : "transparent",
+                    color: "white",
+                    cursor: "pointer",
+                  }}
+                >
+                  🟩 Green Screen
+                </button>
+              </div>
+
+              {activeVFXEffect === "green-screen" && (
+                <div
+                  style={{
+                    marginTop: "12px",
+                    padding: "12px",
+                    background: "#00000040",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <div
                     style={{
-                      display: "block",
-                      color: "#aaa",
-                      fontSize: "0.9em",
-                      marginBottom: "4px",
+                      display: "flex",
+                      gap: "10px",
+                      alignItems: "center",
+                      marginBottom: "8px",
                     }}
                   >
-                    Background Replacer:
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={e => {
-                      if (e.target.files && e.target.files[0]) {
-                        const url = URL.createObjectURL(e.target.files[0]);
-                        setGsBgImage(url);
-                      }
-                    }}
+                    <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
+                      Key Color:
+                    </span>
+                    <input
+                      type="color"
+                      value={gsKeyColor}
+                      onChange={e => setGsKeyColor(e.target.value)}
+                      style={{ border: "none", height: "30px", width: "100%", cursor: "pointer" }}
+                    />
+                  </div>
+
+                  <div
                     style={{
-                      width: "100%",
-                      background: "#222",
-                      color: "#fff",
-                      fontSize: "0.8rem",
+                      display: "flex",
+                      gap: "10px",
+                      alignItems: "center",
+                      marginBottom: "8px",
                     }}
-                  />
-                  {gsBgImage && (
-                    <button
-                      onClick={() => setGsBgImage(null)}
+                  >
+                    <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
+                      Threshold:
+                    </span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="0.5"
+                      step="0.01"
+                      value={gsThreshold}
+                      onChange={e => setGsThreshold(e.target.value)}
+                      style={{ flex: 1 }}
+                    />
+                    <span style={{ color: "white", width: "40px", fontSize: "0.8em" }}>
+                      {(gsThreshold * 100).toFixed(0)}%
+                    </span>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                    <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
+                      Smoothing:
+                    </span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="0.5"
+                      step="0.01"
+                      value={gsSmoothing}
+                      onChange={e => setGsSmoothing(e.target.value)}
+                      style={{ flex: 1 }}
+                    />
+                    <span style={{ color: "white", width: "40px", fontSize: "0.8em" }}>
+                      {(gsSmoothing * 100).toFixed(0)}%
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: "12px",
+                      borderTop: "1px solid #444",
+                      paddingTop: "8px",
+                    }}
+                  >
+                    <label
                       style={{
-                        marginTop: "4px",
-                        background: "none",
-                        border: "none",
-                        color: "#ef4444",
-                        fontSize: "0.8rem",
-                        cursor: "pointer",
-                        padding: 0,
-                        textDecoration: "underline",
+                        display: "block",
+                        color: "#aaa",
+                        fontSize: "0.9em",
+                        marginBottom: "4px",
                       }}
                     >
-                      Remove Background Image
-                    </button>
-                  )}
+                      Background Replacer:
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={e => {
+                        if (e.target.files && e.target.files[0]) {
+                          try {
+                            const url = URL.createObjectURL(e.target.files[0]);
+                            const img = new Image();
+                            img.src = url;
+                            setGsBgImage(url);
+                          } catch (err) {
+                            console.error("Image load fail", err);
+                          }
+                        }
+                      }}
+                      style={{
+                        width: "100%",
+                        background: "#222",
+                        color: "#fff",
+                        fontSize: "0.8rem",
+                      }}
+                    />
+                    {gsBgImage && (
+                      <button
+                        onClick={() => setGsBgImage(null)}
+                        style={{
+                          marginTop: "4px",
+                          background: "none",
+                          border: "none",
+                          color: "#ef4444",
+                          fontSize: "0.8rem",
+                          cursor: "pointer",
+                          padding: 0,
+                          textDecoration: "underline",
+                        }}
+                      >
+                        Remove Background Image
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          <div
-            style={{
-              marginBottom: "16px",
-              padding: "16px",
-              border: "1px solid #333",
-              borderRadius: "12px",
-              background: "#1e1e1e",
-            }}
-          >
-            <h4 style={{ margin: "0 0 12px 0", color: "#fff" }}>📝 Quick Captions</h4>
-            <div
-              className="controls-row"
-              style={{ display: "flex", gap: "10px", alignItems: "center" }}
-            >
-              <button
-                onClick={handleAutoTranscribe}
-                disabled={transcribing}
-                style={{
-                  padding: "10px 16px",
-                  background: transcribing ? "#333" : "#8b5cf6",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: transcribing ? "not-allowed" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  fontWeight: "600",
-                  minWidth: "160px",
-                  justifyContent: "center",
-                }}
-                title="Regenerate captions using AI"
-              >
-                {transcribing ? (
-                  <>👂 Processing...</>
-                ) : hasTranscribed ? (
-                  <>🔄 Regenerate</>
-                ) : (
-                  <>✨ Auto-Transcribe</>
-                )}
-              </button>
-
-              <label className="toggle-label" style={{ fontSize: "0.9rem" }}>
-                <input
-                  type="checkbox"
-                  checked={translateToEnglish}
-                  onChange={e => setTranslateToEnglish(e.target.checked)}
-                  style={{ marginRight: "8px" }}
-                />
-                Translate
-              </label>
-
-              <input
-                type="text"
-                className="time-input input" // reusing class
-                style={{ flex: 1, width: "auto" }}
-                placeholder="Enter caption text..."
-                value={captionText}
-                onChange={e => setCaptionText(e.target.value)}
-              />
-              <select
-                value={captionColor}
-                onChange={e => setCaptionColor(e.target.value)}
-                style={{ width: "120px" }}
-              >
-                <option value="white">White</option>
-                <option value="yellow">Yellow</option>
-                <option value="#3b82f6">Blue</option>
-                <option value="#ef4444">Red</option>
-                <option value="#10b981">Green</option>
-              </select>
+              )}
             </div>
-            {captionText && (
-              <small style={{ color: "#888", display: "block", marginTop: "8px" }}>
-                Preview: Captions are auto-positioned for maximum engagement (Safe Zone Compliant).
-              </small>
-            )}
-          </div>
+          )}
 
-          <div className="overlay-controls" style={{ marginBottom: "16px", display: "none" }}>
-            <span style={{ color: "#fff", fontWeight: "600", marginRight: "10px" }}>
-              🛡️ Safe Zone:
-            </span>
-            <button
-              className={`btn-overlay ${activeOverlay === "none" ? "active" : ""}`}
-              onClick={() => setActiveOverlay("none")}
+          {/* --- TEXT TAB --- */}
+          {activeTab === "text" && (
+            <div
+              className="tab-content"
               style={{
-                background: activeOverlay === "none" ? "#3b82f6" : "#333",
-                color: "#fff",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                marginRight: "8px",
-                cursor: "pointer",
+                marginBottom: "16px",
+                padding: "16px",
+                border: "1px solid #333",
+                borderRadius: "12px",
+                background: "#1e1e1e",
               }}
             >
-              Off
-            </button>
-            <button
-              className={`btn-overlay ${activeOverlay === "tiktok" ? "active" : ""}`}
-              onClick={() => setActiveOverlay("tiktok")}
-              style={{
-                background: activeOverlay === "tiktok" ? "#3b82f6" : "#333",
-                color: "#fff",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                marginRight: "8px",
-                cursor: "pointer",
-              }}
-            >
-              TikTok
-            </button>
-            <button
-              className={`btn-overlay ${activeOverlay === "instagram" ? "active" : ""}`}
-              onClick={() => setActiveOverlay("instagram")}
-              style={{
-                background: activeOverlay === "instagram" ? "#3b82f6" : "#333",
-                color: "#fff",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                marginRight: "8px",
-                cursor: "pointer",
-              }}
-            >
-              Reels
-            </button>
-            <button
-              className={`btn-overlay ${activeOverlay === "youtube" ? "active" : ""}`}
-              onClick={() => setActiveOverlay("youtube")}
-              style={{
-                background: activeOverlay === "youtube" ? "#3b82f6" : "#333",
-                color: "#fff",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                cursor: "pointer",
-              }}
-            >
-              Shorts
-            </button>
-          </div>
+              <h4 style={{ margin: "0 0 12px 0", color: "#fff" }}>📝 Quick Captions</h4>
+              <div
+                className="controls-row"
+                style={{ display: "flex", gap: "10px", alignItems: "center" }}
+              >
+                <button
+                  onClick={handleAutoTranscribe}
+                  disabled={transcribing}
+                  style={{
+                    padding: "10px 16px",
+                    background: transcribing ? "#333" : "#8b5cf6",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: transcribing ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontWeight: "600",
+                    minWidth: "160px",
+                    justifyContent: "center",
+                  }}
+                  title="Regenerate captions using AI"
+                >
+                  {transcribing ? (
+                    <>👂 Processing...</>
+                  ) : hasTranscribed ? (
+                    <>🔄 Regenerate</>
+                  ) : (
+                    <>✨ Auto-Transcribe</>
+                  )}
+                </button>
+
+                <label className="toggle-label" style={{ fontSize: "0.9rem" }}>
+                  <input
+                    type="checkbox"
+                    checked={translateToEnglish}
+                    onChange={e => setTranslateToEnglish(e.target.checked)}
+                    style={{ marginRight: "8px" }}
+                  />
+                  Translate
+                </label>
+
+                <input
+                  type="text"
+                  className="time-input input" // reusing class
+                  style={{ flex: 1, width: "auto" }}
+                  placeholder="Enter caption text..."
+                  value={captionText}
+                  onChange={e => setCaptionText(e.target.value)}
+                />
+                <select
+                  value={captionColor}
+                  onChange={e => setCaptionColor(e.target.value)}
+                  style={{ width: "120px" }}
+                >
+                  <option value="white">White</option>
+                  <option value="yellow">Yellow</option>
+                  <option value="#3b82f6">Blue</option>
+                  <option value="#ef4444">Red</option>
+                  <option value="#10b981">Green</option>
+                </select>
+              </div>
+              {captionText && (
+                <small style={{ color: "#888", display: "block", marginTop: "8px" }}>
+                  Preview: Captions are auto-positioned for maximum engagement (Safe Zone
+                  Compliant).
+                </small>
+              )}
+            </div>
+          )}
+
+          {activeTab === "overlay" && (
+            <div className="overlay-controls tab-content" style={{ marginBottom: "16px" }}>
+              <span style={{ color: "#fff", fontWeight: "600", marginRight: "10px" }}>
+                🛡️ Safe Zone:
+              </span>
+              <button
+                className={`btn-overlay ${activeOverlay === "none" ? "active" : ""}`}
+                onClick={() => setActiveOverlay("none")}
+                style={{
+                  background: activeOverlay === "none" ? "#3b82f6" : "#333",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  marginRight: "8px",
+                  cursor: "pointer",
+                }}
+              >
+                Off
+              </button>
+              <button
+                className={`btn-overlay ${activeOverlay === "tiktok" ? "active" : ""}`}
+                onClick={() => setActiveOverlay("tiktok")}
+                style={{
+                  background: activeOverlay === "tiktok" ? "#3b82f6" : "#333",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  marginRight: "8px",
+                  cursor: "pointer",
+                }}
+              >
+                TikTok
+              </button>
+              <button
+                className={`btn-overlay ${activeOverlay === "instagram" ? "active" : ""}`}
+                onClick={() => setActiveOverlay("instagram")}
+                style={{
+                  background: activeOverlay === "instagram" ? "#3b82f6" : "#333",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  marginRight: "8px",
+                  cursor: "pointer",
+                }}
+              >
+                Reels
+              </button>
+              <button
+                className={`btn-overlay ${activeOverlay === "youtube" ? "active" : ""}`}
+                onClick={() => setActiveOverlay("youtube")}
+                style={{
+                  background: activeOverlay === "youtube" ? "#3b82f6" : "#333",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  cursor: "pointer",
+                }}
+              >
+                Shorts
+              </button>
+            </div>
+          )}
 
           <div className="video-preview" style={{ marginBottom: "0" }}>
             {!file && images && images.length > 0 ? (
