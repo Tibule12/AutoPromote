@@ -136,11 +136,23 @@ export async function initVFXEngine(canvas, videoElement) {
 
   // Interface to control effects
   const setEffect = (effectName, params = {}) => {
+    // Safety check: if app is destroyed, stop
+    if (!sprite || sprite.destroyed) return;
+
     if (effectName === "green-screen") {
       sprite.filters = [greenScreenFilter];
-      if (params.threshold !== undefined) greenScreenFilter.uniforms.threshold = params.threshold;
-      if (params.smoothing !== undefined) greenScreenFilter.uniforms.smoothing = params.smoothing;
-      if (params.keyColor !== undefined) greenScreenFilter.uniforms.keyColor = params.keyColor;
+      // Check uniforms existence before assignment
+      if (greenScreenFilter.uniforms) {
+        if (params.threshold !== undefined) greenScreenFilter.uniforms.threshold = params.threshold;
+        if (params.smoothing !== undefined) greenScreenFilter.uniforms.smoothing = params.smoothing;
+        if (params.keyColor !== undefined) greenScreenFilter.uniforms.keyColor = params.keyColor;
+      } else if (greenScreenFilter.resources && greenScreenFilter.resources.uniforms) {
+        // v8 fallback
+        const u = greenScreenFilter.resources.uniforms.uniforms;
+        if (params.threshold !== undefined) u.threshold = params.threshold;
+        if (params.smoothing !== undefined) u.smoothing = params.smoothing;
+        if (params.keyColor !== undefined) u.keyColor = params.keyColor;
+      }
     } else if (effectName === "cinema") {
       sprite.filters = [cinemaFilter];
     } else {
