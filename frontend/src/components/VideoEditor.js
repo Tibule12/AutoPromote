@@ -159,6 +159,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       case "cinematic":
         setEnhanceAudio(true);
         setIsVFXMode(true); // Enable Gloss Shader
+        setActiveVFXEffect("cinema"); // Sync explicit effect
         setActiveOverlay("none"); // Hide overlay, let the cinema look shine
         setBoostQuality(true);
         break;
@@ -242,6 +243,38 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const vfxCanvasRef = useRef(null);
   const vfxAppRef = useRef(null);
 
+  // Green Screen & VFX State
+  const [activeVFXEffect, setActiveVFXEffect] = useState("cinema"); // 'cinema', 'green-screen', 'none'
+  const [gsThreshold, setGsThreshold] = useState(0.15);
+  const [gsSmoothing, setGsSmoothing] = useState(0.1);
+  const [gsKeyColor, setGsKeyColor] = useState("#00ff00");
+  const [gsBgImage, setGsBgImage] = useState(null); // URL for background image
+
+  const hexToRgbNormalized = hex => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? [
+          parseInt(result[1], 16) / 255,
+          parseInt(result[2], 16) / 255,
+          parseInt(result[3], 16) / 255,
+        ]
+      : [0, 1, 0];
+  };
+
+  useEffect(() => {
+    if (vfxAppRef.current && vfxAppRef.current.setEffect) {
+      if (activeVFXEffect === "green-screen") {
+        vfxAppRef.current.setEffect("green-screen", {
+          threshold: parseFloat(gsThreshold),
+          smoothing: parseFloat(gsSmoothing),
+          keyColor: hexToRgbNormalized(gsKeyColor),
+        });
+      } else {
+        vfxAppRef.current.setEffect(activeVFXEffect);
+      }
+    }
+  }, [activeVFXEffect, gsThreshold, gsSmoothing, gsKeyColor]);
+
   useEffect(() => {
     if (isVFXMode && vfxCanvasRef.current && videoRef.current) {
       setVfxLoading(true);
@@ -254,8 +287,16 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         })
         .then(app => {
           vfxAppRef.current = app;
+          // Apply initial state
+          if (app.setEffect) {
+            app.setEffect(activeVFXEffect, {
+              threshold: parseFloat(gsThreshold),
+              smoothing: parseFloat(gsSmoothing),
+              keyColor: hexToRgbNormalized(gsKeyColor),
+            });
+          }
           setVfxLoading(false);
-          log("VFX Engine Active: Cinematic Shader Loaded");
+          log("VFX Engine Active");
         })
         .catch(err => {
           console.error("VFX Init Failed", err);
@@ -271,7 +312,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         }
       };
     }
-  }, [isVFXMode, safeVideoSrc]);
+  }, [isVFXMode, safeVideoSrc]); // eslint-disable-next-line react-hooks/exhaustive-deps
   // ------------------
 
   useEffect(() => {
@@ -870,6 +911,191 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             </div>
           </div>
 
+          {/* VFX Studio UI */}
+          <div
+            style={{
+              marginBottom: "16px",
+              padding: "16px",
+              border: "1px solid #c084fc", // Purple border
+              borderRadius: "12px",
+              background: "rgba(192, 132, 252, 0.05)",
+            }}
+          >
+            <h4
+              style={{
+                margin: "0 0 12px 0",
+                color: "#c084fc",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span>🎨</span> VFX Studio
+            </h4>
+
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+              <button
+                onClick={() => {
+                  const newEffect = activeVFXEffect === "cinema" ? "none" : "cinema";
+                  setActiveVFXEffect(newEffect);
+                  if (newEffect !== "none") setIsVFXMode(true);
+                }}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  borderRadius: "8px",
+                  border: activeVFXEffect === "cinema" ? "1px solid #c084fc" : "1px solid #444",
+                  background:
+                    activeVFXEffect === "cinema" ? "rgba(192, 132, 252, 0.2)" : "transparent",
+                  color: "white",
+                  cursor: "pointer",
+                }}
+              >
+                🎬 Cinema Look
+              </button>
+
+              <button
+                onClick={() => {
+                  const newEffect = activeVFXEffect === "green-screen" ? "none" : "green-screen";
+                  setActiveVFXEffect(newEffect);
+                  if (newEffect !== "none") setIsVFXMode(true);
+                }}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  borderRadius: "8px",
+                  border:
+                    activeVFXEffect === "green-screen" ? "1px solid #4ade80" : "1px solid #444",
+                  background:
+                    activeVFXEffect === "green-screen" ? "rgba(74, 222, 128, 0.2)" : "transparent",
+                  color: "white",
+                  cursor: "pointer",
+                }}
+              >
+                🟩 Green Screen
+              </button>
+            </div>
+
+            {activeVFXEffect === "green-screen" && (
+              <div
+                style={{
+                  marginTop: "12px",
+                  padding: "12px",
+                  background: "#00000040",
+                  borderRadius: "8px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "center",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
+                    Key Color:
+                  </span>
+                  <input
+                    type="color"
+                    value={gsKeyColor}
+                    onChange={e => setGsKeyColor(e.target.value)}
+                    style={{ border: "none", height: "30px", width: "100%", cursor: "pointer" }}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "center",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
+                    Threshold:
+                  </span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="0.5"
+                    step="0.01"
+                    value={gsThreshold}
+                    onChange={e => setGsThreshold(e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <span style={{ color: "white", width: "40px", fontSize: "0.8em" }}>
+                    {(gsThreshold * 100).toFixed(0)}%
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  <span style={{ color: "#aaa", fontSize: "0.9em", minWidth: "80px" }}>
+                    Smoothing:
+                  </span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="0.5"
+                    step="0.01"
+                    value={gsSmoothing}
+                    onChange={e => setGsSmoothing(e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <span style={{ color: "white", width: "40px", fontSize: "0.8em" }}>
+                    {(gsSmoothing * 100).toFixed(0)}%
+                  </span>
+                </div>
+
+                <div style={{ marginTop: "12px", borderTop: "1px solid #444", paddingTop: "8px" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      color: "#aaa",
+                      fontSize: "0.9em",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    Background Replacer:
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        const url = URL.createObjectURL(e.target.files[0]);
+                        setGsBgImage(url);
+                      }
+                    }}
+                    style={{
+                      width: "100%",
+                      background: "#222",
+                      color: "#fff",
+                      fontSize: "0.8rem",
+                    }}
+                  />
+                  {gsBgImage && (
+                    <button
+                      onClick={() => setGsBgImage(null)}
+                      style={{
+                        marginTop: "4px",
+                        background: "none",
+                        border: "none",
+                        color: "#ef4444",
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                        padding: 0,
+                        textDecoration: "underline",
+                      }}
+                    >
+                      Remove Background Image
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div
             style={{
               marginBottom: "16px",
@@ -1100,7 +1326,25 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 </div>
               </div>
             ) : (
-              <div style={{ position: "relative", width: "100%", height: "100%" }}>
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                  // Checkerboard pattern for transparency
+                  backgroundImage: gsBgImage
+                    ? `url(${gsBgImage})`
+                    : `
+                    linear-gradient(45deg, #222 25%, transparent 25%), 
+                    linear-gradient(-45deg, #222 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #222 75%), 
+                    linear-gradient(-45deg, transparent 75%, #222 75%)
+                  `,
+                  backgroundSize: gsBgImage ? "cover" : "20px 20px",
+                  backgroundPosition: gsBgImage ? "center" : "0 0, 0 10px, 10px -10px, -10px 0px",
+                  backgroundColor: "#333",
+                }}
+              >
                 <video
                   ref={videoRef}
                   src={safeVideoSrc}

@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { greenScreenFrag } from "./shaders";
 
 // Shader for a "Cinema Gloss" Effect (Subtle Color Grade + Bloom)
 // Replaces the heavy "Glitch" shader for a premium look
@@ -60,7 +61,7 @@ export async function initVFXEngine(canvas, videoElement) {
     width: vWidth,
     height: vHeight,
     backgroundColor: 0x000000,
-    backgroundAlpha: 1,
+    backgroundAlpha: 0, // Transparent for Green Screen alpha
     resolution: 1, // Fix resolution to 1 to match video pixels exactly
     autoDensity: false, // Let CSS handle the UI scaling
     resizeTo: undefined, // DISABLE DOM resizing which causes the drift/crop issues
@@ -90,9 +91,6 @@ export async function initVFXEngine(canvas, videoElement) {
   }
 
   // Ensure valid texture dimensions before creating sprite
-  // NOTE: We don't block here anymore because video textures often require the main loop
-  // to start ticking before they report valid dimensions. The ticker below handles updates.
-
   // Force a tiny seek so the video decodes *something* (often needed on Chrome/Edge)
   if (videoElement.paused && videoElement.currentTime < 0.1) {
     videoElement.currentTime = 0.001;
@@ -105,12 +103,20 @@ export async function initVFXEngine(canvas, videoElement) {
   sprite.width = vWidth;
   sprite.height = vHeight;
 
-  const simpleFilter = new PIXI.Filter(undefined, cinemaShaderFrag, {
+  // Default Filter (Cinema)
+  const cinemaFilter = new PIXI.Filter(undefined, cinemaShaderFrag, {
     time: 0.0,
     resolution: [app.screen.width, app.screen.height],
   });
 
-  sprite.filters = [simpleFilter];
+  // Green Screen Filter (Initialized but not default)
+  const greenScreenFilter = new PIXI.Filter(undefined, greenScreenFrag, {
+    threshold: 0.1,
+    smoothing: 0.05,
+    keyColor: [0.0, 1.0, 0.0], // RGB Green
+  });
+
+  sprite.filters = [cinemaFilter];
 
   // ADD TO STAGE (Critical Fix: Sprite must be added to be visible)
   app.stage.addChild(sprite);
@@ -122,27 +128,31 @@ export async function initVFXEngine(canvas, videoElement) {
       texture.source.update();
     }
 
-    // DEBUG: Check if texture is actually valid
-    if (app.ticker.lastTime % 1000 < 20) {
-      // Log roughly once per second
-      console.log(
-        `VFX Status: Texture Valid=${texture.valid}, Width=${texture.width}, Height=${texture.height}`
-      );
-    }
-
-    // Check if uniforms object exists before assigning
-    if (simpleFilter.uniforms) {
-      simpleFilter.uniforms.time += 0.05 * delta.deltaTime;
-    } else if (simpleFilter.resources && simpleFilter.resources.uniforms) {
-      // v8 fallback
-      simpleFilter.resources.uniforms.uniforms.time += 0.05 * delta.deltaTime;
+    // Update Time for Cinema Filter
+    if (cinemaFilter.uniforms) {
+      cinemaFilter.uniforms.time += 0.05 * delta.deltaTime;
     }
   });
+
+  // Interface to control effects
+  const setEffect = (effectName, params = {}) => {
+    if (effectName === "green-screen") {
+      sprite.filters = [greenScreenFilter];
+      if (params.threshold !== undefined) greenScreenFilter.uniforms.threshold = params.threshold;
+      if (params.smoothing !== undefined) greenScreenFilter.uniforms.smoothing = params.smoothing;
+      if (params.keyColor !== undefined) greenScreenFilter.uniforms.keyColor = params.keyColor;
+    } else if (effectName === "cinema") {
+      sprite.filters = [cinemaFilter];
+    } else {
+      sprite.filters = [];
+    }
+  };
 
   return {
     destroy: () => {
       app.destroy(true, { children: true, texture: true, baseTexture: true });
     },
     app,
+    setEffect,
   };
 }
