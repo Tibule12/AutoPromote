@@ -1327,10 +1327,14 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               </div>
             ) : (
               <div
+                className="video-player-wrapper"
                 style={{
                   position: "relative",
                   width: "100%",
                   height: "100%",
+                  maxHeight: "80vh", // Force a maximum height to prevent full-page scroll
+                  aspectRatio: "9/16", // Maintain vertical aspect ratio
+                  margin: "0 auto", // Center it
                   // Checkerboard pattern for transparency
                   backgroundImage: gsBgImage
                     ? `url(${gsBgImage})`
@@ -1343,6 +1347,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   backgroundSize: gsBgImage ? "cover" : "20px 20px",
                   backgroundPosition: gsBgImage ? "center" : "0 0, 0 10px, 10px -10px, -10px 0px",
                   backgroundColor: "#333",
+                  overflow: "hidden",
                 }}
               >
                 <video
@@ -1352,6 +1357,8 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   onLoadedMetadata={handleMetadataLoaded}
                   style={{
                     width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
                     display: "block", // Removes bottom gap
                     // Keep relative so it dictates container height
                     // When VFX is on AND loaded, we hide original (opacity 0).
@@ -1372,6 +1379,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                       left: 0,
                       width: "100%",
                       height: "100%",
+                      objectFit: "contain",
                       pointerEvents: "none", // Allow clicks to pass through to the video elements
                     }}
                   />
