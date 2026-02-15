@@ -13,23 +13,27 @@ void main(void) {
     vec2 uv = vTextureCoord;
     vec4 color = texture2D(uSampler, uv);
     
-    // 1. Subtle S-Curve Contrast (Cinematic Look)
-    color.rgb = pow(color.rgb, vec3(1.1)); // Slight contrast boost
+    // 1. Stronger Contrast (Pop)
+    color.rgb = pow(color.rgb, vec3(1.3)); 
     
-    // 2. Warm/Teal Grade (Teal Shadows, Warm Highlights)
-    vec3 teal = vec3(0.0, 0.1, 0.1);
-    vec3 orange = vec3(0.1, 0.05, 0.0);
+    // 2. Saturation Boost (Vital for "Cinema" look)
     float luma = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+    vec3 gray = vec3(luma);
+    color.rgb = mix(gray, color.rgb, 1.4); // 40% more saturation
+
+    // 3. Stronger Teal/Orange Grade
+    vec3 teal = vec3(0.0, 0.2, 0.2); // More vibrant teal
+    vec3 orange = vec3(0.2, 0.1, 0.0); // More vibrant orange
     
     if (luma < 0.5) {
-        color.rgb += teal * (1.0 - luma) * 0.2;
+        color.rgb += teal * (1.0 - luma) * 0.3; // Stronger shadow tint
     } else {
-        color.rgb += orange * luma * 0.15;
+        color.rgb += orange * luma * 0.25; // Stronger highlight tint
     }
     
-    // 3. Vignette (Darken corners)
+    // 4. Subtle Vignette (Focus on center)
     float dist = distance(uv, vec2(0.5));
-    color.rgb *= smoothstep(0.8, 0.4, dist * (resolution.x / resolution.y));
+    color.rgb *= smoothstep(0.8, 0.3, 1.0 - dist); // Darken edges
 
     gl_FragColor = color;
 }
@@ -43,11 +47,11 @@ void main(void) {
 export async function initVFXEngine(canvas, videoElement) {
   if (!canvas || !videoElement) return null;
 
-  // 1. Critical: Ensure we have intrinsic video dimensions
-  // This prevents the "zoom/crop" bug by matching Pixi buffer 1:1 with Video file
-  if (videoElement.readyState < 1) {
+  // 1. Critical: Ensure we have enough video data to render a frame
+  // Prevents "glCopySubTextureCHROMIUM" errors
+  if (videoElement.readyState < 2) {
     await new Promise(r => {
-      videoElement.onloadedmetadata = r;
+      videoElement.addEventListener("canplay", r, { once: true });
     });
   }
   const vWidth = videoElement.videoWidth || 1280;
@@ -94,6 +98,13 @@ export async function initVFXEngine(canvas, videoElement) {
   // Force a tiny seek so the video decodes *something* (often needed on Chrome/Edge)
   if (videoElement.paused && videoElement.currentTime < 0.1) {
     videoElement.currentTime = 0.001;
+  }
+
+  // SAFETY CHECK: Wait for video to have dimensions
+  if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
+    await new Promise(resolve => {
+      videoElement.onloadedmetadata = resolve;
+    });
   }
 
   const sprite = new PIXI.Sprite(texture);

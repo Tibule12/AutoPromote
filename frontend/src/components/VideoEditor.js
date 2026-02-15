@@ -124,7 +124,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [viralityScore, setViralityScore] = useState(0);
   const [viralityMetrics, setViralityMetrics] = useState([]);
   const [boostQuality, setBoostQuality] = useState(false); // The "Use VP9" Hack
-  const [activePreset, setActivePreset] = useState("cinematic"); // Default to Cinematic for best first impression
+  const [activePreset, setActivePreset] = useState("custom"); // Default to Manual so no heavy shaders run on load
 
   // NEW: Audio & Captions
   const [enhanceAudio, setEnhanceAudio] = useState(false);
@@ -237,14 +237,14 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   }, [captionText]);
 
   // --- VFX Engine ---
-  // Default to TRUE for full auto-magical experience
-  const [isVFXMode, setIsVFXMode] = useState(true);
+  // Default to FALSE to prevent crash/glitches on load
+  const [isVFXMode, setIsVFXMode] = useState(false);
   const [vfxLoading, setVfxLoading] = useState(false);
   const vfxCanvasRef = useRef(null);
   const vfxAppRef = useRef(null);
 
   // Green Screen & VFX State
-  const [activeVFXEffect, setActiveVFXEffect] = useState("cinema"); // 'cinema', 'green-screen', 'none'
+  const [activeVFXEffect, setActiveVFXEffect] = useState("none"); // Default none
   const [gsThreshold, setGsThreshold] = useState(0.15);
   const [gsSmoothing, setGsSmoothing] = useState(0.1);
   const [gsKeyColor, setGsKeyColor] = useState("#00ff00");
@@ -1382,20 +1382,11 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   maxHeight: "80vh", // Force a maximum height to prevent full-page scroll
                   aspectRatio: "9/16", // Maintain vertical aspect ratio
                   margin: "0 auto", // Center it
-                  // Checkerboard pattern for transparency
-                  backgroundImage: safeGsBgImage
-                    ? `url(${safeGsBgImage})`
-                    : `
-                    linear-gradient(45deg, #222 25%, transparent 25%), 
-                    linear-gradient(-45deg, #222 25%, transparent 25%), 
-                    linear-gradient(45deg, transparent 75%, #222 75%), 
-                    linear-gradient(-45deg, transparent 75%, #222 75%)
-                  `,
-                  backgroundSize: safeGsBgImage ? "cover" : "20px 20px",
-                  backgroundPosition: safeGsBgImage
-                    ? "center"
-                    : "0 0, 0 10px, 10px -10px, -10px 0px",
-                  backgroundColor: "#333",
+                  // Cinema Mode: Clean Black Background
+                  backgroundColor: "#000",
+                  backgroundImage: safeGsBgImage ? `url(${safeGsBgImage})` : "none",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
                   overflow: "hidden",
                 }}
               >
