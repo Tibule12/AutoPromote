@@ -339,13 +339,27 @@ async function uploadVideo({
 
   const selfDeclaredMadeForKids = !!ytOptions.made_for_kids;
 
+  // Algorithm Boost: Default to "Entertainment" (24) instead of "People & Blogs" (22) for better reach
+  // 24 = Entertainment, 27 = Education, 20 = Gaming
+  const categoryId = ytOptions.categoryId || "24";
+
+  // Algorithm Boost: Inject signals for mobile/shorts discovery
+  const finalTags = [...(contentTags || [])];
+  if (shortsMode) {
+    if (!finalTags.includes("shorts")) finalTags.push("shorts");
+    if (!finalTags.includes("vertical")) finalTags.push("vertical");
+    // "mobile" tag often helps with mobile-first distribution
+    if (!finalTags.includes("mobile")) finalTags.push("mobile");
+  }
+
   const insertRes = await youtube.videos.insert({
     part: "snippet,status",
     requestBody: {
       snippet: {
         title: finalTitle,
         description: finalDescription,
-        tags: contentTags,
+        tags: finalTags,
+        categoryId,
       },
       status: {
         privacyStatus,
