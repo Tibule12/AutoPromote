@@ -2,6 +2,7 @@ const express = require("express");
 const fetch = require("node-fetch");
 const { db } = require("../../firebaseAdmin");
 const authMiddleware = require("../../authMiddleware");
+const { cleanupSourceFile } = require("../../src/utils/cleanupSource");
 
 const router = express.Router();
 
@@ -100,6 +101,9 @@ router.post("/upload", authMiddleware, async (req, res) => {
     const publishData = await publishRes.json();
     if (!publishRes.ok)
       return res.status(400).json({ error: "IG publish failed", details: publishData });
+
+    // Success - delete source file
+    await cleanupSourceFile(mediaUrl);
 
     return res.json({ success: true, media_id: publishData.id });
   } catch (e) {

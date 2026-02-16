@@ -1,6 +1,7 @@
 // linkedinService.js - LinkedIn Share API integration
 const { db, admin } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
+const { cleanupSourceFile } = require("../utils/cleanupSource");
 
 let fetchFn = global.fetch;
 if (!fetchFn) {
@@ -295,6 +296,8 @@ async function uploadVideo({ uid, videoUrl }) {
           const statusData = await statusRes.json();
           const state = statusData.recipes[0].status;
           if (state === "AVAILABLE") {
+            // Video is ready on LinkedIn, delete source file
+            cleanupSourceFile(videoUrl).catch(() => {});
             resolve(asset);
             return;
           } else if (state === "CLIENT_ERROR" || state === "PROCESSING_FAILED") {

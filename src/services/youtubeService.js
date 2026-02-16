@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 const streamifier = require("streamifier");
+const { cleanupSourceFile } = require("../utils/cleanupSource");
 const { google } = require("googleapis");
 const { admin, db } = require("../firebaseAdmin");
 const crypto = require("crypto");
@@ -424,6 +425,11 @@ async function uploadVideo({
   try {
     await recordUploadDuplicate(false);
   } catch (_) {}
+
+  // Trigger aggressive cleanup of the source file to save storage costs
+  // We do this in background (no await) or await if we want to ensure it's gone
+  await cleanupSourceFile(fileUrl);
+
   return { success: true, videoId, raw: insertRes.data, uploadHash, duplicate: false };
 }
 

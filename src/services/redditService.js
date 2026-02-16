@@ -1,6 +1,7 @@
 // redditService.js - Reddit submission API integration
 const { db, admin } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
+const { cleanupSourceFile } = require("../utils/cleanupSource");
 const FormData = require("form-data");
 
 let fetchFn;
@@ -260,6 +261,8 @@ async function postToReddit({
     const vSource = videoUrl || url;
     try {
       // console.log("Uploading video to standard Reddit S3...");
+      // Reddit media upload is just the first step.
+      // We do NOT cleanup here. We cleanup after successful *submission*.
       const vResult = await uploadRedditMedia(uid, vSource, "video/mp4");
       finalVideoUrl = vResult.url;
     } catch (e) {
@@ -349,6 +352,11 @@ async function postToReddit({
   if (responseData.json && responseData.json.errors && responseData.json.errors.length > 0) {
     const errs = responseData.json.errors.map(e => e[1]).join(", ");
     throw new Error(`Reddit API Error: ${errs}`);
+  }
+
+  // Cleanup source file after successful Reddit submission
+  if (videoUrl) {
+    cleanupSourceFile(videoUrl).catch(() => {});
   }
 
   // Reddit returns data in json.data.url format

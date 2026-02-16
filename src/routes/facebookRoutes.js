@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const { admin, db } = require("../../firebaseAdmin");
 const authMiddleware = require("../../authMiddleware");
 const logger = require("../utils/logger");
+const { cleanupSourceFile } = require("../../src/utils/cleanupSource");
 
 const router = express.Router();
 
@@ -587,6 +588,12 @@ router.post("/upload", authMiddleware, async (req, res) => {
     });
     const fbData = await fbRes.json();
     if (!fbRes.ok) return res.status(400).json({ error: "Facebook API error", details: fbData });
+
+    // Aggressive Cleanup of source file
+    if (content.url) {
+      cleanupSourceFile(content.url).catch(() => {});
+    }
+
     return res.json({ success: true, result: fbData });
   } catch (e) {
     return res.status(500).json({ error: e.message });

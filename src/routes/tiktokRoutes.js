@@ -3,6 +3,7 @@ const express = require("express");
 const fetch = require("node-fetch");
 const router = express.Router();
 const authMiddleware = require("../authMiddleware");
+const { cleanupSourceFile } = require("../utils/cleanupSource");
 const { admin, db } = require("../firebaseAdmin");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 const DEBUG_TIKTOK_OAUTH = process.env.DEBUG_TIKTOK_OAUTH === "true";
@@ -1514,6 +1515,10 @@ router.post(
 
       // Matches typical "Direct Post" flow: Init -> Upload.
       // Often checking status is next, but successful upload usually implies queuing for publish.
+
+      // Aggressive Cleanup to save storage costs
+      await cleanupSourceFile(videoUrl);
+
       res.json({
         success: true,
         publish_id: publishId,
