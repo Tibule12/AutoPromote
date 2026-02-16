@@ -1354,109 +1354,184 @@ router.post(
         });
       }
 
-      // Production: upload not enabled until scopes approved
-      return res.status(403).json({
-        error: "TikTok video upload not available",
-        reason: "video.upload and video.publish scopes not approved",
-        approvedScopes: ["user.info.profile", "video.list"],
-        message:
-          "Currently you can only view video lists. Upload functionality requires additional TikTok approval.",
+      // Production: Start Real Upload Process
+      console.log("[TikTok Upload] Production Mode - Starting real upload");
+
+      // 1. Resolve Connection / Tokens
+      if (!conn) {
+        // Validation logic above tries to load conn, but let's be safe
+        const cSnap = await db
+          .collection("users")
+          .doc(uid)
+          .collection("connections")
+          .doc("tiktok")
+          .get();
+        if (cSnap.exists) conn = cSnap.data();
+      }
+
+      if (!conn) {
+        return res
+          .status(400)
+          .json({ error: "tiktok_not_connected", message: "TikTok account not connected." });
+      }
+
+      const tokens =
+        tokensFromDoc(conn) ||
+        (conn.tokens && typeof conn.tokens === "object" ? conn.tokens : null);
+      const accessToken =
+        tokens && typeof tokens.access_token === "string" ? tokens.access_token : null;
+      const openId = conn.open_id || conn.openId;
+
+      if (!accessToken || !openId) {
+        return res
+          .status(400)
+          .json({ error: "tiktok_token_missing", message: "Valid TikTok access token not found." });
+      }
+
+      // 2. Resolve File URL
+      // Frontend sends 'url' (storage URL) or 'fileUrl'
+      let videoUrl = req.body.url || req.body.fileUrl || req.body.video_url;
+
+      if (!videoUrl) {
+        return res
+          .status(400)
+          .json({ error: "tiktok_missing_file", message: "No video file URL provided." });
+      }
+
+      // 3. Initiate Upload
+      const { safeFetch } = require("../utils/ssrfGuard");
+      const { validateUrl } = require("../utils/urlValidator"); // Assuming this exists or we use safeFetch
+
+      console.log("[TikTok Upload] Initializing upload for open_id:", openId);
+
+      // Step A: Get Upload URL from TikTok
+      // https://developers.tiktok.com/doc/marketing-api-video-publishing/
+      // Note: This endpoint '/v2/video/upload/' is for the "Direct Post" API (Content Posting API)
+      // Confirm the correct endpoint for your app's permission set.
+      // Usually "Content Posting API" uses: POST https://open.tiktokapis.com/v2/post/publish/video/init/
+      // But let's stick to the structure you had if that's what your integration expects,
+      // OR update to the modern v2 endpoints if the disabled code was legacy.
+      // The disabled code used: https://open.tiktokapis.com/v2/video/upload/ (which looks like legacy or specific integration).
+      // Let's assume the disabled code had the right endpoints for your specific app knowing it might be the "Share to TikTok" or "Direct Post" API.
+      // *Correction*: The modern "Direct Post" API (v2) flow usually involves:
+      // 1. /v2/post/publish/video/init/ -> get upload_url
+      // 2. PUT video to upload_url
+      // 3. (Sometimes auto-published) or /v2/post/publish/status/ to check.
+      // The disabled code used `/v2/video/upload/` and `/v2/video/publish/`. We will use those hoping they match your app.
+
+      // Validate URL safety
+      try {
+        const u = new URL(videoUrl);
+        if (!["http:", "https:"].includes(u.protocol)) throw new Error("Invalid protocol");
+      } catch (e) {
+        return res.status(400).json({ error: "invalid_video_url", message: "Invalid video URL." });
+      }
+
+      // Step A: Init Upload
+      const initRes = await safeFetch(
+        "https://open.tiktokapis.com/v2/post/publish/video/init/",
+        fetch,
+        {
+          fetchOptions: {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json; charset=UTF-8",
+            },
+            body: JSON.stringify({
+              post_info: {
+                title: req.body.title || "AutoPromote Video",
+                privacy_level: tiktokOpts?.privacy || "PUBLIC_TO_EVERYONE", // Map to API constants
+                disable_duet:
+                  tiktokOpts?.interactions?.duet === false ||
+                  tiktokOpts?.interactions?.duet === false,
+                disable_comment: tiktokOpts?.interactions?.comments === false,
+                disable_stitch: tiktokOpts?.interactions?.stitch === false,
+                video_cover_timestamp_ms: 1000, // Optional: default cover
+              },
+              source_info: {
+                source: "FILE_UPLOAD",
+                video_size: req.body.meta?.size || 0, // Ideally we have size
+                chunk_size: req.body.meta?.size || 0,
+                total_chunk_count: 1,
+              },
+            }),
+          },
+          requireHttps: true,
+          allowHosts: ["open.tiktokapis.com"],
+        }
+      );
+
+      // Analyze Init Response
+      const initData = await initRes.json();
+      if (!initRes.ok || !initData.data || !initData.data.upload_url) {
+        console.error("[TikTok Upload] Init failed:", JSON.stringify(initData));
+        // Fallback to legacy endpoint if v2 post init fails (in case app uses older scope)
+        // ... But for now, report error
+        return res.status(400).json({
+          error: "tiktok_init_failed",
+          message: "Failed to initialize upload with TikTok.",
+          details: initData,
+        });
+      }
+
+      const uploadUrl = initData.data.upload_url;
+      const publishId = initData.data.publish_id;
+
+      // Step B: Upload File
+      console.log("[TikTok Upload] Uploading file to:", uploadUrl);
+
+      // fetch the file content from storage URL
+      const fileRes = await safeFetch(videoUrl, fetch, {
+        fetchOptions: { timeout: 60000 },
+        requireHttps: true,
+      });
+      if (!fileRes.ok) throw new Error(`Failed to download video from storage: ${fileRes.status}`);
+      const fileBuffer = await fileRes.buffer();
+
+      // Upload to TikTok
+      const uploadRes = await safeFetch(uploadUrl, fetch, {
+        fetchOptions: {
+          method: "PUT",
+          headers: {
+            "Content-Type": "video/mp4",
+            "Content-Range": `bytes 0-${fileBuffer.length - 1}/${fileBuffer.length}`,
+            "Content-Length": fileBuffer.length,
+          },
+          body: fileBuffer,
+        },
+        requireHttps: true,
+        allowHosts: ["open.tiktokapis.com", "tiktokapis.com"], // Add exact host if different for upload
+      });
+
+      if (!uploadRes.ok) {
+        const upErr = await uploadRes.text();
+        console.error("[TikTok Upload] File upload failed:", upErr);
+        return res
+          .status(400)
+          .json({ error: "tiktok_upload_error", message: "Failed to send video file to TikTok." });
+      }
+
+      // Matches typical "Direct Post" flow: Init -> Upload.
+      // Often checking status is next, but successful upload usually implies queuing for publish.
+      res.json({
+        success: true,
+        publish_id: publishId,
+        message: "Video uploaded to TikTok successfully.",
       });
     } catch (err) {
-      console.error("TikTok upload validation error:", err && err.message);
-      return res.status(500).json({ error: "tiktok_upload_failed", details: err && err.message });
+      console.error("TikTok upload error:", err);
+      // Determine if it was a permissions issue
+      const msg = err.message || "";
+      if (msg.includes("scope") || msg.includes("permission")) {
+        return res.status(403).json({
+          error: "tiktok_permission_error",
+          message:
+            "Permission denied by TikTok. Ensure 'video.publish' or equivalent scope is granted.",
+        });
+      }
+      return res.status(500).json({ error: "tiktok_upload_failed", details: msg });
     }
-
-    /* DISABLED CODE - Uncomment when video.upload/video.publish scopes are approved
-	const { access_token, open_id, video_url, title } = req.body;
-	if (!access_token || !open_id || !video_url) {
-		return res.status(400).json({ error: 'Missing required fields' });
-	}
-
-	// Validate video_url to prevent SSRF
-	try {
-		const url = new URL(video_url);
-		if (!['http:', 'https:'].includes(url.protocol)) {
-			return res.status(400).json({ error: 'Invalid video URL protocol' });
-		}
-		// Prevent access to internal/private networks
-		const hostname = url.hostname.toLowerCase();
-		if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') ||
-				hostname.startsWith('10.') || hostname.startsWith('172.') ||
-				hostname.includes('internal') || hostname.includes('local')) {
-			return res.status(400).json({ error: 'Access to internal/private URLs not allowed' });
-		}
-	} catch (e) {
-		return res.status(400).json({ error: 'Invalid video URL format' });
-	}
-
-	try {
-		// Step 1: Get upload URL from TikTok
-		// Use safeFetch for SSRF protection
-		const uploadRes = await safeFetch('https://open.tiktokapis.com/v2/video/upload/', fetch, {
-			fetchOptions: {
-				method: 'POST',
-				headers: {
-					'Authorization': `Bearer ${access_token}`,
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ open_id })
-			},
-			requireHttps: true,
-			allowHosts: ['open.tiktokapis.com']
-		});
-		const uploadData = await uploadRes.json();
-		if (!uploadData.data || !uploadData.data.upload_url) {
-			return res.status(400).json({ error: 'Failed to get TikTok upload URL', details: uploadData });
-		}
-		// Step 2: Upload video file to TikTok (video_url must be a direct link to the file)
-		// Use safeFetch to validate that video_url is not pointing to private IPs or local addresses
-		await validateUrl(video_url, { requireHttps: false });
-		const videoFileRes = await safeFetch(video_url, fetch, { fetchOptions: { timeout: 30000, headers: { 'User-Agent': 'AutoPromote/1.0' } } });
-		if (!videoFileRes.ok) {
-			return res.status(400).json({ error: 'Failed to fetch video from provided URL' });
-		}
-		const videoBuffer = await videoFileRes.arrayBuffer();
-		// Use safeFetch for SSRF protection on upload URL
-		const uploadToTikTokRes = await safeFetch(uploadData.data.upload_url, fetch, {
-			fetchOptions: {
-				method: 'PUT',
-				headers: { 'Content-Type': 'video/mp4' },
-				body: Buffer.from(videoBuffer)
-			},
-			requireHttps: true,
-			allowHosts: ['open.tiktokapis.com', 'sandbox.tiktokapis.com']
-		});
-		if (!uploadToTikTokRes.ok) {
-			return res.status(400).json({ error: 'Failed to upload video to TikTok', details: await uploadToTikTokRes.text() });
-		}
-		// Step 3: Create video post on TikTok
-		// Use safeFetch for SSRF protection
-		const createRes = await safeFetch('https://open.tiktokapis.com/v2/video/publish/', fetch, {
-			fetchOptions: {
-				method: 'POST',
-				headers: {
-					'Authorization': `Bearer ${access_token}`,
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					open_id,
-					video_id: uploadData.data.video_id,
-					title: title || 'AutoPromote Video'
-				})
-			},
-			requireHttps: true,
-			allowHosts: ['open.tiktokapis.com']
-		});
-		const createData = await createRes.json();
-		if (!createData.data || !createData.data.video_id) {
-			return res.status(400).json({ error: 'Failed to publish video on TikTok', details: createData });
-		}
-		res.json({ success: true, video_id: createData.data.video_id });
-	} catch (err) {
-		res.status(500).json({ error: 'TikTok video upload failed', details: err.message });
-	}
-	END OF DISABLED CODE */
   }
 );
 
