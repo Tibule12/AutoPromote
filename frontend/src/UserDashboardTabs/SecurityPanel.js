@@ -163,13 +163,38 @@ const SecurityPanel = ({ user }) => {
       if (response && response.ok) {
         const parsed = await parseJsonSafe(response);
         const data = parsed.json || null;
-        const platforms = Object.entries(data?.connections || {}).map(([key, value]) => ({
-          id: key,
-          provider: value.provider || key,
-          connectedAt: value.obtainedAt ? new Date(value.obtainedAt) : new Date(),
-          scope: value.scope || "Unknown",
-          status: value.mode || "active",
-        }));
+        const platforms = Object.entries(data?.connections || {}).map(([key, value]) => {
+          let date;
+          try {
+            if (value.obtainedAt) {
+              if (typeof value.obtainedAt === "object" && value.obtainedAt._seconds) {
+                // Handle Firestore Timestamp format {_seconds, _nanoseconds}
+                date = new Date(value.obtainedAt._seconds * 1000);
+              } else if (typeof value.obtainedAt === "object" && value.obtainedAt.seconds) {
+                // Handle standard Timestamp format {seconds, nanoseconds}
+                date = new Date(value.obtainedAt.seconds * 1000);
+              } else {
+                date = new Date(value.obtainedAt);
+              }
+            } else {
+              date = new Date(); // Fallback to now
+            }
+            // Check for Invalid Date
+            if (isNaN(date.getTime())) {
+              date = new Date();
+            }
+          } catch (e) {
+            date = new Date();
+          }
+
+          return {
+            id: key,
+            provider: value.provider || key,
+            connectedAt: date,
+            scope: value.scope || "Unknown",
+            status: value.mode || "active",
+          };
+        });
         setConnectedPlatforms(platforms);
       } else if (response) {
         const parsed = await parseJsonSafe(response);
