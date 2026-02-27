@@ -2,6 +2,18 @@
 // Requires: jest, supertest, and your Express app
 
 const request = require("supertest");
+
+// Mock billingService to bypass platform limits for integration tests
+jest.mock("../services/billingService", () => {
+  const originalModule = jest.requireActual("../services/billingService");
+  return {
+    ...originalModule,
+    checkPlatformLimit: jest.fn().mockImplementation((userId, count) => {
+      return Promise.resolve({ allowed: true, limit: count + 10 });
+    }),
+  };
+});
+
 const app = require("../server");
 let server;
 let agent;

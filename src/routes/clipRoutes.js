@@ -322,4 +322,57 @@ router.post("/:clipId/export", authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * @route POST /memetic/seed
+ * @desc Start a memetic experiment (seed phase)
+ * @access Private
+ */
+router.post("/memetic/seed", authMiddleware, async (req, res) => {
+  const { plan, options, contentId } = req.body;
+  // Use user id from auth middleware
+  const userId = req.user.uid;
+
+  if (!plan || !Array.isArray(plan)) {
+    return res.status(400).json({ error: "Plan array is required" });
+  }
+
+  try {
+    // 1. If contentId is provided, enforce ownership
+    if (contentId) {
+      const contentDoc = await db.collection("content").doc(contentId).get();
+      if (!contentDoc.exists) {
+        return res.status(404).json({ error: "Content not found" });
+      }
+      const data = contentDoc.data();
+      // Handle legacy 'user_id' vs 'userId'
+      const owner = data.user_id || data.userId;
+      if (owner !== userId) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+    }
+
+    // 2. Create experiment doc
+    const experimentData = {
+      userId,
+      plan,
+      options: options || {},
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    };
+    if (contentId) {
+      experimentData.contentId = contentId;
+    }
+
+    const docRef = await db.collection("memetic_experiments").add(experimentData);
+
+    res.json({
+      success: true,
+      experimentId: docRef.id,
+    });
+  } catch (error) {
+    console.error("[ClipRoute] Memetic seed error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;

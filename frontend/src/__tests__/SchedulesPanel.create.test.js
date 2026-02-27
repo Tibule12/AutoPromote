@@ -22,7 +22,7 @@ describe("SchedulesPanel create schedule", () => {
     );
 
     // 1. Open Injector
-    const injectBtn = screen.getByText(/\+ INJECT EVENT/i);
+    const injectBtn = screen.getByText(/\+ SCHEDULE DROP/i);
     fireEvent.click(injectBtn);
 
     // 2. Choose Content

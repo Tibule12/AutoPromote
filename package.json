@@ -90,7 +90,7 @@
     "braces": "3.0.3",
     "micromatch": "4.0.8",
     "lodash": "^4.17.23",
-    "fast-xml-parser": "5.3.6"
+    "fast-xml-parser": "5.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.22.0",
