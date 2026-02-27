@@ -20,13 +20,17 @@ service cloud.firestore {
 
     // Users can read/write their own content
     match /content/{contentId} {
-      allow read, write: if isAdmin() || isServiceAccount() ||
-        (request.auth != null &&
-          (
-            (request.method == 'create' && request.resource.data.user_id == request.auth.uid) ||
-            (resource.data.user_id == request.auth.uid)
-          )
-        );
+      allow create: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && (
+          (request.resource.data.keys().hasAny(['userId']) && request.resource.data.userId == request.auth.uid) ||
+          (request.resource.data.keys().hasAny(['user_id']) && request.resource.data.user_id == request.auth.uid)
+        ));
+
+      allow update, delete, get, list: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && resource != null && (
+          (resource.data.keys().hasAny(['userId']) && resource.data.userId == request.auth.uid) ||
+          (resource.data.keys().hasAny(['user_id']) && resource.data.user_id == request.auth.uid)
+        ));
     }
 
     // Only admins, service account, or backend can access analytics, promotions, activities
@@ -108,6 +112,26 @@ service cloud.firestore {
         isAdmin()
       );
       allow write: if isAdmin() || isServiceAccount();
+    }
+    
+    // Notifications - users can read/write their own
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Transactions - users can read their own (read-only usually)
+    match /transactions/{transactionId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Paid Boosts (Missions) - users can read/write their own
+    match /paid_boosts/{boostId} {
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
     // All other collections: only admins, service account, or backend

@@ -1,0 +1,115 @@
+.live-log-container {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0;
+  font-family: "Consolas", "Monaco", monospace;
+  color: #c9d1d9;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.live-log-header {
+  background: #161b22;
+  padding: 8px 12px;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.live-log-header h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #e30b5c; /* Live indicator red */
+  animation: pulse 1.5s infinite;
+}
+
+.live-toggle {
+  background: #238636;
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.live-log-console {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.log-line {
+  padding: 2px 0;
+  border-bottom: 1px solid #21262d;
+}
+
+.log-ts {
+  color: #8b949e;
+  margin-right: 8px;
+}
+
+.log-login {
+  color: #58a6ff;
+}
+.log-upload {
+  color: #d2a8ff;
+  font-weight: bold;
+  background: rgba(210, 168, 255, 0.1);
+}
+.log-revenue {
+  color: #2ea043;
+  font-weight: bold;
+  background: rgba(46, 160, 67, 0.1);
+}
+.log-credit {
+  color: #e3b341;
+  font-weight: bold;
+}
+.log-error {
+  color: #f85149;
+}
+.log-success {
+  color: #7ee787;
+}
+.log-info {
+  color: #8b949e;
+}
+.log-cache {
+  color: #8b949e;
+  opacity: 0.5;
+}
+
+.log-raw {
+  opacity: 0.7;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Scrollbar */
+.live-log-console::-webkit-scrollbar {
+  width: 8px;
+}
+.live-log-console::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+.live-log-console::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 4px;
+}

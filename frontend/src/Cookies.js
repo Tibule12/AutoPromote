@@ -54,7 +54,7 @@ const CookiesPolicy = () => (
       <h2>5. Contact Us</h2>
       <p>
         If you have any questions about our use of cookies, please email us at{" "}
-        <a href="mailto:support@autopromote.com">support@autopromote.com</a>.
+        <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
       </p>
     </div>
   </div>

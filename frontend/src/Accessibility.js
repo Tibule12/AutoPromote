@@ -39,7 +39,7 @@ const Accessibility = () => (
         encounter accessibility barriers on AutoPromote:
       </p>
       <p>
-        E-mail: <a href="mailto:accessibility@autopromote.com">accessibility@autopromote.com</a>
+        E-mail: <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>
       </p>
     </div>
   </div>

@@ -53,7 +53,7 @@ import Features from "./Features";
 import Integrations from "./Integrations";
 import Metrics from "./Metrics";
 import Changelog from "./Changelog";
-import CommunityPage from "./CommunityPage";
+// CommunityPage removed
 import HelpCenter from "./HelpCenter";
 import ApiDocs from "./ApiDocs";
 import Partners from "./Partners";
@@ -730,6 +730,18 @@ function App() {
 
   // Content upload handler (with file and platforms)
   const handleContentUpload = async params => {
+    // If called without params (e.g. from ClipStudioPanel refresh), just reload content
+    if (!params) {
+      console.log("[App] handleContentUpload called without params -> refreshing content");
+      let token = null;
+      try {
+        const current = auth && auth.currentUser;
+        if (current) token = await current.getIdToken(true);
+      } catch (_) {}
+      if (token) await fetchUserContent(token);
+      return;
+    }
+
     console.log("[E2E] handleContentUpload called with params:", {
       isDryRun: params.isDryRun,
       platforms: params.platforms || params.target_platforms,
@@ -798,6 +810,37 @@ function App() {
           finalUrl = await getDownloadURL(storageRef);
         }
       }
+
+      // 2. Upload Platform-Specific Files (if any)
+      // This allows "Upload Once, Publish Everywhere" with tailored content per platform.
+      const platformFiles = params.platform_files || {};
+      // Ensure we have a mutable reference to platform options
+      const platformOptionsObj = params.platformOptions || params.platform_options || {};
+
+      if (platformFiles && Object.keys(platformFiles).length > 0 && !isDryRun) {
+        for (const [pName, pFile] of Object.entries(platformFiles)) {
+          if (pFile && pFile instanceof File) {
+            try {
+              const pPath = `uploads/${type}s/${Date.now()}_${pName}_${pFile.name}`;
+              const pRef = ref(storage, pPath);
+              await uploadBytes(pRef, pFile);
+              const pUrl = await getDownloadURL(pRef);
+
+              // Inject into options so backend sees it
+              if (!platformOptionsObj[pName]) platformOptionsObj[pName] = {};
+              platformOptionsObj[pName].media_url = pUrl;
+            } catch (err) {
+              console.error(`[App] Failed to upload file for ${pName}`, err);
+              // Non-fatal, fallback to global URL will happen in backend
+            }
+          }
+        }
+        // Re-assign back to params to ensure downstream logic uses updated object
+        params.platform_options = platformOptionsObj;
+        // Ensure we keep `platformOptions` in sync if it was passed that way
+        if (params.platformOptions) params.platformOptions = platformOptionsObj;
+      }
+
       const schedule_hint = {
         ...schedule,
         frequency: schedule?.frequency || userDefaults.defaultFrequency || "once",
@@ -1082,7 +1125,7 @@ function App() {
         <Route path="/integrations" element={<Integrations />} />
         <Route path="/metrics" element={<Metrics />} />
         <Route path="/changelog" element={<Changelog />} />
-        <Route path="/community" element={<CommunityPage />} />
+        {/* CommunityPage removed */}
         <Route path="/help" element={<HelpCenter />} />
         <Route path="/api-docs" element={<ApiDocs />} />
         <Route path="/partners" element={<Partners />} />

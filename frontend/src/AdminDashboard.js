@@ -16,7 +16,10 @@ import AdvancedAnalyticsPanel from "./components/AdvancedAnalyticsPanel";
 import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import PlatformHealthPanel from "./components/PlatformHealthPanel"; // NEW
 import AdminPayoutsPanel from "./components/AdminPayoutsPanel";
+import AdminSubscriptionOverview from "./components/AdminSubscriptionOverview";
+import AdminUserList from "./components/AdminUserList";
 import AdminAuditViewer from "./AdminAuditViewer";
+
 import StatCard from "./components/StatCard";
 import ActivityFeed from "./components/ActivityFeed";
 import VoiceOverGuide from "./components/VoiceOverGuide";
@@ -54,14 +57,14 @@ function AdminDashboard({ analytics, user, onLogout }) {
     analytics:
       "Advanced Analytics provides deep dives into user behavior, retention cohorts, and platform-specific performance metrics.",
     system:
-      "System Health Monitoring. View real-time status of all backend services, database connections, and third-party API integrations like OpenAI and PayPal.",
+      "System Health Monitoring. View real-time status of all backend services, database connections, and third-party API integrations like OpenAI, PayPal, and PayFast.",
     audit:
       "The Audit Log records every administrative action for security compliance. Use this to trace who changed what and when.",
     support: "Support Ticket Management. View and respond to user inquiries and bug reports.",
     moderation:
       "Detailed Moderation Tools. Apply bans, mutes, or warnings to users violating the terms of service.",
     subscriptions:
-      "PayPal Subscription Manager. View active recurring payments, cancel subscriptions, and handle refunds.",
+      "Subscription Management. View all active user subscriptions, plan details, and next billing dates.",
     payouts:
       "Creator Payouts. Process withdrawals for monetized creators and view transaction history.",
     openai:
@@ -3239,6 +3242,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
                 </div>
               </div>
             </div>
+            <div style={{ marginTop: 20 }}>
+              <AdminUserList />
+            </div>
           </>
         );
 
@@ -3474,13 +3480,16 @@ function AdminDashboard({ analytics, user, onLogout }) {
               </div>
             </div>
 
-            {/* PayPal Subscription Management */}
+            {/* Subscription & Billing Management (PayPal/PayFast) */}
             <PayPalSubscriptionPanel />
           </>
         );
 
       case "payouts":
         return <AdminPayoutsPanel token={user?.accessToken} />;
+
+      case "subscriptions":
+        return <AdminSubscriptionOverview />;
 
       // Removed Tabs: community, approval, moderation, etc.
 
@@ -3495,11 +3504,14 @@ function AdminDashboard({ analytics, user, onLogout }) {
                 marginBottom: "20px",
               }}
             >
-              <h3 style={{ margin: 0, color: "#1565c0" }}>🤖 Automation Active</h3>
-              <p>All platforms are running. Content checks are automated.</p>
+              <h3 style={{ margin: 0, color: "#1565c0" }}>🤖 System Health & Security</h3>
+              <p>Platform status, system performance, and security audit logs.</p>
             </div>
             <PlatformHealthPanel />
             <SystemHealthPanel />
+            <div style={{ marginTop: "40px" }}>
+              <AdminAuditViewer />
+            </div>
           </div>
         );
 
@@ -3672,10 +3684,11 @@ function AdminDashboard({ analytics, user, onLogout }) {
       </div>
       <div style={{ marginBottom: "24px", display: "flex", flexWrap: "wrap" }}>
         <TabButton name="content" label="Content" icon="📄" />
-        <TabButton name="revenue" label="Revenue" icon="💰" />
         <TabButton name="users" label="Users" icon="👥" />
+        <TabButton name="subscriptions" label="Subscriptions" icon="💳" />
+        <TabButton name="revenue" label="Revenue" icon="💰" />
         <TabButton name="payouts" label="Payouts" icon="💸" />
-        <TabButton name="system" label="Automation Status" icon="🤖" />
+        <TabButton name="system" label="System Health" icon="🤖" />
       </div>
       {error && (
         <div

@@ -80,7 +80,12 @@ const AnalyticsPanel = () => {
           marginBottom: "1.5rem",
         }}
       >
-        <h3>Analytics</h3> ({timeRange})
+        <div>
+          <h3 style={{ margin: 0 }}>MISSION INTELLIGENCE</h3>
+          <span style={{ fontSize: "0.8rem", color: "#64748b" }}>
+            Live debriefing from the field
+          </span>
+        </div>
         <select
           value={timeRange}
           onChange={e => setTimeRange(e.target.value)}
@@ -145,7 +150,7 @@ const AnalyticsPanel = () => {
             </div>
             <p style={{ fontSize: "0.8rem", marginTop: "8px", color: "#9aa4b2" }}>
               Reach {stats.viralityTracker?.nextGoal?.toLocaleString()} views to unlock{" "}
-              <b>${stats.viralityTracker?.potentialBonus}</b> bonus!
+              <b>Rank Up</b> rewards!
             </p>
           </div>
 
@@ -159,7 +164,7 @@ const AnalyticsPanel = () => {
             }}
           >
             <h4 style={{ margin: "0 0 10px 0", fontSize: "0.9rem", color: "#10b981" }}>
-              🚀 REFERRAL CASH TRACKER
+              🚀 REFERRAL TRACKER
             </h4>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
               <span>Referrals: {stats.referralTracker?.total}</span>
@@ -185,7 +190,7 @@ const AnalyticsPanel = () => {
             </div>
             <p style={{ fontSize: "0.8rem", marginTop: "8px", color: "#9aa4b2" }}>
               Refer {stats.referralTracker?.nextGoal - stats.referralTracker?.total} more friends to
-              unlock <b>${stats.referralTracker?.potentialBonus}</b> cash!
+              unlock <b>Mission Credits</b>!
             </p>
           </div>
         </div>

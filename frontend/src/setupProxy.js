@@ -1,10 +1,20 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
 module.exports = function (app) {
-  // Add headers for SharedArrayBuffer support (required for ffmpeg.wasm)
+  // Proxy API requests to the backend server
+  app.use(
+    "/api",
+    createProxyMiddleware({
+      target: "http://localhost:5000",
+      changeOrigin: true,
+      secure: false,
+    })
+  );
+
+  // Explicitly disable COEP to allow loading cross-origin videos (e.g. from Firebase/Google Storage)
   app.use(function (req, res, next) {
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+    res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+    res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
     next();
   });
 };

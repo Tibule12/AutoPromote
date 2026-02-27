@@ -1,6 +1,6 @@
 // Canonical consolidated user dashboard
 /* eslint-disable no-unused-vars */
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import "./UserDashboard.css";
 import ProfilePanel from "./UserDashboardTabs/ProfilePanel";
 import UploadPanel from "./UserDashboardTabs/UploadPanel";
@@ -10,12 +10,14 @@ import RewardsPanel from "./UserDashboardTabs/RewardsPanel";
 import NotificationsPanel from "./UserDashboardTabs/NotificationsPanel";
 import EarningsPanel from "./UserDashboardTabs/EarningsPanel";
 import ConnectionsPanel from "./UserDashboardTabs/ConnectionsPanel";
+import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import AdminAuditViewer from "./AdminAuditViewer";
 import SecurityPanel from "./UserDashboardTabs/SecurityPanel";
-import CommunityPanel from "./UserDashboardTabs/CommunityPanel";
-import CommunityFeed from "./CommunityFeed";
+// CommunityPanel and CommunityFeed removed
+import WolfHuntDashboard from "./EngagementMarketplace";
 import ClipStudioPanel from "./UserDashboardTabs/ClipStudioPanel";
-import AdsPanel from "./UserDashboardTabs/AdsPanel";
+import IdeaVideoPanel from "./UserDashboardTabs/IdeaVideoPanel";
+import MissionControlPanel from "./UserDashboardTabs/MissionControlPanel";
 import LiveWatch from "./LiveWatch";
 import LiveHub from "./LiveHub";
 import FloatingActions from "./components/FloatingActions";
@@ -123,10 +125,78 @@ const UserDashboard = ({
 
   const [emailVerified, setEmailVerified] = useState(true);
   useEffect(() => {
-    if (auth.currentUser) {
-      setEmailVerified(auth.currentUser.emailVerified);
+    // NEW: Check for "Wolf Hunt" onboarding criteria
+    // Triggers if user has >= 2 content items AND hasn't seen the welcome yet
+    if (contentList && contentList.length >= 2) {
+      const hasSeen = localStorage.getItem("wolfHuntWelcomeSeen");
+
+      if (!hasSeen) {
+        // Trigger the special notification logic
+        // Mark as seen so it doesn't fire again immediately on refresh
+        localStorage.setItem("wolfHuntWelcomeSeen", "true");
+
+        // 1. Add to Notifications Panel
+        const welcomeMsg = {
+          id: "wolf-hunt-welcome-" + Date.now(),
+          title: "🐺 WOLF HUNT INVITATION",
+          message:
+            "Soldier! You have proven your worth by publishing content. The Wolf Hunt awaits. Go to the Wolf Hunt tab and click the Speaker icon for your mission briefing.",
+          type: "wolf_hunt_invite",
+          read: false,
+          created_at: new Date().toISOString(),
+        };
+
+        setNotifs(prev => [welcomeMsg, ...(prev || [])]);
+
+        // 2. Show Persistent "Call to Action" Toast
+        toast(
+          t => (
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: "250px" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "20px" }}>🐺</span>
+                <b>RECRUITMENT NOTICE</b>
+              </div>
+              <span>You've published content. Now it's time to hunt.</span>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  handleNav("wolf_hunt"); // Navigate to Wolf Hunt tab
+                }}
+                style={{
+                  background: "#00ff88",
+                  color: "#000",
+                  border: "none",
+                  padding: "8px 12px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  marginTop: "8px",
+                  borderRadius: "4px",
+                  textTransform: "uppercase",
+                }}
+              >
+                REPORT FOR DUTY →
+              </button>
+              <small style={{ color: "#aaa", fontSize: "11px", marginTop: "4px" }}>
+                ℹ️ Click the Speaker icon on the Hunt page for full briefing.
+              </small>
+            </div>
+          ),
+          {
+            duration: 15000,
+            position: "top-center",
+            style: {
+              background: "#111",
+              border: "1px solid #00ff88",
+              color: "#fff",
+              boxShadow: "0 0 20px rgba(0,255,136,0.2)",
+            },
+          }
+        );
+      }
     }
-  }, [user]);
+  }, [contentList]); // Depend on contentList
 
   // Toggle dashboard-mode class on mount/unmount so global gradients don't show through dashboard pages
   useEffect(() => {
@@ -155,41 +225,56 @@ const UserDashboard = ({
     document.body?.classList?.add("dashboard-mode");
 
     // Poll notifications periodically so users see admin feedback promptly (mobile friendly)
+    // Reduce noise: Poll every 60s instead of 10s
     let pollTimer = null;
     const pollNotifications = async () => {
       try {
         const currentUser = auth?.currentUser;
         if (!currentUser) return;
-        const token = await currentUser.getIdToken(true);
+        // Do NOT force refresh token (pass false), use cached token to prevent rate limiting
+        const token = await currentUser.getIdToken(false);
         const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS_LIST}?limit=10`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) return;
         const json = await res.json();
+        if (!json.notifications) return;
         const incoming = Array.isArray(json.notifications) ? json.notifications : [];
-        // Determine new notifications not already present
-        const existingIds = new Set((notifs || []).map(n => n.id));
-        const newOnes = incoming.filter(n => !existingIds.has(n.id));
-        if (newOnes && newOnes.length) {
-          // show toast for each new unread notification
-          newOnes.forEach(n => {
-            if (!n.read) {
-              try {
-                toast(n.message || n.title || "You have a new notification");
-              } catch (_) {}
-            }
-          });
-          setNotifs(prev => [...newOnes, ...(prev || [])].slice(0, 200));
-        }
+
+        setNotifs(prevNotifs => {
+          const currentList = prevNotifs || [];
+          const existingIds = new Set(currentList.map(n => n.id));
+          const newOnes = incoming.filter(n => !existingIds.has(n.id));
+
+          if (newOnes.length > 0) {
+            // Side effect in set state is bad practice, but we need to check against 'prev'
+            // We'll wrap the toast in a setTimeout to push it to the next tick
+            // preventing the "Cannot update while rendering" error
+            setTimeout(() => {
+              newOnes.forEach(n => {
+                // Only notify for actually new unread notifications
+                if (!n.read) {
+                  try {
+                    toast(n.message || n.title || "You have a new notification");
+                  } catch (_) {}
+                }
+              });
+            }, 0);
+
+            return [...newOnes, ...currentList].slice(0, 200);
+          }
+          return currentList;
+        });
       } catch (e) {
         // ignore polling errors
       }
     };
     // Start a timer and also poll on visibility change to catch when mobile resumes
-    pollTimer = setInterval(pollNotifications, 10000);
+    pollTimer = setInterval(pollNotifications, 60000); // 60s interval
     const handleVisibility = () => {
       if (!document.hidden) {
-        pollNotifications();
+        // Debounce visibility poll to avoid double-firing
+        if (!pollTimer) pollNotifications();
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
@@ -203,7 +288,7 @@ const UserDashboard = ({
       document.documentElement?.classList?.remove("dashboard-mode");
       document.body?.classList?.remove("dashboard-mode");
     };
-  }, [notifs]);
+  }, []); // Empty dependency array to run only once on mount
 
   const handleNav = tab => {
     setActiveTab(tab);
@@ -813,12 +898,12 @@ const UserDashboard = ({
     if (activeTab === "earnings") loadEarnings();
   }, [activeTab]);
 
-  const setPlatformOption = (platform, key, value) => {
+  const setPlatformOption = useCallback((platform, key, value) => {
     setPlatformOptions(prev => ({
       ...(prev || {}),
       [platform]: { ...((prev || {})[platform] || {}), [key]: value },
     }));
-  };
+  }, []);
 
   const togglePlatform = name => {
     setSelectedPlatforms(prev =>
@@ -1240,13 +1325,16 @@ const UserDashboard = ({
                 className={activeTab === "schedules" ? "active" : ""}
                 onClick={() => handleNav("schedules")}
               >
-                Schedules
+                Mission Timeline
+              </li>
+              <li className={activeTab === "ads" ? "active" : ""} onClick={() => handleNav("ads")}>
+                Mission Control 🚀
               </li>
               <li
                 className={activeTab === "analytics" ? "active" : ""}
                 onClick={() => handleNav("analytics")}
               >
-                Analytics
+                Intel
               </li>
               <li
                 className={activeTab === "rewards" ? "active" : ""}
@@ -1259,7 +1347,7 @@ const UserDashboard = ({
                 className={activeTab === "earnings" ? "active" : ""}
                 onClick={() => handleNav("earnings")}
               >
-                Earnings
+                Treasury
               </li>
 
               <li
@@ -1292,22 +1380,22 @@ const UserDashboard = ({
                 Security
               </li>
               <li
-                className={activeTab === "feed" ? "active" : ""}
-                onClick={() => handleNav("feed")}
+                className={activeTab === "wolf_hunt" ? "active" : ""}
+                onClick={() => handleNav("wolf_hunt")}
               >
-                🎥 Feed
-              </li>
-              <li
-                className={activeTab === "community" ? "active" : ""}
-                onClick={() => handleNav("community")}
-              >
-                💬 Forum
+                🐺 Wolf Hunt
               </li>
               <li
                 className={activeTab === "clips" ? "active" : ""}
                 onClick={() => handleNav("clips")}
               >
                 AI Clips
+              </li>
+              <li
+                className={activeTab === "idea_video" ? "active" : ""}
+                onClick={() => handleNav("idea_video")}
+              >
+                AI Video Generator ✨
               </li>
               <li
                 className={activeTab === "live" ? "active" : ""}
@@ -1453,12 +1541,15 @@ const UserDashboard = ({
             handleConnectLinkedin={handleConnectLinkedin}
             handleConnectTelegram={handleConnectTelegram}
             handleConnectPinterest={handleConnectPinterest}
+            onNavigate={handleNav}
           />
         )}
 
         {activeTab === "upload" && (
           <UploadPanel
             onUpload={onUpload}
+            initialFile={selectedFile}
+            onClearInitialFile={() => setSelectedFile(null)}
             contentList={contentList}
             platformMetadata={platformMetadata}
             platformOptions={platformOptions}
@@ -1495,7 +1586,9 @@ const UserDashboard = ({
           <EarningsPanel earnings={earnings} onClaim={claimPayout} onNavigate={handleNav} />
         )}
 
-        {activeTab === "ads" && <AdsPanel />}
+        {activeTab === "ads" && <MissionControlPanel />}
+
+        {activeTab === "billing" && <PayPalSubscriptionPanel />}
 
         {activeTab === "connections" && (
           <ConnectionsPanel
@@ -1534,11 +1627,19 @@ const UserDashboard = ({
 
         {activeTab === "security" && <SecurityPanel user={user} />}
 
-        {activeTab === "feed" && <CommunityFeed />}
-
-        {activeTab === "community" && <CommunityPanel />}
+        {activeTab === "wolf_hunt" && <WolfHuntDashboard />}
 
         {activeTab === "clips" && <ClipStudioPanel content={contentList} onRefresh={onUpload} />}
+        {activeTab === "idea_video" && (
+          <IdeaVideoPanel
+            onPublish={videoFile => {
+              setSelectedFile(videoFile);
+              setActiveTab("upload");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              toast.success("Proceeding to Upload Form...");
+            }}
+          />
+        )}
         {activeTab === "live" && (
           <div className="live-panel">
             <LiveHub user={user} />

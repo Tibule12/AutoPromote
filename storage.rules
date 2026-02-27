@@ -17,6 +17,13 @@ service firebase.storage {
       return request.auth == null;
     }
 
+    // Allow users to upload to temp_sources (e.g. Clip Studio uploads)
+    match /temp_sources/{userId}/{allPaths=**} {
+      allow read: if true; // Allow media server (or anyone with public link) to read for processing
+      allow write: if request.auth != null && request.auth.uid == userId
+        && request.resource.size < 500 * 1024 * 1024; // 500MB limit
+    }
+
     // Allow all authenticated users to read and write files
     match /{allPaths=**} {
       allow read: if request.auth != null || isBackend();

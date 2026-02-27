@@ -390,7 +390,7 @@ const PayPalSubscriptionPanel = () => {
       aiClips: "🤖",
       analytics: "📊",
       support: "🎧",
-      watermark: "💧",
+      watermark: "�",
       viralBoost: "🚀",
       priorityModeration: "⚡",
       creatorTipping: "💰",
@@ -398,6 +398,7 @@ const PayPalSubscriptionPanel = () => {
       apiAccess: "🔌",
       teamSeats: "👥",
       whiteLabel: "🎨",
+      wolfHuntTasks: "🐺",
     };
     return icons[feature] || "✨";
   };
@@ -408,6 +409,9 @@ const PayPalSubscriptionPanel = () => {
     }
     if (value === "unlimited") {
       return "♾️ Unlimited";
+    }
+    if (key === "wolfHuntTasks" && typeof value === "number") {
+      return `${value} daily earning tasks`;
     }
     if (typeof value === "number") {
       return `${value} ${key === "teamSeats" ? "seats" : "per month"}`;
@@ -509,16 +513,7 @@ const PayPalSubscriptionPanel = () => {
             </div>
 
             <div className="usage-item">
-              <label>📝 Community Posts</label>
-              {renderUsageBar(
-                usage.communityPosts.used,
-                usage.communityPosts.limit,
-                usage.communityPosts.unlimited
-              )}
-            </div>
-
-            <div className="usage-item">
-              <label>🚀 Viral Boosts</label>
+              <label> Viral Boosts</label>
               {renderUsageBar(
                 usage.viralBoosts.used,
                 usage.viralBoosts.limit,
@@ -560,7 +555,13 @@ const PayPalSubscriptionPanel = () => {
                   {Object.entries(plan.features || {}).map(([key, value]) => (
                     <div key={key} className="feature-item">
                       <span className="feature-icon">{getFeatureIcon(key)}</span>
-                      <span className="feature-name">{key.replace(/([A-Z])/g, " $1").trim()}:</span>
+                      <span className="feature-name">
+                        {key
+                          .replace(/([A-Z])/g, " $1")
+                          .trim()
+                          .replace(/^./, str => str.toUpperCase())}
+                        :
+                      </span>
                       <span className="feature-value">{renderFeatureValue(key, value)}</span>
                     </div>
                   ))}
@@ -589,13 +590,64 @@ const PayPalSubscriptionPanel = () => {
         </div>
       </div>
 
-      {/* PayPal Secure Badge */}
-      <div className="secure-payment-badge">
-        <img
-          src="https://www.paypalobjects.com/webstatic/mktg/logo/PP_AcceptanceMarkTray_150x40.png"
-          alt="PayPal"
-        />
-        <p>Secure payments powered by PayPal</p>
+      {/* Secure Payment Badge - PayPal & PayFast */}
+      <div
+        className="secure-payment-badge"
+        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}
+      >
+        <div
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px" }}
+        >
+          <img
+            src="https://www.paypalobjects.com/webstatic/mktg/logo/PP_AcceptanceMarkTray_150x40.png"
+            alt="PayPal"
+            style={{ height: "40px" }}
+          />
+          {/* PayFast Placeholder */}
+          <div
+            style={{
+              fontWeight: "bold",
+              fontSize: "1.2rem",
+              color: "#d32f2f",
+              border: "2px solid #d32f2f",
+              padding: "4px 8px",
+              borderRadius: "4px",
+              fontFamily: "sans-serif",
+            }}
+          >
+            PayFast
+          </div>
+        </div>
+        <p style={{ marginTop: "5px", color: "#666", fontSize: "0.9rem" }}>
+          Secure payments powered by PayPal & PayFast
+        </p>
+      </div>
+
+      <div
+        className="billing-legal-footer"
+        style={{
+          marginTop: "2rem",
+          borderTop: "1px solid #e5e7eb",
+          paddingTop: "1rem",
+          fontSize: "0.8rem",
+          color: "#6b7280",
+          textAlign: "center",
+        }}
+      >
+        <p>
+          By subscribing, you agree to our{" "}
+          <a href="/terms" target="_blank" rel="noopener noreferrer">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </a>
+          . Subscriptions auto-renew monthly. You may cancel at any time to avoid future charges.
+          Cancellations take effect at the end of the current billing period. For billing support or
+          refund inquiries, please contact{" "}
+          <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
+        </p>
       </div>
     </div>
   );

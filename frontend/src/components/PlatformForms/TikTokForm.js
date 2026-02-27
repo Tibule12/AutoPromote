@@ -137,8 +137,9 @@ const TikTokForm = ({
     }
   }, [brandedContent, privacy]);
 
+  const prevData = React.useRef("");
   useEffect(() => {
-    onChange({
+    const newData = JSON.stringify({
       platform: "tiktok",
       privacy,
       allowComments,
@@ -151,6 +152,11 @@ const TikTokForm = ({
       caption,
       consentChecked,
     });
+
+    if (prevData.current !== newData) {
+      prevData.current = newData;
+      onChange(JSON.parse(newData));
+    }
   }, [
     privacy,
     allowComments,

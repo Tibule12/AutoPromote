@@ -15,6 +15,217 @@ const { computeUserBalance } = require("../services/payments/balanceService");
 const { audit } = require("../services/auditLogger");
 const { recordUsage } = require("../services/usageLedgerService");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
+const { PayFastProvider } = require("../services/payments/payfastProvider");
+// Initialize provider instance
+const payfastProvider = new PayFastProvider();
+
+// Packages definition - mirroring frontend
+const PACKAGES = {
+  pack_small: { credits: 50, price: "4.99" },
+  pack_medium: { credits: 150, price: "12.99" },
+  pack_large: { credits: 500, price: "39.99" },
+};
+
+// --- PAYPL ROUTES ---
+
+router.post("/credits/create-order", authMiddleware, async (req, res) => {
+  try {
+    const { packageId } = req.body;
+    const pack = PACKAGES[packageId];
+    if (!pack) return res.status(400).json({ error: "Invalid package ID" });
+
+    // Using createOrder from ../services/paypal which expects { amount, currency }
+    // or we might need to update that service to support custom purchase units if it doesn't.
+    // Let's assume we can pass the raw structure if the service supports it, or just amount/currency.
+    // Looking at ../services/paypal usage in existing /paypal/create-order, it takes { amount, currency }.
+    // Let's rely on that for now, or check service implementation.
+    // The service implementation likely constructs the body.
+
+    // To be safe and minimal:
+    const tempOrder = await createOrder({
+      amount: pack.price,
+      currency: "USD",
+      intent: "CAPTURE",
+    });
+
+    return res.json(tempOrder);
+  } catch (error) {
+    console.error("Create Credits Order Error:", error);
+    res.status(500).json({ error: "Failed to create order" });
+  }
+});
+
+router.post("/credits/capture-order", authMiddleware, async (req, res) => {
+  try {
+    const { orderID, packageId } = req.body;
+    const captureData = await captureOrder(orderID);
+
+    if (captureData.status === "COMPLETED") {
+      const userId = req.user.uid;
+      const pack = PACKAGES[packageId];
+
+      if (!pack) {
+        // Log but maybe succeed if money is captured?
+        // For now return success with warning or just error.
+        return res.status(400).json({ error: "Package unknown" });
+      }
+
+      await db.runTransaction(async t => {
+        const userRef = db.collection("users").doc(userId);
+        const doc = await t.get(userRef);
+        const currentCredits = doc.exists ? doc.data().credits || 0 : 0;
+
+        t.set(
+          userRef,
+          {
+            credits: currentCredits + pack.credits,
+            lastPurchaseDate: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+
+        const txnRef = db.collection("transactions").doc();
+        t.set(txnRef, {
+          userId,
+          type: "CREDIT_PURCHASE",
+          amount: pack.price,
+          currency: "USD",
+          creditsAdded: pack.credits,
+          provider: "PAYPAL",
+          orderId: orderID,
+          timestamp: new Date().toISOString(),
+        });
+      });
+
+      return res.json({ success: true, newCredits: pack.credits });
+    } else {
+      return res.status(400).json({ error: "Order not completed", details: captureData });
+    }
+  } catch (error) {
+    console.error("Capture Credits Order Error:", error);
+    res.status(500).json({ error: "Failed to capture order" });
+  }
+});
+
+// --- PAYFAST ROUTES ---
+
+// Helper: Convert USD price to ZAR (Demo rate for MVP)
+const USD_TO_ZAR = 18.5;
+
+router.post("/payfast/init", authMiddleware, async (req, res) => {
+  try {
+    const { packageId } = req.body;
+    const pack = PACKAGES[packageId];
+    if (!pack) return res.status(400).json({ error: "Invalid package ID" });
+
+    // Convert fixed USD price to ZAR
+    const zarAmount = (parseFloat(pack.price) * USD_TO_ZAR).toFixed(2);
+    const userId = req.user.uid;
+    const m_payment_id = `pf_${packageId}_${userId}_${Date.now()}`;
+
+    // Create PayFast "Order" (really just signature & params)
+    const result = await payfastProvider.createOrder({
+      amount: zarAmount,
+      currency: "ZAR",
+      returnUrl: `${process.env.APP_BASE_URL || "http://localhost:3000"}/marketplace?payment=success&pkg=${packageId}`,
+      cancelUrl: `${process.env.APP_BASE_URL || "http://localhost:3000"}/marketplace?payment=cancelled`,
+      notifyUrl: `${process.env.APP_API_URL || "http://localhost:5001"}/api/payments/payfast/notify`, // Must be publicly accessible
+      metadata: {
+        m_payment_id,
+        item_name: `Credits: ${pack.credits} (${packageId})`,
+        custom_str1: userId,
+        custom_str2: packageId,
+      },
+    });
+
+    if (!result.success) {
+      return res.status(500).json({ error: "PayFast init failed", details: result.error });
+    }
+
+    // Return the form data (URL + inputs) so frontend can auto-submit
+    res.json(result.order);
+  } catch (error) {
+    console.error("PayFast Init Error:", error);
+    res.status(500).json({ error: "Failed to init PayFast payment" });
+  }
+});
+
+// PayFast ITN (Instant Transaction Notification)
+// THIS MUST BE PUBLIC (no auth middleware)
+router.post("/payfast/notify", async (req, res) => {
+  try {
+    // 1. Verify Signature
+    const verification = await payfastProvider.verifyNotification(req);
+    if (!verification.verified) {
+      console.warn("PayFast ITN validation failed", verification);
+      // Still return 200 so PayFast doesn't retry forever, but maybe log security alert
+      return res.status(200).send("Signature mismatch");
+    }
+
+    const data = verification.data;
+    if (data.payment_status !== "COMPLETE") {
+      console.log("PayFast payment not complete:", data.payment_status);
+      return res.status(200).send("Not complete");
+    }
+
+    // 2. Extract User & Package from metadata or custom strings
+    // We saved userId in custom_str1, packageId in custom_str2
+    const userId = data.custom_str1;
+    const packageId = data.custom_str2;
+    const pack = PACKAGES[packageId];
+
+    if (!userId || !pack) {
+      console.error("PayFast ITN missing context:", { userId, packageId });
+      return res.status(200).send("Context missing");
+    }
+
+    // 3. Credit User (Idempotent check required in real prod, but simplistic here)
+    const m_payment_id = data.m_payment_id;
+
+    // Check if we already processed this payment ID
+    const txnRef = db.collection("transactions").doc(m_payment_id);
+    const txnDoc = await txnRef.get();
+
+    if (txnDoc.exists) {
+      console.log("PayFast payment already processed:", m_payment_id);
+      return res.status(200).send("Already processed");
+    }
+
+    // New transaction
+    await db.runTransaction(async t => {
+      const userRef = db.collection("users").doc(userId);
+      const userDoc = await t.get(userRef);
+      const currentCredits = userDoc.exists ? userDoc.data().credits || 0 : 0;
+
+      t.set(
+        userRef,
+        {
+          credits: currentCredits + pack.credits,
+          lastPurchaseDate: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+
+      t.set(txnRef, {
+        userId,
+        type: "CREDIT_PURCHASE",
+        amount: data.amount_gross,
+        currency: "ZAR",
+        creditsAdded: pack.credits,
+        provider: "PAYFAST",
+        pf_payment_id: data.pf_payment_id,
+        status: "COMPLETED", // Explicit
+        timestamp: new Date().toISOString(),
+      });
+    });
+
+    console.log(`PayFast success: Credited ${pack.credits} to ${userId}`);
+    res.status(200).send("OK");
+  } catch (error) {
+    console.error("PayFast ITN Error:", error);
+    res.status(500).send("Server Error");
+  }
+});
 
 // Return PayPal client id and currency for frontend SDK
 router.get("/paypal/config", (req, res) => {

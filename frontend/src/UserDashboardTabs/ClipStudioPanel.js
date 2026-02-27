@@ -34,9 +34,21 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     scheduledTime: new Date(Date.now() + 3600000).toISOString(),
   });
   const [exportImmediate, setExportImmediate] = useState(false);
+  const [previewClipId, setPreviewClipId] = useState(null); // Track which clip is being previewed
+  const [activeTab, setActiveTab] = useState("studio"); // "studio" | "gallery"
 
-  // Memetic Composer UI toggle
+  // Montage Feature
+  const [selectedClipIds, setSelectedClipIds] = useState([]); // Array of selected clip IDs
+  const [isMontageMode, setIsMontageMode] = useState(false); // To toggle button text/state
+
+  // Memetic Composer UI toggle and state
   const [composerOpen, setComposerOpen] = useState(false);
+  const [preloadedClipUrl, setPreloadedClipUrl] = useState(null);
+
+  const openComposerWithClip = videoUrl => {
+    setPreloadedClipUrl(videoUrl);
+    setComposerOpen(true);
+  };
 
   // Controls the "Clean Interface" aspect
   const [showLibrary, setShowLibrary] = useState(false);
@@ -89,6 +101,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
         type: "video",
         url: url,
         userId: user.uid,
+        user_id: user.uid, // Required for backend query compatibility
+        created_at: new Date().toISOString(), // Match backend schema expectations
         createdAt: new Date().toISOString(),
         description: "Uploaded via Clip Studio",
         platform_options: {}, // Initialize empty
@@ -113,31 +127,44 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     }
   };
 
-  // Run once on mount — dependencies intentionally omitted
-  /* mount-only effect (intentional) */
-  // eslint-disable-next-line
+  // Run once on mount and whenever activeTab changes to 'gallery'
+  useEffect(() => {
+    if (activeTab === "gallery") {
+      loadGeneratedClips();
+    }
+  }, [activeTab]);
+
+  // Initial load
   useEffect(() => {
     loadGeneratedClips();
   }, []);
 
   const loadGeneratedClips = async () => {
     try {
+      const start = Date.now();
       const token = await auth.currentUser?.getIdToken();
-      if (!token) return;
+      if (!token) {
+        console.warn("No auth token available, skipping clip load");
+        return;
+      }
 
+      console.log("Fetching generated clips...");
       const response = await fetch(`${API_BASE_URL}/api/clips/user`, {
         headers: { Authorization: `Bearer ${token}` },
-      }).catch(() => ({ ok: false, status: 500 }));
+      });
 
       if (response.ok) {
         const data = await response.json();
+        console.log(`Loaded ${data.clips?.length} clips in ${Date.now() - start}ms`);
         setGeneratedClips(data.clips || []);
       } else {
-        // Endpoint not ready or error - silently ignore
+        console.error("Failed to load clips:", response.status, await response.text());
+        toast.error(`Could not load clips: ${response.status}`);
         setGeneratedClips([]);
       }
     } catch (error) {
-      // Silently handle - clips feature may not be deployed yet
+      console.error("Error loading clips:", error);
+      toast.error(`Error loading clips: ${error.message}`);
       setGeneratedClips([]);
     }
   };
@@ -149,12 +176,13 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     }
 
     setAnalyzing(true);
-    setSelectedContent(contentItem);
+    setSelectedContent(contentItem); // Ensure UI reflects selection
 
-    const toastId = toast.loading("Analyzing video... This may take a few minutes");
+    const toastId = toast.loading("Analyzing video... This takes ~1-2 mins per 10min of video");
 
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const user = auth.currentUser;
+      const token = await user.getIdToken();
 
       const response = await fetch(`${API_BASE_URL}/api/clips/analyze`, {
         method: "POST",
@@ -164,20 +192,83 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
         },
         body: JSON.stringify({
           contentId: contentItem.id,
-          videoUrl: contentItem.url,
+          videoUrl: contentItem.url, // Ensure we pass the URL
         }),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Analysis failed");
+        const errorData = await response.json();
+
+        if (response.status === 402) {
+          toast.error(
+            `Insufficient Credits! Needed: ${errorData.required}. Use PayPal or PayFast in Marketplace.`,
+            { id: toastId }
+          );
+          // Optionally open credit purchase modal here
+          if (
+            window.confirm(
+              "Insufficient credits! Go to Marketplace to purchase via PayPal/PayFast?"
+            )
+          ) {
+            // Assuming this function is executed in context of UserDashboard
+            // We cannot directly switch tabs here without props, but the message is clear.
+          }
+          return;
+        }
+
+        throw new Error(`Server Error: ${errorData.details || errorData.error || "Unknown"}`);
       }
 
       const result = await response.json();
-      toast.success(`Found ${result.clipsGenerated} potential clips!`, { id: toastId });
 
-      // Load analysis details
-      await loadAnalysis(result.analysisId);
+      // Adapt to new API response structure: { success, analysisId, async: true }
+      const analysisId = result.analysisId || (result.data && result.data.analysisId);
+
+      if (result.async) {
+        toast.success("Analysis Queued! You can close this tab and check back later.", {
+          id: toastId,
+        });
+        setAnalyzing(true);
+
+        // Start Polling
+        const pollInterval = setInterval(async () => {
+          const token = await auth.currentUser?.getIdToken();
+          try {
+            const pollRes = await fetch(`${API_BASE_URL}/api/clips/analysis/${analysisId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (pollRes.ok) {
+              const statusData = await pollRes.json();
+              const job = statusData.data || statusData.analysis || statusData;
+
+              if (job.status === "completed") {
+                clearInterval(pollInterval);
+                setAnalyzing(false);
+                setCurrentAnalysis(job);
+                setGeneratedClips(job.clipSuggestions || []);
+                toast.success(`Analysis Complete! Found ${job.clipSuggestions?.length} clips.`);
+              } else if (job.status === "failed") {
+                clearInterval(pollInterval);
+                setAnalyzing(false);
+                toast.error(`Analysis Failed: ${job.error}`);
+              } else {
+                // Update progress toast or UI
+                // console.log(`Job ${analysisId} status: ${job.status}`);
+              }
+            }
+          } catch (e) {
+            console.warn("Polling error", e);
+          }
+        }, 5000);
+      } else {
+        // Synchronous fallback (old behavior)
+        const clipCount = result.data.clipSuggestions ? result.data.clipSuggestions.length : 0;
+        toast.success(
+          `Success! Found ${clipCount} clips. Credits left: ${result.creditsRemaining}`,
+          { id: toastId }
+        );
+        await loadAnalysis(analysisId);
+      }
     } catch (error) {
       console.error("Analysis error:", error);
       toast.error(error.message, { id: toastId });
@@ -203,6 +294,73 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     }
   };
 
+  // --- Multi-Select & Montage State ---
+  // selectedClipIds state is declared at top level now
+  const [generatingMontage, setGeneratingMontage] = useState(false);
+
+  const toggleClipSelection = clipId => {
+    setSelectedClipIds(prev =>
+      prev.includes(clipId) ? prev.filter(id => id !== clipId) : [...prev, clipId]
+    );
+  };
+
+  const generateMontage = async () => {
+    if (selectedClipIds.length < 2) return toast.error("Select at least 2 clips for a montage");
+    if (generatingMontage) return;
+
+    setGeneratingMontage(true);
+    const toastId = toast.loading("Stitching Montage...");
+    try {
+      const token = await auth.currentUser?.getIdToken();
+
+      // Find the actual clip objects
+      const segmentsToStitch = (currentAnalysis.clipSuggestions || [])
+        .filter(c => selectedClipIds.includes(c.id))
+        .map(c => ({
+          start: c.start,
+          end: c.end,
+          // We could also pass individual clip settings here if UI supported it
+        }))
+        // Sort by start time? Or montage order (selection order)? Let's assume timeline order for now.
+        .sort((a, b) => a.start - b.start);
+
+      const response = await fetch(`${API_BASE_URL}/api/clips/generate`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          analysisId: currentAnalysis.id,
+          // We reuse the generate endpoint but pass specific montage params
+          isMontage: true,
+          montageSegments: segmentsToStitch,
+          options: {
+            ...exportOptions,
+            addMusic: true, // Auto-add music for montages nicely
+            addHook: true,
+            hookText: "BEST MOMENTS 🔥",
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: "Generation failed" }));
+        throw new Error(error.error || error.message || "Generation failed");
+      }
+
+      await response.json().catch(() => null);
+      toast.success("Montage created!", { id: toastId });
+      await loadGeneratedClips();
+      setSelectedClipIds([]); // Clear selection
+    } catch (error) {
+      console.error("Montage error:", error);
+      toast.error(error.message || "Montage failed", { id: toastId });
+    } finally {
+      setGeneratingMontage(false);
+    }
+  };
+
   const generateClip = async clip => {
     if (!currentAnalysis?.id) return toast.error("No analysis selected");
     if (generatingClipId) return; // another generation in-flight
@@ -210,6 +368,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     const toastId = toast.loading("Generating clip...");
     try {
       const token = await auth.currentUser?.getIdToken();
+      // Payload for single clip
       const response = await fetch(`${API_BASE_URL}/api/clips/generate`, {
         method: "POST",
         headers: {
@@ -320,30 +479,175 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
           toast.success("Generation started");
         }}
       />
-      <div
-        className="clip-studio-header"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "10px",
-        }}
-      >
+      <div className="clip-studio-header">
         <div>
           <h2>🎬 AI Clip Studio</h2>
           <p>Generate viral short clips from your long-form videos</p>
         </div>
-        <div>
-          <button className="btn-secondary" onClick={() => setComposerOpen(true)}>
-            Open Memetic Composer
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            className={`btn-secondary ${activeTab === "gallery" ? "active-tab" : ""}`}
+            onClick={() => setActiveTab("gallery")}
+            style={{
+              background:
+                activeTab === "gallery" ? "var(--viral-accent-primary)" : "rgba(255,255,255,0.1)",
+              color: activeTab === "gallery" ? "#000" : "#fff",
+              border: "none",
+            }}
+          >
+            📂 My Clips ({generatedClips.length})
+          </button>
+          <button className="btn-viral-lab" onClick={() => setComposerOpen(true)}>
+            🧬 Open Viral Lab
           </button>
         </div>
       </div>
 
-      {composerOpen && <MemeticComposerPanel onClose={() => setComposerOpen(false)} />}
+      {composerOpen && (
+        <MemeticComposerPanel
+          onClose={() => {
+            setComposerOpen(false);
+            setPreloadedClipUrl(null);
+          }}
+          initialVideoUrl={preloadedClipUrl}
+        />
+      )}
 
-      {!currentAnalysis ? (
+      {activeTab === "gallery" ? (
+        <div className="gallery-view" style={{ padding: "20px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "20px",
+            }}
+          >
+            <h3>Your Generated Clips Library</h3>
+            <button className="btn-secondary" onClick={() => setActiveTab("studio")}>
+              Create New Clips
+            </button>
+          </div>
+
+          {generatedClips.length === 0 ? (
+            <div className="empty-state">
+              <p>No clips generated yet.</p>
+              <button className="btn-primary" onClick={() => setActiveTab("studio")}>
+                Start Creating
+              </button>
+            </div>
+          ) : (
+            <div
+              className="generated-clips-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: "20px",
+              }}
+            >
+              {generatedClips.map(clip => (
+                <div
+                  key={clip.id}
+                  className="generated-clip-card"
+                  style={{
+                    background: "var(--viral-bg-card)",
+                    padding: "15px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "relative",
+                      paddingBottom: "177.78%",
+                      marginBottom: "15px",
+                      background: "#000",
+                      borderRadius: "6px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <video
+                      src={clip.url}
+                      controls
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
+                  <div className="generated-clip-info">
+                    <h4
+                      style={{
+                        margin: "0 0 8px 0",
+                        fontSize: "16px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                      title={clip.title}
+                    >
+                      {clip.title}
+                    </h4>
+                    <p
+                      style={{
+                        fontSize: "12px",
+                        color: "var(--viral-text-muted)",
+                        margin: "0 0 10px 0",
+                      }}
+                    >
+                      Created: {new Date(clip.createdAt).toLocaleDateString()}
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <span
+                        className="viral-chip"
+                        style={{
+                          fontSize: "12px",
+                          background: "rgba(0,255,136,0.1)",
+                          color: "#00ff88",
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        ⚡ Score: {clip.viralScore || 85}
+                      </span>
+                      <span style={{ fontSize: "12px", color: "#aaa" }}>
+                        {formatDuration(clip.duration)}
+                      </span>
+                    </div>
+
+                    <a
+                      href={clip.url}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary"
+                      style={{
+                        display: "block",
+                        textAlign: "center",
+                        textDecoration: "none",
+                        width: "100%",
+                      }}
+                    >
+                      Download Video
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : !currentAnalysis ? (
         <>
           {/* Landing State - Clean UI */}
           {!showLibrary ? (
@@ -487,7 +791,10 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
               </button>
               <div className="results-summary">
                 <h3>Analysis Complete</h3>
-                <p>Found {currentAnalysis.topClips?.length || 0} potential viral clips</p>
+                <p>
+                  Found {(currentAnalysis.topClips || currentAnalysis.clipSuggestions || []).length}{" "}
+                  potential viral clips
+                </p>
                 <div className="analysis-stats">
                   <span>Duration: {formatDuration(currentAnalysis.duration)}</span>
                   <span>Scenes: {currentAnalysis.scenesDetected}</span>
@@ -497,6 +804,111 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                 </div>
               </div>
             </div>
+
+            {/* Generated Clips (Ready to Download) */}
+            {generatedClips.filter(c => c.sourceAnalysisId === currentAnalysis.id).length > 0 && (
+              <div
+                className="generated-clips-preview-section"
+                style={{
+                  marginBottom: "2rem",
+                  padding: "1rem",
+                  background: "rgba(0, 255, 136, 0.05)",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(0, 255, 136, 0.2)",
+                }}
+              >
+                <h4 style={{ color: "#00ff88", marginTop: 0 }}>✅ Generated Clips (Ready)</h4>
+                <div
+                  className="generated-clips-grid"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+                    gap: "1rem",
+                    marginTop: "1rem",
+                  }}
+                >
+                  {generatedClips
+                    .filter(c => c.sourceAnalysisId === currentAnalysis.id)
+                    .map(clip => (
+                      <div
+                        key={clip.id}
+                        className="generated-clip-card"
+                        style={{
+                          background: "rgba(0,0,0,0.3)",
+                          padding: "10px",
+                          borderRadius: "6px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            position: "relative",
+                            paddingBottom: "177.78%",
+                            marginBottom: "10px",
+                            background: "#000",
+                            borderRadius: "4px",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <video
+                            src={clip.url}
+                            controls
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        </div>
+                        <div className="generated-clip-info">
+                          <h5
+                            style={{
+                              margin: "0 0 5px 0",
+                              fontSize: "14px",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                            title={clip.title}
+                          >
+                            {clip.title}
+                          </h5>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              fontSize: "11px",
+                              color: "#aaa",
+                            }}
+                          >
+                            <span>{new Date(clip.createdAt).toLocaleDateString()}</span>
+                            <span>Score: {clip.viralScore}</span>
+                          </div>
+                          <a
+                            href={clip.url}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-primary"
+                            style={{
+                              display: "block",
+                              textAlign: "center",
+                              marginTop: "10px",
+                              padding: "6px",
+                              fontSize: "12px",
+                              textDecoration: "none",
+                            }}
+                          >
+                            Download Video
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
 
             {/* Export Options */}
             <div className="export-options">
@@ -540,57 +952,183 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
 
             {/* Clip Suggestions */}
             <div className="clip-suggestions">
-              <h4>Suggested Clips (sorted by viral potential)</h4>
+              <div
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+              >
+                <h4>Suggested Clips (sorted by viral potential)</h4>
+                {selectedClipIds.length > 1 && (
+                  <button
+                    className="btn-viral-lab"
+                    onClick={generateMontage}
+                    disabled={generatingMontage}
+                    style={{
+                      background: "linear-gradient(45deg, #FF0080, #7928CA)",
+                      border: "none",
+                      color: "white",
+                      padding: "8px 16px",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      fontWeight: "bold",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    {generatingMontage
+                      ? "Stitching..."
+                      : `🎬 Create Montage (${selectedClipIds.length})`}
+                  </button>
+                )}
+              </div>
+
               <div className="clips-list">
-                {currentAnalysis.topClips?.map((clip, index) => (
-                  <div key={clip.id || index} className="clip-suggestion">
-                    <div className="clip-rank">#{index + 1}</div>
-                    <div className="clip-timeline">
-                      <div className="timeline-bar">
-                        <div
-                          className="timeline-segment"
+                {(currentAnalysis.topClips || currentAnalysis.clipSuggestions || []).map(
+                  (clip, index) => (
+                    <div
+                      key={clip.id || index}
+                      className={`clip-suggestion ${selectedClipIds.includes(clip.id) ? "selected-for-montage" : ""}`}
+                      style={{
+                        border: selectedClipIds.includes(clip.id)
+                          ? "2px solid #7928CA"
+                          : "1px solid #333",
+                        background: selectedClipIds.includes(clip.id)
+                          ? "rgba(121, 40, 202, 0.1)"
+                          : "transparent",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", marginRight: "10px" }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedClipIds.includes(clip.id)}
+                          onChange={() => toggleClipSelection(clip.id)}
                           style={{
-                            left: `${(clip.start / currentAnalysis.duration) * 100}%`,
-                            width: `${((clip.end - clip.start) / currentAnalysis.duration) * 100}%`,
+                            width: "18px",
+                            height: "18px",
+                            cursor: "pointer",
+                            accentColor: "#7928CA",
                           }}
                         />
                       </div>
-                      <div className="timeline-labels">
-                        <span>{formatTimestamp(clip.start)}</span>
-                        <span>{formatTimestamp(clip.end)}</span>
-                      </div>
-                    </div>
-                    <div className="clip-details">
-                      <div className="clip-score-large">
-                        <span className="score-number">{clip.score}</span>
-                        <span className="score-label">Viral Score</span>
-                      </div>
-                      <div className="clip-content">
-                        <p className="clip-reason">
-                          <strong>Why this clip:</strong> {clip.reason}
-                        </p>
-                        {clip.text && (
-                          <p className="clip-transcript">
-                            &quot;{clip.text.substring(0, 150)}...&quot;
-                          </p>
-                        )}
-                        <div className="clip-meta-info">
-                          <span>Duration: {formatDuration(clip.end - clip.start)}</span>
-                          {clip.platforms && <span>Best for: {clip.platforms.join(", ")}</span>}
+                      <div className="clip-rank">#{index + 1}</div>
+                      <div className="clip-center-column">
+                        <div className="clip-timeline">
+                          <div className="timeline-bar">
+                            <div
+                              className="timeline-segment"
+                              style={{
+                                left: `${(clip.start / currentAnalysis.duration) * 100}%`,
+                                width: `${((clip.end - clip.start) / currentAnalysis.duration) * 100}%`,
+                              }}
+                            />
+                          </div>
+                          <div className="timeline-labels">
+                            <span>{formatTimestamp(clip.start)}</span>
+                            <span>{formatTimestamp(clip.end)}</span>
+                          </div>
+                        </div>
+                        <div className="clip-details">
+                          {previewClipId === (clip.id || index) ? (
+                            <div className="clip-preview-player">
+                              <video
+                                src={currentAnalysis.videoUrl || selectedContent?.url}
+                                controls
+                                autoPlay
+                                style={{
+                                  width: "100%",
+                                  maxHeight: "300px",
+                                  borderRadius: "8px",
+                                  marginBottom: "10px",
+                                }}
+                                onLoadedMetadata={e => {
+                                  e.target.currentTime = clip.start;
+                                }}
+                                onTimeUpdate={e => {
+                                  if (e.target.currentTime >= clip.end) {
+                                    e.target.pause();
+                                    setPreviewClipId(null); // Close preview or just pause
+                                  }
+                                }}
+                              />
+                              <button
+                                className="close-preview-btn"
+                                onClick={() => setPreviewClipId(null)}
+                                style={{
+                                  marginTop: "5px",
+                                  padding: "4px 8px",
+                                  background: "#444",
+                                  color: "#fff",
+                                  border: "none",
+                                  borderRadius: "4px",
+                                  cursor: "pointer",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                Close Output Preview
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="clip-score-large">
+                              <span className="score-number">
+                                {clip.viralScore || clip.score || 85}
+                              </span>
+                              <span className="score-label">Viral Score</span>
+                              <button
+                                className="preview-clip-btn"
+                                onClick={() => setPreviewClipId(clip.id || index)}
+                                style={{
+                                  marginTop: "8px",
+                                  padding: "6px 12px",
+                                  background: "rgba(0, 255, 255, 0.1)",
+                                  border: "1px solid cyan",
+                                  color: "cyan",
+                                  borderRadius: "4px",
+                                  cursor: "pointer",
+                                  fontSize: "12px",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                ▶ Preview
+                              </button>
+                            </div>
+                          )}
+                          <div className="clip-content">
+                            <p className="clip-reason">
+                              <strong>Why this clip:</strong> {clip.reason}
+                            </p>
+                            {clip.text && (
+                              <p className="clip-transcript">
+                                &quot;{clip.text.substring(0, 150)}...&quot;
+                              </p>
+                            )}
+                            <div className="clip-meta-info">
+                              <span>Duration: {formatDuration(clip.end - clip.start)}</span>
+                              {clip.platforms && <span>Best for: {clip.platforms.join(", ")}</span>}
+                            </div>
+                          </div>
                         </div>
                       </div>
+                      <div className="clip-actions">
+                        <button
+                          className="btn-primary"
+                          onClick={() => generateClip(clip)}
+                          disabled={generatingClipId === clip.id}
+                        >
+                          {generatingClipId === clip.id ? "Generating..." : "Generate Clip"}
+                        </button>
+
+                        <button
+                          className="btn-viral-lab"
+                          onClick={() =>
+                            openComposerWithClip(currentAnalysis.url || currentAnalysis.videoUrl)
+                          }
+                          title="Open in Viral Lab"
+                        >
+                          🧬 Viral Lab
+                        </button>
+                      </div>
                     </div>
-                    <div className="clip-actions">
-                      <button
-                        className="btn-primary"
-                        onClick={() => generateClip(clip)}
-                        disabled={generatingClipId === clip.id}
-                      >
-                        {generatingClipId === clip.id ? "Generating..." : "Generate Clip"}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </div>
           </div>
@@ -614,17 +1152,28 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
           }}
         >
           <div
-            style={{ background: "#0f1724", padding: 20, borderRadius: 8, width: "min(640px,95%)" }}
+            style={{
+              background: "var(--viral-bg-panel)",
+              padding: 30,
+              borderRadius: 16,
+              width: "min(640px,95%)",
+              border: "var(--glass-border)",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+              backdropFilter: "blur(12px)",
+            }}
           >
-            <h3 style={{ marginTop: 0 }}>Confirm Export</h3>
-            <p>
+            <h3 style={{ marginTop: 0, color: "#fff", fontSize: "1.5rem" }}>Confirm Export</h3>
+            <p style={{ color: "var(--viral-text-muted)" }}>
               You&apos;re about to schedule this clip for export to:{" "}
-              <strong>{(confirmExport.platforms || []).join(", ")}</strong>
+              <strong style={{ color: "var(--viral-accent-primary)" }}>
+                {(confirmExport.platforms || []).join(", ")}
+              </strong>
             </p>
-            <div style={{ display: "grid", gap: 8, marginTop: 8 }}>
-              <label>Scheduled time</label>
+            <div style={{ display: "grid", gap: 12, marginTop: 20 }}>
+              <label style={{ color: "#e2e8f0" }}>Scheduled time</label>
               <input
                 type="datetime-local"
+                className="cyber-input"
                 value={confirmExport.scheduledTime ? confirmExport.scheduledTime.slice(0, 16) : ""}
                 onChange={e =>
                   setConfirmExport(prev => ({
@@ -632,7 +1181,14 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                     scheduledTime: new Date(e.target.value).toISOString(),
                   }))
                 }
-                style={{ padding: 8, borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{
+                  padding: 12,
+                  borderRadius: 6,
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "#05050a",
+                  color: "#fff",
+                  fontFamily: "monospace",
+                }}
               />
               <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <input

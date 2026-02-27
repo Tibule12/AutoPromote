@@ -3,6 +3,8 @@ import ContentUploadForm from "../ContentUploadForm";
 
 function UploadPanel({
   onUpload,
+  initialFile,
+  onClearInitialFile,
   contentList,
   platformMetadata,
   platformOptions,
@@ -15,6 +17,18 @@ function UploadPanel({
 }) {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [activeTab, setActiveTab] = useState("upload");
+
+  // Create a ref to track if we've handled the initial file so we only use it once
+  const initialFileProcessed = React.useRef(false);
+
+  // If initialFile is provided, ensure we are on the upload tab
+  React.useEffect(() => {
+    if (initialFile && !initialFileProcessed.current) {
+      setActiveTab("upload");
+      // We do NOT clear it here, ContentUploadForm needs to mount and read it first
+    }
+  }, [initialFile]);
+
   const [refreshedStatus, setRefreshedStatus] = useState({});
 
   const handleMediaClick = item => {
@@ -81,6 +95,8 @@ function UploadPanel({
       {activeTab === "upload" && (
         <ContentUploadForm
           onUpload={onUpload}
+          initialFile={initialFile}
+          onClearInitialFile={onClearInitialFile}
           platformMetadata={platformMetadata}
           platformOptions={platformOptions}
           setPlatformOption={setPlatformOption}

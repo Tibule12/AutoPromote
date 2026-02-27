@@ -43,6 +43,9 @@ router.get("/content/:id", authMiddleware, async (req, res) => {
           revenue: 0,
         };
 
+    // Override revenue to 0 as pay-per-view is disabled
+    if (analytics.revenue) analytics.revenue = 0;
+
     res.json({ analytics });
   } catch (error) {
     const logger = require("./utils/logger");
@@ -67,7 +70,7 @@ router.get("/overview", authMiddleware, async (req, res) => {
       totalViews += content.views || 0;
       totalLikes += content.likes || 0;
       totalShares += content.shares || 0;
-      totalRevenue += content.revenue || 0;
+      // totalRevenue += content.revenue || 0; // Pay-per-view disabled
     });
 
     res.json({
@@ -202,7 +205,7 @@ router.get("/user", authMiddleware, async (req, res) => {
     // 1. Viral Bonus Progress & Content Health Text
     // Logic: Free Tier target is 50k views ("Flaming/Magic").
     // Below that = "We are working on it" (Auto-Promote active).
-    let bestContent = { views: 0, nextGoal: 50000, potentialBonus: 5 };
+    let bestContent = { views: 0, nextGoal: 50000, potentialBonus: 0 };
     let performanceStatus = "Initializing";
     let motivationMessage = "Preparing your content for the algorithm.";
 
@@ -216,21 +219,21 @@ router.get("/user", authMiddleware, async (req, res) => {
     if (maxViews < 1000) {
       performanceStatus = "Needs Work";
       motivationMessage = "Early stages. We are optimizing hashtags and gathering signals.";
-      bestContent = { views: maxViews, nextGoal: 50000, potentialBonus: 5 };
+      bestContent = { views: maxViews, nextGoal: 50000, potentialBonus: 0 };
     } else if (maxViews < 50000) {
       performanceStatus = "Growing";
       motivationMessage =
         "We are working on it! Auto-Promote is cycling your content to reach the magic 50k.";
-      bestContent = { views: maxViews, nextGoal: 50000, potentialBonus: 10 };
+      bestContent = { views: maxViews, nextGoal: 50000, potentialBonus: 0 };
     } else if (maxViews < 100000) {
       performanceStatus = "Flaming & Magic";
       motivationMessage =
         "You hit the magic 50k! Free Tier is maxed out. Upgrade to Subscription to push for 1M+.";
-      bestContent = { views: maxViews, nextGoal: 100000, potentialBonus: 25 };
+      bestContent = { views: maxViews, nextGoal: 100000, potentialBonus: 0 }; // Removed cash bonus
     } else {
       performanceStatus = "Viral Supernova";
       motivationMessage = "Your content is dominating the feed. The algorithm loves you.";
-      bestContent = { views: maxViews, nextGoal: 500000, potentialBonus: 100 };
+      bestContent = { views: maxViews, nextGoal: 500000, potentialBonus: 0 }; // Removed cash bonus
     }
 
     // 2. Referral Progress (Logic from referralGrowthEngine: 10 friends = $5, 20 = $15)

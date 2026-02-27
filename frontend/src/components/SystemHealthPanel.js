@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import { auth } from "../firebaseClient";
+import LiveLogViewer from "./LiveLogViewer";
 
 function SystemHealthPanel() {
   const [health, setHealth] = useState(null);
@@ -126,6 +127,7 @@ function SystemHealthPanel() {
 
   return (
     <div style={{ marginTop: 24 }}>
+      <LiveLogViewer />
       {/* Auto-refresh Toggle */}
       <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
         <label style={{ display: "flex", alignItems: "center", gap: 8 }}>

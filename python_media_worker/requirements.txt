@@ -1,0 +1,26 @@
+# Core Media Processing
+ffmpeg-python
+opencv-python-headless
+Pillow 
+librosa
+numpy
+soundfile
+scenedetect[opencv]
+tqdm
+
+# Web Framework (API Layer)
+fastapi
+uvicorn
+python-multipart 
+requests
+
+# Text-to-Speech & Video Assembly (New)
+edge-tts
+moviepy
+imageio[ffmpeg]
+
+# Production Tools (Heavy but necessary)
+firebase-admin
+openai-whisper
+yt-dlp
+

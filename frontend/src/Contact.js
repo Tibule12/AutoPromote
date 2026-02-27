@@ -27,24 +27,24 @@ const Contact = () => (
         <div className="ap-card">
           <h3>📧 Support</h3>
           <p>For technical issues and general inquiries:</p>
-          <a href="mailto:support@autopromote.com" className="ap-link-button">
-            support@autopromote.com
+          <a href="mailto:thulani@autopromote.org" className="ap-link-button">
+            thulani@autopromote.org
           </a>
         </div>
 
         <div className="ap-card">
           <h3>💼 Sales & Partnerships</h3>
           <p>For enterprise plans and partner opportunities:</p>
-          <a href="mailto:sales@autopromote.com" className="ap-link-button">
-            sales@autopromote.com
+          <a href="mailto:thulani@autopromote.org" className="ap-link-button">
+            thulani@autopromote.org
           </a>
         </div>
 
         <div className="ap-card">
           <h3>📢 Press</h3>
           <p>For media inquiries and brand assets:</p>
-          <a href="mailto:press@autopromote.com" className="ap-link-button">
-            press@autopromote.com
+          <a href="mailto:thulani@autopromote.org" className="ap-link-button">
+            thulani@autopromote.org
           </a>
         </div>
       </div>

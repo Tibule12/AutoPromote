@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const logger = require("../utils/logger");
 const paypalClient = require("./paypal");
 const performanceValidationEngine = require("./performanceValidationEngine");
+const viralMissionControl = require("./viralMissionControl"); // Integration for Organic Missions
 
 class MonetizationService {
   // Results-Based Pricing Configuration (Cost in Credits)
@@ -520,8 +521,22 @@ class MonetizationService {
           status: "pending_approval",
           approvalUrl: paymentResult.approvalUrl,
           boostId: boostRef.id,
-          message: "Please approve PayPal payment to activate boost.",
+          message: "Please approve PayPal payment to deploy Mission Assets (Organic Crew).",
         };
+      } else {
+        // Direct Payment Success (or simulation) - Launch Mission!
+        try {
+          // If payment succeeds immediately (no approval flow), launch the mission now.
+          await viralMissionControl.launchOperation(userId, {
+            contentId: contentId,
+            platform: platform,
+            type: "boost",
+            targetAmount: targetViews,
+          });
+          logger.info(`[Monetization] Mission Launched for ${userId} (BoostID: ${boostRef.id})`);
+        } catch (missionErr) {
+          logger.error("[Monetization] Failed to launch mission post-payment", missionErr);
+        }
       }
     } catch (error) {
       console.error("Error creating paid boost:", error);

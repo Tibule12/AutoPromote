@@ -111,9 +111,9 @@ const SchedulesPanel = ({
       {/* Header */}
       <div className="orchestrator-header">
         <div>
-          <h2 className="orchestrator-title">TEMPORAL ORCHESTRATOR</h2>
+          <h2 className="orchestrator-title">DEPLOYMENT TIMELINE</h2>
           <div style={{ color: "#64748b", fontSize: "0.9rem" }}>
-            Manage your automated publishing timeline
+            Coordinate your organic content drops
           </div>
         </div>
 
@@ -122,20 +122,20 @@ const SchedulesPanel = ({
             className={`control-btn ${viewMode === "orchestrator" ? "active" : ""}`}
             onClick={() => setViewMode("orchestrator")}
           >
-            TIMELINE
+            WAR ROOM VIEW
           </button>
           <button
             className={`control-btn ${viewMode === "list" ? "active" : ""}`}
             onClick={() => setViewMode("list")}
           >
-            DATA LIST
+            MANIFEST
           </button>
           <button
             className="control-btn"
             style={{ borderColor: "#10b981", color: "#10b981" }}
             onClick={() => setShowInjector(!showInjector)}
           >
-            {showInjector ? "CLOSE INJECTOR" : "+ INJECT EVENT"}
+            {showInjector ? "CANCEL DROP" : "+ SCHEDULE DROP"}
           </button>
         </div>
       </div>
@@ -143,7 +143,7 @@ const SchedulesPanel = ({
       {/* Injection Panel (Create Form) */}
       {showInjector && (
         <div className="injection-panel">
-          <h4 style={{ marginBottom: "15px", color: "#fff" }}>NEW TRANSMISSION</h4>
+          <h4 style={{ marginBottom: "15px", color: "#fff" }}>CONFIGURE CONTENT DROP</h4>
           <form onSubmit={handleInject} className="injection-form">
             <div>
               <label

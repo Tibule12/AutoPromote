@@ -1,0 +1,85 @@
+.idea-video-panel {
+  padding: 2rem;
+  color: white;
+}
+
+.iv-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.iv-step-1,
+.iv-step-2,
+.iv-step-3 {
+  max-width: 800px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+.idea-input {
+  width: 100%;
+  min-height: 100px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 8px;
+}
+
+.script-list {
+  margin: 1.5rem 0;
+}
+
+.script-item {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.script-item textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #eee;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.scene-num {
+  font-weight: bold;
+  color: #888;
+  min-width: 30px;
+}
+
+.iv-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.final-video-preview {
+  width: 100%;
+  max-width: 360px; /* Short form usually */
+  margin: 0 auto;
+  display: block;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.download-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  margin-bottom: 1rem;
+}

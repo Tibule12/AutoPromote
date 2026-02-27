@@ -23,6 +23,8 @@ import {
 import SpotifyTrackSearch from "./components/SpotifyTrackSearch";
 import ImageCropper from "./components/ImageCropper";
 import VideoEditor from "./components/VideoEditor";
+import ViralClipFinder from "./components/ViralClipFinder";
+import RemotionPlayer from "./components/RemotionPreview/RemotionPlayer"; // Integrated Remotion
 // import AudioWaveformTrimmer from "./components/AudioWaveformTrimmer";
 import EmojiPicker from "./components/EmojiPicker";
 import FilterEffects from "./components/FilterEffects";
@@ -196,6 +198,8 @@ const escapeHtml = text => {
 
 function ContentUploadForm({
   onUpload,
+  initialFile,
+  onClearInitialFile,
   platformMetadata: extPlatformMetadata,
   platformOptions: extPlatformOptions,
   setPlatformOption: extSetPlatformOption,
@@ -207,6 +211,7 @@ function ContentUploadForm({
   platformCardsOnly = false,
   onNavigate,
 }) {
+  const isDark = true; // Dashboard is always dark mode
   const [title, setTitle] = useState("");
   const [type, setType] = useState("video");
   const [description, setDescription] = useState("");
@@ -223,7 +228,11 @@ function ContentUploadForm({
   const [sourceFiles, setSourceFiles] = useState([]); // Store all uploaded files (images)
   const videoRef = useRef(null);
   const [showCropper, setShowCropper] = useState(false);
-  const [showVideoEditor, setShowVideoEditor] = useState(false);
+  // NEW: Smart Editor State
+  const [showSmartEditor, setShowSmartEditor] = useState(false);
+  const [smartEditorText, setSmartEditorText] = useState("Your Caption Here");
+  const [smartEditorColor, setSmartEditorColor] = useState("#ffffff");
+  const [smartEditorFontSize, setSmartEditorFontSize] = useState(50);
   const [cropMeta, setCropMeta] = useState(null);
   const [spotifyTracks, setSpotifyTracks] = useState(extSpotifySelectedTracks || []);
   const [overlayText, setOverlayText] = useState("");
@@ -242,8 +251,15 @@ function ContentUploadForm({
     shadow: true,
   });
 
+  // VARIANT STRATEGY STATE
+  const [variants, setVariants] = useState([]); // Array of strings (alternate titles/captions)
+  const [variantStrategy, setVariantStrategy] = useState("rotation"); // 'rotation' | 'bandit'
+  const [newVariantText, setNewVariantText] = useState("");
+
   // NEW: Viral & Enchancement States
   const [optimizeViral, setOptimizeViral] = useState(false);
+  const [repostBoost, setRepostBoost] = useState(false);
+  const [shareBoost, setShareBoost] = useState(false);
   const [enhanceQuality, setEnhanceQuality] = useState(true);
 
   // Platform Overrides State
@@ -270,6 +286,45 @@ function ContentUploadForm({
 
   const [isUploading, setIsUploading] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+
+  // Initialize from initialFile (e.g. from Idea-to-Video feature)
+  useEffect(() => {
+    if (initialFile && initialFile instanceof Blob) {
+      console.log("Initializing upload form with file:", initialFile);
+      setFile(initialFile);
+      setSourceFiles([initialFile]); // Ensure it's in sourceFiles array too
+      const url = URL.createObjectURL(initialFile);
+      setPreviewUrl(url);
+
+      // Auto-detect type
+      if (initialFile.type.startsWith("image")) {
+        setType("image");
+      } else {
+        setType("video");
+      }
+
+      // Inherit name if available
+      if (initialFile.suggestedTitle) {
+        setTitle(initialFile.suggestedTitle);
+      } else if (initialFile.name && initialFile.name !== "blob") {
+        // Try to parse title from filename if possible, or leave blank
+        // setTitle(initialFile.name.replace(/\.[^/.]+$/, ""));
+      }
+
+      // Inherit description if passed from AI Generator
+      if (initialFile.suggestedDescription) {
+        setDescription(initialFile.suggestedDescription);
+        // Also set the smart editor text for captions if relevant
+        setSmartEditorText(initialFile.suggestedTitle || "Auto-Captions");
+      }
+
+      // Signal parent that we've consumed the file
+      if (onClearInitialFile) {
+        onClearInitialFile();
+      }
+    }
+  }, [initialFile, onClearInitialFile]);
+
   // TikTok-specific UX state (Direct Post compliance)
   const [tiktokCreatorInfo, setTiktokCreatorInfo] = useState(null);
   const [tiktokPrivacy, setTiktokPrivacy] = useState("");
@@ -295,6 +350,10 @@ function ContentUploadForm({
   const uploadTaskRef = useRef(null);
   const [error, setError] = useState("");
 
+  // Video Editor State (Phase 1 & 2)
+  const [showVideoEditor, setShowVideoEditor] = useState(false);
+  const [showViralFinder, setShowViralFinder] = useState(false); // Phase 2: Opus Clip Style
+
   // =================================================================
   // BILLIONAIRE STRATEGY: Viral Bounty State & Protocol 7 (Insurance)
   // =================================================================
@@ -316,32 +375,65 @@ function ContentUploadForm({
     }));
   }, [tiktokDisclosureEnabled, tiktokYourBrand, tiktokBrandedContent]);
 
+  // Use a ref to prevent infinite loops from useEffect dependency on functions
+  const extSetPlatformOptionRef = React.useRef(extSetPlatformOption);
+  useEffect(() => {
+    extSetPlatformOptionRef.current = extSetPlatformOption;
+  }, [extSetPlatformOption]);
+
   const handleTikTokChange = React.useCallback(
     data => {
       const { platform, ...vals } = data;
-      if (typeof extSetPlatformOption === "function") {
-        Object.entries(vals).forEach(([k, v]) => extSetPlatformOption(platform, k, v));
+      // Use ref to break dependency chain
+      if (typeof extSetPlatformOptionRef.current === "function") {
+        // Optimization: Only update if values actually changed?
+        // For now, trust the caller (TikTokForm) not to spam updates.
+        Object.entries(vals).forEach(([k, v]) => extSetPlatformOptionRef.current(platform, k, v));
       }
       // Local state sync for upload logic
       if (vals.caption !== undefined)
-        setPerPlatformTitle(prev => ({ ...prev, tiktok: vals.caption }));
-      if (vals.privacy) setTiktokPrivacy(vals.privacy);
-      setTiktokInteractions(prev => ({
-        ...prev,
-        comments: vals.allowComments ?? prev.comments,
-        duet: vals.allowDuet ?? prev.duet,
-        stitch: vals.allowStitch ?? prev.stitch,
-      }));
+        setPerPlatformTitle(prev => {
+          if (prev.tiktok === vals.caption) return prev;
+          return { ...prev, tiktok: vals.caption };
+        });
+
+      if (vals.privacy) setTiktokPrivacy(prev => (prev === vals.privacy ? prev : vals.privacy));
+
+      setTiktokInteractions(prev => {
+        const next = {
+          ...prev,
+          comments: vals.allowComments ?? prev.comments,
+          duet: vals.allowDuet ?? prev.duet,
+          stitch: vals.allowStitch ?? prev.stitch,
+        };
+        // Simple distinct check
+        if (
+          prev.comments === next.comments &&
+          prev.duet === next.duet &&
+          prev.stitch === next.stitch
+        )
+          return prev;
+        return next;
+      });
+
       if (vals.commercialContent !== undefined) {
-        setTiktokDisclosureEnabled(vals.commercialContent);
-        setTiktokYourBrand(vals.yourBrand || false);
-        setTiktokBrandedContent(vals.brandedContent || false);
+        setTiktokDisclosureEnabled(prev =>
+          prev === vals.commercialContent ? prev : vals.commercialContent
+        );
+        setTiktokYourBrand(prev =>
+          prev === (vals.yourBrand || false) ? prev : vals.yourBrand || false
+        );
+        setTiktokBrandedContent(prev =>
+          prev === (vals.brandedContent || false) ? prev : vals.brandedContent || false
+        );
       }
       if (vals.consentChecked !== undefined) {
-        setTiktokConsentChecked(vals.consentChecked);
+        setTiktokConsentChecked(prev =>
+          prev === vals.consentChecked ? prev : vals.consentChecked
+        );
       }
     },
-    [extSetPlatformOption]
+    [] // Removed extSetPlatformOption from dependencies
   );
 
   const handleFacebookChange = React.useCallback(
@@ -523,13 +615,19 @@ function ContentUploadForm({
   useEffect(() => {
     // Cleanup URL.createObjectURL to prevent mem leaks
     return () => {
-      if (previewUrl) {
+      // NOTE: Only revoke if explicitly managing object URL lifecycle.
+      // In many cases, react re-renders might revoke prematurely if dependencies aren't perfect.
+      // If the preview is disappearing, commenting out revocation can be a temporary fix.
+      /*
+      if (previewUrl && previewUrl.startsWith('blob:')) {
         try {
-          URL.revokeObjectURL(previewUrl);
+          URL.revokeObjectURL(previewUrl); 
         } catch (e) {}
       }
+      */
     };
-  }, [previewUrl]);
+  }, [previewUrl]); // Dependency on previewUrl causes revocation on every change!
+
   // If branded content is selected, prevent 'SELF_ONLY' privacy by auto-switching
   useEffect(() => {
     if (tiktokCommercial && tiktokCommercial.brandedContent) {
@@ -853,6 +951,27 @@ function ContentUploadForm({
     } catch (e) {}
     return null;
   })();
+
+  const handlePlatformToggle = React.useCallback(
+    platform => {
+      const current = Array.isArray(selectedPlatformsVal) ? selectedPlatformsVal : [];
+      let next;
+      if (current.includes(platform)) {
+        next = current.filter(p => p !== platform);
+      } else {
+        next = [...current, platform];
+      }
+
+      // Use the primary method for updating selection
+      if (typeof extSetSelectedPlatforms === "function") {
+        extSetSelectedPlatforms(next);
+      } else {
+        setSelectedPlatforms(next);
+      }
+    },
+    [selectedPlatformsVal, extSetSelectedPlatforms, setSelectedPlatforms]
+  );
+
   const [discordChannelId, setDiscordChannelId] = useState(
     extPlatformOptions?.discord?.channelId || ""
   );
@@ -927,6 +1046,11 @@ function ContentUploadForm({
       } catch (e) {
         throw new Error("Invalid JSON response from quality check");
       }
+
+      if (response.status === 402) {
+        throw new Error("Quality Check requires Growth Credits. Please purchase in Marketplace!");
+      }
+
       if (response.ok && result) {
         setQualityScore(result.qualityScore || result.quality_score || null);
         setQualityFeedback(result.feedback || result.quality_feedback || []);
@@ -952,6 +1076,7 @@ function ContentUploadForm({
         let url = null;
         try {
           url = URL.createObjectURL(file);
+          if (objectUrlsRef.current) objectUrlsRef.current.add(url);
         } catch (e) {
           url = `preview://${file.name}`;
         }
@@ -1730,18 +1855,27 @@ function ContentUploadForm({
     );
     try {
       console.log("[Upload] Content type:", type);
-      if (!file) {
-        console.error("[Upload] No file selected");
-        throw new Error("Please select a file to upload.");
+
+      // Validation: Either a global file OR specific files for all selected platforms
+      const hasGlobalFile = file || url;
+      const allPlatformsHaveFiles =
+        selectedPlatformsVal.length > 0 &&
+        selectedPlatformsVal.every(
+          p => perPlatformFile && perPlatformFile[p] // Check if specific file exists
+        );
+
+      if (!hasGlobalFile && !allPlatformsHaveFiles) {
+        console.error("[Upload] No valid file configuration");
+        throw new Error(
+          "Please select a global file, or provide files for each selected platform."
+        );
       }
 
-      // 🛑 COST CONTROL: 100MB Limit per file for Free Tier (Everyone)
-      // This protects your Firebase Storage bill.
-      const MAX_SIZE_MB = 100;
-      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-        throw new Error(
-          `File too large. Free tier limit is ${MAX_SIZE_MB}MB. Please compress your video.`
-        );
+      // 🛑 COST CONTROL: 500MB Limit per file (Allow Pro Tier)
+      // Backend will enforce 100MB for Free Tier users
+      const MAX_SIZE_MB = 500;
+      if (file && file.size > MAX_SIZE_MB * 1024 * 1024) {
+        throw new Error(`File too large. Maximum upload size is ${MAX_SIZE_MB}MB.`);
       }
 
       // TikTok-specific client-side checks (Direct Post compliance)
@@ -1795,10 +1929,10 @@ function ContentUploadForm({
       }
 
       // Validate file integrity before upload
-      if (!file || !(file instanceof Blob)) {
+      if (!file || (!file.isRemote && !(file instanceof Blob))) {
         throw new Error("Invalid file object selected. Please re-select the file.");
       }
-      if (file.size && file.size < 100) {
+      if (!file.isRemote && file.size && file.size < 100) {
         // Attempt to read file to check for "undefined" string
         try {
           const text = await file.text();
@@ -1825,7 +1959,11 @@ function ContentUploadForm({
 
       // Upload file to Firebase Storage
       let url = "";
-      if (typeof window !== "undefined" && window.__E2E_BYPASS_UPLOADS) {
+      if (file.isRemote) {
+        url = file.url;
+        console.log("[Upload] Using remote file URL:", url);
+        setUploadProgress(100);
+      } else if (typeof window !== "undefined" && window.__E2E_BYPASS_UPLOADS) {
         url = `https://example.com/e2e-${type}.mp4`;
       } else {
         const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
@@ -2002,6 +2140,11 @@ function ContentUploadForm({
         // New features:
         quality_enhanced: !!enhanceQuality,
         viral_boost: optimizeViral ? { force_seeding: true } : undefined,
+        repost_boost: repostBoost,
+        share_boost: shareBoost,
+        // VARIANT ENGINE
+        variants: variants && variants.length > 0 ? variants : undefined,
+        variant_strategy: variants && variants.length > 0 ? variantStrategy : "rotation",
         meta: {
           trimStart: type === "video" || type === "audio" ? trimStart : undefined,
           trimEnd: type === "video" || type === "audio" ? trimEnd : undefined,
@@ -2013,6 +2156,7 @@ function ContentUploadForm({
           template: template !== "none" ? template : undefined,
         },
         platform_options: finalPlatformOptions,
+        platform_files: perPlatformFile, // Inject platform-specific files for App.js to handle
       };
       // Add overlay metadata to submit payload
       if (overlayText) contentData.meta.overlay = { text: overlayText, position: overlayPosition };
@@ -2176,8 +2320,17 @@ function ContentUploadForm({
         setIdempotencyKey(null);
       }
       try {
-        const url = URL.createObjectURL(selected);
-        setPreviewUrl(url);
+        if (selected.isRemote && selected.url) {
+          // Use the remote URL directly if it's a processed "fake" file object
+          setPreviewUrl(selected.url);
+        } else {
+          const url = URL.createObjectURL(selected);
+          setPreviewUrl(url);
+          // Track for cleanup
+          if (objectUrlsRef.current) {
+            objectUrlsRef.current.add(url);
+          }
+        }
       } catch (err) {
         console.error("[Preview] Error creating local preview:", err);
       }
@@ -2543,8 +2696,7 @@ function ContentUploadForm({
     }
   };
 
-  // By default render a simplified view that only shows platform cards.
-  // Clicking a card will set `focusedPlatform` and reveal the per-platform form.
+  // DISABLED SIMPLIFIED VIEW TO FORCE GLOBAL FORM
   if (!focusedPlatform) {
     const platforms = [
       "youtube",
@@ -2563,6 +2715,57 @@ function ContentUploadForm({
 
     return (
       <div className="content-upload-container">
+        {/* BILLIONAIRE STRATEGY: Scarcity Banner */}
+        <div
+          className="usage-banner"
+          style={{
+            background: "linear-gradient(90deg, #111, #222)",
+            borderBottom: "1px solid #333",
+            padding: "12px 20px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+            <div style={{ color: "#fff", fontSize: "0.9rem" }}>
+              <span style={{ color: "#aaa" }}>Monthly Quota:</span>
+              <strong style={{ marginLeft: "5px", color: "#4CAF50" }}>7/10 Uploads</strong>
+            </div>
+            <div
+              className="progress-bar"
+              style={{ width: "100px", height: "6px", background: "#333", borderRadius: "3px" }}
+            >
+              <div
+                style={{ width: "70%", height: "100%", background: "#4CAF50", borderRadius: "3px" }}
+              ></div>
+            </div>
+          </div>
+          <Link
+            to="/marketplace" // Marketplace handles billing (PayPal/PayFast) for credits
+            style={{
+              color: "#FFD700",
+              textDecoration: "none",
+              fontSize: "0.9rem",
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              border: "1px solid #FFD700",
+              padding: "4px 10px",
+              borderRadius: "4px",
+              background: "rgba(255, 215, 0, 0.1)",
+            }}
+          >
+            🚀 Boost Reach <span style={{ fontSize: "0.8rem" }}>➜</span>
+          </Link>
+        </div>
+
+        <DraftManager onLoadDraft={handleLoadDraft} currentDraft={getCurrentDraft()} />
+
         <div className="form-group">
           <label>🎯 Target Platforms</label>
           {/* Show Facebook Pages and IDs when available to make Page selection explicit for reviewers */}
@@ -2585,52 +2788,52 @@ function ContentUploadForm({
               </div>
             </div>
           ) : null}
-          {/* Sci-Fi Optimization Controls */}
-          <div
-            className="sci-fi-controls"
-            style={{
-              marginBottom: "1rem",
-              padding: "1rem",
-              border: "1px solid #1f2937",
-              borderRadius: "8px",
-              background: "rgba(17, 24, 39, 0.7)",
-              backdropFilter: "blur(10px)",
-              boxShadow: "0 0 15px rgba(0, 255, 255, 0.05)",
-            }}
-          >
-            <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+          {/* Sci-Fi Optimization Controls - Simplified Version */}
+          {!focusedPlatform && (
+            <div
+              className="feature-toggles"
+              style={{
+                display: "flex",
+                gap: "2rem",
+                flexWrap: "wrap",
+                marginBottom: "20px",
+                padding: "15px",
+                background: "rgba(255,255,255,0.03)",
+                borderRadius: "8px",
+                border: "1px solid rgba(255,255,255,0.05)",
+              }}
+            >
               <label
-                style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "0.5rem" }}
+                style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "10px" }}
               >
                 <input
                   type="checkbox"
                   checked={enhanceQuality}
                   onChange={e => setEnhanceQuality(e.target.checked)}
-                  style={{ accentColor: "#00f2ea" }}
+                  style={{ width: "16px", height: "16px", accentColor: "#00f2ea" }}
                 />
-                <span style={{ color: "#eef2ff", fontWeight: 600 }}>
-                  <span style={{ marginRight: "5px" }}>✨</span>
+                <span style={{ color: "#fff", fontWeight: 500 }}>
+                  <span style={{ marginRight: "6px" }}>✨</span>
                   AI Content Enhancement
                 </span>
               </label>
 
               <label
-                style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "0.5rem" }}
+                style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "10px" }}
               >
                 <input
                   type="checkbox"
                   checked={optimizeViral}
                   onChange={e => setOptimizeViral(e.target.checked)}
-                  style={{ accentColor: "#e1306c" }}
+                  style={{ width: "16px", height: "16px", accentColor: "#e1306c" }}
                 />
-                <span style={{ color: "#eef2ff", fontWeight: 600 }}>
-                  <span style={{ marginRight: "5px" }}>🚀</span>
+                <span style={{ color: "#fff", fontWeight: 500 }}>
+                  <span style={{ marginRight: "6px" }}>🚀</span>
                   Upload Now, Publish at Peak
                 </span>
               </label>
             </div>
-            {/* VIRAL BOUNTY (Moved to per-platform forms) */}
-          </div>
+          )}
           <div className="platform-grid">
             {platforms.map(p => {
               const disabled =
@@ -2642,12 +2845,15 @@ function ContentUploadForm({
                   tabIndex={0}
                   aria-label={p.charAt(0).toUpperCase() + p.slice(1)}
                   onClick={() => {
+                    // 1. Toggle selection state
                     if (!disabled) {
-                      setFocusedPlatform(p);
-                      // If parent controls selected platforms (extSelectedPlatforms provided), do not override it.
-                      if (typeof extSetSelectedPlatforms === "function")
-                        extSetSelectedPlatforms([p]);
-                      else if (!Array.isArray(extSelectedPlatforms)) setSelectedPlatforms([p]);
+                      const willBeSelected = !selectedPlatformsVal.includes(p);
+                      handlePlatformToggle(p);
+
+                      // 2. If it's becoming selected, OPEN the full screen view
+                      if (willBeSelected) {
+                        setFocusedPlatform(p);
+                      }
                     } else setError("This TikTok account cannot post via third-party apps.");
                   }}
                   onKeyDown={e => {
@@ -2667,210 +2873,69 @@ function ContentUploadForm({
                     minHeight: expandedPlatform === p ? "auto" : undefined,
                   }}
                 >
-                  <div className="platform-icon" aria-hidden="true">
-                    {getPlatformIcon(p)}
-                  </div>
-                  <div className="platform-name">
-                    {p.charAt(0).toUpperCase() + p.slice(1)}
-                    {/* Peak Time Indicator */}
-                    {getPeakStatus(p) && (
-                      <div
-                        style={{
-                          marginTop: "6px",
-                          fontSize: "0.65rem",
-                          padding: "2px 6px",
-                          borderRadius: "12px",
-                          backgroundColor: "rgba(0,0,0,0.4)",
-                          color: getPeakStatus(p).color,
-                          border: `1px solid ${getPeakStatus(p).color}`,
-                          boxShadow: getPeakStatus(p).glow || "none",
-                          animation: getPeakStatus(p).animate
-                            ? `${getPeakStatus(p).animate} 1.5s infinite`
-                            : "none",
-                          width: "fit-content",
-                          margin: "6px auto 0",
-                        }}
-                      >
-                        {getPeakStatus(p).label}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Intel Toggle */}
-                  <button
-                    type="button"
+                  {/* Use a larger clickable checkbox area for pure selection */}
+                  <div
+                    role="checkbox"
+                    aria-checked={selectedPlatformsVal.includes(p)}
                     onClick={e => {
                       e.stopPropagation();
-                      setExpandedPlatform(expandedPlatform === p ? null : p);
+                      if (!disabled) {
+                        handlePlatformToggle(p);
+                      }
                     }}
                     style={{
                       position: "absolute",
-                      top: "5px",
-                      right: "5px",
-                      background: "none",
-                      border: "none",
-                      fontSize: "1.1rem",
+                      top: 0,
+                      right: 0,
+                      width: 44,
+                      height: 44,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 20,
                       cursor: "pointer",
-                      opacity: 0.7,
                     }}
-                    title="View Algorithm Intel"
                   >
-                    ℹ️
-                  </button>
-
-                  {/* Expanded Algorithm Intel */}
-                  {expandedPlatform === p && (
                     <div
-                      onClick={e => e.stopPropagation()}
                       style={{
-                        marginTop: "12px",
-                        paddingTop: "12px",
-                        borderTop: "1px solid rgba(255,255,255,0.1)",
-                        textAlign: "left",
-                        width: "100%",
-                        animation: "fadeIn 0.3s ease-in-out",
+                        width: 18,
+                        height: 18,
+                        borderRadius: "50%",
+                        border: selectedPlatformsVal.includes(p)
+                          ? "none"
+                          : "2px solid rgba(255,255,255,0.3)",
+                        background: selectedPlatformsVal.includes(p) ? "#00ff88" : "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#000",
+                        fontSize: "12px",
+                        fontWeight: "bold",
                       }}
                     >
-                      {(() => {
-                        const intel = getAlgorithmIntel(p);
-                        return (
-                          <div style={{ fontSize: "0.8rem", color: "#e2e8f0" }}>
-                            <div
-                              style={{
-                                marginBottom: "6px",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                              }}
-                            >
-                              <span
-                                style={{ color: "#00f2ea", fontSize: "0.7rem", fontWeight: "bold" }}
-                              >
-                                INTELLIGENCE
-                              </span>
-                              <span style={{ fontSize: "0.7rem", color: "#64748b" }}>LIVE</span>
-                            </div>
-
-                            <div style={{ fontWeight: 600, marginBottom: "4px" }}>
-                              {intel.audience}
-                            </div>
-
-                            <div style={{ marginBottom: "8px" }}>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  fontSize: "0.7rem",
-                                  marginBottom: "2px",
-                                }}
-                              >
-                                <span>Viral Probability</span>
-                                <span style={{ color: "#e1306c" }}>{intel.viral}%</span>
-                              </div>
-                              <div
-                                style={{
-                                  height: "4px",
-                                  background: "rgba(255,255,255,0.1)",
-                                  borderRadius: "2px",
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    width: `${intel.viral}%`,
-                                    height: "100%",
-                                    background: "linear-gradient(90deg, #00f2ea, #e1306c)",
-                                    borderRadius: "2px",
-                                  }}
-                                ></div>
-                              </div>
-                            </div>
-
-                            <div
-                              style={{
-                                background: "rgba(0, 242, 234, 0.05)",
-                                borderLeft: "2px solid #00f2ea",
-                                padding: "6px",
-                                fontSize: "0.75rem",
-                                fontStyle: "italic",
-                                marginBottom: "8px",
-                              }}
-                            >
-                              "{intel.secret}"
-                            </div>
-
-                            <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
-                              <span style={{ fontWeight: "bold", color: "#fff" }}>TIP:</span>{" "}
-                              {intel.tips}
-                            </div>
-                          </div>
-                        );
-                      })()}
+                      {selectedPlatformsVal.includes(p) && "✓"}
                     </div>
-                  )}
+                  </div>
+
+                  <div className="platform-icon" aria-hidden="true">
+                    {getPlatformIcon(p)}
+                  </div>
+                  <div className="platform-name">{p.charAt(0).toUpperCase() + p.slice(1)}</div>
                 </div>
               );
             })}
           </div>
-          {/* Inline expanded area for when parent provides a single selected platform */}
-          {expandedPlatform && (
-            <div style={{ marginTop: 12 }} className="expanded-platform-inline">
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)} Options
-              </div>
-              {platformGuidelines[expandedPlatform] && (
-                <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 8 }}>
-                  {platformGuidelines[expandedPlatform].summary}
-                </div>
-              )}
 
-              {/* Platform-specific small inputs for selected platforms (tests rely on these) */}
-              {expandedPlatform === "discord" && (
-                <div style={{ display: "grid", gap: 8 }}>
-                  <input
-                    placeholder="Discord channel ID"
-                    value={discordChannelId}
-                    onChange={e => {
-                      setDiscordChannelId(e.target.value);
-                      if (typeof extSetPlatformOption === "function") {
-                        extSetPlatformOption("discord", "channelId", e.target.value);
-                      }
-                    }}
-                  />
-                </div>
-              )}
-
-              {expandedPlatform === "tiktok" && (
-                <div style={{ display: "grid", gap: 8 }} className="tiktok-expanded-inline">
-                  <div style={{ fontSize: 12, color: "#666" }}>
-                    Creator: {tiktokCreatorDisplayName || "Loading..."}
-                  </div>
-                  {type !== "video" && (
-                    <div
-                      role="status"
-                      className="no-video-disclosure"
-                      style={{ fontSize: 12, color: "#b66", marginBottom: 6 }}
-                    >
-                      This post doesn&apos;t contain a video. TikTok features like Duet and Stitch
-                      require a video — upload one to enable them.
-                    </div>
-                  )}
-
-                  {tiktokCreatorInfo && tiktokCreatorInfo.can_post === false && (
-                    <div className="tiktok-disabled-banner" role="alert">
-                      This TikTok account cannot publish via third-party apps right now. Please try
-                      again later.
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}{" "}
+          {/* Inline expanded area - REMOVED for clean UI (using focused view instead) */}
+          {false && expandedPlatform && (
+            <div style={{ marginTop: 12 }}>{/* Logic moved to full screen view */}</div>
+          )}
         </div>
       </div>
     );
   }
 
-  // If a platform was focused, render only that platform's isolated form
+  // ENABLED FOCUSED VIEW - This is the "Full Screen" mode user requested
   if (focusedPlatform) {
     const p = focusedPlatform;
     return (
@@ -2878,10 +2943,12 @@ function ContentUploadForm({
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button
             type="button"
+            className="btn-secondary"
             onClick={() => setFocusedPlatform(null)}
             aria-label="Back to platforms"
+            style={{ padding: "4px 12px", display: "flex", alignItems: "center", gap: "6px" }}
           >
-            ← Back
+            <span>←</span> Back
           </button>
           <h3 style={{ margin: 0 }}>Upload to {p.charAt(0).toUpperCase() + p.slice(1)}</h3>
         </div>
@@ -2917,14 +2984,25 @@ function ContentUploadForm({
             <div style={{ fontSize: 13, marginTop: 4, color: "#666" }}>Selected: {file.name}</div>
           )}
           {((file && type === "video") || (sourceFiles.length > 0 && type === "image")) && (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              style={{ marginTop: 8 }}
-              onClick={() => setShowVideoEditor(true)}
-            >
-              {type === "image" ? "🎬 Create Slideshow" : "✂️ Edit / Trim Video"}
-            </button>
+            <div style={{ display: "flex", gap: "10px", marginTop: 8 }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowVideoEditor(true)}
+              >
+                {type === "image" ? "🎬 Create Slideshow" : "✨ Review AI Enhancements"}
+              </button>
+              {type === "video" && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ background: "#e94560", border: "none" }}
+                  onClick={() => setShowViralFinder(true)}
+                >
+                  🔍 Find Viral Clips
+                </button>
+              )}
+            </div>
           )}
 
           {showVideoEditor && (file || sourceFiles.length > 0) && (
@@ -2936,14 +3014,360 @@ function ContentUploadForm({
                   onSave={newFile => {
                     handleFileChange(newFile);
                     setShowVideoEditor(false);
-                    toast.success("Video trimmed successfully!");
+
+                    // Force update preview for the current platform to show the edited video immediately!
+                    if (focusedPlatform) {
+                      const newUrl =
+                        newFile.url ||
+                        (newFile instanceof File || newFile instanceof Blob
+                          ? URL.createObjectURL(newFile)
+                          : "");
+                      if (newUrl) {
+                        setPerPlatformPreviews(prev => ({
+                          ...prev,
+                          [focusedPlatform]: [
+                            {
+                              platform: focusedPlatform,
+                              mediaUrl: newUrl, // This ensures the music and edits play!
+                              mediaType: "video",
+                              title: title || newFile.name,
+                              description: description || "",
+                            },
+                          ],
+                        }));
+                      }
+                      // CRITICAL: Update the specific file for this platform too, so it UPLOADS the edited version.
+                      handlePerPlatformFileChange(focusedPlatform, newFile);
+                    }
+
+                    toast.success("Video enhanced with AI successfully!");
                   }}
                   onCancel={() => setShowVideoEditor(false)}
                 />
               </div>
             </div>
           )}
+
+          {showViralFinder && file && (
+            <div className="modal-overlay">
+              <div
+                className="modal"
+                style={{
+                  maxWidth: "900px",
+                  width: "95%",
+                  background: "transparent",
+                  border: "none",
+                }}
+              >
+                <ViralClipFinder
+                  file={file}
+                  onSave={newFile => {
+                    handleFileChange(newFile);
+                    setShowViralFinder(false);
+                    toast.success("Viral clip extracted successfully!");
+                  }}
+                  onCancel={() => setShowViralFinder(false)}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* New Preview Section for Focused Mode */}
+          {previewUrl && (
+            <div
+              className="preview-container"
+              style={{
+                marginTop: 15,
+                background: "#000",
+                padding: 10,
+                borderRadius: 8,
+                textAlign: "center",
+              }}
+            >
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: 5,
+                  color: "#888",
+                  fontSize: "0.8rem",
+                  textAlign: "left",
+                }}
+              >
+                Preview:
+              </label>
+              {type === "video" ? (
+                <video
+                  src={previewUrl}
+                  controls
+                  style={{ maxWidth: "100%", maxHeight: 300, borderRadius: 4 }}
+                />
+              ) : (
+                <img
+                  src={previewUrl}
+                  alt="Content Preview"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: 300,
+                    objectFit: "contain",
+                    borderRadius: 4,
+                  }}
+                />
+              )}
+            </div>
+          )}
         </div>
+
+        {/* Global Inputs for Focused Mode */}
+        <div style={{ marginBottom: 20 }}>
+          <div className="form-group">
+            <label>Content Type</label>
+            <select value={type} onChange={e => setType(e.target.value)} className="form-select">
+              <option value="video">Video</option>
+              <option value="image">Image</option>
+              <option value="audio">Audio</option>
+            </select>
+          </div>
+
+          <div className="form-group full-width">
+            <label htmlFor="content-title">Title</label>
+            <div className="input-with-emoji">
+              <input
+                id="content-title"
+                ref={titleInputRef}
+                type="text"
+                placeholder="✨ Enter catchy title..."
+                value={title}
+                required
+                onChange={e => {
+                  // Security: Use centralized sanitization function
+                  setTitle(sanitizeInput(e.target.value));
+                }}
+                className="form-input"
+                maxLength={100}
+              />
+              <button type="button" className="emoji-btn" onClick={() => openEmojiPicker("title")}>
+                😊
+              </button>
+            </div>
+            <div className="char-count">{title.length}/100</div>
+          </div>
+
+          <div className="form-group full-width">
+            <label htmlFor="content-description">Description</label>
+            <div className="input-with-emoji">
+              <textarea
+                id="content-description"
+                ref={descInputRef}
+                placeholder="📝 Describe your content..."
+                value={description}
+                required
+                onChange={e => {
+                  // Security: Use centralized sanitization function
+                  setDescription(sanitizeInput(e.target.value));
+                }}
+                className="form-textarea"
+                rows={4}
+                maxLength={500}
+              />
+              <button
+                type="button"
+                className="emoji-btn"
+                onClick={() => openEmojiPicker("description")}
+              >
+                😊
+              </button>
+            </div>
+            <div className="char-count">{description.length}/500</div>
+          </div>
+
+          {/* Sci-Fi Optimization Controls - Focused View */}
+          <div
+            className="sci-fi-controls"
+            style={{
+              marginBottom: "1rem",
+              padding: "1rem",
+              border: "1px solid #1f2937",
+              borderRadius: "8px",
+              background: "rgba(17, 24, 39, 0.7)",
+              backdropFilter: "blur(10px)",
+              marginTop: 15,
+            }}
+          >
+            <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+              <label
+                style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "0.5rem" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={enhanceQuality}
+                  onChange={e => setEnhanceQuality(e.target.checked)}
+                  style={{ accentColor: "#00f2ea" }}
+                />
+                <span style={{ color: "#eef2ff", fontWeight: 600 }}>✨ AI Enhance</span>
+              </label>
+
+              <label
+                style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "0.5rem" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={optimizeViral}
+                  onChange={e => setOptimizeViral(e.target.checked)}
+                  style={{ accentColor: "#e1306c" }}
+                />
+                <span style={{ color: "#eef2ff", fontWeight: 600 }}>🚀 Peak Publish</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* VARIANT STRATEGY UI (The "Content Hedge Fund") */}
+        <div
+          className="form-group variant-strategy-ui"
+          style={{
+            marginBottom: 20,
+            padding: 16,
+            background: "rgba(20,20,30,0.6)",
+            borderRadius: 8,
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 12,
+            }}
+          >
+            <label
+              style={{
+                margin: 0,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                cursor: "pointer",
+              }}
+            >
+              <span style={{ fontSize: "1.2rem" }}>🎰</span>
+              <span>Bandit Strategy (A/B Testing)</span>
+              <span
+                style={{
+                  fontSize: "0.7rem",
+                  padding: "2px 6px",
+                  background: "#3b82f6",
+                  borderRadius: 4,
+                }}
+              >
+                BETA
+              </span>
+            </label>
+            <select
+              value={variantStrategy}
+              onChange={e => setVariantStrategy(e.target.value)}
+              style={{
+                padding: "4px 8px",
+                borderRadius: 4,
+                background: "#000",
+                color: "#fff",
+                border: "1px solid #444",
+              }}
+            >
+              <option value="rotation">Strategy: Rotation (Default)</option>
+              <option value="bandit">Strategy: Bandit (AI Optimization)</option>
+            </select>
+          </div>
+
+          <div style={{ fontSize: "0.85rem", color: "#aaa", marginBottom: 12 }}>
+            {variantStrategy === "bandit"
+              ? "The AI will automatically test your variants and prioritize the winner (Maximize CTR)."
+              : "Variants will be used sequentially for reposts (Best for evergreen content)."}
+          </div>
+
+          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <input
+              type="text"
+              placeholder="Add an alternative caption/hook..."
+              value={newVariantText}
+              onChange={e => setNewVariantText(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (newVariantText.trim()) {
+                    setVariants([...variants, newVariantText.trim()]);
+                    setNewVariantText("");
+                  }
+                }
+              }}
+              style={{
+                flex: 1,
+                padding: 8,
+                borderRadius: 4,
+                background: "#000",
+                border: "1px solid #444",
+                color: "#fff",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (newVariantText.trim()) {
+                  setVariants([...variants, newVariantText.trim()]);
+                  setNewVariantText("");
+                }
+              }}
+              style={{
+                background: "#3b82f6",
+                color: "#fff",
+                border: "none",
+                borderRadius: 4,
+                padding: "0 16px",
+                cursor: "pointer",
+              }}
+            >
+              Add
+            </button>
+          </div>
+
+          {variants.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {variants.map((v, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: "rgba(59, 130, 246, 0.2)",
+                    padding: "4px 10px",
+                    borderRadius: 16,
+                    border: "1px solid rgba(59, 130, 246, 0.4)",
+                  }}
+                >
+                  <span style={{ fontSize: "0.9rem" }}>{v}</span>
+                  <button
+                    type="button"
+                    onClick={() => setVariants(variants.filter((_, idx) => idx !== i))}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#fff",
+                      cursor: "pointer",
+                      fontSize: "1.1rem",
+                      padding: 0,
+                      lineHeight: 1,
+                      opacity: 0.7,
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {p === "facebook" && (
           <FacebookForm
             onChange={handleFacebookChange}
@@ -3117,7 +3541,7 @@ function ContentUploadForm({
           >
             <h3 style={{ color: "#e94560", fontSize: "1.5rem" }}>🥋 DOJO MODE ACTIVATED</h3>
             <p style={{ margin: "10px 0", fontSize: "1.1rem" }}>
-              Your free uploads (5/5) are depleted correctly.
+              Your monthly upload limit has been reached.
               <br />
               <em>"Limitation breeds creativity."</em>
             </p>
@@ -3273,14 +3697,26 @@ function ContentUploadForm({
                       aria-label="Preview media"
                       src={pv.mediaUrl || pv.thumbnail}
                       controls
-                      style={{ width: "100%", height: 320, objectFit: "cover" }}
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        maxHeight: 320,
+                        objectFit: "contain",
+                        backgroundColor: "#000",
+                      }}
                     />
                   ) : (
                     <img
                       aria-label="Preview media"
                       src={pv.thumbnail || DEFAULT_THUMBNAIL}
                       alt="Preview Thumbnail"
-                      style={{ width: "100%", height: 320, objectFit: "cover" }}
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        maxHeight: 320,
+                        objectFit: "contain",
+                        backgroundColor: "#000",
+                      }}
                     />
                   )}
                 </div>
@@ -3352,7 +3788,7 @@ function ContentUploadForm({
         </div>
 
         <Link
-          to="/marketplace"
+          to="/marketplace" // Marketplace handles billing (PayPal/PayFast) for credits
           style={{
             color: "#FFD700",
             textDecoration: "none",
@@ -3371,6 +3807,7 @@ function ContentUploadForm({
         </Link>
       </div>
 
+      {/* Main Upload Form Content */}
       <form
         onSubmit={handleSubmit}
         onKeyDown={handleFormKeyDown}
@@ -3378,7 +3815,6 @@ function ContentUploadForm({
         data-testid="content-upload-form"
       >
         <DraftManager onLoadDraft={handleLoadDraft} currentDraft={getCurrentDraft()} />
-
         {/* Show which creator/account will be used for platform uploads (e.g., TikTok nickname) */}
         {(() => {
           const currentUser = auth && auth.currentUser;
@@ -3397,1298 +3833,1399 @@ function ContentUploadForm({
             )
           );
         })()}
-
         {error && <div className="error-message">{error}</div>}
-
-        <div className="form-group">
-          <label>Content Type</label>
-          <select value={type} onChange={e => setType(e.target.value)} className="form-select">
-            <option value="video">Video</option>
-            <option value="image">Image</option>
-            <option value="audio">Audio</option>
-          </select>
-        </div>
-        <div className={`content-upload-grid ${file ? "has-file" : ""}`}>
-          <div className="left-column">
+        {/* Global Inputs REMOVED as requested */}
+        {false && (
+          <>
             <div className="form-group">
-              <label htmlFor="content-file-input">File</label>
-              <div
-                data-testid="drop-zone"
-                className={`file-upload drop-zone ${isDropActive ? "dragging" : ""}`}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-              >
-                <input
-                  type="file"
-                  id="content-file-input"
-                  accept={type === "video" ? "video/*" : type === "audio" ? "audio/*" : "image/*"}
-                  onChange={e => handleFileChange(e.target.files[0])}
-                  required
-                  className="form-file-input"
-                />
-                <div className="drop-help">Drop files here or click to browse</div>
-                {file && (
-                  <div className="file-info">
-                    Selected file: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          {file && (
-            <div className="form-group preview-area">
-              <label>Live Preview</label>
-              <div className="preview-wrapper">
-                {type === "video" ? (
-                  <video
-                    ref={videoRef}
-                    src={previewUrl}
-                    controls
-                    className="preview-video"
-                    style={{ filter: selectedFilter?.css ? sanitizeCSS(selectedFilter.css) : "" }}
-                    onLoadedMetadata={ev => {
-                      const dur = ev.target.duration || 0;
-                      setDuration(dur);
-                      setTrimEnd(dur);
-                    }}
-                  />
-                ) : type === "audio" ? (
-                  <audio
-                    src={previewUrl}
-                    controls
-                    style={{
-                      width: "100%",
-                      filter: selectedFilter?.css ? sanitizeCSS(selectedFilter.css) : "",
-                    }}
-                    onLoadedMetadata={ev => {
-                      const dur = ev.target.duration || 0;
-                      setDuration(dur);
-                      setTrimEnd(dur);
-                    }}
-                  />
-                ) : (
-                  <img className="preview-image" src={previewUrl} alt="Content preview" />
-                )}
-              </div>
-              {overlayText && (
-                <div className={`preview-overlay ${overlayPosition}`}>
-                  <div className="overlay-text">{overlayText}</div>
-                </div>
-              )}
-              <div className="preview-controls">
-                {type === "video" ? (
-                  <div className="video-controls">
-                    <div className="trim-row">
-                      <label>
-                        Trim Start:{" "}
-                        <input
-                          type="number"
-                          min={0}
-                          max={duration}
-                          step="0.1"
-                          value={trimStart}
-                          onChange={e => setTrimStart(parseFloat(e.target.value) || 0)}
-                        />{" "}
-                        secs
-                      </label>
-                      <label>
-                        Trim End:{" "}
-                        <input
-                          type="number"
-                          min={0}
-                          max={duration}
-                          step="0.1"
-                          value={trimEnd}
-                          onChange={e => setTrimEnd(parseFloat(e.target.value) || duration)}
-                        />{" "}
-                        secs
-                      </label>
-                    </div>
-                    <div className="range-row">
-                      {/* BOUNTY BADGE ON PREVIEW */}
-                      {bountyAmount > 0 && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "10px",
-                            right: "10px",
-                            background: "linear-gradient(90deg, #ffd700, #b8860b)",
-                            color: "#000",
-                            padding: "4px 8px",
-                            borderRadius: "4px",
-                            fontWeight: "bold",
-                            fontSize: "0.8rem",
-                            boxShadow: "0 2px 4px rgba(0,0,0,0.5)",
-                            zIndex: 10,
-                          }}
-                        >
-                          🏆 ${bountyAmount} Bounty
-                        </div>
-                      )}
-
-                      <input
-                        type="range"
-                        min="0"
-                        max={duration}
-                        step="0.05"
-                        value={trimStart}
-                        onChange={e => setTrimStart(parseFloat(e.target.value))}
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max={duration}
-                        step="0.05"
-                        value={trimEnd}
-                        onChange={e => setTrimEnd(parseFloat(e.target.value))}
-                      />
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          )}
-          <div className="right-column">
-            <div className="form-group">
-              <label>Templates</label>
-              <select
-                value={template}
-                onChange={e => setTemplate(e.target.value)}
-                className="form-select"
-              >
-                <option value="none">No Template</option>
-                <option value="tiktok">TikTok (9:16)</option>
-                <option value="instagram-story">Instagram Story (9:16)</option>
-                <option value="facebook-feed">Facebook Feed (4:5)</option>
-                <option value="youtube">YouTube (16:9)</option>
-                <option value="thumbnail">Platform Thumbnail</option>
+              <label>Content Type</label>
+              <select value={type} onChange={e => setType(e.target.value)} className="form-select">
+                <option value="video">Video</option>
+                <option value="image">Image</option>
+                <option value="audio">Audio</option>
               </select>
-              {template !== "none" && (
-                <div className="template-hint">
-                  Template <strong>{template}</strong> will prefill recommended aspect ratio and
-                  tags
-                </div>
-              )}
-              {template !== "none" && (
-                <button
-                  type="button"
-                  onClick={() => applyTemplate(template)}
-                  className="apply-template-btn"
-                >
-                  Apply Template
-                </button>
-              )}
             </div>
-            <BestTimeToPost selectedPlatforms={selectedPlatformsVal} />
-
-            {/* NEW: Sci-Fi Optimization Controls */}
-            <div
-              className="sci-fi-controls"
-              style={{
-                marginBottom: "1rem",
-                padding: "1rem",
-                border: "1px solid #1f2937",
-                borderRadius: "8px",
-                background: "rgba(17, 24, 39, 0.7)",
-                backdropFilter: "blur(10px)",
-                boxShadow: "0 0 15px rgba(0, 255, 255, 0.05)",
-              }}
-            >
-              <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={enhanceQuality}
-                    onChange={e => setEnhanceQuality(e.target.checked)}
-                    style={{ accentColor: "#00f2ea" }}
-                  />
-                  <span style={{ color: "#eef2ff", fontWeight: 600 }}>
-                    <span style={{ marginRight: "5px" }}>✨</span>
-                    AI Content Enhancement
-                  </span>
-                </label>
-
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={optimizeViral}
-                    onChange={e => setOptimizeViral(e.target.checked)}
-                    style={{ accentColor: "#e1306c" }}
-                  />
-                  <span style={{ color: "#eef2ff", fontWeight: 600 }}>
-                    <span style={{ marginRight: "5px" }}>🚀</span>
-                    Upload Now, Publish at Peak
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>🎯 Target Platforms</label>
-              <div className="platform-grid">
-                {[
-                  "youtube",
-                  "tiktok",
-                  "instagram",
-                  "facebook",
-                  "twitter",
-                  "linkedin",
-                  "reddit",
-                  "discord",
-                  "telegram",
-                  "pinterest",
-                  "spotify",
-                  "snapchat",
-                ].map(p => {
-                  const disabled =
-                    p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false;
-                  return (
-                    <div
-                      key={p}
-                      role="button"
-                      tabIndex={0}
-                      aria-expanded={expandedPlatform === p}
-                      aria-label={p.charAt(0).toUpperCase() + p.slice(1)}
-                      onKeyDown={e => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          if (!disabled) {
-                            const nextExpand = expandedPlatform === p ? null : p;
-                            setExpandedPlatform(nextExpand);
-                            if (typeof extSetSelectedPlatforms === "function") {
-                              const current = Array.isArray(extSelectedPlatforms)
-                                ? extSelectedPlatforms
-                                : [];
-                              const isSel = current.includes(p);
-                              extSetSelectedPlatforms(
-                                isSel ? current.filter(x => x !== p) : [...current, p]
-                              );
-                            } else {
-                              setSelectedPlatforms(prev => {
-                                const curr = Array.isArray(prev) ? prev : [];
-                                const isSel = curr.includes(p);
-                                return isSel ? curr.filter(x => x !== p) : [...curr, p];
-                              });
-                            }
-                          }
-                        }
-                      }}
-                      className={`platform-card ${expandedPlatform === p ? "expanded" : ""} ${disabled ? "disabled" : ""}`}
-                      onClick={() => {
-                        if (!disabled) {
-                          const nextExpand = expandedPlatform === p ? null : p;
-                          setExpandedPlatform(nextExpand);
-                          if (typeof extSetSelectedPlatforms === "function") {
-                            const current = Array.isArray(extSelectedPlatforms)
-                              ? extSelectedPlatforms
-                              : [];
-                            const isSel = current.includes(p);
-                            extSetSelectedPlatforms(
-                              isSel ? current.filter(x => x !== p) : [...current, p]
-                            );
-                          } else {
-                            setSelectedPlatforms(prev => {
-                              const curr = Array.isArray(prev) ? prev : [];
-                              const isSel = curr.includes(p);
-                              return isSel ? curr.filter(x => x !== p) : [...curr, p];
-                            });
-                          }
-                        } else setError("This TikTok account cannot post via third-party apps.");
-                      }}
-                    >
-                      <div className="platform-icon" aria-hidden="true">
-                        {getPlatformIcon(p)}
+            <div className={`content-upload-grid ${file ? "has-file" : ""}`}>
+              <div className="left-column">
+                <div className="form-group">
+                  <label htmlFor="content-file-input">File</label>
+                  <div
+                    data-testid="drop-zone"
+                    className={`file-upload drop-zone ${isDropActive ? "dragging" : ""}`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                  >
+                    <input
+                      type="file"
+                      id="content-file-input"
+                      accept={
+                        type === "video" ? "video/*" : type === "audio" ? "audio/*" : "image/*"
+                      }
+                      onChange={e => handleFileChange(e.target.files[0])}
+                      required
+                      className="form-file-input"
+                    />
+                    <div className="drop-help">Drop files here or click to browse</div>
+                    {file && (
+                      <div className="file-info">
+                        Selected file: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-                        <div
+                    )}
+                  </div>
+                </div>
+                {file && (
+                  <div className="form-group preview-area">
+                    <label>Live Preview</label>
+                    <div className="preview-wrapper">
+                      {type === "video" ? (
+                        <video
+                          ref={videoRef}
+                          src={previewUrl}
+                          controls
+                          className="preview-video"
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
+                            filter: selectedFilter?.css ? sanitizeCSS(selectedFilter.css) : "",
+                          }}
+                          onLoadedMetadata={ev => {
+                            const dur = ev.target.duration || 0;
+                            setDuration(dur);
+                            setTrimEnd(dur);
+                          }}
+                        />
+                      ) : type === "audio" ? (
+                        <audio
+                          src={previewUrl}
+                          controls
+                          style={{
                             width: "100%",
+                            filter: selectedFilter?.css ? sanitizeCSS(selectedFilter.css) : "",
+                          }}
+                          onLoadedMetadata={ev => {
+                            const dur = ev.target.duration || 0;
+                            setDuration(dur);
+                            setTrimEnd(dur);
+                          }}
+                        />
+                      ) : (
+                        <img className="preview-image" src={previewUrl} alt="Content preview" />
+                      )}
+                    </div>
+                    {overlayText && (
+                      <div className={`preview-overlay ${overlayPosition}`}>
+                        <div className="overlay-text">{overlayText}</div>
+                      </div>
+                    )}
+                    <div className="preview-controls">
+                      {/* GLOBAL EDITOR & TOOLS */}
+                      <div style={{ display: "flex", gap: 10, marginBottom: 15, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={() => setShowVideoEditor(true)}
+                          style={{ background: "#444", color: "#fff", border: "1px solid #666" }}
+                        >
+                          ✂️ Open Editor
+                        </button>
+
+                        {type === "images" && sourceFiles.length > 0 && (
+                          <span style={{ fontSize: "0.9rem", alignSelf: "center" }}>
+                            Creating Slideshow from {sourceFiles.length} images
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Video Editor Modal (Global) */}
+                      {showVideoEditor && (
+                        <div
+                          className="modal-overlay"
+                          style={{
+                            zIndex: 9999,
+                            position: "fixed",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            background: "rgba(0,0,0,0.8)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
                           }}
                         >
-                          <div>
-                            <div className="platform-name">
-                              {p.charAt(0).toUpperCase() + p.slice(1)}
-                              {/* Peak Time Indicator */}
-                              {getPeakStatus(p) && (
-                                <span
-                                  style={{
-                                    marginLeft: "8px",
-                                    fontSize: "0.65rem",
-                                    padding: "2px 6px",
-                                    borderRadius: "12px",
-                                    backgroundColor: "rgba(0,0,0,0.4)",
-                                    color: getPeakStatus(p).color,
-                                    border: `1px solid ${getPeakStatus(p).color}`,
-                                    boxShadow: getPeakStatus(p).glow,
-                                    fontWeight: "bold",
-                                    textTransform: "uppercase",
-                                  }}
-                                >
-                                  {getPeakStatus(p).label}
-                                </span>
-                              )}
-                            </div>
-                            {disabled ? (
-                              <div
-                                className="platform-guideline"
-                                style={{ fontSize: 11, color: "#b66" }}
-                              >
-                                Cannot post via third-party apps
-                              </div>
-                            ) : (
-                              platformGuidelines[p] && (
-                                <div
-                                  className="platform-guideline"
-                                  style={{ fontSize: 11, color: "#6b7280" }}
-                                >
-                                  {platformGuidelines[p].summary.replace(
-                                    "dynamic",
-                                    p === "tiktok" &&
-                                      tiktokCreatorInfo &&
-                                      tiktokCreatorInfo.max_video_post_duration_sec
-                                      ? `${tiktokCreatorInfo.max_video_post_duration_sec}s`
-                                      : ""
-                                  )}
-                                </div>
-                              )
-                            )}
-                          </div>
-                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                            {/* Quality Check Button on Card */}
-                            <button
-                              type="button"
-                              onClick={e => {
-                                e.stopPropagation();
-                                handlePlatformQualityCheck(p);
-                              }}
-                              style={{
-                                fontSize: "10px",
-                                padding: "2px 6px",
-                                border: "1px solid #ddd",
-                                background: "#f9fafb",
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                                marginRight: "4px",
-                              }}
-                              title="Run automated quality and safety check"
-                            >
-                              🛡️ Check
-                            </button>
-                            <div
-                              className="open-platform-indicator"
-                              style={{ fontSize: 12, color: "#374151" }}
-                            >
-                              {expandedPlatform === p ? "Close" : "Open"}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Sci-Fi Algorithm Intel - Displayed when Expanded */}
-                        {expandedPlatform === p && !disabled && (
                           <div
+                            className="modal"
                             style={{
-                              marginTop: "12px",
-                              padding: "12px",
-                              background: "rgba(10, 20, 35, 0.9)",
-                              border: "1px solid #00f2ea",
-                              borderRadius: "8px",
-                              color: "#e0f7fa",
-                              boxShadow: "0 0 12px rgba(0, 242, 234, 0.15)",
-                              fontSize: "0.85rem",
-                              animation: "fadeIn 0.3s ease-in-out",
-                              backdropFilter: "blur(4px)",
+                              maxWidth: "800px",
+                              width: "95%",
+                              maxHeight: "90vh",
+                              overflowY: "auto",
+                              background: "#222",
+                              padding: 20,
+                              borderRadius: 8,
                             }}
-                            onClick={e => e.stopPropagation()} // Prevent card collapse when clicking inside intel
                           >
                             <div
                               style={{
                                 display: "flex",
                                 justifyContent: "space-between",
-                                marginBottom: "10px",
-                                borderBottom: "1px solid rgba(0, 242, 234, 0.3)",
-                                paddingBottom: "6px",
+                                marginBottom: 15,
+                                borderBottom: "1px solid #444",
+                                paddingBottom: 10,
                               }}
                             >
-                              <strong
-                                style={{
-                                  color: "#00f2ea",
-                                  textTransform: "uppercase",
-                                  letterSpacing: "0.5px",
-                                  fontSize: "0.8rem",
-                                }}
-                              >
-                                Algorithm Intel
-                              </strong>
-                              <span
-                                style={{
-                                  fontSize: "0.7rem",
-                                  opacity: 0.8,
-                                  color: "#a5f3fc",
-                                  fontFamily: "monospace",
-                                }}
-                              >
-                                LIVE_ANALYSIS_V2
-                              </span>
-                            </div>
-
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns: "1fr 1fr",
-                                gap: "12px",
-                                marginBottom: "10px",
-                              }}
-                            >
-                              <div>
-                                <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
-                                  Audience Potential
-                                </div>
-                                <div
-                                  style={{ fontWeight: "bold", color: "#fff", fontSize: "0.95rem" }}
-                                >
-                                  {getAlgorithmIntel(p).audience}
-                                </div>
-                              </div>
-                              <div>
-                                <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
-                                  Viral Probability
-                                </div>
-                                <div
-                                  style={{
-                                    height: "6px",
-                                    background: "rgba(255,255,255,0.1)",
-                                    borderRadius: "3px",
-                                    marginTop: "6px",
-                                    overflow: "hidden",
-                                  }}
-                                >
-                                  {/* Bounty Boost to Viral Probability */}
-                                  <div
-                                    style={{
-                                      width: `${Math.min(100, getAlgorithmIntel(p).viral + (bountyAmount > 0 ? 15 : 0))}%`,
-                                      height: "100%",
-                                      borderRadius: "3px",
-                                      background:
-                                        bountyAmount > 0
-                                          ? `linear-gradient(90deg, #ffd700, #ff4500)` // Gold/Red fire for Bounty
-                                          : `linear-gradient(90deg, #00f2ea, #3b82f6)`,
-                                      boxShadow: bountyAmount > 0 ? "0 0 8px #ffd700" : "none",
-                                    }}
-                                  ></div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div style={{ marginBottom: "10px" }}>
-                              <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>The Secret</div>
-                              <div style={{ color: "#fff", fontStyle: "italic" }}>
-                                "{getAlgorithmIntel(p).secret}"
-                              </div>
-                            </div>
-
-                            <div
-                              style={{
-                                background: "rgba(59, 130, 246, 0.1)",
-                                padding: "8px",
-                                borderRadius: "4px",
-                                borderLeft: "2px solid #3b82f6",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  fontSize: "0.7rem",
-                                  color: "#60a5fa",
-                                  marginBottom: "2px",
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                FORMAT ADVICE
-                              </div>
-                              <div style={{ fontSize: "0.8rem" }}>{getAlgorithmIntel(p).tips}</div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-                {/* Inline expanded area below grid to show per-platform options for the expandedPlatform */}
-                {expandedPlatform && (
-                  <div
-                    className="platform-expanded"
-                    style={{
-                      marginTop: 12,
-                      padding: 12,
-                      border: "1px solid #eee",
-                      borderRadius: 8,
-                      background: "#fff",
-                    }}
-                  >
-                    <h4 style={{ margin: "0 0 8px 0" }}>
-                      {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)} Options
-                    </h4>
-
-                    {onNavigate && (
-                      <div
-                        style={{
-                          background: "#f0f9ff",
-                          border: "1px solid #bae6fd",
-                          padding: "10px",
-                          borderRadius: "6px",
-                          marginBottom: "12px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <span style={{ fontSize: "13px", color: "#0369a1" }}>
-                          💡 Want to upload to more platforms at once? Connect them now!
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => onNavigate("connections")}
-                          style={{
-                            background: "#0284c7",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            padding: "4px 10px",
-                            fontSize: "12px",
-                            cursor: "pointer",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Connect Accounts
-                        </button>
-                      </div>
-                    )}
-
-                    {platformGuidelines[expandedPlatform] && (
-                      <div style={{ marginBottom: 8, fontSize: 13, color: "#374151" }}>
-                        <strong>Quick Guidelines:</strong>
-                        <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
-                          {platformGuidelines[expandedPlatform].summary.replace(
-                            "dynamic",
-                            expandedPlatform === "tiktok" &&
-                              tiktokCreatorInfo &&
-                              tiktokCreatorInfo.max_video_post_duration_sec
-                              ? `${tiktokCreatorInfo.max_video_post_duration_sec}s`
-                              : ""
-                          )}
-                        </div>
-                        <ul style={{ marginTop: 8 }}>
-                          {platformGuidelines[expandedPlatform].details.map((d, idx) => (
-                            <li key={idx} style={{ fontSize: 13, color: "#374151" }}>
-                              {d.replace(
-                                "max duration",
-                                expandedPlatform === "tiktok" &&
-                                  tiktokCreatorInfo &&
-                                  tiktokCreatorInfo.max_video_post_duration_sec
-                                  ? `max: ${tiktokCreatorInfo.max_video_post_duration_sec}s`
-                                  : d
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {/* Per-platform inputs: file, title, description (defaults to global if empty) */}
-
-                    {/* Professional Forms Integration */}
-                    {/* File Override is now handled inside the specific PlatformForm components */}
-
-                    {/* Specialized Forms for Top Platforms */}
-                    {expandedPlatform === "tiktok" ? (
-                      <>
-                        <TikTokForm
-                          type={type}
-                          onFileChange={f => handlePerPlatformFileChange("tiktok", f)}
-                          currentFile={perPlatformFile?.tiktok}
-                          onChange={handleTikTokChange}
-                          initialData={extPlatformOptions?.tiktok}
-                          creatorInfo={tiktokCreatorInfo}
-                          globalTitle={title}
-                          globalDescription={description}
-                          bountyAmount={bountyAmount}
-                          setBountyAmount={setBountyAmount}
-                          bountyNiche={bountyNiche}
-                          setBountyNiche={setBountyNiche}
-                          protocol7Enabled={protocol7Enabled}
-                          setProtocol7Enabled={setProtocol7Enabled}
-                          protocol7Volatility={protocol7Volatility}
-                          setProtocol7Volatility={setProtocol7Volatility}
-                        />
-                        {renderBestTimeForPlatform("tiktok")}
-                      </>
-                    ) : expandedPlatform === "youtube" ? (
-                      <>
-                        <YouTubeForm
-                          creatorInfo={extPlatformMetadata?.youtube}
-                          onFileChange={f => handlePerPlatformFileChange("youtube", f)}
-                          currentFile={perPlatformFile?.youtube}
-                          onChange={handleYouTubeChange}
-                          initialData={{
-                            ...extPlatformOptions?.youtube,
-                            shortsMode: youtubeShorts,
-                            privacy: youtubeVisibility || extPlatformOptions?.youtube?.privacy,
-                          }}
-                          globalTitle={title}
-                          globalDescription={description}
-                          bountyAmount={bountyAmount}
-                          setBountyAmount={setBountyAmount}
-                          bountyNiche={bountyNiche}
-                          setBountyNiche={setBountyNiche}
-                        />
-                        {renderBestTimeForPlatform("youtube")}
-                      </>
-                    ) : expandedPlatform === "facebook" ? (
-                      <>
-                        <FacebookForm
-                          onFileChange={f => handlePerPlatformFileChange("facebook", f)}
-                          currentFile={perPlatformFile?.facebook}
-                          onChange={handleFacebookChange}
-                          initialData={extPlatformOptions?.facebook}
-                          globalTitle={title}
-                          globalDescription={description}
-                          pages={facebookPages || []}
-                        />
-                        {renderBestTimeForPlatform("facebook")}
-                      </>
-                    ) : expandedPlatform === "linkedin" ? (
-                      <>
-                        <LinkedInForm
-                          onFileChange={f => handlePerPlatformFileChange("linkedin", f)}
-                          currentFile={perPlatformFile?.linkedin}
-                          onChange={handleLinkedInChange}
-                          initialData={{
-                            ...extPlatformOptions?.linkedin,
-                            companyId: linkedinCompanyId,
-                          }}
-                          globalTitle={title}
-                          globalDescription={description}
-                        />
-                        {renderBestTimeForPlatform("linkedin")}
-                      </>
-                    ) : expandedPlatform === "pinterest" ? (
-                      <>
-                        <PinterestForm
-                          onFileChange={f => handlePerPlatformFileChange("pinterest", f)}
-                          currentFile={perPlatformFile?.pinterest}
-                          onChange={handlePinterestChange}
-                          initialData={{
-                            ...extPlatformOptions?.pinterest,
-                            boardId: pinterestBoard || extPlatformOptions?.pinterest?.boardId,
-                          }}
-                          globalTitle={title}
-                          globalDescription={description}
-                          boards={pinterestBoards || []}
-                        />
-                        {renderBestTimeForPlatform("pinterest")}
-                      </>
-                    ) : expandedPlatform === "instagram" ? (
-                      <>
-                        <InstagramForm
-                          onFileChange={f => handlePerPlatformFileChange("instagram", f)}
-                          currentFile={perPlatformFile?.instagram}
-                          facebookPages={facebookPages || []}
-                          instagramBusinessAccountId={instagramBusinessAccountId}
-                          onChange={handleInstagramChange}
-                          initialData={extPlatformOptions?.instagram}
-                          globalTitle={title}
-                          globalDescription={description}
-                          bountyAmount={bountyAmount}
-                          setBountyAmount={setBountyAmount}
-                          bountyNiche={bountyNiche}
-                          setBountyNiche={setBountyNiche}
-                        />
-                        {renderBestTimeForPlatform("instagram")}
-                      </>
-                    ) : expandedPlatform === "reddit" ? (
-                      <>
-                        <RedditForm
-                          onChange={handleRedditChange}
-                          initialData={extPlatformOptions?.reddit}
-                          globalTitle={title}
-                          globalDescription={description}
-                        />
-                        {renderBestTimeForPlatform("reddit")}
-                      </>
-                    ) : expandedPlatform === "spotify" ? (
-                      <>
-                        <SpotifyForm
-                          data={extPlatformOptions?.spotify || spotifySettings}
-                          onChange={handleSpotifyChange}
-                          selectedTracks={extSpotifySelectedTracks || spotifyTracks}
-                          onTrackSelect={handleSpotifyTrackSelect}
-                          onTrackRemove={handleSpotifyTrackRemove}
-                          campaignMode={true}
-                        />
-                        {renderBestTimeForPlatform("spotify")}
-                      </>
-                    ) : (
-                      /* Fallback Generic Form */
-                      <div
-                        className="per-platform-form"
-                        style={{ marginTop: 8, display: "grid", gap: 8 }}
-                      >
-                        <label style={{ fontWeight: 700 }}>
-                          Upload for{" "}
-                          {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)}
-                        </label>
-                        {renderBestTimeForPlatform(expandedPlatform)}
-                        <input
-                          aria-label={`Platform title ${expandedPlatform}`}
-                          placeholder="Title"
-                          className="form-input"
-                          value={perPlatformTitle[expandedPlatform] || title}
-                          onChange={e =>
-                            setPerPlatformTitle(prev => ({
-                              ...prev,
-                              [expandedPlatform]: e.target.value,
-                            }))
-                          }
-                        />
-                        <textarea
-                          aria-label={`Platform description ${expandedPlatform}`}
-                          placeholder="Description"
-                          className="form-input"
-                          value={perPlatformDescription[expandedPlatform] || description}
-                          onChange={e =>
-                            setPerPlatformDescription(prev => ({
-                              ...prev,
-                              [expandedPlatform]: e.target.value,
-                            }))
-                          }
-                        />
-                      </div>
-                    )}
-                    {expandedPlatform === "discord" && (
-                      <DiscordForm
-                        onChange={data => {
-                          const { platform, ...vals } = data;
-                          if (typeof extSetPlatformOption === "function") {
-                            extSetPlatformOption(platform, "channelId", vals.channelId);
-                          }
-                          // Local Sync
-                          if (vals.channelId !== undefined) setDiscordChannelId(vals.channelId);
-                        }}
-                        initialData={{ channelId: discordChannelId }}
-                      />
-                    )}
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
-                      <button
-                        type="button"
-                        className="preview-button"
-                        onClick={() => handlePlatformPreview(expandedPlatform)}
-                        disabled={
-                          !((perPlatformFile && perPlatformFile[expandedPlatform]) || file) ||
-                          perPlatformUploading[expandedPlatform]
-                        }
-                      >
-                        Preview
-                      </button>
-                      <button
-                        type="button"
-                        className="quality-check-button"
-                        onClick={() => handlePlatformQualityCheck(expandedPlatform)}
-                        disabled={
-                          perPlatformQuality[expandedPlatform] &&
-                          perPlatformQuality[expandedPlatform].loading
-                        }
-                      >
-                        Quality Check
-                      </button>
-                      <button
-                        type="button"
-                        className="submit-button"
-                        onClick={() => handlePlatformUpload(expandedPlatform)}
-                        disabled={
-                          !((perPlatformFile && perPlatformFile[expandedPlatform]) || file) ||
-                          perPlatformUploading[expandedPlatform] ||
-                          perPlatformQuality[expandedPlatform]?.result?.moderation?.safe ===
-                            false ||
-                          (expandedPlatform === "tiktok" &&
-                            tiktokCommercial &&
-                            tiktokCommercial.isCommercial &&
-                            !tiktokCommercial.yourBrand &&
-                            !tiktokCommercial.brandedContent) ||
-                          (expandedPlatform === "tiktok" && tiktokConsentChecked === false)
-                        }
-                      >
-                        Upload to{" "}
-                        {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)}
-                      </button>
-                    </div>
-                    {perPlatformPreviews[expandedPlatform] && (
-                      <div style={{ marginTop: 8 }} className="preview-cards">
-                        {perPlatformPreviews[expandedPlatform].map((p, idx) => (
-                          <div
-                            key={idx}
-                            className="preview-card"
-                            style={{
-                              border: "1px solid #ccc",
-                              borderRadius: 8,
-                              padding: "1rem",
-                              minWidth: 220,
-                              maxWidth: 320,
-                              background: "#f9fafb",
-                            }}
-                          >
-                            <h5>
-                              {p.platform
-                                ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
-                                : "Preview"}
-                            </h5>
-                            {/* Smart Frame Intelligence Preview */}
-                            <div
-                              className="smart-frame-wrapper"
-                              style={{
-                                width: "100%",
-                                height: 400 /* Taller for vertical preview */,
-                                marginBottom: 12,
-                                borderRadius: 8,
-                                overflow: "hidden",
-                                background: "#000",
-                                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                              }}
-                            >
-                              <SmartFrameOverlay
-                                src={p.mediaUrl || p.thumbnail || DEFAULT_THUMBNAIL}
-                                mediaType={
-                                  p.mediaType ||
-                                  (file && file.type.startsWith("video") ? "video" : "image")
-                                }
-                                platform={p.platform || expandedPlatform}
-                                showSafeZones={true}
-                                enableHighQuality={enhanceQuality}
-                              />
-                            </div>
-
-                            <div style={{ padding: "0 4px" }}>
-                              <div style={{ marginBottom: 4 }}>
-                                <strong>Title:</strong>{" "}
-                                {p.title || title || (file ? file.name : "Untitled")}
-                              </div>
-                              <div style={{ marginBottom: 8 }}>
-                                <strong>Description:</strong>{" "}
-                                {p.description || description || "No description"}
-                              </div>
-                            </div>
-
-                            <div style={{ marginTop: 8 }}>
+                              <h3 style={{ margin: 0 }}>Media Editor</h3>
                               <button
-                                type="button"
-                                className="edit-platform-btn"
-                                onClick={() => openPreviewEdit(p)}
-                                aria-label={`Edit preview ${p.platform || ""}`}
+                                onClick={() => setShowVideoEditor(false)}
+                                style={{
+                                  background: "transparent",
+                                  border: "none",
+                                  fontSize: "1.5rem",
+                                  cursor: "pointer",
+                                  color: "#fff",
+                                }}
                               >
-                                Edit Metadata
+                                ×
                               </button>
                             </div>
+                            <VideoEditor
+                              file={file}
+                              images={sourceFiles}
+                              onSave={newFile => {
+                                handleFileChange(newFile);
+                                setShowVideoEditor(false);
+                                // Update preview URL immediately
+                                const newUrl =
+                                  newFile.url ||
+                                  (newFile instanceof File || newFile instanceof Blob
+                                    ? URL.createObjectURL(newFile)
+                                    : "");
+                                if (newUrl) setPreviewUrl(newUrl);
+                              }}
+                              onCancel={() => setShowVideoEditor(false)}
+                            />
                           </div>
-                        ))}
-                      </div>
-                    )}
-                    {perPlatformQuality[expandedPlatform] &&
-                      perPlatformQuality[expandedPlatform].result && (
-                        <div style={{ marginTop: 8 }} className="quality-check-mini">
-                          <div>
-                            Score: {perPlatformQuality[expandedPlatform].result.quality_score}/100
-                          </div>
-                          {perPlatformQuality[expandedPlatform].result.feedback &&
-                            perPlatformQuality[expandedPlatform].result.feedback.length > 0 && (
-                              <ul
-                                style={{
-                                  margin: "4px 0",
-                                  paddingLeft: "20px",
-                                  fontSize: "12px",
-                                  color: "#d97706",
-                                }}
-                              >
-                                {perPlatformQuality[expandedPlatform].result.feedback.map(
-                                  (f, i) => (
-                                    <li key={i}>{f}</li>
-                                  )
-                                )}
-                              </ul>
-                            )}
                         </div>
                       )}
-                    {perPlatformUploadStatus[expandedPlatform] && (
-                      <div
-                        style={{ marginTop: 8, fontSize: 13, color: "#374151" }}
-                        className="platform-upload-status"
-                      >
-                        {perPlatformUploadStatus[expandedPlatform]}
-                      </div>
-                    )}
-                    {perPlatformUploadResponse[expandedPlatform] && (
-                      <div
-                        style={{
-                          marginTop: 8,
-                          padding: 8,
-                          background: "#f3f4f6",
-                          borderRadius: 6,
-                          border: "1px solid #e5e7eb",
-                          fontSize: 13,
-                        }}
-                      >
-                        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                          <strong style={{ fontSize: 13 }}>Platform Response</strong>
-                          <button
-                            onClick={() => copyUploadResponse(expandedPlatform)}
-                            style={{
-                              background: "#111827",
-                              color: "#fff",
-                              border: "none",
-                              padding: "4px 8px",
-                              borderRadius: 4,
-                              cursor: "pointer",
-                              fontSize: 12,
-                            }}
-                          >
-                            Copy
-                          </button>
-                        </div>
-                        <pre
-                          style={{
-                            whiteSpace: "pre-wrap",
-                            wordBreak: "break-word",
-                            marginTop: 8,
-                            maxHeight: 160,
-                            overflow: "auto",
-                            fontSize: 12,
-                          }}
-                        >
-                          {JSON.stringify(perPlatformUploadResponse[expandedPlatform], null, 2)}
-                        </pre>
-                      </div>
-                    )}
-                    {expandedPlatform === "telegram" && (
-                      <TelegramForm
-                        onChange={data => {
-                          const { platform, ...vals } = data;
-                          if (typeof extSetPlatformOption === "function") {
-                            extSetPlatformOption(platform, "chatId", vals.chatId);
-                          }
-                          // Local Sync
-                          if (vals.chatId !== undefined) setTelegramChatId(vals.chatId);
-                        }}
-                        initialData={{ chatId: telegramChatId }}
-                      />
-                    )}
 
-                    {expandedPlatform === "twitter" && (
-                      <TwitterForm
-                        onFileChange={f => handlePerPlatformFileChange("twitter", f)}
-                        currentFile={perPlatformFile?.twitter}
-                        onChange={handleTwitterChange}
-                        initialData={{
-                          message: twitterMessage,
-                          threadMode: twitterSettings.threadMode,
-                        }}
-                      />
-                    )}
-
-                    {expandedPlatform === "spotify" && (
-                      <div className="spotify-search-inline">
-                        <label
-                          style={{
-                            display: "block",
-                            fontSize: 12,
-                            fontWeight: 700,
-                            marginBottom: 4,
-                            color: "#1DB954",
-                          }}
-                        >
-                          Search Spotify Catalog
-                        </label>
-                        <SpotifyTrackSearch
-                          selectedTracks={
-                            Array.isArray(extSpotifySelectedTracks)
-                              ? extSpotifySelectedTracks
-                              : spotifyTracks
-                          }
-                          onChangeTracks={list => {
-                            if (typeof extSetSpotifySelectedTracks === "function")
-                              extSetSpotifySelectedTracks(list);
-                            else setSpotifyTracks(list);
-                          }}
-                        />
-                      </div>
-                    )}
-                    {expandedPlatform === "snapchat" && <SnapchatForm onChange={() => {}} />}
-                    {expandedPlatform === "youtube" && (
-                      <div style={{ display: "grid", gap: 8 }}>
-                        {perPlatformPreviews["youtube"] && (
-                          <div style={{ marginTop: 8 }} className="preview-cards">
-                            {perPlatformPreviews["youtube"].map((p, idx) => (
+                      {type === "video" ? (
+                        <div className="video-controls">
+                          <div className="trim-row">
+                            <label>
+                              Trim Start:{" "}
+                              <input
+                                type="number"
+                                min={0}
+                                max={duration}
+                                step="0.1"
+                                value={trimStart}
+                                onChange={e => setTrimStart(parseFloat(e.target.value) || 0)}
+                              />{" "}
+                              secs
+                            </label>
+                            <label>
+                              Trim End:{" "}
+                              <input
+                                type="number"
+                                min={0}
+                                max={duration}
+                                step="0.1"
+                                value={trimEnd}
+                                onChange={e => setTrimEnd(parseFloat(e.target.value) || duration)}
+                              />{" "}
+                              secs
+                            </label>
+                          </div>
+                          <div className="range-row">
+                            {/* BOUNTY BADGE ON PREVIEW */}
+                            {bountyAmount > 0 && (
                               <div
-                                key={idx}
-                                className="preview-card"
                                 style={{
-                                  border: "1px solid #ccc",
-                                  borderRadius: 8,
-                                  padding: "1rem",
-                                  minWidth: 220,
-                                  maxWidth: 320,
-                                  background: "#f9fafb",
+                                  position: "absolute",
+                                  top: "10px",
+                                  right: "10px",
+                                  background: "linear-gradient(90deg, #ffd700, #b8860b)",
+                                  color: "#000",
+                                  padding: "4px 8px",
+                                  borderRadius: "4px",
+                                  fontWeight: "bold",
+                                  fontSize: "0.8rem",
+                                  boxShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                                  zIndex: 10,
                                 }}
                               >
-                                <h5>
-                                  {p.platform
-                                    ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
-                                    : "Preview"}
-                                </h5>
-                                {p.mediaType === "video" ? (
-                                  <video
-                                    aria-label="Preview media"
-                                    src={p.mediaUrl || p.thumbnail}
-                                    controls
-                                    style={{
-                                      width: "100%",
-                                      height: 120,
-                                      objectFit: "cover",
-                                      borderRadius: 6,
-                                    }}
-                                  />
-                                ) : (
-                                  <img
-                                    aria-label="Preview media"
-                                    src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
-                                    onError={e => {
-                                      e.target.onerror = null;
-                                      e.target.src = DEFAULT_THUMBNAIL;
-                                    }}
-                                    alt="Preview Thumbnail"
-                                    style={{
-                                      width: "100%",
-                                      height: 120,
-                                      objectFit: "cover",
-                                      borderRadius: 6,
-                                    }}
-                                  />
+                                🏆 ${bountyAmount} Bounty
+                              </div>
+                            )}
+
+                            <input
+                              type="range"
+                              min="0"
+                              max={duration}
+                              step="0.05"
+                              value={trimStart}
+                              onChange={e => setTrimStart(parseFloat(e.target.value))}
+                            />
+                            <input
+                              type="range"
+                              min="0"
+                              max={duration}
+                              step="0.05"
+                              value={trimEnd}
+                              onChange={e => setTrimEnd(parseFloat(e.target.value))}
+                            />
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* End left-column */}
+              <div className="right-column">
+                <div className="form-group">
+                  <label>Templates</label>
+                  <select
+                    value={template}
+                    onChange={e => setTemplate(e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="none">No Template</option>
+                    <option value="tiktok">TikTok (9:16)</option>
+                    <option value="instagram-story">Instagram Story (9:16)</option>
+                    <option value="facebook-feed">Facebook Feed (4:5)</option>
+                    <option value="youtube">YouTube (16:9)</option>
+                    <option value="thumbnail">Platform Thumbnail</option>
+                  </select>
+                  {template !== "none" && (
+                    <div className="template-hint">
+                      Template <strong>{template}</strong> will prefill recommended aspect ratio and
+                      tags
+                    </div>
+                  )}
+                  {template !== "none" && (
+                    <button
+                      type="button"
+                      onClick={() => applyTemplate(template)}
+                      className="apply-template-btn"
+                    >
+                      Apply Template
+                    </button>
+                  )}
+                </div>
+                <BestTimeToPost selectedPlatforms={selectedPlatformsVal} />
+
+                {/* NEW: Sci-Fi Optimization Controls */}
+                <div
+                  className="sci-fi-controls"
+                  style={{
+                    marginBottom: "1rem",
+                    padding: "1rem",
+                    border: "1px solid #1f2937",
+                    borderRadius: "8px",
+                    background: "rgba(17, 24, 39, 0.7)",
+                    backdropFilter: "blur(10px)",
+                    boxShadow: "0 0 15px rgba(0, 255, 255, 0.05)",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={enhanceQuality}
+                        onChange={e => setEnhanceQuality(e.target.checked)}
+                        style={{ accentColor: "#00f2ea" }}
+                      />
+                      <span style={{ color: "#eef2ff", fontWeight: 600 }}>
+                        <span style={{ marginRight: "5px" }}>✨</span>
+                        AI Content Enhancement
+                      </span>
+                    </label>
+
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={optimizeViral}
+                        onChange={e => setOptimizeViral(e.target.checked)}
+                        style={{ accentColor: "#e1306c" }}
+                      />
+                      <span style={{ color: "#eef2ff", fontWeight: 600 }}>
+                        <span style={{ marginRight: "5px" }}>🚀</span>
+                        Upload Now, Publish at Peak
+                      </span>
+                    </label>
+
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={repostBoost}
+                        onChange={e => setRepostBoost(e.target.checked)}
+                        style={{ accentColor: "#b026ff" }}
+                      />
+                      <span style={{ color: "#eef2ff", fontWeight: 600 }}>
+                        <span style={{ marginRight: "5px" }}>🔄</span>
+                        Auto-Repost (Bot Network)
+                      </span>
+                    </label>
+
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={shareBoost}
+                        onChange={e => setShareBoost(e.target.checked)}
+                        style={{ accentColor: "#ffd700" }}
+                      />
+                      <span style={{ color: "#eef2ff", fontWeight: 600 }}>
+                        <span style={{ marginRight: "5px" }}>📢</span>
+                        Viral Share Blast
+                      </span>
+                    </label>
+                  </div>
+                </div>
+                {/* End right-column */}
+              </div>
+              {/* End content-upload-grid */}
+            </div>
+          </>
+        )}
+        <div className="form-group">
+          <label>🎯 Target Platforms</label>
+          <div className="platform-grid">
+            {[
+              "youtube",
+              "tiktok",
+              "instagram",
+              "facebook",
+              "twitter",
+              "linkedin",
+              "reddit",
+              "discord",
+              "telegram",
+              "pinterest",
+              "spotify",
+              "snapchat",
+            ].map(p => {
+              const disabled =
+                p === "tiktok" && tiktokCreatorInfo && tiktokCreatorInfo.can_post === false;
+              return (
+                <div
+                  key={p}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={expandedPlatform === p}
+                  aria-label={p.charAt(0).toUpperCase() + p.slice(1)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      if (!disabled) {
+                        const nextExpand = expandedPlatform === p ? null : p;
+                        setExpandedPlatform(nextExpand);
+                        if (typeof extSetSelectedPlatforms === "function") {
+                          const current = Array.isArray(extSelectedPlatforms)
+                            ? extSelectedPlatforms
+                            : [];
+                          const isSel = current.includes(p);
+                          extSetSelectedPlatforms(
+                            isSel ? current.filter(x => x !== p) : [...current, p]
+                          );
+                        } else {
+                          setSelectedPlatforms(prev => {
+                            const curr = Array.isArray(prev) ? prev : [];
+                            const isSel = curr.includes(p);
+                            return isSel ? curr.filter(x => x !== p) : [...curr, p];
+                          });
+                        }
+                      }
+                    }
+                  }}
+                  className={`platform-card ${expandedPlatform === p ? "expanded" : ""} ${disabled ? "disabled" : ""}`}
+                  onClick={() => {
+                    if (!disabled) {
+                      // Focus the platform to open the full-screen view
+                      setFocusedPlatform(p);
+
+                      // Also ensure it is selected/expanded for state consistency
+                      const nextExpand = expandedPlatform === p ? null : p;
+                      setExpandedPlatform(nextExpand);
+                      if (typeof extSetSelectedPlatforms === "function") {
+                        const current = Array.isArray(extSelectedPlatforms)
+                          ? extSelectedPlatforms
+                          : [];
+                        const isSel = current.includes(p);
+                        if (!isSel) {
+                          extSetSelectedPlatforms([...current, p]);
+                        }
+                      } else {
+                        setSelectedPlatforms(prev => {
+                          const curr = Array.isArray(prev) ? prev : [];
+                          const isSel = curr.includes(p);
+                          return isSel ? curr : [...curr, p];
+                        });
+                      }
+                    } else setError("This TikTok account cannot post via third-party apps.");
+                  }}
+                >
+                  <div className="platform-icon" aria-hidden="true">
+                    {getPlatformIcon(p)}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        width: "100%",
+                      }}
+                    >
+                      <div>
+                        <div className="platform-name">
+                          {p.charAt(0).toUpperCase() + p.slice(1)}
+
+                          {/* READINESS INDICATOR */}
+                          {(Array.isArray(extSelectedPlatforms)
+                            ? extSelectedPlatforms
+                            : selectedPlatforms
+                          ).includes(p) &&
+                            ((p === "tiktok" && !tiktokConsentChecked) ||
+                            (!file && !perPlatformFile?.[p]) ? (
+                              <span
+                                title="Action Required: Check Platform Settings"
+                                style={{ marginLeft: 8, fontSize: "0.9em", cursor: "help" }}
+                              >
+                                ⚠️
+                              </span>
+                            ) : (
+                              <span
+                                title="Ready to Publish"
+                                style={{ marginLeft: 8, fontSize: "0.9em" }}
+                              >
+                                ✅
+                              </span>
+                            ))}
+
+                          {/* Peak Time Indicator */}
+                          {getPeakStatus(p) && (
+                            <span
+                              style={{
+                                marginLeft: "8px",
+                                fontSize: "0.65rem",
+                                padding: "2px 6px",
+                                borderRadius: "12px",
+                                backgroundColor: "rgba(0,0,0,0.4)",
+                                color: getPeakStatus(p).color,
+                                border: `1px solid ${getPeakStatus(p).color}`,
+                                boxShadow: getPeakStatus(p).glow,
+                                fontWeight: "bold",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {getPeakStatus(p).label}
+                            </span>
+                          )}
+                        </div>
+                        {disabled ? (
+                          <div
+                            className="platform-guideline"
+                            style={{ fontSize: 11, color: "#b66" }}
+                          >
+                            Cannot post via third-party apps
+                          </div>
+                        ) : (
+                          platformGuidelines[p] && (
+                            <div
+                              className="platform-guideline"
+                              style={{ fontSize: 11, color: "#6b7280" }}
+                            >
+                              {platformGuidelines[p].summary.replace(
+                                "dynamic",
+                                p === "tiktok" &&
+                                  tiktokCreatorInfo &&
+                                  tiktokCreatorInfo.max_video_post_duration_sec
+                                  ? `${tiktokCreatorInfo.max_video_post_duration_sec}s`
+                                  : ""
+                              )}
+                            </div>
+                          )
+                        )}
+                      </div>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        {/* Quality Check Button on Card */}
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handlePlatformQualityCheck(p);
+                          }}
+                          style={{
+                            fontSize: "10px",
+                            padding: "2px 6px",
+                            border: "1px solid #ddd",
+                            background: "#f9fafb",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            marginRight: "4px",
+                          }}
+                          title="Run automated quality and safety check"
+                        >
+                          🛡️ Check
+                        </button>
+                        <div
+                          className="open-platform-indicator"
+                          style={{ fontSize: 12, color: "#374151" }}
+                        >
+                          {expandedPlatform === p ? "Close" : "Open"}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Sci-Fi Algorithm Intel - Displayed when Expanded */}
+                    {expandedPlatform === p && !disabled && (
+                      <div
+                        style={{
+                          marginTop: "12px",
+                          padding: "12px",
+                          background: "rgba(10, 20, 35, 0.9)",
+                          border: "1px solid #00f2ea",
+                          borderRadius: "8px",
+                          color: "#e0f7fa",
+                          boxShadow: "0 0 12px rgba(0, 242, 234, 0.15)",
+                          fontSize: "0.85rem",
+                          animation: "fadeIn 0.3s ease-in-out",
+                          backdropFilter: "blur(4px)",
+                        }}
+                        onClick={e => e.stopPropagation()} // Prevent card collapse when clicking inside intel
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            marginBottom: "10px",
+                            borderBottom: "1px solid rgba(0, 242, 234, 0.3)",
+                            paddingBottom: "6px",
+                          }}
+                        >
+                          <strong
+                            style={{
+                              color: "#00f2ea",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              fontSize: "0.8rem",
+                            }}
+                          >
+                            Algorithm Intel
+                          </strong>
+                          <span
+                            style={{
+                              fontSize: "0.7rem",
+                              opacity: 0.8,
+                              color: "#a5f3fc",
+                              fontFamily: "monospace",
+                            }}
+                          >
+                            LIVE_ANALYSIS_V2
+                          </span>
+                        </div>
+
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr 1fr",
+                            gap: "12px",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
+                              Audience Potential
+                            </div>
+                            <div style={{ fontWeight: "bold", color: "#fff", fontSize: "0.95rem" }}>
+                              {getAlgorithmIntel(p).audience}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
+                              Viral Probability
+                            </div>
+                            <div
+                              style={{
+                                height: "6px",
+                                background: "rgba(255,255,255,0.1)",
+                                borderRadius: "3px",
+                                marginTop: "6px",
+                                overflow: "hidden",
+                              }}
+                            >
+                              {/* Bounty Boost to Viral Probability */}
+                              <div
+                                style={{
+                                  width: `${Math.min(100, getAlgorithmIntel(p).viral + (bountyAmount > 0 ? 15 : 0))}%`,
+                                  height: "100%",
+                                  borderRadius: "3px",
+                                  background:
+                                    bountyAmount > 0
+                                      ? `linear-gradient(90deg, #ffd700, #ff4500)` // Gold/Red fire for Bounty
+                                      : `linear-gradient(90deg, #00f2ea, #3b82f6)`,
+                                  boxShadow: bountyAmount > 0 ? "0 0 8px #ffd700" : "none",
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ marginBottom: "10px" }}>
+                          <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>The Secret</div>
+                          <div style={{ color: "#fff", fontStyle: "italic" }}>
+                            "{getAlgorithmIntel(p).secret}"
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            background: "rgba(59, 130, 246, 0.1)",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            borderLeft: "2px solid #3b82f6",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "0.7rem",
+                              color: "#60a5fa",
+                              marginBottom: "2px",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            FORMAT ADVICE
+                          </div>
+                          <div style={{ fontSize: "0.8rem" }}>{getAlgorithmIntel(p).tips}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Inline expanded area below grid to show per-platform options for the expandedPlatform */}
+                  {expandedPlatform === p && (
+                    <div
+                      className="platform-expanded"
+                      style={{
+                        marginTop: 12,
+                        padding: 12,
+                        border: "1px solid #eee",
+                        borderRadius: 8,
+                        background: "#fff",
+                      }}
+                    >
+                      <h4 style={{ margin: "0 0 8px 0" }}>
+                        {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)}{" "}
+                        Options
+                      </h4>
+
+                      {onNavigate && (
+                        <div
+                          style={{
+                            background: "#f0f9ff",
+                            border: "1px solid #bae6fd",
+                            padding: "10px",
+                            borderRadius: "6px",
+                            marginBottom: "12px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <span style={{ fontSize: "13px", color: "#0369a1" }}>
+                            💡 Want to upload to more platforms at once? Connect them now!
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => onNavigate("connections")}
+                            style={{
+                              background: "#0284c7",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              padding: "4px 10px",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              fontWeight: "600",
+                            }}
+                          >
+                            Connect Accounts
+                          </button>
+                        </div>
+                      )}
+
+                      {platformGuidelines[expandedPlatform] && (
+                        <div style={{ marginBottom: 8, fontSize: 13, color: "#374151" }}>
+                          <strong>Quick Guidelines:</strong>
+                          <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
+                            {platformGuidelines[expandedPlatform].summary.replace(
+                              "dynamic",
+                              expandedPlatform === "tiktok" &&
+                                tiktokCreatorInfo &&
+                                tiktokCreatorInfo.max_video_post_duration_sec
+                                ? `${tiktokCreatorInfo.max_video_post_duration_sec}s`
+                                : ""
+                            )}
+                          </div>
+                          <ul style={{ marginTop: 8 }}>
+                            {platformGuidelines[expandedPlatform].details.map((d, idx) => (
+                              <li key={idx} style={{ fontSize: 13, color: "#374151" }}>
+                                {d.replace(
+                                  "max duration",
+                                  expandedPlatform === "tiktok" &&
+                                    tiktokCreatorInfo &&
+                                    tiktokCreatorInfo.max_video_post_duration_sec
+                                    ? `max: ${tiktokCreatorInfo.max_video_post_duration_sec}s`
+                                    : d
                                 )}
-                                <div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {/* Per-platform inputs: file, title, description (defaults to global if empty) */}
+
+                      {/* Professional Forms Integration */}
+                      {/* File Override is now handled inside the specific PlatformForm components */}
+
+                      {/* Specialized Forms for Top Platforms */}
+                      {expandedPlatform === "tiktok" ? (
+                        <>
+                          <TikTokForm
+                            type={type}
+                            onFileChange={f => handlePerPlatformFileChange("tiktok", f)}
+                            currentFile={perPlatformFile?.tiktok}
+                            onChange={handleTikTokChange}
+                            initialData={extPlatformOptions?.tiktok}
+                            creatorInfo={tiktokCreatorInfo}
+                            globalTitle={title}
+                            globalDescription={description}
+                            bountyAmount={bountyAmount}
+                            setBountyAmount={setBountyAmount}
+                            bountyNiche={bountyNiche}
+                            setBountyNiche={setBountyNiche}
+                            protocol7Enabled={protocol7Enabled}
+                            setProtocol7Enabled={setProtocol7Enabled}
+                            protocol7Volatility={protocol7Volatility}
+                            setProtocol7Volatility={setProtocol7Volatility}
+                          />
+                          {renderBestTimeForPlatform("tiktok")}
+                        </>
+                      ) : expandedPlatform === "youtube" ? (
+                        <>
+                          <YouTubeForm
+                            creatorInfo={extPlatformMetadata?.youtube}
+                            onFileChange={f => handlePerPlatformFileChange("youtube", f)}
+                            currentFile={perPlatformFile?.youtube}
+                            onChange={handleYouTubeChange}
+                            initialData={{
+                              ...extPlatformOptions?.youtube,
+                              shortsMode: youtubeShorts,
+                              privacy: youtubeVisibility || extPlatformOptions?.youtube?.privacy,
+                            }}
+                            globalTitle={title}
+                            globalDescription={description}
+                            bountyAmount={bountyAmount}
+                            setBountyAmount={setBountyAmount}
+                            bountyNiche={bountyNiche}
+                            setBountyNiche={setBountyNiche}
+                          />
+                          {renderBestTimeForPlatform("youtube")}
+                        </>
+                      ) : expandedPlatform === "facebook" ? (
+                        <>
+                          <FacebookForm
+                            onFileChange={f => handlePerPlatformFileChange("facebook", f)}
+                            currentFile={perPlatformFile?.facebook}
+                            onChange={handleFacebookChange}
+                            initialData={extPlatformOptions?.facebook}
+                            globalTitle={title}
+                            globalDescription={description}
+                            pages={facebookPages || []}
+                          />
+                          {renderBestTimeForPlatform("facebook")}
+                        </>
+                      ) : expandedPlatform === "linkedin" ? (
+                        <>
+                          <LinkedInForm
+                            onFileChange={f => handlePerPlatformFileChange("linkedin", f)}
+                            currentFile={perPlatformFile?.linkedin}
+                            onChange={handleLinkedInChange}
+                            initialData={{
+                              ...extPlatformOptions?.linkedin,
+                              companyId: linkedinCompanyId,
+                            }}
+                            globalTitle={title}
+                            globalDescription={description}
+                          />
+                          {renderBestTimeForPlatform("linkedin")}
+                        </>
+                      ) : expandedPlatform === "pinterest" ? (
+                        <>
+                          <PinterestForm
+                            onFileChange={f => handlePerPlatformFileChange("pinterest", f)}
+                            currentFile={perPlatformFile?.pinterest}
+                            onChange={handlePinterestChange}
+                            initialData={{
+                              ...extPlatformOptions?.pinterest,
+                              boardId: pinterestBoard || extPlatformOptions?.pinterest?.boardId,
+                            }}
+                            globalTitle={title}
+                            globalDescription={description}
+                            boards={pinterestBoards || []}
+                          />
+                          {renderBestTimeForPlatform("pinterest")}
+                        </>
+                      ) : expandedPlatform === "instagram" ? (
+                        <>
+                          <InstagramForm
+                            onFileChange={f => handlePerPlatformFileChange("instagram", f)}
+                            currentFile={perPlatformFile?.instagram}
+                            facebookPages={facebookPages || []}
+                            instagramBusinessAccountId={instagramBusinessAccountId}
+                            onChange={handleInstagramChange}
+                            initialData={extPlatformOptions?.instagram}
+                            globalTitle={title}
+                            globalDescription={description}
+                            bountyAmount={bountyAmount}
+                            setBountyAmount={setBountyAmount}
+                            bountyNiche={bountyNiche}
+                            setBountyNiche={setBountyNiche}
+                          />
+                          {renderBestTimeForPlatform("instagram")}
+                        </>
+                      ) : expandedPlatform === "reddit" ? (
+                        <>
+                          <RedditForm
+                            onChange={handleRedditChange}
+                            initialData={extPlatformOptions?.reddit}
+                            globalTitle={title}
+                            globalDescription={description}
+                          />
+                          {renderBestTimeForPlatform("reddit")}
+                        </>
+                      ) : expandedPlatform === "spotify" ? (
+                        <>
+                          <SpotifyForm
+                            data={extPlatformOptions?.spotify || spotifySettings}
+                            onChange={handleSpotifyChange}
+                            selectedTracks={extSpotifySelectedTracks || spotifyTracks}
+                            onTrackSelect={handleSpotifyTrackSelect}
+                            onTrackRemove={handleSpotifyTrackRemove}
+                            campaignMode={true}
+                          />
+                          {renderBestTimeForPlatform("spotify")}
+                        </>
+                      ) : (
+                        /* Fallback Generic Form */
+                        <div
+                          className="per-platform-form"
+                          style={{ marginTop: 8, display: "grid", gap: 8 }}
+                        >
+                          <label style={{ fontWeight: 700 }}>
+                            Upload for{" "}
+                            {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)}
+                          </label>
+                          {renderBestTimeForPlatform(expandedPlatform)}
+                          <input
+                            aria-label={`Platform title ${expandedPlatform}`}
+                            placeholder="Title"
+                            className="form-input"
+                            value={perPlatformTitle[expandedPlatform] || title}
+                            onChange={e =>
+                              setPerPlatformTitle(prev => ({
+                                ...prev,
+                                [expandedPlatform]: e.target.value,
+                              }))
+                            }
+                          />
+                          <textarea
+                            aria-label={`Platform description ${expandedPlatform}`}
+                            placeholder="Description"
+                            className="form-input"
+                            value={perPlatformDescription[expandedPlatform] || description}
+                            onChange={e =>
+                              setPerPlatformDescription(prev => ({
+                                ...prev,
+                                [expandedPlatform]: e.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                      )}
+                      {expandedPlatform === "discord" && (
+                        <DiscordForm
+                          onChange={data => {
+                            const { platform, ...vals } = data;
+                            if (typeof extSetPlatformOption === "function") {
+                              extSetPlatformOption(platform, "channelId", vals.channelId);
+                            }
+                            // Local Sync
+                            if (vals.channelId !== undefined) setDiscordChannelId(vals.channelId);
+                          }}
+                          initialData={{ channelId: discordChannelId }}
+                        />
+                      )}
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
+                        <button
+                          type="button"
+                          className="preview-button"
+                          onClick={() => handlePlatformPreview(expandedPlatform)}
+                          disabled={
+                            !((perPlatformFile && perPlatformFile[expandedPlatform]) || file) ||
+                            perPlatformUploading[expandedPlatform]
+                          }
+                        >
+                          Preview
+                        </button>
+                        <button
+                          type="button"
+                          className="quality-check-button"
+                          onClick={() => handlePlatformQualityCheck(expandedPlatform)}
+                          disabled={
+                            perPlatformQuality[expandedPlatform] &&
+                            perPlatformQuality[expandedPlatform].loading
+                          }
+                        >
+                          Quality Check
+                        </button>
+                        <button
+                          type="button"
+                          className="submit-button"
+                          onClick={() => handlePlatformUpload(expandedPlatform)}
+                          disabled={
+                            !((perPlatformFile && perPlatformFile[expandedPlatform]) || file) ||
+                            perPlatformUploading[expandedPlatform] ||
+                            perPlatformQuality[expandedPlatform]?.result?.moderation?.safe ===
+                              false ||
+                            (expandedPlatform === "tiktok" &&
+                              tiktokCommercial &&
+                              tiktokCommercial.isCommercial &&
+                              !tiktokCommercial.yourBrand &&
+                              !tiktokCommercial.brandedContent) ||
+                            (expandedPlatform === "tiktok" && tiktokConsentChecked === false)
+                          }
+                        >
+                          Upload to{" "}
+                          {expandedPlatform.charAt(0).toUpperCase() + expandedPlatform.slice(1)}
+                        </button>
+                      </div>
+                      {perPlatformPreviews[expandedPlatform] && (
+                        <div style={{ marginTop: 8 }} className="preview-cards">
+                          {perPlatformPreviews[expandedPlatform].map((p, idx) => (
+                            <div
+                              key={idx}
+                              className="preview-card"
+                              style={{
+                                border: "1px solid #ccc",
+                                borderRadius: 8,
+                                padding: "1rem",
+                                minWidth: 220,
+                                maxWidth: 320,
+                                background: "#f9fafb",
+                              }}
+                            >
+                              <h5>
+                                {p.platform
+                                  ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
+                                  : "Preview"}
+                              </h5>
+                              {/* Smart Frame Intelligence Preview */}
+                              <div
+                                className="smart-frame-wrapper"
+                                style={{
+                                  width: "100%",
+                                  height: 400 /* Taller for vertical preview */,
+                                  marginBottom: 12,
+                                  borderRadius: 8,
+                                  overflow: "hidden",
+                                  background: "#000",
+                                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                                }}
+                              >
+                                <SmartFrameOverlay
+                                  src={p.mediaUrl || p.thumbnail || DEFAULT_THUMBNAIL}
+                                  mediaType={
+                                    p.mediaType ||
+                                    (file && file.type.startsWith("video") ? "video" : "image")
+                                  }
+                                  platform={p.platform || expandedPlatform}
+                                  showSafeZones={true}
+                                  enableHighQuality={enhanceQuality}
+                                />
+                              </div>
+
+                              <div style={{ padding: "0 4px" }}>
+                                <div style={{ marginBottom: 4 }}>
                                   <strong>Title:</strong>{" "}
                                   {p.title || title || (file ? file.name : "Untitled")}
                                 </div>
-                                <div>
+                                <div style={{ marginBottom: 8 }}>
                                   <strong>Description:</strong>{" "}
                                   {p.description || description || "No description"}
                                 </div>
                               </div>
-                            ))}
+
+                              <div style={{ marginTop: 8 }}>
+                                <button
+                                  type="button"
+                                  className="edit-platform-btn"
+                                  onClick={() => openPreviewEdit(p)}
+                                  aria-label={`Edit preview ${p.platform || ""}`}
+                                >
+                                  Edit Metadata
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {perPlatformQuality[expandedPlatform] &&
+                        perPlatformQuality[expandedPlatform].result && (
+                          <div style={{ marginTop: 8 }} className="quality-check-mini">
+                            <div>
+                              Score: {perPlatformQuality[expandedPlatform].result.quality_score}/100
+                            </div>
+                            {perPlatformQuality[expandedPlatform].result.feedback &&
+                              perPlatformQuality[expandedPlatform].result.feedback.length > 0 && (
+                                <ul
+                                  style={{
+                                    margin: "4px 0",
+                                    paddingLeft: "20px",
+                                    fontSize: "12px",
+                                    color: "#d97706",
+                                  }}
+                                >
+                                  {perPlatformQuality[expandedPlatform].result.feedback.map(
+                                    (f, i) => (
+                                      <li key={i}>{f}</li>
+                                    )
+                                  )}
+                                </ul>
+                              )}
                           </div>
                         )}
-                        {perPlatformQuality["youtube"] && perPlatformQuality["youtube"].result && (
-                          <div style={{ marginTop: 8 }} className="quality-check-mini">
-                            Score: {perPlatformQuality["youtube"].result.quality_score}/100
+                      {perPlatformUploadStatus[expandedPlatform] && (
+                        <div
+                          style={{ marginTop: 8, fontSize: 13, color: "#374151" }}
+                          className="platform-upload-status"
+                        >
+                          {perPlatformUploadStatus[expandedPlatform]}
+                        </div>
+                      )}
+                      {perPlatformUploadResponse[expandedPlatform] && (
+                        <div
+                          style={{
+                            marginTop: 8,
+                            padding: 8,
+                            background: "#f3f4f6",
+                            borderRadius: 6,
+                            border: "1px solid #e5e7eb",
+                            fontSize: 13,
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                            <strong style={{ fontSize: 13 }}>Platform Response</strong>
+                            <button
+                              onClick={() => copyUploadResponse(expandedPlatform)}
+                              style={{
+                                background: "#111827",
+                                color: "#fff",
+                                border: "none",
+                                padding: "4px 8px",
+                                borderRadius: 4,
+                                cursor: "pointer",
+                                fontSize: 12,
+                              }}
+                            >
+                              Copy
+                            </button>
+                          </div>
+                          <pre
+                            style={{
+                              whiteSpace: "pre-wrap",
+                              wordBreak: "break-word",
+                              marginTop: 8,
+                              maxHeight: 160,
+                              overflow: "auto",
+                              fontSize: 12,
+                            }}
+                          >
+                            {JSON.stringify(perPlatformUploadResponse[expandedPlatform], null, 2)}
+                          </pre>
+                        </div>
+                      )}
+                      {expandedPlatform === "telegram" && (
+                        <TelegramForm
+                          onChange={data => {
+                            const { platform, ...vals } = data;
+                            if (typeof extSetPlatformOption === "function") {
+                              extSetPlatformOption(platform, "chatId", vals.chatId);
+                            }
+                            // Local Sync
+                            if (vals.chatId !== undefined) setTelegramChatId(vals.chatId);
+                          }}
+                          initialData={{ chatId: telegramChatId }}
+                        />
+                      )}
+
+                      {expandedPlatform === "twitter" && (
+                        <TwitterForm
+                          onFileChange={f => handlePerPlatformFileChange("twitter", f)}
+                          currentFile={perPlatformFile?.twitter}
+                          onChange={handleTwitterChange}
+                          initialData={{
+                            message: twitterMessage,
+                            threadMode: twitterSettings.threadMode,
+                          }}
+                        />
+                      )}
+
+                      {expandedPlatform === "spotify" && (
+                        <div className="spotify-search-inline">
+                          <label
+                            style={{
+                              display: "block",
+                              fontSize: 12,
+                              fontWeight: 700,
+                              marginBottom: 4,
+                              color: "#1DB954",
+                            }}
+                          >
+                            Search Spotify Catalog
+                          </label>
+                          <SpotifyTrackSearch
+                            selectedTracks={
+                              Array.isArray(extSpotifySelectedTracks)
+                                ? extSpotifySelectedTracks
+                                : spotifyTracks
+                            }
+                            onChangeTracks={list => {
+                              if (typeof extSetSpotifySelectedTracks === "function")
+                                extSetSpotifySelectedTracks(list);
+                              else setSpotifyTracks(list);
+                            }}
+                          />
+                        </div>
+                      )}
+                      {expandedPlatform === "snapchat" && <SnapchatForm onChange={() => {}} />}
+                      {expandedPlatform === "youtube" && (
+                        <div style={{ display: "grid", gap: 8 }}>
+                          {perPlatformPreviews["youtube"] && (
+                            <div style={{ marginTop: 8 }} className="preview-cards">
+                              {perPlatformPreviews["youtube"].map((p, idx) => (
+                                <div
+                                  key={idx}
+                                  className="preview-card"
+                                  style={{
+                                    border: "1px solid #ccc",
+                                    borderRadius: 8,
+                                    padding: "1rem",
+                                    minWidth: 220,
+                                    maxWidth: 320,
+                                    background: "#f9fafb",
+                                  }}
+                                >
+                                  <h5>
+                                    {p.platform
+                                      ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
+                                      : "Preview"}
+                                  </h5>
+                                  {p.mediaType === "video" ? (
+                                    <video
+                                      aria-label="Preview media"
+                                      src={p.mediaUrl || p.thumbnail}
+                                      controls
+                                      style={{
+                                        width: "100%",
+                                        height: "auto",
+                                        maxHeight: 320,
+                                        objectFit: "contain",
+                                        borderRadius: 6,
+                                        backgroundColor: "#000",
+                                      }}
+                                    />
+                                  ) : (
+                                    <img
+                                      aria-label="Preview media"
+                                      src={p.thumbnail ? p.thumbnail : DEFAULT_THUMBNAIL}
+                                      onError={e => {
+                                        e.target.onerror = null;
+                                        e.target.src = DEFAULT_THUMBNAIL;
+                                      }}
+                                      alt="Preview Thumbnail"
+                                      style={{
+                                        width: "100%",
+                                        height: "auto",
+                                        maxHeight: 320,
+                                        objectFit: "contain",
+                                        borderRadius: 6,
+                                        backgroundColor: "#000",
+                                      }}
+                                    />
+                                  )}
+                                  <div>
+                                    <strong>Title:</strong>{" "}
+                                    {p.title || title || (file ? file.name : "Untitled")}
+                                  </div>
+                                  <div>
+                                    <strong>Description:</strong>{" "}
+                                    {p.description || description || "No description"}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {perPlatformQuality["youtube"] &&
+                            perPlatformQuality["youtube"].result && (
+                              <div style={{ marginTop: 8 }} className="quality-check-mini">
+                                Score: {perPlatformQuality["youtube"].result.quality_score}/100
+                              </div>
+                            )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {/* EXPANDED CONTENT AREA - FILE/TITLE/DESC + SETTINGS */}
+                  {expandedPlatform === p && (
+                    <div
+                      className="platform-expanded-content"
+                      style={{
+                        marginTop: "1rem",
+                        borderTop: "1px solid rgba(255,255,255,0.1)",
+                        paddingTop: "1rem",
+                        width: "100%",
+                      }}
+                    >
+                      {/* File Upload for this Platform */}
+                      <div className="form-group full-width">
+                        <label>File Upload</label>
+                        <input
+                          type="file"
+                          onChange={e => {
+                            handleFileChange(e.target.files[0]);
+                          }}
+                          className="form-file-input"
+                        />
+                        {file && (
+                          <div className="file-info" style={{ fontSize: "0.8rem", marginTop: 5 }}>
+                            Selected: {file.name}
                           </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
 
-            {/* Per-platform options moved to expanded card view or PlatformSettingsOverride */}
-          </div>
-        </div>
-        <div className="form-group full-width">
-          <label htmlFor="content-title">Title</label>
-          <div className="input-with-emoji">
-            <input
-              id="content-title"
-              ref={titleInputRef}
-              type="text"
-              placeholder="✨ Enter catchy title..."
-              value={title}
-              required
-              onChange={e => {
-                // Security: Use centralized sanitization function
-                setTitle(sanitizeInput(e.target.value));
-              }}
-              className="form-input"
-              maxLength={100}
-            />
-            <button type="button" className="emoji-btn" onClick={() => openEmojiPicker("title")}>
-              😊
-            </button>
-          </div>
-          <div className="char-count">{title.length}/100</div>
-        </div>
+                      {/* Title & One-line Description */}
+                      <div className="form-group full-width">
+                        <label>Title</label>
+                        <input
+                          type="text"
+                          value={title}
+                          onChange={e => setTitle(e.target.value)}
+                          className="form-input"
+                          placeholder="Title"
+                          maxLength={100}
+                        />
+                      </div>
 
-        <div className="form-group full-width">
-          <label htmlFor="content-description">Description</label>
-          <div className="input-with-emoji">
-            <textarea
-              id="content-description"
-              ref={descInputRef}
-              placeholder="📝 Describe your content..."
-              value={description}
-              required
-              onChange={e => {
-                // Security: Use centralized sanitization function
-                setDescription(sanitizeInput(e.target.value));
-              }}
-              className="form-textarea"
-              rows={4}
-              maxLength={500}
-            />
-            <button
-              type="button"
-              className="emoji-btn"
-              onClick={() => openEmojiPicker("description")}
-            >
-              😊
-            </button>
-          </div>
-          <div className="char-count">{description.length}/500</div>
-        </div>
+                      <div className="form-group full-width">
+                        <label>Description</label>
+                        <textarea
+                          value={description}
+                          onChange={e => setDescription(e.target.value)}
+                          className="form-textarea"
+                          placeholder="Description"
+                          rows={4}
+                          maxLength={500}
+                        />
+                      </div>
 
-        {hashtags.length > 0 && (
-          <div className="selected-hashtags">
-            {hashtags.map((tag, idx) => (
-              <span key={idx} className="hashtag-badge">
-                #{tag}
-                <button type="button" onClick={() => removeHashtag(tag)} className="remove-hashtag">
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-
-        <HashtagSuggestions
-          contentType={type}
-          title={title}
-          description={description}
-          onAddHashtag={handleAddHashtag}
-        />
-
-        {/* Platform Specific Overrides */}
-        <PlatformSettingsOverride
-          selectedPlatforms={selectedPlatformsVal}
-          // TikTok
-          tiktokCommercial={tiktokCommercial}
-          setTiktokCommercial={setTiktokCommercial}
-          tiktokDisclosure={tiktokDisclosure}
-          setTiktokDisclosure={setTiktokDisclosure}
-          tiktokConsentChecked={tiktokConsentChecked}
-          setTiktokConsentChecked={setTiktokConsentChecked}
-          tiktokCreatorInfo={tiktokCreatorInfo}
-          getTikTokDeclaration={getTikTokDeclaration}
-          // YouTube
-          youtubeSettings={youtubeSettings}
-          setYoutubeSettings={setYoutubeSettings}
-          // Expose a setter so role-specific fields can persist upstream
-          setPlatformOption={
-            typeof extSetPlatformOption === "function" ? extSetPlatformOption : undefined
-          }
-          // Instagram
-          instagramSettings={instagramSettings}
-          setInstagramSettings={setInstagramSettings}
-          // Twitter
-          twitterSettings={twitterSettings}
-          setTwitterSettings={setTwitterSettings}
-          // LinkedIn
-          linkedinSettings={linkedinSettings}
-          setLinkedinSettings={setLinkedinSettings}
-          // New Platforms
-          snapchatSettings={snapchatSettings}
-          setSnapchatSettings={setSnapchatSettings}
-          redditSettings={redditSettings}
-          setRedditSettings={setRedditSettings}
-          pinterestSettings={pinterestSettings}
-          setPinterestSettings={setPinterestSettings}
-          discordSettings={discordSettings}
-          setDiscordSettings={setDiscordSettings}
-          telegramSettings={telegramSettings}
-          setTelegramSettings={setTelegramSettings}
-          spotifySettings={spotifySettings}
-          setSpotifySettings={setSpotifySettings}
-        />
-
-        <div className="form-group">
-          <label>🎨 Text Overlay (optional)</label>
-          <div className="input-with-emoji">
-            <input
-              placeholder="Add overlay text..."
-              value={overlayText}
-              onChange={e => {
-                // Security: Use centralized sanitization function
-                setOverlayText(sanitizeInput(e.target.value));
-              }}
-              className="form-input"
-            />
-            <button type="button" className="emoji-btn" onClick={() => openEmojiPicker("overlay")}>
-              😊
-            </button>
-          </div>
-          <div className="overlay-controls">
-            <select
-              aria-label="Overlay position"
-              value={overlayPosition}
-              onChange={e => setOverlayPosition(e.target.value)}
-              className="form-select-small"
-            >
-              <option value="top">⬆️ Top</option>
-              <option value="center">⏺️ Center</option>
-              <option value="bottom">⬇️ Bottom</option>
-            </select>
-            <input
-              type="color"
-              value={textStyles.color}
-              onChange={e => setTextStyles({ ...textStyles, color: e.target.value })}
-              className="color-picker"
-              title="Text color"
-            />
-            <select
-              value={textStyles.fontSize}
-              onChange={e => setTextStyles({ ...textStyles, fontSize: parseInt(e.target.value) })}
-              className="form-select-small"
-            >
-              <option value={12}>Small</option>
-              <option value={16}>Medium</option>
-              <option value={24}>Large</option>
-              <option value={32}>XL</option>
-            </select>
-          </div>
-        </div>
-
-        {file && type === "image" && previewUrl && (
-          <FilterEffects
-            imageUrl={previewUrl}
-            onApplyFilter={filter => setSelectedFilter(filter)}
-          />
-        )}
-
-        {/* Pinterest options moved to PlatformForms */}
-
-        {/* Spotify options moved to PlatformForms */}
-
-        <div style={{ display: "flex", gap: ".5rem", marginTop: ".5rem", flexWrap: "wrap" }}>
+                      {/* Platform Settings Override */}
+                      <PlatformSettingsOverride
+                        selectedPlatforms={[p]}
+                        tiktokCommercial={tiktokCommercial}
+                        setTiktokCommercial={setTiktokCommercial}
+                        tiktokDisclosure={tiktokDisclosure}
+                        setTiktokDisclosure={setTiktokDisclosure}
+                        tiktokConsentChecked={tiktokConsentChecked}
+                        setTiktokConsentChecked={setTiktokConsentChecked}
+                        tiktokCreatorInfo={tiktokCreatorInfo}
+                        getTikTokDeclaration={getTikTokDeclaration}
+                        youtubeSettings={youtubeSettings}
+                        setYoutubeSettings={setYoutubeSettings}
+                        setPlatformOption={
+                          typeof extSetPlatformOption === "function"
+                            ? extSetPlatformOption
+                            : undefined
+                        }
+                        instagramSettings={instagramSettings}
+                        setInstagramSettings={setInstagramSettings}
+                        twitterSettings={twitterSettings}
+                        setTwitterSettings={setTwitterSettings}
+                        linkedinSettings={linkedinSettings}
+                        setLinkedinSettings={setLinkedinSettings}
+                        snapchatSettings={snapchatSettings}
+                        setSnapchatSettings={setSnapchatSettings}
+                        redditSettings={redditSettings}
+                        setRedditSettings={setRedditSettings}
+                        pinterestSettings={pinterestSettings}
+                        setPinterestSettings={setPinterestSettings}
+                        discordSettings={discordSettings}
+                        setDiscordSettings={setDiscordSettings}
+                        telegramSettings={telegramSettings}
+                        setTelegramSettings={setTelegramSettings}
+                        spotifySettings={spotifySettings}
+                        setSpotifySettings={setSpotifySettings}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>{" "}
+          {/* End platform-grid */}
+        </div>{" "}
+        {/* End form-group */}
+        {/* Global Actions Bar - Outside Platform Grid */}
+        <div
+          style={{
+            display: "flex",
+            gap: ".5rem",
+            marginTop: ".5rem",
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+            padding: "1rem",
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
           <button
             type="button"
             disabled={
@@ -4764,7 +5301,6 @@ function ContentUploadForm({
             )}
           </button>
         </div>
-
         <div className="keyboard-shortcuts">
           <span>⌨️ Shortcuts:</span>
           <span className="shortcut-item">Ctrl+Enter = Upload</span>
@@ -4784,7 +5320,6 @@ function ContentUploadForm({
         {showEmojiPicker && (
           <EmojiPicker onSelect={handleEmojiSelect} onClose={() => setShowEmojiPicker(false)} />
         )}
-
         {showProgress && (
           <ProgressIndicator
             progress={uploadProgress}
@@ -5057,9 +5592,36 @@ function ContentUploadForm({
           boxShadow: "0 -4px 6px -1px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <div style={{ fontSize: "14px", color: isDark ? "#A0AEC0" : "#4A5568" }}>
-          <b>{selectedPlatformsVal.length}</b> platform
-          {selectedPlatformsVal.length !== 1 ? "s" : ""} selected
+        <div
+          style={{
+            fontSize: "14px",
+            color: isDark ? "#A0AEC0" : "#4A5568",
+            display: "flex",
+            gap: "8px",
+            alignItems: "center",
+          }}
+        >
+          <b>{selectedPlatformsVal.length}</b> selected
+          {selectedPlatformsVal.some(
+            p => (p === "tiktok" && !tiktokConsentChecked) || (!perPlatformFile?.[p] && !file)
+          ) ? (
+            <span
+              title="Complete the forms for each platform"
+              style={{ color: "#e53e3e", fontWeight: "bold", marginLeft: "12px" }}
+            >
+              ⚠️{" "}
+              {
+                selectedPlatformsVal.filter(
+                  p => (p === "tiktok" && !tiktokConsentChecked) || (!perPlatformFile?.[p] && !file)
+                ).length
+              }{" "}
+              Missing Info
+            </span>
+          ) : selectedPlatformsVal.length > 0 ? (
+            <span style={{ color: "#48bb78", fontWeight: "bold", marginLeft: "12px" }}>
+              ✅ Ready to Launch
+            </span>
+          ) : null}
         </div>
         <button
           className="btn btn-primary"

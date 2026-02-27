@@ -183,10 +183,13 @@ if (bypass) {
   const realAdmin = require('firebase-admin');
 
   // Initialize admin SDK as usual
-  realAdmin.initializeApp({
+  const appConfig = {
     credential: realAdmin.credential.applicationDefault(),
-    databaseURL: 'https://autopromote-cc6d3.firebaseio.com'
-  });
+    databaseURL: 'https://autopromote-cc6d3.firebaseio.com',
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'autopromote-cc6d3.firebasestorage.app'
+  };
+  
+  realAdmin.initializeApp(appConfig);
 
   const db = realAdmin.firestore();
   db.settings({ ignoreUndefinedProperties: true });

@@ -4,6 +4,8 @@
 const { db, admin } = require("../firebaseAdmin");
 const { recordTaskCompletion, recordRateLimitEvent } = require("./aggregationService");
 const { getCooldown, noteRateLimit } = require("./rateLimitTracker");
+const notificationEngine = require("./notificationEngine"); // User Notification Integration
+const billingService = require("./billingService"); // Usage Tracking
 // Defer requiring youtubeService and mediaTransform until function call time to avoid circular import issues
 const crypto = require("crypto");
 
@@ -208,6 +210,16 @@ async function processNextYouTubeTask() {
       completedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
+
+    // Notify User: Success
+    await notificationEngine
+      .sendNotification(task.uid, `YouTube Upload Successful: "${task.title}"`, "success", {
+        contentId: task.contentId,
+        platform: "youtube",
+        link: outcome.videoUrl || null,
+      })
+      .catch(console.warn);
+
     await recordTaskCompletion("youtube_upload", true);
     return { taskId: task.id, outcome };
   } catch (err) {
@@ -228,6 +240,17 @@ async function processNextYouTubeTask() {
     };
     await taskRef.update(failed);
     if (failed.status === "failed") {
+      // Notify User: Failed
+      if (task.uid) {
+        await notificationEngine
+          .sendNotification(
+            task.uid,
+            `YouTube Upload Failed: "${task.title}". ${err.message}`,
+            "error",
+            { contentId: task.contentId, platform: "youtube", error: err.message }
+          )
+          .catch(console.warn);
+      }
       // Dead-letter (J): copy to collection for manual inspection
       try {
         await db
@@ -1385,25 +1408,53 @@ async function processNextPlatformTask() {
           shortlinkCode: payload.__shortlinkCode || null,
         });
 
+        // --- MISSION CONTROL INJECTION (The "Win" for Users) ---
+        // Trigger Organic Mission immediately after successful publish
+        try {
+          const communityEngine = require("./communityEngine");
+          const targetUrl =
+            simulatedResult.videoUrl || simulatedResult.externalId || simulatedResult.permlink;
+          if (targetUrl && (task.platform === "tiktok" || task.platform === "youtube")) {
+            // 1. Default Mission: "Operation First Contact"
+            // 2,000 views target via community swarm.
+            // Looks organic because it IS organic (real people).
+            await communityEngine.triggerPriorityBotSurge(targetUrl, task.platform, 2000, "view");
+            // Track as 1 "Mission Launch" per upload
+            await billingService.trackBotUsage(task.uid, 1);
+
+            // 2. Extra Boosts (User Selected) - Check top-level task props OR hidden payload props
+            const repostParams = task.repost_boost || (task.payload && task.payload.repost_boost);
+            const shareParams = task.share_boost || (task.payload && task.payload.share_boost);
+
+            if (repostParams) {
+              await communityEngine.triggerPriorityBotSurge(targetUrl, task.platform, 15, "repost");
+              // Track extra actions as distinct events if desired, or bundle them.
+              await billingService.trackBotUsage(task.uid, 1);
+            }
+            if (shareParams) {
+              await communityEngine.triggerPriorityBotSurge(targetUrl, task.platform, 25, "share");
+              await billingService.trackBotUsage(task.uid, 1);
+            }
+          }
+        } catch (surgeErr) {
+          console.warn("[Mission Control] Priority Surge Trigger Failed:", surgeErr);
+        }
+
         // Notify user about success
         if (task.uid) {
-          await db
-            .collection("notifications")
-            .add({
-              user_id: task.uid,
-              type: "promotion_success",
-              title: "Promotion Published",
-              message: `Successfully posted to ${task.platform}`,
-              read: false,
-              created_at: new Date().toISOString(),
-              metadata: {
+          await notificationEngine
+            .sendNotification(
+              task.uid,
+              `Promotion Published: Posted to ${task.platform}`,
+              "success",
+              {
                 contentId: task.contentId,
                 platform: task.platform,
                 taskId: task.id,
-                result: simulatedResult,
-              },
-            })
-            .catch(() => {});
+                link: simulatedResult.externalId || null,
+              }
+            )
+            .catch(console.warn);
         }
       } else {
         await recordPlatformPost({
@@ -1462,51 +1513,51 @@ async function processNextPlatformTask() {
           .doc(task.id)
           .set({ ...task, failed });
 
-        // Notify user about failure
+        // Notify User: Failed
         if (task.uid) {
-          await db.collection("notifications").add({
-            user_id: task.uid,
-            type: "promotion_failed",
-            title: "Promotion Failed",
-            message: `Failed to post to ${task.platform}: ${err.message}`,
-            read: false,
-            created_at: new Date().toISOString(),
-            metadata: {
-              contentId: task.contentId,
-              platform: task.platform,
-              taskId: task.id,
-              error: err.message,
-            },
-          });
-        }
-      } catch (_) {}
-      await recordTaskCompletion("platform_post", false);
-      // Even on terminal failure, record a platform post record for observability
-      try {
-        if (lockId) {
-          const { finalizePlatformPostById } = require("./platformPostsService");
-          await finalizePlatformPostById(lockId, {
-            outcome: { success: false, error: err.message },
-            success: false,
-            payload: task.payload,
-            uid: task.uid,
-            taskId: task.id,
-            reason: task.reason,
-          });
-        } else {
-          const { recordPlatformPost } = require("./platformPostsService");
-          await recordPlatformPost({
-            platform: task.platform,
-            contentId: task.contentId,
-            uid: task.uid,
-            reason: task.reason,
-            payload: task.payload,
-            outcome: { success: false, error: err.message },
-            taskId: task.id,
-          });
+          await notificationEngine
+            .sendNotification(
+              task.uid,
+              `Promotion Failed: ${task.platform}. ${err.message}`,
+              "error",
+              {
+                contentId: task.contentId,
+                platform: task.platform,
+                taskId: task.id,
+                error: err.message,
+              }
+            )
+            .catch(console.warn);
         }
       } catch (_) {}
     }
+    await recordTaskCompletion("platform_post", false);
+    // Even on terminal failure, record a platform post record for observability
+    try {
+      if (lockId) {
+        const { finalizePlatformPostById } = require("./platformPostsService");
+        await finalizePlatformPostById(lockId, {
+          outcome: { success: false, error: err.message },
+          success: false,
+          payload: task.payload,
+          uid: task.uid,
+          taskId: task.id,
+          reason: task.reason,
+        });
+      } else {
+        const { recordPlatformPost } = require("./platformPostsService");
+        await recordPlatformPost({
+          platform: task.platform,
+          contentId: task.contentId,
+          uid: task.uid,
+          reason: task.reason,
+          payload: task.payload,
+          outcome: { success: false, error: err.message },
+          taskId: task.id,
+        });
+      }
+    } catch (_) {}
+
     return {
       taskId: task.id,
       error: err.message,

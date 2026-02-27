@@ -83,7 +83,7 @@ const Terms = () => (
       <h2>10. Contact Us</h2>
       <p>
         In order to resolve a complaint regarding the Services or to receive further information
-        regarding use of the Services, please contact us at support@autopromote.com.
+        regarding use of the Services, please contact us at thulani@autopromote.org.
       </p>
     </div>
   </div>
