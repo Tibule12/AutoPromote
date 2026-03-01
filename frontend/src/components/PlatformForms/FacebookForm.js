@@ -8,7 +8,21 @@ const FacebookForm = ({
   pages = [],
   onFileChange,
   currentFile,
+  onReviewAI,
+  onFindViralClips,
 }) => {
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    if (currentFile && currentFile instanceof File) {
+      const url = URL.createObjectURL(currentFile);
+      setVideoPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setVideoPreviewUrl(null);
+    }
+  }, [currentFile]);
+
   const [pageId, setPageId] = useState(initialData.pageId || pages[0]?.id || "");
   const [message, setMessage] = useState(initialData.message || globalDescription || "");
   const [postType, setPostType] = useState(initialData.postType || "feed"); // feed, story, reel
@@ -39,10 +53,38 @@ const FacebookForm = ({
 
       <div className="form-group-modern">
         <label className="form-label-bold">Media File</label>
-        <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
-          {currentFile
-            ? `Selected: ${currentFile.name}`
-            : "Use global file or select unique file for Facebook"}
+        <div
+          style={{
+            fontSize: 12,
+            color: "#666",
+            marginBottom: 6,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <span>
+            {currentFile
+              ? `Selected: ${currentFile.name}`
+              : "Use global file or select unique file for Facebook"}
+          </span>
+          {currentFile && (
+            <button
+              type="button"
+              onClick={() => onFileChange && onFileChange(null)}
+              style={{
+                background: "transparent",
+                border: "1px solid #ef4444",
+                color: "#ef4444",
+                borderRadius: "4px",
+                padding: "2px 8px",
+                fontSize: "11px",
+                cursor: "pointer",
+              }}
+            >
+              Remove
+            </button>
+          )}
         </div>
         <input
           type="file"
@@ -51,6 +93,62 @@ const FacebookForm = ({
           className="modern-input"
           style={{ padding: 8 }}
         />
+
+        {/* --- REVIEW AI ENHANCEMENTS for Facebook --- */}
+        {(currentFile || !currentFile) && (onReviewAI || onFindViralClips) && (
+          <div style={{ display: "flex", gap: "10px", marginTop: 8, marginBottom: 15 }}>
+            {onReviewAI && (
+              <button
+                type="button"
+                style={{
+                  background: "linear-gradient(135deg, #1877F2 0%, #166FE5 100%)",
+                  color: "white",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  flex: 1,
+                }}
+                onClick={onReviewAI}
+              >
+                ✨ Review AI Enhancements
+              </button>
+            )}
+            {onFindViralClips && (
+              <button
+                type="button"
+                style={{
+                  background: "linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%)",
+                  color: "white",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  flex: 1,
+                }}
+                onClick={onFindViralClips}
+              >
+                🔥 Find Viral Clips
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* SIMPLE INLINE VIDEO PREVIEW */}
+        {videoPreviewUrl && (currentFile?.type?.startsWith("video/") || !currentFile) && (
+          <div style={{ marginTop: "10px" }}>
+            <video
+              src={videoPreviewUrl}
+              controls
+              style={{
+                width: "100%",
+                maxHeight: "300px",
+                borderRadius: "8px",
+                border: "1px solid #334155",
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {pages.length === 0 ? (

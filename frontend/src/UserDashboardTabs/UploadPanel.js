@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import ContentUploadForm from "../ContentUploadForm";
+// import ContentUploadForm from "../ContentUploadForm";
+import UnifiedPublisher from "../features/publishing/UnifiedPublisher";
 
 function UploadPanel({
   onUpload,
@@ -25,7 +26,7 @@ function UploadPanel({
   React.useEffect(() => {
     if (initialFile && !initialFileProcessed.current) {
       setActiveTab("upload");
-      // We do NOT clear it here, ContentUploadForm needs to mount and read it first
+      // We do NOT clear it here, UnifiedPublisher needs to mount and read it first
     }
   }, [initialFile]);
 
@@ -93,18 +94,24 @@ function UploadPanel({
       </div>
 
       {activeTab === "upload" && (
-        <ContentUploadForm
-          onUpload={onUpload}
+        <UnifiedPublisher
+          onUpload={async params => {
+            if (onUpload) {
+              // Bridge old callback style to new object params
+              await onUpload(params);
+            }
+            if (onClearInitialFile) onClearInitialFile();
+          }}
+          // Future: map these properly if needed or just use UnifiedPublisher's internal state
           initialFile={initialFile}
-          onClearInitialFile={onClearInitialFile}
-          platformMetadata={platformMetadata}
-          platformOptions={platformOptions}
-          setPlatformOption={setPlatformOption}
-          selectedPlatforms={selectedPlatforms}
-          setSelectedPlatforms={setSelectedPlatforms}
-          spotifySelectedTracks={spotifySelectedTracks}
-          setSpotifySelectedTracks={setSpotifySelectedTracks}
-          onNavigate={onNavigate}
+          // platformMetadata={platformMetadata}
+          // platformOptions={platformOptions}
+          // setPlatformOption={setPlatformOption}
+          // selectedPlatforms={selectedPlatforms}
+          // setSelectedPlatforms={setSelectedPlatforms}
+          // spotifySelectedTracks={spotifySelectedTracks}
+          // setSpotifySelectedTracks={setSpotifySelectedTracks}
+          // onNavigate={onNavigate}
         />
       )}
       {activeTab === "history" && (

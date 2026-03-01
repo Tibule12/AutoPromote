@@ -669,7 +669,14 @@ const UserDashboard = ({
     try {
       const cur = auth.currentUser;
       if (!cur) return;
-      const token = await cur.getIdToken(true);
+      // Get ID token (force refresh only if necessary, use cached otherwise to reduce network errors)
+      let token;
+      try {
+        token = await cur.getIdToken();
+      } catch (tokenErr) {
+        console.warn("Failed to get cached token, trying force refresh...", tokenErr);
+        token = await cur.getIdToken(true);
+      }
 
       const res = await fetch(API_ENDPOINTS.PLATFORM_STATUS, {
         headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },

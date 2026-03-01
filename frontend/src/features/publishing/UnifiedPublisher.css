@@ -1,0 +1,405 @@
+what did /* UnifiedPublisher.css */
+
+.unified-publisher-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 80vh;
+  background: transparent;
+  color: #e2e8f0;
+  font-family: "Inter", sans-serif;
+}
+
+.publisher-header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1rem;
+}
+
+.publisher-header h1 {
+  font-size: 1.8rem;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.publisher-header p {
+  color: #94a3b8;
+  margin: 0;
+}
+
+.feedback-bar {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 6px;
+  color: #93c5fd;
+  font-size: 0.9rem;
+}
+
+/* --- Layout --- */
+.publisher-layout {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 2rem;
+  flex: 1;
+}
+
+/* --- Responsive Mobile Tweaks --- */
+@media (max-width: 1024px) {
+  .publisher-layout {
+    grid-template-columns: 1fr; /* Stack sidebar and main content */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .global-controls {
+    order: 1; /* Move global controls to top on mobile */
+  }
+
+  .platform-workspace {
+    order: 2;
+  }
+
+  .publisher-header h1 {
+    font-size: 1.5rem; /* Smaller title */
+  }
+
+  .unified-publisher-container {
+    padding: 10px; /* Less padding */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+  }
+
+  /* Ensure inputs don't overflow */
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    max-width: 100%;
+    box-sizing: border-box; /* Critical for padding calculation */
+  }
+}
+
+/* --- Platform Card Visibility Fixes --- */
+.platform-card-wrapper {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Better border visibility */
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 20px;
+  overflow-wrap: break-word; /* Prevent text overflow */
+}
+
+.platform-card-wrapper h3 {
+  color: #fff; /* High contrast title */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+/* --- Platform Specific Previews --- */
+.platform-mini-preview {
+  margin-top: 15px;
+  padding: 10px;
+  background: #000;
+  border-radius: 6px;
+  border: 1px solid #333;
+  text-align: center;
+}
+
+.platform-mini-preview video,
+.platform-mini-preview img {
+  max-height: 200px; /* Limit height */
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.platform-mini-preview p {
+  color: #888;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+}
+
+/* --- Button Visibility --- */
+button {
+  white-space: normal; /* Allow text wrapping on small screens */
+  word-wrap: break-word;
+}
+
+/* --- Sidebar (Global Controls) --- */
+.global-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.card h2 {
+  font-size: 1.1rem;
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  color: #f8fafc;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.75rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.75rem;
+  color: #f1f5f9;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  transition: all 0.2s ease;
+}
+
+/* Improve placeholder visibility */
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.4rem;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* --- Platform Toggles --- */
+.platform-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.toggle-btn.active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #bfdbfe;
+}
+
+.toggle-btn input[type="checkbox"] {
+  accent-color: #3b82f6;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* --- Main Workspace --- */
+.platform-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.platform-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.platform-section {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Individual Platform Wrappers */
+.platform-card-wrapper {
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1.5rem;
+  overflow-wrap: break-word; /* Ensure text wraps */
+}
+
+.platform-card-wrapper h3 {
+  margin-top: 0;
+  color: #e2e8f0;
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* --- Action State --- */
+.empty-state {
+  text-align: center;
+  padding: 4rem;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 2px dashed rgba(255, 255, 255, 0.06);
+}
+
+.publish-actions {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(15, 23, 42, 0.8);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  bottom: 0;
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  z-index: 50;
+}
+
+.btn-primary-large {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary-large:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.btn-primary-large:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
+.feedback-message {
+  color: #10b981;
+  font-weight: 500;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Mobile Responsive 768px --- */
+@media (max-width: 768px) {
+  .platform-card-body {
+    grid-template-columns: 1fr !important;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .platform-preview-column {
+    max-width: 100% !important;
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
+
+/* --- High Contrast / Accessibility Overrides --- */
+.btn-secondary-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.global-card {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #1a1a1a;
+}
+.preview-media {
+  border: 2px solid #333;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* --- Fix for White Card / Theme Clash --- */
+.dark-theme-form .platform-card {
+  background: transparent !important; /* Remove white bg */
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.dark-theme-form .platform-form-header {
+  display: none !important; /* Hide redundant header */
+}
+
+.dark-theme-form label,
+.dark-theme-form h4,
+.dark-theme-form span,
+.dark-theme-form div {
+  /* Ensure all text containers inherit light color */
+  color: #e2e8f0 !important;
+}
+
+.dark-theme-form input,
+.dark-theme-form textarea,
+.dark-theme-form select {
+  background: rgba(0, 0, 0, 0.4) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark-theme-form .best-time-banner {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  color: #6ee7b7 !important;
+}

@@ -1,0 +1,238 @@
+.viral-scanner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px);
+}
+
+.viral-scanner-modal {
+  background: #1e293b;
+  width: 90%;
+  max-width: 900px;
+  height: 80vh;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.scanner-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #334155;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0f172a;
+}
+
+.scanner-header h3 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scanner-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.scanner-close-btn:hover {
+  color: #e2e8f0;
+}
+
+.scanner-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.scanner-video-column {
+  flex: 2;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid #334155;
+  position: relative;
+}
+
+.scanner-video-column video {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.scanner-sidebar {
+  flex: 1;
+  background: #1e293b;
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+}
+
+.scanner-controls {
+  padding: 20px;
+  border-bottom: 1px solid #334155;
+  text-align: center;
+}
+
+.scan-btn {
+  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  transition:
+    transform 0.1s,
+    box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+}
+
+.scan-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 65, 108, 0.6);
+}
+
+.scan-btn:disabled {
+  background: #475569;
+  color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.scanning-progress {
+  margin-top: 15px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #334155;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #3b82f6;
+  transition: width 0.3s ease;
+}
+
+.scanning-text {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+.results-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+.result-card {
+  background: #334155;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.result-card:hover {
+  background: #475569;
+  border-color: #64748b;
+}
+
+.result-card.active {
+  background: #1e293b;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.viral-score {
+  background: #10b981;
+  color: #064e3b;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.result-time {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.result-reason {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.use-clip-btn {
+  width: 100%;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.use-clip-btn:hover {
+  background: #2563eb;
+}
