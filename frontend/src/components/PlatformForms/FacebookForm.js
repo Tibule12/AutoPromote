@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { sanitizeUrl } from "../../utils/security";
 
 const FacebookForm = ({
   onChange,
@@ -25,11 +26,19 @@ const FacebookForm = ({
 
   const [pageId, setPageId] = useState(initialData.pageId || pages[0]?.id || "");
   const [message, setMessage] = useState(initialData.message || globalDescription || "");
+  const [isDirtyMessage, setIsDirtyMessage] = useState(false);
   const [postType, setPostType] = useState(initialData.postType || "feed"); // feed, story, reel
   const [isPaidPartnership, setIsPaidPartnership] = useState(
     initialData.isPaidPartnership || false
   );
   const [sponsorUser, setSponsorUser] = useState(initialData.sponsorUser || "");
+
+  // Smart Sync: Update message when globalDescription changes, unless user has edited it
+  useEffect(() => {
+    if (!isDirtyMessage && globalDescription) {
+      setMessage(globalDescription);
+    }
+  }, [globalDescription, isDirtyMessage]);
 
   useEffect(() => {
     onChange({
@@ -95,7 +104,7 @@ const FacebookForm = ({
         />
 
         {/* --- REVIEW AI ENHANCEMENTS for Facebook --- */}
-        {(currentFile || !currentFile) && (onReviewAI || onFindViralClips) && (
+        {(onReviewAI || onFindViralClips) && (
           <div style={{ display: "flex", gap: "10px", marginTop: 8, marginBottom: 15 }}>
             {onReviewAI && (
               <button
@@ -138,7 +147,7 @@ const FacebookForm = ({
         {videoPreviewUrl && (currentFile?.type?.startsWith("video/") || !currentFile) && (
           <div style={{ marginTop: "10px" }}>
             <video
-              src={videoPreviewUrl}
+              src={sanitizeUrl(videoPreviewUrl)}
               controls
               style={{
                 width: "100%",
@@ -301,7 +310,10 @@ const FacebookForm = ({
         <textarea
           className="modern-input"
           value={message}
-          onChange={e => setMessage(e.target.value)}
+          onChange={e => {
+            setMessage(e.target.value);
+            setIsDirtyMessage(true);
+          }}
           placeholder="What's on your mind?"
           rows={4}
         />

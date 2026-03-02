@@ -10,12 +10,15 @@ async function cleanupSourceFile(fileUrl) {
 
   // Ignore external URLs that are clearly not ours (e.g. random internet videos)
   // Only target our storage buckets to prevent accidents
-  if (
-    !fileUrl.includes("firebasestorage") &&
-    !fileUrl.includes("storage.googleapis") &&
-    !fileUrl.startsWith("gs://")
-  ) {
-    return;
+  try {
+    const urlObj = new URL(fileUrl);
+    // Strict hostname checking
+    const allowedHosts = ["firebasestorage.googleapis.com", "storage.googleapis.com"];
+    if (!allowedHosts.includes(urlObj.hostname) && !fileUrl.startsWith("gs://")) {
+      return;
+    }
+  } catch (e) {
+    if (!fileUrl.startsWith("gs://")) return;
   }
 
   console.log(`[Cleanup] Attempting to delete source file: ${fileUrl}`);
@@ -64,10 +67,11 @@ async function cleanupSourceFile(fileUrl) {
         console.log(`[Cleanup] File did not exist (already deleted?): ${filePath}`);
       }
     } else {
-      console.log(`[Cleanup] Could not parse valid storage path from URL: ${fileUrl}`);
+      // Safe logging (prevent format string injection)
+      console.log("[Cleanup] Could not parse valid storage path from URL:", fileUrl);
     }
   } catch (error) {
-    console.warn(`[Cleanup] ⚠️ Failed to delete source file ${fileUrl}:`, error.message);
+    console.warn("[Cleanup] ⚠️ Failed to delete source file:", fileUrl, error.message);
     // Swallow error to preventing crashing the main request
   }
 }

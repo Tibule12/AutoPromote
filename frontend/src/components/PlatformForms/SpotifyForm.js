@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { API_ENDPOINTS } from "../../config";
 import { auth } from "../../firebaseClient";
+import { sanitizeUrl } from "../../utils/security";
 import "../spotify-card.css";
-import MiniPlayer from "../MiniPlayer";
 
 const SpotifyForm = ({
   data,
@@ -21,7 +21,6 @@ const SpotifyForm = ({
   const [errorMessage, setErrorMessage] = useState(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef(null);
-  const [previewTrack, setPreviewTrack] = React.useState(null);
   const [liveMessage, setLiveMessage] = React.useState("");
   const [connected, setConnected] = useState(null);
 
@@ -269,17 +268,13 @@ const SpotifyForm = ({
                 if (e.key === "Enter") {
                   e.preventDefault();
                   addTrack(r);
-                } else if (e.key === " ") {
-                  e.preventDefault();
-                  setPreviewTrack(r);
-                  setLiveMessage(`Previewing ${r.name}`);
                 }
               }}
             >
               <div className="result-img" style={r.image ? { padding: 0 } : {}}>
                 {r.image ? (
                   <img
-                    src={r.image}
+                    src={sanitizeUrl(r.image)}
                     alt=""
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
@@ -299,152 +294,29 @@ const SpotifyForm = ({
                       background: "#333",
                       color: "#fff",
                       marginRight: "6px",
-                      textTransform: "uppercase",
                     }}
                   >
                     {r.type}
                   </span>
-                  {(() => {
-                    switch (r.type) {
-                      case "playlist":
-                        return `by ${r.owner}`;
-                      case "show":
-                        return `Host: ${r.publisher}`;
-                      case "episode":
-                        return `from ${r.show_name}`;
-                      case "album":
-                      case "track":
-                      default:
-                        return Array.isArray(r.artists) ? r.artists.join(", ") : r.artist;
-                    }
-                  })()}
+                  {Array.isArray(r.artists) ? r.artists.join(", ") : ""}
                 </div>
-              </div>
-              <div>
-                <button
-                  className="btn btn-secondary"
-                  onClick={e => {
-                    e.stopPropagation();
-                    addTrack(r);
-                  }}
-                  aria-label={`Add ${r.name}`}
-                >
-                  Add
-                </button>
-                {r.preview_url && (
-                  <button
-                    className="btn"
-                    style={{ marginLeft: 8 }}
-                    onClick={e => {
-                      e.stopPropagation();
-                      setPreviewTrack(r);
-                      setLiveMessage(`Previewing ${r.name}`);
-                    }}
-                    aria-label={`Preview ${r.name}`}
-                  >
-                    ▶
-                  </button>
-                )}
               </div>
             </div>
           ))}
-
-          {loading && (
-            <div className="small-muted" style={{ padding: 8 }}>
-              Searching...
-            </div>
-          )}
-          {!loading && results.length === 0 && query && debouncedQuery && (
-            <div className="small-muted" style={{ padding: 8 }}>
-              No results found.
+          {results.length === 0 && !loading && query && (
+            <div className="small-muted" style={{ padding: 10, textAlign: "center" }}>
+              No results found
             </div>
           )}
         </div>
 
-        {selectedTracks.length > 0 && (
-          <div className="selected-tracks-container" style={{ marginTop: "15px" }}>
-            <h5 style={{ fontSize: "14px", marginBottom: "8px" }}>Selected Items</h5>
-            <div className="selected-tracks" aria-live="polite">
-              {selectedTracks.map(st => (
-                <div key={st.id || st.uri} className="track-chip">
-                  {st.image && (
-                    <img
-                      src={st.image}
-                      alt=""
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 4,
-                        marginRight: 8,
-                        objectFit: "cover",
-                      }}
-                    />
-                  )}
-                  <div style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
-                    <div style={{ fontWeight: 600 }}>{st.name}</div>
-                    <div style={{ fontSize: 12, color: "#9fcfb9" }}>
-                      <span
-                        style={{
-                          textTransform: "uppercase",
-                          fontSize: "0.85em",
-                          opacity: 0.7,
-                          marginRight: 4,
-                        }}
-                      >
-                        {st.type || "track"}
-                      </span>
-                      {(() => {
-                        switch (st.type) {
-                          case "playlist":
-                            return st.owner;
-                          case "show":
-                            return st.publisher;
-                          case "episode":
-                            return st.show_name;
-                          default:
-                            return Array.isArray(st.artists)
-                              ? st.artists.join(", ")
-                              : st.artist || "";
-                        }
-                      })()}
-                    </div>
-                  </div>
-                  <button
-                    className="remove"
-                    onClick={() => removeTrack(st.uri, st.id)}
-                    aria-label={`Remove ${st.name}`}
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {campaignMode && (
-          <div className="campaign-options" style={{ marginTop: "15px" }}>
-            <label>
-              <input
-                type="checkbox"
-                checked={data?.isSponsored || false}
-                onChange={e => onChange("isSponsored", e.target.checked)}
-              />
-              Promote this track (Branded Campaign)
-            </label>
-          </div>
-        )}
-
         <div
-          className="sr-only"
+          className="live-region"
           aria-live="polite"
-          aria-atomic="true"
-          style={{ position: "absolute", width: 1, height: 1, overflow: "hidden" }}
+          style={{ position: "absolute", left: "-9999px" }}
         >
           {liveMessage}
         </div>
-
-        {previewTrack && <MiniPlayer track={previewTrack} onClose={() => setPreviewTrack(null)} />}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import EmojiPicker from "../EmojiPicker";
 import HashtagSuggestions from "../HashtagSuggestions";
 import { OPTIMAL_TIMES } from "../BestTimeToPost";
 import FilterEffects from "../FilterEffects";
+import { sanitizeUrl } from "../../utils/security";
 
 // Helper for Declaration JSX
 const getTikTokDeclarationJSX = (commercialContent, brandedContent) => {
@@ -113,6 +114,17 @@ const TikTokForm = ({
   const [caption, setCaption] = useState(
     initialData.caption || (globalTitle ? `${globalTitle} ${globalDescription || ""}` : "")
   );
+  const [isCaptionDirty, setIsCaptionDirty] = useState(false);
+
+  // Sync Global Title/Description changes UNLESS user has edited caption locally
+  useEffect(() => {
+    if (!isCaptionDirty && (globalTitle || globalDescription)) {
+      const newCaption = `${globalTitle || ""} ${globalDescription || ""}`.trim();
+      if (newCaption && newCaption !== caption) {
+        setCaption(newCaption);
+      }
+    }
+  }, [globalTitle, globalDescription, isCaptionDirty]);
 
   const [showBrandTooltip, setShowBrandTooltip] = useState(false);
   const [showBrandedTooltip, setShowBrandedTooltip] = useState(false);
@@ -136,6 +148,7 @@ const TikTokForm = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const handleInsertEmoji = emoji => {
     setCaption(prev => prev + emoji);
+    setIsCaptionDirty(true);
     setShowEmojiPicker(false);
   };
 
@@ -221,7 +234,10 @@ const TikTokForm = ({
 
       {/* Creator Info & Posting Cap */}
       <div style={{ fontSize: 12, color: "#666", marginBottom: 12 }}>
-        Creator: {creatorInfo ? creatorInfo.display_name || creatorInfo.open_id : "Not available"}
+        <strong>Creator:</strong>{" "}
+        {creatorInfo && (creatorInfo.display_name || creatorInfo.open_id)
+          ? creatorInfo.display_name || creatorInfo.open_id
+          : "Not available (Please refresh or check connection)"}
         {creatorInfo && typeof creatorInfo.posting_remaining === "number" && (
           <div style={{ marginTop: 6, fontSize: 12 }}>
             Posting cap: {creatorInfo.posting_cap_per_24h} per 24h • Remaining:{" "}
@@ -259,7 +275,10 @@ const TikTokForm = ({
             id="tiktok-caption"
             className="modern-input"
             value={caption}
-            onChange={e => setCaption(e.target.value)}
+            onChange={e => {
+              setCaption(e.target.value);
+              setIsCaptionDirty(true);
+            }}
             placeholder="Describe your video... #viral #fyp"
             maxLength={2200}
             rows={3}
@@ -291,7 +310,10 @@ const TikTokForm = ({
           contentType="video"
           title={caption}
           description=""
-          onAddHashtag={tag => setCaption(prev => prev + " #" + tag)}
+          onAddHashtag={tag => {
+            setCaption(prev => prev + " #" + tag);
+            setIsCaptionDirty(true);
+          }}
         />
       </div>
       <div className="form-group-modern">
@@ -384,7 +406,7 @@ const TikTokForm = ({
         {videoPreviewUrl && type === "video" && (
           <div style={{ marginTop: "10px" }}>
             <video
-              src={videoPreviewUrl}
+              src={sanitizeUrl(videoPreviewUrl)}
               controls
               style={{
                 width: "100%",
@@ -418,7 +440,7 @@ const TikTokForm = ({
         {showFilters && previewUrl && (
           <div style={{ marginTop: 10 }}>
             <FilterEffects
-              imageUrl={previewUrl}
+              imageUrl={sanitizeUrl(previewUrl)}
               onApplyFilter={f => console.log("Filter applied:", f.name)}
             />
           </div>

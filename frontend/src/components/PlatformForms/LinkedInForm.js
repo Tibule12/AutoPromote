@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { sanitizeUrl } from "../../utils/security";
 
 const LinkedInForm = ({
   onChange,
   initialData = {},
+  creatorInfo, // Received from UnifiedPublisher (contains profile/companies)
   globalTitle,
   globalDescription,
   currentFile,
@@ -23,10 +25,28 @@ const LinkedInForm = ({
   }, [currentFile]);
 
   const [visibility, setVisibility] = useState(initialData.visibility || "PUBLIC");
+
+  // Smart Sync State
   const [commentary, setCommentary] = useState(initialData.commentary || globalDescription || "");
   const [title, setTitle] = useState(initialData.title || globalTitle || ""); // For articles/videos
+  const [isDirtyCommentary, setIsDirtyCommentary] = useState(!!initialData.commentary);
+  const [isDirtyTitle, setIsDirtyTitle] = useState(!!initialData.title);
+
   const [companyId, setCompanyId] = useState(initialData.companyId || "");
   const [isPromotional, setIsPromotional] = useState(initialData.isPromotional || false);
+
+  // Sync global descriptions if not manually edited
+  useEffect(() => {
+    if (!isDirtyCommentary && globalDescription) {
+      setCommentary(globalDescription);
+    }
+  }, [globalDescription, isDirtyCommentary]);
+
+  useEffect(() => {
+    if (!isDirtyTitle && globalTitle) {
+      setTitle(globalTitle);
+    }
+  }, [globalTitle, isDirtyTitle]);
 
   useEffect(() => {
     onChange({
@@ -39,6 +59,16 @@ const LinkedInForm = ({
     });
   }, [visibility, commentary, title, companyId, isPromotional]);
 
+  const handleCommentaryChange = e => {
+    setCommentary(e.target.value);
+    setIsDirtyCommentary(true);
+  };
+
+  const handleTitleChange = e => {
+    setTitle(e.target.value);
+    setIsDirtyTitle(true);
+  };
+
   return (
     <div className="platform-form linkedin-form">
       <h4 className="platform-form-header">
@@ -47,6 +77,35 @@ const LinkedInForm = ({
         </span>{" "}
         LinkedIn Professional
       </h4>
+
+      {/* IDENTITY BADGE */}
+      {creatorInfo && (
+        <div
+          className="identity-badge"
+          style={{
+            marginBottom: "16px",
+            display: "flex",
+            alignItems: "center",
+            background: "#f3f6f8",
+            padding: "8px",
+            borderRadius: "6px",
+          }}
+        >
+          {creatorInfo.profilePicture && (
+            <img
+              src={creatorInfo.profilePicture}
+              alt="Profile"
+              style={{ width: 32, height: 32, borderRadius: "50%", marginRight: 10 }}
+            />
+          )}
+          <div>
+            <div style={{ fontWeight: "600", color: "#333" }}>
+              {creatorInfo.localizedFirstName} {creatorInfo.localizedLastName}
+            </div>
+            <div style={{ fontSize: "0.8rem", color: "#666" }}>Posting as Profile</div>
+          </div>
+        </div>
+      )}
 
       <div className="form-group-modern">
         <label htmlFor="linkedin-company-id">Organization / Company ID (Required)</label>
@@ -110,7 +169,7 @@ const LinkedInForm = ({
         />
 
         {/* --- REVIEW AI ENHANCEMENTS for LinkedIn --- */}
-        {(currentFile || !currentFile) && (onReviewAI || onFindViralClips) && (
+        {(onReviewAI || onFindViralClips) && (
           <div style={{ display: "flex", gap: "10px", marginTop: 8, marginBottom: 15 }}>
             {onReviewAI && (
               <button
@@ -153,7 +212,7 @@ const LinkedInForm = ({
         {videoPreviewUrl && (currentFile?.type?.startsWith("video/") || !currentFile) && (
           <div style={{ marginTop: "10px" }}>
             <video
-              src={videoPreviewUrl}
+              src={sanitizeUrl(videoPreviewUrl)}
               controls
               style={{
                 width: "100%",
@@ -171,7 +230,7 @@ const LinkedInForm = ({
         <textarea
           className="modern-input"
           value={commentary}
-          onChange={e => setCommentary(e.target.value)}
+          onChange={handleCommentaryChange}
           placeholder="Share your thoughts or professional update..."
           rows={4}
         />
@@ -183,7 +242,7 @@ const LinkedInForm = ({
           type="text"
           className="modern-input"
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={handleTitleChange}
           placeholder="Professional Video Title"
         />
       </div>

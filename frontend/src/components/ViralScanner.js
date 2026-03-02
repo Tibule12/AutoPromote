@@ -4,6 +4,7 @@ import "./ViralScanner.css";
 import { storage, auth } from "../firebaseClient"; // Need auth for ID token
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { MEDIA_API_URL } from "../config"; // Use the configured Python worker URL
+import { sanitizeUrl } from "../utils/security";
 
 const ViralScanner = ({ file, onSelectClip, onClose }) => {
   const videoRef = useRef(null);
@@ -166,7 +167,12 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         <div className="scanner-body">
           <div className="scanner-video-column">
             {videoSrc ? (
-              <video ref={videoRef} src={videoSrc} controls style={{ borderRadius: "8px" }} />
+              <video
+                ref={videoRef}
+                src={sanitizeUrl(videoSrc)}
+                controls
+                style={{ borderRadius: "8px" }}
+              />
             ) : (
               <div style={{ color: "#fff" }}>No video loaded</div>
             )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { sanitizeUrl } from "../../utils/security";
 import EmojiPicker from "../EmojiPicker";
 import HashtagSuggestions from "../HashtagSuggestions";
 import { OPTIMAL_TIMES } from "../BestTimeToPost";
@@ -49,9 +50,27 @@ const YouTubeForm = ({
   }, [currentFile]);
 
   const [title, setTitle] = useState(initialData.title || globalTitle || "");
+  const [isTitleDirty, setIsTitleDirty] = useState(false); // Track if user edited manually
+
   const [description, setDescription] = useState(
     initialData.description || globalDescription || ""
   );
+  const [isDescriptionDirty, setIsDescriptionDirty] = useState(false);
+
+  // Sync Global Title changes UNLESS user has edited locally
+  useEffect(() => {
+    if (!isTitleDirty && globalTitle && globalTitle !== title) {
+      setTitle(globalTitle);
+    }
+  }, [globalTitle, isTitleDirty]);
+
+  // Sync Global Description changes UNLESS user has edited locally
+  useEffect(() => {
+    if (!isDescriptionDirty && globalDescription && globalDescription !== description) {
+      setDescription(globalDescription);
+    }
+  }, [globalDescription, isDescriptionDirty]);
+
   const [privacy, setPrivacy] = useState(initialData.privacy || "public");
   const [madeForKids, setMadeForKids] = useState(initialData.madeForKids || false);
   const [tags, setTags] = useState(initialData.tags || "");
@@ -65,8 +84,10 @@ const YouTubeForm = ({
   const handleInsertEmoji = emoji => {
     if (showEmojiPicker.field === "title") {
       setTitle(prev => prev + emoji);
+      setIsTitleDirty(true);
     } else if (showEmojiPicker.field === "description") {
       setDescription(prev => prev + emoji);
+      setIsDescriptionDirty(true);
     }
     setShowEmojiPicker({ field: null, visible: false });
   };
@@ -194,7 +215,10 @@ const YouTubeForm = ({
             type="text"
             className="modern-input"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={e => {
+              setTitle(e.target.value);
+              setIsTitleDirty(true);
+            }}
             placeholder="Video Title"
           />
           <button
@@ -327,7 +351,7 @@ const YouTubeForm = ({
         {videoPreviewUrl && (
           <div style={{ marginTop: "10px" }}>
             <video
-              src={videoPreviewUrl}
+              src={sanitizeUrl(videoPreviewUrl)}
               controls
               style={{
                 width: "100%",
@@ -404,7 +428,10 @@ const YouTubeForm = ({
             type="text"
             className="modern-input"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={e => {
+              setTitle(e.target.value);
+              setIsTitleDirty(true);
+            }}
             maxLength={100}
             placeholder="Create a title that hooks viewers"
             style={{ paddingRight: "40px" }}
@@ -444,7 +471,10 @@ const YouTubeForm = ({
           <textarea
             className="modern-input"
             value={description}
-            onChange={e => setDescription(e.target.value)}
+            onChange={e => {
+              setDescription(e.target.value);
+              setIsDescriptionDirty(true);
+            }}
             placeholder="Tell viewers about your video..."
             rows={5}
           />
@@ -479,7 +509,10 @@ const YouTubeForm = ({
           contentType="video"
           title={title}
           description={description}
-          onAddHashtag={tag => setDescription(prev => prev + " #" + tag)}
+          onAddHashtag={tag => {
+            setDescription(prev => prev + " #" + tag);
+            setIsDescriptionDirty(true);
+          }}
         />
       </div>
 

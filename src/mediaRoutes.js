@@ -200,7 +200,8 @@ router.post("/memetic/plan", async (req, res) => {
   const userId = req.user.uid;
   const { baseVariant, options, soundId } = req.body;
 
-  console.log(`[Memetic] Planning mutations for user ${userId}`, baseVariant);
+  // Safe logging
+  console.log("[Memetic] Planning mutations", { userId, baseVariant });
 
   // In a real implementation:
   // 1. Send base params to Python worker (AI model trained on viral clips)

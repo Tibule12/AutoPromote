@@ -89,8 +89,9 @@ class VideoEditingService {
    * @returns {Promise<Object>} { success: true, url: string, ... }
    */
   async processVideo(videoUrl, options, userId) {
-    console.log(`[VideoEditing] Processing for User: ${userId}`, options);
-    console.log(`[VideoEditing] Full options object:`, JSON.stringify(options, null, 2));
+    // Safe logging - pass user input as data arg, not template string
+    console.log("[VideoEditing] Processing video request", { userId, options });
+    console.log("[VideoEditing] Options detail:", JSON.stringify(options, null, 2));
 
     // Track the resulting file path from Python
     let resultPath = null;

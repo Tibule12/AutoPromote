@@ -3,6 +3,7 @@ const router = express.Router();
 const { db } = require("./firebaseAdmin");
 const { createOrder, captureOrder, verifyWebhook } = require("./services/payments/paypalService");
 const authMiddleware = require("./authMiddleware");
+const { strictLimiter } = require("./middleware/rateLimiter");
 
 // Add explicit webhook rate limiter for CodeQL/static scanners
 let codeqlLimiter = null;
@@ -26,7 +27,7 @@ router.get("/config/paypal", (req, res) => {
 
 // Create Order Payload
 // Returns { id: "ORDER-ID" ... } to the client
-router.post("/create-order", authMiddleware, async (req, res) => {
+router.post("/create-order", authMiddleware, strictLimiter, async (req, res) => {
   try {
     const { packageId } = req.body;
     const pack = PACKAGES[packageId];
@@ -58,7 +59,7 @@ router.post("/create-order", authMiddleware, async (req, res) => {
 
 // Capture Order Payload
 // Client sends { orderID } after approval
-router.post("/capture-order", authMiddleware, async (req, res) => {
+router.post("/capture-order", authMiddleware, strictLimiter, async (req, res) => {
   try {
     const { orderID, packageId } = req.body; // packageId passed for double-check or logging
     const captureData = await captureOrder(orderID);

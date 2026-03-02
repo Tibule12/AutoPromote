@@ -853,6 +853,7 @@ function ContentUploadForm({
           return;
         }
         const json = await res.json();
+        if (json.diagnostic) console.warn("[FacebookStatus]", json.diagnostic);
         setFacebookPages(json.pages || []);
         setInstagramBusinessAccountId(json.ig_business_account_id || null);
       } catch (e) {
@@ -3097,13 +3098,13 @@ function ContentUploadForm({
               </label>
               {type === "video" ? (
                 <video
-                  src={previewUrl}
+                  src={sanitizeUrl(previewUrl)}
                   controls
                   style={{ maxWidth: "100%", maxHeight: 300, borderRadius: 4 }}
                 />
               ) : (
                 <img
-                  src={previewUrl}
+                  src={sanitizeUrl(previewUrl)}
                   alt="Content Preview"
                   style={{
                     maxWidth: "100%",
