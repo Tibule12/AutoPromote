@@ -2,6 +2,7 @@
 const { db } = require("../firebaseAdmin");
 const { tokensFromDoc } = require("./connectionTokenUtils");
 const { safeFetch } = require("../utils/ssrfGuard");
+const { cleanupSourceFile } = require("../utils/cleanupSource");
 
 let fetchFn = global.fetch;
 if (!fetchFn) {
@@ -70,6 +71,12 @@ async function postToPinterest({ contentId, payload, reason, uid }) {
     if (!response.ok) {
       return { platform: "pinterest", success: false, error: json.error || JSON.stringify(json) };
     }
+
+    if (imageUrl) {
+      // Clean up source file (image/video) after successful pin
+      cleanupSourceFile(imageUrl).catch(() => {});
+    }
+
     const pinId = json.id || json.pin_id || null;
     if (contentId && pinId && uid) {
       try {
@@ -88,15 +95,20 @@ async function postToPinterest({ contentId, payload, reason, uid }) {
 
 // Get Pinterest pin info (metrics)
 async function getPinInfo({ uid, pinId }) {
-  if (!pinId) throw new Error('pinId required');
+  if (!pinId) throw new Error("pinId required");
   // Try user tokens first
   let userTokens = null;
   if (uid) {
     try {
-      const snap = await db.collection('users').doc(uid).collection('connections').doc('pinterest').get();
+      const snap = await db
+        .collection("users")
+        .doc(uid)
+        .collection("connections")
+        .doc("pinterest")
+        .get();
       if (snap.exists) {
         const d = snap.data() || {};
-        const { tokensFromDoc } = require('./connectionTokenUtils');
+        const { tokensFromDoc } = require("./connectionTokenUtils");
         userTokens = tokensFromDoc(d) || null;
       }
     } catch (_) {}
@@ -104,19 +116,23 @@ async function getPinInfo({ uid, pinId }) {
   const accessToken = userTokens ? userTokens.access_token : null;
   if (!accessToken) {
     // If no user token, but server credentials exist, we could use app-level calls (not implemented) -> simulate
-    return { simulated: true, reason: 'missing_credentials', pinId };
+    return { simulated: true, reason: "missing_credentials", pinId };
   }
   try {
-    const response = await safeFetch(`https://api.pinterest.com/v5/pins/${encodeURIComponent(pinId)}`, fetchFn, {
-      fetchOptions: {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-      requireHttps: true,
-      allowHosts: ['api.pinterest.com'],
-    });
+    const response = await safeFetch(
+      `https://api.pinterest.com/v5/pins/${encodeURIComponent(pinId)}`,
+      fetchFn,
+      {
+        fetchOptions: {
+          method: "GET",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+        requireHttps: true,
+        allowHosts: ["api.pinterest.com"],
+      }
+    );
     if (!response.ok) {
-      const txt = await response.text().catch(()=>'');
+      const txt = await response.text().catch(() => "");
       return { success: false, error: `pin_fetch_failed:${response.status}`, raw: txt };
     }
     const j = await response.json();
@@ -133,11 +149,11 @@ async function getPinInfo({ uid, pinId }) {
     };
     return { success: true, metrics };
   } catch (e) {
-    return { success: false, error: e.message || 'pin_fetch_error' };
+    return { success: false, error: e.message || "pin_fetch_error" };
   }
 }
 
-module.exports = { postToPinterest, createBoard, getPinInfo }
+module.exports = { postToPinterest, createBoard, getPinInfo };
 async function createBoard({ name, description, uid }) {
   if (!name || !String(name).trim()) return { ok: false, error: "name_required" };
   const userRef = db.collection("users").doc(uid);

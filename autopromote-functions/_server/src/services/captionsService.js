@@ -7,6 +7,7 @@ const path = require("path");
 const os = require("os");
 const ffmpeg = require("fluent-ffmpeg");
 const { db, admin } = require("../firebaseAdmin");
+const { audioTranscriptions } = require("./openaiClient"); // Import OpenAI Client
 
 const MAX_CHARS = parseInt(process.env.MAX_CAPTION_CHARS || "5000", 10);
 
@@ -168,4 +169,51 @@ async function createCaptions({ contentId, userId, transcript, format = "srt", b
   return { assetId: assetDoc.id, format, burnInQueued: !!burnIn };
 }
 
-module.exports = { createCaptions };
+// --- New Function: Generate Transcription via OpenAI Whisper ---
+// This calls the openaiClient's audioTranscriptions which expects a formData-like object
+// that can return headers (for multipart boundary).
+// const { audioTranscriptions } = require("./openaiClient"); // Removed duplicate
+
+async function generateTranscription(filePathOrBuffer) {
+  const FormData = require("form-data");
+  const form = new FormData();
+
+  if (typeof filePathOrBuffer === "string" && fs.existsSync(filePathOrBuffer)) {
+    form.append("file", fs.createReadStream(filePathOrBuffer));
+  } else if (Buffer.isBuffer(filePathOrBuffer)) {
+    // OpenAI requires a filename to infer content type.
+    form.append("file", filePathOrBuffer, { filename: "upload.mp3", contentType: "audio/mpeg" });
+  } else {
+    throw new Error("Invalid file input for transcription.");
+  }
+
+  // Use whisper-1 model properly configured
+  form.append("model", "whisper-1");
+  form.append("response_format", "verbose_json"); // Get timestamps
+  // Add a prompt to guide the model towards speech and away from hallucinations
+  form.append(
+    "prompt",
+    "Transcribe the spoken words only. Ignore background music, sound effects, and silence. No descriptions like [Music]."
+  );
+  // Set temperature to 0 for most deterministic output
+  form.append("temperature", "0");
+
+  try {
+    // Call openaiClient wrapper.
+    // audioTranscriptions implementation in openaiClient.js takes formData
+    const result = await audioTranscriptions(form, {
+      // Mock getHeaders if form doesn't expose it directly (standard form-data does)
+      getHeaders: () => form.getHeaders(),
+    });
+
+    // Result contains text and segments with timestamps
+    return result; // contains .text, .segments [{ start, end, text }]
+  } catch (error) {
+    console.error("Transcription error:", error.response?.data || error.message);
+    throw new Error(
+      "Failed to generate transcription: " + (error.response?.data?.error?.message || error.message)
+    );
+  }
+}
+
+module.exports = { createCaptions, generateTranscription };

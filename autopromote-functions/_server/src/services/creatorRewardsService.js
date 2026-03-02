@@ -7,8 +7,8 @@ const { admin, db } = require("../firebaseAdmin");
 // Reward thresholds and payouts - CLEARED
 /*
  * PREVIOUSLY IMPLEMENTED:
- * viral: { minViews: 30000, minEngagement: 0.05, reward: 3.0, badge: '🔥 Viral Bonus' },
- * trending: { minViews: 100000, minEngagement: 0.04, reward: 8.0, badge: '📈 Mega Bonus' },
+ * viral: { minViews: 30000, minEngagement: 0.05, reward: 3.0, badge: ' Viral Bonus' },
+ * trending: { minViews: 100000, minEngagement: 0.04, reward: 8.0, badge: ' Mega Bonus' },
  */
 const PERFORMANCE_TIERS = {};
 
@@ -57,7 +57,7 @@ async function calculateContentRewards(contentId, userId) {
     milestoneBonus: 0,
     milestone: null,
     totalEarned: 0,
-    message: "Pay-per-view rewards are currently disabled. Join a Mission to earn rewards."
+    message: "Pay-per-view rewards are currently disabled. Join a Mission to earn rewards.",
   };
 }
 
@@ -72,7 +72,7 @@ async function getUserEarnings(userId) {
     // For now, we still return the values from the DB if they exist (historical data),
     // but the system won't generate NEW earnings from views.
     // However, to stop displaying "fake money", we return 0.
-    
+
     return {
       totalEarnings: 0, // userData.totalEarnings || 0,
       pendingEarnings: 0, // userData.pendingEarnings || 0,
@@ -96,7 +96,8 @@ async function getUserEarnings(userId) {
  */
 async function requestPayout(userId, paymentMethod = "paypal") {
   return {
-    error: "Payouts for view-based rewards are discontinued. Please check the Missions tab for active opportunities."
+    error:
+      "Payouts for view-based rewards are discontinued. Please check the Missions tab for active opportunities.",
   };
 }
 
