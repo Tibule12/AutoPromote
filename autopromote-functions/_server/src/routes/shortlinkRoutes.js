@@ -43,7 +43,9 @@ router.get("/:code", shortlinkPublicLimiter, async (req, res) => {
 
       const safeTitle = escapeHtml(content.title || "Shared Content");
       const safeOgTitle = escapeHtml(content.title || "Check this out!");
-      const safeDescription = escapeHtml(content.description || "Check out this amazing content shared via AutoPromote");
+      const safeDescription = escapeHtml(
+        content.description || "Check out this amazing content shared via AutoPromote"
+      );
       const safeUrl = escapeHtml(content.url || "");
       const safeThumbnail = escapeHtml(content.thumbnail || "");
 

@@ -43,6 +43,9 @@ router.get("/content/:id", authMiddleware, async (req, res) => {
           revenue: 0,
         };
 
+    // Override revenue to 0 as pay-per-view is disabled
+    if (analytics.revenue) analytics.revenue = 0;
+
     res.json({ analytics });
   } catch (error) {
     const logger = require("./utils/logger");
@@ -67,7 +70,7 @@ router.get("/overview", authMiddleware, async (req, res) => {
       totalViews += content.views || 0;
       totalLikes += content.likes || 0;
       totalShares += content.shares || 0;
-      totalRevenue += content.revenue || 0;
+      // totalRevenue += content.revenue || 0; // Pay-per-view disabled
     });
 
     res.json({

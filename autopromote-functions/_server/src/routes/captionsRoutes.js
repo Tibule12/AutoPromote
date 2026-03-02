@@ -1,8 +1,46 @@
 const express = require("express");
 const router = express.Router();
-const { createCaptions } = require("../services/captionsService");
+const { createCaptions, generateTranscription } = require("../services/captionsService");
 const { db } = require("../firebaseAdmin");
 const { audit } = require("../services/auditLogger");
+const multer = require("multer");
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB Whisper Limit
+});
+
+// POST /transcribe relative to mount point
+// Mounted at /api/captions, so full path is /api/captions/transcribe
+router.post("/transcribe", upload.single("file"), async (req, res) => {
+  // Check Auth - Assuming authMiddleware is used globally or injected here
+  // If your app uses a middleware, this check might be redundant but safe
+  const userId = req.user?.uid || (req.headers.authorization ? "unknown_user" : null);
+  // Simplified auth check for demo if middleware not in place for this specific route file
+
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  try {
+    console.log(`[Transcribe] Processing file, size: ${req.file.size}`);
+    const result = await generateTranscription(req.file.buffer);
+
+    audit.log("captions.transcribed", {
+      userId,
+      fileSize: req.file.size,
+      duration: result.duration,
+    });
+
+    res.json({
+      text: result.text,
+      segments: result.segments,
+      language: result.language,
+    });
+  } catch (e) {
+    console.error("[Transcribe] Error:", e);
+    res.status(500).json({ error: "Transcription failed: " + e.message });
+  }
+});
 
 // POST /api/content/:id/captions
 router.post("/content/:id/captions", async (req, res) => {

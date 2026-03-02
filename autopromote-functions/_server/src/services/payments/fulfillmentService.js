@@ -33,30 +33,53 @@ async function fulfillPayment(paymentId, ipnData = {}) {
       const purchaseType = (meta && meta.type) || null;
 
       // Perform user credit updates inside transaction when possible
+      // UNIFICATION: Convert purchased $ amounts to "growth_credits" for Wolf Hunt
       if (purchaseType === "ad_credits" && meta.userId) {
         const userRef = db.collection("users").doc(String(meta.userId));
-        const amt =
+        const dollarAmount =
           Number(meta.amount || payment.amount || (payment.params && payment.params.amount) || 0) ||
           0;
-        if (amt > 0) {
+
+        // EXCHANGE RATE: 100 Credits per $1 USD.
+        // This makes 1 Like (2 credits) cost $0.02, which is competitive.
+        const conversionRate = 100;
+        const creditAmount = Math.floor(dollarAmount * conversionRate);
+
+        if (creditAmount > 0) {
           try {
             if (
               admin &&
               admin.firestore &&
               typeof admin.firestore.FieldValue.increment === "function"
             ) {
+              // Update BOTH fields for backward compatibility, but primarily growth_credits
               tx.set(
                 userRef,
-                { adCredits: admin.firestore.FieldValue.increment(amt) },
+                {
+                  adCredits: admin.firestore.FieldValue.increment(dollarAmount), // Legacy tracker ($)
+                  growth_credits: admin.firestore.FieldValue.increment(creditAmount), // Wolf Hunt Currency
+                },
                 { merge: true }
               );
             } else {
               const userSnap = await tx.get(userRef);
-              const cur =
+              const curAdCredits =
                 userSnap.exists && Number(userSnap.data().adCredits)
                   ? Number(userSnap.data().adCredits)
                   : 0;
-              tx.set(userRef, { adCredits: cur + amt }, { merge: true });
+              const curGrowthCredits =
+                userSnap.exists && Number(userSnap.data().growth_credits)
+                  ? Number(userSnap.data().growth_credits)
+                  : 0;
+
+              tx.set(
+                userRef,
+                {
+                  adCredits: curAdCredits + dollarAmount,
+                  growth_credits: curGrowthCredits + creditAmount,
+                },
+                { merge: true }
+              );
             }
           } catch (e) {}
         }
@@ -141,7 +164,11 @@ async function fulfillPayment(paymentId, ipnData = {}) {
     const purchaseType = (meta && meta.type) || null;
     if (purchaseType === "ad_credits" && meta.userId) {
       const userRef = db.collection("users").doc(String(meta.userId));
-      const amt = Number(meta.amount || payment.amount || 0) || 0;
+      const dollarAmount = Number(meta.amount || payment.amount || 0) || 0;
+
+      const conversionRate = 100;
+      const creditAmount = Math.floor(dollarAmount * conversionRate);
+
       try {
         if (
           admin &&
@@ -149,16 +176,30 @@ async function fulfillPayment(paymentId, ipnData = {}) {
           typeof admin.firestore.FieldValue.increment === "function"
         ) {
           await userRef.set(
-            { adCredits: admin.firestore.FieldValue.increment(amt) },
+            {
+              adCredits: admin.firestore.FieldValue.increment(dollarAmount),
+              growth_credits: admin.firestore.FieldValue.increment(creditAmount),
+            },
             { merge: true }
           );
         } else {
           const uSnap = await userRef.get().catch(() => null);
-          const cur =
+          const curAd =
             uSnap && uSnap.exists && Number(uSnap.data().adCredits)
               ? Number(uSnap.data().adCredits)
               : 0;
-          await userRef.set({ adCredits: cur + amt }, { merge: true });
+          const curGrowth =
+            uSnap && uSnap.exists && Number(uSnap.data().growth_credits)
+              ? Number(uSnap.data().growth_credits)
+              : 0;
+
+          await userRef.set(
+            {
+              adCredits: curAd + dollarAmount,
+              growth_credits: curGrowth + creditAmount,
+            },
+            { merge: true }
+          );
         }
       } catch (e) {}
     }

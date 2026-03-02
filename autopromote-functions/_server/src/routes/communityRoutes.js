@@ -8,6 +8,14 @@ const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 
+const {
+  createEngagementBounty,
+  getAvailableBounties,
+  claimTask,
+  confirmTaskCompletion,
+  checkDailyWorkLimit,
+} = require("../services/communityEngine");
+
 // Apply rate limiting
 const communityLimiter = rateLimiter({
   capacity: parseInt(process.env.RATE_LIMIT_COMMUNITY || "200", 10),
@@ -908,6 +916,91 @@ router.get("/suggestions", authMiddleware, async (req, res) => {
       error: error && error.message ? error.message : error,
     });
     res.status(500).json({ error: "Failed to fetch suggestions" });
+  }
+});
+
+// --- 🐺 WOLF HUNT: GAMIFIED ENGAGEMENT ECONOMY ---
+
+/**
+ * GET /api/community/wolf-hunt/tasks
+ * The Main "Feeding Ground". Lists active tasks users can hunt.
+ */
+router.get("/wolf-hunt/tasks", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    // Check stamina first - gamification blocker
+    const limitStatus = await checkDailyWorkLimit(userId).catch(e => ({ error: e.message }));
+
+    if (limitStatus.error) {
+      // Return empty list but with specific error code for UI to show "Rest Needed"
+      return res.json({ success: false, code: "STAMINA_DEPLETED", message: limitStatus.error });
+    }
+
+    const tasks = await getAvailableBounties(userId);
+    res.json({ success: true, tasks, stamina: limitStatus });
+  } catch (error) {
+    logger.error("WolfHunt.fetchTasks", { error });
+    res.status(500).json({ error: "The hunting grounds are fogged over." });
+  }
+});
+
+/**
+ * POST /api/community/wolf-hunt/campaign
+ * Create a new Prey (Campaign) for others to hunt.
+ */
+router.post("/wolf-hunt/campaign", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { contentId, platform, actionType, quantity } = req.body;
+
+    const result = await createEngagementBounty(userId, contentId, platform, actionType, quantity);
+    res.json(result);
+  } catch (error) {
+    logger.warn("WolfHunt.createCampaignFailed", { userId, error: error.message });
+    res.status(400).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/community/wolf-hunt/claim/:campaignId
+ * "Lock On Target". Reserves a slot.
+ */
+router.post("/wolf-hunt/claim/:campaignId", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { campaignId } = req.params;
+
+    const result = await claimTask(userId, campaignId);
+    res.json(result);
+  } catch (error) {
+    // 409 Conflict if someone else took it
+    res.status(409).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/community/wolf-hunt/confirm/:proofId
+ * "Feast". Confirm action and get paid (with Evidence).
+ */
+router.post("/wolf-hunt/confirm/:proofId", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { proofId } = req.params;
+    const { proofUrl } = req.body; // New: Require Evidence URL
+
+    if (!proofUrl) {
+      return res.status(400).json({ error: "Proof screenshot required to claim bounty." });
+    }
+
+    // Pass proofUrl to engine
+    const result = await confirmTaskCompletion(userId, proofId, proofUrl);
+    res.json(result);
+  } catch (error) {
+    // Return 429 if too fast (Time-Gate)
+    if (error.message.includes("Wait")) {
+      return res.status(429).json({ error: error.message });
+    }
+    res.status(400).json({ error: error.message });
   }
 });
 

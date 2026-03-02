@@ -4,6 +4,8 @@ const authMiddleware = require("../authMiddleware");
 const adminOnly = require("../middlewares/adminOnly");
 const { db, admin } = require("../firebaseAdmin");
 const os = require("os");
+const fs = require("fs");
+const path = require("path");
 
 // Get system health metrics
 router.get("/health", authMiddleware, adminOnly, async (req, res) => {
@@ -80,6 +82,81 @@ router.get("/errors", authMiddleware, adminOnly, async (req, res) => {
   } catch (error) {
     console.error("Error fetching error logs:", error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get system audit logs
+router.get("/logs/live", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    // Find logs directory relative to this file: src/routes/adminSystemRoutes.js -> ../../logs
+    const logsDir = path.join(__dirname, "../../logs");
+
+    if (!fs.existsSync(logsDir)) {
+      return res.json({ success: true, logs: [], warning: "Logs directory not found" });
+    }
+
+    // Find latest log file (access-YYYY-MM-DD.log)
+    const files = fs
+      .readdirSync(logsDir)
+      .filter(f => f.startsWith("access-") && f.endsWith(".log"))
+      .sort()
+      .reverse(); // Latest first
+
+    if (files.length === 0) {
+      return res.json({ success: true, logs: [], warning: "No log files found" });
+    }
+
+    const latestFile = files[0];
+    const logPath = path.join(logsDir, latestFile);
+
+    // Read last 2KB to be safe/fast instead of whole file
+    // But simple readFileSync is fine for <100MB files usually
+    const stats = fs.statSync(logPath);
+    const fileSize = stats.size;
+    const bufferSize = 1024 * 50; // Read last 50KB
+    const start = Math.max(0, fileSize - bufferSize);
+
+    let content = "";
+    if (start > 0) {
+      const buffer = Buffer.alloc(fileSize - start);
+      const fd = fs.openSync(logPath, "r");
+      fs.readSync(fd, buffer, 0, buffer.length, start);
+      fs.closeSync(fd);
+      content = buffer.toString("utf8");
+    } else {
+      content = fs.readFileSync(logPath, "utf8");
+    }
+
+    const lines = content.trim().split("\n");
+    // Return last 50 lines
+    const lastLines = lines.slice(-50);
+
+    res.json({ success: true, logs: lastLines, file: latestFile });
+  } catch (error) {
+    console.error("Error reading live logs:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.get("/audit-logs", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { limit = 100, action, userId } = req.query;
+    let query = db.collection("audit_logs").orderBy("timestamp", "desc");
+
+    if (action) query = query.where("action", "==", action);
+    if (userId) query = query.where("userId", "==", userId);
+
+    const snapshot = await query.limit(parseInt(limit)).get();
+    const logs = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      timestamp: doc.data().timestamp?.toDate?.() || doc.data().timestamp,
+    }));
+
+    res.json({ success: true, logs });
+  } catch (error) {
+    console.error("Error fetching audit logs:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch audit logs" });
   }
 });
 
