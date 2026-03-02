@@ -1,3 +1,4 @@
+require("dotenv").config(); // Load environment variables from .env file
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
 require("./bootstrap");
 // This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
@@ -608,8 +609,6 @@ try {
   console.log("⚠️ Captions routes not found:", e.message);
   captionsRoutes = express.Router();
 }
-// Intentionally not mounted in this instance; keep available for tests
-void captionsRoutes;
 try {
   adminCacheRoutes = require("./routes/adminCacheRoutes");
   console.log("✅ Admin cache routes loaded");
@@ -841,6 +840,18 @@ try {
   void storage;
 
   const app = express();
+
+  // Temporary diagnostic route to check route loading
+  app.get("/api/debug/routes", (req, res) => {
+    const report = {};
+    try {
+      require("./routes/adminSystemRoutes");
+      report.adminSystemRoutes = "OK";
+    } catch (e) {
+      report.adminSystemRoutes = "ERROR: " + e.message + " Stack: " + e.stack;
+    }
+    res.json(report);
+  });
   // Attach Sentry request handler if Sentry initialized
   if (
     global.__sentry &&
@@ -1298,6 +1309,13 @@ try {
   } catch (e) {
     console.warn("Admin test routes mount failed:", e.message);
   }
+  // Mount Captions routes
+  try {
+    app.use("/api/captions", captionsRoutes);
+    console.log("🚏 Captions routes mounted at /api/captions");
+  } catch (e) {
+    console.warn("Captions mount failed:", e.message);
+  }
   // Mount TikTok routes if available (explicit per-mount rate limiter to satisfy scanners)
   app.use(
     "/api/tiktok",
@@ -1419,14 +1437,14 @@ try {
     console.log("⚠️ PayFast routes mount failed:", e.message);
   }
 
-  // PayPal routes
-  try {
-    const paypalRoutes = require("./routes/paypalRoutes");
-    app.use("/api/paypal-subscriptions", paypalRoutes);
-    console.log("🚏 PayPal subscription routes mounted at /api/paypal-subscriptions");
-  } catch (e) {
-    console.log("⚠️ PayPal routes mount failed:", e.message);
-  }
+  // PayPal routes (Handled by paypalSubscriptionRoutes further down)
+  // try {
+  //   const paypalRoutes = require("./routes/paypalRoutes");
+  //   app.use("/api/paypal-subscriptions", paypalRoutes);
+  //   console.log("🚏 PayPal subscription routes mounted at /api/paypal-subscriptions");
+  // } catch (e) {
+  //   console.log("⚠️ PayPal routes mount failed:", e.message);
+  // }
 
   // Fallback handler: return default free subscription status when the PayPal status
   // endpoint is missing or not reachable in the deployed environment. This keeps the
@@ -1544,6 +1562,24 @@ try {
     app.use("/api/content", contentQualityCheck);
   } catch (e) {
     console.warn("Content quality check route not available:", e.message);
+  }
+
+  // AI Video Generator (Idea-to-Video)
+  try {
+    const aiVideoRoutes = require("./routes/aiVideoRoutes");
+    app.use("/api/ai-video", aiVideoRoutes);
+    console.log("🎬 AI Video routes mounted at /api/ai-video");
+  } catch (e) {
+    console.warn("AI Video routes failed to mount:", e.message);
+  }
+
+  // AI Media Processing (Credit-Based)
+  try {
+    const mediaRoutes = require("./mediaRoutes");
+    app.use("/api/media", mediaRoutes);
+    console.log("🎬 AI Media routes mounted at /api/media");
+  } catch (e) {
+    console.warn("Media routes failed:", e.message);
   }
 
   // AfterDark (adult) area removed from codebase per repository policy.
@@ -1812,15 +1848,16 @@ try {
     console.warn("⚠️ Mock TikTok OAuth frontend route not available:", e.message);
   }
 
-  // Media proxy route: serves signed media URLs under the site's domain so third-party services
-  // (e.g., TikTok) can verify and fetch media using a domain you control.
+  // Media proxy route removed: mediaRoutes.js only handles API logic
+  /* 
   try {
-    const mediaRoutes = require("./routes/mediaRoutes");
-    app.use(mediaRoutes);
-    console.log("✅ Media proxy routes mounted (e.g. /media/:id)");
+    // const mediaRoutes = require("./mediaRoutes");
+    // app.use(mediaRoutes);
+    // console.log("✅ Media proxy routes mounted (e.g. /media/:id)");
   } catch (e) {
     console.warn("⚠️ Media proxy routes not available:", e.message);
   }
+  */
 
   // Explicit root-level routes for TikTok verification variations
   const sendFirstExisting = (res, candidates) => {
@@ -2884,6 +2921,15 @@ try {
         } catch (diagError) {
           console.error("Failed to run startup diagnostics:", diagError.message);
         }
+
+        // RECOVERY: restart any stuck background jobs
+        try {
+          const { recoverStuckOptimizations } = require("./services/viralOptimizationService");
+          // Fire and forget, don't block startup
+          recoverStuckOptimizations().catch(e => console.error("Recovery failed:", e));
+        } catch (e) {
+          console.warn("Could not load recovery service:", e.message);
+        }
       })
       .on("error", err => {
         console.log("❌ Server startup error:", err.message);
@@ -3525,6 +3571,14 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
         try {
           const { cleanupTempUploads } = require("./services/storageCleanupService");
           await cleanupTempUploads();
+
+          // Cleanup expired generated clips (older than 5 days)
+          try {
+            const videoClippingService = require("./services/videoClippingService");
+            await videoClippingService.cleanupExpiredClips();
+          } catch (clipErr) {
+            console.error("[Scheduler] ⚠️ Expired clip cleanup failed:", clipErr.message);
+          }
         } catch (e) {
           console.error("[Scheduler] ⚠️ Storage cleanup failed:", e.message);
         }

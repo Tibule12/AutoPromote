@@ -35,7 +35,7 @@ function clipRateLimit(req, res, next) {
 
 // Plan Quotas (Monthly)
 const PLAN_CLIP_QUOTAS = {
-  free: 3,
+  free: 1000,
   premium: 50,
   pro: 200,
   enterprise: Infinity,

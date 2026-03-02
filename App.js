@@ -253,42 +253,50 @@ function App() {
   };
 
   // Firebase-powered upload
-  const handleUploadContent = async contentData => {
+  const handleUploadContent = async (contentData) => {
     try {
-      let url = contentData.url;
-
-      // Compatibility: If logic didn't upload file yet (Legacy), do it here
-      if (!url && contentData.file && contentData.type !== "article") {
-        const file = contentData.file;
-        if (file.size < 100) {
-            throw new Error("File too small to upload.");
-        }
-        const filePath = `${STORAGE_PATH}/${Date.now()}_${file.name}`;
-        const storageRef = ref(storage, filePath);
-        const uploadRes = await uploadBytes(storageRef, file);
-        if (uploadRes.metadata.size < 100) {
-             throw new Error("Upload corrupted (file too small).");
-        }
-        url = await getDownloadURL(storageRef);
-      } else if (contentData.type === "article") {
-        url = contentData.articleText || undefined;
-      }
-      
-      if (!url && contentData.type !== "text" && !contentData.description) {
-         // Check if this is a text-only post (e.g. Twitter/status)
-         // If no URL and no text, it might be invalid, but let backend Validation handle it
-      }
-
-      // Construct Payload: Pass ALL metadata (platform_options, bounty, meta, etc.)
-      const payload = {
-        ...contentData,
-        url: url || contentData.url, // Use the one we just got or the one passed in
-        file: undefined, // Do not send file object JSON
-      };
-
       if (!auth.currentUser) return;
       const idToken = await auth.currentUser.getIdToken(true);
-      const res = await fetch(apiUrl("/api/content/upload"), {
+
+      // 1. Upload Global File
+      let globalUrl = contentData.url;
+      if (!globalUrl && contentData.file && contentData.type !== 'article') {
+        const file = contentData.file;
+        const filePath = `${STORAGE_PATH}/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, filePath);
+        await uploadBytes(storageRef, file);
+        globalUrl = await getDownloadURL(storageRef);
+      } else if (contentData.type === 'article') {
+        globalUrl = contentData.articleText || undefined;
+      }
+
+      // 2. Upload Platform-Specific Files (if any)
+      const platformOptions = { ...contentData.platform_options };
+      if (contentData.platform_files) {
+        for (const [platform, file] of Object.entries(contentData.platform_files)) {
+            if (file && file instanceof File) {
+                const pPath = `${STORAGE_PATH}/${Date.now()}_${platform}_${file.name}`;
+                const pRef = ref(storage, pPath);
+                await uploadBytes(pRef, file);
+                const pUrl = await getDownloadURL(pRef);
+                
+                // Inject the specific URL into platform options
+                if (!platformOptions[platform]) platformOptions[platform] = {};
+                platformOptions[platform].media_url = pUrl;
+            }
+        }
+      }
+
+      // Construct Payload
+      const payload = {
+        ...contentData,
+        url: globalUrl,
+        platform_options: platformOptions,
+        file: undefined, // Do not send file object JSON
+        platform_files: undefined // Do not send file objects
+      };
+
+      const res = await fetch(apiUrl('/api/content/upload'), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

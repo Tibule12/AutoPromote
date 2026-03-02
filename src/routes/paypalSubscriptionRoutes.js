@@ -108,97 +108,57 @@ async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUr
 }
 
 // Subscription plans configuration
+// Mirrors billingService logic somewhat, but ensures UI visibility
 const SUBSCRIPTION_PLANS = {
   free: {
     id: "free",
-    name: "Free - Taste The Power",
+    name: "Free",
     price: 0,
     features: {
-      uploads: 50, // Changed from 10 to 50 - be generous!
-      communityPosts: 20, // Changed from 5 to 20 - let them post!
-      aiClips: true, // Changed from false - GIVE THEM THE TOOLS
-      analytics: "basic",
-      support: "community",
-      watermark: false, // Changed from true - no watermark even on free!
-      viralBoost: 1, // Changed from false - 1 FREE boost to prove it works!
-      viralBoostViews: "10K", // Show what they get
-      priorityModeration: false,
-      creatorTipping: false,
+      uploads: 5,
+      platformLimit: 1, // Single platform
+      wolfHuntTasks: 5, // Daily tasks limit (earn credits)
+      analytics: "Basic",
+      support: "Community",
     },
   },
   premium: {
     id: "premium",
-    name: "Premium - Feel The Growth",
+    name: "Premium",
     price: 9.99,
     paypalPlanId: process.env.PAYPAL_PREMIUM_PLAN_ID,
     features: {
-      uploads: "unlimited",
-      communityPosts: "unlimited", // Changed from 50 - no limits!
-      aiClips: true,
-      analytics: "advanced",
-      support: "priority",
-      watermark: false,
-      viralBoost: 3, // Changed from 1 to 3 - feed the addiction!
-      viralBoostViews: "80K each", // Show the power
-      priorityModeration: true, // Changed from false - they deserve it
-      creatorTipping: true,
-      advancedAI: true, // Better AI generation
-      crossPlatformAuto: true, // Auto-post to all platforms
+      uploads: 15,
+      platformLimit: 3, // Multi-platform
+      wolfHuntTasks: 20, // Unlocks more daily earning
+      analytics: "Advanced",
+      support: "Priority",
     },
   },
   pro: {
     id: "pro",
-    name: "Pro - Scale To The Moon",
+    name: "Pro",
     price: 29.99,
     paypalPlanId: process.env.PAYPAL_PRO_PLAN_ID,
     features: {
-      uploads: "unlimited",
-      communityPosts: "unlimited",
-      aiClips: true,
-      analytics: "enterprise", // Upgraded analytics
-      support: "priority",
-      watermark: false,
-      viralBoost: 10, // Changed from 5 to 10 - serious scaling
-      viralBoostViews: "250K each", // Show the mega power
-      priorityModeration: true,
-      creatorTipping: true,
-      sponsoredPosts: 10, // Changed from 2 to 10 - monetize hard
-      apiAccess: true, // Changed from false - give them API power
-      teamSeats: 10, // Changed from 3 to 10 - build teams
-      dedicatedManager: false,
-      customBranding: true,
-      advancedAI: true,
-      aiVideoEditing: true, // Advanced video AI
-      growthConsultant: true, // Monthly strategy calls
+      uploads: 50,
+      platformLimit: "Unlimited", // Global distribution
+      wolfHuntTasks: 100, // Serious earning potential
+      analytics: "Enterprise",
+      support: "Priority",
     },
   },
   enterprise: {
     id: "enterprise",
-    name: "Enterprise - Absolute Domination",
+    name: "Enterprise",
     price: 99.99,
     paypalPlanId: process.env.PAYPAL_ENTERPRISE_PLAN_ID,
     features: {
-      uploads: "unlimited",
-      communityPosts: "unlimited",
-      aiClips: true,
-      analytics: "enterprise",
-      support: "dedicated",
-      watermark: false,
-      viralBoost: "unlimited",
-      viralBoostViews: "♾️ UNLIMITED per boost", // Show the infinite power
-      priorityModeration: true,
-      creatorTipping: true,
-      sponsoredPosts: "unlimited",
-      apiAccess: true,
-      teamSeats: "unlimited",
-      whiteLabel: true,
-      dedicatedManager: true, // Personal account manager
-      customIntegrations: true,
-      pressReleaseDistribution: true, // Media exposure
-      influencerNetwork: true, // Connect with influencers
-      customAIModels: true, // Train custom AI on their content
-      priorityFeatureRequests: true, // Direct product influence
-      monthlyStrategySession: true, // High-touch consulting
+      uploads: 200,
+      platformLimit: "Unlimited",
+      wolfHuntTasks: 500, // Maximum earning capacity
+      analytics: "Enterprise",
+      support: "Dedicated",
     },
   },
 };
@@ -757,6 +717,275 @@ router.get("/usage", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("[PayPal] Get usage error:", error);
     res.status(500).json({ error: "Failed to fetch usage stats" });
+  }
+});
+
+/* ADMIN ROUTES */
+router.get("/admin/active-subscriptions", authMiddleware, async (req, res) => {
+  try {
+    const userRole = req.user.role;
+    const isAdmin = req.user.isAdmin === true || userRole === "admin";
+
+    if (!isAdmin) {
+      return res.status(403).json({ error: "Unauthorized: Admin access required" });
+    }
+
+    // Fetch active subscribers
+    // Note: This requires a composite index on [subscriptionStatus, subscriptionCreated]
+    // If index is missing, we might need to do client-side filtering or just query by status
+    const snapshot = await db
+      .collection("users")
+      .where("subscriptionStatus", "==", "active")
+      .limit(100)
+      .get();
+
+    const subs = [];
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      subs.push({
+        userId: doc.id,
+        email: d.email || "No Email",
+        name: d.name || d.displayName || "Unknown",
+        plan: d.subscriptionTier || "free",
+        status: d.subscriptionStatus,
+        provider: d.subscriptionProvider || "paypal",
+        amount: d.subscriptionPrice || 0,
+        nextBilling: d.subscriptionPeriodEnd,
+        subscriptionId: d.subscriptionId,
+      });
+    });
+
+    res.json({ subscriptions: subs });
+  } catch (err) {
+    console.error("Admin subscription fetch error:", err);
+    res.status(500).json({ error: "Failed to load subscriptions" });
+  }
+});
+
+router.post("/admin/cancel-subscription", authMiddleware, async (req, res) => {
+  try {
+    const userRole = req.user.role;
+    const isAdmin = req.user.isAdmin === true || userRole === "admin";
+
+    if (!isAdmin) {
+      return res.status(403).json({ error: "Unauthorized: Admin access required" });
+    }
+
+    const { userId, reason } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
+
+    // Get user data to find subscription ID
+    const userDoc = await db.collection("users").doc(userId).get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userData = userDoc.data();
+    const subscriptionId = userData.paypalSubscriptionId;
+
+    if (!subscriptionId) {
+      return res.status(400).json({ error: "User has no active subscription ID" });
+    }
+
+    // Cancel in PayPal
+    // We reuse the logic from the user-facing cancel route
+    if (paypal && paypal.subscriptions && paypal.subscriptions.SubscriptionsCancelRequest) {
+      const client = paypalClient.client();
+      const request = new paypal.subscriptions.SubscriptionsCancelRequest(subscriptionId);
+      request.requestBody({
+        reason: reason || "Admin cancelled subscription",
+      });
+      await client.execute(request);
+    } else {
+      // REST fallback
+      const access = await getAccessToken();
+      const base =
+        process.env.PAYPAL_MODE === "live"
+          ? "https://api-m.paypal.com"
+          : "https://api-m.sandbox.paypal.com";
+
+      await safeFetch(base + `/v1/billing/subscriptions/${subscriptionId}/cancel`, fetchFn, {
+        fetchOptions: {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${access}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ reason: reason || "Admin cancelled subscription" }),
+        },
+        requireHttps: true,
+        allowHosts: ["api-m.paypal.com", "api-m.sandbox.paypal.com"],
+      });
+    }
+
+    // Update user record
+    await db.collection("users").doc(userId).update({
+      subscriptionStatus: "cancelled",
+      subscriptionCancelledAt: new Date().toISOString(),
+      // We don't change expiration because they paid for the month
+      updatedAt: new Date().toISOString(),
+    });
+
+    // Update subscription record
+    await db
+      .collection("user_subscriptions")
+      .doc(userId)
+      .update({
+        status: "cancelled",
+        cancelledAt: new Date().toISOString(),
+        cancelReason: reason || "Admin action",
+        updatedAt: new Date().toISOString(),
+      });
+
+    // Log cancellation
+    await db.collection("subscription_events").add({
+      userId,
+      type: "subscription_cancelled_by_admin",
+      adminId: req.user.uid,
+      paypalSubscriptionId: subscriptionId,
+      reason: reason || "Admin action",
+      timestamp: new Date().toISOString(),
+    });
+
+    audit.log("paypal.subscription.cancelled_admin", {
+      userId,
+      adminId: req.user.uid,
+      subscriptionId,
+      reason,
+    });
+
+    res.json({ success: true, message: "Subscription cancelled successfully" });
+  } catch (error) {
+    console.error("[PayPal Admin] Cancel subscription error:", error);
+    res.status(500).json({ error: "Failed to cancel subscription: " + error.message });
+  }
+});
+
+router.post("/admin/refund-last-payment", authMiddleware, async (req, res) => {
+  try {
+    const userRole = req.user.role;
+    const isAdmin = req.user.isAdmin === true || userRole === "admin";
+
+    if (!isAdmin) {
+      return res.status(403).json({ error: "Unauthorized: Admin access required" });
+    }
+
+    const { userId, reason } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
+
+    // Get user data
+    const userDoc = await db.collection("users").doc(userId).get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userData = userDoc.data();
+    const subscriptionId = userData.paypalSubscriptionId;
+
+    if (!subscriptionId) {
+      return res.status(400).json({ error: "User has no active subscription ID" });
+    }
+
+    // Get access token
+    const access = await getAccessToken();
+    const base =
+      process.env.PAYPAL_MODE === "live"
+        ? "https://api-m.paypal.com"
+        : "https://api-m.sandbox.paypal.com";
+
+    // 1. Get transactions for subscription (last 30 days)
+    const startTime = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const endTime = new Date().toISOString();
+
+    // PayPal API requires startTime/endTime for transaction list
+    const transactionsUrl = `/v1/billing/subscriptions/${subscriptionId}/transactions?start_time=${startTime}&end_time=${endTime}`;
+
+    const txRes = await safeFetch(base + transactionsUrl, fetchFn, {
+      fetchOptions: {
+        method: "GET",
+        headers: { Authorization: `Bearer ${access}` },
+      },
+      requireHttps: true,
+      allowHosts: ["api-m.paypal.com", "api-m.sandbox.paypal.com"],
+    });
+
+    if (!txRes.ok) {
+      console.error("PayPal transactions fetch failed:", await txRes.text());
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch subscription transactions from PayPal" });
+    }
+
+    const txData = await txRes.json();
+    const transactions = txData.transactions || [];
+
+    // Find last COMPLETED payment
+    const lastPayment = transactions
+      .filter(t => t.status === "COMPLETED")
+      .sort((a, b) => new Date(b.time) - new Date(a.time))[0];
+
+    if (!lastPayment) {
+      return res
+        .status(404)
+        .json({ error: "No completed payments found in the last 30 days to refund" });
+    }
+
+    const captureId = lastPayment.id; // Usually the capture ID for completed payments
+
+    // 2. Refund the capture
+    const refundUrl = `/v2/payments/captures/${captureId}/refund`;
+    const refundRes = await safeFetch(base + refundUrl, fetchFn, {
+      fetchOptions: {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${access}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ note_to_payer: reason || "Refunded by admin" }),
+      },
+      requireHttps: true,
+      allowHosts: ["api-m.paypal.com", "api-m.sandbox.paypal.com"],
+    });
+
+    const refundJson = await refundRes.json().catch(() => null);
+
+    if (!refundRes.ok) {
+      console.error("PayPal refund failed:", refundJson);
+      return res
+        .status(500)
+        .json({ error: "PayPal refund failed: " + (refundJson?.message || refundRes.statusText) });
+    }
+
+    // Log the refund
+    await db.collection("subscription_refunds").add({
+      userId,
+      subscriptionId,
+      captureId,
+      refundId: refundJson.id,
+      amount: refundJson.amount?.value, // Assuming 100% refund
+      currency: refundJson.amount?.currency_code,
+      adminId: req.user.uid,
+      reason: reason || "Admin refund",
+      timestamp: new Date().toISOString(),
+    });
+
+    audit.log("paypal.subscription.refunded", {
+      userId,
+      adminId: req.user.uid,
+      amount: refundJson.amount?.value,
+      refundId: refundJson.id,
+    });
+
+    res.json({
+      success: true,
+      message: `Refunded $${refundJson.amount?.value} successfully`,
+      refundId: refundJson.id,
+    });
+  } catch (error) {
+    console.error("[PayPal Admin] Refund error:", error);
+    res.status(500).json({ error: "Refund failed: " + error.message });
   }
 });
 

@@ -1,4 +1,4 @@
-const { auth, db } = require("./firebaseClient");
+const { auth, db } = require("./firebaseAdmin");
 
 // Generate JWT
 
@@ -23,6 +23,7 @@ const registerUser = async (req, res) => {
         name,
         email,
         role: role || "creator",
+        credits: 50, // New users start with 50 free credits
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });

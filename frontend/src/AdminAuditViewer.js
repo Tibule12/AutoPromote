@@ -1,145 +1,267 @@
-import React, { useState } from "react";
+﻿import React, { useState, useEffect } from "react";
+import "./AdminDashboard.css";
+import { API_BASE_URL } from "./config";
 import { auth } from "./firebaseClient";
 
-function AdminAuditViewer() {
-  const [assistantActions, setAssistantActions] = useState([]);
-  const [tiktokChecks, setTiktokChecks] = useState([]);
+const AdminAuditViewer = () => {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [limit, setLimit] = useState(50);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const withAuthHeaders = async () => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("Not signed in");
-    const token = await currentUser.getIdToken(true);
-    return {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-  };
+  useEffect(() => {
+    fetchLogs();
+    // eslint-disable-next-line
+  }, [limit]);
 
-  const loadAssistant = async () => {
+  const fetchLogs = async () => {
+    if (loading) return;
+    setLoading(true);
+    setRefreshing(true);
     setError(null);
     try {
-      const headers = await withAuthHeaders();
-      const res = await fetch(
-        `/api/tiktok/admin/assistant_actions?limit=${encodeURIComponent(limit)}`,
-        { headers }
-      );
-      if (!res.ok) throw new Error("Failed to load assistant actions");
-      const j = await res.json();
-      setAssistantActions(j.items || []);
-    } catch (e) {
-      setError(e.message);
+      const user = auth.currentUser;
+      const token = user ? await user.getIdToken() : null;
+
+      // If we aren't logged in, valid fetch will fail, but let the fetch handle 401
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const res = await fetch(`${API_BASE_URL}/api/admin/system/audit-logs?limit=${limit}`, {
+        headers,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setLogs(data.logs || []);
+      } else {
+        // Fallback or error
+        setError(data.error || "Failed to load audit logs");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Network error loading logs");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  const loadTiktokChecks = async () => {
-    setError(null);
-    try {
-      const headers = await withAuthHeaders();
-      const res = await fetch(
-        `/api/tiktok/admin/tiktok_checks?limit=${encodeURIComponent(limit)}`,
-        { headers }
-      );
-      if (!res.ok) throw new Error("Failed to load tiktok checks");
-      const j = await res.json();
-      setTiktokChecks(j.items || []);
-    } catch (e) {
-      setError(e.message);
-    }
+  const formatDate = isoString => {
+    if (!isoString) return "-";
+    return new Date(isoString).toLocaleString();
   };
 
   return (
-    <section style={{ padding: 16 }}>
-      <h3>Admin Audit Viewer</h3>
-      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
-        <label style={{ fontSize: 13 }}>Limit</label>
-        <input
-          type="number"
-          value={limit}
-          onChange={e =>
-            setLimit(Math.max(1, Math.min(200, parseInt(e.target.value || "50", 10) || 50)))
-          }
-          style={{ width: 80 }}
-        />
-        <button
-          onClick={() => {
-            loadAssistant();
-            loadTiktokChecks();
-          }}
-        >
-          Refresh
-        </button>
-        <button
-          onClick={async () => {
-            await loadAssistant();
-          }}
-        >
-          Load Assistant Actions
-        </button>
-        <button
-          onClick={async () => {
-            await loadTiktokChecks();
-          }}
-        >
-          Load TikTok Checks
-        </button>
-      </div>
-      {error && <div style={{ color: "crimson", marginBottom: 8 }}>{error}</div>}
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        <div style={{ background: "#0f1724", padding: 12, borderRadius: 8 }}>
-          <h4 style={{ marginTop: 0 }}>Assistant Actions ({assistantActions.length})</h4>
-          <div style={{ maxHeight: 400, overflow: "auto" }}>
-            {assistantActions.map(a => (
-              <div
-                key={a.id}
-                style={{ padding: 8, borderBottom: "1px solid rgba(255,255,255,0.03)" }}
-              >
-                <div style={{ fontSize: 12, color: "#9aa4b2" }}>
-                  {new Date(
-                    a.createdAt && a.createdAt._seconds ? a.createdAt._seconds * 1000 : Date.now()
-                  ).toLocaleString()}
-                </div>
-                <div>
-                  <strong>{a.uid || "unknown"}</strong> — {a.provider} / {a.provider_status}
-                </div>
-                <div style={{ fontSize: 13, color: "#cbd5e1" }}>{a.intent || ""}</div>
-              </div>
-            ))}
+    <div className="admin-audit-viewer" style={{ padding: "20px" }}>
+      <div
+        style={{
+          padding: "20px",
+          background: "#f3e5f5",
+          borderRadius: "8px",
+          marginBottom: "20px",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+          border: "1px solid #e1bee7",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h3
+              style={{
+                margin: 0,
+                color: "#7b1fa2",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              Security Audit Logs
+            </h3>
+            <p style={{ margin: "4px 0 0 0", color: "#666", fontSize: "0.9em" }}>
+              Track sensitive actions, system events, and security alerts.
+            </p>
           </div>
-        </div>
-
-        <div style={{ background: "#0f1724", padding: 12, borderRadius: 8 }}>
-          <h4 style={{ marginTop: 0 }}>TikTok Creator Info Checks ({tiktokChecks.length})</h4>
-          <div style={{ maxHeight: 400, overflow: "auto" }}>
-            {tiktokChecks.map(t => (
-              <div
-                key={t.id}
-                style={{ padding: 8, borderBottom: "1px solid rgba(255,255,255,0.03)" }}
-              >
-                <div style={{ fontSize: 12, color: "#9aa4b2" }}>
-                  {new Date(
-                    t.createdAt && t.createdAt._seconds ? t.createdAt._seconds * 1000 : Date.now()
-                  ).toLocaleString()}
-                </div>
-                <div>
-                  <strong>{t.uid || "unknown"}</strong> — demo: {t.demo ? "yes" : "no"}
-                </div>
-                <div style={{ fontSize: 13, color: "#cbd5e1" }}>
-                  Result:{" "}
-                  {t.result && t.result.creator
-                    ? JSON.stringify(t.result.creator)
-                    : JSON.stringify(t.result)}
-                </div>
-              </div>
-            ))}
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <select
+              value={limit}
+              onChange={e => setLimit(Number(e.target.value))}
+              style={{ padding: "6px", borderRadius: "4px", border: "1px solid #ddd" }}
+            >
+              <option value="50">Last 50</option>
+              <option value="100">Last 100</option>
+              <option value="500">Last 500</option>
+            </select>
+            <button
+              onClick={fetchLogs}
+              disabled={refreshing}
+              style={{
+                background: "#7b1fa2",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "4px",
+                cursor: refreshing ? "not-allowed" : "pointer",
+                opacity: refreshing ? 0.7 : 1,
+                fontWeight: "bold",
+              }}
+            >
+              {refreshing ? "Refreshing..." : " Refresh Logs"}
+            </button>
           </div>
         </div>
       </div>
-    </section>
+
+      {error && (
+        <div
+          style={{
+            background: "#fee2e2",
+            color: "#b91c1c",
+            padding: "10px",
+            borderRadius: "6px",
+            marginBottom: "16px",
+            border: "1px solid #fecaca",
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      {loading && logs.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
+          Loading security logs...
+        </div>
+      ) : (
+        <div
+          className="table-responsive"
+          style={{
+            background: "white",
+            borderRadius: "8px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            overflow: "hidden",
+          }}
+        >
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
+                <th
+                  style={{
+                    padding: "12px 16px",
+                    textAlign: "left",
+                    fontSize: "0.75rem",
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Timestamp
+                </th>
+                <th
+                  style={{
+                    padding: "12px 16px",
+                    textAlign: "left",
+                    fontSize: "0.75rem",
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Type
+                </th>
+                <th
+                  style={{
+                    padding: "12px 16px",
+                    textAlign: "left",
+                    fontSize: "0.75rem",
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  User / Admin
+                </th>
+                <th
+                  style={{
+                    padding: "12px 16px",
+                    textAlign: "left",
+                    fontSize: "0.75rem",
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Details
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {logs.length > 0 ? (
+                logs.map((log, index) => (
+                  <tr key={log.id || index} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        fontSize: "0.85rem",
+                        color: "#374151",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {formatDate(log.timestamp)}
+                    </td>
+                    <td style={{ padding: "12px 16px", fontSize: "0.85rem" }}>
+                      <span
+                        style={{
+                          background: log.severity === "high" ? "#fee2e2" : "#f3f4f6",
+                          color: log.severity === "high" ? "#b91c1c" : "#374151",
+                          padding: "2px 8px",
+                          borderRadius: "12px",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {log.action || log.type || "Unknown"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px 16px", fontSize: "0.85rem", color: "#6b7280" }}>
+                      {log.adminId ? (
+                        <div style={{ color: "#d97706" }}> Admin: {log.adminId.slice(0, 8)}...</div>
+                      ) : log.userId ? (
+                        <div style={{ color: "#2563eb" }}> User: {log.userId.slice(0, 8)}...</div>
+                      ) : (
+                        <div style={{ color: "#9ca3af" }}> System</div>
+                      )}
+                    </td>
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        fontSize: "0.8rem",
+                        color: "#6b7280",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      <div
+                        style={{
+                          maxWidth: "400px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {JSON.stringify(log.details || log.metadata || {}, null, 0)}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="4"
+                    style={{ padding: "24px", textAlign: "center", color: "#6b7280" }}
+                  >
+                    No audit logs found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
-}
+};
 
 export default AdminAuditViewer;

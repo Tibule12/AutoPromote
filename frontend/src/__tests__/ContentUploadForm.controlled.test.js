@@ -19,16 +19,25 @@ describe("ContentUploadForm controlled mode", () => {
     expect(setSelectedPlatforms).toHaveBeenCalled();
   });
 
-  test("calls setPlatformOption when platform option changes", () => {
+  test("calls setPlatformOption when platform option changes", async () => {
     const setPlatformOption = jest.fn();
+    // Start with empty selection so we can click to select & focus (opening the form)
     render(
       <ContentUploadForm
         onUpload={async () => {}}
-        selectedPlatforms={["discord"]}
+        selectedPlatforms={[]}
         setPlatformOption={setPlatformOption}
       />
     );
-    const discordInput = screen.getByPlaceholderText(/Discord channel ID/i);
+
+    // Click Discord to select it and trigger focused view
+    const discordTile = screen.getByLabelText(/Discord/i);
+    fireEvent.click(discordTile);
+
+    // Now the form should appear
+    const channelInputs = await screen.findAllByPlaceholderText(/Channel ID/i);
+    const discordInput = channelInputs[0];
+
     fireEvent.change(discordInput, { target: { value: "12345" } });
     expect(setPlatformOption).toHaveBeenCalledWith("discord", "channelId", "12345");
   });

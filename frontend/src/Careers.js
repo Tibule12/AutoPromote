@@ -54,7 +54,7 @@ const Careers = () => (
           Don&apos;t see a role that fits? We&apos;re always looking for talent.
           <br />
           Send your portfolio or CV to{" "}
-          <a href="mailto:careers@autopromote.com">careers@autopromote.com</a>.
+          <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
         </p>
       </div>
     </div>

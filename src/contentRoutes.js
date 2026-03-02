@@ -11,6 +11,7 @@ const costControlMiddleware = require("./middlewares/costControlMiddleware");
 // NEW: Services for Engagement-as-Currency Architecture
 const billingService = require("./services/billingService");
 const complianceService = require("./services/complianceService");
+const { getVariantStats } = require("./services/variantStatsService");
 
 // Enable test bypass for viral optimization when running under CI/test flags
 if (
@@ -57,6 +58,10 @@ const contentUploadSchema = Joi.object({
   quality_enhanced: Joi.boolean().optional(),
   // Preview-only flag used by the frontend to request a dry-run (do not persist)
   isDryRun: Joi.boolean().optional(),
+
+  // VARIANT STRATEGY (Bandit / Rotation)
+  variants: Joi.array().items(Joi.string()).optional(),
+  variant_strategy: Joi.string().valid("rotation", "bandit").default("rotation"),
 
   // BRAND / PROMOTION SETTINGS (The "TikTok Card" Revenue Linking)
   monetization_settings: Joi.object({
@@ -132,7 +137,7 @@ function rateLimitMiddleware(limit = 10, windowMs = 60000) {
 router.post(
   "/upload",
   authMiddleware,
-  usageLimitMiddleware({ freeLimit: 10 }),
+  usageLimitMiddleware({ freeLimit: 50 }),
   costControlMiddleware,
   validateBody(contentUploadSchema),
   rateLimitMiddleware(10, 60000),
@@ -208,7 +213,11 @@ router.post(
         custom_hashtags,
         growth_guarantee,
         viral_boost,
+        repost_boost, // ADDED
+        share_boost, // ADDED
         monetization_settings, // Added for persistence
+        variants,
+        variant_strategy,
         protocol7, // Protocol 7
       } = req.body;
 
@@ -288,6 +297,19 @@ router.post(
         // We pass empty features array for now, functionality to extract features from req.body can be added later
         const charge = await billingService.calculateCreatorCharge(userId, detectedIntent, []);
 
+        // --- NEW: PLATFORM LIMIT CHECK ---
+        // Enforces "Global Distribution" limitation based on tier (Free=1, Basic=3, Pro=Unlimited)
+        if (target_platforms && target_platforms.length > 0) {
+          await billingService.checkPlatformLimit(userId, target_platforms.length);
+        }
+
+        // --- NEW: BOT ENTITLEMENT CHECKS ---
+        if (viral_boost || repost_boost || share_boost) {
+          if (viral_boost) await billingService.checkBotEntitlement(userId, "bot_boost");
+          if (repost_boost) await billingService.checkBotEntitlement(userId, "repost_boost");
+          if (share_boost) await billingService.checkBotEntitlement(userId, "share_boost");
+        }
+
         // If there's a monetary charge (e.g. Creator has no credits), we would process it here.
         // For MVP, we primarily rely on the function throwing an error if Upgrade is required (Caps hit).
         if (charge.requiresPayment) {
@@ -319,6 +341,8 @@ router.post(
         quality_feedback,
         quality_enhanced,
         enhance_quality,
+        variants: variants || [],
+        variant_strategy: variant_strategy || "rotation",
         custom_hashtags,
         growth_guarantee,
         viral_boost,
@@ -414,6 +438,18 @@ router.post(
         const contentDoc = await contentRef.get();
         content = { id: contentRef.id, ...contentDoc.data() };
 
+        // --- NEW: TRIGGER DISTRIBUTION ---
+        // We use setImmediate (Node.js) or simply don't await the promise
+        // so the user gets a 200 OK immediately while the system works in the background.
+        const distributionManager = require("./services/distributionManager");
+        if (target_platforms && target_platforms.length > 0) {
+          // Lazy-load to avoid import cycles or heavy init
+          // Fire and forget (user doesn't wait)
+          distributionManager.distributeContent(contentRef.id, userId).catch(err => {
+            console.error("[Distribution] Background task failed:", err);
+          });
+        }
+
         // Create success notification
         try {
           await db.collection("notifications").add({
@@ -506,143 +542,32 @@ router.post(
       // Asynchronous Viral Optimization (Background Processing)
       // This prevents the user from waiting for AI generation and complex calculations.
       // We start this promise but do NOT await it before sending the response.
-      const performViralOptimization = async () => {
+
+      // Load the new dedicated service for optimization & recovery
+      const { performViralOptimization } = require("./services/viralOptimizationService");
+
+      const backgroundOptimization = async () => {
         try {
-          // AI CONTENT ENHANCEMENT TRIGGER (Sci-Fi Auto-Fix Layer)
-          // Default to TRUE for videos to ensure retention guarantees (Silence trim, Loudness, Aspect)
-          if (type === "video" && enhance_quality !== false) {
-            try {
-              const { enqueueMediaTransformTask } = require("./services/mediaTransform");
-              await enqueueMediaTransformTask({
-                contentId: content.id,
-                uid: userId,
-                url: url,
-                meta: { quality_enhanced: true, original_quality: quality_score || "standard" },
-              });
-            } catch (e) {
-              console.warn("[Upload] Failed to queue enhancement:", e.message);
-            }
-          }
-
-          let hashtagOptimization = { hashtags: [] };
-          let distributionStrategy = { platforms: [] };
-          let algorithmOptimization = { optimizationScore: 0 };
-          let viralSeeding = { seedingResults: [] };
-          let boostChain = { chainId: null, squadSize: 0 };
-
-          if (!bypassViral) {
-            // ... (Optimization Logic)
-            const requestedPlatforms = Array.isArray(target_platforms) ? target_platforms : [];
-            hashtagOptimization = await hashtagEngine.generateCustomHashtags({
-              content,
-              platform: requestedPlatforms[0] || "tiktok",
-              customTags: custom_hashtags || [],
-              growthGuarantee: growth_guarantee !== false,
-            });
-            distributionStrategy = await smartDistributionEngine.generateDistributionStrategy(
-              content,
-              requestedPlatforms,
-              { timezone: "UTC", growthGuarantee: growth_guarantee !== false }
-            );
-            algorithmOptimization = algorithmExploitationEngine.optimizeForAlgorithm(
-              content,
-              requestedPlatforms[0] || "tiktok"
-            );
-            viralSeeding = await viralImpactEngine.seedContentToVisibilityZones(
-              content,
-              requestedPlatforms[0] || null,
-              { forceAll: viral_boost?.force_seeding || false }
-            );
-            boostChain = await viralImpactEngine.orchestrateBoostChain(
-              content,
-              requestedPlatforms,
-              {
-                userId,
-                squadUserIds: viral_boost?.squad_user_ids || [],
-              }
-            );
-
-            // Update content with viral optimization data
-            await contentRef.update({
-              viral_optimization: sanitizeForFirestore({
-                hashtags: hashtagOptimization,
-                distribution: distributionStrategy,
-                algorithm: algorithmOptimization,
-                seeding: viralSeeding,
-                boost_chain: boostChain,
-                optimized_at: new Date().toISOString(),
-              }),
-              viral_velocity: { current: 0, category: "new", status: "optimized" },
-              growth_guarantee_badge: {
-                enabled: true,
-                message: "AutoPromote Boosted: Guaranteed to Grow or Retried Free",
-                viral_score: algorithmOptimization.optimizationScore || 0,
-              },
-            });
-          }
-
-          // Schedule promotion based on calculated strategy
-          const optimalTiming =
-            distributionStrategy.platforms?.[0]?.timing?.optimalTime ||
-            scheduled_promotion_time ||
-            new Date().toISOString();
-
-          // Create Schedule in DB (Background)
-          if (true) {
-            // Immediate Publish Mode
-            // FIX: Enforce single-platform scheduling as requested.
-            // multi-platform selection is not supported in the UI to ensure professional, platform-specific optimization.
-            // We prioritize the primary platform chosen by the user.
-            const selectedPlatform =
-              Array.isArray(target_platforms) && target_platforms.length > 0
-                ? target_platforms[0]
-                : null;
-
-            if (selectedPlatform) {
-              const scheduleData = {
-                contentId: contentRef.id,
-                user_id: userId,
-                platform: selectedPlatform,
-                startTime: optimalTiming,
-                status: "pending",
-                isActive: true,
-                platformSpecificSettings: platform_options || {},
-              };
-              await db.collection("promotion_schedules").add(scheduleData);
-
-              // Dispatch Queue Tasks (Background)
-              if (true) {
-                // Ensure we only process for the selected single platform
-                const platform = selectedPlatform;
-
-                // ... platform specific dispatching ...
-                // We need to replicate the dispatch logic here or call a helper
-                // To minimize code duplication and complexity in this specialized fix,
-                // we will trigger the 'platformPoster' directly or let the scheduler handle it if timing is future.
-                // For now, let's assume the Scheduler (which runs every min) picks it up.
-                // OR, if we want instant execution:
-                if (new Date(optimalTiming) <= new Date()) {
-                  // Trigger immediate dispatch
-                  // But for "fast load", relying on the robust Scheduler is safer and cleaner than duplicating dispatch logic inside this async block.
-                }
-              }
-            } else {
-              console.warn(
-                "[Schedule] No target platform selected. Skipping automatic promotion schedule."
-              );
-            }
-            // } <-- Loop removed, so we remove one closing brace level
-          }
-        } catch (err) {
-          console.error("[ViralOptimization] Background process failed:", err);
-          await contentRef.update({
-            viral_velocity: { status: "optimization_failed", error: err.message },
+          await performViralOptimization(content.id, userId, content, {
+            bypassViral,
+            enhance_quality: enhance_quality,
+            custom_hashtags,
+            growth_guarantee,
+            viral_boost,
+            repost_boost, // PASS THROUGH
+            share_boost, // PASS THROUGH
+            target_platforms:
+              detectedIntent === "commercial" ? target_platforms : content.target_platforms || [],
+            scheduled_promotion_time,
+            platform_options,
           });
+        } catch (err) {
+          console.error("[ViralOptimization] Background process wrapper failed:", err);
         }
       };
 
       // Start the background process (do not await)
-      performViralOptimization();
+      backgroundOptimization();
 
       // IMMEDIATE RESPONSE TO USER
       // We return success immediately, trusting the background process to handle the rest.
@@ -699,9 +624,98 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       .orderBy("created_at", "desc");
     const snapshot = await contentRef.get();
     const content = [];
-    snapshot.forEach(doc => {
-      content.push({ id: doc.id, ...doc.data() });
+
+    // Parallel fetch for stats to avoid N+1 slow down
+    const docs = snapshot.docs;
+    const statsPromises = docs.map(async doc => {
+      const data = doc.data();
+      const item = { id: doc.id, ...data };
+
+      // Attach Bandit Stats if strategy is active
+      if (item.variant_strategy === "bandit" || (item.variants && item.variants.length > 0)) {
+        try {
+          const vs = await getVariantStats(doc.id);
+          if (vs && vs.platforms) {
+            // Summarize the winner
+            let bestVariant = null;
+            let maxScore = -1;
+            let totalImpressions = 0;
+            let totalClicks = 0;
+
+            Object.values(vs.platforms).forEach(p => {
+              if (p.variants) {
+                p.variants.forEach(v => {
+                  totalImpressions += v.impressions || 0;
+                  totalClicks += v.clicks || 0;
+                  // Simple heuristic for winner: clicks (or impressions if clicks 0)
+                  const score = (v.clicks || 0) * 10 + (v.impressions || 0) * 0.01;
+                  if (score > maxScore) {
+                    maxScore = score;
+                    bestVariant = v;
+                  }
+                });
+              }
+            });
+
+            const ctrVal = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+            item.stats = {
+              totalImpressions,
+              totalClicks,
+              ctr: totalImpressions > 0 ? ctrVal.toFixed(2) + "%" : "0%",
+              winningVariant: bestVariant ? bestVariant.value : null,
+            };
+
+            // AI COACH INSIGHTS (Why is it winning/failing?)
+            const insights = {
+              status: "learning",
+              message: "Data is accumulating...",
+              color: "#aaa",
+            };
+
+            if (totalImpressions < 50) {
+              insights.status = "learning";
+              insights.message = "❄️ Learning Phase: Not enough data yet.";
+              insights.color = "#fbbf24"; // yellow-500
+              insights.suggestion = "Keep posting to gather more reach.";
+            } else if (ctrVal < 1.0) {
+              insights.status = "failing";
+              insights.message = "📉 Underperforming: Low Click-Through Rate (<1%)";
+              insights.color = "#ef4444"; // red-500
+              insights.suggestion =
+                "Your hooks aren't landing. Try more controversial or question-based titles.";
+            } else if (ctrVal >= 3.0) {
+              insights.status = "winning";
+              insights.message = "🚀 Viral Potential: High Engagement (>3% CTR)";
+              insights.color = "#10b981"; // green-500
+              insights.suggestion = "Double down! Create more variants similar to the winner.";
+            } else {
+              insights.status = "average";
+              insights.message = "😐 Average Performance (1-3% CTR)";
+              insights.color = "#9ca3af"; // gray-400
+              insights.suggestion = "Try tweaking the thumbnail or first 3 seconds of video.";
+            }
+
+            // Check suppressions
+            let suppressedCount = 0;
+            Object.values(vs.platforms).forEach(p => {
+              if (p.variants) suppressedCount += p.variants.filter(v => v.suppressed).length;
+            });
+
+            if (suppressedCount > 0) {
+              insights.alert = `⚠️ ${suppressedCount} variants were killed due to poor performance.`;
+            }
+
+            item.insights = insights;
+          }
+        } catch (e) {
+          /* ignore stats error */
+        }
+      }
+      return item;
     });
+
+    const contentWithStats = await Promise.all(statsPromises);
+
     const took = Date.now() - startMs;
     if (took > 500)
       console.warn(
@@ -710,7 +724,7 @@ router.get("/my-content", authMiddleware, async (req, res) => {
         took,
         req.ip || req.headers["x-forwarded-for"] || "unknown"
       );
-    res.json({ content });
+    res.json({ content: contentWithStats });
   } catch (error) {
     console.error("[GET /my-content] Error:", error);
     res.status(500).json({ error: "Internal server error" });

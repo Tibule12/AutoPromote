@@ -7,8 +7,8 @@ const mockAnalyticsData = {
   newUsersToday: 12,
   totalContent: 478,
   newContentToday: 23,
-  totalRevenue: 12458.9,
-  revenueToday: 567.45,
+  totalRevenue: 0, // Pay-per-view removed
+  revenueToday: 0, // Pay-per-view removed
   activePromotions: 124,
   scheduledPromotions: 47,
   activeUsers: 134,
@@ -26,9 +26,9 @@ const mockAnalyticsData = {
     medium: 286,
     low: 95,
   },
-  avgRevenuePerContent: 26.07,
-  avgRevenuePerUser: 48.67,
-  projectedMonthlyRevenue: 15780.0,
+  avgRevenuePerContent: 0,
+  avgRevenuePerUser: 0,
+  projectedMonthlyRevenue: 0,
   promotionsCompleted: 287,
 
   // New fields for enhanced dashboard
@@ -171,28 +171,21 @@ const mockAnalyticsData = {
     },
   },
 
-  // Revenue and financial data
+  // Revenue and financial data (Zeroed out for Mission pivot)
   financialMetrics: {
     revenueByMonth: [
-      { month: "Jan", revenue: 8450 },
-      { month: "Feb", revenue: 9120 },
-      { month: "Mar", revenue: 8790 },
-      { month: "Apr", revenue: 9840 },
-      { month: "May", revenue: 10380 },
-      { month: "Jun", revenue: 11200 },
-      { month: "Jul", revenue: 12150 },
-      { month: "Aug", revenue: 12458 },
+      { month: "Jan", revenue: 0 },
+      { month: "Feb", revenue: 0 },
+      { month: "Mar", revenue: 0 },
     ],
     revenueByContentType: {
-      Article: 42,
-      Video: 28,
-      Image: 18,
-      Audio: 12,
+      Article: 0,
+      Video: 0,
     },
     transactionTrends: {
-      averageOrderValue: 38.72,
-      conversionRate: 2.8,
-      repeatPurchaseRate: 18.5,
+      averageOrderValue: 0,
+      conversionRate: 0,
+      repeatPurchaseRate: 0,
     },
   },
 };

@@ -1,0 +1,582 @@
+.viral-studio-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85); /* Dark dim */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Above regular editor */
+}
+
+.viral-studio-container {
+  width: 90%;
+  max-width: 1200px;
+  height: 85vh;
+  background: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  font-family: "Inter", sans-serif;
+}
+
+.studio-header {
+  padding: 20px 30px;
+  background: linear-gradient(90deg, #ff8a00 0%, #e52e71 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.studio-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: rotate(90deg);
+}
+
+.studio-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  background: #f8f9fa;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+/* Base styles for desktop/tablet */
+.phone-preview-container {
+  flex: 2;
+  display: flex;
+  flex-direction: column; /* Stack vertically: Phone then Timeline */
+  justify-content: flex-start; /* Start from top */
+  align-items: center; /* Center horizontally */
+  background: #f0f2f5;
+  padding: 40px; /* More padding */
+  border-right: 1px solid #eee;
+  min-width: 380px; /* Ensure space for phone frame */
+  overflow-y: auto; /* Allow scrolling if content is tall */
+  height: 100%;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .viral-studio-container {
+    width: 100%;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+  }
+
+  .studio-layout {
+    flex-direction: column;
+    overflow-y: auto; /* Allow scrolling entire layout */
+  }
+
+  .phone-preview-container {
+    flex: 0 0 auto;
+    max-height: 60vh;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .phone-frame {
+    max-height: 55vh; /* Keep video visible but smaller */
+    max-width: 100%;
+    aspect-ratio: 9/16;
+  }
+
+  .studio-sidebar {
+    flex: 1;
+    padding: 15px;
+    overflow-y: visible; /* Let page scroll */
+  }
+
+  .studio-header {
+    padding: 10px 15px;
+  }
+
+  .studio-header h3 {
+    font-size: 1.1rem;
+  }
+}
+
+.phone-frame {
+  width: 100%;
+  max-width: 360px; /* Standard mobile width */
+  height: 640px; /* Specific height for phone aspect ratio */
+  flex-shrink: 0; /* Prevent squashing */
+  background: #000;
+  border-radius: 24px;
+  border: 4px solid #333;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px; /* Space between phone and timeline */
+}
+
+.studio-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Ensure full video is visible by default */
+  background: #000;
+  position: relative;
+  z-index: 10;
+}
+
+/* Background gradient removed in favor of blurred video * /
+/* .phone-frame::before { ... } */
+
+.overlays-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20; /* Ensure above video (z-index 10) */
+}
+
+.draggable-overlay {
+  position: absolute;
+  pointer-events: auto;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.4;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); /* Strong shadow for readability */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+  /* Default center logic for demo */
+  transform: translate(-50%, -50%);
+  user-select: none;
+  border: 2px solid transparent; /* Prepare for active state */
+  transition:
+    transform 0.1s,
+    border-color 0.2s;
+  text-align: center;
+  white-space: pre-wrap; /* Preserve newlines */
+  max-width: 90%; /* Prevent overflow off screen */
+}
+
+.draggable-overlay.active {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px #e52e71; /* Double border effect */
+  z-index: 100;
+}
+
+.draggable-overlay:active {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.overlay-delete-btn {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.overlay-controls {
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  display: flex;
+  gap: 5px;
+}
+
+.resize-handle {
+  display: flex;
+  gap: 2px;
+}
+
+.resize-btn {
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* --- Sidebar Controls --- */
+.studio-sidebar {
+  flex: 1;
+  min-width: 320px;
+  padding: 24px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 100%; /* Ensure it respects container height */
+  position: relative;
+}
+
+/* Ensure Export Button is visible or sticky */
+.action-buttons {
+  margin-top: auto;
+  padding-top: 20px;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  z-index: 10;
+  padding-bottom: 5px; /* Add some space at bottom */
+}
+
+.clips-list h4,
+.editing-tools h4 {
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 800;
+}
+
+.clips-scroller {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* Custom Scrollbar */
+.clips-scroller::-webkit-scrollbar {
+  width: 6px;
+}
+.clips-scroller::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 3px;
+}
+
+.clip-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.clip-card p {
+  color: #333; /* Dark text for readability */
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  margin-left: 10px;
+}
+
+.clip-card:hover {
+  border-color: #ff8a00;
+  background: #fff8f0;
+}
+
+.clip-card.active {
+  border-color: #e52e71;
+  background: #fff0f5;
+  box-shadow: 0 4px 12px rgba(229, 46, 113, 0.2);
+}
+
+.clip-badge {
+  background: #eee;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+}
+
+.clip-card.active .clip-badge {
+  background: #e52e71;
+  color: white;
+}
+
+.clip-time {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Timeline Components */
+.studio-timeline-container {
+  margin-top: 15px;
+  width: 100%;
+  max-width: 450px; /* Slightly wider than phone frame */
+  margin-left: auto;
+  margin-right: auto;
+  background: white;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0 5px;
+}
+
+.timeline-scroll-area {
+  min-height: 80px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row; /* Horizontal scroll */
+  overflow-x: auto;
+  padding: 8px;
+  gap: 8px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-clip-thumb {
+  min-width: 70px;
+  height: 60px;
+  background: #f8f9fa;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.timeline-clip-thumb:hover {
+  border-color: #ff8a00;
+  background: #fff8f0;
+}
+
+.timeline-clip-thumb.active {
+  border-color: #e52e71;
+  background: #fff0f5;
+  box-shadow: 0 4px 8px rgba(229, 46, 113, 0.2);
+}
+
+.clip-thumb-label {
+  font-weight: 800;
+  font-size: 16px;
+  color: #333;
+}
+
+.clip-dur-label {
+  font-size: 10px;
+  color: #777;
+  margin-top: 2px;
+}
+
+.add-clip-btn {
+  min-width: 50px;
+  height: 60px;
+  background: #eee;
+  border: 2px dashed #bbb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.add-clip-btn:hover {
+  background: #e0e0e0;
+  color: #555;
+  border-color: #999;
+}
+
+.clip-delete-btn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  background: #ff4757;
+  color: white;
+  border-radius: 50%;
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 5;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.studio-trim-controls {
+  margin-top: 15px;
+  padding: 15px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  width: 100%;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.trim-header {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+}
+
+.trim-inputs {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.trim-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trim-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.trim-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.trim-group input:focus {
+  border-color: #e52e71;
+  outline: none;
+}
+
+/* --- Tools Grid --- */
+.editing-tools {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tool-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 12px;
+  border: none;
+  background: #f8f9fa;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+  transition: background 0.2s;
+}
+
+.tool-btn:hover {
+  background: #eee;
+}
+
+.tool-btn span {
+  font-size: 20px;
+}
+
+/* --- Export --- */
+.action-buttons {
+  margin-top: auto;
+  padding-top: 20px;
+  position: sticky;
+  bottom: 0;
+  background: white; /* Opaque background to cover scrolling content */
+  z-index: 10;
+  padding-bottom: 5px;
+  border-top: 1px solid #f0f0f0; /* Subtle separator */
+}
+
+.export-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(90deg, #ff8a00 0%, #e52e71 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(229, 46, 113, 0.3);
+  transition: transform 0.2s;
+}
+
+.export-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(229, 46, 113, 0.4);
+}

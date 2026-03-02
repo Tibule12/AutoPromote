@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import ContentUploadForm from "../ContentUploadForm";
+// import ContentUploadForm from "../ContentUploadForm";
+import UnifiedPublisher from "../features/publishing/UnifiedPublisher";
 
 function UploadPanel({
   onUpload,
+  initialFile,
+  onClearInitialFile,
   contentList,
   platformMetadata,
   platformOptions,
@@ -15,6 +18,18 @@ function UploadPanel({
 }) {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [activeTab, setActiveTab] = useState("upload");
+
+  // Create a ref to track if we've handled the initial file so we only use it once
+  const initialFileProcessed = React.useRef(false);
+
+  // If initialFile is provided, ensure we are on the upload tab
+  React.useEffect(() => {
+    if (initialFile && !initialFileProcessed.current) {
+      setActiveTab("upload");
+      // We do NOT clear it here, UnifiedPublisher needs to mount and read it first
+    }
+  }, [initialFile]);
+
   const [refreshedStatus, setRefreshedStatus] = useState({});
 
   const handleMediaClick = item => {
@@ -79,16 +94,24 @@ function UploadPanel({
       </div>
 
       {activeTab === "upload" && (
-        <ContentUploadForm
-          onUpload={onUpload}
-          platformMetadata={platformMetadata}
-          platformOptions={platformOptions}
-          setPlatformOption={setPlatformOption}
-          selectedPlatforms={selectedPlatforms}
-          setSelectedPlatforms={setSelectedPlatforms}
-          spotifySelectedTracks={spotifySelectedTracks}
-          setSpotifySelectedTracks={setSpotifySelectedTracks}
-          onNavigate={onNavigate}
+        <UnifiedPublisher
+          onUpload={async params => {
+            if (onUpload) {
+              // Bridge old callback style to new object params
+              await onUpload(params);
+            }
+            if (onClearInitialFile) onClearInitialFile();
+          }}
+          // Future: map these properly if needed or just use UnifiedPublisher's internal state
+          initialFile={initialFile}
+          // platformMetadata={platformMetadata}
+          // platformOptions={platformOptions}
+          // setPlatformOption={setPlatformOption}
+          // selectedPlatforms={selectedPlatforms}
+          // setSelectedPlatforms={setSelectedPlatforms}
+          // spotifySelectedTracks={spotifySelectedTracks}
+          // setSpotifySelectedTracks={setSpotifySelectedTracks}
+          // onNavigate={onNavigate}
         />
       )}
       {activeTab === "history" && (

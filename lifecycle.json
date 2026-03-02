@@ -1,0 +1,20 @@
+{
+  "lifecycle": {
+    "rule": [
+      {
+        "action": { "type": "Delete" },
+        "condition": {
+          "age": 1,
+          "matchesPrefix": ["temp_uploads/", "temp_sources/"]
+        }
+      },
+      {
+        "action": { "type": "Delete" },
+        "condition": {
+          "age": 30,
+          "matchesPrefix": ["uploads/", "edited_videos/"]
+        }
+      }
+    ]
+  }
+}

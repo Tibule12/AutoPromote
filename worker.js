@@ -108,7 +108,8 @@ async function loop() {
           batchSize: parseInt(process.env.YT_STATS_BATCH_SIZE || "5", 10),
           velocityThreshold,
         });
-        console.log("[worker] youtube_stats_batch", batch.processed);
+        // Console log removed to reduce noise
+        // console.log("[worker] youtube_stats_batch", batch.processed);
         await setStatus("youtube_stats_poller", { ts: Date.now(), processed: batch.processed });
       } catch (e) {
         console.warn("[worker] youtube_stats_batch error:", e.message);
@@ -201,6 +202,25 @@ async function loop() {
         console.warn("[worker] overage_auto error:", e.message);
       }
     }
+
+    // --- NIGHT SHIFT BOT TRIGGER (Auto-Pilot) ---
+    // Checks for engagement tasks that human users haven't picked up
+    // Priority Surge (New Uploads) runs frequently (80% chance) to ensure velocity
+    // Stale Cleanups (Old Tasks) run rarely (10% chance)
+    if (randChance(0.8)) { 
+      try {
+         const communityEngine = require('./src/services/communityEngine');
+         // This function now handles BOTH priority surges (first) and stale tasks (second)
+         // It internally prioritizes the surge.
+         const result = await communityEngine.processStaleBounties();
+         if (result.processed > 0) {
+             console.log(`[Worker] Auto-Pilot: ${result.message}`);
+         }
+      } catch (err) {
+         console.warn("[Worker] Auto-Pilot Error:", err.message);
+      }
+    }
+
     // Periodic earnings snapshot (simulate accrual) - dev placeholder: store latest provisional balance summary every ~loop with low probability
     if (balanceService && randChance(0.05)) {
       try {

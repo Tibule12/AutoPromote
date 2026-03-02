@@ -56,7 +56,7 @@ class RepostDrivenEngine {
 
     return {
       hashtag: `#AutoPromote${contentId.slice(-6)}${random}`,
-      caption: `Powered by AutoPromote 🚀 #ViralGrowth #AutoPromoteBoosted`,
+      caption: `🚀 #ViralGrowth #BoostedContent`,
       watermark: `AP${timestamp.toString(36)}`,
       trackingId: `track_${contentId}_${platform}_${timestamp}`,
       fingerprint: this.generateContentFingerprint(contentId),

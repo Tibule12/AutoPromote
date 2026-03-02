@@ -20,8 +20,8 @@ router.get("/", authMiddleware, async (req, res) => {
     const crypto = require("crypto");
     const cacheKey = `notifications_${req.userId}_${limit}`;
 
-    // Reduced cache time to 1s to allow "Read All" to reflect quickly
-    const result = await withCache(cacheKey, 1000, async () => {
+    // Increased cache time to 30s to reduce Firestore reads and noise
+    const result = await withCache(cacheKey, 30000, async () => {
       const q = db
         .collection("notifications")
         .where("user_id", "==", req.userId)

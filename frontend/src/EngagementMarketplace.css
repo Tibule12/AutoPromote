@@ -1,194 +1,406 @@
-.marketplace-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  color: #fff;
-  font-family: "Inter", sans-serif;
+/* EngagementMarketplace.css - The Billionaire's Wolf Hunt Edition */
+
+body {
+  background-color: #050505;
 }
 
-.marketplace-header {
+.wolf-hunt-dashboard {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  color: #e0e0e0;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: radial-gradient(circle at top right, #1a1a2e 0%, #000000 40%);
+  min-height: 100vh;
+}
+
+/* --- HEADER & STATUS BAR --- */
+.hunt-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 3rem;
+  border-bottom: 2px solid #222;
+  padding-bottom: 1.5rem;
 }
 
-.credits-display {
-  background: linear-gradient(135deg, #ffd700, #ffa500);
-  padding: 0.8rem 1.5rem;
-  border-radius: 50px;
-  color: #000;
-  font-weight: 800;
-  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+.brand-title h1 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin: 0;
+  background: linear-gradient(90deg, #fff, #888);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -1px;
+}
+
+.brand-title .tagline {
+  font-size: 0.9rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  display: block;
+  margin-top: 5px;
+}
+
+.status-bar {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  gap: 2rem;
 }
 
-.marketplace-grid {
+.stat-card {
+  background: #111;
+  border: 1px solid #333;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 120px;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #888;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.stat-value.gold {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+.energy-bar-container {
+  width: 100%;
+  height: 4px;
+  background: #222;
+  margin-top: 5px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.energy-fill {
+  height: 100%;
+  background: #00ff88;
+  box-shadow: 0 0 8px #00ff88;
+}
+
+/* --- MAIN GRID LAYOUT --- */
+.hunt-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
 }
 
-@media (max-width: 900px) {
-  .marketplace-grid {
+@media (max-width: 1024px) {
+  .hunt-grid {
     grid-template-columns: 1fr;
   }
 }
 
-.auction-section,
-.redemption-section {
-  background: rgba(255, 255, 255, 0.05);
+/* --- FEEDING GROUNDS (Task List) --- */
+.feeding-grounds-section,
+.war-room-section {
+  background: #0a0a0a;
+  border: 1px solid #222; /* Default border */
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.subtitle {
-  color: #aaa;
+/* Section Titles with 'HUD' look */
+.section-hud-title {
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #ffd700;
   margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.auction-list {
+.section-hud-title::before {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 20px;
+  background: #ffd700;
+}
+
+/* --- TASK CARDS --- */
+.bounty-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.auction-card {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.bounty-card {
+  background: linear-gradient(145deg, #111, #0d0d0d);
+  border: 1px solid #222;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.auction-card.urgent {
-  border-color: #ff4444;
-  box-shadow: 0 0 10px rgba(255, 68, 68, 0.1);
+.bounty-card:hover {
+  border-color: #444;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
 }
 
-.auction-header h3 {
+.bounty-card.frenzy {
+  border: 1px solid rgba(255, 0, 85, 0.4);
+  background: linear-gradient(145deg, #1a0505, #0d0000);
+}
+
+.bounty-card.frenzy::after {
+  content: "FRENZY";
+  position: absolute;
+  top: 10px;
+  right: -20px;
+  background: #ff0055;
+  color: white;
+  font-size: 0.6rem;
+  padding: 2px 25px;
+  transform: rotate(45deg);
+  font-weight: 800;
+}
+
+.bounty-info h3 {
   margin: 0;
   font-size: 1.1rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.live-badge {
-  background: #ff0000;
-  color: white;
+.platform-tag {
   font-size: 0.7rem;
   padding: 2px 6px;
   border-radius: 4px;
-  margin-left: 8px;
-  font-weight: bold;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.auction-stats {
-  display: flex;
-  gap: 2rem;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat label {
-  font-size: 0.7rem;
+  background: #333;
   color: #aaa;
   text-transform: uppercase;
 }
 
-.stat .price {
-  color: #ffd700;
-  font-weight: bold;
-  font-size: 1.1rem;
+.bounty-meta {
+  display: flex;
+  gap: 15px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #777;
 }
 
-.stat .time {
-  font-family: monospace;
-  font-weight: bold;
-  color: #4caf50;
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.urgent .time {
+.meta-item.urgent {
   color: #ff4444;
 }
 
-.bid-button {
-  background: #2563eb;
+.bounty-action {
+  text-align: right;
+}
+
+.reward-badge {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffd700;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.hunt-btn {
+  background: #fff;
+  color: #000;
   border: none;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  font-weight: 600;
+  padding: 8px 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 2px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  letter-spacing: 1px;
 }
 
-.bid-button:hover:not(:disabled) {
-  background: #1d4ed8;
+.hunt-btn:hover {
+  background: #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
 }
 
-.bid-button:disabled {
-  background: #4b5563;
+.hunt-btn:disabled {
+  background: #333;
+  color: #555;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
-.redemption-options {
+/* --- ACTIVE MISSION MODAL / PANEL --- */
+.active-mission-panel {
+  margin-top: 20px;
+  background: #151515;
+  border: 1px solid #ffd700;
+  padding: 1.5rem;
+  border-radius: 8px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mission-timer {
+  font-family: "Courier New", monospace;
+  font-size: 2rem;
+  color: #ffd700;
+  text-align: center;
+  margin: 1rem 0;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.mission-steps {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 10px;
 }
 
-.redeem-card {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.redeem-card h3 {
-  margin-top: 0;
-  color: #ffd700;
-}
-
-.redeem-card .cost {
-  display: block;
-  margin: 1rem 0;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-.redeem-btn {
+.step-btn {
   width: 100%;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  padding: 12px;
+  background: #222;
+  border: 1px solid #444;
+  color: #fff;
+  text-align: left;
   cursor: pointer;
-  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.redeem-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+.step-btn.completed {
+  border-color: #00ff88;
+  color: #00ff88;
+}
+
+.step-btn.primary {
+  background: #ffd700;
+  color: #000;
+  font-weight: 800;
+  justify-content: center;
+  border: none;
+  font-size: 1rem;
+}
+
+.step-btn.primary:hover {
+  filter: brightness(1.1);
+}
+
+/* --- WAR ROOM (Create Campaign) --- */
+.create-campaign-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.dark-input,
+.dark-select {
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  padding: 12px;
+  color: #fff;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.dark-input:focus,
+.dark-select:focus {
+  border-color: #ffd700;
+  outline: none;
+}
+
+.cost-summary {
+  background: #111;
+  padding: 1rem;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 3px solid #ffd700;
+}
+
+.launch-btn {
+  background: linear-gradient(90deg, #ffd700, #ffaa00);
+  border: none;
+  padding: 15px;
+  color: #000;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: transform 0.1s;
+}
+
+.launch-btn:hover {
+  transform: scale(1.02);
+}
+
+/* --- NOTIFICATIONS --- */
+.notification-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #111;
+  border-left: 4px solid #00ff88;
+  padding: 1rem 2rem;
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification-toast.error {
+  border-left-color: #ff4444;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }

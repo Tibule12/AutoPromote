@@ -4,6 +4,7 @@ const os = require("os");
 const path = require("path");
 const fs = require("fs");
 const { v4: uuidv4 } = require("../../lib/uuid-compat");
+const notificationEngine = require("./notificationEngine"); // User Notification Integration
 
 /**
  * Placeholder media transform service.
@@ -221,6 +222,15 @@ async function processNextMediaTransformTask() {
       outputUrl: finalUrl,
     });
 
+    // Notify User: Transform Success
+    if (data.uid) {
+       notificationEngine.sendNotification(data.uid,
+         `Media Enhanced: Your video is processed and ready.`,
+         "success",
+         { contentId: data.contentId, type: "media_process", link: finalUrl }
+       ).catch(console.warn);
+    }
+
     // -------------------------------------------------------------------------
     // CHAINING: Automatically enqueue the post task if requested (The "After" Step)
     // -------------------------------------------------------------------------
@@ -261,6 +271,16 @@ async function processNextMediaTransformTask() {
       error: err.message || "transform_failed",
       updatedAt: new Date().toISOString(),
     });
+    
+    // Notify User: Transform Failed
+    if (data.uid) {
+       notificationEngine.sendNotification(data.uid,
+         `Media Enhancement Failed: ${err.message}`, 
+         "error", 
+         { contentId: data.contentId, type: "media_process", error: err.message }
+       ).catch(console.warn);
+    }
+
     return { id: doc.id, error: err.message || "transform_failed" };
   }
 }

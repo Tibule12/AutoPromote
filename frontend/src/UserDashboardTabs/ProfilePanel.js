@@ -37,11 +37,39 @@ const ProfilePanel = ({
   handleConnectLinkedin,
   handleConnectTelegram,
   handleConnectPinterest,
+  onNavigate,
 }) => {
   const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ""}/image.png`;
   return (
     <section className="profile-details">
-      <h3>Landing Page Preview</h3>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1rem",
+        }}
+      >
+        <h3>Landing Page Preview</h3>
+        <button
+          onClick={() => onNavigate && onNavigate("billing")}
+          style={{
+            padding: "8px 16px",
+            fontSize: "0.9rem",
+            background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: "500",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          💳 Manage Subscription
+        </button>
+      </div>
       <div className="landing-preview">
         <img
           className="landing-thumbnail"

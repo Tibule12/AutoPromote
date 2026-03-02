@@ -89,7 +89,7 @@ const Privacy = () => (
       <h2>8. Contact Us</h2>
       <p>
         If you have any questions about this privacy policy or our privacy practices, please contact
-        us at support@autopromote.com.
+        us at thulani@autopromote.org.
       </p>
     </div>
   </div>

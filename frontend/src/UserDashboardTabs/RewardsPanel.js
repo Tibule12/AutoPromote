@@ -42,7 +42,7 @@ const RewardsPanel = ({ badges }) => {
   // Safe defaults
   const stats = analytics || {};
   const referralTracker = stats.referralTracker || { total: 0, nextGoal: 10, potentialBonus: 5 };
-  const viralityTracker = stats.viralityTracker || { views: 0, nextGoal: 30000, potentialBonus: 3 };
+  const viralityTracker = stats.viralityTracker || { views: 0, nextGoal: 30000, potentialBonus: 0 };
   const refLink = stats.referralCode
     ? `${window.location.origin}/signup?ref=${stats.referralCode}`
     : "Loading...";
@@ -87,8 +87,7 @@ const RewardsPanel = ({ badges }) => {
       >
         <h4 style={{ marginTop: 0, marginBottom: "1rem" }}>🔗 Your Referral Engine</h4>
         <p style={{ color: "var(--muted)", fontSize: "0.9rem", marginBottom: "1rem" }}>
-          Share your link. Earn <b>$5</b> for every paid subscriber, and unlock <b>$15</b> bonuses
-          for free signups!
+          Share your link. Earn <b>$5</b> commission for every active paid subscriber you refer!
         </p>
 
         <div style={{ display: "flex", gap: "10px" }}>
@@ -144,7 +143,7 @@ const RewardsPanel = ({ badges }) => {
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
             <span style={{ fontWeight: "bold", color: "#047857" }}>👥 Level 2: Ambassador</span>
             <span style={{ fontWeight: "bold", color: "#059669" }}>
-              ${referralTracker.potentialBonus} Reward
+              ${referralTracker.potentialBonus} Commission
             </span>
           </div>
           <div style={{ fontSize: "0.9rem", marginBottom: "10px", color: "#065f46" }}>
@@ -177,7 +176,7 @@ const RewardsPanel = ({ badges }) => {
           </div>
         </div>
 
-        {/* Mission 2: Viral Views */}
+        {/* Mission 2: Viral Views - REWARD CHANGED FROM CASH TO STATUS */}
         <div
           style={{
             background: "linear-gradient(135deg, #eef2ff 0%, #ffffff 100%)",
@@ -187,10 +186,8 @@ const RewardsPanel = ({ badges }) => {
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
-            <span style={{ fontWeight: "bold", color: "#4338ca" }}>🔥 Viral Content Bonus</span>
-            <span style={{ fontWeight: "bold", color: "#4f46e5" }}>
-              ${viralityTracker.potentialBonus} Reward
-            </span>
+            <span style={{ fontWeight: "bold", color: "#4338ca" }}>🔥 Viral Status</span>
+            <span style={{ fontWeight: "bold", color: "#4f46e5" }}>Unlock "Viral" Badge</span>
           </div>
           <div style={{ fontSize: "0.9rem", marginBottom: "10px", color: "#3730a3" }}>
             Get a video to {viralityTracker.nextGoal.toLocaleString()} views

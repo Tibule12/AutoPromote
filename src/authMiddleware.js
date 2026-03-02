@@ -1,6 +1,7 @@
 const { admin, db } = require("./firebaseAdmin");
 const { tokenInfo } = require("./utils/logSanitizer");
 const diag = require("./diagnostics");
+const { withCache } = require("./utils/simpleCache");
 
 const authMiddleware = async (req, res, next) => {
   const startMs = Date.now();
@@ -254,18 +255,67 @@ const authMiddleware = async (req, res, next) => {
     }
 
     try {
-      // Get user data from Firestore
-      const userDoc = await db.collection("users").doc(decodedToken.uid).get();
-      const userData = userDoc.exists ? userDoc.data() : null;
+      // CACHED FETCH: Reduce sequential round trips to Firestore by fetching in parallel and caching for 30s
+      // This drastically reduces [auth][slow] logs and dashboard polling overhead
+      const { userData, adminData, isAdminInCollection } = await withCache(
+        `auth_user_${decodedToken.uid}`,
+        30000,
+        async () => {
+          const [userSn, adminSn] = await Promise.all([
+            db.collection("users").doc(decodedToken.uid).get(),
+            db.collection("admins").doc(decodedToken.uid).get(),
+          ]);
 
-      // Check if user is an admin by checking the admins collection
-      const adminDoc = await db.collection("admins").doc(decodedToken.uid).get();
-      const isAdminInCollection = adminDoc.exists;
+          let ud = userSn.exists ? userSn.data() : null;
+          // Handle automatic account creation if missing
+          if (!ud) {
+            const basicUserData = {
+              email: decodedToken.email,
+              name: decodedToken.name || decodedToken.email?.split("@")[0],
+              role: roleFromClaims,
+              isAdmin: isAdminFromClaims,
+              createdAt: new Date().toISOString(),
+            };
+            // Side effect: Create user doc (don't await to avoid blocking critical path too much, or await if consistency needed)
+            // But we must await or the cache holds 'null'. For safety, we block-create once.
+            await db.collection("users").doc(decodedToken.uid).set(basicUserData);
+            ud = basicUserData;
+          } else {
+            // Handle Role Sync (Admin Promotion/Demotion) inside the cache logic
+            // If data is stale, we update it.
+            let changed = false;
+            if (isAdminFromClaims && ud.role !== "admin") {
+              ud.role = "admin";
+              ud.isAdmin = true;
+              changed = true;
+            } else if (!isAdminFromClaims && !adminSn.exists && ud.role === "admin") {
+              ud.role = "user";
+              ud.isAdmin = false;
+              changed = true;
+            }
+            if (changed) {
+              await db
+                .collection("users")
+                .doc(decodedToken.uid)
+                .update({
+                  role: ud.role,
+                  isAdmin: ud.isAdmin,
+                  updatedAt: new Date().toISOString(),
+                });
+            }
+          }
+
+          return {
+            userData: ud,
+            adminData: adminSn.exists ? adminSn.data() : null,
+            isAdminInCollection: adminSn.exists,
+          };
+        }
+      );
 
       // If admin is found in admins collection, treat as authoritative admin regardless of stale user doc
       if (isAdminInCollection) {
         if (debugAuth) console.log("User found in admins collection: uid=%s", decodedToken.uid);
-        const adminData = adminDoc.data();
         req.user = {
           uid: decodedToken.uid,
           email: decodedToken.email,
@@ -279,95 +329,26 @@ const authMiddleware = async (req, res, next) => {
         return next();
       }
 
-      if (!userData) {
-        // Create a basic user document if it doesn't exist
-        if (debugAuth) console.log("No user document found in Firestore, creating one...");
-        const basicUserData = {
-          email: decodedToken.email,
-          name: decodedToken.name || decodedToken.email?.split("@")[0],
-          role: roleFromClaims, // Use role from claims
-          isAdmin: isAdminFromClaims,
-          createdAt: new Date().toISOString(),
-        };
-        if (debugAuth)
-          console.log(
-            "Creating user with role=%s emailPresent=%s",
-            basicUserData.role,
-            !!basicUserData.email
-          );
-        await db.collection("users").doc(decodedToken.uid).set(basicUserData);
-        req.user = {
-          uid: decodedToken.uid,
-          email: decodedToken.email,
-          ...basicUserData,
-        };
-        req.user.token = token;
-        if (debugAuth)
-          console.log(
-            "New user document created and attached to request for uid=%s",
-            decodedToken.uid
-          );
-      } else {
-        // If user exists but role needs to be updated based on claims
-        if (debugAuth)
-          console.log(
-            "User document found: uid=%s emailPresent=%s role=%s isAdmin=%s",
-            decodedToken.uid,
-            !!userData.email,
-            userData.role,
-            !!userData.isAdmin
-          );
-
-        if (isAdminFromClaims && userData.role !== "admin") {
-          if (debugAuth)
-            console.log(
-              "Updating user to admin role for uid=%s based on token claims",
-              decodedToken.uid
-            );
-          await db.collection("users").doc(decodedToken.uid).update({
-            role: "admin",
-            isAdmin: true,
-            updatedAt: new Date().toISOString(),
-          });
-          userData.role = "admin";
-          userData.isAdmin = true;
-        } else if (!isAdminFromClaims && !isAdminInCollection && userData.role === "admin") {
-          // Auto-demotion: user doc still thinks admin but claims / collections do not
-          if (debugAuth)
-            console.log(
-              "Demoting user from admin -> user for uid=%s due to missing claims & collection membership",
-              decodedToken.uid
-            );
-          await db.collection("users").doc(decodedToken.uid).update({
-            role: "user",
-            isAdmin: false,
-            updatedAt: new Date().toISOString(),
-          });
-          userData.role = "user";
-          userData.isAdmin = false;
-        }
-
-        // Attach full user data to request
-        req.user = {
-          uid: decodedToken.uid,
-          email: decodedToken.email,
-          ...userData,
-        };
-        // Attach the raw token for request-scoped usage in HTML templates
-        req.user.token = token;
-        // Normalize: ensure isAdmin reflects effective state (collection or claims)
-        if (isAdminInCollection || isAdminFromClaims) {
-          req.user.isAdmin = true;
-          req.user.role = "admin";
-        }
-        if (debugAuth)
-          console.log(
-            "User data attached to request: uid=%s role=%s isAdmin=%s",
-            req.user.uid,
-            req.user.role,
-            !!req.user.isAdmin
-          );
+      // Attach full user data to request
+      req.user = {
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        ...userData,
+      };
+      // Attach the raw token for request-scoped usage in HTML templates
+      req.user.token = token;
+      // Normalize: ensure isAdmin reflects effective state (collection or claims)
+      if (isAdminInCollection || isAdminFromClaims) {
+        req.user.isAdmin = true;
+        req.user.role = "admin";
       }
+      if (debugAuth)
+        console.log(
+          "User data attached to request: uid=%s role=%s isAdmin=%s",
+          req.user.uid,
+          req.user.role,
+          !!req.user.isAdmin
+        );
     } catch (firestoreError) {
       console.error(
         "Firestore error in auth middleware: code=%s messagePresent=%s",

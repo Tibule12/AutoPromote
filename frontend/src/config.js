@@ -11,6 +11,10 @@
 // Default to localhost for development convenience if not specified
 export const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+// Media Worker URL - Python FastAPI service for heavy video processing
+// In production, this might be the same as API_BASE_URL if proxied, or a separate service
+export const MEDIA_API_URL = process.env.REACT_APP_MEDIA_API_URL || "http://localhost:8000";
+
 // Public site URL used for user-facing pages (Terms, Privacy, etc.)
 export const PUBLIC_SITE_URL = process.env.REACT_APP_SITE_URL || "https://autopromote.org";
 
