@@ -4,6 +4,7 @@ import HashtagSuggestions from "../HashtagSuggestions";
 import { OPTIMAL_TIMES } from "../BestTimeToPost";
 import FilterEffects from "../FilterEffects";
 import ImageCropper from "../ImageCropper";
+import { sanitizeUrl } from "../../utils/security";
 
 const InstagramForm = ({
   onChange,
@@ -28,6 +29,18 @@ const InstagramForm = ({
   const [caption, setCaption] = useState(
     initialData.caption || globalTitle + "\n\n" + globalDescription
   );
+  const [isCaptionDirty, setIsCaptionDirty] = useState(false);
+
+  // Sync Global Title/Description changes UNLESS user has edited caption locally
+  useEffect(() => {
+    if (!isCaptionDirty && (globalTitle || globalDescription)) {
+      const newCaption = `${globalTitle || ""}\n\n${globalDescription || ""}`.trim();
+      if (newCaption && newCaption !== caption) {
+        setCaption(newCaption);
+      }
+    }
+  }, [globalTitle, globalDescription, isCaptionDirty]);
+
   const [location, setLocation] = useState(initialData.location || "");
   const [isReel, setIsReel] = useState(initialData.isReel !== false); // Default to Reel in 2026
   const [shareToFeed, setShareToFeed] = useState(initialData.shareToFeed !== false);
@@ -289,7 +302,7 @@ const InstagramForm = ({
         {videoPreviewUrl && (currentFile?.type?.startsWith("video/") || !currentFile) && (
           <div style={{ marginTop: "10px" }}>
             <video
-              src={videoPreviewUrl}
+              src={sanitizeUrl(videoPreviewUrl)}
               controls
               style={{
                 width: "100%",
@@ -339,7 +352,7 @@ const InstagramForm = ({
         {showFilters && previewUrl && (
           <div style={{ marginTop: 10 }}>
             <FilterEffects
-              imageUrl={previewUrl}
+              imageUrl={sanitizeUrl(previewUrl)}
               onApplyFilter={f => console.log("Filter applied:", f.name)}
             />
           </div>
@@ -361,7 +374,7 @@ const InstagramForm = ({
             }}
           >
             <div style={{ background: "white", padding: 20, borderRadius: 8 }}>
-              <ImageCropper imageUrl={previewUrl} onClose={() => setShowCrop(false)} />
+              <ImageCropper imageUrl={sanitizeUrl(previewUrl)} onClose={() => setShowCrop(false)} />
               <button onClick={() => setShowCrop(false)} style={{ marginTop: 10 }}>
                 Close
               </button>
@@ -511,7 +524,10 @@ const InstagramForm = ({
           <textarea
             className="modern-input"
             value={caption}
-            onChange={e => setCaption(e.target.value)}
+            onChange={e => {
+              setCaption(e.target.value);
+              setIsCaptionDirty(true);
+            }}
             placeholder="Write a caption..."
             rows={4}
             maxLength={2200}
@@ -537,6 +553,7 @@ const InstagramForm = ({
               <EmojiPicker
                 onSelect={emoji => {
                   handleInsertEmoji(emoji);
+                  setIsCaptionDirty(true);
                   setShowEmojiPicker(false);
                 }}
                 onClose={() => setShowEmojiPicker(false)}
@@ -549,7 +566,10 @@ const InstagramForm = ({
           contentType="image"
           title={caption}
           description=""
-          onAddHashtag={tag => setCaption(prev => prev + " #" + tag)}
+          onAddHashtag={tag => {
+            setCaption(prev => prev + " #" + tag);
+            setIsCaptionDirty(true);
+          }}
         />
       </div>
 

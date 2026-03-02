@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { sanitizeUrl } from "../../utils/security";
 
 const RedditForm = ({
   onChange,
   initialData = {},
+  creatorInfo,
   globalTitle,
   globalDescription,
   currentFile,
@@ -29,6 +31,15 @@ const RedditForm = ({
   const [isSpoiler, setIsSpoiler] = useState(initialData.isSpoiler || false);
   const [isPromotional, setIsPromotional] = useState(initialData.isPromotional || false);
 
+  // Smart Sync for title
+  const [isDirtyTitle, setIsDirtyTitle] = useState(initialData.title ? true : false);
+
+  useEffect(() => {
+    if (!isDirtyTitle && globalTitle) {
+      setTitle(globalTitle);
+    }
+  }, [globalTitle, isDirtyTitle]);
+
   // Mock flairs for now, in real app would fetch based on subreddit
   const [availableFlairs, setAvailableFlairs] = useState([]);
 
@@ -52,6 +63,42 @@ const RedditForm = ({
         </span>{" "}
         Reddit Post
       </h4>
+
+      {/* IDENTITY BADGE */}
+      {creatorInfo?.name && (
+        <div
+          className="identity-badge"
+          style={{
+            marginBottom: "16px",
+            display: "flex",
+            alignItems: "center",
+            background: "#fef2f2",
+            padding: "8px",
+            borderRadius: "6px",
+            border: "1px solid #fee2e2",
+          }}
+        >
+          {creatorInfo.icon_img && (
+            <img
+              src={sanitizeUrl(creatorInfo.icon_img.split("?")[0])}
+              alt="User"
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                marginRight: 10,
+                objectFit: "cover",
+              }}
+            />
+          )}
+          <div>
+            <div style={{ fontWeight: "600", color: "#333" }}>u/{creatorInfo.name}</div>
+            <div style={{ fontSize: "0.8rem", color: "#666" }}>
+              Karma: {creatorInfo.total_karma}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* File Input for Reddit (Added) */}
       <div className="form-group-modern">
@@ -98,7 +145,7 @@ const RedditForm = ({
         />
 
         {/* --- REVIEW AI ENHANCEMENTS for Reddit --- */}
-        {(currentFile || !currentFile) && (onReviewAI || onFindViralClips) && (
+        {(onReviewAI || onFindViralClips) && (
           <div style={{ display: "flex", gap: "10px", marginTop: 8, marginBottom: 15 }}>
             {onReviewAI && (
               <button
@@ -141,7 +188,7 @@ const RedditForm = ({
         {videoPreviewUrl && (currentFile?.type?.startsWith("video/") || !currentFile) && (
           <div style={{ marginTop: "10px" }}>
             <video
-              src={videoPreviewUrl}
+              src={sanitizeUrl(videoPreviewUrl)}
               controls
               style={{
                 width: "100%",
@@ -174,7 +221,10 @@ const RedditForm = ({
           type="text"
           className="modern-input"
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={e => {
+            setTitle(e.target.value);
+            setIsDirtyTitle(true);
+          }}
           placeholder="An interesting title"
           maxLength={300}
         />

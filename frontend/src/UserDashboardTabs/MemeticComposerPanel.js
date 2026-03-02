@@ -4,6 +4,7 @@ import { API_BASE_URL } from "../config";
 import toast from "react-hot-toast";
 import "./MemeticComposerPanel.css";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { sanitizeUrl } from "../utils/security";
 
 // Extended params for full Viral Engineering
 const defaultParams = {
@@ -331,7 +332,7 @@ const MemeticComposerPanel = ({ onClose, initialVideoUrl = null }) => {
               </div>
             ) : (
               <div className="video-preview-mini">
-                <video src={videoUrl} controls className="seed-video-preview" />
+                <video src={sanitizeUrl(videoUrl)} controls className="seed-video-preview" />
                 <button
                   className="clear-video-btn"
                   onClick={() => {
@@ -397,7 +398,7 @@ const MemeticComposerPanel = ({ onClose, initialVideoUrl = null }) => {
             <div className="preview-player-placeholder">
               {/* In real app, this plays the variant.previewUrl */}
               <video
-                src={previewVariant.videoUrl}
+                src={sanitizeUrl(previewVariant.videoUrl)}
                 controls
                 autoPlay
                 loop

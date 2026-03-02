@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../config";
+import { sanitizeUrl } from "../utils/security";
 import React, { useState, useRef, useEffect } from "react";
 import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -240,7 +241,7 @@ const ViralClipStudio = ({
       // Create temp video to get duration
       const tempId = Date.now();
       const tempVideo = document.createElement("video");
-      tempVideo.src = url;
+      tempVideo.src = sanitizeUrl(url);
       tempVideo.preload = "metadata";
 
       tempVideo.onloadedmetadata = () => {
@@ -400,7 +401,7 @@ const ViralClipStudio = ({
               >
                 <video
                   key={timeline[activeTimelineIndex]?.id || "bg-video"}
-                  src={timeline[activeTimelineIndex]?.url || videoUrl}
+                  src={sanitizeUrl(timeline[activeTimelineIndex]?.url || videoUrl)}
                   autoPlay
                   muted
                   loop
@@ -465,7 +466,7 @@ const ViralClipStudio = ({
                         )
                       ) : (
                         <video
-                          src={overlay.src}
+                          src={sanitizeUrl(overlay.src)}
                           autoPlay
                           loop
                           muted
@@ -844,7 +845,7 @@ const ViralClipStudio = ({
                     className={`clip-card ${selectedClip && selectedClip.id === clip.id ? "active" : ""}`}
                     onClick={() => {
                       setSelectedClip(clip);
-                      videoRef.current.src = videoUrl; // Reset to main video source
+                      videoRef.current.src = sanitizeUrl(videoUrl); // Reset to main video source
                     }}
                   >
                     <span className="clip-badge">#{idx + 1}</span>

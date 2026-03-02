@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ImageCropper from "../ImageCropper";
 import { OPTIMAL_TIMES } from "../BestTimeToPost";
+import { sanitizeUrl } from "../../utils/security";
 
 const PinterestForm = ({
   onChange,
@@ -10,18 +11,41 @@ const PinterestForm = ({
   boards = [],
   onFileChange,
   currentFile,
+  onReviewAI,
+  onFindViralClips,
 }) => {
   const [boardId, setBoardId] = useState(initialData.boardId || boards[0]?.id || "");
+
+  // Use "Smart Sync" for title/description
   const [title, setTitle] = useState(initialData.title || globalTitle || "");
   const [description, setDescription] = useState(
     initialData.description || globalDescription || ""
   );
+
+  // Track if user has manually edited ("dirty")
+  const [isDirtyTitle, setIsDirtyTitle] = useState(!!initialData.title);
+  const [isDirtyDescription, setIsDirtyDescription] = useState(!!initialData.description);
+
   const [link, setLink] = useState(initialData.link || "");
   const [isPaidPartnership, setIsPaidPartnership] = useState(
     initialData.isPaidPartnership || false
   );
   const [showCrop, setShowCrop] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+
+  // Sync Global Title if not dirty
+  useEffect(() => {
+    if (!isDirtyTitle && globalTitle) {
+      setTitle(globalTitle);
+    }
+  }, [globalTitle, isDirtyTitle]);
+
+  // Sync Global Description if not dirty
+  useEffect(() => {
+    if (!isDirtyDescription && globalDescription) {
+      setDescription(globalDescription);
+    }
+  }, [globalDescription, isDirtyDescription]);
 
   useEffect(() => {
     if (currentFile && currentFile.type.startsWith("image/")) {
@@ -77,6 +101,46 @@ const PinterestForm = ({
         </div>
       )}
 
+      {/* --- REVIEW AI ENHANCEMENTS for Pinterest --- */}
+      {(onReviewAI || onFindViralClips) && (
+        <div style={{ display: "flex", gap: "10px", marginTop: 8, marginBottom: 15 }}>
+          {onReviewAI && (
+            <button
+              type="button"
+              style={{
+                background: "linear-gradient(135deg, #E60023 0%, #bd081c 100%)",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                flex: 1,
+              }}
+              onClick={onReviewAI}
+            >
+              ✨ Review AI Enhancements
+            </button>
+          )}
+          {onFindViralClips && (
+            <button
+              type="button"
+              style={{
+                background: "linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%)",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                flex: 1,
+              }}
+              onClick={onFindViralClips}
+            >
+              🔥 Find Viral Clips
+            </button>
+          )}
+        </div>
+      )}
+
       {/* File Upload Section */}
       <div className="form-group-modern">
         <label className="form-label-bold">Pin Image</label>
@@ -127,7 +191,7 @@ const PinterestForm = ({
             }}
           >
             <div style={{ background: "white", padding: 20, borderRadius: 8 }}>
-              <ImageCropper imageUrl={previewUrl} onClose={() => setShowCrop(false)} />
+              <ImageCropper imageUrl={sanitizeUrl(previewUrl)} onClose={() => setShowCrop(false)} />
               <button onClick={() => setShowCrop(false)} style={{ marginTop: 10 }}>
                 Close
               </button>
@@ -164,7 +228,10 @@ const PinterestForm = ({
           type="text"
           className="modern-input"
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={e => {
+            setTitle(e.target.value);
+            setIsDirtyTitle(true);
+          }}
           placeholder="Add a catchy title"
           maxLength={100}
         />
@@ -175,7 +242,10 @@ const PinterestForm = ({
         <textarea
           className="modern-input"
           value={description}
-          onChange={e => setDescription(e.target.value)}
+          onChange={e => {
+            setDescription(e.target.value);
+            setIsDirtyDescription(true);
+          }}
           placeholder="Tell everyone what your Pin is about"
           rows={3}
           maxLength={500}

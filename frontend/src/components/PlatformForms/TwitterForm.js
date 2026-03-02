@@ -3,13 +3,50 @@ import "../../ContentUploadForm.css";
 import EmojiPicker from "../EmojiPicker";
 import HashtagSuggestions from "../HashtagSuggestions";
 import { OPTIMAL_TIMES } from "../BestTimeToPost";
+import { sanitizeUrl } from "../../utils/security";
 
-const TwitterForm = ({ onChange, initialData = {}, onFileChange, currentFile }) => {
+const TwitterForm = ({
+  onChange,
+  initialData = {},
+  onFileChange,
+  currentFile,
+  globalDescription,
+  onReviewAI,
+  onFindViralClips,
+}) => {
   const [message, setMessage] = useState(initialData.message || "");
   const [threadMode, setThreadMode] = useState(initialData.threadMode || false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [isDirtyMessage, setIsDirtyMessage] = useState(initialData.message ? true : false);
 
-  const handleInsertEmoji = emoji => setMessage(prev => prev + emoji.native);
+  // Generate preview URL when file changes
+  useEffect(() => {
+    if (currentFile) {
+      const url = URL.createObjectURL(currentFile);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [currentFile]);
+
+  // Smart Sync: Update message from globalDescription if not manually edited
+  useEffect(() => {
+    if (!isDirtyMessage && globalDescription) {
+      setMessage(globalDescription);
+    }
+  }, [globalDescription, isDirtyMessage]);
+
+  const handleMessageChange = e => {
+    setMessage(e.target.value);
+    setIsDirtyMessage(true);
+  };
+
+  const handleInsertEmoji = emoji => {
+    setMessage(prev => prev + emoji.native);
+    setIsDirtyMessage(true);
+  };
 
   useEffect(() => {
     onChange({ platform: "twitter", message, threadMode });
@@ -56,6 +93,25 @@ const TwitterForm = ({ onChange, initialData = {}, onFileChange, currentFile }) 
         <strong>Platform Capabilities:</strong> Supports Native Video and Image.
       </div>
 
+      {/* Preview Section */}
+      {previewUrl && (
+        <div className="preview-container" style={{ marginBottom: "15px", textAlign: "center" }}>
+          {currentFile?.type?.startsWith("video") ? (
+            <video
+              src={sanitizeUrl(previewUrl)}
+              controls
+              style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "8px" }}
+            />
+          ) : (
+            <img
+              src={sanitizeUrl(previewUrl)}
+              alt="Preview"
+              style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "8px" }}
+            />
+          )}
+        </div>
+      )}
+
       <div className="form-group-modern">
         <label className="form-label-bold">Media File</label>
         <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
@@ -79,7 +135,7 @@ const TwitterForm = ({ onChange, initialData = {}, onFileChange, currentFile }) 
             className="modern-input"
             style={{ minHeight: "80px" }}
             value={message}
-            onChange={e => setMessage(e.target.value)}
+            onChange={handleMessageChange}
           />
           <button
             type="button"
@@ -113,12 +169,65 @@ const TwitterForm = ({ onChange, initialData = {}, onFileChange, currentFile }) 
         >
           {message.length}/280
         </div>
+
         <HashtagSuggestions
           contentType="text"
           title={message}
           description=""
-          onAddHashtag={tag => setMessage(prev => prev + " #" + tag)}
+          onAddHashtag={tag => {
+            setMessage(prev => prev + " #" + tag);
+            setIsDirtyMessage(true);
+          }}
         />
+
+        <div className="ai-actions" style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+          {onReviewAI && (
+            <button
+              type="button"
+              className="ai-button"
+              onClick={() => onReviewAI(message)}
+              style={{
+                flex: 1,
+                padding: "8px",
+                background: "#f0f9ff",
+                border: "1px solid #bae6fd",
+                borderRadius: "6px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+                fontSize: "12px",
+                color: "#0369a1",
+              }}
+            >
+              <span>✨</span> Review with AI
+            </button>
+          )}
+          {onFindViralClips && currentFile?.type?.startsWith("video") && (
+            <button
+              type="button"
+              className="ai-button"
+              onClick={onFindViralClips}
+              style={{
+                flex: 1,
+                padding: "8px",
+                background: "#fdf4ff",
+                border: "1px solid #f0abfc",
+                borderRadius: "6px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+                fontSize: "12px",
+                color: "#a21caf",
+              }}
+            >
+              <span>🎬</span> Find Viral Clips
+            </button>
+          )}
+        </div>
       </div>
 
       <div style={{ marginTop: 8 }}>

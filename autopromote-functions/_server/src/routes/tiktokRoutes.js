@@ -1732,7 +1732,7 @@ router.get("/creator_info", authMiddleware, ttPublicLimiter, async (req, res) =>
 
     // Default conservative info (used when tokens missing or in demo mode)
     const defaultInfo = {
-      display_name: conn && conn.open_id ? conn.display_name || conn.open_id : "TikTok Creator",
+      display_name: conn && (conn.display_name || conn.open_id) ? (conn.display_name || conn.open_id) : "TikTok Creator (Not connected)",
       privacy_level_options: ["SELF_ONLY", "FRIENDS", "EVERYONE"],
       max_video_post_duration_sec: 60,
       interactions: { comments: true, duet: true, stitch: true },

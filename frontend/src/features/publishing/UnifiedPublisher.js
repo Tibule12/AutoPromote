@@ -17,6 +17,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 // --- Hooks ---
 import { usePublishingState } from "./hooks/usePublishingState";
 import { useMediaProcessor } from "./hooks/useMediaProcessor";
+import { sanitizeUrl } from "../../utils/security";
 
 // --- Components ---
 import VideoEditor from "../../components/VideoEditor";
@@ -39,6 +40,7 @@ const PlatformPreview = ({
   previewUrl,
   mediaType,
   platformId,
+  creatorInfo,
 }) => {
   // Correctly resolve the file to preview: Platform specific > Global
   const fileToPreview = data.file || globalFile;
@@ -100,7 +102,7 @@ const PlatformPreview = ({
       return (
         <div style={{ ...style, overflow: "hidden", position: style.position || "relative" }}>
           <video
-            src={effectivePreviewUrl}
+            src={sanitizeUrl(effectivePreviewUrl)}
             controls={showControls}
             playsInline
             loop
@@ -133,7 +135,13 @@ const PlatformPreview = ({
         </div>
       );
     }
-    return <img src={effectivePreviewUrl} alt="Preview" style={{ ...style, objectFit: "cover" }} />;
+    return (
+      <img
+        src={sanitizeUrl(effectivePreviewUrl)}
+        alt="Preview"
+        style={{ ...style, objectFit: "cover" }}
+      />
+    );
   };
 
   // --- PLATFORM SPECIFIC MOCKUPS ---
@@ -169,7 +177,12 @@ const PlatformPreview = ({
             color: "white",
           }}
         >
-          <div style={{ fontWeight: "bold", marginBottom: "5px" }}>@your_username</div>
+          <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
+            {creatorInfo?.display_name ||
+              creatorInfo?.user?.display_name ||
+              creatorInfo?.open_id ||
+              "@your_username"}
+          </div>
           <div style={{ fontSize: "0.9rem", marginBottom: "10px", lineHeight: "1.2" }}>
             {data.caption || "Your caption will appear here..."}
           </div>
@@ -573,9 +586,12 @@ const PlatformPreview = ({
           ></div>
           <div>
             <div style={{ fontWeight: "bold", fontSize: "0.9rem", color: "#000" }}>
-              Your Company
+              {creatorInfo?.meta?.localizedName || creatorInfo?.localizedName || "Your Company"}
             </div>
-            <div style={{ fontSize: "0.75rem", color: "#606060" }}>1,234 followers</div>
+            <div style={{ fontSize: "0.75rem", color: "#606060" }}>
+              {creatorInfo?.meta?.followers ? creatorInfo.meta.followers.toLocaleString() : "1,234"}{" "}
+              followers
+            </div>
             <div style={{ fontSize: "0.75rem", color: "#606060" }}>Just now • 🌐</div>
           </div>
         </div>
@@ -654,7 +670,9 @@ const PlatformPreview = ({
             <span style={{ fontWeight: "bold", color: "#000" }}>
               r/{data.subreddit || "subreddit"}
             </span>
-            <span>• Posted by u/me just now</span>
+            <span>
+              • Posted by u/{creatorInfo?.name || creatorInfo?.meta?.name || "me"} just now
+            </span>
           </div>
           <h3 style={{ fontSize: "1rem", fontWeight: "500", margin: "0 0 10px 0", color: "#000" }}>
             {data.title || "Your Post Title"}
@@ -753,7 +771,151 @@ const UnifiedPublisher = ({ onUpload }) => {
     togglePlatform,
     updatePlatformData,
     getPlatformEffectiveData,
+    platformStates, // Expose platform selection overrides if needed, but usually we rely on "selectedPlatforms" array
   } = usePublishingState(["tiktok", "youtube"]); // Default selection
+
+  // --- External Data Fetching ---
+  const [tiktokCreator, setTiktokCreator] = useState(null);
+  const [facebookPages, setFacebookPages] = useState([]);
+  const [youtubeChannel, setYoutubeChannel] = useState(null);
+  const [linkedinProfile, setLinkedinProfile] = useState(null);
+  const [redditUser, setRedditUser] = useState(null);
+
+  // 1. TikTok Creator Info
+  useEffect(() => {
+    if (selectedPlatforms.includes("tiktok")) {
+      let mounted = true;
+      const fetchTikTok = async () => {
+        try {
+          const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+          const res = await fetch(API_ENDPOINTS.TIKTOK_CREATOR_INFO, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (mounted && res.ok) {
+            const json = await res.json();
+            if (json && !json.error) {
+              setTiktokCreator(json.creator || json);
+            }
+          }
+        } catch (e) {
+          console.warn("TikTok fetch failed", e);
+        }
+      };
+      fetchTikTok();
+      return () => {
+        mounted = false;
+      };
+    }
+  }, [selectedPlatforms]);
+
+  // 2. Facebook/Instagram Pages
+  useEffect(() => {
+    if (!selectedPlatforms.includes("facebook") && !selectedPlatforms.includes("instagram")) {
+      setFacebookPages([]);
+      return;
+    }
+    let mounted = true;
+    const fetchPages = async () => {
+      try {
+        const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+        const res = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (mounted && res.ok) {
+          const json = await res.json();
+          if (json.diagnostic) console.warn("[FacebookStatus]", json.diagnostic);
+          setFacebookPages(json.pages || []);
+        }
+      } catch (e) {
+        console.warn("UnifiedPublisher: Failed to fetch FB pages", e);
+      }
+    };
+    fetchPages();
+    return () => {
+      mounted = false;
+    };
+  }, [selectedPlatforms]);
+
+  // 3. YouTube Channel Info
+  useEffect(() => {
+    if (selectedPlatforms.includes("youtube")) {
+      let mounted = true;
+      const fetchYouTube = async () => {
+        try {
+          const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+          const res = await fetch(API_ENDPOINTS.YOUTUBE_STATUS, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (mounted && res.ok) {
+            const json = await res.json();
+            if (json && json.channel && !json.error) {
+              setYoutubeChannel(json.channel);
+            }
+          }
+        } catch (e) {
+          console.warn("YouTube fetch failed", e);
+        }
+      };
+      fetchYouTube();
+      return () => {
+        mounted = false;
+      };
+    }
+  }, [selectedPlatforms]);
+
+  // 4. LinkedIn Profile Info
+  useEffect(() => {
+    if (selectedPlatforms.includes("linkedin")) {
+      let mounted = true;
+      const fetchLinkedIn = async () => {
+        try {
+          const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+          const res = await fetch(API_ENDPOINTS.LINKEDIN_STATUS, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (mounted && res.ok) {
+            const json = await res.json();
+            if (json && !json.error) {
+              setLinkedinProfile(json);
+            }
+          }
+        } catch (e) {
+          console.warn("LinkedIn fetch failed", e);
+        }
+      };
+      fetchLinkedIn();
+      return () => {
+        mounted = false;
+      };
+    }
+  }, [selectedPlatforms]);
+
+  // 5. Reddit User Info
+  useEffect(() => {
+    if (selectedPlatforms.includes("reddit")) {
+      let mounted = true;
+      const fetchReddit = async () => {
+        try {
+          const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+          const res = await fetch(API_ENDPOINTS.REDDIT_STATUS, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (mounted && res.ok) {
+            const json = await res.json();
+            if (json && !json.error) {
+              setRedditUser(json);
+            }
+          }
+        } catch (e) {
+          console.warn("Reddit fetch failed", e);
+        }
+      };
+      fetchReddit();
+      return () => {
+        mounted = false;
+      };
+    }
+  }, [selectedPlatforms]);
 
   // Media Processor Hook (Handles heavy edits: crop, trim, filter)
   const {
@@ -783,7 +945,6 @@ const UnifiedPublisher = ({ onUpload }) => {
     setDuration,
   } = useMediaProcessor(globalFile);
 
-  const [tiktokCreatorInfo, setTiktokCreatorInfo] = useState(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [editingTarget, setEditingTarget] = useState(null); // 'global' or platformId
@@ -798,38 +959,6 @@ const UnifiedPublisher = ({ onUpload }) => {
       processFileChange(globalFile);
     }
   }, [globalFile]);
-
-  // --- Fetch TikTok Creator Info ---
-  useEffect(() => {
-    let mounted = true;
-    const fetchTiktokInfo = async () => {
-      // Only fetch if TikTok is selected
-      if (!selectedPlatforms.includes("tiktok")) return;
-
-      try {
-        const currentUser = auth?.currentUser;
-        if (!currentUser) return;
-
-        const token = await currentUser.getIdToken(true);
-        const res = await fetch(API_ENDPOINTS.TIKTOK_CREATOR_INFO, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.ok) {
-          const json = await res.json();
-          if (mounted && json.creator) {
-            setTiktokCreatorInfo(json.creator);
-          }
-        }
-      } catch (err) {
-        console.warn("UnifiedPublisher: Failed to fetch TikTok info", err);
-      }
-    };
-    fetchTiktokInfo();
-    return () => {
-      mounted = false;
-    };
-  }, [selectedPlatforms]);
 
   // 2. Handle File Upload (Global)
   const handleGlobalFileChange = e => {
@@ -848,16 +977,29 @@ const UnifiedPublisher = ({ onUpload }) => {
     // Get the effective data (Global + Overrides)
     const data = getPlatformEffectiveData(platformId);
 
-    // Common props for ALL forms. These map directly to the APIs your existing forms expect.
+    // Common props for ALL forms
     const commonProps = {
       // 1. Core Content
       globalTitle,
       globalDescription,
       currentFile: data.file,
+      // Pass facebook pages (needed for FB and IG forms)
+      pages: facebookPages,
+      facebookPages: facebookPages,
+      // Pass Platform Specific Creator Info
+      creatorInfo:
+        platformId === "tiktok"
+          ? tiktokCreator
+          : platformId === "youtube"
+            ? youtubeChannel
+            : platformId === "linkedin"
+              ? linkedinProfile
+              : platformId === "reddit"
+                ? redditUser
+                : null,
+
       onFileChange: newFile => {
         updatePlatformData(platformId, { file: newFile });
-        // If we are overriding the file, we might want to process it for preview
-        // But currently media processor handles global file only.
       },
 
       // New props for AI Review & Viral Clips on Platform-Specific Files
@@ -929,12 +1071,7 @@ const UnifiedPublisher = ({ onUpload }) => {
               <div className="platform-form-column" style={{ marginBottom: "20px" }}>
                 {/* Wrap in dark-theme-provider class to force styles */}
                 <div className="dark-theme-form">
-                  <TikTokForm
-                    {...commonProps}
-                    initialData={data}
-                    // TikTok Specifics
-                    creatorInfo={tiktokCreatorInfo}
-                  />
+                  <TikTokForm {...commonProps} initialData={data} />
                 </div>
               </div>
               <div className="platform-preview-column">
@@ -945,6 +1082,7 @@ const UnifiedPublisher = ({ onUpload }) => {
                   previewUrl={previewUrl}
                   mediaType={mediaType}
                   platformId={platformId}
+                  creatorInfo={tiktokCreator}
                 />
               </div>
             </div>
@@ -1057,6 +1195,7 @@ const UnifiedPublisher = ({ onUpload }) => {
                   previewUrl={previewUrl}
                   mediaType={mediaType}
                   platformId={platformId}
+                  creatorInfo={linkedinProfile}
                 />
               </div>
             </div>
@@ -1085,6 +1224,7 @@ const UnifiedPublisher = ({ onUpload }) => {
                   previewUrl={previewUrl}
                   mediaType={mediaType}
                   platformId={platformId}
+                  creatorInfo={redditUser}
                 />
               </div>
             </div>
@@ -1249,7 +1389,7 @@ const UnifiedPublisher = ({ onUpload }) => {
                   style={{ marginTop: "10px", marginBottom: "10px" }}
                 >
                   <img
-                    src={previewUrl}
+                    src={sanitizeUrl(previewUrl)}
                     alt="Preview"
                     className="preview-media"
                     style={{
@@ -1310,7 +1450,7 @@ const UnifiedPublisher = ({ onUpload }) => {
                       </label>
                       <video
                         key={previewUrl}
-                        src={previewUrl}
+                        src={sanitizeUrl(previewUrl)}
                         controls
                         className="preview-media"
                         onLoadedMetadata={e => setDuration(e.target.duration)}

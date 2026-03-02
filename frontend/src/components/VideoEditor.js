@@ -7,6 +7,7 @@ import { getAuth } from "firebase/auth";
 import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getStorage } from "firebase/storage";
 import ViralClipStudio from "./ViralClipStudio"; // Import the new Studio component
+import { sanitizeUrl } from "../utils/security";
 
 function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [videoSrc, setVideoSrc] = useState("");
@@ -413,7 +414,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       <div className="editor-layout">
         <div className="video-preview">
           {videoSrc ? (
-            <video ref={videoRef} src={videoSrc} controls />
+            <video ref={videoRef} src={sanitizeUrl(videoSrc)} controls />
           ) : (
             <div className="loading-placeholder">Loading Video...</div>
           )}
