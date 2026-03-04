@@ -13,6 +13,7 @@ import "../../components/PlatformForms/PlatformForms.css";
 import { API_ENDPOINTS } from "../../config";
 import { auth, storage } from "../../firebaseClient";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import toast from "react-hot-toast";
 
 // --- Hooks ---
 import { usePublishingState } from "./hooks/usePublishingState";
@@ -102,6 +103,7 @@ const PlatformPreview = ({
       return (
         <div style={{ ...style, overflow: "hidden", position: style.position || "relative" }}>
           <video
+            key={effectivePreviewUrl} // Force reload on URL change
             src={sanitizeUrl(effectivePreviewUrl)}
             controls={showControls}
             playsInline
@@ -1733,7 +1735,7 @@ const UnifiedPublisher = ({ onUpload }) => {
         </aside>
 
         {/* --- RIGHT SIDE: The Platform Cards (Your Existing Forms) --- */}
-        <main className="platform-workspace">
+        <main className="platform-workspace" style={{ paddingBottom: "120px" }}>
           <h2>3. Optimize & Publish</h2>
 
           {selectedPlatforms.length === 0 ? (
@@ -1864,15 +1866,23 @@ const UnifiedPublisher = ({ onUpload }) => {
               // Assuming sourceFiles was there before, I should keep it if possible or remove if undefined.
               // In ContentUploadForm, sourceFiles was state. Here, it might be missing or handled differently.
               // I will keep `images={[]}` for now to be safe or check if sourceFiles is defined.
-              onSave={options => {
-                // If the VideoEditor returns a file blob (e.g. from smart crop)
-                // We handle it here.
-                // Currently VideoEditor structure is a bit ambiguous in this file, so we fallback to assuming it sets global state?
-                // Actually, let's just close it for now as the 'onSave' handling inside VideoEditor usually does the heavy lifting.
-                // But we need to refresh the preview.
+              onSave={async result => {
+                try {
+                  if (result && result.isRemote && result.url) {
+                    // For viral clips, use remote URL directly to prevent download/timeout issues
+                    processFileChange(result);
+                    toast.success("Viral clip ready for scheduling!");
+                  } else if (result instanceof File || result instanceof Blob) {
+                    // FIX: Usse processFileChange
+                    processFileChange(result);
+                    toast.success("Edits applied!");
+                  }
+                } catch (e) {
+                  console.error("Failed to load viral clip:", e);
+                  setFeedbackMessage("Error loading clip.");
+                }
                 setShowVideoEditor(false);
                 setEditingTarget(null);
-                setFeedbackMessage("Edits applied.");
               }}
               onCancel={() => {
                 setShowVideoEditor(false);

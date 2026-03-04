@@ -13,10 +13,11 @@ fastapi
 uvicorn
 python-multipart 
 requests
+python-dotenv
 
 # Text-to-Speech & Video Assembly (New)
 edge-tts
-moviepy
+moviepy==1.0.3
 imageio[ffmpeg]
 
 # Production Tools (Heavy but necessary)

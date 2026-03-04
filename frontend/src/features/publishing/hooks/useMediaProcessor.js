@@ -25,7 +25,28 @@ export const useMediaProcessor = (initialFile = null) => {
 
   // Handle new file selection
   const handleFileChange = newFile => {
-    // If it's just a file object, load it (Standard File Input)
+    // 1. Handle Remote File Object (e.g. from VideoEditor backend processing)
+    if (newFile && newFile.url && !newFile.edit) {
+      setFile(newFile);
+      setSourceFiles([newFile]);
+      if (newFile.type && newFile.type.startsWith("image")) {
+        setType("image");
+      } else {
+        setType("video");
+      }
+      setPreviewUrl(newFile.url);
+
+      // Reset edits on new file
+      setRotate(0);
+      setFlipH(false);
+      setFlipV(false);
+      setTrimStart(0);
+      setTrimEnd(0);
+      setSelectedFilter(null);
+      return;
+    }
+
+    // 2. If it's just a file object, load it (Standard File Input)
     if (newFile instanceof File || newFile instanceof Blob) {
       setFile(newFile);
       setSourceFiles([newFile]); // Default to single file

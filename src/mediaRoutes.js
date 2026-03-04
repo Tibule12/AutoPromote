@@ -137,7 +137,10 @@ router.get("/status/:jobId", async (req, res) => {
       success: true,
       status: data.status,
       progress: data.progress,
-      result: data.result, // Contains { url } if completed
+      result: data.result, // Node worker result
+      output_url: data.output_url, // Python worker result (Async)
+      outputUrl: data.outputUrl, // Legacy Node worker result
+      clipSuggestions: data.clipSuggestions, // Viral clips
       error: data.error,
     });
   } catch (e) {

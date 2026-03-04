@@ -1,8 +1,18 @@
 [
   {
-    "origin": ["https://tibule12.github.io"],
-    "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "origin": ["*"],
+    "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     "maxAgeSeconds": 3600,
-    "responseHeader": ["Content-Type", "Authorization", "x-goog-meta-*"]
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "x-goog-meta-*",
+      "x-firebase-storage-version",
+      "x-goog-date",
+      "x-goog-credential",
+      "x-goog-algorithm",
+      "x-goog-signature",
+      "x-goog-signedheaders"
+    ]
   }
 ]
