@@ -1196,6 +1196,7 @@ try {
           },
         },
         crossOriginEmbedderPolicy: false,
+        frameguard: { action: "deny" },
         hsts: {
           maxAge: 31536000,
           includeSubDomains: true,

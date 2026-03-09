@@ -190,8 +190,8 @@ async function generateTranscription(filePathOrBuffer) {
     // Check if path is within tmpDir (or other safe dir)
     if (!normalizedPath.startsWith(tmpDir) && !normalizedPath.includes("temp_uploads")) {
       // Log warning but proceed if necessary, or throw
-      console.warn(`[Transcription] Warning: Reading file outside temp dir: ${normalizedPath}`);
-      // For strict security: throw new Error("Invalid file path for transcription.");
+      console.error(`[Transcription] Illicit path blocked: ${normalizedPath}`);
+      throw new Error("Invalid file path for transcription.");
     }
 
     if (fs.existsSync(filePathOrBuffer)) {

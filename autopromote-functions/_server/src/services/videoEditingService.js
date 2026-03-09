@@ -7,8 +7,10 @@ const admin = require("firebase-admin");
 const db = admin.firestore();
 const fs = require("fs");
 
-// Point to the Python service (default localhost:8000)
-const MEDIA_WORKER_URL = process.env.MEDIA_WORKER_URL || "http://localhost:8000";
+// Point to the Python service (default to Cloud Run in production, localhost in dev)
+// Use the deployed URL for stability if env var is missing
+const MEDIA_WORKER_URL =
+  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 
 const { v4: uuidv4 } = require("uuid");
 
@@ -59,7 +61,20 @@ class VideoEditingService {
 
       // Call the existing synchronous logic
       // Note: processVideo handles the Python communication, storage upload, etc.
-      const result = await this.processVideo(videoUrl, options, userId);
+      // We pass jobId to enable async handoff
+      const result = await this.processVideo(videoUrl, options, userId, jobId);
+
+      // If async mode was triggered, the python worker took over responsibilities.
+      // We don't mark as completed here. Python will do it.
+      if (result.status === "processing" && result.mode === "async") {
+        console.log(`[VideoEditing] Job ${jobId} handed off to Async Worker.`);
+        // Optionally update status to indicate remote processing
+        await docRef.update({
+          status: "processing_remote",
+          updatedAt: new Date().toISOString(),
+        });
+        return;
+      }
 
       await docRef.update({
         status: "completed",
@@ -86,11 +101,13 @@ class VideoEditingService {
    * @param {string} videoUrl - Source video URL
    * @param {Object} options - { smartCrop: boolean, silenceRemoval: boolean }
    * @param {string} userId - User ID requesting the edit
+   * @param {string} jobId - (Optional) Job ID for async tracking
    * @returns {Promise<Object>} { success: true, url: string, ... }
    */
-  async processVideo(videoUrl, options, userId) {
-    console.log(`[VideoEditing] Processing for User: ${userId}`, options);
-    console.log(`[VideoEditing] Full options object:`, JSON.stringify(options, null, 2));
+  async processVideo(videoUrl, options, userId, jobId = null) {
+    // Safe logging - pass user input as data arg, not template string
+    console.log("[VideoEditing] Processing video request", { userId, options, jobId });
+    console.log("[VideoEditing] Options detail:", JSON.stringify(options, null, 2));
 
     // Track the resulting file path from Python
     let resultPath = null;
@@ -106,7 +123,7 @@ class VideoEditingService {
 
       // Special cases that use dedicated endpoints (Phase 2 analysis)
       if (options.analyzeClips) {
-        endpoint = "/analyze-clips";
+        endpoint = "/analyze-clips"; // Note: Endpoint names must match exactly
         operation = "analyze_clips";
         isPipeline = false;
       } else if (options.renderViral) {
@@ -153,6 +170,10 @@ class VideoEditingService {
         video_url: videoUrl, // The URL (or local path if running locally)
         target_aspect_ratio: "9:16",
 
+        // Context
+        job_id: jobId,
+        async_mode: !!jobId, // Enable async if JobId provided
+
         // Pipeline Flags
         smart_crop: options.smartCrop || false,
         crop_style: cropStyle,
@@ -172,10 +193,12 @@ class VideoEditingService {
 
       // If rendering a Viral Clip, attach specific data
       if (options.renderViral && options.viralData) {
+        endpoint = "/render-viral-clip";
         payload = {
           ...payload,
           start_time: options.viralData.clipTime.start,
           end_time: options.viralData.clipTime.end,
+          auto_captions: options.captions, // Remap captions -> auto_captions
           // Map JS startTime -> Python start_time
           overlays: (options.viralData.overlays || []).map(o => ({
             ...o,
@@ -193,6 +216,11 @@ class VideoEditingService {
       });
 
       const result = response.data;
+
+      // CHECK FOR ASYNC MODE RESPONSE
+      if (result.status === "processing" && result.mode === "async") {
+        return { status: "processing", mode: "async", jobId: result.job_id };
+      }
 
       // Special handling for Analyze Clips (No output file, just JSON)
       if (operation === "analyze_clips") {

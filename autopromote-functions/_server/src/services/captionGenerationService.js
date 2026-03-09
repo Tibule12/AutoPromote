@@ -7,7 +7,8 @@ const { logOpenAIUsage } = require("./openaiUsageLogger");
 class CaptionGenerationService {
   constructor() {
     this.openaiApiKey = process.env.OPENAI_API_KEY;
-    this.model = "gpt-4o";
+    // Using gpt-4o-mini for cost efficiency
+    this.model = "gpt-4o-mini";
 
     if (!this.openaiApiKey) {
       console.warn(

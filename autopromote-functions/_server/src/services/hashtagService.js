@@ -5,7 +5,8 @@
 class HashtagService {
   constructor() {
     this.openaiApiKey = process.env.OPENAI_API_KEY;
-    this.model = "gpt-4o";
+    // Using gpt-4o-mini for efficient hashtag generation
+    this.model = "gpt-4o-mini";
 
     if (!this.openaiApiKey) {
       console.warn(

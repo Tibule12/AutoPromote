@@ -109,22 +109,6 @@ router.get(
   // without requiring an ID token. The handler itself will return connected:false when
   // no user is present. Do not apply authMiddleware which would return 401.
   rateLimit({ max: 50, windowMs: 60000, key: r => r.userId || r.ip }),
-  // OPTIONAL AUTH: attempt to verify token if present
-  async (req, res, next) => {
-    try {
-      if (req.userId || req.user) return next();
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        const token = authHeader.split("Bearer ")[1];
-        const decoded = await admin.auth().verifyIdToken(token);
-        req.userId = decoded.uid;
-        req.user = decoded;
-      }
-    } catch (e) {
-      // Ignore token errors (expired, invalid), just proceed as anonymous
-    }
-    next();
-  },
   async (req, res) => {
     const platform = normalize(req.params.platform);
     if (!SUPPORTED_PLATFORMS.includes(platform))
