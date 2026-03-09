@@ -7,11 +7,20 @@ import { getAuth } from "firebase/auth";
 import html2canvas from "html2canvas"; // For rendering styled captions
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
-// --- Constants for Cute/Rainbow Styles ---
-const GAMEPLAY_LOOPS = [
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // Placeholder: Replace with Minecraft Parkour
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", // Placeholder: Replace with Slime Cutting
-];
+// --- Constants for Viral Styles ---
+const GAMEPLAY_OPTIONS = {
+  runner: {
+    label: "🏎️ Runner (Tux Racer)",
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Tux_Racer_gameplay_(Ingo%27s_Speedway).webm/Tux_Racer_gameplay_(Ingo%27s_Speedway).webm.480p.vp9.webm",
+    description: "Fast-paced racing, similar to Subway Surfers.",
+  },
+  shooter: {
+    label: "🔫 Shooter (Red Eclipse)",
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c6/Red_Eclipse_1%2C5_Gameplay_2.webm/Red_Eclipse_1%2C5_Gameplay_2.webm.480p.vp9.webm",
+    description: "Action FPS gameplay, similar to CoD/Halo.",
+  },
+  // Add more here if you find other CC0 clips (e.g. Slime, Parkour)
+};
 
 const RAINBOW_COLORS = [
   "#FF9AA2", // Soft Red
@@ -63,6 +72,10 @@ const ViralClipStudio = ({
   const [activeOverlayId, setActiveOverlayId] = useState(null);
   const [videoTime, setVideoTime] = useState(0);
   const [videoFit, setVideoFit] = useState("contain"); // 'contain', 'cover' (fill), 'fill' (stretch)
+
+  // New AI Options for users
+  const [autoCaptions, setAutoCaptions] = useState(false);
+  const [smartCrop, setSmartCrop] = useState(false);
 
   const [timeline, setTimeline] = useState(() => {
     // Initial timeline is just the main video URL, effectively one clip
@@ -272,36 +285,59 @@ const ViralClipStudio = ({
   };
 
   // --- NEW: Split Screen (Gameplay Mode) ---
-  const handleSplitScreen = () => {
-    // 1. Pick a random gameplay video
-    const randomLoop = GAMEPLAY_LOOPS[Math.floor(Math.random() * GAMEPLAY_LOOPS.length)];
+  const handleSplitScreen = (type = "runner") => {
+    // 1. Pick a gameplay video based on selection
+    let loopUrl = "";
+    if (type === "custom") {
+      // Handled by file input
+      document.getElementById("gameplay-upload-input").click();
+      return;
+    } else if (GAMEPLAY_OPTIONS[type]) {
+      loopUrl = GAMEPLAY_OPTIONS[type].url;
+    } else {
+      // Fallback
+      loopUrl = GAMEPLAY_OPTIONS.runner.url;
+    }
 
     // 2. Add as overlay, but styled specially
     // We want it to take up the BOTTOM HALF (50% height, 100% width, y=50%)
-    // And we want the main video to take up TOP HALF.
-
-    // Update the main video frame? No, we can't easily resize the base <video>.
-    // Trick: Add TWO overlays. One is Main Video (scaled), One is Gameplay (scaled).
-    // Or: Cover bottom half with overlay.
-
     const newOverlay = {
       id: Date.now(),
       type: "video",
-      src: randomLoop,
+      src: loopUrl,
       isLocal: false,
       x: 50, // Center X
       y: 75, // Center of bottom half (50 + 25)
       width: 100, // Full width
-      height: 50, // Half height? (approx)
+      height: 50, // Half height
       scale: 1,
+      // Metadata for UI
+      tag: "gameplay",
     };
 
-    // To make it look "Split Screen", the main video might still be full height behind it.
-    // This is MVP. A pro version would resize the base video.
-    // For now, let's just add the gameplay overlay at the bottom.
+    setOverlays(prev => [...prev.filter(o => o.tag !== "gameplay"), newOverlay]); // Replace existing gameplay if any
+    alert(`🎮 ${GAMEPLAY_OPTIONS[type]?.label || "Gameplay"} Layer Added!`);
+  };
 
-    setOverlays(prev => [...prev, newOverlay]);
-    alert("🎮 Gameplay Layer Added! Drag to position or resize.");
+  const handleCustomGameplayUpload = event => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const newOverlay = {
+      id: Date.now(),
+      type: "video",
+      src: URL.createObjectURL(file), // Local preview
+      file: file, // For upload later
+      isLocal: true,
+      x: 50,
+      y: 75,
+      width: 100,
+      height: 50,
+      tag: "gameplay",
+    };
+
+    setOverlays(prev => [...prev.filter(o => o.tag !== "gameplay"), newOverlay]);
+    alert("🎮 Custom Gameplay Added!");
   };
 
   const updateOverlayText = (id, newText) => {
@@ -913,26 +949,106 @@ const ViralClipStudio = ({
               >
                 <span>🎵</span> Change Music ({currentMusic || "None"})
               </button>
+
+              <div
+                style={{
+                  marginTop: "15px",
+                  padding: "10px",
+                  background: "#f5f5f5",
+                  borderRadius: "8px",
+                }}
+              >
+                <h5 style={{ margin: "0 0 10px 0" }}>🤖 AI Enhancements</h5>
+                <label style={{ display: "block", marginBottom: "8px", cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={autoCaptions}
+                    onChange={e => setAutoCaptions(e.target.checked)}
+                    style={{ marginRight: "8px" }}
+                  />
+                  Auto-Captions (Burn-in)
+                </label>
+                <label style={{ display: "block", cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={smartCrop}
+                    onChange={e => setSmartCrop(e.target.checked)}
+                    style={{ marginRight: "8px" }}
+                  />
+                  Smart Crop (Keep face centered)
+                </label>
+              </div>
             </div>
 
-            <div className="action-buttons">
-              <button
-                className="gameplay-btn"
-                style={{
-                  width: "100%",
-                  marginBottom: "10px",
-                  background: "#333",
-                  color: "#fff",
-                  padding: "10px",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  border: "1px solid #444",
-                  fontWeight: "bold",
-                }}
-                onClick={handleSplitScreen}
-              >
-                🎮 Add Gameplay (Split Screen)
-              </button>
+            <div
+              style={{
+                marginTop: "15px",
+                padding: "10px",
+                background: "#f5f5f5",
+                borderRadius: "8px",
+              }}
+            >
+              <h5 style={{ margin: "0 0 10px 0" }}>🎮 Split-Screen (Retention)</h5>
+              <p style={{ fontSize: "12px", color: "#666", marginBottom: "8px" }}>
+                Add a gameplay loop to default to keep viewers watching if there's a lull in your
+                video.
+              </p>
+              <div style={{ display: "flex", gap: "5px", flexDirection: "column" }}>
+                <button
+                  style={{
+                    padding: "8px",
+                    cursor: "pointer",
+                    background: "white",
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                  }}
+                  onClick={() => handleSplitScreen("runner")}
+                >
+                  🏎️ Add Runner
+                </button>
+                <button
+                  style={{
+                    padding: "8px",
+                    cursor: "pointer",
+                    background: "white",
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                  }}
+                  onClick={() => handleSplitScreen("shooter")}
+                >
+                  🔫 Add Shooter
+                </button>
+                <button
+                  style={{
+                    padding: "8px",
+                    cursor: "pointer",
+                    background: "white",
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                  }}
+                  onClick={() => document.getElementById("gameplay-upload-input").click()}
+                >
+                  📁 Upload Custom
+                </button>
+                <input
+                  id="gameplay-upload-input"
+                  type="file"
+                  accept="video/*"
+                  style={{ display: "none" }}
+                  onChange={handleCustomGameplayUpload}
+                />
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: "15px",
+                padding: "10px",
+                background: "#f5f5f5",
+                borderRadius: "8px",
+              }}
+            >
+              <h5 style={{ margin: "0 0 10px 0" }}>🤖 AI Enhancements</h5>
 
               <button
                 className="export-btn"
@@ -1027,7 +1143,8 @@ const ViralClipStudio = ({
                     );
 
                     setOverlays(newOverlays);
-                    onSave(selectedClip, newOverlays);
+                    // Pass AI options to the save handler
+                    onSave(selectedClip, newOverlays, { autoCaptions, smartCrop });
                   } catch (err) {
                     alert("Export failed: " + err.message);
                   } finally {

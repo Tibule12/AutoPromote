@@ -98,7 +98,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       const auth = getAuth();
       const user = auth.currentUser;
       if (!user) throw new Error("Please log in to use AI tools.");
-      const token = await user.getIdToken();
+      let token = await user.getIdToken();
 
       // 2. Upload File (if local)
       let fileUrl = "";
@@ -163,16 +163,32 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         // Poll loop
         let attempts = 0;
         while (true) {
-          if (attempts > 300) throw new Error("Processing timed out (10m limit)"); // Safety break
+          if (attempts > 1800) throw new Error("Processing timed out (1h limit)"); // Extended to 1h for long 0.3x renders
           await new Promise(r => setTimeout(r, 2000)); // Sleep 2s
           attempts++;
 
-          const statusRes = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
+          let statusRes = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
+          // Handle Token Expiry (401)
+          if (statusRes.status === 401) {
+            console.warn("Token expired during polling, refreshing...");
+            try {
+              // Refresh Firebase token
+              token = await user.getIdToken(true);
+              // Retry request with new token
+              statusRes = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+            } catch (err) {
+              console.error("Token refresh failed:", err);
+              throw new Error("Authentication session expired.");
+            }
+          }
+
           if (!statusRes.ok) {
-            console.warn("Status check failed, retrying...");
+            console.warn(`Status check failed (${statusRes.status}), retrying...`);
             continue;
           }
 
@@ -184,17 +200,25 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           }
 
           if (statusData.status === "completed") {
-            result = statusData.result; // Swap initial result with final result
+            // FIX: If result is nested, use it. Otherwise, assume statusData IS the result.
+            // Also ensure we don't accidentally set 'result' to undefined.
+            result = statusData.result || statusData;
             break;
           }
 
           // Updates
           const progress = statusData.progress || 0;
-          setStatusMessage(`Processing Video... ${progress}%`); // Dynamic updates
+          const detail = statusData.detail ? ` - ${statusData.detail}` : "";
+          setStatusMessage(`Processing Video... ${progress}%${detail}`); // Dynamic updates
         }
       }
 
-      setStatusMessage(`Success! Remaining Credits: ${result.remainingCredits}`);
+      // Ensure we handle cases where result.remainingCredits might be undefined/hidden
+      const creditsMsg =
+        result.remainingCredits !== undefined
+          ? ` Remaining Credits: ${result.remainingCredits}`
+          : "";
+      setStatusMessage(`Success!${creditsMsg}`);
 
       // If we got Viral Clips back (check both top-level and nested scenarios), switch to Studio Mode
       const suggestions = result.clipSuggestions || (result.data && result.data.clipSuggestions);
@@ -218,32 +242,53 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         // Or rely on lifecycle rules.
       }
 
-      if (result.url) {
-        // Force UI refresh by ensuring the URL is treated as new (even if same filename)
-        // Though in our backend we use timestamped filenames, caching can still be aggressive.
-        const urlWithCacheBuster = result.url.includes("?")
-          ? `${result.url}&t=${Date.now()}`
-          : `${result.url}?t=${Date.now()}`;
+      // Ensure we don't accidentally set 'result' to undefined.
+      const finalResult = result;
 
+      const finalUrl = finalResult.output_url || finalResult.url;
+      if (finalUrl) {
+        // Force UI refresh by ensuring the URL is treated as new.
+        // SIGNED URL SAFEGUARDS: Do NOT append cache busters to Signed URLs (Google/AWS) or Firebase Tokens.
+        // Modifying the query string invalidates the signature!
+        const isSigned =
+          finalUrl.includes("Signature") ||
+          finalUrl.includes("token=") ||
+          finalUrl.includes("Expires");
+
+        const urlWithCacheBuster = isSigned
+          ? finalUrl
+          : finalUrl.includes("?")
+            ? `${finalUrl}&t=${Date.now()}`
+            : `${finalUrl}?t=${Date.now()}`;
+
+        console.log("Setting Video Source:", urlWithCacheBuster);
         setVideoSrc(urlWithCacheBuster);
-        // Fetch the blob so we can save it back to parent if needed
-        // Or just keep the URL if parent supports it. For now, try to get blob.
+
+        // FORCE RE-RENDER OF VIDEO ELEMENT using the correct ref
+        if (videoRef.current) {
+          videoRef.current.load();
+          videoRef.current.play().catch(e => console.warn("Auto-play blocked:", e));
+        }
+
         try {
           // Note: This fetch might fail if CORS is not configured on the Storage bucket.
           // If it fails, we will wrap the URL in a File-like object or pass the URL directly.
-          const videoBlob = await fetch(result.url, { mode: "cors" }).then(r => {
-            if (!r.ok) throw new Error("Fetch failed");
+          // For Signed URLs, we use the EXACT URL without modification.
+          const videoBlob = await fetch(urlWithCacheBuster, { mode: "cors" }).then(r => {
+            if (!r.ok) throw new Error(`Fetch failed: ${r.status}`);
             return r.blob();
           });
           // Update state so next step uses THIS new file instead of original
           const newFile = new File([videoBlob], "processed_video.mp4", { type: "video/mp4" });
           setProcessedFile(newFile);
         } catch (e) {
-          console.warn("Could not fetch blob. Chaining URL for next step.");
+          console.warn(
+            "Could not fetch blob (likely CORS or Signature). Using remote URL directly."
+          );
           const fakeFile = {
             name: "processed_video_remote.mp4",
             type: "video/mp4",
-            url: result.url,
+            url: urlWithCacheBuster,
             isRemote: true,
           };
           setProcessedFile(fakeFile);
@@ -266,7 +311,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     }
   };
 
-  const handleViralRender = async (selectedClip, overlays) => {
+  const handleViralRender = async (selectedClip, overlays, extraOptions = {}) => {
     setStatusMessage("Rendering your viral clip with overlays...");
     setProcessing(true);
     setClipSuggestions(null); // Close studio but keep processing state
@@ -294,11 +339,18 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
       // Prepare payload
       const payload = {
-        videoUrl: finalVideoUrl,
-        clipTime: { start: selectedClip.start, end: selectedClip.end },
+        video_url: finalVideoUrl,
+        start_time: selectedClip.start,
+        end_time: selectedClip.end,
         overlays: overlays,
-        options: { ...options, renderViral: true, analyzeClips: false }, // Force analyzeClips to false for rendering!
+        auto_captions: !!extraOptions.autoCaptions,
+        // smart_crop: !!extraOptions.smartCrop, // Backend supports this? Check Python worker.
       };
+
+      // NOTE: backend 'mediaRoutes.js' expects 'fileUrl' and 'options'.
+      // But 'videoEditingService.js' puts 'payload' inside 'options.viralData'.
+      // So detailed fields go into 'payload' (viralData).
+      // Let's pass smartCrop in both places to be safe if backend logic varies.
 
       const response = await fetch(`${API_BASE_URL}/api/media/process`, {
         method: "POST",
@@ -307,8 +359,15 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          fileUrl: finalVideoUrl, // Re-send main URL
-          options: { ...options, renderViral: true, analyzeClips: false, viralData: payload }, // Force here too
+          fileUrl: finalVideoUrl,
+          options: {
+            ...options,
+            renderViral: true,
+            analyzeClips: false,
+            viralData: payload,
+            // Pass simple flags at top level if needed by other services
+            smartCrop: !!extraOptions.smartCrop,
+          },
         }),
       });
 
@@ -366,7 +425,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           isRemote: true,
         };
         setProcessedFile(fakeFile);
-        setStatusMessage("Viral Clip Rendered! Ready to Save.");
+        setStatusMessage("Viral Clip Rendered! Auto-saving...");
+
+        // Automatically save back to parent if onSave is provided
+        if (onSave) {
+          onSave(fakeFile);
+        }
       } else {
         console.error("Rendering succeeded but no URL returned:", result);
         setStatusMessage("Error: Server returned success but no video URL.");
@@ -414,7 +478,32 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       <div className="editor-layout">
         <div className="video-preview">
           {videoSrc ? (
-            <video ref={videoRef} src={sanitizeUrl(videoSrc)} controls />
+            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <video
+                key={videoSrc} // Force component remount on source change
+                ref={videoRef}
+                src={sanitizeUrl(videoSrc)}
+                controls
+                style={{ width: "100%", flex: 1, objectFit: "contain" }}
+              />
+              <div
+                style={{
+                  padding: "8px",
+                  textAlign: "center",
+                  background: "#222",
+                  marginTop: "4px",
+                }}
+              >
+                <a
+                  href={videoSrc}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#4caf50", textDecoration: "none", fontWeight: "bold" }}
+                >
+                  📥 Download / Open Video
+                </a>
+              </div>
+            </div>
           ) : (
             <div className="loading-placeholder">Loading Video...</div>
           )}

@@ -482,6 +482,16 @@ async function enqueuePlatformPostTask({
       const contentSnap = await db.collection("content").doc(contentId).get();
       if (contentSnap.exists) {
         const c = contentSnap.data();
+
+        // DUPLICATE PRE-CHECK:
+        // If the content distribution status already shows this platform is processed/processing, skip.
+        // This handles race conditions where immediate distribution (contentRoutes) and viral optimization (scheduled) overlap.
+        const distStatus = c.distribution && c.distribution[platform] && c.distribution[platform].status;
+        if (distStatus === "published" || distStatus === "processing") {
+          console.log(`[enqueue] Skipping ${platform} post for ${contentId} - already ${distStatus}`);
+          return { skipped: true, reason: "already_distributed", platform, contentId, status: distStatus };
+        }
+
         const options =
           (c.platform_options && c.platform_options[platform]) ||
           (c.platformOptions && c.platformOptions[platform]) ||

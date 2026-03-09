@@ -75,6 +75,7 @@ const ProfilePanel = ({
           className="landing-thumbnail"
           src={user?.thumbnailUrl || DEFAULT_IMAGE}
           alt="Landing Thumbnail"
+          referrerPolicy="no-referrer"
         />
         <div style={{ color: "#9aa4b2", marginTop: ".5rem" }}>
           Welcome back, {user?.name || "User"}.

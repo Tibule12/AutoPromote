@@ -687,3 +687,47 @@ input:checked + .toggle-slider:before {
     transform: rotate(360deg);
   }
 }
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  /* Force vertical stacking for form rows */
+  .form-row-modern {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-row-modern .form-group-modern {
+    width: 100%;
+    margin-bottom: 0px; /* Gap handles spacing */
+  }
+
+  /* Ensure inputs are full width and touch-friendly */
+  .modern-input,
+  .modern-select {
+    width: 100%;
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 12px; /* Larger touch target */
+  }
+
+  /* Wrap card selectors if too narrow */
+  .card-selector {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .card-option {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Adjust grid columns for settings */
+  .settings-grid {
+    grid-template-columns: 1fr 1fr; /* 2 columns on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-grid {
+    grid-template-columns: 1fr; /* 1 column on very small screens */
+  }
+}

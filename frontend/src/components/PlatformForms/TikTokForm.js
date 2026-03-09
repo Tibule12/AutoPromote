@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../../ContentUploadForm.css";
+// import "../../ContentUploadForm.css";
 import EmojiPicker from "../EmojiPicker";
 import HashtagSuggestions from "../HashtagSuggestions";
 import { OPTIMAL_TIMES } from "../BestTimeToPost";

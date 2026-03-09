@@ -1,6 +1,9 @@
 # Use official Python runtime
 FROM python:3.10-slim
 
+# Prevent prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install system dependencies (For OpenCV + FFmpeg)
 RUN apt-get update && apt-get install -y \
     ffmpeg \

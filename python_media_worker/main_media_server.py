@@ -14,7 +14,7 @@ import re  # Added for parsing silence output
 import cv2  # OpenCV (Phase 1)
 import ffmpeg  # FFmpeg (Phase 1)
 import firebase_admin
-from firebase_admin import credentials, storage
+from firebase_admin import credentials, storage, firestore
 from scenedetect import VideoManager, SceneManager
 from scenedetect.detectors import ContentDetector
 from dotenv import load_dotenv
@@ -114,15 +114,16 @@ model_whisper = None
 def get_whisper_model():
     global model_whisper
     if model_whisper is None and whisper is not None:
-        # Upgrade to 'base' - Better accuracy than tiny, still fast enough for CPU.
-        # 'small' is too slow for 2min requirement on CPU.
-        logger.info("Loading Whisper model (base) for balanced speed/accuracy...")
-        model_whisper = whisper.load_model("base")
+        # UPGRADE: 'small' model is required for decent performance on African languages (Zulu, Xhosa, Afrikaans).
+        # 'base' often fails to detect them or hallucinates English. 
+        # RAM Usage: 'small' requires ~2GB, which fits within our 4GB instance.
+        logger.info("Loading Whisper model (small) for South African language support...")
+        model_whisper = whisper.load_model("small")
     return model_whisper
 
 def upload_file_to_firebase(local_path, destination_path=None):
     """
-    Uploads a file to Firebase Storage and returns the public URL.
+    Uploads file to Firebase (Signed URL + Fallback).
     """
     try:
         bucket = storage.bucket()
@@ -131,12 +132,51 @@ def upload_file_to_firebase(local_path, destination_path=None):
         
         blob = bucket.blob(destination_path)
         blob.upload_from_filename(local_path)
-        blob.make_public()
-        logger.info(f"Uploaded to Firebase: {blob.public_url}")
-        return blob.public_url
+
+        # 1. Try Signed URL (Best for uniform buckets)
+        try:
+            import datetime
+            url = blob.generate_signed_url(
+                version="v4",
+                expiration=datetime.timedelta(days=7),
+                method="GET"
+            )
+            logger.info(f"Generated Signed URL: {url}")
+            return url
+        except Exception as e:
+            logger.warning(f"Signed URL failed: {e}")
+
+        # 2. Try make_public (Legacy)
+        try:
+            blob.make_public()
+            return blob.public_url
+        except Exception as e:
+            logger.warning(f"make_public failed: {e}")
+            
+        # 3. Fallback (Maybe bucket is public via policy)
+        return blob.public_url or f"https://storage.googleapis.com/{bucket.name}/{destination_path}"
+
     except Exception as e:
-        logger.error(f"Firebase Upload Failed: {e}")
+        logger.error(f"Firebase Upload CRITICAL: {e}")
         return None
+
+def update_firestore_job(job_id, data):
+    """
+    Update Firestore job status (for async processing).
+    """
+    if not job_id: return
+    try:
+        db = firestore.client()
+        # Ensure timestamp is set properly if needed, but 'merge=True' handles partial updates
+        # Add timestamp for traceability
+        data['updated_at'] = firestore.SERVER_TIMESTAMP
+        
+        doc_ref = db.collection("video_edits").document(job_id)
+        doc_ref.set(data, merge=True)
+        logger.info(f"Firestore updated for job {job_id}: {data.get('status')}")
+    except Exception as e:
+        logger.error(f"Failed to update Firestore for job {job_id}: {e}")
+
 
 
 def download_youtube_audio(query, output_path):
@@ -311,6 +351,8 @@ class VideoProcessRequest(BaseModel):
     volume: float = 0.15
     is_search: bool = False
     safe_search: bool = True
+    job_id: Optional[str] = None
+    async_mode: bool = True  # DEFAULT TO TRUE to avoid 504 timeouts
 
 async def detect_silence_intervals(input_path, threshold="-30dB", duration=0.5):
     """
@@ -352,21 +394,40 @@ async def detect_silence_intervals(input_path, threshold="-30dB", duration=0.5):
     return intervals
 
 @app.post("/process-video")
-async def process_video_pipeline(request: VideoProcessRequest):
+async def process_video_endpoint(request: VideoProcessRequest, background_tasks: BackgroundTasks):
     """
-    Master pipeline that runs multiple AI enhancements sequentially without intermediate uploads.
-    1. Download
-    2. Smart Crop (if enabled)
-    3. Silence Removal (if enabled)
-    4. Viral Hook Intro (if enabled) - NEW
-    5. Mute Audio (if enabled)
-    6. Add Music (if enabled)
-    7. Captions (if enabled)
-    Returns the final local path.
+    Endpoint for video processing (Sync or Async).
     """
-    logger.info(f"Received efficient pipeline request: {request}")
+    if request.async_mode:
+        job_id = request.job_id or str(uuid.uuid4())
+        logger.info(f"Queuing ASYNC job {job_id}")
+        
+        # Mark initial status
+        update_firestore_job(job_id, {"status": "processing", "progress": 0, "mode": "async-python"})
+        
+        # Add to background tasks
+        background_tasks.add_task(run_pipeline_impl, request, provided_job_id=job_id)
+        
+        return {"status": "processing", "job_id": job_id, "mode": "async"}
+    else:
+        # Sync mode (blocking)
+        return await run_pipeline_impl(request)
+
+async def run_pipeline_impl(request: VideoProcessRequest, provided_job_id: str = None):
+    """
+    Internal implementation of the video pipeline.
+    """
+    request_job_id = provided_job_id or request.job_id
+    logger.info(f"Running pipeline implementation for Job {request_job_id} (Async: {request.async_mode})")
     
-    job_id = str(uuid.uuid4())
+    # If async mode, update status to processing immediately in Firestore?
+    # No, caller handles that. We handle completion/failure.
+
+    if not request_job_id:
+        job_id = str(uuid.uuid4())
+    else:
+        job_id = request_job_id
+
     SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
     if not os.path.exists(SHARED_TMP_DIR):
         os.makedirs(SHARED_TMP_DIR)
@@ -376,7 +437,8 @@ async def process_video_pipeline(request: VideoProcessRequest):
     current_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_step0.mp4")
     
     # Auto-Kill existing job if busy (Last-Write-Wins for single user UX)
-    if current_job_info["status"] == "busy":
+    # Note: Global variable usage here is tricky with async tasks. We depend on correct scoping.
+    if current_job_info["status"] == "busy" and current_job_info.get("job_id") != job_id:
         logger.warning(f"Worker busy with {current_job_info['job_id']}. New request {job_id} effectively cancels it.")
         reset_worker()
         # clear_current_process() is called by reset_worker
@@ -404,6 +466,10 @@ async def process_video_pipeline(request: VideoProcessRequest):
             ["ffmpeg", "-user_agent", "Mozilla/5.0", "-i", request.video_url, "-c", "copy", "-y", current_path],
             check=True
         )
+
+        # Notify progress: Download Complete
+        if request.async_mode:
+             update_firestore_job(job_id, {"status": "processing", "progress": 15, "detail": "Downloaded Source"})
         
         # OPTIMIZED PIPELINE: Combine multiple FFmpeg filters into fewer passes
         # Re-encoding repeatedly (Crop -> Silence -> Hook -> Music) is too slow for 10min videos.
@@ -419,6 +485,9 @@ async def process_video_pipeline(request: VideoProcessRequest):
         
         if request.montage_segments and len(request.montage_segments) > 0:
            step_count += 1
+           # Notify progress
+           if request.async_mode: update_firestore_job(job_id, {"progress": 20, "detail": "Processing Montage"})
+
            logger.info(f"Step {step_count}: Creating Montage from {len(request.montage_segments)} segments")
            next_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_step{step_count}.mp4")
            
@@ -464,6 +533,7 @@ async def process_video_pipeline(request: VideoProcessRequest):
            
         elif request.silence_removal:
            step_count += 1
+           if request.async_mode: update_firestore_job(job_id, {"progress": 25, "detail": "Removing Silence"})
            logger.info(f"Step {step_count}: Removing Silence (Structural Edit)")
 
            next_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_step{step_count}.mp4")
@@ -528,6 +598,9 @@ async def process_video_pipeline(request: VideoProcessRequest):
         
         step_count += 1
         logger.info(f"Step {step_count}: Applying Effects (Crop, Hook, Music, Captions) in ONE PASS")
+        
+        if request.async_mode: update_firestore_job(job_id, {"progress": 40, "detail": "Applying AI Effects"})
+
         final_pass_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_final_pass.mp4")
         
         main_filters = []     # List of filter strings
@@ -538,13 +611,19 @@ async def process_video_pipeline(request: VideoProcessRequest):
         next_input_idx = 1
         
         # 1. Prepare CAPTION file (if needed) - Must be done BEFORE ffmpeg call
-        ass_filter = ""
-        if request.captions and whisper:
+        ass_path = None # initialize
+        if request.captions:
              logger.info("Generating Captions for single-pass burn...")
+             
+             # PROGRESS UPDATE BEFORE WHISPER STARTS
+             if request.async_mode: update_firestore_job(job_id, {"progress": 40, "detail": "Generating Smart Captions (AI)"})
+             
              model = get_whisper_model()
              # We need to transcribe current_path (which might be silence-removed)
              result = model.transcribe(current_path, word_timestamps=True, fp16=False)
              
+             if request.async_mode: update_firestore_job(job_id, {"progress": 60, "detail": "Transcription Complete"})
+
              ass_path = os.path.join(SHARED_TMP_DIR, f"{job_id}.ass")
              # ... [Reuse ASS generation code] ...
              # For brevity, let's inject a helper function or simplified ASS generator here
@@ -640,6 +719,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         music_added_successfully = False
 
         if request.add_music:
+             if request.async_mode: update_firestore_job(job_id, {"progress": 70, "detail": "Downloading Music"})
              # Download song logic...
              song_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_song.mp3")
              
@@ -699,7 +779,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         if not main_filters:
              # No filters? Just Copy.
              shutil.copy(current_path, final_pass_path)
+             if request.async_mode: update_firestore_job(job_id, {"progress": 90, "detail": "Finalizing (Copy)"})
         else:
+             if request.async_mode: update_firestore_job(job_id, {"progress": 80, "detail": "Rendering Final Video (High CPU)"})
              filter_str = ";".join(main_filters)
              # Map the last labels
              cmd = ["ffmpeg"] + input_args
@@ -722,24 +804,40 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         # Final Result
         final_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_final.mp4")
         if os.path.exists(current_path):
+            if request.async_mode: update_firestore_job(job_id, {"progress": 95, "detail": "Uploading Result"})
             os.rename(current_path, final_output_path)
             # Clean up temp ass file
-            if 'ass_path' in locals() and os.path.exists(ass_path):
+            if 'ass_path' in locals() and ass_path and os.path.exists(ass_path):
                  try: os.remove(ass_path)
                  except: pass
 
-            return {
+            final_result = {
                 "status": "completed", 
                 "job_id": job_id, 
                 "output_path": final_output_path,
                 "output_url": upload_file_to_firebase(final_output_path)
             }
+            
+            # --- ASYNC FLUSH ---
+            if request.async_mode:
+                 update_firestore_job(job_id, final_result)
+
+            return final_result
         else:
             raise HTTPException(status_code=500, detail="Pipeline failed to produce output")
 
     except Exception as e:
         logger.error(f"Pipeline Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        error_detail = str(e)
+        if request.async_mode:
+             update_firestore_job(job_id, {"status": "failed", "error": error_detail})
+             
+        # Re-raise unless async mode (since background task exception is swallowed otherwise)
+        if not request.async_mode:
+             raise HTTPException(status_code=500, detail=error_detail)
+        else:
+             logger.error(f"Async Job {job_id} failed silently (logged to Firestore).")
+             return  # Should return specifically None or dict for cleanup, but task swallows it anyway
 
 @app.post("/smart-crop")
 async def smart_crop_video(request: CropRequest):
@@ -1095,6 +1193,7 @@ async def add_captions(request: CropRequest):
         # Use more robust parameters for music/singing
         # condition_on_previous_text=False prevents "hallucination loops"
         # initial_prompt guides context (Singing, Lyrics)
+        update_firestore_job(job_id, {"status": "generating_captions", "progress": 20})
         logger.info("Starting Whisper transcription (medium model)...")
         model = get_whisper_model()
         
@@ -1261,10 +1360,11 @@ async def analyze_clips(request: Dict[str, Any]):
         # Define tasks
         def run_whisper():
             if get_whisper_model():
-                logger.info("Task [Whisper]: Starting...")
+                logger.info("Task [Whisper]: Starting (Translating to English for Analysis)...")
                 # Extract audio first for speed? No, Whisper handles it.
                 # Use threads=4 to prevent hogging all cores?
-                res = get_whisper_model().transcribe(input_path, fp16=False)
+                # FORCE TRANSLATE: We need English text to match our VIRAL_KEYWORDS list.
+                res = get_whisper_model().transcribe(input_path, fp16=False, task="translate")
                 logger.info("Task [Whisper]: Completed.")
                 return res.get("segments", [])
             return []
@@ -1912,21 +2012,39 @@ class RenderViralRequest(BaseModel):
     end_time: float
     overlays: List[ViralOverlay] = []
     auto_captions: bool = False
+    smart_crop: bool = False
+    job_id: Optional[str] = None
+    async_mode: bool = False
 
 @app.post("/render-viral-clip")
-async def render_viral_clip(request: RenderViralRequest):
+async def render_viral_clip(request: RenderViralRequest, background_tasks: BackgroundTasks):
     """
     Renders a clip with overlays (PiP, Text) and cuts it to specific time.
+    Supports basic Smart Crop (Center Focus) and Auto-Captions.
     """
-    logger.info(f"Rendering viral clip for {request.video_url} with {len(request.overlays)} overlays")
+    if request.async_mode:
+        job_id = request.job_id or str(uuid.uuid4())
+        logger.info(f"Queuing ASYNC viral render job {job_id}")
+        background_tasks.add_task(render_viral_clip_impl, request, job_id)
+        return {"status": "processing", "job_id": job_id, "mode": "async"}
 
-    job_id = str(uuid.uuid4())
+    return await render_viral_clip_impl(request)
+
+async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: str = None):
+    logger.info(f"Rendering viral clip for {request.video_url} with {len(request.overlays)} overlays (SmartCrop={request.smart_crop}, AutoCaptions={request.auto_captions})")
+
+    job_id = provided_job_id or str(uuid.uuid4())
     SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
     if not os.path.exists(SHARED_TMP_DIR): os.makedirs(SHARED_TMP_DIR)
 
     input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_input.mp4")
     trimmed_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_trimmed.mp4")
     output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_viral.mp4")
+
+    # Initial async update
+    if request.async_mode:
+         try: update_firestore_job(job_id, {"status": "processing", "progress": 0})
+         except: pass
 
     try:
         # 1. Download/Prepare Main Video (Async)
@@ -1936,7 +2054,12 @@ async def render_viral_clip(request: RenderViralRequest):
             else:
                  shutil.copy(request.video_url, input_path)
         except Exception as e:
-             raise HTTPException(status_code=400, detail=f"Failed to load video: {str(e)}")
+             err_msg = f"Failed to load video: {str(e)}"
+             logger.error(err_msg)
+             if request.async_mode:
+                  update_firestore_job(job_id, {"status": "failed", "error": err_msg})
+                  return
+             raise HTTPException(status_code=400, detail=err_msg)
 
         # 2. Pre-trim to duration (Async)
         duration = request.end_time - request.start_time
@@ -1951,6 +2074,26 @@ async def render_viral_clip(request: RenderViralRequest):
                 "ffmpeg", "-ss", str(request.start_time), "-i", input_path, 
                 "-t", str(duration), "-c:v", "libx264", "-y", trimmed_path
             ], check=True)
+        
+        # 2.5. Smart Crop (Vertical 9:16) - OPTIONAL
+        working_path = trimmed_path
+        if request.smart_crop:
+            cropped_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_cropped.mp4")
+            try:
+                logger.info("Applying Smart Crop (Center Focus 9:16)...")
+                # Scale height to 1920 (or width to 1080) ensuring coverage, then crop center
+                # This focuses on the center of the frame (usually the speaker)
+                vf_crop = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+                
+                await run_subprocess_async([
+                    "ffmpeg", "-i", trimmed_path, 
+                    "-vf", vf_crop, 
+                    "-c:v", "libx264", "-c:a", "copy", "-y", cropped_path
+                ], check=True)
+                working_path = cropped_path # Update reference for further steps
+            except Exception as e:
+                logger.error(f"Smart Crop failed: {e}. Proceeding with original aspect ratio.")
+                # Fallback to trimmed_path
 
         # 3. Auto-Captions (Optional)
         if request.auto_captions:
@@ -1963,7 +2106,7 @@ async def render_viral_clip(request: RenderViralRequest):
                     # For singing/music videos, we relax the no_speech_threshold slightly
                     # but keep hallucinaton filters.
                     result = await loop.run_in_executor(None, lambda: model.transcribe(
-                        trimmed_path, 
+                        working_path, 
                         fp16=False,
                         condition_on_previous_text=False, 
                         # no_speech_threshold=0.6  <-- Removed to allow singing/lyrics detection
@@ -2008,12 +2151,12 @@ async def render_viral_clip(request: RenderViralRequest):
             except Exception as e:
                 logger.error(f"Auto-caption generation failed: {e}")
                 # Continue without captions
-
-        inputs = ["-i", trimmed_path]
+        
+        # Use working_path (either original trimmed or cropped version) as base for overlays
+        inputs = ["-i", working_path]
         filter_chain = []
         current_v_label = "0:v"
-        input_idx = 1
-        
+        input_idx = 1        
         # Process Video Overlays
         video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
         
@@ -2022,11 +2165,19 @@ async def render_viral_clip(request: RenderViralRequest):
             if ov.src.startswith("http"):
                  ov_dl_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_ov_{input_idx}.mp4")
                  # Async download
-                 await run_subprocess_async(["ffmpeg", "-i", ov.src, "-c", "copy", "-y", ov_dl_path], check=True)
+                 # Force re-encode to ensure compatibility (copy might fail for webm -> mp4 container)
+                 # Use fast preset for speed
+                 await run_subprocess_async([
+                     "ffmpeg", "-i", ov.src, 
+                     "-c:v", "libx264", "-preset", "ultrafast",     # Re-encode video
+                     "-c:a", "aac",                                 # Re-encode audio
+                     "-y", ov_dl_path
+                 ], check=True)
                  ov_path = ov_dl_path
             
             if ov_path:
-                inputs.extend(["-i", ov_path])
+                # Add -stream_loop -1 to loop the overlay video indefinitely
+                inputs.extend(["-stream_loop", "-1", "-i", ov_path])
                 w_scale = (ov.width or 30) / 100.0
                 scale_filter = f"[{input_idx}:v]scale=w=iw*{w_scale}:h=-1[ov{input_idx}];"
                 
@@ -2197,17 +2348,30 @@ async def render_viral_clip(request: RenderViralRequest):
         await run_subprocess_async(cmd, check=True)
 
         if os.path.exists(output_path):
-            return {
+            public_url = upload_file_to_firebase(output_path)
+            
+            result_data = {
                 "status": "completed", 
                 "job_id": job_id, 
                 "output_path": output_path,
-                "output_url": upload_file_to_firebase(output_path)
+                "output_url": public_url
             }
+            
+            if request.async_mode:
+                 update_firestore_job(job_id, result_data)
+
+            return result_data
         else:
-             raise Exception("Output viral video not generated")
+             err_msg = "Output viral video not generated"
+             if request.async_mode:
+                  update_firestore_job(job_id, {"status": "failed", "error": err_msg})
+             raise Exception(err_msg)
 
     except Exception as e:
         logger.error(f"Render Viral Error: {e}")
+        if request.async_mode:
+             update_firestore_job(job_id, {"status": "failed", "error": str(e)})
+
         # Cleanup
         if os.path.exists(trimmed_path): os.remove(trimmed_path)
         raise HTTPException(status_code=500, detail=str(e))

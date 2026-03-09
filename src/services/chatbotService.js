@@ -8,7 +8,8 @@ const { db } = require("../firebaseAdmin");
 class ChatbotService {
   constructor() {
     this.openaiApiKey = process.env.OPENAI_API_KEY;
-    this.model = "gpt-4o"; // Best for multilingual support
+    // Using gpt-4o-mini for efficient multilingual support
+    this.model = "gpt-4o-mini";
     this.systemPrompt = this.buildSystemPrompt();
 
     // Validate API key is configured

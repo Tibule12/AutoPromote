@@ -16,6 +16,16 @@ if (-not (Get-Command gcloud -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
+if (Test-Path "../service-account-key.json") {
+    Write-Host "Found service account key in parent directory. Copying for build..." -ForegroundColor Cyan
+    Copy-Item "../service-account-key.json" -Destination "serviceAccountKey.json"
+} elseif (Test-Path "../serviceAccountKey.json") {
+    Write-Host "Found service account key (alt name) in parent directory. Copying for build..." -ForegroundColor Cyan
+    Copy-Item "../serviceAccountKey.json" -Destination "serviceAccountKey.json"
+} else {
+    Write-Warning "No service account key found in parent directory. Worker may fail to auth with Firebase/GCP Storage."
+}
+
 # 1. Build the container image using Cloud Build
 Write-Host "Step 1: Building container image..." -ForegroundColor Yellow
 gcloud builds submit --tag gcr.io/$ProjectID/$ServiceName .
@@ -25,6 +35,11 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# Cleanup key after build
+if (Test-Path "serviceAccountKey.json") {
+    Remove-Item "serviceAccountKey.json"
+}
+
 # 2. Deploy to Cloud Run
 Write-Host "Step 2: Deploying to Cloud Run..." -ForegroundColor Yellow
 gcloud run deploy $ServiceName `
@@ -32,7 +47,7 @@ gcloud run deploy $ServiceName `
     --platform managed `
     --region $Region `
     --allow-unauthenticated `
-    --memory 2Gi `
+    --memory 4Gi `
     --cpu 2 `
     --timeout 300 `
     --concurrency 80

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import "../ContentUploadForm.css";
+import "./Modal.css";
+// import "../ContentUploadForm.css";
 import SmartFrameOverlay from "./SmartFrameOverlay";
 
 export default function PreviewEditModal({ open, preview, onClose, onSave }) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../../ContentUploadForm.css";
+// import "../../ContentUploadForm.css";
 
 const DiscordForm = ({ onChange, initialData = {} }) => {
   const [channelId, setChannelId] = useState(initialData.channelId || "");

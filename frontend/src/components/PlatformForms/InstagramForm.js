@@ -97,6 +97,11 @@ const InstagramForm = ({
   const [sponsorUser, setSponsorUser] = useState(initialData.sponsorUser || "");
 
   useEffect(() => {
+    // Find the page object to get a display name
+    const pageObj = facebookPages?.find(p => p.id === selectedPageId);
+    // Prefer IG username if available, else page name
+    const username = pageObj?.instagram_business_account?.username || pageObj?.name || "";
+
     onChange({
       platform: "instagram",
       caption,
@@ -106,8 +111,18 @@ const InstagramForm = ({
       isPaidPartnership,
       sponsorUser,
       pageId: selectedPageId, // Include identity in payload
+      username, // Pass username for preview
     });
-  }, [caption, location, isReel, shareToFeed, isPaidPartnership, sponsorUser, selectedPageId]);
+  }, [
+    caption,
+    location,
+    isReel,
+    shareToFeed,
+    isPaidPartnership,
+    sponsorUser,
+    selectedPageId,
+    facebookPages,
+  ]);
 
   return (
     <div className="platform-form instagram-form">

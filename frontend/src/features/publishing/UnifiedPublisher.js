@@ -13,6 +13,7 @@ import "../../components/PlatformForms/PlatformForms.css";
 import { API_ENDPOINTS } from "../../config";
 import { auth, storage } from "../../firebaseClient";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import toast from "react-hot-toast";
 
 // --- Hooks ---
 import { usePublishingState } from "./hooks/usePublishingState";
@@ -102,6 +103,7 @@ const PlatformPreview = ({
       return (
         <div style={{ ...style, overflow: "hidden", position: style.position || "relative" }}>
           <video
+            key={effectivePreviewUrl} // Force reload on URL change
             src={sanitizeUrl(effectivePreviewUrl)}
             controls={showControls}
             playsInline
@@ -265,10 +267,30 @@ const PlatformPreview = ({
               {data.title || "Title goes here..."}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <div
-                style={{ width: "24px", height: "24px", background: "#ccc", borderRadius: "50%" }}
-              ></div>
-              <span style={{ fontSize: "0.9rem" }}>@channel</span>
+              {creatorInfo?.snippet?.thumbnails?.default?.url ? (
+                <img
+                  src={creatorInfo.snippet.thumbnails.default.url}
+                  alt="Avatar"
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    background: "#ccc",
+                    borderRadius: "50%",
+                  }}
+                ></div>
+              )}
+              <span style={{ fontSize: "0.9rem" }}>
+                {creatorInfo?.snippet?.title || "@channel"}
+              </span>
               <button
                 style={{
                   background: "#fff",
@@ -343,14 +365,38 @@ const PlatformPreview = ({
               padding: "8px 0",
             }}
           >
-            <div
-              style={{ width: "32px", height: "32px", background: "#ccc", borderRadius: "50%" }}
-            ></div>
+            {creatorInfo?.snippet?.thumbnails?.default?.url ? (
+              <img
+                src={creatorInfo.snippet.thumbnails.default.url}
+                alt="Avatar"
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  background: "#ccc",
+                  borderRadius: "50%",
+                }}
+              ></div>
+            )}
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: "bold", fontSize: "0.9rem", color: "#000" }}>
-                Channel Name
+                {creatorInfo?.snippet?.title || "Channel Name"}
               </div>
-              <div style={{ fontSize: "0.75rem", color: "#606060" }}>10K subscribers</div>
+              <div style={{ fontSize: "0.75rem", color: "#606060" }}>
+                {creatorInfo?.statistics?.subscriberCount
+                  ? `${new Intl.NumberFormat("en-US", { notation: "compact" }).format(
+                      creatorInfo.statistics.subscriberCount
+                    )} subscribers`
+                  : "10K subscribers"}
+              </div>
             </div>
             <button
               style={{
@@ -475,7 +521,9 @@ const PlatformPreview = ({
               <div
                 style={{ width: "24px", height: "24px", background: "#ccc", borderRadius: "50%" }}
               ></div>
-              <span style={{ fontWeight: "bold", fontSize: "0.9rem" }}>username</span>
+              <span style={{ fontWeight: "bold", fontSize: "0.9rem" }}>
+                {data.username || "username"}
+              </span>
               <button
                 style={{
                   background: "transparent",
@@ -539,7 +587,9 @@ const PlatformPreview = ({
               borderRadius: "50%",
             }}
           ></div>
-          <div style={{ fontWeight: "bold", fontSize: "0.9rem", color: "#000" }}>username</div>
+          <div style={{ fontWeight: "bold", fontSize: "0.9rem", color: "#000" }}>
+            {data.username || "username"}
+          </div>
         </div>
         {renderMedia({ width: "100%", height: "auto", aspectRatio: "1/1" })}
         <div style={{ padding: "10px" }}>
@@ -557,7 +607,9 @@ const PlatformPreview = ({
             <span>✈️</span>
           </div>
           <div style={{ fontSize: "0.9rem", color: "#000" }}>
-            <span style={{ fontWeight: "bold", marginRight: "5px" }}>username</span>
+            <span style={{ fontWeight: "bold", marginRight: "5px" }}>
+              {data.username || "username"}
+            </span>
             {data.caption || "Caption text here..."}
           </div>
         </div>
@@ -732,7 +784,7 @@ const PlatformPreview = ({
   );
 };
 
-const UnifiedPublisher = ({ onUpload }) => {
+const UnifiedPublisher = ({ onUpload, initialFile }) => {
   // 1. Initialize State Logic
   const {
     // Global File (Raw)
@@ -773,6 +825,16 @@ const UnifiedPublisher = ({ onUpload }) => {
     getPlatformEffectiveData,
     platformStates, // Expose platform selection overrides if needed, but usually we rely on "selectedPlatforms" array
   } = usePublishingState(["tiktok", "youtube"]); // Default selection
+
+  // Handle Initial File
+  useEffect(() => {
+    if (initialFile) {
+      setGlobalFile(initialFile);
+      if (initialFile.suggestedTitle) setGlobalTitle(initialFile.suggestedTitle);
+      if (initialFile.suggestedDescription) setGlobalDescription(initialFile.suggestedDescription);
+      toast.success("Loaded generated video! Proceed to publish.");
+    }
+  }, [initialFile, setGlobalFile, setGlobalTitle, setGlobalDescription]);
 
   // --- External Data Fetching ---
   const [tiktokCreator, setTiktokCreator] = useState(null);
@@ -1111,6 +1173,7 @@ const UnifiedPublisher = ({ onUpload }) => {
                   previewUrl={previewUrl}
                   mediaType={mediaType}
                   platformId={platformId}
+                  creatorInfo={youtubeChannel}
                 />
               </div>
             </div>
@@ -1301,10 +1364,26 @@ const UnifiedPublisher = ({ onUpload }) => {
 
         // Specific Adjustments for App.js compatibility if needed
         if (p === "tiktok") {
-          // Ensure commercialContent is set if that's what App.js looks for
-          // App.js checks "commercialContent" for is_sponsored logic
-          if (data.commercial?.isCommercial) {
-            platformOptionsMap[p].commercialContent = true;
+          // FIX: Map flat form data to nested 'commercial' object expected by backend complianceService
+          platformOptionsMap[p].commercial = {
+            isCommercial: data.commercialContent,
+            yourBrand: data.yourBrand,
+            brandedContent: data.brandedContent,
+            is_commercial_content: data.commercialContent, // Legacy/Service compatibility
+          };
+
+          // App.js checks "commercialContent" for is_sponsored logic (Keep flat for App.js)
+          platformOptionsMap[p].commercialContent = data.commercialContent;
+        }
+
+        // --- INSTAGRAM SANITIZATION ---
+        if (p === "instagram") {
+          // If the user checked "Paid Partnership" but left the sponsor blank,
+          // the backend will reject it with a 400. We auto-disable it here
+          // to assume it was accidental or left over from exploration.
+          if (platformOptionsMap[p].isPaidPartnership && !platformOptionsMap[p].sponsorUser) {
+            console.warn("[UnifiedPublisher] Sanitizing Instagram options: disabling isPaidPartnership (missing sponsorUser)");
+            platformOptionsMap[p].isPaidPartnership = false;
           }
         }
       });
@@ -1318,7 +1397,10 @@ const UnifiedPublisher = ({ onUpload }) => {
         description: globalDescription,
         platform_options: platformOptionsMap,
         // Pass global feature flags
-        bounty: { amount: bountyAmount, niche: bountyNiche },
+        bounty: {
+          amount: bountyAmount,
+          niche: bountyNiche || "general",
+        },
         protocol7: { enabled: protocol7Enabled, volatility: protocol7Volatility },
         // Growth Features
         viral_boost: optimizeViral ? { force_seeding: true } : undefined,
@@ -1733,7 +1815,7 @@ const UnifiedPublisher = ({ onUpload }) => {
         </aside>
 
         {/* --- RIGHT SIDE: The Platform Cards (Your Existing Forms) --- */}
-        <main className="platform-workspace">
+        <main className="platform-workspace" style={{ paddingBottom: "120px" }}>
           <h2>3. Optimize & Publish</h2>
 
           {selectedPlatforms.length === 0 ? (
@@ -1864,15 +1946,23 @@ const UnifiedPublisher = ({ onUpload }) => {
               // Assuming sourceFiles was there before, I should keep it if possible or remove if undefined.
               // In ContentUploadForm, sourceFiles was state. Here, it might be missing or handled differently.
               // I will keep `images={[]}` for now to be safe or check if sourceFiles is defined.
-              onSave={options => {
-                // If the VideoEditor returns a file blob (e.g. from smart crop)
-                // We handle it here.
-                // Currently VideoEditor structure is a bit ambiguous in this file, so we fallback to assuming it sets global state?
-                // Actually, let's just close it for now as the 'onSave' handling inside VideoEditor usually does the heavy lifting.
-                // But we need to refresh the preview.
+              onSave={async result => {
+                try {
+                  if (result && result.isRemote && result.url) {
+                    // For viral clips, use remote URL directly to prevent download/timeout issues
+                    processFileChange(result);
+                    toast.success("Viral clip ready for scheduling!");
+                  } else if (result instanceof File || result instanceof Blob) {
+                    // FIX: Usse processFileChange
+                    processFileChange(result);
+                    toast.success("Edits applied!");
+                  }
+                } catch (e) {
+                  console.error("Failed to load viral clip:", e);
+                  setFeedbackMessage("Error loading clip.");
+                }
                 setShowVideoEditor(false);
                 setEditingTarget(null);
-                setFeedbackMessage("Edits applied.");
               }}
               onCancel={() => {
                 setShowVideoEditor(false);

@@ -25,6 +25,13 @@ const FacebookForm = ({
   }, [currentFile]);
 
   const [pageId, setPageId] = useState(initialData.pageId || pages[0]?.id || "");
+
+  // Fix for async data loading: If pageId is empty, try to select the first page when pages arrive
+  useEffect(() => {
+    if (!pageId && pages && pages.length > 0) {
+      setPageId(pages[0].id);
+    }
+  }, [pages, pageId]);
   const [message, setMessage] = useState(initialData.message || globalDescription || "");
   const [isDirtyMessage, setIsDirtyMessage] = useState(false);
   const [postType, setPostType] = useState(initialData.postType || "feed"); // feed, story, reel
@@ -41,15 +48,20 @@ const FacebookForm = ({
   }, [globalDescription, isDirtyMessage]);
 
   useEffect(() => {
+    // Determine the user-friendly page name
+    const selectedPage = pages?.find(p => p.id === pageId);
+    const pageName = selectedPage ? selectedPage.name : "";
+
     onChange({
       platform: "facebook",
       pageId,
+      pageName, // Pass the name so UnifiedPublisher can show it in preview
       message,
       postType,
       isPaidPartnership,
       sponsorUser,
     });
-  }, [pageId, message, postType, isPaidPartnership, sponsorUser]);
+  }, [pageId, message, postType, isPaidPartnership, sponsorUser, pages]);
 
   return (
     <div className="platform-form facebook-form">

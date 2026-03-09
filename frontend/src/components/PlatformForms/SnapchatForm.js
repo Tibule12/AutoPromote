@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../../ContentUploadForm.css";
+// import "../../ContentUploadForm.css";
 
 const SnapchatForm = ({ onChange, initialData = {} }) => {
   // Snapchat currently has no specific per-post fields in the frontend,

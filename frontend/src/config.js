@@ -9,7 +9,7 @@
 // Prefer env var from Render; fallback to the deployed backend domain.
 // Prefer custom domain by default; environment variable can override per-deploy
 // Default to localhost for development convenience if not specified
-export const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+export const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
 
 // Media Worker URL - Python FastAPI service for heavy video processing
 // In production, this might be the same as API_BASE_URL if proxied, or a separate service
