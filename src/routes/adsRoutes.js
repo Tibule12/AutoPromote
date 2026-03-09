@@ -233,7 +233,7 @@ router.post("/:adId/launch", authMiddleware, adsPublicLimiter, async (req, res) 
     if (requiredBudget > availableCredits) {
       return res.status(402).json({
         ok: false,
-        message: `Insufficient ad credits. You have $${availableCredits.toFixed(2)} but this ad requires $${requiredBudget.toFixed(2)}. Please add funds.`,
+        message: `Insufficient strategy credits. You have $${availableCredits.toFixed(2)} but this strategy requires $${requiredBudget.toFixed(2)}. Please add funds.`,
         currentBalance: availableCredits,
         required: requiredBudget,
       });

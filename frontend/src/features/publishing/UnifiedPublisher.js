@@ -267,10 +267,30 @@ const PlatformPreview = ({
               {data.title || "Title goes here..."}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <div
-                style={{ width: "24px", height: "24px", background: "#ccc", borderRadius: "50%" }}
-              ></div>
-              <span style={{ fontSize: "0.9rem" }}>@channel</span>
+              {creatorInfo?.snippet?.thumbnails?.default?.url ? (
+                <img
+                  src={creatorInfo.snippet.thumbnails.default.url}
+                  alt="Avatar"
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    background: "#ccc",
+                    borderRadius: "50%",
+                  }}
+                ></div>
+              )}
+              <span style={{ fontSize: "0.9rem" }}>
+                {creatorInfo?.snippet?.title || "@channel"}
+              </span>
               <button
                 style={{
                   background: "#fff",
@@ -345,14 +365,38 @@ const PlatformPreview = ({
               padding: "8px 0",
             }}
           >
-            <div
-              style={{ width: "32px", height: "32px", background: "#ccc", borderRadius: "50%" }}
-            ></div>
+            {creatorInfo?.snippet?.thumbnails?.default?.url ? (
+              <img
+                src={creatorInfo.snippet.thumbnails.default.url}
+                alt="Avatar"
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  background: "#ccc",
+                  borderRadius: "50%",
+                }}
+              ></div>
+            )}
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: "bold", fontSize: "0.9rem", color: "#000" }}>
-                Channel Name
+                {creatorInfo?.snippet?.title || "Channel Name"}
               </div>
-              <div style={{ fontSize: "0.75rem", color: "#606060" }}>10K subscribers</div>
+              <div style={{ fontSize: "0.75rem", color: "#606060" }}>
+                {creatorInfo?.statistics?.subscriberCount
+                  ? `${new Intl.NumberFormat("en-US", { notation: "compact" }).format(
+                      creatorInfo.statistics.subscriberCount
+                    )} subscribers`
+                  : "10K subscribers"}
+              </div>
             </div>
             <button
               style={{
@@ -477,7 +521,9 @@ const PlatformPreview = ({
               <div
                 style={{ width: "24px", height: "24px", background: "#ccc", borderRadius: "50%" }}
               ></div>
-              <span style={{ fontWeight: "bold", fontSize: "0.9rem" }}>username</span>
+              <span style={{ fontWeight: "bold", fontSize: "0.9rem" }}>
+                {data.username || "username"}
+              </span>
               <button
                 style={{
                   background: "transparent",
@@ -541,7 +587,9 @@ const PlatformPreview = ({
               borderRadius: "50%",
             }}
           ></div>
-          <div style={{ fontWeight: "bold", fontSize: "0.9rem", color: "#000" }}>username</div>
+          <div style={{ fontWeight: "bold", fontSize: "0.9rem", color: "#000" }}>
+            {data.username || "username"}
+          </div>
         </div>
         {renderMedia({ width: "100%", height: "auto", aspectRatio: "1/1" })}
         <div style={{ padding: "10px" }}>
@@ -559,7 +607,9 @@ const PlatformPreview = ({
             <span>✈️</span>
           </div>
           <div style={{ fontSize: "0.9rem", color: "#000" }}>
-            <span style={{ fontWeight: "bold", marginRight: "5px" }}>username</span>
+            <span style={{ fontWeight: "bold", marginRight: "5px" }}>
+              {data.username || "username"}
+            </span>
             {data.caption || "Caption text here..."}
           </div>
         </div>
@@ -734,7 +784,7 @@ const PlatformPreview = ({
   );
 };
 
-const UnifiedPublisher = ({ onUpload }) => {
+const UnifiedPublisher = ({ onUpload, initialFile }) => {
   // 1. Initialize State Logic
   const {
     // Global File (Raw)
@@ -775,6 +825,16 @@ const UnifiedPublisher = ({ onUpload }) => {
     getPlatformEffectiveData,
     platformStates, // Expose platform selection overrides if needed, but usually we rely on "selectedPlatforms" array
   } = usePublishingState(["tiktok", "youtube"]); // Default selection
+
+  // Handle Initial File
+  useEffect(() => {
+    if (initialFile) {
+      setGlobalFile(initialFile);
+      if (initialFile.suggestedTitle) setGlobalTitle(initialFile.suggestedTitle);
+      if (initialFile.suggestedDescription) setGlobalDescription(initialFile.suggestedDescription);
+      toast.success("Loaded generated video! Proceed to publish.");
+    }
+  }, [initialFile, setGlobalFile, setGlobalTitle, setGlobalDescription]);
 
   // --- External Data Fetching ---
   const [tiktokCreator, setTiktokCreator] = useState(null);
@@ -1113,6 +1173,7 @@ const UnifiedPublisher = ({ onUpload }) => {
                   previewUrl={previewUrl}
                   mediaType={mediaType}
                   platformId={platformId}
+                  creatorInfo={youtubeChannel}
                 />
               </div>
             </div>
@@ -1303,10 +1364,26 @@ const UnifiedPublisher = ({ onUpload }) => {
 
         // Specific Adjustments for App.js compatibility if needed
         if (p === "tiktok") {
-          // Ensure commercialContent is set if that's what App.js looks for
-          // App.js checks "commercialContent" for is_sponsored logic
-          if (data.commercial?.isCommercial) {
-            platformOptionsMap[p].commercialContent = true;
+          // FIX: Map flat form data to nested 'commercial' object expected by backend complianceService
+          platformOptionsMap[p].commercial = {
+            isCommercial: data.commercialContent,
+            yourBrand: data.yourBrand,
+            brandedContent: data.brandedContent,
+            is_commercial_content: data.commercialContent, // Legacy/Service compatibility
+          };
+
+          // App.js checks "commercialContent" for is_sponsored logic (Keep flat for App.js)
+          platformOptionsMap[p].commercialContent = data.commercialContent;
+        }
+
+        // --- INSTAGRAM SANITIZATION ---
+        if (p === "instagram") {
+          // If the user checked "Paid Partnership" but left the sponsor blank,
+          // the backend will reject it with a 400. We auto-disable it here
+          // to assume it was accidental or left over from exploration.
+          if (platformOptionsMap[p].isPaidPartnership && !platformOptionsMap[p].sponsorUser) {
+            console.warn("[UnifiedPublisher] Sanitizing Instagram options: disabling isPaidPartnership (missing sponsorUser)");
+            platformOptionsMap[p].isPaidPartnership = false;
           }
         }
       });
@@ -1320,7 +1397,10 @@ const UnifiedPublisher = ({ onUpload }) => {
         description: globalDescription,
         platform_options: platformOptionsMap,
         // Pass global feature flags
-        bounty: { amount: bountyAmount, niche: bountyNiche },
+        bounty: {
+          amount: bountyAmount,
+          niche: bountyNiche || "general",
+        },
         protocol7: { enabled: protocol7Enabled, volatility: protocol7Volatility },
         // Growth Features
         viral_boost: optimizeViral ? { force_seeding: true } : undefined,

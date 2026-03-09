@@ -1,318 +1,176 @@
-// ChatWidget.js
-// Floating AI chatbot widget with multilingual support
+import React, { useState } from 'react';
+import './ChatWidget.css';
+import { auth } from './firebaseClient';
+import { API_BASE_URL } from './config';
 
-import React, { useState, useEffect, useRef } from "react";
-import { auth } from "./firebaseClient";
-import { API_BASE_URL } from "./config";
-import ReactMarkdown from "react-markdown";
-import toast from "react-hot-toast";
-import "./ChatWidget.css";
-
-const ChatWidget = () => {
+const ChatWidget = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState("");
-  const [conversationId, setConversationId] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
-  const messagesEndRef = useRef(null);
+  const [loadingPayment, setLoadingPayment] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      checkChatbotStatus();
-      loadSuggestions();
-    }
-  }, [isOpen, messages.length]);
+  // Check access: Admin, Credits > 0, or Active Subscription
+  const hasAccess =
+    user?.isAdmin ||
+    (user?.aiCredits && user.aiCredits > 0) ||
+    (user?.aiSubscriptionEnd && user.aiSubscriptionEnd > Date.now());
 
-  const checkChatbotStatus = async () => {
+  const AI_URL = "https://thulani-frontend-341498038874.us-central1.run.app";
+
+  const handlePurchase = async (type, amount) => {
+    if (!auth.currentUser) return;
+    setLoadingPayment(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/chat/health`);
-      const data = await response.json();
-
-      if (data.configured) {
-        // Send welcome message
-        setMessages([
-          {
-            role: "assistant",
-            content:
-              "👋 Hi! I'm your AutoPromote AI Assistant. I speak all 11 South African languages! How can I help you today?\n\nSawubona! (Zulu) | Molo! (Xhosa) | Hallo! (Afrikaans)",
-            timestamp: new Date().toISOString(),
-          },
-        ]);
-      } else {
-        // Show not configured message
-        setMessages([
-          {
-            role: "assistant",
-            content:
-              "⚠️ AI Chatbot is currently being configured. Please check back soon or contact support for assistance.",
-            timestamp: new Date().toISOString(),
-          },
-        ]);
-      }
-    } catch (error) {
-      console.error("Failed to check chatbot status:", error);
-      // Default welcome message on error
-      setMessages([
-        {
-          role: "assistant",
-          content: "👋 Hi! I'm your AutoPromote AI Assistant. How can I help you today?",
-          timestamp: new Date().toISOString(),
-        },
-      ]);
-    }
-  };
-
-  const speakMessage = text => {
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const loadSuggestions = async () => {
-    try {
-      const token = await auth.currentUser?.getIdToken();
-      if (!token) return;
-
-      const response = await fetch(`${API_BASE_URL}/api/chat/suggestions`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSuggestions(data.suggestions || []);
-      }
-    } catch (error) {
-      console.error("Failed to load suggestions:", error);
-    }
-  };
-
-  const sendMessage = async (messageText = inputMessage) => {
-    if (!messageText.trim() || loading) return;
-
-    const userMessage = {
-      role: "user",
-      content: messageText,
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage("");
-    setLoading(true);
-
-    try {
-      const token = await auth.currentUser?.getIdToken();
-
-      const response = await fetch(`${API_BASE_URL}/api/chat/message`, {
+      const token = await auth.currentUser.getIdToken();
+      // Use existing billing route, passing type to specify AI purchase
+      const res = await fetch(`${API_BASE_URL}/credits/create-order`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          conversationId,
-          message: messageText,
-        }),
+          amount,
+          currency: "USD",
+          type // 'ai_credits' or 'ai_subscription'
+        })
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle limits specially
-        if (response.status === 403 && data.isUpgradeTrigger) {
-          setMessages(prev => [
-            ...prev,
-            {
-              role: "assistant",
-              content: data.message,
-              timestamp: new Date().toISOString(),
-              isError: true,
-            },
-          ]);
-          // Speak the upgrade prompt
-          speakMessage("Daily limit reached. Please upgrade to continue.");
-          return;
-        }
-        throw new Error(data.error || "Failed to send message");
+      const data = await res.json();
+      if (data.ok && data.approve) {
+        // Redirect to PayPal approval
+        window.location.href = data.approve;
+      } else {
+        alert("Payment initialization failed: " + (data.error || "Unknown error"));
       }
-
-      // Update conversation ID if new
-      if (data.conversationId && !conversationId) {
-        setConversationId(data.conversationId);
-      }
-
-      // Add bot response
-      const botMessage = {
-        role: "assistant",
-        content: data.message,
-        timestamp: new Date().toISOString(),
-      };
-
-      setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
-      console.error("Chat error:", error);
-      toast.error("Failed to send message");
-
-      // Add fallback message
-      setMessages(prev => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Sorry, I'm having trouble responding right now. Please try again in a moment.",
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+    } catch (e) {
+      console.error(e);
+      alert("Error starting payment process. Please try again.");
     } finally {
-      setLoading(false);
+      setLoadingPayment(false);
     }
-  };
-
-  const handleKeyPress = e => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  const handleSuggestionClick = suggestion => {
-    sendMessage(suggestion.text);
-  };
-
-  const clearChat = () => {
-    setMessages([
-      {
-        role: "assistant",
-        content: "👋 Chat cleared! How can I help you?",
-        timestamp: new Date().toISOString(),
-      },
-    ]);
-    setConversationId(null);
-  };
-
-  const formatTime = timestamp => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" });
   };
 
   return (
-    <>
-      {/* Floating button */}
-      <button
-        className={`chat-widget-button ${isOpen ? "open" : ""}`}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label="Open chat"
-      >
-        {isOpen ? "✕" : "💬"}
-      </button>
-
-      {/* Chat panel */}
+    <div className="chat-widget-container">
+      
+      {/* Chat Window */}
       {isOpen && (
-        <div className="chat-widget-panel">
-          {/* Header */}
-          <div className="chat-widget-header">
-            <div className="chat-widget-header-content">
-              <div className="chat-widget-avatar">🤖</div>
-              <div>
-                <h3>AI Assistant</h3>
-                <p>All 11 SA Languages</p>
-              </div>
-            </div>
-            <button onClick={clearChat} className="chat-clear-btn" title="Clear chat">
-              🔄
-            </button>
-          </div>
+        <div className="chat-window" style={{ display: 'flex', flexDirection: 'column', background: 'white' }}>
+          {hasAccess ? (
+            <iframe 
+              src={AI_URL}
+              className="chat-iframe"
+              title="Thulani AI Assistant"
+              allow="microphone; camera; clipboard-write; autoplay"
+              style={{ width: '100%', height: '100%', border: 'none' }}
+            />
+          ) : (
+            <div className="paywall-overlay" style={{
+                padding: '24px',
+                textAlign: 'center',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                overflowY: 'auto'
+            }}>
+                <h3 style={{ marginBottom: '12px', color: '#111827' }}>Thulani AI Premium</h3>
+                <p style={{ color: '#6b7280', marginBottom: '24px', fontSize: '0.95rem' }}>
+                  Unlock our advanced AI assistant to boost your productivity.
+                </p>
 
-          {/* Messages */}
-          <div className="chat-widget-messages">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`chat-message ${msg.role === "user" ? "user" : "assistant"}`}
-              >
-                <div className="chat-message-content">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  {msg.role === "assistant" && (
-                    <button
-                      className="chat-speak-btn"
-                      onClick={() => speakMessage(msg.content)}
-                      title="Listen to this message"
+                <div className="pricing-options" style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    
+                    {/* Pay As You Go Option */}
+                    <div 
+                      className="price-card" 
+                      onClick={() => !loadingPayment && handlePurchase('ai_credits', 5.0)}
+                      style={{
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: '1px solid #e5e7eb',
+                        cursor: loadingPayment ? 'wait' : 'pointer',
+                        transition: 'all 0.2s',
+                        textAlign: 'left'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                      onMouseOut={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
                     >
-                      🔊
-                    </button>
-                  )}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Pay As You Go</h4>
+                            <span style={{ fontWeight: 700, color: '#6366f1' }}>$5.00</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>50 Credits (Quick Help)</p>
+                    </div>
+
+                    {/* Pro Bundle Option */}
+                    <div 
+                      className="price-card" 
+                      onClick={() => !loadingPayment && handlePurchase('ai_credits', 19.99)}
+                      style={{
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: '1px solid #e5e7eb',
+                        cursor: loadingPayment ? 'wait' : 'pointer',
+                        textAlign: 'left'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                      onMouseOut={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Pro Bundle</h4>
+                            <span style={{ fontWeight: 700, color: '#6366f1' }}>$19.99</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>250 Credits (Best Value)</p>
+                    </div>
+
+                    {/* Unlimited Monthly Option */}
+                    <div 
+                      className="price-card" 
+                      onClick={() => !loadingPayment && handlePurchase('ai_subscription', 29.99)}
+                      style={{
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: '2px solid #6366f1',
+                        backgroundColor: '#eff6ff',
+                        cursor: loadingPayment ? 'wait' : 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#1e40af' }}>Unlimited</h4>
+                            <span style={{ fontWeight: 700, color: '#1e40af' }}>$29.99</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.875rem', color: '#1e40af' }}>Unlimited Access (30 Days)</p>
+                    </div>
                 </div>
-                <div className="chat-message-time">{formatTime(msg.timestamp)}</div>
-              </div>
-            ))}
 
-            {loading && (
-              <div className="chat-message assistant">
-                <div className="chat-message-content">
-                  <div className="typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Suggestions */}
-          {messages.length === 1 && suggestions.length > 0 && (
-            <div className="chat-suggestions">
-              {suggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  className="chat-suggestion-btn"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                >
-                  <span className="suggestion-icon">{suggestion.icon}</span>
-                  {suggestion.text}
-                </button>
-              ))}
+                {loadingPayment && (
+                  <p style={{ marginTop: '16px', fontSize: '0.875rem', color: '#6366f1' }}>
+                    Redirecting to PayPal...
+                  </p>
+                )}
             </div>
           )}
-
-          {/* Input */}
-          <div className="chat-widget-input">
-            <textarea
-              value={inputMessage}
-              onChange={e => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message... (Any language)"
-              rows={1}
-              disabled={loading}
-            />
-            <button
-              onClick={() => sendMessage()}
-              disabled={!inputMessage.trim() || loading}
-              className="chat-send-btn"
-            >
-              ➤
-            </button>
-          </div>
-
-          {/* Footer */}
-          <div className="chat-widget-footer">Powered by OpenAI GPT-4o</div>
         </div>
       )}
-    </>
+
+      {/* Floating Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`chat-widget-button ${isOpen ? 'is-open' : ''}`}
+        aria-label={isOpen ? "Close Chat" : "Open Chat"}
+      >
+        {isOpen ? (
+          // Close Icon
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        ) : (
+          // Chat Icon
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        )}
+      </button>
+    </div>
   );
-};
+}
 
 export default ChatWidget;

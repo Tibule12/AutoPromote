@@ -471,30 +471,35 @@ async function getPostStats({ uid, postId, pageId }) {
       });
 
       // Also fetch basic interactions (likes/comments) separately as they aren't in "insights" metric list easily
-      const basicUrl = `https://graph.facebook.com/v18.0/${postId}?fields=shares,comments.summary(true),likes.summary(true)&access_token=${accessToken}`;
-      const basicRes = await safeFetch(basicUrl, fetchFn, {
-        fetchOptions: { method: "GET" },
-        requireHttps: true,
-        allowHosts: ["graph.facebook.com"],
-      });
+      // Try fetching shares separately or omit if problematic
       let likes = 0,
         comments = 0,
         shares = 0;
 
-      if (basicRes.ok) {
-        const bData = await basicRes.json();
-        likes = bData.likes?.summary?.total_count || 0;
-        comments = bData.comments?.summary?.total_count || 0;
-        shares = bData.shares?.count || 0;
-      }
+      try {
+        const basicUrl = `https://graph.facebook.com/v18.0/${postId}?fields=comments.summary(true),likes.summary(true)&access_token=${accessToken}`;
+        const basicRes = await safeFetch(basicUrl, fetchFn, {
+          fetchOptions: { method: "GET" },
+          requireHttps: true,
+          allowHosts: ["graph.facebook.com"],
+        });
+        
+        if (basicRes.ok) {
+          const bData = await basicRes.json();
+          likes = bData.likes?.summary?.total_count || 0;
+          comments = bData.comments?.summary?.total_count || 0;
+          // Try shares in a separate lightweight call or just skip to avoid #100 errors on videos
+          // shares = bData.shares?.count || 0; 
+        }
+      } catch (_) {}
 
       return {
         postId,
-        impressions: values.post_impressions || 0,
-        engagedUsers: values.post_engaged_users || 0,
+        impressions: parseInt(values.post_impressions || 0, 10),
+        engagedUsers: parseInt(values.post_engaged_users || 0, 10),
         likes,
         comments,
-        shares,
+        shares: 0, // Disabled to prevent (#100) errors
         fetchedAt: new Date().toISOString(),
       };
     }
@@ -502,13 +507,18 @@ async function getPostStats({ uid, postId, pageId }) {
     console.warn("[Facebook] Insights fetch failed, falling back to basic:", e.message);
   }
 
-  // 2. Fallback: Basic Graph Object fields (Likes, Comments)
-  const basicUrl = `https://graph.facebook.com/v18.0/${postId}?fields=shares,comments.summary(true),likes.summary(true)&access_token=${accessToken}`;
-  const response = await safeFetch(basicUrl, fetchFn, {
-    fetchOptions: { method: "GET" },
-    requireHttps: true,
-    allowHosts: ["graph.facebook.com"],
-  });
+  // 2. Fallback: Basic Graph Object fields (Likes, Comments) - removed shares to avoid #100
+  const basicUrl = `https://graph.facebook.com/v18.0/${postId}?fields=comments.summary(true),likes.summary(true)&access_token=${accessToken}`;
+  let response;
+  try {
+    response = await safeFetch(basicUrl, fetchFn, {
+      fetchOptions: { method: "GET" },
+      requireHttps: true,
+      allowHosts: ["graph.facebook.com"],
+    });
+  } catch(netErr) {
+    throw new Error(`Network failed: ${netErr.message}`);
+  }
 
   if (!response.ok) {
     let errorText = "";
@@ -540,21 +550,17 @@ async function getPostStats({ uid, postId, pageId }) {
       };
     }
 
-    if (errorText.includes("(#10)") && errorText.includes("permission")) {
-      console.debug(
-        `[Facebook] Permissions missing for post ${postId} metrics. (pages_read_engagement)`
-      );
-      // Return partial result (zeros) to proceed with valid status update
+    // New: If permissions are missing (#10) or any other non-critical graph error (#100), return 0s instead of throwing
+    // This allows the poller to continue updating other metrics (or successfully recording the fetch attempt)
+    if (errorText.includes("(#10)") || errorText.includes("(#100)")) {
+      console.warn(`[Facebook] Soft fail for post ${postId}: ${errorText.substring(0, 100)}...`);
       return {
         postId,
         likes: 0,
         comments: 0,
         shares: 0,
-        impressions: 0,
-        engagedUsers: 0,
         fetchedAt: new Date().toISOString(),
         partial: true,
-        permissionMissing: true,
       };
     }
 
@@ -569,7 +575,7 @@ async function getPostStats({ uid, postId, pageId }) {
     postId,
     likes: data.likes?.summary?.total_count || 0,
     comments: data.comments?.summary?.total_count || 0,
-    shares: data.shares?.count || 0,
+    shares: 0, // Disabled
     fetchedAt: new Date().toISOString(),
   };
 }

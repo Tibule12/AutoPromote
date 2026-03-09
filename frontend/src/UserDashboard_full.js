@@ -18,8 +18,8 @@ import WolfHuntDashboard from "./EngagementMarketplace";
 import ClipStudioPanel from "./UserDashboardTabs/ClipStudioPanel";
 import IdeaVideoPanel from "./UserDashboardTabs/IdeaVideoPanel";
 import MissionControlPanel from "./UserDashboardTabs/MissionControlPanel";
-import LiveWatch from "./LiveWatch";
-import LiveHub from "./LiveHub";
+// LiveWatch import removed
+// LiveHub import removed
 import FloatingActions from "./components/FloatingActions";
 import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
@@ -1404,12 +1404,6 @@ const UserDashboard = ({
               >
                 AI Video Generator ✨
               </li>
-              <li
-                className={activeTab === "live" ? "active" : ""}
-                onClick={() => handleNav("live")}
-              >
-                Live
-              </li>
             </ul>
           </nav>
           <button className="logout-btn" onClick={onLogout}>
@@ -1647,13 +1641,8 @@ const UserDashboard = ({
             }}
           />
         )}
-        {activeTab === "live" && (
-          <div className="live-panel">
-            <LiveHub user={user} />
-          </div>
-        )}
+
       </main>
-      {activeTab === "live" && <FloatingActions />}
       <BottomNav activeTab={activeTab} onNav={handleNav} onLogout={onLogout} />
     </div>
   );

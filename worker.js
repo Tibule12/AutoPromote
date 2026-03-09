@@ -21,6 +21,12 @@ try {
 } catch (_) {
   poller = null;
 }
+let platformPoller;
+try {
+  platformPoller = require("./src/services/platformStatsPoller");
+} catch (_) {
+  platformPoller = null;
+}
 const { setStatus } = require("./src/services/statusRecorder");
 const crypto = require("crypto");
 const { safeFetch } = require("./src/utils/ssrfGuard");
@@ -57,6 +63,7 @@ try {
 
 const LOOP_INTERVAL_MS = parseInt(process.env.JOB_LOOP_INTERVAL_MS || "5000", 10);
 const YT_POLL_INTERVAL_MS = parseInt(process.env.YT_STATS_LOOP_INTERVAL_MS || "60000", 10);
+const PLATFORM_POLL_INTERVAL_MS = parseInt(process.env.PLATFORM_STATS_LOOP_INTERVAL_MS || "30000", 10);
 const ENABLE = process.env.ENABLE_BACKGROUND_JOBS === "true";
 
 if (!ENABLE) {
@@ -65,6 +72,7 @@ if (!ENABLE) {
 }
 
 let lastYouTubePoll = 0;
+let lastPlatformPoll = 0;
 let lastRollupDate = null; // YYYYMMDD of last completed rollup
 
 async function loop() {
@@ -115,6 +123,21 @@ async function loop() {
         console.warn("[worker] youtube_stats_batch error:", e.message);
       }
     }
+
+    // Periodic Platform stats poll
+    if (platformPoller && (Date.now() - lastPlatformPoll >= PLATFORM_POLL_INTERVAL_MS)) {
+      lastPlatformPoll = Date.now();
+      try {
+        const batch = await platformPoller.pollPlatformPostMetricsBatch({
+          batchSize: parseInt(process.env.PLATFORM_STATS_BATCH_SIZE || "5", 10),
+        });
+        if (batch.processed)
+          await setStatus("platform_stats_poller", { ts: Date.now(), processed: batch.processed });
+      } catch (e) {
+        console.warn("[worker] platform_stats_batch error:", e.message);
+      }
+    }
+
     // Engagement ingestion (lightweight) every other stats cycle
     if (engagementIngestion && randChance(0.3)) {
       try {

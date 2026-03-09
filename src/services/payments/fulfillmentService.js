@@ -34,7 +34,7 @@ async function fulfillPayment(paymentId, ipnData = {}) {
 
       // Perform user credit updates inside transaction when possible
       // UNIFICATION: Convert purchased $ amounts to "growth_credits" for Wolf Hunt
-      if (purchaseType === "ad_credits" && meta.userId) {
+      if ((purchaseType === "ad_credits" || purchaseType === "strategy_credits") && meta.userId) {
         const userRef = db.collection("users").doc(String(meta.userId));
         const dollarAmount =
           Number(meta.amount || payment.amount || (payment.params && payment.params.amount) || 0) ||
@@ -52,11 +52,12 @@ async function fulfillPayment(paymentId, ipnData = {}) {
               admin.firestore &&
               typeof admin.firestore.FieldValue.increment === "function"
             ) {
-              // Update BOTH fields for backward compatibility, but primarily growth_credits
+              // Update all relevant fields for backward compatibility. Strategy Credits is the new term.
               tx.set(
                 userRef,
                 {
                   adCredits: admin.firestore.FieldValue.increment(dollarAmount), // Legacy tracker ($)
+                  strategyCredits: admin.firestore.FieldValue.increment(dollarAmount), // New tracker ($)
                   growth_credits: admin.firestore.FieldValue.increment(creditAmount), // Wolf Hunt Currency
                 },
                 { merge: true }
@@ -67,6 +68,10 @@ async function fulfillPayment(paymentId, ipnData = {}) {
                 userSnap.exists && Number(userSnap.data().adCredits)
                   ? Number(userSnap.data().adCredits)
                   : 0;
+              const curStrategyCredits = 
+                userSnap.exists && (Number(userSnap.data().strategyCredits) || Number(userSnap.data().adCredits))
+                  ? (Number(userSnap.data().strategyCredits) || Number(userSnap.data().adCredits))
+                  : 0;
               const curGrowthCredits =
                 userSnap.exists && Number(userSnap.data().growth_credits)
                   ? Number(userSnap.data().growth_credits)
@@ -76,6 +81,7 @@ async function fulfillPayment(paymentId, ipnData = {}) {
                 userRef,
                 {
                   adCredits: curAdCredits + dollarAmount,
+                  strategyCredits: curStrategyCredits + dollarAmount,
                   growth_credits: curGrowthCredits + creditAmount,
                 },
                 { merge: true }
@@ -83,6 +89,49 @@ async function fulfillPayment(paymentId, ipnData = {}) {
             }
           } catch (e) {}
         }
+      }
+
+      // Handle AI Credits Purchase
+      if (purchaseType === "ai_credits" && meta.userId) {
+        const userRef = db.collection("users").doc(String(meta.userId));
+        const dollarAmount = Number(meta.amount || 0);
+        
+        // Tiered Exchange Rate:
+        // < $10: 10 credits/$ (e.g. $5 -> 50 credits)
+        // >= $10: 12.5 credits/$ (e.g. $19.99 -> ~250 credits)
+        const rate = dollarAmount >= 19.0 ? 12.51 : 10; 
+        const creditsToAdd = Math.floor(dollarAmount * rate);
+
+        if (creditsToAdd > 0) {
+          tx.set(
+            userRef,
+            {
+              aiCredits: admin.firestore.FieldValue.increment(creditsToAdd),
+            },
+            { merge: true }
+          );
+        }
+      }
+
+      // Handle AI Monthly Subscription
+      if (purchaseType === "ai_subscription" && meta.userId) {
+        const userRef = db.collection("users").doc(String(meta.userId));
+        const snap = await tx.get(userRef);
+        const userData = snap.data() || {};
+        
+        const now = Date.now();
+        const currentEnd = userData.aiSubscriptionEnd || 0;
+        // Extend from current expiration date if active, otherwise from now
+        const start = currentEnd > now ? currentEnd : now;
+        const newEnd = start + 30 * 24 * 60 * 60 * 1000; // Add 30 days in milliseconds
+
+        tx.set(
+          userRef,
+          {
+            aiSubscriptionEnd: newEnd,
+          },
+          { merge: true }
+        );
       }
 
       // Mark payment fulfilled

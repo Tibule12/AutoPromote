@@ -1,5 +1,6 @@
 import React from "react";
-import "../ContentUploadForm.css";
+// import "../ContentUploadForm.css";
+import "./Modal.css";
 
 export default function ConfirmPublishModal({
   open,

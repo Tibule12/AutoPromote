@@ -1409,7 +1409,7 @@ function App() {
       </Routes>
 
       {/* AI Chat Widget - only show when user is logged in */}
-      {user && <ChatWidget />}
+      {user && <ChatWidget user={user} />}
 
       {/* Global Footer */}
       <Footer />

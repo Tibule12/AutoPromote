@@ -389,13 +389,13 @@
     left: 0;
     right: 0;
     bottom: 0;
-    height: 62px;
+    height: 50px;
     align-items: center;
     justify-content: space-around;
     background: linear-gradient(0deg, rgba(10, 10, 20, 0.98), rgba(10, 10, 20, 0.95));
     z-index: 1900;
-    padding: env(safe-area-inset-bottom, 8px) 12px;
-    gap: 8px;
+    padding: env(safe-area-inset-bottom, 4px) 12px;
+    gap: 6px;
   }
   .bn-item {
     background: transparent;
@@ -404,27 +404,27 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     border-radius: 12px;
   }
   .bn-item.create {
-    width: 64px;
-    height: 64px;
+    width: 46px;
+    height: 46px;
     background: #ff0050;
-    border-radius: 32px;
-    transform: translateY(-12px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    border-radius: 23px;
+    transform: translateY(-6px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
   }
   .create-icon {
     color: #fff;
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 800;
     line-height: 1;
   }
   .bn-avatar {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     object-fit: cover;
   }

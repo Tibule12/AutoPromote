@@ -44,3 +44,29 @@ tmp-service-account.json
 # Artifacts produced by E2E runs (generated locally)
 artifacts/
 frontend/prototypes/futuristic-card/tmp/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Python
+venv/
+python_media_worker/venv/
+__pycache__/
+
+# Temp scripts
+check-*.js
+check_*.js
+debug-*.js
+verify-*.js
+dump-*.js
+fix-*.js
+force-*.js
+merge-*.js
+sync-*.js
+

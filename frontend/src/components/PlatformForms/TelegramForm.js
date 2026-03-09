@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { sanitizeUrl } from "../../utils/security";
-import "../../ContentUploadForm.css";
+// import "../../ContentUploadForm.css";
 
 const TelegramForm = ({
   onChange,
