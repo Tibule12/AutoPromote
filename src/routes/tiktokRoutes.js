@@ -1392,7 +1392,12 @@ router.post(
       // 2. Resolve File URL
       // Frontend sends 'url' (storage URL) or 'fileUrl'
       let videoUrl = req.body.url || req.body.fileUrl || req.body.video_url;
-
+      // Validating protocol to prevent SSRF
+      if (videoUrl && !videoUrl.startsWith("https://")) {
+        return res
+          .status(400)
+          .json({ error: "invalid_protocol", message: "Only HTTPS URLs are allowed." });
+      }
       if (!videoUrl) {
         return res
           .status(400)
@@ -1887,8 +1892,12 @@ router.get("/creator_info", authMiddleware, ttPublicLimiter, async (req, res) =>
 
 // --- Admin-only endpoints for audit / review evidence ---
 // Returns recent assistant actions (requires admin privileges)
-router.get("/admin/assistant_actions", authMiddleware, async (req, res) => {
-  try {
+router.get(
+  "/admin/assistant_actions",
+  authMiddleware,
+  ttWriteLimiter,
+  async (req, res) => {
+    try {
     if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "forbidden" });
     const limit = Math.min(200, parseInt(req.query.limit || "50", 10));
     const q = db.collection("assistant_actions").orderBy("createdAt", "desc").limit(limit);
@@ -1903,8 +1912,12 @@ router.get("/admin/assistant_actions", authMiddleware, async (req, res) => {
 });
 
 // Returns recent TikTok creator_info audit logs (requires admin privileges)
-router.get("/admin/tiktok_checks", authMiddleware, async (req, res) => {
-  try {
+router.get(
+  "/admin/tiktok_checks",
+  authMiddleware,
+  ttWriteLimiter,
+  async (req, res) => {
+    try {
     if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "forbidden" });
     const limit = Math.min(200, parseInt(req.query.limit || "50", 10));
     const q = db
