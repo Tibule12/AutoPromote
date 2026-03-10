@@ -3,7 +3,7 @@ const router = express.Router();
 const { db } = require("./firebaseAdmin");
 const { createOrder, captureOrder, verifyWebhook } = require("./services/payments/paypalService");
 const authMiddleware = require("./authMiddleware");
-const { strictLimiter } = require("./middleware/rateLimiter");
+const { strictLimiter, apiLimiter } = require("./middleware/rateLimiter");
 
 // Add explicit webhook rate limiter for CodeQL/static scanners
 let codeqlLimiter = null;
@@ -21,7 +21,7 @@ const PACKAGES = {
 };
 
 // Expose PayPal Client ID for frontend SDK
-router.get("/config/paypal", (req, res) => {
+router.get("/config/paypal", apiLimiter, (req, res) => {
   res.json({ clientId: process.env.PAYPAL_CLIENT_ID || "sb" }); // Default to sandbox "sb" if missing
 });
 

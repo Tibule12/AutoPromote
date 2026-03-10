@@ -1,6 +1,10 @@
 const { db } = require("../firebaseAdmin");
 const youtubeService = require("./youtubeService");
 const tiktokService = require("./tiktokService");
+const { postToFacebook } = require("./facebookService");
+const { publishInstagram } = require("./instagramPublisher");
+const { postToReddit } = require("./redditService");
+const { postToLinkedIn } = require("./linkedinService");
 const logger = require("../utils/logger");
 
 /**
@@ -74,14 +78,21 @@ const distributeContent = async (contentId, userId) => {
         // Note: Real TikTok API requires 'video_upload' capability which is restricted.
         // For MVP/Simulation:
         const result = await tiktokService.postToTikTok({
-          userId,
-          fileUrl: uploadUrl,
-          caption: title, // TikTok uses title as caption usually
-          privacy: opts.privacy || "public_readers",
+          uid: userId,
+          contentId,
+          payload: {
+            videoUrl: uploadUrl,
+            title: title, // TikTok uses title as caption usually
+            privacy: opts.privacy || "public_readers",
+          }
         });
 
-        results.tiktok = { success: true, id: result.itemId };
-        await updatePlatformStatus(contentId, "tiktok", "published", result);
+        if (result.success) {
+          results.tiktok = { success: true, id: result.publishId || result.videoId };
+          await updatePlatformStatus(contentId, "tiktok", "published", result);
+        } else {
+          throw new Error(result.error || "TikTok upload failed");
+        }
       } catch (err) {
         logger.error(`[DistributionManager] TikTok upload failed: ${err.message}`);
         results.tiktok = { success: false, error: err.message };
@@ -89,9 +100,132 @@ const distributeContent = async (contentId, userId) => {
       }
     }
 
-    // --- FACEBOOK / INSTAGRAM / OTHERS ---
-    // (Add similar blocks here using socialPlatformHelpers or specific services)
+    // --- FACEBOOK ---
+    if (target_platforms.includes("facebook")) {
+      try {
+        await updatePlatformStatus(contentId, "facebook", "processing");
 
+        const opts = platform_options?.facebook || {};
+        // Determine payload for Facebook
+        const fbPayload = {
+          message: description || title,
+          videoUrl: url,
+          title: title,
+          // Allow override of pageId specific to this post if provided in options
+          pageId: opts.pageId
+        };
+        
+        // Use facebookService
+        const result = await postToFacebook({
+          contentId,
+          payload: fbPayload,
+          uid: userId
+        });
+
+        if (result.success) {
+          results.facebook = { success: true, id: result.postId || result.id };
+          await updatePlatformStatus(contentId, "facebook", "published", result);
+        } else {
+          throw new Error(result.error || "Facebook upload failed");
+        }
+      } catch (err) {
+        logger.error(`[DistributionManager] Facebook upload failed: ${err.message}`);
+        results.facebook = { success: false, error: err.message };
+        await updatePlatformStatus(contentId, "facebook", "failed", { error: err.message });
+      }
+    }
+
+    // --- INSTAGRAM ---
+    if (target_platforms.includes("instagram")) {
+      try {
+        await updatePlatformStatus(contentId, "instagram", "processing");
+
+        const opts = platform_options?.instagram || {};
+        // Determine payload for Instagram
+        const igPayload = {
+          caption: description || title,
+          media_url: url,
+          media_type: "VIDEO" // We assume video for now, or could check file type
+        };
+
+        const result = await publishInstagram({
+          contentId,
+          payload: igPayload,
+          uid: userId
+        });
+
+        if (result.success) {
+          results.instagram = { success: true, id: result.mediaId || result.id };
+          await updatePlatformStatus(contentId, "instagram", "published", result);
+        } else {
+          throw new Error(result.error || "Instagram upload failed");
+        }
+      } catch (err) {
+        logger.error(`[DistributionManager] Instagram upload failed: ${err.message}`);
+        results.instagram = { success: false, error: err.message };
+        await updatePlatformStatus(contentId, "instagram", "failed", { error: err.message });
+      }
+    }
+
+    // --- REDDIT ---
+    if (target_platforms.includes("reddit")) {
+      try {
+        await updatePlatformStatus(contentId, "reddit", "processing");
+
+        const opts = platform_options?.reddit || {};
+        if (!opts.subreddit) throw new Error("Subreddit is required for Reddit posting");
+
+        const result = await postToReddit({
+          uid: userId,
+          contentId,
+          subreddit: opts.subreddit,
+          title: opts.title || title,
+          text: opts.text || description || title, // Fallback
+          kind: "video", // Default to video since we're distributing content
+          videoUrl: url,
+        });
+
+        if (result.success) {
+          results.reddit = { success: true, id: result.postId || result.id };
+          await updatePlatformStatus(contentId, "reddit", "published", result);
+        } else {
+          throw new Error(result.error || "Reddit upload failed");
+        }
+      } catch (err) {
+        logger.error(`[DistributionManager] Reddit upload failed: ${err.message}`);
+        results.reddit = { success: false, error: err.message };
+        await updatePlatformStatus(contentId, "reddit", "failed", { error: err.message });
+      }
+    }
+
+    // --- LINKEDIN ---
+    if (target_platforms.includes("linkedin")) {
+      try {
+        await updatePlatformStatus(contentId, "linkedin", "processing");
+        const opts = platform_options?.linkedin || {};
+
+        const result = await postToLinkedIn({
+          uid: userId,
+          contentId,
+          text: opts.commentary || description || title,
+          videoUrl: url, // Assuming video upload
+          postType: "video",
+          title: opts.title || title,
+        });
+
+        if (result.success) {
+          results.linkedin = { success: true, id: result.postId || result.id };
+          await updatePlatformStatus(contentId, "linkedin", "published", result);
+        } else {
+          throw new Error(result.error || "LinkedIn upload failed");
+        }
+      } catch (err) {
+        logger.error(`[DistributionManager] LinkedIn upload failed: ${err.message}`);
+        results.linkedin = { success: false, error: err.message };
+        await updatePlatformStatus(contentId, "linkedin", "failed", { error: err.message });
+      }
+    }
+    
     logger.info(`[DistributionManager] Distribution complete for ${contentId}`, results);
     return results;
   } catch (err) {

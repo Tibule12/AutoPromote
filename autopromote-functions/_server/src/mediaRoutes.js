@@ -137,7 +137,10 @@ router.get("/status/:jobId", async (req, res) => {
       success: true,
       status: data.status,
       progress: data.progress,
-      result: data.result, // Contains { url } if completed
+      result: data.result, // Node worker result
+      output_url: data.output_url, // Python worker result (Async)
+      outputUrl: data.outputUrl, // Legacy Node worker result
+      clipSuggestions: data.clipSuggestions, // Viral clips
       error: data.error,
     });
   } catch (e) {
@@ -200,7 +203,8 @@ router.post("/memetic/plan", async (req, res) => {
   const userId = req.user.uid;
   const { baseVariant, options, soundId } = req.body;
 
-  console.log(`[Memetic] Planning mutations for user ${userId}`, baseVariant);
+  // Safe logging
+  console.log("[Memetic] Planning mutations", { userId, baseVariant });
 
   // In a real implementation:
   // 1. Send base params to Python worker (AI model trained on viral clips)

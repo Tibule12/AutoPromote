@@ -362,7 +362,7 @@ router.post("/paypal/capture", async (req, res) => {
   }
 });
 
-// Capture PayPal order for Ad Credits
+// Capture PayPal order for strategy credits
 router.post("/paypal/capture-ad-credits", authMiddleware, async (req, res) => {
   try {
     const { orderId } = req.body || {};

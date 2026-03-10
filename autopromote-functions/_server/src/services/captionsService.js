@@ -178,8 +178,25 @@ async function generateTranscription(filePathOrBuffer) {
   const FormData = require("form-data");
   const form = new FormData();
 
-  if (typeof filePathOrBuffer === "string" && fs.existsSync(filePathOrBuffer)) {
-    form.append("file", fs.createReadStream(filePathOrBuffer));
+  // Validate file path if string
+  if (typeof filePathOrBuffer === "string") {
+    // Only allow files within a temporary directory or known safe location
+    // This is a basic check.
+    const path = require("path");
+    const os = require("os");
+    const normalizedPath = path.resolve(filePathOrBuffer);
+    const tmpDir = fs.realpathSync(os.tmpdir());
+
+    // Check if path is within tmpDir (or other safe dir)
+    if (!normalizedPath.startsWith(tmpDir) && !normalizedPath.includes("temp_uploads")) {
+      // Log warning but proceed if necessary, or throw
+      console.error(`[Transcription] Illicit path blocked: ${normalizedPath}`);
+      throw new Error("Invalid file path for transcription.");
+    }
+
+    if (fs.existsSync(filePathOrBuffer)) {
+      form.append("file", fs.createReadStream(filePathOrBuffer));
+    }
   } else if (Buffer.isBuffer(filePathOrBuffer)) {
     // OpenAI requires a filename to infer content type.
     form.append("file", filePathOrBuffer, { filename: "upload.mp3", contentType: "audio/mpeg" });

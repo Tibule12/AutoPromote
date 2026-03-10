@@ -53,7 +53,9 @@ function checkPlatformCompliance(platform, options, intent) {
 
   // 3. Instagram / Facebook Compliance
   if (platform === "instagram" || platform === "facebook") {
-    if (intent === "sponsored") {
+    // Only enforce if the platform-specific flag explicitly claims Paid Partnership.
+    // We ignore strict global 'intent' here to allow mixed-mode publishing (e.g. Sponsored TikTok but Organic IG).
+    if (options.isPaidPartnership) {
       // "Paid Partnership" requires a sponsor user/brand
       if (!options.sponsorUser && !options.brandName) {
         throw new Error(`${VALIDATION_ERRORS.MISSING_PARTNER} (${platform})`);
@@ -63,7 +65,8 @@ function checkPlatformCompliance(platform, options, intent) {
 
   // 4. LinkedIn Compliance
   if (platform === "linkedin") {
-    if (intent === "commercial" || intent === "sponsored") {
+    // Similarly, only enforce Organization requirement if this specific post is marked promotional/commercial
+    if (options.isPromotional) {
       // Commercial posts usually attach to a Company Page, not a personal profile
       if (!options.companyId) {
         throw new Error(VALIDATION_ERRORS.LINKEDIN_ORG);

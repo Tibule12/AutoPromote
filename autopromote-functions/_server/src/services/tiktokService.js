@@ -303,6 +303,7 @@ async function saveInitCapture({
  */
 async function initializeVideoUpload({
   accessToken,
+  title,
   videoSize,
   chunkSize = DEFAULT_CHUNK_SIZE,
   privacyLevel = "SELF_ONLY",
@@ -315,7 +316,7 @@ async function initializeVideoUpload({
 
   const body = {
     post_info: {
-      title: "",
+      title: title || "",
       privacy_level: privacyLevel, // Set by caller (admin-approved publishes default PUBLIC)
       disable_duet: false,
       disable_comment: false,
@@ -770,6 +771,7 @@ async function pullFromUrlPublish({
   accessToken,
   videoUrl,
   contentId,
+  title,
   privacyLevel = undefined,
   maxWaitMs = 120000,
   isCommercial = false,
@@ -780,7 +782,8 @@ async function pullFromUrlPublish({
   // Init PULL_FROM_URL
   const initBody = {
     post_info: {
-      title: "",
+      post_mode: "DIRECT_POST",
+      title: title || "",
       privacy_level: privacyLevel || "SELF_ONLY",
       is_commercial_content: isCommercial,
       brand_content_toggle: brandedContent,
@@ -988,6 +991,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         accessToken,
         videoUrl,
         contentId,
+        title,
         privacyLevel,
         isCommercial,
         brandOrganic,
@@ -1015,6 +1019,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
               accessToken,
               videoUrl,
               contentId,
+              title,
               privacyLevel,
               isCommercial,
               brandOrganic,
@@ -1244,6 +1249,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         console.log("[tiktok] trying chunk_size candidate=%d", cs);
         const initData = await initializeVideoUpload({
           accessToken,
+          title: baseTitle,
           videoSize,
           privacyLevel,
           chunkSize: cs,
