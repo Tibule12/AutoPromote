@@ -117,7 +117,8 @@
     "supertest": "^7.1.4"
   },
   "overrides": {
-    "@tootallnate/once": "3.0.1"
+    "@tootallnate/once": "3.0.1",
+    "@grpc/grpc-js": "1.14.3"
   },
   "eslintConfig": {
     "root": true,
