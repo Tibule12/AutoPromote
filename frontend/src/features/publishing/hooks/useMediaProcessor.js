@@ -126,5 +126,11 @@ export const useMediaProcessor = (initialFile = null) => {
 
     // Actions
     handleFileChange,
+
+    // Explicit setters for advanced integration
+    setFile,
+    setSourceFiles,
+    setType,
+    setPreviewUrl,
   };
 };

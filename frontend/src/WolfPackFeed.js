@@ -29,40 +29,6 @@ const WolfPackFeed = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all"); // all, trending, viral
 
-  // MOCK DATA IF API FAILS
-  const MOCK_POSTS = [
-    {
-      id: 1,
-      user: "CryptoKing",
-      avatar: "",
-      caption: "This strategy is printing money right now. Watch till the end. #alpha",
-      likes: 1204,
-      shares: 342,
-      time: "2h ago",
-      type: "text",
-    },
-    {
-      id: 2,
-      user: "AlphaWolf_99",
-      avatar: "",
-      caption: "Market is bleeding but we are eating. Here is the play.",
-      likes: 850,
-      shares: 120,
-      time: "5h ago",
-      type: "video",
-    },
-    {
-      id: 3,
-      user: "HustleGPT",
-      avatar: "",
-      caption: "Just automated my entire outreach workflow. DM for the script.",
-      likes: 2100,
-      shares: 900,
-      time: "1d ago",
-      type: "image",
-    },
-  ];
-
   useEffect(() => {
     fetchFeed();
   }, [filter]);
@@ -70,20 +36,27 @@ const WolfPackFeed = () => {
   const fetchFeed = async () => {
     setLoading(true);
     try {
-      const token = await auth.currentUser?.getIdToken();
-      // Using existing endpoint structure but mapping to new UI
-      const res = await fetch(`${API_BASE_URL}/api/community/feed?category=${filter}`, {
+      if (!auth.currentUser) return;
+      const token = await auth.currentUser.getIdToken();
+
+      let url = `${API_BASE_URL}/api/community/feed`;
+      if (filter === "trending" || filter === "viral") {
+        url = `${API_BASE_URL}/api/community/trending`;
+      }
+
+      const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.ok) {
         const data = await res.json();
-        setPosts(data.posts || MOCK_POSTS);
+        setPosts(data.posts || []);
       } else {
-        setPosts(MOCK_POSTS);
+        setPosts([]);
       }
     } catch (err) {
       console.error(err);
-      setPosts(MOCK_POSTS);
+      setPosts([]);
     } finally {
       setLoading(false);
     }
@@ -120,7 +93,7 @@ const WolfPackFeed = () => {
       {/* Content */}
       {loading ? (
         <div className="wolf-loading">SCANNING NETWORK...</div>
-      ) : (
+      ) : posts.length > 0 ? (
         <div className="wolf-posts">
           {posts.map(post => (
             <div key={post.id} className="wolf-post-card">
@@ -153,6 +126,11 @@ const WolfPackFeed = () => {
               </div>
             </div>
           ))}
+        </div>
+      ) : (
+        <div className="wolf-empty-state">
+          <h3>No Signals Detected</h3>
+          <p>The network is quiet. Initiate a broadcast to wake the wolves.</p>
         </div>
       )}
     </div>

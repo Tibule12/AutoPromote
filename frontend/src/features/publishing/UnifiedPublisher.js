@@ -1005,6 +1005,8 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     setSelectedFilter,
     duration,
     setDuration,
+    setFile: setMediaFile, // Expose manually
+    setPreviewUrl, // Expose manually
   } = useMediaProcessor(globalFile);
 
   const [isPublishing, setIsPublishing] = useState(false);
@@ -1071,10 +1073,16 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
         if (fileToEdit) {
           console.log(`Reviewing AI for ${platformId}:`, fileToEdit.name);
-          setEditingTarget(platformId); // Set target to current platform
-          // If it's the global file, we might typically edit passing 'null' target,
-          // but here we are in a platform context.
-          processFileChange(fileToEdit); // Load into processor and edit
+          // CRITICAL: Set editing target so VideoEditor knows which state to update on Save
+          setEditingTarget(platformId);
+
+          // CRITICAL: We must load the file into the state that VideoEditor reads.
+          // In UnifiedPublisher, 'mediaFile' seems to be the source for VideoEditor.
+          // If we are editing a platform-specific file, we might need a way to tell VideoEditor about it.
+          // Currently, VideoEditor takes 'file={mediaFile}'.
+          // So let's temporarily swap mediaFile (or ensure VideoEditor uses a different state if target is set).
+
+          processFileChange(fileToEdit); // Load this file into the main editor state properly
           setShowVideoEditor(true);
         } else {
           setFeedbackMessage("Please select a file first.");
@@ -1382,7 +1390,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           // the backend will reject it with a 400. We auto-disable it here
           // to assume it was accidental or left over from exploration.
           if (platformOptionsMap[p].isPaidPartnership && !platformOptionsMap[p].sponsorUser) {
-            console.warn("[UnifiedPublisher] Sanitizing Instagram options: disabling isPaidPartnership (missing sponsorUser)");
+            console.warn(
+              "[UnifiedPublisher] Sanitizing Instagram options: disabling isPaidPartnership (missing sponsorUser)"
+            );
             platformOptionsMap[p].isPaidPartnership = false;
           }
         }
@@ -1500,7 +1510,10 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                       <button
                         className="btn-secondary-sm"
                         style={{ flex: 1, background: "#e94560", color: "white", border: "none" }}
-                        onClick={() => alert("Viral Clips Scanner (Coming Soon)")}
+                        onClick={() => {
+                          setViralScannerFile(mediaFile);
+                          setShowViralScanner(true);
+                        }}
                       >
                         🔍 Find Viral Clips
                       </button>
@@ -1975,7 +1988,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
       {/* --- VIRAL SCANNER MODAL --- */}
       {showViralScanner && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 }}>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 3000 }}>
           <ViralScanner
             file={viralScannerFile || mediaFile} // specific file or fallback
             onClose={() => setShowViralScanner(false)}

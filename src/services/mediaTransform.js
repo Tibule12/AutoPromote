@@ -58,10 +58,20 @@ function processMedia(inputFile, outputFile, options = {}) {
       normalizeAudio = true,
       fixAspectRatio = true,
       targetAspectRatio = 9 / 16, // Default to TikTok/Reels vertical
+      viralMutation = false, // ENABLE THE COMEBACK: Randomly mutate content to bypass hash/duplicate detection
     } = options;
 
     let command = ffmpeg(inputFile);
     const complexFilters = [];
+
+    // --- VIRAL MUTATION ENGINE ---
+    // If enabled, we subtly alter the video DNA to evade "Shadowban" or "Duplicate Content" filters.
+    // 1. Speed Change (Tempo 1.05x) - Changes duration hash
+    // 2. Color Grade (Saturation 1.2) - Changes visual hash
+    // 3. Zoom Crop (1.02x) - Changes pixel mapping
+
+    let videoFilterChain = "";
+    let audioFilterChain = "";
 
     // 1. Retention Guard: Trim Silence at Start
     // silenceremove=start_periods=1:start_duration=0.5:start_threshold=-40dB
@@ -72,23 +82,56 @@ function processMedia(inputFile, outputFile, options = {}) {
       // Simplified "Sci-Fi" approach: We just cut the first 1.5s if it's dead silence,
       // OR we rely on 'silenceremove' and let ffmpeg sync (it usually drops video frames to match).
       // For safety, we will use a dedicated silence remover that works well.
-      complexFilters.push(
-        "[0:a]silenceremove=start_periods=1:start_duration=0.3:start_threshold=-35dB[a_trimmed]"
-      );
-    } else {
-      complexFilters.push("[0:a]anull[a_trimmed]");
+      audioFilterChain += "silenceremove=start_periods=1:start_duration=0.3:start_threshold=-35dB,";
     }
 
     // 2. Loudness Equalizer (Spotify/TikTok Standard)
     // loudnorm=I=-16:TP=-1.5:LRA=11
     if (normalizeAudio) {
       // Chain from previous audio output
-      complexFilters.push("[a_trimmed]loudnorm=I=-16:TP=-1.5:LRA=11[a_out]");
-    } else {
-      complexFilters.push("[a_trimmed]anull[a_out]");
+      audioFilterChain += "loudnorm=I=-16:TP=-1.5:LRA=11,";
     }
 
-    // 3. Format Defender (Aspect Ratio)
+    // 3. Viral Mutation (The "Comeback" Logic)
+    if (viralMutation) {
+      // Speed up video and audio by 5% (imperceptible to humans, new content to bots)
+      // video: setpts=0.95*PTS
+      // audio: atempo=1.05
+      videoFilterChain += "setpts=0.952*PTS,";
+      audioFilterChain += "atempo=1.05,";
+
+      // Color Grading (Pop the colors)
+      // eq=saturation=1.1:contrast=1.05
+      videoFilterChain += "eq=saturation=1.1:contrast=1.05,";
+
+      // Slight Zoom (Crop 2% from center) to break pixel matching
+      // crop=iw*0.98:ih*0.98:(iw-ow)/2:(ih-oh)/2
+      videoFilterChain += "crop=iw*0.98:ih*0.98:(iw-ow)/2:(ih-oh)/2,";
+    }
+
+    // Clean up trailing commas in chains for basic processing
+    // We will build the final complex filter graph carefully.
+
+    // We need to name the streams to chain them properly.
+    // [0:a] -> [a_proc]
+    // [0:v] -> [v_proc]
+
+    if (audioFilterChain.endsWith(",")) audioFilterChain = audioFilterChain.slice(0, -1);
+    if (videoFilterChain.endsWith(",")) videoFilterChain = videoFilterChain.slice(0, -1);
+
+    if (audioFilterChain) {
+      complexFilters.push(`[0:a]${audioFilterChain}[a_processed]`);
+    } else {
+      complexFilters.push(`[0:a]anull[a_processed]`);
+    }
+
+    if (videoFilterChain) {
+      complexFilters.push(`[0:v]${videoFilterChain}[v_processed]`);
+    } else {
+      complexFilters.push(`[0:v]null[v_processed]`);
+    }
+
+    // 4. Format Defender (Aspect Ratio)
     if (fixAspectRatio) {
       // We need to decide if we blur-fill or pass through.
       // This requires knowing input info, but we can use strict filter logic with 'scale' and 'pad'.
@@ -103,13 +146,13 @@ function processMedia(inputFile, outputFile, options = {}) {
       // or blur fill. Blur fill is more professional ("Sci-Fi").
 
       // Complex Filter Graph for Blur Fill:
-      // [0:v]split[v_bg][v_fg];
+      // [v_processed]split[v_bg][v_fg];
       // [v_bg]scale=1080:1920:force_original_aspect_ratio=increase,boxblur=20:10[v_bg_blurred];
       // [v_bg_blurred]crop=1080:1920[v_bg_cropped];
       // [v_fg]scale=1080:1920:force_original_aspect_ratio=decrease[v_fg_scaled];
       // [v_bg_cropped][v_fg_scaled]overlay=(W-w)/2:(H-h)/2[v_out]
 
-      complexFilters.push(`[0:v]split[v_bg][v_fg]`);
+      complexFilters.push(`[v_processed]split[v_bg][v_fg]`);
       complexFilters.push(
         `[v_bg]scale=1080:1920:force_original_aspect_ratio=increase,boxblur=20:10,crop=1080:1920[v_bg_processed]`
       );
@@ -118,14 +161,14 @@ function processMedia(inputFile, outputFile, options = {}) {
       );
       complexFilters.push(`[v_bg_processed][v_fg_processed]overlay=(W-w)/2:(H-h)/2[v_out]`);
     } else {
-      complexFilters.push(`[0:v]null[v_out]`);
+      complexFilters.push(`[v_processed]null[v_out]`);
     }
 
     command
       .complexFilter(complexFilters)
       .outputOptions([
         "-map [v_out]",
-        "-map [a_out]",
+        "-map [a_processed]",
         "-c:v libx264",
         "-preset veryfast", // speed over compression for user feedback loop
         "-c:a aac",
@@ -199,14 +242,18 @@ async function processNextMediaTransformTask() {
     }
 
     // 4. Run FFmpeg Processing
+    const viralMode = data.meta?.viral_remix || false;
+
     console.log(
-      `[MediaTransform] Processing ${data.contentId} (FixRatio: ${shouldFixRatio}, Normalize: true)...`
+      `[MediaTransform] Processing ${data.contentId} (FixRatio: ${shouldFixRatio}, Normalize: true, ViralMode: ${viralMode})...`
     );
 
+    // Apply "Comeback" Logic (Protcol 7 Mutation) if requested
     await processMedia(tmpIn, tmpOut, {
       trimSilence: true, // Always clean the hook
       normalizeAudio: true, // Always professional audio
       fixAspectRatio: shouldFixRatio, // Intelligent formatting
+      viralMutation: viralMode, // Change DNA if this is a "Remix" attempt
     });
 
     // 5. Upload Processed File

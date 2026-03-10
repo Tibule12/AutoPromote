@@ -175,6 +175,20 @@ class MonetizationService {
 
     try {
       if (method === "paypal") {
+        // --- DEV MODE SAFEGUARD: If no credentials, use Mock Mode ---
+        if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+          logger.warn("PayPal credentials missing. Using MOCK payment flow.");
+          return {
+            success: false,
+            status: "pending_approval",
+            paymentId: `MOCK-${Date.now()}`,
+            approvalUrl: `http://localhost:3000/mock-payment-approval?orderId=MOCK-${Date.now()}&amount=${amount}`,
+            amount,
+            method,
+            processedAt: new Date().toISOString(),
+          };
+        }
+
         // Create PayPal Order
         const order = await paypalClient.createOrder({
           amount: amount.toFixed(2),
@@ -274,13 +288,15 @@ class MonetizationService {
 
   // Check if user can perform action
   canPerformAction(subscription, action, limits) {
-    const usage = subscription.usage;
+    const usage = subscription.usage || { uploadsThisMonth: 0, boostsThisMonth: 0 };
 
     switch (action) {
       case "upload":
-        return limits.monthlyUploads === -1 || usage.uploadsThisMonth < limits.monthlyUploads;
+        return (
+          limits.monthlyUploads === -1 || (usage.uploadsThisMonth || 0) < limits.monthlyUploads
+        );
       case "boost":
-        return limits.monthlyBoosts === -1 || usage.boostsThisMonth < limits.monthlyBoosts;
+        return limits.monthlyBoosts === -1 || (usage.boostsThisMonth || 0) < limits.monthlyBoosts;
       default:
         return true;
     }

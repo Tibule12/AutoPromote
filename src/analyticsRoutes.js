@@ -84,35 +84,34 @@ router.get("/user", authMiddleware, async (req, res) => {
 
     // Get user's content (Filtered in memory to avoid missing index issues on createdAt)
     console.log(`[Analytics] Filtering content for user: ${uid} over range: ${range}`);
-    const contentRef = db
-      .collection("content")
-      .where("userId", "==", uid);
-      
+    const contentRef = db.collection("content").where("userId", "==", uid);
+
     const contentSnapshot = await contentRef.get();
     console.log(`[Analytics] Found ${contentSnapshot.size} total docs for user.`);
-    
+
     // In-memory filter & sort
     const filteredDocs = [];
     contentSnapshot.forEach(doc => {
-       const data = doc.data();
-       let createdTime = 0;
-       /* ... logic ... */
-       if (data.createdAt) {
-           if (typeof data.createdAt.toDate === 'function') {
-               createdTime = data.createdAt.toDate().getTime();
-           } else if (data.createdAt instanceof Date) {
-               createdTime = data.createdAt.getTime();
-           } else if (typeof data.createdAt === 'string') {
-               createdTime = new Date(data.createdAt).getTime();
-           }
-       }
-       
-       if (createdTime >= startDate.getTime()) {
-           filteredDocs.push(data);
-       }
-    });
-    console.log(`[Analytics] ${filteredDocs.length} passed date filter (>= ${startDate.toISOString()})`);
+      const data = doc.data();
+      let createdTime = 0;
+      /* ... logic ... */
+      if (data.createdAt) {
+        if (typeof data.createdAt.toDate === "function") {
+          createdTime = data.createdAt.toDate().getTime();
+        } else if (data.createdAt instanceof Date) {
+          createdTime = data.createdAt.getTime();
+        } else if (typeof data.createdAt === "string") {
+          createdTime = new Date(data.createdAt).getTime();
+        }
+      }
 
+      if (createdTime >= startDate.getTime()) {
+        filteredDocs.push(data);
+      }
+    });
+    console.log(
+      `[Analytics] ${filteredDocs.length} passed date filter (>= ${startDate.toISOString()})`
+    );
 
     // Emulate existing logic by looping heavily
     // But since subsequent logic iterates `contentSnapshot`, we need to change how we iterate.
@@ -126,7 +125,7 @@ router.get("/user", authMiddleware, async (req, res) => {
 
     filteredDocs.forEach(content => {
       // original loop body used 'doc.data()' -> 'content'
-      
+
       // Handle views from nested stats object if not at top level
       let views = content.views || 0;
       if (!views && content.stats && content.stats.viewCount) {
@@ -138,42 +137,49 @@ router.get("/user", authMiddleware, async (req, res) => {
       if (!likes && content.stats && content.stats.likeCount) {
         likes = parseInt(content.stats.likeCount, 10) || 0;
       }
-      
+
       totalViews += views;
       totalLikes += likes;
       totalShares += content.shares || 0;
       totalRevenue += content.revenue || 0;
 
       // Smart Platform Aggregation for Multi-Platform Content
-      const potentialPlatforms = ['youtube', 'tiktok', 'instagram', 'facebook', 'linkedin', 'twitter'];
+      const potentialPlatforms = [
+        "youtube",
+        "tiktok",
+        "instagram",
+        "facebook",
+        "linkedin",
+        "twitter",
+      ];
       let handledAsMultiPlatform = false;
 
       potentialPlatforms.forEach(p => {
-          if (content[p] && content[p].stats) {
-              handledAsMultiPlatform = true;
-              if (!contentByPlatform[p]) {
-                  contentByPlatform[p] = { count: 0, views: 0, likes: 0, revenue: 0 };
-              }
-              
-              const pViews = parseInt(content[p].stats.viewCount || 0, 10);
-              const pLikes = parseInt(content[p].stats.likeCount || 0, 10);
-              
-              contentByPlatform[p].views += pViews;
-              contentByPlatform[p].likes += pLikes;
-              contentByPlatform[p].count++;
+        if (content[p] && content[p].stats) {
+          handledAsMultiPlatform = true;
+          if (!contentByPlatform[p]) {
+            contentByPlatform[p] = { count: 0, views: 0, likes: 0, revenue: 0 };
           }
+
+          const pViews = parseInt(content[p].stats.viewCount || 0, 10);
+          const pLikes = parseInt(content[p].stats.likeCount || 0, 10);
+
+          contentByPlatform[p].views += pViews;
+          contentByPlatform[p].likes += pLikes;
+          contentByPlatform[p].count++;
+        }
       });
 
       // Fallback: If no specific platform stats found, attribute to main platform
       if (!handledAsMultiPlatform) {
-          const platform = content.platform || "unknown";
-          if (!contentByPlatform[platform]) {
-            contentByPlatform[platform] = { count: 0, views: 0, likes: 0, revenue: 0 };
-          }
-          contentByPlatform[platform].count++;
-          contentByPlatform[platform].views += views;
-          contentByPlatform[platform].likes += likes;
-          contentByPlatform[platform].revenue += content.revenue || 0;
+        const platform = content.platform || "unknown";
+        if (!contentByPlatform[platform]) {
+          contentByPlatform[platform] = { count: 0, views: 0, likes: 0, revenue: 0 };
+        }
+        contentByPlatform[platform].count++;
+        contentByPlatform[platform].views += views;
+        contentByPlatform[platform].likes += likes;
+        contentByPlatform[platform].revenue += content.revenue || 0;
       }
     });
 
@@ -184,16 +190,13 @@ router.get("/user", authMiddleware, async (req, res) => {
       // We'll filter and sort by date in memory
       // FIXED: Also fetch failed posts that might have partial metrics or missing status
       // to ensure the dashboard shows at least static/simulated data if available
-      const postsRef = db
-        .collection("platform_posts")
-        .where("uid", "==", uid)
-        .limit(200); // safety cap
+      const postsRef = db.collection("platform_posts").where("uid", "==", uid).limit(200); // safety cap
 
       const postsSnap = await postsRef.get();
-      
+
       const docs = [];
       postsSnap.forEach(d => docs.push(d.data()));
-      
+
       // Sort desc
       docs.sort((a, b) => {
         const tA = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
@@ -203,7 +206,7 @@ router.get("/user", authMiddleware, async (req, res) => {
 
       docs.forEach(p => {
         if (!p.platform) return;
-        
+
         // Manual date filter
         if (p.createdAt) {
           const createdTime = p.createdAt.toDate ? p.createdAt.toDate() : new Date(p.createdAt);
@@ -267,17 +270,40 @@ router.get("/user", authMiddleware, async (req, res) => {
     let performanceStatus = "Initializing";
     let motivationMessage = "Preparing your content for the algorithm.";
 
-    // Find best performer
+    // Find best performer & latest activity to be honest about "dead" campaigns
     let maxViews = 0;
+    let latestUploadDate = 0;
+
     contentSnapshot.forEach(doc => {
-      const v = doc.data().views || 0;
+      const d = doc.data();
+      const v = d.views || 0;
       if (v > maxViews) maxViews = v;
+
+      const createdAt = d.created_at || d.createdAt;
+      if (createdAt) {
+        const time = createdAt.toDate
+          ? createdAt.toDate().getTime()
+          : new Date(createdAt).getTime();
+        if (time > latestUploadDate) latestUploadDate = time;
+      }
     });
 
+    const daysSinceLatest =
+      latestUploadDate > 0 ? (new Date() - latestUploadDate) / (1000 * 60 * 60 * 24) : 0;
+
     if (maxViews < 1000) {
-      performanceStatus = "Needs Work";
-      motivationMessage = "Early stages. We are optimizing hashtags and gathering signals.";
-      bestContent = { views: maxViews, nextGoal: 50000, potentialBonus: 0 };
+      if (latestUploadDate > 0 && daysSinceLatest > 5) {
+        // Honest Reality Check: Older than 5 days with low views = Failed
+        performanceStatus = "Algorithm Limited";
+        motivationMessage =
+          "Campaign ended below target. External platforms limited organic reach. Use Protocol 7 to Remix & Retry.";
+        bestContent = { views: maxViews, nextGoal: 1000, potentialBonus: 0 };
+      } else {
+        // Still fresh (< 5 days)
+        performanceStatus = "Needs Work";
+        motivationMessage = "Early stages. We are optimizing hashtags and gathering signals.";
+        bestContent = { views: maxViews, nextGoal: 50000, potentialBonus: 0 };
+      }
     } else if (maxViews < 50000) {
       performanceStatus = "Growing";
       motivationMessage =
@@ -306,10 +332,10 @@ router.get("/user", authMiddleware, async (req, res) => {
 
       if (creds.exists) {
         const count = creds.data().totalReferrals || 0;
-        referralStats = { 
-            total: count, 
-            nextGoal: count < 10 ? 10 : (count < 20 ? 20 : 100), 
-            potentialBonus: count < 10 ? 5 : (count < 20 ? 15 : 50) 
+        referralStats = {
+          total: count,
+          nextGoal: count < 10 ? 10 : count < 20 ? 20 : 100,
+          potentialBonus: count < 10 ? 5 : count < 20 ? 15 : 50,
         };
       }
       if (userDoc.exists) {
@@ -321,28 +347,31 @@ router.get("/user", authMiddleware, async (req, res) => {
     let topPlatform = "N/A";
     let maxPlatViews = -1;
     Object.entries(contentByPlatform).forEach(([plat, data]) => {
-        if (data.views > maxPlatViews) {
-            maxPlatViews = data.views;
-            topPlatform = plat;
-        }
+      if (data.views > maxPlatViews) {
+        maxPlatViews = data.views;
+        topPlatform = plat;
+      }
     });
     if (maxPlatViews === 0 && topPlatform === "unknown") topPlatform = "N/A";
 
     // Calculate Top Content (Top 5)
     // Create a simplified list from filteredDocs
-    const topContent = filteredDocs.map(doc => {
+    const topContent = filteredDocs
+      .map(doc => {
         // Need to parse views correctly again as we did in the loop
         let views = doc.views || 0;
         if (!views && doc.stats && doc.stats.viewCount) {
-             views = parseInt(doc.stats.viewCount, 10) || 0;
+          views = parseInt(doc.stats.viewCount, 10) || 0;
         }
         return {
-            title: doc.title || "Untitled",
-            views: views,
-            clicks: doc.clicks || 0, // Assuming clicks are tracked
-            platform: doc.platform
+          title: doc.title || "Untitled",
+          views: views,
+          clicks: doc.clicks || 0, // Assuming clicks are tracked
+          platform: doc.platform,
         };
-    }).sort((a, b) => b.views - a.views).slice(0, 5);
+      })
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 5);
 
     res.json({
       range,
@@ -353,13 +382,13 @@ router.get("/user", authMiddleware, async (req, res) => {
       totalRevenue,
       totalClicks: 0, // Placeholder
       ctr: 0, // Placeholder
-      
+
       // Frontend specific keys
       platformBreakdown: contentByPlatform, // Matches frontend expectation
       byPlatform: contentByPlatform, // Keep for backward compat if any
       topPlatform,
       topContent,
-      
+
       viralityTracker: bestContent,
       performanceStatus,
       motivationMessage,

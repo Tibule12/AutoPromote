@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { db, auth } from "../firebaseClient";
+import { db, auth, storage } from "../firebaseClient";
 import { collection, query, where, onSnapshot, orderBy, getDocs, limit } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { toast } from "react-hot-toast";
 import { API_ENDPOINTS } from "../config";
 import "./MissionControlPanel.css";
@@ -10,8 +11,12 @@ import UserLiveLogViewer from "../components/UserLiveLogViewer";
 const MissionControlPanel = () => {
   const [user] = useAuthState(auth);
   const [campaigns, setCampaigns] = useState([]);
-  const [latestContentId, setLatestContentId] = useState(null); // Store latest content ID
+  const [availableContent, setAvailableContent] = useState([]); // List of selectable content
+  const [selectedContentId, setSelectedContentId] = useState(null); // Currently selected content ID
+  const [selectedContentThumbnail, setSelectedContentThumbnail] = useState(null); // Currently selected content thumbnail
   const [loading, setLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false); // New state for upload status
+  const [isLocked] = useState(true); // Locked for maintenance
 
   // Reactor State
   const [prompt, setPrompt] = useState("");
@@ -19,6 +24,7 @@ const MissionControlPanel = () => {
   const [frequency, setFrequency] = useState(30); // Represents Duration/Intensity
   const [isStabilizing, setIsStabilizing] = useState(false);
   const [reactorState, setReactorState] = useState("idle"); // idle, charging, active, critical
+  const [simulationMode, setSimulationMode] = useState(false); // TEST PROTOCOL
 
   // Tactical Logger (Visual only for the reactor)
   const [missionLog, setMissionLog] = useState([]);
@@ -58,14 +64,28 @@ const MissionControlPanel = () => {
           collection(db, "content"),
           where("userId", "==", user.uid),
           orderBy("createdAt", "desc"),
-          limit(1)
+          limit(20)
         );
         const snaps = await getDocs(contentQ);
+
         if (!snaps.empty) {
-          setLatestContentId(snaps.docs[0].id);
+          const contentList = snaps.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setAvailableContent(contentList);
+
+          // Default select the first one
+          const firstDoc = contentList[0];
+          setSelectedContentId(firstDoc.id);
+          const thumb =
+            firstDoc.thumbnailUrl ||
+            firstDoc.previewUrl ||
+            (firstDoc.type === "image" ? firstDoc.url : null);
+          setSelectedContentThumbnail(thumb);
         }
       } catch (e) {
-        console.error("Failed to fetch latest content for ads:", e);
+        console.error("Failed to fetch content list for ads:", e);
       }
     };
     fetchContent();
@@ -83,6 +103,18 @@ const MissionControlPanel = () => {
     const particles = [];
     const particleCount = Math.floor(powerLevel * 2);
 
+    // Load content image if available
+    let contentImg = null;
+    if (selectedContentThumbnail) {
+      const img = new Image();
+      img.src = selectedContentThumbnail;
+      // Handle cross-origin if needed, though usually standard img tags work fine on canvas if server allows
+      img.crossOrigin = "Anonymous";
+      img.onload = () => {
+        contentImg = img;
+      };
+    }
+
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: canvas.width / 2,
@@ -90,44 +122,117 @@ const MissionControlPanel = () => {
         angle: Math.random() * Math.PI * 2,
         velocity: Math.random() * (powerLevel / 10),
         life: Math.random() * 100,
+        radius: Math.random() * (powerLevel / 20) + 1,
       });
     }
 
     const render = () => {
-      ctx.fillStyle = "rgba(10, 15, 30, 0.2)"; // Trail effect
+      // Clear with trail effect
+      ctx.fillStyle = "rgba(5, 10, 20, 0.3)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
+      // Draw Content Image if available (masked circle)
+      if (selectedContentThumbnail) {
+        const thumb = new Image();
+        thumb.src = selectedContentThumbnail;
+        if (thumb.complete) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.clip();
+          try {
+            ctx.drawImage(thumb, centerX - 60, centerY - 60, 120, 120);
+          } catch (e) {}
+          // Hologram overlay
+          ctx.fillStyle = `rgba(0, 255, 65, ${0.2 + Math.sin(Date.now() / 300) * 0.1})`;
+          ctx.fillRect(centerX - 60, centerY - 60, 120, 120);
+          ctx.restore();
 
+          // Tech Ring
+          ctx.strokeStyle = "#00ff41";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, 65, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+      // Draw Particles first (background layer)
       particles.forEach((p, index) => {
         p.x += Math.cos(p.angle) * p.velocity;
         p.y += Math.sin(p.angle) * p.velocity;
-        p.life -= 1;
+        p.life -= 1; // Decay
 
         // Reset particle
         if (p.life <= 0 || p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
-          p.x = centerX;
-          p.y = centerY;
+          p.x = centerX + (Math.random() - 0.5) * 10;
+          p.y = centerY + (Math.random() - 0.5) * 10;
           p.life = 100;
-          p.angle += 0.1; // Spiral effect
+          p.angle += (Math.random() - 0.5) * 0.5; // Drift
+          p.velocity = Math.random() * (powerLevel / 8) + 0.5;
         }
 
         const colorIntensity = Math.min(255, powerLevel * 2.5);
-        ctx.fillStyle = `rgba(${colorIntensity}, ${100 + frequency}, 255, ${p.life / 100})`;
+        // Color shifts based on velocity
+        const hue = (frequency * 2 + p.velocity * 20) % 360;
+        ctx.fillStyle = `hsla(${120 + hue / 2}, 100%, 60%, ${p.life / 100})`;
+
         ctx.beginPath();
-        ctx.arc(p.x, p.y, Math.max(1, powerLevel / 20), 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      // Core Glow
-      const gradient = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, 50);
-      gradient.addColorStop(0, "rgba(255, 255, 255, 0.8)");
-      gradient.addColorStop(1, `rgba(${powerLevel * 2}, 100, 255, 0)`);
+      // Core Glow (Under the image)
+      const gradient = ctx.createRadialGradient(centerX, centerY, 30, centerX, centerY, 150);
+      gradient.addColorStop(0, `rgba(${powerLevel * 2}, 255, 100, 0.4)`);
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 50, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, 150, 0, Math.PI * 2);
       ctx.fill();
+
+      // Draw Content Image (The Core)
+      if (contentImg) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 60, 0, Math.PI * 2); // Circular clip
+        ctx.closePath();
+        ctx.clip();
+
+        // Draw image centered and scaled
+        // Determine aspect ratio scaling
+        const scale = Math.max(120 / contentImg.width, 120 / contentImg.height);
+        const w = contentImg.width * scale;
+        const h = contentImg.height * scale;
+        ctx.drawImage(contentImg, centerX - w / 2, centerY - h / 2, w, h);
+
+        // Add a slight overlay tint based on reactor state
+        if (reactorState === "charging") {
+          ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.3})`;
+          ctx.fill();
+        }
+
+        ctx.restore();
+
+        // Border ring around image
+        ctx.strokeStyle = "#00ff41";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        // Fallback Core (if no image)
+        const coreGradient = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, 40);
+        coreGradient.addColorStop(0, "rgba(255, 255, 255, 0.9)");
+        coreGradient.addColorStop(0.5, "rgba(0, 255, 65, 0.6)");
+        coreGradient.addColorStop(1, "rgba(0, 50, 20, 0)");
+        ctx.fillStyle = coreGradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -137,10 +242,10 @@ const MissionControlPanel = () => {
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [powerLevel, frequency]);
+  }, [powerLevel, frequency, selectedContentThumbnail, reactorState]);
 
   const handleIgnite = async () => {
-    if (!prompt.trim()) {
+    if (!prompt.trim() && !simulationMode) {
       toast.error("MISSING CATALYST: Please enter a campaign prompt");
       return;
     }
@@ -149,17 +254,43 @@ const MissionControlPanel = () => {
     setReactorState("charging");
     setMissionLog([]); // Clear previous logs
     addLog("INITIALIZING LAUNCH SEQUENCE...");
-    addLog(`TARGET LOCK: ${latestContentId || "UNKNOWN_NODE"}`);
+    addLog(
+      `TARGET LOCK: ${selectedContentId || (simulationMode ? "SIM_TARGET_ALPHA" : "UNKNOWN_NODE")}`
+    );
     addLog(`SQUAD SIZE: ${powerLevel * 10} UNITS`);
 
     // Simulate "Spin Up"
     setTimeout(async () => {
       try {
+        if (simulationMode) {
+          addLog("SIMULATION PROTOCOL ENGAGED.");
+          addLog("SKIPPING ORBITAL UPLINK...");
+          await new Promise(r => setTimeout(r, 1000));
+          addLog("SIMULATED PAYMENT: BYPASSED");
+          setReactorState("active");
+          addLog("MISSION DEPLOYED SUCCESSFULLY (SIMULATION).");
+          addLog(`OPERATION ID: SIM-${Date.now()}`);
+          addLog("ASSETS EN ROUTE.");
+
+          toast.success("SIMULATION SUCCESSFUL", {
+            style: {
+              background: "#00ff41",
+              color: "black",
+              fontFamily: "monospace",
+            },
+          });
+
+          setPrompt("");
+          setIsStabilizing(false);
+          setTimeout(() => setReactorState("idle"), 3000);
+          return;
+        }
+
         addLog("ESTABLISHING SECURE CONNECTION...");
         const budget = powerLevel * 10; // $10 to $1000
         const estimatedReach = Math.floor(budget * (frequency * 0.5) * 12.5);
 
-        if (!latestContentId) {
+        if (!selectedContentId) {
           throw new Error("No content found to promote. Upload content first!");
         }
 
@@ -175,7 +306,7 @@ const MissionControlPanel = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            contentId: latestContentId,
+            contentId: selectedContentId,
             platform: "all", // Promote everywhere
             targetViews: estimatedReach,
             duration: Math.ceil(frequency / 3),
@@ -227,6 +358,135 @@ const MissionControlPanel = () => {
     }, 1500);
   };
 
+  const handleContentSelect = e => {
+    const newId = e.target.value;
+    setSelectedContentId(newId);
+
+    // Find thumbnail for new selection
+    const selectedItem = availableContent.find(c => c.id === newId);
+    if (selectedItem) {
+      const thumb =
+        selectedItem.thumbnailUrl ||
+        selectedItem.previewUrl ||
+        (selectedItem.type === "image" ? selectedItem.url : null);
+      setSelectedContentThumbnail(thumb);
+    } else {
+      setSelectedContentThumbnail(null);
+    }
+  };
+
+  const handleFileUpload = async event => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!user) {
+      toast.error("Authentication required");
+      return;
+    }
+
+    // Limit to images/video
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      toast.error("INVALID PAYLOAD: Only Image/Video assets accepted");
+      return;
+    }
+
+    setIsUploading(true);
+    addLog(`INITIALIZING UPLOAD SEQUENCE: ${file.name}`);
+    addLog(`PAYLOAD SIZE: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+
+    // Upload directly to Firebase Storage first (Client-side)
+    const storagePath = `users/${user.uid}/uploads/${Date.now()}_${file.name}`;
+    const storageRef = ref(storage, storagePath);
+
+    try {
+      addLog("ESTABLISHING UPLINK TO STORAGE VAULT...");
+      const snapshot = await uploadBytesResumable(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      addLog("ASSET SECURED. REGISTERING METADATA...");
+
+      // Register metadata with backend
+      const token = await user.getIdToken();
+
+      const payload = {
+        title: file.name.split(".")[0] || "Mission Asset",
+        type: file.type.startsWith("video/") ? "video" : "image",
+        url: downloadURL,
+        platform: "mission_control_direct",
+        description: "Direct upload from Mission Control",
+      };
+
+      const response = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || "Metadata registration failed");
+
+      addLog("ASSET REGISTERED. MISSION READY.");
+      toast.success("ASSET UPLOAD SUCCESSFUL");
+
+      // Set as selected immediately
+      const newAsset = {
+        id: data.contentId || data.content?.id,
+        title: payload.title,
+        thumbnailUrl: downloadURL,
+        url: downloadURL,
+        type: payload.type,
+        createdAt: { seconds: Date.now() / 1000 },
+      };
+
+      setAvailableContent(prev => [newAsset, ...prev]);
+      setSelectedContentId(newAsset.id);
+      setSelectedContentThumbnail(downloadURL);
+    } catch (error) {
+      console.error("Upload error:", error);
+      addLog(`UPLOAD FAILED: ${error.message}`);
+      toast.error("UPLOAD FAILED: " + error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  if (isLocked) {
+    return (
+      <div
+        className="ads-reactor-container"
+        style={{
+          position: "relative",
+          minHeight: "400px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          className="reactor-module control-core"
+          style={{
+            maxWidth: "500px",
+            textAlign: "center",
+            border: "1px solid #ff0000",
+            padding: "40px",
+          }}
+        >
+          <h1 style={{ color: "#ff0000", marginBottom: "20px" }}>🔒 MISSION CONTROL LOCKED</h1>
+          <p style={{ color: "#aaa", marginBottom: "20px" }}>
+            This system is currently undergoing critical upgrades. Access is restricted to
+            authorized personnel only.
+          </p>
+          <div style={{ fontSize: "0.8rem", color: "#666", fontFamily: "monospace" }}>
+            ERROR: PROTOCOL_7_MAINTENANCE_REQUIRED
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="ads-reactor-container">
       <h1 className="reactor-title">VIRAL MISSION CONTROL</h1>
@@ -234,6 +494,79 @@ const MissionControlPanel = () => {
       <div className="reactor-grid">
         {/* Control Core */}
         <div className="reactor-module control-core">
+          <div
+            style={{
+              marginBottom: "1rem",
+              borderBottom: "1px solid #003311",
+              paddingBottom: "0.5rem",
+            }}
+          >
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                color: simulationMode ? "#ffff00" : "#004411",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={simulationMode}
+                onChange={e => setSimulationMode(e.target.checked)}
+                style={{ marginRight: "10px" }}
+              />
+              ⚠️ SIMULATION MODE (TEST PROTOCOL)
+            </label>
+          </div>
+          <div className="holographic-input-group">
+            <label>SELECT TARGET ASSET (CONTENT) OR UPLOAD NEW</label>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <select
+                className="terminal-input"
+                style={{ height: "50px", marginBottom: "1rem", cursor: "pointer", flex: 1 }}
+                value={selectedContentId || ""}
+                onChange={handleContentSelect}
+              >
+                <option value="" disabled>
+                  -- SELECT CONTENT --
+                </option>
+                {availableContent.length === 0 ? (
+                  <option disabled>NO ASSETS FOUND</option>
+                ) : (
+                  availableContent.map(content => (
+                    <option key={content.id} value={content.id}>
+                      {content.title ||
+                        `Untitled Asset (${new Date(content.createdAt?.seconds * 1000).toLocaleDateString()})`}
+                    </option>
+                  ))
+                )}
+              </select>
+
+              <label
+                className="ignite-button"
+                style={{
+                  fontSize: "1rem",
+                  padding: "0.5rem 1rem",
+                  height: "50px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  whiteSpace: "nowrap",
+                  width: "auto",
+                }}
+              >
+                {isUploading ? "UPLOADING..." : "UPLOAD ⬆️"}
+                <input
+                  type="file"
+                  style={{ display: "none" }}
+                  accept="image/*,video/*"
+                  onChange={handleFileUpload}
+                  disabled={isUploading}
+                />
+              </label>
+            </div>
+          </div>
+
           <div className="holographic-input-group">
             <label>MISSION OBJECTIVE (PROMPT)</label>
             <textarea

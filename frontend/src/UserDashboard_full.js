@@ -1334,8 +1334,15 @@ const UserDashboard = ({
               >
                 Mission Timeline
               </li>
-              <li className={activeTab === "ads" ? "active" : ""} onClick={() => handleNav("ads")}>
-                Mission Control 🚀
+              <li
+                className="locked-feature"
+                style={{ opacity: 0.6, cursor: "not-allowed" }}
+                onClick={e => {
+                  e.stopPropagation();
+                  toast("🚀 Mission Control launching soon!", { icon: "🔒" });
+                }}
+              >
+                Mission Control 🔒
               </li>
               <li
                 className={activeTab === "analytics" ? "active" : ""}
@@ -1344,17 +1351,25 @@ const UserDashboard = ({
                 Intel
               </li>
               <li
-                className={activeTab === "rewards" ? "active" : ""}
-                onClick={() => handleNav("rewards")}
+                className="locked-feature"
+                style={{ opacity: 0.6, cursor: "not-allowed" }}
+                onClick={e => {
+                  e.stopPropagation();
+                  toast("🏆 Rewards coming soon!", { icon: "🔒" });
+                }}
               >
-                Rewards
+                Rewards 🔒
               </li>
               {/* Notifications moved to top bar */}
               <li
-                className={activeTab === "earnings" ? "active" : ""}
-                onClick={() => handleNav("earnings")}
+                className="locked-feature"
+                style={{ opacity: 0.6, cursor: "not-allowed" }}
+                onClick={e => {
+                  e.stopPropagation();
+                  toast("💰 Treasury opening soon!", { icon: "🔒" });
+                }}
               >
-                Treasury
+                Treasury 🔒
               </li>
 
               <li
@@ -1393,10 +1408,20 @@ const UserDashboard = ({
                 🐺 Wolf Hunt
               </li>
               <li
-                className={activeTab === "clips" ? "active" : ""}
-                onClick={() => handleNav("clips")}
+                className={activeTab === "idea_video" ? "active" : ""}
+                onClick={() => handleNav("idea_video")}
               >
-                AI Clips
+                AI Video Generator
+              </li>
+              <li
+                className="locked-feature"
+                style={{ opacity: 0.6, cursor: "not-allowed" }}
+                onClick={e => {
+                  e.stopPropagation();
+                  toast("🎬 AI Clip Studio coming soon!", { icon: "🔒" });
+                }}
+              >
+                AI Clips 🔒
               </li>
               <li
                 className={activeTab === "idea_video" ? "active" : ""}
@@ -1641,7 +1666,6 @@ const UserDashboard = ({
             }}
           />
         )}
-
       </main>
       <BottomNav activeTab={activeTab} onNav={handleNav} onLogout={onLogout} />
     </div>
