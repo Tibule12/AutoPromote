@@ -42,7 +42,7 @@
     "build:frontend": "npm --prefix frontend ci || (npm --prefix frontend install && npm --prefix frontend run build)"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.19.0",

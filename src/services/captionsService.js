@@ -184,12 +184,21 @@ async function generateTranscription(filePathOrBuffer) {
     // This is a basic check.
     const path = require("path");
     const os = require("os");
-    const normalizedPath = path.resolve(filePathOrBuffer);
+
+    // Resolve absolute path and normalize
+    let normalizedPath = path.resolve(filePathOrBuffer);
     const tmpDir = fs.realpathSync(os.tmpdir());
 
-    // Check if path is within tmpDir (or other safe dir)
-    if (!normalizedPath.startsWith(tmpDir) && !normalizedPath.includes("temp_uploads")) {
-      // Log warning but proceed if necessary, or throw
+    // Security Fix: Ensure we are checking the real path to prevent symlink bypass
+    // If the file exists, we resolve its real path. If not, we just check the normalized path.
+    // For existing files, realpathSync is crucial.
+    if (fs.existsSync(normalizedPath)) {
+      normalizedPath = fs.realpathSync(normalizedPath);
+    }
+
+    // Check if path is within tmpDir (strictly starts with tmpDir)
+    // We remove the loose 'temp_uploads' check to prevent path traversal via directory names
+    if (!normalizedPath.startsWith(tmpDir)) {
       console.error(`[Transcription] Illicit path blocked: ${normalizedPath}`);
       throw new Error("Invalid file path for transcription.");
     }

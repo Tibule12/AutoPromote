@@ -10,7 +10,12 @@ import { ToastProvider } from "./components/ToastProvider";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 initSentry();
 root.render(
-  <HashRouter>
+  <HashRouter
+    future={{
+      v7_startTransition: true,
+      v7_relativeSplatPath: true,
+    }}
+  >
     {Sentry ? (
       <Sentry.ErrorBoundary fallback={<div>An error occurred</div>}>
         <ToastProvider>
