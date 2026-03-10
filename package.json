@@ -116,6 +116,9 @@
     "prettier": "^3.7.4",
     "supertest": "^7.1.4"
   },
+  "overrides": {
+    "@tootallnate/once": "3.0.1"
+  },
   "eslintConfig": {
     "root": true,
     "extends": [
