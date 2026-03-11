@@ -6,6 +6,7 @@ import { HashRouter } from "react-router-dom";
 import "./App.css";
 import App from "./App";
 import { ToastProvider } from "./components/ToastProvider";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 initSentry();
@@ -18,14 +19,18 @@ root.render(
   >
     {Sentry ? (
       <Sentry.ErrorBoundary fallback={<div>An error occurred</div>}>
+        <AuthProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </AuthProvider>
+      </Sentry.ErrorBoundary>
+    ) : (
+      <AuthProvider>
         <ToastProvider>
           <App />
         </ToastProvider>
-      </Sentry.ErrorBoundary>
-    ) : (
-      <ToastProvider>
-        <App />
-      </ToastProvider>
+      </AuthProvider>
     )}
   </HashRouter>
 );

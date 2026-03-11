@@ -1,6 +1,10 @@
 [
   {
-    "origin": ["*"],
+    "origin": [
+      "https://autopromote.org",
+      "https://www.autopromote.org",
+      "https://Tibule12.github.io"
+    ],
     "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     "maxAgeSeconds": 3600,
     "responseHeader": [

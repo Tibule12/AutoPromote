@@ -21,7 +21,7 @@ async function recreateAdminUser() {
   const adminName = "System Administrator";
 
   console.log(`Attempting to recreate admin user: ${adminEmail}`);
-  console.log(`Password will be set to: ${adminPassword}`);
+  console.log(`Password will be set to: [REDACTED]`);
 
   // First, try to delete the existing user
   try {
@@ -107,7 +107,7 @@ async function recreateAdminUser() {
 
     console.log(`\n✅ Admin user recreated successfully!`);
     console.log(`Email: ${adminEmail}`);
-    console.log(`Password: ${adminPassword}`);
+    console.log(`Password: [REDACTED]`);
     console.log(`UID: ${newUserRecord.uid}`);
 
     return true;

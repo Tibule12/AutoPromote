@@ -4,6 +4,7 @@ import FloatingActions from "./components/FloatingActions";
 import { auth } from "./firebaseClient";
 import toast from "react-hot-toast";
 import { API_ENDPOINTS } from "./config";
+import { isSafeRedirectUrl } from "./utils/security";
 
 function useQuery() {
   if (typeof window === "undefined") return new URLSearchParams("");
@@ -119,6 +120,10 @@ export default function LiveWatch({ liveId: propLiveId, token: propToken, onExit
               });
               const body = await resp.json();
               if (resp.ok && body.ok && body.url) {
+                if (!isSafeRedirectUrl(body.url)) {
+                  alert("Untrusted redirect URL blocked for security.");
+                  return;
+                }
                 // redirect to live with token
                 window.location.href = body.url;
               } else {
@@ -347,6 +352,10 @@ export default function LiveWatch({ liveId: propLiveId, token: propToken, onExit
               const base = window.location.origin + window.location.pathname;
               window.history.replaceState({}, document.title, base);
             } catch (_) {}
+            if (!isSafeRedirectUrl(body.url)) {
+              alert("Untrusted redirect URL blocked for security.");
+              return;
+            }
             window.location.href = body.url;
             return;
           }

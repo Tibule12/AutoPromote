@@ -5,6 +5,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { toast } from "react-hot-toast";
 import { API_ENDPOINTS } from "../config";
+import { isSafeRedirectUrl } from "../utils/security";
 import "./MissionControlPanel.css";
 import UserLiveLogViewer from "../components/UserLiveLogViewer";
 
@@ -326,6 +327,10 @@ const MissionControlPanel = () => {
           toast.success("CONNECTING TO MISSION CONTROL...", { icon: "🔗" });
 
           setTimeout(() => {
+            if (!isSafeRedirectUrl(data.approvalUrl)) {
+              toast.error("Untrusted payment redirect URL blocked.");
+              return;
+            }
             window.location.href = data.approvalUrl;
           }, 1500);
           return;

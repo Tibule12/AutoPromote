@@ -14,20 +14,23 @@ service firebase.storage {
     }
 
     function isBackend() {
-      return request.auth == null;
+      // Backend calls must use a service account (authenticated), not unauthenticated requests
+      return request.auth != null &&
+        request.auth.token.firebase != null &&
+        request.auth.token.firebase.sign_in_provider == 'service_account';
     }
 
     // Allow users to upload to temp_sources (e.g. Clip Studio uploads)
     match /temp_sources/{userId}/{allPaths=**} {
-      allow read: if true; // Allow media server (or anyone with public link) to read for processing
+      allow read: if request.auth != null; // Authenticated users only
       allow write: if request.auth != null && request.auth.uid == userId
         && request.resource.size < 500 * 1024 * 1024; // 500MB limit
     }
 
     // Allow all authenticated users to read and write files
     match /{allPaths=**} {
-      allow read: if request.auth != null || isBackend();
-      allow write: if (request.auth != null || isBackend())
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
         && request.resource.size < 50 * 1024 * 1024 // 50MB limit
         // PREVENT UPLOAD IF QUOTA EXCEEDED
         // Check if doc exists first to avoid error, then check property

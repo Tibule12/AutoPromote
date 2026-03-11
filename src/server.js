@@ -1011,7 +1011,7 @@ try {
   app.use(microCache);
 
   // CORS configuration - restrict origins to specific domains for security
-  // Support env override via CORS_ALLOWED_ORIGINS (comma-separated) and CORS_ALLOW_ALL
+  // Support env override via CORS_ALLOWED_ORIGINS (comma-separated)
   const defaultAllowedOrigins = [
     // Canonical custom domain (www + apex)
     "https://www.autopromote.org",
@@ -1023,28 +1023,21 @@ try {
     .map(s => s.trim())
     .filter(Boolean);
   const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...envAllowed]));
-  const allowAll = process.env.CORS_ALLOW_ALL === "true";
 
   const corsOptions = {
     origin: function (origin, callback) {
       try {
-        logger.debug("[cors.origin] origin:", origin, "allowAll:", allowAll);
+        logger.debug("[cors.origin] origin:", origin);
       } catch (e) {}
       // Allow requests with no origin (like mobile apps or curl requests).
       if (!origin) return callback(null, true);
-      // In development or when allowAll is set, also treat the string 'null' as no-origin and allow it.
-      if (origin === "null" && (allowAll || process.env.NODE_ENV === "development"))
-        return callback(null, true);
-      if (allowAll || allowedOrigins.includes(origin)) {
+      if (allowedOrigins.includes(origin)) {
         try {
           logger.debug("[cors.origin] -> allowed");
         } catch (e) {}
         return callback(null, true);
       }
       logger.warn("[cors.origin] -> blocked", origin);
-      try {
-        logger.warn("[cors.origin] -> stack", new Error("origin-blocked").stack);
-      } catch (e) {}
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
@@ -1060,12 +1053,7 @@ try {
     credentials: true,
     optionsSuccessStatus: 204,
   };
-  logger.debug(
-    "[diagnostic] CORS allowAll:",
-    allowAll,
-    "allowedOrigins:",
-    allowedOrigins.join(",")
-  );
+  logger.debug("[diagnostic] CORS allowedOrigins:", allowedOrigins.join(","));
 
   // Proactively set Vary header for caches and handle preflight explicitly
   app.use((req, res, next) => {
@@ -1305,10 +1293,13 @@ try {
   } catch (e) {
     console.warn("aggregateStatusRoutes mount failed:", e.message);
   }
-  try {
-    app.use("/api", adminTestRoutes); // Add admin test routes
-  } catch (e) {
-    console.warn("Admin test routes mount failed:", e.message);
+  // Only mount admin test routes in non-production environments
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      app.use("/api", adminTestRoutes);
+    } catch (e) {
+      console.warn("Admin test routes mount failed:", e.message);
+    }
   }
   // Mount Captions routes
   try {

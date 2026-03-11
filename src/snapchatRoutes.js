@@ -1095,9 +1095,9 @@ router.normalizeScopes = normalizeScopes;
 
 module.exports = router;
 
-// Debug probe (only when DEBUG_SNAPCHAT_OAUTH=true)
+// Debug probe (only in non-production when DEBUG_SNAPCHAT_OAUTH=true)
 // Performs a server-side GET to the Snapchat authorize endpoint to capture status and a short body
-if (DEBUG_SNAPCHAT_OAUTH) {
+if (DEBUG_SNAPCHAT_OAUTH && process.env.NODE_ENV !== "production") {
   router.get("/_debug/authorize_probe", async (req, res) => {
     try {
       const cfg = activeConfig();
@@ -1125,9 +1125,9 @@ if (DEBUG_SNAPCHAT_OAUTH) {
   });
 }
 
-// Public debug probe (guarded by environment) to inspect provider responses
+// Public debug probe (guarded by environment, blocked in production)
 // Set SNAPCHAT_DEBUG_ALLOW=true in the environment to enable.
-if (process.env.SNAPCHAT_DEBUG_ALLOW === "true") {
+if (process.env.SNAPCHAT_DEBUG_ALLOW === "true" && process.env.NODE_ENV !== "production") {
   router.get("/_debug/authorize_probe_public", async (req, res) => {
     try {
       const cfg = activeConfig();

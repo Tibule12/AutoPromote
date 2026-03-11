@@ -81,7 +81,7 @@ async function setupAdminUser() {
 
     console.log("\n✅ Admin setup complete!");
     console.log("Admin Email:", adminEmail);
-    console.log("Admin Password:", adminPassword);
+    console.log("Admin Password: [REDACTED]");
     console.log("Admin UID:", userRecord.uid);
     console.log("Admin Document Path:", `admins/${userRecord.uid}`);
 

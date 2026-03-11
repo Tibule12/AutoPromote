@@ -58,10 +58,10 @@ async function createTestAdmin() {
 
     console.log("\n🎉 Test admin user created successfully!");
     console.log(`Email: ${adminEmail}`);
-    console.log(`Password: ${adminPassword}`);
+    console.log(`Password: [REDACTED]`);
     console.log(`UID: ${userRecord.uid}`);
 
-    return { email: adminEmail, password: adminPassword, uid: userRecord.uid };
+    return { email: adminEmail, uid: userRecord.uid };
   } catch (error) {
     console.error("❌ Failed to create admin user:", error.message);
     return null;

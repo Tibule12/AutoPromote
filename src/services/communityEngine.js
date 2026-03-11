@@ -363,6 +363,42 @@ async function confirmTaskCompletion(workerUserId, proofId, proofUrl) {
     if (!cDoc.exists) throw new Error("Campaign missing");
     const campaign = cDoc.data();
 
+    // Validate proof URL domain matches the target platform
+    const platformDomains = {
+      tiktok: ["tiktok.com"],
+      instagram: ["instagram.com"],
+      youtube: ["youtube.com", "youtu.be"],
+      twitter: ["twitter.com", "x.com"],
+      facebook: ["facebook.com", "fb.watch"],
+      reddit: ["reddit.com"],
+      linkedin: ["linkedin.com"],
+      pinterest: ["pinterest.com"],
+      discord: ["discord.com", "cdn.discordapp.com"],
+      snapchat: ["snapchat.com"],
+      spotify: ["spotify.com"],
+      telegram: ["telegram.org", "t.me"],
+    };
+    const expectedDomains = platformDomains[campaign.platform] || [];
+    if (expectedDomains.length > 0) {
+      const proofHostMatch = expectedDomains.some(d => proofUrl.includes(d));
+      // Also allow common image hosting for screenshot evidence
+      const screenshotHosts = [
+        "imgur.com",
+        "i.imgur.com",
+        "ibb.co",
+        "postimg.cc",
+        "prnt.sc",
+        "gyazo.com",
+        "firebasestorage.googleapis.com",
+      ];
+      const isScreenshot = screenshotHosts.some(d => proofUrl.includes(d));
+      if (!proofHostMatch && !isScreenshot) {
+        throw new Error(
+          `Proof URL must be from ${campaign.platform} or a recognized screenshot host. Got: ${new URL(proofUrl).hostname}`
+        );
+      }
+    }
+
     // CREDIT TRANSFER
     const workerRef = db.collection("users").doc(workerUserId);
 

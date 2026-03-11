@@ -6,7 +6,8 @@ const { createClient } = require("pexels");
 const authMiddleware = require("../authMiddleware");
 const { chatCompletions } = require("../services/openaiClient");
 
-const MEDIA_WORKER_URL = process.env.MEDIA_WORKER_URL || "http://localhost:8000";
+const MEDIA_WORKER_URL =
+  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 
 const pexels = process.env.PEXELS_API_KEY ? createClient(process.env.PEXELS_API_KEY) : null;
 
@@ -139,26 +140,16 @@ router.post("/generate", async (req, res) => {
       res.setHeader("Content-Disposition", 'attachment; filename="generated_video.mp4"');
       response.data.pipe(res);
     } catch (workerError) {
-      console.warn(
-        "Python Worker Failed/Unreachable. Using Fallback Simulation.",
-        workerError.message
-      );
+      console.error("[AI Video] Worker unavailable:", workerError.message);
 
-      // FALLBACK: Redirect to a stock video so the user flow completes
-      // In a real production app we would return an error, but for "End to End" polish without the heavy worker,
-      // we provide a result.
-      const stockFallback =
-        "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4";
-
-      // If client accepts JSON (some might), we could send JSON, but frontend expects BLOB/Stream.
-      // We will fetch the stock video and pipe it.
-      const fetch = (await import("node-fetch")).default;
-      const vidRes = await fetch(stockFallback);
-      if (!vidRes.ok) throw new Error("Fallback video unreachable");
-
-      res.setHeader("Content-Type", "video/mp4");
-      res.setHeader("Content-Disposition", 'attachment; filename="simulated_video.mp4"');
-      vidRes.body.pipe(res);
+      // Return a clear error instead of a fake/unrelated video
+      if (!res.headersSent) {
+        return res.status(503).json({
+          error:
+            "Video generation is temporarily unavailable. Our rendering service is offline. Please try again later or use the script to create your video manually.",
+          scripts: enrichedScenes.map(s => s.text),
+        });
+      }
     }
   } catch (error) {
     console.error("Idea Generation Failed:", error.message);

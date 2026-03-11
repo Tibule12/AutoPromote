@@ -108,18 +108,31 @@ async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUr
 }
 
 // Subscription plans configuration
-// Mirrors billingService logic somewhat, but ensures UI visibility
+// Mirrors billingService logic — keep in sync with TIERS in billingService.js
 const SUBSCRIPTION_PLANS = {
   free: {
     id: "free",
     name: "Free",
     price: 0,
     features: {
-      uploads: 5,
+      uploads: 3,
       platformLimit: 1, // Single platform
       wolfHuntTasks: 5, // Daily tasks limit (earn credits)
       analytics: "Basic",
       support: "Community",
+    },
+  },
+  basic: {
+    id: "basic",
+    name: "Basic",
+    price: 29,
+    paypalPlanId: process.env.PAYPAL_BASIC_PLAN_ID,
+    features: {
+      uploads: 30,
+      platformLimit: 3, // Multi-platform
+      wolfHuntTasks: 15,
+      analytics: "Standard",
+      support: "Email",
     },
   },
   premium: {
@@ -154,7 +167,7 @@ const SUBSCRIPTION_PLANS = {
     price: 99.99,
     paypalPlanId: process.env.PAYPAL_ENTERPRISE_PLAN_ID,
     features: {
-      uploads: 200,
+      uploads: "unlimited",
       platformLimit: "Unlimited",
       wolfHuntTasks: 500, // Maximum earning capacity
       analytics: "Enterprise",

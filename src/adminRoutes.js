@@ -103,33 +103,34 @@ router.get("/overview", authMiddleware, adminOnly, async (req, res) => {
     const usersSnapshot = await db.collection("users").get();
     const totalUsers = usersSnapshot.size;
 
-    const usersWithStats = await Promise.all(
-      usersSnapshot.docs.map(async userDoc => {
-        const userData = userDoc.data();
-        const contentSnapshot = await db
-          .collection("content")
-          .where("userId", "==", userDoc.id)
-          .get();
+    // Fetch ALL content in one query instead of N+1 per-user queries
+    const contentSnapshot = await db.collection("content").get();
+    // Build a stats map keyed by userId
+    const statsByUser = {};
+    contentSnapshot.forEach(doc => {
+      const data = doc.data();
+      const uid = data.userId;
+      if (!uid) return;
+      if (!statsByUser[uid])
+        statsByUser[uid] = { content_count: 0, total_views: 0, total_revenue: 0 };
+      statsByUser[uid].content_count += 1;
+      statsByUser[uid].total_views += data.views || 0;
+      statsByUser[uid].total_revenue += data.revenue || 0;
+    });
 
-        const contentStats = contentSnapshot.docs.reduce(
-          (stats, doc) => {
-            const content = doc.data();
-            return {
-              content_count: stats.content_count + 1,
-              total_views: stats.total_views + (content.views || 0),
-              total_revenue: stats.total_revenue + (content.revenue || 0),
-            };
-          },
-          { content_count: 0, total_views: 0, total_revenue: 0 }
-        );
-
-        return {
-          id: userDoc.id,
-          ...userData,
-          ...contentStats,
-        };
-      })
-    );
+    const usersWithStats = usersSnapshot.docs.map(userDoc => {
+      const userData = userDoc.data();
+      const contentStats = statsByUser[userDoc.id] || {
+        content_count: 0,
+        total_views: 0,
+        total_revenue: 0,
+      };
+      return {
+        id: userDoc.id,
+        ...userData,
+        ...contentStats,
+      };
+    });
 
     res.json({
       total_users: totalUsers,
@@ -146,25 +147,27 @@ router.get("/content", authMiddleware, adminOnly, async (req, res) => {
   try {
     const contentSnapshot = await db.collection("content").orderBy("createdAt", "desc").get();
 
-    const contentWithUsers = await Promise.all(
-      contentSnapshot.docs.map(async doc => {
-        const content = doc.data();
-        const userDoc = await db.collection("users").doc(content.userId).get();
-        const userData = userDoc.data();
+    // Collect unique userIds, then batch-fetch all users in one query
+    const userIds = [...new Set(contentSnapshot.docs.map(d => d.data().userId).filter(Boolean))];
+    const userMap = {};
+    // Firestore 'in' queries support max 30 items per batch
+    for (let i = 0; i < userIds.length; i += 30) {
+      const batch = userIds.slice(i, i + 30);
+      const usersSnap = await db.collection("users").where("__name__", "in", batch).get();
+      usersSnap.forEach(doc => {
+        const d = doc.data();
+        userMap[doc.id] = { id: doc.id, name: d.name, email: d.email };
+      });
+    }
 
-        return {
-          id: doc.id,
-          ...content,
-          user: userData
-            ? {
-                id: userDoc.id,
-                name: userData.name,
-                email: userData.email,
-              }
-            : null,
-        };
-      })
-    );
+    const contentWithUsers = contentSnapshot.docs.map(doc => {
+      const content = doc.data();
+      return {
+        id: doc.id,
+        ...content,
+        user: userMap[content.userId] || null,
+      };
+    });
 
     res.json({ content: contentWithUsers });
   } catch (error) {

@@ -46,8 +46,12 @@ const authMiddleware = async (req, res, next) => {
 
     // E2E bypass: when Playwright sets the x-playwright-e2e header, treat the request as an admin test user
     // This keeps E2E tests deterministic and avoids hard 401s when using short/mocked tokens.
-    // NOTE: allow bypass when test header is present to make CI/Playwright runs reliable
-    if (req.headers && req.headers["x-playwright-e2e"] === "1") {
+    // SECURITY: Only available in non-production environments
+    if (
+      process.env.NODE_ENV !== "production" &&
+      req.headers &&
+      req.headers["x-playwright-e2e"] === "1"
+    ) {
       req.userId = "adminUser";
       req.user = {
         uid: "adminUser",
@@ -67,17 +71,10 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // Allow integration test bypass with test tokens of the form 'test-token-for-{uid}'
-    // SECURED: Restricted to non-production environments or localhost requests (E2E)
-    const isLocalRequest =
-      requestContext.ip &&
-      (requestContext.ip.includes("127.0.0.1") ||
-        requestContext.ip === "::1" ||
-        (requestContext.ip || "").startsWith("::ffff:127.0.0.1"));
+    // SECURITY: Strictly gated to non-production environments only
     if (
-      (process.env.NODE_ENV === "test" ||
-        process.env.NODE_ENV === "development" ||
-        (req.headers && req.headers["x-playwright-e2e"] === "1") ||
-        isLocalRequest) &&
+      process.env.NODE_ENV !== "production" &&
+      (process.env.NODE_ENV === "test" || process.env.NODE_ENV === "development") &&
       typeof token === "string" &&
       token.startsWith("test-token-for-")
     ) {
@@ -294,14 +291,11 @@ const authMiddleware = async (req, res, next) => {
               changed = true;
             }
             if (changed) {
-              await db
-                .collection("users")
-                .doc(decodedToken.uid)
-                .update({
-                  role: ud.role,
-                  isAdmin: ud.isAdmin,
-                  updatedAt: new Date().toISOString(),
-                });
+              await db.collection("users").doc(decodedToken.uid).update({
+                role: ud.role,
+                isAdmin: ud.isAdmin,
+                updatedAt: new Date().toISOString(),
+              });
             }
           }
 

@@ -145,7 +145,14 @@ const IdeaVideoPanel = ({ onPublish }) => {
         }),
       });
 
-      if (!response.ok) throw new Error("Generation failed");
+      if (!response.ok) {
+        let errMsg = "Generation failed";
+        try {
+          const errData = await response.json();
+          if (errData.error) errMsg = errData.error;
+        } catch (_) {}
+        throw new Error(errMsg);
+      }
 
       // Stream the video blob directly (no cloud storage involved)
       const videoBlob = await response.blob();
