@@ -435,56 +435,20 @@ class PromotionService {
 
       const content = { id: contentDoc.id, ...contentDoc.data() };
 
-      // Calculate promotion impact based on platform and budget
-      const platformMultiplier = this.getPlatformMultiplier(schedule.platform);
-      const budgetMultiplier = Math.min(schedule.budget / 1000, 5); // Cap at 5x for $5000 budget
-
-      // Generate realistic metrics based on content type and platform
-      const baseViews = this.calculateBaseViews(content.type, schedule.platform);
-      const actualViews = Math.floor(
-        baseViews * platformMultiplier * budgetMultiplier * (0.8 + Math.random() * 0.4)
-      ); // 80-120% variation
-
-      const engagementRate = this.calculateEngagementRate(content.type, schedule.platform);
-      const actualEngagements = Math.floor(actualViews * engagementRate);
-
-      // Calculate revenue based on views and RPM
-      const rpm = content.target_rpm || 900000; // Revenue per million views
-      const revenue = (actualViews / 1000000) * rpm;
-
-      // Update content with new metrics
-      const updatedContent = {
-        views: (content.views || 0) + actualViews,
-        engagements: (content.engagements || 0) + actualEngagements,
-        revenue: (content.revenue || 0) + revenue,
-        engagementRate:
-          ((content.views || 0) * (content.engagementRate || 0) + actualViews * engagementRate) /
-          ((content.views || 0) + actualViews),
+      // Update content status — real metrics will come from platform APIs after posting
+      await db.collection("content").doc(schedule.contentId).update({
         lastPromotionDate: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      };
+      });
 
-      await db.collection("content").doc(schedule.contentId).update(updatedContent);
-
-      // Record promotion execution
+      // Record promotion execution (metrics populated later from real platform data)
       const executionRef = db.collection("promotion_executions").doc();
       await executionRef.set({
         scheduleId,
         contentId: schedule.contentId,
         platform: schedule.platform,
         executedAt: new Date().toISOString(),
-        viewsGenerated: actualViews,
-        engagementsGenerated: actualEngagements,
-        revenueGenerated: revenue,
-        cost: schedule.budget,
-        metrics: {
-          views: actualViews,
-          engagements: actualEngagements,
-          engagementRate,
-          revenue,
-          costPerView: schedule.budget / actualViews,
-          roi: revenue / schedule.budget,
-        },
+        status: "posted",
       });
 
       // TRIGGER REAL PLATFORM POSTING
@@ -505,27 +469,15 @@ class PromotionService {
           console.error("⚠️ Failed to enqueue real platform task:", err.message);
       }
 
-      // PayPal and Monetization logic skipped due to simulation mode
       console.log(
-        `✅ Executed promotion for content ${schedule.contentId}: ${actualViews} views, $${revenue.toFixed(2)} revenue (Simulated + Real Task Enqueued)`
+        `✅ Executed promotion for content ${schedule.contentId} on ${schedule.platform} — real platform task enqueued`
       );
 
       return {
         scheduleId,
         contentId: schedule.contentId,
-        viewsGenerated: actualViews,
-        engagementsGenerated: actualEngagements,
-        revenueGenerated: revenue,
-        paypalOrderId: "skipped",
-        paypalCaptureId: "skipped",
-        metrics: {
-          views: actualViews,
-          engagements: actualEngagements,
-          engagementRate,
-          revenue,
-          costPerView: schedule.budget / actualViews,
-          roi: revenue / schedule.budget,
-        },
+        status: "posted",
+        platform: schedule.platform,
       };
     } catch (error) {
       console.error("Error executing promotion:", error);

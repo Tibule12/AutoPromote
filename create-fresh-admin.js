@@ -158,7 +158,7 @@ async function createFreshAdmin() {
     console.log("\n✅ Fresh admin user created successfully");
     console.log("Use these credentials to log in:");
     console.log(`Email: ${adminEmail}`);
-    console.log(`Password: ${adminPassword}`);
+    console.log(`Password: [REDACTED]`);
 
     return uid;
   } catch (error) {

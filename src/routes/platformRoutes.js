@@ -6,6 +6,7 @@ const { db } = require("../firebaseAdmin");
 const { encryptToken } = require("../services/secretVault");
 const { tokensFromDoc } = require("../services/connectionTokenUtils");
 const { safeFetch } = require("../utils/ssrfGuard");
+const { checkConnectionLimit } = require("../services/billingService");
 const logger = require("../utils/logger");
 // Engines to warm-up/connect on new platform connections
 const smartDistributionEngine = require("../services/smartDistributionEngine");
@@ -726,6 +727,22 @@ router.post("/:platform/auth/simulate", authMiddleware, platformWriteLimiter, as
   try {
     const uid = req.userId || req.user?.uid;
     if (!uid) return res.status(400).json({ ok: false, error: "missing_user" });
+    // Enforce connection limit before allowing new platform connection
+    try {
+      await checkConnectionLimit(uid, platform);
+    } catch (limitErr) {
+      if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED") {
+        return res
+          .status(403)
+          .json({
+            ok: false,
+            error: "connection_limit_exceeded",
+            message: limitErr.message,
+            context: limitErr.context,
+          });
+      }
+      throw limitErr;
+    }
     const userRef = db.collection("users").doc(uid);
     const now = new Date().toISOString();
     const fakeMeta = Object.assign(
@@ -853,6 +870,14 @@ router.get("/reddit/auth/callback", platformPublicLimiter, async (req, res) => {
     }
     if (!uid && state && state.split && state.split(":")[0]) uid = state.split(":")[0];
     if (uid && uid !== "anon") {
+      // Enforce connection limit
+      try {
+        await checkConnectionLimit(uid, platform);
+      } catch (limitErr) {
+        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
+          return sendPlain(res, 403, limitErr.message);
+        throw limitErr;
+      }
       const userRef = db.collection("users").doc(uid);
       const now = new Date().toISOString();
       await userRef
@@ -982,6 +1007,14 @@ router.get("/discord/auth/callback", platformPublicLimiter, async (req, res) => 
     // If state was stored with a :popup suffix, normalize it when doing legacy parsing
     if (!uid && state && state.split && state.split(":")[0]) uid = state.split(":")[0];
     if (uid && uid !== "anon") {
+      // Enforce connection limit
+      try {
+        await checkConnectionLimit(uid, platform);
+      } catch (limitErr) {
+        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
+          return sendPlain(res, 403, limitErr.message);
+        throw limitErr;
+      }
       const userRef = db.collection("users").doc(uid);
       const now = new Date().toISOString();
       await userRef
@@ -1255,6 +1288,14 @@ router.get("/spotify/auth/callback", platformPublicLimiter, async (req, res) => 
     if (!uid && state && state.split && state.split(":")[0]) uid = state.split(":")[0];
 
     if (uid && uid !== "anon") {
+      // Enforce connection limit
+      try {
+        await checkConnectionLimit(uid, platform);
+      } catch (limitErr) {
+        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
+          return sendPlain(res, 403, limitErr.message);
+        throw limitErr;
+      }
       const userRef = db.collection("users").doc(uid);
       const now = new Date().toISOString();
       await userRef
@@ -1429,6 +1470,14 @@ router.get("/linkedin/auth/callback", platformPublicLimiter, async (req, res) =>
     }
     if (!uid && state && state.split && state.split(":")[0]) uid = state.split(":")[0];
     if (uid && uid !== "anon") {
+      // Enforce connection limit
+      try {
+        await checkConnectionLimit(uid, platform);
+      } catch (limitErr) {
+        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
+          return sendPlain(res, 403, limitErr.message);
+        throw limitErr;
+      }
       const userRef = db.collection("users").doc(uid);
       const now = new Date().toISOString();
       await userRef
@@ -1590,6 +1639,14 @@ router.get("/pinterest/auth/callback", platformPublicLimiter, async (req, res) =
     }
     if (!uid && state && state.split && state.split(":")[0]) uid = state.split(":")[0];
     if (uid && uid !== "anon") {
+      // Enforce connection limit
+      try {
+        await checkConnectionLimit(uid, platform);
+      } catch (limitErr) {
+        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
+          return sendPlain(res, 403, limitErr.message);
+        throw limitErr;
+      }
       const userRef = db.collection("users").doc(uid);
       const now = new Date().toISOString();
       await userRef

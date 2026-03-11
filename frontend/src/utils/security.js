@@ -35,3 +35,28 @@ export function sanitizeUrl(url) {
 
   return "";
 }
+
+// Validate redirect URLs to prevent open redirect attacks.
+// Only allows HTTPS URLs on trusted domains, or same-origin relative paths.
+const TRUSTED_REDIRECT_HOSTS = [
+  "autopromote.org",
+  "www.autopromote.org",
+  "tibule12.github.io",
+  "paypal.com",
+  "www.paypal.com",
+  "www.sandbox.paypal.com",
+];
+
+export function isSafeRedirectUrl(url) {
+  if (!url) return false;
+  // Allow relative paths (same-origin navigation)
+  if (url.startsWith("/") && !url.startsWith("//")) return true;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return false;
+    const host = parsed.hostname.toLowerCase();
+    return TRUSTED_REDIRECT_HOSTS.some(trusted => host === trusted || host.endsWith("." + trusted));
+  } catch {
+    return false;
+  }
+}

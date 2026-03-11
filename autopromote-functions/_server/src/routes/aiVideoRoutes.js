@@ -4,7 +4,7 @@ const admin = require("firebase-admin");
 const axios = require("axios");
 const { createClient } = require("pexels");
 const authMiddleware = require("../authMiddleware");
-const MEDIA_WORKER_URL = process.env.MEDIA_WORKER_URL || "http://localhost:8000";
+const MEDIA_WORKER_URL = process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 
 const pexels = process.env.PEXELS_API_KEY ? createClient(process.env.PEXELS_API_KEY) : null;
 

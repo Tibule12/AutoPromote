@@ -131,6 +131,14 @@ function validateBody(schema) {
 
 // Simple in-memory rate limiter (per user, per route)
 const rateLimitMap = new Map();
+// Periodic cleanup: evict expired entries every 2 minutes to prevent unbounded growth
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitMap) {
+    if (now - entry.start > 120000) rateLimitMap.delete(key);
+  }
+}, 120000).unref();
+
 function rateLimitMiddleware(limit = 10, windowMs = 60000) {
   return (req, res, next) => {
     const userId = req.userId || "anonymous";
@@ -234,8 +242,6 @@ router.post(
         variant_strategy,
         protocol7, // Protocol 7
       } = req.body;
-
-
 
       // --- OPTIMIZATION: Services are now pre-loaded ---
       // Removed lazy-load blocks to improve per-request performance.
@@ -768,7 +774,8 @@ router.get("/my-promotion-schedules", authMiddleware, async (req, res) => {
 // GET /api/content/leaderboard - simple top users by points (alias for rewards leaderboard for backward compatibility)
 router.get("/leaderboard", authMiddleware, async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 100;
+    const MAX_LEADERBOARD_LIMIT = 100;
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 25, 1), MAX_LEADERBOARD_LIMIT);
     const snapshot = await db
       .collection("user_rewards")
       .orderBy("totalPointsEarned", "desc")
@@ -887,15 +894,29 @@ router.get("/:id/analytics", authMiddleware, async (req, res) => {
 // POST /admin/process-creator-payout/:contentId - Admin process payout
 router.post("/admin/process-creator-payout/:contentId", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    if (token === "test-token-for-adminUser") {
-      req.user = { role: "admin", isAdmin: true, uid: "adminUser123" };
-    }
     if (!req.user || req.user.role !== "admin") {
       return res.status(403).json({ error: "Admin access required" });
     }
     const contentId = req.params.contentId;
     const { recipientEmail, payoutAmount } = req.body;
+
+    // Validate payout inputs
+    if (
+      !recipientEmail ||
+      typeof recipientEmail !== "string" ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)
+    ) {
+      return res.status(400).json({ error: "Valid recipientEmail is required" });
+    }
+    if (
+      payoutAmount == null ||
+      typeof payoutAmount !== "number" ||
+      payoutAmount <= 0 ||
+      payoutAmount > 10000
+    ) {
+      return res.status(400).json({ error: "payoutAmount must be a positive number up to 10000" });
+    }
+
     const contentRef = db.collection("content").doc(contentId);
     const contentDoc = await contentRef.get();
     if (!contentDoc.exists) {
@@ -945,10 +966,6 @@ router.post("/admin/process-creator-payout/:contentId", authMiddleware, async (r
 // POST /admin/moderate-content/:contentId - Admin moderate content
 router.post("/admin/moderate-content/:contentId", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    if (token === "test-token-for-adminUser") {
-      req.user = { role: "admin", isAdmin: true, uid: "adminUser123" };
-    }
     if (!req.user || req.user.role !== "admin") {
       return res.status(403).json({ error: "Admin access required" });
     }

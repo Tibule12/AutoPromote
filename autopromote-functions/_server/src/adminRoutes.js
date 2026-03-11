@@ -146,25 +146,27 @@ router.get("/content", authMiddleware, adminOnly, async (req, res) => {
   try {
     const contentSnapshot = await db.collection("content").orderBy("createdAt", "desc").get();
 
-    const contentWithUsers = await Promise.all(
-      contentSnapshot.docs.map(async doc => {
-        const content = doc.data();
-        const userDoc = await db.collection("users").doc(content.userId).get();
-        const userData = userDoc.data();
+    // Collect unique userIds, then batch-fetch all users in one query
+    const userIds = [...new Set(contentSnapshot.docs.map(d => d.data().userId).filter(Boolean))];
+    const userMap = {};
+    // Firestore 'in' queries support max 30 items per batch
+    for (let i = 0; i < userIds.length; i += 30) {
+      const batch = userIds.slice(i, i + 30);
+      const usersSnap = await db.collection("users").where("__name__", "in", batch).get();
+      usersSnap.forEach(doc => {
+        const d = doc.data();
+        userMap[doc.id] = { id: doc.id, name: d.name, email: d.email };
+      });
+    }
 
-        return {
-          id: doc.id,
-          ...content,
-          user: userData
-            ? {
-                id: userDoc.id,
-                name: userData.name,
-                email: userData.email,
-              }
-            : null,
-        };
-      })
-    );
+    const contentWithUsers = contentSnapshot.docs.map(doc => {
+      const content = doc.data();
+      return {
+        id: doc.id,
+        ...content,
+        user: userMap[content.userId] || null,
+      };
+    });
 
     res.json({ content: contentWithUsers });
   } catch (error) {

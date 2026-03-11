@@ -1023,7 +1023,8 @@ try {
     .map(s => s.trim())
     .filter(Boolean);
   const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...envAllowed]));
-  const allowAll = process.env.CORS_ALLOW_ALL === "true";
+  // SECURITY: CORS_ALLOW_ALL only honoured in non-production environments
+  const allowAll = process.env.CORS_ALLOW_ALL === "true" && process.env.NODE_ENV !== "production";
 
   const corsOptions = {
     origin: function (origin, callback) {

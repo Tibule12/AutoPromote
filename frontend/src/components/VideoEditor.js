@@ -320,7 +320,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       const auth = getAuth();
       const user = auth.currentUser;
       if (!user) throw new Error("Please log in.");
-      const token = await user.getIdToken();
+      let token = await user.getIdToken();
 
       // FIX: Ensure videoSrc is a Real URL (Firebase/Cloud), not a Local Blob.
       // If it's a blob, we must upload it first.
@@ -395,9 +395,23 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           await new Promise(r => setTimeout(r, 2000));
           attempts++;
 
-          const statusRes = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
+          let statusRes = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
+
+          // Handle Token Expiry (401)
+          if (statusRes.status === 401) {
+            console.warn("Token expired during viral render polling, refreshing...");
+            try {
+              token = await user.getIdToken(true);
+              statusRes = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+            } catch (err) {
+              console.error("Token refresh failed:", err);
+              throw new Error("Authentication session expired.");
+            }
+          }
 
           if (!statusRes.ok) continue;
           const statusData = await statusRes.json();

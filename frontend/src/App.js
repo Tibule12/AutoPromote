@@ -1,6 +1,6 @@
 // Trigger CI/CD: minor change for deployment
 /* eslint-disable no-console, no-unused-vars */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import DojoPage from "./DojoPage";
 import "./App.css";
@@ -39,37 +39,45 @@ import { Sentry } from "./sentryClient";
 import TestSentryButton from "./components/TestSentryButton";
 import Footer from "./components/Footer";
 
-// Static Pages
-import About from "./About";
-import Blog from "./Blog";
-import Careers from "./Careers";
-import Contact from "./Contact";
-import Cookies from "./Cookies";
-import Docs from "./Docs";
-import Pricing from "./Pricing";
-import Support from "./Support";
-import Accessibility from "./Accessibility";
-import Features from "./Features";
-import Integrations from "./Integrations";
-import Metrics from "./Metrics";
-import Changelog from "./Changelog";
+// Static Pages — lazy loaded for bundle splitting
+const About = lazy(() => import("./About"));
+const Blog = lazy(() => import("./Blog"));
+const Careers = lazy(() => import("./Careers"));
+const Contact = lazy(() => import("./Contact"));
+const Cookies = lazy(() => import("./Cookies"));
+const Docs = lazy(() => import("./Docs"));
+const Pricing = lazy(() => import("./Pricing"));
+const Support = lazy(() => import("./Support"));
+const Accessibility = lazy(() => import("./Accessibility"));
+const Features = lazy(() => import("./Features"));
+const Integrations = lazy(() => import("./Integrations"));
+const Metrics = lazy(() => import("./Metrics"));
+const Changelog = lazy(() => import("./Changelog"));
 // CommunityPage removed
-import HelpCenter from "./HelpCenter";
-import ApiDocs from "./ApiDocs";
-import Partners from "./Partners";
-import Security from "./Security";
-import Terms from "./Terms";
-import Privacy from "./Privacy";
-import LiveLanding from "./LiveLanding";
-import LiveWatch from "./LiveWatch";
-import StreamerDashboard from "./StreamerDashboard";
-import EngagementMarketplace from "./EngagementMarketplace";
+const HelpCenter = lazy(() => import("./HelpCenter"));
+const ApiDocs = lazy(() => import("./ApiDocs"));
+const Partners = lazy(() => import("./Partners"));
+const Security = lazy(() => import("./Security"));
+const Terms = lazy(() => import("./Terms"));
+const Privacy = lazy(() => import("./Privacy"));
+const LiveLanding = lazy(() => import("./LiveLanding"));
+const LiveWatch = lazy(() => import("./LiveWatch"));
+const StreamerDashboard = lazy(() => import("./StreamerDashboard"));
+const EngagementMarketplace = lazy(() => import("./EngagementMarketplace"));
+const AdminDashboard = lazy(() => import("./AdminDashboard"));
 
 import WelcomePage from "./WelcomePage";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
-import AdminDashboard from "./AdminDashboard";
 import UserDashboard from "./UserDashboard_full";
+
+const PageLoader = () => (
+  <div
+    style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}
+  >
+    <div style={{ textAlign: "center", color: "#888" }}>Loading...</div>
+  </div>
+);
 
 function App() {
   const [user, setUser] = useState(null);
@@ -1106,307 +1114,311 @@ function App() {
 
   return (
     <div className="App">
-      <Routes>
-        {/* Static Content Pages */}
-        <Route path="/about" element={<About />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/careers" element={<Careers />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/cookies" element={<Cookies />} />
-        <Route path="/docs" element={<Docs />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/support" element={<Support />} />
-        <Route path="/accessibility" element={<Accessibility />} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Static Content Pages */}
+          <Route path="/about" element={<About />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/cookies" element={<Cookies />} />
+          <Route path="/docs" element={<Docs />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/accessibility" element={<Accessibility />} />
 
-        {/* GAMIFICATION / DOJO */}
-        <Route path="/dojo/trend-analyzer" element={<DojoPage />} />
+          {/* GAMIFICATION / DOJO */}
+          <Route path="/dojo/trend-analyzer" element={<DojoPage />} />
 
-        <Route path="/features" element={<Features />} />
-        <Route path="/integrations" element={<Integrations />} />
-        <Route path="/metrics" element={<Metrics />} />
-        <Route path="/changelog" element={<Changelog />} />
-        {/* CommunityPage removed */}
-        <Route path="/help" element={<HelpCenter />} />
-        <Route path="/api-docs" element={<ApiDocs />} />
-        <Route path="/partners" element={<Partners />} />
-        <Route path="/security" element={<Security />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/integrations" element={<Integrations />} />
+          <Route path="/metrics" element={<Metrics />} />
+          <Route path="/changelog" element={<Changelog />} />
+          {/* CommunityPage removed */}
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/api-docs" element={<ApiDocs />} />
+          <Route path="/partners" element={<Partners />} />
+          <Route path="/security" element={<Security />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
 
-        {/* Live Streaming Pages */}
-        <Route path="/live" element={<LiveLanding />} />
-        <Route path="/live/watch" element={<LiveWatch />} />
-        <Route path="/streamer" element={<StreamerDashboard />} />
-        <Route path="/marketplace" element={<EngagementMarketplace />} />
+          {/* Live Streaming Pages */}
+          <Route path="/live" element={<LiveLanding />} />
+          <Route path="/live/watch" element={<LiveWatch />} />
+          <Route path="/streamer" element={<StreamerDashboard />} />
+          <Route path="/marketplace" element={<EngagementMarketplace />} />
 
-        {/* Main Application Logic (Welcome / Auth / Dashboard) */}
-        <Route
-          path="*"
-          element={
-            <>
-              {/* Terms Modal */}
-              {showTermsModal && (
-                <div
-                  style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100vw",
-                    height: "100vh",
-                    background: "rgba(0,0,0,0.5)",
-                    zIndex: 10000,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
+          {/* Main Application Logic (Welcome / Auth / Dashboard) */}
+          <Route
+            path="*"
+            element={
+              <>
+                {/* Terms Modal */}
+                {showTermsModal && (
                   <div
                     style={{
-                      background: "#fff",
-                      borderRadius: 16,
-                      boxShadow: "0 12px 36px rgba(0,0,0,0.2)",
-                      padding: "24px 22px",
-                      maxWidth: 560,
-                      width: "90%",
+                      position: "fixed",
+                      top: 0,
+                      left: 0,
+                      width: "100vw",
+                      height: "100vh",
+                      background: "rgba(0,0,0,0.5)",
+                      zIndex: 10000,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    <h3 style={{ marginTop: 0, marginBottom: 8 }}>Accept Terms of Service</h3>
-                    <p style={{ marginTop: 0, color: "#444" }}>
-                      Please accept the latest Terms of Service
-                      {requiredTermsVersion ? ` (${requiredTermsVersion})` : ""} to continue.
-                    </p>
-                    <div style={{ display: "flex", gap: 12, marginTop: 16, alignItems: "center" }}>
-                      <button
-                        onClick={acceptTerms}
-                        style={{
-                          background: "#111827",
-                          color: "#fff",
-                          border: "none",
-                          padding: "10px 16px",
-                          borderRadius: 8,
-                          cursor: "pointer",
-                        }}
+                    <div
+                      style={{
+                        background: "#fff",
+                        borderRadius: 16,
+                        boxShadow: "0 12px 36px rgba(0,0,0,0.2)",
+                        padding: "24px 22px",
+                        maxWidth: 560,
+                        width: "90%",
+                      }}
+                    >
+                      <h3 style={{ marginTop: 0, marginBottom: 8 }}>Accept Terms of Service</h3>
+                      <p style={{ marginTop: 0, color: "#444" }}>
+                        Please accept the latest Terms of Service
+                        {requiredTermsVersion ? ` (${requiredTermsVersion})` : ""} to continue.
+                      </p>
+                      <div
+                        style={{ display: "flex", gap: 12, marginTop: 16, alignItems: "center" }}
                       >
-                        Accept and Continue
-                      </button>
-                      <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">
-                        View Terms
-                      </a>
+                        <button
+                          onClick={acceptTerms}
+                          style={{
+                            background: "#111827",
+                            color: "#fff",
+                            border: "none",
+                            padding: "10px 16px",
+                            borderRadius: 8,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Accept and Continue
+                        </button>
+                        <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">
+                          View Terms
+                        </a>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {/* If no user, show welcome/login page */}
-              {!user ? (
-                <>
-                  {!showLogin && !showRegister && (
-                    <WelcomePage
-                      onGetStarted={() => setShowRegister(true)}
-                      onSignIn={() => setShowLogin(true)}
-                    />
-                  )}
-                  {/* Show login modal if requested */}
-                  {showLogin && (
-                    <div
-                      className="modal-overlay"
-                      style={{
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        width: "100vw",
-                        height: "100vh",
-                        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                        zIndex: 9999,
-                        overflowY: "auto",
-                      }}
-                    >
-                      <div
-                        style={{
-                          minHeight: "100%",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "flex-start",
-                          padding: "3rem 1.25rem",
-                        }}
-                      >
-                        <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
-                      </div>
-                    </div>
-                  )}
-                  {/* Show register modal if requested */}
-                  {showRegister && (
-                    <div
-                      className="modal-overlay"
-                      style={{
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        width: "100vw",
-                        height: "100vh",
-                        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                        zIndex: 9999,
-                        overflowY: "auto",
-                      }}
-                    >
-                      <div
-                        style={{
-                          minHeight: "100%",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "flex-start",
-                          padding: "3rem 1.25rem",
-                        }}
-                      >
-                        <RegisterForm
-                          onRegister={registerUser}
-                          onClose={() => setShowRegister(false)}
-                          onLogin={() => {
-                            setShowRegister(false);
-                            setShowLogin(true);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : user && (user.role === "admin" || user.isAdmin === true) ? (
-                // Render admin dashboard for admin users
-                <AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />
-              ) : (
-                // Render full user dashboard for normal users
-                <UserDashboard
-                  user={user}
-                  content={content}
-                  userDefaults={userDefaults}
-                  onSaveDefaults={saveUserDefaults}
-                  onLogout={handleLogout}
-                  onUpload={handleContentUpload}
-                  mySchedules={mySchedules}
-                  onSchedulesChanged={refreshSchedules}
-                />
-              )}
-              {/* MFA Modal */}
-              {showMfaModal && (
-                <div
-                  style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    backgroundColor: "rgba(0,0,0,0.5)",
-                    zIndex: 10000,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      background: "white",
-                      padding: "20px",
-                      borderRadius: "8px",
-                      maxWidth: "400px",
-                      width: "90%",
-                      boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    <h3 style={{ marginTop: 0 }}>Two-Factor Authentication</h3>
-                    <p>Please verify your identity to continue.</p>
-                    {mfaError && (
-                      <div style={{ color: "red", marginBottom: "10px" }}>{mfaError}</div>
+                )}
+                {/* If no user, show welcome/login page */}
+                {!user ? (
+                  <>
+                    {!showLogin && !showRegister && (
+                      <WelcomePage
+                        onGetStarted={() => setShowRegister(true)}
+                        onSignIn={() => setShowLogin(true)}
+                      />
                     )}
-
-                    {!verificationId ? (
-                      <div>
-                        <p>
-                          A verification code will be sent to your phone
-                          {mfaResolver?.hints?.[0]?.phoneNumber
-                            ? ` ending in ${mfaResolver.hints[0].phoneNumber.slice(-4)}`
-                            : ""}
-                          .
-                        </p>
-                        <div id="mfa-recaptcha-container"></div>
+                    {/* Show login modal if requested */}
+                    {showLogin && (
+                      <div
+                        className="modal-overlay"
+                        style={{
+                          position: "fixed",
+                          top: 0,
+                          left: 0,
+                          width: "100vw",
+                          height: "100vh",
+                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                          zIndex: 9999,
+                          overflowY: "auto",
+                        }}
+                      >
                         <div
                           style={{
-                            marginTop: "20px",
+                            minHeight: "100%",
                             display: "flex",
-                            justifyContent: "space-between",
+                            justifyContent: "center",
+                            alignItems: "flex-start",
+                            padding: "3rem 1.25rem",
                           }}
                         >
-                          <button
-                            onClick={cancelMfa}
-                            style={{ padding: "8px 16px", cursor: "pointer" }}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={sendMfaCode}
-                            style={{
-                              padding: "8px 16px",
-                              background: "#007bff",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Send Code
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <p>Enter the 6-digit code sent to your phone.</p>
-                        <input
-                          type="text"
-                          value={mfaCode}
-                          onChange={e => setMfaCode(e.target.value)}
-                          placeholder="123456"
-                          style={{
-                            width: "100%",
-                            padding: "8px",
-                            margin: "10px 0",
-                            boxSizing: "border-box",
-                            fontSize: "16px",
-                          }}
-                        />
-                        <div
-                          style={{
-                            marginTop: "20px",
-                            display: "flex",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <button
-                            onClick={cancelMfa}
-                            style={{ padding: "8px 16px", cursor: "pointer" }}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={verifyMfaCode}
-                            style={{
-                              padding: "8px 16px",
-                              background: "#007bff",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Verify & Sign In
-                          </button>
+                          <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
                         </div>
                       </div>
                     )}
+                    {/* Show register modal if requested */}
+                    {showRegister && (
+                      <div
+                        className="modal-overlay"
+                        style={{
+                          position: "fixed",
+                          top: 0,
+                          left: 0,
+                          width: "100vw",
+                          height: "100vh",
+                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                          zIndex: 9999,
+                          overflowY: "auto",
+                        }}
+                      >
+                        <div
+                          style={{
+                            minHeight: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "flex-start",
+                            padding: "3rem 1.25rem",
+                          }}
+                        >
+                          <RegisterForm
+                            onRegister={registerUser}
+                            onClose={() => setShowRegister(false)}
+                            onLogin={() => {
+                              setShowRegister(false);
+                              setShowLogin(true);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : user && (user.role === "admin" || user.isAdmin === true) ? (
+                  // Render admin dashboard for admin users
+                  <AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />
+                ) : (
+                  // Render full user dashboard for normal users
+                  <UserDashboard
+                    user={user}
+                    content={content}
+                    userDefaults={userDefaults}
+                    onSaveDefaults={saveUserDefaults}
+                    onLogout={handleLogout}
+                    onUpload={handleContentUpload}
+                    mySchedules={mySchedules}
+                    onSchedulesChanged={refreshSchedules}
+                  />
+                )}
+                {/* MFA Modal */}
+                {showMfaModal && (
+                  <div
+                    style={{
+                      position: "fixed",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      backgroundColor: "rgba(0,0,0,0.5)",
+                      zIndex: 10000,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: "white",
+                        padding: "20px",
+                        borderRadius: "8px",
+                        maxWidth: "400px",
+                        width: "90%",
+                        boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                      }}
+                    >
+                      <h3 style={{ marginTop: 0 }}>Two-Factor Authentication</h3>
+                      <p>Please verify your identity to continue.</p>
+                      {mfaError && (
+                        <div style={{ color: "red", marginBottom: "10px" }}>{mfaError}</div>
+                      )}
+
+                      {!verificationId ? (
+                        <div>
+                          <p>
+                            A verification code will be sent to your phone
+                            {mfaResolver?.hints?.[0]?.phoneNumber
+                              ? ` ending in ${mfaResolver.hints[0].phoneNumber.slice(-4)}`
+                              : ""}
+                            .
+                          </p>
+                          <div id="mfa-recaptcha-container"></div>
+                          <div
+                            style={{
+                              marginTop: "20px",
+                              display: "flex",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <button
+                              onClick={cancelMfa}
+                              style={{ padding: "8px 16px", cursor: "pointer" }}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={sendMfaCode}
+                              style={{
+                                padding: "8px 16px",
+                                background: "#007bff",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Send Code
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <p>Enter the 6-digit code sent to your phone.</p>
+                          <input
+                            type="text"
+                            value={mfaCode}
+                            onChange={e => setMfaCode(e.target.value)}
+                            placeholder="123456"
+                            style={{
+                              width: "100%",
+                              padding: "8px",
+                              margin: "10px 0",
+                              boxSizing: "border-box",
+                              fontSize: "16px",
+                            }}
+                          />
+                          <div
+                            style={{
+                              marginTop: "20px",
+                              display: "flex",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <button
+                              onClick={cancelMfa}
+                              style={{ padding: "8px 16px", cursor: "pointer" }}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={verifyMfaCode}
+                              style={{
+                                padding: "8px 16px",
+                                background: "#007bff",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Verify & Sign In
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-            </>
-          }
-        />
-      </Routes>
+                )}
+              </>
+            }
+          />
+        </Routes>
+      </Suspense>
 
       {/* AI Chat Widget - only show when user is logged in */}
       {user && <ChatWidget user={user} />}

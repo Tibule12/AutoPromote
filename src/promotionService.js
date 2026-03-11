@@ -646,133 +646,45 @@ class PromotionService {
 
       const content = { id: contentDoc.id, ...contentDoc.data() };
 
-      // Calculate promotion impact based on platform and budget
-      const platformMultiplier = this.getPlatformMultiplier(schedule.platform);
-      const budgetMultiplier = Math.min(schedule.budget / 1000, 5); // Cap at 5x for $5000 budget
-
-      // Generate realistic metrics based on content type and platform
-      const baseViews = this.calculateBaseViews(content.type, schedule.platform);
-      const actualViews = Math.floor(
-        baseViews * platformMultiplier * budgetMultiplier * (0.8 + Math.random() * 0.4)
-      ); // 80-120% variation
-
-      const engagementRate = this.calculateEngagementRate(content.type, schedule.platform);
-      const actualEngagements = Math.floor(actualViews * engagementRate);
-
-      // Calculate revenue based on views and RPM
-      const rpm = content.target_rpm || 900000; // Revenue per million views
-      const revenue = (actualViews / 1000000) * rpm;
-
-      // Update content with new metrics
-      const updatedContent = {
-        views: (content.views || 0) + actualViews,
-        engagements: (content.engagements || 0) + actualEngagements,
-        revenue: (content.revenue || 0) + revenue,
-        engagementRate:
-          ((content.views || 0) * (content.engagementRate || 0) + actualViews * engagementRate) /
-          ((content.views || 0) + actualViews),
+      // Update content status — real metrics will come from platform APIs after posting
+      await db.collection("content").doc(schedule.contentId).update({
         lastPromotionDate: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      };
+      });
 
-      await db.collection("content").doc(schedule.contentId).update(updatedContent);
-
-      // Record promotion execution
+      // Record promotion execution (metrics populated later from real platform data)
       const executionRef = db.collection("promotion_executions").doc();
       await executionRef.set({
         scheduleId,
         contentId: schedule.contentId,
         platform: schedule.platform,
         executedAt: new Date().toISOString(),
-        viewsGenerated: actualViews,
-        engagementsGenerated: actualEngagements,
-        revenueGenerated: revenue,
-        cost: schedule.budget,
-        metrics: {
-          views: actualViews,
-          engagements: actualEngagements,
-          engagementRate,
-          revenue,
-          costPerView: schedule.budget / actualViews,
-          roi: revenue / schedule.budget,
-        },
+        status: "posted",
       });
 
-      // Process PayPal payment order
-      const request = new paypal.orders.OrdersCreateRequest();
-      request.prefer("return=representation");
-      request.requestBody({
-        intent: "CAPTURE",
-        purchase_units: [
-          {
-            amount: {
-              currency_code: "USD",
-              value: revenue.toFixed(2),
-            },
-            description: `Promotion payment for content ID ${schedule.contentId}`,
-          },
-        ],
-      });
-
-      const client = paypalClient.client();
-      let order;
+      // Enqueue real platform posting task
       try {
-        order = await client.execute(request);
-        console.log("✅ PayPal order created:", order.result.id);
-      } catch (paypalError) {
-        console.error("❌ PayPal order creation failed:", paypalError);
-        throw paypalError;
-      }
-
-      // Capture the order immediately (for simplicity)
-      const captureRequest = new paypal.orders.OrdersCaptureRequest(order.result.id);
-      captureRequest.requestBody({});
-      let capture;
-      try {
-        capture = await client.execute(captureRequest);
-        console.log("✅ PayPal payment captured:", capture.result.id);
-      } catch (captureError) {
-        console.error("❌ PayPal payment capture failed:", captureError);
-        throw captureError;
-      }
-
-      // Process transaction through monetization service
-      try {
-        const monetizationService = require("./monetizationService");
-        await monetizationService.processTransaction({
+        const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
+        const result = await enqueuePlatformPostTask({
           contentId: schedule.contentId,
-          userId: content.userId || "system",
-          viewsGenerated: actualViews,
-          engagementsGenerated: actualEngagements,
-          cost: schedule.budget,
-          paypalOrderId: order.result.id,
-          paypalCaptureId: capture.result.id,
+          uid: schedule.user_id || schedule.uid || content.userId,
+          platform: schedule.platform,
+          reason: "scheduled_promotion_" + scheduleId,
+          payload: { scheduleId },
+          skipIfDuplicate: true,
         });
-        console.log("✅ Monetization transaction processed successfully");
-      } catch (monetizationError) {
-        console.error("❌ Could not process monetization transaction:", monetizationError);
+        console.log(
+          `✅ Executed promotion for content ${schedule.contentId} on ${schedule.platform}`
+        );
+      } catch (err) {
+        console.error("⚠️ Failed to enqueue platform task:", err.message);
       }
-
-      console.log(
-        `✅ Executed promotion for content ${schedule.contentId}: ${actualViews} views, $${revenue.toFixed(2)} revenue`
-      );
 
       return {
         scheduleId,
         contentId: schedule.contentId,
-        viewsGenerated: actualViews,
-        engagementsGenerated: actualEngagements,
-        revenueGenerated: revenue,
-        paypalOrderId: order.result.id,
-        paypalCaptureId: capture.result.id,
-        metrics: {
-          views: actualViews,
-          engagements: actualEngagements,
-          engagementRate,
-          revenue,
-          costPerView: schedule.budget / actualViews,
-          roi: revenue / schedule.budget,
-        },
+        status: "posted",
+        platform: schedule.platform,
       };
     } catch (error) {
       console.error("Error executing promotion:", error);

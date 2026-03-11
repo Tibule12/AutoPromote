@@ -242,6 +242,47 @@ async function checkPlatformLimit(userId, platformCount) {
 }
 
 /**
+ * Checks if a user is allowed to connect an additional platform (OAuth).
+ * Prevents free users from connecting more platforms than their tier allows.
+ */
+async function checkConnectionLimit(userId, platform) {
+  const billingDocRef = db.collection("user_billing").doc(userId);
+  const billingSnap = await billingDocRef.get();
+  const billingData = billingSnap.data() || { tier: "free" };
+
+  const userTierId = (billingData.tier || "free").toUpperCase();
+  const userTier = TIERS[userTierId] || TIERS.FREE;
+  const limit = userTier.platform_limit || 1;
+
+  // No limit for this tier
+  if (limit === Infinity) return { allowed: true, limit };
+
+  // Read current connections
+  const userSnap = await db.collection("users").doc(userId).get();
+  const userData = userSnap.data() || {};
+  const connected = Array.isArray(userData.connectedPlatforms) ? userData.connectedPlatforms : [];
+
+  // If re-connecting an already-connected platform, allow it (reconnect, not new)
+  if (connected.includes(platform)) return { allowed: true, limit };
+
+  if (connected.length >= limit) {
+    const error = new Error(
+      `Your ${userTier.name} plan allows ${limit} platform connection(s). Upgrade to connect more.`
+    );
+    error.code = "CONNECTION_LIMIT_EXCEEDED";
+    error.context = {
+      limit,
+      current: connected.length,
+      connected,
+      upgrade_required: true,
+      suggested_tier: limit < 3 ? "BASIC" : "PRO",
+    };
+    throw error;
+  }
+  return { allowed: true, limit };
+}
+
+/**
  * Check if user has exceeded their monthly AI analysis limit
  */
 async function checkAILimit(userId) {
@@ -339,6 +380,7 @@ module.exports = {
   calculateCreatorCharge,
   checkAILimit,
   checkPlatformLimit, // NEW
+  checkConnectionLimit, // NEW — OAuth connection-time enforcement
   trackAIUsage,
   checkBotEntitlement, // NEW
   trackBotUsage, // NEW

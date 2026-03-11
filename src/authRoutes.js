@@ -77,7 +77,19 @@ router.post("/resend-verification", async (req, res) => {
     // Basic in-memory rate limiting (per process). For production, move to Redis if scaled horizontally.
     const key = `rv_${email.toLowerCase()}`;
     const now = Date.now();
-    global.__resendLimiter = global.__resendLimiter || new Map();
+    if (!global.__resendLimiter) {
+      global.__resendLimiter = new Map();
+      // Periodic cleanup: evict entries older than 15 minutes every 5 minutes
+      setInterval(
+        () => {
+          const cutoff = Date.now() - 15 * 60 * 1000;
+          for (const [k, v] of global.__resendLimiter) {
+            if (v.first < cutoff) global.__resendLimiter.delete(k);
+          }
+        },
+        5 * 60 * 1000
+      ).unref();
+    }
     const entry = global.__resendLimiter.get(key) || { count: 0, first: now };
     if (now - entry.first > 15 * 60 * 1000) {
       // 15 min window
@@ -162,7 +174,15 @@ router.post("/request-password-reset", async (req, res) => {
 });
 
 // Complete password reset (admin override path)
-router.post("/reset-password", async (req, res) => {
+// SECURITY: Requires authentication + admin role — otherwise anyone can reset any password
+const authMiddleware = require("./authMiddleware");
+const adminOnly = (req, res, next) => {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+  next();
+};
+router.post("/reset-password", authMiddleware, adminOnly, async (req, res) => {
   try {
     const { uid, newPassword } = req.body || {};
     if (!uid || !newPassword)
@@ -198,22 +218,36 @@ router.post("/login", async (req, res) => {
       console.log("Token verified for uid=%s", decodedToken.uid);
     } else if (email && password) {
       console.log("Using email/password authentication...");
-      // This is a more risky approach as we're handling credentials directly
-      // Sign in with email and password using admin SDK
+      // SECURITY: Verify password via Firebase Auth REST API (Admin SDK cannot verify passwords)
+      const firebaseApiKey = process.env.FIREBASE_API_KEY || process.env.REACT_APP_FIREBASE_API_KEY;
+      if (!firebaseApiKey) {
+        console.error("FIREBASE_API_KEY env var not set — email/password login unavailable");
+        return res
+          .status(500)
+          .json({ error: "Server misconfiguration: password login unavailable" });
+      }
       try {
-        const userRecord = await admin.auth().getUserByEmail(email);
-        // We can't verify the password directly with Admin SDK
-        // Creating a custom token for the user
-        const _customToken = await admin.auth().createCustomToken(userRecord.uid);
-
-        // Instead of directly using this as decoded token, we should provide
-        // the custom token to the client and have them exchange it for an ID token
-        decodedToken = {
-          uid: userRecord.uid,
-          email: userRecord.email,
-          name: userRecord.displayName || email.split("@")[0],
-        };
-        console.log("Email/password auth successful for uid=%s", decodedToken.uid);
+        const fetch = globalThis.fetch || require("node-fetch");
+        const authResp = await fetch(
+          `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${encodeURIComponent(firebaseApiKey)}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, returnSecureToken: true }),
+          }
+        );
+        const authJson = await authResp.json();
+        if (!authResp.ok || authJson.error) {
+          console.warn(
+            "Email/password auth failed for email=%s code=%s",
+            email,
+            authJson.error?.message
+          );
+          return res.status(401).json({ error: "Invalid email or password" });
+        }
+        // Password verified — now verify the returned idToken with Admin SDK
+        decodedToken = await admin.auth().verifyIdToken(authJson.idToken);
+        console.log("Email/password auth verified for uid=%s", decodedToken.uid);
       } catch (error) {
         console.error("Email/password authentication failed:", error);
         return res.status(401).json({ error: "Invalid email or password" });

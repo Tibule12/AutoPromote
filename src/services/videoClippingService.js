@@ -21,7 +21,8 @@ function getStorage() {
 const crypto = require("crypto");
 
 // Point to the Python service (default localhost:8000)
-const MEDIA_WORKER_URL = process.env.MEDIA_WORKER_URL || "http://localhost:8000";
+const MEDIA_WORKER_URL =
+  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 
 class VideoClippingService {
   /**

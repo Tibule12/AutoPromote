@@ -16,7 +16,8 @@
     "jsonpath": "^1.2.0",
     "bfj": "^9.1.2",
     "tar": "^7.5.11",
-    "@tootallnate/once": "3.0.1"
+    "@tootallnate/once": "3.0.1",
+    "webpack-dev-server": "^5.2.1"
   },
   "dependencies": {
     "@ffmpeg/util": "^0.12.2",
@@ -26,7 +27,7 @@
     "dompurify": "^3.3.2",
     "fast-xml-parser": "^5.4.1",
     "firebase": "^12.2.1",
-    "hono": "^4.12.5",
+    "hono": "^4.12.7",
     "html2canvas": "^1.4.1",
     "idb": "^8.0.3",
     "multer": "^2.1.1",
