@@ -534,141 +534,140 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 />
                 <div className="option-label">
                   <div className="option-title">🎵 Add Background Music</div>
-                  <div className="option-desc">
-                    {options.addMusic ? (
-                      <div
-                        className="music-selection"
-                        onClick={e => e.stopPropagation()}
-                        style={{ marginTop: "10px" }}
-                      >
-                        <div style={{ display: "flex", gap: "10px", marginBottom: "8px" }}>
-                          <label
-                            style={{
-                              fontSize: "13px",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                          >
-                            <input
-                              type="radio"
-                              name="musicType"
-                              checked={!options.isSearch}
-                              onChange={() =>
-                                setOptions({
-                                  ...options,
-                                  isSearch: false,
-                                  musicFile: "upbeat_pop.mp3",
-                                })
-                              }
-                              style={{ marginRight: "5px" }}
-                            />
-                            Preset
-                          </label>
-                          <label
-                            style={{
-                              fontSize: "13px",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                          >
-                            <input
-                              type="radio"
-                              name="musicType"
-                              checked={options.isSearch}
-                              onChange={() =>
-                                setOptions({ ...options, isSearch: true, musicFile: "" })
-                              }
-                              style={{ marginRight: "5px" }}
-                            />
-                            Search (YouTube)
-                          </label>
-                        </div>
-
-                        {!options.isSearch ? (
-                          <select
-                            value={options.musicFile}
-                            onChange={e => setOptions({ ...options, musicFile: e.target.value })}
-                            style={{
-                              width: "100%",
-                              padding: "6px",
-                              borderRadius: "4px",
-                              border: "1px solid #ccc",
-                            }}
-                          >
-                            <option value="upbeat_pop.mp3">Upbeat Pop</option>
-                            <option value="lofi_chill.mp3">Lofi Chill</option>
-                            <option value="cinematic.mp3">Cinematic</option>
-                            <option value="corporate.mp3">Corporate</option>
-                          </select>
-                        ) : (
-                          <div style={{ display: "flex", flexDirection: "column" }}>
-                            <input
-                              type="text"
-                              placeholder="Type song or genre (e.g. 'Amapiano Beats')"
-                              value={options.musicFile}
-                              onChange={e => setOptions({ ...options, musicFile: e.target.value })}
-                              style={{
-                                width: "100%",
-                                padding: "6px",
-                                borderRadius: "4px",
-                                border: "1px solid #ccc",
-                              }}
-                            />
-
-                            <label
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                marginTop: "6px",
-                                fontSize: "12px",
-                                cursor: "pointer",
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={options.safeSearch}
-                                onChange={e =>
-                                  setOptions({ ...options, safeSearch: e.target.checked })
-                                }
-                                style={{ marginRight: "6px" }}
-                              />
-                              Enable Copyright Protection (Royalty-Free Only)
-                            </label>
-
-                            {options.safeSearch ? (
-                              <span
-                                style={{
-                                  fontSize: "11px",
-                                  color: "#4caf50",
-                                  marginLeft: "20px",
-                                  fontStyle: "italic",
-                                }}
-                              >
-                                ✅ Safe from strikes. Might not find famous songs.
-                              </span>
-                            ) : (
-                              <span
-                                style={{
-                                  fontSize: "11px",
-                                  color: "#ff5722",
-                                  marginLeft: "20px",
-                                  fontStyle: "italic",
-                                }}
-                              >
-                                ⚠️ Risks account suspension if used on YouTube/TikTok.
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      "Add music track (select genre or search)"
-                    )}
-                  </div>
+                  <div className="option-desc">Add music track (select genre or search)</div>
                 </div>
               </label>
+
+              {options.addMusic && (
+                <div
+                  className="music-selection"
+                  style={{
+                    marginTop: "10px",
+                    marginLeft: "34px",
+                    padding: "10px",
+                    background: "#2a2a2a",
+                    borderRadius: "6px",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "10px", marginBottom: "8px" }}>
+                    <label
+                      style={{
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="musicType"
+                        checked={!options.isSearch}
+                        onChange={() =>
+                          setOptions({
+                            ...options,
+                            isSearch: false,
+                            musicFile: "upbeat_pop.mp3",
+                          })
+                        }
+                        style={{ marginRight: "5px" }}
+                      />
+                      Preset
+                    </label>
+                    <label
+                      style={{
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="musicType"
+                        checked={options.isSearch}
+                        onChange={() => setOptions({ ...options, isSearch: true, musicFile: "" })}
+                        style={{ marginRight: "5px" }}
+                      />
+                      Search (YouTube)
+                    </label>
+                  </div>
+
+                  {!options.isSearch ? (
+                    <select
+                      value={options.musicFile}
+                      onChange={e => setOptions({ ...options, musicFile: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "6px",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                      }}
+                    >
+                      <option value="upbeat_pop.mp3">Upbeat Pop</option>
+                      <option value="lofi_chill.mp3">Lofi Chill</option>
+                      <option value="cinematic.mp3">Cinematic</option>
+                      <option value="corporate.mp3">Corporate</option>
+                    </select>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      <input
+                        type="text"
+                        placeholder="Type song or genre (e.g. 'Amapiano Beats')"
+                        value={options.musicFile}
+                        onChange={e => setOptions({ ...options, musicFile: e.target.value })}
+                        style={{
+                          width: "100%",
+                          padding: "6px",
+                          borderRadius: "4px",
+                          border: "1px solid #ccc",
+                        }}
+                      />
+
+                      <label
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginTop: "6px",
+                          fontSize: "12px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={options.safeSearch}
+                          onChange={e => setOptions({ ...options, safeSearch: e.target.checked })}
+                          style={{ marginRight: "6px" }}
+                        />
+                        Enable Copyright Protection (Royalty-Free Only)
+                      </label>
+
+                      {options.safeSearch ? (
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            color: "#4caf50",
+                            marginLeft: "20px",
+                            fontStyle: "italic",
+                          }}
+                        >
+                          ✅ Safe from strikes. Might not find famous songs.
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            color: "#ff5722",
+                            marginLeft: "20px",
+                            fontStyle: "italic",
+                          }}
+                        >
+                          ⚠️ Risks account suspension if used on YouTube/TikTok.
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <label className="ai-option">
                 <input

@@ -231,18 +231,9 @@ const WolfHuntDashboard = () => {
       return;
     }
 
-    // Legacy/Simulation Handling (Fallback if needed, but PayPal is handled in useEffect)
-    showToast(`Initiating ${method} secure checkout for ${pack.name}...`);
-
-    setTimeout(() => {
-      // This block is effectively dead code for PayPal now, but kept for future fallback
-      setUserCredits(prev => prev + pack.credits);
-      showToast(`Transaction Complete via ${method}. +${pack.credits} Credits added.`, "success");
-      setShowBuyCredits(false);
-      setSelectedPackage(null);
-      if (voiceEnabled)
-        speakCommand(`Arsenal reloaded. ${pack.credits} credits derived from capital injection.`);
-    }, 1500);
+    // Legacy Fallback
+    showToast(`Initializing specialized payment gateway...`);
+    // No simulation logic here.
   };
 
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -275,59 +266,8 @@ const WolfHuntDashboard = () => {
     quantity: 10,
   });
 
-  // MOCK DATA FOR DEMO IF API FAILS OR IS EMPTY
-  const MOCK_TASKS = [
-    {
-      id: "m1",
-      title: "Viral Dance Challenge",
-      platform: "tiktok",
-      reward: 8,
-      tags: [" FRENZY", " LAST CALL"],
-      slotsLeft: 3,
-      timeLeft: 4500000,
-      externalUrl: "https://tiktok.com",
-    },
-    {
-      id: "m2",
-      title: "Tech Review Premiere",
-      platform: "youtube",
-      reward: 5,
-      tags: [" ENDING SOON"],
-      slotsLeft: 12,
-      timeLeft: 1200000,
-      externalUrl: "https://youtube.com",
-    },
-    {
-      id: "m3",
-      title: "Luxury Brand Showcase",
-      platform: "instagram",
-      reward: 12,
-      tags: [" FRENZY"],
-      slotsLeft: 1,
-      timeLeft: 300000,
-      externalUrl: "https://instagram.com",
-    },
-    {
-      id: "m4",
-      title: "Crypto Alpha Thread",
-      platform: "reddit",
-      reward: 4,
-      tags: [],
-      slotsLeft: 45,
-      timeLeft: 8000000,
-      externalUrl: "https://reddit.com",
-    },
-    {
-      id: "m5",
-      title: "Community Discussion",
-      platform: "facebook",
-      reward: 3,
-      tags: [],
-      slotsLeft: 20,
-      timeLeft: 6000000,
-      externalUrl: "https://facebook.com",
-    },
-  ];
+  // MOCK DATA REMOVED FOR PRODUCTION
+  const MOCK_TASKS = [];
 
   useEffect(() => {
     fetchFeedingGrounds();
@@ -350,40 +290,35 @@ const WolfHuntDashboard = () => {
   const fetchFeedingGrounds = async () => {
     setLoading(true);
     try {
-      const token = await auth.currentUser?.getIdToken();
+      if (!auth.currentUser) return;
+      const token = await auth.currentUser.getIdToken();
 
-      let apiTasks = [];
-      let staminaData = null;
+      const res = await fetch("/api/community/wolf-hunt/tasks", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
 
-      if (token) {
-        const res = await fetch("/api/community/wolf-hunt/tasks", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (data.success) {
-          apiTasks = data.tasks;
-          staminaData = data.stamina;
+      if (data.success) {
+        setTasks(data.tasks || []);
+        if (data.stamina) {
+          setEnergy(
+            data.stamina.remaining !== undefined
+              ? { current: data.stamina.remaining, max: data.stamina.max }
+              : { current: 0, max: 50 }
+          );
         }
-      }
-
-      // FALLBACK TO MOCK IF EMPTY
-      if (!apiTasks || apiTasks.length === 0) {
-        console.warn("Using simulation data for feeding grounds");
-        setTasks(MOCK_TASKS);
       } else {
-        setTasks(apiTasks);
-      }
-
-      if (staminaData) {
-        setEnergy(
-          staminaData.remaining
-            ? { current: staminaData.remaining, max: staminaData.max }
-            : { current: 0, max: 50 }
-        );
+        // Handle stamina depleted or error
+        if (data.code === "STAMINA_DEPLETED") {
+          showToast("Energy Depleted. Rest required.", "error");
+          setEnergy({ current: 0, max: 50 });
+        }
+        setTasks([]);
       }
     } catch (err) {
       console.error("Failed to scout:", err);
-      setTasks(MOCK_TASKS); // Fallback on error
+      showToast("Connection to feeding grounds lost.", "error");
+      setTasks([]);
     } finally {
       setLoading(false);
     }
@@ -432,7 +367,8 @@ const WolfHuntDashboard = () => {
   // Modified handleClaim to intercept for briefing
   const handleClaim = campaignId => {
     // Find task details for briefing
-    const task = tasks.find(t => t.id === campaignId) || MOCK_TASKS.find(t => t.id === campaignId);
+    const task = tasks.find(t => t.id === campaignId);
+    if (!task) return;
 
     // STAMINA CHECK
     if (energy.current <= 0) {
@@ -458,20 +394,14 @@ const WolfHuntDashboard = () => {
   };
 
   const executeClaim = async campaignId => {
-    // Handling Mock Tasks
+    // Handling Mock Tasks - DISABLED FOR PRODUCTION
+    /*
     if (typeof campaignId === "string" && campaignId.startsWith("m")) {
       const task = MOCK_TASKS.find(t => t.id === campaignId);
-      showToast("SIMULATION ENGAGED: Target Locked", "success");
-      setActiveMission({
-        proofId: "demo_proof_" + Date.now(),
-        campaignId,
-        externalUrl: task.externalUrl,
-        minConfirmTime: Date.now() + 5000, // Shorten for demo (5s)
-        claimedAt: Date.now(),
-      });
-      window.open(task.externalUrl, "_blank");
+      // Mock logic...
       return;
     }
+    */
 
     try {
       const token = await auth.currentUser.getIdToken();
@@ -508,11 +438,9 @@ const WolfHuntDashboard = () => {
   const handleConfirm = async () => {
     if (!activeMission) return;
 
-    // Handle Mock Confirmation
-    if (activeMission.proofId && activeMission.proofId.startsWith("demo_proof")) {
-      showToast("SIMULATION: Kill Confirmed. +5 Credits", "success");
-      if (voiceEnabled) speakCommand("Target neutralized. Funds transferred.");
-      setUserCredits(prev => prev + 5);
+    // Handle Mock Confirmation - DISABLED
+    if (activeMission.proofId && String(activeMission.proofId).startsWith("demo_proof")) {
+      showToast("Simulation Complete. No credits awarded.", "info");
       setActiveMission(null);
       return;
     }

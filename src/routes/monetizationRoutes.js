@@ -73,7 +73,7 @@ router.post("/boost/create", authMiddleware, async (req, res) => {
       return res.status(400).json({ error: "ContentId, platform, and targetViews are required" });
     }
 
-    const boost = await monetizationService.createPaidBoost(userId, {
+    const boost = await monetizationService.createPaidBoost(userId, contentId, {
       platform,
       targetViews: parseInt(targetViews),
       duration: parseInt(duration) || 24,
