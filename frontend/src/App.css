@@ -12,19 +12,27 @@ body {
   color: #333;
 }
 
-/* modal overlay defaults (used by login/register modals) */
+/* modal overlay defaults (used by login/register modals)
+   Keep overlays inert by default so incidental wrappers don't block content.
+   Components should toggle `.open` when the overlay is active. */
 .modal-overlay {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent;
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 2000;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  pointer-events: none;
+}
+
+/* When explicitly opened, show the backdrop and allow interaction */
+.modal-overlay.open {
+  background: rgba(0, 0, 0, 0.45) !important;
   backdrop-filter: blur(5px);
+  pointer-events: auto;
 }
 
 /* When on dashboard, avoid showing purple/blue modal overlays and body background */
@@ -934,4 +942,51 @@ form,
 .checkbox-group-modern label {
   margin-bottom: 0;
   cursor: pointer;
+}
+
+/* Additional strong mobile overrides to ensure modal and forms are fully visible */
+@media (max-width: 760px) {
+  .modal-overlay {
+    align-items: flex-start !important;
+    padding-top: 12px !important;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0) + 120px) !important;
+    touch-action: pan-y !important;
+    background: transparent !important;
+    pointer-events: none !important;
+  }
+
+  .modal-overlay .modal,
+  .modal-overlay .publish-panel,
+  .modal-overlay .publish-modal,
+  .modal-overlay .PublishPanel {
+    pointer-events: auto !important;
+    position: relative !important;
+    inset: auto !important;
+    /* limit the modal to the dashboard's mobile container width so the dark
+       card behind it lines up exactly; also still respect a viewport margin */
+    width: auto !important;
+    max-width: min(calc(100% - 32px), 420px) !important;
+    margin: 8px auto !important;
+    max-height: calc(100vh - 160px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    box-sizing: border-box !important;
+    border-radius: 12px !important;
+    background: var(--surface, #ffffff) !important;
+  }
+
+  .modal-overlay form,
+  .publish-panel form,
+  .PublishPanel form {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 8px !important;
+  }
+
+  .modal-overlay.open {
+    background: rgba(0, 0, 0, 0.4) !important;
+    pointer-events: auto !important;
+  }
 }

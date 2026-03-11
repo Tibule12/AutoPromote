@@ -1016,7 +1016,16 @@ try {
     // Canonical custom domain (www + apex)
     "https://www.autopromote.org",
     "https://autopromote.org",
-    process.env.NODE_ENV === "development" ? "http://localhost:3000" : null,
+    // Helpful development origins (only included when not running in production)
+    ...(process.env.NODE_ENV !== "production"
+      ? [
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "http://127.0.0.1:3000",
+          "http://127.0.0.1:3001",
+          "http://localhost:37803",
+        ]
+      : []),
   ].filter(Boolean);
   const envAllowed = (process.env.CORS_ALLOWED_ORIGINS || "")
     .split(",")
@@ -1029,6 +1038,14 @@ try {
       try {
         logger.debug("[cors.origin] origin:", origin);
       } catch (e) {}
+      // Quick override: allow all origins when explicitly requested via env.
+      // Use only for development/testing. Setting this in production is dangerous.
+      if (process.env.CORS_ALLOW_ALL === "true") {
+        try {
+          logger.warn("[cors] CORS_ALLOW_ALL=true — allowing all origins (override)");
+        } catch (e) {}
+        return callback(null, true);
+      }
       // Allow requests with no origin (like mobile apps or curl requests).
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
@@ -1036,6 +1053,20 @@ try {
           logger.debug("[cors.origin] -> allowed");
         } catch (e) {}
         return callback(null, true);
+      }
+      // In non-production allow common localhost / LAN patterns so mobile and
+      // local device testing works without updating env vars each time.
+      if (process.env.NODE_ENV !== "production") {
+        try {
+          const devLocalRegex =
+            /^https?:\/\/(localhost|127\.0\.0\.1|\d{1,3}(?:\.\d{1,3}){3})(:\d+)?$/;
+          if (devLocalRegex.test(origin)) {
+            try {
+              logger.debug("[cors.origin] -> allowed (dev local match)");
+            } catch (e) {}
+            return callback(null, true);
+          }
+        } catch (e) {}
       }
       logger.warn("[cors.origin] -> blocked", origin);
       return callback(new Error("Not allowed by CORS"));

@@ -203,6 +203,69 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+/* Mobile centering fixes: ensure dashboard content and forms are centered on small screens */
+@media (max-width: 820px) {
+  .dashboard-main {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0.5rem 12px !important;
+    max-width: 420px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-root {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .upload-panel,
+  .profile-details,
+  .analytics-panel {
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; /* center contents horizontally */
+  }
+
+  /* Ensure forms are centered inside panels */
+  .upload-panel form,
+  .profile-details form,
+  .publish-panel form,
+  form {
+    margin: 12px auto !important;
+    width: calc(100% - 24px) !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  /* platform-form entries should occupy full width to match card background */
+  .platform-form,
+  .platform-form form {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* reset centering margins from earlier selectors */
+  .upload-panel *,
+  .profile-details *,
+  .publish-panel * {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
 @media (min-width: 1024px) {
   .dashboard-main {
     /* Reserve space for the fixed sidebar and keep the main content within viewport. */
@@ -307,6 +370,7 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 1rem;
+  overflow: visible; /* allow children (like publisher) to overflow/scroll internally */
 }
 .profile-details h3,
 .upload-panel h3,
