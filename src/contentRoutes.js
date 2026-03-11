@@ -771,6 +771,131 @@ router.get("/my-promotion-schedules", authMiddleware, async (req, res) => {
   }
 });
 
+// POST /:contentId/promotion-schedules - Create a new promotion schedule
+router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { contentId } = req.params;
+    const { time, frequency, platforms = [], platformOptions = {} } = req.body;
+
+    if (!time) return res.status(400).json({ error: "Missing required field: time" });
+
+    // Verify content belongs to user
+    const contentDoc = await db.collection("content").doc(contentId).get();
+    if (!contentDoc.exists) return res.status(404).json({ error: "Content not found" });
+    const content = contentDoc.data();
+    if (content.userId !== userId) return res.status(403).json({ error: "Forbidden" });
+
+    const promotionService = require("./promotionService");
+    const schedules = [];
+    const platformList = platforms.length > 0 ? platforms : ["all"];
+
+    for (const platform of platformList) {
+      const scheduleData = {
+        platform,
+        startTime: time,
+        frequency: frequency || "once",
+        ...(platformOptions[platform] || {}),
+      };
+      const schedule = await promotionService.schedulePromotion(contentId, scheduleData);
+      // Store user_id so GET /my-promotion-schedules can find it
+      await db.collection("promotion_schedules").doc(schedule.id).update({ user_id: userId });
+      schedule.user_id = userId;
+      schedules.push(schedule);
+    }
+
+    res.json({ success: true, schedules });
+  } catch (error) {
+    console.error("[POST /:contentId/promotion-schedules] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /promotion-schedules/:id/pause - Pause a promotion schedule
+router.post("/promotion-schedules/:id/pause", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
+    if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
+    if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
+
+    const promotionService = require("./promotionService");
+    const updated = await promotionService.updatePromotionSchedule(id, { isActive: false });
+    res.json({ success: true, schedule: updated });
+  } catch (error) {
+    console.error("[POST /promotion-schedules/:id/pause] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /promotion-schedules/:id/resume - Resume a promotion schedule
+router.post("/promotion-schedules/:id/resume", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
+    if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
+    if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
+
+    const promotionService = require("./promotionService");
+    const updated = await promotionService.updatePromotionSchedule(id, { isActive: true });
+    res.json({ success: true, schedule: updated });
+  } catch (error) {
+    console.error("[POST /promotion-schedules/:id/resume] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /promotion-schedules/:id/reschedule - Reschedule a promotion
+router.post("/promotion-schedules/:id/reschedule", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    const { time } = req.body;
+    if (!time) return res.status(400).json({ error: "Missing required field: time" });
+
+    const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
+    if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
+    if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
+
+    const promotionService = require("./promotionService");
+    const updated = await promotionService.updatePromotionSchedule(id, { startTime: time });
+    res.json({ success: true, schedule: updated });
+  } catch (error) {
+    console.error("[POST /promotion-schedules/:id/reschedule] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// DELETE /promotion-schedules/:id - Delete a promotion schedule
+router.delete("/promotion-schedules/:id", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
+    if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
+    if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
+
+    const promotionService = require("./promotionService");
+    await promotionService.deletePromotionSchedule(id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[DELETE /promotion-schedules/:id] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // GET /api/content/leaderboard - simple top users by points (alias for rewards leaderboard for backward compatibility)
 router.get("/leaderboard", authMiddleware, async (req, res) => {
   try {

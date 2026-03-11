@@ -664,7 +664,7 @@ class PromotionService {
 
       // Enqueue real platform posting task
       try {
-        const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
+        const { enqueuePlatformPostTask } = require("./services/promotionTaskQueue");
         const result = await enqueuePlatformPostTask({
           contentId: schedule.contentId,
           uid: schedule.user_id || schedule.uid || content.userId,
