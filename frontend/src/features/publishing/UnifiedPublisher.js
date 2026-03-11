@@ -1902,7 +1902,18 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
       {/* --- Modals --- */}
       {showVideoEditor && (
-        <div className="modal-overlay">
+        <div
+          className="modal-overlay open"
+          style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            overflowY: "auto",
+            zIndex: 3000,
+          }}
+        >
           <div
             className="modal"
             style={{
@@ -2000,7 +2011,18 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       )}
 
       {showCropper && mediaFile && (
-        <div className="modal-overlay">
+        <div
+          className="modal-overlay open"
+          style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            overflowY: "auto",
+            zIndex: 3000,
+          }}
+        >
           <div className="modal" style={{ background: "#1e293b", color: "#fff" }}>
             <button className="close-btn" onClick={() => setShowCropper(false)}>
               ×
