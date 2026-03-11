@@ -47,6 +47,12 @@ body.dashboard-mode .modal-overlay {
   background-image: none !important;
 }
 
+/* global body class to suppress scrolling when a modal is active */
+body.modal-open {
+  overflow: hidden !important;
+  touch-action: none; /* prevent mobile overscroll */
+}
+
 .App {
   min-height: 100vh;
   display: flex;

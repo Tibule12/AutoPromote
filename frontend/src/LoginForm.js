@@ -210,6 +210,16 @@ const LoginForm = ({ onLogin, onClose }) => {
 
         <button
           type="button"
+          className="auth-link"
+          onClick={() => {
+            window.location.href = PUBLIC_SITE_URL || "/";
+          }}
+        >
+          Back to home
+        </button>
+
+        <button
+          type="button"
           onClick={() => {
             if (onClose) onClose();
           }}
