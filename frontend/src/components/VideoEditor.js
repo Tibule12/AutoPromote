@@ -13,8 +13,32 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [videoSrc, setVideoSrc] = useState("");
   const [processing, setProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [creditBalance, setCreditBalance] = useState(null);
   const [processedFile, setProcessedFile] = useState(null);
   const [clipSuggestions, setClipSuggestions] = useState(null); // Store detected clips
+
+  // fetch credit balance on mount so user sees it immediately
+  useEffect(() => {
+    async function fetchCredits() {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) return; // not logged in yet
+        const token = await user.getIdToken();
+        const r = await fetch(`${API_BASE_URL}/api/credits/balance`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (r.ok) {
+          const data = await r.json();
+          setCreditBalance(data.balance);
+          setStatusMessage(`You have ${data.balance} credits available.`);
+        }
+      } catch (e) {
+        console.warn("Failed to fetch credit balance", e);
+      }
+    }
+    fetchCredits();
+  }, []);
 
   // Phase 1 Features State
   const [options, setOptions] = useState({
