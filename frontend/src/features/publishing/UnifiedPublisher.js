@@ -1456,8 +1456,10 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     }
   };
 
+  const modalOpen = showVideoEditor || showViralScanner || showCropper;
+
   return (
-    <div className="unified-publisher-container">
+    <div className={`unified-publisher-container${modalOpen ? " modal-open" : ""}`}>
       {/* --- HEADER: Global Context --- */}
       <header className="publisher-header">
         <h1>Cross-Platform Publisher</h1>
@@ -1844,24 +1846,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           )}
 
           {/* --- Bottom Action Bar (Fixed) --- */}
-          <div
-            className="publish-actions"
-            style={{
-              position: "fixed",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              background: "#1a202c", // Match dark theme bg
-              borderTop: "1px solid #2d3748",
-              padding: "16px 24px",
-              zIndex: 999,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              boxShadow: "0 -4px 6px -1px rgba(0, 0, 0, 0.4)",
-              backdropFilter: "blur(10px)",
-            }}
-          >
+          <div className="publish-actions">
             <div
               style={{
                 fontSize: "14px",

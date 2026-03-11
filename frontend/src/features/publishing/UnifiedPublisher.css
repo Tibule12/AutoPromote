@@ -3,11 +3,13 @@ what did /* UnifiedPublisher.css */
 .unified-publisher-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 80vh;
+  height: auto; /* allow natural document flow */
+  min-height: 0; /* avoid forcing viewport-limited height that causes blank scroll gaps */
   background: transparent;
   color: #e2e8f0;
   font-family: "Inter", sans-serif;
+  width: 100%;
+  overflow: visible; /* allow children to render fully without being clipped */
 }
 
 .publisher-header {
@@ -43,9 +45,10 @@ what did /* UnifiedPublisher.css */
 /* --- Layout --- */
 .publisher-layout {
   display: grid;
-  grid-template-columns: 350px 1fr;
+  grid-template-columns: minmax(280px, 350px) 1fr;
   gap: 2rem;
-  flex: 1;
+  width: 100%;
+  align-items: start;
 }
 
 /* --- Responsive Mobile Tweaks --- */
@@ -83,8 +86,19 @@ what did /* UnifiedPublisher.css */
 }
 
 /* --- Platform Card Visibility Fixes --- */
+/* force each form element to use full width of card to match dimension */
+.platform-form {
+  width: 100%;
+}
+
+/* make sure each card stretches to the full width of its container so all platforms
+   have identical horizontal size */
+.platform-section,
 .platform-card-wrapper {
-  background: rgba(30, 41, 59, 0.4);
+  width: 100%;
+}
+.platform-card-wrapper {
+  background: rgba(30, 41, 59, 0.4); /* dark card backdrop like desktop */
   border: 1px solid rgba(255, 255, 255, 0.08); /* Better border visibility */
   border-radius: 8px;
   padding: 1.5rem;
@@ -115,6 +129,16 @@ what did /* UnifiedPublisher.css */
   max-height: 200px; /* Limit height */
   max-width: 100%;
   object-fit: contain;
+}
+
+/* Prevent inner form controls from exceeding available width */
+.publisher-layout .platform-card-wrapper,
+.publisher-layout .platform-section,
+.publisher-layout .platform-workspace,
+.publisher-layout .platform-stack {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
 .platform-mini-preview p {
@@ -294,10 +318,12 @@ button {
   backdrop-filter: blur(12px);
   border-radius: 12px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between; /* spread children across container */
   align-items: center;
   gap: 1rem;
   z-index: 50;
+  width: 100%; /* fill parent width */
+  box-sizing: border-box; /* include padding in width */
 }
 
 .btn-primary-large {
@@ -354,6 +380,64 @@ button {
     max-width: 100% !important;
     width: 100%;
     margin-top: 1rem;
+  }
+}
+
+/* Defensive mobile fixes: ensure no element exceeds container width */
+@media (max-width: 820px) {
+  .unified-publisher-container,
+  .publisher-layout,
+  .platform-workspace,
+  .platform-stack,
+  .platform-section,
+  .platform-mini-preview,
+  .publish-modal,
+  .publish-panel,
+  .PublishPanel {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: visible !important;
+  }
+
+  /* make cards and forms full width but leave their normal dark styling intact */
+  .platform-card-wrapper,
+  .platform-form {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
+  }
+  /* mobile: remove the dark card background/border entirely so only the form remains */
+  .platform-card-wrapper {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  /* keep default appearance of the wrapper; do not hide header */
+
+  .unified-publisher-container * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+  }
+
+  /* no further modifications to card appearance on mobile */
+
+  .platform-mini-preview video,
+  .platform-mini-preview img,
+  .preview-media img,
+  .preview-media video {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Prevent sticky bottom publish-actions from covering content on tiny screens */
+  .publish-actions {
+    position: static !important;
+    margin-top: 8px !important;
+    border-radius: 8px !important;
   }
 }
 
