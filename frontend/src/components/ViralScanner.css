@@ -97,6 +97,33 @@
   min-width: 300px;
 }
 
+/* Mobile adjustments: stack video over sidebar and remove rigid min-width */
+@media (max-width: 600px) {
+  .viral-scanner-modal {
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    height: 90vh;
+  }
+  .scanner-body {
+    flex-direction: column;
+  }
+  .scanner-sidebar {
+    min-width: auto;
+    width: 100%;
+    order: 2;
+  }
+  .scanner-video-column {
+    order: 1;
+    width: 100%;
+    height: auto;
+    max-height: 40vh;
+  }
+  .scanner-video-column video {
+    max-height: 100%;
+  }
+}
+
 .scanner-controls {
   padding: 20px;
   border-bottom: 1px solid #334155;
