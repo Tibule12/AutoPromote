@@ -85,6 +85,7 @@ function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [content, setContent] = useState([]);
   const [mySchedules, setMySchedules] = useState([]);
   const [analytics, setAnalytics] = useState(null);
@@ -118,6 +119,22 @@ function App() {
         : window.location.pathname
       : "/"
   );
+
+  // Track whether any modal overlay is open (login/register etc.).
+  // Used for styling and to disable body scrolling/touch.
+  useEffect(() => {
+    // add/remove class for global CSS (UnifiedPublisher uses it too)
+    document.body.classList.toggle("modal-open", modalOpen);
+  }, [modalOpen]);
+
+  // auto-set modalOpen when login/register visibility changes
+  useEffect(() => {
+    if (showLogin || showRegister || showAdminLogin || showMfaModal || showTermsModal) {
+      setModalOpen(true);
+    } else {
+      setModalOpen(false);
+    }
+  }, [showLogin, showRegister, showAdminLogin, showMfaModal, showTermsModal]);
 
   // E2E test auth bypass: when true, skip firebase auth and set test user
   const E2E_AUTH_BYPASS = process.env.REACT_APP_E2E_AUTH_BYPASS === "true";
@@ -1219,17 +1236,21 @@ function App() {
                     {/* Show login modal if requested */}
                     {showLogin && (
                       <div
-                        className="modal-overlay"
+                        className="modal-overlay open"
+                        onTransitionEnd={() => {}}
                         style={{
                           position: "fixed",
                           top: 0,
+                          right: 0,
+                          bottom: 0,
                           left: 0,
-                          width: "100vw",
-                          height: "100vh",
                           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                          zIndex: 9999,
+                          zIndex: 10000,
                           overflowY: "auto",
+                          touchAction: "none", // prevent touch through
+                          pointerEvents: "auto", // ensure clicks are captured
                         }}
+                        onClick={e => e.stopPropagation()}
                       >
                         <div
                           style={{
@@ -1240,24 +1261,33 @@ function App() {
                             padding: "3rem 1.25rem",
                           }}
                         >
-                          <LoginForm onLogin={loginUser} onClose={() => setShowLogin(false)} />
+                          <LoginForm
+                            onLogin={loginUser}
+                            onClose={() => {
+                              setShowLogin(false);
+                              setModalOpen(false);
+                            }}
+                          />
                         </div>
                       </div>
                     )}
                     {/* Show register modal if requested */}
                     {showRegister && (
                       <div
-                        className="modal-overlay"
+                        className="modal-overlay open"
                         style={{
                           position: "fixed",
                           top: 0,
+                          right: 0,
+                          bottom: 0,
                           left: 0,
-                          width: "100vw",
-                          height: "100vh",
                           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                          zIndex: 9999,
+                          zIndex: 10000,
                           overflowY: "auto",
+                          touchAction: "none",
+                          pointerEvents: "auto",
                         }}
+                        onClick={e => e.stopPropagation()}
                       >
                         <div
                           style={{
@@ -1270,9 +1300,13 @@ function App() {
                         >
                           <RegisterForm
                             onRegister={registerUser}
-                            onClose={() => setShowRegister(false)}
+                            onClose={() => {
+                              setShowRegister(false);
+                              setModalOpen(false);
+                            }}
                             onLogin={() => {
                               setShowRegister(false);
+                              setModalOpen(true);
                               setShowLogin(true);
                             }}
                           />

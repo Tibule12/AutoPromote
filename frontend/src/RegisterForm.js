@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import "./Auth.css";
+import { PUBLIC_SITE_URL } from "./config";
 
 const RegisterForm = ({ onRegister, onClose, onLogin }) => {
   const [formData, setFormData] = useState({
@@ -160,6 +161,17 @@ const RegisterForm = ({ onRegister, onClose, onLogin }) => {
           ) : (
             "Create Account"
           )}
+        </button>
+
+        <button
+          type="button"
+          className="auth-link"
+          onClick={() => {
+            // PUBLIC_SITE_URL should always be defined via config, but guard anyway.
+            window.location.href = typeof PUBLIC_SITE_URL !== "undefined" ? PUBLIC_SITE_URL : "/";
+          }}
+        >
+          Back to home
         </button>
 
         <button
