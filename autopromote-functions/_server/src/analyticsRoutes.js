@@ -122,6 +122,7 @@ router.get("/user", authMiddleware, async (req, res) => {
     let totalLikes = 0;
     let totalShares = 0;
     let totalRevenue = 0;
+    let totalClicks = 0;
     const contentByPlatform = {};
 
     filteredDocs.forEach(content => {
@@ -240,6 +241,12 @@ router.get("/user", authMiddleware, async (req, res) => {
         const shares = m.shares || m.share_count || m.retweet_count || 0;
         contentByPlatform[plat].shares += parseInt(shares || 0, 10);
 
+        // Clicks / Link clicks
+        const clicks = m.clicks || m.click_count || m.link_clicks || m.post_clicks || 0;
+        if (!contentByPlatform[plat].clicks) contentByPlatform[plat].clicks = 0;
+        contentByPlatform[plat].clicks += parseInt(clicks || 0, 10);
+        totalClicks += parseInt(clicks || 0, 10);
+
         // Comments / Replies
         const comments =
           m.comments || m.comment_count || m.reply_count || m.post_engaged_users || 0;
@@ -351,8 +358,8 @@ router.get("/user", authMiddleware, async (req, res) => {
       totalLikes,
       totalShares,
       totalRevenue,
-      totalClicks: 0, // Placeholder
-      ctr: 0, // Placeholder
+      totalClicks,
+      ctr: totalViews > 0 ? parseFloat(((totalClicks / totalViews) * 100).toFixed(2)) : 0,
       
       // Frontend specific keys
       platformBreakdown: contentByPlatform, // Matches frontend expectation

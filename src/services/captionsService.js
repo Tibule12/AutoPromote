@@ -203,8 +203,8 @@ async function generateTranscription(filePathOrBuffer) {
       throw new Error("Invalid file path for transcription.");
     }
 
-    if (fs.existsSync(filePathOrBuffer)) {
-      form.append("file", fs.createReadStream(filePathOrBuffer));
+    if (fs.existsSync(normalizedPath)) {
+      form.append("file", fs.createReadStream(normalizedPath));
     }
   } else if (Buffer.isBuffer(filePathOrBuffer)) {
     // OpenAI requires a filename to infer content type.

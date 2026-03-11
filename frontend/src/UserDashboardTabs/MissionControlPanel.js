@@ -17,7 +17,7 @@ const MissionControlPanel = () => {
   const [selectedContentThumbnail, setSelectedContentThumbnail] = useState(null); // Currently selected content thumbnail
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false); // New state for upload status
-  const [isLocked] = useState(true); // Locked for maintenance
+  const [isLocked] = useState(false);
 
   // Reactor State
   const [prompt, setPrompt] = useState("");
