@@ -33,6 +33,20 @@ async function getUserFacebookConnection(uid) {
   return d;
 }
 
+// mark in the database that this user must re-authenticate with Facebook
+async function flagFacebookReauth(uid) {
+  try {
+    await db
+      .collection("users")
+      .doc(uid)
+      .collection("connections")
+      .doc("facebook")
+      .set({ needsReauth: true }, { merge: true });
+  } catch (e) {
+    console.warn("Failed to flag Facebook token stale for", uid, e);
+  }
+}
+
 /**
  * Generate Facebook OAuth authorization URL
  */
@@ -235,11 +249,30 @@ async function postToFacebookPage({
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
+    const errorText = error.error?.message || "Post failed";
     console.error("[Facebook] API Error response:", JSON.stringify(error, null, 2));
-    throw new Error(error.error?.message || "Post failed");
-  }
 
-  return response.json();
+    // if missing permission (#10) or related, flag token stale so user reconnects
+    if (
+      errorText.includes("(#10)") ||
+      errorText.includes("(#100)") ||
+      errorText.includes("permission")
+    ) {
+      console.warn(
+        `[Facebook] Soft fail for post ${postId || "?"}: ${errorText.substring(0, 100)}...`
+      );
+      // attempt to flag the owning user if we have uid in scope
+      if (uid) {
+        flagFacebookReauth(uid);
+      }
+      // throw so calling code can treat as partial/soft error
+      const ex = new Error(errorText);
+      ex.soft = true;
+      throw ex;
+    }
+
+    throw new Error(errorText);
+  }
 }
 
 /**
@@ -376,15 +409,26 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
       } catch (_) {}
     }
 
-    const result = await postToFacebookPage({
-      pageId: targetPageId,
-      pageAccessToken: pageToken,
-      message,
-      link,
-      imageUrl,
-      videoUrl,
-      title,
-    });
+    let result;
+    try {
+      result = await postToFacebookPage({
+        pageId: targetPageId,
+        pageAccessToken: pageToken,
+        message,
+        link,
+        imageUrl,
+        videoUrl,
+        title,
+      });
+    } catch (err) {
+      // treat errors flagged by postToFacebookPage as soft (permission) failures
+      if (err.soft) {
+        console.warn("Facebook permission issue detected for uid", uid, "token will be refreshed");
+        await flagFacebookReauth(uid);
+      }
+      // rethrow so outer try/catch handles generic failure response
+      throw err;
+    }
 
     // Store result in Firestore
     if (contentId) {
@@ -415,6 +459,15 @@ async function postToFacebook({ contentId, payload, reason, uid }) {
       reason,
     };
   } catch (e) {
+    // If we flagged this as a permission issue, forward a recognisable code
+    if (e.soft) {
+      return {
+        platform: "facebook",
+        success: false,
+        error: "permission_expired",
+        message: "User must re-authorize Facebook permissions",
+      };
+    }
     return {
       platform: "facebook",
       success: false,
@@ -483,13 +536,13 @@ async function getPostStats({ uid, postId, pageId }) {
           requireHttps: true,
           allowHosts: ["graph.facebook.com"],
         });
-        
+
         if (basicRes.ok) {
           const bData = await basicRes.json();
           likes = bData.likes?.summary?.total_count || 0;
           comments = bData.comments?.summary?.total_count || 0;
           // Try shares in a separate lightweight call or just skip to avoid #100 errors on videos
-          // shares = bData.shares?.count || 0; 
+          // shares = bData.shares?.count || 0;
         }
       } catch (_) {}
 
@@ -516,7 +569,7 @@ async function getPostStats({ uid, postId, pageId }) {
       requireHttps: true,
       allowHosts: ["graph.facebook.com"],
     });
-  } catch(netErr) {
+  } catch (netErr) {
     throw new Error(`Network failed: ${netErr.message}`);
   }
 
@@ -580,6 +633,7 @@ async function getPostStats({ uid, postId, pageId }) {
   };
 }
 
+// Export public helpers
 module.exports = {
   postToFacebook,
   generateAuthUrl,
