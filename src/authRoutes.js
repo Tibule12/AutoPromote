@@ -22,26 +22,70 @@ const _verifyFirebaseToken = async (req, res, next) => {
 
 // Register endpoint
 router.post("/register", async (req, res) => {
+  let userRecord = null;
   try {
-    const { name, email, password, role = "user" } = req.body;
+    const { name, email, password, role = "user", idToken } = req.body;
 
-    // Create user in Firebase Auth
-    const userRecord = await admin.auth().createUser({
-      email,
-      password,
-      displayName: name,
-    });
+    // If the frontend already created a Firebase Auth user (via client-side SDK),
+    // it will send `idToken` so we can just update the existing user record.
+    let uid;
+    if (idToken) {
+      try {
+        const decoded = await admin.auth().verifyIdToken(idToken);
+        uid = decoded.uid;
+      } catch (e) {
+        console.warn("Invalid idToken passed to /register", e.message);
+      }
+    }
 
-    // Set custom claims for role
-    await admin.auth().setCustomUserClaims(userRecord.uid, { role });
+    if (uid) {
+      userRecord = await admin
+        .auth()
+        .getUser(uid)
+        .catch(() => null);
+    }
+
+    // If user doesn't exist yet, create one (fallback for non-Firebase client flows)
+    if (!userRecord) {
+      if (!email || !password) {
+        return res.status(400).json({ error: "email and password required" });
+      }
+      try {
+        userRecord = await admin.auth().createUser({
+          email,
+          password,
+          displayName: name,
+        });
+      } catch (e) {
+        // If user already exists, fall back to fetching it.
+        if (e.code === "auth/email-already-exists") {
+          userRecord = await admin.auth().getUserByEmail(email);
+        } else {
+          throw e;
+        }
+      }
+      uid = userRecord.uid;
+    }
+
+    // Update displayName / email if needed
+    const updates = {};
+    if (name && userRecord.displayName !== name) updates.displayName = name;
+    if (email && userRecord.email !== email) updates.email = email;
+    if (Object.keys(updates).length) {
+      userRecord = await admin.auth().updateUser(userRecord.uid, updates);
+    }
+
+    // Set custom claims for role (preserve existing admin role)
+    const existingClaims = userRecord.customClaims || {};
+    const finalRole = existingClaims.role === "admin" ? "admin" : role;
+    await admin.auth().setCustomUserClaims(userRecord.uid, { role: finalRole });
 
     // Store additional user data in Firestore
     const userDocRef = admin.firestore().collection("users").doc(userRecord.uid);
     const userSnap = await userDocRef.get();
-    let currentData = userSnap.exists ? userSnap.data() : {};
-    // Only set role/isAdmin to 'user'/false if not already admin
-    let docRole = currentData.role === "admin" ? "admin" : role;
-    let docIsAdmin = currentData.role === "admin" ? true : false;
+    const currentData = userSnap.exists ? userSnap.data() : {};
+    const docRole = currentData.role === "admin" ? "admin" : finalRole;
+    const docIsAdmin = currentData.role === "admin" ? true : false;
     await userDocRef.set({
       name,
       email,
@@ -50,7 +94,7 @@ router.post("/register", async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    // Generate email verification link
+    // Generate email verification link (safe to call even if already verified)
     try {
       const verifyLink = await admin.auth().generateEmailVerificationLink(email, {
         url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
@@ -59,12 +103,23 @@ router.post("/register", async (req, res) => {
     } catch (e) {
       console.log("⚠️ Could not send verification email:", e.message);
     }
+
     res.status(201).json({
       message: "User registered. Verification email sent.",
       requiresEmailVerification: true,
     });
   } catch (error) {
     console.error("Registration error:", error);
+
+    // If the account was already created (or found), we still want the end-user to proceed.
+    // This avoids the UX where Firebase Auth succeeds but the backend returns an error.
+    if (userRecord && userRecord.uid) {
+      return res.status(201).json({
+        message: "User registered (partial). Some backend steps failed, but you can still log in.",
+        warning: error.message,
+      });
+    }
+
     res.status(500).json({ error: error.message });
   }
 });

@@ -586,7 +586,15 @@ function App() {
         // Success - RegisterForm will show message and switch to login
         return;
       } else {
-        throw new Error("Registration failed on server.");
+        let errorMessage = "Registration failed on server.";
+        try {
+          const json = await res.json();
+          if (json && json.error) errorMessage = json.error;
+          else if (json && json.message) errorMessage = json.message;
+        } catch (_e) {
+          // ignore parse errors
+        }
+        throw new Error(errorMessage);
       }
     } catch (error) {
       await signOut(auth); // Ensure signed out on error
