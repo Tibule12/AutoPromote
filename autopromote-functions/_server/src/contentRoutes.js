@@ -155,7 +155,7 @@ function rateLimitMiddleware(limit = 10, windowMs = 60000) {
 router.post(
   "/upload",
   authMiddleware,
-  usageLimitMiddleware({ freeLimit: 50 }),
+  usageLimitMiddleware(),
   costControlMiddleware,
   validateBody(contentUploadSchema),
   rateLimitMiddleware(10, 60000),

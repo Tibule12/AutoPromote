@@ -5,6 +5,18 @@ const { db, storage } = require("../firebaseAdmin");
 const logger = require("../utils/logger");
 const url = require("url");
 
+// Free tier upload limit (per month). Can be overridden with env var FREE_UPLOAD_LIMIT.
+// Default matches the PayPal plan configuration (5 uploads/month).
+const FREE_UPLOAD_LIMIT = parseInt(process.env.FREE_UPLOAD_LIMIT || "5", 10);
+
+// Sync this with the PayPal subscription plan configuration in src/routes/paypalSubscriptionRoutes.js
+const SUBSCRIPTION_UPLOAD_LIMITS = {
+  free: FREE_UPLOAD_LIMIT,
+  premium: 15,
+  pro: 25,
+  enterprise: 50,
+};
+
 /**
  * Helper to delete a file from storage if quota is exceeded
  */
@@ -42,7 +54,7 @@ async function cleanupUnauthorizedUpload(fileUrl) {
  * @param {string} options.limitType - Type of limit to check (default: 'upload')
  */
 function usageLimitMiddleware(options = {}) {
-  const freeLimit = options.freeLimit || 10;
+  const freeLimit = options.freeLimit || FREE_UPLOAD_LIMIT;
   const limitType = options.limitType || "upload";
 
   return async (req, res, next) => {
@@ -108,7 +120,7 @@ function usageLimitMiddleware(options = {}) {
         return next();
       }
 
-      // Check if user has paid subscription
+      // Check if user has subscription info
       const userDoc = await db.collection("users").doc(userId).get();
       const userData = userDoc.data() || {};
       const createdAt = userData.createdAt
@@ -121,21 +133,24 @@ function usageLimitMiddleware(options = {}) {
       const ONBOARDING_PERIOD_MS = 90 * 24 * 60 * 60 * 1000;
       const isInOnboarding = Date.now() - createdAt.getTime() < ONBOARDING_PERIOD_MS;
 
-      // Check subscription status
-      const hasPaidSubscription =
-        userData.subscriptionTier === "premium" ||
-        userData.subscriptionTier === "pro" ||
-        userData.isPaid === true ||
-        userData.unlimited === true;
+      // Determine the user's subscription tier
+      const subscriptionTier =
+        userData.subscriptionTier ||
+        (userData.subscription && userData.subscription.planId) ||
+        "free";
 
-      // Allow unlimited if paid OR in onboarding period
-      if (hasPaidSubscription || isInOnboarding) {
+      // Determine upload limit for the user based on plan
+      const planLimit = SUBSCRIPTION_UPLOAD_LIMITS[subscriptionTier] ?? FREE_UPLOAD_LIMIT;
+      const hasUnlimitedUploads = planLimit === Infinity;
+
+      // If the user has unlimited (paid) or is in onboarding, allow without counting
+      if (hasUnlimitedUploads || isInOnboarding) {
         req.userUsage = {
-          limit: Infinity,
+          limit: planLimit,
           used: 0,
-          remaining: Infinity,
-          isPaid: hasPaidSubscription,
-          isInOnboarding: !hasPaidSubscription && isInOnboarding, // Flag for specific UI messaging
+          remaining: planLimit,
+          isPaid: hasUnlimitedUploads,
+          isInOnboarding: !hasUnlimitedUploads && isInOnboarding,
           monthKey: new Date().toISOString().slice(0, 7),
         };
         return next();
@@ -166,14 +181,14 @@ function usageLimitMiddleware(options = {}) {
 
       // Attach usage info to request for logging
       req.userUsage = {
-        limit: freeLimit,
+        limit: planLimit,
         used: usageCount,
         remaining: remaining,
         isPaid: false,
         monthKey: monthKey,
       };
 
-      if (usageCount >= freeLimit) {
+      if (usageCount >= planLimit) {
         // CLEANUP: If the user uploaded a file but is over quota, delete it immediately.
         if (req.body && req.body.url) {
           // Run in background to not delay response, but ensure it runs
@@ -182,8 +197,8 @@ function usageLimitMiddleware(options = {}) {
 
         return res.status(403).json({
           error: "Monthly upload limit reached",
-          message: `You've reached your free tier limit of ${freeLimit} uploads per month. Upgrade to premium for unlimited uploads.`,
-          limit: freeLimit,
+          message: `You've reached your plan limit of ${planLimit} uploads per month. Upgrade for more uploads.`,
+          limit: planLimit,
           used: usageCount,
           remaining: 0,
           upgradeUrl: "/pricing",
@@ -302,7 +317,7 @@ async function getUserUsageStats(userId) {
       usageCount += data.count || 1;
     });
 
-    const freeLimit = 10;
+    const freeLimit = FREE_UPLOAD_LIMIT;
     return {
       isPaid: false,
       limit: freeLimit,
