@@ -26,10 +26,35 @@ const distributeContent = async (contentId, userId) => {
     }
 
     const content = doc.data();
-    const { url, title, description, target_platforms, platform_options } = content;
+    const {
+      url,
+      title,
+      description,
+      target_platforms,
+      platform_options,
+      distribution = {},
+    } = content;
 
     if (!target_platforms || target_platforms.length === 0) {
       logger.info(`[DistributionManager] No target platforms for ${contentId}`);
+      return;
+    }
+
+    // Guard: Prevent duplicate distribution for the same platform/content.
+    // If a previous run is already processing/published, skip that platform.
+    const platformsToPublish = target_platforms.filter(p => {
+      const status = distribution[p]?.status;
+      if (status === "processing" || status === "published") {
+        logger.info(
+          `[DistributionManager] Skipping ${p} for ${contentId} because status is '${status}'`
+        );
+        return false;
+      }
+      return true;
+    });
+
+    if (platformsToPublish.length === 0) {
+      logger.info(`[DistributionManager] All platforms already processed for ${contentId}`);
       return;
     }
 
@@ -46,6 +71,16 @@ const distributeContent = async (contentId, userId) => {
         const opts = platform_options?.youtube || {};
         const uploadUrl = opts.media_url || url; // Prefer specific file, fallback to global
 
+        // Respect visibility settings (public/unlisted/private) when configured by the user
+        const ytPrivacy = opts.privacy || opts.visibility;
+        logger.info(
+          `[DistributionManager] YouTube visibility for ${contentId}: ${ytPrivacy || "(default: public)"}`
+        );
+        const ytPayload = {
+          privacy: ytPrivacy,
+          platform_options: { youtube: opts },
+        };
+
         const result = await youtubeService.uploadVideo({
           uid: userId,
           title: title,
@@ -54,6 +89,7 @@ const distributeContent = async (contentId, userId) => {
           contentId: contentId,
           shortsMode: opts.shortsMode || false,
           skipIfDuplicate: true,
+          payload: ytPayload,
         });
 
         results.youtube = { success: true, id: result.videoId };
@@ -84,7 +120,7 @@ const distributeContent = async (contentId, userId) => {
             videoUrl: uploadUrl,
             title: title, // TikTok uses title as caption usually
             privacy: opts.privacy || "public_readers",
-          }
+          },
         });
 
         if (result.success) {
@@ -112,14 +148,14 @@ const distributeContent = async (contentId, userId) => {
           videoUrl: url,
           title: title,
           // Allow override of pageId specific to this post if provided in options
-          pageId: opts.pageId
+          pageId: opts.pageId,
         };
-        
+
         // Use facebookService
         const result = await postToFacebook({
           contentId,
           payload: fbPayload,
-          uid: userId
+          uid: userId,
         });
 
         if (result.success) {
@@ -145,13 +181,13 @@ const distributeContent = async (contentId, userId) => {
         const igPayload = {
           caption: description || title,
           media_url: url,
-          media_type: "VIDEO" // We assume video for now, or could check file type
+          media_type: "VIDEO", // We assume video for now, or could check file type
         };
 
         const result = await publishInstagram({
           contentId,
           payload: igPayload,
-          uid: userId
+          uid: userId,
         });
 
         if (result.success) {
@@ -225,7 +261,7 @@ const distributeContent = async (contentId, userId) => {
         await updatePlatformStatus(contentId, "linkedin", "failed", { error: err.message });
       }
     }
-    
+
     logger.info(`[DistributionManager] Distribution complete for ${contentId}`, results);
     return results;
   } catch (err) {
