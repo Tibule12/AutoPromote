@@ -267,6 +267,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       }
 
       if (!data || !data.redirectUrl || !data.params) throw new Error("invalid_payfast_response");
+
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = data.redirectUrl;
+      form.style.display = "none";
+
       Object.entries(data.params).forEach(([key, value]) => {
         const input = document.createElement("input");
         input.type = "hidden";
