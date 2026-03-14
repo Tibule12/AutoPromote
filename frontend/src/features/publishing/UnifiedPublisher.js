@@ -32,6 +32,23 @@ import FacebookForm from "../../components/PlatformForms/FacebookForm";
 // --- New Features ---
 import ViralScanner from "../../components/ViralScanner";
 
+// --- Helpers ---
+const PLATFORM_LABELS = {
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  instagram: "Instagram",
+  facebook: "Facebook",
+  linkedin: "LinkedIn",
+  reddit: "Reddit",
+};
+
+const getPlatformName = platformId => {
+  if (!platformId) return "";
+  return (
+    PLATFORM_LABELS[platformId] || `${platformId.charAt(0).toUpperCase()}${platformId.slice(1)}`
+  );
+};
+
 // --- Sub-components ---
 
 const PlatformPreview = ({
@@ -1154,6 +1171,24 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   platformId={platformId}
                   creatorInfo={tiktokCreator}
                 />
+
+                <button
+                  className="btn-primary-sm"
+                  style={{
+                    marginTop: "12px",
+                    width: "100%",
+                    fontSize: "0.9rem",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handlePublishPlatform(platformId)}
+                  disabled={isPublishing && publishingPlatform !== platformId}
+                >
+                  {isPublishing && publishingPlatform === platformId
+                    ? "Publishing..."
+                    : `Publish to ${getPlatformName(platformId)}`}
+                </button>
               </div>
             </div>
           </div>
@@ -1183,6 +1218,24 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   platformId={platformId}
                   creatorInfo={youtubeChannel}
                 />
+
+                <button
+                  className="btn-primary-sm"
+                  style={{
+                    marginTop: "12px",
+                    width: "100%",
+                    fontSize: "0.9rem",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handlePublishPlatform(platformId)}
+                  disabled={isPublishing && publishingPlatform !== platformId}
+                >
+                  {isPublishing && publishingPlatform === platformId
+                    ? "Publishing..."
+                    : `Publish to ${getPlatformName(platformId)}`}
+                </button>
               </div>
             </div>
           </div>
@@ -1211,6 +1264,24 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   mediaType={mediaType}
                   platformId={platformId}
                 />
+
+                <button
+                  className="btn-primary-sm"
+                  style={{
+                    marginTop: "12px",
+                    width: "100%",
+                    fontSize: "0.9rem",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handlePublishPlatform(platformId)}
+                  disabled={isPublishing && publishingPlatform !== platformId}
+                >
+                  {isPublishing && publishingPlatform === platformId
+                    ? "Publishing..."
+                    : `Publish to ${getPlatformName(platformId)}`}
+                </button>
               </div>
             </div>
           </div>
@@ -1239,6 +1310,24 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   mediaType={mediaType}
                   platformId={platformId}
                 />
+
+                <button
+                  className="btn-primary-sm"
+                  style={{
+                    marginTop: "12px",
+                    width: "100%",
+                    fontSize: "0.9rem",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handlePublishPlatform(platformId)}
+                  disabled={isPublishing && publishingPlatform !== platformId}
+                >
+                  {isPublishing && publishingPlatform === platformId
+                    ? "Publishing..."
+                    : `Publish to ${getPlatformName(platformId)}`}
+                </button>
               </div>
             </div>
           </div>
@@ -1268,6 +1357,24 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   platformId={platformId}
                   creatorInfo={linkedinProfile}
                 />
+
+                <button
+                  className="btn-primary-sm"
+                  style={{
+                    marginTop: "12px",
+                    width: "100%",
+                    fontSize: "0.9rem",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handlePublishPlatform(platformId)}
+                  disabled={isPublishing && publishingPlatform !== platformId}
+                >
+                  {isPublishing && publishingPlatform === platformId
+                    ? "Publishing..."
+                    : `Publish to ${getPlatformName(platformId)}`}
+                </button>
               </div>
             </div>
           </div>
@@ -1297,6 +1404,24 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   platformId={platformId}
                   creatorInfo={redditUser}
                 />
+
+                <button
+                  className="btn-primary-sm"
+                  style={{
+                    marginTop: "12px",
+                    width: "100%",
+                    fontSize: "0.9rem",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handlePublishPlatform(platformId)}
+                  disabled={isPublishing && publishingPlatform !== platformId}
+                >
+                  {isPublishing && publishingPlatform === platformId
+                    ? "Publishing..."
+                    : `Publish to ${getPlatformName(platformId)}`}
+                </button>
               </div>
             </div>
           </div>
@@ -1307,17 +1432,18 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   };
 
   // 4. Publish Action
-  const handlePublishAll = async () => {
+  const publish = async (platforms, label) => {
     if (!globalFile) {
       setFeedbackMessage("Please select a file first.");
       return;
     }
-    if (selectedPlatforms.length === 0) {
+    if (!platforms || platforms.length === 0) {
       setFeedbackMessage("Please select at least one platform.");
       return;
     }
 
     setIsPublishing(true);
+    setPublishingPlatform(platforms.length === 1 ? platforms[0] : "all");
     setFeedbackMessage("Preparing upload...");
 
     try {
@@ -1362,33 +1488,23 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       }
 
       // --- 3. Construct Payload ---
-      // Construct Payload for App.js handleContentUpload
       const platformOptionsMap = {};
 
-      selectedPlatforms.forEach(p => {
+      platforms.forEach(p => {
         const data = getPlatformEffectiveData(p);
-        // Simple spread for now - assumes PlatformForms provide correct shape
         platformOptionsMap[p] = { ...data };
 
-        // Specific Adjustments for App.js compatibility if needed
         if (p === "tiktok") {
-          // FIX: Map flat form data to nested 'commercial' object expected by backend complianceService
           platformOptionsMap[p].commercial = {
             isCommercial: data.commercialContent,
             yourBrand: data.yourBrand,
             brandedContent: data.brandedContent,
-            is_commercial_content: data.commercialContent, // Legacy/Service compatibility
+            is_commercial_content: data.commercialContent,
           };
-
-          // App.js checks "commercialContent" for is_sponsored logic (Keep flat for App.js)
           platformOptionsMap[p].commercialContent = data.commercialContent;
         }
 
-        // --- INSTAGRAM SANITIZATION ---
         if (p === "instagram") {
-          // If the user checked "Paid Partnership" but left the sponsor blank,
-          // the backend will reject it with a 400. We auto-disable it here
-          // to assume it was accidental or left over from exploration.
           if (platformOptionsMap[p].isPaidPartnership && !platformOptionsMap[p].sponsorUser) {
             console.warn(
               "[UnifiedPublisher] Sanitizing Instagram options: disabling isPaidPartnership (missing sponsorUser)"
@@ -1400,34 +1516,28 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
       const uploadParams = {
         url: finalUrl,
-        file: null, // We handled upload already
+        file: null,
         type: mediaType,
-        platforms: selectedPlatforms,
+        platforms,
         title: globalTitle,
         description: globalDescription,
         platform_options: platformOptionsMap,
-        // Pass global feature flags
         bounty: {
           amount: bountyAmount,
           niche: bountyNiche || "general",
         },
         protocol7: { enabled: protocol7Enabled, volatility: protocol7Volatility },
-        // Growth Features
         viral_boost: optimizeViral ? { force_seeding: true } : undefined,
-        repost_boost: repostBoost, // Boolean
-        share_boost: shareBoost, // Boolean
+        repost_boost: repostBoost,
+        share_boost: shareBoost,
         variants: variants && variants.length > 0 ? variants : undefined,
-
-        // Scheduling
         schedule: scheduledTime
           ? {
               date: new Date(scheduledTime).toISOString(),
               frequency: frequency,
             }
           : undefined,
-
         isDryRun: false,
-        // Metadata for backend processing (FFmpeg)
         meta: {
           trimStart: trimStart > 0 ? trimStart : undefined,
           trimEnd: trimEnd > 0 ? trimEnd : undefined,
@@ -1439,22 +1549,26 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         },
       };
 
-      // Delegate to parent (App.js) which handles Firebase Storage & Backend
       if (onUpload) {
         await onUpload(uploadParams);
-        setFeedbackMessage("Upload started successfully!");
+        setFeedbackMessage(`${label} started successfully!`);
       } else {
         console.warn("UnifiedPublisher: No onUpload prop provided");
         setFeedbackMessage("Error: Upload handler missing.");
       }
 
       setIsPublishing(false);
+      setPublishingPlatform(null);
     } catch (err) {
       console.error("UnifiedPublisher Error:", err);
       setFeedbackMessage(`Error: ${err.message}`);
       setIsPublishing(false);
+      setPublishingPlatform(null);
     }
   };
+
+  const handlePublishAll = () => publish(selectedPlatforms, "Publish Everywhere");
+  const handlePublishPlatform = platformId => publish([platformId], `Publish to ${platformId}`);
 
   const modalOpen = showVideoEditor || showViralScanner || showCropper;
 
@@ -1822,7 +1936,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                     checked={selectedPlatforms.includes(p)}
                     onChange={() => togglePlatform(p)}
                   />
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
+                  {getPlatformName(p)}
                 </label>
               ))}
             </div>
