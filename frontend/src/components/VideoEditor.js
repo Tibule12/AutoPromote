@@ -101,7 +101,20 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         console.warn("Failed to fetch credit balance", e);
       }
     }
+
     fetchCredits();
+
+    // If we came back from a PayFast purchase (redirect), refresh balance again
+    try {
+      const pending = localStorage.getItem("payfastPendingPurchase");
+      if (pending) {
+        localStorage.removeItem("payfastPendingPurchase");
+        fetchCredits();
+        setStatusMessage("Purchase complete! Your updated credit balance is shown above.");
+      }
+    } catch (_) {
+      // ignore storage errors (private browsing)
+    }
   }, []);
 
   // Load PayPal SDK when the credit shop is visible
@@ -215,12 +228,22 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             throw new Error(details.error || "capture_failed");
           }
 
-          setCreditBalance(prev => {
-            const prevNum = typeof prev === "number" ? prev : Number(prev) || 0;
-            return prevNum + (details.newCredits || 0);
-          });
+          const newBalance = typeof details.balance === "number" ? details.balance : null;
+          const addedCredits = typeof details.newCredits === "number" ? details.newCredits : null;
+
+          if (newBalance !== null) {
+            setCreditBalance(newBalance);
+          } else {
+            setCreditBalance(prev => {
+              const prevNum = typeof prev === "number" ? prev : Number(prev) || 0;
+              return prevNum + (addedCredits || 0);
+            });
+          }
+
           setNeedsCredits(false);
-          setStatusMessage(`Purchase complete! +${details.newCredits} credits added.`);
+          setStatusMessage(
+            `Purchase complete! +${addedCredits != null ? addedCredits : "?"} credits added.`
+          );
           setShowCreditShop(false);
           setSelectedPackage(null);
         },
@@ -246,6 +269,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         },
         body: JSON.stringify({ packageId: pkg.id }),
       });
+
+      try {
+        localStorage.setItem("payfastPendingPurchase", "1");
+      } catch (_) {
+        // ignore if storage isn't available
+      }
 
       const text = await res.text();
       let data = null;
