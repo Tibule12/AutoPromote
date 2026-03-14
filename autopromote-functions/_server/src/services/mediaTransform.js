@@ -7,13 +7,14 @@ const { v4: uuidv4 } = require("uuid"); // Ensure consistent uuid import
 
 // Configure FFmpeg path (Ensure ffmpeg is installed in environment or docker image)
 try {
-  const ffmpegPath = require("ffmpeg-static");
+  const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
+  const ffmpegPath = ffmpegInstaller.path;
   if (ffmpegPath) {
     ffmpeg.setFfmpegPath(ffmpegPath);
-    console.log(`[MediaTransform] Using ffmpeg-static at ${ffmpegPath}`);
+    console.log(`[MediaTransform] Using ffmpeg installer at ${ffmpegPath}`);
   }
 } catch (e) {
-  console.warn("[MediaTransform] ffmpeg-static not found, relying on system PATH ffmpeg");
+  console.warn("[MediaTransform] @ffmpeg-installer/ffmpeg not found, relying on system PATH ffmpeg");
 }
 
 /**
