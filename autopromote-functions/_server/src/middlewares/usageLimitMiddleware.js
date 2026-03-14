@@ -5,6 +5,9 @@ const { db, storage } = require("../firebaseAdmin");
 const logger = require("../utils/logger");
 const url = require("url");
 
+// Free tier upload limit (per month). Can be overridden with env var FREE_UPLOAD_LIMIT.
+const FREE_UPLOAD_LIMIT = parseInt(process.env.FREE_UPLOAD_LIMIT || "10", 10);
+
 /**
  * Helper to delete a file from storage if quota is exceeded
  */
@@ -42,7 +45,7 @@ async function cleanupUnauthorizedUpload(fileUrl) {
  * @param {string} options.limitType - Type of limit to check (default: 'upload')
  */
 function usageLimitMiddleware(options = {}) {
-  const freeLimit = options.freeLimit || 10;
+  const freeLimit = options.freeLimit || FREE_UPLOAD_LIMIT;
   const limitType = options.limitType || "upload";
 
   return async (req, res, next) => {
@@ -302,7 +305,7 @@ async function getUserUsageStats(userId) {
       usageCount += data.count || 1;
     });
 
-    const freeLimit = 10;
+    const freeLimit = FREE_UPLOAD_LIMIT;
     return {
       isPaid: false,
       limit: freeLimit,

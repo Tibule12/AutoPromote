@@ -163,7 +163,8 @@ function rateLimitMiddleware(limit = 10, windowMs = 60000) {
 router.post(
   "/upload",
   authMiddleware,
-  usageLimitMiddleware({ freeLimit: 50 }),
+  usageLimitMiddleware(),
+
   costControlMiddleware,
   validateBody(contentUploadSchema),
   rateLimitMiddleware(10, 60000),
@@ -583,8 +584,11 @@ router.post(
         }
       };
 
-      // Start the background process (do not await)
+      // Start the background processes (do not await)
       backgroundOptimization();
+      trackUsage(userId).catch(e => {
+        console.warn("[upload] Failed to track usage:", e && e.message ? e.message : e);
+      });
 
       // IMMEDIATE RESPONSE TO USER
       // We return success immediately, trusting the background process to handle the rest.

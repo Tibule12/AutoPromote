@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { auth } from "../firebaseClient";
-import { API_ENDPOINTS } from "../config";
+import { API_ENDPOINTS, ENABLE_WOLF_HUNT } from "../config";
 
 const EarningsPanel = ({ earnings, onClaim, onNavigate }) => {
   const [payoutHistory, setPayoutHistory] = useState([]);
@@ -264,16 +265,24 @@ const EarningsPanel = ({ earnings, onClaim, onNavigate }) => {
             </p>
 
             <button
-              onClick={() => onNavigate && onNavigate("wolf_hunt")}
+              onClick={() => {
+                if (!ENABLE_WOLF_HUNT) {
+                  toast("🐺 Wolf Hunt is currently locked.", { icon: "🔒" });
+                  return;
+                }
+                onNavigate && onNavigate("wolf_hunt");
+              }}
+              disabled={!ENABLE_WOLF_HUNT}
               style={{
-                background: "#6366f1",
+                background: ENABLE_WOLF_HUNT ? "#6366f1" : "#9ca3af",
                 color: "white",
                 border: "none",
                 padding: "10px 20px",
                 borderRadius: "6px",
                 fontWeight: "bold",
-                cursor: "pointer",
-                boxShadow: "0 4px 14px 0 rgba(99, 102, 241, 0.39)",
+                cursor: ENABLE_WOLF_HUNT ? "pointer" : "not-allowed",
+                boxShadow: ENABLE_WOLF_HUNT ? "0 4px 14px 0 rgba(99, 102, 241, 0.39)" : "none",
+                opacity: ENABLE_WOLF_HUNT ? 1 : 0.6,
               }}
             >
               Go to Missions Board →

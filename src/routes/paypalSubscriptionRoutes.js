@@ -115,24 +115,11 @@ const SUBSCRIPTION_PLANS = {
     name: "Free",
     price: 0,
     features: {
-      uploads: 3,
+      uploads: 5, // Matches PayPal Free plan
       platformLimit: 1, // Single platform
       wolfHuntTasks: 5, // Daily tasks limit (earn credits)
       analytics: "Basic",
       support: "Community",
-    },
-  },
-  basic: {
-    id: "basic",
-    name: "Basic",
-    price: 29,
-    paypalPlanId: process.env.PAYPAL_BASIC_PLAN_ID,
-    features: {
-      uploads: 30,
-      platformLimit: 3, // Multi-platform
-      wolfHuntTasks: 15,
-      analytics: "Standard",
-      support: "Email",
     },
   },
   premium: {
@@ -154,7 +141,7 @@ const SUBSCRIPTION_PLANS = {
     price: 29.99,
     paypalPlanId: process.env.PAYPAL_PRO_PLAN_ID,
     features: {
-      uploads: 50,
+      uploads: 25, // Fixed cap for external API constraints
       platformLimit: "Unlimited", // Global distribution
       wolfHuntTasks: 100, // Serious earning potential
       analytics: "Enterprise",
@@ -167,7 +154,7 @@ const SUBSCRIPTION_PLANS = {
     price: 99.99,
     paypalPlanId: process.env.PAYPAL_ENTERPRISE_PLAN_ID,
     features: {
-      uploads: "unlimited",
+      uploads: 50, // Set cap to prevent external API overage
       platformLimit: "Unlimited",
       wolfHuntTasks: 500, // Maximum earning capacity
       analytics: "Enterprise",

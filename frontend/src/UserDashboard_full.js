@@ -28,7 +28,7 @@ import AdminKyc from "./AdminKyc";
 import UsageLimitBanner from "./components/UsageLimitBanner";
 import { auth } from "./firebaseClient";
 import { sendEmailVerification } from "firebase/auth";
-import { API_ENDPOINTS, API_BASE_URL } from "./config";
+import { API_ENDPOINTS, API_BASE_URL, ENABLE_WOLF_HUNT } from "./config";
 import toast, { Toaster } from "react-hot-toast";
 import { cachedFetch, batchWithDelay, clearCache } from "./utils/requestCache";
 import { isSafeRedirectUrl } from "./utils/security";
@@ -51,6 +51,13 @@ const UserDashboard = ({
 }) => {
   const [activeTab, setActiveTab] = useState("profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // If Wolf Hunt is disabled, prevent accidentally staying on that tab
+  useEffect(() => {
+    if (!ENABLE_WOLF_HUNT && activeTab === "wolf_hunt") {
+      setActiveTab("profile");
+    }
+  }, [activeTab]);
   const [earnings, setEarnings] = useState(null);
   const [notifs, setNotifs] = useState(Array.isArray(notifications) ? notifications : []);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -302,10 +309,17 @@ const UserDashboard = ({
     };
   }, []); // Empty dependency array to run only once on mount
 
-  const handleNav = useCallback(tab => {
-    setActiveTab(tab);
-    setSidebarOpen(false);
-  }, []);
+  const handleNav = useCallback(
+    tab => {
+      if (tab === "wolf_hunt" && !ENABLE_WOLF_HUNT) {
+        toast("🐺 Wolf Hunt is currently locked. Come back later!", { icon: "🔒" });
+        return;
+      }
+      setActiveTab(tab);
+      setSidebarOpen(false);
+    },
+    [ENABLE_WOLF_HUNT]
+  );
   const triggerSchedulesRefresh = useCallback(() => {
     onSchedulesChanged && onSchedulesChanged();
   }, [onSchedulesChanged]);
@@ -1046,17 +1060,30 @@ const UserDashboard = ({
               >
                 Security
               </li>
-              <li
-                className={activeTab === "wolf_hunt" ? "active" : ""}
-                onClick={() => handleNav("wolf_hunt")}
-              >
-                🐺 Wolf Hunt
-              </li>
+              {ENABLE_WOLF_HUNT ? (
+                <li
+                  className={activeTab === "wolf_hunt" ? "active" : ""}
+                  onClick={() => handleNav("wolf_hunt")}
+                >
+                  🐺 Wolf Hunt
+                </li>
+              ) : (
+                <li
+                  className="locked-feature"
+                  style={{ opacity: 0.6, cursor: "not-allowed" }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    toast("🐺 Wolf Hunt is currently locked.", { icon: "🔒" });
+                  }}
+                >
+                  🐺 Wolf Hunt 🔒
+                </li>
+              )}
               <li
                 className={activeTab === "idea_video" ? "active" : ""}
                 onClick={() => handleNav("idea_video")}
               >
-                AI Video Generator
+                AI Video Generator ✨
               </li>
               <li
                 className="locked-feature"
@@ -1067,12 +1094,6 @@ const UserDashboard = ({
                 }}
               >
                 AI Clips 🔒
-              </li>
-              <li
-                className={activeTab === "idea_video" ? "active" : ""}
-                onClick={() => handleNav("idea_video")}
-              >
-                AI Video Generator ✨
               </li>
             </ul>
           </nav>

@@ -46,10 +46,11 @@ async function main() {
   const preset = argv.preset || argv.p || "veryfast";
   const crf = argv.crf || argv.c || 23;
 
-  // Attempt to use bundled ffmpeg (ffmpeg-static) if available
+  // Attempt to use bundled ffmpeg (ffmpeg installer) if available
   let ffmpegPath;
   try {
-    ffmpegPath = require("ffmpeg-static");
+    const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
+    ffmpegPath = ffmpegInstaller.path;
   } catch (e) {
     // fallback to system ffmpeg
     ffmpegPath = "ffmpeg";

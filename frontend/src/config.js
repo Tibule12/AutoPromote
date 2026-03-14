@@ -18,6 +18,10 @@ export const MEDIA_API_URL = process.env.REACT_APP_MEDIA_API_URL || "http://loca
 // Public site URL used for user-facing pages (Terms, Privacy, etc.)
 export const PUBLIC_SITE_URL = process.env.REACT_APP_SITE_URL || "https://autopromote.org";
 
+// Feature flags (controlled via environment variables)
+// Wolf Hunt is disabled by default; set REACT_APP_ENABLE_WOLF_HUNT=true to enable.
+export const ENABLE_WOLF_HUNT = process.env.REACT_APP_ENABLE_WOLF_HUNT === "true";
+
 // API Endpoints
 export const API_ENDPOINTS = {
   // Auth endpoints
