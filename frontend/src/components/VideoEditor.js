@@ -73,6 +73,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           const text = await r.text();
           try {
             const data = JSON.parse(text);
+            console.log("credits/balance response:", data);
             setCreditBalance(data.balance);
             setStatusMessage(`You have ${formatBalance(data.balance)} credits available.`);
           } catch (jsonErr) {
@@ -224,6 +225,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           );
 
           const details = await res.json();
+          console.log("capture-order response:", details);
           if (!res.ok || !details.success) {
             throw new Error(details.error || "capture_failed");
           }
@@ -242,7 +244,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
           setNeedsCredits(false);
           setStatusMessage(
-            `Purchase complete! +${addedCredits != null ? addedCredits : "?"} credits added.`
+            `Purchase complete! +${addedCredits != null ? addedCredits : "?"} credits added. (balance: ${
+              newBalance != null ? newBalance : "?"
+            })`
           );
           setShowCreditShop(false);
           setSelectedPackage(null);
