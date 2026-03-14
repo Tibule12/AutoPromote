@@ -3,6 +3,13 @@ const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
 const router = express.Router();
 
+function parseTimestamp(value) {
+  if (!value) return null;
+  if (value.toMillis) return value.toMillis();
+  const t = Date.parse(value);
+  return isNaN(t) ? null : t;
+}
+
 // Get content analytics
 router.get("/content/:id", authMiddleware, async (req, res) => {
   try {
@@ -205,6 +212,10 @@ router.get("/user", authMiddleware, async (req, res) => {
         return tB - tA;
       });
 
+      let latestSnapshot = null;
+      let lastUpdatedAt = null;
+      let nextUpdateAt = null;
+
       docs.forEach(p => {
         if (!p.platform) return;
 
@@ -261,6 +272,23 @@ router.get("/user", authMiddleware, async (req, res) => {
         totalViews += parseInt(views || 0, 10);
         totalLikes += parseInt(likes || 0, 10);
         totalShares += parseInt(shares || 0, 10);
+
+        // Track latest analytics snapshot & next scheduled check
+        if (Array.isArray(p.analytics_snapshots)) {
+          p.analytics_snapshots.forEach(s => {
+            if (!s || !s.timestamp) return;
+            const ts = parseTimestamp(s.timestamp);
+            if (!ts) return;
+            if (!lastUpdatedAt || ts > lastUpdatedAt) {
+              lastUpdatedAt = ts;
+              latestSnapshot = s;
+            }
+          });
+        }
+        const nextCheckTs = parseTimestamp(p.next_check_at);
+        if (nextCheckTs && (!nextUpdateAt || nextCheckTs < nextUpdateAt)) {
+          nextUpdateAt = nextCheckTs;
+        }
       });
     } catch (e) {
       console.warn("[Analytics] Failed to aggregate platform_posts:", e.message);
@@ -380,6 +408,9 @@ router.get("/user", authMiddleware, async (req, res) => {
       .sort((a, b) => b.views - a.views)
       .slice(0, 5);
 
+    const latestSnapshotAt = lastUpdatedAt ? new Date(lastUpdatedAt).toISOString() : null;
+    const nextUpdateAtStr = nextUpdateAt ? new Date(nextUpdateAt).toISOString() : null;
+
     res.json({
       range,
       totalContent: filteredDocs.length,
@@ -395,6 +426,11 @@ router.get("/user", authMiddleware, async (req, res) => {
       byPlatform: contentByPlatform, // Keep for backward compat if any
       topPlatform,
       topContent,
+
+      // Analytics snapshot info
+      latestSnapshot,
+      lastUpdatedAt: latestSnapshotAt,
+      nextUpdateAt: nextUpdateAtStr,
 
       viralityTracker: bestContent,
       performanceStatus,
