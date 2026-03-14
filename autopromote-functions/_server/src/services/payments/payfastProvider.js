@@ -22,7 +22,9 @@ function buildPayfastSignature(params = {}, passphrase) {
   const pieces = keys.map(k => `${k}=${params[k]}`);
   let signatureString = pieces.join("&");
   if (passphrase) signatureString = signatureString + `&passphrase=${passphrase}`;
-  // Intentionally using MD5 per PayFast spec (external signature), not for passwords
+  // Intentionally using MD5 per PayFast spec (external signature), not for passwords.
+  // This is not used for authentication or storing secrets.
+  // eslint-disable-next-line security/detect-weak-hash
   return crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
 }
 

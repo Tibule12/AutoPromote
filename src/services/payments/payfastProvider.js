@@ -44,7 +44,8 @@ function buildPayfastSignature(params = {}, passphrase) {
     console.info("[PayFast] signature string:", signatureString);
   }
 
-  // Intentionally using MD5 per PayFast spec (external signature), not for passwords
+  // Intentionally using MD5 per PayFast spec (external signature), not for passwords.
+  // This is not used for authentication or storing secrets.
   return crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
 }
 
@@ -62,7 +63,7 @@ class PayFastProvider extends PaymentProvider {
         : "https://www.payfast.co.za/eng/process");
   }
 
-  async getAccountStatus(user) {
+  async getAccountStatus() {
     return { ok: true, configured: !!this.merchantId };
   }
 
