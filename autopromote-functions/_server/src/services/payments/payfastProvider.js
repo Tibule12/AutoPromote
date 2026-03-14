@@ -70,8 +70,7 @@ class PayFastProvider extends PaymentProvider {
       notify_url:
         notifyUrl ||
         process.env.PAYFAST_NOTIFY_URL ||
-        process.env.PAYFAST_NOTIFY_URL ||
-        (process.env.APP_BASE_URL || "") + "/api/payfast/webhook",
+        (process.env.APP_BASE_URL || "") + "/api/payfast/notify",
       m_payment_id,
       amount: Number(amount).toFixed(2),
       item_name: metadata.item_name || metadata.description || "AutoPromote payment",
