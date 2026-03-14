@@ -63,17 +63,26 @@ export default function LiveWatch({ liveId: propLiveId, token: propToken, onExit
     // fetch paypal config for client id
     const load = async () => {
       try {
-        // Use configured endpoint or relative path if not defined
+        const apiBase = process.env.REACT_APP_API_URL
+          ? process.env.REACT_APP_API_URL.replace(/\/$/, "")
+          : "";
         const url =
           (API_ENDPOINTS && API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG) ||
-          (process.env.REACT_APP_API_URL
-            ? `${process.env.REACT_APP_API_URL}/api/payments/paypal/config`
-            : "/api/payments/paypal/config");
+          (apiBase ? `${apiBase}/api/payments/paypal/config` : "/api/payments/paypal/config");
         const res = await fetch(url);
-        const body = await res.json().catch(() => ({}));
+        const text = await res.text();
+        let body = null;
+        try {
+          body = text ? JSON.parse(text) : null;
+        } catch (_) {
+          console.warn("PayPal config endpoint returned invalid JSON", {
+            status: res.status,
+            text,
+          });
+        }
         if (res.ok) {
-          setClientId(body.clientId || null);
-          setCurrency(body.currency || "USD");
+          setClientId((body && body.clientId) || null);
+          setCurrency((body && body.currency) || "USD");
         }
       } catch (_) {}
     };
@@ -101,23 +110,51 @@ export default function LiveWatch({ liveId: propLiveId, token: propToken, onExit
           .Buttons({
             createOrder: async (_data, actions) => {
               // create server order
-              const resp = await fetch("/api/payments/paypal/create-order", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount: selectedAmount, currency }),
-              });
-              const body = await resp.json();
-              if (!resp.ok)
-                throw new Error(body && body.reason ? body.reason : "create_order_failed");
+              const apiBase = process.env.REACT_APP_API_URL
+                ? process.env.REACT_APP_API_URL.replace(/\/$/, "")
+                : "";
+              const resp = await fetch(
+                apiBase
+                  ? `${apiBase}/api/payments/paypal/create-order`
+                  : "/api/payments/paypal/create-order",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ amount: selectedAmount, currency }),
+                }
+              );
+              const text = await resp.text();
+              let body = null;
+              try {
+                body = text ? JSON.parse(text) : null;
+              } catch (e) {
+                console.warn("create-order returned invalid JSON", { status: resp.status, text });
+              }
+              if (!resp.ok) {
+                const message =
+                  (body && (body.error || body.reason)) ||
+                  (typeof text === "string" && text.trim()) ||
+                  `HTTP ${resp.status}`;
+                throw new Error(message);
+              }
+              if (!body || !body.orderId) {
+                throw new Error("create_order_no_id");
+              }
               return body.orderId;
             },
             onApprove: async data => {
               // capture on server
-              const resp = await fetch("/api/payments/paypal/capture", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId: data.orderID, liveId }),
-              });
+              const apiBase = process.env.REACT_APP_API_URL
+                ? process.env.REACT_APP_API_URL.replace(/\/$/, "")
+                : "";
+              const resp = await fetch(
+                apiBase ? `${apiBase}/api/payments/paypal/capture` : "/api/payments/paypal/capture",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ orderId: data.orderID, liveId }),
+                }
+              );
               const body = await resp.json();
               if (resp.ok && body.ok && body.url) {
                 if (!isSafeRedirectUrl(body.url)) {
@@ -225,22 +262,50 @@ export default function LiveWatch({ liveId: propLiveId, token: propToken, onExit
         window.paypal
           .Buttons({
             createOrder: async (_data, _actions) => {
-              const resp = await fetch("/api/payments/paypal/create-order", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount: tipAmount, currency }),
-              });
-              const body = await resp.json();
-              if (!resp.ok)
-                throw new Error(body && body.reason ? body.reason : "create_order_failed");
+              const apiBase = process.env.REACT_APP_API_URL
+                ? process.env.REACT_APP_API_URL.replace(/\/$/, "")
+                : "";
+              const resp = await fetch(
+                apiBase
+                  ? `${apiBase}/api/payments/paypal/create-order`
+                  : "/api/payments/paypal/create-order",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ amount: tipAmount, currency }),
+                }
+              );
+              const text = await resp.text();
+              let body = null;
+              try {
+                body = text ? JSON.parse(text) : null;
+              } catch (e) {
+                console.warn("create-order returned invalid JSON", { status: resp.status, text });
+              }
+              if (!resp.ok) {
+                const message =
+                  (body && (body.error || body.reason)) ||
+                  (typeof text === "string" && text.trim()) ||
+                  `HTTP ${resp.status}`;
+                throw new Error(message);
+              }
+              if (!body || !body.orderId) {
+                throw new Error("create_order_no_id");
+              }
               return body.orderId;
             },
             onApprove: async data => {
-              const resp = await fetch("/api/payments/paypal/capture", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId: data.orderID, liveId }),
-              });
+              const apiBase = process.env.REACT_APP_API_URL
+                ? process.env.REACT_APP_API_URL.replace(/\/$/, "")
+                : "";
+              const resp = await fetch(
+                apiBase ? `${apiBase}/api/payments/paypal/capture` : "/api/payments/paypal/capture",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ orderId: data.orderID, liveId }),
+                }
+              );
               await resp.json().catch(() => ({}));
               if (resp.ok) {
                 // show confetti and floating emote
