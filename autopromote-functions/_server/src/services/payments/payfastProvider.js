@@ -20,10 +20,10 @@ function buildPayfastSignature(params = {}, passphrase) {
     .filter(k => params[k] !== undefined && params[k] !== null && params[k] !== "")
     .sort();
   const pieces = keys.map(k => `${k}=${params[k]}`);
-  let str = pieces.join("&");
-  if (passphrase) str = str + `&passphrase=${passphrase}`;
+  let signatureString = pieces.join("&");
+  if (passphrase) signatureString = signatureString + `&passphrase=${passphrase}`;
   // Intentionally using MD5 per PayFast spec (external signature), not for passwords
-  return crypto.createHash("md5").update(str, "utf8").digest("hex");
+  return crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
 }
 
 class PayFastProvider extends PaymentProvider {
