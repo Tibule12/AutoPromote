@@ -101,6 +101,9 @@ export const API_ENDPOINTS = {
   // Credits (for AI/strategy credit balance)
   CREDITS_BALANCE: `${API_BASE_URL}/api/monetization/credits/balance`,
 
+  // PayPal configuration endpoint used by frontend SDK loaders
+  PAYMENTS_PAYPAL_CONFIG: `${API_BASE_URL}/api/payments/paypal/config`,
+
   // New platform endpoints (placeholders)
   SPOTIFY_AUTH_START: `${API_BASE_URL}/api/spotify/auth/start`,
   SPOTIFY_STATUS: `${API_BASE_URL}/api/spotify/status`,

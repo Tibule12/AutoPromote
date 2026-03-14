@@ -110,10 +110,19 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
     const load = async () => {
       try {
-        const res = await fetch("/api/payments/paypal/config");
-        const data = await res.json().catch(() => ({}));
-        const clientId = data.clientId || "sb";
-        const currency = data.currency || "USD";
+        const res = await fetch(API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG);
+        const text = await res.text();
+        let data = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (e) {
+          console.warn("PayPal config endpoint returned invalid JSON", {
+            status: res.status,
+            text,
+          });
+        }
+        const clientId = (data && data.clientId) || "sb";
+        const currency = (data && data.currency) || "USD";
 
         if (document.getElementById("paypal-sdk-video-editor")) {
           setPaypalLoaded(true);
@@ -151,17 +160,37 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           const user = auth.currentUser;
           const token = user ? await user.getIdToken() : null;
 
-          const res = await fetch("/api/payments/credits/create-order", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({ packageId: selectedPackage.id }),
-          });
+          const res = await fetch(
+            `${API_BASE_URL.replace(/\/$/, "")}/api/payments/credits/create-order`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify({ packageId: selectedPackage.id }),
+            }
+          );
 
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "create_order_failed");
+          const text = await res.text();
+          let data = null;
+          try {
+            data = text ? JSON.parse(text) : null;
+          } catch (e) {
+            console.warn("create-order returned invalid JSON", { status: res.status, text });
+          }
+
+          if (!res.ok) {
+            const message =
+              (data && (data.error || data.reason)) ||
+              (typeof text === "string" && text.trim()) ||
+              `HTTP ${res.status}`;
+            throw new Error(message);
+          }
+
+          if (!data || !data.id) {
+            throw new Error("create_order_no_id");
+          }
           return data.id;
         },
         onApprove: async data => {
@@ -169,14 +198,17 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           const user = auth.currentUser;
           const token = user ? await user.getIdToken() : null;
 
-          const res = await fetch("/api/payments/credits/capture-order", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({ orderID: data.orderID, packageId: selectedPackage.id }),
-          });
+          const res = await fetch(
+            `${API_BASE_URL.replace(/\/$/, "")}/api/payments/credits/capture-order`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify({ orderID: data.orderID, packageId: selectedPackage.id }),
+            }
+          );
 
           const details = await res.json();
           if (!res.ok || !details.success) {
@@ -206,7 +238,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       const user = auth.currentUser;
       const token = user ? await user.getIdToken() : null;
 
-      const res = await fetch("/api/payments/payfast/init", {
+      const res = await fetch(`${API_BASE_URL}/api/payments/payfast/init`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -215,15 +247,26 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         body: JSON.stringify({ packageId: pkg.id }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "payfast_init_failed");
-      if (!data.redirectUrl || !data.params) throw new Error("invalid_payfast_response");
+      const text = await res.text();
+      let data = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch (err) {
+        console.warn("PayFast init endpoint returned invalid JSON", {
+          status: res.status,
+          text: text && text.slice ? text.slice(0, 800) : text,
+        });
+      }
 
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = data.redirectUrl;
-      form.style.display = "none";
+      if (!res.ok) {
+        const message =
+          (data && (data.error || data.reason)) ||
+          (typeof text === "string" && text.trim()) ||
+          `HTTP ${res.status}`;
+        throw new Error(message);
+      }
 
+      if (!data || !data.redirectUrl || !data.params) throw new Error("invalid_payfast_response");
       Object.entries(data.params).forEach(([key, value]) => {
         const input = document.createElement("input");
         input.type = "hidden";
