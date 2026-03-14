@@ -1,6 +1,7 @@
 const { PaymentProvider } = require("./providerInterface");
 const { db } = require("../../firebaseAdmin");
 const crypto = require("crypto");
+const querystring = require("querystring");
 
 /**
  * Build PayFast signature string using MD5 hash.
@@ -15,24 +16,27 @@ const crypto = require("crypto");
  * @returns {string} hexadecimal MD5 signature
  */
 function buildPayfastSignature(params = {}, passphrase) {
-  // Per PayFast docs, signature is computed using a URL-encoded string of params.
-  // Values must be percent-encoded using RFC 1738 (spaces as +).
-  const encode = value =>
-    encodeURIComponent(String(value))
-      .replace(/%20/g, "+")
-      .replace(/%21/g, "!")
-      .replace(/%27/g, "'")
-      .replace(/%28/g, "(")
-      .replace(/%29/g, ")");
+  // PayFast expects signatures generated from a URL-encoded query string
+  // built from all params (sorted alphabetically) and an optional passphrase.
+  // This matches PHP's http_build_query() with RFC1738 rules (spaces => +).
+
+  const encodeRfc1738 = value => encodeURIComponent(String(value)).replace(/%20/g, "+");
 
   const keys = Object.keys(params)
     .filter(k => params[k] !== undefined && params[k] !== null && params[k] !== "")
     .sort();
 
-  const pieces = keys.map(k => `${k}=${encode(params[k])}`);
-  let str = pieces.join("&");
+  const sortedParams = {};
+  keys.forEach(k => {
+    sortedParams[k] = params[k];
+  });
+
+  let str = querystring.stringify(sortedParams, "&", "=", {
+    encodeURIComponent: encodeRfc1738,
+  });
+
   if (passphrase) {
-    str = `${str}&passphrase=${encode(passphrase)}`;
+    str += `&passphrase=${encodeRfc1738(passphrase)}`;
   }
 
   // Intentionally using MD5 per PayFast spec (external signature), not for passwords
