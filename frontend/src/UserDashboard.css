@@ -338,15 +338,16 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
 .dashboard-navbar-vertical li {
   padding: 0.6rem 0.75rem;
   border-radius: 10px;
-  color: var(--muted);
+  color: #1e40af; /* Blue text for better visibility */
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  background: white;
 }
 .dashboard-navbar-vertical li.active,
 .dashboard-navbar-vertical li:hover {
-  color: var(--text);
-  border-color: rgba(139, 92, 246, 0.25);
-  background: linear-gradient(180deg, rgba(139, 92, 246, 0.09), rgba(139, 92, 246, 0.04));
+  color: white;
+  border-color: rgba(37, 99, 235, 0.55);
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9));
 }
 
 .logout-btn {
