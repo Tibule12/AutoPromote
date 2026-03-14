@@ -104,6 +104,25 @@ const AnalyticsPanel = () => {
         </select>
       </div>
 
+      {(analytics?.lastUpdatedAt || analytics?.nextUpdateAt) && (
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            fontSize: "0.8rem",
+            color: "#94a3b8",
+            marginBottom: "1rem",
+          }}
+        >
+          {analytics?.lastUpdatedAt && (
+            <span>Last updated: {new Date(analytics.lastUpdatedAt).toLocaleString()}</span>
+          )}
+          {analytics?.nextUpdateAt && (
+            <span>Next update: {new Date(analytics.nextUpdateAt).toLocaleString()}</span>
+          )}
+        </div>
+      )}
+
       {/* --- SALES SHARK PROGRESS TRACKERS --- */}
       {analytics && (
         <div

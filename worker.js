@@ -63,7 +63,7 @@ try {
 
 const LOOP_INTERVAL_MS = parseInt(process.env.JOB_LOOP_INTERVAL_MS || "5000", 10);
 const YT_POLL_INTERVAL_MS = parseInt(process.env.YT_STATS_LOOP_INTERVAL_MS || "60000", 10);
-const PLATFORM_POLL_INTERVAL_MS = parseInt(process.env.PLATFORM_STATS_LOOP_INTERVAL_MS || "30000", 10);
+const PLATFORM_POLL_INTERVAL_MS = parseInt(process.env.PLATFORM_STATS_LOOP_INTERVAL_MS || "900000", 10); // default 15 minutes
 const ENABLE = process.env.ENABLE_BACKGROUND_JOBS === "true";
 
 if (!ENABLE) {

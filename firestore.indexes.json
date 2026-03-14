@@ -747,6 +747,20 @@
       ]
     },
     {
+      "collectionGroup": "platform_posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "success",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "next_check_at",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "promotion_schedules",
       "queryScope": "COLLECTION_GROUP",
       "fields": [

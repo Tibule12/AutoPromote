@@ -110,38 +110,168 @@ async function fetchMetricsForPost(doc) {
   }
 }
 
+function getTimestamp(value) {
+  if (!value) return null;
+  if (value.toMillis) return value.toMillis();
+  const t = Date.parse(value);
+  return isNaN(t) ? null : t;
+}
+
+function computeNextAnalyticsCheck(publishedAtMs, nowMs, latestSnapshot) {
+  if (!publishedAtMs || !nowMs) return null;
+
+  const ageMinutes = (nowMs - publishedAtMs) / 60000;
+  const maxMinutes = 7 * 24 * 60; // 7 days
+  if (ageMinutes >= maxMinutes) return null;
+
+  // If after 24h and views are extremely low, stop polling to save costs
+  if (ageMinutes >= 24 * 60 && latestSnapshot && typeof latestSnapshot.views === "number") {
+    if (latestSnapshot.views < 20) return null;
+  }
+
+  const scheduleMinutes = [60, 180, 360, 720, 1440, 2880, 4320, 7200, 10080];
+  for (const minutes of scheduleMinutes) {
+    if (ageMinutes < minutes) {
+      return new Date(publishedAtMs + minutes * 60000).toISOString();
+    }
+  }
+  return null;
+}
+
+function normalizeSnapshot(metrics) {
+  if (!metrics || typeof metrics !== "object") return null;
+  const views =
+    parseInt(
+      metrics.view_count || metrics.views || metrics.impressions || metrics.impression_count || 0,
+      10
+    ) || 0;
+  const likes = parseInt(metrics.like_count || metrics.likes || 0, 10) || 0;
+  const comments = parseInt(metrics.comment_count || metrics.comments || 0, 10) || 0;
+  const shares =
+    parseInt(metrics.share_count || metrics.shares || metrics.retweet_count || 0, 10) || 0;
+  const retention = metrics.retention || metrics.watch_time || null;
+  const completion_rate = metrics.completion_rate || null;
+  return {
+    timestamp: new Date().toISOString(),
+    views,
+    likes,
+    comments,
+    shares,
+    retention,
+    completion_rate,
+  };
+}
+
 async function pollPlatformPostMetricsBatch({ batchSize = 5, maxAgeMinutes = 30 } = {}) {
   const cutoff = Date.now() - maxAgeMinutes * 60000;
-  const snap = await db
+  // Query by next_check_at to avoid scanning all docs each run.
+  // NOTE: Firestore requires a composite index on (success ASC, next_check_at ASC).
+  const nowIso = new Date().toISOString();
+
+  // 1) Get docs that are due for checking (next_check_at <= now)
+  const dueSnap = await db
     .collection("platform_posts")
     .where("success", "==", true)
-    .orderBy("createdAt", "desc")
-    .limit(batchSize * 5) // oversample then filter
+    .where("next_check_at", "<=", nowIso)
+    .orderBy("next_check_at")
+    .limit(batchSize * 2)
     .get()
     .catch(() => ({ empty: true, docs: [] }));
-  if (snap.empty) return { processed: 0 };
+
+  // 2) Also include new posts that haven't been scheduled yet (next_check_at null)
+  const unsetSnap = await db
+    .collection("platform_posts")
+    .where("success", "==", true)
+    .where("next_check_at", "==", null)
+    .orderBy("createdAt", "desc")
+    .limit(batchSize * 2)
+    .get()
+    .catch(() => ({ empty: true, docs: [] }));
+
+  const seen = new Set();
+  const docsToProcess = [];
+  const appendDocs = snap => {
+    if (snap.empty) return;
+    for (const d of snap.docs) {
+      if (seen.has(d.id)) continue;
+      seen.add(d.id);
+      docsToProcess.push(d);
+    }
+  };
+
+  appendDocs(dueSnap);
+  appendDocs(unsetSnap);
+
+  if (docsToProcess.length === 0) return { processed: 0 };
+
   let processed = 0;
-  for (const doc of snap.docs) {
+  for (const doc of docsToProcess) {
     if (processed >= batchSize) break;
     const d = doc.data();
     if (d.simulated) continue; // skip simulated posts
-    const lastCheckMs =
-      d.lastMetricsCheck && d.lastMetricsCheck.toMillis ? d.lastMetricsCheck.toMillis() : 0;
-    if (lastCheckMs && lastCheckMs > cutoff) continue; // recently checked
+
+    const nowMs = Date.now();
+
+    const publishedAtMs =
+      getTimestamp(d.publish_timestamp) ||
+      getTimestamp(d.publishedAt) ||
+      getTimestamp(d.createdAt) ||
+      nowMs;
+
+    const snapshots = Array.isArray(d.analytics_snapshots) ? d.analytics_snapshots : [];
+    const latestSnapshot =
+      snapshots
+        .slice()
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0] ||
+      null;
+
+    const nextScheduledCheck = computeNextAnalyticsCheck(publishedAtMs, nowMs, latestSnapshot);
+    if (!nextScheduledCheck) {
+      // Stopped polling (either past 7 days or low views after 24h)
+      await doc.ref.set(
+        {
+          next_check_at: null,
+          last_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+          lastMetricsCheck: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      continue;
+    }
+
+    const nextCheckMs = getTimestamp(d.next_check_at);
+    if (nextCheckMs && nextCheckMs > nowMs) continue; // not time yet
+
+    // If we haven't set next_check yet (or it's stale), update it to the calculated schedule and wait
+    if (!nextCheckMs || new Date(nextScheduledCheck).getTime() > nowMs) {
+      await doc.ref.set({ next_check_at: nextScheduledCheck }, { merge: true });
+      continue;
+    }
+
     try {
       const metrics = await fetchMetricsForPost(doc);
 
       // Update check time regardless of success to prevent rapid looping on failures
       const baseUpdate = {
+        last_checked_at: admin.firestore.FieldValue.serverTimestamp(),
         lastMetricsCheck: admin.firestore.FieldValue.serverTimestamp(),
+        next_check_at: nextScheduledCheck,
       };
 
       if (metrics) {
         const normalizedScore = computeNormalizedScore(d.platform, metrics);
+        const snapshot = normalizeSnapshot(metrics);
+        const mergedSnapshots = Array.isArray(snapshots) ? snapshots.slice() : [];
+        if (snapshot) {
+          mergedSnapshots.push(snapshot);
+          // Keep a reasonable history size
+          if (mergedSnapshots.length > 20) mergedSnapshots.splice(0, mergedSnapshots.length - 20);
+        }
         const update = {
           ...baseUpdate,
           metrics,
           normalizedScore,
+          analytics_snapshots: mergedSnapshots,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         };
         // Attempt to propagate impressions into variant materialized stats
