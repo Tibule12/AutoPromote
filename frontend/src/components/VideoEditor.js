@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./VideoEditor.css";
 // Use the main API URL (Node.js) instead of direct Python worker
-import { API_ENDPOINTS } from "../config";
+import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { getAuth } from "firebase/auth";
 import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getStorage } from "firebase/storage";
