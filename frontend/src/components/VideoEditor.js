@@ -74,8 +74,11 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           try {
             const data = JSON.parse(text);
             console.log("credits/balance response:", data);
+            console.log("credits/balance value:", data.balance && data.balance.balance);
             setCreditBalance(data.balance);
-            setStatusMessage(`You have ${formatBalance(data.balance)} credits available.`);
+            setStatusMessage(
+              `You have ${formatBalance(data.balance && data.balance.balance)} credits available.`
+            );
           } catch (jsonErr) {
             // Avoid dumping huge HTML into console while still keeping enough info
             const snippet = (text || "").slice(0, 400).replace(/\s+/g, " ");

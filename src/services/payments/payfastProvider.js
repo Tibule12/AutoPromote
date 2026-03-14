@@ -39,6 +39,11 @@ function buildPayfastSignature(params = {}, passphrase) {
     str += `&passphrase=${encodeRfc1738(passphrase)}`;
   }
 
+  // Debug: log the exact string we are hashing when debug enabled.
+  if (process.env.PAYFAST_DEBUG === "true") {
+    console.info("[PayFast] signature string:", str);
+  }
+
   // Intentionally using MD5 per PayFast spec (external signature), not for passwords
   return crypto.createHash("md5").update(str, "utf8").digest("hex");
 }
