@@ -31,21 +31,21 @@ function buildPayfastSignature(params = {}, passphrase) {
     sortedParams[k] = params[k];
   });
 
-  let str = querystring.stringify(sortedParams, "&", "=", {
+  let signatureString = querystring.stringify(sortedParams, "&", "=", {
     encodeURIComponent: encodeRfc1738,
   });
 
   if (passphrase) {
-    str += `&passphrase=${encodeRfc1738(passphrase)}`;
+    signatureString += `&passphrase=${encodeRfc1738(passphrase)}`;
   }
 
   // Debug: log the exact string we are hashing when debug enabled.
   if (process.env.PAYFAST_DEBUG === "true") {
-    console.info("[PayFast] signature string:", str);
+    console.info("[PayFast] signature string:", signatureString);
   }
 
   // Intentionally using MD5 per PayFast spec (external signature), not for passwords
-  return crypto.createHash("md5").update(str, "utf8").digest("hex");
+  return crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
 }
 
 class PayFastProvider extends PaymentProvider {
