@@ -146,6 +146,8 @@ const UserDashboard = ({
   useEffect(() => {
     // NEW: Check for "Wolf Hunt" onboarding criteria
     // Triggers if user has >= 2 content items AND hasn't seen the welcome yet
+    if (!ENABLE_WOLF_HUNT) return; // Do not show recruitment notice when Wolf Hunt is locked
+
     if (contentList && contentList.length >= 2) {
       const hasSeen = localStorage.getItem("wolfHuntWelcomeSeen");
 
