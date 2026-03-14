@@ -228,12 +228,22 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             throw new Error(details.error || "capture_failed");
           }
 
-          setCreditBalance(prev => {
-            const prevNum = typeof prev === "number" ? prev : Number(prev) || 0;
-            return prevNum + (details.newCredits || 0);
-          });
+          const newBalance = typeof details.balance === "number" ? details.balance : null;
+          const addedCredits = typeof details.newCredits === "number" ? details.newCredits : null;
+
+          if (newBalance !== null) {
+            setCreditBalance(newBalance);
+          } else {
+            setCreditBalance(prev => {
+              const prevNum = typeof prev === "number" ? prev : Number(prev) || 0;
+              return prevNum + (addedCredits || 0);
+            });
+          }
+
           setNeedsCredits(false);
-          setStatusMessage(`Purchase complete! +${details.newCredits} credits added.`);
+          setStatusMessage(
+            `Purchase complete! +${addedCredits != null ? addedCredits : "?"} credits added.`
+          );
           setShowCreditShop(false);
           setSelectedPackage(null);
         },
