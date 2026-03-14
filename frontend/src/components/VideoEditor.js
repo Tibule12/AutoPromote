@@ -296,7 +296,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
       if (!res.ok) {
         const message =
-          (data && (data.error || data.reason)) ||
+          (data && (data.details || data.error || data.reason)) ||
           (typeof text === "string" && text.trim()) ||
           `HTTP ${res.status}`;
         throw new Error(message);

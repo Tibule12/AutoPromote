@@ -159,7 +159,12 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
     });
 
     if (!result.success) {
-      return res.status(500).json({ error: "PayFast init failed", details: result.error });
+      console.error("PayFast init failed (provider):", result.error, result);
+      return res.status(500).json({
+        error: "PayFast init failed",
+        details: result.error || "unknown",
+        debug: process.env.PAYFAST_DEBUG === "true" ? result : undefined,
+      });
     }
 
     // Log the PayFast redirect payload (helps debug 403 signature / payload mismatch)
@@ -172,7 +177,11 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
     res.json(result.order);
   } catch (error) {
     console.error("PayFast Init Error:", error);
-    res.status(500).json({ error: "Failed to init PayFast payment" });
+    res.status(500).json({
+      error: "Failed to init PayFast payment",
+      details: error && error.message ? error.message : String(error),
+      stack: process.env.PAYFAST_DEBUG === "true" ? error.stack : undefined,
+    });
   }
 });
 
