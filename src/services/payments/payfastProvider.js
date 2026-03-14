@@ -92,8 +92,7 @@ class PayFastProvider extends PaymentProvider {
       notify_url:
         notifyUrl ||
         process.env.PAYFAST_NOTIFY_URL ||
-        process.env.PAYFAST_NOTIFY_URL ||
-        (process.env.APP_BASE_URL || "") + "/api/payfast/webhook",
+        (process.env.APP_BASE_URL || "") + "/api/payfast/notify",
       m_payment_id,
       amount: Number(amount).toFixed(2),
       item_name: metadata.item_name || metadata.description || "AutoPromote payment",
@@ -133,7 +132,17 @@ class PayFastProvider extends PaymentProvider {
       console.warn("PayFast createOrder: failed to persist payment draft", e && e.message);
     }
 
-    return { success: true, order: { redirectUrl: this.processUrl, params } };
+    const order = { redirectUrl: this.processUrl, params };
+
+    if (process.env.PAYFAST_DEBUG === "true") {
+      // Make it easy to diagnose signature mismatches without digging through logs.
+      order.debug = {
+        signatureString: str,
+        computedSignature: signature,
+      };
+    }
+
+    return { success: true, order };
   }
 
   async verifyNotification(req) {

@@ -149,7 +149,7 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
       returnUrl: `${baseUrl}/marketplace?payment=success&pkg=${packageId}`,
       cancelUrl: `${baseUrl}/marketplace?payment=cancelled`,
       // PayFast expects an ITN/notify URL that is publicly reachable.
-      notifyUrl: `${apiUrl}/api/payfast/webhook`,
+      notifyUrl: `${apiUrl}/api/payfast/notify`,
       metadata: {
         m_payment_id,
         item_name: `Credits: ${pack.credits} (${packageId})`,
@@ -231,6 +231,32 @@ router.post("/payfast/notify", async (req, res) => {
         },
         { merge: true }
       );
+
+      // Keep the user_credits collection in sync so balance endpoints show the updated amount.
+      const creditsRef = db.collection("user_credits").doc(userId);
+      const creditsDoc = await t.get(creditsRef);
+      const currentBalance = creditsDoc.exists ? creditsDoc.data().balance || 0 : 0;
+      const updatedBalance = currentBalance + pack.credits;
+
+      const creditsUpdate = {
+        balance: updatedBalance,
+        totalEarned: (creditsDoc.exists ? creditsDoc.data().totalEarned || 0 : 0) + pack.credits,
+        lastUpdated: new Date().toISOString(),
+      };
+
+      if (admin && admin.firestore && admin.firestore.FieldValue) {
+        creditsUpdate.transactions = admin.firestore.FieldValue.arrayUnion({
+          type: "credit_purchase",
+          amount: data.amount_gross,
+          currency: "ZAR",
+          creditsAdded: pack.credits,
+          provider: "PAYFAST",
+          pf_payment_id: data.pf_payment_id,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      t.set(creditsRef, creditsUpdate, { merge: true });
 
       t.set(txnRef, {
         userId,
