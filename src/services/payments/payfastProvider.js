@@ -15,13 +15,26 @@ const crypto = require("crypto");
  * @returns {string} hexadecimal MD5 signature
  */
 function buildPayfastSignature(params = {}, passphrase) {
-  // Build string of params in alphabetical order of keys
+  // Per PayFast docs, signature is computed using a URL-encoded string of params.
+  // Values must be percent-encoded using RFC 1738 (spaces as +).
+  const encode = value =>
+    encodeURIComponent(String(value))
+      .replace(/%20/g, "+")
+      .replace(/%21/g, "!")
+      .replace(/%27/g, "'")
+      .replace(/%28/g, "(")
+      .replace(/%29/g, ")");
+
   const keys = Object.keys(params)
     .filter(k => params[k] !== undefined && params[k] !== null && params[k] !== "")
     .sort();
-  const pieces = keys.map(k => `${k}=${params[k]}`);
+
+  const pieces = keys.map(k => `${k}=${encode(params[k])}`);
   let str = pieces.join("&");
-  if (passphrase) str = str + `&passphrase=${passphrase}`;
+  if (passphrase) {
+    str = `${str}&passphrase=${encode(passphrase)}`;
+  }
+
   // Intentionally using MD5 per PayFast spec (external signature), not for passwords
   return crypto.createHash("md5").update(str, "utf8").digest("hex");
 }
