@@ -18,7 +18,7 @@
     "hono": "^4.12.7",
     "react": "19.0.0",
     "react-native": "0.79.6",
-    "undici": "^7.18.2"
+    "undici": "^7.24.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
