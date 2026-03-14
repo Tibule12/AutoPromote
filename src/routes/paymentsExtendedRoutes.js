@@ -71,10 +71,36 @@ router.post("/credits/capture-order", authMiddleware, async (req, res) => {
       }
 
       await db.runTransaction(async t => {
-        const userRef = db.collection("users").doc(userId);
-        const doc = await t.get(userRef);
-        const currentCredits = doc.exists ? doc.data().credits || 0 : 0;
+        // Update credits record used by the frontend credit balance endpoint
+        const creditsRef = db.collection("user_credits").doc(userId);
+        const creditsDoc = await t.get(creditsRef);
+        const currentCredits = creditsDoc.exists ? creditsDoc.data().balance || 0 : 0;
 
+        t.set(
+          creditsRef,
+          {
+            balance: currentCredits + pack.credits,
+            totalEarned:
+              (creditsDoc.exists ? creditsDoc.data().totalEarned || 0 : 0) + pack.credits,
+            lastUpdated: new Date().toISOString(),
+            transactions:
+              admin && admin.firestore && admin.firestore.FieldValue
+                ? admin.firestore.FieldValue.arrayUnion({
+                    type: "credit_purchase",
+                    amount: pack.price,
+                    currency: "USD",
+                    creditsAdded: pack.credits,
+                    provider: "PAYPAL",
+                    orderId: orderID,
+                    timestamp: new Date().toISOString(),
+                  })
+                : undefined,
+          },
+          { merge: true }
+        );
+
+        // Also keep the older 'users' record in sync for legacy use.
+        const userRef = db.collection("users").doc(userId);
         t.set(
           userRef,
           {
@@ -83,18 +109,6 @@ router.post("/credits/capture-order", authMiddleware, async (req, res) => {
           },
           { merge: true }
         );
-
-        const txnRef = db.collection("transactions").doc();
-        t.set(txnRef, {
-          userId,
-          type: "CREDIT_PURCHASE",
-          amount: pack.price,
-          currency: "USD",
-          creditsAdded: pack.credits,
-          provider: "PAYPAL",
-          orderId: orderID,
-          timestamp: new Date().toISOString(),
-        });
       });
 
       return res.json({ success: true, newCredits: pack.credits });
