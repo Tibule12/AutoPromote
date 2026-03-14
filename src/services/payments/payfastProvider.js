@@ -81,6 +81,16 @@ class PayFastProvider extends PaymentProvider {
     const signature = buildPayfastSignature(params, this.passphrase);
     params.signature = signature;
 
+    // DEBUG: log the PayFast payload so we can verify the exact POST data / signature
+    // Set PAYFAST_DEBUG=true in env to enable.
+    if (process.env.PAYFAST_DEBUG === "true") {
+      console.info("[PayFast] createOrder payload:", {
+        url: this.processUrl,
+        params,
+        signature,
+      });
+    }
+
     // Persist a draft payment record in Firestore (include metadata for fulfillment)
     try {
       await db

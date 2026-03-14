@@ -85,16 +85,14 @@ router.post("/process", async (req, res) => {
 
   // 1. Deduct Credits
   try {
-    /* Temporarily bypass for testing
     const result = await deductCredits(userId, cost);
     if (!result.success) {
-      return res.status(403).json({ 
-        message: "Insufficient credits. Please upgrade or top up.",
-        required: cost
+      return res.status(403).json({
+        message: "Insufficient credits. Please purchase more credits.",
+        required: cost,
+        remaining: result.remaining,
       });
     }
-    */
-    const result = { success: true, remaining: 999 };
 
     // 2. Delegate to Service (Async Job Queue)
     // Old sync method: const processResult = await videoEditingService.processVideo(fileUrl, options, userId);

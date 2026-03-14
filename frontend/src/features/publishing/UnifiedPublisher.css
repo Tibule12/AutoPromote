@@ -339,6 +339,8 @@ button {
     transform 0.1s,
     box-shadow 0.2s;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  touch-action: manipulation;
+  z-index: 1;
 }
 
 .btn-primary-large:hover:not(:disabled) {
@@ -350,6 +352,7 @@ button {
   opacity: 0.6;
   cursor: not-allowed;
   filter: grayscale(0.8);
+  touch-action: none;
 }
 
 .feedback-message {
