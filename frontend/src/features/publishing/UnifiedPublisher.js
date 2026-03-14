@@ -32,6 +32,23 @@ import FacebookForm from "../../components/PlatformForms/FacebookForm";
 // --- New Features ---
 import ViralScanner from "../../components/ViralScanner";
 
+// --- Helpers ---
+const PLATFORM_LABELS = {
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  instagram: "Instagram",
+  facebook: "Facebook",
+  linkedin: "LinkedIn",
+  reddit: "Reddit",
+};
+
+const getPlatformName = platformId => {
+  if (!platformId) return "";
+  return (
+    PLATFORM_LABELS[platformId] || `${platformId.charAt(0).toUpperCase()}${platformId.slice(1)}`
+  );
+};
+
 // --- Sub-components ---
 
 const PlatformPreview = ({
@@ -1170,7 +1187,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 >
                   {isPublishing && publishingPlatform === platformId
                     ? "Publishing..."
-                    : `Publish to ${platformId.charAt(0).toUpperCase() + platformId.slice(1)}`}
+                    : `Publish to ${getPlatformName(platformId)}`}
                 </button>
               </div>
             </div>
@@ -1217,7 +1234,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 >
                   {isPublishing && publishingPlatform === platformId
                     ? "Publishing..."
-                    : `Publish to ${platformId.charAt(0).toUpperCase() + platformId.slice(1)}`}
+                    : `Publish to ${getPlatformName(platformId)}`}
                 </button>
               </div>
             </div>
@@ -1263,7 +1280,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 >
                   {isPublishing && publishingPlatform === platformId
                     ? "Publishing..."
-                    : `Publish to ${platformId.charAt(0).toUpperCase() + platformId.slice(1)}`}
+                    : `Publish to ${getPlatformName(platformId)}`}
                 </button>
               </div>
             </div>
@@ -1309,7 +1326,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 >
                   {isPublishing && publishingPlatform === platformId
                     ? "Publishing..."
-                    : `Publish to ${platformId.charAt(0).toUpperCase() + platformId.slice(1)}`}
+                    : `Publish to ${getPlatformName(platformId)}`}
                 </button>
               </div>
             </div>
@@ -1356,7 +1373,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 >
                   {isPublishing && publishingPlatform === platformId
                     ? "Publishing..."
-                    : `Publish to ${platformId.charAt(0).toUpperCase() + platformId.slice(1)}`}
+                    : `Publish to ${getPlatformName(platformId)}`}
                 </button>
               </div>
             </div>
@@ -1403,7 +1420,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 >
                   {isPublishing && publishingPlatform === platformId
                     ? "Publishing..."
-                    : `Publish to ${platformId.charAt(0).toUpperCase() + platformId.slice(1)}`}
+                    : `Publish to ${getPlatformName(platformId)}`}
                 </button>
               </div>
             </div>
@@ -1919,7 +1936,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                     checked={selectedPlatforms.includes(p)}
                     onChange={() => togglePlatform(p)}
                   />
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
+                  {getPlatformName(p)}
                 </label>
               ))}
             </div>
