@@ -110,6 +110,7 @@ class PayFastProvider extends PaymentProvider {
         url: this.processUrl,
         params,
         signature,
+        signatureString,
       });
     }
 
