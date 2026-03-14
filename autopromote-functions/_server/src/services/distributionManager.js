@@ -26,10 +26,27 @@ const distributeContent = async (contentId, userId) => {
     }
 
     const content = doc.data();
-    const { url, title, description, target_platforms, platform_options } = content;
+    const { url, title, description, target_platforms, platform_options, distribution = {} } = content;
 
     if (!target_platforms || target_platforms.length === 0) {
       logger.info(`[DistributionManager] No target platforms for ${contentId}`);
+      return;
+    }
+
+    // Guard: Prevent duplicate distribution for the same platform/content.
+    // If a previous run is already processing/published, skip that platform.
+    const platformsToPublish = target_platforms.filter(p => {
+      const status = distribution[p]?.status;
+      if (status === "processing" || status === "published") {
+        logger.info(
+          `[DistributionManager] Skipping ${p} for ${contentId} because status is '${status}'`);
+        return false;
+      }
+      return true;
+    });
+
+    if (platformsToPublish.length === 0) {
+      logger.info(`[DistributionManager] All platforms already processed for ${contentId}`);
       return;
     }
 

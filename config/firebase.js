@@ -9,6 +9,17 @@
 // Firebase Admin SDK configuration
 let adminConfig;
 
+function normalizeEnvPrivateKey(value) {
+  if (!value || typeof value !== "string") return value;
+  let key = value.trim();
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+    key = key.slice(1, -1);
+  }
+  key = key.replace(/\r/g, "");
+  key = key.replace(/\\n/g, "\n");
+  return key;
+}
+
 try {
   // Load service account from environment variable as first priority
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
@@ -31,7 +42,7 @@ try {
     process.env.FIREBASE_PRIVATE_KEY
   ) {
     console.log("✅ Using individual Firebase credential environment variables");
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
+    const privateKey = normalizeEnvPrivateKey(process.env.FIREBASE_PRIVATE_KEY);
 
     adminConfig = {
       credential: require("firebase-admin").credential.cert({

@@ -98,6 +98,9 @@ export const API_ENDPOINTS = {
   // Health check
   HEALTH: `${API_BASE_URL}/api/health`,
 
+  // Credits (for AI/strategy credit balance)
+  CREDITS_BALANCE: `${API_BASE_URL}/api/monetization/credits/balance`,
+
   // New platform endpoints (placeholders)
   SPOTIFY_AUTH_START: `${API_BASE_URL}/api/spotify/auth/start`,
   SPOTIFY_STATUS: `${API_BASE_URL}/api/spotify/status`,

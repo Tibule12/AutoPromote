@@ -202,6 +202,12 @@ const WolfHuntDashboard = () => {
 
         // Expected { redirectUrl, params } form backend
         if (data.redirectUrl && data.params) {
+          // Debug: log the PayFast payload being submitted (help debug 403 signature errors)
+          console.debug("PayFast checkout params:", {
+            redirectUrl: data.redirectUrl,
+            params: data.params,
+          });
+
           // Construct hidden form and submit to redirect user
           const form = document.createElement("form");
           form.method = "POST";

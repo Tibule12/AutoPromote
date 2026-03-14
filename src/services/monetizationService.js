@@ -90,7 +90,7 @@ class MonetizationService {
   }
 
   // Subscribe user to premium tier
-  async subscribeToTier(userId, tierName, paymentMethod = "stripe") {
+  async subscribeToTier(userId, tierName, paymentMethod = "paypal") {
     try {
       const tier = this.PREMIUM_TIERS[tierName];
       if (!tier) {
@@ -205,10 +205,8 @@ class MonetizationService {
           processedAt: new Date().toISOString(),
         };
       } else {
-        // Fallback for Stripe (if added later) or other methods
-        // For now, simulate success for 'stripe' purely for dev compatibility if needed,
-        // OR throw error to force PayPal usage as requested.
-        // User requested: "we are using paypal alone for now"
+        // Only PayPal is supported for now.
+        // Any other method will throw so callers don't assume Stripe is active.
         throw new Error(
           "Only PayPal is currently supported. Please select 'paypal' as payment method."
         );

@@ -504,15 +504,25 @@ class PromotionService {
       let processedCount = 0;
 
       for (const doc of snapshot.docs) {
-        const schedule = { id: doc.id, ...doc.data() };
+        // Attempt to acquire a lock atomically to avoid duplicate execution in concurrent scheduler runs.
+        const schedule = await db.runTransaction(async t => {
+          const snap = await t.get(doc.ref);
+          if (!snap.exists) return null;
+          const data = snap.data();
 
-        // Skip if already processing (safety check if lock failed)
-        if (schedule.status === "processing" || schedule.status === "executed") continue;
+          // Skip if already processing or executed.
+          if (data.status === "processing" || data.status === "executed") return null;
+
+          // Skip if it's not due yet (possible due to race/concurrency)
+          if (data.startTime && data.startTime > now) return null;
+
+          t.update(doc.ref, { status: "processing", updatedAt: now });
+          return { id: doc.id, ...data };
+        });
+
+        if (!schedule) continue; // Lock not acquired or not due
 
         console.log(`[Scheduler] 🚀 Processing schedule ${schedule.id} for ${schedule.platform}`);
-
-        // 1. Lock
-        await doc.ref.update({ status: "processing", updatedAt: now });
 
         try {
           // 2. Dispatch to Platform Poster (Real API Call)

@@ -51,7 +51,7 @@ router.post("/credits/create-order", authMiddleware, async (req, res) => {
     return res.json(tempOrder);
   } catch (error) {
     console.error("Create Credits Order Error:", error);
-    res.status(500).json({ error: "Failed to create order" });
+    res.status(500).json({ error: "Failed to create order", details: error.message });
   }
 });
 
@@ -124,12 +124,17 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
     const m_payment_id = `pf_${packageId}_${userId}_${Date.now()}`;
 
     // Create PayFast "Order" (really just signature & params)
+    // In production, APP_BASE_URL should be set to your public frontend URL (e.g. https://www.autopromote.org)
+    const baseUrl = process.env.APP_BASE_URL || "https://www.autopromote.org";
+    const apiUrl = process.env.APP_API_URL || "https://api.autopromote.org";
+
     const result = await payfastProvider.createOrder({
       amount: zarAmount,
       currency: "ZAR",
-      returnUrl: `${process.env.APP_BASE_URL || "http://localhost:3000"}/marketplace?payment=success&pkg=${packageId}`,
-      cancelUrl: `${process.env.APP_BASE_URL || "http://localhost:3000"}/marketplace?payment=cancelled`,
-      notifyUrl: `${process.env.APP_API_URL || "http://localhost:5001"}/api/payments/payfast/notify`, // Must be publicly accessible
+      returnUrl: `${baseUrl}/marketplace?payment=success&pkg=${packageId}`,
+      cancelUrl: `${baseUrl}/marketplace?payment=cancelled`,
+      // PayFast expects an ITN/notify URL that is publicly reachable.
+      notifyUrl: `${apiUrl}/api/payfast/webhook`,
       metadata: {
         m_payment_id,
         item_name: `Credits: ${pack.credits} (${packageId})`,
@@ -141,6 +146,12 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
     if (!result.success) {
       return res.status(500).json({ error: "PayFast init failed", details: result.error });
     }
+
+    // Log the PayFast redirect payload (helps debug 403 signature / payload mismatch)
+    console.info("[PayFast] init payload:", {
+      redirectUrl: result.order?.redirectUrl,
+      params: result.order?.params,
+    });
 
     // Return the form data (URL + inputs) so frontend can auto-submit
     res.json(result.order);

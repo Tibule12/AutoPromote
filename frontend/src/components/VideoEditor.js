@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./VideoEditor.css";
 // Use the main API URL (Node.js) instead of direct Python worker
-import { API_BASE_URL } from "../config";
+import { API_ENDPOINTS } from "../config";
 import { getAuth } from "firebase/auth";
 import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getStorage } from "firebase/storage";
@@ -13,25 +13,89 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [videoSrc, setVideoSrc] = useState("");
   const [processing, setProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+
+  const formatBalance = balance => {
+    if (balance === null || typeof balance === "undefined") return 0;
+    if (typeof balance === "number" || typeof balance === "string") return balance;
+    if (typeof balance === "object") {
+      if (typeof balance.balance !== "undefined") return balance.balance;
+      if (typeof balance.amount !== "undefined") return balance.amount;
+      return JSON.stringify(balance);
+    }
+    return String(balance);
+  };
   const [creditBalance, setCreditBalance] = useState(null);
+  const [needsCredits, setNeedsCredits] = useState(false);
+  const [showCreditShop, setShowCreditShop] = useState(false);
+  const [paypalLoaded, setPaypalLoaded] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const paypalButtonsRef = useRef(null);
+
+  const CREDIT_PACKAGES = [
+    { id: "pack_small", credits: 50, price: "4.99", name: "Starter Pack" },
+    { id: "pack_medium", credits: 150, price: "12.99", name: "Pro Pack" },
+    { id: "pack_large", credits: 500, price: "39.99", name: "Mega Pack" },
+  ];
+
   const [processedFile, setProcessedFile] = useState(null);
   const [clipSuggestions, setClipSuggestions] = useState(null); // Store detected clips
 
   // fetch credit balance on mount so user sees it immediately
   useEffect(() => {
+    // Warn if the configured API base URL appears to point at the frontend host (common misconfiguration)
+    try {
+      const apiUrl = new URL(API_BASE_URL);
+      if (window && window.location && apiUrl.origin === window.location.origin) {
+        console.warn(
+          "API_BASE_URL appears to point to the frontend host. This may cause API calls to return HTML instead of JSON.",
+          { API_BASE_URL, origin: window.location.origin }
+        );
+        setStatusMessage(
+          "Warning: API base URL may be misconfigured; some features may not work properly."
+        );
+      }
+    } catch (_) {
+      // ignore invalid URL
+    }
+
     async function fetchCredits() {
       try {
         const auth = getAuth();
         const user = auth.currentUser;
         if (!user) return; // not logged in yet
         const token = await user.getIdToken();
-        const r = await fetch(`${API_BASE_URL}/api/credits/balance`, {
+        const r = await fetch(API_ENDPOINTS.CREDITS_BALANCE, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (r.ok) {
-          const data = await r.json();
-          setCreditBalance(data.balance);
-          setStatusMessage(`You have ${data.balance} credits available.`);
+          // Some responses may be HTML/redirects in misconfigured environments.
+          // Guard against JSON parse failures.
+          const text = await r.text();
+          try {
+            const data = JSON.parse(text);
+            setCreditBalance(data.balance);
+            setStatusMessage(`You have ${formatBalance(data.balance)} credits available.`);
+          } catch (jsonErr) {
+            // Avoid dumping huge HTML into console while still keeping enough info
+            const snippet = (text || "").slice(0, 400).replace(/\s+/g, " ");
+            console.warn(
+              "Credits endpoint returned non-JSON response (likely misconfigured API base URL)",
+              { status: r.status, snippet }
+            );
+            setStatusMessage(
+              "Unable to load credit balance (API endpoint misconfigured or unavailable)."
+            );
+          }
+        } else {
+          const errorText = await r.text();
+          console.warn("Credits endpoint error", r.status, errorText);
+          if (r.status === 401) {
+            setStatusMessage(
+              "Not signed in or session expired. Please log in again to access credit balance."
+            );
+          } else {
+            setStatusMessage("Unable to load credit balance (server error).");
+          }
         }
       } catch (e) {
         console.warn("Failed to fetch credit balance", e);
@@ -39,6 +103,142 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     }
     fetchCredits();
   }, []);
+
+  // Load PayPal SDK when the credit shop is visible
+  useEffect(() => {
+    if (!showCreditShop || paypalLoaded) return;
+
+    const load = async () => {
+      try {
+        const res = await fetch("/api/payments/paypal/config");
+        const data = await res.json().catch(() => ({}));
+        const clientId = data.clientId || "sb";
+        const currency = data.currency || "USD";
+
+        if (document.getElementById("paypal-sdk-video-editor")) {
+          setPaypalLoaded(true);
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.id = "paypal-sdk-video-editor";
+        script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
+          clientId
+        )}&currency=${encodeURIComponent(currency)}`;
+        script.async = true;
+        script.onload = () => setPaypalLoaded(true);
+        document.body.appendChild(script);
+      } catch (e) {
+        console.warn("Failed to load PayPal SDK:", e);
+      }
+    };
+
+    load();
+  }, [showCreditShop, paypalLoaded]);
+
+  // Render PayPal buttons when ready
+  useEffect(() => {
+    if (!paypalLoaded || !selectedPackage) return;
+    if (!window.paypal || !paypalButtonsRef.current) return;
+
+    const container = paypalButtonsRef.current;
+    container.innerHTML = "";
+
+    window.paypal
+      .Buttons({
+        createOrder: async () => {
+          const auth = getAuth();
+          const user = auth.currentUser;
+          const token = user ? await user.getIdToken() : null;
+
+          const res = await fetch("/api/payments/credits/create-order", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ packageId: selectedPackage.id }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "create_order_failed");
+          return data.id;
+        },
+        onApprove: async data => {
+          const auth = getAuth();
+          const user = auth.currentUser;
+          const token = user ? await user.getIdToken() : null;
+
+          const res = await fetch("/api/payments/credits/capture-order", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ orderID: data.orderID, packageId: selectedPackage.id }),
+          });
+
+          const details = await res.json();
+          if (!res.ok || !details.success) {
+            throw new Error(details.error || "capture_failed");
+          }
+
+          setCreditBalance(prev => {
+            const prevNum = typeof prev === "number" ? prev : Number(prev) || 0;
+            return prevNum + (details.newCredits || 0);
+          });
+          setNeedsCredits(false);
+          setStatusMessage(`Purchase complete! +${details.newCredits} credits added.`);
+          setShowCreditShop(false);
+          setSelectedPackage(null);
+        },
+        onError: err => {
+          console.error("PayPal Error:", err);
+          setStatusMessage("Payment failed. Please try again.");
+        },
+      })
+      .render(container);
+  }, [paypalLoaded, selectedPackage]);
+
+  const initiatePayFastCheckout = async pkg => {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      const token = user ? await user.getIdToken() : null;
+
+      const res = await fetch("/api/payments/payfast/init", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ packageId: pkg.id }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "payfast_init_failed");
+      if (!data.redirectUrl || !data.params) throw new Error("invalid_payfast_response");
+
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = data.redirectUrl;
+      form.style.display = "none";
+
+      Object.entries(data.params).forEach(([key, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+    } catch (e) {
+      console.error("PayFast checkout failed", e);
+      setStatusMessage("PayFast checkout failed. Please try again.");
+    }
+  };
 
   // Phase 1 Features State
   const [options, setOptions] = useState({
@@ -165,9 +365,10 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       if (!response.ok) {
         if (response.status === 403 || response.status === 402) {
           // STRICT CREDIT BILLING: AI Features are Pay-As-You-Go
-          throw new Error(
-            "⚠️ AI Video Processing requires Growth Credits. This is separate from your subscription. Please purchase credits (PayPal/PayFast) in the Marketplace."
-          );
+          setNeedsCredits(true);
+          setShowCreditShop(true);
+          setStatusMessage("Not enough credits to process the video. Purchase more to continue.");
+          return;
         }
         const errorData = await response.json();
         // Include detailed error message from backend if available
@@ -512,6 +713,182 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           &times;
         </button>
       </div>
+
+      {statusMessage ? (
+        <div
+          style={{
+            padding: "10px 14px",
+            background: "rgba(255, 235, 160, 0.35)",
+            border: "1px solid rgba(255, 204, 0, 0.5)",
+            borderRadius: "8px",
+            margin: "10px 20px",
+            color: "#1c1c1c",
+            fontSize: "0.9rem",
+            fontWeight: "700",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ flex: 1 }}>{statusMessage}</span>
+            {creditBalance !== null ? (
+              <button
+                onClick={() => {
+                  setShowCreditShop(true);
+                  setSelectedPackage(CREDIT_PACKAGES[0]);
+                }}
+                style={{
+                  marginLeft: "12px",
+                  background: "#222",
+                  color: "#ffd700",
+                  border: "1px solid #ffd700",
+                  borderRadius: "6px",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  fontWeight: "700",
+                }}
+              >
+                Buy Credits
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {needsCredits && !showCreditShop ? (
+        <div
+          style={{
+            padding: "10px 14px",
+            background: "rgba(255, 220, 220, 0.45)",
+            border: "1px solid rgba(255, 100, 100, 0.5)",
+            borderRadius: "8px",
+            margin: "10px 20px",
+            color: "#1c1c1c",
+            fontSize: "0.9rem",
+            fontWeight: "700",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <span>Not enough credits to process the video.</span>
+          <button
+            onClick={() => {
+              setShowCreditShop(true);
+              setSelectedPackage(CREDIT_PACKAGES[0]);
+            }}
+            style={{
+              marginLeft: "12px",
+              background: "#222",
+              color: "#ffd700",
+              border: "1px solid #ffd700",
+              borderRadius: "6px",
+              padding: "6px 12px",
+              cursor: "pointer",
+              fontWeight: "700",
+            }}
+          >
+            Buy Credits
+          </button>
+        </div>
+      ) : null}
+
+      {showCreditShop ? (
+        <div
+          style={{
+            padding: "12px 14px",
+            background: "rgba(30, 30, 30, 0.8)",
+            border: "1px solid rgba(150, 150, 150, 0.3)",
+            borderRadius: "10px",
+            margin: "10px 20px",
+            color: "#fff",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "10px",
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 700, fontSize: "1rem" }}>Buy Growth Credits</div>
+              <div style={{ fontSize: "0.85rem", opacity: 0.8 }}>
+                Select a package and complete payment via PayPal.
+              </div>
+            </div>
+            <button
+              onClick={() => setShowCreditShop(false)}
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(255,255,255,0.35)",
+                borderRadius: "6px",
+                color: "#fff",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Close
+            </button>
+          </div>
+
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            {CREDIT_PACKAGES.map(pkg => (
+              <button
+                key={pkg.id}
+                onClick={() => setSelectedPackage(pkg)}
+                style={{
+                  flex: 1,
+                  minWidth: "140px",
+                  padding: "10px",
+                  borderRadius: "10px",
+                  border:
+                    selectedPackage?.id === pkg.id
+                      ? "2px solid #4caf50"
+                      : "1px solid rgba(255,255,255,0.2)",
+                  background:
+                    selectedPackage?.id === pkg.id ? "rgba(76, 175, 80, 0.15)" : "rgba(0,0,0,0.35)",
+                  color: "#fff",
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                <div style={{ fontWeight: 700, marginBottom: "4px" }}>{pkg.name}</div>
+                <div style={{ fontSize: "0.85rem", opacity: 0.86 }}>
+                  {pkg.credits} credits • ${pkg.price}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div style={{ marginTop: "14px" }}>
+            <div ref={paypalButtonsRef} />
+            <div style={{ marginTop: "10px", fontSize: "0.82rem", opacity: 0.8 }}>
+              Payments handled securely by PayPal.
+            </div>
+
+            <div style={{ marginTop: "16px" }}>
+              <div style={{ fontWeight: 600, marginBottom: "8px" }}>Or pay with PayFast</div>
+              <button
+                onClick={() => {
+                  if (!selectedPackage) return;
+                  initiatePayFastCheckout(selectedPackage);
+                }}
+                style={{
+                  background: "#ff6600",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "10px 14px",
+                  color: "#fff",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                }}
+              >
+                Pay with PayFast
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="editor-layout">
         <div className="video-preview">

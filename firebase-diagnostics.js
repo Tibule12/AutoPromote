@@ -71,6 +71,17 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   );
 }
 
+function normalizeEnvPrivateKey(value) {
+  if (!value || typeof value !== "string") return value;
+  let key = value.trim();
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+    key = key.slice(1, -1);
+  }
+  key = key.replace(/\r/g, "");
+  key = key.replace(/\\n/g, "\n");
+  return key;
+}
+
 // Check individual credential fields
 if (!useServiceAccountJson) {
   const credFields = {
@@ -104,7 +115,7 @@ if (!useServiceAccountJson) {
     serviceAccount = {
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      privateKey: normalizeEnvPrivateKey(process.env.FIREBASE_PRIVATE_KEY),
     };
   }
 }

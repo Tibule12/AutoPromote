@@ -38,6 +38,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("content");
   const [refreshing, setRefreshing] = useState(false);
+  const [transactionsFilter, setTransactionsFilter] = useState("all");
 
   // Voice Over Scripts for Admin Dashboard
   const adminScripts = {
@@ -509,6 +510,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
         revenueByPlatform,
         revenuePerContent,
         revenuePerUser,
+        transactions: allTransactions,
         eventCounts,
         // Performance metrics
         performanceMetrics: {
@@ -610,6 +612,14 @@ function AdminDashboard({ analytics, user, onLogout }) {
               ).length;
               return totalUsers > 0 ? (repeatUsers / totalUsers) * 100 : 0;
             })(),
+          },
+          // Credit purchase-specific metrics
+          creditPurchases: allTransactions.filter(t => t.type === "CREDIT_PURCHASE"),
+          creditPurchaseSummary: {
+            totalPurchases: allTransactions.filter(t => t.type === "CREDIT_PURCHASE").length,
+            totalAmount: allTransactions
+              .filter(t => t.type === "CREDIT_PURCHASE")
+              .reduce((sum, t) => sum + (t.amount || 0), 0),
           },
         },
       };
@@ -3485,6 +3495,90 @@ function AdminDashboard({ analytics, user, onLogout }) {
           </>
         );
 
+      case "credits":
+        const allTransactions = dashboardData.transactions || [];
+        const filteredTransactions =
+          transactionsFilter === "all"
+            ? allTransactions
+            : allTransactions.filter(t => t.type === transactionsFilter);
+
+        return (
+          <>
+            <div
+              style={{
+                padding: "20px",
+                background: "#f3e5f5",
+                borderRadius: "8px",
+                marginBottom: "20px",
+              }}
+            >
+              <h3 style={{ margin: 0, color: "#7b1fa2" }}>🪙 Transactions</h3>
+              <p>Track all in-app purchases and transaction events.</p>
+              <div
+                style={{ marginTop: "12px", display: "flex", gap: "10px", alignItems: "center" }}
+              >
+                <span style={{ color: "#555" }}>Filter:</span>
+                <select
+                  value={transactionsFilter}
+                  onChange={e => setTransactionsFilter(e.target.value)}
+                  style={{ padding: "6px 10px", borderRadius: "6px", border: "1px solid #ccc" }}
+                >
+                  <option value="all">All</option>
+                  <option value="CREDIT_PURCHASE">Credit Purchases</option>
+                  <option value="SUBSCRIPTION">Subscriptions</option>
+                  <option value="REFUND">Refunds</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 24 }}>
+              <div style={{ display: "flex", flexWrap: "wrap", margin: "-10px" }}>
+                <StatCard
+                  title="Total Transactions"
+                  value={allTransactions.length}
+                  subtitle={`${filteredTransactions.length} shown`}
+                  icon="🧾"
+                  color="#1976d2"
+                  trend={0}
+                />
+                <StatCard
+                  title="Total Volume"
+                  value={`$${allTransactions.reduce((sum, t) => sum + (t.amount || 0), 0).toFixed(2)}`}
+                  subtitle="All transactions"
+                  icon="💵"
+                  color="#2e7d32"
+                  trend={0}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 20 }}>
+              <DataTable
+                title="Recent Transactions"
+                data={filteredTransactions}
+                columns={[
+                  { header: "Type", accessor: "type" },
+                  { header: "User ID", accessor: "userId" },
+                  { header: "Credits", accessor: "creditsAdded" },
+                  { header: "Amount", accessor: "amount" },
+                  { header: "Order ID", accessor: "orderId" },
+                  {
+                    header: "Date",
+                    accessor: "timestamp",
+                    render: row => {
+                      const ts = row.timestamp;
+                      if (!ts) return "-";
+                      const date = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
+                      return date.toLocaleString();
+                    },
+                  },
+                ]}
+              />
+            </div>
+          </>
+        );
+
       case "payouts":
         return <AdminPayoutsPanel token={user?.accessToken} />;
 
@@ -3588,7 +3682,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
                       ? dashboardData?.topContent
                       : activeTab === "revenue"
                         ? dashboardData?.financialMetrics?.revenueByMonth
-                        : [];
+                        : activeTab === "credits"
+                          ? dashboardData?.creditPurchases || []
+                          : [];
               exportToCSV(dataToExport, `autopromote_${activeTab}`);
             }}
             style={{
@@ -3687,6 +3783,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
         <TabButton name="users" label="Users" icon="👥" />
         <TabButton name="subscriptions" label="Subscriptions" icon="💳" />
         <TabButton name="revenue" label="Revenue" icon="💰" />
+        <TabButton name="credits" label="Credit Purchases" icon="🪙" />
         <TabButton name="payouts" label="Payouts" icon="💸" />
         <TabButton name="system" label="System Health" icon="🤖" />
       </div>

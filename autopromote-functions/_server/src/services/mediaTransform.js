@@ -3,18 +3,29 @@ const ffmpeg = require("fluent-ffmpeg");
 const os = require("os");
 const path = require("path");
 const fs = require("fs");
+const { Readable } = require("stream");
 const { v4: uuidv4 } = require("uuid"); // Ensure consistent uuid import
 
-// Configure FFmpeg path (Ensure ffmpeg is installed in environment or docker image)
+// Configure FFmpeg/FFprobe path (Ensure ffmpeg/ffprobe are installed in environment or docker image)
 try {
   const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
+  const ffprobeInstaller = require("@ffprobe-installer/ffprobe");
   const ffmpegPath = ffmpegInstaller.path;
+  const ffprobePath = ffprobeInstaller.path;
+
   if (ffmpegPath) {
     ffmpeg.setFfmpegPath(ffmpegPath);
     console.log(`[MediaTransform] Using ffmpeg installer at ${ffmpegPath}`);
   }
+  if (ffprobePath) {
+    ffmpeg.setFfprobePath(ffprobePath);
+    console.log(`[MediaTransform] Using ffprobe installer at ${ffprobePath}`);
+  }
 } catch (e) {
-  console.warn("[MediaTransform] @ffmpeg-installer/ffmpeg not found, relying on system PATH ffmpeg");
+  console.warn(
+    "[MediaTransform] @ffmpeg-installer/ffmpeg or @ffprobe-installer/ffprobe not found, relying on system PATH. ffprobe errors may occur.",
+    e.message
+  );
 }
 
 /**
@@ -168,12 +179,30 @@ async function processNextMediaTransformTask() {
     const fetchFn = global.fetch || require("node-fetch");
     const res = await fetchFn(data.sourceUrl);
     if (!res.ok) throw new Error(`download_failed(${res.status})`);
+
     const fileStream = fs.createWriteStream(tmpIn);
-    await new Promise((resolve, reject) => {
-      res.body.pipe(fileStream);
-      res.body.on("error", reject);
-      fileStream.on("finish", resolve);
-    });
+
+    const body = res.body;
+    if (!body) throw new Error("download_failed(no_body)");
+
+    if (typeof body.pipe === "function") {
+      await new Promise((resolve, reject) => {
+        body.pipe(fileStream);
+        body.on("error", reject);
+        fileStream.on("finish", resolve);
+      });
+    } else if (typeof body.getReader === "function") {
+      const nodeStream = Readable.fromWeb(body);
+      await new Promise((resolve, reject) => {
+        nodeStream.pipe(fileStream);
+        nodeStream.on("error", reject);
+        fileStream.on("finish", resolve);
+      });
+    } else {
+      // Fallback if we can't stream
+      const buffer = Buffer.from(await res.arrayBuffer());
+      await fs.promises.writeFile(tmpIn, buffer);
+    }
 
     // 2. Probe to check current state
     const metadata = await probeMedia(tmpIn);

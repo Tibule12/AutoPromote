@@ -86,7 +86,37 @@ const PlatformPreview = ({
   }, [fileToPreview, globalFile, previewUrl]);
 
   // RENDER HELPERS
+  const [previewError, setPreviewError] = React.useState(null);
+
+  React.useEffect(() => {
+    // Clear preview error when the preview source changes.
+    setPreviewError(null);
+  }, [effectivePreviewUrl]);
+
   const renderMedia = (style = {}) => {
+    if (previewError) {
+      return (
+        <div
+          style={{
+            ...style,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#333",
+            color: "#f88",
+            minHeight: "200px",
+            padding: "10px",
+            textAlign: "center",
+          }}
+        >
+          <div>
+            <strong>Preview not available</strong>
+            <div style={{ fontSize: "0.9rem", marginTop: "6px" }}>{previewError}</div>
+          </div>
+        </div>
+      );
+    }
+
     if (!effectivePreviewUrl) {
       return (
         <div
@@ -128,6 +158,12 @@ const PlatformPreview = ({
             autoPlay
             muted // Start muted for autoplay policy
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            onError={e => {
+              console.warn("Preview video failed to load", e);
+              setPreviewError(
+                "This file cannot be previewed. Please select a video or image file (e.g., MP4, MOV, JPG, PNG)."
+              );
+            }}
             onClick={e => {
               // Simple toggle mute/play for non-controlled videos (like TikTok style)
               if (!showControls) {
@@ -1027,7 +1063,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   } = useMediaProcessor(globalFile);
 
   const [isPublishing, setIsPublishing] = useState(false);
+  const [publishingPlatform, setPublishingPlatform] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [fallbackPublishPlatform, setFallbackPublishPlatform] = useState(null);
   const [editingTarget, setEditingTarget] = useState(null); // 'global' or platformId
 
   // --- Viral Scanner State ---
@@ -1433,10 +1471,32 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
   // 4. Publish Action
   const publish = async (platforms, label) => {
-    if (!globalFile) {
+    // Determine the file to upload: prefer global file, but fall back to a single-platform file if set.
+    let fileToUpload = globalFile;
+
+    if (!fileToUpload && platforms && platforms.length === 1) {
+      const effective = getPlatformEffectiveData(platforms[0]);
+      if (effective && effective.file) {
+        fileToUpload = effective.file;
+      }
+    }
+
+    if (!fileToUpload) {
       setFeedbackMessage("Please select a file first.");
       return;
     }
+
+    // If user selected a platform-specific file but not a global file, keep UI consistent by
+    // mirroring the selected file into global state and showing a hint.
+    if (!globalFile && fileToUpload) {
+      setGlobalFile(fileToUpload);
+      if (platforms && platforms.length === 1) {
+        setFallbackPublishPlatform(platforms[0]);
+      }
+    } else {
+      setFallbackPublishPlatform(null);
+    }
+
     if (!platforms || platforms.length === 0) {
       setFeedbackMessage("Please select at least one platform.");
       return;
@@ -1449,17 +1509,22 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     try {
       // --- 1. Validation ---
       const MAX_SIZE_MB = 500;
-      if (globalFile instanceof Blob && globalFile.size > MAX_SIZE_MB * 1024 * 1024) {
+      const effectiveMediaType =
+        (fileToUpload && fileToUpload.type && fileToUpload.type.split("/")[0]) ||
+        mediaType ||
+        "video";
+
+      if (fileToUpload instanceof Blob && fileToUpload.size > MAX_SIZE_MB * 1024 * 1024) {
         throw new Error(`File too large. Maximum upload size is ${MAX_SIZE_MB}MB.`);
       }
 
       // --- 2. Upload with Progress ---
       let finalUrl = "";
-      if (globalFile instanceof Blob) {
+      if (fileToUpload instanceof Blob) {
         // File or Blob
-        const storagePath = `uploads/${mediaType}s/${Date.now()}_${globalFile.name || "untitled"}`;
+        const storagePath = `uploads/${effectiveMediaType}s/${Date.now()}_${fileToUpload.name || "untitled"}`;
         const storageRef = ref(storage, storagePath);
-        const uploadTask = uploadBytesResumable(storageRef, globalFile);
+        const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
 
         await new Promise((resolve, reject) => {
           uploadTask.on(
@@ -1483,8 +1548,8 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           );
         });
         setFeedbackMessage("Finalizing...");
-      } else if (typeof globalFile === "string") {
-        finalUrl = globalFile;
+      } else if (typeof fileToUpload === "string") {
+        finalUrl = fileToUpload;
       }
 
       // --- 3. Construct Payload ---
@@ -1514,12 +1579,22 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         }
       });
 
+      const resolvedTitle =
+        (globalTitle || "").trim() ||
+        (fileToUpload && fileToUpload.name
+          ? fileToUpload.name.replace(/\.[^/.]+$/, "")
+          : "Untitled");
+
+      if (!globalTitle || !globalTitle.trim()) {
+        setGlobalTitle(resolvedTitle);
+      }
+
       const uploadParams = {
         url: finalUrl,
         file: null,
-        type: mediaType,
+        type: effectiveMediaType,
         platforms,
-        title: globalTitle,
+        title: resolvedTitle,
         description: globalDescription,
         platform_options: platformOptionsMap,
         bounty: {
@@ -1559,11 +1634,13 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
       setIsPublishing(false);
       setPublishingPlatform(null);
+      setFallbackPublishPlatform(null);
     } catch (err) {
       console.error("UnifiedPublisher Error:", err);
       setFeedbackMessage(`Error: ${err.message}`);
       setIsPublishing(false);
       setPublishingPlatform(null);
+      setFallbackPublishPlatform(null);
     }
   };
 
@@ -1588,7 +1665,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
             <div className="form-group">
               <label>Master File</label>
 
-              <input type="file" onChange={handleGlobalFileChange} />
+              <input type="file" accept="video/*,image/*" onChange={handleGlobalFileChange} />
               <small>Applying to {selectedPlatforms.length} platforms</small>
 
               {previewUrl && mediaType !== "video" && (
@@ -1978,6 +2055,12 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   | {feedbackMessage}
                 </span>
               )}
+              {fallbackPublishPlatform && (
+                <span className="feedback-message" style={{ marginLeft: "15px", color: "#a5b4fc" }}>
+                  | Using {getPlatformName(fallbackPublishPlatform)} file because no global file was
+                  selected.
+                </span>
+              )}
             </div>
 
             <div style={{ display: "flex", gap: "15px", marginRight: "20px" }}>
@@ -2007,7 +2090,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   boxShadow: "0 4px 15px rgba(37, 99, 235, 0.3)",
                 }}
               >
-                {isPublishing ? "Publishing..." : "🚀 Publish Everywhere"}
+                {isPublishing
+                  ? "Publishing..."
+                  : `🚀 Publish to ${selectedPlatforms.map(p => getPlatformName(p)).join(" + ")}`}
               </button>
             </div>
           </div>

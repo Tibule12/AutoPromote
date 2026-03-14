@@ -126,13 +126,35 @@ class StartupDiagnostics {
     }
 
     try {
-      // Test Auth
-      await admin.auth().listUsers(1);
-      this.log("success", "firebase", "Firebase Auth connection successful");
+      // Test Auth (retry once if transient failure occurs)
+      let authError = null;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          await admin.auth().listUsers(1);
+          authError = null;
+          break;
+        } catch (err) {
+          authError = err;
+          // brief pause between attempts
+          await new Promise(r => setTimeout(r, 250));
+        }
+      }
+
+      if (!authError) {
+        this.log("success", "firebase", "Firebase Auth connection successful");
+      } else {
+        this.log("critical", "firebase", "Firebase Auth connection failed", {
+          error: authError.message,
+          stack: authError.stack,
+          action_required: "Check Firebase Auth configuration and network connectivity",
+          impact: "User authentication will fail",
+        });
+      }
     } catch (error) {
       this.log("critical", "firebase", "Firebase Auth connection failed", {
         error: error.message,
-        action_required: "Check Firebase Auth configuration",
+        stack: error.stack,
+        action_required: "Check Firebase Auth configuration and network connectivity",
         impact: "User authentication will fail",
       });
     }
