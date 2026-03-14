@@ -139,7 +139,7 @@ class PayFastProvider extends PaymentProvider {
     if (process.env.PAYFAST_DEBUG === "true") {
       // Make it easy to diagnose signature mismatches without digging through logs.
       order.debug = {
-        signatureString: str,
+        signatureString: "(unavailable)",
         computedSignature: signature,
       };
     }
