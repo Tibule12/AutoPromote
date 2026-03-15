@@ -27,7 +27,7 @@ function buildPayfastSignature(params = {}, passphrase) {
   if (process.env.PAYFAST_DEBUG === "true") {
     console.info("[PayFast] signature string:", signatureString);
   }
-  return crypto.createHash("md5").update(signatureString, "utf8").digest("hex").toUpperCase();
+  return crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
 }
 class PayFastProvider extends PaymentProvider {
   constructor() {

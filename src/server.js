@@ -1723,6 +1723,12 @@ try {
     paypalSubscriptionRoutes
   );
   app.use("/api/viral-boost", routeLimiter({ windowHint: "viral_boost" }), viralBoostRoutes);
+  // Legacy support: allow older clients to post to /credits/* without the /api prefix.
+  // This avoids returning HTML 503 pages when the client expects JSON.
+  app.use("/credits", (req, res) => {
+    const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+    return res.redirect(307, `/api/credits${req.path}${qs}`);
+  });
   // Phase 1 mounts
   app.use("/api/credits", routeLimiter({ windowHint: "payments" }), creditsRoutes);
   app.use("/api/boosts", routeLimiter({ windowHint: "viral_boost" }), boostsRoutes);
