@@ -19,11 +19,9 @@ function buildPayfastSignature(params = {}, passphrase) {
     k => params[k] !== undefined && params[k] !== null && params[k] !== ""
   );
   let signatureString = keys.map(k => `${k}=${encodeRfc1738(params[k])}`).join("&");
-  // Include the passphrase only when it is non-empty (PayFast expects it only when set).
-  const pass = passphrase == null ? "" : String(passphrase).trim();
-  if (pass) {
-    signatureString += `&passphrase=${encodeRfc1738(pass)}`;
-  }
+  // Always include the passphrase field (PHP http_build_query includes it even if blank).
+  const pass = passphrase == null ? "" : String(passphrase);
+  signatureString += `&passphrase=${encodeRfc1738(pass)}`;
   if (process.env.PAYFAST_DEBUG === "true") {
     console.info("[PayFast] signature string:", signatureString);
   }
