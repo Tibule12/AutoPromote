@@ -13,7 +13,7 @@ const crypto = require("crypto");
  * @returns {string} hexadecimal MD5 signature
  */
 function buildPayfastSignature(params = {}, passphrase) {
-  const encodeRfc1738 = value => encodeURIComponent(String(value)).replace(/%20/g, "+");
+  const encodeRfc1738 = value => encodeURIComponent(String(value));
   // Ensure the signature uses PayFast's expected parameter order.
   // This must exactly match the order PayFast uses internally.
   const orderedKeys = [
