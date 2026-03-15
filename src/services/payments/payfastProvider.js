@@ -14,11 +14,39 @@ const crypto = require("crypto");
  */
 function buildPayfastSignature(params = {}, passphrase) {
   const encodeRfc1738 = value => encodeURIComponent(String(value)).replace(/%20/g, "+");
-  // Do NOT sort keys: PayFast expects parameters in the same order they are submitted.
-  const keys = Object.keys(params).filter(
-    k => params[k] !== undefined && params[k] !== null && params[k] !== ""
-  );
-  let signatureString = keys.map(k => `${k}=${encodeRfc1738(params[k])}`).join("&");
+  // Ensure the signature uses PayFast's expected parameter order.
+  // This must exactly match the order PayFast uses internally.
+  const orderedKeys = [
+    "merchant_id",
+    "merchant_key",
+    "return_url",
+    "cancel_url",
+    "notify_url",
+    "m_payment_id",
+    "amount",
+    "item_name",
+  ];
+
+  const seen = new Set();
+  const pairs = [];
+
+  orderedKeys.forEach(k => {
+    if (params[k] !== undefined && params[k] !== null && params[k] !== "") {
+      seen.add(k);
+      pairs.push(`${k}=${encodeRfc1738(params[k])}`);
+    }
+  });
+
+  // Add any remaining keys in insertion order (should be rare).
+  Object.keys(params).forEach(k => {
+    if (!seen.has(k) && params[k] !== undefined && params[k] !== null && params[k] !== "") {
+      seen.add(k);
+      pairs.push(`${k}=${encodeRfc1738(params[k])}`);
+    }
+  });
+
+  let signatureString = pairs.join("&");
+
   // Always include the passphrase field (PHP http_build_query includes it even if blank).
   const pass = passphrase == null ? "" : String(passphrase);
   signatureString += `&passphrase=${encodeRfc1738(pass)}`;
