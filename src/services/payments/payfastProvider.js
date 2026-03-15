@@ -35,8 +35,9 @@ function buildPayfastSignature(params = {}, passphrase) {
     encodeURIComponent: encodeRfc1738,
   });
 
-  if (passphrase) {
-    signatureString += `&passphrase=${encodeRfc1738(passphrase)}`;
+  const pass = passphrase ? String(passphrase).trim() : "";
+  if (pass) {
+    signatureString += `&passphrase=${encodeRfc1738(pass)}`;
   }
 
   // Debug: log the exact string we are hashing when debug enabled.
