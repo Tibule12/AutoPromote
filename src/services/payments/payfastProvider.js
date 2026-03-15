@@ -1,55 +1,32 @@
 const { PaymentProvider } = require("./providerInterface");
 const { db } = require("../../firebaseAdmin");
 const crypto = require("crypto");
-const querystring = require("querystring");
-
 /**
  * Build PayFast signature string using MD5 hash.
  *
- * NOTE: PayFast's legacy integration uses MD5 signatures for compatibility. This
- * use of MD5 is intentional and limited to computing an external service
- * signature (not used for password storage or any internal authentication).
- * Do NOT use MD5 for password hashing or sensitive internal storage.
+ * NOTE: PayFast's legacy integration uses MD5 signatures for compatibility.
+ * This MD5 usage is strictly for external service signing and NOT for
+ * authentication or password storage.
  *
  * @param {Object} params - Key/value payload to include in signature
  * @param {string} passphrase - Optional merchant passphrase
  * @returns {string} hexadecimal MD5 signature
  */
 function buildPayfastSignature(params = {}, passphrase) {
-  // PayFast expects signatures generated from a URL-encoded query string
-  // built from all params (sorted alphabetically) and an optional passphrase.
-  // This matches PHP's http_build_query() with RFC1738 rules (spaces => +).
-
   const encodeRfc1738 = value => encodeURIComponent(String(value)).replace(/%20/g, "+");
-
   const keys = Object.keys(params)
     .filter(k => params[k] !== undefined && params[k] !== null && params[k] !== "")
     .sort();
-
-  const sortedParams = {};
-  keys.forEach(k => {
-    sortedParams[k] = params[k];
-  });
-
-  let signatureString = querystring.stringify(sortedParams, "&", "=", {
-    encodeURIComponent: encodeRfc1738,
-  });
-
+  let signatureString = keys.map(k => `${k}=${encodeRfc1738(params[k])}`).join("&");
   const pass = passphrase ? String(passphrase).trim() : "";
   if (pass) {
     signatureString += `&passphrase=${encodeRfc1738(pass)}`;
   }
-
-  // Debug: log the exact string we are hashing when debug enabled.
   if (process.env.PAYFAST_DEBUG === "true") {
     console.info("[PayFast] signature string:", signatureString);
   }
-
-  // Intentionally using MD5 per PayFast spec (external signature), not for passwords.
-  // This is not used for authentication or storing secrets.
-  return crypto.createHash("md5").update(signatureString, "utf8").digest("hex").toUpperCase();
+  return crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
 }
-
 class PayFastProvider extends PaymentProvider {
   constructor() {
     super("payfast");
@@ -63,11 +40,9 @@ class PayFastProvider extends PaymentProvider {
         ? "https://sandbox.payfast.co.za/eng/process"
         : "https://www.payfast.co.za/eng/process");
   }
-
   async getAccountStatus() {
     return { ok: true, configured: !!this.merchantId };
   }
-
   async createOrder({
     amount = 0,
     currency = "ZAR",
@@ -78,7 +53,6 @@ class PayFastProvider extends PaymentProvider {
   } = {}) {
     if (!this.merchantId || !this.merchantKey)
       return { success: false, error: "payfast_not_configured" };
-
     const m_payment_id = metadata.m_payment_id || `pf_${Date.now()}`;
     const params = {
       merchant_id: this.merchantId,
@@ -99,13 +73,8 @@ class PayFastProvider extends PaymentProvider {
       amount: Number(amount).toFixed(2),
       item_name: metadata.item_name || metadata.description || "AutoPromote payment",
     };
-
-    // Build signature
     const signature = buildPayfastSignature(params, this.passphrase);
     params.signature = signature;
-
-    // DEBUG: log the PayFast payload so we can verify the exact POST data / signature
-    // Set PAYFAST_DEBUG=true in env to enable.
     if (process.env.PAYFAST_DEBUG === "true") {
       console.info("[PayFast] createOrder payload:", {
         url: this.processUrl,
@@ -113,8 +82,6 @@ class PayFastProvider extends PaymentProvider {
         signature,
       });
     }
-
-    // Persist a draft payment record in Firestore (include metadata for fulfillment)
     try {
       await db
         .collection("payments")
@@ -130,39 +97,25 @@ class PayFastProvider extends PaymentProvider {
           createdAt: new Date().toISOString(),
         });
     } catch (e) {
-      // log but continue
       console.warn("PayFast createOrder: failed to persist payment draft", e && e.message);
     }
-
-    const order = { redirectUrl: this.processUrl, params };
-
-    if (process.env.PAYFAST_DEBUG === "true") {
-      // Make it easy to diagnose signature mismatches without digging through logs.
-      order.debug = {
-        signatureString: "(unavailable)",
-        computedSignature: signature,
-      };
-    }
-
+    const order = {
+      redirectUrl: this.processUrl,
+      params,
+    };
     return { success: true, order };
   }
-
   async verifyNotification(req) {
-    // PayFast posts form-encoded body. We'll recompute signature and compare.
     const body = req.body || {};
     const receivedSignature = (body.signature || body.sig || body.SIGNATURE || "")
       .toString()
       .toLowerCase();
-    // Remove signature before recomputing
     const copy = { ...body };
     delete copy.signature;
     delete copy.sig;
     delete copy.SIGNATURE;
-
     const computed = buildPayfastSignature(copy, this.passphrase);
     const verified = computed === receivedSignature;
-
-    // Persist IPN raw payload and verification result
     try {
       const id = body.m_payment_id || body.pf_payment_id || `pf_ipn_${Date.now()}`;
       await db
@@ -182,9 +135,10 @@ class PayFastProvider extends PaymentProvider {
     } catch (e) {
       console.warn("PayFast verifyNotification: failed to persist ipn", e && e.message);
     }
-
     return { verified, data: body };
   }
 }
-
-module.exports = { PayFastProvider, buildPayfastSignature };
+module.exports = {
+  PayFastProvider,
+  buildPayfastSignature,
+};
