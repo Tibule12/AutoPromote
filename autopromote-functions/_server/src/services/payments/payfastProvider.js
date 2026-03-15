@@ -24,6 +24,8 @@ function buildPayfastSignature(params = {}, passphrase) {
   if (passphrase) signatureString = signatureString + `&passphrase=${passphrase}`;
   // Intentionally using MD5 per PayFast spec (external signature), not for passwords.
   // This is not used for authentication or storing secrets.
+  // cql:ignore
+  // codeql: ignore
   // eslint-disable-next-line security/detect-weak-hash
   return crypto.createHash("md5").update(signatureString, "utf8").digest("hex").toUpperCase();
 }
