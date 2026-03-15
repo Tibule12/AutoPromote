@@ -14,14 +14,14 @@ const crypto = require("crypto");
  */
 function buildPayfastSignature(params = {}, passphrase) {
   const encodeRfc1738 = value => encodeURIComponent(String(value)).replace(/%20/g, "+");
-  const keys = Object.keys(params)
-    .filter(k => params[k] !== undefined && params[k] !== null && params[k] !== "")
-    .sort();
+  // Do NOT sort keys: PayFast expects parameters in the same order they are submitted.
+  const keys = Object.keys(params).filter(
+    k => params[k] !== undefined && params[k] !== null && params[k] !== ""
+  );
   let signatureString = keys.map(k => `${k}=${encodeRfc1738(params[k])}`).join("&");
-  const pass = passphrase ? String(passphrase).trim() : "";
-  if (pass) {
-    signatureString += `&passphrase=${encodeRfc1738(pass)}`;
-  }
+  // PayFast expects a passphrase field; include it even if blank to match PHP http_build_query behavior.
+  const pass = passphrase == null ? "" : String(passphrase);
+  signatureString += `&passphrase=${encodeRfc1738(pass)}`;
   if (process.env.PAYFAST_DEBUG === "true") {
     console.info("[PayFast] signature string:", signatureString);
   }

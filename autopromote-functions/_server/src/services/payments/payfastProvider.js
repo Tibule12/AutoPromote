@@ -16,9 +16,10 @@ const crypto = require("crypto");
  */
 function buildPayfastSignature(params = {}, passphrase) {
   // Build string of params in alphabetical order of keys
-  const keys = Object.keys(params)
-    .filter(k => params[k] !== undefined && params[k] !== null && params[k] !== "")
-    .sort();
+  // Do NOT sort keys: PayFast expects parameters in the same order they are submitted.
+  const keys = Object.keys(params).filter(
+    k => params[k] !== undefined && params[k] !== null && params[k] !== ""
+  );
   const pieces = keys.map(k => `${k}=${params[k]}`);
   let signatureString = pieces.join("&");
   if (passphrase) signatureString = signatureString + `&passphrase=${passphrase}`;
