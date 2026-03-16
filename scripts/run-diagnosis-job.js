@@ -25,20 +25,45 @@ async function main() {
 
   try {
     // 2. Run Analytics Polling (Batch)
-    // We run a few batches to ensure we cover recent content. 
-    // Cron runs hourly, so we want to process enough to keep up.
+    // STRATEGY: "Drain the Queue"
+    // Since we run hourly, we want to process ALL items that are due, 
+    // effectively clearing the backlog until we run out of time (safety limit).
+    const MAX_RUNTIME_MS = 10 * 60 * 1000; // 10 minutes max runtime for analytics
+    const startTime = Date.now();
+
     if (platformStatsPoller && platformStatsPoller.pollPlatformPostMetricsBatch) {
       console.log("   --> Polling Platform Analytics...");
-      // Run larger batch since we only run hourly
-      const batchSize = 50; 
-      const res = await platformStatsPoller.pollPlatformPostMetricsBatch({ batchSize });
-      console.log(`   --> Platform Analytics: Processed ${res.processed || 0} posts`);
+      let totalProcessed = 0;
+      let batchCount = 0;
+      
+      while (Date.now() - startTime < MAX_RUNTIME_MS) {
+        // Fetch in chunks of 50
+        const res = await platformStatsPoller.pollPlatformPostMetricsBatch({ batchSize: 50 });
+        const count = res.processed || 0;
+        totalProcessed += count;
+        batchCount++;
+        
+        // If we processed fewer than asked, the queue is likely empty
+        if (count < 50) break;
+        
+        console.log(`       Batch ${batchCount}: processed ${count} posts...`);
+      }
+      console.log(`   --> Platform Analytics: Total Processed ${totalProcessed} posts`);
     }
 
     if (youtubeStatsPoller && youtubeStatsPoller.pollYouTubeStatsBatch) {
       console.log("   --> Polling YouTube Analytics...");
-      const res = await youtubeStatsPoller.pollYouTubeStatsBatch({ batchSize: 20 });
-      console.log(`   --> YouTube Analytics: Processed ${res.processed || 0} videos`);
+      let totalProcessed = 0;
+      
+      // Give YouTube the remaining time budget
+      while (Date.now() - startTime < MAX_RUNTIME_MS) {
+        const res = await youtubeStatsPoller.pollYouTubeStatsBatch({ batchSize: 20 });
+        const count = res.processed || 0;
+        totalProcessed += count;
+        
+        if (count < 20) break;
+      }
+      console.log(`   --> YouTube Analytics: Total Processed ${totalProcessed} videos`);
     }
 
     // 3. Run the Policy Logic
