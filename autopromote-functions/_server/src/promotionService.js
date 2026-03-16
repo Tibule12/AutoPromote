@@ -2,7 +2,7 @@ const { db, admin } = require("./firebaseAdmin");
 const optimizationService = require("./optimizationService");
 const paypalClient = require("./paypalClient");
 const paypal = require("@paypal/paypal-server-sdk");
-const { dispatchPlatformPost } = require("./services/platformPoster");
+const { enqueuePlatformPostTask } = require("./services/promotionTaskQueue");
 
 class PromotionService {
   // Normalize incoming schedule data (accept snake_case or camelCase) to canonical camelCase
@@ -504,15 +504,19 @@ class PromotionService {
       let processedCount = 0;
 
       for (const doc of snapshot.docs) {
-        const schedule = { id: doc.id, ...doc.data() };
+        const schedule = await db.runTransaction(async t => {
+          const snap = await t.get(doc.ref);
+          if (!snap.exists) return null;
+          const data = snap.data();
+          if (data.status === "processing" || data.status === "executed") return null;
+          if (data.startTime && data.startTime > now) return null;
+          t.update(doc.ref, { status: "processing", updatedAt: now });
+          return { id: doc.id, ...data };
+        });
 
-        // Skip if already processing (safety check if lock failed)
-        if (schedule.status === "processing" || schedule.status === "executed") continue;
+        if (!schedule) continue;
 
         console.log(`[Scheduler] 🚀 Processing schedule ${schedule.id} for ${schedule.platform}`);
-
-        // 1. Lock
-        await doc.ref.update({ status: "processing", updatedAt: now });
 
         try {
           // 2. Dispatch to Platform Poster (Real API Call)
@@ -525,16 +529,17 @@ class PromotionService {
             hashtagString: schedule.viral_optimization?.hashtags?.join(" ") || "",
           };
 
-          const result = await dispatchPlatformPost({
+          const result = await enqueuePlatformPostTask({
             platform: schedule.platform,
             contentId: schedule.contentId,
             uid: schedule.user_id || schedule.userId,
             payload: payload,
             reason: "scheduled_event",
+            skipIfDuplicate: true,
           });
 
           // 3. Handle Result
-          if (result.success) {
+          if (result && result.id) {
             console.log(`[Scheduler] ✅ Success ${schedule.id}: ${JSON.stringify(result)}`);
 
             // Mark done
@@ -542,7 +547,7 @@ class PromotionService {
               status: "executed",
               isActive: false, // This instance is done
               executedAt: new Date().toISOString(),
-              result: result,
+              result: { taskId: result.id, status: "queued" },
             });
 
             // Recursion?
@@ -614,6 +619,7 @@ class PromotionService {
           console.error(`[Scheduler] 💥 Exception ${schedule.id}:`, err);
           await doc.ref.update({
             status: "error",
+            isActive: false,
             error: err.message,
             updatedAt: new Date().toISOString(),
           });
@@ -673,7 +679,9 @@ class PromotionService {
           payload: { scheduleId },
           skipIfDuplicate: true,
         });
-        console.log(`✅ Executed promotion for content ${schedule.contentId} on ${schedule.platform}`);
+        console.log(
+          `✅ Executed promotion for content ${schedule.contentId} on ${schedule.platform}`
+        );
       } catch (err) {
         console.error("⚠️ Failed to enqueue platform task:", err.message);
       }

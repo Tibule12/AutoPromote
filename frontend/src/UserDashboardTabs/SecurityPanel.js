@@ -580,7 +580,7 @@ const SecurityPanel = ({ user }) => {
           <div className="privacy-option">
             <div className="privacy-option-info">
               <strong>Email Notifications</strong>
-              <p>Receive updates about your content and earnings</p>
+              <p>Receive updates about your content</p>
             </div>
             <label className="toggle-switch">
               <input

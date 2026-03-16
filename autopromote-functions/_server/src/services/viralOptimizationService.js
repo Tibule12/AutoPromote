@@ -24,6 +24,12 @@ function loadEngines() {
   if (!mediaTransform) mediaTransform = require("./mediaTransform");
 }
 
+function hasExplicitFutureSchedule(scheduledPromotionTime) {
+  if (!scheduledPromotionTime) return false;
+  const scheduledAt = Date.parse(scheduledPromotionTime);
+  return Number.isFinite(scheduledAt) && scheduledAt > Date.now() + 30000;
+}
+
 /**
  * Performs the heavy-lifting viral optimization in the background.
  * @param {string} contentId - The Firestore Doc ID.
@@ -183,43 +189,42 @@ async function performViralOptimization(contentId, userId, contentData, options 
     }
 
     // 8. Schedule Promotion
-    const optimalTiming =
-      distributionStrategy.platforms?.[0]?.timing?.optimalTime ||
-      scheduled_promotion_time ||
-      new Date().toISOString();
+    const shouldCreateInitialSchedule = hasExplicitFutureSchedule(scheduled_promotion_time);
+    const schedulePlatforms = shouldCreateInitialSchedule
+      ? [...new Set((Array.isArray(target_platforms) ? target_platforms : []).filter(Boolean))]
+      : [];
 
-    const selectedPlatform =
-      Array.isArray(target_platforms) && target_platforms.length > 0 ? target_platforms[0] : null;
-
-    if (selectedPlatform) {
-      const scheduleData = {
-        contentId: contentId,
-        user_id: userId,
-        platform: selectedPlatform,
-        startTime: optimalTiming,
-        status: "pending",
-        isActive: true,
-        repost_boost: repost_boost,
-        share_boost: share_boost,
-        platformSpecificSettings: {
-          ...(platform_options || {}),
-          repost_boost,
-          share_boost,
-        },
-      };
-      await db.collection("promotion_schedules").add(scheduleData);
-    } else {
-      logger.warn(`[Optimization] No platform selected for scheduling ${contentId}`);
+    if (shouldCreateInitialSchedule && schedulePlatforms.length > 0) {
+      await Promise.all(
+        schedulePlatforms.map(platform =>
+          db.collection("promotion_schedules").add({
+            contentId,
+            user_id: userId,
+            platform,
+            startTime: scheduled_promotion_time,
+            status: "pending",
+            isActive: true,
+            repost_boost,
+            share_boost,
+            platformSpecificSettings: {
+              ...((platform_options && platform_options[platform]) || {}),
+              repost_boost,
+              share_boost,
+            },
+          })
+        )
+      );
     }
 
     // Success Notification
-    const successMsg = selectedPlatform
-      ? `Content optimized & scheduled for ${selectedPlatform} at ${new Date(optimalTiming).toLocaleString()}`
-      : `Content optimized successfully (No platform scheduled)`;
+    const successMsg =
+      shouldCreateInitialSchedule && schedulePlatforms.length > 0
+        ? `Content optimized & scheduled for ${schedulePlatforms.join(", ")} at ${new Date(scheduled_promotion_time).toLocaleString()}`
+        : `Content optimized successfully`;
 
     await notificationEngine.sendNotification(userId, successMsg, "success", {
       contentId,
-      platform: selectedPlatform,
+      platform: schedulePlatforms[0] || null,
     });
 
     logger.info(`[Optimization] Completed for ${contentId} in ${Date.now() - startTime}ms`);

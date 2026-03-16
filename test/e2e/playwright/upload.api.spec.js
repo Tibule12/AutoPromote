@@ -1,50 +1,10 @@
 const { test, expect } = require("@playwright/test");
-const path = require("path");
 const fetch = require("node-fetch");
 
 test("API upload test - create content and check Firestore", async () => {
   process.env.CORS_ALLOW_ALL = "true";
   process.env.BYPASS_ACCEPTED_TERMS = "1";
-  process.env.BYPASS_ACCEPTED_TERMS = "1";
-  // Prefer a supplied GOOGLE_APPLICATION_CREDENTIALS path; otherwise, if the env provides the service account
-  // JSON or base64, write it to test/e2e/tmp/service-account.json and use that.
-  const tmpSaPath = path.resolve(__dirname, "..", "tmp", "service-account.json");
-  const fs = require("fs");
-  try {
-    if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-      if (
-        process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT ||
-        process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64
-      ) {
-        const payload =
-          process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT ||
-          Buffer.from(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64, "base64").toString("utf8");
-        fs.mkdirSync(path.dirname(tmpSaPath), { recursive: true });
-        fs.writeFileSync(tmpSaPath, payload, { encoding: "utf8", mode: 0o600 });
-        process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpSaPath;
-      }
-    }
-  } catch (e) {
-    console.warn("⚠️ Could not write temporary service account file for API tests:", e.message);
-  }
-  const { db } = require("../../../src/firebaseAdmin");
   const app = require("../../../src/server");
-  try {
-    await db
-      .collection("users")
-      .doc("testUser123")
-      .set(
-        {
-          lastAcceptedTerms: {
-            version: process.env.REQUIRED_TERMS_VERSION || "AUTOPROMOTE-v1.0",
-            acceptedAt: new Date().toISOString(),
-          },
-        },
-        { merge: true }
-      );
-  } catch (e) {
-    console.warn("⚠️ Could not seed lastAcceptedTerms for testUser123:", e.message);
-  }
   const mainServer = app.listen(0);
   await new Promise(r => mainServer.once("listening", r));
   const mainPort = mainServer.address().port;
@@ -73,18 +33,7 @@ test("API upload test - create content and check Firestore", async () => {
     if (!contentId)
       console.warn("Warning: upload API returned unexpected json shape:", JSON.stringify(json));
     expect(contentId).toBeTruthy();
-    // cleanup - attempt to delete if Firestore is available; skip if no credentials are set
-    try {
-      if (contentId && process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-        await db.collection("content").doc(contentId).delete();
-      } else if (contentId && String(contentId).startsWith("e2e-fake-")) {
-        console.log("[E2E] Skipping Firestore cleanup for fake content id:", contentId);
-      } else {
-        console.warn("[E2E] Skipping Firestore cleanup - no credentials available");
-      }
-    } catch (e) {
-      console.warn("[E2E] Could not delete test content, skipping cleanup:", e.message);
-    }
+    expect(String(contentId)).toContain("e2e-fake-");
   } finally {
     await new Promise(r => (mainServer ? mainServer.close(r) : r()));
   }

@@ -741,9 +741,30 @@ class ReferralGrowthEngine {
   // Get user's credit balance
   async getCreditBalance(userId) {
     try {
-      const creditsDoc = await db.collection("user_credits").doc(userId).get();
+      const creditsRef = db.collection("user_credits").doc(userId);
+      const userRef = db.collection("users").doc(userId);
+      const [creditsDoc, userDoc] = await Promise.all([creditsRef.get(), userRef.get()]);
 
-      if (!creditsDoc.exists) {
+      const credits = creditsDoc.exists ? creditsDoc.data() || {} : {};
+      const legacyUser = userDoc.exists ? userDoc.data() || {} : {};
+      const storedBalance = Number(credits.balance || 0) || 0;
+      const legacyBalance = Number(legacyUser.credits || 0) || 0;
+      const resolvedBalance = Math.max(storedBalance, legacyBalance);
+      const totalEarned = Math.max(Number(credits.totalEarned || 0) || 0, resolvedBalance);
+      const repairedAt = new Date().toISOString();
+
+      if (resolvedBalance > storedBalance) {
+        await creditsRef.set(
+          {
+            balance: resolvedBalance,
+            totalEarned,
+            lastUpdated: repairedAt,
+          },
+          { merge: true }
+        );
+      }
+
+      if (!creditsDoc.exists && resolvedBalance === 0) {
         return {
           userId,
           balance: 0,
@@ -753,14 +774,13 @@ class ReferralGrowthEngine {
         };
       }
 
-      const credits = creditsDoc.data();
-
       return {
         userId,
-        balance: credits.balance || 0,
-        totalEarned: credits.totalEarned || 0,
+        balance: resolvedBalance,
+        totalEarned,
         transactions: credits.transactions || [],
-        lastUpdated: credits.lastUpdated,
+        lastUpdated:
+          credits.lastUpdated || (resolvedBalance > storedBalance ? repairedAt : undefined),
       };
     } catch (error) {
       console.error("Error getting credit balance:", error);

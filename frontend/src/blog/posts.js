@@ -5,7 +5,7 @@ const posts = [
     date: "2026-01-02",
     content: `# Welcome to AutoPromote
 
-We're excited to launch features focused on creator monetization and cross-platform promotion. This blog will feature product updates and best practices.
+We're excited to share a publishing platform focused on connected uploads, scheduling, analytics, and practical workflow improvements. This blog will feature product updates, release notes, and honest guidance about what is live, what depends on your setup, and what is still evolving.
 `,
   },
   {
@@ -14,7 +14,7 @@ We're excited to launch features focused on creator monetization and cross-platf
     date: "2026-01-02",
     content: `# January 2026 Release
 
-This release includes improved scheduling and platform integrations.
+This release includes improved scheduling, clearer platform-status handling, and product messaging that better matches the platform's current capabilities.
 `,
   },
 ];

@@ -21,6 +21,12 @@ router.use(adminPublicLimiter);
 const { db } = require("../firebaseAdmin");
 const { validateEnv } = require("../utils/envValidator");
 const SENSITIVE_PREFIXES = ["PAYPAL_", "SESSION_SECRET", "JWT_", "DOC_SIGNING_SECRET"];
+const REQUIRED_BACKGROUND_WORKERS = [
+  "statsPoller",
+  "promotionTasks",
+  "platformMetrics",
+  "earningsAggregator",
+];
 
 router.get("/", authMiddleware, adminOnly, async (_req, res) => {
   try {
@@ -68,14 +74,12 @@ router.post("/update", authMiddleware, adminOnly, async (req, res) => {
       return res.status(400).json({ ok: false, error: "no_valid_fields" });
     const updated = await updateConfig(filtered);
     try {
-      await db
-        .collection("admin_logs")
-        .add({
-          type: "config_update",
-          by: req.userId || "unknown",
-          patch: filtered,
-          at: new Date().toISOString(),
-        });
+      await db.collection("admin_logs").add({
+        type: "config_update",
+        by: req.userId || "unknown",
+        patch: filtered,
+        at: new Date().toISOString(),
+      });
     } catch (_) {}
     return res.json({ ok: true, config: updated });
   } catch (e) {
@@ -117,11 +121,51 @@ router.get("/env-status", authMiddleware, adminOnly, async (_req, res) => {
       }
       envPresence[k] = { present: true, value };
     });
+
+    const backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === "true";
+    const staleThresholdSec = parseInt(process.env.WORKER_STATUS_STALE_SEC || "900", 10);
+    const staleCutoff = Date.now() - staleThresholdSec * 1000;
+    const workerStatus = {};
+    REQUIRED_BACKGROUND_WORKERS.forEach(name => {
+      workerStatus[name] = { found: false, ok: !backgroundJobsEnabled, lastRun: null };
+    });
+
+    try {
+      const statusSnap = await db
+        .collection("system_status")
+        .where("__name__", "in", REQUIRED_BACKGROUND_WORKERS)
+        .get();
+      statusSnap.forEach(doc => {
+        const value = doc.data() || {};
+        const lastRun = value.lastRun || null;
+        const lastRunMs = lastRun ? Date.parse(lastRun) : null;
+        workerStatus[doc.id] = {
+          found: true,
+          lastRun,
+          ok: !backgroundJobsEnabled || !!(lastRunMs && lastRunMs >= staleCutoff),
+          status: value.status || null,
+          error: value.error || null,
+        };
+      });
+    } catch (workerErr) {
+      workerStatus._error = workerErr.message;
+    }
+
+    const allWorkersHealthy = REQUIRED_BACKGROUND_WORKERS.every(
+      name => workerStatus[name] && workerStatus[name].ok
+    );
+
     return res.json({
       ok: true,
       errors,
       warnings,
-      backgroundJobsEnabled: process.env.ENABLE_BACKGROUND_JOBS === "true",
+      backgroundJobsEnabled,
+      workerStatus: {
+        required: REQUIRED_BACKGROUND_WORKERS,
+        staleThresholdSec,
+        allHealthy: allWorkersHealthy,
+        details: workerStatus,
+      },
       env: envPresence,
     });
   } catch (e) {

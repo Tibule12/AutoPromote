@@ -45,10 +45,23 @@ what did /* UnifiedPublisher.css */
 /* --- Layout --- */
 .publisher-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 350px) 1fr;
+  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
   gap: 2rem;
   width: 100%;
   align-items: start;
+}
+
+.platform-card-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+  align-items: start;
+}
+
+.platform-form-column,
+.platform-preview-column {
+  min-width: 0;
 }
 
 /* --- Responsive Mobile Tweaks --- */
@@ -72,7 +85,7 @@ what did /* UnifiedPublisher.css */
   }
 
   .unified-publisher-container {
-    padding: 10px; /* Less padding */
+    padding: 0; /* Let the upload panel own the viewport gutters */
     overflow-x: hidden; /* Prevent horizontal scroll */
   }
 
@@ -82,6 +95,18 @@ what did /* UnifiedPublisher.css */
   .form-group select {
     max-width: 100%;
     box-sizing: border-box; /* Critical for padding calculation */
+  }
+}
+
+/* Keep desktop readable on smaller laptops by stacking preview under the form. */
+@media (max-width: 1450px) {
+  .platform-card-body {
+    grid-template-columns: 1fr;
+  }
+
+  .platform-preview-column {
+    max-width: 640px;
+    width: 100%;
   }
 }
 
@@ -384,6 +409,10 @@ button {
     width: 100%;
     margin-top: 1rem;
   }
+
+  .global-controls {
+    gap: 1rem;
+  }
 }
 
 /* Defensive mobile fixes: ensure no element exceeds container width */
@@ -403,19 +432,41 @@ button {
     overflow-x: visible !important;
   }
 
+  .platform-card-body,
+  .platform-form-column,
+  .platform-preview-column,
+  .platform-card-wrapper,
+  .dark-theme-form,
+  .platform-form {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
   /* make cards and forms full width but leave their normal dark styling intact */
   .platform-card-wrapper,
   .platform-form {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
   }
   /* mobile: remove the dark card background/border entirely so only the form remains */
   .platform-card-wrapper {
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
+  }
+
+  .platform-form {
+    margin: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .platform-form-column,
+  .platform-preview-column {
+    margin-bottom: 0 !important;
   }
   /* keep default appearance of the wrapper; do not hide header */
 
@@ -434,6 +485,12 @@ button {
     max-width: 100% !important;
     width: 100% !important;
     height: auto !important;
+  }
+
+  .platform-preview-mockup {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
   }
 
   /* Prevent sticky bottom publish-actions from covering content on tiny screens */

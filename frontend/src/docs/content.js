@@ -4,7 +4,7 @@ const docs = [
     title: "Getting Started",
     content: `# Getting Started
 
-Welcome to AutoPromote. This quickstart helps you create and promote content.
+  Welcome to AutoPromote. This quickstart helps you connect platforms, publish deliberately, and learn from the resulting analytics.
 
 ## Steps
 
@@ -16,6 +16,7 @@ Welcome to AutoPromote. This quickstart helps you create and promote content.
 ## Tips
 
 Use the analytics panel to monitor performance and iterate.
+Short-link and landing-page behavior may depend on deployment configuration, so treat those features as environment-specific unless your workspace has them enabled.
 `,
   },
   {

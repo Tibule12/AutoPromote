@@ -69,6 +69,19 @@ function canRetry(classification) {
   return true;
 }
 
+function buildPlatformPostHash({ platform, contentId, payload = {} }) {
+  const canonical = {
+    message: payload.message || payload.text || payload.caption || payload.title || "",
+    link: payload.link || payload.url || "",
+    media: payload.mediaUrl || payload.videoUrl || payload.imageUrl || "",
+  };
+
+  return crypto
+    .createHash("sha256")
+    .update(`${platform}|${contentId}|${JSON.stringify(canonical)}`, "utf8")
+    .digest("hex");
+}
+
 async function enqueueYouTubeUploadTask({
   contentId,
   uid,
@@ -458,6 +471,27 @@ async function enqueuePlatformPostTask({
   }
   if (!contentId || !uid || !platform) throw new Error("contentId, uid, platform required");
 
+  let contentDocData = null;
+  try {
+    const contentSnap = await db.collection("content").doc(contentId).get();
+    if (contentSnap.exists) {
+      contentDocData = contentSnap.data() || {};
+      const distStatus =
+        contentDocData.distribution &&
+        contentDocData.distribution[platform] &&
+        contentDocData.distribution[platform].status;
+      if (distStatus === "published" || distStatus === "processing") {
+        return {
+          skipped: true,
+          reason: "already_distributed",
+          platform,
+          contentId,
+          status: distStatus,
+        };
+      }
+    }
+  } catch (_) {}
+
   // Feature-flag gating: allow TikTok only if enabled or the UID is in the canary list
   if (String(platform).toLowerCase() === "tiktok") {
     try {
@@ -479,19 +513,8 @@ async function enqueuePlatformPostTask({
 
     // Enforce sponsor approval for TikTok (production path) similar to fast-path
     try {
-      const contentSnap = await db.collection("content").doc(contentId).get();
-      if (contentSnap.exists) {
-        const c = contentSnap.data();
-
-        // DUPLICATE PRE-CHECK:
-        // If the content distribution status already shows this platform is processed/processing, skip.
-        // This handles race conditions where immediate distribution (contentRoutes) and viral optimization (scheduled) overlap.
-        const distStatus = c.distribution && c.distribution[platform] && c.distribution[platform].status;
-        if (distStatus === "published" || distStatus === "processing") {
-          console.log(`[enqueue] Skipping ${platform} post for ${contentId} - already ${distStatus}`);
-          return { skipped: true, reason: "already_distributed", platform, contentId, status: distStatus };
-        }
-
+      const c = contentDocData || {};
+      if (contentDocData) {
         const options =
           (c.platform_options && c.platform_options[platform]) ||
           (c.platformOptions && c.platformOptions[platform]) ||
@@ -649,15 +672,7 @@ async function enqueuePlatformPostTask({
     payload.__revenueEligible = null;
   }
   // Canonical subset of payload for hashing (avoid volatile fields)
-  const canonical = {
-    message: payload.message || "",
-    link: payload.link || payload.url || "",
-    media: payload.mediaUrl || payload.videoUrl || "",
-  };
-  const postHash = crypto
-    .createHash("sha256")
-    .update(`${platform}|${contentId}|${reason}|${JSON.stringify(canonical)}`, "utf8")
-    .digest("hex");
+  const postHash = buildPlatformPostHash({ platform, contentId, payload });
 
   const COOLDOWN_HOURS = parseInt(process.env.PLATFORM_POST_DUPLICATE_COOLDOWN_HOURS || "24", 10);
   const sinceMs = Date.now() - COOLDOWN_HOURS * 3600000;
@@ -701,9 +716,7 @@ async function enqueuePlatformPostTask({
   const existingTask = await db
     .collection("promotion_tasks")
     .where("type", "==", "platform_post")
-    .where("platform", "==", platform)
-    .where("contentId", "==", contentId)
-    .where("reason", "==", reason)
+    .where("postHash", "==", postHash)
     .where("status", "in", ["queued", "processing"])
     .limit(1)
     .get()
@@ -1583,4 +1596,5 @@ module.exports = {
   enqueuePlatformPostTask,
   processNextPlatformTask,
   enqueueMediaTransform,
+  buildPlatformPostHash,
 };

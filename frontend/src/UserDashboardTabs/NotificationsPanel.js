@@ -3,8 +3,6 @@ import React from "react";
 const NotificationsPanel = ({ notifs, onMarkAllRead }) => {
   const getTypeIcon = type => {
     switch (type) {
-      case "earnings":
-        return "💰";
       case "system":
         return "🔧";
       case "security":
@@ -18,8 +16,6 @@ const NotificationsPanel = ({ notifs, onMarkAllRead }) => {
 
   const getTypeColor = type => {
     switch (type) {
-      case "earnings":
-        return "#d1fae5"; // green
       case "security":
         return "#fee2e2"; // red
       case "viral":

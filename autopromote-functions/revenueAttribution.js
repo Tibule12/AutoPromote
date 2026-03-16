@@ -4,10 +4,10 @@ const admin = require("firebase-admin");
 const region = "us-central1";
 
 // Revenue Attribution System
-// Call this function from landing page JS or affiliate link redirect
+// Logs subscription-based monetization events (e.g. smart_link_click, landing_view)
 exports.logMonetizationEvent = functions.region(region).https.onCall(async (data, context) => {
   // data: { contentId, userId, eventType, value, referrerId }
-  // eventType: 'ad_impression', 'ad_click', 'affiliate_click', 'affiliate_conversion'
+  // eventType: 'smart_link_click', 'landing_view'
   const { contentId, userId, eventType, value, referrerId } = data;
   if (!contentId || !userId || !eventType) {
     throw new functions.https.HttpsError(
@@ -28,31 +28,6 @@ exports.logMonetizationEvent = functions.region(region).https.onCall(async (data
         referrerId: referrerId || null,
         timestamp: admin.firestore.FieldValue.serverTimestamp(),
       });
-    // Update revenue per content
-    const revenueField =
-      eventType === "ad_click" || eventType === "affiliate_conversion" ? "revenue" : null;
-    if (revenueField && value) {
-      await admin
-        .firestore()
-        .collection("content")
-        .doc(contentId)
-        .update({
-          revenue: admin.firestore.FieldValue.increment(value),
-        });
-      await admin
-        .firestore()
-        .collection("revenue")
-        .doc(contentId)
-        .set(
-          {
-            contentId,
-            userId,
-            totalRevenue: admin.firestore.FieldValue.increment(value),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
-    }
     return { success: true };
   } catch (error) {
     console.error("Error logging monetization event:", error);

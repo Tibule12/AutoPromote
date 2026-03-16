@@ -15,20 +15,47 @@ const crypto = require("crypto");
  * @returns {string} hexadecimal MD5 signature
  */
 function buildPayfastSignature(params = {}, passphrase) {
-  // Build string of params in alphabetical order of keys
-  // Do NOT sort keys: PayFast expects parameters in the same order they are submitted.
-  const keys = Object.keys(params).filter(
-    k => params[k] !== undefined && params[k] !== null && params[k] !== ""
-  );
-  const pieces = keys.map(k => `${k}=${params[k]}`);
+  const encodeRfc1738 = value => encodeURIComponent(String(value)).replace(/%20/g, "+");
+  const orderedKeys = [
+    "merchant_id",
+    "merchant_key",
+    "return_url",
+    "cancel_url",
+    "notify_url",
+    "m_payment_id",
+    "amount",
+    "item_name",
+    "custom_str1",
+    "custom_str2",
+    "custom_str3",
+    "custom_str4",
+    "custom_str5",
+  ];
+  const seen = new Set();
+  const pieces = [];
+
+  orderedKeys.forEach(key => {
+    if (params[key] !== undefined && params[key] !== null && params[key] !== "") {
+      seen.add(key);
+      pieces.push(`${key}=${encodeRfc1738(params[key])}`);
+    }
+  });
+
+  Object.keys(params).forEach(key => {
+    if (!seen.has(key) && params[key] !== undefined && params[key] !== null && params[key] !== "") {
+      pieces.push(`${key}=${encodeRfc1738(params[key])}`);
+    }
+  });
+
   let signatureString = pieces.join("&");
-  if (passphrase) signatureString = signatureString + `&passphrase=${passphrase}`;
+  const pass = passphrase == null ? "" : String(passphrase).trim();
+  if (pass) signatureString += `&passphrase=${encodeRfc1738(pass)}`;
   // Intentionally using MD5 per PayFast spec (external signature), not for passwords.
   // This is not used for authentication or storing secrets.
   // cql:ignore
   // codeql: ignore
   // eslint-disable-next-line security/detect-weak-hash
-  return crypto.createHash("md5").update(signatureString, "utf8").digest("hex").toUpperCase();
+  return crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
 }
 
 class PayFastProvider extends PaymentProvider {
@@ -79,6 +106,11 @@ class PayFastProvider extends PaymentProvider {
       m_payment_id,
       amount: Number(amount).toFixed(2),
       item_name: metadata.item_name || metadata.description || "AutoPromote payment",
+      custom_str1: metadata.custom_str1 || "",
+      custom_str2: metadata.custom_str2 || "",
+      custom_str3: metadata.custom_str3 || "",
+      custom_str4: metadata.custom_str4 || "",
+      custom_str5: metadata.custom_str5 || "",
     };
 
     // Build signature
@@ -120,7 +152,7 @@ class PayFastProvider extends PaymentProvider {
     delete copy.sig;
     delete copy.SIGNATURE;
 
-    const computed = buildPayfastSignature(copy, this.passphrase);
+    const computed = buildPayfastSignature(copy, this.passphrase).toLowerCase();
     const verified = computed === receivedSignature;
 
     // Persist IPN raw payload and verification result

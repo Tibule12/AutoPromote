@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import docs from "./docs/content";
+import PublicFeatureAvailability from "./components/PublicFeatureAvailability";
 
 const MarkdownRenderer = ({ md }) => {
   if (!md) return null;
@@ -61,6 +62,14 @@ const Docs = () => {
     <div style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
       <h1>Documentation</h1>
       <p>Welcome to the AutoPromote documentation. Choose a topic below.</p>
+      <p>
+        These docs focus on the current product: connected publishing, scheduling, analytics,
+        editing workflows, and the current monetization posture.
+      </p>
+      <PublicFeatureAvailability
+        title="Before You Dive In"
+        intro="Use this snapshot to separate supported workflows from environment-dependent or retired behavior before following the guides below."
+      />
       <ul>
         {docs.map(d => (
           <li key={d.slug}>

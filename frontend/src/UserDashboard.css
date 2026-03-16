@@ -209,8 +209,8 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   .dashboard-main {
     margin-left: 0 !important;
     margin-right: 0 !important;
-    padding: 0.5rem 12px !important;
-    max-width: 420px !important;
+    padding: 0.5rem 0 !important;
+    max-width: none !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
@@ -225,20 +225,31 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   .analytics-panel {
     margin: 0 auto !important;
     width: 100% !important;
-    max-width: 420px !important;
+    max-width: none !important;
     box-sizing: border-box !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: center !important; /* center contents horizontally */
+    align-items: stretch !important;
+  }
+
+  .upload-panel {
+    padding: 0.75rem 12px !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  .upload-panel > * {
+    width: 100% !important;
+    max-width: none !important;
   }
 
   /* Ensure forms are centered inside panels */
   .upload-panel form,
   .profile-details form,
-  .publish-panel form,
-  form {
-    margin: 12px auto !important;
-    width: calc(100% - 24px) !important;
+  .publish-panel form {
+    margin: 0 !important;
+    width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
     position: static !important;
@@ -251,29 +262,38 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
     align-items: stretch !important;
   }
 
+  .upload-panel .unified-publisher-container,
+  .upload-panel .publisher-layout,
+  .upload-panel .platform-workspace,
+  .upload-panel .platform-stack,
+  .upload-panel .platform-section {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
   /* platform-form entries should occupy full width to match card background */
   .platform-form,
   .platform-form form {
     width: 100% !important;
     max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
-  /* reset centering margins from earlier selectors */
-  .upload-panel *,
-  .profile-details *,
-  .publish-panel * {
-    margin-left: auto !important;
-    margin-right: auto !important;
+  .publish-panel .platform-form *,
+  .publish-panel .platform-card-wrapper * {
+    margin-left: initial !important;
+    margin-right: initial !important;
   }
 }
 @media (min-width: 1024px) {
   .dashboard-main {
-    /* Reserve space for the fixed sidebar and keep the main content within viewport. */
+    /* Reserve space for the fixed sidebar and let the desktop content breathe. */
     margin-left: 300px;
-    /* Prevent the main content from expanding past the usable viewport width and add right padding
-       so right-side nav elements or floating buttons aren't hidden. */
-    max-width: 1100px;
-    padding-right: 24px;
+    width: calc(100% - 324px);
+    max-width: none;
+    margin-right: 24px;
+    padding-right: 0;
   }
 }
 

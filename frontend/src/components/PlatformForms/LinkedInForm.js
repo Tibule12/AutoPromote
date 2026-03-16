@@ -13,6 +13,13 @@ const LinkedInForm = ({
   onFindViralClips,
 }) => {
   const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+  const profileName =
+    creatorInfo?.localizedName ||
+    [creatorInfo?.localizedFirstName, creatorInfo?.localizedLastName].filter(Boolean).join(" ") ||
+    creatorInfo?.meta?.localizedName ||
+    creatorInfo?.meta?.display_name ||
+    null;
+  const profilePicture = creatorInfo?.profilePicture || creatorInfo?.meta?.profilePicture || null;
 
   useEffect(() => {
     if (currentFile && currentFile instanceof File) {
@@ -79,7 +86,7 @@ const LinkedInForm = ({
       </h4>
 
       {/* IDENTITY BADGE */}
-      {creatorInfo && (
+      {profileName && (
         <div
           className="identity-badge"
           style={{
@@ -91,17 +98,15 @@ const LinkedInForm = ({
             borderRadius: "6px",
           }}
         >
-          {creatorInfo.profilePicture && (
+          {profilePicture && (
             <img
-              src={creatorInfo.profilePicture}
+              src={profilePicture}
               alt="Profile"
               style={{ width: 32, height: 32, borderRadius: "50%", marginRight: 10 }}
             />
           )}
           <div>
-            <div style={{ fontWeight: "600", color: "#333" }}>
-              {creatorInfo.localizedFirstName} {creatorInfo.localizedLastName}
-            </div>
+            <div style={{ fontWeight: "600", color: "#333" }}>{profileName}</div>
             <div style={{ fontSize: "0.8rem", color: "#666" }}>Posting as Profile</div>
           </div>
         </div>

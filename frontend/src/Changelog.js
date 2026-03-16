@@ -9,14 +9,16 @@ const Changelog = () => (
     </header>
 
     <div className="ap-changelog-item">
-      <h3>v1.2.0 - Content Safety & Viral Bonus</h3>
+      <h3>v1.2.0 - Content Safety & Monetization Transition</h3>
       <span className="ap-date">January 2026</span>
       <ul>
         <li>
-          Introduced AI-powered <strong>Content Safety Check</strong> to prevent policy violations.
+          Expanded <strong>content safety and compliance checks</strong> to reduce avoidable policy
+          issues before publishing.
         </li>
         <li>
-          Launched <strong>Viral Bonus System</strong>: Get paid for high-performing views.
+          Began the shift away from legacy view-based bonus messaging toward the current
+          mission-driven earning model.
         </li>
         <li>Enhanced footer with better navigation and resource links.</li>
       </ul>

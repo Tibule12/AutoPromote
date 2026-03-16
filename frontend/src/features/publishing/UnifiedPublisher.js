@@ -49,6 +49,187 @@ const getPlatformName = platformId => {
   );
 };
 
+function normalizeTikTokCreatorInfo(primary, fallbackRaw, fallbackSummary) {
+  const displayName =
+    primary?.display_name ||
+    primary?.user?.display_name ||
+    primary?.profile?.display_name ||
+    primary?.profile?.username ||
+    fallbackRaw?.display_name ||
+    fallbackRaw?.meta?.display_name ||
+    fallbackRaw?.profile?.username ||
+    fallbackSummary?.display_name ||
+    primary?.open_id ||
+    fallbackRaw?.open_id ||
+    null;
+
+  if (!displayName && !primary && !fallbackRaw && !fallbackSummary) {
+    return null;
+  }
+
+  return {
+    ...(fallbackRaw || {}),
+    ...(primary || {}),
+    display_name: displayName,
+    open_id: primary?.open_id || fallbackRaw?.open_id || displayName,
+  };
+}
+
+function normalizeYouTubeCreatorInfo(primary, fallbackRaw, fallbackSummary) {
+  const source =
+    primary?.channel ||
+    primary ||
+    fallbackRaw?.channel ||
+    (fallbackSummary?.channelTitle || fallbackSummary?.display_name
+      ? {
+          snippet: {
+            title: fallbackSummary.channelTitle || fallbackSummary.display_name,
+          },
+        }
+      : null);
+
+  const title =
+    source?.snippet?.title ||
+    fallbackRaw?.display_name ||
+    fallbackSummary?.channelTitle ||
+    fallbackSummary?.display_name ||
+    null;
+  const thumbnailUrl =
+    source?.snippet?.thumbnails?.default?.url ||
+    source?.snippet?.thumbnails?.medium?.url ||
+    source?.snippet?.thumbnails?.high?.url ||
+    null;
+
+  if (!title && !thumbnailUrl && !primary && !fallbackRaw && !fallbackSummary) {
+    return null;
+  }
+
+  return {
+    ...(source || {}),
+    snippet: {
+      ...(source?.snippet || {}),
+      title: title || source?.snippet?.title || "Unknown Channel",
+      thumbnails: {
+        ...(source?.snippet?.thumbnails || {}),
+        default: thumbnailUrl
+          ? {
+              ...(source?.snippet?.thumbnails?.default || {}),
+              url: thumbnailUrl,
+            }
+          : source?.snippet?.thumbnails?.default,
+      },
+    },
+  };
+}
+
+function normalizeLinkedInCreatorInfo(primary, fallbackRaw, fallbackSummary) {
+  const localizedName =
+    primary?.meta?.localizedName ||
+    primary?.localizedName ||
+    [primary?.localizedFirstName, primary?.localizedLastName].filter(Boolean).join(" ") ||
+    fallbackRaw?.meta?.display_name ||
+    fallbackSummary?.display_name ||
+    null;
+  const profilePicture =
+    primary?.profilePicture ||
+    primary?.meta?.profilePicture ||
+    fallbackRaw?.profilePicture ||
+    fallbackRaw?.meta?.profilePicture ||
+    null;
+  const followers =
+    primary?.meta?.followers ||
+    primary?.followers ||
+    fallbackRaw?.meta?.followers ||
+    fallbackSummary?.followers ||
+    null;
+
+  if (
+    !localizedName &&
+    !profilePicture &&
+    !followers &&
+    !primary &&
+    !fallbackRaw &&
+    !fallbackSummary
+  ) {
+    return null;
+  }
+
+  const [firstName, ...restName] = (localizedName || "").split(" ").filter(Boolean);
+
+  return {
+    ...(fallbackRaw || {}),
+    ...(primary || {}),
+    localizedName,
+    localizedFirstName: primary?.localizedFirstName || firstName || null,
+    localizedLastName: primary?.localizedLastName || restName.join(" ") || null,
+    profilePicture,
+    meta: {
+      ...((fallbackRaw && fallbackRaw.meta) || {}),
+      ...((primary && primary.meta) || {}),
+      localizedName,
+      followers,
+      profilePicture,
+    },
+  };
+}
+
+function normalizeRedditCreatorInfo(primary, fallbackRaw, fallbackSummary) {
+  const username =
+    primary?.name ||
+    primary?.meta?.name ||
+    primary?.meta?.username ||
+    fallbackRaw?.meta?.username ||
+    fallbackRaw?.name ||
+    fallbackSummary?.name ||
+    fallbackSummary?.display_name ||
+    null;
+  const iconImg =
+    primary?.icon_img ||
+    primary?.meta?.icon_img ||
+    fallbackRaw?.icon_img ||
+    fallbackRaw?.meta?.icon_img ||
+    null;
+  const totalKarma =
+    primary?.total_karma ||
+    primary?.meta?.total_karma ||
+    fallbackRaw?.total_karma ||
+    fallbackRaw?.meta?.total_karma ||
+    null;
+
+  if (!username && !iconImg && !primary && !fallbackRaw && !fallbackSummary) {
+    return null;
+  }
+
+  return {
+    ...(fallbackRaw || {}),
+    ...(primary || {}),
+    name: username,
+    icon_img: iconImg,
+    total_karma: totalKarma,
+    meta: {
+      ...((fallbackRaw && fallbackRaw.meta) || {}),
+      ...((primary && primary.meta) || {}),
+      name: username,
+      username,
+      icon_img: iconImg,
+      total_karma: totalKarma,
+    },
+  };
+}
+
+async function fetchPlatformStatusSnapshot(token) {
+  const res = await fetch(API_ENDPOINTS.PLATFORM_STATUS, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+
+  if (!res.ok) return { raw: {}, summary: {} };
+  const json = await res.json();
+  return {
+    raw: json.raw || {},
+    summary: json.summary || {},
+  };
+}
+
 // --- Sub-components ---
 
 const PlatformPreview = ({
@@ -672,6 +853,17 @@ const PlatformPreview = ({
 
   // 5. LinkedIn Mockup
   if (platformId === "linkedin") {
+    const linkedInName =
+      creatorInfo?.localizedName ||
+      creatorInfo?.meta?.localizedName ||
+      [creatorInfo?.localizedFirstName, creatorInfo?.localizedLastName].filter(Boolean).join(" ") ||
+      creatorInfo?.meta?.display_name ||
+      "Your Company";
+    const linkedInFollowers =
+      creatorInfo?.meta?.followers ||
+      creatorInfo?.followers ||
+      creatorInfo?.meta?.followerCount ||
+      null;
     return (
       <div
         className="platform-preview-mockup linkedin-mockup"
@@ -691,11 +883,10 @@ const PlatformPreview = ({
           ></div>
           <div>
             <div style={{ fontWeight: "bold", fontSize: "0.9rem", color: "#000" }}>
-              {creatorInfo?.meta?.localizedName || creatorInfo?.localizedName || "Your Company"}
+              {linkedInName}
             </div>
             <div style={{ fontSize: "0.75rem", color: "#606060" }}>
-              {creatorInfo?.meta?.followers ? creatorInfo.meta.followers.toLocaleString() : "1,234"}{" "}
-              followers
+              {linkedInFollowers ? linkedInFollowers.toLocaleString() : "1,234"} followers
             </div>
             <div style={{ fontSize: "0.75rem", color: "#606060" }}>Just now • 🌐</div>
           </div>
@@ -732,6 +923,8 @@ const PlatformPreview = ({
 
   // 6. Reddit Mockup
   if (platformId === "reddit") {
+    const redditPoster =
+      creatorInfo?.name || creatorInfo?.meta?.username || creatorInfo?.meta?.name || "me";
     return (
       <div
         className="platform-preview-mockup reddit-mockup"
@@ -775,9 +968,7 @@ const PlatformPreview = ({
             <span style={{ fontWeight: "bold", color: "#000" }}>
               r/{data.subreddit || "subreddit"}
             </span>
-            <span>
-              • Posted by u/{creatorInfo?.name || creatorInfo?.meta?.name || "me"} just now
-            </span>
+            <span>• Posted by u/{redditPoster} just now</span>
           </div>
           <h3 style={{ fontSize: "1rem", fontWeight: "500", margin: "0 0 10px 0", color: "#000" }}>
             {data.title || "Your Post Title"}
@@ -903,14 +1094,31 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       const fetchTikTok = async () => {
         try {
           const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
-          const res = await fetch(API_ENDPOINTS.TIKTOK_CREATOR_INFO, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
+          const [res, platformStatus] = await Promise.all([
+            fetch(API_ENDPOINTS.TIKTOK_CREATOR_INFO, {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }),
+            fetchPlatformStatusSnapshot(token),
+          ]);
           if (mounted && res.ok) {
             const json = await res.json();
             if (json && !json.error) {
-              setTiktokCreator(json.creator || json);
+              setTiktokCreator(
+                normalizeTikTokCreatorInfo(
+                  json.creator || json,
+                  platformStatus.raw.tiktok,
+                  platformStatus.summary.tiktok
+                )
+              );
             }
+          } else if (mounted) {
+            setTiktokCreator(
+              normalizeTikTokCreatorInfo(
+                null,
+                platformStatus.raw.tiktok,
+                platformStatus.summary.tiktok
+              )
+            );
           }
         } catch (e) {
           console.warn("TikTok fetch failed", e);
@@ -958,14 +1166,29 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       const fetchYouTube = async () => {
         try {
           const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
-          const res = await fetch(API_ENDPOINTS.YOUTUBE_STATUS, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
+          const [res, platformStatus] = await Promise.all([
+            fetch(API_ENDPOINTS.YOUTUBE_STATUS, {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }),
+            fetchPlatformStatusSnapshot(token),
+          ]);
           if (mounted && res.ok) {
             const json = await res.json();
-            if (json && json.channel && !json.error) {
-              setYoutubeChannel(json.channel);
-            }
+            setYoutubeChannel(
+              normalizeYouTubeCreatorInfo(
+                json && !json.error ? json.channel || json : null,
+                platformStatus.raw.youtube,
+                platformStatus.summary.youtube
+              )
+            );
+          } else if (mounted) {
+            setYoutubeChannel(
+              normalizeYouTubeCreatorInfo(
+                null,
+                platformStatus.raw.youtube,
+                platformStatus.summary.youtube
+              )
+            );
           }
         } catch (e) {
           console.warn("YouTube fetch failed", e);
@@ -985,14 +1208,31 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       const fetchLinkedIn = async () => {
         try {
           const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
-          const res = await fetch(API_ENDPOINTS.LINKEDIN_STATUS, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
+          const [res, platformStatus] = await Promise.all([
+            fetch(API_ENDPOINTS.LINKEDIN_STATUS, {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }),
+            fetchPlatformStatusSnapshot(token),
+          ]);
           if (mounted && res.ok) {
             const json = await res.json();
             if (json && !json.error) {
-              setLinkedinProfile(json);
+              setLinkedinProfile(
+                normalizeLinkedInCreatorInfo(
+                  json,
+                  platformStatus.raw.linkedin,
+                  platformStatus.summary.linkedin
+                )
+              );
             }
+          } else if (mounted) {
+            setLinkedinProfile(
+              normalizeLinkedInCreatorInfo(
+                null,
+                platformStatus.raw.linkedin,
+                platformStatus.summary.linkedin
+              )
+            );
           }
         } catch (e) {
           console.warn("LinkedIn fetch failed", e);
@@ -1012,14 +1252,31 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       const fetchReddit = async () => {
         try {
           const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
-          const res = await fetch(API_ENDPOINTS.REDDIT_STATUS, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
+          const [res, platformStatus] = await Promise.all([
+            fetch(API_ENDPOINTS.REDDIT_STATUS, {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }),
+            fetchPlatformStatusSnapshot(token),
+          ]);
           if (mounted && res.ok) {
             const json = await res.json();
             if (json && !json.error) {
-              setRedditUser(json);
+              setRedditUser(
+                normalizeRedditCreatorInfo(
+                  json,
+                  platformStatus.raw.reddit,
+                  platformStatus.summary.reddit
+                )
+              );
             }
+          } else if (mounted) {
+            setRedditUser(
+              normalizeRedditCreatorInfo(
+                null,
+                platformStatus.raw.reddit,
+                platformStatus.summary.reddit
+              )
+            );
           }
         } catch (e) {
           console.warn("Reddit fetch failed", e);

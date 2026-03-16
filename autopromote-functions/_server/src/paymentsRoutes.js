@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { db } = require("./firebaseAdmin");
+const { db, admin } = require("./firebaseAdmin");
 const { createOrder, captureOrder, verifyWebhook } = require("./services/payments/paypalService");
 const authMiddleware = require("./authMiddleware");
 const { strictLimiter, apiLimiter } = require("./middleware/rateLimiter");
@@ -19,6 +19,37 @@ const PACKAGES = {
   pack_medium: { credits: 150, price: "12.99" },
   pack_large: { credits: 500, price: "39.99" },
 };
+
+function normalizeCreditAmount(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+async function getSyncedCreditBalance(userId) {
+  const creditsRef = db.collection("user_credits").doc(userId);
+  const userRef = db.collection("users").doc(userId);
+  const [creditsDoc, userDoc] = await Promise.all([creditsRef.get(), userRef.get()]);
+
+  const storedBalance = creditsDoc.exists ? normalizeCreditAmount(creditsDoc.data().balance) : 0;
+  const legacyBalance = userDoc.exists ? normalizeCreditAmount(userDoc.data().credits) : 0;
+  const resolvedBalance = Math.max(storedBalance, legacyBalance);
+
+  if (resolvedBalance > storedBalance) {
+    const currentTotalEarned = creditsDoc.exists
+      ? normalizeCreditAmount(creditsDoc.data().totalEarned)
+      : 0;
+    await creditsRef.set(
+      {
+        balance: resolvedBalance,
+        totalEarned: Math.max(currentTotalEarned, resolvedBalance),
+        lastUpdated: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+  }
+
+  return resolvedBalance;
+}
 
 // Expose PayPal Client ID for frontend SDK
 router.get("/config/paypal", apiLimiter, (req, res) => {
@@ -62,55 +93,116 @@ router.post("/create-order", strictLimiter, authMiddleware, async (req, res) => 
 router.post("/capture-order", strictLimiter, authMiddleware, async (req, res) => {
   try {
     const { orderID, packageId } = req.body; // packageId passed for double-check or logging
+    const userId = (req.user && req.user.uid) || req.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    const pack = PACKAGES[packageId];
+    if (!pack) {
+      return res.status(400).json({ error: "Order captured but package unknown" });
+    }
+
+    const receiptRef = db.collection("transactions").doc(`paypal_${orderID}`);
+    const existingReceipt = await receiptRef.get();
+    if (existingReceipt.exists) {
+      const balance = await getSyncedCreditBalance(userId);
+      return res.json({
+        success: true,
+        newCredits: 0,
+        balance,
+        alreadyProcessed: true,
+      });
+    }
+
     const captureData = await captureOrder(orderID);
 
     if (captureData.status === "COMPLETED") {
-      // 1. Identify User
-      const userId = req.user.uid;
+      let responsePayload = null;
+      const processedAt = new Date().toISOString();
 
-      // 2. Identify Credits to add
-      // In a robust system, we might look up the order details from PayPal first to ensure tampering didn't happen
-      // with the amount. But here we can trust the packageId logic if we wanted, OR we can inspect captureData.
-      // captureData.purchase_units[0].payments.captures[0].amount.value
-      // For speed, let's use the packageId passed from client, but verify usage against the PACKAGES map.
-
-      const pack = PACKAGES[packageId];
-      if (!pack) {
-        // Fallback if packageId is lost, log error but maybe still credit if money captured?
-        // For now, fail safe.
-        console.error("Capture success but unknown package", packageId);
-        return res.status(400).json({ error: "Order captured but package unknown" });
-      }
-
-      // 3. Atomically update user credits
-      const userRef = db.collection("users").doc(userId);
       await db.runTransaction(async t => {
-        const doc = await t.get(userRef);
-        const currentCredits = doc.exists ? doc.data().credits || 0 : 0;
+        const receiptDoc = await t.get(receiptRef);
+        const creditsRef = db.collection("user_credits").doc(userId);
+        const userRef = db.collection("users").doc(userId);
+        const creditsDoc = await t.get(creditsRef);
+        const userDoc = await t.get(userRef);
+        const currentCredits = Math.max(
+          creditsDoc.exists ? normalizeCreditAmount(creditsDoc.data().balance) : 0,
+          userDoc.exists ? normalizeCreditAmount(userDoc.data().credits) : 0
+        );
+
+        if (receiptDoc.exists) {
+          responsePayload = {
+            success: true,
+            newCredits: 0,
+            balance: currentCredits,
+            alreadyProcessed: true,
+          };
+          return;
+        }
+
+        const updatedCredits = currentCredits + pack.credits;
+
+        const creditsUpdate = {
+          balance: updatedCredits,
+          totalEarned:
+            Math.max(
+              creditsDoc.exists ? normalizeCreditAmount(creditsDoc.data().totalEarned) : 0,
+              currentCredits
+            ) + pack.credits,
+          lastUpdated: processedAt,
+        };
+
+        if (admin && admin.firestore && admin.firestore.FieldValue) {
+          creditsUpdate.transactions = admin.firestore.FieldValue.arrayUnion({
+            type: "credit_purchase",
+            amount: pack.price,
+            currency: "USD",
+            creditsAdded: pack.credits,
+            provider: "PAYPAL",
+            orderId: orderID,
+            timestamp: processedAt,
+          });
+        }
+
+        t.set(creditsRef, creditsUpdate, { merge: true });
+
         t.set(
           userRef,
           {
-            credits: currentCredits + pack.credits,
-            lastPurchaseDate: new Date().toISOString(),
+            credits: updatedCredits,
+            lastPurchaseDate: processedAt,
           },
           { merge: true }
         );
 
-        // Log transaction
-        const txnRef = db.collection("transactions").doc();
-        t.set(txnRef, {
-          userId,
-          type: "CREDIT_PURCHASE",
-          amount: pack.price,
-          currency: "USD",
-          creditsAdded: pack.credits,
-          provider: "PAYPAL",
-          orderId: orderID,
-          timestamp: new Date().toISOString(),
-        });
+        t.set(
+          receiptRef,
+          {
+            userId,
+            type: "CREDIT_PURCHASE",
+            amount: pack.price,
+            currency: "USD",
+            creditsAdded: pack.credits,
+            provider: "PAYPAL",
+            orderId: orderID,
+            status: "COMPLETED",
+            timestamp: processedAt,
+            balanceAfter: updatedCredits,
+          },
+          { merge: true }
+        );
+
+        responsePayload = {
+          success: true,
+          newCredits: pack.credits,
+          balance: updatedCredits,
+          alreadyProcessed: false,
+        };
       });
 
-      return res.json({ success: true, newCredits: pack.credits });
+      return res.json(responsePayload || { success: true, newCredits: 0, balance: 0 });
     } else {
       return res.status(400).json({ error: "Order not completed", details: captureData });
     }

@@ -26,6 +26,64 @@ const PACKAGES = {
   pack_large: { credits: 500, price: "39.99" },
 };
 
+function resolveFrontendUrl(baseUrl, requestedUrl, fallbackPath) {
+  const fallback = new URL(fallbackPath, baseUrl).toString();
+  if (!requestedUrl || typeof requestedUrl !== "string") return fallback;
+
+  try {
+    if (/^https?:\/\//i.test(requestedUrl)) {
+      const candidate = new URL(requestedUrl);
+      if (candidate.origin === new URL(baseUrl).origin) {
+        return candidate.toString();
+      }
+      return fallback;
+    }
+
+    if (requestedUrl.startsWith("/")) {
+      return new URL(requestedUrl, baseUrl).toString();
+    }
+
+    if (requestedUrl.startsWith("?")) {
+      return new URL(`${fallbackPath}${requestedUrl}`, baseUrl).toString();
+    }
+  } catch (_) {
+    return fallback;
+  }
+
+  return fallback;
+}
+
+function normalizeCreditAmount(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+async function getSyncedCreditBalance(userId) {
+  const creditsRef = db.collection("user_credits").doc(userId);
+  const userRef = db.collection("users").doc(userId);
+  const [creditsDoc, userDoc] = await Promise.all([creditsRef.get(), userRef.get()]);
+
+  const storedBalance = creditsDoc.exists ? normalizeCreditAmount(creditsDoc.data().balance) : 0;
+  const legacyBalance = userDoc.exists ? normalizeCreditAmount(userDoc.data().credits) : 0;
+  const resolvedBalance = Math.max(storedBalance, legacyBalance);
+
+  if (resolvedBalance > storedBalance) {
+    const currentTotalEarned = creditsDoc.exists
+      ? normalizeCreditAmount(creditsDoc.data().totalEarned)
+      : 0;
+    await creditsRef.set(
+      {
+        balance: resolvedBalance,
+        totalEarned: Math.max(currentTotalEarned, resolvedBalance),
+        lastUpdated: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+  }
+
+  return resolvedBalance;
+}
+
 // --- PAYPL ROUTES ---
 
 router.post("/credits/create-order", authMiddleware, async (req, res) => {
@@ -58,30 +116,65 @@ router.post("/credits/create-order", authMiddleware, async (req, res) => {
 router.post("/credits/capture-order", authMiddleware, async (req, res) => {
   try {
     const { orderID, packageId } = req.body;
+    const userId = (req.user && req.user.uid) || req.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    const pack = PACKAGES[packageId];
+    if (!pack) {
+      return res.status(400).json({ error: "Package unknown" });
+    }
+
+    const receiptRef = db.collection("transactions").doc(`paypal_${orderID}`);
+    const existingReceipt = await receiptRef.get();
+    if (existingReceipt.exists) {
+      const balance = await getSyncedCreditBalance(userId);
+      return res.json({
+        success: true,
+        newCredits: 0,
+        balance,
+        alreadyProcessed: true,
+      });
+    }
+
     const captureData = await captureOrder(orderID);
 
     if (captureData.status === "COMPLETED") {
-      const userId = req.user.uid;
-      const pack = PACKAGES[packageId];
+      let responsePayload = null;
+      const processedAt = new Date().toISOString();
 
-      if (!pack) {
-        // Log but maybe succeed if money is captured?
-        // For now return success with warning or just error.
-        return res.status(400).json({ error: "Package unknown" });
-      }
-
-      // Persist credits in the collection used by the frontend balance endpoint.
       await db.runTransaction(async t => {
+        const receiptDoc = await t.get(receiptRef);
         const creditsRef = db.collection("user_credits").doc(userId);
+        const userRef = db.collection("users").doc(userId);
         const creditsDoc = await t.get(creditsRef);
-        const currentCredits = creditsDoc.exists ? creditsDoc.data().balance || 0 : 0;
+        const userDoc = await t.get(userRef);
+
+        const currentCredits = Math.max(
+          creditsDoc.exists ? normalizeCreditAmount(creditsDoc.data().balance) : 0,
+          userDoc.exists ? normalizeCreditAmount(userDoc.data().credits) : 0
+        );
+
+        if (receiptDoc.exists) {
+          responsePayload = {
+            success: true,
+            newCredits: 0,
+            balance: currentCredits,
+            alreadyProcessed: true,
+          };
+          return;
+        }
 
         const updatedCredits = currentCredits + pack.credits;
         const updateData = {
           balance: updatedCredits,
           totalEarned:
-            (creditsDoc.exists ? creditsDoc.data().totalEarned || 0 : 0) + pack.credits,
-          lastUpdated: new Date().toISOString(),
+            Math.max(
+              creditsDoc.exists ? normalizeCreditAmount(creditsDoc.data().totalEarned) : 0,
+              currentCredits
+            ) + pack.credits,
+          lastUpdated: processedAt,
         };
 
         if (admin && admin.firestore && admin.firestore.FieldValue) {
@@ -92,27 +185,48 @@ router.post("/credits/capture-order", authMiddleware, async (req, res) => {
             creditsAdded: pack.credits,
             provider: "PAYPAL",
             orderId: orderID,
-            timestamp: new Date().toISOString(),
+            timestamp: processedAt,
           });
         }
 
         t.set(creditsRef, updateData, { merge: true });
 
         // Also keep the older 'users' record in sync for legacy usage.
-        const userRef = db.collection("users").doc(userId);
         t.set(
           userRef,
           {
             credits: updatedCredits,
-            lastPurchaseDate: new Date().toISOString(),
+            lastPurchaseDate: processedAt,
           },
           { merge: true }
         );
+
+        t.set(
+          receiptRef,
+          {
+            userId,
+            type: "CREDIT_PURCHASE",
+            amount: pack.price,
+            currency: "USD",
+            creditsAdded: pack.credits,
+            provider: "PAYPAL",
+            orderId: orderID,
+            status: "COMPLETED",
+            timestamp: processedAt,
+            balanceAfter: updatedCredits,
+          },
+          { merge: true }
+        );
+
+        responsePayload = {
+          success: true,
+          newCredits: pack.credits,
+          balance: updatedCredits,
+          alreadyProcessed: false,
+        };
       });
 
-      const updatedDoc = await db.collection("user_credits").doc(userId).get();
-      const updatedBalance = updatedDoc.exists ? updatedDoc.data().balance || 0 : 0;
-      return res.json({ success: true, newCredits: pack.credits, balance: updatedBalance });
+      return res.json(responsePayload || { success: true, newCredits: 0, balance: 0 });
     } else {
       return res.status(400).json({ error: "Order not completed", details: captureData });
     }
@@ -129,22 +243,42 @@ const USD_TO_ZAR = 18.5;
 
 router.post("/payfast/init", authMiddleware, async (req, res) => {
   try {
-    const { packageId } = req.body;
+    const { packageId, returnUrl, cancelUrl, returnPath, cancelPath } = req.body || {};
     const pack = PACKAGES[packageId];
     if (!pack) return res.status(400).json({ error: "Invalid package ID" });
 
     // Convert fixed USD price to ZAR
     const zarAmount = (parseFloat(pack.price) * USD_TO_ZAR).toFixed(2);
-    const userId = req.user.uid;
+    const userId = (req.user && req.user.uid) || req.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
     const m_payment_id = `pf_${packageId}_${userId}_${Date.now()}`;
+
+    const baseUrl =
+      process.env.APP_BASE_URL ||
+      req.get("origin") ||
+      req.headers.origin ||
+      "http://localhost:3000";
+    const apiUrl = process.env.APP_API_URL || "http://localhost:5001";
+    const safeReturnUrl = resolveFrontendUrl(
+      baseUrl,
+      returnUrl || returnPath,
+      `/marketplace?payment=success&pkg=${packageId}`
+    );
+    const safeCancelUrl = resolveFrontendUrl(
+      baseUrl,
+      cancelUrl || cancelPath,
+      "/marketplace?payment=cancelled"
+    );
 
     // Create PayFast "Order" (really just signature & params)
     const result = await payfastProvider.createOrder({
       amount: zarAmount,
       currency: "ZAR",
-      returnUrl: `${process.env.APP_BASE_URL || "http://localhost:3000"}/marketplace?payment=success&pkg=${packageId}`,
-      cancelUrl: `${process.env.APP_BASE_URL || "http://localhost:3000"}/marketplace?payment=cancelled`,
-      notifyUrl: `${process.env.APP_API_URL || "http://localhost:5001"}/api/payments/payfast/notify`, // Must be publicly accessible
+      returnUrl: safeReturnUrl,
+      cancelUrl: safeCancelUrl,
+      notifyUrl: `${apiUrl}/api/payments/payfast/notify`,
       metadata: {
         m_payment_id,
         item_name: `Credits: ${pack.credits} (${packageId})`,

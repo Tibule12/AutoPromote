@@ -1,5 +1,5 @@
 // paypalSubscriptionRoutes.js
-// PayPal subscription management for community monetization
+// PayPal subscription management for AutoPromote paid plans
 
 const express = require("express");
 const router = express.Router();
@@ -112,53 +112,53 @@ async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUr
 const SUBSCRIPTION_PLANS = {
   free: {
     id: "free",
-    name: "Free",
+    name: "Starter",
     price: 0,
     features: {
-      uploads: 5, // Matches PayPal Free plan
-      platformLimit: 1, // Single platform
-      wolfHuntTasks: 5, // Daily tasks limit (earn credits)
+      uploads: 5,
+      platformLimit: 1,
+      wolfHuntTasks: 5,
       analytics: "Basic",
-      support: "Community",
+      support: "Self-serve",
     },
   },
   premium: {
     id: "premium",
-    name: "Premium",
+    name: "Creator",
     price: 9.99,
     paypalPlanId: process.env.PAYPAL_PREMIUM_PLAN_ID,
     features: {
       uploads: 15,
-      platformLimit: 3, // Multi-platform
-      wolfHuntTasks: 20, // Unlocks more daily earning
-      analytics: "Advanced",
-      support: "Priority",
+      platformLimit: 3,
+      wolfHuntTasks: 20,
+      analytics: "Workflow analytics",
+      support: "Email support",
     },
   },
   pro: {
     id: "pro",
-    name: "Pro",
+    name: "Studio",
     price: 29.99,
     paypalPlanId: process.env.PAYPAL_PRO_PLAN_ID,
     features: {
-      uploads: 25, // Fixed cap for external API constraints
-      platformLimit: "Unlimited", // Global distribution
-      wolfHuntTasks: 100, // Serious earning potential
-      analytics: "Enterprise",
-      support: "Priority",
+      uploads: 25,
+      platformLimit: "Unlimited",
+      wolfHuntTasks: 100,
+      analytics: "Advanced insights",
+      support: "Priority support",
     },
   },
   enterprise: {
     id: "enterprise",
-    name: "Enterprise",
+    name: "Team",
     price: 99.99,
     paypalPlanId: process.env.PAYPAL_ENTERPRISE_PLAN_ID,
     features: {
-      uploads: 50, // Set cap to prevent external API overage
+      uploads: 50,
       platformLimit: "Unlimited",
-      wolfHuntTasks: 500, // Maximum earning capacity
-      analytics: "Enterprise",
-      support: "Dedicated",
+      wolfHuntTasks: 500,
+      analytics: "Team reporting",
+      support: "Dedicated support",
     },
   },
 };

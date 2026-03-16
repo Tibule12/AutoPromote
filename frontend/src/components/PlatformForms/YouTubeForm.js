@@ -38,6 +38,13 @@ const YouTubeForm = ({
   onFindViralClips,
 }) => {
   const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+  const channelTitle =
+    creatorInfo?.snippet?.title || creatorInfo?.channelTitle || creatorInfo?.display_name || null;
+  const channelAvatar =
+    creatorInfo?.snippet?.thumbnails?.default?.url ||
+    creatorInfo?.snippet?.thumbnails?.medium?.url ||
+    creatorInfo?.snippet?.thumbnails?.high?.url ||
+    null;
 
   useEffect(() => {
     if (currentFile && currentFile instanceof File) {
@@ -116,16 +123,18 @@ const YouTubeForm = ({
       </h4>
 
       {/* IDENTITY: Show Channel Name if Available (Added for Audit) */}
-      {creatorInfo ? (
+      {channelTitle ? (
         <div className="identity-badge" style={{ marginBottom: "16px" }}>
-          <img
-            src={creatorInfo.snippet?.thumbnails?.default?.url}
-            alt="Channel"
-            style={{ width: 24, height: 24, borderRadius: "50%", verticalAlign: "middle" }}
-          />
-          <span style={{ marginLeft: 8, fontWeight: "600" }}>
-            {creatorInfo.snippet?.title || "Unknown Channel"}
-          </span>
+          {channelAvatar ? (
+            <img
+              src={channelAvatar}
+              alt="Channel"
+              style={{ width: 24, height: 24, borderRadius: "50%", verticalAlign: "middle" }}
+            />
+          ) : (
+            <span style={{ fontSize: 18, lineHeight: 1 }}>▶</span>
+          )}
+          <span style={{ marginLeft: 8, fontWeight: "600" }}>{channelTitle}</span>
         </div>
       ) : (
         <div className="alert-box warning">
