@@ -5,6 +5,12 @@ const connectDB = require("../db");
 async function main() {
   console.log("⏱️  Starting Content Diagnosis Automation Job...");
   
+  // DEBUG: Check environment variables
+  console.log("🔍 Debugging Environment:");
+  console.log(`   - FIREBASE_SERVICE_ACCOUNT_JSON present? ${!!process.env.FIREBASE_SERVICE_ACCOUNT_JSON}`);
+  console.log(`   - FIREBASE_SERVICE_ACCOUNT_BASE64 present? ${!!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64}`);
+  console.log(`   - FIREBASE_SERVICE_ACCOUNT present? ${!!process.env.FIREBASE_SERVICE_ACCOUNT}`);
+  
   // 1. Initialize Database
   const isConnected = await connectDB();
   if (!isConnected) {
