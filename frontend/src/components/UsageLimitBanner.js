@@ -77,13 +77,12 @@ const UsageLimitBanner = () => {
           </div>
         </div>
         <button className="upgrade-button" onClick={handleUpgrade}>
-          ⭐ Upgrade for Unlimited
+          ⭐ Upgrade for Higher Limits
         </button>
       </div>
       {isAtLimit && (
         <div className="limit-message">
-          Upgrade to Premium to continue uploading and promoting your content with unlimited uploads
-          per month.
+          Upgrade to Premium or Pro to continue uploading and get a higher monthly upload limit.
         </div>
       )}
     </div>

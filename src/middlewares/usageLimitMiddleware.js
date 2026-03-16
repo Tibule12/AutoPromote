@@ -4,17 +4,21 @@
 const { db, storage } = require("../firebaseAdmin");
 const logger = require("../utils/logger");
 const url = require("url");
+const { normalizePlanId, getUploadLimitForPlan } = require("../config/subscriptionPlans");
 
 // Free tier upload limit (per month). Can be overridden with env var FREE_UPLOAD_LIMIT.
 // Default matches the PayPal plan configuration (5 uploads/month).
-const FREE_UPLOAD_LIMIT = parseInt(process.env.FREE_UPLOAD_LIMIT || "5", 10);
+const FREE_UPLOAD_LIMIT = parseInt(
+  process.env.FREE_UPLOAD_LIMIT || String(getUploadLimitForPlan("free")),
+  10
+);
 
 // Sync this with the PayPal subscription plan configuration in src/routes/paypalSubscriptionRoutes.js
 const SUBSCRIPTION_UPLOAD_LIMITS = {
   free: FREE_UPLOAD_LIMIT,
-  premium: 15,
-  pro: 25,
-  enterprise: 50,
+  premium: getUploadLimitForPlan("premium"),
+  pro: getUploadLimitForPlan("pro"),
+  enterprise: getUploadLimitForPlan("enterprise"),
 };
 
 /**
@@ -134,10 +138,11 @@ function usageLimitMiddleware(options = {}) {
       const isInOnboarding = Date.now() - createdAt.getTime() < ONBOARDING_PERIOD_MS;
 
       // Determine the user's subscription tier
-      const subscriptionTier =
+      const subscriptionTier = normalizePlanId(
         userData.subscriptionTier ||
-        (userData.subscription && userData.subscription.planId) ||
-        "free";
+          (userData.subscription && userData.subscription.planId) ||
+          "free"
+      );
 
       // Determine upload limit for the user based on plan
       const planLimit = SUBSCRIPTION_UPLOAD_LIMITS[subscriptionTier] ?? FREE_UPLOAD_LIMIT;
@@ -287,21 +292,9 @@ async function getUserUsageStats(userId) {
     const userDoc = await db.collection("users").doc(userId).get();
     const userData = userDoc.data() || {};
 
-    const hasPaidSubscription =
-      userData.subscriptionTier === "premium" ||
-      userData.subscriptionTier === "pro" ||
-      userData.isPaid === true ||
-      userData.unlimited === true;
-
-    if (hasPaidSubscription) {
-      return {
-        isPaid: true,
-        limit: Infinity,
-        used: 0,
-        remaining: Infinity,
-        monthKey,
-      };
-    }
+    const normalizedTier = normalizePlanId(userData.subscriptionTier || "free");
+    const isPaidTier =
+      normalizedTier !== "free" || userData.isPaid === true || userData.unlimited === true;
 
     // Get upload count for current month
     const usageSnap = await db
@@ -317,12 +310,12 @@ async function getUserUsageStats(userId) {
       usageCount += data.count || 1;
     });
 
-    const freeLimit = FREE_UPLOAD_LIMIT;
+    const planLimit = SUBSCRIPTION_UPLOAD_LIMITS[normalizedTier] ?? FREE_UPLOAD_LIMIT;
     return {
-      isPaid: false,
-      limit: freeLimit,
+      isPaid: isPaidTier,
+      limit: planLimit,
       used: usageCount,
-      remaining: Math.max(0, freeLimit - usageCount),
+      remaining: Math.max(0, planLimit - usageCount),
       monthKey,
     };
   } catch (error) {

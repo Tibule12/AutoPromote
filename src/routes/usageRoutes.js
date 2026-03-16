@@ -75,6 +75,14 @@ router.post("/upgrade", authMiddleware, async (req, res) => {
       { merge: true }
     );
 
+    await db.collection("user_billing").doc(userId).set(
+      {
+        tier,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+
     // Log subscription event
     await db.collection("subscription_events").add({
       userId,
