@@ -1,21 +1,17 @@
 // src/optimizationService.js
+const { generateRecommendations } = require("./services/contentDiagnosisService");
+
 module.exports = {
   optimize: data => {
     // Add optimization logic here
     return data;
   },
-  generateOptimizationRecommendations: (content, _analyticsData = {}) => {
-    // Example recommendation logic
-    return [
-      {
-        recommendation: "Increase posting frequency for better engagement",
-        reason: "Content with higher frequency tends to get more views.",
-      },
-      {
-        recommendation: "Optimize for platforms with highest engagement",
-        reason: "Focus on platforms where your audience is most active.",
-      },
-    ];
+  generateOptimizationRecommendations: (content, analyticsData = {}) => {
+    const result = generateRecommendations(content || {}, analyticsData || {});
+    return result.recommendations;
+  },
+  diagnoseContentPerformance: (content, analyticsData = {}) => {
+    return generateRecommendations(content || {}, analyticsData || {});
   },
   optimizePromotionSchedule: (content, platforms) => {
     // Example platform optimization logic

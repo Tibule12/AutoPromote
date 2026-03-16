@@ -7,6 +7,7 @@ const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
 const { audit } = require("../services/auditLogger");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
+const { SUBSCRIPTION_PLANS, normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
 
 // PayPal SDK + helpers
 const paypalClient = require("../paypalClient");
@@ -107,71 +108,19 @@ async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUr
   return json;
 }
 
-// Subscription plans configuration
-// Mirrors billingService logic — keep in sync with TIERS in billingService.js
-const SUBSCRIPTION_PLANS = {
-  free: {
-    id: "free",
-    name: "Starter",
-    price: 0,
-    features: {
-      uploads: 5,
-      platformLimit: 1,
-      wolfHuntTasks: 5,
-      analytics: "Basic",
-      support: "Self-serve",
-    },
-  },
-  premium: {
-    id: "premium",
-    name: "Creator",
-    price: 9.99,
-    paypalPlanId: process.env.PAYPAL_PREMIUM_PLAN_ID,
-    features: {
-      uploads: 15,
-      platformLimit: 3,
-      wolfHuntTasks: 20,
-      analytics: "Workflow analytics",
-      support: "Email support",
-    },
-  },
-  pro: {
-    id: "pro",
-    name: "Studio",
-    price: 29.99,
-    paypalPlanId: process.env.PAYPAL_PRO_PLAN_ID,
-    features: {
-      uploads: 25,
-      platformLimit: "Unlimited",
-      wolfHuntTasks: 100,
-      analytics: "Advanced insights",
-      support: "Priority support",
-    },
-  },
-  enterprise: {
-    id: "enterprise",
-    name: "Team",
-    price: 99.99,
-    paypalPlanId: process.env.PAYPAL_ENTERPRISE_PLAN_ID,
-    features: {
-      uploads: 50,
-      platformLimit: "Unlimited",
-      wolfHuntTasks: 500,
-      analytics: "Team reporting",
-      support: "Dedicated support",
-    },
-  },
-};
-
 /**
  * GET /api/paypal-subscriptions/plans
  * Get available subscription plans
  */
 router.get("/plans", async (req, res) => {
   try {
+    const plans = Object.values(SUBSCRIPTION_PLANS).map(plan => ({
+      ...plan,
+      paypalPlanId: plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : undefined,
+    }));
     res.json({
       success: true,
-      plans: Object.values(SUBSCRIPTION_PLANS),
+      plans,
       currency: "USD",
     });
   } catch (error) {
@@ -193,12 +142,14 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const plan = SUBSCRIPTION_PLANS[planId];
-    if (!plan || planId === "free") {
+    const normalizedPlanId = normalizePlanId(planId);
+    const plan = resolvePlan(normalizedPlanId);
+    const paypalPlanId = plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : undefined;
+    if (!plan || normalizedPlanId === "free") {
       return res.status(400).json({ error: "Invalid plan selection" });
     }
 
-    if (!plan.paypalPlanId) {
+    if (!paypalPlanId) {
       return res.status(500).json({
         error: "PayPal plan not configured",
         message: "Please contact support to set up this plan",
@@ -213,7 +164,7 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
     if (paypal && paypal.subscriptions && paypal.subscriptions.SubscriptionsCreateRequest) {
       const request = new paypal.subscriptions.SubscriptionsCreateRequest();
       request.requestBody({
-        plan_id: plan.paypalPlanId,
+        plan_id: paypalPlanId,
         subscriber: {
           name: {
             given_name: userData.displayName?.split(" ")[0] || "User",
@@ -242,7 +193,7 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
       // Store subscription intent in Firestore
       await db.collection("subscription_intents").doc(subscription.result.id).set({
         userId,
-        planId,
+        planId: normalizedPlanId,
         paypalSubscriptionId: subscription.result.id,
         status: "pending",
         amount: plan.price,
@@ -251,7 +202,7 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
 
       audit.log("paypal.subscription.created", {
         userId,
-        planId,
+        planId: normalizedPlanId,
         subscriptionId: subscription.result.id,
       });
 
@@ -263,7 +214,7 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
         used: "sdk",
         subscriptionId: subscription.result.id,
         approvalUrl: approvalLink?.href,
-        planId,
+        planId: normalizedPlanId,
         amount: plan.price,
       });
     } else {
@@ -271,7 +222,7 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
       try {
         console.warn("[PayPal] SDK subscriptions API missing; using REST fallback");
         const rest = await createSubscriptionViaRest({
-          planId: plan.paypalPlanId,
+          planId: paypalPlanId,
           userData,
           returnUrl: returnUrl || `${process.env.FRONTEND_URL}/dashboard?payment=success`,
           cancelUrl: cancelUrl || `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`,
@@ -280,13 +231,17 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
         const subscriptionId = rest && (rest.id || rest.subscription_id);
         await db.collection("subscription_intents").doc(subscriptionId).set({
           userId,
-          planId,
+          planId: normalizedPlanId,
           paypalSubscriptionId: subscriptionId,
           status: "pending",
           amount: plan.price,
           createdAt: new Date().toISOString(),
         });
-        audit.log("paypal.subscription.created", { userId, planId, subscriptionId });
+        audit.log("paypal.subscription.created", {
+          userId,
+          planId: normalizedPlanId,
+          subscriptionId,
+        });
         const approvalLink =
           (rest && rest.links && rest.links.find(l => l.rel === "approve")) || null;
         return res.json({
@@ -294,7 +249,7 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
           used: "rest",
           subscriptionId,
           approvalUrl: approvalLink?.href,
-          planId,
+          planId: normalizedPlanId,
           amount: plan.price,
         });
       } catch (e) {
@@ -369,14 +324,15 @@ router.post("/activate", authMiddleware, async (req, res) => {
       });
     }
 
-    const plan = SUBSCRIPTION_PLANS[intent.planId];
+    const planId = normalizePlanId(intent.planId);
+    const plan = resolvePlan(planId);
 
     // Update user subscription in Firestore
     await db
       .collection("users")
       .doc(userId)
       .update({
-        subscriptionTier: intent.planId,
+        subscriptionTier: planId,
         subscriptionStatus: "active",
         paypalSubscriptionId: subscriptionId,
         subscriptionStartedAt: new Date().toISOString(),
@@ -388,13 +344,21 @@ router.post("/activate", authMiddleware, async (req, res) => {
         updatedAt: new Date().toISOString(),
       });
 
+    await db.collection("user_billing").doc(userId).set(
+      {
+        tier: planId,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+
     // Create subscription record
     await db
       .collection("user_subscriptions")
       .doc(userId)
       .set({
         userId,
-        planId: intent.planId,
+        planId,
         planName: plan.name,
         paypalSubscriptionId: subscriptionId,
         status: "active",
@@ -418,7 +382,7 @@ router.post("/activate", authMiddleware, async (req, res) => {
     await db.collection("subscription_events").add({
       userId,
       type: "subscription_activated",
-      planId: intent.planId,
+      planId,
       paypalSubscriptionId: subscriptionId,
       amount: plan.price,
       timestamp: new Date().toISOString(),
@@ -426,7 +390,7 @@ router.post("/activate", authMiddleware, async (req, res) => {
 
     audit.log("paypal.subscription.activated", {
       userId,
-      planId: intent.planId,
+      planId,
       subscriptionId,
     });
 
@@ -434,7 +398,7 @@ router.post("/activate", authMiddleware, async (req, res) => {
       success: true,
       message: `Successfully subscribed to ${plan.name}`,
       subscription: {
-        planId: intent.planId,
+        planId,
         planName: plan.name,
         status: "active",
         features: plan.features,
@@ -486,6 +450,14 @@ router.post("/cancel", authMiddleware, async (req, res) => {
       subscriptionExpiresAt: userData.subscriptionPeriodEnd,
       updatedAt: new Date().toISOString(),
     });
+
+    await db.collection("user_billing").doc(userId).set(
+      {
+        tier: "free",
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
 
     // Update subscription record
     await db.collection("user_subscriptions").doc(userId).update({
@@ -657,52 +629,91 @@ router.get("/usage", authMiddleware, async (req, res) => {
     const userDoc = await db.collection("users").doc(userId).get();
     const userData = userDoc.data() || {};
 
-    const tier = userData.subscriptionTier || "free";
-    const plan = SUBSCRIPTION_PLANS[tier];
+    const tier = normalizePlanId(userData.subscriptionTier || "free");
+    const plan = resolvePlan(tier);
 
     // Calculate period start
     const periodStart = userData.subscriptionPeriodStart
       ? new Date(userData.subscriptionPeriodStart)
       : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
+    const toDate = value => {
+      if (!value) return null;
+      if (value instanceof Date) return value;
+      if (typeof value.toDate === "function") return value.toDate();
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    const countDocsSince = (snapshots, startDate) => {
+      const seen = new Set();
+      snapshots.forEach(snapshot => {
+        if (!snapshot || !snapshot.docs) return;
+        snapshot.docs.forEach(doc => {
+          const data = doc.data() || {};
+          const ts =
+            toDate(data.created_at) ||
+            toDate(data.createdAt) ||
+            toDate(data.timestamp) ||
+            toDate(data.updatedAt);
+          if (ts && ts >= startDate) seen.add(doc.id);
+        });
+      });
+      return seen.size;
+    };
+
     // Get usage counts (with error handling for missing indexes/collections)
-    let uploadsSnap, postsSnap, boostsSnap;
+    let uploadsByUserIdSnap, uploadsByLegacySnap, postsSnap, boostsSnap;
     try {
-      uploadsSnap = await db.collection("content").where("userId", "==", userId).get();
+      [uploadsByUserIdSnap, uploadsByLegacySnap] = await Promise.all([
+        db.collection("content").where("userId", "==", userId).get(),
+        db.collection("content").where("user_id", "==", userId).get(),
+      ]);
     } catch (e) {
       console.log("[PayPal] Content query error:", e.message);
-      uploadsSnap = { size: 0 };
+      uploadsByUserIdSnap = { docs: [] };
+      uploadsByLegacySnap = { docs: [] };
     }
 
     try {
       postsSnap = await db.collection("community_posts").where("userId", "==", userId).get();
     } catch (e) {
       console.log("[PayPal] Posts query error:", e.message);
-      postsSnap = { size: 0 };
+      postsSnap = { docs: [] };
     }
 
     try {
       boostsSnap = await db.collection("viral_boosts").where("userId", "==", userId).get();
     } catch (e) {
       console.log("[PayPal] Boosts query error:", e.message);
-      boostsSnap = { size: 0 };
+      boostsSnap = { docs: [] };
     }
+
+    const uploadLimit = plan.features.uploads;
+    const communityPostLimit = plan.features.communityPosts;
+    const viralBoostLimit = plan.features.viralBoost;
+    const isUnlimited = value =>
+      value === undefined || value === null || value === "unlimited" || value === "Unlimited";
+
+    const uploadsUsed = countDocsSince([uploadsByUserIdSnap, uploadsByLegacySnap], periodStart);
+    const postsUsed = countDocsSince([postsSnap], periodStart);
+    const boostsUsed = countDocsSince([boostsSnap], periodStart);
 
     const usage = {
       uploads: {
-        used: uploadsSnap.size,
-        limit: plan.features.uploads === "unlimited" ? null : plan.features.uploads,
-        unlimited: plan.features.uploads === "unlimited",
+        used: uploadsUsed,
+        limit: isUnlimited(uploadLimit) ? null : uploadLimit,
+        unlimited: isUnlimited(uploadLimit),
       },
       communityPosts: {
-        used: postsSnap.size,
-        limit: plan.features.communityPosts === "unlimited" ? null : plan.features.communityPosts,
-        unlimited: plan.features.communityPosts === "unlimited",
+        used: postsUsed,
+        limit: isUnlimited(communityPostLimit) ? null : communityPostLimit,
+        unlimited: isUnlimited(communityPostLimit),
       },
       viralBoosts: {
-        used: boostsSnap.size,
-        limit: plan.features.viralBoost === "unlimited" ? null : plan.features.viralBoost,
-        unlimited: plan.features.viralBoost === "unlimited",
+        used: boostsUsed,
+        limit: isUnlimited(viralBoostLimit) ? null : viralBoostLimit,
+        unlimited: isUnlimited(viralBoostLimit),
       },
       periodStart: periodStart.toISOString(),
       periodEnd: userData.subscriptionPeriodEnd,

@@ -9,6 +9,9 @@ module.exports = {
         "<rootDir>/src/**/*.test.js",
         "<rootDir>/test/**/__tests__/**",
         "<rootDir>/test/**/*.jest.test.js",
+        "<rootDir>/test/paypal-subscription.routes.test.js",
+        "<rootDir>/test/payments-routes.test.js",
+        "<rootDir>/test/payments.dev.mock.subscription.test.js",
       ],
       // Load early env setup before any modules are imported to ensure bypass flags are present
       setupFiles: ["<rootDir>/test/jest.setup.js"],
