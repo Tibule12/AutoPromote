@@ -1,5 +1,5 @@
-# Use Node.js 18 Alpine for smaller image size
-FROM node:18-alpine
+# Use Node.js 20 Alpine for smaller image size (Updated for Firebase/Undici requirements)
+FROM node:20-alpine
 
 # Install system dependencies (FFmpeg for media processing)
 RUN apk add --no-cache ffmpeg
