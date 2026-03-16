@@ -3,6 +3,119 @@ const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
 const router = express.Router();
 
+function parseTimestamp(value) {
+  if (!value) return null;
+  if (value.toMillis) return value.toMillis();
+  const t = Date.parse(value);
+  return isNaN(t) ? null : t;
+}
+
+function parseDateValue(value) {
+  if (!value) return null;
+  if (typeof value.toDate === "function") return value.toDate();
+  if (value instanceof Date) return value;
+  const t = parseTimestamp(value);
+  return t ? new Date(t) : null;
+}
+
+function getContentCreatedAt(content) {
+  return (
+    parseDateValue(content.createdAt) ||
+    parseDateValue(content.created_at) ||
+    parseDateValue(content.updatedAt) ||
+    parseDateValue(content.updated_at)
+  );
+}
+
+function getOwnerId(record) {
+  if (!record) return null;
+  return record.user_id || record.userId || record.uid || record.ownerId || record.creatorId || null;
+}
+
+function getNumericMetric(...values) {
+  for (const value of values) {
+    const numericValue = Number(value);
+    if (Number.isFinite(numericValue)) return numericValue;
+  }
+  return 0;
+}
+
+async function fetchOwnedCollectionDocs(collectionName, uid, ownerFields, limit = 200) {
+  const seen = new Set();
+  const docs = [];
+
+  await Promise.all(
+    ownerFields.map(async field => {
+      try {
+        const snapshot = await db.collection(collectionName).where(field, "==", uid).limit(limit).get();
+        snapshot.forEach(doc => {
+          if (seen.has(doc.id)) return;
+          seen.add(doc.id);
+          docs.push({ id: doc.id, ...doc.data() });
+        });
+      } catch (error) {
+        console.warn(`[Analytics] Failed ${collectionName} lookup on ${field}:`, error.message);
+      }
+    })
+  );
+
+  return docs;
+}
+
+function normalizePlatformName(value) {
+  if (!value) return null;
+  const normalized = String(value).trim().toLowerCase();
+  if (!normalized || normalized === "unknown" || normalized === "n/a") return null;
+  return normalized;
+}
+
+function getPostEventDate(post) {
+  return (
+    parseDateValue(post.publishedAt) ||
+    parseDateValue(post.published_at) ||
+    parseDateValue(post.postedAt) ||
+    parseDateValue(post.completedAt) ||
+    parseDateValue(post.createdAt) ||
+    parseDateValue(post.created_at) ||
+    parseDateValue(post.updatedAt) ||
+    parseDateValue(post.updated_at)
+  );
+}
+
+function isPublishedPlatformPost(post) {
+  if (!post) return false;
+  // Exclude synthetic/test placeholders from user-facing analytics.
+  if (post.simulated === true) return false;
+  if (post.rawOutcome && post.rawOutcome.simulated === true) return false;
+  const reason = String(post.reason || post.rawOutcome?.reason || "").toLowerCase();
+  if (["missing_credentials", "missing_fetch", "disabled_by_feature_flag"].includes(reason)) {
+    return false;
+  }
+  if (post.success === true) return true;
+  const status = String(post.status || post.publish_status || "").toLowerCase();
+  if (["published", "posted", "completed", "success", "succeeded", "done", "live"].includes(status)) {
+    return true;
+  }
+  if (post.externalId || post.external_id || post.postId || post.post_id) return true;
+  if (post.rawOutcome && post.rawOutcome.success === true) return true;
+  return false;
+}
+
+async function fetchContentTitleMap(contentIds) {
+  const titleMap = new Map();
+  await Promise.all(
+    [...contentIds].map(async contentId => {
+      try {
+        const snap = await db.collection("content").doc(contentId).get();
+        if (!snap.exists) return;
+        const data = snap.data() || {};
+        titleMap.set(contentId, data.title || data.caption || null);
+      } catch (_error) {}
+    })
+  );
+  return titleMap;
+}
+
 // Get content analytics
 router.get("/content/:id", authMiddleware, async (req, res) => {
   try {
@@ -27,7 +140,7 @@ router.get("/content/:id", authMiddleware, async (req, res) => {
         req.user
       );
     }
-    if (content.userId !== req.user.uid && req.user.role !== "admin") {
+    if (getOwnerId(content) !== req.user.uid && req.user.role !== "admin") {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -75,48 +188,54 @@ router.get("/user", authMiddleware, async (req, res) => {
 
     // Parse time range
     const now = new Date();
-    let startDate = new Date();
-    if (range === "24h") startDate.setHours(now.getHours() - 24);
-    else if (range === "7d") startDate.setDate(now.getDate() - 7);
-    else if (range === "30d") startDate.setDate(now.getDate() - 30);
-    else if (range === "90d") startDate.setDate(now.getDate() - 90);
-    else startDate.setDate(now.getDate() - 7); // default to 7d
+    let startDate = null;
+    if (range === "all") {
+      startDate = null;
+    } else {
+      startDate = new Date();
+      if (range === "24h") startDate.setHours(now.getHours() - 24);
+      else if (range === "7d") startDate.setDate(now.getDate() - 7);
+      else if (range === "30d") startDate.setDate(now.getDate() - 30);
+      else if (range === "90d") startDate.setDate(now.getDate() - 90);
+      else startDate.setDate(now.getDate() - 7); // default to 7d
+    }
 
-    // Get user's content (Filtered in memory to avoid missing index issues on createdAt)
-    console.log(`[Analytics] Filtering content for user: ${uid} over range: ${range}`);
-    const contentRef = db
-      .collection("content")
-      .where("userId", "==", uid);
-      
-    const contentSnapshot = await contentRef.get();
-    console.log(`[Analytics] Found ${contentSnapshot.size} total docs for user.`);
-    
-    // In-memory filter & sort
-    const filteredDocs = [];
-    contentSnapshot.forEach(doc => {
-       const data = doc.data();
-       let createdTime = 0;
-       /* ... logic ... */
-       if (data.createdAt) {
-           if (typeof data.createdAt.toDate === 'function') {
-               createdTime = data.createdAt.toDate().getTime();
-           } else if (data.createdAt instanceof Date) {
-               createdTime = data.createdAt.getTime();
-           } else if (typeof data.createdAt === 'string') {
-               createdTime = new Date(data.createdAt).getTime();
-           }
-       }
-       
-       if (createdTime >= startDate.getTime()) {
-           filteredDocs.push(data);
-       }
-    });
-    console.log(`[Analytics] ${filteredDocs.length} passed date filter (>= ${startDate.toISOString()})`);
+    // Analytics should be sourced from published platform posts only.
+    console.log(`[Analytics] Aggregating published platform posts for user: ${uid}, range: ${range}`);
+    const allOwnedPosts = await fetchOwnedCollectionDocs(
+      "platform_posts",
+      uid,
+      ["uid", "userId", "user_id", "ownerId", "creatorId"],
+      400
+    );
 
+    const publishedPostsAllTime = allOwnedPosts.filter(
+      post => isPublishedPlatformPost(post) && normalizePlatformName(post.platform)
+    );
+    const postsWithoutEventDate = publishedPostsAllTime.filter(post => !getPostEventDate(post)).length;
+    const publishedPosts = publishedPostsAllTime
+      .filter(post => {
+        const eventDate = getPostEventDate(post);
+        if (!startDate) return true;
+        // Keep range windows strict: posts with no event timestamp are excluded from dated windows.
+        if (!eventDate) return false;
+        return eventDate.getTime() >= startDate.getTime();
+      })
+      .sort((a, b) => {
+        const aTime = getPostEventDate(a)?.getTime() || 0;
+        const bTime = getPostEventDate(b)?.getTime() || 0;
+        return bTime - aTime;
+      });
 
-    // Emulate existing logic by looping heavily
-    // But since subsequent logic iterates `contentSnapshot`, we need to change how we iterate.
-    // Let's replace the `contentSnapshot` usage.
+    const filterLabel = startDate ? startDate.toISOString() : "all-time";
+    console.log(
+      `[Analytics] ${publishedPosts.length} published platform posts passed date filter (>= ${filterLabel})`
+    );
+
+    const contentIds = new Set(
+      publishedPosts.map(post => post.contentId).filter(contentId => typeof contentId === "string" && contentId)
+    );
+    const contentTitleMap = await fetchContentTitleMap(contentIds);
 
     let totalViews = 0;
     let totalLikes = 0;
@@ -124,182 +243,139 @@ router.get("/user", authMiddleware, async (req, res) => {
     let totalRevenue = 0;
     let totalClicks = 0;
     const contentByPlatform = {};
+    let latestSnapshot = null;
+    let lastUpdatedAt = null;
+    let nextUpdateAt = null;
 
-    filteredDocs.forEach(content => {
-      // original loop body used 'doc.data()' -> 'content'
-      
-      // Handle views from nested stats object if not at top level
-      let views = content.views || 0;
-      if (!views && content.stats && content.stats.viewCount) {
-        views = parseInt(content.stats.viewCount, 10) || 0;
+    const topContentCandidates = publishedPosts.map(post => {
+      const platform = normalizePlatformName(post.platform);
+      const metrics = post.metrics || {};
+      const views = getNumericMetric(
+        metrics.views,
+        metrics.view_count,
+        metrics.video_views,
+        metrics.video_view_count,
+        metrics.play_count,
+        metrics.plays,
+        metrics.post_impressions,
+        metrics.impressions,
+        metrics.impression_count
+      );
+      const likes = getNumericMetric(
+        metrics.likes,
+        metrics.like_count,
+        metrics.favorite_count,
+        metrics.reaction_count,
+        metrics.score
+      );
+      const shares = getNumericMetric(
+        metrics.shares,
+        metrics.share_count,
+        metrics.retweet_count,
+        metrics.repost_count,
+        metrics.reposts
+      );
+      const clicks = getNumericMetric(metrics.clicks, metrics.click_count, metrics.link_clicks, metrics.post_clicks);
+      const comments = getNumericMetric(
+        metrics.comments,
+        metrics.comment_count,
+        metrics.comments_count,
+        metrics.reply_count,
+        metrics.post_engaged_users,
+        metrics.total_comments
+      );
+
+      if (!contentByPlatform[platform]) {
+        contentByPlatform[platform] = {
+          count: 0,
+          views: 0,
+          likes: 0,
+          shares: 0,
+          comments: 0,
+          clicks: 0,
+          ctr: 0,
+        };
       }
 
-      // Handle likes from nested stats object if not at top level
-      let likes = content.likes || 0;
-      if (!likes && content.stats && content.stats.likeCount) {
-        likes = parseInt(content.stats.likeCount, 10) || 0;
-      }
-      
+      contentByPlatform[platform].count += 1;
+      contentByPlatform[platform].views += views;
+      contentByPlatform[platform].likes += likes;
+      contentByPlatform[platform].shares += shares;
+      contentByPlatform[platform].comments += comments;
+      contentByPlatform[platform].clicks += clicks;
+
       totalViews += views;
       totalLikes += likes;
-      totalShares += content.shares || 0;
-      totalRevenue += content.revenue || 0;
+      totalShares += shares;
+      totalClicks += clicks;
 
-      // Smart Platform Aggregation for Multi-Platform Content
-      const potentialPlatforms = ['youtube', 'tiktok', 'instagram', 'facebook', 'linkedin', 'twitter'];
-      let handledAsMultiPlatform = false;
-
-      potentialPlatforms.forEach(p => {
-          if (content[p] && content[p].stats) {
-              handledAsMultiPlatform = true;
-              if (!contentByPlatform[p]) {
-                  contentByPlatform[p] = { count: 0, views: 0, likes: 0, revenue: 0 };
-              }
-              
-              const pViews = parseInt(content[p].stats.viewCount || 0, 10);
-              const pLikes = parseInt(content[p].stats.likeCount || 0, 10);
-              
-              contentByPlatform[p].views += pViews;
-              contentByPlatform[p].likes += pLikes;
-              contentByPlatform[p].count++;
+      if (Array.isArray(post.analytics_snapshots)) {
+        post.analytics_snapshots.forEach(snapshot => {
+          if (!snapshot || !snapshot.timestamp) return;
+          const ts = parseTimestamp(snapshot.timestamp);
+          if (!ts) return;
+          if (!lastUpdatedAt || ts > lastUpdatedAt) {
+            lastUpdatedAt = ts;
+            latestSnapshot = snapshot;
           }
-      });
-
-      // Fallback: If no specific platform stats found, attribute to main platform
-      if (!handledAsMultiPlatform) {
-          const platform = content.platform || "unknown";
-          if (!contentByPlatform[platform]) {
-            contentByPlatform[platform] = { count: 0, views: 0, likes: 0, revenue: 0 };
-          }
-          contentByPlatform[platform].count++;
-          contentByPlatform[platform].views += views;
-          contentByPlatform[platform].likes += likes;
-          contentByPlatform[platform].revenue += content.revenue || 0;
+        });
       }
+      const nextCheckTs = parseTimestamp(post.next_check_at);
+      if (nextCheckTs && (!nextUpdateAt || nextCheckTs < nextUpdateAt)) {
+        nextUpdateAt = nextCheckTs;
+      }
+
+      const fallbackTitle = post.payload?.title || post.payload?.caption || post.payload?.message || post.payload?.text || null;
+      const resolvedTitle = contentTitleMap.get(post.contentId) || fallbackTitle || "Untitled";
+      const publishedAt = getPostEventDate(post);
+
+      return {
+        title: resolvedTitle,
+        views,
+        clicks,
+        platform,
+        comments,
+        shares,
+        publishedAt: publishedAt ? publishedAt.toISOString() : null,
+      };
     });
 
-    // --- PLATFORM POSTS AGGREGATION (Cross-posting stats) ---
-    // Fetch individual platform posts (Facebook shares, Tweets, etc.) for this user
-    try {
-      // Use simple query to avoid missing index error (FAILED_PRECONDITION)
-      // We'll filter and sort by date in memory
-      // FIXED: Also fetch failed posts that might have partial metrics or missing status
-      // to ensure the dashboard shows at least static/simulated data if available
-      const postsRef = db
-        .collection("platform_posts")
-        .where("uid", "==", uid)
-        .limit(200); // safety cap
-
-      const postsSnap = await postsRef.get();
-      
-      const docs = [];
-      postsSnap.forEach(d => docs.push(d.data()));
-      
-      // Sort desc
-      docs.sort((a, b) => {
-        const tA = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
-        const tB = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
-        return tB - tA;
-      });
-
-      docs.forEach(p => {
-        if (!p.platform) return;
-        
-        // Manual date filter
-        if (p.createdAt) {
-          const createdTime = p.createdAt.toDate ? p.createdAt.toDate() : new Date(p.createdAt);
-          if (createdTime < startDate) return;
-        }
-
-        const plat = p.platform;
-        if (!contentByPlatform[plat]) {
-          contentByPlatform[plat] = {
-            count: 0,
-            views: 0,
-            likes: 0,
-            revenue: 0,
-            comments: 0,
-            shares: 0,
-          };
-        }
-
-        contentByPlatform[plat].count++;
-
-        // Extract metrics (normalized from platformStatsPoller)
-        const m = p.metrics || {};
-
-        // Views / Impressions
-        const views =
-          m.views || m.view_count || m.post_impressions || m.impressions || m.impression_count || 0;
-        contentByPlatform[plat].views += parseInt(views || 0, 10);
-
-        // Likes / Upvotes
-        const likes = m.likes || m.like_count || m.score || 0; // Reddit uses 'score'
-        contentByPlatform[plat].likes += parseInt(likes || 0, 10);
-
-        // Shares / Retweets
-        const shares = m.shares || m.share_count || m.retweet_count || 0;
-        contentByPlatform[plat].shares += parseInt(shares || 0, 10);
-
-        // Clicks / Link clicks
-        const clicks = m.clicks || m.click_count || m.link_clicks || m.post_clicks || 0;
-        if (!contentByPlatform[plat].clicks) contentByPlatform[plat].clicks = 0;
-        contentByPlatform[plat].clicks += parseInt(clicks || 0, 10);
-        totalClicks += parseInt(clicks || 0, 10);
-
-        // Comments / Replies
-        const comments =
-          m.comments || m.comment_count || m.reply_count || m.post_engaged_users || 0;
-        if (!contentByPlatform[plat].comments) contentByPlatform[plat].comments = 0;
-        contentByPlatform[plat].comments += parseInt(comments || 0, 10);
-
-        // Add to totals (optional: maybe keep separate to avoiding double counting if content doc also tracks it?
-        // Usually content doc tracks Source, this tracks Distribution. Adding them gives total reach.)
-        totalViews += parseInt(views || 0, 10);
-        totalLikes += parseInt(likes || 0, 10);
-        totalShares += parseInt(shares || 0, 10);
-      });
-    } catch (e) {
-      console.warn("[Analytics] Failed to aggregate platform_posts:", e.message);
-    }
-
-    // --- REVENUE & REFERRAL TRACKING INJECTION ---
-    // Inject current progress towards bonuses so frontend can display "Sales Shark" trackers
-    // Using top-level db import
-
-    // 1. Viral Bonus Progress & Content Health Text
-    // Logic: Free Tier target is 50k views ("Flaming/Magic").
-    // Below that = "We are working on it" (Auto-Promote active).
-    let bestContent = { views: 0, nextGoal: 50000, potentialBonus: 0 };
-    let performanceStatus = "Initializing";
-    let motivationMessage = "Preparing your content for the algorithm.";
-
-    // Find best performer
-    let maxViews = 0;
-    contentSnapshot.forEach(doc => {
-      const v = doc.data().views || 0;
-      if (v > maxViews) maxViews = v;
+    Object.values(contentByPlatform).forEach(platformRow => {
+      platformRow.ctr =
+        platformRow.views > 0
+          ? parseFloat(((platformRow.clicks / platformRow.views) * 100).toFixed(2))
+          : 0;
     });
 
-    if (maxViews < 1000) {
-      performanceStatus = "Needs Work";
-      motivationMessage = "Early stages. We are optimizing hashtags and gathering signals.";
-      bestContent = { views: maxViews, nextGoal: 50000, potentialBonus: 0 };
-    } else if (maxViews < 50000) {
-      performanceStatus = "Growing";
-      motivationMessage =
-        "We are working on it! Auto-Promote is cycling your content to reach the magic 50k.";
-      bestContent = { views: maxViews, nextGoal: 50000, potentialBonus: 0 };
-    } else if (maxViews < 100000) {
-      performanceStatus = "Flaming & Magic";
-      motivationMessage =
-        "You hit the magic 50k! Free Tier is maxed out. Upgrade to Subscription to push for 1M+.";
-      bestContent = { views: maxViews, nextGoal: 100000, potentialBonus: 0 }; // Removed cash bonus
-    } else {
-      performanceStatus = "Viral Supernova";
-      motivationMessage = "Your content is dominating the feed. The algorithm loves you.";
-      bestContent = { views: maxViews, nextGoal: 500000, potentialBonus: 0 }; // Removed cash bonus
-    }
+    const bestCandidate = topContentCandidates.reduce(
+      (best, item) => {
+        if (!best) return item;
+        if (item.views > best.views) return item;
+        if (item.views === best.views && item.clicks > best.clicks) return item;
+        return best;
+      },
+      null
+    );
+
+    const bestContent = {
+      views: bestCandidate ? bestCandidate.views : 0,
+      nextGoal:
+        bestCandidate && bestCandidate.views >= 100000
+          ? 500000
+          : bestCandidate && bestCandidate.views >= 50000
+            ? 100000
+            : 50000,
+      potentialBonus: 0,
+    };
+
+    const performanceStatus = publishedPosts.length
+      ? totalViews > 0
+        ? "Live"
+        : "Published with low measurable reach"
+      : "No published platform posts";
+    const motivationMessage = publishedPosts.length
+      ? "Analytics are sourced from published platform post records."
+      : "Publish content to at least one connected platform to generate analytics.";
 
     // 2. Referral Progress (Logic from referralGrowthEngine: 10 friends = $5, 20 = $15)
     let referralStats = { total: 0, nextGoal: 10, potentialBonus: 5 };
@@ -313,10 +389,10 @@ router.get("/user", authMiddleware, async (req, res) => {
 
       if (creds.exists) {
         const count = creds.data().totalReferrals || 0;
-        referralStats = { 
-            total: count, 
-            nextGoal: count < 10 ? 10 : (count < 20 ? 20 : 100), 
-            potentialBonus: count < 10 ? 5 : (count < 20 ? 15 : 50) 
+        referralStats = {
+          total: count,
+          nextGoal: count < 10 ? 10 : count < 20 ? 20 : 100,
+          potentialBonus: count < 10 ? 5 : count < 20 ? 15 : 50,
         };
       }
       if (userDoc.exists) {
@@ -324,54 +400,59 @@ router.get("/user", authMiddleware, async (req, res) => {
       }
     } catch (e) {}
 
-    // Calculate Top Platform
+    // Calculate top platform from published platform post metrics only.
     let topPlatform = "N/A";
     let maxPlatViews = -1;
     Object.entries(contentByPlatform).forEach(([plat, data]) => {
-        if (data.views > maxPlatViews) {
-            maxPlatViews = data.views;
-            topPlatform = plat;
-        }
+      if (data.views > maxPlatViews) {
+        maxPlatViews = data.views;
+        topPlatform = plat;
+      }
     });
-    if (maxPlatViews === 0 && topPlatform === "unknown") topPlatform = "N/A";
+    if (maxPlatViews <= 0) topPlatform = "N/A";
 
-    // Calculate Top Content (Top 5)
-    // Create a simplified list from filteredDocs
-    const topContent = filteredDocs.map(doc => {
-        // Need to parse views correctly again as we did in the loop
-        let views = doc.views || 0;
-        if (!views && doc.stats && doc.stats.viewCount) {
-             views = parseInt(doc.stats.viewCount, 10) || 0;
-        }
-        return {
-            title: doc.title || "Untitled",
-            views: views,
-            clicks: doc.clicks || 0, // Assuming clicks are tracked
-            platform: doc.platform
-        };
-    }).sort((a, b) => b.views - a.views).slice(0, 5);
+    const topContent = topContentCandidates
+      .sort((a, b) => {
+        if (b.views !== a.views) return b.views - a.views;
+        return b.clicks - a.clicks;
+      })
+      .slice(0, 5);
+
+    const latestSnapshotAt = lastUpdatedAt ? new Date(lastUpdatedAt).toISOString() : null;
+    const nextUpdateAtStr = nextUpdateAt ? new Date(nextUpdateAt).toISOString() : null;
 
     res.json({
       range,
-      totalContent: filteredDocs.length,
+      totalContent: contentIds.size,
+      publishedPostCount: publishedPosts.length,
+      publishedPostCountAllTime: publishedPostsAllTime.length,
+      postsWithoutEventDate,
+      rangeStartAt: startDate ? startDate.toISOString() : null,
+      rangeEndAt: now.toISOString(),
       totalViews,
       totalLikes,
       totalShares,
       totalRevenue,
       totalClicks,
       ctr: totalViews > 0 ? parseFloat(((totalClicks / totalViews) * 100).toFixed(2)) : 0,
-      
+
       // Frontend specific keys
       platformBreakdown: contentByPlatform, // Matches frontend expectation
       byPlatform: contentByPlatform, // Keep for backward compat if any
       topPlatform,
       topContent,
-      
+
+      // Analytics snapshot info
+      latestSnapshot,
+      lastUpdatedAt: latestSnapshotAt,
+      nextUpdateAt: nextUpdateAtStr,
+
       viralityTracker: bestContent,
       performanceStatus,
       motivationMessage,
       referralTracker: referralStats,
       referralCode,
+      dataSource: "published_platform_posts",
     });
   } catch (error) {
     console.error("Error getting user analytics:", error);

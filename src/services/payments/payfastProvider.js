@@ -13,7 +13,7 @@ const crypto = require("crypto");
  * @returns {string} hexadecimal MD5 signature
  */
 function buildPayfastSignature(params = {}, passphrase) {
-  const encodeRfc1738 = value => encodeURIComponent(String(value));
+  const encodeRfc1738 = value => encodeURIComponent(String(value)).replace(/%20/g, "+");
   // Ensure the signature uses PayFast's expected parameter order.
   // This must exactly match the order PayFast uses internally.
   const orderedKeys = [
@@ -25,6 +25,11 @@ function buildPayfastSignature(params = {}, passphrase) {
     "m_payment_id",
     "amount",
     "item_name",
+    "custom_str1",
+    "custom_str2",
+    "custom_str3",
+    "custom_str4",
+    "custom_str5",
   ];
 
   const seen = new Set();
@@ -47,9 +52,10 @@ function buildPayfastSignature(params = {}, passphrase) {
 
   let signatureString = pairs.join("&");
 
-  // Always include the passphrase field (PHP http_build_query includes it even if blank).
-  const pass = passphrase == null ? "" : String(passphrase);
-  signatureString += `&passphrase=${encodeRfc1738(pass)}`;
+  const pass = passphrase == null ? "" : String(passphrase).trim();
+  if (pass) {
+    signatureString += `&passphrase=${encodeRfc1738(pass)}`;
+  }
   if (process.env.PAYFAST_DEBUG === "true") {
     console.info("[PayFast] signature string:", signatureString);
   }
@@ -100,6 +106,11 @@ class PayFastProvider extends PaymentProvider {
       m_payment_id,
       amount: Number(amount).toFixed(2),
       item_name: metadata.item_name || metadata.description || "AutoPromote payment",
+      custom_str1: metadata.custom_str1 || "",
+      custom_str2: metadata.custom_str2 || "",
+      custom_str3: metadata.custom_str3 || "",
+      custom_str4: metadata.custom_str4 || "",
+      custom_str5: metadata.custom_str5 || "",
     };
     const signature = buildPayfastSignature(params, this.passphrase);
     params.signature = signature;
@@ -142,7 +153,7 @@ class PayFastProvider extends PaymentProvider {
     delete copy.signature;
     delete copy.sig;
     delete copy.SIGNATURE;
-    const computed = buildPayfastSignature(copy, this.passphrase);
+    const computed = buildPayfastSignature(copy, this.passphrase).toLowerCase();
     const verified = computed === receivedSignature;
     try {
       const id = body.m_payment_id || body.pf_payment_id || `pf_ipn_${Date.now()}`;

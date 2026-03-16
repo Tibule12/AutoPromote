@@ -1,6 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import UploadPanel from "../UserDashboardTabs/UploadPanel";
+
+jest.mock("../features/publishing/UnifiedPublisher", () => () => <div>Unified Publisher Mock</div>);
+jest.mock("../firebaseClient", () => ({
+  auth: { currentUser: null },
+}));
 
 test("upload panel toggles between upload and history tabs", async () => {
   const onUpload = jest.fn();
@@ -15,6 +20,11 @@ test("upload panel toggles between upload and history tabs", async () => {
       platforms: ["tiktok"],
     },
   ];
+
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({ content: contentList }),
+  });
 
   render(
     <UploadPanel
@@ -43,17 +53,16 @@ test("upload panel toggles between upload and history tabs", async () => {
   const historyTab = screen.getByRole("tab", { name: /Upload History/i });
   expect(historyTab).toBeInTheDocument();
   expect(historyTab).toHaveAttribute("aria-selected", "true");
+  await waitFor(() => expect(global.fetch).toHaveBeenCalled());
   expect(screen.getByText(/Cute Video/i)).toBeInTheDocument();
   expect(screen.getByText(/Lovely short clip/i)).toBeInTheDocument();
   expect(screen.getByText(/Tiktok/i)).toBeInTheDocument();
   // Ensure the created date badge is visible (date string) scoped to the card
-  const { within } = require("@testing-library/react");
-  const cards = screen.getAllByRole("button");
-  const card = cards.find(c => within(c).queryByText(/Cute Video/i));
-  expect(card).toBeDefined();
+  const card = screen.getByText(/Cute Video/i).closest("article");
+  expect(card).toBeTruthy();
   // Match either YYYY/MM/DD or MM/DD/YYYY formats (CI runners vary by locale)
   expect(
-    within(card).getByText(/(?:\d{4}\/\d{1,2}\/\d{1,2})|(?:\d{1,2}\/\d{1,2}\/\d{4})/)
+    require("@testing-library/react").within(card).getByText(/(?:\d{4}\/\d{1,2}\/\d{1,2})|(?:\d{1,2}\/\d{1,2}\/\d{4})/)
   ).toBeInTheDocument();
 });
 
@@ -61,6 +70,7 @@ test("upload history shows View on platform link and refresh when processing", a
   const onUpload = jest.fn();
   const contentList = [
     {
+      id: "content-123",
       title: "Processing Video",
       type: "video",
       url: "/video.mp4",
@@ -71,6 +81,33 @@ test("upload history shows View on platform link and refresh when processing", a
       platform_post_url: "https://www.tiktok.com/@user/video/123",
     },
   ];
+
+  global.fetch = jest
+    .fn()
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        content: [
+          {
+            ...contentList[0],
+            status: "processing",
+            target_platforms: ["tiktok"],
+          },
+        ],
+      }),
+    })
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        content: [
+          {
+            ...contentList[0],
+            status: "published",
+            target_platforms: ["tiktok"],
+          },
+        ],
+      }),
+    });
 
   render(
     <UploadPanel
@@ -89,11 +126,29 @@ test("upload history shows View on platform link and refresh when processing", a
   const historyBtn = screen.getByRole("tab", { name: /Upload History/i });
   fireEvent.click(historyBtn);
 
-  // The processing label should be visible inside the content card and the 'View on platform' link should be present
-  const { within } = require("@testing-library/react");
-  const cards = screen.getAllByRole("button");
-  const card = cards.find(c => within(c).queryByText(/Processing Video/i));
-  expect(card).toBeDefined();
-  expect(within(card).getByText(/Still processing/i)).toBeInTheDocument();
-  expect(within(card).getByRole("link", { name: /View on platform/i })).toBeInTheDocument();
+  await waitFor(() => {
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/content/my-content",
+      expect.objectContaining({
+        headers: expect.objectContaining({ Accept: "application/json" }),
+        credentials: "include",
+      })
+    );
+  });
+
+  await waitFor(() => expect(screen.getByRole("button", { name: /Refresh status/i })).toBeInTheDocument());
+  expect(screen.getByText(/Still processing/i)).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: /View on platform/i })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: /Download media/i })).toHaveAttribute(
+    "href",
+    "/api/content/content-123/download"
+  );
+
+  fireEvent.click(screen.getByRole("button", { name: /Refresh status/i }));
+  await waitFor(() => expect(screen.getByText(/published/i)).toBeInTheDocument());
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+  delete global.fetch;
 });

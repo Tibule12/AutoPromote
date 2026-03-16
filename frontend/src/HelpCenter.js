@@ -1,5 +1,6 @@
 import React from "react";
 import "./Page.css";
+import PublicFeatureAvailability from "./components/PublicFeatureAvailability";
 
 const HelpCenter = () => (
   <div className="ap-page-container">
@@ -28,6 +29,28 @@ const HelpCenter = () => (
         <a href="/support">Contact Us</a>
       </div>
     </div>
+
+    <PublicFeatureAvailability
+      title="Support Scope"
+      intro="The support team can help most with the parts of AutoPromote that are live today: account connections, publishing state, scheduling, analytics visibility, and current monetization guidance."
+      items={[
+        {
+          name: "Connected publishing workflows",
+          status: "Live",
+          description: "Best supported for uploads, scheduling, queue state, and platform connection issues.",
+        },
+        {
+          name: "Monetization guidance",
+          status: "Live",
+          description: "Support can help explain how the platform works, subscription tiers, and platform connection issues.",
+        },
+        {
+          name: "Deployment-only features",
+          status: "Deployment-dependent",
+          description: "Some short-link and landing-page behavior depends on how the running environment has been configured.",
+        },
+      ]}
+    />
   </div>
 );
 

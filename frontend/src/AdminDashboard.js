@@ -19,6 +19,7 @@ import AdminPayoutsPanel from "./components/AdminPayoutsPanel";
 import AdminSubscriptionOverview from "./components/AdminSubscriptionOverview";
 import AdminUserList from "./components/AdminUserList";
 import AdminAuditViewer from "./AdminAuditViewer";
+import BackgroundJobsPanel from "./components/BackgroundJobsPanel";
 
 import StatCard from "./components/StatCard";
 import ActivityFeed from "./components/ActivityFeed";
@@ -189,20 +190,10 @@ function AdminDashboard({ analytics, user, onLogout }) {
       const analyticsEvents = analyticsSnapshot.docs.map(doc => doc.data());
       const revenueByPlatform = {};
       const eventCounts = {
-        ad_impression: 0,
-        ad_click: 0,
-        affiliate_click: 0,
-        affiliate_conversion: 0,
+        smart_link_click: 0,
+        landing_view: 0,
       };
       analyticsEvents.forEach(event => {
-        if (
-          event.platform &&
-          event.type &&
-          (event.type === "ad_click" || event.type === "affiliate_conversion")
-        ) {
-          revenueByPlatform[event.platform] =
-            (revenueByPlatform[event.platform] || 0) + (event.value || 0);
-        }
         if (event.type && Object.prototype.hasOwnProperty.call(eventCounts, event.type)) {
           eventCounts[event.type] += 1;
         }
@@ -2991,7 +2982,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
                 />
                 <PieChart
                   data={dashboardData.eventCounts || {}}
-                  title="Event Counts (Impressions, Clicks, Conversions)"
+                  title="Event Counts (Link Clicks, Landing Views)"
                   colors={["#1976d2", "#5e35b1", "#2e7d32", "#ed6c02"]}
                 />
               </div>
@@ -3601,6 +3592,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
               <h3 style={{ margin: 0, color: "#1565c0" }}>🤖 System Health & Security</h3>
               <p>Platform status, system performance, and security audit logs.</p>
             </div>
+            <BackgroundJobsPanel />
             <PlatformHealthPanel />
             <SystemHealthPanel />
             <div style={{ marginTop: "40px" }}>

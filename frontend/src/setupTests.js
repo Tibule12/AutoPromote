@@ -76,6 +76,7 @@ try {
     const React = require("react");
     return {
       MemoryRouter: ({ children }) => React.createElement("div", null, children),
+      useLocation: () => ({ pathname: "/" }),
       Link: ({ to, children, ...rest }) =>
         React.createElement("a", { href: to, ...rest }, children),
       NavLink: ({ to, children, ...rest }) =>

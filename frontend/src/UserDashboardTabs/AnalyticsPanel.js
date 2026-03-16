@@ -1,51 +1,78 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { auth } from "../firebaseClient";
 import { API_ENDPOINTS } from "../config";
+import "./AnalyticsPanel.css";
 
 const AnalyticsPanel = () => {
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState(null);
   const [timeRange, setTimeRange] = useState("7d");
+  const [error, setError] = useState("");
+
+  const loadAnalytics = useCallback(
+    async ({ retryCount = 0, forceRefreshToken = false } = {}) => {
+      if (retryCount === 0) setLoading(true);
+
+      try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          setAnalytics(null);
+          setError("Sign in to load analytics.");
+          return;
+        }
+
+        const token = await currentUser.getIdToken(forceRefreshToken);
+        const res = await fetch(`${API_ENDPOINTS.ANALYTICS_USER}?range=${timeRange}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
+        }).catch(() => ({ ok: false, status: 500 }));
+
+        if (res.ok) {
+          const data = await res.json();
+          setAnalytics(data);
+          setError("");
+          return;
+        }
+
+        if (res.status === 401 && !forceRefreshToken) {
+          // Token may be expired; refresh once and retry immediately.
+          await loadAnalytics({ retryCount, forceRefreshToken: true });
+          return;
+        }
+
+        if (res.status === 429 && retryCount < 2) {
+          const delay = Math.pow(2, retryCount) * 2000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          await loadAnalytics({ retryCount: retryCount + 1, forceRefreshToken });
+          return;
+        }
+
+        setAnalytics(null);
+        setError(
+          res.status === 403
+            ? "You do not have permission to view analytics."
+            : "Could not load analytics right now."
+        );
+      } catch (_e) {
+        setAnalytics(null);
+        setError("Could not load analytics right now.");
+      } finally {
+        if (retryCount === 0) setLoading(false);
+      }
+    },
+    [timeRange]
+  );
 
   useEffect(() => {
     loadAnalytics();
-  }, [timeRange]);
+  }, [loadAnalytics]);
 
-  const loadAnalytics = async (retryCount = 0) => {
-    setLoading(true);
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        setLoading(false);
-        return;
-      }
-      // Use cached token unless expired to improve reliability
-      const token = await currentUser.getIdToken();
-
-      // Fetch user analytics
-      const res = await fetch(`${API_ENDPOINTS.ANALYTICS_USER}?range=${timeRange}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).catch(() => ({ ok: false, status: 500 }));
-
-      if (res.ok) {
-        const data = await res.json();
-        setAnalytics(data);
-      } else if (res.status === 429 && retryCount < 2) {
-        // Rate limited - retry after delay with exponential backoff
-        const delay = Math.pow(2, retryCount) * 2000; // 2s, 4s
-        setTimeout(() => loadAnalytics(retryCount + 1), delay);
-        return;
-      } else {
-        // Backend error or endpoint not ready, use default data
-        setAnalytics(null);
-      }
-    } catch (e) {
-      // Silently handle errors
-      setAnalytics(null);
-    } finally {
-      if (retryCount === 0) setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) loadAnalytics();
+    });
+    return () => unsubscribe();
+  }, [loadAnalytics]);
 
   if (loading) {
     return (
@@ -66,13 +93,47 @@ const AnalyticsPanel = () => {
     ctr: 0,
     topPlatform: "N/A",
     platformBreakdown: {},
+    publishedPostCount: 0,
+    dataSource: null,
     viralityTracker: { views: 0, nextGoal: 30000, potentialBonus: 3 },
     referralTracker: { total: 0, nextGoal: 10, potentialBonus: 5 },
   };
 
+  const sortedPlatformBreakdown = Object.entries(stats.platformBreakdown || {}).sort((a, b) => {
+    const aViews = Number((a[1] && a[1].views) || 0);
+    const bViews = Number((b[1] && b[1].views) || 0);
+    if (bViews !== aViews) return bViews - aViews;
+    const aClicks = Number((a[1] && a[1].clicks) || 0);
+    const bClicks = Number((b[1] && b[1].clicks) || 0);
+    return bClicks - aClicks;
+  });
+
+  const hasNoDataForRange =
+    !loading &&
+    !error &&
+    (stats.publishedPostCount || 0) === 0 &&
+    (stats.publishedPostCountAllTime || 0) > 0;
+
+  const formatRangeDate = value => {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const rangeStartLabel = formatRangeDate(stats.rangeStartAt);
+  const rangeEndLabel = formatRangeDate(stats.rangeEndAt);
+
   return (
     <section className="analytics-panel">
       <div
+        className="ap-analytics-header"
         style={{
           display: "flex",
           justifyContent: "space-between",
@@ -81,9 +142,9 @@ const AnalyticsPanel = () => {
         }}
       >
         <div>
-          <h3 style={{ margin: 0 }}>MISSION INTELLIGENCE</h3>
+          <h3 style={{ margin: 0 }}>Published Content Analytics</h3>
           <span style={{ fontSize: "0.8rem", color: "#64748b" }}>
-            Live debriefing from the field
+            Real performance from published platform posts
           </span>
         </div>
         <select
@@ -101,8 +162,23 @@ const AnalyticsPanel = () => {
           <option value="7d">Last 7 Days</option>
           <option value="30d">Last 30 Days</option>
           <option value="90d">Last 90 Days</option>
+          <option value="all">All Time</option>
         </select>
       </div>
+
+      {error ? (
+        <div
+          style={{
+            marginBottom: "1rem",
+            padding: "0.8rem 1rem",
+            borderRadius: 10,
+            background: "rgba(239,68,68,0.12)",
+            color: "#fecaca",
+          }}
+        >
+          {error}
+        </div>
+      ) : null}
 
       {(analytics?.lastUpdatedAt || analytics?.nextUpdateAt) && (
         <div
@@ -123,9 +199,43 @@ const AnalyticsPanel = () => {
         </div>
       )}
 
+      {stats.dataSource === "published_platform_posts" ? (
+        <div
+          className="ap-analytics-source"
+          style={{
+            marginBottom: "1rem",
+            padding: "0.75rem 1rem",
+            borderRadius: 10,
+            border: "1px solid rgba(148,163,184,0.35)",
+            background: "rgba(15,23,42,0.35)",
+            color: "#cbd5e1",
+            fontSize: ".85rem",
+          }}
+        >
+          Data source: published platform posts only ({stats.publishedPostCount || 0} posts in this range).
+          {rangeEndLabel ? (
+            <span style={{ display: "block", marginTop: ".35rem", color: "#94a3b8" }}>
+              Date range: {rangeStartLabel || "Beginning"} to {rangeEndLabel}
+            </span>
+          ) : null}
+          {typeof stats.postsWithoutEventDate === "number" && stats.postsWithoutEventDate > 0 ? (
+            <span style={{ display: "block", marginTop: ".35rem", color: "#94a3b8" }}>
+              {stats.postsWithoutEventDate} published post(s) missing event date are excluded from time-window filters.
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {hasNoDataForRange ? (
+        <div className="ap-analytics-empty-window">
+          No published platform posts were found for this time window. Try <b>All Time</b> to see full history.
+        </div>
+      ) : null}
+
       {/* --- SALES SHARK PROGRESS TRACKERS --- */}
       {analytics && (
         <div
+          className="ap-analytics-trackers"
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
@@ -143,7 +253,7 @@ const AnalyticsPanel = () => {
             }}
           >
             <h4 style={{ margin: "0 0 10px 0", fontSize: "0.9rem", color: "#6366f1" }}>
-              🔥 VIRAL BONUS TRACKER
+              🔥 Top Post Reach
             </h4>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
               <span>Top Video: {stats.viralityTracker?.views.toLocaleString()} views</span>
@@ -168,8 +278,7 @@ const AnalyticsPanel = () => {
               ></div>
             </div>
             <p style={{ fontSize: "0.8rem", marginTop: "8px", color: "#9aa4b2" }}>
-              Reach {stats.viralityTracker?.nextGoal?.toLocaleString()} views to unlock{" "}
-              <b>Rank Up</b> rewards!
+              Next benchmark: {stats.viralityTracker?.nextGoal?.toLocaleString()} views.
             </p>
           </div>
 
@@ -183,7 +292,7 @@ const AnalyticsPanel = () => {
             }}
           >
             <h4 style={{ margin: "0 0 10px 0", fontSize: "0.9rem", color: "#10b981" }}>
-              🚀 REFERRAL TRACKER
+              🚀 Referral Progress
             </h4>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
               <span>Referrals: {stats.referralTracker?.total}</span>
@@ -208,8 +317,7 @@ const AnalyticsPanel = () => {
               ></div>
             </div>
             <p style={{ fontSize: "0.8rem", marginTop: "8px", color: "#9aa4b2" }}>
-              Refer {stats.referralTracker?.nextGoal - stats.referralTracker?.total} more friends to
-              unlock <b>Mission Credits</b>!
+              {Math.max(0, (stats.referralTracker?.nextGoal || 0) - (stats.referralTracker?.total || 0))} more referrals to the next goal.
             </p>
           </div>
         </div>
@@ -302,7 +410,7 @@ const AnalyticsPanel = () => {
       </div>
 
       <div
-        className="platform-breakdown"
+        className="platform-breakdown ap-analytics-panel-card"
         style={{
           background: "var(--card)",
           padding: "1.5rem",
@@ -312,11 +420,12 @@ const AnalyticsPanel = () => {
         }}
       >
         <h4 style={{ marginTop: 0, marginBottom: "1rem" }}>Platform Breakdown</h4>
-        {stats.platformBreakdown && Object.keys(stats.platformBreakdown).length > 0 ? (
+        {sortedPlatformBreakdown.length > 0 ? (
           <div style={{ display: "grid", gap: "0.75rem" }}>
-            {Object.entries(stats.platformBreakdown).map(([platform, data]) => (
+            {sortedPlatformBreakdown.map(([platform, data]) => (
               <div
                 key={platform}
+                className="ap-platform-row"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -327,7 +436,7 @@ const AnalyticsPanel = () => {
                 }}
               >
                 <span style={{ textTransform: "capitalize", fontWeight: 500 }}>{platform}</span>
-                <div style={{ display: "flex", gap: "1rem", color: "var(--muted)" }}>
+                <div className="ap-platform-row-stats" style={{ display: "flex", gap: "1rem", color: "var(--muted)" }}>
                   <span>{data.views || 0} views</span>
                   <span>{data.clicks || 0} clicks</span>
                   <span style={{ color: "var(--brand)" }}>{data.ctr?.toFixed(1) || 0}% CTR</span>
@@ -343,7 +452,7 @@ const AnalyticsPanel = () => {
       </div>
 
       <div
-        className="recent-content"
+        className="recent-content ap-analytics-panel-card"
         style={{
           background: "var(--card)",
           padding: "1.5rem",
@@ -357,6 +466,7 @@ const AnalyticsPanel = () => {
             {stats.topContent.slice(0, 5).map((item, idx) => (
               <div
                 key={idx}
+                className="ap-top-content-row"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -367,6 +477,7 @@ const AnalyticsPanel = () => {
                 }}
               >
                 <span
+                  className="ap-top-content-title"
                   style={{
                     flex: 1,
                     overflow: "hidden",
@@ -377,13 +488,26 @@ const AnalyticsPanel = () => {
                   {item.title || "Untitled"}
                 </span>
                 <div
+                  className="ap-top-content-stats"
                   style={{
                     display: "flex",
-                    gap: "1rem",
+                    gap: "0.85rem",
                     color: "var(--muted)",
                     fontSize: "0.875rem",
+                    alignItems: "center",
                   }}
                 >
+                  <span
+                    style={{
+                      textTransform: "capitalize",
+                      color: "#cbd5e1",
+                      background: "rgba(59,130,246,0.16)",
+                      borderRadius: 999,
+                      padding: "0.15rem 0.5rem",
+                    }}
+                  >
+                    {item.platform || "n/a"}
+                  </span>
                   <span>👁 {item.views || 0}</span>
                   <span>🖱 {item.clicks || 0}</span>
                 </div>

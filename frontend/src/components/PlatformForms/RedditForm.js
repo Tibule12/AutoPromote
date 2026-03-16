@@ -13,6 +13,9 @@ const RedditForm = ({
   onFindViralClips,
 }) => {
   const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+  const redditName = creatorInfo?.name || creatorInfo?.meta?.username || creatorInfo?.meta?.name || null;
+  const redditIcon = creatorInfo?.icon_img || creatorInfo?.meta?.icon_img || null;
+  const redditKarma = creatorInfo?.total_karma || creatorInfo?.meta?.total_karma || null;
 
   useEffect(() => {
     if (currentFile && currentFile instanceof File) {
@@ -65,7 +68,7 @@ const RedditForm = ({
       </h4>
 
       {/* IDENTITY BADGE */}
-      {creatorInfo?.name && (
+      {redditName && (
         <div
           className="identity-badge"
           style={{
@@ -78,9 +81,9 @@ const RedditForm = ({
             border: "1px solid #fee2e2",
           }}
         >
-          {creatorInfo.icon_img && (
+          {redditIcon && (
             <img
-              src={sanitizeUrl(creatorInfo.icon_img.split("?")[0])}
+              src={sanitizeUrl(redditIcon.split("?")[0])}
               alt="User"
               style={{
                 width: 32,
@@ -92,9 +95,9 @@ const RedditForm = ({
             />
           )}
           <div>
-            <div style={{ fontWeight: "600", color: "#333" }}>u/{creatorInfo.name}</div>
+            <div style={{ fontWeight: "600", color: "#333" }}>u/{redditName}</div>
             <div style={{ fontSize: "0.8rem", color: "#666" }}>
-              Karma: {creatorInfo.total_karma}
+              Karma: {redditKarma ?? "-"}
             </div>
           </div>
         </div>

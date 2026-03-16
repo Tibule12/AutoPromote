@@ -8,6 +8,8 @@ const path = require("path");
 const sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
 const { usageLimitMiddleware, trackUsage } = require("./middlewares/usageLimitMiddleware");
 const costControlMiddleware = require("./middlewares/costControlMiddleware");
+const fetch = require("node-fetch");
+const { safeFetch } = require("./utils/ssrfGuard");
 // NEW: Services for Engagement-as-Currency Architecture
 const billingService = require("./services/billingService");
 const complianceService = require("./services/complianceService");
@@ -52,6 +54,48 @@ let _userSegmentation; // require('./services/userSegmentation');
 // Helper function to remove undefined fields from objects
 function cleanObject(obj) {
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
+}
+
+function resolveContentMediaUrl(record) {
+  return record.url || record.media_url || record.video_url || record.file_url || null;
+}
+
+function inferDownloadExtension(mediaUrl, type) {
+  try {
+    const pathname = new URL(mediaUrl).pathname || "";
+    const ext = pathname.split(".").pop();
+    if (ext && ext.length <= 5) return ext;
+  } catch (_err) {}
+  if (type === "video") return "mp4";
+  if (type === "audio") return "mp3";
+  if (type === "image") return "jpg";
+  return "bin";
+}
+
+function buildDownloadFilename(record, mediaUrl) {
+  const baseName = String(record.title || record.id || "autopromote-upload")
+    .trim()
+    .replace(/[^a-z0-9-_]+/gi, "-")
+    .replace(/^-+|-+$/g, "") || "autopromote-upload";
+  return `${baseName}.${inferDownloadExtension(mediaUrl, record.type)}`;
+}
+
+async function getOwnedContentSnapshot(userId, identifier) {
+  let contentDoc = await db.collection("content").doc(identifier).get();
+  if (!contentDoc.exists) {
+    const q = await db.collection("content").where("idempotency_key", "==", identifier).limit(1).get();
+    if (!q.empty) contentDoc = q.docs[0];
+  }
+  if (!contentDoc || !contentDoc.exists) return null;
+  const data = contentDoc.data() || {};
+  if (data.user_id !== userId) return null;
+  return { id: contentDoc.id, data };
+}
+
+function hasExplicitFutureSchedule(scheduledPromotionTime) {
+  if (!scheduledPromotionTime) return false;
+  const scheduledAt = Date.parse(scheduledPromotionTime);
+  return Number.isFinite(scheduledAt) && scheduledAt > Date.now() + 30000;
 }
 
 // Content upload schema
@@ -460,7 +504,7 @@ router.post(
         // We use setImmediate (Node.js) or simply don't await the promise
         // so the user gets a 200 OK immediately while the system works in the background.
         const distributionManager = require("./services/distributionManager");
-        if (target_platforms && target_platforms.length > 0) {
+        if (target_platforms && target_platforms.length > 0 && !hasExplicitFutureSchedule(scheduled_promotion_time)) {
           // Lazy-load to avoid import cycles or heavy init
           // Fire and forget (user doesn't wait)
           distributionManager.distributeContent(contentRef.id, userId).catch(err => {
@@ -978,6 +1022,71 @@ router.get("/status/:id", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("[GET /status/:id] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/:id/download", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const ownedContent = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!ownedContent) return res.status(404).json({ error: "Content not found" });
+
+    const mediaUrl = resolveContentMediaUrl(ownedContent.data);
+    if (!mediaUrl) return res.status(404).json({ error: "No downloadable media found" });
+
+    if (mediaUrl.startsWith("/")) {
+      return res.redirect(mediaUrl);
+    }
+
+    let parsed;
+    try {
+      parsed = new URL(mediaUrl);
+    } catch (_err) {
+      return res.status(400).json({ error: "Invalid media URL" });
+    }
+
+    if (["localhost", "127.0.0.1"].includes(parsed.hostname) && process.env.NODE_ENV !== "production") {
+      return res.redirect(mediaUrl);
+    }
+
+    const upstream = await safeFetch(mediaUrl, fetch, {
+      allowHosts: [parsed.hostname],
+      fetchOptions: {
+        headers: {
+          Accept: "*/*",
+          "User-Agent": "AutoPromoteDownloader/1.0",
+        },
+      },
+    });
+
+    if (!upstream.ok) {
+      return res.status(502).json({ error: "Unable to fetch media for download" });
+    }
+
+    const fileName = buildDownloadFilename(ownedContent.data, mediaUrl);
+    res.setHeader("Content-Type", upstream.headers.get("content-type") || "application/octet-stream");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.setHeader("Cache-Control", "private, max-age=60");
+    const contentLength = upstream.headers.get("content-length");
+    if (contentLength) res.setHeader("Content-Length", contentLength);
+
+    if (upstream.body && typeof upstream.body.pipe === "function") {
+      upstream.body.on("error", error => {
+        console.error("[GET /:id/download] stream error:", error);
+        if (!res.headersSent) return res.status(502).json({ error: "Download stream failed" });
+        res.end();
+      });
+      upstream.body.pipe(res);
+      return;
+    }
+
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+    return res.send(buffer);
+  } catch (error) {
+    console.error("[GET /:id/download] Error:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -8,7 +8,7 @@ import SchedulesPanel from "./UserDashboardTabs/SchedulesPanel";
 import AnalyticsPanel from "./UserDashboardTabs/AnalyticsPanel";
 import RewardsPanel from "./UserDashboardTabs/RewardsPanel";
 import NotificationsPanel from "./UserDashboardTabs/NotificationsPanel";
-import EarningsPanel from "./UserDashboardTabs/EarningsPanel";
+
 import ConnectionsPanel from "./UserDashboardTabs/ConnectionsPanel";
 import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import AdminAuditViewer from "./AdminAuditViewer";
@@ -35,6 +35,7 @@ import { isSafeRedirectUrl } from "./utils/security";
 import usePlatformStatus from "./hooks/usePlatformStatus";
 
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ""}/image.png`;
+const CLIP_STUDIO_LOCKED = true;
 
 const UserDashboard = ({
   user,
@@ -58,7 +59,13 @@ const UserDashboard = ({
       setActiveTab("profile");
     }
   }, [activeTab]);
-  const [earnings, setEarnings] = useState(null);
+
+  useEffect(() => {
+    if (CLIP_STUDIO_LOCKED && activeTab === "clips") {
+      setActiveTab("profile");
+    }
+  }, [activeTab]);
+
   const [notifs, setNotifs] = useState(Array.isArray(notifications) ? notifications : []);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
@@ -115,18 +122,13 @@ const UserDashboard = ({
 
   const [connectBanner, setConnectBanner] = useState(null);
   const [systemHealth, setSystemHealth] = useState({ ok: true, status: "unknown", message: null });
-  const [payouts, setPayouts] = useState([]);
-  const [progress, setProgress] = useState({
-    contentCount: 0,
-    requiredForRevenue: 0,
-    remaining: 0,
-    revenueEligible: false,
-  });
+
   const [afterdarkRefreshKey, setAfterdarkRefreshKey] = useState(0);
   const [pinterestCreateVisible, setPinterestCreateVisible] = useState(false);
   const [pinterestCreateName, setPinterestCreateName] = useState("");
   const [pinterestCreateDesc, setPinterestCreateDesc] = useState("");
   const selectedVideoRef = useRef(null);
+  const hasAutoRoutedPrimaryTab = useRef(false);
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
   const schedulesList = useMemo(
     () => (Array.isArray(mySchedules) ? mySchedules : []),
@@ -141,6 +143,11 @@ const UserDashboard = ({
   );
   const isAdminUser = !!(user && (user.isAdmin || user.role === "admin"));
   const needsKyc = !!(user && !user.kycVerified);
+  const connectedPlatformCount = useMemo(() => {
+    const rawPlatforms = platformSummary && platformSummary.raw ? Object.values(platformSummary.raw) : [];
+    return rawPlatforms.filter(platform => platform && platform.connected).length;
+  }, [platformSummary]);
+  const hasConnectedPlatforms = connectedPlatformCount > 0;
 
   const [emailVerified, setEmailVerified] = useState(true);
   useEffect(() => {
@@ -315,6 +322,10 @@ const UserDashboard = ({
     tab => {
       if (tab === "wolf_hunt" && !ENABLE_WOLF_HUNT) {
         toast("🐺 Wolf Hunt is currently locked. Come back later!", { icon: "🔒" });
+        return;
+      }
+      if (tab === "clips" && CLIP_STUDIO_LOCKED) {
+        toast("Clip Studio is currently locked.", { icon: "🔒" });
         return;
       }
       setActiveTab(tab);
@@ -504,29 +515,7 @@ const UserDashboard = ({
         await cachedFetch(
           "initial-data",
           async () => {
-            const [earnRes, payRes, progRes] = await Promise.all([
-              fetch(API_ENDPOINTS.EARNINGS_SUMMARY, {
-                headers: { Authorization: `Bearer ${token}` },
-              }).catch(() => null),
-              fetch(API_ENDPOINTS.EARNINGS_PAYOUTS, {
-                headers: { Authorization: `Bearer ${token}` },
-              }).catch(() => null),
-              fetch(API_ENDPOINTS.USER_PROGRESS, {
-                headers: { Authorization: `Bearer ${token}` },
-              }).catch(() => null),
-            ]);
-            if (earnRes?.ok) {
-              const d = await earnRes.json();
-              setEarnings(d);
-            }
-            if (payRes?.ok) {
-              const d = await payRes.json();
-              setPayouts(d.payouts || []);
-            }
-            if (progRes?.ok) {
-              const d = await progRes.json();
-              setProgress(d);
-            }
+
             return true;
           },
           60000
@@ -552,24 +541,20 @@ const UserDashboard = ({
         }
       });
     }
-    const loadEarnings = async () => {
-      try {
-        const currentUser = auth.currentUser;
-        if (!currentUser) return;
-        const token = await currentUser.getIdToken(true);
-        const res = await fetch(API_ENDPOINTS.EARNINGS_SUMMARY, {
-          headers: { Authorization: `Bearer ${token}` },
-        }).catch(() => ({ ok: false }));
-        if (res.ok) {
-          const d = await res.json().catch(() => null);
-          if (d) setEarnings(d);
-        }
-      } catch (e) {
-        /* silently ignore */
-      }
-    };
-    if (activeTab === "earnings") loadEarnings();
+
   }, [activeTab]);
+
+  useEffect(() => {
+    const rawPlatforms = platformSummary && platformSummary.raw ? Object.values(platformSummary.raw) : [];
+    if (hasAutoRoutedPrimaryTab.current || rawPlatforms.length === 0) return;
+    if (activeTab !== "profile") {
+      hasAutoRoutedPrimaryTab.current = true;
+      return;
+    }
+
+    setActiveTab(rawPlatforms.some(platform => platform && platform.connected) ? "upload" : "connections");
+    hasAutoRoutedPrimaryTab.current = true;
+  }, [platformSummary, activeTab]);
 
   const setPlatformOption = useCallback((platform, key, value) => {
     setPlatformOptions(prev => ({
@@ -683,22 +668,7 @@ const UserDashboard = ({
     }
   };
 
-  const claimPayout = async () => {
-    const toastId = toast.loading("Requesting payout...");
-    try {
-      await withAuth(async token => {
-        const res = await fetch(API_ENDPOINTS.EARNINGS_PAYOUT_SELF, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Payout failed");
-        toast.success("Payout requested successfully!", { id: toastId });
-      });
-    } catch (e) {
-      console.warn(e);
-      toast.error("Payout request failed", { id: toastId });
-    }
-  };
+
 
   const openProviderAuth = async endpointUrl => {
     try {
@@ -981,64 +951,39 @@ const UserDashboard = ({
                 className={activeTab === "profile" ? "active" : ""}
                 onClick={() => handleNav("profile")}
               >
-                Profile
+                Overview
               </li>
-              <li
-                className={activeTab === "upload" ? "active" : ""}
-                onClick={() => handleNav("upload")}
-              >
-                Upload
-              </li>
-              <li
-                className={activeTab === "schedules" ? "active" : ""}
-                onClick={() => handleNav("schedules")}
-              >
-                Mission Timeline
-              </li>
-              <li
-                className="locked-feature"
-                style={{ opacity: 0.6, cursor: "not-allowed" }}
-                onClick={e => {
-                  e.stopPropagation();
-                  toast("🚀 Mission Control launching soon!", { icon: "🔒" });
-                }}
-              >
-                Mission Control 🔒
-              </li>
-              <li
-                className={activeTab === "analytics" ? "active" : ""}
-                onClick={() => handleNav("analytics")}
-              >
-                Intel
-              </li>
-              <li
-                className="locked-feature"
-                style={{ opacity: 0.6, cursor: "not-allowed" }}
-                onClick={e => {
-                  e.stopPropagation();
-                  toast("🏆 Rewards coming soon!", { icon: "🔒" });
-                }}
-              >
-                Rewards 🔒
-              </li>
-              {/* Notifications moved to top bar */}
-              <li
-                className="locked-feature"
-                style={{ opacity: 0.6, cursor: "not-allowed" }}
-                onClick={e => {
-                  e.stopPropagation();
-                  toast("💰 Treasury opening soon!", { icon: "🔒" });
-                }}
-              >
-                Treasury 🔒
-              </li>
-
               <li
                 className={activeTab === "connections" ? "active" : ""}
                 onClick={() => handleNav("connections")}
               >
                 Connections
               </li>
+              <li
+                className={activeTab === "upload" ? "active" : ""}
+                onClick={() => handleNav("upload")}
+              >
+                Publish
+              </li>
+              <li
+                className={activeTab === "schedules" ? "active" : ""}
+                onClick={() => handleNav("schedules")}
+              >
+                Queue
+              </li>
+              <li
+                className={activeTab === "analytics" ? "active" : ""}
+                onClick={() => handleNav("analytics")}
+              >
+                Analytics
+              </li>
+              <li
+                className={activeTab === "billing" ? "active" : ""}
+                onClick={() => handleNav("billing")}
+              >
+                Billing
+              </li>
+              {/* Notifications moved to top bar */}
               {isAdminUser && (
                 <li
                   className={activeTab === "admin-audit" ? "active" : ""}
@@ -1067,7 +1012,7 @@ const UserDashboard = ({
                   className={activeTab === "wolf_hunt" ? "active" : ""}
                   onClick={() => handleNav("wolf_hunt")}
                 >
-                  🐺 Wolf Hunt
+                  Mission Board
                 </li>
               ) : (
                 <li
@@ -1075,27 +1020,46 @@ const UserDashboard = ({
                   style={{ opacity: 0.6, cursor: "not-allowed" }}
                   onClick={e => {
                     e.stopPropagation();
-                    toast("🐺 Wolf Hunt is currently locked.", { icon: "🔒" });
+                    toast("Mission Board is currently locked.", { icon: "🔒" });
                   }}
                 >
-                  🐺 Wolf Hunt 🔒
+                  Mission Board 🔒
+                </li>
+              )}
+              {CLIP_STUDIO_LOCKED ? (
+                <li
+                  className="locked-feature"
+                  style={{ opacity: 0.6, cursor: "not-allowed" }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    toast("Clip Studio is currently locked.", { icon: "🔒" });
+                  }}
+                >
+                  Clip Studio 🔒
+                </li>
+              ) : (
+                <li
+                  className={activeTab === "clips" ? "active" : ""}
+                  onClick={() => handleNav("clips")}
+                >
+                  Clip Studio
                 </li>
               )}
               <li
                 className={activeTab === "idea_video" ? "active" : ""}
                 onClick={() => handleNav("idea_video")}
               >
-                AI Video Generator ✨
+                Creative Tools
               </li>
               <li
                 className="locked-feature"
                 style={{ opacity: 0.6, cursor: "not-allowed" }}
                 onClick={e => {
                   e.stopPropagation();
-                  toast("🎬 AI Clip Studio coming soon!", { icon: "🔒" });
+                  toast("Promotion controls are coming soon.", { icon: "🔒" });
                 }}
               >
-                AI Clips 🔒
+                Promotion Controls 🔒
               </li>
             </ul>
           </nav>
@@ -1127,6 +1091,56 @@ const UserDashboard = ({
             }}
           >
             <span>
+                  {!hasConnectedPlatforms && (
+                    <div
+                      style={{
+                        marginBottom: "1rem",
+                        padding: "14px 16px",
+                        borderRadius: 14,
+                        background: "#eff6ff",
+                        border: "1px solid #bfdbfe",
+                        color: "#1e3a8a",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: "1rem",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <div>
+                        <strong>Start here:</strong> connect at least one platform before your first publish
+                        workflow.
+                      </div>
+                      <button className="check-quality" onClick={() => handleNav("connections")}>
+                        Connect Platforms
+                      </button>
+                    </div>
+                  )}
+                  {hasConnectedPlatforms && contentList.length === 0 && (
+                    <div
+                      style={{
+                        marginBottom: "1rem",
+                        padding: "14px 16px",
+                        borderRadius: 14,
+                        background: "#ecfeff",
+                        border: "1px solid #a5f3fc",
+                        color: "#155e75",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: "1rem",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <div>
+                        <strong>Workspace ready:</strong> upload once, choose destinations, and inspect
+                        status from one queue.
+                      </div>
+                      <button className="check-quality" onClick={() => handleNav("upload")}>
+                        Publish Your First Asset
+                      </button>
+                    </div>
+                  )}
               <strong>Verify your email:</strong> Please check your inbox for a verification link.
               Verify to access security features.
             </span>
@@ -1276,9 +1290,7 @@ const UserDashboard = ({
           <NotificationsPanel notifs={notifs} onMarkAllRead={markAllNotificationsRead} />
         )}
 
-        {activeTab === "earnings" && (
-          <EarningsPanel earnings={earnings} onClaim={claimPayout} onNavigate={handleNav} />
-        )}
+
 
         {activeTab === "ads" && <MissionControlPanel />}
 
@@ -1323,7 +1335,9 @@ const UserDashboard = ({
 
         {activeTab === "wolf_hunt" && <WolfHuntDashboard />}
 
-        {activeTab === "clips" && <ClipStudioPanel content={contentList} onRefresh={onUpload} />}
+        {activeTab === "clips" && !CLIP_STUDIO_LOCKED && (
+          <ClipStudioPanel content={contentList} onRefresh={onUpload} />
+        )}
         {activeTab === "idea_video" && (
           <IdeaVideoPanel
             onPublish={videoFile => {

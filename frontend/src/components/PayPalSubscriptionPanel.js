@@ -403,6 +403,27 @@ const PayPalSubscriptionPanel = () => {
     return icons[feature] || "✨";
   };
 
+  const getFeatureLabel = key => {
+    const labels = {
+      uploads: "Monthly uploads",
+      platformLimit: "Connected platforms",
+      analytics: "Analytics depth",
+      support: "Support",
+      communityPosts: "Community posts",
+      aiClips: "AI clip tools",
+      watermark: "Watermark removal",
+      viralBoost: "Priority promotion tools",
+      priorityModeration: "Priority review",
+      creatorTipping: "Creator tipping",
+      sponsoredPosts: "Sponsored posts",
+      apiAccess: "API access",
+      teamSeats: "Team seats",
+      whiteLabel: "White-label",
+      wolfHuntTasks: "Mission opportunities",
+    };
+    return labels[key] || key.replace(/([A-Z])/g, " $1").trim().replace(/^./, str => str.toUpperCase());
+  };
+
   const renderFeatureValue = (key, value) => {
     if (typeof value === "boolean") {
       return value ? "✅ Included" : "❌ Not included";
@@ -410,8 +431,11 @@ const PayPalSubscriptionPanel = () => {
     if (value === "unlimited") {
       return "♾️ Unlimited";
     }
+    if (key === "platformLimit" && typeof value === "number") {
+      return `${value} platform${value === 1 ? "" : "s"}`;
+    }
     if (key === "wolfHuntTasks" && typeof value === "number") {
-      return `${value} daily earning tasks`;
+      return `${value} mission actions`;
     }
     if (typeof value === "number") {
       return `${value} ${key === "teamSeats" ? "seats" : "per month"}`;
@@ -453,7 +477,27 @@ const PayPalSubscriptionPanel = () => {
 
   return (
     <div className="paypal-subscription-panel">
-      <h2>💳 Subscription & Billing</h2>
+      <h2>💳 Plans For Cross-Platform Publishing</h2>
+      <p style={{ marginTop: "0.5rem", color: "#4b5563", maxWidth: 760 }}>
+        Paid plans are billed as monthly PayPal subscriptions. You are paying for more publishing
+        throughput, more connected destinations, deeper workflow visibility, and better support as
+        your operation grows.
+      </p>
+      <div
+        style={{
+          marginTop: "1rem",
+          marginBottom: "1.5rem",
+          padding: "14px 16px",
+          borderRadius: 14,
+          background: "#f8fafc",
+          border: "1px solid #e5e7eb",
+          color: "#374151",
+        }}
+      >
+        <strong>When billing starts:</strong> you choose a paid plan here, approve the PayPal
+        checkout, and the subscription is activated on return. Cancellation keeps access active
+        until the end of the current billing period.
+      </div>
 
       {/* Current Subscription Status */}
       {currentSubscription && (
@@ -513,7 +557,7 @@ const PayPalSubscriptionPanel = () => {
             </div>
 
             <div className="usage-item">
-              <label> Viral Boosts</label>
+              <label> Mission Opportunities</label>
               {renderUsageBar(
                 usage.viralBoosts.used,
                 usage.viralBoosts.limit,
@@ -542,7 +586,7 @@ const PayPalSubscriptionPanel = () => {
 
                 <div className="plan-price">
                   {plan.price === 0 ? (
-                    <span className="free-label">Free Forever</span>
+                    <span className="free-label">Start Free</span>
                   ) : (
                     <>
                       <span className="price">${plan.price}</span>
@@ -555,13 +599,7 @@ const PayPalSubscriptionPanel = () => {
                   {Object.entries(plan.features || {}).map(([key, value]) => (
                     <div key={key} className="feature-item">
                       <span className="feature-icon">{getFeatureIcon(key)}</span>
-                      <span className="feature-name">
-                        {key
-                          .replace(/([A-Z])/g, " $1")
-                          .trim()
-                          .replace(/^./, str => str.toUpperCase())}
-                        :
-                      </span>
+                      <span className="feature-name">{getFeatureLabel(key)}:</span>
                       <span className="feature-value">{renderFeatureValue(key, value)}</span>
                     </div>
                   ))}
@@ -590,36 +628,20 @@ const PayPalSubscriptionPanel = () => {
         </div>
       </div>
 
-      {/* Secure Payment Badge - PayPal & PayFast */}
+      {/* Secure Payment Badge */}
       <div
         className="secure-payment-badge"
         style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}
       >
-        <div
-          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px" }}
-        >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
           <img
             src="https://www.paypalobjects.com/webstatic/mktg/logo/PP_AcceptanceMarkTray_150x40.png"
             alt="PayPal"
             style={{ height: "40px" }}
           />
-          {/* PayFast Placeholder */}
-          <div
-            style={{
-              fontWeight: "bold",
-              fontSize: "1.2rem",
-              color: "#d32f2f",
-              border: "2px solid #d32f2f",
-              padding: "4px 8px",
-              borderRadius: "4px",
-              fontFamily: "sans-serif",
-            }}
-          >
-            PayFast
-          </div>
         </div>
         <p style={{ marginTop: "5px", color: "#666", fontSize: "0.9rem" }}>
-          Secure payments powered by PayPal & PayFast
+          Secure subscription billing powered by PayPal
         </p>
       </div>
 
@@ -643,9 +665,9 @@ const PayPalSubscriptionPanel = () => {
           <a href="/privacy" target="_blank" rel="noopener noreferrer">
             Privacy Policy
           </a>
-          . Subscriptions auto-renew monthly. You may cancel at any time to avoid future charges.
-          Cancellations take effect at the end of the current billing period. For billing support or
-          refund inquiries, please contact{" "}
+          . Subscriptions auto-renew monthly through PayPal. You may cancel at any time to stop
+          future renewals. Cancellations take effect at the end of the current billing period. For
+          billing support or refund inquiries, please contact{" "}
           <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
         </p>
       </div>

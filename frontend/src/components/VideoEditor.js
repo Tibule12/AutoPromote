@@ -108,17 +108,18 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
     fetchCredits();
 
-    // If we came back from a PayFast purchase (redirect), refresh balance again
     try {
       const pending = localStorage.getItem("payfastPendingPurchase");
-      if (pending) {
+      const url = new URL(window.location.href);
+      if (pending || url.searchParams.get("payment") === "success") {
         localStorage.removeItem("payfastPendingPurchase");
         fetchCredits();
         setStatusMessage("Purchase complete! Your updated credit balance is shown above.");
       }
     } catch (_) {
-      // ignore storage errors (private browsing)
+      // ignore storage and URL parsing errors
     }
+
   }, []);
 
   // Load PayPal SDK when the credit shop is visible
@@ -267,21 +268,20 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       const auth = getAuth();
       const user = auth.currentUser;
       const token = user ? await user.getIdToken() : null;
+      const returnPath = `${window.location.pathname}${window.location.search}`;
 
-      const res = await fetch(`${API_BASE_URL}/api/payments/payfast/init`, {
+      const res = await fetch(`${API_BASE_URL.replace(/\/$/, "")}/api/payments/payfast/init`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ packageId: pkg.id }),
+        body: JSON.stringify({
+          packageId: pkg.id,
+          returnPath,
+          cancelPath: returnPath,
+        }),
       });
-
-      try {
-        localStorage.setItem("payfastPendingPurchase", "1");
-      } catch (_) {
-        // ignore if storage isn't available
-      }
 
       const text = await res.text();
       let data = null;
@@ -302,7 +302,15 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         throw new Error(message);
       }
 
-      if (!data || !data.redirectUrl || !data.params) throw new Error("invalid_payfast_response");
+      if (!data || !data.redirectUrl || !data.params) {
+        throw new Error("invalid_payfast_response");
+      }
+
+      try {
+        localStorage.setItem("payfastPendingPurchase", "1");
+      } catch (_) {
+        // ignore if storage isn't available
+      }
 
       const form = document.createElement("form");
       form.method = "POST";
@@ -321,9 +329,10 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       form.submit();
     } catch (e) {
       console.error("PayFast checkout failed", e);
-      setStatusMessage("PayFast checkout failed. Please try again.");
+      setStatusMessage(`PayFast checkout failed: ${e.message || "Please try again."}`);
     }
   };
+
 
   // Phase 1 Features State
   const [options, setOptions] = useState({
@@ -959,7 +968,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   initiatePayFastCheckout(selectedPackage);
                 }}
                 style={{
-                  background: "#ff6600",
+                  background: "#f97316",
                   border: "none",
                   borderRadius: "8px",
                   padding: "10px 14px",
@@ -971,6 +980,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 Pay with PayFast
               </button>
             </div>
+
           </div>
         </div>
       ) : null}

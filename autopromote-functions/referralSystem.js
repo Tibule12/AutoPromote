@@ -49,8 +49,6 @@ exports.getReferralStats = functions.region(region).https.onCall(async (data, co
       analyticsSnapshot.docs.forEach(doc => {
         const data = doc.data();
         if (data.type === "smart_link_click") totalTraffic++;
-        if ((data.type === "ad_click" || data.type === "affiliate_conversion") && data.value)
-          totalRevenue += data.value;
       });
     }
     return { totalTraffic, totalRevenue };

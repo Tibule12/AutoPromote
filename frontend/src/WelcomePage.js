@@ -1,6 +1,7 @@
 import React from "react";
 import "./WelcomePage.css";
 import Footer from "./components/Footer";
+import PublicFeatureAvailability from "./components/PublicFeatureAvailability";
 
 const Section = ({ id, title, children }) => (
   <section id={id} className="hp-section">
@@ -22,13 +23,13 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
             <div>
               <h1 className="new-welcome-title">AutoPromote</h1>
               <p className="new-welcome-tagline-small">
-                Turn every upload into a smarter decision.
+                Cross-platform publishing control for creators who need clarity.
               </p>
               <p
                 className="new-welcome-subline"
                 style={{ marginTop: "0.5rem", opacity: 0.9, fontSize: "1.1rem" }}
               >
-                Test content performance before you scale it across platforms.
+                Upload once, publish deliberately, track what happened, and learn what to improve.
               </p>
             </div>
           </div>
@@ -50,13 +51,13 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
         <div className="hp-main">
           <Section id="what-is" title="What is AutoPromote?">
             <p>
-              AutoPromote is a content intelligence platform for creators and businesses who already
-              publish content and want clearer signals before scaling it.
+              AutoPromote is a cross-platform publishing control layer for creators and teams who
+              already publish content and want a cleaner way to manage distribution.
             </p>
             <p>
-              Instead of blindly posting or promoting content everywhere, AutoPromote lets you run a
-              controlled first publish, observe early performance, and improve presentation before
-              wider amplification.
+              Instead of repeating the same workflow on every native platform, AutoPromote helps
+              you upload once, choose your destinations, track publishing state, and make better
+              decisions from one dashboard.
             </p>
             <p
               className="highlight-text"
@@ -88,43 +89,45 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
 
           <Section id="how-it-works" title="How It Works">
             <p style={{ marginBottom: "1.5rem", fontStyle: "italic" }}>
-              Every step is opt-in. Nothing is published, tested, or changed without user approval.
+              Every publishing action starts from your chosen platforms and settings. AutoPromote
+              does not push content anywhere until you submit it for those destinations.
             </p>
             <ol className="hp-steps">
               <li>
                 <strong>Upload Once</strong>
                 <p>
-                  Users upload original content to AutoPromote and choose a single platform or
-                  limited audience for an initial test publish.
+                  Upload original content once, choose the platforms you want, and decide whether
+                  it should go out now or on a schedule.
                 </p>
                 <p className="small-note" style={{ fontSize: "0.9em", color: "#666" }}>
-                  No mass distribution. No amplification. Just an early signal.
+                  AutoPromote handles queueing, scheduling, and status tracking after you confirm
+                  the upload.
                 </p>
               </li>
               <li>
                 <strong>Observe Performance</strong>
                 <p>
-                  The platform monitors early performance during a short observation window
-                  (typically 3–7 hours, depending on platform), focusing on initial engagement
-                  signals such as retention, interaction, and response velocity.
+                  After publishing, the dashboard tracks status, connected platform health, and the
+                  analytics signals we can actually collect from linked accounts and platform post
+                  records.
                 </p>
               </li>
               <li>
                 <strong>Improve When Needed</strong>
                 <p>
-                  If content underperforms and the user has given consent, AutoPromote generates 1–2
-                  optional AI-assisted variations.
+                  Use the editor, caption helpers, and clip tools to improve packaging when a post
+                  needs a stronger hook, clearer formatting, or a better platform fit.
                 </p>
                 <p>
-                  These improvements focus on stronger hooks, better pacing, and platform-native
-                  formatting — while preserving the creator’s original voice and intent.
+                  AI assistance is optional and currently focused on captioning, clip generation,
+                  and formatting support rather than fully rewriting your content automatically.
                 </p>
               </li>
               <li>
                 <strong>Learn & Compare</strong>
                 <p>
-                  AutoPromote compares original performance against AI-assisted variations and
-                  provides clear, human-readable feedback:
+                  AutoPromote brings your publishing history, platform responses, and available
+                  analytics into one workflow so you can compare what worked and what to try next.
                 </p>
                 <div style={{ marginLeft: "1rem", marginTop: "0.5rem", marginBottom: "0.5rem" }}>
                   • what improved
@@ -135,6 +138,25 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
                 <p>The goal is learning, not guessing.</p>
               </li>
             </ol>
+          </Section>
+
+          <Section id="today" title="What Works Today">
+            <ul className="hp-list">
+              <li>Upload, queue, and schedule content across connected platforms</li>
+              <li>Track publishing state, worker health, and platform connection status</li>
+              <li>Review analytics and post-performance data that linked platforms expose</li>
+              <li>Use built-in editing, clip, caption, and formatting tools before publishing</li>
+              <li>Download your uploaded media and review publish history from the dashboard</li>
+            </ul>
+            <p className="muted">
+              Some integrations and automation paths are still feature-gated or account-dependent,
+              so AutoPromote only promises what your connected platforms and current plan support.
+            </p>
+            <p className="muted">
+              If you only need one native platform, its own tools may be enough. AutoPromote is
+              most useful when repeating the workflow across multiple destinations becomes the real
+              bottleneck.
+            </p>
           </Section>
 
           <Section id="not" title="What AutoPromote Is NOT">
@@ -162,6 +184,7 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
             <p>AutoPromote is for creators and teams who:</p>
             <ul className="hp-list" style={{ marginTop: "0.5rem" }}>
               <li>already publish content regularly</li>
+              <li>reuse the same core asset across several platforms</li>
               <li>want clearer feedback before scaling or boosting</li>
               <li>care about learning and consistency, not one-off virality</li>
             </ul>
@@ -170,14 +193,20 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
             </p>
           </Section>
 
+          <PublicFeatureAvailability
+            title="Availability Snapshot"
+            intro="A quick view of which parts of AutoPromote are live now, which depend on your setup, and which should not be treated as active promises."
+          />
+
           <Section id="growth" title="Growth & Amplification (Future-Ready)">
             <p>
-              AutoPromote is designed so that amplification — organic or paid — happens{" "}
-              <strong>after</strong> content proves itself.
+              AutoPromote is designed so that stronger promotion decisions happen{" "}
+              <strong>after</strong> you have evidence from real posts, real audiences, and real
+              platform responses.
             </p>
             <p>
-              When amplification features are introduced, they will be optional, informed by
-              performance data, and applied only to content that has already shown positive signals.
+              Additional amplification features should stay optional, transparent, and tied to
+              performance data rather than broad “push everywhere” automation.
             </p>
           </Section>
 

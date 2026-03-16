@@ -2,7 +2,7 @@ const { db, admin } = require("./firebaseAdmin");
 const optimizationService = require("./optimizationService");
 const paypalClient = require("./paypalClient");
 const paypal = require("@paypal/paypal-server-sdk");
-const { dispatchPlatformPost } = require("./services/platformPoster");
+const { enqueuePlatformPostTask } = require("./services/promotionTaskQueue");
 
 class PromotionService {
   // Normalize incoming schedule data (accept snake_case or camelCase) to canonical camelCase
@@ -535,16 +535,17 @@ class PromotionService {
             hashtagString: schedule.viral_optimization?.hashtags?.join(" ") || "",
           };
 
-          const result = await dispatchPlatformPost({
+          const result = await enqueuePlatformPostTask({
             platform: schedule.platform,
             contentId: schedule.contentId,
             uid: schedule.user_id || schedule.userId,
             payload: payload,
             reason: "scheduled_event",
+            skipIfDuplicate: true,
           });
 
           // 3. Handle Result
-          if (result.success) {
+          if (result && result.id) {
             console.log(`[Scheduler] ✅ Success ${schedule.id}: ${JSON.stringify(result)}`);
 
             // Mark done
@@ -552,7 +553,7 @@ class PromotionService {
               status: "executed",
               isActive: false, // This instance is done
               executedAt: new Date().toISOString(),
-              result: result,
+              result: { taskId: result.id, status: "queued" },
             });
 
             // Recursion?
@@ -624,6 +625,7 @@ class PromotionService {
           console.error(`[Scheduler] 💥 Exception ${schedule.id}:`, err);
           await doc.ref.update({
             status: "error",
+            isActive: false,
             error: err.message,
             updatedAt: new Date().toISOString(),
           });

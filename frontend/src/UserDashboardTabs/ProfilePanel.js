@@ -50,7 +50,7 @@ const ProfilePanel = ({
           marginBottom: "1rem",
         }}
       >
-        <h3>Landing Page Preview</h3>
+        <h3>Workspace Overview</h3>
         <button
           onClick={() => onNavigate && onNavigate("billing")}
           style={{
@@ -67,9 +67,13 @@ const ProfilePanel = ({
             gap: "6px",
           }}
         >
-          💳 Manage Subscription
+          💳 Billing & Plans
         </button>
       </div>
+      <p style={{ color: "#9aa4b2", marginTop: 0, marginBottom: "1rem", maxWidth: 640 }}>
+        Billing controls the paid publishing capacity of your workspace: upload limits, connected
+        platform reach, analytics depth, and support level.
+      </p>
       <div className="landing-preview">
         <img
           className="landing-thumbnail"
@@ -176,28 +180,6 @@ const ProfilePanel = ({
       </div>
 
       <div className="profile-defaults" style={{ marginTop: "1rem" }}>
-        <h4>Payment Settings</h4>
-        <div style={{ display: "grid", gap: ".5rem", maxWidth: 520, marginBottom: "1rem" }}>
-          <label style={{ color: "#9aa4b2" }}>
-            PayPal Email (For Payouts)
-            <input
-              type="email"
-              value={paypalEmail}
-              onChange={e => setPaypalEmail && setPaypalEmail(e.target.value)}
-              placeholder="your-email@example.com"
-              style={{
-                display: "block",
-                width: "100%",
-                marginTop: ".25rem",
-                padding: ".4rem",
-                borderRadius: "8px",
-                border: "1px solid rgba(255,255,255,0.15)",
-                background: "rgba(255,255,255,0.05)",
-                color: "#eef2ff",
-              }}
-            />
-          </label>
-        </div>
 
         <h4>Profile Defaults</h4>
         <div style={{ display: "grid", gap: ".5rem", maxWidth: 520 }}>
