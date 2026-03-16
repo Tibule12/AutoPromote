@@ -50,21 +50,44 @@ export default function BackgroundJobsPanel() {
     return (
       <div
         data-testid="background-jobs-panel"
-        style={{ background: "white", borderRadius: 12, padding: 20, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
+        style={{
+          background: "white",
+          borderRadius: 12,
+          padding: 20,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        }}
       >
         Loading background job status...
       </div>
     );
   }
 
-  const workerStatus = envStatus?.workerStatus || { required: [], details: {}, staleThresholdSec: 0 };
+  const workerStatus = envStatus?.workerStatus || {
+    required: [],
+    details: {},
+    staleThresholdSec: 0,
+  };
 
   return (
     <div
       data-testid="background-jobs-panel"
-      style={{ background: "white", borderRadius: 12, padding: 20, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
+      style={{
+        background: "white",
+        borderRadius: 12,
+        padding: 20,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+      }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, gap: 16, flexWrap: "wrap" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+          gap: 16,
+          flexWrap: "wrap",
+        }}
+      >
         <div>
           <h3 style={{ margin: 0, color: "#333" }}>Background Jobs</h3>
           <div style={{ color: "#666", fontSize: "0.9rem", marginTop: 4 }}>
@@ -72,27 +95,69 @@ export default function BackgroundJobsPanel() {
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <span style={{ padding: "6px 10px", borderRadius: 999, background: envStatus?.backgroundJobsEnabled ? "#e8f5e9" : "#fff3e0", color: envStatus?.backgroundJobsEnabled ? "#2e7d32" : "#b26a00", fontWeight: 600, fontSize: "0.85rem" }}>
+          <span
+            style={{
+              padding: "6px 10px",
+              borderRadius: 999,
+              background: envStatus?.backgroundJobsEnabled ? "#e8f5e9" : "#fff3e0",
+              color: envStatus?.backgroundJobsEnabled ? "#2e7d32" : "#b26a00",
+              fontWeight: 600,
+              fontSize: "0.85rem",
+            }}
+          >
             {envStatus?.backgroundJobsEnabled ? "Enabled" : "Disabled"}
           </span>
-          <span style={{ padding: "6px 10px", borderRadius: 999, background: workerStatus.allHealthy ? "#e8f5e9" : "#ffebee", color: workerStatus.allHealthy ? "#2e7d32" : "#c62828", fontWeight: 600, fontSize: "0.85rem" }}>
+          <span
+            style={{
+              padding: "6px 10px",
+              borderRadius: 999,
+              background: workerStatus.allHealthy ? "#e8f5e9" : "#ffebee",
+              color: workerStatus.allHealthy ? "#2e7d32" : "#c62828",
+              fontWeight: 600,
+              fontSize: "0.85rem",
+            }}
+          >
             {workerStatus.allHealthy ? "Workers Fresh" : "Worker Attention Needed"}
           </span>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: 12,
+        }}
+      >
         {(workerStatus.required || []).map(name => {
           const item = (workerStatus.details && workerStatus.details[name]) || {};
           return (
             <div
               key={name}
               data-testid={`background-job-${name}`}
-              style={{ border: `1px solid ${item.ok ? "#c8e6c9" : "#ffcdd2"}`, borderRadius: 10, padding: 14, background: item.ok ? "#f6fff7" : "#fff8f8" }}
+              style={{
+                border: `1px solid ${item.ok ? "#c8e6c9" : "#ffcdd2"}`,
+                borderRadius: 10,
+                padding: 14,
+                background: item.ok ? "#f6fff7" : "#fff8f8",
+              }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
                 <strong style={{ color: "#333" }}>{name}</strong>
-                <span style={{ fontSize: "0.8rem", fontWeight: 600, color: item.ok ? "#2e7d32" : "#c62828" }}>
+                <span
+                  style={{
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                    color: item.ok ? "#2e7d32" : "#c62828",
+                  }}
+                >
                   {item.ok ? "OK" : item.found ? "Stale" : "Missing"}
                 </span>
               </div>
@@ -100,10 +165,14 @@ export default function BackgroundJobsPanel() {
                 Last run: {formatDate(item.lastRun)}
               </div>
               {item.status ? (
-                <div style={{ marginTop: 4, fontSize: "0.8rem", color: "#666" }}>Status: {item.status}</div>
+                <div style={{ marginTop: 4, fontSize: "0.8rem", color: "#666" }}>
+                  Status: {item.status}
+                </div>
               ) : null}
               {item.error ? (
-                <div style={{ marginTop: 8, fontSize: "0.8rem", color: "#c62828" }}>{item.error}</div>
+                <div style={{ marginTop: 8, fontSize: "0.8rem", color: "#c62828" }}>
+                  {item.error}
+                </div>
               ) : null}
             </div>
           );

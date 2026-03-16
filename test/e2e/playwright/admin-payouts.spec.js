@@ -32,9 +32,9 @@ test("admin payouts list and process single payout", async ({ page }) => {
   await page.setExtraHTTPHeaders({ "x-playwright-e2e": "1" });
 
   // Diagnostic listeners to capture unexpected page lifecycle events
-  page.on('close', () => console.log('[PAGE EVENT] page closed')); 
-  page.on('crash', () => console.log('[PAGE EVENT] page crashed'));
-  page.on('pageerror', err => console.log('[PAGE EVENT] pageerror', err && err.message));
+  page.on("close", () => console.log("[PAGE EVENT] page closed"));
+  page.on("crash", () => console.log("[PAGE EVENT] page crashed"));
+  page.on("pageerror", err => console.log("[PAGE EVENT] pageerror", err && err.message));
   test.setTimeout(120000);
 
   const { db } = hasDbAccess ? require("../../../src/firebaseAdmin") : { db: null };
@@ -65,16 +65,14 @@ test("admin payouts list and process single payout", async ({ page }) => {
           .collection("users")
           .doc(payoutUid)
           .set({ paypalEmail: "e2e-paypal2@example.com", pendingEarnings: 12.34 }, { merge: true });
-        await db
-          .collection("payouts")
-          .add({
-            userId: payoutUid,
-            amount: 12.34,
-            status: "pending",
-            requestedAt: new Date().toISOString(),
-            paymentMethod: "paypal",
-            payee: { paypalEmail: "e2e-paypal2@example.com" },
-          });
+        await db.collection("payouts").add({
+          userId: payoutUid,
+          amount: 12.34,
+          status: "pending",
+          requestedAt: new Date().toISOString(),
+          paymentMethod: "paypal",
+          payee: { paypalEmail: "e2e-paypal2@example.com" },
+        });
       } catch (e) {
         console.warn("Could not seed payout doc:", e.message);
       }
@@ -90,7 +88,7 @@ test("admin payouts list and process single payout", async ({ page }) => {
     let navErr = null;
     while (Date.now() - navStart < 15000) {
       try {
-        await page.goto(targetUrl, { waitUntil: 'load', timeout: 4000 });
+        await page.goto(targetUrl, { waitUntil: "load", timeout: 4000 });
         navErr = null;
         break;
       } catch (e) {
@@ -178,8 +176,8 @@ test("admin payouts list and process single payout", async ({ page }) => {
       await page.click('button:has-text("Payouts")');
     } catch (e) {
       console.log('[WARN] "Payouts" button not found. Dumping buttons...');
-      const btns = await page.$$eval('button', els => els.map(e => e.textContent));
-      console.log('[WARN] Buttons found:', btns);
+      const btns = await page.$$eval("button", els => els.map(e => e.textContent));
+      console.log("[WARN] Buttons found:", btns);
       // Try finding it by loose text or navigation link
       const fallback = await page.$('li:has-text("Payouts")');
       if (fallback) await fallback.click();

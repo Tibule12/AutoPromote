@@ -4,27 +4,32 @@ const DEFAULT_ITEMS = [
   {
     name: "Publishing queue and scheduling",
     status: "Live",
-    description: "Upload once, choose platforms, and send content into immediate or scheduled publishing flows.",
+    description:
+      "Upload once, choose platforms, and send content into immediate or scheduled publishing flows.",
   },
   {
     name: "Analytics and status tracking",
     status: "Live",
-    description: "Track upload history, post state, worker health, and available analytics from linked accounts.",
+    description:
+      "Track upload history, post state, worker health, and available analytics from linked accounts.",
   },
   {
     name: "Editing, clips, captions, and formatting",
     status: "Live",
-    description: "Use built-in media tools before publishing rather than relying on fully automatic content rewrites.",
+    description:
+      "Use built-in media tools before publishing rather than relying on fully automatic content rewrites.",
   },
   {
     name: "Platform-specific posting depth",
     status: "Account-dependent",
-    description: "Capabilities vary by connected account, API permission level, and active feature flags.",
+    description:
+      "Capabilities vary by connected account, API permission level, and active feature flags.",
   },
   {
     name: "Short links and landing flows",
     status: "Deployment-dependent",
-    description: "Infrastructure exists, but availability depends on routing and deployment configuration in the running environment.",
+    description:
+      "Infrastructure exists, but availability depends on routing and deployment configuration in the running environment.",
   },
 ];
 
@@ -57,7 +62,15 @@ export default function PublicFeatureAvailability({
           const statusTone = tone(item.status);
           return (
             <div key={item.name} className="ap-feature-card">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 10 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: 12,
+                  marginBottom: 10,
+                }}
+              >
                 <h3 style={{ margin: 0 }}>{item.name}</h3>
                 <span
                   style={{

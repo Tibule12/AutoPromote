@@ -55,7 +55,8 @@ function inferExtension(url, type) {
 
 function buildDownloadName(item) {
   const rawTitle = String(item.title || item.id || "autopromote-upload").trim();
-  const safeTitle = rawTitle.replace(/[^a-z0-9-_]+/gi, "-").replace(/^-+|-+$/g, "") || "autopromote-upload";
+  const safeTitle =
+    rawTitle.replace(/[^a-z0-9-_]+/gi, "-").replace(/^-+|-+$/g, "") || "autopromote-upload";
   return `${safeTitle}.${inferExtension(getMediaUrl(item), item.type)}`;
 }
 
@@ -113,7 +114,10 @@ function UploadPanel({
   }, [initialFile]);
 
   const fallbackHistoryItems = useMemo(
-    () => (Array.isArray(contentList) ? contentList : []).map(normalizeHistoryItem).sort((a, b) => b.createdMs - a.createdMs),
+    () =>
+      (Array.isArray(contentList) ? contentList : [])
+        .map(normalizeHistoryItem)
+        .sort((a, b) => b.createdMs - a.createdMs),
     [contentList]
   );
 
@@ -270,7 +274,15 @@ function UploadPanel({
           </div>
 
           {historyError ? (
-            <div style={{ marginBottom: "1rem", padding: ".8rem 1rem", borderRadius: 10, background: "rgba(239,68,68,0.08)", color: "#fecaca" }}>
+            <div
+              style={{
+                marginBottom: "1rem",
+                padding: ".8rem 1rem",
+                borderRadius: 10,
+                background: "rgba(239,68,68,0.08)",
+                color: "#fecaca",
+              }}
+            >
               {historyError}
             </div>
           ) : null}
@@ -289,9 +301,7 @@ function UploadPanel({
               <p style={{ fontSize: ".875rem" }}>Upload your first content to get started!</p>
             </div>
           ) : (
-            <div
-              className="content-grid upload-history-grid"
-            >
+            <div className="content-grid upload-history-grid">
               {displayHistoryItems.map(item => {
                 const canPreview = item.type === "video" || item.type === "audio";
                 const createdLabel = item.createdMs
@@ -309,7 +319,8 @@ function UploadPanel({
                     key={item.key}
                     className="content-card cute-card"
                     style={{
-                      background: "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.72))",
+                      background:
+                        "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.72))",
                       border: "1px solid rgba(148,163,184,0.18)",
                       borderRadius: 16,
                       overflow: "hidden",
@@ -330,25 +341,34 @@ function UploadPanel({
                       disabled={!canPreview}
                     >
                       <div className="cute-video-thumb">
-                      {item.mediaUrl && item.type === "video" ? (
-                        <>
-                          <video src={item.mediaUrl} className="cute-video" />
-                          <div className="cute-play">▶</div>
-                        </>
-                      ) : item.mediaUrl && item.type === "image" ? (
-                        <img src={item.mediaUrl} alt={item.title} className="cute-video" />
-                      ) : item.mediaUrl && item.type === "audio" ? (
-                        <div className="cute-placeholder">Audio ready</div>
-                      ) : (
-                        <div className="cute-placeholder">No media</div>
-                      )}
+                        {item.mediaUrl && item.type === "video" ? (
+                          <>
+                            <video src={item.mediaUrl} className="cute-video" />
+                            <div className="cute-play">▶</div>
+                          </>
+                        ) : item.mediaUrl && item.type === "image" ? (
+                          <img src={item.mediaUrl} alt={item.title} className="cute-video" />
+                        ) : item.mediaUrl && item.type === "audio" ? (
+                          <div className="cute-placeholder">Audio ready</div>
+                        ) : (
+                          <div className="cute-placeholder">No media</div>
+                        )}
                         <div className="cute-badge">{createdLabel}</div>
                       </div>
                     </button>
 
                     <div className="cute-meta" style={{ padding: "1rem" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: ".75rem", alignItems: "flex-start" }}>
-                        <div className="cute-title" style={{ color: "#f8fafc", fontSize: "1rem" }}>{item.title}</div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: ".75rem",
+                          alignItems: "flex-start",
+                        }}
+                      >
+                        <div className="cute-title" style={{ color: "#f8fafc", fontSize: "1rem" }}>
+                          {item.title}
+                        </div>
                         <span
                           style={{
                             whiteSpace: "nowrap",
@@ -365,12 +385,22 @@ function UploadPanel({
                         </span>
                       </div>
                       {item.description ? (
-                        <div className="cute-desc" style={{ color: "#cbd5e1", marginTop: ".55rem" }}>
+                        <div
+                          className="cute-desc"
+                          style={{ color: "#cbd5e1", marginTop: ".55rem" }}
+                        >
                           {item.description}
                         </div>
                       ) : null}
 
-                      <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap", marginTop: ".85rem" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: ".5rem",
+                          flexWrap: "wrap",
+                          marginTop: ".85rem",
+                        }}
+                      >
                         {item.platforms.map(platform => (
                           <span
                             key={`${item.key}-${platform}`}
@@ -380,11 +410,23 @@ function UploadPanel({
                             {String(platform).charAt(0).toUpperCase() + String(platform).slice(1)}
                           </span>
                         ))}
-                        {item.views ? <span className="platform-pill">{item.views} views</span> : null}
-                        {item.clicks ? <span className="platform-pill">{item.clicks} clicks</span> : null}
+                        {item.views ? (
+                          <span className="platform-pill">{item.views} views</span>
+                        ) : null}
+                        {item.clicks ? (
+                          <span className="platform-pill">{item.clicks} clicks</span>
+                        ) : null}
                       </div>
 
-                      <div className="cute-row" style={{ marginTop: "1rem", display: "flex", flexWrap: "wrap", gap: ".6rem" }}>
+                      <div
+                        className="cute-row"
+                        style={{
+                          marginTop: "1rem",
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: ".6rem",
+                        }}
+                      >
                         {canPreview ? (
                           <button
                             type="button"
@@ -404,7 +446,11 @@ function UploadPanel({
                             download={buildDownloadName(item)}
                             className="edit-platform-btn"
                             onClick={event => event.stopPropagation()}
-                            style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}
+                            style={{
+                              textDecoration: "none",
+                              display: "inline-flex",
+                              alignItems: "center",
+                            }}
                           >
                             Download media
                           </a>
@@ -424,7 +470,12 @@ function UploadPanel({
                             target="_blank"
                             rel="noreferrer"
                             onClick={event => event.stopPropagation()}
-                            style={{ color: "#93c5fd", textDecoration: "none", display: "inline-flex", alignItems: "center" }}
+                            style={{
+                              color: "#93c5fd",
+                              textDecoration: "none",
+                              display: "inline-flex",
+                              alignItems: "center",
+                            }}
                           >
                             View on platform
                           </a>

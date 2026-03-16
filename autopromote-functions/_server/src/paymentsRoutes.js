@@ -166,11 +166,7 @@ router.post("/capture-order", strictLimiter, authMiddleware, async (req, res) =>
           });
         }
 
-        t.set(
-          creditsRef,
-          creditsUpdate,
-          { merge: true }
-        );
+        t.set(creditsRef, creditsUpdate, { merge: true });
 
         t.set(
           userRef,

@@ -55,8 +55,8 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
               already publish content and want a cleaner way to manage distribution.
             </p>
             <p>
-              Instead of repeating the same workflow on every native platform, AutoPromote helps
-              you upload once, choose your destinations, track publishing state, and make better
+              Instead of repeating the same workflow on every native platform, AutoPromote helps you
+              upload once, choose your destinations, track publishing state, and make better
               decisions from one dashboard.
             </p>
             <p
@@ -96,8 +96,8 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
               <li>
                 <strong>Upload Once</strong>
                 <p>
-                  Upload original content once, choose the platforms you want, and decide whether
-                  it should go out now or on a schedule.
+                  Upload original content once, choose the platforms you want, and decide whether it
+                  should go out now or on a schedule.
                 </p>
                 <p className="small-note" style={{ fontSize: "0.9em", color: "#666" }}>
                   AutoPromote handles queueing, scheduling, and status tracking after you confirm
@@ -153,8 +153,8 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
               so AutoPromote only promises what your connected platforms and current plan support.
             </p>
             <p className="muted">
-              If you only need one native platform, its own tools may be enough. AutoPromote is
-              most useful when repeating the workflow across multiple destinations becomes the real
+              If you only need one native platform, its own tools may be enough. AutoPromote is most
+              useful when repeating the workflow across multiple destinations becomes the real
               bottleneck.
             </p>
           </Section>

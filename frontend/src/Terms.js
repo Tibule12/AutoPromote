@@ -14,9 +14,9 @@ const Terms = () => (
     <div className="ap-content-section">
       <h2>1. Agreement to Terms</h2>
       <p>
-        By using our application and services (&quot;Service&quot;), you agree to be bound by
-        these Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, do not use
-        the Service.
+        By using our application and services (&quot;Service&quot;), you agree to be bound by these
+        Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, do not use the
+        Service.
       </p>
 
       <h2>2. Description of Service</h2>
@@ -78,11 +78,11 @@ const Terms = () => (
 
       <h2>9. Limitation of Liability</h2>
       <p>
-        In no event shall AutoPromote, nor its directors, employees, partners, agents, suppliers,
-        or affiliates, be liable for any indirect, incidental, special, consequential or punitive
+        In no event shall AutoPromote, nor its directors, employees, partners, agents, suppliers, or
+        affiliates, be liable for any indirect, incidental, special, consequential or punitive
         damages, including without limitation, loss of profits, data, use, goodwill, or other
-        intangible losses, resulting from your access to or use of or inability to access or use
-        the Service.
+        intangible losses, resulting from your access to or use of or inability to access or use the
+        Service.
       </p>
 
       <h2>10. Changes to Terms</h2>
@@ -110,8 +110,7 @@ const Terms = () => (
 
       <h2>13. Contact Us</h2>
       <p>
-        If you have any questions about these Terms, please contact us at:
-        thulani@autopromote.org.
+        If you have any questions about these Terms, please contact us at: thulani@autopromote.org.
       </p>
     </div>
   </div>

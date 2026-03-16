@@ -180,7 +180,6 @@ const ProfilePanel = ({
       </div>
 
       <div className="profile-defaults" style={{ marginTop: "1rem" }}>
-
         <h4>Profile Defaults</h4>
         <div style={{ display: "grid", gap: ".5rem", maxWidth: 520 }}>
           <label style={{ color: "#9aa4b2" }}>

@@ -119,7 +119,6 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     } catch (_) {
       // ignore storage and URL parsing errors
     }
-
   }, []);
 
   // Load PayPal SDK when the credit shop is visible
@@ -332,7 +331,6 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       setStatusMessage(`PayFast checkout failed: ${e.message || "Please try again."}`);
     }
   };
-
 
   // Phase 1 Features State
   const [options, setOptions] = useState({
@@ -980,7 +978,6 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 Pay with PayFast
               </button>
             </div>
-
           </div>
         </div>
       ) : null}

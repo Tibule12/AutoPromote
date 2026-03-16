@@ -62,7 +62,9 @@ test("upload panel toggles between upload and history tabs", async () => {
   expect(card).toBeTruthy();
   // Match either YYYY/MM/DD or MM/DD/YYYY formats (CI runners vary by locale)
   expect(
-    require("@testing-library/react").within(card).getByText(/(?:\d{4}\/\d{1,2}\/\d{1,2})|(?:\d{1,2}\/\d{1,2}\/\d{4})/)
+    require("@testing-library/react")
+      .within(card)
+      .getByText(/(?:\d{4}\/\d{1,2}\/\d{1,2})|(?:\d{1,2}\/\d{1,2}\/\d{4})/)
   ).toBeInTheDocument();
 });
 
@@ -136,7 +138,9 @@ test("upload history shows View on platform link and refresh when processing", a
     );
   });
 
-  await waitFor(() => expect(screen.getByRole("button", { name: /Refresh status/i })).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: /Refresh status/i })).toBeInTheDocument()
+  );
   expect(screen.getByText(/Still processing/i)).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /View on platform/i })).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /Download media/i })).toHaveAttribute(

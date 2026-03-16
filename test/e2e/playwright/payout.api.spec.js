@@ -39,7 +39,11 @@ test("API payout request - create payout doc and update user pending earnings", 
     }
     try {
       const check = await db.collection("users").doc(uid).get();
-      console.warn("[E2E] seed check - user exists?", !!(check && check.exists), check && check.exists ? check.data() : null);
+      console.warn(
+        "[E2E] seed check - user exists?",
+        !!(check && check.exists),
+        check && check.exists ? check.data() : null
+      );
     } catch (e) {
       console.warn("[E2E] seed check failed:", e.message);
     }

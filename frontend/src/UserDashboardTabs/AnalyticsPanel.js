@@ -212,7 +212,8 @@ const AnalyticsPanel = () => {
             fontSize: ".85rem",
           }}
         >
-          Data source: published platform posts only ({stats.publishedPostCount || 0} posts in this range).
+          Data source: published platform posts only ({stats.publishedPostCount || 0} posts in this
+          range).
           {rangeEndLabel ? (
             <span style={{ display: "block", marginTop: ".35rem", color: "#94a3b8" }}>
               Date range: {rangeStartLabel || "Beginning"} to {rangeEndLabel}
@@ -220,7 +221,8 @@ const AnalyticsPanel = () => {
           ) : null}
           {typeof stats.postsWithoutEventDate === "number" && stats.postsWithoutEventDate > 0 ? (
             <span style={{ display: "block", marginTop: ".35rem", color: "#94a3b8" }}>
-              {stats.postsWithoutEventDate} published post(s) missing event date are excluded from time-window filters.
+              {stats.postsWithoutEventDate} published post(s) missing event date are excluded from
+              time-window filters.
             </span>
           ) : null}
         </div>
@@ -228,7 +230,8 @@ const AnalyticsPanel = () => {
 
       {hasNoDataForRange ? (
         <div className="ap-analytics-empty-window">
-          No published platform posts were found for this time window. Try <b>All Time</b> to see full history.
+          No published platform posts were found for this time window. Try <b>All Time</b> to see
+          full history.
         </div>
       ) : null}
 
@@ -317,7 +320,11 @@ const AnalyticsPanel = () => {
               ></div>
             </div>
             <p style={{ fontSize: "0.8rem", marginTop: "8px", color: "#9aa4b2" }}>
-              {Math.max(0, (stats.referralTracker?.nextGoal || 0) - (stats.referralTracker?.total || 0))} more referrals to the next goal.
+              {Math.max(
+                0,
+                (stats.referralTracker?.nextGoal || 0) - (stats.referralTracker?.total || 0)
+              )}{" "}
+              more referrals to the next goal.
             </p>
           </div>
         </div>
@@ -436,7 +443,10 @@ const AnalyticsPanel = () => {
                 }}
               >
                 <span style={{ textTransform: "capitalize", fontWeight: 500 }}>{platform}</span>
-                <div className="ap-platform-row-stats" style={{ display: "flex", gap: "1rem", color: "var(--muted)" }}>
+                <div
+                  className="ap-platform-row-stats"
+                  style={{ display: "flex", gap: "1rem", color: "var(--muted)" }}
+                >
                   <span>{data.views || 0} views</span>
                   <span>{data.clicks || 0} clicks</span>
                   <span style={{ color: "var(--brand)" }}>{data.ctr?.toFixed(1) || 0}% CTR</span>

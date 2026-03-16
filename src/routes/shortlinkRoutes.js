@@ -57,7 +57,7 @@ router.get("/:code", shortlinkPublicLimiter, async (req, res) => {
       // Escape </script> tag break attempts in JSON string
       const safeTrackingJson = trackingPayload.replace(/</g, "\\u003c");
 
-const html = `
+      const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>

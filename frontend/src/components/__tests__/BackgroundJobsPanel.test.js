@@ -29,8 +29,18 @@ describe("BackgroundJobsPanel", () => {
           staleThresholdSec: 900,
           allHealthy: false,
           details: {
-            promotionTasks: { found: true, ok: true, lastRun: "2026-03-15T10:00:00.000Z", status: "ok" },
-            platformMetrics: { found: true, ok: false, lastRun: "2026-03-15T08:00:00.000Z", status: "lagging" },
+            promotionTasks: {
+              found: true,
+              ok: true,
+              lastRun: "2026-03-15T10:00:00.000Z",
+              status: "ok",
+            },
+            platformMetrics: {
+              found: true,
+              ok: false,
+              lastRun: "2026-03-15T08:00:00.000Z",
+              status: "lagging",
+            },
           },
         },
       }),

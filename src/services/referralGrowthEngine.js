@@ -779,7 +779,8 @@ class ReferralGrowthEngine {
         balance: resolvedBalance,
         totalEarned,
         transactions: credits.transactions || [],
-        lastUpdated: credits.lastUpdated || (resolvedBalance > storedBalance ? repairedAt : undefined),
+        lastUpdated:
+          credits.lastUpdated || (resolvedBalance > storedBalance ? repairedAt : undefined),
       };
     } catch (error) {
       console.error("Error getting credit balance:", error);

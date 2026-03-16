@@ -73,17 +73,22 @@ function inferDownloadExtension(mediaUrl, type) {
 }
 
 function buildDownloadFilename(record, mediaUrl) {
-  const baseName = String(record.title || record.id || "autopromote-upload")
-    .trim()
-    .replace(/[^a-z0-9-_]+/gi, "-")
-    .replace(/^-+|-+$/g, "") || "autopromote-upload";
+  const baseName =
+    String(record.title || record.id || "autopromote-upload")
+      .trim()
+      .replace(/[^a-z0-9-_]+/gi, "-")
+      .replace(/^-+|-+$/g, "") || "autopromote-upload";
   return `${baseName}.${inferDownloadExtension(mediaUrl, record.type)}`;
 }
 
 async function getOwnedContentSnapshot(userId, identifier) {
   let contentDoc = await db.collection("content").doc(identifier).get();
   if (!contentDoc.exists) {
-    const q = await db.collection("content").where("idempotency_key", "==", identifier).limit(1).get();
+    const q = await db
+      .collection("content")
+      .where("idempotency_key", "==", identifier)
+      .limit(1)
+      .get();
     if (!q.empty) contentDoc = q.docs[0];
   }
   if (!contentDoc || !contentDoc.exists) return null;
@@ -278,8 +283,6 @@ router.post(
         variant_strategy,
         protocol7, // Protocol 7
       } = req.body;
-
-
 
       // --- OPTIMIZATION: Services are now pre-loaded ---
       // Removed lazy-load blocks to improve per-request performance.
@@ -497,7 +500,11 @@ router.post(
         // We use setImmediate (Node.js) or simply don't await the promise
         // so the user gets a 200 OK immediately while the system works in the background.
         const distributionManager = require("./services/distributionManager");
-        if (target_platforms && target_platforms.length > 0 && !hasExplicitFutureSchedule(scheduled_promotion_time)) {
+        if (
+          target_platforms &&
+          target_platforms.length > 0 &&
+          !hasExplicitFutureSchedule(scheduled_promotion_time)
+        ) {
           // Lazy-load to avoid import cycles or heavy init
           // Fire and forget (user doesn't wait)
           distributionManager.distributeContent(contentRef.id, userId).catch(err => {
@@ -912,7 +919,10 @@ router.get("/:id/download", authMiddleware, async (req, res) => {
       return res.status(400).json({ error: "Invalid media URL" });
     }
 
-    if (["localhost", "127.0.0.1"].includes(parsed.hostname) && process.env.NODE_ENV !== "production") {
+    if (
+      ["localhost", "127.0.0.1"].includes(parsed.hostname) &&
+      process.env.NODE_ENV !== "production"
+    ) {
       return res.redirect(mediaUrl);
     }
 
@@ -931,7 +941,10 @@ router.get("/:id/download", authMiddleware, async (req, res) => {
     }
 
     const fileName = buildDownloadFilename(ownedContent.data, mediaUrl);
-    res.setHeader("Content-Type", upstream.headers.get("content-type") || "application/octet-stream");
+    res.setHeader(
+      "Content-Type",
+      upstream.headers.get("content-type") || "application/octet-stream"
+    );
     res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
     res.setHeader("Cache-Control", "private, max-age=60");
     const contentLength = upstream.headers.get("content-length");

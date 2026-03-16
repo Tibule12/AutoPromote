@@ -144,7 +144,8 @@ const UserDashboard = ({
   const isAdminUser = !!(user && (user.isAdmin || user.role === "admin"));
   const needsKyc = !!(user && !user.kycVerified);
   const connectedPlatformCount = useMemo(() => {
-    const rawPlatforms = platformSummary && platformSummary.raw ? Object.values(platformSummary.raw) : [];
+    const rawPlatforms =
+      platformSummary && platformSummary.raw ? Object.values(platformSummary.raw) : [];
     return rawPlatforms.filter(platform => platform && platform.connected).length;
   }, [platformSummary]);
   const hasConnectedPlatforms = connectedPlatformCount > 0;
@@ -515,7 +516,6 @@ const UserDashboard = ({
         await cachedFetch(
           "initial-data",
           async () => {
-
             return true;
           },
           60000
@@ -541,18 +541,20 @@ const UserDashboard = ({
         }
       });
     }
-
   }, [activeTab]);
 
   useEffect(() => {
-    const rawPlatforms = platformSummary && platformSummary.raw ? Object.values(platformSummary.raw) : [];
+    const rawPlatforms =
+      platformSummary && platformSummary.raw ? Object.values(platformSummary.raw) : [];
     if (hasAutoRoutedPrimaryTab.current || rawPlatforms.length === 0) return;
     if (activeTab !== "profile") {
       hasAutoRoutedPrimaryTab.current = true;
       return;
     }
 
-    setActiveTab(rawPlatforms.some(platform => platform && platform.connected) ? "upload" : "connections");
+    setActiveTab(
+      rawPlatforms.some(platform => platform && platform.connected) ? "upload" : "connections"
+    );
     hasAutoRoutedPrimaryTab.current = true;
   }, [platformSummary, activeTab]);
 
@@ -667,8 +669,6 @@ const UserDashboard = ({
       toast.error("Failed to mark notifications as read");
     }
   };
-
-
 
   const openProviderAuth = async endpointUrl => {
     try {
@@ -1091,56 +1091,56 @@ const UserDashboard = ({
             }}
           >
             <span>
-                  {!hasConnectedPlatforms && (
-                    <div
-                      style={{
-                        marginBottom: "1rem",
-                        padding: "14px 16px",
-                        borderRadius: 14,
-                        background: "#eff6ff",
-                        border: "1px solid #bfdbfe",
-                        color: "#1e3a8a",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: "1rem",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <div>
-                        <strong>Start here:</strong> connect at least one platform before your first publish
-                        workflow.
-                      </div>
-                      <button className="check-quality" onClick={() => handleNav("connections")}>
-                        Connect Platforms
-                      </button>
-                    </div>
-                  )}
-                  {hasConnectedPlatforms && contentList.length === 0 && (
-                    <div
-                      style={{
-                        marginBottom: "1rem",
-                        padding: "14px 16px",
-                        borderRadius: 14,
-                        background: "#ecfeff",
-                        border: "1px solid #a5f3fc",
-                        color: "#155e75",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: "1rem",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <div>
-                        <strong>Workspace ready:</strong> upload once, choose destinations, and inspect
-                        status from one queue.
-                      </div>
-                      <button className="check-quality" onClick={() => handleNav("upload")}>
-                        Publish Your First Asset
-                      </button>
-                    </div>
-                  )}
+              {!hasConnectedPlatforms && (
+                <div
+                  style={{
+                    marginBottom: "1rem",
+                    padding: "14px 16px",
+                    borderRadius: 14,
+                    background: "#eff6ff",
+                    border: "1px solid #bfdbfe",
+                    color: "#1e3a8a",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "1rem",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div>
+                    <strong>Start here:</strong> connect at least one platform before your first
+                    publish workflow.
+                  </div>
+                  <button className="check-quality" onClick={() => handleNav("connections")}>
+                    Connect Platforms
+                  </button>
+                </div>
+              )}
+              {hasConnectedPlatforms && contentList.length === 0 && (
+                <div
+                  style={{
+                    marginBottom: "1rem",
+                    padding: "14px 16px",
+                    borderRadius: 14,
+                    background: "#ecfeff",
+                    border: "1px solid #a5f3fc",
+                    color: "#155e75",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "1rem",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div>
+                    <strong>Workspace ready:</strong> upload once, choose destinations, and inspect
+                    status from one queue.
+                  </div>
+                  <button className="check-quality" onClick={() => handleNav("upload")}>
+                    Publish Your First Asset
+                  </button>
+                </div>
+              )}
               <strong>Verify your email:</strong> Please check your inbox for a verification link.
               Verify to access security features.
             </span>
@@ -1289,8 +1289,6 @@ const UserDashboard = ({
         {activeTab === "notifications" && (
           <NotificationsPanel notifs={notifs} onMarkAllRead={markAllNotificationsRead} />
         )}
-
-
 
         {activeTab === "ads" && <MissionControlPanel />}
 

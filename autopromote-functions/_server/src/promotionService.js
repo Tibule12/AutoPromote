@@ -679,7 +679,9 @@ class PromotionService {
           payload: { scheduleId },
           skipIfDuplicate: true,
         });
-        console.log(`✅ Executed promotion for content ${schedule.contentId} on ${schedule.platform}`);
+        console.log(
+          `✅ Executed promotion for content ${schedule.contentId} on ${schedule.platform}`
+        );
       } catch (err) {
         console.error("⚠️ Failed to enqueue platform task:", err.message);
       }

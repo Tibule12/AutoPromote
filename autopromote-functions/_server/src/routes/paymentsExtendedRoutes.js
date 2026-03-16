@@ -256,7 +256,10 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
     const m_payment_id = `pf_${packageId}_${userId}_${Date.now()}`;
 
     const baseUrl =
-      process.env.APP_BASE_URL || req.get("origin") || req.headers.origin || "http://localhost:3000";
+      process.env.APP_BASE_URL ||
+      req.get("origin") ||
+      req.headers.origin ||
+      "http://localhost:3000";
     const apiUrl = process.env.APP_API_URL || "http://localhost:5001";
     const safeReturnUrl = resolveFrontendUrl(
       baseUrl,

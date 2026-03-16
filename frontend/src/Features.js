@@ -6,7 +6,9 @@ const Features = () => (
   <div className="ap-page-container">
     <header className="ap-page-header">
       <h1>Platform Features</h1>
-      <p className="ap-page-subtitle">A practical publishing stack for connected creators and teams.</p>
+      <p className="ap-page-subtitle">
+        A practical publishing stack for connected creators and teams.
+      </p>
     </header>
 
     <div className="ap-features-grid">
@@ -28,7 +30,8 @@ const Features = () => (
       <div className="ap-feature-card">
         <h3>🎯 Mission Board</h3>
         <p>
-          Track your publishing activity, queue state, and performance signals across all connected platforms.
+          Track your publishing activity, queue state, and performance signals across all connected
+          platforms.
         </p>
       </div>
       <div className="ap-feature-card">

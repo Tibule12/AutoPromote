@@ -21,10 +21,17 @@ describe("public marketing pages", () => {
 
     expect(screen.getByText(/What Works Today/i)).toBeInTheDocument();
     expect(screen.getByText(/Availability Snapshot/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Feature Availability|Availability Snapshot|What To Expect In Practice/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Upload, queue, and schedule content across connected platforms/i)).toBeInTheDocument();
+    expect(
+      screen.getAllByText(/Feature Availability|Availability Snapshot|What To Expect In Practice/i)
+        .length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByText(/Upload, queue, and schedule content across connected platforms/i)
+    ).toBeInTheDocument();
     expect(screen.queryByText(/typically 3-7 hours/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/AI-assisted variations focus on stronger hooks/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/AI-assisted variations focus on stronger hooks/i)
+    ).not.toBeInTheDocument();
   });
 
   test("features and changelog avoid retired viral bonus promises", () => {
@@ -41,7 +48,9 @@ describe("public marketing pages", () => {
     expect(screen.getByText(/Monetization Transition/i)).toBeInTheDocument();
     expect(screen.queryByText(/Viral Bonus System/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Get paid for high-performing views/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/broadcast their voice across the internet with a single click/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/broadcast their voice across the internet with a single click/i)
+    ).not.toBeInTheDocument();
     expect(screen.getByText(/Integration depth varies by platform/i)).toBeInTheDocument();
   });
 
@@ -55,7 +64,11 @@ describe("public marketing pages", () => {
     docsRender.unmount();
 
     renderWithPath(<Blog />, "/blog");
-    expect(screen.getByText(/Read the latest updates from the AutoPromote team/i)).toBeInTheDocument();
-    expect(screen.queryByText(/creator monetization and cross-platform promotion/i)).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/Read the latest updates from the AutoPromote team/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/creator monetization and cross-platform promotion/i)
+    ).not.toBeInTheDocument();
   });
 });

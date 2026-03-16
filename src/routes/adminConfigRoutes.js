@@ -74,14 +74,12 @@ router.post("/update", authMiddleware, adminOnly, async (req, res) => {
       return res.status(400).json({ ok: false, error: "no_valid_fields" });
     const updated = await updateConfig(filtered);
     try {
-      await db
-        .collection("admin_logs")
-        .add({
-          type: "config_update",
-          by: req.userId || "unknown",
-          patch: filtered,
-          at: new Date().toISOString(),
-        });
+      await db.collection("admin_logs").add({
+        type: "config_update",
+        by: req.userId || "unknown",
+        patch: filtered,
+        at: new Date().toISOString(),
+      });
     } catch (_) {}
     return res.json({ ok: true, config: updated });
   } catch (e) {

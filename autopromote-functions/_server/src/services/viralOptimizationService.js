@@ -217,9 +217,10 @@ async function performViralOptimization(contentId, userId, contentData, options 
     }
 
     // Success Notification
-    const successMsg = shouldCreateInitialSchedule && schedulePlatforms.length > 0
-      ? `Content optimized & scheduled for ${schedulePlatforms.join(", ")} at ${new Date(scheduled_promotion_time).toLocaleString()}`
-      : `Content optimized successfully`;
+    const successMsg =
+      shouldCreateInitialSchedule && schedulePlatforms.length > 0
+        ? `Content optimized & scheduled for ${schedulePlatforms.join(", ")} at ${new Date(scheduled_promotion_time).toLocaleString()}`
+        : `Content optimized successfully`;
 
     await notificationEngine.sendNotification(userId, successMsg, "success", {
       contentId,

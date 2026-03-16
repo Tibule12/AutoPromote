@@ -29,7 +29,9 @@ function getContentCreatedAt(content) {
 
 function getOwnerId(record) {
   if (!record) return null;
-  return record.user_id || record.userId || record.uid || record.ownerId || record.creatorId || null;
+  return (
+    record.user_id || record.userId || record.uid || record.ownerId || record.creatorId || null
+  );
 }
 
 function getNumericMetric(...values) {
@@ -47,7 +49,11 @@ async function fetchOwnedCollectionDocs(collectionName, uid, ownerFields, limit 
   await Promise.all(
     ownerFields.map(async field => {
       try {
-        const snapshot = await db.collection(collectionName).where(field, "==", uid).limit(limit).get();
+        const snapshot = await db
+          .collection(collectionName)
+          .where(field, "==", uid)
+          .limit(limit)
+          .get();
         snapshot.forEach(doc => {
           if (seen.has(doc.id)) return;
           seen.add(doc.id);
@@ -93,7 +99,9 @@ function isPublishedPlatformPost(post) {
   }
   if (post.success === true) return true;
   const status = String(post.status || post.publish_status || "").toLowerCase();
-  if (["published", "posted", "completed", "success", "succeeded", "done", "live"].includes(status)) {
+  if (
+    ["published", "posted", "completed", "success", "succeeded", "done", "live"].includes(status)
+  ) {
     return true;
   }
   if (post.externalId || post.external_id || post.postId || post.post_id) return true;
@@ -201,7 +209,9 @@ router.get("/user", authMiddleware, async (req, res) => {
     }
 
     // Analytics should be sourced from published platform posts only.
-    console.log(`[Analytics] Aggregating published platform posts for user: ${uid}, range: ${range}`);
+    console.log(
+      `[Analytics] Aggregating published platform posts for user: ${uid}, range: ${range}`
+    );
     const allOwnedPosts = await fetchOwnedCollectionDocs(
       "platform_posts",
       uid,
@@ -212,7 +222,9 @@ router.get("/user", authMiddleware, async (req, res) => {
     const publishedPostsAllTime = allOwnedPosts.filter(
       post => isPublishedPlatformPost(post) && normalizePlatformName(post.platform)
     );
-    const postsWithoutEventDate = publishedPostsAllTime.filter(post => !getPostEventDate(post)).length;
+    const postsWithoutEventDate = publishedPostsAllTime.filter(
+      post => !getPostEventDate(post)
+    ).length;
     const publishedPosts = publishedPostsAllTime
       .filter(post => {
         const eventDate = getPostEventDate(post);
@@ -233,7 +245,9 @@ router.get("/user", authMiddleware, async (req, res) => {
     );
 
     const contentIds = new Set(
-      publishedPosts.map(post => post.contentId).filter(contentId => typeof contentId === "string" && contentId)
+      publishedPosts
+        .map(post => post.contentId)
+        .filter(contentId => typeof contentId === "string" && contentId)
     );
     const contentTitleMap = await fetchContentTitleMap(contentIds);
 
@@ -275,7 +289,12 @@ router.get("/user", authMiddleware, async (req, res) => {
         metrics.repost_count,
         metrics.reposts
       );
-      const clicks = getNumericMetric(metrics.clicks, metrics.click_count, metrics.link_clicks, metrics.post_clicks);
+      const clicks = getNumericMetric(
+        metrics.clicks,
+        metrics.click_count,
+        metrics.link_clicks,
+        metrics.post_clicks
+      );
       const comments = getNumericMetric(
         metrics.comments,
         metrics.comment_count,
@@ -325,7 +344,12 @@ router.get("/user", authMiddleware, async (req, res) => {
         nextUpdateAt = nextCheckTs;
       }
 
-      const fallbackTitle = post.payload?.title || post.payload?.caption || post.payload?.message || post.payload?.text || null;
+      const fallbackTitle =
+        post.payload?.title ||
+        post.payload?.caption ||
+        post.payload?.message ||
+        post.payload?.text ||
+        null;
       const resolvedTitle = contentTitleMap.get(post.contentId) || fallbackTitle || "Untitled";
       const publishedAt = getPostEventDate(post);
 
@@ -347,15 +371,12 @@ router.get("/user", authMiddleware, async (req, res) => {
           : 0;
     });
 
-    const bestCandidate = topContentCandidates.reduce(
-      (best, item) => {
-        if (!best) return item;
-        if (item.views > best.views) return item;
-        if (item.views === best.views && item.clicks > best.clicks) return item;
-        return best;
-      },
-      null
-    );
+    const bestCandidate = topContentCandidates.reduce((best, item) => {
+      if (!best) return item;
+      if (item.views > best.views) return item;
+      if (item.views === best.views && item.clicks > best.clicks) return item;
+      return best;
+    }, null);
 
     const bestContent = {
       views: bestCandidate ? bestCandidate.views : 0,

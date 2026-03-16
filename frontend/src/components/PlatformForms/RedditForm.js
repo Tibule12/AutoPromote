@@ -13,7 +13,8 @@ const RedditForm = ({
   onFindViralClips,
 }) => {
   const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
-  const redditName = creatorInfo?.name || creatorInfo?.meta?.username || creatorInfo?.meta?.name || null;
+  const redditName =
+    creatorInfo?.name || creatorInfo?.meta?.username || creatorInfo?.meta?.name || null;
   const redditIcon = creatorInfo?.icon_img || creatorInfo?.meta?.icon_img || null;
   const redditKarma = creatorInfo?.total_karma || creatorInfo?.meta?.total_karma || null;
 
@@ -96,9 +97,7 @@ const RedditForm = ({
           )}
           <div>
             <div style={{ fontWeight: "600", color: "#333" }}>u/{redditName}</div>
-            <div style={{ fontSize: "0.8rem", color: "#666" }}>
-              Karma: {redditKarma ?? "-"}
-            </div>
+            <div style={{ fontSize: "0.8rem", color: "#666" }}>Karma: {redditKarma ?? "-"}</div>
           </div>
         </div>
       )}

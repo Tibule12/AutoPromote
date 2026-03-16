@@ -258,7 +258,10 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
     // Create PayFast "Order" (really just signature & params)
     // In production, APP_BASE_URL should be set to your public frontend URL (e.g. https://www.autopromote.org)
     const baseUrl =
-      process.env.APP_BASE_URL || req.get("origin") || req.headers.origin || "https://www.autopromote.org";
+      process.env.APP_BASE_URL ||
+      req.get("origin") ||
+      req.headers.origin ||
+      "https://www.autopromote.org";
     const apiUrl = process.env.APP_API_URL || "https://api.autopromote.org";
     const safeReturnUrl = resolveFrontendUrl(
       baseUrl,

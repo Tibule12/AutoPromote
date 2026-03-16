@@ -5,7 +5,9 @@ const About = () => (
   <div className="ap-page-container">
     <header className="ap-page-header">
       <h1>About AutoPromote</h1>
-      <p className="ap-page-subtitle">The publishing control layer for creators running across multiple platforms.</p>
+      <p className="ap-page-subtitle">
+        The publishing control layer for creators running across multiple platforms.
+      </p>
     </header>
 
     <div className="ap-content-section">
@@ -28,8 +30,8 @@ const About = () => (
         <h2>Our Mission</h2>
         <p>
           To give creators and teams better publishing infrastructure: clearer platform visibility,
-          safer automation, stronger workflow visibility, and feedback loops they can actually
-          learn from.
+          safer automation, stronger workflow visibility, and feedback loops they can actually learn
+          from.
         </p>
       </div>
 

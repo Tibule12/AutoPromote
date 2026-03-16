@@ -37,17 +37,20 @@ const HelpCenter = () => (
         {
           name: "Connected publishing workflows",
           status: "Live",
-          description: "Best supported for uploads, scheduling, queue state, and platform connection issues.",
+          description:
+            "Best supported for uploads, scheduling, queue state, and platform connection issues.",
         },
         {
           name: "Monetization guidance",
           status: "Live",
-          description: "Support can help explain how the platform works, subscription tiers, and platform connection issues.",
+          description:
+            "Support can help explain how the platform works, subscription tiers, and platform connection issues.",
         },
         {
           name: "Deployment-only features",
           status: "Deployment-dependent",
-          description: "Some short-link and landing-page behavior depends on how the running environment has been configured.",
+          description:
+            "Some short-link and landing-page behavior depends on how the running environment has been configured.",
         },
       ]}
     />

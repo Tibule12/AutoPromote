@@ -421,7 +421,13 @@ const PayPalSubscriptionPanel = () => {
       whiteLabel: "White-label",
       wolfHuntTasks: "Mission opportunities",
     };
-    return labels[key] || key.replace(/([A-Z])/g, " $1").trim().replace(/^./, str => str.toUpperCase());
+    return (
+      labels[key] ||
+      key
+        .replace(/([A-Z])/g, " $1")
+        .trim()
+        .replace(/^./, str => str.toUpperCase())
+    );
   };
 
   const renderFeatureValue = (key, value) => {

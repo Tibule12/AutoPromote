@@ -143,7 +143,14 @@ function normalizeLinkedInCreatorInfo(primary, fallbackRaw, fallbackSummary) {
     fallbackSummary?.followers ||
     null;
 
-  if (!localizedName && !profilePicture && !followers && !primary && !fallbackRaw && !fallbackSummary) {
+  if (
+    !localizedName &&
+    !profilePicture &&
+    !followers &&
+    !primary &&
+    !fallbackRaw &&
+    !fallbackSummary
+  ) {
     return null;
   }
 
@@ -853,7 +860,10 @@ const PlatformPreview = ({
       creatorInfo?.meta?.display_name ||
       "Your Company";
     const linkedInFollowers =
-      creatorInfo?.meta?.followers || creatorInfo?.followers || creatorInfo?.meta?.followerCount || null;
+      creatorInfo?.meta?.followers ||
+      creatorInfo?.followers ||
+      creatorInfo?.meta?.followerCount ||
+      null;
     return (
       <div
         className="platform-preview-mockup linkedin-mockup"
@@ -876,8 +886,7 @@ const PlatformPreview = ({
               {linkedInName}
             </div>
             <div style={{ fontSize: "0.75rem", color: "#606060" }}>
-              {linkedInFollowers ? linkedInFollowers.toLocaleString() : "1,234"}{" "}
-              followers
+              {linkedInFollowers ? linkedInFollowers.toLocaleString() : "1,234"} followers
             </div>
             <div style={{ fontSize: "0.75rem", color: "#606060" }}>Just now • 🌐</div>
           </div>
@@ -959,9 +968,7 @@ const PlatformPreview = ({
             <span style={{ fontWeight: "bold", color: "#000" }}>
               r/{data.subreddit || "subreddit"}
             </span>
-            <span>
-              • Posted by u/{redditPoster} just now
-            </span>
+            <span>• Posted by u/{redditPoster} just now</span>
           </div>
           <h3 style={{ fontSize: "1rem", fontWeight: "500", margin: "0 0 10px 0", color: "#000" }}>
             {data.title || "Your Post Title"}
@@ -1106,7 +1113,11 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
             }
           } else if (mounted) {
             setTiktokCreator(
-              normalizeTikTokCreatorInfo(null, platformStatus.raw.tiktok, platformStatus.summary.tiktok)
+              normalizeTikTokCreatorInfo(
+                null,
+                platformStatus.raw.tiktok,
+                platformStatus.summary.tiktok
+              )
             );
           }
         } catch (e) {

@@ -114,7 +114,8 @@ const distributeContent = async (contentId, userId) => {
       const status = distribution[p]?.status;
       if (status === "processing" || status === "published") {
         logger.info(
-          `[DistributionManager] Skipping ${p} for ${contentId} because status is '${status}'`);
+          `[DistributionManager] Skipping ${p} for ${contentId} because status is '${status}'`
+        );
         return false;
       }
       return true;
@@ -168,7 +169,7 @@ const distributeContent = async (contentId, userId) => {
         await updatePlatformStatus(contentId, platform, "failed", { error: err.message });
       }
     }
-    
+
     logger.info(`[DistributionManager] Distribution complete for ${contentId}`, results);
     return results;
   } catch (err) {

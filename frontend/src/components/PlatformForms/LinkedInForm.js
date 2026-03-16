@@ -19,8 +19,7 @@ const LinkedInForm = ({
     creatorInfo?.meta?.localizedName ||
     creatorInfo?.meta?.display_name ||
     null;
-  const profilePicture =
-    creatorInfo?.profilePicture || creatorInfo?.meta?.profilePicture || null;
+  const profilePicture = creatorInfo?.profilePicture || creatorInfo?.meta?.profilePicture || null;
 
   useEffect(() => {
     if (currentFile && currentFile instanceof File) {
@@ -107,9 +106,7 @@ const LinkedInForm = ({
             />
           )}
           <div>
-            <div style={{ fontWeight: "600", color: "#333" }}>
-              {profileName}
-            </div>
+            <div style={{ fontWeight: "600", color: "#333" }}>{profileName}</div>
             <div style={{ fontSize: "0.8rem", color: "#666" }}>Posting as Profile</div>
           </div>
         </div>

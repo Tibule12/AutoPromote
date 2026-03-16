@@ -134,9 +134,7 @@ const YouTubeForm = ({
           ) : (
             <span style={{ fontSize: 18, lineHeight: 1 }}>▶</span>
           )}
-          <span style={{ marginLeft: 8, fontWeight: "600" }}>
-            {channelTitle}
-          </span>
+          <span style={{ marginLeft: 8, fontWeight: "600" }}>{channelTitle}</span>
         </div>
       ) : (
         <div className="alert-box warning">

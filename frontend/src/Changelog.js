@@ -13,10 +13,12 @@ const Changelog = () => (
       <span className="ap-date">January 2026</span>
       <ul>
         <li>
-          Expanded <strong>content safety and compliance checks</strong> to reduce avoidable policy issues before publishing.
+          Expanded <strong>content safety and compliance checks</strong> to reduce avoidable policy
+          issues before publishing.
         </li>
         <li>
-          Began the shift away from legacy view-based bonus messaging toward the current mission-driven earning model.
+          Began the shift away from legacy view-based bonus messaging toward the current
+          mission-driven earning model.
         </li>
         <li>Enhanced footer with better navigation and resource links.</li>
       </ul>
