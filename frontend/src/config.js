@@ -35,6 +35,15 @@ export const API_ENDPOINTS = {
   CONTENT_UPLOAD: `${API_BASE_URL}/api/content/upload`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
   MY_SCHEDULES: `${API_BASE_URL}/api/content/my-promotion-schedules`,
+  CONTENT_DIAGNOSIS: id => `${API_BASE_URL}/api/content/${encodeURIComponent(id)}/diagnosis`,
+  CONTENT_DIAGNOSIS_REMEDIATE: id =>
+    `${API_BASE_URL}/api/content/${encodeURIComponent(id)}/diagnosis/remediate`,
+  CONTENT_DIAGNOSIS_HISTORY: id =>
+    `${API_BASE_URL}/api/content/${encodeURIComponent(id)}/diagnosis/history`,
+  CONTENT_DIAGNOSIS_POLICY: id =>
+    `${API_BASE_URL}/api/content/${encodeURIComponent(id)}/diagnosis/policy`,
+  CONTENT_DIAGNOSIS_RUN_AUTO: id =>
+    `${API_BASE_URL}/api/content/${encodeURIComponent(id)}/diagnosis/run-auto`,
 
   // User endpoints
   USERS_ME: `${API_BASE_URL}/api/users/me`,

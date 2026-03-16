@@ -23,6 +23,14 @@ const smartDistributionEngine = require("./services/smartDistributionEngine");
 const viralImpactEngine = require("./services/viralImpactEngine");
 const algorithmExploitationEngine = require("./services/algorithmExploitationEngine");
 const { performViralOptimization } = require("./services/viralOptimizationService");
+const {
+  diagnoseContent,
+  triggerRemediation,
+  listRemediationHistory,
+  getDiagnosisPolicy,
+  setDiagnosisPolicy,
+  runDuePolicies,
+} = require("./services/contentRecoveryService");
 
 // Optional services still loaded defensively
 let viralInsuranceService;
@@ -1141,6 +1149,157 @@ router.get("/:id/analytics", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("[GET /:id/analytics] Error:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /:id/diagnosis - Get (or compute) diagnosis for owned content
+router.get("/:id/diagnosis", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const forceRefresh = String(req.query.refresh || "").toLowerCase() === "1";
+    const diagnosis = await diagnoseContent({
+      contentId,
+      forceRefresh,
+      trigger: "user_fetch",
+      actorUid: userId,
+    });
+
+    return res.json({ diagnosis });
+  } catch (error) {
+    console.error("[GET /:id/diagnosis] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /:id/diagnosis/remediate - Trigger remediation actions for owned content
+router.post("/:id/diagnosis/remediate", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const dryRun = req.body && req.body.dryRun === true;
+    const remediation = await triggerRemediation({
+      contentId,
+      actorUid: userId,
+      dryRun,
+    });
+
+    return res.json({ remediation });
+  } catch (error) {
+    console.error("[POST /:id/diagnosis/remediate] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /:id/diagnosis/history - List remediation history for owned content
+router.get("/:id/diagnosis/history", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const history = await listRemediationHistory({
+      contentId,
+      limit: req.query.limit || 20,
+      type: req.query.type || null,
+      status: req.query.status || null,
+    });
+
+    return res.json({ history, count: history.length });
+  } catch (error) {
+    console.error("[GET /:id/diagnosis/history] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /:id/diagnosis/policy - Read auto-remediation policy for owned content
+router.get("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const policy = await getDiagnosisPolicy(contentId);
+    return res.json({ policy });
+  } catch (error) {
+    console.error("[GET /:id/diagnosis/policy] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PUT /:id/diagnosis/policy - Update auto-remediation policy for owned content
+router.put("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const updated = await setDiagnosisPolicy({
+      contentId,
+      policy: req.body || {},
+      actorUid: userId,
+    });
+
+    return res.json({ policy: updated });
+  } catch (error) {
+    console.error("[PUT /:id/diagnosis/policy] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /:id/diagnosis/run-auto - Execute due auto policy for this content only
+router.post("/:id/diagnosis/run-auto", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const dryRun = req.body && req.body.dryRun === true;
+    const run = await runDuePolicies({
+      limit: 50,
+      actorUid: userId,
+      dryRun,
+      contentIds: [contentId],
+    });
+    const match = (run.processed || []).find(r => String(r.contentId) === String(contentId));
+
+    if (!match) {
+      return res.json({
+        autoRun: {
+          contentId,
+          skipped: true,
+          reason: "not_due_or_policy_disabled",
+          dryRun,
+        },
+      });
+    }
+
+    return res.json({ autoRun: match, dryRun });
+  } catch (error) {
+    console.error("[POST /:id/diagnosis/run-auto] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 

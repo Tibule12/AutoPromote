@@ -8,6 +8,37 @@ const AnalyticsPanel = () => {
   const [analytics, setAnalytics] = useState(null);
   const [timeRange, setTimeRange] = useState("7d");
   const [error, setError] = useState("");
+  const [contentItems, setContentItems] = useState([]);
+  const [selectedContentId, setSelectedContentId] = useState("");
+  const [diagnosisData, setDiagnosisData] = useState(null);
+  const [recoveryHistory, setRecoveryHistory] = useState([]);
+  const [policyState, setPolicyState] = useState({
+    enabled: false,
+    cadenceHours: 24,
+    minHealthScore: 45,
+    maxDailyRuns: 2,
+    cooldownHours: 6,
+    dryRunOnly: false,
+  });
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [policySaving, setPolicySaving] = useState(false);
+  const [recoveryMessage, setRecoveryMessage] = useState("");
+
+  const authedFetch = useCallback(async (url, options = {}) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("Sign in to use recovery tools.");
+    const token = await currentUser.getIdToken();
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+    return res;
+  }, []);
 
   const loadAnalytics = useCallback(
     async ({ retryCount = 0, forceRefreshToken = false } = {}) => {
@@ -73,6 +104,135 @@ const AnalyticsPanel = () => {
     });
     return () => unsubscribe();
   }, [loadAnalytics]);
+
+  const loadRecoveryAssets = useCallback(async () => {
+    try {
+      const res = await authedFetch(API_ENDPOINTS.MY_CONTENT, { method: "GET" });
+      if (!res.ok) return;
+      const json = await res.json();
+      const items = Array.isArray(json.content) ? json.content : [];
+      setContentItems(items);
+      if (!selectedContentId && items.length) {
+        setSelectedContentId(items[0].id || items[0]._id || "");
+      }
+    } catch (_e) {
+      // Recovery tools are optional; fail silently to avoid blocking analytics panel.
+    }
+  }, [authedFetch, selectedContentId]);
+
+  const loadRecoveryForContent = useCallback(
+    async contentId => {
+      if (!contentId) return;
+      setRecoveryLoading(true);
+      setRecoveryMessage("");
+      try {
+        const [diagRes, histRes, policyRes] = await Promise.all([
+          authedFetch(`${API_ENDPOINTS.CONTENT_DIAGNOSIS(contentId)}?refresh=1`),
+          authedFetch(`${API_ENDPOINTS.CONTENT_DIAGNOSIS_HISTORY(contentId)}?limit=10`),
+          authedFetch(API_ENDPOINTS.CONTENT_DIAGNOSIS_POLICY(contentId)),
+        ]);
+
+        if (diagRes.ok) {
+          const d = await diagRes.json();
+          setDiagnosisData(d.diagnosis || null);
+        }
+        if (histRes.ok) {
+          const h = await histRes.json();
+          setRecoveryHistory(Array.isArray(h.history) ? h.history : []);
+        }
+        if (policyRes.ok) {
+          const p = await policyRes.json();
+          if (p.policy && p.policy.policy) {
+            setPolicyState(prev => ({ ...prev, ...p.policy.policy }));
+          }
+        }
+      } catch (_e) {
+        setRecoveryMessage("Could not load recovery details for this content.");
+      } finally {
+        setRecoveryLoading(false);
+      }
+    },
+    [authedFetch]
+  );
+
+  useEffect(() => {
+    loadRecoveryAssets();
+  }, [loadRecoveryAssets]);
+
+  useEffect(() => {
+    if (selectedContentId) loadRecoveryForContent(selectedContentId);
+  }, [selectedContentId, loadRecoveryForContent]);
+
+  const runRemediation = async dryRun => {
+    if (!selectedContentId) return;
+    setRecoveryLoading(true);
+    setRecoveryMessage("");
+    try {
+      const res = await authedFetch(API_ENDPOINTS.CONTENT_DIAGNOSIS_REMEDIATE(selectedContentId), {
+        method: "POST",
+        body: JSON.stringify({ dryRun }),
+      });
+      if (!res.ok) throw new Error("Remediation failed");
+      const data = await res.json();
+      const count = Array.isArray(data.remediation?.actions) ? data.remediation.actions.length : 0;
+      setRecoveryMessage(
+        dryRun
+          ? `Dry run complete. ${count} action(s) planned.`
+          : `Remediation executed. ${count} action(s) processed.`
+      );
+      await loadRecoveryForContent(selectedContentId);
+    } catch (_e) {
+      setRecoveryMessage("Remediation request failed. Please retry.");
+    } finally {
+      setRecoveryLoading(false);
+    }
+  };
+
+  const savePolicy = async () => {
+    if (!selectedContentId) return;
+    setPolicySaving(true);
+    setRecoveryMessage("");
+    try {
+      const res = await authedFetch(API_ENDPOINTS.CONTENT_DIAGNOSIS_POLICY(selectedContentId), {
+        method: "PUT",
+        body: JSON.stringify(policyState),
+      });
+      if (!res.ok) throw new Error("Policy save failed");
+      setRecoveryMessage("Auto-recovery policy saved.");
+      await loadRecoveryForContent(selectedContentId);
+    } catch (_e) {
+      setRecoveryMessage("Failed to save policy.");
+    } finally {
+      setPolicySaving(false);
+    }
+  };
+
+  const runAutoPolicyNow = async dryRun => {
+    if (!selectedContentId) return;
+    setRecoveryLoading(true);
+    setRecoveryMessage("");
+    try {
+      const res = await authedFetch(API_ENDPOINTS.CONTENT_DIAGNOSIS_RUN_AUTO(selectedContentId), {
+        method: "POST",
+        body: JSON.stringify({ dryRun }),
+      });
+      if (!res.ok) throw new Error("Auto-run failed");
+      const data = await res.json();
+      const skipped = Boolean(data.autoRun && data.autoRun.skipped);
+      setRecoveryMessage(
+        skipped
+          ? `Auto policy skipped (${data.autoRun.reason || "not_due_or_policy_disabled"}).`
+          : dryRun
+            ? "Auto policy dry run completed."
+            : "Auto policy run completed."
+      );
+      await loadRecoveryForContent(selectedContentId);
+    } catch (_e) {
+      setRecoveryMessage("Failed to run auto policy.");
+    } finally {
+      setRecoveryLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -234,6 +394,231 @@ const AnalyticsPanel = () => {
           full history.
         </div>
       ) : null}
+
+      <div
+        className="ap-analytics-panel-card"
+        style={{
+          background: "var(--card)",
+          padding: "1rem",
+          borderRadius: "12px",
+          border: "1px solid var(--border)",
+          marginBottom: "1.5rem",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: "0.75rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <h4 style={{ margin: 0 }}>Recovery Lab</h4>
+            <div style={{ color: "var(--muted)", fontSize: ".82rem", marginTop: "0.2rem" }}>
+              Diagnose weak content, run remediation, and configure guardrails.
+            </div>
+          </div>
+          <select
+            value={selectedContentId}
+            onChange={e => setSelectedContentId(e.target.value)}
+            style={{
+              minWidth: 220,
+              padding: "0.45rem 0.6rem",
+              borderRadius: 8,
+              border: "1px solid var(--border)",
+              background: "var(--bg-2)",
+              color: "var(--text)",
+            }}
+          >
+            <option value="">Select content…</option>
+            {contentItems.map(item => (
+              <option key={item.id || item._id} value={item.id || item._id}>
+                {(item.title || "Untitled").slice(0, 48)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {recoveryMessage ? (
+          <div style={{ marginTop: ".85rem", color: "#93c5fd", fontSize: ".85rem" }}>
+            {recoveryMessage}
+          </div>
+        ) : null}
+
+        {diagnosisData ? (
+          <div style={{ marginTop: "0.85rem", display: "grid", gap: "0.5rem" }}>
+            <div style={{ fontSize: ".88rem" }}>
+              Status: <b style={{ textTransform: "capitalize" }}>{diagnosisData.status}</b> | Health
+              Score: <b>{diagnosisData.healthScore}</b>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+              {(diagnosisData.issues || []).slice(0, 5).map(issue => (
+                <span
+                  key={`${issue.type}-${issue.severity}`}
+                  style={{
+                    fontSize: ".75rem",
+                    background: "rgba(248,113,113,0.15)",
+                    border: "1px solid rgba(248,113,113,0.35)",
+                    borderRadius: 999,
+                    padding: "0.2rem 0.5rem",
+                    color: "#fecaca",
+                  }}
+                >
+                  {issue.type}
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div style={{ marginTop: "0.9rem", display: "flex", gap: "0.55rem", flexWrap: "wrap" }}>
+          <button
+            disabled={!selectedContentId || recoveryLoading}
+            onClick={() => runRemediation(true)}
+          >
+            Dry Run Remediation
+          </button>
+          <button
+            disabled={!selectedContentId || recoveryLoading}
+            onClick={() => runRemediation(false)}
+          >
+            Execute Remediation
+          </button>
+          <button
+            disabled={!selectedContentId || recoveryLoading}
+            onClick={() => runAutoPolicyNow(true)}
+          >
+            Dry Run Auto Policy
+          </button>
+          <button
+            disabled={!selectedContentId || recoveryLoading}
+            onClick={() => runAutoPolicyNow(false)}
+          >
+            Run Auto Policy
+          </button>
+        </div>
+
+        <div
+          style={{
+            marginTop: "1rem",
+            display: "grid",
+            gap: "0.65rem",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          }}
+        >
+          <label style={{ fontSize: ".8rem" }}>
+            <input
+              type="checkbox"
+              checked={Boolean(policyState.enabled)}
+              onChange={e => setPolicyState(prev => ({ ...prev, enabled: e.target.checked }))}
+            />{" "}
+            Enable Auto Recovery
+          </label>
+          <label style={{ fontSize: ".8rem" }}>
+            Cadence (hours)
+            <input
+              type="number"
+              min={1}
+              max={168}
+              value={policyState.cadenceHours}
+              onChange={e =>
+                setPolicyState(prev => ({ ...prev, cadenceHours: Number(e.target.value || 24) }))
+              }
+            />
+          </label>
+          <label style={{ fontSize: ".8rem" }}>
+            Min Health Score
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={policyState.minHealthScore}
+              onChange={e =>
+                setPolicyState(prev => ({ ...prev, minHealthScore: Number(e.target.value || 45) }))
+              }
+            />
+          </label>
+          <label style={{ fontSize: ".8rem" }}>
+            Max Daily Runs
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={policyState.maxDailyRuns}
+              onChange={e =>
+                setPolicyState(prev => ({ ...prev, maxDailyRuns: Number(e.target.value || 2) }))
+              }
+            />
+          </label>
+          <label style={{ fontSize: ".8rem" }}>
+            Cooldown (hours)
+            <input
+              type="number"
+              min={1}
+              max={48}
+              value={policyState.cooldownHours}
+              onChange={e =>
+                setPolicyState(prev => ({ ...prev, cooldownHours: Number(e.target.value || 6) }))
+              }
+            />
+          </label>
+          <label style={{ fontSize: ".8rem" }}>
+            <input
+              type="checkbox"
+              checked={Boolean(policyState.dryRunOnly)}
+              onChange={e => setPolicyState(prev => ({ ...prev, dryRunOnly: e.target.checked }))}
+            />{" "}
+            Dry Run Only
+          </label>
+        </div>
+
+        <div style={{ marginTop: "0.75rem" }}>
+          <button disabled={!selectedContentId || policySaving} onClick={savePolicy}>
+            {policySaving ? "Saving..." : "Save Policy"}
+          </button>
+        </div>
+
+        <div style={{ marginTop: "1rem" }}>
+          <h5 style={{ margin: 0, marginBottom: ".4rem" }}>Recent Recovery Actions</h5>
+          {recoveryLoading ? (
+            <div style={{ color: "var(--muted)", fontSize: ".82rem" }}>
+              Loading recovery data...
+            </div>
+          ) : recoveryHistory.length ? (
+            <div style={{ display: "grid", gap: ".45rem" }}>
+              {recoveryHistory.slice(0, 5).map(entry => (
+                <div
+                  key={entry.id || entry.executedAt}
+                  style={{
+                    fontSize: ".8rem",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                    padding: ".5rem .65rem",
+                    background: "var(--bg-2)",
+                  }}
+                >
+                  <div>
+                    {entry.executedAt
+                      ? new Date(entry.executedAt).toLocaleString()
+                      : "Unknown time"}{" "}
+                    | {entry.diagnosisStatus || "n/a"}
+                  </div>
+                  <div style={{ color: "var(--muted)", marginTop: ".2rem" }}>
+                    {Array.isArray(entry.actions)
+                      ? entry.actions.map(a => `${a.type}:${a.status}`).join(" | ")
+                      : "No action details"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ color: "var(--muted)", fontSize: ".82rem" }}>
+              No remediation history yet.
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* --- SALES SHARK PROGRESS TRACKERS --- */}
       {analytics && (
