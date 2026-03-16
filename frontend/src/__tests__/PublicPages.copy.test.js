@@ -44,7 +44,7 @@ describe("public marketing pages", () => {
       </div>
     );
 
-    expect(screen.getByText(/Missions & Monetization Tracking/i)).toBeInTheDocument();
+    expect(screen.getByText(/Mission Board/i)).toBeInTheDocument();
     expect(screen.getByText(/Monetization Transition/i)).toBeInTheDocument();
     expect(screen.queryByText(/Viral Bonus System/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Get paid for high-performing views/i)).not.toBeInTheDocument();
