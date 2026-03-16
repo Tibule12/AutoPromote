@@ -25,6 +25,9 @@ function buildPayfastSignature(params = {}, passphrase) {
     "m_payment_id",
     "amount",
     "item_name",
+    "name_first",
+    "name_last",
+    "email_address",
     "custom_str1",
     "custom_str2",
     "custom_str3",
@@ -106,12 +109,23 @@ class PayFastProvider extends PaymentProvider {
       m_payment_id,
       amount: Number(amount).toFixed(2),
       item_name: metadata.item_name || metadata.description || "AutoPromote payment",
-      custom_str1: metadata.custom_str1 || "",
-      custom_str2: metadata.custom_str2 || "",
-      custom_str3: metadata.custom_str3 || "",
-      custom_str4: metadata.custom_str4 || "",
-      custom_str5: metadata.custom_str5 || "",
     };
+
+    [
+      "name_first",
+      "name_last",
+      "email_address",
+      "custom_str1",
+      "custom_str2",
+      "custom_str3",
+      "custom_str4",
+      "custom_str5",
+    ].forEach(key => {
+      const value = metadata[key];
+      if (value !== undefined && value !== null && String(value) !== "") {
+        params[key] = String(value);
+      }
+    });
 
     // Build signature
     const signature = buildPayfastSignature(params, this.passphrase);

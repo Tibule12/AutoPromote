@@ -286,6 +286,7 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
         item_name: `Credits: ${pack.credits} (${packageId})`,
         custom_str1: userId,
         custom_str2: packageId,
+        email_address: req.user?.email || null,
       },
     });
 
