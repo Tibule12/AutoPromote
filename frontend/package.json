@@ -17,7 +17,7 @@
     "bfj": "^9.1.2",
     "tar": "^7.5.11",
     "@tootallnate/once": "3.0.1",
-    "webpack-dev-server": "^5.2.1"
+    "webpack-dev-server": "4.15.2"
   },
   "dependencies": {
     "@ffmpeg/util": "^0.12.2",

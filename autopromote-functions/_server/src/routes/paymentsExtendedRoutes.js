@@ -53,6 +53,18 @@ function resolveFrontendUrl(baseUrl, requestedUrl, fallbackPath) {
   return fallback;
 }
 
+function toPayfastCompatibleUrl(url, baseUrl, fallbackPath) {
+  try {
+    const candidate = new URL(url || fallbackPath, baseUrl);
+    // Keep callback URLs simple for PayFast: absolute URL without query/hash.
+    candidate.search = "";
+    candidate.hash = "";
+    return candidate.toString();
+  } catch (_) {
+    return new URL(fallbackPath, baseUrl).toString();
+  }
+}
+
 function normalizeCreditAmount(value) {
   const amount = Number(value);
   return Number.isFinite(amount) && amount > 0 ? amount : 0;
@@ -264,16 +276,18 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
       process.env.APP_BASE_URL ||
       (isLocalRuntimeOrigin ? runtimeOrigin : "https://www.autopromote.org");
     const apiUrl = process.env.APP_API_URL || "http://localhost:5001";
-    const safeReturnUrl = resolveFrontendUrl(
+    const safeReturnUrlRaw = resolveFrontendUrl(
       baseUrl,
       returnUrl || returnPath,
-      `/marketplace?payment=success&pkg=${packageId}`
+      "/marketplace"
     );
-    const safeCancelUrl = resolveFrontendUrl(
+    const safeCancelUrlRaw = resolveFrontendUrl(
       baseUrl,
       cancelUrl || cancelPath,
-      "/marketplace?payment=cancelled"
+      "/marketplace"
     );
+    const safeReturnUrl = toPayfastCompatibleUrl(safeReturnUrlRaw, baseUrl, "/marketplace");
+    const safeCancelUrl = toPayfastCompatibleUrl(safeCancelUrlRaw, baseUrl, "/marketplace");
 
     // Create PayFast "Order" (really just signature & params)
     const result = await payfastProvider.createOrder({
