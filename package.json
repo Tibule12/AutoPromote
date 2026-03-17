@@ -10,6 +10,7 @@
     "start": "node src/server.js",
     "start:worker": "cross-env ENABLE_BACKGROUND_JOBS=true node worker.js",
     "start:all": "node scripts/start-all.js",
+    "cron:diagnosis": "node scripts/run-diagnosis-job.js",
     "start:dev": "NODE_ENV=development nodemon src/server.js",
     "test:unit": "node test/basic-sanity.js",
     "test:routes": "node test/route-imports.test.js",
