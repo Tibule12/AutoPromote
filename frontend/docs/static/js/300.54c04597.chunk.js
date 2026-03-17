@@ -1,0 +1,62 @@
+"use strict";
+(globalThis.webpackChunkautopromote_frontend =
+  globalThis.webpackChunkautopromote_frontend || []).push([
+  [300],
+  {
+    8300(e, t, r) {
+      (r.r(t), r.d(t, { default: () => a }));
+      (r(5043), r(9258));
+      var s = r(579);
+      const a = () =>
+        (0, s.jsxs)("div", {
+          className: "ap-page-container",
+          children: [
+            (0, s.jsxs)("header", {
+              className: "ap-page-header",
+              children: [
+                (0, s.jsx)("h1", { children: "Security & Compliance" }),
+                (0, s.jsx)("p", {
+                  className: "ap-page-subtitle",
+                  children: "Your data and content safety is our top priority.",
+                }),
+              ],
+            }),
+            (0, s.jsxs)("div", {
+              className: "ap-content-section",
+              children: [
+                (0, s.jsx)("h3", { children: "Data Encryption" }),
+                (0, s.jsx)("p", {
+                  children:
+                    "All data is encrypted in transit using TLS 1.3 and at rest using AES-256 encryption. We utilize Google Cloud Platform's secure infrastructure.",
+                }),
+                (0, s.jsx)("h3", { children: "Authentication" }),
+                (0, s.jsx)("p", {
+                  children:
+                    "We use Firebase Authentication to handle identity management securely. We support Multi-Factor Authentication (MFA) to protect your account.",
+                }),
+                (0, s.jsx)("h3", { children: "Access Control" }),
+                (0, s.jsx)("p", {
+                  children:
+                    "Strict role-based access control (RBAC) ensures only authorized personnel can access system internals. We perform regular security audits.",
+                }),
+                (0, s.jsx)("h3", { children: "Reporting Vulnerabilities" }),
+                (0, s.jsxs)("p", {
+                  children: [
+                    "If you discover a security issue, please email us at",
+                    " ",
+                    (0, s.jsx)("a", {
+                      href: "mailto:security@autopromote.org",
+                      children: "security@autopromote.org",
+                    }),
+                    ". We offer a bug bounty program for valid reports.",
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+    },
+    9258() {},
+  },
+]);
+//# sourceMappingURL=300.54c04597.chunk.js.map

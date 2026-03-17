@@ -1,0 +1,6092 @@
+"use strict";
+(globalThis.webpackChunkautopromote_frontend =
+  globalThis.webpackChunkautopromote_frontend || []).push([
+  [769],
+  {
+    4769(e, t, s) {
+      (s.r(t), s.d(t, { default: () => Z }));
+      var n = s(5043),
+        r = s(3488),
+        i = s(4250),
+        o = s(4834),
+        a = s(2032);
+      const l = {
+        totalUsers: 256,
+        newUsersToday: 12,
+        totalContent: 478,
+        newContentToday: 23,
+        totalRevenue: 0,
+        revenueToday: 0,
+        activePromotions: 124,
+        scheduledPromotions: 47,
+        activeUsers: 134,
+        activeUsersLastWeek: 127,
+        engagementRate: 0.62,
+        engagementChange: 0.08,
+        userSegmentation: { powerUsers: 32, regularUsers: 156, occasionalUsers: 68, total: 256 },
+        contentPerformance: { high: 97, medium: 286, low: 95 },
+        avgRevenuePerContent: 0,
+        avgRevenuePerUser: 0,
+        projectedMonthlyRevenue: 0,
+        promotionsCompleted: 287,
+        topContent: [
+          {
+            id: "content1",
+            title: "Ultimate Guide to Social Media Marketing",
+            type: "Article",
+            views: 12540,
+            engagementRate: 0.78,
+            createdAt: { seconds: Date.now() / 1e3 - 1209600, nanoseconds: 0 },
+            status: "active",
+          },
+          {
+            id: "content2",
+            title: "How to Grow Your Audience in 2025",
+            type: "Video",
+            views: 8972,
+            engagementRate: 0.65,
+            createdAt: { seconds: Date.now() / 1e3 - 604800, nanoseconds: 0 },
+            status: "active",
+          },
+          {
+            id: "content3",
+            title: "Viral Marketing Techniques",
+            type: "Article",
+            views: 7632,
+            engagementRate: 0.53,
+            createdAt: { seconds: Date.now() / 1e3 - 1814400, nanoseconds: 0 },
+            status: "active",
+          },
+          {
+            id: "content4",
+            title: "10 Ways to Monetize Your Content",
+            type: "Video",
+            views: 6943,
+            engagementRate: 0.71,
+            createdAt: { seconds: Date.now() / 1e3 - 432e3, nanoseconds: 0 },
+            status: "active",
+          },
+          {
+            id: "content5",
+            title: "Building a Loyal Audience",
+            type: "Article",
+            views: 5421,
+            engagementRate: 0.62,
+            createdAt: { seconds: Date.now() / 1e3 - 864e3, nanoseconds: 0 },
+            status: "pending",
+          },
+        ],
+        recentActivities: [
+          {
+            id: "activity1",
+            type: "user",
+            title: "New User Registration",
+            description: "User johnsmith@example.com registered",
+            timestamp: { seconds: Date.now() / 1e3 - 3600, nanoseconds: 0 },
+          },
+          {
+            id: "activity2",
+            type: "content",
+            title: "Content Published",
+            description: 'New article "SEO Strategies for 2025" published',
+            timestamp: { seconds: Date.now() / 1e3 - 7200, nanoseconds: 0 },
+          },
+          {
+            id: "activity3",
+            type: "promotion",
+            title: "Promotion Started",
+            description: 'Promotion "Summer Special" is now active',
+            timestamp: { seconds: Date.now() / 1e3 - 10800, nanoseconds: 0 },
+          },
+          {
+            id: "activity4",
+            type: "user",
+            title: "Subscription Upgraded",
+            description: "User sarahj@example.com upgraded to premium plan",
+            timestamp: { seconds: Date.now() / 1e3 - 14400, nanoseconds: 0 },
+          },
+          {
+            id: "activity5",
+            type: "content",
+            title: "Content Trending",
+            description: 'Video "Marketing Tips" is trending with high engagement',
+            timestamp: { seconds: Date.now() / 1e3 - 18e3, nanoseconds: 0 },
+          },
+          {
+            id: "activity6",
+            type: "promotion",
+            title: "Promotion Ended",
+            description: 'Promotion "Spring Sale" has ended with 87% success rate',
+            timestamp: { seconds: Date.now() / 1e3 - 21600, nanoseconds: 0 },
+          },
+          {
+            id: "activity7",
+            type: "user",
+            title: "User Milestone",
+            description: "User mikeb@example.com reached 1000 followers",
+            timestamp: { seconds: Date.now() / 1e3 - 25200, nanoseconds: 0 },
+          },
+        ],
+        performanceMetrics: {
+          conversionRate: 3.2,
+          bounceRate: 42.8,
+          averageSessionDuration: 187,
+          returnVisitorRate: 28.5,
+          engagementByPlatform: { mobile: 64, desktop: 31, tablet: 5 },
+        },
+        demographics: {
+          ageGroups: { "18-24": 15, "25-34": 32, "35-44": 28, "45-54": 18, "55+": 7 },
+          geoDistribution: {
+            "North America": 42,
+            Europe: 28,
+            Asia: 18,
+            "South America": 8,
+            Africa: 3,
+            Oceania: 1,
+          },
+          deviceTypes: { iOS: 38, Android: 41, Windows: 16, Mac: 4, Other: 1 },
+        },
+        financialMetrics: {
+          revenueByMonth: [
+            { month: "Jan", revenue: 0 },
+            { month: "Feb", revenue: 0 },
+            { month: "Mar", revenue: 0 },
+          ],
+          revenueByContentType: { Article: 0, Video: 0 },
+          transactionTrends: { averageOrderValue: 0, conversionRate: 0, repeatPurchaseRate: 0 },
+        },
+      };
+      var d = s(108),
+        c = s(2291),
+        u = s(2185),
+        p = s(6026),
+        h = s(6150),
+        x = s(8763),
+        m = s(579);
+      function g(e) {
+        let { samples: t = [], bins: s = 10 } = e;
+        if (!t || !t.length) return null;
+        const n = Math.min(...t),
+          r = (Math.max(...t) - n) / s || 1,
+          i = new Array(s).fill(0),
+          o = new Array(s).fill(0).map((e, t) => {
+            const s = n + t * r,
+              i = s + r;
+            return `${(100 * s).toFixed(2)}%\u2013${(100 * i).toFixed(2)}%`;
+          });
+        for (const l of t) {
+          let e = Math.floor((l - n) / r);
+          (e < 0 && (e = 0), e >= s && (e = s - 1), i[e]++);
+        }
+        const a = i.map((e, t) => ({ bin: o[t], count: e }));
+        return (0, m.jsx)("div", {
+          style: { width: "100%", height: 120 },
+          children: (0, m.jsx)(d.u, {
+            children: (0, m.jsxs)(c.E, {
+              data: a,
+              margin: { top: 10, right: 10, left: 0, bottom: 10 },
+              children: [
+                (0, m.jsx)(u.W, { dataKey: "bin", hide: !0 }),
+                (0, m.jsx)(p.h, { hide: !0 }),
+                (0, m.jsx)(h.m, { formatter: e => [e, "Count"] }),
+                (0, m.jsx)(x.y, { dataKey: "count", fill: "#1976d2" }),
+              ],
+            }),
+          }),
+        });
+      }
+      function y(e) {
+        let { decision: t, test: s, serverSimulation: r } = e;
+        const [i, o] = n.useState(0);
+        if (!t) return null;
+        const a = (t && t.simulation && t.simulation.samples) || [],
+          l =
+            r && r.simulation ? r.simulation : t && t.serverSimulation ? t.serverSimulation : null,
+          d = l && l.samples && l.samples.length ? l.samples : a,
+          c = s && t && t.winner ? (s.variants || []).find(e => e.id === t.winner) : null,
+          u =
+            c && c.promotionSettings && "number" === typeof c.promotionSettings.budget
+              ? c.promotionSettings.budget
+              : 0,
+          p = c && c.metrics && "number" === typeof c.metrics.views ? c.metrics.views : 0,
+          h = (() => {
+            if (!d.length) return null;
+            const e = Math.min(...a),
+              t = Math.max(...a),
+              s = (t - e) / 10 || 1,
+              n = new Array(10).fill(0);
+            for (const r of d) {
+              let t = Math.floor((r - e) / s);
+              (t < 0 && (t = 0), t >= 10 && (t = 9), n[t]++);
+            }
+            return { min: e, max: t, width: s, counts: n, maxCount: Math.max(...n) };
+          })(),
+          x = (() => {
+            const e = Number(i) || 0,
+              s = u * (1 + e / 100),
+              n = u > 0 ? p / u : p || 1e3,
+              r = u > 0 ? Math.round(n * s) : Math.round(p + s * (n || 1e3)),
+              o = r - p;
+            return {
+              pct: e,
+              newBudget: s,
+              newViews: r,
+              deltaViews: o,
+              deltaConversions: (t.incConversionsPer1000Views || 0) * (o / 1e3),
+              deltaRevenue: (t.estimatedRevenueChangePer1000Views || 0) * (o / 1e3),
+            };
+          })(),
+          y =
+            l && "number" === typeof l.p50
+              ? l.p50
+              : t.simulation && t.simulation.p50
+                ? t.simulation.p50
+                : 0,
+          f =
+            l && "number" === typeof l.p95
+              ? l.p95
+              : t.simulation && t.simulation.p95
+                ? t.simulation.p95
+                : 0;
+        return (0, m.jsxs)("div", {
+          style: {
+            padding: 12,
+            borderRadius: 8,
+            background: "#fff",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
+            marginTop: 12,
+          },
+          children: [
+            (0, m.jsx)("h4", { style: { margin: 0 }, children: "Autopilot Preview" }),
+            (0, m.jsxs)("div", {
+              style: { marginTop: 8 },
+              children: ["Winner: ", (0, m.jsx)("strong", { children: t.winner })],
+            }),
+            (0, m.jsxs)("div", {
+              children: ["Confidence: ", (0, m.jsxs)("strong", { children: [t.confidence, "%"] })],
+            }),
+            (0, m.jsxs)("div", {
+              children: [
+                "Predicted uplift:",
+                " ",
+                (0, m.jsx)("strong", {
+                  children: t.predictedUplift ? `${Math.round(t.predictedUplift)}%` : "-",
+                }),
+              ],
+            }),
+            (0, m.jsxs)("div", {
+              children: [
+                "Inc conv/1k views:",
+                " ",
+                (0, m.jsx)("strong", {
+                  children:
+                    "number" === typeof t.incConversionsPer1000Views
+                      ? t.incConversionsPer1000Views.toFixed(2)
+                      : "-",
+                }),
+              ],
+            }),
+            (0, m.jsxs)("div", {
+              children: [
+                "Est rev/1k views:",
+                " ",
+                (0, m.jsx)("strong", {
+                  children:
+                    "number" === typeof t.estimatedRevenueChangePer1000Views
+                      ? `$${t.estimatedRevenueChangePer1000Views.toFixed(2)}`
+                      : "-",
+                }),
+              ],
+            }),
+            (0, m.jsxs)("div", {
+              children: [
+                "Baseline conv rate:",
+                " ",
+                (0, m.jsx)("strong", {
+                  children:
+                    "number" === typeof t.baselineRate
+                      ? `${(100 * t.baselineRate).toFixed(3)}%`
+                      : "-",
+                }),
+              ],
+            }),
+            (0, m.jsxs)("div", {
+              children: [
+                "Top conv rate:",
+                " ",
+                (0, m.jsx)("strong", {
+                  children:
+                    "number" === typeof t.topRate ? `${(100 * t.topRate).toFixed(3)}%` : "-",
+                }),
+              ],
+            }),
+            (0, m.jsxs)("div", {
+              children: [
+                "Risk score:",
+                " ",
+                (0, m.jsx)("strong", {
+                  children: "number" === typeof t.riskScore ? `${t.riskScore}%` : "-",
+                }),
+              ],
+            }),
+            (0, m.jsxs)("div", {
+              style: { marginTop: 8, color: "#666" },
+              children: ["Reason: ", t.reason],
+            }),
+            (0, m.jsxs)("div", {
+              style: { marginTop: 8, color: "#333" },
+              children: [
+                (0, m.jsx)("strong", { children: "Why this choice?" }),
+                (0, m.jsxs)("div", {
+                  style: { marginTop: 6, color: "#666" },
+                  children: [
+                    "The top variant's conversion rate is",
+                    " ",
+                    "number" === typeof t.topRate ? `${(100 * t.topRate).toFixed(3)}%` : "-",
+                    " ",
+                    "vs baseline",
+                    " ",
+                    "number" === typeof t.baselineRate
+                      ? `${(100 * t.baselineRate).toFixed(3)}%`
+                      : "-",
+                    ", predicted uplift of",
+                    " ",
+                    "number" === typeof t.predictedUplift
+                      ? `${Math.round(t.predictedUplift)}%`
+                      : "-",
+                    " ",
+                    "with",
+                    " ",
+                    "number" === typeof t.confidence ? `${Math.round(t.confidence)}%` : "-",
+                    " ",
+                    "confidence. Risk score:",
+                    " ",
+                    "number" === typeof t.riskScore ? `${Math.round(t.riskScore)}%` : "-",
+                    ".",
+                  ],
+                }),
+              ],
+            }),
+            h
+              ? (0, m.jsxs)("div", {
+                  style: { marginTop: 12 },
+                  children: [
+                    (0, m.jsxs)("div", {
+                      style: { fontSize: "0.9rem", color: "#333", marginBottom: 6 },
+                      children: [
+                        (0, m.jsx)("strong", { children: "Simulation" }),
+                        " (delta conv rate distribution)",
+                      ],
+                    }),
+                    (0, m.jsx)("div", {
+                      style: { display: "block", height: 120 },
+                      children: (0, m.jsx)(g, { samples: d, bins: 10 }),
+                    }),
+                    (0, m.jsxs)("div", {
+                      style: { fontSize: "0.8rem", color: "#777", marginTop: 6 },
+                      children: [
+                        "Median: ",
+                        (0, m.jsxs)("strong", { children: [(100 * y).toFixed(2), "%"] }),
+                        " \u2014 95th percentile:",
+                        " ",
+                        (0, m.jsxs)("strong", { children: [(100 * f).toFixed(2), "%"] }),
+                      ],
+                    }),
+                  ],
+                })
+              : null,
+            (0, m.jsxs)("div", {
+              style: { marginTop: 12 },
+              children: [
+                (0, m.jsx)("h5", {
+                  style: { margin: "6px 0" },
+                  children: "Budget What-If Simulator",
+                }),
+                (0, m.jsxs)("div", {
+                  style: { display: "flex", alignItems: "center", gap: 8 },
+                  children: [
+                    (0, m.jsx)("label", {
+                      style: { fontSize: "0.9rem" },
+                      children: "Budget change (%)",
+                    }),
+                    (0, m.jsx)("input", {
+                      type: "number",
+                      value: i,
+                      onChange: e => o(e.target.value),
+                      style: { width: 80 },
+                    }),
+                    (0, m.jsxs)("div", {
+                      style: { fontSize: "0.85rem", color: "#666" },
+                      children: [
+                        "New budget: ",
+                        (0, m.jsxs)("strong", { children: ["$", x.newBudget.toFixed(2)] }),
+                      ],
+                    }),
+                  ],
+                }),
+                (0, m.jsxs)("div", {
+                  style: { marginTop: 8 },
+                  children: [
+                    r && r.budgetSimulation
+                      ? (0, m.jsxs)("div", {
+                          children: [
+                            (0, m.jsxs)("div", {
+                              children: [
+                                "Expected change in views:",
+                                " ",
+                                (0, m.jsx)("strong", { children: r.budgetSimulation.deltaViews }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              children: [
+                                "Expected change in conversions:",
+                                " ",
+                                (0, m.jsx)("strong", {
+                                  children: Number(r.budgetSimulation.deltaConversions).toFixed(2),
+                                }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              children: [
+                                "Estimated change in revenue:",
+                                " ",
+                                (0, m.jsxs)("strong", {
+                                  children: [
+                                    "$",
+                                    Number(r.budgetSimulation.deltaRevenue).toFixed(2),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        })
+                      : (0, m.jsxs)(m.Fragment, {
+                          children: [
+                            (0, m.jsxs)("div", {
+                              children: [
+                                "Expected change in views: ",
+                                (0, m.jsx)("strong", { children: x.deltaViews }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              children: [
+                                "Expected change in conversions:",
+                                " ",
+                                (0, m.jsx)("strong", { children: x.deltaConversions.toFixed(2) }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              children: [
+                                "Estimated change in revenue:",
+                                " ",
+                                (0, m.jsxs)("strong", {
+                                  children: ["$", x.deltaRevenue.toFixed(2)],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                    (0, m.jsx)("div", {
+                      style: { marginTop: 8, color: "#777", fontSize: "0.85rem" },
+                      children:
+                        "Note: This is a heuristic simulation that assumes views scale linearly with budget. Use with caution; platform-level variance and diminishing returns are not modeled.",
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      }
+      var f = s(5748),
+        v = s(1327),
+        j = s(168),
+        b = s(9374);
+      function w(e) {
+        let { data: t = [], variants: s = [], actions: n = [], metric: r = "views" } = e;
+        if (!t || !t.length)
+          return (0, m.jsx)("div", {
+            style: { padding: 12, color: "#666" },
+            children: "No trend data available.",
+          });
+        const i = s.map((e, t) => ({
+          key: e,
+          color: ["#1976d2", "#2e7d32", "#ed6c02", "#7b1fa2"][t % 4],
+        }));
+        return (0, m.jsxs)("div", {
+          style: {
+            background: "white",
+            borderRadius: 12,
+            padding: 16,
+            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+          },
+          children: [
+            (0, m.jsxs)("h3", {
+              style: { marginTop: 0 },
+              children: ["Variant Trends (last ", t.length, " days)"],
+            }),
+            (0, m.jsx)("div", {
+              style: { width: "100%", height: 300 },
+              children: (0, m.jsx)(d.u, {
+                children: (0, m.jsxs)(f.b, {
+                  data: t,
+                  margin: { top: 10, right: 30, left: 0, bottom: 10 },
+                  children: [
+                    (0, m.jsx)(u.W, { dataKey: "day" }),
+                    (0, m.jsx)(p.h, {}),
+                    (0, m.jsx)(h.m, { formatter: e => [e, r] }),
+                    (0, m.jsx)(v.s, {}),
+                    i.map(e =>
+                      (0, m.jsx)(
+                        j.N,
+                        {
+                          type: "monotone",
+                          dataKey: `${e.key}_${r}`,
+                          stroke: e.color,
+                          dot: !1,
+                          strokeWidth: 2,
+                        },
+                        e.key
+                      )
+                    ),
+                    n.map((e, t) => {
+                      const s = new Date(
+                        e.triggeredAt && e.triggeredAt.toDate
+                          ? e.triggeredAt.toDate()
+                          : e.triggeredAt
+                      )
+                        .toISOString()
+                        .split("T")[0];
+                      return (0, m.jsx)(
+                        b.r,
+                        { x: s, y: 0, r: 4, fill: "#d32f2f", stroke: "none" },
+                        t
+                      );
+                    }),
+                  ],
+                }),
+              }),
+            }),
+            (0, m.jsx)("div", {
+              style: { marginTop: 10, color: "#666", display: "flex", gap: 14 },
+              children: s.map((e, t) =>
+                (0, m.jsx)(
+                  "div",
+                  {
+                    children: (0, m.jsx)("span", {
+                      style: { color: i[t].color, fontWeight: 600 },
+                      children: e,
+                    }),
+                  },
+                  e
+                )
+              ),
+            }),
+          ],
+        });
+      }
+      function S() {
+        const [e, t] = (0, n.useState)([]),
+          [s, r] = (0, n.useState)(!1),
+          [i, a] = (0, n.useState)(null),
+          [l, d] = (0, n.useState)(null),
+          [c, u] = (0, n.useState)(null),
+          [p, h] = (0, n.useState)(null),
+          [x, g] = (0, n.useState)(1e3),
+          [f, v] = (0, n.useState)(42),
+          [j, b] = (0, n.useState)(0),
+          [S, k] = (0, n.useState)(null),
+          [T, R] = (0, n.useState)(null),
+          [C, A] = (0, n.useState)(!1),
+          [P, I] = (0, n.useState)(""),
+          [B, D] = (0, n.useState)(!1),
+          [$, N] = (0, n.useState)(95),
+          [U, z] = (0, n.useState)(100),
+          [E, M] = (0, n.useState)("recommend"),
+          [O, L] = (0, n.useState)(10),
+          [F, W] = (0, n.useState)(!1),
+          [J, V] = (0, n.useState)(!1),
+          [_, G] = (0, n.useState)([]),
+          [H, q] = (0, n.useState)(null),
+          [Y, K] = (0, n.useState)(null);
+        async function Q(e) {
+          let t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+          const s = o.j2.currentUser;
+          if (!s) throw new Error("Not authenticated");
+          const n = await s.getIdToken(!0);
+          return await fetch(`https://api.autopromote.org${e}`, {
+            ...t,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${n}`,
+              ...(t.headers || {}),
+            },
+          });
+        }
+        const X = async () => {
+          (r(!0), a(null));
+          try {
+            const e = await Q("https://autopromote.onrender.com/api/admin/variants/anomalies");
+            if (!e.ok) throw new Error(`HTTP ${e.status}`);
+            const s = await e.json();
+            t(s.anomalies || []);
+          } catch (e) {
+            a(e.message);
+          } finally {
+            r(!1);
+          }
+        };
+        (0, n.useEffect)(() => {
+          X();
+        }, []);
+        const Z = async () => {
+            (d(null), a(null));
+            try {
+              if (!P) throw new Error("Please enter a test ID");
+              const e = await Q(`/api/admin/ab_tests/${P}`);
+              if (!e.ok) throw new Error("Failed to fetch test");
+              const t = (await e.json()).test;
+              (D(!!(t && t.autopilot && t.autopilot.enabled)),
+                N((t && t.autopilot && t.autopilot.confidenceThreshold) || 95),
+                z((t && t.autopilot && t.autopilot.minSample) || 100),
+                M((t && t.autopilot && t.autopilot.mode) || "recommend"),
+                L((t && t.autopilot && t.autopilot.maxBudgetChangePercent) || 10),
+                W((t && t.autopilot && !!t.autopilot.allowBudgetIncrease) || !1),
+                V((t && t.autopilot && !!t.autopilot.requiresApproval) || !1),
+                G((t && t.autopilotActions) || []),
+                q((t && t.autopilot && t.autopilot.approvedBy) || null),
+                K((t && t.autopilot && t.autopilot.approvedAt) || null),
+                d("Loaded test settings"));
+            } catch (e) {
+              a(e.message);
+            }
+          },
+          ee = async function (e) {
+            let t = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
+            try {
+              const s = t
+                ? "https://autopromote.onrender.com/api/admin/variants/quarantine"
+                : "https://autopromote.onrender.com/api/admin/variants/unquarantine";
+              if (
+                !(
+                  await Q(s, {
+                    method: "POST",
+                    body: JSON.stringify({
+                      contentId: e.contentId,
+                      platform: e.platform,
+                      variant: e.variant,
+                    }),
+                  })
+                ).ok
+              )
+                throw new Error("Failed");
+              (d(t ? "Variant quarantined" : "Variant unquarantined"), await X());
+            } catch (s) {
+              a(s.message);
+            }
+          };
+        return (0, m.jsxs)("div", {
+          style: { border: "1px solid #ccc", padding: 16, borderRadius: 8, marginTop: 24 },
+          children: [
+            (0, m.jsx)("h3", { children: "Variant Anomalies" }),
+            (0, m.jsxs)("div", {
+              style: {
+                marginBottom: 12,
+                padding: 12,
+                border: "1px dashed #efefef",
+                borderRadius: 6,
+              },
+              children: [
+                (0, m.jsx)("h4", { children: "Autopilot Quick Controls" }),
+                (0, m.jsxs)("div", {
+                  style: { display: "flex", gap: 8, alignItems: "center" },
+                  children: [
+                    (0, m.jsx)("input", {
+                      placeholder: "AB Test ID",
+                      value: P,
+                      onChange: e => I(e.target.value),
+                    }),
+                    (0, m.jsx)("button", { onClick: Z, children: "Load" }),
+                    (0, m.jsxs)("label", {
+                      style: { display: "flex", gap: 6, alignItems: "center" },
+                      children: [
+                        (0, m.jsx)("input", {
+                          type: "checkbox",
+                          checked: B,
+                          onChange: e => D(e.target.checked),
+                        }),
+                        " ",
+                        "Enable",
+                      ],
+                    }),
+                    (0, m.jsxs)("select", {
+                      value: E,
+                      onChange: e => M(e.target.value),
+                      children: [
+                        (0, m.jsx)("option", { value: "recommend", children: "Recommend" }),
+                        (0, m.jsx)("option", { value: "auto", children: "Auto Apply" }),
+                      ],
+                    }),
+                    (0, m.jsx)("input", {
+                      type: "number",
+                      value: $,
+                      onChange: e => N(e.target.value),
+                      style: { width: 80 },
+                    }),
+                    "%",
+                    (0, m.jsxs)("label", {
+                      style: { display: "flex", gap: 6, alignItems: "center" },
+                      children: [
+                        "MinSample",
+                        (0, m.jsx)("input", {
+                          type: "number",
+                          value: U,
+                          onChange: e => z(e.target.value),
+                          style: { width: 80 },
+                        }),
+                      ],
+                    }),
+                    (0, m.jsxs)("label", {
+                      style: { display: "flex", gap: 6, alignItems: "center" },
+                      children: [
+                        "MaxBudgetChange%",
+                        (0, m.jsx)("input", {
+                          type: "number",
+                          value: O,
+                          onChange: e => L(e.target.value),
+                          style: { width: 80 },
+                        }),
+                      ],
+                    }),
+                    (0, m.jsxs)("label", {
+                      style: { display: "flex", gap: 6, alignItems: "center" },
+                      children: [
+                        (0, m.jsx)("input", {
+                          type: "checkbox",
+                          checked: F,
+                          onChange: e => W(e.target.checked),
+                        }),
+                        " ",
+                        "Allow budget increase",
+                      ],
+                    }),
+                    (0, m.jsxs)("label", {
+                      style: { display: "flex", gap: 6, alignItems: "center" },
+                      children: [
+                        (0, m.jsx)("input", {
+                          type: "checkbox",
+                          checked: J,
+                          onChange: e => V(e.target.checked),
+                        }),
+                        " ",
+                        "Require approval for auto-apply",
+                      ],
+                    }),
+                    (0, m.jsx)("button", {
+                      onClick: async () => {
+                        (d(null), a(null));
+                        try {
+                          const e = {
+                            enabled: B,
+                            confidenceThreshold: Number($),
+                            minSample: Number(U),
+                            mode: E,
+                            maxBudgetChangePercent: Number(O),
+                            allowBudgetIncrease: Boolean(F),
+                          };
+                          if (
+                            !(
+                              await Q(`/api/admin/ab_tests/${P}/autopilot`, {
+                                method: "PUT",
+                                body: JSON.stringify(e),
+                              })
+                            ).ok
+                          )
+                            throw new Error("Failed to update autopilot settings");
+                          d("Autopilot settings updated");
+                        } catch (e) {
+                          a(e.message);
+                        }
+                      },
+                      children: "Update",
+                    }),
+                    (0, m.jsx)("button", {
+                      onClick: async () => {
+                        (d(null), a(null));
+                        try {
+                          if (!P) throw new Error("Please enter a test ID");
+                          const e = await Q(`/api/admin/ab_tests/${P}/autopilot/preview`, {
+                            method: "POST",
+                          });
+                          if (!e.ok) throw new Error("Failed to preview autopilot");
+                          const t = await e.json();
+                          (u(t.decision), h(t.test || null), d("Preview loaded"));
+                        } catch (e) {
+                          a(e.message);
+                        }
+                      },
+                      children: "Preview",
+                    }),
+                    (0, m.jsxs)("div", {
+                      style: { display: "flex", alignItems: "center", gap: 8 },
+                      children: [
+                        (0, m.jsxs)("label", {
+                          style: { display: "flex", alignItems: "center", gap: 6 },
+                          children: [
+                            "Samples",
+                            " ",
+                            (0, m.jsx)("input", {
+                              type: "number",
+                              value: x,
+                              onChange: e => g(e.target.value),
+                              style: { width: 90 },
+                            }),
+                          ],
+                        }),
+                        (0, m.jsxs)("label", {
+                          style: { display: "flex", alignItems: "center", gap: 6 },
+                          children: [
+                            "Seed",
+                            " ",
+                            (0, m.jsx)("input", {
+                              type: "number",
+                              value: f,
+                              onChange: e => v(e.target.value),
+                              style: { width: 90 },
+                            }),
+                          ],
+                        }),
+                        (0, m.jsxs)("label", {
+                          style: { display: "flex", alignItems: "center", gap: 6 },
+                          children: [
+                            "Budget%",
+                            " ",
+                            (0, m.jsx)("input", {
+                              type: "number",
+                              value: j,
+                              onChange: e => b(e.target.value),
+                              style: { width: 100 },
+                            }),
+                          ],
+                        }),
+                        (0, m.jsx)("button", {
+                          onClick: async () => {
+                            (d(null), a(null));
+                            try {
+                              if (!P) throw new Error("Please enter a test ID");
+                              const e = {
+                                  samples: Number(x),
+                                  seed: Number(f),
+                                  budgetPct: Number(j),
+                                },
+                                t = await Q(`/api/admin/ab_tests/${P}/autopilot/simulate`, {
+                                  method: "POST",
+                                  body: JSON.stringify(e),
+                                });
+                              if (!t.ok) throw new Error("Failed to simulate autopilot");
+                              const s = await t.json();
+                              (k(s), d("Simulation loaded (server-side)"));
+                            } catch (e) {
+                              a(e.message);
+                            }
+                          },
+                          children: "Simulate (server)",
+                        }),
+                      ],
+                    }),
+                    (0, m.jsx)("button", {
+                      onClick: async () => {
+                        (d(null), a(null));
+                        try {
+                          if (!P) throw new Error("Please enter a test ID");
+                          if (
+                            !window.confirm(
+                              "Are you sure you want to APPLY autopilot for this test? This will auto-apply winners and update promotions."
+                            )
+                          )
+                            return;
+                          const e = await Q(`/api/admin/ab_tests/${P}/autopilot/apply`, {
+                            method: "POST",
+                          });
+                          if (!e.ok) throw new Error("Failed to apply autopilot");
+                          const t = await e.json();
+                          d(JSON.stringify(t.result, null, 2));
+                        } catch (e) {
+                          a(e.message);
+                        }
+                      },
+                      children: "Apply",
+                    }),
+                    (0, m.jsx)("button", {
+                      onClick: async () => {
+                        (A(!0), a(null), d(null));
+                        try {
+                          if (!P) throw new Error("Please enter a test ID");
+                          const e = await Q(`/api/admin/ab_tests/${P}/metrics`);
+                          if (!e.ok) throw new Error("Failed to fetch trends");
+                          const t = await e.json();
+                          (R(t), d("Trend data loaded"));
+                        } catch (e) {
+                          a(e.message);
+                        } finally {
+                          A(!1);
+                        }
+                      },
+                      disabled: C,
+                      style: { marginLeft: 6 },
+                      children: C ? "Loading..." : "Load Trends",
+                    }),
+                    (0, m.jsx)("button", {
+                      onClick: async () => {
+                        (d(null), a(null));
+                        try {
+                          if (!P) throw new Error("Please enter a test ID");
+                          if (
+                            !window.confirm(
+                              "Are you sure you want to roll back the most recent autopilot action for this test?"
+                            )
+                          )
+                            return;
+                          const e = await Q(`/api/admin/ab_tests/${P}/autopilot/rollback`, {
+                            method: "POST",
+                          });
+                          if (!e.ok) throw new Error("Failed to rollback autopilot");
+                          const t = await e.json();
+                          d(JSON.stringify(t.result, null, 2));
+                        } catch (e) {
+                          a(e.message);
+                        }
+                      },
+                      children: "Rollback",
+                    }),
+                  ],
+                }),
+                _.length > 0 &&
+                  (0, m.jsxs)("div", {
+                    style: { marginTop: 12 },
+                    children: [
+                      (0, m.jsx)("h5", { children: "Autopilot Actions" }),
+                      (0, m.jsx)("ul", {
+                        children: _.map((e, t) =>
+                          (0, m.jsxs)(
+                            "li",
+                            {
+                              children: [
+                                e.triggeredAt
+                                  ? new Date(
+                                      e.triggeredAt.seconds
+                                        ? 1e3 * e.triggeredAt.seconds
+                                        : e.triggeredAt
+                                    ).toLocaleString()
+                                  : e.triggeredAt,
+                                " ",
+                                "\u2022 ",
+                                e.variantId,
+                                " \u2022 ",
+                                e.reason,
+                                " \u2022 confidence: ",
+                                e.confidence || "-",
+                                e.attemptedBudgetChangePercent
+                                  ? ` \u2022 budgetChange: ${Math.round(e.attemptedBudgetChangePercent)}%`
+                                  : "",
+                              ],
+                            },
+                            t
+                          )
+                        ),
+                      }),
+                    ],
+                  }),
+                c &&
+                  (0, m.jsx)("div", {
+                    style: { marginTop: 12 },
+                    children: (0, m.jsx)(y, { decision: c, test: p, serverSimulation: S }),
+                  }),
+                T &&
+                  T.timeseries &&
+                  (0, m.jsx)("div", {
+                    style: { marginTop: 12 },
+                    children: (0, m.jsx)(w, {
+                      data: T.timeseries,
+                      variants: T.variants,
+                      actions: T.actions,
+                      metric: "views",
+                    }),
+                  }),
+                (0, m.jsxs)("div", {
+                  style: { marginTop: 8 },
+                  children: [
+                    (0, m.jsx)("strong", { children: "Approval Status:" }),
+                    " ",
+                    H
+                      ? `Approved by ${H} at ${Y ? new Date(Y.seconds ? 1e3 * Y.seconds : Y).toLocaleString() : Y}`
+                      : "Not approved",
+                    (0, m.jsxs)("div", {
+                      style: { marginTop: 8 },
+                      children: [
+                        !H &&
+                          (0, m.jsx)("button", {
+                            onClick: async () => {
+                              (d(null), a(null));
+                              try {
+                                if (!P) throw new Error("Please enter a test ID");
+                                if (
+                                  !(
+                                    await Q(`/api/admin/ab_tests/${P}/autopilot/approve`, {
+                                      method: "POST",
+                                    })
+                                  ).ok
+                                )
+                                  throw new Error("Failed to approve autopilot");
+                                (d("Autopilot approved"), await Z());
+                              } catch (e) {
+                                a(e.message);
+                              }
+                            },
+                            style: { marginRight: 8 },
+                            children: "Approve",
+                          }),
+                        H &&
+                          (0, m.jsx)("button", {
+                            onClick: async () => {
+                              (d(null), a(null));
+                              try {
+                                if (!P) throw new Error("Please enter a test ID");
+                                if (
+                                  !(
+                                    await Q(`/api/admin/ab_tests/${P}/autopilot/unapprove`, {
+                                      method: "POST",
+                                    })
+                                  ).ok
+                                )
+                                  throw new Error("Failed to unapprove autopilot");
+                                (d("Autopilot unapproved"), await Z());
+                              } catch (e) {
+                                a(e.message);
+                              }
+                            },
+                            children: "Revoke Approval",
+                          }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+            s && (0, m.jsx)("div", { children: "Loading anomalies..." }),
+            i && (0, m.jsxs)("div", { style: { color: "red" }, children: ["Error: ", i] }),
+            l && (0, m.jsx)("div", { style: { color: "green" }, children: l }),
+            (0, m.jsx)("button", { onClick: X, disabled: s, children: "Refresh" }),
+            (0, m.jsxs)("table", {
+              style: { width: "100%", marginTop: 12, fontSize: 14 },
+              children: [
+                (0, m.jsx)("thead", {
+                  children: (0, m.jsxs)("tr", {
+                    children: [
+                      (0, m.jsx)("th", { children: "Content" }),
+                      (0, m.jsx)("th", { children: "Platform" }),
+                      (0, m.jsx)("th", { children: "Variant" }),
+                      (0, m.jsx)("th", { children: "Posts" }),
+                      (0, m.jsx)("th", { children: "Clicks" }),
+                      (0, m.jsx)("th", { children: "Decayed CTR" }),
+                      (0, m.jsx)("th", { children: "Suppressed" }),
+                      (0, m.jsx)("th", { children: "Quarantined" }),
+                      (0, m.jsx)("th", { children: "Actions" }),
+                    ],
+                  }),
+                }),
+                (0, m.jsxs)("tbody", {
+                  children: [
+                    e.map(e =>
+                      (0, m.jsxs)(
+                        "tr",
+                        {
+                          style: {
+                            background: e.quarantined
+                              ? "#fff4e5"
+                              : e.suppressed
+                                ? "#ffeaea"
+                                : void 0,
+                          },
+                          children: [
+                            (0, m.jsx)("td", { children: e.contentId }),
+                            (0, m.jsx)("td", { children: e.platform }),
+                            (0, m.jsx)("td", { children: e.variant }),
+                            (0, m.jsx)("td", { children: e.posts }),
+                            (0, m.jsx)("td", { children: e.clicks }),
+                            (0, m.jsx)("td", {
+                              children: null != e.decayedCtr ? e.decayedCtr.toFixed(3) : "-",
+                            }),
+                            (0, m.jsx)("td", { children: e.suppressed ? "Yes" : "No" }),
+                            (0, m.jsx)("td", { children: e.quarantined ? "Yes" : "No" }),
+                            (0, m.jsxs)("td", {
+                              children: [
+                                (0, m.jsx)("button", {
+                                  onClick: () =>
+                                    (async e => {
+                                      try {
+                                        if (
+                                          !(
+                                            await Q(
+                                              "https://autopromote.onrender.com/api/admin/variants/clear-anomaly",
+                                              {
+                                                method: "POST",
+                                                body: JSON.stringify({
+                                                  contentId: e.contentId,
+                                                  platform: e.platform,
+                                                  variant: e.variant,
+                                                }),
+                                              }
+                                            )
+                                          ).ok
+                                        )
+                                          throw new Error("Failed");
+                                        (d("Anomaly cleared"), await X());
+                                      } catch (t) {
+                                        a(t.message);
+                                      }
+                                    })(e),
+                                  style: { marginRight: 8 },
+                                  children: "Clear",
+                                }),
+                                e.suppressed &&
+                                  (0, m.jsx)("button", {
+                                    onClick: () =>
+                                      (async e => {
+                                        try {
+                                          if (
+                                            !(
+                                              await Q(
+                                                "https://autopromote.onrender.com/api/admin/variants/unsuppress",
+                                                {
+                                                  method: "POST",
+                                                  body: JSON.stringify({
+                                                    contentId: e.contentId,
+                                                    platform: e.platform,
+                                                    variant: e.variant,
+                                                  }),
+                                                }
+                                              )
+                                            ).ok
+                                          )
+                                            throw new Error("Failed");
+                                          (d("Variant unsuppressed"), await X());
+                                        } catch (t) {
+                                          a(t.message);
+                                        }
+                                      })(e),
+                                    style: { marginRight: 8 },
+                                    children: "Unsuppress",
+                                  }),
+                                e.quarantined &&
+                                  (0, m.jsx)("button", {
+                                    onClick: () => ee(e, !1),
+                                    style: { marginRight: 8 },
+                                    children: "Unquarantine",
+                                  }),
+                                !e.quarantined &&
+                                  (0, m.jsx)("button", {
+                                    onClick: () => ee(e, !0),
+                                    children: "Quarantine",
+                                  }),
+                              ],
+                            }),
+                          ],
+                        },
+                        `${e.contentId}:${e.platform}:${e.variant}`
+                      )
+                    ),
+                    !s &&
+                      0 === e.length &&
+                      (0, m.jsx)("tr", {
+                        children: (0, m.jsx)("td", { colSpan: 9, children: "No anomalies" }),
+                      }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      }
+      const k = {
+        padding: "10px 20px",
+        border: "1px solid #ddd",
+        backgroundColor: "white",
+        borderRadius: 8,
+        cursor: "pointer",
+        fontSize: "0.95rem",
+      };
+      s(2956);
+      const T = () => {
+        const [e, t] = (0, n.useState)([]),
+          [s, i] = (0, n.useState)(!0),
+          [a, l] = (0, n.useState)(null),
+          [d, c] = (0, n.useState)(!0),
+          u = (0, n.useRef)(null),
+          p = async () => {
+            if (d)
+              try {
+                const s = o.j2.currentUser ? await o.j2.currentUser.getIdToken() : null;
+                if (!s) return;
+                const n = `${r.JR}/api/admin/system/logs/live`;
+                console.log("[LiveLog] Fetching logs from:", n);
+                const i = await fetch(n, { headers: { Authorization: `Bearer ${s}` } });
+                if (!i.ok)
+                  return (
+                    console.warn(`[LiveLog] HTTP error: status=${i.status}`),
+                    void (404 === i.status && l("Log endpoint not found (404)"))
+                  );
+                const a = await i.text();
+                let d;
+                try {
+                  d = JSON.parse(a);
+                } catch (e) {
+                  return (
+                    console.error("[LiveLog] JSON parse failed. Response was:", a.slice(0, 100)),
+                    void (a.trim().startsWith("<!DOCTYPE html>") || a.trim().startsWith("<html")
+                      ? l("API Error: Endpoint returned HTML (Check API URL)")
+                      : l("API Error: Invalid JSON response"))
+                  );
+                }
+                if (d.success && Array.isArray(d.logs)) {
+                  const e = d.logs.map((e, t) => {
+                    let s = "info",
+                      n = e;
+                    return (
+                      e.includes("POST /api/auth/login")
+                        ? ((s = "login"), (n = "\ud83d\udc64 New User Login"))
+                        : e.includes("POST /api/content/upload")
+                          ? ((s = "upload"), (n = "\ud83d\udcf9 NEW VIDEO UPLOAD DETECTED!"))
+                          : e.includes("POST /api/payments")
+                            ? ((s = "revenue"),
+                              (n = "\ud83d\udcb0\ud83d\udcb0\ud83d\udcb0 REVENUE EVENT"))
+                            : e.includes("POST /api/clips")
+                              ? ((s = "credit"), (n = "\ud83d\udc8e CREDIT SPEND: Clip Analysis"))
+                              : e.includes("render-clip")
+                                ? ((s = "credit"),
+                                  (n = "\ud83d\udc8e CREDIT SPEND: Rendering (~50 credits)"))
+                                : e.includes("status=500") || e.includes("status=400")
+                                  ? (s = "error")
+                                  : e.includes("status=200") || e.includes("status=204")
+                                    ? (s = "success")
+                                    : e.includes("status=304") && (s = "cache"),
+                      { raw: e, type: s, message: n, id: t }
+                    );
+                  });
+                  (t(e), l(null));
+                }
+              } catch (s) {
+                console.error("Live log fetch error:", s);
+              } finally {
+                i(!1);
+              }
+          };
+        return (
+          (0, n.useEffect)(() => {
+            p();
+            const e = setInterval(p, 2e3);
+            return () => clearInterval(e);
+          }, [d]),
+          (0, n.useEffect)(() => {
+            var e;
+            null === (e = u.current) || void 0 === e || e.scrollIntoView({ behavior: "smooth" });
+          }, [e]),
+          (0, m.jsxs)("div", {
+            className: "live-log-container",
+            children: [
+              (0, m.jsxs)("div", {
+                className: "live-log-header",
+                children: [
+                  (0, m.jsx)("h4", { children: "\ud83d\udd34 Live System Feed" }),
+                  (0, m.jsx)("button", {
+                    onClick: () => c(!d),
+                    className: "live-toggle",
+                    children: d ? "Pause" : "Resume",
+                  }),
+                ],
+              }),
+              (0, m.jsxs)("div", {
+                className: "live-log-console",
+                children: [
+                  0 === e.length &&
+                    !s &&
+                    (0, m.jsx)("div", { className: "log-line", children: "Waiting for events..." }),
+                  e.map((e, t) =>
+                    (0, m.jsxs)(
+                      "div",
+                      {
+                        className: `log-line log-${e.type}`,
+                        children: [
+                          (0, m.jsx)("span", {
+                            className: "log-ts",
+                            children: new Date().toLocaleTimeString(),
+                          }),
+                          " ",
+                          "info" !== e.type && "success" !== e.type
+                            ? (0, m.jsx)("span", {
+                                className: "log-highlight",
+                                children: e.message,
+                              })
+                            : (0, m.jsx)("span", { className: "log-raw", children: e.raw }),
+                        ],
+                      },
+                      t
+                    )
+                  ),
+                  (0, m.jsx)("div", { ref: u }),
+                ],
+              }),
+            ],
+          })
+        );
+      };
+      const R = {
+          backgroundColor: "white",
+          borderRadius: 12,
+          padding: 20,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        },
+        C = {
+          padding: 15,
+          backgroundColor: "#f5f5f5",
+          borderRadius: 8,
+          flex: "1 1 150px",
+          minWidth: 150,
+        },
+        A = { fontSize: "0.85rem", color: "#666", marginBottom: 5 },
+        P = { fontSize: "1.5rem", fontWeight: "bold", color: "#1976d2" },
+        I = { fontSize: "0.8rem", color: "#999", marginTop: 3 },
+        B = {
+          padding: "8px 16px",
+          backgroundColor: "#1976d2",
+          color: "white",
+          border: "none",
+          borderRadius: 8,
+          cursor: "pointer",
+          fontSize: "0.9rem",
+        },
+        D = {
+          padding: 15,
+          borderLeft: "4px solid #d32f2f",
+          backgroundColor: "#fff",
+          marginBottom: 10,
+          borderRadius: 4,
+        },
+        $ = { padding: 12, borderBottom: "1px solid #eee" },
+        N = { padding: "4px 8px", borderRadius: 4, fontSize: "0.75rem", fontWeight: "500" },
+        U = { width: "100%", borderCollapse: "collapse", marginTop: 10 },
+        z = {
+          textAlign: "left",
+          padding: "12px 8px",
+          borderBottom: "2px solid #eee",
+          fontWeight: "600",
+          fontSize: "0.9rem",
+        },
+        E = { padding: "10px 8px", borderBottom: "1px solid #eee", fontSize: "0.9rem" },
+        M = function () {
+          const [e, t] = (0, n.useState)(null),
+            [s, i] = (0, n.useState)(null),
+            [a, l] = (0, n.useState)([]),
+            [d, c] = (0, n.useState)(null),
+            [u, p] = (0, n.useState)([]),
+            [h, x] = (0, n.useState)(!0),
+            [g, y] = (0, n.useState)(!1),
+            [f, v] = (0, n.useState)({}),
+            [j, b] = (0, n.useState)(!1),
+            [w, S] = (0, n.useState)([]),
+            [k, M] = (0, n.useState)(null);
+          (0, n.useEffect)(() => {
+            if ((O(), g)) {
+              const e = setInterval(O, 1e4);
+              return () => clearInterval(e);
+            }
+          }, [g]);
+          const O = async () => {
+              try {
+                var e;
+                const n = await (null === (e = o.j2.currentUser) || void 0 === e
+                    ? void 0
+                    : e.getIdToken()),
+                  [a, d, u, h, m] = await Promise.all([
+                    fetch(`${r.JR}/api/admin/system/health`, {
+                      headers: { Authorization: `Bearer ${n}` },
+                    }),
+                    fetch(`${r.JR}/api/diagnostics/health`, {
+                      headers: { Authorization: `Bearer ${n}` },
+                    }),
+                    fetch(`${r.JR}/api/admin/system/errors?limit=20`, {
+                      headers: { Authorization: `Bearer ${n}` },
+                    }),
+                    fetch(`${r.JR}/api/admin/system/api-metrics?timeframe=24h`, {
+                      headers: { Authorization: `Bearer ${n}` },
+                    }),
+                    fetch(`${r.JR}/api/admin/system/activity?limit=20`, {
+                      headers: { Authorization: `Bearer ${n}` },
+                    }),
+                  ]),
+                  [g, y, f, v, j] = await Promise.all([
+                    a.json(),
+                    d.json(),
+                    u.json(),
+                    h.json(),
+                    m.json(),
+                  ]);
+                (g.success && t(g.health),
+                  b(200 === a.status),
+                  i(y),
+                  f.success && l(f.errors),
+                  v.success && c(v.metrics),
+                  j.success && p(j.activities),
+                  x(!1));
+                try {
+                  const e = await fetch(`${r.JR}/api/diagnostics/scan?dashboard=admin`, {
+                    headers: { Authorization: `Bearer ${n}` },
+                  });
+                  let t = e;
+                  403 === e.status &&
+                    (t = await fetch(`${r.JR}/api/diagnostics/scan?dashboard=user`, {
+                      headers: { Authorization: `Bearer ${n}` },
+                    }));
+                  const s = await t.json();
+                  (M(s.results), a && 200 === a.status && b(!0));
+                } catch (s) {
+                  console.error("Scan failed:", s);
+                }
+              } catch (n) {
+                (console.error("Error fetching system data:", n), x(!1));
+              }
+            },
+            L = async () => {
+              try {
+                var e;
+                const t = await (null === (e = o.j2.currentUser) || void 0 === e
+                    ? void 0
+                    : e.getIdToken()),
+                  s = await fetch(`${r.JR}/api/diagnostics/scans`, {
+                    headers: { Authorization: `Bearer ${t}` },
+                  });
+                if (403 === s.status) return;
+                const n = await s.json();
+                n.scans && S(n.scans);
+              } catch (t) {
+                console.error("Fetch scan history failed", t);
+              }
+            };
+          return h
+            ? (0, m.jsx)("div", {
+                style: { padding: 40, textAlign: "center" },
+                children: "Loading system health...",
+              })
+            : (0, m.jsxs)("div", {
+                style: { marginTop: 24 },
+                children: [
+                  (0, m.jsx)(T, {}),
+                  (0, m.jsxs)("div", {
+                    style: { marginBottom: 20, display: "flex", alignItems: "center", gap: 10 },
+                    children: [
+                      (0, m.jsxs)("label", {
+                        style: { display: "flex", alignItems: "center", gap: 8 },
+                        children: [
+                          (0, m.jsx)("input", {
+                            type: "checkbox",
+                            checked: g,
+                            onChange: e => y(e.target.checked),
+                          }),
+                          (0, m.jsx)("span", { children: "Auto-refresh (10s)" }),
+                        ],
+                      }),
+                      (0, m.jsx)("button", {
+                        onClick: O,
+                        style: B,
+                        children: "\ud83d\udd04 Refresh Now",
+                      }),
+                      j &&
+                        (0, m.jsxs)(m.Fragment, {
+                          children: [
+                            (0, m.jsx)("button", {
+                              onClick: async () => {
+                                try {
+                                  var e;
+                                  const t = await (null === (e = o.j2.currentUser) || void 0 === e
+                                      ? void 0
+                                      : e.getIdToken()),
+                                    s = await fetch(
+                                      `${r.JR}/api/diagnostics/scan?dashboard=admin&store=1`,
+                                      { headers: { Authorization: `Bearer ${t}` } }
+                                    );
+                                  if (200 === s.status) {
+                                    const e = await s.json();
+                                    M(e.results);
+                                  } else console.error("Failed to store scan", s.status);
+                                } catch (t) {
+                                  console.error("Store scan failed", t);
+                                }
+                              },
+                              style: { ...B, backgroundColor: "#2e7d32", marginLeft: 8 },
+                              children: "\ud83d\udcbe Run & Save Scan",
+                            }),
+                            (0, m.jsx)("button", {
+                              onClick: L,
+                              style: { ...B, backgroundColor: "#1976d2", marginLeft: 8 },
+                              children: "\ud83d\udd58 Fetch Scan History",
+                            }),
+                          ],
+                        }),
+                    ],
+                  }),
+                  e &&
+                    (0, m.jsxs)("div", {
+                      style: R,
+                      children: [
+                        (0, m.jsx)("h3", { children: "System Health" }),
+                        (0, m.jsxs)("div", {
+                          style: { display: "flex", gap: 20, flexWrap: "wrap" },
+                          children: [
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Status" }),
+                                (0, m.jsx)("div", {
+                                  style: { ...P, color: "#2e7d32" },
+                                  children:
+                                    "healthy" === e.status
+                                      ? "\u2705 Healthy"
+                                      : "\u26a0\ufe0f Issues",
+                                }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Uptime" }),
+                                (0, m.jsxs)("div", {
+                                  style: P,
+                                  children: [
+                                    Math.floor(e.uptime / 3600),
+                                    "h ",
+                                    Math.floor((e.uptime % 3600) / 60),
+                                    "m",
+                                  ],
+                                }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Memory Usage" }),
+                                (0, m.jsxs)("div", {
+                                  style: P,
+                                  children: [e.memory.percentage.toFixed(1), "%"],
+                                }),
+                                (0, m.jsxs)("div", {
+                                  style: I,
+                                  children: [
+                                    e.memory.used.toFixed(0),
+                                    " MB / ",
+                                    e.memory.total.toFixed(0),
+                                    " MB",
+                                  ],
+                                }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "CPU Cores" }),
+                                (0, m.jsx)("div", { style: P, children: e.cpu.cores }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "System Memory" }),
+                                (0, m.jsxs)("div", {
+                                  style: P,
+                                  children: [e.system.freeMemory.toFixed(1), " GB free"],
+                                }),
+                                (0, m.jsxs)("div", {
+                                  style: I,
+                                  children: ["of ", e.system.totalMemory.toFixed(1), " GB"],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  s &&
+                    (0, m.jsxs)("div", {
+                      style: { ...R, marginTop: 20 },
+                      children: [
+                        (0, m.jsx)("h3", { children: "Platform Diagnostics" }),
+                        (0, m.jsxs)("div", {
+                          style: { display: "flex", gap: 20, marginBottom: 20, flexWrap: "wrap" },
+                          children: [
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Overall Status" }),
+                                (0, m.jsxs)("div", {
+                                  style: {
+                                    ...P,
+                                    color:
+                                      "healthy" === s.overall_status
+                                        ? "#2e7d32"
+                                        : "warning" === s.overall_status
+                                          ? "#ed6c02"
+                                          : "#d32f2f",
+                                  },
+                                  children: [
+                                    "healthy" === s.overall_status
+                                      ? "\u2705"
+                                      : "warning" === s.overall_status
+                                        ? "\u26a0\ufe0f"
+                                        : "\u274c",
+                                    " ",
+                                    s.overall_status.toUpperCase(),
+                                  ],
+                                }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Checks Passed" }),
+                                (0, m.jsxs)("div", {
+                                  style: { ...P, color: "#2e7d32" },
+                                  children: [s.summary.passed, " / ", s.summary.total_checks],
+                                }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Warnings" }),
+                                (0, m.jsx)("div", {
+                                  style: { ...P, color: "#ed6c02" },
+                                  children: s.summary.warnings,
+                                }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Errors" }),
+                                (0, m.jsx)("div", {
+                                  style: { ...P, color: "#d32f2f" },
+                                  children: s.summary.errors,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                        (0, m.jsx)("div", {
+                          style: { marginTop: 20 },
+                          children: Object.entries(s.checks).map(e => {
+                            let [t, s] = e;
+                            const n = f[t],
+                              r =
+                                "passed" === s.status
+                                  ? "\u2705"
+                                  : "warning" === s.status
+                                    ? "\u26a0\ufe0f"
+                                    : "\u274c",
+                              i =
+                                "passed" === s.status
+                                  ? "#2e7d32"
+                                  : "warning" === s.status
+                                    ? "#ed6c02"
+                                    : "#d32f2f";
+                            return (0, m.jsxs)(
+                              "div",
+                              {
+                                style: { ...D, borderLeft: `4px solid ${i}`, marginBottom: 10 },
+                                children: [
+                                  (0, m.jsxs)("div", {
+                                    style: {
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      alignItems: "center",
+                                      cursor: "pointer",
+                                    },
+                                    onClick: () => v(e => ({ ...e, [t]: !e[t] })),
+                                    children: [
+                                      (0, m.jsxs)("div", {
+                                        style: { display: "flex", alignItems: "center", gap: 10 },
+                                        children: [
+                                          (0, m.jsx)("span", {
+                                            style: { fontSize: "1.2rem" },
+                                            children: r,
+                                          }),
+                                          (0, m.jsx)("strong", {
+                                            children: t.replace(/_/g, " ").toUpperCase(),
+                                          }),
+                                        ],
+                                      }),
+                                      (0, m.jsx)("span", {
+                                        style: { fontSize: "1.2rem" },
+                                        children: n ? "\u25bc" : "\u25b6",
+                                      }),
+                                    ],
+                                  }),
+                                  n &&
+                                    (0, m.jsxs)("div", {
+                                      style: { marginTop: 15 },
+                                      children: [
+                                        (0, m.jsx)("p", {
+                                          style: { marginBottom: 10 },
+                                          children: s.message,
+                                        }),
+                                        s.issues &&
+                                          s.issues.length > 0 &&
+                                          (0, m.jsxs)("div", {
+                                            style: {
+                                              marginTop: 10,
+                                              padding: 10,
+                                              backgroundColor: "#ffebee",
+                                              borderRadius: 4,
+                                            },
+                                            children: [
+                                              (0, m.jsx)("strong", {
+                                                style: { color: "#d32f2f" },
+                                                children: "Issues:",
+                                              }),
+                                              (0, m.jsx)("ul", {
+                                                style: { marginTop: 5, marginLeft: 20 },
+                                                children: s.issues.map((e, t) =>
+                                                  (0, m.jsx)(
+                                                    "li",
+                                                    {
+                                                      style: { color: "#d32f2f", marginTop: 5 },
+                                                      children: e,
+                                                    },
+                                                    t
+                                                  )
+                                                ),
+                                              }),
+                                            ],
+                                          }),
+                                        s.warnings &&
+                                          s.warnings.length > 0 &&
+                                          (0, m.jsxs)("div", {
+                                            style: {
+                                              marginTop: 10,
+                                              padding: 10,
+                                              backgroundColor: "#fff3e0",
+                                              borderRadius: 4,
+                                            },
+                                            children: [
+                                              (0, m.jsx)("strong", {
+                                                style: { color: "#ed6c02" },
+                                                children: "Warnings:",
+                                              }),
+                                              (0, m.jsx)("ul", {
+                                                style: { marginTop: 5, marginLeft: 20 },
+                                                children: s.warnings.map((e, t) =>
+                                                  (0, m.jsx)(
+                                                    "li",
+                                                    {
+                                                      style: { color: "#ed6c02", marginTop: 5 },
+                                                      children: e,
+                                                    },
+                                                    t
+                                                  )
+                                                ),
+                                              }),
+                                            ],
+                                          }),
+                                        "platform_credentials" === t &&
+                                          s.platforms &&
+                                          (0, m.jsxs)("div", {
+                                            style: { marginTop: 15 },
+                                            children: [
+                                              (0, m.jsx)("strong", {
+                                                children: "Platform Status:",
+                                              }),
+                                              (0, m.jsx)("div", {
+                                                style: {
+                                                  display: "grid",
+                                                  gridTemplateColumns:
+                                                    "repeat(auto-fill, minmax(200px, 1fr))",
+                                                  gap: 10,
+                                                  marginTop: 10,
+                                                },
+                                                children: Object.entries(s.platforms).map(e => {
+                                                  let [t, s] = e;
+                                                  return (0, m.jsxs)(
+                                                    "div",
+                                                    {
+                                                      style: {
+                                                        padding: 10,
+                                                        backgroundColor: s.configured
+                                                          ? "#e8f5e9"
+                                                          : "#ffebee",
+                                                        borderRadius: 4,
+                                                        border:
+                                                          "1px solid " +
+                                                          (s.configured ? "#2e7d32" : "#d32f2f"),
+                                                      },
+                                                      children: [
+                                                        (0, m.jsx)("div", {
+                                                          style: {
+                                                            fontWeight: "bold",
+                                                            marginBottom: 5,
+                                                          },
+                                                          children: t.toUpperCase(),
+                                                        }),
+                                                        (0, m.jsx)("div", {
+                                                          style: {
+                                                            color: s.configured
+                                                              ? "#2e7d32"
+                                                              : "#d32f2f",
+                                                          },
+                                                          children: s.configured
+                                                            ? "\u2713 Configured"
+                                                            : "\u2717 Not Configured",
+                                                        }),
+                                                        !s.configured &&
+                                                          s.missing_variables &&
+                                                          (0, m.jsxs)("div", {
+                                                            style: {
+                                                              fontSize: "0.85rem",
+                                                              marginTop: 5,
+                                                              color: "#666",
+                                                            },
+                                                            children: [
+                                                              "Missing: ",
+                                                              s.missing_variables.join(", "),
+                                                            ],
+                                                          }),
+                                                      ],
+                                                    },
+                                                    t
+                                                  );
+                                                }),
+                                              }),
+                                            ],
+                                          }),
+                                        "database_collections" === t &&
+                                          s.collections &&
+                                          (0, m.jsxs)("div", {
+                                            style: { marginTop: 15 },
+                                            children: [
+                                              (0, m.jsx)("strong", {
+                                                children: "Database Collections:",
+                                              }),
+                                              (0, m.jsx)("div", {
+                                                style: {
+                                                  display: "grid",
+                                                  gridTemplateColumns:
+                                                    "repeat(auto-fill, minmax(150px, 1fr))",
+                                                  gap: 10,
+                                                  marginTop: 10,
+                                                },
+                                                children: Object.entries(s.collections).map(e => {
+                                                  let [t, s] = e;
+                                                  return (0, m.jsxs)(
+                                                    "div",
+                                                    {
+                                                      style: {
+                                                        padding: 8,
+                                                        backgroundColor:
+                                                          "accessible" === s
+                                                            ? "#e8f5e9"
+                                                            : "#ffebee",
+                                                        borderRadius: 4,
+                                                        textAlign: "center",
+                                                      },
+                                                      children: [
+                                                        (0, m.jsx)("div", {
+                                                          style: { fontSize: "0.9rem" },
+                                                          children: t,
+                                                        }),
+                                                        (0, m.jsx)("div", {
+                                                          style: {
+                                                            fontSize: "0.85rem",
+                                                            color:
+                                                              "accessible" === s
+                                                                ? "#2e7d32"
+                                                                : "#d32f2f",
+                                                            marginTop: 3,
+                                                          },
+                                                          children: s,
+                                                        }),
+                                                      ],
+                                                    },
+                                                    t
+                                                  );
+                                                }),
+                                              }),
+                                            ],
+                                          }),
+                                        "ai_services" === t &&
+                                          s.services &&
+                                          (0, m.jsxs)("div", {
+                                            style: { marginTop: 15 },
+                                            children: [
+                                              (0, m.jsx)("strong", { children: "AI Services:" }),
+                                              (0, m.jsx)("div", {
+                                                style: { marginTop: 10 },
+                                                children: Object.entries(s.services).map(e => {
+                                                  let [t, s] = e;
+                                                  return (0, m.jsxs)(
+                                                    "div",
+                                                    {
+                                                      style: {
+                                                        padding: 8,
+                                                        marginBottom: 5,
+                                                        backgroundColor: s ? "#e8f5e9" : "#f5f5f5",
+                                                        borderRadius: 4,
+                                                        display: "flex",
+                                                        justifyContent: "space-between",
+                                                      },
+                                                      children: [
+                                                        (0, m.jsx)("span", {
+                                                          children: t.replace(/_/g, " "),
+                                                        }),
+                                                        (0, m.jsx)("span", {
+                                                          style: { color: s ? "#2e7d32" : "#999" },
+                                                          children: s
+                                                            ? "\u2713 Enabled"
+                                                            : "\u2717 Disabled",
+                                                        }),
+                                                      ],
+                                                    },
+                                                    t
+                                                  );
+                                                }),
+                                              }),
+                                            ],
+                                          }),
+                                        s.details &&
+                                          (0, m.jsx)("div", {
+                                            style: { marginTop: 15 },
+                                            children: (0, m.jsxs)("details", {
+                                              children: [
+                                                (0, m.jsx)("summary", {
+                                                  style: {
+                                                    cursor: "pointer",
+                                                    color: "#1976d2",
+                                                    fontWeight: "500",
+                                                  },
+                                                  children: "View Details",
+                                                }),
+                                                (0, m.jsx)("pre", {
+                                                  style: {
+                                                    marginTop: 10,
+                                                    padding: 10,
+                                                    backgroundColor: "#f5f5f5",
+                                                    borderRadius: 4,
+                                                    overflow: "auto",
+                                                    fontSize: "0.85rem",
+                                                  },
+                                                  children: JSON.stringify(s.details, null, 2),
+                                                }),
+                                              ],
+                                            }),
+                                          }),
+                                      ],
+                                    }),
+                                ],
+                              },
+                              t
+                            );
+                          }),
+                        }),
+                      ],
+                    }),
+                  d &&
+                    (0, m.jsxs)("div", {
+                      style: { ...R, marginTop: 20 },
+                      children: [
+                        (0, m.jsx)("h3", { children: "API Performance (Last 24h)" }),
+                        (0, m.jsxs)("div", {
+                          style: { display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 20 },
+                          children: [
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Total Requests" }),
+                                (0, m.jsx)("div", {
+                                  style: P,
+                                  children: d.totalRequests.toLocaleString(),
+                                }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Success Rate" }),
+                                (0, m.jsxs)("div", {
+                                  style: { ...P, color: "#2e7d32" },
+                                  children: [d.successRate.toFixed(1), "%"],
+                                }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Avg Response Time" }),
+                                (0, m.jsxs)("div", {
+                                  style: P,
+                                  children: [d.avgResponseTime, "ms"],
+                                }),
+                              ],
+                            }),
+                            (0, m.jsxs)("div", {
+                              style: C,
+                              children: [
+                                (0, m.jsx)("div", { style: A, children: "Failed Requests" }),
+                                (0, m.jsx)("div", {
+                                  style: { ...P, color: "#d32f2f" },
+                                  children: d.failedRequests,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                        d.topEndpoints &&
+                          d.topEndpoints.length > 0 &&
+                          (0, m.jsxs)(m.Fragment, {
+                            children: [
+                              (0, m.jsx)("h4", {
+                                style: { marginTop: 20 },
+                                children: "Top Endpoints",
+                              }),
+                              (0, m.jsxs)("table", {
+                                style: U,
+                                children: [
+                                  (0, m.jsx)("thead", {
+                                    children: (0, m.jsxs)("tr", {
+                                      children: [
+                                        (0, m.jsx)("th", { style: z, children: "Endpoint" }),
+                                        (0, m.jsx)("th", { style: z, children: "Requests" }),
+                                        (0, m.jsx)("th", { style: z, children: "Avg Response" }),
+                                        (0, m.jsx)("th", { style: z, children: "Errors" }),
+                                      ],
+                                    }),
+                                  }),
+                                  (0, m.jsx)("tbody", {
+                                    children: d.topEndpoints.map((e, t) =>
+                                      (0, m.jsxs)(
+                                        "tr",
+                                        {
+                                          children: [
+                                            (0, m.jsx)("td", { style: E, children: e.endpoint }),
+                                            (0, m.jsx)("td", { style: E, children: e.count }),
+                                            (0, m.jsxs)("td", {
+                                              style: E,
+                                              children: [Math.round(e.avgResponseTime), "ms"],
+                                            }),
+                                            (0, m.jsx)("td", {
+                                              style: {
+                                                ...E,
+                                                color: e.errors > 0 ? "#d32f2f" : "#2e7d32",
+                                              },
+                                              children: e.errors,
+                                            }),
+                                          ],
+                                        },
+                                        t
+                                      )
+                                    ),
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                      ],
+                    }),
+                  a &&
+                    a.length > 0 &&
+                    (0, m.jsxs)("div", {
+                      style: { ...R, marginTop: 20 },
+                      children: [
+                        (0, m.jsxs)("h3", { children: ["Recent Errors (", a.length, ")"] }),
+                        (0, m.jsx)("div", {
+                          style: { maxHeight: 400, overflowY: "auto" },
+                          children: a.map((e, t) =>
+                            (0, m.jsxs)(
+                              "div",
+                              {
+                                style: D,
+                                children: [
+                                  (0, m.jsxs)("div", {
+                                    style: {
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      marginBottom: 5,
+                                    },
+                                    children: [
+                                      (0, m.jsx)("span", {
+                                        style: {
+                                          ...N,
+                                          backgroundColor:
+                                            "critical" === e.severity
+                                              ? "#d32f2f"
+                                              : "error" === e.severity
+                                                ? "#ed6c02"
+                                                : "#1976d2",
+                                          color: "white",
+                                        },
+                                        children: e.severity || "error",
+                                      }),
+                                      (0, m.jsx)("span", {
+                                        style: { fontSize: "0.85rem", color: "#666" },
+                                        children: new Date(e.timestamp).toLocaleString(),
+                                      }),
+                                    ],
+                                  }),
+                                  (0, m.jsx)("div", {
+                                    style: { fontWeight: "500", marginBottom: 5 },
+                                    children: e.type || "Unknown Error",
+                                  }),
+                                  (0, m.jsx)("div", {
+                                    style: { fontSize: "0.9rem", color: "#666" },
+                                    children: e.message,
+                                  }),
+                                  e.stack &&
+                                    (0, m.jsxs)("details", {
+                                      style: { marginTop: 10, fontSize: "0.85rem" },
+                                      children: [
+                                        (0, m.jsx)("summary", {
+                                          style: { cursor: "pointer", color: "#1976d2" },
+                                          children: "View Stack Trace",
+                                        }),
+                                        (0, m.jsx)("pre", {
+                                          style: {
+                                            marginTop: 10,
+                                            padding: 10,
+                                            backgroundColor: "#f5f5f5",
+                                            borderRadius: 4,
+                                            overflow: "auto",
+                                            fontSize: "0.8rem",
+                                          },
+                                          children: e.stack,
+                                        }),
+                                      ],
+                                    }),
+                                ],
+                              },
+                              e.id || t
+                            )
+                          ),
+                        }),
+                      ],
+                    }),
+                  k &&
+                    (0, m.jsxs)("div", {
+                      style: { ...R, marginTop: 20 },
+                      children: [
+                        (0, m.jsx)("h3", { children: "Integration Scan Results" }),
+                        (0, m.jsx)("div", {
+                          style: { display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 20 },
+                          children: Object.entries(k.checks).map(e => {
+                            let [t, s] = e;
+                            return (0, m.jsxs)(
+                              "div",
+                              {
+                                style: {
+                                  padding: 10,
+                                  borderRadius: 6,
+                                  border: "1px solid #eee",
+                                  minWidth: 220,
+                                },
+                                children: [
+                                  (0, m.jsx)("div", {
+                                    style: { fontWeight: "600" },
+                                    children: t.replace(/_/g, " ").toUpperCase(),
+                                  }),
+                                  (0, m.jsx)("div", {
+                                    style: {
+                                      color:
+                                        "ok" === s.status
+                                          ? "#2e7d32"
+                                          : "warning" === s.status
+                                            ? "#ed6c02"
+                                            : "#d32f2f",
+                                      marginTop: 6,
+                                    },
+                                    children: s.message,
+                                  }),
+                                  s.id &&
+                                    (0, m.jsxs)("div", {
+                                      style: { fontSize: "0.85rem", marginTop: 8 },
+                                      children: ["ID: ", s.id],
+                                    }),
+                                  s.squadId &&
+                                    (0, m.jsxs)("div", {
+                                      style: { fontSize: "0.85rem", marginTop: 8 },
+                                      children: ["SquadId: ", s.squadId],
+                                    }),
+                                  s.connection &&
+                                    (0, m.jsx)("div", {
+                                      style: { fontSize: "0.85rem", marginTop: 8 },
+                                      children: Object.entries(s.connection)
+                                        .slice(0, 4)
+                                        .map(e => {
+                                          let [t, s] = e;
+                                          return (0, m.jsxs)(
+                                            "div",
+                                            {
+                                              children: [
+                                                (0, m.jsx)("strong", { children: t }),
+                                                ": ",
+                                                String(s),
+                                              ],
+                                            },
+                                            t
+                                          );
+                                        }),
+                                    }),
+                                  j &&
+                                    "ok" !== s.status &&
+                                    (0, m.jsxs)("div", {
+                                      style: { marginTop: 10 },
+                                      children: [
+                                        (0, m.jsxs)("div", {
+                                          style: { fontSize: "0.9rem", color: "#666" },
+                                          children: [
+                                            (0, m.jsx)("strong", { children: "Suggestion:" }),
+                                            " ",
+                                            s.recommendation,
+                                          ],
+                                        }),
+                                        (0, m.jsx)("button", {
+                                          onClick: async () => {
+                                            try {
+                                              var e;
+                                              const s = await (null === (e = o.j2.currentUser) ||
+                                              void 0 === e
+                                                ? void 0
+                                                : e.getIdToken());
+                                              let n = k.scanId || null;
+                                              if (!n) {
+                                                const e = await fetch(
+                                                  `${r.JR}/api/diagnostics/scan?dashboard=admin&store=1`,
+                                                  { headers: { Authorization: `Bearer ${s}` } }
+                                                );
+                                                await e.json();
+                                                const t = await fetch(
+                                                    `${r.JR}/api/diagnostics/scans`,
+                                                    { headers: { Authorization: `Bearer ${s}` } }
+                                                  ),
+                                                  i = await t.json();
+                                                i.scans && i.scans.length && (n = i.scans[0].id);
+                                              }
+                                              if (!n)
+                                                throw new Error("Unable to obtain scan record id");
+                                              const i = await fetch(
+                                                  `${r.JR}/api/diagnostics/scans/${n}/remediate`,
+                                                  {
+                                                    method: "POST",
+                                                    headers: {
+                                                      "content-type": "application/json",
+                                                      Authorization: `Bearer ${s}`,
+                                                    },
+                                                    body: JSON.stringify({ checks: [t] }),
+                                                  }
+                                                ),
+                                                a = await i.json();
+                                              a.success
+                                                ? (alert(
+                                                    "Remediation applied successfully. Re-run scan to verify."
+                                                  ),
+                                                  O(),
+                                                  L())
+                                                : alert("Remediation failed: " + JSON.stringify(a));
+                                            } catch (s) {
+                                              (console.error("Remediation failed:", s),
+                                                alert("Remediation failed: " + (s && s.message)));
+                                            }
+                                          },
+                                          style: {
+                                            marginTop: 8,
+                                            padding: "6px 12px",
+                                            borderRadius: 6,
+                                            backgroundColor: "#2e7d32",
+                                            color: "white",
+                                            border: "none",
+                                          },
+                                          children: "Run suggested fix",
+                                        }),
+                                      ],
+                                    }),
+                                ],
+                              },
+                              t
+                            );
+                          }),
+                        }),
+                      ],
+                    }),
+                  w &&
+                    w.length > 0 &&
+                    (0, m.jsxs)("div", {
+                      style: { ...R, marginTop: 20 },
+                      children: [
+                        (0, m.jsx)("h3", { children: "Scan History" }),
+                        (0, m.jsxs)("table", {
+                          style: U,
+                          children: [
+                            (0, m.jsx)("thead", {
+                              children: (0, m.jsxs)("tr", {
+                                children: [
+                                  (0, m.jsx)("th", { style: z, children: "When" }),
+                                  (0, m.jsx)("th", { style: z, children: "Dashboard" }),
+                                  (0, m.jsx)("th", { style: z, children: "Overall" }),
+                                  (0, m.jsx)("th", { style: z, children: "Details" }),
+                                ],
+                              }),
+                            }),
+                            (0, m.jsx)("tbody", {
+                              children: w.map(e =>
+                                (0, m.jsxs)(
+                                  "tr",
+                                  {
+                                    children: [
+                                      (0, m.jsx)("td", {
+                                        style: E,
+                                        children: new Date(e.createdAt).toLocaleString(),
+                                      }),
+                                      (0, m.jsx)("td", { style: E, children: e.dashboard }),
+                                      (0, m.jsx)("td", {
+                                        style: {
+                                          ...E,
+                                          color:
+                                            "ok" === e.result.overall
+                                              ? "#2e7d32"
+                                              : "warning" === e.result.overall
+                                                ? "#ed6c02"
+                                                : "#d32f2f",
+                                        },
+                                        children: e.result.overall,
+                                      }),
+                                      (0, m.jsx)("td", {
+                                        style: E,
+                                        children: (0, m.jsxs)("details", {
+                                          children: [
+                                            (0, m.jsx)("summary", { children: "View" }),
+                                            (0, m.jsx)("pre", {
+                                              style: { whiteSpace: "pre-wrap" },
+                                              children: JSON.stringify(e.result, null, 2),
+                                            }),
+                                          ],
+                                        }),
+                                      }),
+                                    ],
+                                  },
+                                  e.id
+                                )
+                              ),
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  u &&
+                    u.length > 0 &&
+                    (0, m.jsxs)("div", {
+                      style: { ...R, marginTop: 20 },
+                      children: [
+                        (0, m.jsx)("h3", { children: "Live Activity Feed" }),
+                        (0, m.jsx)("div", {
+                          style: { maxHeight: 400, overflowY: "auto" },
+                          children: u.map((e, t) => {
+                            var s;
+                            return (0, m.jsx)(
+                              "div",
+                              {
+                                style: $,
+                                children: (0, m.jsxs)("div", {
+                                  style: { display: "flex", gap: 15 },
+                                  children: [
+                                    (0, m.jsx)("div", {
+                                      style: { fontSize: "1.5rem" },
+                                      children:
+                                        "upload" === e.type
+                                          ? "\ud83d\udce4"
+                                          : "promotion" === e.type
+                                            ? "\ud83d\udce2"
+                                            : "purchase" === e.type
+                                              ? "\ud83d\udcb0"
+                                              : "login" === e.type
+                                                ? "\ud83d\udd10"
+                                                : "\ud83d\udcca",
+                                    }),
+                                    (0, m.jsxs)("div", {
+                                      style: { flex: 1 },
+                                      children: [
+                                        (0, m.jsx)("div", {
+                                          style: { fontWeight: "500" },
+                                          children:
+                                            (null === (s = e.user) || void 0 === s
+                                              ? void 0
+                                              : s.name) || "Unknown User",
+                                        }),
+                                        (0, m.jsx)("div", {
+                                          style: { fontSize: "0.9rem", color: "#666" },
+                                          children: e.description || e.type,
+                                        }),
+                                        (0, m.jsx)("div", {
+                                          style: {
+                                            fontSize: "0.85rem",
+                                            color: "#999",
+                                            marginTop: 5,
+                                          },
+                                          children: new Date(e.timestamp).toLocaleString(),
+                                        }),
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                              },
+                              e.id || t
+                            );
+                          }),
+                        }),
+                      ],
+                    }),
+                ],
+              });
+        };
+      function O() {
+        const [e, t] = (0, n.useState)(!1),
+          [s, a] = (0, n.useState)(!1),
+          [l, d] = (0, n.useState)(null),
+          [c, u] = (0, n.useState)(null);
+        return (0, m.jsxs)("div", {
+          style: { display: "inline-block", marginLeft: 8 },
+          children: [
+            (0, m.jsx)("button", {
+              onClick: () => {
+                e
+                  ? t(!1)
+                  : (async () => {
+                      (t(!0), a(!0), u(null));
+                      try {
+                        var e;
+                        const t = await (null === (e = o.j2.currentUser) || void 0 === e
+                            ? void 0
+                            : e.getIdToken()),
+                          s = await fetch(`${r.JR}/api/diagnostics/env`, {
+                            headers: { Authorization: t ? `Bearer ${t}` : "" },
+                          }),
+                          n = await (0, i.p)(s);
+                        n.ok && n.json
+                          ? d(n.json)
+                          : u(`Status ${n.status} ${n.textPreview || n.error || ""}`);
+                      } catch (s) {
+                        u(s.message || "Failed to fetch env");
+                      } finally {
+                        a(!1);
+                      }
+                    })();
+              },
+              className: "admin-diag-btn",
+              children: e ? "Close Diagnostics" : "Run Diagnostics",
+            }),
+            e &&
+              (0, m.jsx)("div", {
+                className: "admin-diag-panel",
+                children: (0, m.jsxs)("div", {
+                  style: { padding: 8 },
+                  children: [
+                    (0, m.jsx)("strong", { children: "Diagnostics Env Presence" }),
+                    s && (0, m.jsx)("div", { children: "Loading..." }),
+                    c && (0, m.jsx)("div", { style: { color: "red" }, children: c }),
+                    l &&
+                      (0, m.jsx)("div", {
+                        style: { marginTop: 8 },
+                        children: (0, m.jsx)("pre", {
+                          style: {
+                            maxHeight: 300,
+                            overflow: "auto",
+                            whiteSpace: "pre-wrap",
+                            fontSize: 12,
+                          },
+                          children: JSON.stringify(l, null, 2),
+                        }),
+                      }),
+                  ],
+                }),
+              }),
+          ],
+        });
+      }
+      s(3768);
+      const L = {
+        padding: "10px 20px",
+        border: "1px solid #ddd",
+        backgroundColor: "white",
+        borderRadius: 8,
+        cursor: "pointer",
+        fontSize: "0.95rem",
+      };
+      var F = s(6507);
+      s(9500);
+      const W = e => {
+          let { status: t } = e;
+          return (0, m.jsx)("span", {
+            className: `px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide ${{ online: "bg-green-100 text-green-800", issue: "bg-red-100 text-red-800", warning: "bg-yellow-100 text-yellow-800" }[t]}`,
+            children: t,
+          });
+        },
+        J = function () {
+          const [e, t] = (0, n.useState)(null),
+            [s, i] = (0, n.useState)(!0),
+            [a, l] = (0, n.useState)(null),
+            d = async () => {
+              i(!0);
+              try {
+                var e;
+                const s = await (null === (e = o.j2.currentUser) || void 0 === e
+                  ? void 0
+                  : e.getIdToken());
+                if (!s) return;
+                const n = await fetch(`${r.JR}/api/admin/platforms/status`, {
+                    headers: { Authorization: `Bearer ${s}` },
+                  }),
+                  i = await n.json();
+                i.success ? t(i.platforms) : l(i.error || "Failed to load platform status");
+              } catch (s) {
+                l(s.message);
+              } finally {
+                i(!1);
+              }
+            };
+          return (
+            (0, n.useEffect)(() => {
+              d();
+              const e = setInterval(d, 6e4);
+              return () => clearInterval(e);
+            }, []),
+            s && !e
+              ? (0, m.jsx)("div", {
+                  className: "p-4 text-center",
+                  children: "Scanning platform connectivity...",
+                })
+              : a
+                ? (0, m.jsxs)("div", {
+                    className: "p-4 text-red-600 bg-red-50 rounded",
+                    children: ["Error: ", a],
+                  })
+                : (0, m.jsxs)("div", {
+                    className: "platform-health-grid",
+                    children: [
+                      (0, m.jsxs)("h3", {
+                        className: "text-xl font-bold mb-4 flex justify-between items-center",
+                        children: [
+                          (0, m.jsx)("span", { children: "Platform Integration Status" }),
+                          (0, m.jsx)("button", {
+                            onClick: d,
+                            className:
+                              "text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100",
+                            children: "Refresh Now",
+                          }),
+                        ],
+                      }),
+                      (0, m.jsx)("div", {
+                        className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4",
+                        children:
+                          e &&
+                          Object.entries(e).map(e => {
+                            let [t, s] = e;
+                            return (0, m.jsxs)(
+                              "div",
+                              {
+                                className:
+                                  "stat-card p-4 rounded-lg border " +
+                                  (s.configured && s.reachable
+                                    ? "border-green-200 bg-green-50"
+                                    : "border-red-200 bg-red-50"),
+                                children: [
+                                  (0, m.jsxs)("div", {
+                                    className: "flex justify-between items-start mb-2",
+                                    children: [
+                                      (0, m.jsx)("h4", {
+                                        className: "font-bold text-lg capitalize",
+                                        children: s.name,
+                                      }),
+                                      (0, m.jsx)(W, {
+                                        status: s.configured && s.reachable ? "online" : "issue",
+                                      }),
+                                    ],
+                                  }),
+                                  (0, m.jsxs)("div", {
+                                    className: "space-y-2 text-sm",
+                                    children: [
+                                      (0, m.jsxs)("div", {
+                                        className: "flex justify-between",
+                                        children: [
+                                          (0, m.jsx)("span", {
+                                            className: "text-gray-600",
+                                            children: "Config:",
+                                          }),
+                                          s.configured
+                                            ? (0, m.jsx)("span", {
+                                                className: "text-green-600 font-medium",
+                                                children: "Valid",
+                                              })
+                                            : (0, m.jsx)("span", {
+                                                className: "text-red-600 font-medium cursor-help",
+                                                title: `Missing: ${s.missingEnv.join(", ")}`,
+                                                children: "Missing Keys",
+                                              }),
+                                        ],
+                                      }),
+                                      (0, m.jsxs)("div", {
+                                        className: "flex justify-between",
+                                        children: [
+                                          (0, m.jsx)("span", {
+                                            className: "text-gray-600",
+                                            children: "API Access:",
+                                          }),
+                                          s.reachable
+                                            ? (0, m.jsx)("span", {
+                                                className: "text-green-600 font-medium",
+                                                children: "Reachable",
+                                              })
+                                            : (0, m.jsx)("span", {
+                                                className: "text-red-600 font-medium",
+                                                children: "Unreachable",
+                                              }),
+                                        ],
+                                      }),
+                                      (0, m.jsxs)("div", {
+                                        className: "flex justify-between",
+                                        children: [
+                                          (0, m.jsx)("span", {
+                                            className: "text-gray-600",
+                                            children: "Latency:",
+                                          }),
+                                          (0, m.jsxs)("span", {
+                                            className:
+                                              "font-mono " +
+                                              (s.latency > 1e3
+                                                ? "text-yellow-600"
+                                                : "text-gray-800"),
+                                            children: [s.latency, "ms"],
+                                          }),
+                                        ],
+                                      }),
+                                      (0, m.jsxs)("div", {
+                                        className:
+                                          "flex justify-between text-xs text-gray-500 mt-1",
+                                        children: [
+                                          (0, m.jsx)("span", { children: "Response code:" }),
+                                          (0, m.jsx)("span", { children: s.httpStatus || "N/A" }),
+                                        ],
+                                      }),
+                                    ],
+                                  }),
+                                ],
+                              },
+                              t
+                            );
+                          }),
+                      }),
+                    ],
+                  })
+          );
+        },
+        V = e => {
+          let { data: t, columns: s, title: n, emptyMessage: r = "No data available" } = e;
+          return (0, m.jsxs)("div", {
+            className: "dashboard-panel",
+            children: [
+              (0, m.jsx)("h3", { className: "panel-title", children: n }),
+              t && t.length > 0
+                ? (0, m.jsx)("div", {
+                    style: { overflowX: "auto" },
+                    children: (0, m.jsxs)("table", {
+                      className: "data-table",
+                      children: [
+                        (0, m.jsx)("thead", {
+                          children: (0, m.jsx)("tr", {
+                            children: s.map((e, t) => (0, m.jsx)("th", { children: e.header }, t)),
+                          }),
+                        }),
+                        (0, m.jsx)("tbody", {
+                          children: t.map((e, t) =>
+                            (0, m.jsx)(
+                              "tr",
+                              {
+                                children: s.map((t, s) =>
+                                  (0, m.jsx)(
+                                    "td",
+                                    { children: t.render ? t.render(e) : e[t.accessor] },
+                                    s
+                                  )
+                                ),
+                              },
+                              t
+                            )
+                          ),
+                        }),
+                      ],
+                    }),
+                  })
+                : (0, m.jsx)("div", { className: "empty-state", children: r }),
+            ],
+          });
+        },
+        _ = e => {
+          let { token: t } = e;
+          const [s, i] = (0, n.useState)([]),
+            [a, l] = (0, n.useState)(!1),
+            [d, c] = (0, n.useState)(null),
+            [u, p] = (0, n.useState)(null),
+            h = async () => {
+              (l(!0), c(null));
+              try {
+                let s = {};
+                try {
+                  const e = o.j2.currentUser ? await o.j2.currentUser.getIdToken(!0) : null;
+                  e && (s = { Authorization: `Bearer ${e}` });
+                } catch (e) {
+                  s = {};
+                }
+                let n = 0,
+                  a = null;
+                for (; n < 3; )
+                  try {
+                    const e = await fetch(`${r.Sn.ADMIN_PAYOUTS}?status=pending&limit=200`, {
+                        headers: s,
+                      }),
+                      t = await e.json().catch(() => null);
+                    (t && t.items ? i(t.items) : i([]), (a = null));
+                    break;
+                  } catch (t) {
+                    ((a = t), (n += 1), await new Promise(e => setTimeout(e, 200)));
+                  }
+                if (a) throw a;
+              } catch (t) {
+                c(t.message || "Failed to fetch payouts");
+              } finally {
+                l(!1);
+              }
+            };
+          (0, n.useEffect)(() => {
+            h();
+          }, []);
+          const x = async e => {
+              var t;
+              if (
+                window.confirm(
+                  `Process payout ${e.id} to ${(null === (t = e.payee) || void 0 === t ? void 0 : t.paypalEmail) || "unknown"} for $${e.amount}?`
+                )
+              )
+                try {
+                  let t = {};
+                  try {
+                    const e = o.j2.currentUser ? await o.j2.currentUser.getIdToken(!0) : null;
+                    e && (t = { Authorization: `Bearer ${e}` });
+                  } catch (s) {
+                    t = {};
+                  }
+                  const n = await fetch(r.Sn.ADMIN_PAYOUT_PROCESS(e.id), {
+                      method: "POST",
+                      headers: t,
+                    }),
+                    i = await n.json();
+                  i.success
+                    ? (alert("Payout processed (dry-run if payouts not enabled)"), h())
+                    : alert("Failed to process payout: " + (i.error || "unknown"));
+                } catch (n) {
+                  alert("Failed to process payout: " + n.message);
+                }
+            },
+            g = [
+              { header: "ID", accessor: "id" },
+              { header: "User", accessor: "userId" },
+              {
+                header: "Amount",
+                accessor: "amount",
+                render: e => `$${(e.amount || 0).toFixed(2)}`,
+              },
+              {
+                header: "Requested",
+                accessor: "requestedAt",
+                render: e => new Date(e.requestedAt).toLocaleString(),
+              },
+              { header: "Status", accessor: "status" },
+              {
+                header: "Actions",
+                render: e =>
+                  (0, m.jsxs)("div", {
+                    style: { display: "flex", gap: 8 },
+                    children: [
+                      (0, m.jsx)("button", { onClick: () => p(e), children: "View" }),
+                      (0, m.jsx)("button", { onClick: () => x(e), children: "Process" }),
+                    ],
+                  }),
+              },
+            ];
+          return (0, m.jsxs)("div", {
+            children: [
+              (0, m.jsx)("h3", { children: "Payouts" }),
+              a && (0, m.jsx)("div", { children: "Loading..." }),
+              d && (0, m.jsx)("div", { className: "error", children: d }),
+              (0, m.jsx)(V, { data: s, columns: g, title: "Pending payouts" }),
+              u &&
+                (0, m.jsx)("div", {
+                  className: "overlay",
+                  children: (0, m.jsxs)("div", {
+                    className: "modal",
+                    children: [
+                      (0, m.jsxs)("h4", { children: ["Payout ", u.id] }),
+                      (0, m.jsx)("pre", { children: JSON.stringify(u, null, 2) }),
+                      (0, m.jsxs)("div", {
+                        style: { display: "flex", gap: 8 },
+                        children: [
+                          (0, m.jsx)("button", { onClick: () => p(null), children: "Close" }),
+                          (0, m.jsx)("button", { onClick: () => x(u), children: "Process" }),
+                        ],
+                      }),
+                    ],
+                  }),
+                }),
+            ],
+          });
+        },
+        G = () => {
+          const [e, t] = (0, n.useState)([]),
+            [s, i] = (0, n.useState)(!1),
+            [a, l] = (0, n.useState)(null);
+          (0, n.useEffect)(() => {
+            d();
+          }, []);
+          const d = async () => {
+              (i(!0), l(null));
+              try {
+                const e = await o.j2.currentUser.getIdToken(!0),
+                  s = await fetch(`${r.JR}/api/paypal-subscriptions/admin/active-subscriptions`, {
+                    headers: { Authorization: `Bearer ${e}` },
+                  }),
+                  n = await s.json();
+                s.ok && n.subscriptions
+                  ? t(n.subscriptions)
+                  : l(n.error || "Failed to load subscriptions");
+              } catch (e) {
+                (console.error(e), l("Network error fetching subscriptions"));
+              } finally {
+                i(!1);
+              }
+            },
+            c = [
+              {
+                header: "User",
+                accessor: "name",
+                render: e =>
+                  (0, m.jsxs)("div", {
+                    children: [
+                      (0, m.jsx)("div", { style: { fontWeight: "bold" }, children: e.name }),
+                      (0, m.jsx)("div", {
+                        style: { fontSize: "0.8em", color: "#666" },
+                        children: e.userId,
+                      }),
+                    ],
+                  }),
+              },
+              { header: "Email", accessor: "email" },
+              {
+                header: "Plan",
+                accessor: "plan",
+                render: e =>
+                  (0, m.jsx)("span", {
+                    style: {
+                      background: "pro" === e.plan ? "#e0f2fe" : "#f3f4f6",
+                      color: "pro" === e.plan ? "#0284c7" : "#374151",
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      fontWeight: "bold",
+                      fontSize: "0.8em",
+                    },
+                    children: e.plan.toUpperCase(),
+                  }),
+              },
+              {
+                header: "Status",
+                accessor: "status",
+                render: e =>
+                  (0, m.jsx)("span", {
+                    style: { color: "active" === e.status ? "green" : "red", fontWeight: "bold" },
+                    children: e.status.toUpperCase(),
+                  }),
+              },
+              {
+                header: "Next Billing",
+                accessor: "nextBilling",
+                render: e => (e.nextBilling ? new Date(e.nextBilling).toLocaleDateString() : "-"),
+              },
+              {
+                header: "Actions",
+                render: e =>
+                  (0, m.jsxs)("div", {
+                    style: { display: "flex", gap: "8px" },
+                    children: [
+                      (0, m.jsx)("button", {
+                        onClick: () =>
+                          (async (e, t) => {
+                            if (
+                              window.confirm(
+                                `Are you sure you want to CANCEL the subscription for ${t}? This action cannot be undone.`
+                              )
+                            )
+                              try {
+                                const t = await o.j2.currentUser.getIdToken(),
+                                  s = await fetch(
+                                    `${r.JR}/api/paypal-subscriptions/admin/cancel-subscription`,
+                                    {
+                                      method: "POST",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `Bearer ${t}`,
+                                      },
+                                      body: JSON.stringify({
+                                        userId: e,
+                                        reason: "Cancelled by admin via dashboard",
+                                      }),
+                                    }
+                                  ),
+                                  n = await s.json();
+                                s.ok
+                                  ? (alert("Subscription cancelled successfully."), d())
+                                  : alert("Failed to cancel: " + (n.error || "Unknown error"));
+                              } catch (s) {
+                                (console.error(s), alert("Network error while cancelling."));
+                              }
+                          })(e.userId, e.name),
+                        style: {
+                          background: "#fee2e2",
+                          color: "#b91c1c",
+                          border: "none",
+                          padding: "6px 12px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                          fontSize: "0.85rem",
+                          transition: "background 0.2s",
+                        },
+                        onMouseOver: e => (e.target.style.background = "#fca5a5"),
+                        onMouseOut: e => (e.target.style.background = "#fee2e2"),
+                        children: "Cancel",
+                      }),
+                      (0, m.jsx)("button", {
+                        onClick: () =>
+                          (async (e, t) => {
+                            if (
+                              window.confirm(
+                                `Are you sure you want to REFUND the last payment for ${t}? This will reverse the most recent transaction.`
+                              )
+                            )
+                              try {
+                                const t = await o.j2.currentUser.getIdToken(),
+                                  s = await fetch(
+                                    `${r.JR}/api/paypal-subscriptions/admin/refund-last-payment`,
+                                    {
+                                      method: "POST",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `Bearer ${t}`,
+                                      },
+                                      body: JSON.stringify({
+                                        userId: e,
+                                        reason: "Admin requested refund via dashboard",
+                                      }),
+                                    }
+                                  ),
+                                  n = await s.json();
+                                s.ok
+                                  ? alert(`Success! Refunded payment (ID: ${n.refundId})`)
+                                  : alert("Failed to refund: " + (n.error || "Unknown error"));
+                              } catch (s) {
+                                (console.error(s), alert("Network error while refunding."));
+                              }
+                          })(e.userId, e.name),
+                        style: {
+                          background: "#dbeafe",
+                          color: "#1e40af",
+                          border: "none",
+                          padding: "6px 12px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                          fontSize: "0.85rem",
+                          transition: "background 0.2s",
+                        },
+                        onMouseOver: e => (e.target.style.background = "#bfdbfe"),
+                        onMouseOut: e => (e.target.style.background = "#dbeafe"),
+                        children: "Refund Last",
+                      }),
+                    ],
+                  }),
+              },
+            ];
+          return (0, m.jsxs)("div", {
+            className: "admin-payouts-panel",
+            children: [
+              (0, m.jsxs)("div", {
+                style: {
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "1rem",
+                },
+                children: [
+                  (0, m.jsxs)("h3", { children: ["Active Subscriptions (", e.length, ")"] }),
+                  (0, m.jsx)("button", {
+                    onClick: d,
+                    className: "refresh-btn",
+                    children: "\ud83d\udd04 Refresh",
+                  }),
+                ],
+              }),
+              s &&
+                (0, m.jsx)("div", {
+                  className: "loading-spinner",
+                  children: "Loading subscriptions...",
+                }),
+              a && (0, m.jsx)("div", { className: "error-banner", children: a }),
+              !s && !a && (0, m.jsx)(V, { data: e, columns: c, title: "Current Subscribers" }),
+            ],
+          });
+        };
+      var H = s(587);
+      const q = () => {
+        const [e, t] = (0, n.useState)([]),
+          [s, i] = (0, n.useState)(!1),
+          [a, l] = (0, n.useState)(null);
+        (0, n.useEffect)(() => {
+          d();
+        }, []);
+        const d = async () => {
+            i(!0);
+            try {
+              const e = await o.j2.currentUser.getIdToken(),
+                s = await fetch(`${r.JR}/api/admin/users?limit=100`, {
+                  headers: { Authorization: `Bearer ${e}` },
+                }),
+                n = await s.json();
+              n.success && n.users ? t(n.users) : l("Failed to load users");
+            } catch (e) {
+              (console.error(e), l("Network error loading users"));
+            } finally {
+              i(!1);
+            }
+          },
+          c = [
+            {
+              header: "User",
+              accessor: "name",
+              render: e =>
+                (0, m.jsxs)("div", {
+                  children: [
+                    (0, m.jsx)("div", {
+                      style: { fontWeight: "bold" },
+                      children: e.name || e.displayName || "No Name",
+                    }),
+                    (0, m.jsx)("div", {
+                      style: { fontSize: "0.8em", color: "#666" },
+                      children: e.email,
+                    }),
+                    (0, m.jsxs)("div", {
+                      style: { fontSize: "0.7em", color: "#999" },
+                      children: ["ID: ", e.id || e.userId],
+                    }),
+                  ],
+                }),
+            },
+            {
+              header: "Role",
+              accessor: "role",
+              render: e =>
+                (0, m.jsx)("span", {
+                  style: {
+                    background: "admin" === e.role ? "#fef3c7" : "#e0f2fe",
+                    color: "admin" === e.role ? "#d97706" : "#0284c7",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    fontSize: "0.8em",
+                    fontWeight: "bold",
+                  },
+                  children: e.role || "user",
+                }),
+            },
+            {
+              header: "Status",
+              accessor: "status",
+              render: e => {
+                const t = "suspended" === e.status || "banned" === e.status;
+                return (0, m.jsx)("span", {
+                  style: { color: t ? "red" : "green", fontWeight: "bold" },
+                  children: t ? "BANNED" : e.status || "Active",
+                });
+              },
+            },
+            {
+              header: "Actions",
+              render: e =>
+                (0, m.jsx)("div", {
+                  style: { display: "flex", gap: "8px" },
+                  children:
+                    "admin" !== e.role &&
+                    (0, m.jsxs)(m.Fragment, {
+                      children: [
+                        (0, m.jsx)("button", {
+                          onClick: () =>
+                            (async (e, t) => {
+                              if (
+                                window.confirm(
+                                  `Warning: You are about to log in as ${t}.\n\nThis will log you out of your Admin account. You will need to log back in as Admin when finished.\n\nContinue?`
+                                )
+                              )
+                                try {
+                                  const t = await o.j2.currentUser.getIdToken(),
+                                    s = await fetch(`${r.JR}/api/admin/support/impersonate/${e}`, {
+                                      method: "POST",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `Bearer ${t}`,
+                                      },
+                                      body: JSON.stringify({
+                                        reason: "Admin dashboard impersonation",
+                                      }),
+                                    }),
+                                    n = await s.json();
+                                  n.success && n.customToken
+                                    ? (await (0, H.p)(o.j2, n.customToken),
+                                      (window.location.href = "/dashboard"))
+                                    : alert(
+                                        "Failed to get impersonation token: " +
+                                          (n.error || "Unknown error")
+                                      );
+                                } catch (s) {
+                                  (console.error(s), alert("Impersonation failed: " + s.message));
+                                }
+                            })(e.id || e.userId, e.name || e.email),
+                          style: {
+                            background: "#4b5563",
+                            color: "white",
+                            border: "none",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "0.8em",
+                          },
+                          title: "Log in as this user",
+                          children: "\ud83d\udd75\ufe0f Impersonate",
+                        }),
+                        (0, m.jsx)("button", {
+                          onClick: () =>
+                            (async (e, t) => {
+                              const s = "suspended" === t || "banned" === t,
+                                n = s ? "unsuspend" : "suspend",
+                                i = s
+                                  ? `Unban user ${e}? They will regain access.`
+                                  : `Ban user ${e}? They will lose access immediately.`;
+                              if (window.confirm(i))
+                                try {
+                                  const t = await o.j2.currentUser.getIdToken(),
+                                    s = await fetch(`${r.JR}/api/admin/users/${e}/${n}`, {
+                                      method: "POST",
+                                      headers: { Authorization: `Bearer ${t}` },
+                                    });
+                                  if (s.ok) (alert(`User ${n}ed successfully`), d());
+                                  else {
+                                    const e = await s.json();
+                                    alert(`Failed: ${e.error || "Unknown error"}`);
+                                  }
+                                } catch (a) {
+                                  alert("Network error");
+                                }
+                            })(e.id || e.userId, e.status),
+                          style: {
+                            background:
+                              "suspended" === e.status || "banned" === e.status
+                                ? "#dcfce7"
+                                : "#fee2e2",
+                            color:
+                              "suspended" === e.status || "banned" === e.status
+                                ? "#166534"
+                                : "#b91c1c",
+                            border: "none",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "0.8em",
+                          },
+                          children:
+                            "suspended" === e.status || "banned" === e.status
+                              ? "\u2705 Unban"
+                              : "\ud83d\udeab Ban",
+                        }),
+                      ],
+                    }),
+                }),
+            },
+          ];
+        return (0, m.jsxs)("div", {
+          style: { marginTop: "24px" },
+          children: [
+            (0, m.jsxs)("div", {
+              style: {
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
+              },
+              children: [
+                (0, m.jsx)("h3", { children: "User Management" }),
+                (0, m.jsx)("button", {
+                  onClick: d,
+                  style: {
+                    background: "#f3f4f6",
+                    border: "1px solid #d1d5db",
+                    padding: "6px 12px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  },
+                  children: "Refresh List",
+                }),
+              ],
+            }),
+            s && (0, m.jsx)("div", { children: "Loading users..." }),
+            a && (0, m.jsx)("div", { style: { color: "red" }, children: a }),
+            !s &&
+              !a &&
+              (0, m.jsx)(V, { data: e, columns: c, title: "", emptyMessage: "No users found." }),
+          ],
+        });
+      };
+      var Y = s(5158);
+      function K(e) {
+        try {
+          return e
+            ? "number" === typeof (null === e || void 0 === e ? void 0 : e.seconds)
+              ? new Date(1e3 * e.seconds).toLocaleString()
+              : new Date(e).toLocaleString()
+            : "Never recorded";
+        } catch (t) {
+          return "Never recorded";
+        }
+      }
+      function Q() {
+        const [e, t] = (0, n.useState)(null),
+          [s, a] = (0, n.useState)(!0);
+        if (
+          ((0, n.useEffect)(() => {
+            let e = !0;
+            return (
+              (async () => {
+                try {
+                  var s;
+                  const n = await (null === (s = o.j2.currentUser) || void 0 === s
+                      ? void 0
+                      : s.getIdToken()),
+                    a = await fetch(`${r.JR}/api/admin/config/env-status`, {
+                      headers: n ? { Authorization: `Bearer ${n}` } : void 0,
+                    }),
+                    l = await (0, i.p)(a);
+                  if (!e) return;
+                  l.ok && l.json && l.json.ok && t(l.json);
+                } catch (n) {
+                  console.warn("BackgroundJobsPanel: failed to load env status", n);
+                } finally {
+                  e && a(!1);
+                }
+              })(),
+              () => {
+                e = !1;
+              }
+            );
+          }, []),
+          s)
+        )
+          return (0, m.jsx)("div", {
+            "data-testid": "background-jobs-panel",
+            style: {
+              background: "white",
+              borderRadius: 12,
+              padding: 20,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            },
+            children: "Loading background job status...",
+          });
+        const l = (null === e || void 0 === e ? void 0 : e.workerStatus) || {
+          required: [],
+          details: {},
+          staleThresholdSec: 0,
+        };
+        return (0, m.jsxs)("div", {
+          "data-testid": "background-jobs-panel",
+          style: {
+            background: "white",
+            borderRadius: 12,
+            padding: 20,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+          },
+          children: [
+            (0, m.jsxs)("div", {
+              style: {
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 16,
+                gap: 16,
+                flexWrap: "wrap",
+              },
+              children: [
+                (0, m.jsxs)("div", {
+                  children: [
+                    (0, m.jsx)("h3", {
+                      style: { margin: 0, color: "#333" },
+                      children: "Background Jobs",
+                    }),
+                    (0, m.jsx)("div", {
+                      style: { color: "#666", fontSize: "0.9rem", marginTop: 4 },
+                      children: "Worker heartbeat visibility from system status records.",
+                    }),
+                  ],
+                }),
+                (0, m.jsxs)("div", {
+                  style: { display: "flex", gap: 10, flexWrap: "wrap" },
+                  children: [
+                    (0, m.jsx)("span", {
+                      style: {
+                        padding: "6px 10px",
+                        borderRadius: 999,
+                        background:
+                          null !== e && void 0 !== e && e.backgroundJobsEnabled
+                            ? "#e8f5e9"
+                            : "#fff3e0",
+                        color:
+                          null !== e && void 0 !== e && e.backgroundJobsEnabled
+                            ? "#2e7d32"
+                            : "#b26a00",
+                        fontWeight: 600,
+                        fontSize: "0.85rem",
+                      },
+                      children:
+                        null !== e && void 0 !== e && e.backgroundJobsEnabled
+                          ? "Enabled"
+                          : "Disabled",
+                    }),
+                    (0, m.jsx)("span", {
+                      style: {
+                        padding: "6px 10px",
+                        borderRadius: 999,
+                        background: l.allHealthy ? "#e8f5e9" : "#ffebee",
+                        color: l.allHealthy ? "#2e7d32" : "#c62828",
+                        fontWeight: 600,
+                        fontSize: "0.85rem",
+                      },
+                      children: l.allHealthy ? "Workers Fresh" : "Worker Attention Needed",
+                    }),
+                  ],
+                }),
+              ],
+            }),
+            (0, m.jsx)("div", {
+              style: {
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: 12,
+              },
+              children: (l.required || []).map(e => {
+                const t = (l.details && l.details[e]) || {};
+                return (0, m.jsxs)(
+                  "div",
+                  {
+                    "data-testid": `background-job-${e}`,
+                    style: {
+                      border: "1px solid " + (t.ok ? "#c8e6c9" : "#ffcdd2"),
+                      borderRadius: 10,
+                      padding: 14,
+                      background: t.ok ? "#f6fff7" : "#fff8f8",
+                    },
+                    children: [
+                      (0, m.jsxs)("div", {
+                        style: {
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: 10,
+                        },
+                        children: [
+                          (0, m.jsx)("strong", { style: { color: "#333" }, children: e }),
+                          (0, m.jsx)("span", {
+                            style: {
+                              fontSize: "0.8rem",
+                              fontWeight: 600,
+                              color: t.ok ? "#2e7d32" : "#c62828",
+                            },
+                            children: t.ok ? "OK" : t.found ? "Stale" : "Missing",
+                          }),
+                        ],
+                      }),
+                      (0, m.jsxs)("div", {
+                        style: { marginTop: 8, fontSize: "0.85rem", color: "#666" },
+                        children: ["Last run: ", K(t.lastRun)],
+                      }),
+                      t.status
+                        ? (0, m.jsxs)("div", {
+                            style: { marginTop: 4, fontSize: "0.8rem", color: "#666" },
+                            children: ["Status: ", t.status],
+                          })
+                        : null,
+                      t.error
+                        ? (0, m.jsx)("div", {
+                            style: { marginTop: 8, fontSize: "0.8rem", color: "#c62828" },
+                            children: t.error,
+                          })
+                        : null,
+                    ],
+                  },
+                  e
+                );
+              }),
+            }),
+            (0, m.jsxs)("div", {
+              style: { marginTop: 14, fontSize: "0.8rem", color: "#666" },
+              children: ["Freshness threshold: ", l.staleThresholdSec || 0, " seconds."],
+            }),
+          ],
+        });
+      }
+      var X = s(1973);
+      const Z = function (e) {
+        var t, s;
+        let { analytics: d, user: c, onLogout: u } = e;
+        const [p, h] = (0, n.useState)(null),
+          [x, g] = (0, n.useState)(!0),
+          [y, f] = (0, n.useState)(null),
+          [v, j] = (0, n.useState)("content"),
+          [b, w] = (0, n.useState)(!1),
+          [k, T] = (0, n.useState)("all"),
+          [R, C] = (0, n.useState)(""),
+          [A, P] = (0, n.useState)("all"),
+          [I, B] = (0, n.useState)(null),
+          [D, $] = (0, n.useState)(null),
+          [N, U] = (0, n.useState)(!1),
+          [z, E] = (0, n.useState)("all"),
+          L = function (e) {
+            let t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : "0";
+            if (null === e || void 0 === e) return t;
+            if ("number" === typeof e) return e.toLocaleString();
+            const s = Number(e);
+            return Number.isNaN(s) ? t : s.toLocaleString();
+          },
+          W = async () => {
+            async function e() {
+              return o.j2.currentUser ? await o.j2.currentUser.getIdToken() : null;
+            }
+            try {
+              const l = new Date();
+              l.setHours(0, 0, 0, 0);
+              const u = a.Dc.fromDate(l),
+                p = (await (0, a.GG)((0, a.rJ)(o.db, "users"))).size,
+                x = (0, a.P)((0, a.rJ)(o.db, "users"), (0, a._M)("createdAt", ">=", u)),
+                m = (await (0, a.GG)(x)).size,
+                y = await (0, a.GG)((0, a.rJ)(o.db, "content")),
+                f = y.size,
+                v = (0, a.P)((0, a.rJ)(o.db, "content"), (0, a._M)("createdAt", ">=", u)),
+                j = (await (0, a.GG)(v)).size;
+              let b = 0,
+                S = 0,
+                k = 0,
+                T = { Video: 0, Image: 0, Audio: 0, Article: 0, Other: 0 };
+              y.docs.forEach(e => {
+                const t = e.data(),
+                  s = t.views || 0;
+                s >= 1e3 ? b++ : s >= 100 ? S++ : k++;
+                let n = t.type || "Other";
+                n = n && n.length > 0 ? n.charAt(0).toUpperCase() + n.slice(1) : "Other";
+                const r = Number(t.revenue) || 0.002 * s;
+                void 0 !== T[n] ? (T[n] += r) : (T.Other = (T.Other || 0) + r);
+              });
+              const R = (await (0, a.GG)((0, a.rJ)(o.db, "analytics"))).docs.map(e => e.data()),
+                C = {},
+                A = { smart_link_click: 0, landing_view: 0 };
+              R.forEach(e => {
+                e.type && Object.prototype.hasOwnProperty.call(A, e.type) && (A[e.type] += 1);
+              });
+              const P = [],
+                I = {},
+                B = (await (0, a.GG)((0, a.rJ)(o.db, "promotion_schedules"))).docs.map(e => ({
+                  id: e.id,
+                  ...e.data(),
+                })),
+                D = new Date(),
+                $ = B.filter(
+                  e =>
+                    e.isActive &&
+                    e.startTime &&
+                    ("function" === typeof e.startTime.toDate
+                      ? e.startTime.toDate()
+                      : new Date(e.startTime)) <= D &&
+                    (!e.endTime ||
+                      ("function" === typeof e.endTime.toDate
+                        ? e.endTime.toDate()
+                        : new Date(e.endTime)) >= D)
+                ).length,
+                N = B.filter(
+                  e =>
+                    e.isActive &&
+                    e.startTime &&
+                    ("function" === typeof e.startTime.toDate
+                      ? e.startTime.toDate()
+                      : new Date(e.startTime)) > D
+                ).length,
+                U = B.filter(
+                  e =>
+                    !e.isActive ||
+                    (e.endTime &&
+                      ("function" === typeof e.endTime.toDate
+                        ? e.endTime.toDate()
+                        : new Date(e.endTime)) < D)
+                ).length;
+              let z = null;
+              try {
+                const t = await e(),
+                  s = await fetch(
+                    `${r.JR}/api/monetization/revenue-analytics?timeframe=month`,
+                    t ? { headers: { Authorization: `Bearer ${t}` } } : void 0
+                  ),
+                  n = await (0, i.p)(s);
+                n.ok && n.json
+                  ? (z = n.json)
+                  : n.ok ||
+                    console.warn("Could not fetch revenue analytics: non-JSON or error response", {
+                      status: n.status,
+                      preview: n.textPreview || n.error,
+                    });
+              } catch (d) {
+                console.warn("Could not fetch revenue analytics:", d);
+              }
+              const E = await (0, a.GG)((0, a.rJ)(o.db, "transactions")),
+                M = E.docs.map(e => ({ id: e.id, ...e.data() }));
+              E.docs.forEach(e => {
+                const t = e.data();
+                if (t.contentId) {
+                  const e = P.find(e => e.contentId === t.contentId);
+                  e
+                    ? (e.totalRevenue += t.amount || 0)
+                    : P.push({ contentId: t.contentId, totalRevenue: t.amount || 0 });
+                }
+                t.userId && (I[t.userId] = (I[t.userId] || 0) + (t.amount || 0));
+              });
+              const O = M.reduce((e, t) => e + (t.amount || 0), 0),
+                L = M.filter(e => {
+                  let t = null;
+                  return (
+                    e.timestamp &&
+                      (t =
+                        "function" === typeof e.timestamp.toDate
+                          ? e.timestamp.toDate()
+                          : new Date(e.timestamp)),
+                    t && t.toDateString() === l.toDateString()
+                  );
+                }).reduce((e, t) => e + (t.amount || 0), 0),
+                F = (await (0, a.GG)((0, a.rJ)(o.db, "user_activity"))).docs.map(e => ({
+                  id: e.id,
+                  ...e.data(),
+                })),
+                W = new Set(
+                  F.filter(e => {
+                    let t = null;
+                    return (
+                      e.timestamp &&
+                        (t =
+                          "function" === typeof e.timestamp.toDate
+                            ? e.timestamp.toDate()
+                            : new Date(e.timestamp)),
+                      t && t.toDateString() === l.toDateString()
+                    );
+                  }).map(e => e.userId)
+                ).size,
+                J = new Set(
+                  F.filter(e => {
+                    let t = null;
+                    e.timestamp &&
+                      (t =
+                        "function" === typeof e.timestamp.toDate
+                          ? e.timestamp.toDate()
+                          : new Date(e.timestamp));
+                    const s = new Date();
+                    return (s.setDate(s.getDate() - 7), t && t >= s);
+                  }).map(e => e.userId)
+                ).size,
+                V = F.length,
+                _ = p > 0 ? (V / p) * 100 : 0,
+                G = (0, a.P)((0, a.rJ)(o.db, "content"), (0, a.My)("views", "desc"), (0, a.AB)(5)),
+                H = (await (0, a.GG)(G)).docs.map(e => ({ id: e.id, ...e.data() })),
+                q = (0, a.P)(
+                  (0, a.rJ)(o.db, "activities"),
+                  (0, a.My)("timestamp", "desc"),
+                  (0, a.AB)(10)
+                ),
+                Y = (await (0, a.GG)(q)).docs.map(e => ({ id: e.id, ...e.data() }));
+              let K = {
+                totalRevenue: 0,
+                revenueToday: 0,
+                avgRevenuePerContent: 0,
+                avgRevenuePerUser: 0,
+                projectedMonthlyRevenue: 0,
+                financialMetrics: {
+                  revenueByMonth: [],
+                  revenueByContentType: {},
+                  transactionTrends: {},
+                },
+              };
+              try {
+                const o = await e(),
+                  a = await fetch(
+                    `${r.JR}/api/monetization/revenue-analytics?timeframe=month`,
+                    o ? { headers: { Authorization: `Bearer ${o}` } } : void 0
+                  ),
+                  l = await (0, i.p)(a);
+                if (l.ok && l.json) {
+                  var t, s, n;
+                  const e = l.json;
+                  K = {
+                    totalRevenue: e.totalRevenue || 0,
+                    revenueToday:
+                      (null === (t = e.dailyBreakdown) ||
+                      void 0 === t ||
+                      null === (s = t[e.dailyBreakdown.length - 1]) ||
+                      void 0 === s
+                        ? void 0
+                        : s.revenue) || 0,
+                    avgRevenuePerContent: f > 0 ? e.totalRevenue / f : 0,
+                    avgRevenuePerUser: p > 0 ? e.totalRevenue / p : 0,
+                    projectedMonthlyRevenue: 1.2 * e.totalRevenue,
+                    financialMetrics: {
+                      revenueByMonth:
+                        (null === (n = e.dailyBreakdown) || void 0 === n
+                          ? void 0
+                          : n.map(e => ({
+                              month: new Date(e.date).toLocaleDateString("en-US", {
+                                month: "short",
+                              }),
+                              revenue: e.revenue,
+                            }))) || [],
+                      revenueByContentType: T,
+                      transactionTrends: {
+                        averageOrderValue: 38.72,
+                        conversionRate: 2.8,
+                        repeatPurchaseRate: 18.5,
+                      },
+                    },
+                  };
+                }
+              } catch (c) {
+                console.warn("Could not fetch revenue analytics:", c);
+              }
+              let Q = 0,
+                X = 0;
+              H.forEach(e => {
+                ((X += e.views || 0), (Q += (e.engagementRate || 0) * (e.views || 0)));
+              });
+              let Z = 0,
+                ee = 0;
+              try {
+                const e = (await (0, a.GG)((0, a.rJ)(o.db, "ab_tests"))).docs.map(e => ({
+                    id: e.id,
+                    ...e.data(),
+                  })),
+                  t = new Date(),
+                  s = new Date(t.getTime() - 864e5);
+                for (const n of e)
+                  if (
+                    (n.autopilot && n.autopilot.enabled && Z++, Array.isArray(n.autopilotActions))
+                  )
+                    for (const e of n.autopilotActions) {
+                      let t =
+                        e && e.triggeredAt
+                          ? "function" === typeof e.triggeredAt.toDate
+                            ? e.triggeredAt.toDate()
+                            : new Date(e.triggeredAt)
+                          : null;
+                      t && t >= s && ee++;
+                    }
+              } catch (d) {
+                console.warn("AdminDashboard: could not compute autopilot stats", d);
+              }
+              const te = {
+                totalUsers: p,
+                newUsersToday: m,
+                totalContent: f,
+                newContentToday: j,
+                totalRevenue: O || K.totalRevenue,
+                revenueToday: L || K.revenueToday,
+                activePromotions: $,
+                scheduledPromotions: N,
+                activeUsers: W || Math.round(0.52 * p),
+                activeUsersLastWeek: J || Math.round(0.48 * p),
+                engagementRate: _ / 100,
+                engagementChange: J > 0 ? (W - J) / J : 0.08,
+                userSegmentation: {
+                  powerUsers: Math.round(0.12 * p),
+                  regularUsers: Math.round(0.58 * p),
+                  occasionalUsers: Math.round(0.3 * p),
+                  total: p,
+                },
+                contentPerformance: { high: b, medium: S, low: k },
+                avgRevenuePerContent: K.avgRevenuePerContent,
+                avgRevenuePerUser: K.avgRevenuePerUser,
+                projectedMonthlyRevenue: K.projectedMonthlyRevenue,
+                promotionsCompleted: U,
+                topContent: H,
+                recentActivities: Y,
+                promotionSchedules: B,
+                autopilot: { enabledCount: Z, actionsLast24h: ee },
+                revenueByPlatform: C,
+                revenuePerContent: P,
+                revenuePerUser: I,
+                transactions: M,
+                eventCounts: A,
+                performanceMetrics: {
+                  conversionRate: 3.2,
+                  bounceRate: 42.8,
+                  averageSessionDuration: 187,
+                  returnVisitorRate: 28.5,
+                  engagementByPlatform: { mobile: 64, desktop: 31, tablet: 5 },
+                },
+                demographics: {
+                  ageGroups: { "18-24": 15, "25-34": 32, "35-44": 28, "45-54": 18, "55+": 7 },
+                  geoDistribution: {
+                    "North America": 42,
+                    Europe: 28,
+                    Asia: 18,
+                    "South America": 8,
+                    Africa: 3,
+                    Oceania: 1,
+                  },
+                  deviceTypes: { iOS: 38, Android: 41, Windows: 16, Mac: 4, Other: 1 },
+                },
+                financialMetrics: {
+                  revenueByMonth: (() => {
+                    const e = {};
+                    return (
+                      M.forEach(t => {
+                        let s = null;
+                        if (
+                          (t.timestamp &&
+                            (s =
+                              "function" === typeof t.timestamp.toDate
+                                ? t.timestamp.toDate()
+                                : new Date(t.timestamp)),
+                          s)
+                        ) {
+                          const n = s.toLocaleDateString("en-US", {
+                            month: "short",
+                            year: "numeric",
+                          });
+                          e[n] = (e[n] || 0) + (t.amount || 0);
+                        }
+                      }),
+                      Object.entries(e)
+                        .map(e => {
+                          let [t, s] = e;
+                          return { month: t, revenue: s };
+                        })
+                        .slice(-6)
+                    );
+                  })(),
+                  revenueByContentType: (() => {
+                    const e = {};
+                    M.forEach(t => {
+                      const s = t.contentType || "Other";
+                      e[s] = (e[s] || 0) + (t.amount || 0);
+                    });
+                    const t = Object.values(e).reduce((e, t) => e + t, 0),
+                      s = {};
+                    return (
+                      Object.entries(e).forEach(e => {
+                        let [n, r] = e;
+                        s[n] = Math.round((r / t) * 100);
+                      }),
+                      s
+                    );
+                  })(),
+                  transactionTrends: {
+                    averageOrderValue:
+                      M.length > 0 ? M.reduce((e, t) => e + (t.amount || 0), 0) / M.length : 0,
+                    conversionRate: p > 0 ? (M.length / p) * 100 : 0,
+                    repeatPurchaseRate: (() => {
+                      const e = {};
+                      M.forEach(t => {
+                        const s = t.userId;
+                        s && (e[s] = (e[s] || 0) + 1);
+                      });
+                      const t = Object.values(e).filter(e => e > 1).length;
+                      return p > 0 ? (t / p) * 100 : 0;
+                    })(),
+                  },
+                  creditPurchases: M.filter(e => "CREDIT_PURCHASE" === e.type),
+                  creditPurchaseSummary: {
+                    totalPurchases: M.filter(e => "CREDIT_PURCHASE" === e.type).length,
+                    totalAmount: M.filter(e => "CREDIT_PURCHASE" === e.type).reduce(
+                      (e, t) => e + (t.amount || 0),
+                      0
+                    ),
+                  },
+                },
+              };
+              (h(te), g(!1), w(!1));
+            } catch (d) {
+              (console.error("Error fetching analytics data from Firestore:", d),
+                f(d.message),
+                setTimeout(() => {
+                  (h(l), g(!1), w(!1));
+                }, 1500));
+            }
+          };
+        (0, n.useEffect)(() => {
+          if (d) (h(d), g(!1));
+          else {
+            (async () => {
+              try {
+                const e = o.j2.currentUser ? await o.j2.currentUser.getIdToken() : null,
+                  t = await fetch(r.Sn.ADMIN_ANALYTICS, {
+                    headers: { Authorization: e ? `Bearer ${e}` : "" },
+                  }),
+                  s = await (0, i.p)(t);
+                if (s.ok && s.json) return (h(s.json), void g(!1));
+                console.warn(
+                  "Server analytics returned non-ok response; status:",
+                  s.status,
+                  "error:",
+                  s.error || s.textPreview
+                );
+              } catch (e) {
+                console.error("Error fetching server analytics:", e.message || e);
+              }
+              (h(l), g(!1));
+            })();
+          }
+        }, [d]);
+        const V = e => {
+            let { title: t, value: s, subtitle: n, color: r = "#1976d2", icon: i, trend: o } = e;
+            return (0, m.jsxs)("div", {
+              style: {
+                background: "white",
+                borderRadius: "12px",
+                padding: "24px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                flex: "1",
+                minWidth: "220px",
+                margin: "10px",
+                position: "relative",
+                overflow: "hidden",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                cursor: "pointer",
+                border: "1px solid rgba(0,0,0,0.05)",
+              },
+              children: [
+                (0, m.jsx)("div", {
+                  style: {
+                    position: "absolute",
+                    top: "15px",
+                    right: "15px",
+                    color: r,
+                    opacity: 0.2,
+                    fontSize: "2.5rem",
+                  },
+                  children: i,
+                }),
+                (0, m.jsx)("div", {
+                  style: {
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "8px",
+                    backgroundColor: `${r}15`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: "15px",
+                  },
+                  children: (0, m.jsx)("span", {
+                    style: { color: r, fontSize: "1.2rem" },
+                    children: i,
+                  }),
+                }),
+                (0, m.jsx)("h3", {
+                  style: { color: "#333", marginTop: 0, fontSize: "1.1rem", fontWeight: "600" },
+                  children: t,
+                }),
+                (0, m.jsx)("div", {
+                  style: {
+                    fontSize: "1.8rem",
+                    fontWeight: "bold",
+                    marginBottom: "8px",
+                    color: "#111",
+                  },
+                  children:
+                    "number" === typeof s && t.toLowerCase().includes("revenue")
+                      ? `$${s.toFixed(2)}`
+                      : s,
+                }),
+                n &&
+                  (0, m.jsxs)("div", {
+                    style: {
+                      fontSize: "0.9rem",
+                      color: "#666",
+                      display: "flex",
+                      alignItems: "center",
+                    },
+                    children: [
+                      o &&
+                        (0, m.jsxs)("span", {
+                          style: {
+                            color: o > 0 ? "#2e7d32" : "#d32f2f",
+                            marginRight: "5px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                          },
+                          children: [o > 0 ? "\u2191" : "\u2193", " ", Math.abs(o), "%"],
+                        }),
+                      n,
+                    ],
+                  }),
+              ],
+            });
+          },
+          H = e => {
+            let { value: t, max: s, color: n = "#1976d2", label: r } = e;
+            return (0, m.jsxs)("div", {
+              style: { marginBottom: "15px" },
+              children: [
+                (0, m.jsxs)("div", {
+                  style: { display: "flex", justifyContent: "space-between", marginBottom: "5px" },
+                  children: [
+                    (0, m.jsx)("span", {
+                      style: { fontSize: "0.9rem", color: "#555" },
+                      children: r,
+                    }),
+                    (0, m.jsxs)("span", {
+                      style: { fontSize: "0.9rem", color: "#555", fontWeight: "bold" },
+                      children: [t, "%"],
+                    }),
+                  ],
+                }),
+                (0, m.jsx)("div", {
+                  style: {
+                    height: "8px",
+                    backgroundColor: "#f0f0f0",
+                    borderRadius: "4px",
+                    overflow: "hidden",
+                  },
+                  children: (0, m.jsx)("div", {
+                    style: {
+                      height: "100%",
+                      width: (t / s) * 100 + "%",
+                      backgroundColor: n,
+                      borderRadius: "4px",
+                    },
+                  }),
+                }),
+              ],
+            });
+          },
+          K = e => {
+            let { name: t, label: s, icon: n } = e;
+            return (0, m.jsxs)("button", {
+              onClick: () => j(t),
+              style: {
+                backgroundColor: v === t ? "#1976d2" : "transparent",
+                color: v === t ? "white" : "#555",
+                border: "none",
+                padding: "12px 20px",
+                borderRadius: "8px",
+                fontSize: "0.95rem",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                margin: "0 5px",
+                fontWeight: v === t ? "600" : "400",
+                transition: "all 0.2s ease",
+              },
+              children: [
+                (0, m.jsx)("span", {
+                  style: { marginRight: "8px", fontSize: "1.1rem" },
+                  children: n,
+                }),
+                s,
+              ],
+            });
+          },
+          Z = e => {
+            let { data: t, title: s } = e;
+            return (0, m.jsxs)("div", {
+              style: {
+                backgroundColor: "white",
+                borderRadius: "12px",
+                padding: "20px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                marginBottom: "24px",
+              },
+              children: [
+                (0, m.jsx)("h3", {
+                  style: { marginTop: 0, marginBottom: "20px", color: "#333" },
+                  children: s,
+                }),
+                (0, m.jsx)("div", {
+                  style: { display: "flex", height: "200px", alignItems: "flex-end" },
+                  children: t.map((e, s) =>
+                    (0, m.jsxs)(
+                      "div",
+                      {
+                        style: {
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        },
+                        children: [
+                          (0, m.jsx)("div", {
+                            style: {
+                              height: (e.revenue / Math.max(...t.map(e => e.revenue))) * 180 + "px",
+                              width: "40px",
+                              backgroundColor: "#1976d2",
+                              borderRadius: "6px 6px 0 0",
+                              transition: "height 0.5s ease",
+                            },
+                          }),
+                          (0, m.jsx)("div", {
+                            style: { marginTop: "8px", fontSize: "0.8rem", color: "#666" },
+                            children: e.month,
+                          }),
+                        ],
+                      },
+                      s
+                    )
+                  ),
+                }),
+              ],
+            });
+          },
+          ee = e => {
+            let { data: t, title: s, colors: n } = e;
+            return (0, m.jsxs)("div", {
+              style: {
+                backgroundColor: "white",
+                borderRadius: "12px",
+                padding: "20px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                marginBottom: "24px",
+              },
+              children: [
+                (0, m.jsx)("h3", {
+                  style: { marginTop: 0, marginBottom: "20px", color: "#333" },
+                  children: s,
+                }),
+                (0, m.jsx)("div", {
+                  children: Object.entries(t).map((e, t) => {
+                    let [s, r] = e;
+                    return (0, m.jsxs)(
+                      "div",
+                      {
+                        style: { marginBottom: "12px" },
+                        children: [
+                          (0, m.jsxs)("div", {
+                            style: {
+                              display: "flex",
+                              justifyContent: "space-between",
+                              marginBottom: "5px",
+                            },
+                            children: [
+                              (0, m.jsxs)("span", {
+                                style: { display: "flex", alignItems: "center" },
+                                children: [
+                                  (0, m.jsx)("span", {
+                                    style: {
+                                      display: "inline-block",
+                                      width: "12px",
+                                      height: "12px",
+                                      backgroundColor: n[t % n.length],
+                                      borderRadius: "2px",
+                                      marginRight: "8px",
+                                    },
+                                  }),
+                                  s,
+                                ],
+                              }),
+                              (0, m.jsxs)("span", {
+                                style: { fontWeight: "bold" },
+                                children: [r, "%"],
+                              }),
+                            ],
+                          }),
+                          (0, m.jsx)("div", {
+                            style: {
+                              height: "8px",
+                              backgroundColor: "#f0f0f0",
+                              borderRadius: "4px",
+                              overflow: "hidden",
+                            },
+                            children: (0, m.jsx)("div", {
+                              style: {
+                                height: "100%",
+                                width: `${r}%`,
+                                backgroundColor: n[t % n.length],
+                                borderRadius: "4px",
+                              },
+                            }),
+                          }),
+                        ],
+                      },
+                      t
+                    );
+                  }),
+                }),
+              ],
+            });
+          },
+          te = e => {
+            let { data: t, columns: s, title: n } = e;
+            return (0, m.jsxs)("div", {
+              style: {
+                backgroundColor: "white",
+                borderRadius: "12px",
+                padding: "20px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                marginBottom: "24px",
+                overflowX: "auto",
+              },
+              children: [
+                (0, m.jsx)("h3", {
+                  style: { marginTop: 0, marginBottom: "20px", color: "#333" },
+                  children: n,
+                }),
+                (0, m.jsxs)("table", {
+                  style: { width: "100%", borderCollapse: "collapse" },
+                  children: [
+                    (0, m.jsx)("thead", {
+                      children: (0, m.jsx)("tr", {
+                        children: s.map((e, t) =>
+                          (0, m.jsx)(
+                            "th",
+                            {
+                              style: {
+                                textAlign: "left",
+                                padding: "12px 15px",
+                                borderBottom: "1px solid #eee",
+                                color: "#555",
+                                fontWeight: "600",
+                              },
+                              children: e.header,
+                            },
+                            t
+                          )
+                        ),
+                      }),
+                    }),
+                    (0, m.jsx)("tbody", {
+                      children: t.map((e, t) =>
+                        (0, m.jsx)(
+                          "tr",
+                          {
+                            style: { backgroundColor: t % 2 === 0 ? "#f9f9f9" : "white" },
+                            children: s.map((t, s) =>
+                              (0, m.jsx)(
+                                "td",
+                                {
+                                  style: {
+                                    padding: "12px 15px",
+                                    borderBottom: "1px solid #eee",
+                                    color: "#333",
+                                  },
+                                  children: t.render ? t.render(e) : e[t.accessor],
+                                },
+                                s
+                              )
+                            ),
+                          },
+                          t
+                        )
+                      ),
+                    }),
+                  ],
+                }),
+              ],
+            });
+          },
+          se = e => {
+            let { dashboardData: t } = e;
+            const [s, i] = (0, n.useState)([]),
+              [l, d] = (0, n.useState)(!0),
+              [c, u] = (0, n.useState)({ type: "all", status: "all", platform: "all" });
+            (0, n.useEffect)(() => {
+              p();
+            }, [c]);
+            const p = async () => {
+                d(!0);
+                try {
+                  let e = (await (0, a.GG)((0, a.rJ)(o.db, "ads"))).docs.map(e => ({
+                    id: e.id,
+                    ...e.data(),
+                  }));
+                  ("all" !== c.type && (e = e.filter(e => e.type === c.type)),
+                    "all" !== c.status && (e = e.filter(e => e.status === c.status)),
+                    "all" !== c.platform && (e = e.filter(e => e.externalPlatform === c.platform)),
+                    i(e),
+                    d(!1));
+                } catch (y) {
+                  (console.error("Error fetching ads:", y), d(!1));
+                }
+              },
+              h = async (e, t) => {
+                if (window.confirm(`Change ad status to ${t}?`))
+                  try {
+                    var s;
+                    const n = await (null === (s = o.j2.currentUser) || void 0 === s
+                      ? void 0
+                      : s.getIdToken());
+                    (
+                      await fetch(`${r.JR}/api/admin/ads/${e}/status`, {
+                        method: "PATCH",
+                        headers: {
+                          Authorization: `Bearer ${n}`,
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ status: t }),
+                      })
+                    ).ok
+                      ? (alert("Ad status updated successfully"), p())
+                      : alert("Failed to update ad status");
+                  } catch (y) {
+                    (console.error("Error updating ad status:", y),
+                      alert("Error updating ad status"));
+                  }
+              },
+              x = s.length,
+              g = s.filter(e => "active" === e.status).length,
+              f = s.filter(e => "draft" === e.status).length,
+              v = s.filter(e => "paused" === e.status).length,
+              j = s.reduce((e, t) => e + (t.impressions || 0), 0),
+              b = s.reduce((e, t) => e + (t.clicks || 0), 0),
+              w = s.reduce((e, t) => e + (t.spent || 0), 0),
+              S = j > 0 ? ((b / j) * 100).toFixed(2) : 0;
+            return (0, m.jsxs)(m.Fragment, {
+              children: [
+                (0, m.jsx)("div", {
+                  style: { marginTop: 24 },
+                  children: (0, m.jsxs)("div", {
+                    style: { display: "flex", flexWrap: "wrap", margin: "-10px" },
+                    children: [
+                      (0, m.jsx)(V, {
+                        title: "Total Ads",
+                        value: x.toLocaleString(),
+                        subtitle: `${g} active`,
+                        color: "#1976d2",
+                        icon: "\ud83d\udce3",
+                      }),
+                      (0, m.jsx)(V, {
+                        title: "Avg CTR",
+                        value: `${S}%`,
+                        subtitle: `${b.toLocaleString()} clicks`,
+                        color: "#2e7d32",
+                        icon: "\ud83d\udcc8",
+                      }),
+                      (0, m.jsx)(V, {
+                        title: "Total Impressions",
+                        value: j.toLocaleString(),
+                        subtitle: `${b.toLocaleString()} clicks`,
+                        color: "#5e35b1",
+                        icon: "\ud83d\udc41\ufe0f",
+                      }),
+                      (0, m.jsx)(V, {
+                        title: "Average CTR",
+                        value: `${S}%`,
+                        subtitle: `$${w.toFixed(2)} spent`,
+                        color: "#ed6c02",
+                        icon: "\ud83d\udcca",
+                      }),
+                    ],
+                  }),
+                }),
+                (0, m.jsxs)("div", {
+                  style: { marginTop: 30 },
+                  children: [
+                    (0, m.jsxs)("div", {
+                      style: { display: "flex", gap: "15px", marginBottom: "20px" },
+                      children: [
+                        (0, m.jsxs)("select", {
+                          value: c.type,
+                          onChange: e => u({ ...c, type: e.target.value }),
+                          style: {
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "1px solid #ddd",
+                            fontSize: "0.95rem",
+                          },
+                          children: [
+                            (0, m.jsx)("option", { value: "all", children: "All Types" }),
+                            (0, m.jsx)("option", { value: "platform", children: "Platform Ads" }),
+                            (0, m.jsx)("option", { value: "external", children: "External Ads" }),
+                          ],
+                        }),
+                        (0, m.jsxs)("select", {
+                          value: c.status,
+                          onChange: e => u({ ...c, status: e.target.value }),
+                          style: {
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "1px solid #ddd",
+                            fontSize: "0.95rem",
+                          },
+                          children: [
+                            (0, m.jsx)("option", { value: "all", children: "All Status" }),
+                            (0, m.jsx)("option", { value: "draft", children: "Draft" }),
+                            (0, m.jsx)("option", { value: "active", children: "Active" }),
+                            (0, m.jsx)("option", { value: "paused", children: "Paused" }),
+                            (0, m.jsx)("option", { value: "completed", children: "Completed" }),
+                          ],
+                        }),
+                        (0, m.jsxs)("select", {
+                          value: c.platform,
+                          onChange: e => u({ ...c, platform: e.target.value }),
+                          style: {
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "1px solid #ddd",
+                            fontSize: "0.95rem",
+                          },
+                          children: [
+                            (0, m.jsx)("option", { value: "all", children: "All Platforms" }),
+                            (0, m.jsx)("option", { value: "facebook", children: "Facebook" }),
+                            (0, m.jsx)("option", { value: "instagram", children: "Instagram" }),
+                            (0, m.jsx)("option", { value: "google", children: "Google" }),
+                            (0, m.jsx)("option", { value: "youtube", children: "YouTube" }),
+                            (0, m.jsx)("option", { value: "tiktok", children: "TikTok" }),
+                            (0, m.jsx)("option", { value: "twitter", children: "Twitter" }),
+                            (0, m.jsx)("option", { value: "linkedin", children: "LinkedIn" }),
+                            (0, m.jsx)("option", { value: "snapchat", children: "Snapchat" }),
+                          ],
+                        }),
+                      ],
+                    }),
+                    (0, m.jsxs)("div", {
+                      style: {
+                        backgroundColor: "white",
+                        borderRadius: "12px",
+                        padding: "20px",
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                      },
+                      children: [
+                        (0, m.jsxs)("h3", {
+                          style: { marginTop: 0, marginBottom: "20px" },
+                          children: ["All Ads (", s.length, ")"],
+                        }),
+                        l
+                          ? (0, m.jsx)("div", {
+                              style: { textAlign: "center", padding: "40px" },
+                              children: "Loading ads...",
+                            })
+                          : 0 === s.length
+                            ? (0, m.jsx)("div", {
+                                style: { textAlign: "center", padding: "40px", color: "#666" },
+                                children: "No ads found with current filters",
+                              })
+                            : (0, m.jsx)("div", {
+                                style: { overflowX: "auto" },
+                                children: (0, m.jsxs)("table", {
+                                  style: { width: "100%", borderCollapse: "collapse" },
+                                  children: [
+                                    (0, m.jsx)("thead", {
+                                      children: (0, m.jsxs)("tr", {
+                                        children: [
+                                          (0, m.jsx)("th", {
+                                            style: {
+                                              textAlign: "left",
+                                              padding: "12px",
+                                              borderBottom: "2px solid #eee",
+                                            },
+                                            children: "Ad",
+                                          }),
+                                          (0, m.jsx)("th", {
+                                            style: {
+                                              textAlign: "left",
+                                              padding: "12px",
+                                              borderBottom: "2px solid #eee",
+                                            },
+                                            children: "Type",
+                                          }),
+                                          (0, m.jsx)("th", {
+                                            style: {
+                                              textAlign: "left",
+                                              padding: "12px",
+                                              borderBottom: "2px solid #eee",
+                                            },
+                                            children: "Platform",
+                                          }),
+                                          (0, m.jsx)("th", {
+                                            style: {
+                                              textAlign: "left",
+                                              padding: "12px",
+                                              borderBottom: "2px solid #eee",
+                                            },
+                                            children: "Status",
+                                          }),
+                                          (0, m.jsx)("th", {
+                                            style: {
+                                              textAlign: "left",
+                                              padding: "12px",
+                                              borderBottom: "2px solid #eee",
+                                            },
+                                            children: "Budget",
+                                          }),
+                                          (0, m.jsx)("th", {
+                                            style: {
+                                              textAlign: "left",
+                                              padding: "12px",
+                                              borderBottom: "2px solid #eee",
+                                            },
+                                            children: "Impressions",
+                                          }),
+                                          (0, m.jsx)("th", {
+                                            style: {
+                                              textAlign: "left",
+                                              padding: "12px",
+                                              borderBottom: "2px solid #eee",
+                                            },
+                                            children: "Clicks",
+                                          }),
+                                          (0, m.jsx)("th", {
+                                            style: {
+                                              textAlign: "left",
+                                              padding: "12px",
+                                              borderBottom: "2px solid #eee",
+                                            },
+                                            children: "CTR",
+                                          }),
+                                          (0, m.jsx)("th", {
+                                            style: {
+                                              textAlign: "left",
+                                              padding: "12px",
+                                              borderBottom: "2px solid #eee",
+                                            },
+                                            children: "Created",
+                                          }),
+                                          (0, m.jsx)("th", {
+                                            style: {
+                                              textAlign: "left",
+                                              padding: "12px",
+                                              borderBottom: "2px solid #eee",
+                                            },
+                                            children: "Actions",
+                                          }),
+                                        ],
+                                      }),
+                                    }),
+                                    (0, m.jsx)("tbody", {
+                                      children: s.map(e => {
+                                        var t;
+                                        return (0, m.jsxs)(
+                                          "tr",
+                                          {
+                                            style: { borderBottom: "1px solid #eee" },
+                                            children: [
+                                              (0, m.jsxs)("td", {
+                                                style: { padding: "12px" },
+                                                children: [
+                                                  (0, m.jsx)("div", {
+                                                    style: { fontWeight: "500" },
+                                                    children: e.title,
+                                                  }),
+                                                  (0, m.jsx)("div", {
+                                                    style: { fontSize: "0.85rem", color: "#666" },
+                                                    children: e.description
+                                                      ? e.description.substring(0, 50) + "..."
+                                                      : "",
+                                                  }),
+                                                  (0, m.jsxs)("div", {
+                                                    style: {
+                                                      fontSize: "0.8rem",
+                                                      color: "#999",
+                                                      marginTop: "4px",
+                                                    },
+                                                    children: [
+                                                      "User: ",
+                                                      null === (t = e.userId) || void 0 === t
+                                                        ? void 0
+                                                        : t.substring(0, 8),
+                                                    ],
+                                                  }),
+                                                ],
+                                              }),
+                                              (0, m.jsx)("td", {
+                                                style: { padding: "12px" },
+                                                children: (0, m.jsx)("span", {
+                                                  style: {
+                                                    padding: "4px 8px",
+                                                    borderRadius: "4px",
+                                                    fontSize: "0.85rem",
+                                                    backgroundColor:
+                                                      "platform" === e.type ? "#e3f2fd" : "#f3e5f5",
+                                                    color:
+                                                      "platform" === e.type ? "#1976d2" : "#7b1fa2",
+                                                  },
+                                                  children: e.type,
+                                                }),
+                                              }),
+                                              (0, m.jsx)("td", {
+                                                style: { padding: "12px" },
+                                                children:
+                                                  "external" === e.type && e.externalPlatform
+                                                    ? (0, m.jsx)("span", {
+                                                        style: { textTransform: "capitalize" },
+                                                        children: e.externalPlatform,
+                                                      })
+                                                    : (0, m.jsx)("span", {
+                                                        style: { color: "#999" },
+                                                        children: "AutoPromote",
+                                                      }),
+                                              }),
+                                              (0, m.jsx)("td", {
+                                                style: { padding: "12px" },
+                                                children: (0, m.jsx)("span", {
+                                                  style: {
+                                                    padding: "4px 8px",
+                                                    borderRadius: "4px",
+                                                    fontSize: "0.85rem",
+                                                    backgroundColor:
+                                                      "active" === e.status
+                                                        ? "#e8f5e9"
+                                                        : "paused" === e.status
+                                                          ? "#fff3e0"
+                                                          : "draft" === e.status
+                                                            ? "#f5f5f5"
+                                                            : "#e3f2fd",
+                                                    color:
+                                                      "active" === e.status
+                                                        ? "#2e7d32"
+                                                        : "paused" === e.status
+                                                          ? "#ed6c02"
+                                                          : "draft" === e.status
+                                                            ? "#666"
+                                                            : "#1976d2",
+                                                  },
+                                                  children: e.status,
+                                                }),
+                                              }),
+                                              (0, m.jsxs)("td", {
+                                                style: { padding: "12px", fontWeight: "500" },
+                                                children: ["$", e.budget || 0],
+                                              }),
+                                              (0, m.jsx)("td", {
+                                                style: { padding: "12px" },
+                                                children: (e.impressions || 0).toLocaleString(),
+                                              }),
+                                              (0, m.jsx)("td", {
+                                                style: { padding: "12px" },
+                                                children: (e.clicks || 0).toLocaleString(),
+                                              }),
+                                              (0, m.jsxs)("td", {
+                                                style: { padding: "12px" },
+                                                children: [
+                                                  e.impressions > 0
+                                                    ? ((e.clicks / e.impressions) * 100).toFixed(2)
+                                                    : "0.00",
+                                                  "%",
+                                                ],
+                                              }),
+                                              (0, m.jsx)("td", {
+                                                style: { padding: "12px", fontSize: "0.9rem" },
+                                                children: e.createdAt
+                                                  ? new Date(e.createdAt).toLocaleDateString()
+                                                  : "N/A",
+                                              }),
+                                              (0, m.jsx)("td", {
+                                                style: { padding: "12px" },
+                                                children: (0, m.jsxs)("div", {
+                                                  style: { display: "flex", gap: "8px" },
+                                                  children: [
+                                                    "active" === e.status &&
+                                                      (0, m.jsx)("button", {
+                                                        onClick: () => h(e.id, "paused"),
+                                                        style: {
+                                                          padding: "6px 12px",
+                                                          borderRadius: "6px",
+                                                          border: "none",
+                                                          backgroundColor: "#ed6c02",
+                                                          color: "white",
+                                                          fontSize: "0.85rem",
+                                                          cursor: "pointer",
+                                                        },
+                                                        children: "Pause",
+                                                      }),
+                                                    "paused" === e.status &&
+                                                      (0, m.jsx)("button", {
+                                                        onClick: () => h(e.id, "active"),
+                                                        style: {
+                                                          padding: "6px 12px",
+                                                          borderRadius: "6px",
+                                                          border: "none",
+                                                          backgroundColor: "#2e7d32",
+                                                          color: "white",
+                                                          fontSize: "0.85rem",
+                                                          cursor: "pointer",
+                                                        },
+                                                        children: "Resume",
+                                                      }),
+                                                    (0, m.jsx)("button", {
+                                                      onClick: () =>
+                                                        (async e => {
+                                                          if (
+                                                            window.confirm(
+                                                              "Are you sure you want to delete this ad? This action cannot be undone."
+                                                            )
+                                                          )
+                                                            try {
+                                                              var t;
+                                                              const s = await (null ===
+                                                                (t = o.j2.currentUser) ||
+                                                              void 0 === t
+                                                                ? void 0
+                                                                : t.getIdToken());
+                                                              (
+                                                                await fetch(
+                                                                  `${r.JR}/api/admin/ads/${e}`,
+                                                                  {
+                                                                    method: "DELETE",
+                                                                    headers: {
+                                                                      Authorization: `Bearer ${s}`,
+                                                                    },
+                                                                  }
+                                                                )
+                                                              ).ok
+                                                                ? (alert("Ad deleted successfully"),
+                                                                  p())
+                                                                : alert("Failed to delete ad");
+                                                            } catch (y) {
+                                                              (console.error(
+                                                                "Error deleting ad:",
+                                                                y
+                                                              ),
+                                                                alert("Error deleting ad"));
+                                                            }
+                                                        })(e.id),
+                                                      style: {
+                                                        padding: "6px 12px",
+                                                        borderRadius: "6px",
+                                                        border: "none",
+                                                        backgroundColor: "#d32f2f",
+                                                        color: "white",
+                                                        fontSize: "0.85rem",
+                                                        cursor: "pointer",
+                                                      },
+                                                      children: "Delete",
+                                                    }),
+                                                  ],
+                                                }),
+                                              }),
+                                            ],
+                                          },
+                                          e.id
+                                        );
+                                      }),
+                                    }),
+                                  ],
+                                }),
+                              }),
+                      ],
+                    }),
+                  ],
+                }),
+                (0, m.jsxs)("div", {
+                  style: { marginTop: 30, display: "flex", gap: "20px" },
+                  children: [
+                    (0, m.jsx)("div", {
+                      style: { flex: 1 },
+                      children: (0, m.jsxs)("div", {
+                        style: {
+                          backgroundColor: "white",
+                          borderRadius: "12px",
+                          padding: "20px",
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                        },
+                        children: [
+                          (0, m.jsx)("h3", {
+                            style: { marginTop: 0, marginBottom: "20px" },
+                            children: "Ad Distribution",
+                          }),
+                          (0, m.jsx)(H, {
+                            label: "Platform Ads",
+                            value:
+                              Math.round((s.filter(e => "platform" === e.type).length / x) * 100) ||
+                              0,
+                            max: 100,
+                            color: "#1976d2",
+                          }),
+                          (0, m.jsx)(H, {
+                            label: "External Ads",
+                            value:
+                              Math.round((s.filter(e => "external" === e.type).length / x) * 100) ||
+                              0,
+                            max: 100,
+                            color: "#7b1fa2",
+                          }),
+                        ],
+                      }),
+                    }),
+                    (0, m.jsx)("div", {
+                      style: { flex: 1 },
+                      children: (0, m.jsxs)("div", {
+                        style: {
+                          backgroundColor: "white",
+                          borderRadius: "12px",
+                          padding: "20px",
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                        },
+                        children: [
+                          (0, m.jsx)("h3", {
+                            style: { marginTop: 0, marginBottom: "20px" },
+                            children: "Ad Status Breakdown",
+                          }),
+                          (0, m.jsx)(H, {
+                            label: "Active",
+                            value: Math.round((g / x) * 100) || 0,
+                            max: 100,
+                            color: "#2e7d32",
+                          }),
+                          (0, m.jsx)(H, {
+                            label: "Draft",
+                            value: Math.round((f / x) * 100) || 0,
+                            max: 100,
+                            color: "#666",
+                          }),
+                          (0, m.jsx)(H, {
+                            label: "Paused",
+                            value: Math.round((v / x) * 100) || 0,
+                            max: 100,
+                            color: "#ed6c02",
+                          }),
+                        ],
+                      }),
+                    }),
+                  ],
+                }),
+              ],
+            });
+          },
+          ne = e => {
+            let { activities: t } = e;
+            return (0, m.jsxs)("div", {
+              style: {
+                backgroundColor: "white",
+                borderRadius: "12px",
+                padding: "20px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                marginBottom: "24px",
+              },
+              children: [
+                (0, m.jsx)("h3", {
+                  style: { marginTop: 0, marginBottom: "20px", color: "#333" },
+                  children: "Recent Activity",
+                }),
+                (0, m.jsx)("div", {
+                  style: { maxHeight: "400px", overflowY: "auto" },
+                  children:
+                    t && t.length > 0
+                      ? t.map((e, s) =>
+                          (0, m.jsxs)(
+                            "div",
+                            {
+                              style: {
+                                padding: "12px 0",
+                                borderBottom: s !== t.length - 1 ? "1px solid #eee" : "none",
+                                display: "flex",
+                                alignItems: "flex-start",
+                              },
+                              children: [
+                                (0, m.jsx)("div", {
+                                  style: {
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "50%",
+                                    backgroundColor: "#e3f2fd",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    marginRight: "15px",
+                                    flexShrink: 0,
+                                  },
+                                  children: (0, m.jsx)("span", {
+                                    style: { color: "#1976d2" },
+                                    children:
+                                      "user" === e.type
+                                        ? "\ud83d\udc64"
+                                        : "content" === e.type
+                                          ? "\ud83d\udcc4"
+                                          : "promotion" === e.type
+                                            ? "\ud83d\ude80"
+                                            : "\ud83d\udcca",
+                                  }),
+                                }),
+                                (0, m.jsxs)("div", {
+                                  children: [
+                                    (0, m.jsx)("div", {
+                                      style: {
+                                        fontWeight: "500",
+                                        color: "#333",
+                                        marginBottom: "3px",
+                                      },
+                                      children: e.title || "Action performed",
+                                    }),
+                                    (0, m.jsx)("div", {
+                                      style: {
+                                        fontSize: "0.85rem",
+                                        color: "#666",
+                                        marginBottom: "3px",
+                                      },
+                                      children: e.description || "No description available",
+                                    }),
+                                    (0, m.jsx)("div", {
+                                      style: { fontSize: "0.8rem", color: "#999" },
+                                      children: e.timestamp
+                                        ? new Date(1e3 * e.timestamp.seconds).toLocaleString()
+                                        : "Unknown time",
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            },
+                            s
+                          )
+                        )
+                      : (0, m.jsx)("div", {
+                          style: { textAlign: "center", padding: "20px", color: "#666" },
+                          children: "No recent activities to display",
+                        }),
+                }),
+              ],
+            });
+          };
+        return x
+          ? (0, m.jsxs)("div", {
+              style: { marginTop: 24, padding: "24px", textAlign: "center" },
+              children: [
+                (0, m.jsxs)("div", {
+                  style: { display: "flex", alignItems: "center", justifyContent: "space-between" },
+                  children: [
+                    (0, m.jsx)("h2", { style: { color: "#333" }, children: "Admin Dashboard" }),
+                    (0, m.jsx)("div", { children: (0, m.jsx)(O, {}) }),
+                  ],
+                }),
+                (0, m.jsx)("div", {
+                  style: {
+                    margin: "24px auto",
+                    width: "50px",
+                    height: "50px",
+                    border: "5px solid rgba(25, 118, 210, 0.2)",
+                    borderTop: "5px solid #1976d2",
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite",
+                  },
+                  children: (0, m.jsx)("style", {
+                    children:
+                      "\n            @keyframes spin {\n              0% { transform: rotate(0deg); }\n              100% { transform: rotate(360deg); }\n            }\n          ",
+                  }),
+                }),
+                (0, m.jsx)("div", {
+                  children: (0, m.jsxs)("strong", {
+                    children: ["Welcome, ", c && c.name ? c.name : "Admin", " (Admin)"],
+                  }),
+                }),
+                (0, m.jsx)("div", {
+                  style: { marginTop: 16, color: "#666" },
+                  children: "Loading analytics data...",
+                }),
+              ],
+            })
+          : (0, m.jsxs)("div", {
+              style: { padding: "24px", backgroundColor: "#f5f5f5", minHeight: "100vh" },
+              children: [
+                (0, m.jsxs)("div", {
+                  style: {
+                    marginBottom: "24px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  },
+                  children: [
+                    (0, m.jsx)("h1", {
+                      style: { color: "#333", margin: 0 },
+                      children: "Admin Dashboard",
+                    }),
+                    (0, m.jsxs)("div", {
+                      style: { display: "flex", alignItems: "center" },
+                      children: [
+                        (0, m.jsx)("div", {
+                          style: { marginRight: "16px" },
+                          children: (0, m.jsx)(X.A, {
+                            activeTab: v,
+                            scripts: {
+                              overview:
+                                "Welcome to the Admin Overview. This dashboard provides a high-level summary of system performance. You can see total active users, ongoing A/B tests, and real-time revenue stats. Use the buttons above to export data or refresh metrics.",
+                              users:
+                                "This is the User Management panel. Here you can search for users via email or ID, view their detailed profiles, check their subscription status, and manage their permissions. You can also assume their identity for debugging.",
+                              content:
+                                "The Content Management table shows all videos and posts ever uploaded. Use this to track viral potential, debug failed uploads, or manually approve flagged content.",
+                              revenue:
+                                "The Revenue Dashboard tracks all income streams. Analyze monthly revenue, subscription retention, and transaction trends to optimize monetization strategies.",
+                              ads: "The Ads Management System lets you oversee all advertising campaigns running on the platform. Monitor impressions, clicks, and budgets, and pause or delete underperforming ads.",
+                              community:
+                                "This is the Community Moderation interface. Review flagged comments and posts to ensure a safe environment for all users.",
+                              approval:
+                                "Content Approval Queue. Review user-submitted content before it goes live. Approve safe content or reject violations with a reason.",
+                              analytics:
+                                "Advanced Analytics provides deep dives into user behavior, retention cohorts, and platform-specific performance metrics.",
+                              system:
+                                "System Health Monitoring. View real-time status of all backend services, database connections, and third-party API integrations like OpenAI, PayPal, and PayFast.",
+                              audit:
+                                "The Audit Log records every administrative action for security compliance. Use this to trace who changed what and when.",
+                              support:
+                                "Support Ticket Management. View and respond to user inquiries and bug reports.",
+                              moderation:
+                                "Detailed Moderation Tools. Apply bans, mutes, or warnings to users violating the terms of service.",
+                              subscriptions:
+                                "Subscription Management. View all active user subscriptions, plan details, and next billing dates.",
+                              payouts:
+                                "Creator Payouts. Process withdrawals for monetized creators and view transaction history.",
+                              openai:
+                                "OpenAI Usage Tracking. Monitor token consumption and costs associated with AI features.",
+                              notifications:
+                                "Notification Center. Manage email templates and send broadcast messages to all users.",
+                              default:
+                                "Select a tab to hear a detailed explanation of its function.",
+                            },
+                            theme: "light",
+                          }),
+                        }),
+                        (0, m.jsxs)("button", {
+                          onClick: () => {
+                            var e;
+                            ((e, t) => {
+                              if (!e || 0 === e.length) return void alert("No data to export");
+                              const s = Object.keys(e[0]),
+                                n = [
+                                  s.join(","),
+                                  ...e.map(e =>
+                                    s
+                                      .map(t => {
+                                        const s = e[t];
+                                        return "string" === typeof s &&
+                                          (s.includes(",") || s.includes('"'))
+                                          ? `"${s.replace(/"/g, '""')}"`
+                                          : s;
+                                      })
+                                      .join(",")
+                                  ),
+                                ].join("\n"),
+                                r = new Blob([n], { type: "text/csv;charset=utf-8;" }),
+                                i = document.createElement("a"),
+                                o = URL.createObjectURL(r);
+                              (i.setAttribute("href", o),
+                                i.setAttribute(
+                                  "download",
+                                  `${t}_${new Date().toISOString().split("T")[0]}.csv`
+                                ),
+                                (i.style.visibility = "hidden"),
+                                document.body.appendChild(i),
+                                i.click(),
+                                document.body.removeChild(i));
+                            })(
+                              "overview" === v
+                                ? null === p || void 0 === p
+                                  ? void 0
+                                  : p.topContent
+                                : "users" === v
+                                  ? []
+                                  : "content" === v
+                                    ? null === p || void 0 === p
+                                      ? void 0
+                                      : p.topContent
+                                    : "revenue" === v
+                                      ? null === p ||
+                                        void 0 === p ||
+                                        null === (e = p.financialMetrics) ||
+                                        void 0 === e
+                                        ? void 0
+                                        : e.revenueByMonth
+                                      : ("credits" === v &&
+                                          (null === p || void 0 === p
+                                            ? void 0
+                                            : p.creditPurchases)) ||
+                                        [],
+                              `autopromote_${v}`
+                            );
+                          },
+                          style: {
+                            backgroundColor: "#2e7d32",
+                            color: "white",
+                            border: "none",
+                            padding: "10px 20px",
+                            borderRadius: "8px",
+                            fontSize: "0.9rem",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            marginRight: "15px",
+                          },
+                          children: [
+                            (0, m.jsx)("span", {
+                              style: { marginRight: "8px" },
+                              children: "\ud83d\udce5",
+                            }),
+                            "Export CSV",
+                          ],
+                        }),
+                        (0, m.jsxs)("button", {
+                          onClick: () => {
+                            (w(!0), g(!0), W());
+                          },
+                          disabled: b,
+                          style: {
+                            backgroundColor: b ? "#ccc" : "#1976d2",
+                            color: "white",
+                            border: "none",
+                            padding: "10px 20px",
+                            borderRadius: "8px",
+                            fontSize: "0.9rem",
+                            cursor: b ? "not-allowed" : "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            marginRight: "15px",
+                          },
+                          children: [
+                            (0, m.jsx)("span", {
+                              style: { marginRight: "8px" },
+                              children: "\ud83d\udd04",
+                            }),
+                            b ? "Refreshing..." : "Refresh Data",
+                          ],
+                        }),
+                        (0, m.jsx)("button", {
+                          onClick: () => {
+                            u && u();
+                          },
+                          style: {
+                            backgroundColor: "#d32f2f",
+                            color: "white",
+                            border: "none",
+                            padding: "10px 20px",
+                            borderRadius: "8px",
+                            fontSize: "0.9rem",
+                            cursor: "pointer",
+                            marginRight: "15px",
+                            marginLeft: "10px",
+                            fontWeight: 600,
+                          },
+                          children: "Log out",
+                        }),
+                        (0, m.jsxs)("div", {
+                          style: { fontSize: "0.9rem", color: "#666" },
+                          children: ["Last updated: ", new Date().toLocaleString()],
+                        }),
+                      ],
+                    }),
+                    (0, m.jsxs)("div", {
+                      style: { display: "flex", gap: 10, marginBottom: 16 },
+                      children: [
+                        (0, m.jsx)(V, {
+                          title: "Autopilot enabled tests",
+                          value:
+                            (null === p ||
+                            void 0 === p ||
+                            null === (t = p.autopilot) ||
+                            void 0 === t
+                              ? void 0
+                              : t.enabledCount) || 0,
+                          subtitle: "Number of ab-tests where autopilot is enabled",
+                          icon: "\ud83e\udd16",
+                          color: "#1976d2",
+                        }),
+                        (0, m.jsx)(V, {
+                          title: "Autopilot actions (24h)",
+                          value:
+                            (null === p ||
+                            void 0 === p ||
+                            null === (s = p.autopilot) ||
+                            void 0 === s
+                              ? void 0
+                              : s.actionsLast24h) || 0,
+                          subtitle: "Autopilot apply or rollback actions in last 24 hours",
+                          icon: "\ud83d\udce3",
+                          color: "#2e7d32",
+                        }),
+                        (0, m.jsx)(V, {
+                          title: "Active Promotions",
+                          value: (null === p || void 0 === p ? void 0 : p.activePromotions) || 0,
+                          subtitle: "Promotion schedules currently active",
+                          icon: "\ud83d\ude80",
+                          color: "#7b1fa2",
+                        }),
+                        (0, m.jsx)(V, {
+                          title: "Total Revenue",
+                          value: (null === p || void 0 === p ? void 0 : p.totalRevenue) || 0,
+                          subtitle: "Total collected revenue",
+                          icon: "\ud83d\udcb0",
+                          color: "#d32f2f",
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                (0, m.jsxs)("div", {
+                  style: { marginBottom: "24px", display: "flex", flexWrap: "wrap" },
+                  children: [
+                    (0, m.jsx)(K, { name: "content", label: "Content", icon: "\ud83d\udcc4" }),
+                    (0, m.jsx)(K, { name: "users", label: "Users", icon: "\ud83d\udc65" }),
+                    (0, m.jsx)(K, {
+                      name: "subscriptions",
+                      label: "Subscriptions",
+                      icon: "\ud83d\udcb3",
+                    }),
+                    (0, m.jsx)(K, { name: "revenue", label: "Revenue", icon: "\ud83d\udcb0" }),
+                    (0, m.jsx)(K, {
+                      name: "credits",
+                      label: "Credit Purchases",
+                      icon: "\ud83e\ude99",
+                    }),
+                    (0, m.jsx)(K, { name: "payouts", label: "Payouts", icon: "\ud83d\udcb8" }),
+                    (0, m.jsx)(K, { name: "system", label: "System Health", icon: "\ud83e\udd16" }),
+                  ],
+                }),
+                y &&
+                  (0, m.jsxs)("div", {
+                    style: {
+                      backgroundColor: "#ffebee",
+                      color: "#d32f2f",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      marginBottom: "24px",
+                      border: "1px solid #ffcdd2",
+                    },
+                    children: [(0, m.jsx)("strong", { children: "Error:" }), " ", y],
+                  }),
+                (() => {
+                  var e, t, s, n, r, i, o, a, l, d, u, h;
+                  switch (v) {
+                    case "overview":
+                      return (0, m.jsxs)(m.Fragment, {
+                        children: [
+                          (0, m.jsx)("div", {
+                            style: { marginTop: 24 },
+                            children: (0, m.jsxs)("div", {
+                              style: { display: "flex", flexWrap: "wrap", margin: "-10px" },
+                              children: [
+                                (0, m.jsx)(V, {
+                                  title: "Total Users",
+                                  value: p.totalUsers,
+                                  subtitle: `${p.newUsersToday} new today`,
+                                  icon: "\ud83d\udc65",
+                                  trend: 12,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Total Content",
+                                  value: p.totalContent,
+                                  subtitle: `${p.newContentToday} new today`,
+                                  color: "#5e35b1",
+                                  icon: "\ud83d\udcc4",
+                                  trend: 8,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Total Revenue",
+                                  value: p.totalRevenue,
+                                  subtitle: `$${p.revenueToday} today`,
+                                  color: "#2e7d32",
+                                  icon: "\ud83d\udcb0",
+                                  trend: 15,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Active Promotions",
+                                  value: p.activePromotions,
+                                  subtitle: `${p.scheduledPromotions} scheduled`,
+                                  color: "#ed6c02",
+                                  icon: "\ud83d\ude80",
+                                  trend: 5,
+                                }),
+                              ],
+                            }),
+                          }),
+                          (0, m.jsxs)("div", {
+                            style: { marginTop: 30, display: "flex", gap: "20px" },
+                            children: [
+                              (0, m.jsxs)("div", {
+                                style: { flex: 2 },
+                                children: [
+                                  (0, m.jsx)(Z, {
+                                    data:
+                                      (null === (e = p.financialMetrics) || void 0 === e
+                                        ? void 0
+                                        : e.revenueByMonth) || [],
+                                    title: "Monthly Revenue",
+                                  }),
+                                  (0, m.jsx)(Z, {
+                                    data: Object.entries(p.revenueByPlatform || {}).map(e => {
+                                      let [t, s] = e;
+                                      return { month: t, revenue: s };
+                                    }),
+                                    title: "Revenue by Platform",
+                                  }),
+                                ],
+                              }),
+                              (0, m.jsxs)("div", {
+                                style: { flex: 1 },
+                                children: [
+                                  (0, m.jsx)(ee, {
+                                    data:
+                                      (null === (t = p.demographics) || void 0 === t
+                                        ? void 0
+                                        : t.deviceTypes) || {},
+                                    title: "Device Distribution",
+                                    colors: ["#1976d2", "#5e35b1", "#2e7d32", "#ed6c02", "#d32f2f"],
+                                  }),
+                                  (0, m.jsx)(ee, {
+                                    data: p.eventCounts || {},
+                                    title: "Event Counts (Link Clicks, Landing Views)",
+                                    colors: ["#1976d2", "#5e35b1", "#2e7d32", "#ed6c02"],
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                          (0, m.jsxs)("div", {
+                            style: { marginTop: 10, display: "flex", gap: "20px" },
+                            children: [
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsx)(te, {
+                                  title: "Revenue per Content",
+                                  data: p.revenuePerContent || [],
+                                  columns: [
+                                    { header: "Content ID", accessor: "contentId" },
+                                    {
+                                      header: "Total Revenue",
+                                      accessor: "totalRevenue",
+                                      render: e => `$${e.totalRevenue.toFixed(2)}`,
+                                    },
+                                  ],
+                                }),
+                              }),
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsx)(te, {
+                                  title: "Revenue per User",
+                                  data: Object.entries(p.revenuePerUser || {}).map(e => {
+                                    let [t, s] = e;
+                                    return { userId: t, totalRevenue: s };
+                                  }),
+                                  columns: [
+                                    { header: "User ID", accessor: "userId" },
+                                    {
+                                      header: "Total Revenue",
+                                      accessor: "totalRevenue",
+                                      render: e => `$${e.totalRevenue.toFixed(2)}`,
+                                    },
+                                  ],
+                                }),
+                              }),
+                            ],
+                          }),
+                          (0, m.jsxs)("div", {
+                            style: { marginTop: 10, display: "flex", gap: "20px" },
+                            children: [
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsx)(te, {
+                                  title: "Top Performing Content",
+                                  data: p.topContent || [],
+                                  columns: [
+                                    { header: "Title", accessor: "title" },
+                                    { header: "Type", accessor: "type" },
+                                    { header: "Views", accessor: "views" },
+                                    {
+                                      header: "Engagement",
+                                      accessor: "engagementRate",
+                                      render: e => `${(100 * (e.engagementRate || 0)).toFixed(1)}%`,
+                                    },
+                                  ],
+                                }),
+                              }),
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsx)(te, {
+                                  title: "Recent Promotion Schedules",
+                                  data: (p.promotionSchedules || []).slice(0, 5),
+                                  columns: [
+                                    {
+                                      header: "Content ID",
+                                      accessor: "contentId",
+                                      render: e =>
+                                        e.contentId ? e.contentId.substring(0, 8) + "..." : "N/A",
+                                    },
+                                    { header: "Platform", accessor: "platform" },
+                                    {
+                                      header: "Status",
+                                      accessor: "isActive",
+                                      render: e =>
+                                        (0, m.jsx)("span", {
+                                          style: {
+                                            padding: "4px 8px",
+                                            borderRadius: "4px",
+                                            fontSize: "0.8rem",
+                                            backgroundColor: e.isActive ? "#e8f5e9" : "#ffebee",
+                                            color: e.isActive ? "#2e7d32" : "#d32f2f",
+                                          },
+                                          children: e.isActive ? "Active" : "Inactive",
+                                        }),
+                                    },
+                                    {
+                                      header: "Start Time",
+                                      accessor: "startTime",
+                                      render: e =>
+                                        e.startTime
+                                          ? new Date(1e3 * e.startTime.seconds).toLocaleDateString()
+                                          : "N/A",
+                                    },
+                                  ],
+                                }),
+                              }),
+                            ],
+                          }),
+                        ],
+                      });
+                    case "users":
+                      return (0, m.jsxs)(m.Fragment, {
+                        children: [
+                          (0, m.jsxs)("div", {
+                            style: {
+                              padding: "20px",
+                              background: "#fff3e0",
+                              borderRadius: "8px",
+                              marginBottom: "20px",
+                            },
+                            children: [
+                              (0, m.jsx)("h3", {
+                                style: { margin: 0, color: "#e65100" },
+                                children: "\ud83d\udc65 User Database",
+                              }),
+                              (0, m.jsx)("p", {
+                                children:
+                                  "Monitor user growth, subscription tiers, and engagement. Manual actions are audit-logged.",
+                              }),
+                            ],
+                          }),
+                          (0, m.jsx)("div", {
+                            style: { marginTop: 24 },
+                            children: (0, m.jsxs)("div", {
+                              style: { display: "flex", flexWrap: "wrap", margin: "-10px" },
+                              children: [
+                                (0, m.jsx)(V, {
+                                  title: "Active Users",
+                                  value: p.activeUsers,
+                                  subtitle: `${p.activeUsersLastWeek} last week`,
+                                  color: "#1976d2",
+                                  icon: "\ud83d\udc64",
+                                  trend: 5,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Engagement Rate",
+                                  value: `${(100 * p.engagementRate).toFixed(1)}%`,
+                                  subtitle: `${p.engagementChange > 0 ? "+" : ""}${(100 * p.engagementChange).toFixed(1)}% change`,
+                                  color: "#5e35b1",
+                                  icon: "\ud83d\udcca",
+                                  trend: 100 * p.engagementChange,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Power Users",
+                                  value: p.userSegmentation.powerUsers,
+                                  subtitle: `${((p.userSegmentation.powerUsers / p.userSegmentation.total) * 100).toFixed(1)}% of total users`,
+                                  color: "#2e7d32",
+                                  icon: "\u2b50",
+                                  trend: 3,
+                                }),
+                              ],
+                            }),
+                          }),
+                          (0, m.jsxs)("div", {
+                            style: { marginTop: 30, display: "flex", gap: "20px" },
+                            children: [
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsxs)("div", {
+                                  style: {
+                                    backgroundColor: "white",
+                                    borderRadius: "12px",
+                                    padding: "20px",
+                                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                                    marginBottom: "24px",
+                                  },
+                                  children: [
+                                    (0, m.jsx)("h3", {
+                                      style: { marginTop: 0, marginBottom: "20px", color: "#333" },
+                                      children: "User Segmentation",
+                                    }),
+                                    (0, m.jsx)(H, {
+                                      label: "Power Users",
+                                      value: Math.round(
+                                        (p.userSegmentation.powerUsers / p.userSegmentation.total) *
+                                          100
+                                      ),
+                                      max: 100,
+                                      color: "#2e7d32",
+                                    }),
+                                    (0, m.jsx)(H, {
+                                      label: "Regular Users",
+                                      value: Math.round(
+                                        (p.userSegmentation.regularUsers /
+                                          p.userSegmentation.total) *
+                                          100
+                                      ),
+                                      max: 100,
+                                      color: "#1976d2",
+                                    }),
+                                    (0, m.jsx)(H, {
+                                      label: "Occasional Users",
+                                      value: Math.round(
+                                        (p.userSegmentation.occasionalUsers /
+                                          p.userSegmentation.total) *
+                                          100
+                                      ),
+                                      max: 100,
+                                      color: "#ed6c02",
+                                    }),
+                                  ],
+                                }),
+                              }),
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsx)(ee, {
+                                  data:
+                                    (null === (s = p.demographics) || void 0 === s
+                                      ? void 0
+                                      : s.ageGroups) || {},
+                                  title: "Age Distribution",
+                                  colors: ["#1976d2", "#5e35b1", "#2e7d32", "#ed6c02", "#d32f2f"],
+                                }),
+                              }),
+                            ],
+                          }),
+                          (0, m.jsxs)("div", {
+                            style: { marginTop: 10, display: "flex", gap: "20px" },
+                            children: [
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsx)(ee, {
+                                  data:
+                                    (null === (n = p.demographics) || void 0 === n
+                                      ? void 0
+                                      : n.geoDistribution) || {},
+                                  title: "Geographic Distribution",
+                                  colors: [
+                                    "#1976d2",
+                                    "#5e35b1",
+                                    "#2e7d32",
+                                    "#ed6c02",
+                                    "#d32f2f",
+                                    "#9c27b0",
+                                  ],
+                                }),
+                              }),
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsxs)("div", {
+                                  style: {
+                                    backgroundColor: "white",
+                                    borderRadius: "12px",
+                                    padding: "20px",
+                                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                                    marginBottom: "24px",
+                                  },
+                                  children: [
+                                    (0, m.jsx)("h3", {
+                                      style: { marginTop: 0, marginBottom: "20px", color: "#333" },
+                                      children: "Performance Metrics",
+                                    }),
+                                    (0, m.jsxs)("div", {
+                                      style: { display: "flex", flexWrap: "wrap" },
+                                      children: [
+                                        (0, m.jsxs)("div", {
+                                          style: { flex: "1 0 50%", padding: "10px" },
+                                          children: [
+                                            (0, m.jsx)("div", {
+                                              style: {
+                                                fontSize: "0.9rem",
+                                                color: "#666",
+                                                marginBottom: "5px",
+                                              },
+                                              children: "Conversion Rate",
+                                            }),
+                                            (0, m.jsxs)("div", {
+                                              style: {
+                                                fontSize: "1.5rem",
+                                                fontWeight: "bold",
+                                                color: "#1976d2",
+                                              },
+                                              children: [
+                                                null === (r = p.performanceMetrics) || void 0 === r
+                                                  ? void 0
+                                                  : r.conversionRate,
+                                                "%",
+                                              ],
+                                            }),
+                                          ],
+                                        }),
+                                        (0, m.jsxs)("div", {
+                                          style: { flex: "1 0 50%", padding: "10px" },
+                                          children: [
+                                            (0, m.jsx)("div", {
+                                              style: {
+                                                fontSize: "0.9rem",
+                                                color: "#666",
+                                                marginBottom: "5px",
+                                              },
+                                              children: "Bounce Rate",
+                                            }),
+                                            (0, m.jsxs)("div", {
+                                              style: {
+                                                fontSize: "1.5rem",
+                                                fontWeight: "bold",
+                                                color: "#ed6c02",
+                                              },
+                                              children: [
+                                                null === (i = p.performanceMetrics) || void 0 === i
+                                                  ? void 0
+                                                  : i.bounceRate,
+                                                "%",
+                                              ],
+                                            }),
+                                          ],
+                                        }),
+                                        (0, m.jsxs)("div", {
+                                          style: { flex: "1 0 50%", padding: "10px" },
+                                          children: [
+                                            (0, m.jsx)("div", {
+                                              style: {
+                                                fontSize: "0.9rem",
+                                                color: "#666",
+                                                marginBottom: "5px",
+                                              },
+                                              children: "Avg. Session Duration",
+                                            }),
+                                            (0, m.jsxs)("div", {
+                                              style: {
+                                                fontSize: "1.5rem",
+                                                fontWeight: "bold",
+                                                color: "#2e7d32",
+                                              },
+                                              children: [
+                                                Math.floor(
+                                                  (null === (o = p.performanceMetrics) ||
+                                                  void 0 === o
+                                                    ? void 0
+                                                    : o.averageSessionDuration) / 60
+                                                ),
+                                                "m",
+                                                " ",
+                                                (null === (a = p.performanceMetrics) || void 0 === a
+                                                  ? void 0
+                                                  : a.averageSessionDuration) % 60,
+                                                "s",
+                                              ],
+                                            }),
+                                          ],
+                                        }),
+                                        (0, m.jsxs)("div", {
+                                          style: { flex: "1 0 50%", padding: "10px" },
+                                          children: [
+                                            (0, m.jsx)("div", {
+                                              style: {
+                                                fontSize: "0.9rem",
+                                                color: "#666",
+                                                marginBottom: "5px",
+                                              },
+                                              children: "Return Visitor Rate",
+                                            }),
+                                            (0, m.jsxs)("div", {
+                                              style: {
+                                                fontSize: "1.5rem",
+                                                fontWeight: "bold",
+                                                color: "#5e35b1",
+                                              },
+                                              children: [
+                                                null === (l = p.performanceMetrics) || void 0 === l
+                                                  ? void 0
+                                                  : l.returnVisitorRate,
+                                                "%",
+                                              ],
+                                            }),
+                                          ],
+                                        }),
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                              }),
+                            ],
+                          }),
+                          (0, m.jsx)("div", {
+                            style: { marginTop: 20 },
+                            children: (0, m.jsx)(q, {}),
+                          }),
+                        ],
+                      });
+                    case "content":
+                      return (0, m.jsxs)(m.Fragment, {
+                        children: [
+                          (0, m.jsxs)("div", {
+                            style: {
+                              padding: "20px",
+                              background: "#e8f5e9",
+                              borderRadius: "8px",
+                              marginBottom: "20px",
+                            },
+                            children: [
+                              (0, m.jsx)("h3", {
+                                style: { margin: 0, color: "#2e7d32" },
+                                children: "\ud83d\udcc4 Content Performance",
+                              }),
+                              (0, m.jsx)("p", {
+                                children:
+                                  "Track the viral success of auto-published content across all platforms.",
+                              }),
+                            ],
+                          }),
+                          (0, m.jsx)("div", {
+                            style: { marginTop: 24 },
+                            children: (0, m.jsxs)("div", {
+                              style: { display: "flex", flexWrap: "wrap", margin: "-10px" },
+                              children: [
+                                (0, m.jsx)(V, {
+                                  title: "High Performing",
+                                  value: p.contentPerformance.high,
+                                  color: "#2e7d32",
+                                  icon: "\ud83d\udd1d",
+                                  trend: 7,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Medium Performing",
+                                  value: p.contentPerformance.medium,
+                                  color: "#ed6c02",
+                                  icon: "\ud83d\udcca",
+                                  trend: 4,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Low Performing",
+                                  value: p.contentPerformance.low,
+                                  color: "#d32f2f",
+                                  icon: "\ud83d\udcc9",
+                                  trend: -2,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Avg Revenue/Content",
+                                  value: p.avgRevenuePerContent,
+                                  color: "#2e7d32",
+                                  icon: "\ud83d\udcb2",
+                                  trend: 10,
+                                }),
+                              ],
+                            }),
+                          }),
+                          (0, m.jsxs)("div", {
+                            style: { marginTop: 30, display: "flex", gap: "20px" },
+                            children: [
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsx)(ee, {
+                                  data:
+                                    (null === (d = p.financialMetrics) || void 0 === d
+                                      ? void 0
+                                      : d.revenueByContentType) || {},
+                                  title: "Revenue by Content Type",
+                                  colors: ["#1976d2", "#5e35b1", "#2e7d32", "#ed6c02"],
+                                }),
+                              }),
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsxs)("div", {
+                                  style: {
+                                    backgroundColor: "white",
+                                    borderRadius: "12px",
+                                    padding: "20px",
+                                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                                    marginBottom: "24px",
+                                  },
+                                  children: [
+                                    (0, m.jsx)("h3", {
+                                      style: { marginTop: 0, marginBottom: "20px", color: "#333" },
+                                      children: "Content Performance",
+                                    }),
+                                    (0, m.jsx)(H, {
+                                      label: "High Performing",
+                                      value: Math.round(
+                                        (p.contentPerformance.high / p.totalContent) * 100
+                                      ),
+                                      max: 100,
+                                      color: "#2e7d32",
+                                    }),
+                                    (0, m.jsx)(H, {
+                                      label: "Medium Performing",
+                                      value: Math.round(
+                                        (p.contentPerformance.medium / p.totalContent) * 100
+                                      ),
+                                      max: 100,
+                                      color: "#ed6c02",
+                                    }),
+                                    (0, m.jsx)(H, {
+                                      label: "Low Performing",
+                                      value: Math.round(
+                                        (p.contentPerformance.low / p.totalContent) * 100
+                                      ),
+                                      max: 100,
+                                      color: "#d32f2f",
+                                    }),
+                                  ],
+                                }),
+                              }),
+                            ],
+                          }),
+                          (0, m.jsx)(S, {}),
+                          (0, m.jsx)("div", {
+                            style: { marginTop: 10 },
+                            children: (0, m.jsx)(te, {
+                              title: "Top Performing Content",
+                              data: p.topContent || [],
+                              columns: [
+                                { header: "Title", accessor: "title" },
+                                { header: "Type", accessor: "type" },
+                                { header: "Views", accessor: "views" },
+                                {
+                                  header: "Engagement",
+                                  accessor: "engagementRate",
+                                  render: e => `${(100 * (e.engagementRate || 0)).toFixed(1)}%`,
+                                },
+                                {
+                                  header: "Created",
+                                  accessor: "createdAt",
+                                  render: e =>
+                                    e.createdAt
+                                      ? new Date(1e3 * e.createdAt.seconds).toLocaleDateString()
+                                      : "N/A",
+                                },
+                                {
+                                  header: "Status",
+                                  accessor: "status",
+                                  render: e =>
+                                    (0, m.jsx)("span", {
+                                      style: {
+                                        padding: "4px 8px",
+                                        borderRadius: "4px",
+                                        fontSize: "0.8rem",
+                                        backgroundColor:
+                                          "active" === e.status ? "#e8f5e9" : "#ffebee",
+                                        color: "active" === e.status ? "#2e7d32" : "#d32f2f",
+                                      },
+                                      children: e.status || "active",
+                                    }),
+                                },
+                              ],
+                            }),
+                          }),
+                        ],
+                      });
+                    case "revenue":
+                      return (0, m.jsxs)(m.Fragment, {
+                        children: [
+                          (0, m.jsxs)("div", {
+                            style: {
+                              padding: "20px",
+                              background: "#f3e5f5",
+                              borderRadius: "8px",
+                              marginBottom: "20px",
+                            },
+                            children: [
+                              (0, m.jsx)("h3", {
+                                style: { margin: 0, color: "#7b1fa2" },
+                                children: "\ud83d\udcb0 Financial Overview",
+                              }),
+                              (0, m.jsx)("p", {
+                                children:
+                                  "Real-time tracking of generated value, subscription income, and ROI.",
+                              }),
+                            ],
+                          }),
+                          (0, m.jsx)("div", {
+                            style: { marginTop: 24 },
+                            children: (0, m.jsxs)("div", {
+                              style: { display: "flex", flexWrap: "wrap", margin: "-10px" },
+                              children: [
+                                (0, m.jsx)(V, {
+                                  title: "Avg Revenue/User",
+                                  value: p.avgRevenuePerUser,
+                                  color: "#2e7d32",
+                                  icon: "\ud83d\udcb5",
+                                  trend: 8,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Projected Monthly",
+                                  value: p.projectedMonthlyRevenue,
+                                  subtitle: "Based on current growth",
+                                  color: "#2e7d32",
+                                  icon: "\ud83d\udcc8",
+                                  trend: 12,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Completed Promotions",
+                                  value: p.promotionsCompleted,
+                                  subtitle: `${((p.promotionsCompleted / (p.promotionsCompleted + p.activePromotions)) * 100).toFixed(1)}% completion rate`,
+                                  color: "#1976d2",
+                                  icon: "\u2705",
+                                  trend: 6,
+                                }),
+                              ],
+                            }),
+                          }),
+                          (0, m.jsx)("div", {
+                            style: { marginTop: 30 },
+                            children: (0, m.jsx)(Z, {
+                              data:
+                                (null === (u = p.financialMetrics) || void 0 === u
+                                  ? void 0
+                                  : u.revenueByMonth) || [],
+                              title: "Monthly Revenue",
+                            }),
+                          }),
+                          (0, m.jsxs)("div", {
+                            style: { marginTop: 10, display: "flex", gap: "20px" },
+                            children: [
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsx)(ee, {
+                                  data:
+                                    (null === (h = p.financialMetrics) || void 0 === h
+                                      ? void 0
+                                      : h.revenueByContentType) || {},
+                                  title: "Revenue by Content Type",
+                                  colors: ["#1976d2", "#5e35b1", "#2e7d32", "#ed6c02"],
+                                }),
+                              }),
+                              (0, m.jsx)("div", {
+                                style: { flex: 1 },
+                                children: (0, m.jsxs)("div", {
+                                  style: {
+                                    backgroundColor: "white",
+                                    padding: "20px",
+                                    borderRadius: "12px",
+                                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                                    height: "100%",
+                                  },
+                                  children: [
+                                    (0, m.jsx)("h4", {
+                                      style: { margin: "0 0 15px 0", color: "#666" },
+                                      children: "Subscription Status",
+                                    }),
+                                    (0, m.jsx)("div", {
+                                      style: {
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        height: "calc(100% - 40px)",
+                                      },
+                                      children: (0, m.jsxs)("div", {
+                                        style: { textAlign: "center" },
+                                        children: [
+                                          (0, m.jsx)("div", {
+                                            style: {
+                                              fontSize: "2.5rem",
+                                              fontWeight: "bold",
+                                              color: "#1976d2",
+                                            },
+                                            children: L(p.activeSubscriptions),
+                                          }),
+                                          (0, m.jsx)("div", {
+                                            style: { color: "#666" },
+                                            children: "Active Subscribers",
+                                          }),
+                                        ],
+                                      }),
+                                    }),
+                                  ],
+                                }),
+                              }),
+                            ],
+                          }),
+                          (0, m.jsx)(F.A, {}),
+                        ],
+                      });
+                    case "credits":
+                      const x = p.transactions || [],
+                        g = "all" === k ? x : x.filter(e => e.type === k);
+                      return (0, m.jsxs)(m.Fragment, {
+                        children: [
+                          (0, m.jsxs)("div", {
+                            style: {
+                              padding: "20px",
+                              background: "#f3e5f5",
+                              borderRadius: "8px",
+                              marginBottom: "20px",
+                            },
+                            children: [
+                              (0, m.jsx)("h3", {
+                                style: { margin: 0, color: "#7b1fa2" },
+                                children: "\ud83e\ude99 Transactions",
+                              }),
+                              (0, m.jsx)("p", {
+                                children: "Track all in-app purchases and transaction events.",
+                              }),
+                              (0, m.jsxs)("div", {
+                                style: {
+                                  marginTop: "12px",
+                                  display: "flex",
+                                  gap: "10px",
+                                  alignItems: "center",
+                                },
+                                children: [
+                                  (0, m.jsx)("span", {
+                                    style: { color: "#555" },
+                                    children: "Filter:",
+                                  }),
+                                  (0, m.jsxs)("select", {
+                                    value: k,
+                                    onChange: e => T(e.target.value),
+                                    style: {
+                                      padding: "6px 10px",
+                                      borderRadius: "6px",
+                                      border: "1px solid #ccc",
+                                    },
+                                    children: [
+                                      (0, m.jsx)("option", { value: "all", children: "All" }),
+                                      (0, m.jsx)("option", {
+                                        value: "CREDIT_PURCHASE",
+                                        children: "Credit Purchases",
+                                      }),
+                                      (0, m.jsx)("option", {
+                                        value: "SUBSCRIPTION",
+                                        children: "Subscriptions",
+                                      }),
+                                      (0, m.jsx)("option", {
+                                        value: "REFUND",
+                                        children: "Refunds",
+                                      }),
+                                      (0, m.jsx)("option", { value: "OTHER", children: "Other" }),
+                                    ],
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                          (0, m.jsx)("div", {
+                            style: { marginTop: 24 },
+                            children: (0, m.jsxs)("div", {
+                              style: { display: "flex", flexWrap: "wrap", margin: "-10px" },
+                              children: [
+                                (0, m.jsx)(V, {
+                                  title: "Total Transactions",
+                                  value: x.length,
+                                  subtitle: `${g.length} shown`,
+                                  icon: "\ud83e\uddfe",
+                                  color: "#1976d2",
+                                  trend: 0,
+                                }),
+                                (0, m.jsx)(V, {
+                                  title: "Total Volume",
+                                  value: `$${x.reduce((e, t) => e + (t.amount || 0), 0).toFixed(2)}`,
+                                  subtitle: "All transactions",
+                                  icon: "\ud83d\udcb5",
+                                  color: "#2e7d32",
+                                  trend: 0,
+                                }),
+                              ],
+                            }),
+                          }),
+                          (0, m.jsx)("div", {
+                            style: { marginTop: 20 },
+                            children: (0, m.jsx)(te, {
+                              title: "Recent Transactions",
+                              data: g,
+                              columns: [
+                                { header: "Type", accessor: "type" },
+                                { header: "User ID", accessor: "userId" },
+                                { header: "Credits", accessor: "creditsAdded" },
+                                { header: "Amount", accessor: "amount" },
+                                { header: "Order ID", accessor: "orderId" },
+                                {
+                                  header: "Date",
+                                  accessor: "timestamp",
+                                  render: e => {
+                                    const t = e.timestamp;
+                                    if (!t) return "-";
+                                    return (
+                                      t.seconds ? new Date(1e3 * t.seconds) : new Date(t)
+                                    ).toLocaleString();
+                                  },
+                                },
+                              ],
+                            }),
+                          }),
+                        ],
+                      });
+                    case "payouts":
+                      return (0, m.jsx)(_, {
+                        token: null === c || void 0 === c ? void 0 : c.accessToken,
+                      });
+                    case "subscriptions":
+                      return (0, m.jsx)(G, {});
+                    case "system":
+                      return (0, m.jsxs)("div", {
+                        className: "space-y-8",
+                        children: [
+                          (0, m.jsxs)("div", {
+                            style: {
+                              padding: "20px",
+                              background: "#e3f2fd",
+                              borderRadius: "8px",
+                              marginBottom: "20px",
+                            },
+                            children: [
+                              (0, m.jsx)("h3", {
+                                style: { margin: 0, color: "#1565c0" },
+                                children: "\ud83e\udd16 System Health & Security",
+                              }),
+                              (0, m.jsx)("p", {
+                                children:
+                                  "Platform status, system performance, and security audit logs.",
+                              }),
+                            ],
+                          }),
+                          (0, m.jsx)(Q, {}),
+                          (0, m.jsx)(J, {}),
+                          (0, m.jsx)(M, {}),
+                          (0, m.jsx)("div", {
+                            style: { marginTop: "40px" },
+                            children: (0, m.jsx)(Y.A, {}),
+                          }),
+                        ],
+                      });
+                    case "ads":
+                      return (0, m.jsx)(se, { dashboardData: p });
+                    default:
+                      return (0, m.jsx)("div", { children: "Tab not found" });
+                  }
+                })(),
+                (null === p || void 0 === p ? void 0 : p.recentActivities) &&
+                  (0, m.jsxs)("div", {
+                    style: { marginTop: 40 },
+                    children: [
+                      (0, m.jsx)("h3", { children: "Recent System Activity" }),
+                      (0, m.jsx)(ne, { activities: p.recentActivities }),
+                    ],
+                  }),
+              ],
+            });
+      };
+    },
+  },
+]);
+//# sourceMappingURL=769.dec45cf0.chunk.js.map

@@ -855,10 +855,32 @@ const AnalyticsPanel = () => {
           border: "1px solid var(--border)",
         }}
       >
-        <h4 style={{ marginTop: 0, marginBottom: "1rem" }}>Top Performing Content</h4>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "1rem",
+          }}
+        >
+          <h4 style={{ margin: 0 }}>Top Performing Content</h4>
+          {stats.topContent && stats.topContent.length > 5 && (
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+              Showing {Math.min(stats.topContent.length, 50)} items
+            </span>
+          )}
+        </div>
         {stats.topContent && stats.topContent.length > 0 ? (
-          <div style={{ display: "grid", gap: "0.75rem" }}>
-            {stats.topContent.slice(0, 5).map((item, idx) => (
+          <div
+            style={{
+              display: "grid",
+              gap: "0.75rem",
+              maxHeight: "400px",
+              overflowY: "auto",
+              paddingRight: "4px",
+            }}
+          >
+            {stats.topContent.slice(0, 50).map((item, idx) => (
               <div
                 key={idx}
                 className="ap-top-content-row"
@@ -871,17 +893,35 @@ const AnalyticsPanel = () => {
                   borderRadius: "8px",
                 }}
               >
-                <span
-                  className="ap-top-content-title"
+                <div
                   style={{
+                    display: "flex",
+                    flexDirection: "column",
                     flex: 1,
                     overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    marginRight: "1rem",
                   }}
                 >
-                  {item.title || "Untitled"}
-                </span>
+                  <span
+                    className="ap-top-content-title"
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      fontWeight: 500,
+                    }}
+                    title={item.title || "Untitled"}
+                  >
+                    {item.title || "Untitled"}
+                  </span>
+                  {item.publishedAt && (
+                    <span
+                      style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}
+                    >
+                      {new Date(item.publishedAt).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
                 <div
                   className="ap-top-content-stats"
                   style={{

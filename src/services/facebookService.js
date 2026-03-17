@@ -11,8 +11,8 @@ if (!fetchFn) {
   }
 }
 
-const TOKEN_URL = "https://graph.facebook.com/v18.0/oauth/access_token";
-const AUTH_URL = "https://www.facebook.com/v18.0/dialog/oauth";
+const TOKEN_URL = "https://graph.facebook.com/v19.0/oauth/access_token";
+const AUTH_URL = "https://www.facebook.com/v19.0/dialog/oauth";
 
 /**
  * Get user's Facebook connection tokens
@@ -151,7 +151,7 @@ async function getUserPages(accessToken) {
   if (!fetchFn) throw new Error("Fetch not available");
 
   const response = await safeFetch(
-    "https://graph.facebook.com/v18.0/me/accounts?fields=id,name,access_token,category,tasks",
+    "https://graph.facebook.com/v19.0/me/accounts?fields=id,name,access_token,category,tasks",
     fetchFn,
     {
       fetchOptions: {
@@ -180,7 +180,7 @@ async function getUserProfile(accessToken) {
   if (!fetchFn) throw new Error("Fetch not available");
 
   const response = await safeFetch(
-    "https://graph.facebook.com/v18.0/me?fields=id,name,email",
+    "https://graph.facebook.com/v19.0/me?fields=id,name,email",
     fetchFn,
     {
       fetchOptions: {
@@ -488,33 +488,73 @@ async function getPostStats({ uid, postId, pageId }) {
 
   let accessToken = null;
   // If pageId provided, try to find specific page token
-  if (pageId && connection.meta && connection.meta.pages) {
-    const p = connection.meta.pages.find(page => page.id === pageId);
+  // Fix: Check both connection.pages (new schema) and connection.meta.pages (legacy)
+  const pages = connection.pages || (connection.meta && connection.meta.pages);
+
+  if (pageId && pages) {
+    const p = pages.find(page => page.id === pageId);
     if (p) accessToken = p.access_token;
   }
   // Fallback to first page if available
-  if (
-    !accessToken &&
-    connection.meta &&
-    connection.meta.pages &&
-    connection.meta.pages.length > 0
-  ) {
-    accessToken = connection.meta.pages[0].access_token;
+  if (!accessToken && pages && pages.length > 0) {
+    accessToken = pages[0].access_token;
   }
 
   if (!accessToken) accessToken = connection.tokens.access_token;
 
-  // 1. Try fetching Insights (Impressions, Engaged Users) - requires Page Token usually
+  // 1. Try fetching Insights
   try {
-    const metrics = "post_impressions,post_engaged_users";
-    const url = `https://graph.facebook.com/v18.0/${postId}/insights?metric=${metrics}&access_token=${accessToken}`;
+    // Determine metrics based on content type if possible, or try a broad set.
+    // Error (#100) indicates some metrics aren't valid for this object type (e.g. Video vs Post).
+    // Let's try separate calls or fallbacks.
 
-    // safeFetch handles the request
-    const response = await safeFetch(url, fetchFn, {
+    // Attempt A: Standard Post Metrics
+    const metricsParams = "post_impressions,post_engaged_users";
+    const url = `https://graph.facebook.com/v19.0/${postId}/insights?metric=${metricsParams}&access_token=${accessToken}`;
+    let response = await safeFetch(url, fetchFn, {
       fetchOptions: { method: "GET" },
       requireHttps: true,
       allowHosts: ["graph.facebook.com"],
     });
+
+    // Attempt B: If A fails with #100 or returns empty data (sometimes videos don't show post_impressions), try video metrics
+    let shouldRetryVideo = false;
+    if (!response.ok) {
+      const txt = await response.text();
+      if (
+        txt.includes("(#100)") &&
+        (txt.includes("valid insights metric") || txt.includes("nonexisting field"))
+      ) {
+        shouldRetryVideo = true;
+      } else {
+        throw new Error(txt);
+      }
+    } else {
+      // Even if OK, check if data is empty. If so, might be video needing video metrics.
+      try {
+        const data = await response.clone().json(); // clone so we can re-read if needed, or just parse once
+        if (!data.data || data.data.length === 0) {
+          shouldRetryVideo = true;
+        }
+      } catch (_) {}
+    }
+
+    if (shouldRetryVideo) {
+      // Retry with Video metrics (lifetime period usually implied or needed)
+      // Note: For some video metrics, 'period=lifetime' or 'period=day' matters.
+      const vidMetrics = "post_video_views,post_video_view_time_organic";
+      // try without a date range first, using period=lifetime if supported, OR just let FB defaults apply
+      const vidUrl = `https://graph.facebook.com/v19.0/${postId}/insights?metric=${vidMetrics}&period=lifetime&access_token=${accessToken}`;
+
+      response = await safeFetch(vidUrl, fetchFn, {
+        fetchOptions: { method: "GET" },
+        requireHttps: true,
+        allowHosts: ["graph.facebook.com"],
+      });
+
+      // Debug
+      // const t = await response.clone().text(); console.log("Video Retry Result:", t);
+    }
 
     if (response.ok) {
       const data = await response.json();
@@ -523,45 +563,111 @@ async function getPostStats({ uid, postId, pageId }) {
         values[item.name] = item.values && item.values[0] ? item.values[0].value : 0;
       });
 
+      if (Object.keys(values).length === 0) {
+        console.warn(
+          `[Facebook] Insights GET returned empty data for ${postId}. Metadata:`,
+          JSON.stringify(data)
+        );
+      }
+
       // Also fetch basic interactions (likes/comments) separately as they aren't in "insights" metric list easily
       // Try fetching shares separately or omit if problematic
       let likes = 0,
-        comments = 0,
-        shares = 0;
+        comments = 0;
 
       try {
-        const basicUrl = `https://graph.facebook.com/v18.0/${postId}?fields=comments.summary(true),likes.summary(true)&access_token=${accessToken}`;
+        // If video, try 'post_video_views' from insights result if 'post_impressions' is missing/zero
+        let impressions = parseInt(values.post_impressions || 0, 10);
+        if (impressions === 0 && values.post_video_views) {
+          impressions = parseInt(values.post_video_views || 0, 10);
+        }
+        if (impressions === 0 && values.post_video_views_organic) {
+          // New: fallback to organic
+          impressions = parseInt(values.post_video_views_organic || 0, 10);
+        }
+
+        // Use attachments to get video ID. Split basic stats to separate call if needed later.
+        // Prioritizing attachments to fix video view tracking first.
+        const basicUrl = `https://graph.facebook.com/v19.0/${postId}?fields=attachments&access_token=${accessToken}`;
         const basicRes = await safeFetch(basicUrl, fetchFn, {
           fetchOptions: { method: "GET" },
           requireHttps: true,
           allowHosts: ["graph.facebook.com"],
         });
 
-        if (basicRes.ok) {
-          const bData = await basicRes.json();
-          likes = bData.likes?.summary?.total_count || 0;
-          comments = bData.comments?.summary?.total_count || 0;
-          // Try shares in a separate lightweight call or just skip to avoid #100 errors on videos
-          // shares = bData.shares?.count || 0;
-        }
-      } catch (_) {}
+        let objectId = null;
 
-      return {
-        postId,
-        impressions: parseInt(values.post_impressions || 0, 10),
-        engagedUsers: parseInt(values.post_engaged_users || 0, 10),
-        likes,
-        comments,
-        shares: 0, // Disabled to prevent (#100) errors
-        fetchedAt: new Date().toISOString(),
-      };
+        if (!basicRes.ok) {
+          const err = await basicRes.text();
+          console.warn(`[Facebook] Attachments fetch failed for ${postId}: ${err}`);
+        } else {
+          const bData = await basicRes.json();
+
+          // Extract object ID from attachments if present
+          if (bData.attachments && bData.attachments.data && bData.attachments.data.length > 0) {
+            const target = bData.attachments.data[0].target;
+            if (target && target.id) {
+              objectId = target.id;
+            }
+          }
+        }
+
+        // If we have an object ID (like a video ID) and impressions are 0, try fetching video metrics on that ID
+        if (objectId && objectId !== postId) {
+          try {
+            console.log(
+              `[Facebook] Found video object ID ${objectId} via attachments for post ${postId}. Fetching video insights...`
+            );
+            const vidMetric = "total_video_views,total_video_views_unique";
+            const vUrl = `https://graph.facebook.com/v19.0/${objectId}/video_insights?metric=${vidMetric}&access_token=${accessToken}`;
+            const vRes = await safeFetch(vUrl, fetchFn, {
+              fetchOptions: { method: "GET" },
+              requireHttps: true,
+              allowHosts: ["graph.facebook.com"],
+            });
+            if (vRes.ok) {
+              const vData = await vRes.json();
+              const vVals = {};
+              (vData.data || []).forEach(item => {
+                vVals[item.name] = item.values && item.values[0] ? item.values[0].value : 0;
+              });
+              console.log(`[Facebook] Video Metrics for ${objectId}:`, JSON.stringify(vVals));
+              if (vVals.total_video_views) {
+                impressions = vVals.total_video_views;
+                // Update values object so we return it correctly below if needed
+                values.post_video_views = impressions;
+              }
+            } else {
+              const vErr = await vRes.text();
+              console.warn(`[Facebook] Video fetch failed for ${objectId}:`, vErr);
+            }
+          } catch (e) {
+            console.warn("[Facebook] Video object fetch exception", e.message);
+          }
+        } else {
+          // console.warn(`[Facebook] No distinct video object ID found for ${postId}`);
+        }
+
+        return {
+          postId,
+          impressions,
+          engagedUsers: parseInt(values.post_engaged_users || 0, 10),
+          likes,
+          comments,
+          shares: 0,
+          fetchedAt: new Date().toISOString(),
+        };
+      } catch (_) {}
+    } else {
+      const errText = await response.text();
+      console.warn(`[Facebook] Insights GET failed for ${postId}:`, errText);
     }
   } catch (e) {
-    console.warn("[Facebook] Insights fetch failed, falling back to basic:", e.message);
+    console.warn("[Facebook] Insights fetch error:", e.message);
   }
 
   // 2. Fallback: Basic Graph Object fields (Likes, Comments) - removed shares to avoid #100
-  const basicUrl = `https://graph.facebook.com/v18.0/${postId}?fields=comments.summary(true),likes.summary(true)&access_token=${accessToken}`;
+  const basicUrl = `https://graph.facebook.com/v19.0/${postId}?fields=comments.summary(true),likes.summary(true),reactions.summary(true),shares,attachments&access_token=${accessToken}`;
   let response;
   try {
     response = await safeFetch(basicUrl, fetchFn, {
@@ -571,6 +677,48 @@ async function getPostStats({ uid, postId, pageId }) {
     });
   } catch (netErr) {
     throw new Error(`Network failed: ${netErr.message}`);
+  }
+
+  if (response.ok) {
+    const data = await response.json();
+
+    // Infer object_id from attachments if missing
+    if (!data.object_id && data.attachments?.data?.[0]?.target?.id) {
+      data.object_id = data.attachments.data[0].target.id;
+      console.warn(`[Facebook] Inferred object_id from attachment: ${data.object_id}`);
+    }
+
+    // Prefer reaction count
+    const likes = data.reactions?.summary?.total_count || data.likes?.summary?.total_count || 0;
+    const comments = data.comments?.summary?.total_count || 0;
+
+    // Attempt to fetch video views if object_id present
+    let views = 0;
+    if (data.object_id && data.object_id !== postId) {
+      try {
+        const vUrl = `https://graph.facebook.com/v19.0/${data.object_id}/video_insights?metric=total_video_views&access_token=${accessToken}`;
+        const vRes = await safeFetch(vUrl, fetchFn, {
+          fetchOptions: { method: "GET" },
+          requireHttps: true,
+          allowHosts: ["graph.facebook.com"],
+        });
+        if (vRes.ok) {
+          const vData = await vRes.json();
+          if (vData.data && vData.data[0] && vData.data[0].values && vData.data[0].values[0]) {
+            views = vData.data[0].values[0].value;
+          }
+        }
+      } catch (_) {}
+    }
+
+    return {
+      postId,
+      likes,
+      comments,
+      shares: 0,
+      impressions: views, // Populate impressions with views in fallback
+      fetchedAt: new Date().toISOString(),
+    };
   }
 
   if (!response.ok) {

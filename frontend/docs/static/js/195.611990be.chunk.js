@@ -1,0 +1,32 @@
+"use strict";
+(globalThis.webpackChunkautopromote_frontend =
+  globalThis.webpackChunkautopromote_frontend || []).push([
+  [195],
+  {
+    2195(e, o, t) {
+      (t.r(o), t.d(o, { default: () => r }));
+      t(5043);
+      var a = t(579);
+      const r = () =>
+        (0, a.jsxs)("div", {
+          className: "page-container",
+          style: { padding: 24 },
+          children: [
+            (0, a.jsx)("h2", { children: "Support" }),
+            (0, a.jsxs)("p", {
+              children: [
+                "Need help? Email our support team at",
+                " ",
+                (0, a.jsx)("a", {
+                  href: "mailto:thulani@autopromote.org",
+                  children: "thulani@autopromote.org",
+                }),
+                " or use the contact page.",
+              ],
+            }),
+          ],
+        });
+    },
+  },
+]);
+//# sourceMappingURL=195.611990be.chunk.js.map

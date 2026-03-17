@@ -435,6 +435,8 @@ async function uploadVideo({
 
 module.exports = {
   getUserYouTubeConnection,
+  buildOAuthClient,
+  ensureFreshTokens,
   uploadVideo,
   /**
    * Fetch statistics for a single video using stored user credentials
