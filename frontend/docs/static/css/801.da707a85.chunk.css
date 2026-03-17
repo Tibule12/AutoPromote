@@ -1,0 +1,135 @@
+.streamer-dashboard {
+  margin: 0 auto;
+  max-width: 980px;
+  padding: 20px;
+}
+.sd-header {
+  gap: 16px;
+  justify-content: space-between;
+}
+.sd-controls,
+.sd-header {
+  align-items: center;
+  display: flex;
+}
+.sd-controls {
+  gap: 8px;
+}
+.sd-label {
+  color: #333;
+  font-size: 14px;
+  margin-right: 4px;
+}
+.sd-input {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-width: 180px;
+  padding: 8px 10px;
+}
+.sd-btn {
+  background-color: #61dafb;
+  border: none;
+  border-radius: 6px;
+  color: #03303a;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 8px 12px;
+}
+.sd-btn:hover {
+  background-color: #4fd0e6;
+}
+.sd-ghost {
+  background: #0000;
+  border: 1px solid #ddd;
+  color: #333;
+}
+.sd-section {
+  margin-top: 18px;
+}
+.sd-status {
+  margin-bottom: 8px;
+  min-height: 26px;
+}
+.sd-status-success {
+  background: #d1fae5;
+  border-radius: 6px;
+  color: #064e3b;
+  padding: 8px 10px;
+}
+.sd-status-error {
+  background: #fee2e2;
+  border-radius: 6px;
+  color: #7f1d1d;
+  padding: 8px 10px;
+}
+.sd-table {
+  border-collapse: collapse;
+  margin-top: 8px;
+  width: 100%;
+}
+.sd-table td,
+.sd-table th {
+  border-bottom: 1px solid #eee;
+  padding: 10px 12px;
+  text-align: left;
+}
+.sd-empty {
+  color: #666;
+  padding: 20px;
+}
+.sd-token {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sd-small {
+  background: #e6f7fb;
+  border: 1px solid #cfeef7;
+  border-radius: 5px;
+  color: #034048;
+  cursor: pointer;
+  margin-right: 6px;
+  padding: 6px 8px;
+}
+.sd-small:hover {
+  background: #d1f1f7;
+}
+.sd-danger {
+  background: #ffecec;
+  border: 1px solid #f5c2c2;
+  color: #7f1d1d;
+}
+.sd-revoked {
+  opacity: 0.6;
+}
+.sd-tips {
+  background: #fff8e1;
+  border: 1px solid #ffe6a7;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+}
+.sd-tips ul {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.sd-tips li {
+  color: #333;
+  font-size: 13px;
+  padding: 4px 0;
+}
+@media (max-width: 720px) {
+  .sd-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .sd-controls {
+    flex-wrap: wrap;
+  }
+  .sd-input {
+    flex: 1 1 100%;
+  }
+}
+/*# sourceMappingURL=801.da707a85.chunk.css.map*/

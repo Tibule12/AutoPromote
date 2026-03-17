@@ -230,6 +230,26 @@ async function processNextYouTubeTask() {
       contentId: task.contentId,
       shortsMode: task.shortsMode,
     });
+
+    try {
+      const { recordPlatformPost } = require("./platformPostsService");
+      await recordPlatformPost({
+        platform: "youtube",
+        contentId: task.contentId,
+        uid: task.uid,
+        reason: "task_queue_upload",
+        taskId: task.id,
+        outcome: {
+          success: true,
+          externalId: outcome.videoId,
+          postId: outcome.videoId, // compatibility
+          ...outcome,
+        },
+      });
+    } catch (e) {
+      console.warn("Failed to record youtube platform post:", e.message);
+    }
+
     await taskRef.update({
       status: "completed",
       outcome,

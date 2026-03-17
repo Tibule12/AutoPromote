@@ -1,0 +1,111 @@
+"use strict";
+(globalThis.webpackChunkautopromote_frontend =
+  globalThis.webpackChunkautopromote_frontend || []).push([
+  [895],
+  {
+    4895(e, t, o) {
+      (o.r(t), o.d(t, { default: () => i }));
+      (o(5043), o(9258));
+      var r = o(579);
+      const i = () =>
+        (0, r.jsxs)("div", {
+          className: "ap-page-container",
+          children: [
+            (0, r.jsx)("h1", { children: "Terms of Service for AutoPromote" }),
+            (0, r.jsx)("p", {
+              children: "Effective date: December 10, 2025 (Last Updated: November 15, 2025)",
+            }),
+            (0, r.jsx)("p", {
+              children:
+                "Note: This is a draft policy for transparency and platform review. It does not constitute legal advice. For compliance matters, contact us at thulani@autopromote.org.",
+            }),
+            (0, r.jsxs)("div", {
+              className: "ap-content-section",
+              children: [
+                (0, r.jsx)("h2", { children: "1. Agreement to Terms" }),
+                (0, r.jsx)("p", {
+                  children:
+                    'By using our application and services ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use the Service.',
+                }),
+                (0, r.jsx)("h2", { children: "2. Description of Service" }),
+                (0, r.jsx)("p", {
+                  children:
+                    'AutoPromote provides users with tools to automate the promotion of their content across various social media platforms. The Service is provided on an "as is" and "as available" basis.',
+                }),
+                (0, r.jsx)("h2", { children: "3. User Accounts" }),
+                (0, r.jsx)("p", {
+                  children:
+                    "To use certain features of the Service, you must register for an account. You are responsible for safeguarding your account and are liable for any activities or actions under your account. You agree to notify us immediately of any unauthorized use of your account.",
+                }),
+                (0, r.jsx)("h2", { children: "4. Payments and Billing" }),
+                (0, r.jsx)("p", {
+                  children:
+                    "If you purchase paid features, subscriptions are billed through third-party payment processors (such as PayPal). Billing, refunds, and chargebacks are handled by the payment provider and in accordance with their terms. We do not store full payment card numbers on our servers.",
+                }),
+                (0, r.jsx)("h2", { children: "5. User Content" }),
+                (0, r.jsx)("p", {
+                  children:
+                    'You are responsible for the content you post, link, or otherwise make available through the Service ("User Content"). You retain all your rights to your User Content, but you grant us a worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display, and distribute such User Content in connection with providing the Service.',
+                }),
+                (0, r.jsx)("h2", { children: "6. Prohibited Conduct" }),
+                (0, r.jsx)("p", { children: "You agree not to use the Service to:" }),
+                (0, r.jsxs)("ul", {
+                  children: [
+                    (0, r.jsx)("li", { children: "Violate any law or regulation." }),
+                    (0, r.jsx)("li", {
+                      children:
+                        "Infringe the intellectual property or other rights of third parties.",
+                    }),
+                    (0, r.jsx)("li", {
+                      children: "Transmit any viruses, malware, or other malicious code.",
+                    }),
+                    (0, r.jsx)("li", {
+                      children:
+                        "Engage in any activity that is harmful, fraudulent, deceptive, threatening, harassing, defamatory, obscene, or otherwise objectionable.",
+                    }),
+                  ],
+                }),
+                (0, r.jsx)("h2", { children: "7. Termination" }),
+                (0, r.jsx)("p", {
+                  children:
+                    "We may terminate or suspend your access to the Service at any time, without prior notice or liability, for any reason, including if you breach these Terms.",
+                }),
+                (0, r.jsx)("h2", { children: "8. Third-Party Platforms and Sharing" }),
+                (0, r.jsx)("p", {
+                  children:
+                    "When you connect third-party accounts (for example, social networks), you authorize us to act on your behalf to post, schedule, or otherwise manage content. You are responsible for ensuring you have the right to post content to those platforms and for complying with the target platform's terms.",
+                }),
+                (0, r.jsx)("h2", { children: "9. Limitation of Liability" }),
+                (0, r.jsx)("p", {
+                  children:
+                    "In no event shall AutoPromote, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.",
+                }),
+                (0, r.jsx)("h2", { children: "10. Changes to Terms" }),
+                (0, r.jsx)("p", {
+                  children:
+                    "We reserve the right to modify these Terms at any time. We will provide notice of any material changes by posting the new Terms on this site and, where appropriate, notifying users by email or in-app message. Your continued use of the Service after any such change constitutes your acceptance of the new Terms.",
+                }),
+                (0, r.jsx)("h2", { children: "11. Governing Law" }),
+                (0, r.jsx)("p", {
+                  children:
+                    "These Terms are governed by the laws of the jurisdiction in which AutoPromote is incorporated or operates. For any disputes, you agree to submit to the jurisdiction and venue of the courts located there, except where otherwise required by applicable law.",
+                }),
+                (0, r.jsx)("h2", { children: "12. Data Protection & Privacy" }),
+                (0, r.jsx)("p", {
+                  children:
+                    "Your privacy matters. Our Privacy Policy explains what information we collect and how we use it. You can read the Privacy Policy at /legal/privacy.html (or /privacy on the public site). To exercise privacy rights or for data protection inquiries, contact: thulani@autopromote.org.",
+                }),
+                (0, r.jsx)("h2", { children: "13. Contact Us" }),
+                (0, r.jsx)("p", {
+                  children:
+                    "If you have any questions about these Terms, please contact us at: thulani@autopromote.org.",
+                }),
+              ],
+            }),
+          ],
+        });
+    },
+    9258() {},
+  },
+]);
+//# sourceMappingURL=895.e4eb5b2b.chunk.js.map

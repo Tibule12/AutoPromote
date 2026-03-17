@@ -9,6 +9,7 @@ const {
   fetchTikTokMetrics,
   fetchLinkedInMetrics,
   fetchRedditMetrics,
+  fetchYouTubeMetrics,
 } = require("./platformMetricsService");
 const {
   recordPlatformAmplifyTrigger,
@@ -55,6 +56,14 @@ function computeNormalizedScore(platform, metrics) {
       const score = ((likes + comments * 2 + shares * 4) / Math.max(views, 1)) * 100;
       return Math.min(100, score * 3.0); // Multiplier to normalize against other platforms
     }
+    case "youtube": {
+      const views = metrics.view_count || 0;
+      const likes = metrics.like_count || 0;
+      const comments = metrics.comment_count || 0;
+      if (!views) return 0;
+      const score = ((likes + comments * 3) / Math.max(views, 1)) * 100;
+      return Math.min(100, score * 2.0);
+    }
     case "linkedin": {
       // LinkedIn (basic) has no views. Use raw engagement count as proxy for score
       const likes = metrics.like_count || 0;
@@ -98,6 +107,8 @@ async function fetchMetricsForPost(doc) {
         return await fetchInstagramMediaMetrics(externalId);
       case "tiktok":
         return await fetchTikTokMetrics(data.uid, externalId);
+      case "youtube":
+        return await fetchYouTubeMetrics(data.uid, externalId);
       case "linkedin":
         return await fetchLinkedInMetrics(data.uid, externalId);
       case "reddit":
@@ -129,7 +140,7 @@ function computeNextAnalyticsCheck(publishedAtMs, nowMs, latestSnapshot) {
     if (latestSnapshot.views < 20) return null;
   }
 
-  const scheduleMinutes = [60, 180, 360, 720, 1440, 2880, 4320, 7200, 10080];
+  const scheduleMinutes = [10, 30, 60, 180, 360, 720, 1440, 2880, 4320, 7200, 10080];
   for (const minutes of scheduleMinutes) {
     if (ageMinutes < minutes) {
       return new Date(publishedAtMs + minutes * 60000).toISOString();
@@ -183,7 +194,7 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5, maxAgeMinutes = 30 
     .collection("platform_posts")
     .where("success", "==", true)
     .where("next_check_at", "==", null)
-    .orderBy("createdAt", "desc")
+    //.orderBy("createdAt", "desc") // Requires composite index
     .limit(batchSize * 2)
     .get()
     .catch(() => ({ empty: true, docs: [] }));
@@ -242,8 +253,8 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5, maxAgeMinutes = 30 
     const nextCheckMs = getTimestamp(d.next_check_at);
     if (nextCheckMs && nextCheckMs > nowMs) continue; // not time yet
 
-    // If we haven't set next_check yet (or it's stale), update it to the calculated schedule and wait
-    if (!nextCheckMs || new Date(nextScheduledCheck).getTime() > nowMs) {
+    // If we haven't set next_check yet, schedule it and wait (defer first check)
+    if (!nextCheckMs) {
       await doc.ref.set({ next_check_at: nextScheduledCheck }, { merge: true });
       continue;
     }

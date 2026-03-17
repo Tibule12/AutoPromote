@@ -115,46 +115,78 @@
           ? `Bot: ${safe(bot)} · State: ${safe(state)}`
           : `State: ${safe(state)}`;
 
-        // Only allow safe targets — accept tg scheme and known Telegram web hosts.
+        // Only allow safe targets — strict validation for tg:// and HTTPS Telegram domains
         function isAllowedTelegramUrl(url) {
-          if (!url) return false;
-          if (url.startsWith("tg:") || url.startsWith("tg://")) return true;
+          if (!url || typeof url !== "string") return false;
+          url = url.trim();
+
+          // Validate tg:// protocol with strict pattern
+          if (url.startsWith("tg://")) {
+            return /^tg:\/\/[a-zA-Z0-9_\-\/\?=&]+$/.test(url);
+          }
+
+          // Only allow HTTPS URLs from whitelisted Telegram domains
           try {
             const u = new URL(url);
+            if (u.protocol !== "https:") return false;
             const allowed = ["t.me", "web.telegram.org"];
-            if (allowed.includes(u.hostname)) return true;
-            // Allow same-origin for debug / staging local interstitials
-            if (u.origin === window.location.origin) return true;
+            return allowed.includes(u.hostname);
           } catch (_) {}
           return false;
         }
 
-        openApp.href = isAllowedTelegramUrl(appUrl)
-          ? appUrl
-          : isAllowedTelegramUrl(authUrl)
-            ? authUrl
-            : "#";
-        openApp.onclick = function (e) {
-          const t = appUrl || authUrl || "";
-          if (!isAllowedTelegramUrl(t)) {
-            e.preventDefault();
+        // Validate and sanitize URLs before use
+        const validAppUrl = isAllowedTelegramUrl(appUrl) ? appUrl : "";
+        const validAuthUrl = isAllowedTelegramUrl(authUrl) ? authUrl : "";
+
+        // Sanitize URLs to prevent XSS - encode any special characters
+        const sanitizeUrl = function (u) {
+          if (!u) return "#";
+          // Only allow telegram:// or https:// schemes
+          if (!u.startsWith("telegram://") && !u.startsWith("https://")) return "#";
+          // Additional validation: ensure it passes allowlist check
+          if (!isAllowedTelegramUrl(u)) return "#";
+          return u.replace(/[<>"'`]/g, "");
+        };
+
+        // Strict redirect function that double-checks validation
+        const safeRedirect = function (url) {
+          if (!url || !isAllowedTelegramUrl(url)) return false;
+          const sanitized = sanitizeUrl(url);
+          if (sanitized === "#") return false;
+          // Final validation: ensure sanitized URL is still safe
+          if (!sanitized.startsWith("telegram://") && !sanitized.startsWith("https://"))
+            return false;
+          if (!isAllowedTelegramUrl(sanitized)) return false;
+          try {
+            window.location.href = sanitized;
+            return true;
+          } catch (_) {
             return false;
           }
-          try {
-            window.location.href = t;
-          } catch (err) {
-            window.open(t, "_self");
-          }
+        };
+
+        openApp.href = sanitizeUrl(validAppUrl) || sanitizeUrl(validAuthUrl) || "#";
+        openApp.onclick = function (e) {
           e.preventDefault();
+          const targetUrl = validAppUrl || validAuthUrl;
+          safeRedirect(targetUrl);
           return false;
         };
 
-        openWeb.href = isAllowedTelegramUrl(authUrl)
-          ? authUrl
-          : isAllowedTelegramUrl(appUrl)
-            ? appUrl
-            : "#";
-        openWeb.onclick = function () {
+        openWeb.href = sanitizeUrl(validAuthUrl) || sanitizeUrl(validAppUrl) || "#";
+        openWeb.onclick = function (e) {
+          const href = openWeb.href;
+          if (
+            !href ||
+            href === "#" ||
+            !href.startsWith("https://") ||
+            !isAllowedTelegramUrl(href)
+          ) {
+            e.preventDefault();
+            return false;
+          }
+          // Allow navigation only to validated URLs
           return true;
         };
 
@@ -162,14 +194,10 @@
           window.close();
         };
 
-        // Auto-attempt native open on load (non-blocking)
-        if (isAllowedTelegramUrl(appUrl)) {
+        // Auto-attempt native open on load (non-blocking) - only if strictly validated
+        if (validAppUrl && isAllowedTelegramUrl(validAppUrl)) {
           setTimeout(function () {
-            try {
-              window.location.href = appUrl;
-            } catch (_) {
-              /* ignore */
-            }
+            safeRedirect(validAppUrl);
           }, 300);
         }
 

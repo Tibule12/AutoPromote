@@ -1,0 +1,87 @@
+"use strict";
+(globalThis.webpackChunkautopromote_frontend =
+  globalThis.webpackChunkautopromote_frontend || []).push([
+  [267],
+  {
+    8267(e, s, n) {
+      (n.r(s), n.d(s, { default: () => l }));
+      (n(5043), n(9258));
+      var i = n(579);
+      const l = () =>
+        (0, i.jsxs)("div", {
+          className: "ap-page-container",
+          children: [
+            (0, i.jsxs)("header", {
+              className: "ap-page-header",
+              children: [
+                (0, i.jsx)("h1", { children: "API Reference" }),
+                (0, i.jsx)("p", {
+                  className: "ap-page-subtitle",
+                  children: "Build on top of AutoPromote.",
+                }),
+              ],
+            }),
+            (0, i.jsxs)("div", {
+              className: "ap-content-section",
+              children: [
+                (0, i.jsxs)("div", {
+                  className: "ap-alert-box",
+                  children: [
+                    (0, i.jsx)("strong", { children: "Note:" }),
+                    " Public API access is currently in Beta.",
+                  ],
+                }),
+                (0, i.jsx)("h3", { children: "Authentication" }),
+                (0, i.jsxs)("p", {
+                  children: [
+                    "All API requests require a Bearer token. Use ",
+                    (0, i.jsx)("code", {
+                      children: "https://autopromote.onrender.com/api/auth/login",
+                    }),
+                    " to retrieve a token.",
+                  ],
+                }),
+                (0, i.jsx)("h3", { children: "Endpoints" }),
+                (0, i.jsxs)("ul", {
+                  className: "ap-list",
+                  children: [
+                    (0, i.jsxs)("li", {
+                      children: [
+                        (0, i.jsx)("code", { children: "POST /api/content/upload" }),
+                        " - Upload new media.",
+                      ],
+                    }),
+                    (0, i.jsxs)("li", {
+                      children: [
+                        (0, i.jsx)("code", { children: "GET /api/content/my-content" }),
+                        " - Retrieve uploaded items.",
+                      ],
+                    }),
+                    (0, i.jsxs)("li", {
+                      children: [
+                        (0, i.jsx)("code", { children: "GET /api/users/me" }),
+                        " - Get current user profile.",
+                      ],
+                    }),
+                  ],
+                }),
+                (0, i.jsxs)("p", {
+                  children: [
+                    "For full documentation, please visit our",
+                    " ",
+                    (0, i.jsx)("span", {
+                      style: { textDecoration: "underline" },
+                      children: "Developer Portal",
+                    }),
+                    " (Coming Soon).",
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+    },
+    9258() {},
+  },
+]);
+//# sourceMappingURL=267.192fdc03.chunk.js.map
