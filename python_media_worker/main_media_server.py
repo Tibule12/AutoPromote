@@ -341,7 +341,9 @@ class VideoProcessRequest(BaseModel):
     smart_crop: bool = False
     crop_style: str = "blur"
     silence_removal: bool = False
-    montage_segments: Optional[List[dict]] = None  # NEW: For concatenating clips
+    remove_watermark: bool = False  # New Field
+    montage_segments: Optional[List[dict]] = None
+    captions: bool = False  # NEW: For concatenating clips
     captions: bool = False
     add_music: bool = False
     music_file: str = "upbeat.mp3"  # Fixed default
@@ -665,6 +667,27 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         # 2. Build Filter Chain
         current_v = f"[{input_map}:v]"
         current_a = f"[{audio_map_idx}:a]"
+
+        # A0. Remove Watermark (TikTok/Reels) - Prioritize this before scaling
+        if request.remove_watermark:
+             # Standard positions for TikTok (Top Left & Bottom Right)
+             # We apply delogo twice. 
+             # Top Left: x=10, y=20, w=200, h=80 (approx)
+             # Bottom Right: x=W-210, y=H-140, w=200, h=80 (approx)
+             
+             # Note: delogo requires x,y,w,h.
+             # We assume 1080x1920 (Vertical) or 1920x1080 (Horizontal)
+             # But at this stage 'current_path' defines dimensions.
+             # Delogo works on pixels. If we are smart cropping later, logos might move.
+             # It is SAFER to remove logos on the source resolution if possible.
+             
+             # Filter 1: Top Left
+             # Filter 2: Bottom Right (dynamic expression 'w' and 'h' supported in delogo?) 
+             # No, delogo usually needs fixed numbers or basic expressions. 
+             # Let's use a conservative box.
+             
+             main_filters.append(f"{current_v}delogo=x=20:y=20:w=250:h=90:show=0,delogo=x=W-270:y=H-150:w=250:h=90:show=0[v_clean]")
+             current_v = "[v_clean]"
         
         # A. Smart Crop / Scale
         if request.smart_crop:

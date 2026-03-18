@@ -340,6 +340,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     captions: false, // Auto-Captions (Whisper)
     muteAudio: false, // Strip original audio
     addMusic: false, // Background Music
+    removeWatermark: false, // 🚫 Remove TikTok/Reels Watermark
     analyzeClips: false, // 🔍 NEW: Find Viral Moments
     isSearch: false, // Use YouTube Search for Music
     safeSearch: true, // Default: Search only royalty-free music
@@ -399,6 +400,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       !options.captions &&
       !options.muteAudio &&
       !options.addMusic &&
+      !options.removeWatermark &&
       !options.analyzeClips &&
       !options.addHook
     ) {
@@ -1269,6 +1271,18 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 <div className="option-desc">
                   Auto-detects language (English, Zulu, Xhosa, Afrikaans, etc.)
                 </div>
+              </div>
+            </label>
+
+            <label className="ai-option">
+              <input
+                type="checkbox"
+                checked={options.removeWatermark}
+                onChange={() => toggleOption("removeWatermark")}
+              />
+              <div className="option-label">
+                <div className="option-title">🚫 Remove TikTok Watermark</div>
+                <div className="option-desc">Auto-erases branding from corners (Beta)</div>
               </div>
             </label>
 

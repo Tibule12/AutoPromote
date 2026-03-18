@@ -178,6 +178,7 @@ class VideoEditingService {
         smart_crop: options.smartCrop || false,
         crop_style: cropStyle,
         silence_removal: options.silenceRemoval || false,
+        remove_watermark: options.removeWatermark || false, // Add watermark option
         captions: options.captions || false,
         add_music: options.addMusic || false,
         music_file: options.musicFile || "upbeat.mp3", // Changed default to upbeat.mp3
