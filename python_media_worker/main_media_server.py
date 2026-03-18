@@ -341,7 +341,10 @@ class VideoProcessRequest(BaseModel):
     smart_crop: bool = False
     crop_style: str = "blur"
     silence_removal: bool = False
-    montage_segments: Optional[List[dict]] = None  # NEW: For concatenating clips
+    remove_watermark: bool = False
+    watermark_mode: str = "corners" # corners, top_right, bottom_left, all
+    montage_segments: Optional[List[dict]] = None
+    captions: bool = False  # NEW: For concatenating clips
     captions: bool = False
     add_music: bool = False
     music_file: str = "upbeat.mp3"  # Fixed default
@@ -665,6 +668,51 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         # 2. Build Filter Chain
         current_v = f"[{input_map}:v]"
         current_a = f"[{audio_map_idx}:a]"
+
+        # Get dimensions for delogo calculation (since delogo doesn't always support expressions)
+        width_val, height_val = 1080, 1920
+        try:
+             dim_cmd = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=s=x:p=0", current_path]
+             dim_res = await run_subprocess_async(dim_cmd, check=True, stdout=subprocess.PIPE, text=True)
+             parts = dim_res.stdout.strip().split('x')
+             if len(parts) >= 2:
+                 width_val, height_val = int(parts[0]), int(parts[1])
+        except Exception as e:
+             logger.warning(f"Dimension probe failed: {e}")
+
+        # A0. Remove Watermark (TikTok/Reels) - Prioritize this before scaling
+        if request.remove_watermark:
+             mode = request.watermark_mode or "corners"
+             filters = []
+             
+             # Filters definitions
+             # Top Left: x=20:y=20:w=250:h=90 (TikTok)
+             f_tl = "delogo=x=20:y=20:w=250:h=90:show=0"
+             # Bottom Right: x=W-270:y=H-150:w=250:h=90 (TikTok Bouncing / Shorts)
+             f_br = f"delogo=x={width_val-270}:y={height_val-150}:w=250:h=90:show=0"
+             # Top Right: x=W-200:y=20:w=180:h=80 (Reels/Kwai sometimes)
+             f_tr = f"delogo=x={width_val-200}:y=20:w=180:h=80:show=0"
+             # Bottom Left: x=20:y=H-150:w=200:h=80 (Less common)
+             f_bl = f"delogo=x=20:y={height_val-150}:w=200:h=80:show=0"
+             
+             if mode == "corners" or mode == "standard":
+                 # Standard TikTok/Reels/Shorts
+                 filters.append(f_tl)
+                 filters.append(f_br)
+             elif mode == "top_right":
+                 filters.append(f_tr)
+             elif mode == "bottom_left":
+                 filters.append(f_bl) 
+             elif mode == "all":
+                 filters.append(f_tl)
+                 filters.append(f_br)
+                 filters.append(f_tr)
+                 filters.append(f_bl)
+                 
+             if filters:
+                 filter_str = ",".join(filters)
+                 main_filters.append(f"{current_v}{filter_str}[v_clean]")
+                 current_v = "[v_clean]"
         
         # A. Smart Crop / Scale
         if request.smart_crop:
