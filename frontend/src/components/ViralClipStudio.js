@@ -352,12 +352,16 @@ const ViralClipStudio = ({
   const handleMouseMove = e => {
     if (!isDragging || !dragItem.current) return;
 
+    // Support both mouse and touch events
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
     // We must track mouse relative to the PHONE FRAME, not the window or element
     const container = e.currentTarget.getBoundingClientRect();
 
     // Calculate mouse position relative to container
-    const relativeX = e.clientX - container.left;
-    const relativeY = e.clientY - container.top;
+    const relativeX = clientX - container.left;
+    const relativeY = clientY - container.top;
 
     // Convert to percentage (0-100)
     let percentX = (relativeX / container.width) * 100;
@@ -404,6 +408,8 @@ const ViralClipStudio = ({
               onMouseMove={handleMouseMove}
               onMouseUp={handleDragEnd}
               onMouseLeave={handleDragEnd}
+              onTouchMove={handleMouseMove}
+              onTouchEnd={handleDragEnd}
             >
               <video
                 ref={videoRef}
@@ -422,7 +428,7 @@ const ViralClipStudio = ({
                 onClick={() => setActiveOverlayId(null)} // Deselect on video click
               />
 
-              {/* Background Video Layer (Clear & Visible) */}
+              {/* Background Layer (Static Gradient instead of Video for Performance) */}
               <div
                 className="video-bg-layer"
                 style={{
@@ -433,25 +439,9 @@ const ViralClipStudio = ({
                   height: "100%",
                   zIndex: 0,
                   overflow: "hidden",
+                  background: "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)",
                 }}
-              >
-                <video
-                  key={timeline[activeTimelineIndex]?.id || "bg-video"}
-                  src={sanitizeUrl(timeline[activeTimelineIndex]?.url || videoUrl)}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    transform: "scale(1.05)",
-                    opacity: 0.8,
-                    filter: "blur(10px)",
-                  }}
-                />
-              </div>
+              />
 
               {/* Overlays Layer */}
               <div className="overlays-layer">
@@ -487,6 +477,7 @@ const ViralClipStudio = ({
                         zIndex: 100 + index,
                       }}
                       onMouseDown={e => handleDragStart(e, overlay)}
+                      onTouchStart={e => handleDragStart(e, overlay)}
                       onDoubleClick={() => {
                         if (overlay.type === "text") {
                           const newText = prompt("Edit Text:", overlay.text);
