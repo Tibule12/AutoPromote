@@ -120,7 +120,14 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
       }
 
       const contentSnap = await db.collection("content").doc(t.contentId).get();
-      const uid = contentSnap.exists ? contentSnap.data().user_id || contentSnap.data().uid : null;
+      const contentData = contentSnap.exists ? contentSnap.data() : null;
+      if (!contentData) continue;
+
+      const uid = contentData.user_id || contentData.uid;
+      // Extract media URL from the source content to enable Smart Transform
+      const persistentMediaUrl =
+        contentData.url || contentData.mediaUrl || contentData.downloadInfo?.url;
+
       if (!uid) continue;
 
       // VISUAL FIX: Create a "schedule" entry so it appears on the Dashboard Timeline
@@ -155,7 +162,7 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
       // STRATEGIC REPOST: Route through Media Transform first to generate unique hash
       // This changes the file binary (brightness/metadata) so platforms treat it as "fresh" content.
       try {
-        const sourceUrl = t.mediaUrl || t.payload?.mediaUrl || t.payload?.url;
+        const sourceUrl = t.mediaUrl || t.payload?.mediaUrl || t.payload?.url || persistentMediaUrl;
         if (sourceUrl) {
           console.log(
             `[RepostScheduler] Routing ${t.contentId} through Strategic Transform for safety.`

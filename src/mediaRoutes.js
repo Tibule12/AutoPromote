@@ -155,21 +155,25 @@ router.post("/analyze", async (req, res) => {
 
   try {
     console.log(`[MediaRoute] Analyze clip request for user ${userId}, file: ${fileUrl}`);
-    // Temporarily bypass credit check for testing if needed
-    // const creditRes = await deductCredits(userId, cost);
 
-    const creditRes = { success: true, remaining: 999 }; // Bypass for testing
-    /*
-      const creditRes = await deductCredits(userId, cost);
-      if (!creditRes.success) {
-        console.warn(`[MediaRoute] Insufficient credits for user ${userId}. Required: ${cost}, Msg: ${creditRes.message}`);
-        return res.status(403).json({ message: "Insufficient credits", details: creditRes.message });
-      }
-      */
+    // Check and deduct credits first
+    const credits = await deductCredits(userId, cost);
+    if (!credits.success) {
+      console.warn(
+        `[MediaRoute] Insufficient credits for user ${userId}. Required: ${cost}, Msg: ${credits.message}`
+      );
+      return res
+        .status(403)
+        .json({
+          message: "Insufficient credits. Please purchase more.",
+          required: cost,
+          balance: credits.remaining,
+        });
+    }
 
     console.log(`[MediaRoute] Credits OK. Starting analysis...`);
     const scenes = await videoEditingService.analyzeVideo(fileUrl, userId);
-    res.json({ success: true, scenes: scenes, remainingCredits: creditRes.remaining });
+    res.json({ success: true, scenes: scenes, remainingCredits: credits.remaining });
   } catch (error) {
     console.error(`[MediaRoute] Analyze error:`, error);
     res.status(500).json({ message: "Analysis failed", details: error.message });
