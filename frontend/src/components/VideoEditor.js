@@ -341,6 +341,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     muteAudio: false, // Strip original audio
     addMusic: false, // Background Music
     removeWatermark: false, // 🚫 Remove TikTok/Reels Watermark
+    watermarkMode: "corners", // corners, top_right, bottom_left, all
     analyzeClips: false, // 🔍 NEW: Find Viral Moments
     isSearch: false, // Use YouTube Search for Music
     safeSearch: true, // Default: Search only royalty-free music
@@ -1281,10 +1282,33 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 onChange={() => toggleOption("removeWatermark")}
               />
               <div className="option-label">
-                <div className="option-title">🚫 Remove TikTok Watermark</div>
-                <div className="option-desc">Auto-erases branding from corners (Beta)</div>
+                <div className="option-title">🚫 Remove Platform Watermarks</div>
+                <div className="option-desc">Auto-erasers logos (TikTok, Reels, Shorts, etc.)</div>
               </div>
             </label>
+
+            {options.removeWatermark && (
+              <div style={{ marginLeft: "34px", marginBottom: "10px" }}>
+                <select
+                  value={options.watermarkMode}
+                  onChange={e => setOptions({ ...options, watermarkMode: e.target.value })}
+                  style={{
+                    width: "100%",
+                    padding: "6px",
+                    borderRadius: "4px",
+                    border: "1px solid #444",
+                    background: "#222",
+                    color: "#fff",
+                    fontSize: "12px",
+                  }}
+                >
+                  <option value="corners">Standard (TikTok/Reels - TL & BR)</option>
+                  <option value="top_right">Top Right Only</option>
+                  <option value="bottom_left">Bottom Left Only</option>
+                  <option value="all">Aggressive (All 4 Corners)</option>
+                </select>
+              </div>
+            )}
 
             <label className="ai-option">
               <input

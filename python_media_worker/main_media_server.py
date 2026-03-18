@@ -341,7 +341,8 @@ class VideoProcessRequest(BaseModel):
     smart_crop: bool = False
     crop_style: str = "blur"
     silence_removal: bool = False
-    remove_watermark: bool = False  # New Field
+    remove_watermark: bool = False
+    watermark_mode: str = "corners" # corners, top_right, bottom_left, all
     montage_segments: Optional[List[dict]] = None
     captions: bool = False  # NEW: For concatenating clips
     captions: bool = False
@@ -670,24 +671,37 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
         # A0. Remove Watermark (TikTok/Reels) - Prioritize this before scaling
         if request.remove_watermark:
-             # Standard positions for TikTok (Top Left & Bottom Right)
-             # We apply delogo twice. 
-             # Top Left: x=10, y=20, w=200, h=80 (approx)
-             # Bottom Right: x=W-210, y=H-140, w=200, h=80 (approx)
+             mode = request.watermark_mode or "corners"
+             filters = []
              
-             # Note: delogo requires x,y,w,h.
-             # We assume 1080x1920 (Vertical) or 1920x1080 (Horizontal)
-             # But at this stage 'current_path' defines dimensions.
-             # Delogo works on pixels. If we are smart cropping later, logos might move.
-             # It is SAFER to remove logos on the source resolution if possible.
+             # Filters definitions
+             # Top Left: x=20:y=20:w=250:h=90 (TikTok)
+             f_tl = "delogo=x=20:y=20:w=250:h=90:show=0"
+             # Bottom Right: x=W-270:y=H-150:w=250:h=90 (TikTok Bouncing / Shorts)
+             f_br = "delogo=x=W-270:y=H-150:w=250:h=90:show=0"
+             # Top Right: x=W-200:y=20:w=180:h=80 (Reels/Kwai sometimes)
+             f_tr = "delogo=x=W-200:y=20:w=180:h=80:show=0"
+             # Bottom Left: x=20:y=H-150:w=200:h=80 (Less common)
+             f_bl = "delogo=x=20:y=H-150:w=200:h=80:show=0"
              
-             # Filter 1: Top Left
-             # Filter 2: Bottom Right (dynamic expression 'w' and 'h' supported in delogo?) 
-             # No, delogo usually needs fixed numbers or basic expressions. 
-             # Let's use a conservative box.
-             
-             main_filters.append(f"{current_v}delogo=x=20:y=20:w=250:h=90:show=0,delogo=x=W-270:y=H-150:w=250:h=90:show=0[v_clean]")
-             current_v = "[v_clean]"
+             if mode == "corners" or mode == "standard":
+                 # Standard TikTok/Reels/Shorts
+                 filters.append(f_tl)
+                 filters.append(f_br)
+             elif mode == "top_right":
+                 filters.append(f_tr)
+             elif mode == "bottom_left":
+                 filters.append(f_bl) 
+             elif mode == "all":
+                 filters.append(f_tl)
+                 filters.append(f_br)
+                 filters.append(f_tr)
+                 filters.append(f_bl)
+                 
+             if filters:
+                 filter_str = ",".join(filters)
+                 main_filters.append(f"{current_v}{filter_str}[v_clean]")
+                 current_v = "[v_clean]"
         
         # A. Smart Crop / Scale
         if request.smart_crop:
