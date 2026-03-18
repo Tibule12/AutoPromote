@@ -669,6 +669,17 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         current_v = f"[{input_map}:v]"
         current_a = f"[{audio_map_idx}:a]"
 
+        # Get dimensions for delogo calculation (since delogo doesn't always support expressions)
+        width_val, height_val = 1080, 1920
+        try:
+             dim_cmd = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=s=x:p=0", current_path]
+             dim_res = await run_subprocess_async(dim_cmd, check=True, stdout=subprocess.PIPE, text=True)
+             parts = dim_res.stdout.strip().split('x')
+             if len(parts) >= 2:
+                 width_val, height_val = int(parts[0]), int(parts[1])
+        except Exception as e:
+             logger.warning(f"Dimension probe failed: {e}")
+
         # A0. Remove Watermark (TikTok/Reels) - Prioritize this before scaling
         if request.remove_watermark:
              mode = request.watermark_mode or "corners"
@@ -678,11 +689,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
              # Top Left: x=20:y=20:w=250:h=90 (TikTok)
              f_tl = "delogo=x=20:y=20:w=250:h=90:show=0"
              # Bottom Right: x=W-270:y=H-150:w=250:h=90 (TikTok Bouncing / Shorts)
-             f_br = "delogo=x=W-270:y=H-150:w=250:h=90:show=0"
+             f_br = f"delogo=x={width_val-270}:y={height_val-150}:w=250:h=90:show=0"
              # Top Right: x=W-200:y=20:w=180:h=80 (Reels/Kwai sometimes)
-             f_tr = "delogo=x=W-200:y=20:w=180:h=80:show=0"
+             f_tr = f"delogo=x={width_val-200}:y=20:w=180:h=80:show=0"
              # Bottom Left: x=20:y=H-150:w=200:h=80 (Less common)
-             f_bl = "delogo=x=20:y=H-150:w=200:h=80:show=0"
+             f_bl = f"delogo=x=20:y={height_val-150}:w=200:h=80:show=0"
              
              if mode == "corners" or mode == "standard":
                  # Standard TikTok/Reels/Shorts
