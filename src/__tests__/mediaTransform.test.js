@@ -1,6 +1,7 @@
 const {
   enqueueMediaTransformTask,
   processNextMediaTransformTask,
+  __testables,
 } = require("../services/mediaTransform");
 const admin = require("../firebaseAdmin").admin;
 const stream = require("stream");
@@ -52,6 +53,22 @@ jest.mock("fluent-ffmpeg", () => {
 jest.mock("ffmpeg-static", () => "ffmpeg", { virtual: true });
 
 describe("mediaTransform", () => {
+  it("escapes subtitle paths before building the ffmpeg subtitles filter", () => {
+    const filter = __testables.buildSubtitleOverlayFilter(
+      "/tmp/repost:captions,semi;[preview]'quote'.srt",
+      "youtube"
+    );
+
+    expect(filter).toContain(
+      "subtitles='/tmp/repost\\:captions\\,semi\\;\\[preview\\]\\'quote\\'.srt'"
+    );
+    expect(filter).toContain("force_style='");
+  });
+
+  it("drops subtitle overlays when the subtitle path contains control characters", () => {
+    expect(__testables.buildSubtitleOverlayFilter("/tmp/bad\nname.srt", "youtube")).toBe("");
+  });
+
   it("enqueues and processes a transform task (mocked ffmpeg/storage)", async () => {
     // Mock fetch to return a Readable stream in res.body
     global.fetch = jest.fn(async _url => ({

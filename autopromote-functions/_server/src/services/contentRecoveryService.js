@@ -101,7 +101,7 @@ async function setRecoveryAutomationConfig({ patch = {}, actorUid = null } = {})
 
   await updateConfig({ recoveryAutomation: next });
   await incrCounter("diagnosis_automation_config_updates");
-  return getRecoveryAutomationConfig({ force: true });
+  return next;
 }
 
 async function disableRecoveryAutomation({ actorUid = null, reason = "manual_disable" } = {}) {
