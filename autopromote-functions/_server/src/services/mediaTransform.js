@@ -6,7 +6,7 @@ const fs = require("fs");
 const { Readable } = require("stream");
 const { v4: uuidv4 } = require("uuid"); // Ensure consistent uuid import
 
-// Configure FFmpeg/FFprobe path (Ensure ffmpeg/ffprobe are installed in environment or docker image)
+// Configure FFmpeg path (Ensure ffmpeg/ffprobe are installed in environment or docker image)
 try {
   const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
   const ffprobeInstaller = require("@ffprobe-installer/ffprobe");
@@ -182,7 +182,8 @@ function buildSrtFromSegments(segments) {
 }
 
 async function prepareCaptionFile({ inputPath, contentId, taskId, tmpDir, enabled }) {
-  if (enabled === false) return { subtitlePath: null, captionBurnedIn: false, transcriptionError: null };
+  if (enabled === false)
+    return { subtitlePath: null, captionBurnedIn: false, transcriptionError: null };
   try {
     const { generateTranscription } = require("./captionsService");
     const transcription = await generateTranscription(inputPath);
@@ -222,7 +223,9 @@ function buildHookOverlayFilter(hookText, platform, options = {}) {
   if (!hookText) return "";
   const style = getHookStyle(platform);
   const safeText = escapeDrawtext(wrapText(hookText, 20, 3)).slice(0, 140);
-  const introSeconds = Number.isFinite(options.introSeconds) ? options.introSeconds.toFixed(1) : "3.0";
+  const introSeconds = Number.isFinite(options.introSeconds)
+    ? options.introSeconds.toFixed(1)
+    : "3.0";
   const bannerEnd = Number.isFinite(options.bannerEndSeconds)
     ? options.bannerEndSeconds.toFixed(1)
     : "5.8";
@@ -246,7 +249,7 @@ function processMedia(inputFile, outputFile, options = {}) {
       normalizeAudio = true,
       fixAspectRatio = true,
       targetAspectRatio = 9 / 16, // Default to TikTok/Reels vertical
-      viralMutation = false,
+      viralMutation = false, // ENABLE THE COMEBACK: Randomly mutate content to bypass hash/duplicate detection
       hookText = "",
       subtitlePath = "",
       platform = "default",
@@ -255,23 +258,58 @@ function processMedia(inputFile, outputFile, options = {}) {
 
     let command = ffmpeg(inputFile);
     const complexFilters = [];
+
+    // --- VIRAL MUTATION ENGINE ---
+    // If enabled, we subtly alter the video DNA to evade "Shadowban" or "Duplicate Content" filters.
+    // 1. Speed Change (Tempo 1.05x) - Changes duration hash
+    // 2. Color Grade (Saturation 1.2) - Changes visual hash
+    // 3. Zoom Crop (1.02x) - Changes pixel mapping
+
     let videoFilterChain = "";
     let audioFilterChain = "";
 
+    // 1. Retention Guard: Trim Silence at Start
+    // silenceremove=start_periods=1:start_duration=0.5:start_threshold=-40dB
     if (trimSilence) {
+      // Applied as an audio filter. Note: this shifts audio. Video needs to be synced or we just cut content.
+      // FFmpeg 'silenceremove' only affects audio streams.
+      // To cut VIDEO based on audio silence is complex.
+      // Simplified "Sci-Fi" approach: We just cut the first 1.5s if it's dead silence,
+      // OR we rely on 'silenceremove' and let ffmpeg sync (it usually drops video frames to match).
+      // For safety, we will use a dedicated silence remover that works well.
       audioFilterChain += "silenceremove=start_periods=1:start_duration=0.3:start_threshold=-35dB,";
     }
 
+    // 2. Loudness Equalizer (Spotify/TikTok Standard)
+    // loudnorm=I=-16:TP=-1.5:LRA=11
     if (normalizeAudio) {
+      // Chain from previous audio output
       audioFilterChain += "loudnorm=I=-16:TP=-1.5:LRA=11,";
     }
 
+    // 3. Viral Mutation (The "Comeback" Logic)
     if (viralMutation) {
+      // Speed up video and audio by 5% (imperceptible to humans, new content to bots)
+      // video: setpts=0.95*PTS
+      // audio: atempo=1.05
       videoFilterChain += "setpts=0.952*PTS,";
       audioFilterChain += "atempo=1.05,";
+
+      // Color Grading (Pop the colors)
+      // eq=saturation=1.1:contrast=1.05
       videoFilterChain += "eq=saturation=1.1:contrast=1.05,";
+
+      // Slight Zoom (Crop 2% from center) to break pixel matching
+      // crop=iw*0.98:ih*0.98:(iw-ow)/2:(ih-oh)/2
       videoFilterChain += "crop=iw*0.98:ih*0.98:(iw-ow)/2:(ih-oh)/2,";
     }
+
+    // Clean up trailing commas in chains for basic processing
+    // We will build the final complex filter graph carefully.
+
+    // We need to name the streams to chain them properly.
+    // [0:a] -> [a_proc]
+    // [0:v] -> [v_proc]
 
     if (audioFilterChain.endsWith(",")) audioFilterChain = audioFilterChain.slice(0, -1);
     if (videoFilterChain.endsWith(",")) videoFilterChain = videoFilterChain.slice(0, -1);
@@ -293,17 +331,37 @@ function processMedia(inputFile, outputFile, options = {}) {
     if (audioFilterChain) {
       complexFilters.push(`[0:a]${audioFilterChain}[a_processed]`);
     } else {
-      complexFilters.push("[0:a]anull[a_processed]");
+      complexFilters.push(`[0:a]anull[a_processed]`);
     }
 
     if (videoFilterChain) {
       complexFilters.push(`[0:v]${videoFilterChain}[v_processed]`);
     } else {
-      complexFilters.push("[0:v]null[v_processed]");
+      complexFilters.push(`[0:v]null[v_processed]`);
     }
 
+    // 4. Format Defender (Aspect Ratio)
     if (fixAspectRatio) {
-      complexFilters.push("[v_processed]split[v_bg][v_fg]");
+      // We need to decide if we blur-fill or pass through.
+      // This requires knowing input info, but we can use strict filter logic with 'scale' and 'pad'.
+      // "Blur Fill" Logic for 9:16 target:
+      // Split input -> Stream 1 (Background): Scale to 1080x1920 (Force), BoxBlur
+      // Split input -> Stream 2 (Foreground): Scale to fit 1080x1920 (Keep Aspect)
+      // Overlay Stream 2 on Stream 1.
+
+      // Note: This logic forces everything to 9:16.
+      // We should only do this if the user didn't opt out, or if we are sure it's for vertical platforms.
+      // For now, let's implement the generic "Smart Scale" which fits into 1080x1920 with black bars (pad)
+      // or blur fill. Blur fill is more professional ("Sci-Fi").
+
+      // Complex Filter Graph for Blur Fill:
+      // [v_processed]split[v_bg][v_fg];
+      // [v_bg]scale=1080:1920:force_original_aspect_ratio=increase,boxblur=20:10[v_bg_blurred];
+      // [v_bg_blurred]crop=1080:1920[v_bg_cropped];
+      // [v_fg]scale=1080:1920:force_original_aspect_ratio=decrease[v_fg_scaled];
+      // [v_bg_cropped][v_fg_scaled]overlay=(W-w)/2:(H-h)/2[v_out]
+
+      complexFilters.push(`[v_processed]split[v_bg][v_fg]`);
       complexFilters.push(
         `[v_bg]scale=1080:1920:force_original_aspect_ratio=increase,boxblur=20:10,crop=1080:1920[v_bg_processed]`
       );
@@ -312,7 +370,7 @@ function processMedia(inputFile, outputFile, options = {}) {
       );
       complexFilters.push(`[v_bg_processed][v_fg_processed]overlay=(W-w)/2:(H-h)/2[v_out]`);
     } else {
-      complexFilters.push("[v_processed]null[v_out]");
+      complexFilters.push(`[v_processed]null[v_out]`);
     }
 
     command
@@ -354,6 +412,7 @@ async function processMediaTransformTaskDoc(doc) {
 
     const fileStream = fs.createWriteStream(tmpIn);
 
+    // Handle Node/Fetch stream differences (Node fetch returns Node stream, native fetch returns web stream)
     const body = res.body;
     if (!body) throw new Error("download_failed(no_body)");
 
@@ -364,6 +423,7 @@ async function processMediaTransformTaskDoc(doc) {
         fileStream.on("finish", resolve);
       });
     } else if (typeof body.getReader === "function") {
+      // Web ReadableStream (Node 18+ global fetch)
       const nodeStream = Readable.fromWeb(body);
       await new Promise((resolve, reject) => {
         nodeStream.pipe(fileStream);
@@ -371,7 +431,7 @@ async function processMediaTransformTaskDoc(doc) {
         fileStream.on("finish", resolve);
       });
     } else {
-      // Fallback if we can't stream
+      // Fallback: load entire body into memory then write.
       const buffer = Buffer.from(await res.arrayBuffer());
       await fs.promises.writeFile(tmpIn, buffer);
     }
@@ -400,6 +460,7 @@ async function processMediaTransformTaskDoc(doc) {
       shouldFixRatio = true;
     }
 
+    // 4. Run FFmpeg Processing
     const viralMode = data.meta?.viral_remix || false;
     const targetPlatform = normalizePlatformKey(
       data.meta?.targetPlatform ||
@@ -418,11 +479,12 @@ async function processMediaTransformTaskDoc(doc) {
       `[MediaTransform] Processing ${data.contentId} (FixRatio: ${shouldFixRatio}, Normalize: true, ViralMode: ${viralMode}, Platform: ${targetPlatform}, BurnedCaptions: ${captionPrep.captionBurnedIn})...`
     );
 
+    // Apply "Comeback" Logic (Protcol 7 Mutation) if requested
     await processMedia(tmpIn, tmpOut, {
       trimSilence: true, // Always clean the hook
       normalizeAudio: true, // Always professional audio
       fixAspectRatio: shouldFixRatio, // Intelligent formatting
-      viralMutation: viralMode,
+      viralMutation: viralMode, // Change DNA if this is a "Remix" attempt
       hookText: data.meta?.hookText || "",
       subtitlePath,
       platform: targetPlatform,
@@ -565,9 +627,7 @@ async function processMediaTransformTaskDoc(doc) {
             hookText: data.meta.hookText,
             title: data.meta?.creativeTitle || null,
             description: data.meta?.creativeDescription || null,
-            hashtags: Array.isArray(data.meta?.creativeHashtags)
-              ? data.meta.creativeHashtags
-              : [],
+            hashtags: Array.isArray(data.meta?.creativeHashtags) ? data.meta.creativeHashtags : [],
             caption: data.meta?.creativeCaption || null,
             previewLabel: data.meta?.creativePreviewLabel || null,
             creatorLine: data.meta?.creativeCreatorLine || null,
@@ -591,25 +651,30 @@ async function processMediaTransformTaskDoc(doc) {
     });
 
     if (data.meta?.previewOnly) {
-      await db.collection("content").doc(data.contentId).set(
-        {
-          repostPreview: {
-            taskId: doc.id,
-            status: "failed",
-            error: e.message,
-            profile: data.meta?.creativeProfile || "smart_repost_polish_v1",
-            hookText: data.meta?.hookText || null,
-            title: data.meta?.creativeTitle || null,
-            description: data.meta?.creativeDescription || null,
-            hashtags: Array.isArray(data.meta?.creativeHashtags) ? data.meta.creativeHashtags : [],
-            caption: data.meta?.creativeCaption || null,
-            previewLabel: data.meta?.creativePreviewLabel || null,
-            creatorLine: data.meta?.creativeCreatorLine || null,
-            updatedAt: new Date().toISOString(),
+      await db
+        .collection("content")
+        .doc(data.contentId)
+        .set(
+          {
+            repostPreview: {
+              taskId: doc.id,
+              status: "failed",
+              error: e.message,
+              profile: data.meta?.creativeProfile || "smart_repost_polish_v1",
+              hookText: data.meta?.hookText || null,
+              title: data.meta?.creativeTitle || null,
+              description: data.meta?.creativeDescription || null,
+              hashtags: Array.isArray(data.meta?.creativeHashtags)
+                ? data.meta.creativeHashtags
+                : [],
+              caption: data.meta?.creativeCaption || null,
+              previewLabel: data.meta?.creativePreviewLabel || null,
+              creatorLine: data.meta?.creativeCreatorLine || null,
+              updatedAt: new Date().toISOString(),
+            },
           },
-        },
-        { merge: true }
-      );
+          { merge: true }
+        );
     }
     return null;
   } finally {

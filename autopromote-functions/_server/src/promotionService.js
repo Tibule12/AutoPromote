@@ -504,17 +504,23 @@ class PromotionService {
       let processedCount = 0;
 
       for (const doc of snapshot.docs) {
+        // Attempt to acquire a lock atomically to avoid duplicate execution in concurrent scheduler runs.
         const schedule = await db.runTransaction(async t => {
           const snap = await t.get(doc.ref);
           if (!snap.exists) return null;
           const data = snap.data();
+
+          // Skip if already processing or executed.
           if (data.status === "processing" || data.status === "executed") return null;
+
+          // Skip if it's not due yet (possible due to race/concurrency)
           if (data.startTime && data.startTime > now) return null;
+
           t.update(doc.ref, { status: "processing", updatedAt: now });
           return { id: doc.id, ...data };
         });
 
-        if (!schedule) continue;
+        if (!schedule) continue; // Lock not acquired or not due
 
         console.log(`[Scheduler] 🚀 Processing schedule ${schedule.id} for ${schedule.platform}`);
 
@@ -670,7 +676,7 @@ class PromotionService {
 
       // Enqueue real platform posting task
       try {
-        const { enqueuePlatformPostTask } = require("../services/promotionTaskQueue");
+        const { enqueuePlatformPostTask } = require("./services/promotionTaskQueue");
         const result = await enqueuePlatformPostTask({
           contentId: schedule.contentId,
           uid: schedule.user_id || schedule.uid || content.userId,

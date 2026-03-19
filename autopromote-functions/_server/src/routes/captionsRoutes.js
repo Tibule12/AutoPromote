@@ -4,9 +4,29 @@ const { createCaptions, generateTranscription } = require("../services/captionsS
 const { db } = require("../firebaseAdmin");
 const { audit } = require("../services/auditLogger");
 const multer = require("multer");
+const ALLOWED_MIME_TYPES = [
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
+  "audio/flac",
+  "audio/mp4",
+  "audio/webm",
+  "audio/x-m4a",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+  "video/x-msvideo",
+];
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 25 * 1024 * 1024 }, // 25MB Whisper Limit
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file type. Only audio and video files are accepted."));
+    }
+  },
 });
 
 // POST /transcribe relative to mount point

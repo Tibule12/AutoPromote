@@ -47,14 +47,11 @@
                         if (s) {
                           n(!0);
                           try {
-                            const e = await fetch(
-                                "https://autopromote.onrender.com/api/live/redeem",
-                                {
-                                  method: "POST",
-                                  headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({ token: s }),
-                                }
-                              ),
+                            const e = await fetch("/api/live/redeem", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ token: s }),
+                              }),
                               i = await e.json().catch(() => ({}));
                             if (!e.ok)
                               return (

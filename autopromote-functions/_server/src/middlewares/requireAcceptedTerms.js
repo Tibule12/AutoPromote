@@ -29,13 +29,13 @@ module.exports = function requireAcceptedTerms(options = {}) {
           // Skip noisy per-request terms logs unless explicitly debugging the middleware.
         } else {
           // Avoid logging any part of the Authorization header to prevent token leakage.
-        logger.info("requireAcceptedTerms.debug", {
-          isE2EHeader: !!isE2EHeader,
-          isLocalHost: !!isLocalHost,
-          isNodeFetchUA: !!isNodeFetchUA,
-          isTestToken: !!isTestToken,
-          hasAuthHeader: !!authHeader,
-        });
+          logger.info("requireAcceptedTerms.debug", {
+            isE2EHeader: !!isE2EHeader,
+            isLocalHost: !!isLocalHost,
+            isNodeFetchUA: !!isNodeFetchUA,
+            isTestToken: !!isTestToken,
+            hasAuthHeader: !!authHeader,
+          });
         }
       } catch (e) {}
       // Allow runtime bypass for CI or E2E runs via environment

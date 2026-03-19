@@ -7,7 +7,10 @@ const { withCache } = require("./utils/simpleCache");
 const AUTH_TOKEN_CACHE_TTL_MS = parseInt(process.env.AUTH_TOKEN_CACHE_TTL_MS || "15000", 10);
 
 function getTokenCacheKey(token) {
-  const digest = crypto.createHash("sha1").update(String(token || "")).digest("hex");
+  const digest = crypto
+    .createHash("sha1")
+    .update(String(token || ""))
+    .digest("hex");
   return `auth_token_${digest}`;
 }
 
@@ -303,14 +306,11 @@ const authMiddleware = async (req, res, next) => {
               changed = true;
             }
             if (changed) {
-              await db
-                .collection("users")
-                .doc(decodedToken.uid)
-                .update({
-                  role: ud.role,
-                  isAdmin: ud.isAdmin,
-                  updatedAt: new Date().toISOString(),
-                });
+              await db.collection("users").doc(decodedToken.uid).update({
+                role: ud.role,
+                isAdmin: ud.isAdmin,
+                updatedAt: new Date().toISOString(),
+              });
             }
           }
 

@@ -111,95 +111,87 @@
         const note = document.getElementById("stateNote");
         const closeBtn = document.getElementById("close");
 
-        note.textContent = bot
-          ? `Bot: ${safe(bot)} · State: ${safe(state)}`
-          : `State: ${safe(state)}`;
-
-        // Only allow safe targets — strict validation for tg:// and HTTPS Telegram domains
-        function isAllowedTelegramUrl(url) {
-          if (!url || typeof url !== "string") return false;
-          url = url.trim();
-
-          // Validate tg:// protocol with strict pattern
-          if (url.startsWith("tg://")) {
-            return /^tg:\/\/[a-zA-Z0-9_\-\/\?=&]+$/.test(url);
-          }
-
-          // Only allow HTTPS URLs from whitelisted Telegram domains
-          try {
-            const u = new URL(url);
-            if (u.protocol !== "https:") return false;
-            const allowed = ["t.me", "web.telegram.org"];
-            return allowed.includes(u.hostname);
-          } catch (_) {}
-          return false;
+        function sanitizeBotUsername(value) {
+          const normalized = String(value || "").trim();
+          return /^[A-Za-z0-9_]{5,32}$/.test(normalized) ? normalized : "";
         }
 
-        // Validate and sanitize URLs before use
-        const validAppUrl = isAllowedTelegramUrl(appUrl) ? appUrl : "";
-        const validAuthUrl = isAllowedTelegramUrl(authUrl) ? authUrl : "";
+        function sanitizeStartParam(value) {
+          const normalized = String(value || "").trim();
+          return /^[A-Za-z0-9_-]{1,128}$/.test(normalized) ? normalized : "";
+        }
 
-        // Sanitize URLs to prevent XSS - encode any special characters
-        const sanitizeUrl = function (u) {
-          if (!u) return "#";
-          // Only allow telegram:// or https:// schemes
-          if (!u.startsWith("telegram://") && !u.startsWith("https://")) return "#";
-          // Additional validation: ensure it passes allowlist check
-          if (!isAllowedTelegramUrl(u)) return "#";
-          return u.replace(/[<>"'`]/g, "");
-        };
-
-        // Strict redirect function that double-checks validation
-        const safeRedirect = function (url) {
-          if (!url || !isAllowedTelegramUrl(url)) return false;
-          const sanitized = sanitizeUrl(url);
-          if (sanitized === "#") return false;
-          // Final validation: ensure sanitized URL is still safe
-          if (!sanitized.startsWith("telegram://") && !sanitized.startsWith("https://"))
-            return false;
-          if (!isAllowedTelegramUrl(sanitized)) return false;
+        function extractTelegramPayload(rawUrl) {
+          if (!rawUrl || typeof rawUrl !== "string") return { bot: "", start: "" };
           try {
-            window.location.href = sanitized;
-            return true;
-          } catch (_) {
-            return false;
-          }
-        };
+            const parsed = new URL(rawUrl, window.location.origin);
+            const protocol = parsed.protocol.toLowerCase();
+            if (protocol === "tg:" && parsed.hostname === "resolve") {
+              return {
+                bot: sanitizeBotUsername(parsed.searchParams.get("domain")),
+                start: sanitizeStartParam(parsed.searchParams.get("start")),
+              };
+            }
+            if (protocol === "https:" && parsed.hostname === "t.me") {
+              const pathParts = parsed.pathname.split("/").filter(Boolean);
+              return {
+                bot: sanitizeBotUsername(pathParts[0] || ""),
+                start: sanitizeStartParam(parsed.searchParams.get("start")),
+              };
+            }
+          } catch (_) {}
+          return { bot: "", start: "" };
+        }
 
-        openApp.href = sanitizeUrl(validAppUrl) || sanitizeUrl(validAuthUrl) || "#";
+        function buildTelegramAppLink(botUsername, startParam) {
+          if (!botUsername) return "";
+          const query = new URLSearchParams({ domain: botUsername });
+          if (startParam) query.set("start", startParam);
+          return `tg://resolve?${query.toString()}`;
+        }
+
+        function buildTelegramWebLink(botUsername, startParam) {
+          if (!botUsername) return "";
+          const webUrl = new URL(`https://t.me/${encodeURIComponent(botUsername)}`);
+          if (startParam) webUrl.searchParams.set("start", startParam);
+          return webUrl.toString();
+        }
+
+        const appPayload = extractTelegramPayload(appUrl);
+        const authPayload = extractTelegramPayload(authUrl);
+        const resolvedBot =
+          sanitizeBotUsername(bot) || appPayload.bot || authPayload.bot || "";
+        const resolvedState =
+          sanitizeStartParam(state) || appPayload.start || authPayload.start || "";
+        const telegramAppLink = buildTelegramAppLink(resolvedBot, resolvedState);
+        const telegramWebLink = buildTelegramWebLink(resolvedBot, resolvedState);
+
+        note.textContent = resolvedBot
+          ? `Bot: ${safe(resolvedBot)} · State: ${safe(resolvedState)}`
+          : "Unable to determine the Telegram bot safely. Use the browser flow from the dashboard.";
+
+        openApp.href = telegramAppLink || "#";
         openApp.onclick = function (e) {
-          e.preventDefault();
-          const targetUrl = validAppUrl || validAuthUrl;
-          safeRedirect(targetUrl);
-          return false;
-        };
-
-        openWeb.href = sanitizeUrl(validAuthUrl) || sanitizeUrl(validAppUrl) || "#";
-        openWeb.onclick = function (e) {
-          const href = openWeb.href;
-          if (
-            !href ||
-            href === "#" ||
-            !href.startsWith("https://") ||
-            !isAllowedTelegramUrl(href)
-          ) {
+          if (!telegramAppLink) {
             e.preventDefault();
             return false;
           }
-          // Allow navigation only to validated URLs
+          return true;
+        };
+
+        openWeb.href = telegramWebLink || "#";
+        openWeb.rel = "noopener noreferrer";
+        openWeb.onclick = function (e) {
+          if (!telegramWebLink) {
+            e.preventDefault();
+            return false;
+          }
           return true;
         };
 
         closeBtn.onclick = function () {
           window.close();
         };
-
-        // Auto-attempt native open on load (non-blocking) - only if strictly validated
-        if (validAppUrl && isAllowedTelegramUrl(validAppUrl)) {
-          setTimeout(function () {
-            safeRedirect(validAppUrl);
-          }, 300);
-        }
 
         // If the opener exists on same-origin, request it to check status periodically.
         const origin = window.location.origin;

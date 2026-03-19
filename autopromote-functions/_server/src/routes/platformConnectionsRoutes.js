@@ -40,7 +40,10 @@ function getUserDocFallback(userData, name) {
   const lowerKeys = Object.keys(userData).map(key => key.toLowerCase());
   const hasToken = lowerKeys.some(key => key.includes(name) && key.includes("token"));
   const identity =
-    userData[`${name}Identity`] || userData[`${name}_identity`] || userData[`${name}Profile`] || null;
+    userData[`${name}Identity`] ||
+    userData[`${name}_identity`] ||
+    userData[`${name}Profile`] ||
+    null;
   if (hasToken || identity) {
     return { connected: true, inferred: true, identity, source: "userDoc" };
   }
@@ -69,29 +72,32 @@ function normalizeConnectionMap(connectionDocs, userData) {
     ? facebook.pages.find(page => page && page.ig_business_account_id)
     : null;
 
-  connections.instagram = linkedInstagramId || linkedInstagramPage
-    ? {
-        connected: true,
-        source: "facebook_link",
-        ig_business_account_id:
-          linkedInstagramId || linkedInstagramPage?.ig_business_account_id || null,
-        display_name:
-          facebook.display_name ||
-          facebook.meta?.display_name ||
-          linkedInstagramPage?.name ||
-          null,
-        pages: Array.isArray(facebook.pages)
-          ? facebook.pages
-              .filter(page => page && (page.ig_business_account_id || page.instagram_business_account))
-              .map(page => ({
-                id: page.id,
-                name: page.name,
-                ig_business_account_id:
-                  page.ig_business_account_id || page.instagram_business_account?.id || null,
-              }))
-          : [],
-      }
-    : { connected: false };
+  connections.instagram =
+    linkedInstagramId || linkedInstagramPage
+      ? {
+          connected: true,
+          source: "facebook_link",
+          ig_business_account_id:
+            linkedInstagramId || linkedInstagramPage?.ig_business_account_id || null,
+          display_name:
+            facebook.display_name ||
+            facebook.meta?.display_name ||
+            linkedInstagramPage?.name ||
+            null,
+          pages: Array.isArray(facebook.pages)
+            ? facebook.pages
+                .filter(
+                  page => page && (page.ig_business_account_id || page.instagram_business_account)
+                )
+                .map(page => ({
+                  id: page.id,
+                  name: page.name,
+                  ig_business_account_id:
+                    page.ig_business_account_id || page.instagram_business_account?.id || null,
+                }))
+            : [],
+        }
+      : { connected: false };
 
   return connections;
 }

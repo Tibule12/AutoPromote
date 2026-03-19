@@ -1,14 +1,12 @@
 const { PaymentProvider } = require("./providerInterface");
 const { db } = require("../../firebaseAdmin");
 const crypto = require("crypto");
-
 /**
  * Build PayFast signature string using MD5 hash.
  *
- * NOTE: PayFast's legacy integration uses MD5 signatures for compatibility. This
- * use of MD5 is intentional and limited to computing an external service
- * signature (not used for password storage or any internal authentication).
- * Do NOT use MD5 for password hashing or sensitive internal storage.
+ * NOTE: PayFast's legacy integration uses MD5 signatures for compatibility.
+ * This MD5 usage is strictly for external service signing and NOT for
+ * authentication or password storage.
  *
  * @param {Object} params - Key/value payload to include in signature
  * @param {string} passphrase - Optional merchant passphrase
@@ -16,6 +14,8 @@ const crypto = require("crypto");
  */
 function buildPayfastSignature(params = {}, passphrase) {
   const encodeRfc1738 = value => encodeURIComponent(String(value)).replace(/%20/g, "+");
+  // Ensure the signature uses PayFast's expected parameter order.
+  // This must exactly match the order PayFast uses internally.
   const orderedKeys = [
     "merchant_id",
     "merchant_key",
@@ -34,33 +34,36 @@ function buildPayfastSignature(params = {}, passphrase) {
     "custom_str4",
     "custom_str5",
   ];
+
   const seen = new Set();
-  const pieces = [];
+  const pairs = [];
 
-  orderedKeys.forEach(key => {
-    if (params[key] !== undefined && params[key] !== null && params[key] !== "") {
-      seen.add(key);
-      pieces.push(`${key}=${encodeRfc1738(params[key])}`);
+  orderedKeys.forEach(k => {
+    if (params[k] !== undefined && params[k] !== null && params[k] !== "") {
+      seen.add(k);
+      pairs.push(`${k}=${encodeRfc1738(params[k])}`);
     }
   });
 
-  Object.keys(params).forEach(key => {
-    if (!seen.has(key) && params[key] !== undefined && params[key] !== null && params[key] !== "") {
-      pieces.push(`${key}=${encodeRfc1738(params[key])}`);
+  // Add any remaining keys in insertion order (should be rare).
+  Object.keys(params).forEach(k => {
+    if (!seen.has(k) && params[k] !== undefined && params[k] !== null && params[k] !== "") {
+      seen.add(k);
+      pairs.push(`${k}=${encodeRfc1738(params[k])}`);
     }
   });
 
-  let signatureString = pieces.join("&");
+  let signatureString = pairs.join("&");
+
   const pass = passphrase == null ? "" : String(passphrase).trim();
-  if (pass) signatureString += `&passphrase=${encodeRfc1738(pass)}`;
-  // Intentionally using MD5 per PayFast spec (external signature), not for passwords.
-  // This is not used for authentication or storing secrets.
-  // cql:ignore
-  // codeql: ignore
-  // eslint-disable-next-line security/detect-weak-hash
+  if (pass) {
+    signatureString += `&passphrase=${encodeRfc1738(pass)}`;
+  }
+  if (process.env.PAYFAST_DEBUG === "true") {
+    console.info("[PayFast] signature string:", signatureString);
+  }
   return crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
 }
-
 class PayFastProvider extends PaymentProvider {
   constructor() {
     super("payfast");
@@ -74,11 +77,9 @@ class PayFastProvider extends PaymentProvider {
         ? "https://sandbox.payfast.co.za/eng/process"
         : "https://www.payfast.co.za/eng/process");
   }
-
-  async getAccountStatus(user) {
+  async getAccountStatus() {
     return { ok: true, configured: !!this.merchantId };
   }
-
   async createOrder({
     amount = 0,
     currency = "ZAR",
@@ -89,7 +90,6 @@ class PayFastProvider extends PaymentProvider {
   } = {}) {
     if (!this.merchantId || !this.merchantKey)
       return { success: false, error: "payfast_not_configured" };
-
     const m_payment_id = metadata.m_payment_id || `pf_${Date.now()}`;
     const params = {
       merchant_id: this.merchantId,
@@ -126,12 +126,15 @@ class PayFastProvider extends PaymentProvider {
         params[key] = String(value);
       }
     });
-
-    // Build signature
     const signature = buildPayfastSignature(params, this.passphrase);
     params.signature = signature;
-
-    // Persist a draft payment record in Firestore (include metadata for fulfillment)
+    if (process.env.PAYFAST_DEBUG === "true") {
+      console.info("[PayFast] createOrder payload:", {
+        url: this.processUrl,
+        params,
+        signature,
+      });
+    }
     try {
       await db
         .collection("payments")
@@ -147,29 +150,25 @@ class PayFastProvider extends PaymentProvider {
           createdAt: new Date().toISOString(),
         });
     } catch (e) {
-      // log but continue
       console.warn("PayFast createOrder: failed to persist payment draft", e && e.message);
     }
-
-    return { success: true, order: { redirectUrl: this.processUrl, params } };
+    const order = {
+      redirectUrl: this.processUrl,
+      params,
+    };
+    return { success: true, order };
   }
-
   async verifyNotification(req) {
-    // PayFast posts form-encoded body. We'll recompute signature and compare.
     const body = req.body || {};
     const receivedSignature = (body.signature || body.sig || body.SIGNATURE || "")
       .toString()
       .toLowerCase();
-    // Remove signature before recomputing
     const copy = { ...body };
     delete copy.signature;
     delete copy.sig;
     delete copy.SIGNATURE;
-
     const computed = buildPayfastSignature(copy, this.passphrase).toLowerCase();
     const verified = computed === receivedSignature;
-
-    // Persist IPN raw payload and verification result
     try {
       const id = body.m_payment_id || body.pf_payment_id || `pf_ipn_${Date.now()}`;
       await db
@@ -189,9 +188,10 @@ class PayFastProvider extends PaymentProvider {
     } catch (e) {
       console.warn("PayFast verifyNotification: failed to persist ipn", e && e.message);
     }
-
     return { verified, data: body };
   }
 }
-
-module.exports = { PayFastProvider, buildPayfastSignature };
+module.exports = {
+  PayFastProvider,
+  buildPayfastSignature,
+};

@@ -28,4 +28,3 @@ function captureException(err) {
   }
 }
 module.exports = { init, getSentry: () => Sentry, captureException };
-module.exports = { init, getSentry: () => Sentry };

@@ -73,6 +73,7 @@ async function fetchInstagramMediaMetrics(mediaId) {
 }
 
 const { getVideoMetrics } = require("./tiktokService");
+const { fetchVideoStats: getYouTubeVideoStats } = require("./youtubeService");
 const { getPostStats: getLinkedInPostStats } = require("./linkedinService");
 const { getPostInfo: getRedditPostInfo } = require("./redditService");
 const { getTracksBatch } = require("./spotifyService");
@@ -93,6 +94,24 @@ async function fetchTikTokMetrics(uid, externalId) {
     };
   } catch (e) {
     console.warn("[PlatformMetrics] TikTok fetch failed for %s: %s", externalId, e.message);
+    return null;
+  }
+}
+
+async function fetchYouTubeMetrics(uid, externalId) {
+  if (!uid || !externalId) return null;
+  try {
+    const data = await getYouTubeVideoStats({ uid, videoId: externalId });
+    if (!data || !data.statistics) return null;
+
+    return {
+      view_count: parseInt(data.statistics.viewCount || "0", 10),
+      like_count: parseInt(data.statistics.likeCount || "0", 10),
+      comment_count: parseInt(data.statistics.commentCount || "0", 10),
+      // YouTube doesn't always show shares publicly via API
+    };
+  } catch (e) {
+    console.warn("[PlatformMetrics] YouTube fetch failed:", e.message);
     return null;
   }
 }
@@ -201,6 +220,7 @@ async function fetchBatchMetrics(platform, items) {
       else if (platform === "instagram") metrics = await fetchInstagramMediaMetrics(item.id);
       else if (platform === "twitter") metrics = await fetchTwitterTweetMetrics(item.id);
       else if (platform === "linkedin") metrics = await fetchLinkedInMetrics(item.uid, item.id);
+      else if (platform === "youtube") metrics = await fetchYouTubeMetrics(item.uid, item.id);
 
       if (metrics) results[item.id] = metrics;
     })
@@ -215,5 +235,6 @@ module.exports = {
   fetchTikTokMetrics,
   fetchLinkedInMetrics,
   fetchRedditMetrics,
+  fetchYouTubeMetrics,
   fetchBatchMetrics,
 };

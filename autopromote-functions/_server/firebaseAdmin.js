@@ -181,15 +181,31 @@ if (bypass) {
   module.exports = { admin, db, auth, storage };
 } else {
   const realAdmin = require('firebase-admin');
+  const serviceAccount = require('./firebaseConfig.server.js');
 
-  // Initialize admin SDK as usual
+  // Initialize admin SDK
+  // Use loaded service account credentials if available, otherwise fall back to applicationDefault()
+  // which works in GCP environments (App Engine, Cloud Functions, etc) automatically.
+  let credential;
+  let projectId;
+
+  if (serviceAccount && serviceAccount.project_id) {
+    credential = realAdmin.credential.cert(serviceAccount);
+    projectId = serviceAccount.project_id;
+  } else {
+    credential = realAdmin.credential.applicationDefault();
+  }
+
   const appConfig = {
-    credential: realAdmin.credential.applicationDefault(),
-    databaseURL: 'https://autopromote-cc6d3.firebaseio.com',
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'autopromote-cc6d3.firebasestorage.app'
+    credential,
+    databaseURL: process.env.FIREBASE_DATABASE_URL || 'https://autopromote-cc6d3.firebaseio.com',
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'autopromote-cc6d3.firebasestorage.app',
+    ...(projectId ? { projectId } : {})
   };
   
-  realAdmin.initializeApp(appConfig);
+  if (realAdmin.apps.length === 0) {
+    realAdmin.initializeApp(appConfig);
+  }
 
   const db = realAdmin.firestore();
   db.settings({ ignoreUndefinedProperties: true });

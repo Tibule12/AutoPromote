@@ -24,6 +24,14 @@ const viralImpactEngine = require("./services/viralImpactEngine");
 const algorithmExploitationEngine = require("./services/algorithmExploitationEngine");
 const { performViralOptimization } = require("./services/viralOptimizationService");
 const {
+  diagnoseContent,
+  triggerRemediation,
+  listRemediationHistory,
+  getDiagnosisPolicy,
+  setDiagnosisPolicy,
+  runDuePolicies,
+} = require("./services/contentRecoveryService");
+const {
   enqueueMediaTransformTask,
   processMediaTransformTaskById,
 } = require("./services/mediaTransform");
@@ -76,7 +84,9 @@ function parsePositiveInt(value, fallback, { min = 1, max = Number.MAX_SAFE_INTE
 }
 
 function hasVariantOptimization(item) {
-  return item.variant_strategy === "bandit" || (Array.isArray(item.variants) && item.variants.length > 0);
+  return (
+    item.variant_strategy === "bandit" || (Array.isArray(item.variants) && item.variants.length > 0)
+  );
 }
 
 function buildVariantStatsPayload(variantStats) {
@@ -308,6 +318,14 @@ function validateBody(schema) {
 
 // Simple in-memory rate limiter (per user, per route)
 const rateLimitMap = new Map();
+// Periodic cleanup: evict expired entries every 2 minutes to prevent unbounded growth
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitMap) {
+    if (now - entry.start > 120000) rateLimitMap.delete(key);
+  }
+}, 120000).unref();
+
 function rateLimitMiddleware(limit = 10, windowMs = 60000) {
   return (req, res, next) => {
     const userId = req.userId || "anonymous";
@@ -333,6 +351,7 @@ router.post(
   "/upload",
   authMiddleware,
   usageLimitMiddleware(),
+
   costControlMiddleware,
   validateBody(contentUploadSchema),
   rateLimitMiddleware(10, 60000),
@@ -756,8 +775,11 @@ router.post(
         }
       };
 
-      // Start the background process (do not await)
+      // Start the background processes (do not await)
       backgroundOptimization();
+      trackUsage(userId).catch(e => {
+        console.warn("[upload] Failed to track usage:", e && e.message ? e.message : e);
+      });
 
       // IMMEDIATE RESPONSE TO USER
       // We return success immediately, trusting the background process to handle the rest.
@@ -831,22 +853,22 @@ router.get("/my-content", authMiddleware, async (req, res) => {
 
     const contentWithStats = await Promise.all(
       docs.map(async doc => {
-      const data = doc.data();
-      const item = { id: doc.id, ...data };
+        const data = doc.data();
+        const item = { id: doc.id, ...data };
 
-      if (docsToEnrich.has(doc.id)) {
-        try {
-          const vs = await getVariantStats(doc.id);
-          const summary = buildVariantStatsPayload(vs);
-          if (summary) {
-            item.stats = summary.stats;
-            item.insights = summary.insights;
+        if (docsToEnrich.has(doc.id)) {
+          try {
+            const vs = await getVariantStats(doc.id);
+            const summary = buildVariantStatsPayload(vs);
+            if (summary) {
+              item.stats = summary.stats;
+              item.insights = summary.insights;
+            }
+          } catch (e) {
+            /* ignore stats error */
           }
-        } catch (e) {
-          /* ignore stats error */
         }
-      }
-      return item;
+        return item;
       })
     );
 
@@ -918,10 +940,136 @@ router.get("/my-promotion-schedules", authMiddleware, async (req, res) => {
   }
 });
 
+// POST /:contentId/promotion-schedules - Create a new promotion schedule
+router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { contentId } = req.params;
+    const { time, frequency, platforms = [], platformOptions = {} } = req.body;
+
+    if (!time) return res.status(400).json({ error: "Missing required field: time" });
+
+    // Verify content belongs to user
+    const contentDoc = await db.collection("content").doc(contentId).get();
+    if (!contentDoc.exists) return res.status(404).json({ error: "Content not found" });
+    const content = contentDoc.data();
+    if (content.userId !== userId) return res.status(403).json({ error: "Forbidden" });
+
+    const promotionService = require("./promotionService");
+    const schedules = [];
+    const platformList = platforms.length > 0 ? platforms : ["all"];
+
+    for (const platform of platformList) {
+      const scheduleData = {
+        platform,
+        startTime: time,
+        frequency: frequency || "once",
+        ...(platformOptions[platform] || {}),
+      };
+      const schedule = await promotionService.schedulePromotion(contentId, scheduleData);
+      // Store user_id so GET /my-promotion-schedules can find it
+      await db.collection("promotion_schedules").doc(schedule.id).update({ user_id: userId });
+      schedule.user_id = userId;
+      schedules.push(schedule);
+    }
+
+    res.json({ success: true, schedules });
+  } catch (error) {
+    console.error("[POST /:contentId/promotion-schedules] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /promotion-schedules/:id/pause - Pause a promotion schedule
+router.post("/promotion-schedules/:id/pause", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
+    if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
+    if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
+
+    const promotionService = require("./promotionService");
+    const updated = await promotionService.updatePromotionSchedule(id, { isActive: false });
+    res.json({ success: true, schedule: updated });
+  } catch (error) {
+    console.error("[POST /promotion-schedules/:id/pause] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /promotion-schedules/:id/resume - Resume a promotion schedule
+router.post("/promotion-schedules/:id/resume", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
+    if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
+    if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
+
+    const promotionService = require("./promotionService");
+    const updated = await promotionService.updatePromotionSchedule(id, { isActive: true });
+    res.json({ success: true, schedule: updated });
+  } catch (error) {
+    console.error("[POST /promotion-schedules/:id/resume] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /promotion-schedules/:id/reschedule - Reschedule a promotion
+router.post("/promotion-schedules/:id/reschedule", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    const { time } = req.body;
+    if (!time) return res.status(400).json({ error: "Missing required field: time" });
+
+    const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
+    if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
+    if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
+
+    const promotionService = require("./promotionService");
+    const updated = await promotionService.updatePromotionSchedule(id, { startTime: time });
+    res.json({ success: true, schedule: updated });
+  } catch (error) {
+    console.error("[POST /promotion-schedules/:id/reschedule] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// DELETE /promotion-schedules/:id - Delete a promotion schedule
+router.delete("/promotion-schedules/:id", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
+    if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
+    if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
+
+    const promotionService = require("./promotionService");
+    await promotionService.deletePromotionSchedule(id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[DELETE /promotion-schedules/:id] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // GET /api/content/leaderboard - simple top users by points (alias for rewards leaderboard for backward compatibility)
 router.get("/leaderboard", authMiddleware, async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 100;
+    const MAX_LEADERBOARD_LIMIT = 100;
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 25, 1), MAX_LEADERBOARD_LIMIT);
     const snapshot = await db
       .collection("user_rewards")
       .orderBy("totalPointsEarned", "desc")
@@ -1107,27 +1255,30 @@ router.post("/:id/repost-preview", authMiddleware, async (req, res) => {
       },
     });
 
-    await db.collection("content").doc(ownedContent.id).set(
-      {
-        repostPreview: {
-          taskId: task.id,
-          status: "queued",
-          profile: "smart_repost_preview_v1",
-          hookText: creativePlan.hook,
-          caption: creativePlan.caption,
-          title: creativePlan.title,
-          description: creativePlan.description,
-          hashtags: creativePlan.hashtags,
-          previewLabel: creativePlan.previewLabel,
-          creatorLine: creativePlan.creatorLine,
-          niche: creativePlan.niche,
-          targetPlatform: platform,
-          introSeconds: 3,
-          updatedAt: new Date().toISOString(),
+    await db
+      .collection("content")
+      .doc(ownedContent.id)
+      .set(
+        {
+          repostPreview: {
+            taskId: task.id,
+            status: "queued",
+            profile: "smart_repost_preview_v1",
+            hookText: creativePlan.hook,
+            caption: creativePlan.caption,
+            title: creativePlan.title,
+            description: creativePlan.description,
+            hashtags: creativePlan.hashtags,
+            previewLabel: creativePlan.previewLabel,
+            creatorLine: creativePlan.creatorLine,
+            niche: creativePlan.niche,
+            targetPlatform: platform,
+            introSeconds: 3,
+            updatedAt: new Date().toISOString(),
+          },
         },
-      },
-      { merge: true }
-    );
+        { merge: true }
+      );
 
     const shouldRunNow = req.body?.runNow === true;
     let result = null;
@@ -1193,18 +1344,183 @@ router.get("/:id/analytics", authMiddleware, async (req, res) => {
   }
 });
 
+// GET /:id/diagnosis - Get (or compute) diagnosis for owned content
+router.get("/:id/diagnosis", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const forceRefresh = String(req.query.refresh || "").toLowerCase() === "1";
+    const diagnosis = await diagnoseContent({
+      contentId,
+      forceRefresh,
+      trigger: "user_fetch",
+      actorUid: userId,
+    });
+
+    return res.json({ diagnosis });
+  } catch (error) {
+    console.error("[GET /:id/diagnosis] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /:id/diagnosis/remediate - Trigger remediation actions for owned content
+router.post("/:id/diagnosis/remediate", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const dryRun = req.body && req.body.dryRun === true;
+    const remediation = await triggerRemediation({
+      contentId,
+      actorUid: userId,
+      dryRun,
+    });
+
+    return res.json({ remediation });
+  } catch (error) {
+    console.error("[POST /:id/diagnosis/remediate] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /:id/diagnosis/history - List remediation history for owned content
+router.get("/:id/diagnosis/history", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const history = await listRemediationHistory({
+      contentId,
+      limit: req.query.limit || 20,
+      type: req.query.type || null,
+      status: req.query.status || null,
+    });
+
+    return res.json({ history, count: history.length });
+  } catch (error) {
+    console.error("[GET /:id/diagnosis/history] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /:id/diagnosis/policy - Read auto-remediation policy for owned content
+router.get("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const policy = await getDiagnosisPolicy(contentId);
+    return res.json({ policy });
+  } catch (error) {
+    console.error("[GET /:id/diagnosis/policy] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PUT /:id/diagnosis/policy - Update auto-remediation policy for owned content
+router.put("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const updated = await setDiagnosisPolicy({
+      contentId,
+      policy: req.body || {},
+      actorUid: userId,
+    });
+
+    return res.json({ policy: updated });
+  } catch (error) {
+    console.error("[PUT /:id/diagnosis/policy] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /:id/diagnosis/run-auto - Execute due auto policy for this content only
+router.post("/:id/diagnosis/run-auto", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!owned) return res.status(404).json({ error: "Content not found" });
+    const contentId = owned.id || req.params.id;
+
+    const dryRun = req.body && req.body.dryRun === true;
+    const run = await runDuePolicies({
+      limit: 50,
+      actorUid: userId,
+      dryRun,
+      contentIds: [contentId],
+    });
+    const match = (run.processed || []).find(r => String(r.contentId) === String(contentId));
+
+    if (!match) {
+      return res.json({
+        autoRun: {
+          contentId,
+          skipped: true,
+          reason: "not_due_or_policy_disabled",
+          dryRun,
+        },
+      });
+    }
+
+    return res.json({ autoRun: match, dryRun });
+  } catch (error) {
+    console.error("[POST /:id/diagnosis/run-auto] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // POST /admin/process-creator-payout/:contentId - Admin process payout
 router.post("/admin/process-creator-payout/:contentId", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    if (token === "test-token-for-adminUser") {
-      req.user = { role: "admin", isAdmin: true, uid: "adminUser123" };
-    }
     if (!req.user || req.user.role !== "admin") {
       return res.status(403).json({ error: "Admin access required" });
     }
     const contentId = req.params.contentId;
     const { recipientEmail, payoutAmount } = req.body;
+
+    // Validate payout inputs
+    if (
+      !recipientEmail ||
+      typeof recipientEmail !== "string" ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)
+    ) {
+      return res.status(400).json({ error: "Valid recipientEmail is required" });
+    }
+    if (
+      payoutAmount == null ||
+      typeof payoutAmount !== "number" ||
+      payoutAmount <= 0 ||
+      payoutAmount > 10000
+    ) {
+      return res.status(400).json({ error: "payoutAmount must be a positive number up to 10000" });
+    }
+
     const contentRef = db.collection("content").doc(contentId);
     const contentDoc = await contentRef.get();
     if (!contentDoc.exists) {
@@ -1254,10 +1570,6 @@ router.post("/admin/process-creator-payout/:contentId", authMiddleware, async (r
 // POST /admin/moderate-content/:contentId - Admin moderate content
 router.post("/admin/moderate-content/:contentId", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    if (token === "test-token-for-adminUser") {
-      req.user = { role: "admin", isAdmin: true, uid: "adminUser123" };
-    }
     if (!req.user || req.user.role !== "admin") {
       return res.status(403).json({ error: "Admin access required" });
     }

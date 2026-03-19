@@ -1,44 +1,12 @@
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import docs from "./docs/content";
 import PublicFeatureAvailability from "./components/PublicFeatureAvailability";
 
 const MarkdownRenderer = ({ md }) => {
   if (!md) return null;
-  const lines = md.split(/\r?\n/);
-  const out = [];
-  let inList = false;
-  lines.forEach(l => {
-    if (/^#\s+/.test(l)) {
-      if (inList) {
-        out.push("</ul>");
-        inList = false;
-      }
-      out.push(`<h1>${l.replace(/^#\s+/, "")}</h1>`);
-    } else if (/^##\s+/.test(l)) {
-      if (inList) {
-        out.push("</ul>");
-        inList = false;
-      }
-      out.push(`<h2>${l.replace(/^##\s+/, "")}</h2>`);
-    } else if (/^-\s+/.test(l)) {
-      if (!inList) {
-        out.push("<ul>");
-        inList = true;
-      }
-      out.push(`<li>${l.replace(/^-\s+/, "")}</li>`);
-    } else if (l.trim() === "") {
-      if (inList) {
-        out.push("</ul>");
-        inList = false;
-      }
-      out.push(`<p></p>`);
-    } else {
-      out.push(`<p>${l}</p>`);
-    }
-  });
-  if (inList) out.push("</ul>");
-  return <div dangerouslySetInnerHTML={{ __html: out.join("") }} />;
+  return <ReactMarkdown>{md}</ReactMarkdown>;
 };
 
 const Docs = () => {

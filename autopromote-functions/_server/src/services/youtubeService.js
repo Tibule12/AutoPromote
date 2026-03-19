@@ -335,8 +335,8 @@ async function uploadVideo({
 
   const ytOptions = (payload && payload.platform_options && payload.platform_options.youtube) || {};
 
-  // Logic: Prefer top-level 'privacy', then platform-specific 'visibility', then default 'public'
-  const privacyStatus = payload.privacy || ytOptions.visibility || "public";
+  // Logic: Prefer top-level 'privacy', then platform-specific 'privacy'/'visibility', then default 'public'
+  const privacyStatus = payload.privacy || ytOptions.privacy || ytOptions.visibility || "public";
 
   const selfDeclaredMadeForKids = !!ytOptions.made_for_kids;
 
@@ -435,6 +435,8 @@ async function uploadVideo({
 
 module.exports = {
   getUserYouTubeConnection,
+  buildOAuthClient,
+  ensureFreshTokens,
   uploadVideo,
   /**
    * Fetch statistics for a single video using stored user credentials

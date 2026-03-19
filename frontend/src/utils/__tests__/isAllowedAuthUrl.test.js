@@ -10,7 +10,8 @@ describe("isAllowedAuthUrl helper", () => {
 
   it("allows tg:// deep links", () => {
     expect(isAllowedAuthUrl("tg://resolve?domain=testbot&start=123")).toBe(true);
-    expect(isAllowedAuthUrl("tg:some/path")).toBe(true);
+    expect(isAllowedAuthUrl("tg://resolve?domain=creator_bot")).toBe(true);
+    expect(isAllowedAuthUrl("tg:some/path")).toBe(false);
   });
 
   it("allows known oauth hostnames", () => {

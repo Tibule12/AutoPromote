@@ -18,10 +18,16 @@ router.post("/setup-admin", async (req, res) => {
       console.log("Could not import setup-admin-collection.js, using simple setup");
       // Simple setup function as fallback
       setupAdminCollection = async () => {
-        // Admin user credentials
-        const adminEmail = "admin123@gmail.com";
-        const adminPassword = "Admin12345";
-        const adminName = "System Administrator";
+        // Admin user credentials from environment variables
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+        const adminName = process.env.ADMIN_NAME || "System Administrator";
+
+        if (!adminEmail || !adminPassword) {
+          throw new Error(
+            "ADMIN_EMAIL and ADMIN_PASSWORD environment variables are required for admin setup"
+          );
+        }
 
         // Check if admin user exists in Auth
         try {

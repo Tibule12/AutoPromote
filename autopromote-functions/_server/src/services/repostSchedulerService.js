@@ -28,7 +28,9 @@ const REPOST_PLAN_ALIASES = Object.freeze({
 });
 
 function normalizeRepostPlan(planId) {
-  const raw = String(planId || "free").trim().toLowerCase();
+  const raw = String(planId || "free")
+    .trim()
+    .toLowerCase();
   return REPOST_PLAN_ALIASES[raw] || "free";
 }
 
@@ -61,12 +63,21 @@ function hasExplicitOptOut(userData = {}, subscriptionData = {}) {
 
 async function resolveUserRepostPolicy(uid) {
   const [userSnap, subscriptionSnap] = await Promise.all([
-    db.collection("users").doc(uid).get().catch(() => null),
-    db.collection("user_subscriptions").doc(uid).get().catch(() => null),
+    db
+      .collection("users")
+      .doc(uid)
+      .get()
+      .catch(() => null),
+    db
+      .collection("user_subscriptions")
+      .doc(uid)
+      .get()
+      .catch(() => null),
   ]);
 
   const userData = userSnap && userSnap.exists ? userSnap.data() : {};
-  const subscriptionData = subscriptionSnap && subscriptionSnap.exists ? subscriptionSnap.data() : {};
+  const subscriptionData =
+    subscriptionSnap && subscriptionSnap.exists ? subscriptionSnap.data() : {};
   const rawPlan =
     userData.subscriptionTier ||
     (userData.plan && (userData.plan.tier || userData.plan.id)) ||
@@ -132,7 +143,9 @@ function normalizeWords(value) {
 }
 
 function trimToLength(value, maxLength) {
-  const normalized = String(value || "").replace(/\s+/g, " ").trim();
+  const normalized = String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
   if (!normalized || normalized.length <= maxLength) return normalized;
   return `${normalized.slice(0, Math.max(0, maxLength - 3)).trim()}...`;
 }
@@ -325,10 +338,7 @@ function getPlatformHookVariants({ platform, niche, shortLabel, subject, keyword
     ],
   };
 
-  return [
-    ...(byVoice[profile.voice] || byVoice.general),
-    ...(nicheBoosters[niche] || []),
-  ];
+  return [...(byVoice[profile.voice] || byVoice.general), ...(nicheBoosters[niche] || [])];
 }
 
 async function maybeSendRepostNotification({
@@ -343,9 +353,7 @@ async function maybeSendRepostNotification({
 }) {
   if (!uid || !contentId) return null;
 
-  const attemptField = autoScheduled
-    ? "lastAutoRepostNoticeAttempt"
-    : "lastPreviewPromptAttempt";
+  const attemptField = autoScheduled ? "lastAutoRepostNoticeAttempt" : "lastPreviewPromptAttempt";
   const atField = autoScheduled ? "lastAutoRepostNoticeAt" : "lastPreviewPromptAt";
   if (Number(platformState?.[attemptField] || 0) >= attemptNumber) {
     return null;
@@ -413,16 +421,17 @@ function buildPlatformTitle({ platform, hook, subject, niche }) {
 
 function buildPlatformDescription({ platform, hook, niche, caption }) {
   const profile = getPlatformCreativeProfile(platform);
-  const nicheLine = {
-    tech: "Built to feel cleaner, smarter, and easier to follow.",
-    crypto: "Tighter framing so the confidence lands immediately.",
-    fitness: "Cleaner timing so the physical detail lands faster.",
-    fashion: "Visual polish first so the reveal feels intentional.",
-    music: "Sharper entry so the switch lands on time.",
-    comedy: "Cleaner pacing so the turn hits exactly where it should.",
-    education: "Structured to make the takeaway obvious in seconds.",
-    general: "Refined for a stronger first impression and cleaner retention.",
-  }[niche] || "Refined for a stronger first impression and cleaner retention.";
+  const nicheLine =
+    {
+      tech: "Built to feel cleaner, smarter, and easier to follow.",
+      crypto: "Tighter framing so the confidence lands immediately.",
+      fitness: "Cleaner timing so the physical detail lands faster.",
+      fashion: "Visual polish first so the reveal feels intentional.",
+      music: "Sharper entry so the switch lands on time.",
+      comedy: "Cleaner pacing so the turn hits exactly where it should.",
+      education: "Structured to make the takeaway obvious in seconds.",
+      general: "Refined for a stronger first impression and cleaner retention.",
+    }[niche] || "Refined for a stronger first impression and cleaner retention.";
   return trimToLength(`${caption} ${nicheLine} ${hook}. ${profile.cta}`, profile.descriptionMax);
 }
 
@@ -453,7 +462,7 @@ function buildHashtagSet({ platform, niche, subject, keywords }) {
     ...(platformTags[String(platform || "default").toLowerCase()] || platformTags.default),
     ...(nicheTags[niche] || nicheTags.general),
     ...subjectTags,
-    ...((keywords || []).slice(0, 2)),
+    ...(keywords || []).slice(0, 2),
   ];
   const seen = new Set();
   return merged
@@ -475,7 +484,11 @@ function inferRepostNiche(contentData) {
     contentData?.niche,
     contentData?.meta?.niche,
   ]
-    .map(value => String(value || "").toLowerCase().trim())
+    .map(value =>
+      String(value || "")
+        .toLowerCase()
+        .trim()
+    )
     .find(Boolean);
   if (explicit) return explicit;
 
@@ -494,18 +507,24 @@ function getNicheHookVariants(niche, shortLabel) {
   const byNiche = {
     tech: [
       shortLabel ? `The part of ${shortLabel} most people miss` : "The part most people miss",
-      shortLabel ? `${shortLabel} lands harder when you see this` : "This lands harder than it looks",
+      shortLabel
+        ? `${shortLabel} lands harder when you see this`
+        : "This lands harder than it looks",
       shortLabel ? `Watch the payoff in ${shortLabel}` : "Watch the payoff here",
     ],
     crypto: [
-      shortLabel ? `Before you fade ${shortLabel}, watch this` : "Before you fade this, watch closely",
+      shortLabel
+        ? `Before you fade ${shortLabel}, watch this`
+        : "Before you fade this, watch closely",
       shortLabel ? `${shortLabel} turns on this moment` : "The turn happens right here",
       shortLabel ? `This ${shortLabel} setup is cleaner now` : "This setup is cleaner now",
     ],
     fitness: [
       shortLabel ? `${shortLabel} changes with this detail` : "This detail changes the result",
       shortLabel ? `Your eye should go here in ${shortLabel}` : "Your eye should go here",
-      shortLabel ? `${shortLabel} hits different with the cleaner setup` : "This hits different with the cleaner setup",
+      shortLabel
+        ? `${shortLabel} hits different with the cleaner setup`
+        : "This hits different with the cleaner setup",
     ],
     fashion: [
       shortLabel ? `The detail that sells ${shortLabel}` : "The detail that sells the look",
@@ -518,7 +537,9 @@ function getNicheHookVariants(niche, shortLabel) {
       shortLabel ? `The cleaner drop in ${shortLabel}` : "The cleaner drop is here",
     ],
     comedy: [
-      shortLabel ? `The timing in ${shortLabel} is the whole point` : "The timing is the whole point",
+      shortLabel
+        ? `The timing in ${shortLabel} is the whole point`
+        : "The timing is the whole point",
       shortLabel ? `${shortLabel} lands better this way` : "This lands better this way",
       shortLabel ? `Wait for the turn in ${shortLabel}` : "Wait for the turn",
     ],

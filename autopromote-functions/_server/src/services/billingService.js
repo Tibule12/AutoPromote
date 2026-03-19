@@ -2,12 +2,17 @@
 // Implements "Engagement-as-Currency" billing model
 
 const { db, admin } = require("../firebaseAdmin");
+const {
+  normalizePlanId,
+  getUploadLimitForPlan,
+  getPlatformLimitForPlan,
+} = require("../config/subscriptionPlans");
 
 const TIERS = {
   FREE: {
     id: "free",
     name: "Starter",
-    monthly_upload_cap: 3, // Strict limit to force upgrade
+    monthly_upload_cap: getUploadLimitForPlan("free"),
     monthly_ai_cap: 3,
     monthly_bot_cap: 2, // TEASER: Allow 2 bot-boosted uploads to get them hooked
     platform_limit: 1, // NEW: Single platform only for free users
@@ -24,10 +29,10 @@ const TIERS = {
   BASIC: {
     id: "basic", // Legacy ID
     name: "Creator",
-    monthly_upload_cap: 30,
+    monthly_upload_cap: getUploadLimitForPlan("premium"),
     monthly_ai_cap: 50,
     monthly_bot_cap: 5,
-    platform_limit: 3,
+    platform_limit: getPlatformLimitForPlan("premium"),
     monthly_price: 29.0,
     allowed_features: {
       organic_upload: true,
@@ -41,10 +46,10 @@ const TIERS = {
   PREMIUM: {
     id: "premium", // Matches PayPal Plan
     name: "Premium",
-    monthly_upload_cap: 15,
+    monthly_upload_cap: getUploadLimitForPlan("premium"),
     monthly_ai_cap: 20,
     monthly_bot_cap: 10,
-    platform_limit: 3,
+    platform_limit: getPlatformLimitForPlan("premium"),
     monthly_price: 9.99,
     allowed_features: {
       organic_upload: true,
@@ -58,10 +63,10 @@ const TIERS = {
   PRO: {
     id: "pro",
     name: "Pro",
-    monthly_upload_cap: 50,
+    monthly_upload_cap: getUploadLimitForPlan("pro"),
     monthly_ai_cap: 500,
     monthly_bot_cap: 100,
-    platform_limit: Infinity,
+    platform_limit: getPlatformLimitForPlan("pro"),
     monthly_price: 29.99,
     allowed_features: {
       organic_upload: true,
@@ -81,10 +86,10 @@ const TIERS = {
   ENTERPRISE: {
     id: "enterprise",
     name: "Enterprise",
-    monthly_upload_cap: Infinity,
+    monthly_upload_cap: getUploadLimitForPlan("enterprise"),
     monthly_ai_cap: 2000,
     monthly_bot_cap: 500,
-    platform_limit: Infinity,
+    platform_limit: getPlatformLimitForPlan("enterprise"),
     monthly_price: 99.99,
     allowed_features: {
       organic_upload: true,
@@ -112,6 +117,31 @@ const FEATURE_PRICES = {
   processing_fee_percent: 0.0,
 };
 
+async function resolveEffectiveTierId(userId, billingData, userData) {
+  const safeBilling = billingData || {};
+  let safeUser = userData || null;
+
+  if (!safeUser) {
+    const userSnap = await db.collection("users").doc(userId).get();
+    safeUser = userSnap.data() || {};
+  }
+
+  const billingTier = normalizePlanId(safeBilling.tier || "free");
+  const userTier = normalizePlanId(
+    safeUser.subscriptionTier || (safeUser.subscription && safeUser.subscription.planId) || "free"
+  );
+
+  if (
+    safeUser.isPaid === true ||
+    safeUser.unlimited === true ||
+    safeUser.subscriptionStatus === "active"
+  ) {
+    return userTier;
+  }
+
+  return billingTier !== "free" ? billingTier : userTier;
+}
+
 /**
  * Calculate the charge for a specific upload based on user tier and content intent
  */
@@ -125,7 +155,7 @@ async function calculateCreatorCharge(userId, intent, featuresSelected = []) {
   const billingSnap = await billingDocRef.get();
   const billingData = billingSnap.data() || { tier: "free", uploads_this_month: 0 };
 
-  const userTierId = billingData.tier || "free";
+  const userTierId = await resolveEffectiveTierId(userId, billingData, userData);
   const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
 
   // 2. Check Upload Caps (for Organic/Commercial)
@@ -220,8 +250,8 @@ async function checkPlatformLimit(userId, platformCount) {
   const billingSnap = await billingDocRef.get();
   const billingData = billingSnap.data() || { tier: "free" };
 
-  const userTierId = (billingData.tier || "free").toUpperCase();
-  const userTier = TIERS[userTierId] || TIERS.FREE;
+  const userTierId = await resolveEffectiveTierId(userId, billingData);
+  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
 
   const limit = userTier.platform_limit || 1;
 
@@ -250,8 +280,8 @@ async function checkConnectionLimit(userId, platform) {
   const billingSnap = await billingDocRef.get();
   const billingData = billingSnap.data() || { tier: "free" };
 
-  const userTierId = (billingData.tier || "free").toUpperCase();
-  const userTier = TIERS[userTierId] || TIERS.FREE;
+  const userTierId = await resolveEffectiveTierId(userId, billingData);
+  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
   const limit = userTier.platform_limit || 1;
 
   // No limit for this tier
@@ -290,8 +320,8 @@ async function checkAILimit(userId) {
   const billingSnap = await billingDocRef.get();
   const billingData = billingSnap.data() || { tier: "free", ai_usage_this_month: 0 };
 
-  const userTierId = (billingData.tier || "free").toUpperCase();
-  const userTier = TIERS[userTierId] || TIERS.FREE;
+  const userTierId = await resolveEffectiveTierId(userId, billingData);
+  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
 
   // Cap check
   if ((billingData.ai_usage_this_month || 0) >= (userTier.monthly_ai_cap || 0)) {
@@ -325,8 +355,8 @@ async function checkBotEntitlement(userId, featureName) {
   const billingSnap = await billingDocRef.get();
   const billingData = billingSnap.data() || { tier: "free", bot_actions_used: 0 };
 
-  const userTierId = (billingData.tier || "free").toUpperCase();
-  const userTier = TIERS[userTierId] || TIERS.FREE;
+  const userTierId = await resolveEffectiveTierId(userId, billingData);
+  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
 
   // 2. feature Gating (Strict Boolean)
   // If the tier explicitly disallows this feature (e.g. "repost_boost" is false for starter)
