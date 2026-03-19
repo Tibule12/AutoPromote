@@ -47,6 +47,22 @@ const TRUSTED_REDIRECT_HOSTS = [
   "www.sandbox.paypal.com",
 ];
 
+function normalizeHostname(hostname) {
+  return String(hostname || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\.+$/g, "");
+}
+
+function isTrustedHostname(hostname, trustedHosts) {
+  const normalizedHost = normalizeHostname(hostname);
+  if (!normalizedHost) return false;
+  return trustedHosts.some(trustedHost => {
+    const normalizedTrusted = normalizeHostname(trustedHost);
+    return normalizedHost === normalizedTrusted || normalizedHost.endsWith(`.${normalizedTrusted}`);
+  });
+}
+
 export function isSafeRedirectUrl(url) {
   if (!url) return false;
   // Allow relative paths (same-origin navigation)
@@ -54,8 +70,7 @@ export function isSafeRedirectUrl(url) {
   try {
     const parsed = new URL(url);
     if (parsed.protocol !== "https:") return false;
-    const host = parsed.hostname.toLowerCase();
-    return TRUSTED_REDIRECT_HOSTS.some(trusted => host === trusted || host.endsWith("." + trusted));
+    return isTrustedHostname(parsed.hostname, TRUSTED_REDIRECT_HOSTS);
   } catch {
     return false;
   }

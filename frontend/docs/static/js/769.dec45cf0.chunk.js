@@ -626,7 +626,7 @@
         const X = async () => {
           (r(!0), a(null));
           try {
-            const e = await Q("https://autopromote.onrender.com/api/admin/variants/anomalies");
+            const e = await Q("/api/admin/variants/anomalies");
             if (!e.ok) throw new Error(`HTTP ${e.status}`);
             const s = await e.json();
             t(s.anomalies || []);
@@ -664,9 +664,7 @@
           ee = async function (e) {
             let t = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
             try {
-              const s = t
-                ? "https://autopromote.onrender.com/api/admin/variants/quarantine"
-                : "https://autopromote.onrender.com/api/admin/variants/unquarantine";
+              const s = t ? "/api/admin/variants/quarantine" : "/api/admin/variants/unquarantine";
               if (
                 !(
                   await Q(s, {
@@ -1127,17 +1125,14 @@
                                       try {
                                         if (
                                           !(
-                                            await Q(
-                                              "https://autopromote.onrender.com/api/admin/variants/clear-anomaly",
-                                              {
-                                                method: "POST",
-                                                body: JSON.stringify({
-                                                  contentId: e.contentId,
-                                                  platform: e.platform,
-                                                  variant: e.variant,
-                                                }),
-                                              }
-                                            )
+                                            await Q("/api/admin/variants/clear-anomaly", {
+                                              method: "POST",
+                                              body: JSON.stringify({
+                                                contentId: e.contentId,
+                                                platform: e.platform,
+                                                variant: e.variant,
+                                              }),
+                                            })
                                           ).ok
                                         )
                                           throw new Error("Failed");
@@ -1156,17 +1151,14 @@
                                         try {
                                           if (
                                             !(
-                                              await Q(
-                                                "https://autopromote.onrender.com/api/admin/variants/unsuppress",
-                                                {
-                                                  method: "POST",
-                                                  body: JSON.stringify({
-                                                    contentId: e.contentId,
-                                                    platform: e.platform,
-                                                    variant: e.variant,
-                                                  }),
-                                                }
-                                              )
+                                              await Q("/api/admin/variants/unsuppress", {
+                                                method: "POST",
+                                                body: JSON.stringify({
+                                                  contentId: e.contentId,
+                                                  platform: e.platform,
+                                                  variant: e.variant,
+                                                }),
+                                              })
                                             ).ok
                                           )
                                             throw new Error("Failed");

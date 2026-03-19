@@ -56,9 +56,7 @@
                 const t = "https://api.autopromote.org".replace(/\/$/, ""),
                   r =
                     (o.Sn && o.Sn.PAYMENTS_PAYPAL_CONFIG) ||
-                    (t
-                      ? `${t}/api/payments/paypal/config`
-                      : "https://autopromote.onrender.com/api/payments/paypal/config"),
+                    (t ? `${t}/api/payments/paypal/config` : "/api/payments/paypal/config"),
                   n = await fetch(r),
                   a = await n.text();
                 let i = null;
@@ -89,7 +87,7 @@
                         n = await fetch(
                           r
                             ? `${r}/api/payments/paypal/create-order`
-                            : "https://autopromote.onrender.com/api/payments/paypal/create-order",
+                            : "/api/payments/paypal/create-order",
                           {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
@@ -119,9 +117,7 @@
                     onApprove: async e => {
                       const t = "https://api.autopromote.org".replace(/\/$/, ""),
                         r = await fetch(
-                          t
-                            ? `${t}/api/payments/paypal/capture`
-                            : "https://autopromote.onrender.com/api/payments/paypal/capture",
+                          t ? `${t}/api/payments/paypal/capture` : "/api/payments/paypal/capture",
                           {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
@@ -230,7 +226,7 @@
                           n = await fetch(
                             r
                               ? `${r}/api/payments/paypal/create-order`
-                              : "https://autopromote.onrender.com/api/payments/paypal/create-order",
+                              : "/api/payments/paypal/create-order",
                             {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
@@ -260,9 +256,7 @@
                       onApprove: async e => {
                         const t = "https://api.autopromote.org".replace(/\/$/, ""),
                           r = await fetch(
-                            t
-                              ? `${t}/api/payments/paypal/capture`
-                              : "https://autopromote.onrender.com/api/payments/paypal/capture",
+                            t ? `${t}/api/payments/paypal/capture` : "/api/payments/paypal/capture",
                             {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },

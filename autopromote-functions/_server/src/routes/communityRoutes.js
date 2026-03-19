@@ -16,6 +16,19 @@ const {
   checkDailyWorkLimit,
 } = require("../services/communityEngine");
 
+const isWolfHuntEnabled = () => {
+  // Disabled by default; enable via environment variable ENABLE_WOLF_HUNT=true
+  const env = process.env.ENABLE_WOLF_HUNT;
+  return env === "true";
+};
+
+const requireWolfHuntEnabled = (req, res, next) => {
+  if (!isWolfHuntEnabled()) {
+    return res.status(403).json({ error: "Wolf Hunt is currently disabled." });
+  }
+  next();
+};
+
 // Apply rate limiting
 const communityLimiter = rateLimiter({
   capacity: parseInt(process.env.RATE_LIMIT_COMMUNITY || "200", 10),
@@ -925,7 +938,7 @@ router.get("/suggestions", authMiddleware, async (req, res) => {
  * GET /api/community/wolf-hunt/tasks
  * The Main "Feeding Ground". Lists active tasks users can hunt.
  */
-router.get("/wolf-hunt/tasks", authMiddleware, async (req, res) => {
+router.get("/wolf-hunt/tasks", authMiddleware, requireWolfHuntEnabled, async (req, res) => {
   try {
     const userId = req.userId;
     // Check stamina first - gamification blocker
@@ -948,7 +961,7 @@ router.get("/wolf-hunt/tasks", authMiddleware, async (req, res) => {
  * POST /api/community/wolf-hunt/campaign
  * Create a new Prey (Campaign) for others to hunt.
  */
-router.post("/wolf-hunt/campaign", authMiddleware, async (req, res) => {
+router.post("/wolf-hunt/campaign", authMiddleware, requireWolfHuntEnabled, async (req, res) => {
   try {
     const userId = req.userId;
     const { contentId, platform, actionType, quantity } = req.body;
@@ -965,43 +978,53 @@ router.post("/wolf-hunt/campaign", authMiddleware, async (req, res) => {
  * POST /api/community/wolf-hunt/claim/:campaignId
  * "Lock On Target". Reserves a slot.
  */
-router.post("/wolf-hunt/claim/:campaignId", authMiddleware, async (req, res) => {
-  try {
-    const userId = req.userId;
-    const { campaignId } = req.params;
+router.post(
+  "/wolf-hunt/claim/:campaignId",
+  authMiddleware,
+  requireWolfHuntEnabled,
+  async (req, res) => {
+    try {
+      const userId = req.userId;
+      const { campaignId } = req.params;
 
-    const result = await claimTask(userId, campaignId);
-    res.json(result);
-  } catch (error) {
-    // 409 Conflict if someone else took it
-    res.status(409).json({ error: error.message });
+      const result = await claimTask(userId, campaignId);
+      res.json(result);
+    } catch (error) {
+      // 409 Conflict if someone else took it
+      res.status(409).json({ error: error.message });
+    }
   }
-});
+);
 
 /**
  * POST /api/community/wolf-hunt/confirm/:proofId
  * "Feast". Confirm action and get paid (with Evidence).
  */
-router.post("/wolf-hunt/confirm/:proofId", authMiddleware, async (req, res) => {
-  try {
-    const userId = req.userId;
-    const { proofId } = req.params;
-    const { proofUrl } = req.body; // New: Require Evidence URL
+router.post(
+  "/wolf-hunt/confirm/:proofId",
+  authMiddleware,
+  requireWolfHuntEnabled,
+  async (req, res) => {
+    try {
+      const userId = req.userId;
+      const { proofId } = req.params;
+      const { proofUrl } = req.body; // New: Require Evidence URL
 
-    if (!proofUrl) {
-      return res.status(400).json({ error: "Proof screenshot required to claim bounty." });
-    }
+      if (!proofUrl) {
+        return res.status(400).json({ error: "Proof screenshot required to claim bounty." });
+      }
 
-    // Pass proofUrl to engine
-    const result = await confirmTaskCompletion(userId, proofId, proofUrl);
-    res.json(result);
-  } catch (error) {
-    // Return 429 if too fast (Time-Gate)
-    if (error.message.includes("Wait")) {
-      return res.status(429).json({ error: error.message });
+      // Pass proofUrl to engine
+      const result = await confirmTaskCompletion(userId, proofId, proofUrl);
+      res.json(result);
+    } catch (error) {
+      // Return 429 if too fast (Time-Gate)
+      if (error.message.includes("Wait")) {
+        return res.status(429).json({ error: error.message });
+      }
+      res.status(400).json({ error: error.message });
     }
-    res.status(400).json({ error: error.message });
   }
-});
+);
 
 module.exports = router;

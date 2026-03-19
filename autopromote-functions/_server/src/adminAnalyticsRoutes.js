@@ -3,6 +3,18 @@ const router = express.Router();
 const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
 const optimizationService = require("./optimizationService");
+const {
+  diagnoseContent,
+  triggerRemediation,
+  listRemediationHistory,
+  getDiagnosisPolicy,
+  setDiagnosisPolicy,
+  runDuePolicies,
+  getPolicySafetyDashboard,
+  getRecoveryAutomationConfig,
+  setRecoveryAutomationConfig,
+  disableRecoveryAutomation,
+} = require("./services/contentRecoveryService");
 const { rateLimiter } = require("./middlewares/globalRateLimiter");
 
 // Admin-level limiter: moderate capacity, higher refill to allow admin activity but prevent abuse.
@@ -11,6 +23,13 @@ const adminLimiter = rateLimiter({
   refillPerSec: parseFloat(process.env.RATE_LIMIT_ADMIN_REFILL || "10"),
   windowHint: "admin",
 });
+
+function isAdminRequest(req) {
+  return (
+    req.user &&
+    (req.user.fromCollection === "admins" || req.user.role === "admin" || req.user.isAdmin === true)
+  );
+}
 
 // Get comprehensive admin analytics overview with advanced metrics
 router.get("/overview", adminLimiter, authMiddleware, async (req, res) => {
@@ -619,6 +638,182 @@ router.get("/optimization-recommendations", adminLimiter, authMiddleware, async 
       total_recommendations: 0,
       recommendations: [],
     });
+  }
+});
+
+// Get diagnosis for any content (admin)
+router.get("/content/:id/diagnosis", adminLimiter, authMiddleware, async (req, res) => {
+  try {
+    if (!isAdminRequest(req)) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const forceRefresh = String(req.query.refresh || "").toLowerCase() === "1";
+    const diagnosis = await diagnoseContent({
+      contentId: req.params.id,
+      forceRefresh,
+      trigger: "admin_fetch",
+      actorUid: req.user?.uid || null,
+    });
+
+    return res.json({ diagnosis });
+  } catch (error) {
+    if (error && error.code === "not_found") {
+      return res.status(404).json({ error: "Content not found" });
+    }
+    console.error("Admin content diagnosis error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Trigger remediation for any content (admin)
+router.post("/content/:id/diagnosis/remediate", adminLimiter, authMiddleware, async (req, res) => {
+  try {
+    if (!isAdminRequest(req)) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const dryRun = req.body && req.body.dryRun === true;
+    const remediation = await triggerRemediation({
+      contentId: req.params.id,
+      actorUid: req.user?.uid || null,
+      dryRun,
+    });
+
+    return res.json({ remediation });
+  } catch (error) {
+    if (error && error.code === "not_found") {
+      return res.status(404).json({ error: "Content not found" });
+    }
+    console.error("Admin remediation error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/content/:id/diagnosis/history", adminLimiter, authMiddleware, async (req, res) => {
+  try {
+    if (!isAdminRequest(req)) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    const history = await listRemediationHistory({
+      contentId: req.params.id,
+      limit: req.query.limit || 50,
+      type: req.query.type || null,
+      status: req.query.status || null,
+      actorUid: req.query.actorUid || null,
+    });
+    return res.json({ history, count: history.length });
+  } catch (error) {
+    console.error("Admin diagnosis history error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/content/:id/diagnosis/policy", adminLimiter, authMiddleware, async (req, res) => {
+  try {
+    if (!isAdminRequest(req)) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    const policy = await getDiagnosisPolicy(req.params.id);
+    return res.json({ policy });
+  } catch (error) {
+    console.error("Admin diagnosis policy read error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.put("/content/:id/diagnosis/policy", adminLimiter, authMiddleware, async (req, res) => {
+  try {
+    if (!isAdminRequest(req)) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    const policy = await setDiagnosisPolicy({
+      contentId: req.params.id,
+      policy: req.body || {},
+      actorUid: req.user?.uid || null,
+    });
+    return res.json({ policy });
+  } catch (error) {
+    console.error("Admin diagnosis policy update error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/diagnosis/run-due", adminLimiter, authMiddleware, async (req, res) => {
+  try {
+    if (!isAdminRequest(req)) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    const run = await runDuePolicies({
+      limit: req.body && req.body.limit ? req.body.limit : 20,
+      actorUid: req.user?.uid || null,
+      dryRun: Boolean(req.body && req.body.dryRun === true),
+    });
+    return res.json(run);
+  } catch (error) {
+    console.error("Admin run-due policy error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/diagnosis/automation/status", adminLimiter, authMiddleware, async (req, res) => {
+  try {
+    if (!isAdminRequest(req)) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    const automation = await getRecoveryAutomationConfig();
+    return res.json({ automation });
+  } catch (error) {
+    console.error("Admin automation status read error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.put("/diagnosis/automation/status", adminLimiter, authMiddleware, async (req, res) => {
+  try {
+    if (!isAdminRequest(req)) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    const automation = await setRecoveryAutomationConfig({
+      patch: req.body || {},
+      actorUid: req.user?.uid || null,
+    });
+    return res.json({ automation });
+  } catch (error) {
+    console.error("Admin automation status update error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/diagnosis/automation/disable", adminLimiter, authMiddleware, async (req, res) => {
+  try {
+    if (!isAdminRequest(req)) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    const automation = await disableRecoveryAutomation({
+      actorUid: req.user?.uid || null,
+      reason: req.body && req.body.reason ? req.body.reason : "admin_rollback",
+    });
+    return res.json({ automation });
+  } catch (error) {
+    console.error("Admin automation disable error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/diagnosis/safety-dashboard", adminLimiter, authMiddleware, async (req, res) => {
+  try {
+    if (!isAdminRequest(req)) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    const dashboard = await getPolicySafetyDashboard({
+      hours: req.query.hours || 24,
+      limit: req.query.limit || 500,
+    });
+    return res.json({ dashboard });
+  } catch (error) {
+    console.error("Admin diagnosis safety-dashboard error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 

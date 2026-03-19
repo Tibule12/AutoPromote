@@ -15,6 +15,9 @@ const registerUser = async (req, res) => {
       displayName: name,
     });
 
+    // compute initial credits; environment variable lets us reduce it after testing
+    const initialCredits = parseInt(process.env.INITIAL_FREE_CREDITS || "50", 10);
+
     // Store user profile in Firestore
     await db
       .collection("users")
@@ -23,7 +26,9 @@ const registerUser = async (req, res) => {
         name,
         email,
         role: role || "creator",
-        credits: 50, // New users start with 50 free credits
+        credits: initialCredits,
+        // optional flag to easily recognize early testers
+        promoGranted: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });

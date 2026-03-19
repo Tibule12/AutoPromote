@@ -355,6 +355,8 @@ router.get("/callback", async (req, res) => {
         }
       }
 
+      // clear any previous reauth requirement now that we've successfully exchanged a new token
+      stored.needsReauth = false;
       await connRef.set(stored, { merge: true });
       const url = new URL(DASHBOARD_URL);
       url.searchParams.set("facebook", "connected");
@@ -400,6 +402,8 @@ router.get(
           return out;
         }
         const data = snap.data();
+        // surface reauth flag to client so UI can prompt reconnect
+        const needsReauth = !!data.needsReauth;
         const suppressMigration = process.env.SUPPRESS_STATUS_TOKEN_MIGRATION === "true";
         if (!suppressMigration && data.user_access_token && !data.encrypted_user_access_token) {
           try {
@@ -488,6 +492,7 @@ router.get(
             instagram_business_account: p.instagram_business_account,
           })),
           ig_business_account_id: data.ig_business_account_id || null,
+          needs_reauth: needsReauth || false,
         };
 
         // If no pages are present, attach a short diagnostic hint and attempt to inspect token scopes if an unsecured token is available

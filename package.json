@@ -82,7 +82,8 @@
   },
   "overrides": {
     "@tootallnate/once": "3.0.1",
-    "@grpc/grpc-js": "1.14.3"
+    "@grpc/grpc-js": "1.14.3",
+    "fast-xml-parser": "5.5.6"
   },
   "devDependencies": {
     "@babel/core": "^7.22.0",

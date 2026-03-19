@@ -121,7 +121,7 @@ router.post("/credits/create-order", authMiddleware, async (req, res) => {
     return res.json(tempOrder);
   } catch (error) {
     console.error("Create Credits Order Error:", error);
-    res.status(500).json({ error: "Failed to create order" });
+    res.status(500).json({ error: "Failed to create order", details: error.message });
   }
 });
 
@@ -203,7 +203,7 @@ router.post("/credits/capture-order", authMiddleware, async (req, res) => {
 
         t.set(creditsRef, updateData, { merge: true });
 
-        // Also keep the older 'users' record in sync for legacy usage.
+        // Also keep the older 'users' record in sync for legacy use.
         t.set(
           userRef,
           {
@@ -267,34 +267,29 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
     }
     const m_payment_id = `pf_${packageId}_${userId}_${Date.now()}`;
 
+    // Create PayFast "Order" (really just signature & params)
+    // In production, APP_BASE_URL should be set to your public frontend URL (e.g. https://www.autopromote.org)
     const runtimeOrigin = req.get("origin") || req.headers.origin || null;
     const isLocalRuntimeOrigin =
       typeof runtimeOrigin === "string" &&
       (runtimeOrigin.includes("localhost") || runtimeOrigin.includes("127.0.0.1"));
-    // Keep PayFast callbacks canonical in production to avoid upstream process errors.
+    // In production, always prefer canonical APP_BASE_URL (or stable hosted default)
+    // to avoid PayFast rejecting non-canonical return/cancel URLs.
     const baseUrl =
       process.env.APP_BASE_URL ||
       (isLocalRuntimeOrigin ? runtimeOrigin : "https://www.autopromote.org");
-    const apiUrl = process.env.APP_API_URL || "http://localhost:5001";
-    const safeReturnUrlRaw = resolveFrontendUrl(
-      baseUrl,
-      returnUrl || returnPath,
-      "/marketplace"
-    );
-    const safeCancelUrlRaw = resolveFrontendUrl(
-      baseUrl,
-      cancelUrl || cancelPath,
-      "/marketplace"
-    );
+    const apiUrl = process.env.APP_API_URL || "https://api.autopromote.org";
+    const safeReturnUrlRaw = resolveFrontendUrl(baseUrl, returnUrl || returnPath, "/marketplace");
+    const safeCancelUrlRaw = resolveFrontendUrl(baseUrl, cancelUrl || cancelPath, "/marketplace");
     const safeReturnUrl = toPayfastCompatibleUrl(safeReturnUrlRaw, baseUrl, "/marketplace");
     const safeCancelUrl = toPayfastCompatibleUrl(safeCancelUrlRaw, baseUrl, "/marketplace");
 
-    // Create PayFast "Order" (really just signature & params)
     const result = await payfastProvider.createOrder({
       amount: zarAmount,
       currency: "ZAR",
       returnUrl: safeReturnUrl,
       cancelUrl: safeCancelUrl,
+      // PayFast expects an ITN/notify URL that is publicly reachable.
       notifyUrl: `${apiUrl}/api/payments/payfast/notify`,
       metadata: {
         m_payment_id,
@@ -306,14 +301,29 @@ router.post("/payfast/init", authMiddleware, async (req, res) => {
     });
 
     if (!result.success) {
-      return res.status(500).json({ error: "PayFast init failed", details: result.error });
+      console.error("PayFast init failed (provider):", result.error, result);
+      return res.status(500).json({
+        error: "PayFast init failed",
+        details: result.error || "unknown",
+        debug: process.env.PAYFAST_DEBUG === "true" ? result : undefined,
+      });
     }
+
+    // Log the PayFast redirect payload (helps debug 403 signature / payload mismatch)
+    console.info("[PayFast] init payload:", {
+      redirectUrl: result.order?.redirectUrl,
+      params: result.order?.params,
+    });
 
     // Return the form data (URL + inputs) so frontend can auto-submit
     res.json(result.order);
   } catch (error) {
     console.error("PayFast Init Error:", error);
-    res.status(500).json({ error: "Failed to init PayFast payment" });
+    res.status(500).json({
+      error: "Failed to init PayFast payment",
+      details: error && error.message ? error.message : String(error),
+      stack: process.env.PAYFAST_DEBUG === "true" ? error.stack : undefined,
+    });
   }
 });
 
@@ -372,6 +382,32 @@ router.post("/payfast/notify", async (req, res) => {
         },
         { merge: true }
       );
+
+      // Keep the user_credits collection in sync so balance endpoints show the updated amount.
+      const creditsRef = db.collection("user_credits").doc(userId);
+      const creditsDoc = await t.get(creditsRef);
+      const currentBalance = creditsDoc.exists ? creditsDoc.data().balance || 0 : 0;
+      const updatedBalance = currentBalance + pack.credits;
+
+      const creditsUpdate = {
+        balance: updatedBalance,
+        totalEarned: (creditsDoc.exists ? creditsDoc.data().totalEarned || 0 : 0) + pack.credits,
+        lastUpdated: new Date().toISOString(),
+      };
+
+      if (admin && admin.firestore && admin.firestore.FieldValue) {
+        creditsUpdate.transactions = admin.firestore.FieldValue.arrayUnion({
+          type: "credit_purchase",
+          amount: data.amount_gross,
+          currency: "ZAR",
+          creditsAdded: pack.credits,
+          provider: "PAYFAST",
+          pf_payment_id: data.pf_payment_id,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      t.set(creditsRef, creditsUpdate, { merge: true });
 
       t.set(txnRef, {
         userId,

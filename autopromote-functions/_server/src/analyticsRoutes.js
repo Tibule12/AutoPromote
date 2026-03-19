@@ -434,10 +434,16 @@ router.get("/user", authMiddleware, async (req, res) => {
 
     const topContent = topContentCandidates
       .sort((a, b) => {
+        // Prioritize views
         if (b.views !== a.views) return b.views - a.views;
-        return b.clicks - a.clicks;
+        // Then clicks
+        if (b.clicks !== a.clicks) return b.clicks - a.clicks;
+        // Then recency (publishedAt desc) if tied
+        const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+        const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+        return db - da;
       })
-      .slice(0, 5);
+      .slice(0, 50);
 
     const latestSnapshotAt = lastUpdatedAt ? new Date(lastUpdatedAt).toISOString() : null;
     const nextUpdateAtStr = nextUpdateAt ? new Date(nextUpdateAt).toISOString() : null;

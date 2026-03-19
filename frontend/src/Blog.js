@@ -1,18 +1,11 @@
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import posts from "./blog/posts";
 
 const MarkdownRenderer = ({ md }) => {
   if (!md) return null;
-  const lines = md.split(/\r?\n/);
-  const out = [];
-  lines.forEach(l => {
-    if (/^#\s+/.test(l)) out.push(`<h1>${l.replace(/^#\s+/, "")}</h1>`);
-    else if (/^##\s+/.test(l)) out.push(`<h2>${l.replace(/^##\s+/, "")}</h2>`);
-    else if (l.trim() === "") out.push(`<p></p>`);
-    else out.push(`<p>${l}</p>`);
-  });
-  return <div dangerouslySetInnerHTML={{ __html: out.join("") }} />;
+  return <ReactMarkdown>{md}</ReactMarkdown>;
 };
 
 const Blog = () => {

@@ -1,6 +1,14 @@
 const fetch = require("node-fetch");
 
-const PAYPAL_API_BASE = process.env.PAYPAL_API_BASE || "https://api-m.sandbox.paypal.com";
+// PayPal environment selection:
+// - If PAYPAL_API_BASE is set, use it directly (overrides env).
+// - Otherwise, use sandbox by default, or production if PAYPAL_ENV/PAYPAL_MODE is set to "live"/"production".
+const PAYPAL_ENV = (process.env.PAYPAL_ENV || process.env.PAYPAL_MODE || "sandbox").toLowerCase();
+const PAYPAL_API_BASE =
+  process.env.PAYPAL_API_BASE ||
+  (PAYPAL_ENV === "production" || PAYPAL_ENV === "live"
+    ? "https://api-m.paypal.com"
+    : "https://api-m.sandbox.paypal.com");
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID || "";
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || "";
 

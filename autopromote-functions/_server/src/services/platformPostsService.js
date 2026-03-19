@@ -60,9 +60,8 @@ async function recordPlatformPost({
     (repostMetadata && repostMetadata.mode === "smart_decay_repost") ||
     false;
   const validationStatus = isOptimizationRun ? "pending" : null;
-  const baselinePostId = repostMetadata && repostMetadata.baselinePostId
-    ? repostMetadata.baselinePostId
-    : null;
+  const baselinePostId =
+    repostMetadata && repostMetadata.baselinePostId ? repostMetadata.baselinePostId : null;
   // Build tracked link (attribution) if link or landing page ref available
   let trackedLink = null;
   try {
@@ -247,14 +246,9 @@ async function finalizePlatformPostById(
     reason: reason || undefined,
     shortlinkCode: shortlinkCode || undefined,
     isOptimizationRun,
-    validationStatus:
-      isOptimizationRun === true
-        ? "pending"
-        : undefined,
+    validationStatus: isOptimizationRun === true ? "pending" : undefined,
     baselinePostId:
-      repostMetadata && repostMetadata.baselinePostId
-        ? repostMetadata.baselinePostId
-        : undefined,
+      repostMetadata && repostMetadata.baselinePostId ? repostMetadata.baselinePostId : undefined,
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
   // Clean undefined keys (don't overwrite existing with undefined)

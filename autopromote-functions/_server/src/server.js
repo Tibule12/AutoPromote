@@ -1011,41 +1011,64 @@ try {
   app.use(microCache);
 
   // CORS configuration - restrict origins to specific domains for security
-  // Support env override via CORS_ALLOWED_ORIGINS (comma-separated) and CORS_ALLOW_ALL
+  // Support env override via CORS_ALLOWED_ORIGINS (comma-separated)
   const defaultAllowedOrigins = [
     // Canonical custom domain (www + apex)
     "https://www.autopromote.org",
     "https://autopromote.org",
-    process.env.NODE_ENV === "development" ? "http://localhost:3000" : null,
+    // Helpful development origins (only included when not running in production)
+    ...(process.env.NODE_ENV !== "production"
+      ? [
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "http://127.0.0.1:3000",
+          "http://127.0.0.1:3001",
+          "http://localhost:37803",
+        ]
+      : []),
   ].filter(Boolean);
   const envAllowed = (process.env.CORS_ALLOWED_ORIGINS || "")
     .split(",")
     .map(s => s.trim())
     .filter(Boolean);
   const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...envAllowed]));
-  // SECURITY: CORS_ALLOW_ALL only honoured in non-production environments
-  const allowAll = process.env.CORS_ALLOW_ALL === "true" && process.env.NODE_ENV !== "production";
 
   const corsOptions = {
     origin: function (origin, callback) {
       try {
-        logger.debug("[cors.origin] origin:", origin, "allowAll:", allowAll);
+        logger.debug("[cors.origin] origin:", origin);
       } catch (e) {}
+      // Quick override: allow all origins when explicitly requested via env.
+      // Use only for development/testing. Setting this in production is dangerous.
+      if (process.env.CORS_ALLOW_ALL === "true") {
+        try {
+          logger.warn("[cors] CORS_ALLOW_ALL=true — allowing all origins (override)");
+        } catch (e) {}
+        return callback(null, true);
+      }
       // Allow requests with no origin (like mobile apps or curl requests).
       if (!origin) return callback(null, true);
-      // In development or when allowAll is set, also treat the string 'null' as no-origin and allow it.
-      if (origin === "null" && (allowAll || process.env.NODE_ENV === "development"))
-        return callback(null, true);
-      if (allowAll || allowedOrigins.includes(origin)) {
+      if (allowedOrigins.includes(origin)) {
         try {
           logger.debug("[cors.origin] -> allowed");
         } catch (e) {}
         return callback(null, true);
       }
+      // In non-production allow common localhost / LAN patterns so mobile and
+      // local device testing works without updating env vars each time.
+      if (process.env.NODE_ENV !== "production") {
+        try {
+          const devLocalRegex =
+            /^https?:\/\/(localhost|127\.0\.0\.1|\d{1,3}(?:\.\d{1,3}){3})(:\d+)?$/;
+          if (devLocalRegex.test(origin)) {
+            try {
+              logger.debug("[cors.origin] -> allowed (dev local match)");
+            } catch (e) {}
+            return callback(null, true);
+          }
+        } catch (e) {}
+      }
       logger.warn("[cors.origin] -> blocked", origin);
-      try {
-        logger.warn("[cors.origin] -> stack", new Error("origin-blocked").stack);
-      } catch (e) {}
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
@@ -1061,12 +1084,7 @@ try {
     credentials: true,
     optionsSuccessStatus: 204,
   };
-  logger.debug(
-    "[diagnostic] CORS allowAll:",
-    allowAll,
-    "allowedOrigins:",
-    allowedOrigins.join(",")
-  );
+  logger.debug("[diagnostic] CORS allowedOrigins:", allowedOrigins.join(","));
 
   // Proactively set Vary header for caches and handle preflight explicitly
   app.use((req, res, next) => {
@@ -1306,10 +1324,13 @@ try {
   } catch (e) {
     console.warn("aggregateStatusRoutes mount failed:", e.message);
   }
-  try {
-    app.use("/api", adminTestRoutes); // Add admin test routes
-  } catch (e) {
-    console.warn("Admin test routes mount failed:", e.message);
+  // Only mount admin test routes in non-production environments
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      app.use("/api", adminTestRoutes);
+    } catch (e) {
+      console.warn("Admin test routes mount failed:", e.message);
+    }
   }
   // Mount Captions routes
   try {
@@ -1702,6 +1723,12 @@ try {
     paypalSubscriptionRoutes
   );
   app.use("/api/viral-boost", routeLimiter({ windowHint: "viral_boost" }), viralBoostRoutes);
+  // Legacy support: allow older clients to post to /credits/* without the /api prefix.
+  // This avoids returning HTML 503 pages when the client expects JSON.
+  app.use("/credits", (req, res) => {
+    const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+    return res.redirect(307, `/api/credits${req.path}${qs}`);
+  });
   // Phase 1 mounts
   app.use("/api/credits", routeLimiter({ windowHint: "payments" }), creditsRoutes);
   app.use("/api/boosts", routeLimiter({ windowHint: "viral_boost" }), boostsRoutes);

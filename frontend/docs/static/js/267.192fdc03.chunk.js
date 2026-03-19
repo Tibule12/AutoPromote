@@ -35,9 +35,7 @@
                 (0, i.jsxs)("p", {
                   children: [
                     "All API requests require a Bearer token. Use ",
-                    (0, i.jsx)("code", {
-                      children: "https://autopromote.onrender.com/api/auth/login",
-                    }),
+                    (0, i.jsx)("code", { children: "/api/auth/login" }),
                     " to retrieve a token.",
                   ],
                 }),

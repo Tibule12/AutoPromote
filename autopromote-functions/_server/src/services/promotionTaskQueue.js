@@ -9,6 +9,19 @@ const billingService = require("./billingService"); // Usage Tracking
 // Defer requiring youtubeService and mediaTransform until function call time to avoid circular import issues
 const crypto = require("crypto");
 
+/**
+ * Guerrilla Warfare Rate Limits
+ * We define standard "Penalty Box" times here.
+ * If a Giant hits us with a 429, we disappear for this long.
+ */
+const PENALTY_BOX_DURATIONS = {
+  youtube: 3600000, // 1 hour
+  tiktok: 7200000, // 2 hours (TikTok allows fewer strikes)
+  instagram: 3600000, // 1 hour
+  facebook: 3600000,
+  linkedin: 1800000, // 30 mins
+};
+
 const MAX_ATTEMPTS = parseInt(process.env.TASK_MAX_ATTEMPTS || "5", 10);
 const BASE_BACKOFF_MS = parseInt(process.env.TASK_BASE_BACKOFF_MS || "60000", 10); // 1 min default
 let __lastIndexWarn = 0;
@@ -217,6 +230,26 @@ async function processNextYouTubeTask() {
       contentId: task.contentId,
       shortsMode: task.shortsMode,
     });
+
+    try {
+      const { recordPlatformPost } = require("./platformPostsService");
+      await recordPlatformPost({
+        platform: "youtube",
+        contentId: task.contentId,
+        uid: task.uid,
+        reason: "task_queue_upload",
+        taskId: task.id,
+        outcome: {
+          success: true,
+          externalId: outcome.videoId,
+          postId: outcome.videoId, // compatibility
+          ...outcome,
+        },
+      });
+    } catch (e) {
+      console.warn("Failed to record youtube platform post:", e.message);
+    }
+
     await taskRef.update({
       status: "completed",
       outcome,
@@ -1508,17 +1541,51 @@ async function processNextPlatformTask() {
     const attempts = (task.attempts || 0) + 1;
     const classification = classifyError(err.message);
     if (classification === "rate_limit") {
-      // Note platform-wide cooldown (configurable window)
-      const windowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS_DEFAULT || "900000", 10); // 15min default
+      // GUERRILLA LOGIC: If we hit a wall, we don't just back off for 15 mins.
+      // We check the specific platform Penalty Box duration and vanish.
+      const platformKey = task.platform ? task.platform.split("_")[0] : "default"; // normalize 'youtube_shorts' -> 'youtube'
+      const penaltyTime =
+        PENALTY_BOX_DURATIONS[platformKey] ||
+        parseInt(process.env.RATE_LIMIT_WINDOW_MS_DEFAULT || "900000", 10);
+
+      console.warn(
+        `[Guerrilla] 🛡️ Rate Limit Hit on ${task.platform}. Entering penalty box for ${penaltyTime / 60000} mins.`
+      );
+
       try {
-        await noteRateLimit(task.platform, windowMs);
+        await noteRateLimit(task.platform, penaltyTime);
         await recordRateLimitEvent(task.platform);
+
+        // Notify user about the strategic delay
+        await notificationEngine.sendNotification(
+          task.uid,
+          `Publishing paused for ${task.platform} to optimize algorithm safety.`,
+          "info",
+          {
+            type: "rate_limit_pause",
+            platform: task.platform,
+            durationMinutes: penaltyTime / 60000,
+          }
+        );
       } catch (_) {}
     }
+
+    // GUERRILLA SCHEDULING:
+    // If we hit a rate limit, the next attempt must be strictly AFTER the penalty box expires.
+    // We override the standard exponential backoff in this case.
+    let nextAttemptTimestamp;
+
+    if (classification === "rate_limit") {
+      const platformKey = task.platform ? task.platform.split("_")[0] : "default";
+      const penaltyTime = PENALTY_BOX_DURATIONS[platformKey] || 900000;
+      nextAttemptTimestamp = Date.now() + penaltyTime + 60000; // 1 min buffer strictly after penalty
+    } else {
+      nextAttemptTimestamp = computeNextAttempt(attempts, classification);
+    }
+
     const retryable = attempts < MAX_ATTEMPTS && canRetry(classification);
-    const nextAttemptAt = retryable
-      ? new Date(computeNextAttempt(attempts, classification)).toISOString()
-      : null;
+    const nextAttemptAt = retryable ? new Date(nextAttemptTimestamp).toISOString() : null;
+
     const failed = {
       status: retryable ? "queued" : "failed",
       error: err.message,

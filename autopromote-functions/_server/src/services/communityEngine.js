@@ -381,7 +381,16 @@ async function confirmTaskCompletion(workerUserId, proofId, proofUrl) {
     const expectedDomains = platformDomains[campaign.platform] || [];
     if (expectedDomains.length > 0) {
       const proofHostMatch = expectedDomains.some(d => proofUrl.includes(d));
-      const screenshotHosts = ["imgur.com", "i.imgur.com", "ibb.co", "postimg.cc", "prnt.sc", "gyazo.com", "firebasestorage.googleapis.com"];
+      // Also allow common image hosting for screenshot evidence
+      const screenshotHosts = [
+        "imgur.com",
+        "i.imgur.com",
+        "ibb.co",
+        "postimg.cc",
+        "prnt.sc",
+        "gyazo.com",
+        "firebasestorage.googleapis.com",
+      ];
       const isScreenshot = screenshotHosts.some(d => proofUrl.includes(d));
       if (!proofHostMatch && !isScreenshot) {
         throw new Error(

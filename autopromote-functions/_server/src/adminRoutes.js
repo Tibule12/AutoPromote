@@ -103,33 +103,34 @@ router.get("/overview", authMiddleware, adminOnly, async (req, res) => {
     const usersSnapshot = await db.collection("users").get();
     const totalUsers = usersSnapshot.size;
 
-    const usersWithStats = await Promise.all(
-      usersSnapshot.docs.map(async userDoc => {
-        const userData = userDoc.data();
-        const contentSnapshot = await db
-          .collection("content")
-          .where("userId", "==", userDoc.id)
-          .get();
+    // Fetch ALL content in one query instead of N+1 per-user queries
+    const contentSnapshot = await db.collection("content").get();
+    // Build a stats map keyed by userId
+    const statsByUser = {};
+    contentSnapshot.forEach(doc => {
+      const data = doc.data();
+      const uid = data.userId;
+      if (!uid) return;
+      if (!statsByUser[uid])
+        statsByUser[uid] = { content_count: 0, total_views: 0, total_revenue: 0 };
+      statsByUser[uid].content_count += 1;
+      statsByUser[uid].total_views += data.views || 0;
+      statsByUser[uid].total_revenue += data.revenue || 0;
+    });
 
-        const contentStats = contentSnapshot.docs.reduce(
-          (stats, doc) => {
-            const content = doc.data();
-            return {
-              content_count: stats.content_count + 1,
-              total_views: stats.total_views + (content.views || 0),
-              total_revenue: stats.total_revenue + (content.revenue || 0),
-            };
-          },
-          { content_count: 0, total_views: 0, total_revenue: 0 }
-        );
-
-        return {
-          id: userDoc.id,
-          ...userData,
-          ...contentStats,
-        };
-      })
-    );
+    const usersWithStats = usersSnapshot.docs.map(userDoc => {
+      const userData = userDoc.data();
+      const contentStats = statsByUser[userDoc.id] || {
+        content_count: 0,
+        total_views: 0,
+        total_revenue: 0,
+      };
+      return {
+        id: userDoc.id,
+        ...userData,
+        ...contentStats,
+      };
+    });
 
     res.json({
       total_users: totalUsers,

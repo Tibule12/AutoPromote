@@ -732,7 +732,14 @@ router.post("/:platform/auth/simulate", authMiddleware, platformWriteLimiter, as
       await checkConnectionLimit(uid, platform);
     } catch (limitErr) {
       if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED") {
-        return res.status(403).json({ ok: false, error: "connection_limit_exceeded", message: limitErr.message, context: limitErr.context });
+        return res
+          .status(403)
+          .json({
+            ok: false,
+            error: "connection_limit_exceeded",
+            message: limitErr.message,
+            context: limitErr.context,
+          });
       }
       throw limitErr;
     }
@@ -864,8 +871,11 @@ router.get("/reddit/auth/callback", platformPublicLimiter, async (req, res) => {
     if (!uid && state && state.split && state.split(":")[0]) uid = state.split(":")[0];
     if (uid && uid !== "anon") {
       // Enforce connection limit
-      try { await checkConnectionLimit(uid, platform); } catch (limitErr) {
-        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED") return sendPlain(res, 403, limitErr.message);
+      try {
+        await checkConnectionLimit(uid, platform);
+      } catch (limitErr) {
+        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
+          return sendPlain(res, 403, limitErr.message);
         throw limitErr;
       }
       const userRef = db.collection("users").doc(uid);
@@ -998,8 +1008,11 @@ router.get("/discord/auth/callback", platformPublicLimiter, async (req, res) => 
     if (!uid && state && state.split && state.split(":")[0]) uid = state.split(":")[0];
     if (uid && uid !== "anon") {
       // Enforce connection limit
-      try { await checkConnectionLimit(uid, platform); } catch (limitErr) {
-        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED") return sendPlain(res, 403, limitErr.message);
+      try {
+        await checkConnectionLimit(uid, platform);
+      } catch (limitErr) {
+        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
+          return sendPlain(res, 403, limitErr.message);
         throw limitErr;
       }
       const userRef = db.collection("users").doc(uid);
@@ -1276,8 +1289,11 @@ router.get("/spotify/auth/callback", platformPublicLimiter, async (req, res) => 
 
     if (uid && uid !== "anon") {
       // Enforce connection limit
-      try { await checkConnectionLimit(uid, platform); } catch (limitErr) {
-        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED") return sendPlain(res, 403, limitErr.message);
+      try {
+        await checkConnectionLimit(uid, platform);
+      } catch (limitErr) {
+        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
+          return sendPlain(res, 403, limitErr.message);
         throw limitErr;
       }
       const userRef = db.collection("users").doc(uid);
@@ -1455,8 +1471,11 @@ router.get("/linkedin/auth/callback", platformPublicLimiter, async (req, res) =>
     if (!uid && state && state.split && state.split(":")[0]) uid = state.split(":")[0];
     if (uid && uid !== "anon") {
       // Enforce connection limit
-      try { await checkConnectionLimit(uid, platform); } catch (limitErr) {
-        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED") return sendPlain(res, 403, limitErr.message);
+      try {
+        await checkConnectionLimit(uid, platform);
+      } catch (limitErr) {
+        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
+          return sendPlain(res, 403, limitErr.message);
         throw limitErr;
       }
       const userRef = db.collection("users").doc(uid);
@@ -1621,8 +1640,11 @@ router.get("/pinterest/auth/callback", platformPublicLimiter, async (req, res) =
     if (!uid && state && state.split && state.split(":")[0]) uid = state.split(":")[0];
     if (uid && uid !== "anon") {
       // Enforce connection limit
-      try { await checkConnectionLimit(uid, platform); } catch (limitErr) {
-        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED") return sendPlain(res, 403, limitErr.message);
+      try {
+        await checkConnectionLimit(uid, platform);
+      } catch (limitErr) {
+        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
+          return sendPlain(res, 403, limitErr.message);
         throw limitErr;
       }
       const userRef = db.collection("users").doc(uid);

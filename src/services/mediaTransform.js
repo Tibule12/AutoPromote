@@ -148,10 +148,11 @@ function getHookStyle(platform) {
 }
 
 function escapeSubtitlePath(filePath) {
-  return String(filePath || "")
-    .replace(/\\/g, "/")
-    .replace(/:/g, "\\:")
-    .replace(/'/g, "\\\\'");
+  const normalizedPath = path.resolve(String(filePath || "")).replace(/\\/g, "/");
+  if (!normalizedPath || /[\u0000-\u001f\u007f]/.test(normalizedPath)) {
+    return "";
+  }
+  return normalizedPath.replace(/[':,;\[\]]/g, "\\$&");
 }
 
 function msToSrtTimestamp(ms) {
@@ -205,6 +206,7 @@ function buildSubtitleOverlayFilter(subtitlePath, platform) {
   const platformKey = normalizePlatformKey(platform);
   const marginV = platformKey === "youtube" ? 180 : 140;
   const escapedPath = escapeSubtitlePath(subtitlePath);
+  if (!escapedPath) return "";
   const forceStyle = [
     "FontName=DejaVu Sans",
     "FontSize=20",
@@ -741,4 +743,8 @@ module.exports = {
   enqueueMediaTransformTask,
   processNextMediaTransformTask,
   processMediaTransformTaskById,
+  __testables: {
+    buildSubtitleOverlayFilter,
+    escapeSubtitlePath,
+  },
 };

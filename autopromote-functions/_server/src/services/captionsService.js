@@ -184,7 +184,7 @@ async function generateTranscription(filePathOrBuffer) {
     // This is a basic check.
     const path = require("path");
     const os = require("os");
-    
+
     // Resolve absolute path and normalize
     let normalizedPath = path.resolve(filePathOrBuffer);
     const tmpDir = fs.realpathSync(os.tmpdir());
@@ -193,7 +193,7 @@ async function generateTranscription(filePathOrBuffer) {
     // If the file exists, we resolve its real path. If not, we just check the normalized path.
     // For existing files, realpathSync is crucial.
     if (fs.existsSync(normalizedPath)) {
-        normalizedPath = fs.realpathSync(normalizedPath);
+      normalizedPath = fs.realpathSync(normalizedPath);
     }
 
     // Check if path is within tmpDir (strictly starts with tmpDir)
