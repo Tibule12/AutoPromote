@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import UnifiedPublisher from "../features/publishing/UnifiedPublisher";
 import { auth } from "../firebaseClient";
+import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import "./UploadPanel.css";
 
 function getItemKey(item) {
@@ -257,7 +258,7 @@ function UploadPanel({
       setHistoryError("");
       const headers = await buildAuthHeaders();
 
-      const res = await fetch("/api/content/my-content?includeStats=0", {
+      const res = await fetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0`, {
         headers,
         credentials: "include",
       });
@@ -315,15 +316,18 @@ function UploadPanel({
         setHistoryError("");
         const headers = await buildAuthHeaders(true);
 
-        const res = await fetch(`/api/content/${encodeURIComponent(identifier)}/repost-preview`, {
-          method: "POST",
-          headers,
-          credentials: "include",
-          body: JSON.stringify({
-            platform: getPreferredRepostPlatform(item),
-            runNow: false,
-          }),
-        });
+        const res = await fetch(
+          `${API_BASE_URL}/api/content/${encodeURIComponent(identifier)}/repost-preview`,
+          {
+            method: "POST",
+            headers,
+            credentials: "include",
+            body: JSON.stringify({
+              platform: getPreferredRepostPlatform(item),
+              runNow: false,
+            }),
+          }
+        );
 
         const payload = await res.json().catch(() => ({}));
         if (!res.ok) {
@@ -365,10 +369,13 @@ function UploadPanel({
         setDownloadBusyKey(item.key);
         setHistoryError("");
         const headers = await buildAuthHeaders();
-        const res = await fetch(downloadUrl, {
-          headers,
-          credentials: "include",
-        });
+        const res = await fetch(
+          downloadUrl.startsWith("/api/") ? `${API_BASE_URL}${downloadUrl}` : downloadUrl,
+          {
+            headers,
+            credentials: "include",
+          }
+        );
 
         if (res.status === 401) {
           setHistoryError("Please sign in again to download this media.");

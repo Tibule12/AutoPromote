@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../config";
 
 // Minimal Assistant Drawer - scaffold
 export default function AssistantDrawer({ user, platformSummary }) {
@@ -15,7 +16,7 @@ export default function AssistantDrawer({ user, platformSummary }) {
     }
     setLoading(true);
     try {
-      const res = await fetch("/api/assistant/query", {
+      const res = await fetch(`${API_BASE_URL}/api/assistant/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

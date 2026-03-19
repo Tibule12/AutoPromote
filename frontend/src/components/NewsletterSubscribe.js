@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_BASE_URL } from "../config";
 
 const NewsletterSubscribe = () => {
   const [email, setEmail] = useState("");
@@ -12,7 +13,7 @@ const NewsletterSubscribe = () => {
     }
     // Try posting to /api/newsletter if present, otherwise fallback to mailto
     try {
-      const res = await fetch("/api/newsletter/subscribe", {
+      const res = await fetch(`${API_BASE_URL}/api/newsletter/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({ email }),

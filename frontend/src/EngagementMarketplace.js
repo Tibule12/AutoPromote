@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./EngagementMarketplace.css";
+import { API_BASE_URL, API_ENDPOINTS } from "./config";
 import { auth, storage } from "./firebaseClient";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import WolfPackFeed from "./WolfPackFeed";
@@ -96,7 +97,7 @@ const WolfHuntDashboard = () => {
   // PAYPAL INTEGRATION
   useEffect(() => {
     if (showBuyCredits && !paypalLoaded && !document.getElementById("paypal-sdk")) {
-      fetch("/api/payments/paypal/config")
+      fetch(API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG || `${API_BASE_URL}/api/payments/paypal/config`)
         .then(r => r.json())
         .then(cfg => {
           const script = document.createElement("script");
@@ -120,7 +121,7 @@ const WolfHuntDashboard = () => {
           .Buttons({
             createOrder: async (data, actions) => {
               const token = await auth.currentUser?.getIdToken();
-              return fetch("/api/payments/credits/create-order", {
+              return fetch(`${API_BASE_URL}/api/payments/credits/create-order`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -133,7 +134,7 @@ const WolfHuntDashboard = () => {
             },
             onApprove: async (data, actions) => {
               const token = await auth.currentUser?.getIdToken();
-              return fetch("/api/payments/credits/capture-order", {
+              return fetch(`${API_BASE_URL}/api/payments/credits/capture-order`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -187,7 +188,7 @@ const WolfHuntDashboard = () => {
       showToast(`Initializing secure channel via PayFast...`);
       try {
         const token = await auth.currentUser?.getIdToken();
-        const res = await fetch("/api/payments/payfast/init", {
+        const res = await fetch(`${API_BASE_URL}/api/payments/payfast/init`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -299,7 +300,7 @@ const WolfHuntDashboard = () => {
       if (!auth.currentUser) return;
       const token = await auth.currentUser.getIdToken();
 
-      const res = await fetch("/api/community/wolf-hunt/tasks", {
+      const res = await fetch(`${API_BASE_URL}/api/community/wolf-hunt/tasks`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -411,7 +412,7 @@ const WolfHuntDashboard = () => {
 
     try {
       const token = await auth.currentUser.getIdToken();
-      const res = await fetch(`/api/community/wolf-hunt/claim/${campaignId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/community/wolf-hunt/claim/${campaignId}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -472,14 +473,17 @@ const WolfHuntDashboard = () => {
       }
 
       // 2. Submit Claim
-      const res = await fetch(`/api/community/wolf-hunt/confirm/${activeMission.proofId}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ proofUrl }),
-      });
+      const res = await fetch(
+        `${API_BASE_URL}/api/community/wolf-hunt/confirm/${activeMission.proofId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ proofUrl }),
+        }
+      );
       const data = await res.json();
 
       if (data.success) {
@@ -508,7 +512,7 @@ const WolfHuntDashboard = () => {
     e.preventDefault();
     try {
       const token = await auth.currentUser.getIdToken();
-      const res = await fetch("/api/community/wolf-hunt/campaign", {
+      const res = await fetch(`${API_BASE_URL}/api/community/wolf-hunt/campaign`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

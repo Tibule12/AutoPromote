@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "./config";
 
 export default function AdminKyc() {
   const [users, setUsers] = useState([]);
@@ -13,7 +14,7 @@ export default function AdminKyc() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/users", { credentials: "same-origin" });
+      const res = await fetch(`${API_BASE_URL}/api/admin/users`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch users");
       const json = await res.json();
       setUsers(json.users || []);
@@ -26,10 +27,10 @@ export default function AdminKyc() {
 
   const toggleKyc = async (id, current) => {
     try {
-      const res = await fetch(`/api/admin/users/${id}/kyc`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users/${id}/kyc`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
+        credentials: "include",
         body: JSON.stringify({ kycVerified: !current }),
       });
       if (!res.ok) throw new Error("Failed to update");
@@ -88,12 +89,15 @@ export default function AdminKyc() {
                 <button
                   onClick={async () => {
                     try {
-                      const res = await fetch(`/api/admin/users/${u.id}/afterdark-access`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "same-origin",
-                        body: JSON.stringify({ granted: !(u.flags && u.flags.afterDarkAccess) }),
-                      });
+                      const res = await fetch(
+                        `${API_BASE_URL}/api/admin/users/${u.id}/afterdark-access`,
+                        {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          credentials: "include",
+                          body: JSON.stringify({ granted: !(u.flags && u.flags.afterDarkAccess) }),
+                        }
+                      );
                       if (!res.ok) throw new Error("Failed to update");
                       const json = await res.json();
                       setUsers(list => list.map(x => (x.id === u.id ? json.user : x)));
