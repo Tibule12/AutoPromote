@@ -68,25 +68,28 @@ function escapeDrawtext(value) {
   // of potentially harmful or syntax-breaking characters. We avoid
   // constructing a RegExp from user input elsewhere; this is a simple
   // character-level escape for drawtext literals.
-  return String(value || "")
-    .replace(/\\/g, "\\\\")
-    .replace(/:/g, "\\:")
-    .replace(/'/g, "\\\\'")
-    .replace(/"/g, '\\"')
-    .replace(/,/g, "\\,")
-    .replace(/%/g, "\\%")
-    .replace(/\\n/g, "\\n")
-    .replace(/\(/g, "\\(")
-    .replace(/\)/g, "\\)")
-    .replace(/;/g, "\\;")
-    .replace(/&/g, "\\&")
-    .replace(/\$/g, "\\$")
-    .replace(/`/g, "\\`")
-    .replace(/</g, "\\<")
-    .replace(/>/g, "\\>")
-    .replace(/\|/g, "\\|")
-    .replace(/\*/g, "\\*")
-    .replace(/\?/g, "\\?");
+  return (
+    String(value || "")
+      .replace(/\\/g, "\\\\")
+      .replace(/:/g, "\\:")
+      .replace(/'/g, "\\\\'")
+      .replace(/"/g, '\\"')
+      .replace(/,/g, "\\,")
+      .replace(/%/g, "\\%")
+      // Replace actual newline characters with the literal escaped sequence
+      .replace(/\n/g, "\\n")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)")
+      .replace(/;/g, "\\;")
+      .replace(/&/g, "\\&")
+      .replace(/\$/g, "\\$")
+      .replace(/`/g, "\\`")
+      .replace(/</g, "\\<")
+      .replace(/>/g, "\\>")
+      .replace(/\|/g, "\\|")
+      .replace(/\*/g, "\\*")
+      .replace(/\?/g, "\\?")
+  );
 }
 
 function normalizePlatformKey(platform) {
