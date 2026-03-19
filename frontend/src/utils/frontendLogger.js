@@ -1,4 +1,6 @@
 // Lightweight frontend logger that forwards logs to backend when enabled
+import { API_BASE_URL } from "../config";
+
 export async function send(level, message, meta) {
   const enabled = process.env.REACT_APP_ENABLE_FRONTEND_LOGGING === "1";
   if (!enabled) {
@@ -9,7 +11,7 @@ export async function send(level, message, meta) {
     return;
   }
   try {
-    await fetch("/api/internal/frontend-logs", {
+    await fetch(`${API_BASE_URL}/api/internal/frontend-logs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ level, message, meta }),

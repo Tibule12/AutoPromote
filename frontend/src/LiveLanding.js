@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "./config";
 
 function useQuery() {
   if (typeof window === "undefined") return new URLSearchParams("");
@@ -22,7 +23,7 @@ export default function LiveLanding() {
     }
     setLoading(true);
     try {
-      const res = await fetch("/api/live/redeem", {
+      const res = await fetch(`${API_BASE_URL}/api/live/redeem`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),

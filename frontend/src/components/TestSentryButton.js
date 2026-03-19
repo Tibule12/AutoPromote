@@ -1,5 +1,6 @@
 import React from "react";
 import initSentry, { Sentry } from "../sentryClient";
+import { API_BASE_URL } from "../config";
 
 initSentry();
 
@@ -29,7 +30,7 @@ export default function TestSentryButton() {
   const triggerServer = async () => {
     try {
       // Trigger a server-side Sentry test event (if server has SENTRY enabled)
-      await fetch("/api/test/sentry", { method: "GET", credentials: "include" });
+      await fetch(`${API_BASE_URL}/api/test/sentry`, { method: "GET", credentials: "include" });
     } catch (e) {
       console.warn("Failed to call /api/test/sentry", e.message || e);
     }

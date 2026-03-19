@@ -132,7 +132,7 @@ test("upload history shows View on platform link and refresh when processing", a
 
   await waitFor(() => {
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/content/my-content?includeStats=0",
+      expect.stringMatching(/\/api\/content\/my-content\?includeStats=0$/),
       expect.objectContaining({
         headers: expect.objectContaining({ Accept: "application/json" }),
         credentials: "include",
@@ -228,7 +228,7 @@ test("upload history downloads media with auth", async () => {
 
   await waitFor(() =>
     expect(global.fetch).toHaveBeenLastCalledWith(
-      "/api/content/content-download/download",
+      expect.stringMatching(/\/api\/content\/content-download\/download$/),
       expect.objectContaining({
         headers: expect.objectContaining({ Authorization: "Bearer test-token" }),
         credentials: "include",

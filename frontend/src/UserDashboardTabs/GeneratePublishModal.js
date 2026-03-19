@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./GeneratePublishModal.css";
+import { API_BASE_URL } from "../config";
 
 export default function GeneratePublishModal({ open, contentItem, onClose, onStarted }) {
   const [aspect, setAspect] = useState("9:16");
@@ -23,7 +24,7 @@ export default function GeneratePublishModal({ open, contentItem, onClose, onSta
     setStatus("queued");
     setMessage("Queued for analysis");
     try {
-      const res = await fetch("/api/clips/generate-and-publish", {
+      const res = await fetch(`${API_BASE_URL}/api/clips/generate-and-publish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

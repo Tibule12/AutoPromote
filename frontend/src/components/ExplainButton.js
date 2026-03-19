@@ -1,11 +1,12 @@
 import React from "react";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../config";
 
 // Small Explain button that asks the assistant for a short explanation of a context
 export default function ExplainButton({ contextSummary = "", label = "Explain" }) {
   const handle = async () => {
     try {
-      const res = await fetch("/api/assistant/query", {
+      const res = await fetch(`${API_BASE_URL}/api/assistant/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: `Explain: ${contextSummary}` }),

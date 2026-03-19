@@ -71,7 +71,8 @@
   },
   "jest": {
     "moduleNameMapper": {
-      "^react-router-dom$": "<rootDir>/src/react-router-dom.js"
+      "^react-router-dom$": "<rootDir>/src/react-router-dom.js",
+      "^react-markdown$": "<rootDir>/src/__mocks__/react-markdown.js"
     }
   },
   "devDependencies": {
