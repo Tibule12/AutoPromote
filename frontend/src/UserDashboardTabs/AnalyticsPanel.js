@@ -107,7 +107,9 @@ const AnalyticsPanel = () => {
 
   const loadRecoveryAssets = useCallback(async () => {
     try {
-      const res = await authedFetch(API_ENDPOINTS.MY_CONTENT, { method: "GET" });
+      const res = await authedFetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0`, {
+        method: "GET",
+      });
       if (!res.ok) return;
       const json = await res.json();
       const items = Array.isArray(json.content) ? json.content : [];

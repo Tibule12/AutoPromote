@@ -93,6 +93,7 @@ function App() {
     timezone: "UTC",
     defaultPlatforms: [],
     defaultFrequency: "once",
+    autoRepostEnabled: true,
   });
 
   // MFA State
@@ -276,7 +277,7 @@ function App() {
           return;
         }
       }
-      const res = await fetch(API_ENDPOINTS.MY_CONTENT, {
+      const res = await fetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -328,7 +329,7 @@ function App() {
         else if (user && user.token) token = user.token;
         else return;
       }
-      const res = await fetch(API_ENDPOINTS.MY_SCHEDULES, {
+      const res = await fetch(`${API_ENDPOINTS.MY_SCHEDULES}?summary=1&limit=100`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -537,7 +538,7 @@ function App() {
   // Ensure terms are accepted; if not, show modal and defer login
   const ensureTermsAccepted = async (token, userData, source) => {
     try {
-      const res = await fetch(API_ENDPOINTS.MY_CONTENT, {
+      const res = await fetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0`, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       });
@@ -651,11 +652,51 @@ function App() {
     setShowRegister(false);
   };
 
+  const loadUserDefaults = async providedToken => {
+    try {
+      let token = providedToken;
+      if (!token) {
+        const currentUser = auth.currentUser;
+        if (currentUser) token = await currentUser.getIdToken(true);
+        else if (user && user.token) token = user.token;
+        else return;
+      }
+
+      const res = await fetch(API_ENDPOINTS.USERS_ME, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+      if (!res.ok) return;
+
+      const data = await res.json().catch(() => ({}));
+      const u = data && data.user ? data.user : {};
+      const sched = u.schedulingDefaults || {};
+
+      setUserDefaults({
+        timezone: u.timezone || "UTC",
+        schedulingDefaults: sched,
+        defaultPlatforms: sched.platforms || [],
+        defaultFrequency: sched.frequency || "once",
+        paypalEmail: u.paypalEmail || "",
+        autoRepostEnabled: typeof u.autoRepostEnabled === "boolean" ? u.autoRepostEnabled : true,
+      });
+    } catch (_) {}
+  };
+
+  useEffect(() => {
+    if (!user || user.role === "admin" || user.isAdmin === true) return;
+    loadUserDefaults().catch(() => {});
+  }, [user?.uid, user?.role, user?.isAdmin]);
+
   // Save user defaults (timezone, default platforms, frequency, paypalEmail)
   const saveUserDefaults = async ({
     timezone,
     defaultPlatforms,
     defaultFrequency,
+    autoRepostEnabled,
     paypalEmail,
   }) => {
     try {
@@ -669,7 +710,13 @@ function App() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ timezone, defaultPlatforms, defaultFrequency, paypalEmail }),
+        body: JSON.stringify({
+          timezone,
+          defaultPlatforms,
+          defaultFrequency,
+          autoRepostEnabled,
+          paypalEmail,
+        }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -683,6 +730,13 @@ function App() {
         schedulingDefaults: sched,
         defaultPlatforms: sched.platforms || defaultPlatforms || [],
         defaultFrequency: sched.frequency || defaultFrequency || "once",
+        paypalEmail: u.paypalEmail || paypalEmail || "",
+        autoRepostEnabled:
+          typeof u.autoRepostEnabled === "boolean"
+            ? u.autoRepostEnabled
+            : typeof autoRepostEnabled === "boolean"
+              ? autoRepostEnabled
+              : true,
       });
       return true;
     } catch (e) {
@@ -912,6 +966,9 @@ function App() {
         // Pass through Viral/Bounty/Quality fields from ContentUploadForm
         bounty: params.bounty,
         viral_boost: params.viral_boost,
+        variants: Array.isArray(params.variants) ? params.variants : undefined,
+        variant_strategy:
+          Array.isArray(params.variants) && params.variants.length > 0 ? "rotation" : undefined,
         quality_enhanced: params.quality_enhanced,
         enhance_quality: params.quality_enhanced, // alias for backend
         custom_hashtags: params.custom_hashtags,

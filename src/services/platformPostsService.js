@@ -54,6 +54,14 @@ async function recordPlatformPost({
     outcome.postId || outcome.tweetId || outcome.mediaId || outcome.externalId || null;
   const usedVariant = outcome.usedVariant || null;
   const variantIndex = typeof outcome.variantIndex === "number" ? outcome.variantIndex : null;
+  const repostMetadata = payload && payload.repostMetadata ? payload.repostMetadata : null;
+  const isOptimizationRun =
+    reason === "decay_repost" ||
+    (repostMetadata && repostMetadata.mode === "smart_decay_repost") ||
+    false;
+  const validationStatus = isOptimizationRun ? "pending" : null;
+  const baselinePostId =
+    repostMetadata && repostMetadata.baselinePostId ? repostMetadata.baselinePostId : null;
   // Build tracked link (attribution) if link or landing page ref available
   let trackedLink = null;
   try {
@@ -87,6 +95,9 @@ async function recordPlatformPost({
     payload: payload || {},
     shortlinkCode: shortlinkCode || null,
     rawOutcome: sanitizeOutcome(outcome),
+    isOptimizationRun,
+    validationStatus,
+    baselinePostId,
     usedVariant,
     variantIndex,
     trackedLink: trackedLink,
@@ -207,6 +218,11 @@ async function finalizePlatformPostById(
 ) {
   if (!id) throw new Error("id required");
   const ref = db.collection("platform_posts").doc(id);
+  const repostMetadata = payload && payload.repostMetadata ? payload.repostMetadata : null;
+  const isOptimizationRun =
+    reason === "decay_repost" ||
+    (repostMetadata && repostMetadata.mode === "smart_decay_repost") ||
+    null;
   const update = {
     rawOutcome: sanitizeOutcome(outcome),
     success: success === null ? outcome && outcome.success !== false : success,
@@ -229,6 +245,10 @@ async function finalizePlatformPostById(
     taskId: taskId || undefined,
     reason: reason || undefined,
     shortlinkCode: shortlinkCode || undefined,
+    isOptimizationRun,
+    validationStatus: isOptimizationRun === true ? "pending" : undefined,
+    baselinePostId:
+      repostMetadata && repostMetadata.baselinePostId ? repostMetadata.baselinePostId : undefined,
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
   // Clean undefined keys (don't overwrite existing with undefined)

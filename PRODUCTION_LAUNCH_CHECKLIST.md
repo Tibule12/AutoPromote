@@ -243,7 +243,10 @@ npm run build
 
 ```bash
 # Test backend health:
-curl https://api.autopromote.org/health
+curl https://api.autopromote.org/api/health
+
+# Test backend readiness:
+curl https://api.autopromote.org/api/health/ready
 
 # Test PayPal webhook endpoint (should return 400 for GET):
 curl https://api.autopromote.org/api/paypal/webhook

@@ -1,6 +1,6 @@
 import React from "react";
 
-const NotificationsPanel = ({ notifs, onMarkAllRead }) => {
+const NotificationsPanel = ({ notifs, onMarkAllRead, onNavigate }) => {
   const getTypeIcon = type => {
     switch (type) {
       case "system":
@@ -99,6 +99,24 @@ const NotificationsPanel = ({ notifs, onMarkAllRead }) => {
                 <div style={{ fontSize: "0.9rem", color: "#4b5563", lineHeight: 1.4 }}>
                   {n.message || n.body}
                 </div>
+                {n.metadata?.targetTab && onNavigate ? (
+                  <button
+                    className="check-quality"
+                    onClick={() =>
+                      onNavigate(n.metadata.targetTab, {
+                        uploadTab: n.metadata.targetPanel || n.metadata.uploadTab || null,
+                        contentId: n.metadata.contentId || null,
+                      })
+                    }
+                    style={{
+                      marginTop: "0.75rem",
+                      fontSize: "0.8rem",
+                      padding: "0.45rem 0.75rem",
+                    }}
+                  >
+                    {n.metadata.ctaLabel || "Open"}
+                  </button>
+                ) : null}
                 <div style={{ fontSize: "0.75rem", color: "#9ca3af", marginTop: "0.5rem" }}>
                   {new Date(n.timestamp || Date.now()).toLocaleDateString()}
                 </div>

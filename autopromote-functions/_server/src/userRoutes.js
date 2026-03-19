@@ -35,31 +35,52 @@ const kycLimiter = rateLimiter({
   windowHint: "kyc",
 });
 
+const userDefaultsCache = new Map();
+const USER_DEFAULTS_TTL_MS = parseInt(process.env.USER_DEFAULTS_TTL_MS || "15000", 10);
+
+function buildUserDefaultsPayload(snap) {
+  const data = snap.data() || {};
+  return {
+    user: {
+      id: snap.id,
+      name: data.name || "",
+      email: data.email || "",
+      paypalEmail: data.paypalEmail || "",
+      timezone: data.timezone || "UTC",
+      schedulingDefaults: data.schedulingDefaults || {
+        windows: [],
+        frequency: "once",
+        platforms: ["youtube", "tiktok", "instagram"],
+      },
+      notifications: data.notifications || {
+        email: { uploadSuccess: true, scheduleCreated: true, weeklyDigest: false },
+      },
+      autoRepostEnabled:
+        typeof data.autoRepostEnabled === "boolean"
+          ? data.autoRepostEnabled
+          : typeof data.automation?.autoRepostEnabled === "boolean"
+            ? data.automation.autoRepostEnabled
+            : true,
+      role: data.role || "user",
+      isAdmin: data.isAdmin || false,
+    },
+  };
+}
+
 // Get current user (profile defaults)
 router.get("/me", authMiddleware, writeLimiter, async (req, res) => {
   try {
+    const cached = userDefaultsCache.get(req.userId);
+    if (cached && Date.now() - cached.ts < USER_DEFAULTS_TTL_MS) {
+      return res.json(cached.payload);
+    }
+
     const ref = db.collection("users").doc(req.userId);
     const snap = await ref.get();
     if (!snap.exists) return res.status(404).json({ error: "User not found" });
-    const data = snap.data();
-    res.json({
-      user: {
-        id: snap.id,
-        name: data.name || "",
-        email: data.email || "",
-        timezone: data.timezone || "UTC",
-        schedulingDefaults: data.schedulingDefaults || {
-          windows: [], // e.g., [{ days:[1-5], start:'19:00', end:'21:00' }]
-          frequency: "once",
-          platforms: ["youtube", "tiktok", "instagram"],
-        },
-        notifications: data.notifications || {
-          email: { uploadSuccess: true, scheduleCreated: true, weeklyDigest: false },
-        },
-        role: data.role || "user",
-        isAdmin: data.isAdmin || false,
-      },
-    });
+    const payload = buildUserDefaultsPayload(snap);
+    userDefaultsCache.set(req.userId, { ts: Date.now(), payload });
+    res.json(payload);
   } catch (err) {
     console.error("Error getting /me:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -76,6 +97,7 @@ router.put("/me", authMiddleware, writeLimiter, async (req, res) => {
       notifications,
       defaultPlatforms,
       defaultFrequency,
+      autoRepostEnabled,
       paypalEmail,
     } = req.body;
     const ref = db.collection("users").doc(req.userId);
@@ -96,6 +118,13 @@ router.put("/me", authMiddleware, writeLimiter, async (req, res) => {
       if (defaultPlatforms) updates.schedulingDefaults.platforms = defaultPlatforms;
       if (defaultFrequency) updates.schedulingDefaults.frequency = defaultFrequency;
     }
+    if (typeof autoRepostEnabled === "boolean") {
+      updates.autoRepostEnabled = autoRepostEnabled;
+      updates.automation = {
+        ...(currentData.automation || {}),
+        autoRepostEnabled,
+      };
+    }
     // Prevent downgrading admin role or isAdmin
     if (currentData.role === "admin" || currentData.isAdmin === true) {
       updates.role = "admin";
@@ -103,7 +132,9 @@ router.put("/me", authMiddleware, writeLimiter, async (req, res) => {
     }
     await ref.set(updates, { merge: true });
     const snap = await ref.get();
-    res.json({ user: { id: snap.id, ...snap.data() } });
+    const payload = buildUserDefaultsPayload(snap);
+    userDefaultsCache.set(req.userId, { ts: Date.now(), payload });
+    res.json(payload);
   } catch (err) {
     console.error("Error updating /me:", err);
     res.status(500).json({ error: "Internal server error" });

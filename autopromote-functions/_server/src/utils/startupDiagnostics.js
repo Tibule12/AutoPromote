@@ -269,16 +269,19 @@ class StartupDiagnostics {
       if (platform === "instagram") {
         const hasApp = process.env.INSTAGRAM_APP_ID && process.env.INSTAGRAM_APP_SECRET;
         const hasClient = process.env.INSTAGRAM_CLIENT_ID && process.env.INSTAGRAM_CLIENT_SECRET;
-        if (hasApp || hasClient) {
+        const hasFacebookGraph =
+          (process.env.FACEBOOK_APP_ID || process.env.FACEBOOK_CLIENT_ID) &&
+          (process.env.FACEBOOK_APP_SECRET || process.env.FACEBOOK_CLIENT_SECRET);
+        if (hasApp || hasClient || hasFacebookGraph) {
           this.log("success", "platforms", `${platform.toUpperCase()} credentials configured`);
           configuredCount++;
         } else {
           this.log("warning", "platforms", `${platform.toUpperCase()} not fully configured`, {
             missing_variables: [
-              "INSTAGRAM_APP_ID/INSTAGRAM_APP_SECRET or INSTAGRAM_CLIENT_ID/INSTAGRAM_CLIENT_SECRET",
+              "INSTAGRAM_APP_ID/INSTAGRAM_APP_SECRET or INSTAGRAM_CLIENT_ID/INSTAGRAM_CLIENT_SECRET or FACEBOOK_APP_ID/FACEBOOK_APP_SECRET",
             ],
-            action_required: "Add platform credentials to enable integration",
-            impact: `${platform} integration will not work`,
+            action_required: "Add Instagram credentials or use the Facebook Graph credentials path",
+            impact: `${platform} direct integration will not work`,
           });
         }
         continue;

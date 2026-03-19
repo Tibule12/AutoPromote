@@ -1050,10 +1050,6 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     // Marketing
     optimizeViral,
     setOptimizeViral,
-    repostBoost,
-    setRepostBoost,
-    shareBoost,
-    setShareBoost,
     variants,
     setVariants,
 
@@ -1860,8 +1856,6 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         },
         protocol7: { enabled: protocol7Enabled, volatility: protocol7Volatility },
         viral_boost: optimizeViral ? { force_seeding: true } : undefined,
-        repost_boost: repostBoost,
-        share_boost: shareBoost,
         variants: variants && variants.length > 0 ? variants : undefined,
         schedule: scheduledTime
           ? {
@@ -2131,7 +2125,18 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 borderRadius: "4px",
               }}
             >
-              <h4 style={{ margin: "0 0 10px 0", fontSize: "14px" }}>🚀 Growth & Optimization</h4>
+              <h4 style={{ margin: "0 0 10px 0", fontSize: "14px" }}>🚀 Growth Optimization</h4>
+              <p
+                style={{
+                  margin: "0 0 10px 0",
+                  fontSize: "12px",
+                  color: "#64748b",
+                  lineHeight: 1.5,
+                }}
+              >
+                Keep this section focused on options that are applied at upload time. Repost cadence
+                and follow-up recycling are managed after publish.
+              </p>
 
               {/* Viral Toggle */}
               <label
@@ -2148,43 +2153,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   onChange={e => setOptimizeViral(e.target.checked)}
                   style={{ marginRight: "8px" }}
                 />
-                <span>Optimize for Viral Reach (Force Seeding)</span>
-              </label>
-
-              {/* Repost Boost */}
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "8px",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={repostBoost}
-                  onChange={e => setRepostBoost(e.target.checked)}
-                  style={{ marginRight: "8px" }}
-                />
-                <span>Auto-Repost Boost</span>
-              </label>
-
-              {/* Share Boost */}
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "8px",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={shareBoost}
-                  onChange={e => setShareBoost(e.target.checked)}
-                  style={{ marginRight: "8px" }}
-                />
-                <span>Cross-Platform Share Boost</span>
+                <span>Prime this upload for viral seeding</span>
               </label>
 
               {/* A/B Variants */}
@@ -2193,15 +2162,18 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px dashed #eee" }}
               >
                 <label style={{ fontSize: "12px", fontWeight: "bold" }}>
-                  A/B Test Title (Variant)
+                  Alternate hook or title
                 </label>
                 <input
                   type="text"
-                  placeholder="Enter alternate title..."
+                  placeholder="Optional alternate title for testing"
                   value={variants[0] || ""}
                   onChange={e => setVariants(e.target.value ? [e.target.value] : [])}
                   style={{ width: "100%", fontSize: "12px" }}
                 />
+                <div style={{ marginTop: "6px", fontSize: "11px", color: "#64748b" }}>
+                  AutoPromote stores this as a simple rotation variant for headline testing.
+                </div>
               </div>
             </div>
 

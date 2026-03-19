@@ -165,19 +165,25 @@ export default function usePlatformStatus() {
     try {
       const cur = auth.currentUser;
       if (!cur) return;
-      let token;
-      try {
-        token = await cur.getIdToken();
-      } catch {
-        token = await cur.getIdToken(true);
-      }
+      const data = await cachedFetch(
+        "platform-status-unified",
+        async () => {
+          let token;
+          try {
+            token = await cur.getIdToken();
+          } catch {
+            token = await cur.getIdToken(true);
+          }
 
-      const res = await fetch(API_ENDPOINTS.PLATFORM_STATUS, {
-        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-      });
-      if (!res.ok) return;
+          const res = await fetch(API_ENDPOINTS.PLATFORM_STATUS, {
+            headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+          });
+          if (!res.ok) throw new Error(`platform_status_${res.status}`);
+          return res.json();
+        },
+        15000
+      );
 
-      const data = await res.json();
       const platforms = data.raw || {};
 
       const newStatuses = {};

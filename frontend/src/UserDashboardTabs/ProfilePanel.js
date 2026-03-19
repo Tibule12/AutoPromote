@@ -24,6 +24,8 @@ const ProfilePanel = ({
   toggleDefaultPlatform,
   setDefaultsFrequency,
   setTz,
+  autoRepostEnabled,
+  setAutoRepostEnabled,
   handleSaveDefaults,
   // connect handlers
   handleConnectTikTok,
@@ -248,6 +250,48 @@ const ProfilePanel = ({
               <option value="weekly">Weekly</option>
             </select>
           </label>
+          <div
+            style={{
+              border: "1px solid rgba(148,163,184,0.18)",
+              borderRadius: 14,
+              padding: "0.9rem 1rem",
+              background: "rgba(15,23,42,0.45)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "1rem",
+                alignItems: "flex-start",
+              }}
+            >
+              <div>
+                <div style={{ color: "#eef2ff", fontWeight: 700 }}>Smart Reposts</div>
+                <div style={{ color: "#9aa4b2", marginTop: ".35rem", lineHeight: 1.5 }}>
+                  Re-polish and repost decaying videos with plan-based limits. Free plans get 2
+                  reposts. Paid plans get a few more, but never unlimited retries.
+                </div>
+              </div>
+              <label
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: ".55rem",
+                  color: "#e2e8f0",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={autoRepostEnabled}
+                  onChange={e => setAutoRepostEnabled && setAutoRepostEnabled(e.target.checked)}
+                />
+                Auto repost enabled
+              </label>
+            </div>
+          </div>
           <div style={{ display: "flex", gap: ".5rem" }}>
             <button className="check-quality" onClick={handleSaveDefaults}>
               Save Defaults
