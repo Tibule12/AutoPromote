@@ -9,49 +9,97 @@ const platformConnectionsPublicLimiter = rateLimiter({
   windowHint: "platform_connections_public",
 });
 
-// Helper to fetch connection doc if exists
-async function getConn(uid, name) {
-  try {
-    // Validate uid to prevent injection
-    if (typeof uid !== "string" || !/^[a-zA-Z0-9_-]+$/.test(uid)) {
-      return { connected: false, error: "invalid_uid" };
-    }
-    // Validate name to prevent injection
-    if (typeof name !== "string" || !/^[a-zA-Z0-9_-]+$/.test(name)) {
-      return { connected: false, error: "invalid_name" };
-    }
+const PLATFORM_NAMES = [
+  "twitter",
+  "youtube",
+  "facebook",
+  "instagram",
+  "tiktok",
+  "spotify",
+  "reddit",
+  "discord",
+  "linkedin",
+  "telegram",
+  "pinterest",
+  "snapchat",
+];
 
-    const userRef = db.collection("users").doc(uid);
-    const snap = await userRef.collection("connections").doc(name).get();
-    if (snap.exists) {
-      const data = snap.data();
-      // Avoid exposing sensitive fields such as tokens
-      if (data && typeof data === "object") {
-        const safe = Object.assign({}, data);
-        delete safe.tokens;
-        delete safe.access_token;
-        delete safe.refresh_token;
-        delete safe.client_secret;
-        delete safe.secret;
-        return { connected: true, ...safe, source: "subcollection" };
-      }
-      return { connected: true, ...data, source: "subcollection" };
-    }
-    // Heuristic fallback: inspect top-level user doc for token/identity hints
-    const userSnap = await userRef.get();
-    if (userSnap.exists) {
-      const u = userSnap.data() || {};
-      const lowerKeys = Object.keys(u).map(k => k.toLowerCase());
-      const hasToken = lowerKeys.some(k => k.includes(name) && k.includes("token"));
-      const identity = u[`${name}Identity`] || u[`${name}_identity`] || u[`${name}Profile`] || null;
-      if (hasToken || identity) {
-        return { connected: true, inferred: true, identity, source: "userDoc" };
-      }
-    }
-    return { connected: false };
-  } catch (_) {
-    return { connected: false, error: "lookup_failed" };
+function sanitizeConnection(data) {
+  if (!data || typeof data !== "object") return {};
+  const safe = Object.assign({}, data);
+  delete safe.tokens;
+  delete safe.access_token;
+  delete safe.refresh_token;
+  delete safe.client_secret;
+  delete safe.secret;
+  return safe;
+}
+
+function getUserDocFallback(userData, name) {
+  if (!userData || typeof userData !== "object") return { connected: false };
+  const lowerKeys = Object.keys(userData).map(key => key.toLowerCase());
+  const hasToken = lowerKeys.some(key => key.includes(name) && key.includes("token"));
+  const identity =
+    userData[`${name}Identity`] ||
+    userData[`${name}_identity`] ||
+    userData[`${name}Profile`] ||
+    null;
+  if (hasToken || identity) {
+    return { connected: true, inferred: true, identity, source: "userDoc" };
   }
+  return { connected: false };
+}
+
+function normalizeConnectionMap(connectionDocs, userData) {
+  const connections = {};
+
+  PLATFORM_NAMES.forEach(name => {
+    if (name === "instagram") return;
+    const docData = connectionDocs[name];
+    connections[name] = docData
+      ? { connected: true, ...sanitizeConnection(docData), source: "subcollection" }
+      : getUserDocFallback(userData, name);
+  });
+
+  const facebook = connections.facebook || { connected: false };
+  const linkedInstagramId =
+    facebook.ig_business_account_id ||
+    facebook.instagramBusinessAccountId ||
+    facebook.instagramId ||
+    facebook.meta?.instagram_business_account_id ||
+    null;
+  const linkedInstagramPage = Array.isArray(facebook.pages)
+    ? facebook.pages.find(page => page && page.ig_business_account_id)
+    : null;
+
+  connections.instagram =
+    linkedInstagramId || linkedInstagramPage
+      ? {
+          connected: true,
+          source: "facebook_link",
+          ig_business_account_id:
+            linkedInstagramId || linkedInstagramPage?.ig_business_account_id || null,
+          display_name:
+            facebook.display_name ||
+            facebook.meta?.display_name ||
+            linkedInstagramPage?.name ||
+            null,
+          pages: Array.isArray(facebook.pages)
+            ? facebook.pages
+                .filter(
+                  page => page && (page.ig_business_account_id || page.instagram_business_account)
+                )
+                .map(page => ({
+                  id: page.id,
+                  name: page.name,
+                  ig_business_account_id:
+                    page.ig_business_account_id || page.instagram_business_account?.id || null,
+                }))
+            : [],
+        }
+      : { connected: false };
+
+  return connections;
 }
 
 router.get(
@@ -64,32 +112,32 @@ router.get(
     const cacheKey = `platform_connections_status_${uid}`;
     const cached = getCache(cacheKey);
     if (cached) return res.json({ ...cached, _cached: true });
-    // include additional platforms so frontend can query a single status endpoint
-    const [
-      twitter,
-      youtube,
-      facebook,
-      tiktok,
-      spotify,
-      reddit,
-      discord,
-      linkedin,
-      telegram,
-      pinterest,
-      snapchat,
-    ] = await Promise.all([
-      getConn(uid, "twitter"),
-      getConn(uid, "youtube"),
-      getConn(uid, "facebook"),
-      getConn(uid, "tiktok"),
-      getConn(uid, "spotify"),
-      getConn(uid, "reddit"),
-      getConn(uid, "discord"),
-      getConn(uid, "linkedin"),
-      getConn(uid, "telegram"),
-      getConn(uid, "pinterest"),
-      getConn(uid, "snapchat"),
+    const userRef = db.collection("users").doc(uid);
+    const [connectionsSnap, userSnap] = await Promise.all([
+      userRef.collection("connections").get(),
+      userRef.get(),
     ]);
+
+    const connectionDocs = {};
+    connectionsSnap.forEach(doc => {
+      connectionDocs[doc.id] = doc.data() || {};
+    });
+    const userData = userSnap.exists ? userSnap.data() || {} : {};
+    const connections = normalizeConnectionMap(connectionDocs, userData);
+
+    const twitter = connections.twitter || { connected: false };
+    const youtube = connections.youtube || { connected: false };
+    const facebook = connections.facebook || { connected: false };
+    const instagram = connections.instagram || { connected: false };
+    const tiktok = connections.tiktok || { connected: false };
+    const spotify = connections.spotify || { connected: false };
+    const reddit = connections.reddit || { connected: false };
+    const discord = connections.discord || { connected: false };
+    const linkedin = connections.linkedin || { connected: false };
+    const telegram = connections.telegram || { connected: false };
+    const pinterest = connections.pinterest || { connected: false };
+    const snapchat = connections.snapchat || { connected: false };
+
     const summary = {
       twitter: {
         connected: twitter.connected,
@@ -109,6 +157,15 @@ router.get(
           facebook.meta?.display_name ||
           (Array.isArray(facebook.pages) && facebook.pages[0]?.name) ||
           null,
+      },
+      instagram: {
+        connected: instagram.connected,
+        display_name:
+          instagram.display_name ||
+          (Array.isArray(instagram.pages) && instagram.pages[0]?.name) ||
+          null,
+        ig_business_account_id: instagram.ig_business_account_id || null,
+        pages: Array.isArray(instagram.pages) ? instagram.pages.map(p => p.name).slice(0, 3) : [],
       },
       tiktok: {
         connected: tiktok.connected,
@@ -162,33 +219,22 @@ router.get(
           null,
       },
     };
-    // Minimize token exposure in raw connections; ensure tokens are removed
-    const makeSafe = d => {
-      const s = Object.assign({}, d || {});
-      if (s) {
-        delete s.tokens;
-        delete s.access_token;
-        delete s.refresh_token;
-        delete s.client_secret;
-        delete s.secret;
-      }
-      return s;
-    };
     const payload = {
       ok: true,
       summary,
       raw: {
-        twitter: makeSafe(twitter),
-        youtube: makeSafe(youtube),
-        facebook: makeSafe(facebook),
-        tiktok: makeSafe(tiktok),
-        spotify: makeSafe(spotify),
-        reddit: makeSafe(reddit),
-        discord: makeSafe(discord),
-        linkedin: makeSafe(linkedin),
-        telegram: makeSafe(telegram),
-        pinterest: makeSafe(pinterest),
-        snapchat: makeSafe(snapchat),
+        twitter: sanitizeConnection(twitter),
+        youtube: sanitizeConnection(youtube),
+        facebook: sanitizeConnection(facebook),
+        instagram: sanitizeConnection(instagram),
+        tiktok: sanitizeConnection(tiktok),
+        spotify: sanitizeConnection(spotify),
+        reddit: sanitizeConnection(reddit),
+        discord: sanitizeConnection(discord),
+        linkedin: sanitizeConnection(linkedin),
+        telegram: sanitizeConnection(telegram),
+        pinterest: sanitizeConnection(pinterest),
+        snapchat: sanitizeConnection(snapchat),
       },
     };
     setCache(cacheKey, payload, 7000);

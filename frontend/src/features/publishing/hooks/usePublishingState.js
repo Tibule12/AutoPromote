@@ -23,12 +23,9 @@ export const usePublishingState = (initialPlatforms = []) => {
   // --- Marketing & Growth Features ---
   // Viral Optimization
   const [optimizeViral, setOptimizeViral] = useState(false);
-  const [repostBoost, setRepostBoost] = useState(false);
-  const [shareBoost, setShareBoost] = useState(false);
 
   // A/B Testing (Variants)
   const [variants, setVariants] = useState([]); // Array of strings (alternate titles)
-  const [variantStrategy, setVariantStrategy] = useState("rotation"); // 'rotation' | 'bandit'
 
   // --- Scheduling ---
   const [scheduledTime, setScheduledTime] = useState(""); // ISO date string or empty for "Now"
@@ -114,10 +111,6 @@ export const usePublishingState = (initialPlatforms = []) => {
     // Marketing State
     optimizeViral,
     setOptimizeViral,
-    repostBoost,
-    setRepostBoost,
-    shareBoost,
-    setShareBoost,
     variants,
     setVariants,
 

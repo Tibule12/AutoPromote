@@ -31,6 +31,11 @@ const {
   setDiagnosisPolicy,
   runDuePolicies,
 } = require("./services/contentRecoveryService");
+const {
+  enqueueMediaTransformTask,
+  processMediaTransformTaskById,
+} = require("./services/mediaTransform");
+const { buildRepostCreativePlan } = require("./services/repostSchedulerService");
 
 // Optional services still loaded defensively
 let viralInsuranceService;
@@ -64,8 +69,133 @@ function cleanObject(obj) {
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
 }
 
+function parseBooleanQuery(value, defaultValue = false) {
+  if (typeof value === "undefined") return defaultValue;
+  const normalized = String(value).trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(normalized)) return true;
+  if (["0", "false", "no", "off"].includes(normalized)) return false;
+  return defaultValue;
+}
+
+function parsePositiveInt(value, fallback, { min = 1, max = Number.MAX_SAFE_INTEGER } = {}) {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
+
+function hasVariantOptimization(item) {
+  return (
+    item.variant_strategy === "bandit" || (Array.isArray(item.variants) && item.variants.length > 0)
+  );
+}
+
+function buildVariantStatsPayload(variantStats) {
+  if (!variantStats || !variantStats.platforms) return null;
+
+  let bestVariant = null;
+  let maxScore = -1;
+  let totalImpressions = 0;
+  let totalClicks = 0;
+  let suppressedCount = 0;
+
+  Object.values(variantStats.platforms).forEach(platformStats => {
+    if (!platformStats?.variants) return;
+    platformStats.variants.forEach(variant => {
+      totalImpressions += variant.impressions || 0;
+      totalClicks += variant.clicks || 0;
+      const score = (variant.clicks || 0) * 10 + (variant.impressions || 0) * 0.01;
+      if (score > maxScore) {
+        maxScore = score;
+        bestVariant = variant;
+      }
+      if (variant.suppressed) suppressedCount += 1;
+    });
+  });
+
+  const ctrValue = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+  const insights = {
+    status: "learning",
+    message: "Data is accumulating...",
+    color: "#aaa",
+  };
+
+  if (totalImpressions < 50) {
+    insights.status = "learning";
+    insights.message = "❄️ Learning Phase: Not enough data yet.";
+    insights.color = "#fbbf24";
+    insights.suggestion = "Keep posting to gather more reach.";
+  } else if (ctrValue < 1.0) {
+    insights.status = "failing";
+    insights.message = "📉 Underperforming: Low Click-Through Rate (<1%)";
+    insights.color = "#ef4444";
+    insights.suggestion =
+      "Your hooks aren't landing. Try more controversial or question-based titles.";
+  } else if (ctrValue >= 3.0) {
+    insights.status = "winning";
+    insights.message = "🚀 Viral Potential: High Engagement (>3% CTR)";
+    insights.color = "#10b981";
+    insights.suggestion = "Double down! Create more variants similar to the winner.";
+  } else {
+    insights.status = "average";
+    insights.message = "😐 Average Performance (1-3% CTR)";
+    insights.color = "#9ca3af";
+    insights.suggestion = "Try tweaking the thumbnail or first 3 seconds of video.";
+  }
+
+  if (suppressedCount > 0) {
+    insights.alert = `⚠️ ${suppressedCount} variants were killed due to poor performance.`;
+  }
+
+  return {
+    stats: {
+      totalImpressions,
+      totalClicks,
+      ctr: totalImpressions > 0 ? `${ctrValue.toFixed(2)}%` : "0%",
+      winningVariant: bestVariant ? bestVariant.value : null,
+    },
+    insights,
+  };
+}
+
+function summarizeSchedule(doc) {
+  const data = doc.data() || {};
+  return {
+    id: doc.id,
+    contentId: data.contentId || data.content_id || null,
+    platform: data.platform || null,
+    platforms: Array.isArray(data.platforms) ? data.platforms : undefined,
+    startTime: data.startTime || data.time || null,
+    time: data.time || data.startTime || null,
+    endTime: data.endTime || null,
+    frequency: data.frequency || "once",
+    isActive: typeof data.isActive === "boolean" ? data.isActive : true,
+    status: data.status || null,
+    createdAt: data.createdAt || data.created_at || null,
+    updatedAt: data.updatedAt || data.updated_at || null,
+  };
+}
+
 function resolveContentMediaUrl(record) {
   return record.url || record.media_url || record.video_url || record.file_url || null;
+}
+
+function resolvePreviewMediaUrl(record) {
+  return record.processedUrl || record.persistentMediaUrl || resolveContentMediaUrl(record);
+}
+
+function resolvePreviewPlatform(record, requestedPlatform) {
+  if (requestedPlatform) return String(requestedPlatform).toLowerCase();
+  const platforms = Array.isArray(record.target_platforms)
+    ? record.target_platforms
+    : Array.isArray(record.platforms)
+      ? record.platforms
+      : [];
+  return String(platforms[0] || "tiktok").toLowerCase();
+}
+
+function getPreviewAttemptNumber(record, platform) {
+  const current = Number(record?.autoRepostState?.platforms?.[platform]?.attemptsScheduled || 0);
+  return Math.max(1, current + 1);
 }
 
 function inferDownloadExtension(mediaUrl, type) {
@@ -674,6 +804,10 @@ router.get("/my-content", authMiddleware, async (req, res) => {
   const startMs = Date.now();
   try {
     const userId = req.userId || req.user?.uid;
+    const includeStats = parseBooleanQuery(req.query.includeStats, true);
+    const statsLimit = includeStats
+      ? parsePositiveInt(req.query.statsLimit, 12, { min: 0, max: 50 })
+      : 0;
     // Debugging aid: optionally log sanitized user info when diagnosing 403 issues
     if (process.env.DEBUG_CONTENT === "true") {
       try {
@@ -705,98 +839,38 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       .where("user_id", "==", userId)
       .orderBy("created_at", "desc");
     const snapshot = await contentRef.get();
-    const content = [];
-
-    // Parallel fetch for stats to avoid N+1 slow down
     const docs = snapshot.docs;
-    const statsPromises = docs.map(async doc => {
-      const data = doc.data();
-      const item = { id: doc.id, ...data };
+    const docsToEnrich = new Set();
 
-      // Attach Bandit Stats if strategy is active
-      if (item.variant_strategy === "bandit" || (item.variants && item.variants.length > 0)) {
-        try {
-          const vs = await getVariantStats(doc.id);
-          if (vs && vs.platforms) {
-            // Summarize the winner
-            let bestVariant = null;
-            let maxScore = -1;
-            let totalImpressions = 0;
-            let totalClicks = 0;
-
-            Object.values(vs.platforms).forEach(p => {
-              if (p.variants) {
-                p.variants.forEach(v => {
-                  totalImpressions += v.impressions || 0;
-                  totalClicks += v.clicks || 0;
-                  // Simple heuristic for winner: clicks (or impressions if clicks 0)
-                  const score = (v.clicks || 0) * 10 + (v.impressions || 0) * 0.01;
-                  if (score > maxScore) {
-                    maxScore = score;
-                    bestVariant = v;
-                  }
-                });
-              }
-            });
-
-            const ctrVal = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
-            item.stats = {
-              totalImpressions,
-              totalClicks,
-              ctr: totalImpressions > 0 ? ctrVal.toFixed(2) + "%" : "0%",
-              winningVariant: bestVariant ? bestVariant.value : null,
-            };
-
-            // AI COACH INSIGHTS (Why is it winning/failing?)
-            const insights = {
-              status: "learning",
-              message: "Data is accumulating...",
-              color: "#aaa",
-            };
-
-            if (totalImpressions < 50) {
-              insights.status = "learning";
-              insights.message = "❄️ Learning Phase: Not enough data yet.";
-              insights.color = "#fbbf24"; // yellow-500
-              insights.suggestion = "Keep posting to gather more reach.";
-            } else if (ctrVal < 1.0) {
-              insights.status = "failing";
-              insights.message = "📉 Underperforming: Low Click-Through Rate (<1%)";
-              insights.color = "#ef4444"; // red-500
-              insights.suggestion =
-                "Your hooks aren't landing. Try more controversial or question-based titles.";
-            } else if (ctrVal >= 3.0) {
-              insights.status = "winning";
-              insights.message = "🚀 Viral Potential: High Engagement (>3% CTR)";
-              insights.color = "#10b981"; // green-500
-              insights.suggestion = "Double down! Create more variants similar to the winner.";
-            } else {
-              insights.status = "average";
-              insights.message = "😐 Average Performance (1-3% CTR)";
-              insights.color = "#9ca3af"; // gray-400
-              insights.suggestion = "Try tweaking the thumbnail or first 3 seconds of video.";
-            }
-
-            // Check suppressions
-            let suppressedCount = 0;
-            Object.values(vs.platforms).forEach(p => {
-              if (p.variants) suppressedCount += p.variants.filter(v => v.suppressed).length;
-            });
-
-            if (suppressedCount > 0) {
-              insights.alert = `⚠️ ${suppressedCount} variants were killed due to poor performance.`;
-            }
-
-            item.insights = insights;
-          }
-        } catch (e) {
-          /* ignore stats error */
-        }
+    if (includeStats && statsLimit > 0) {
+      for (const doc of docs) {
+        const data = doc.data() || {};
+        if (!hasVariantOptimization(data)) continue;
+        docsToEnrich.add(doc.id);
+        if (docsToEnrich.size >= statsLimit) break;
       }
-      return item;
-    });
+    }
 
-    const contentWithStats = await Promise.all(statsPromises);
+    const contentWithStats = await Promise.all(
+      docs.map(async doc => {
+        const data = doc.data();
+        const item = { id: doc.id, ...data };
+
+        if (docsToEnrich.has(doc.id)) {
+          try {
+            const vs = await getVariantStats(doc.id);
+            const summary = buildVariantStatsPayload(vs);
+            if (summary) {
+              item.stats = summary.stats;
+              item.insights = summary.insights;
+            }
+          } catch (e) {
+            /* ignore stats error */
+          }
+        }
+        return item;
+      })
+    );
 
     const took = Date.now() - startMs;
     if (took > 500)
@@ -806,7 +880,13 @@ router.get("/my-content", authMiddleware, async (req, res) => {
         took,
         req.ip || req.headers["x-forwarded-for"] || "unknown"
       );
-    res.json({ content: contentWithStats });
+    res.json({
+      content: contentWithStats,
+      meta: {
+        statsIncluded: includeStats,
+        statsLimit,
+      },
+    });
   } catch (error) {
     console.error("[GET /my-content] Error:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -815,21 +895,45 @@ router.get("/my-content", authMiddleware, async (req, res) => {
 
 // GET /my-promotion-schedules - Get user's own promotion schedules
 router.get("/my-promotion-schedules", authMiddleware, async (req, res) => {
+  const startMs = Date.now();
   try {
     const userId = req.userId || req.user?.uid;
+    const limit = parsePositiveInt(req.query.limit, 100, { min: 1, max: 250 });
+    const summaryOnly = parseBooleanQuery(req.query.summary, false);
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
     const schedulesRef = db
       .collection("promotion_schedules")
       .where("user_id", "==", userId)
-      .orderBy("startTime", "desc");
+      .orderBy("startTime", "desc")
+      .limit(limit);
     const snapshot = await schedulesRef.get();
-    const schedules = [];
-    snapshot.forEach(doc => {
-      schedules.push({ id: doc.id, ...doc.data() });
+    const schedules = snapshot.docs.map(doc =>
+      summaryOnly ? summarizeSchedule(doc) : { id: doc.id, ...doc.data() }
+    );
+
+    const took = Date.now() - startMs;
+    if (took > 500) {
+      console.warn(
+        "[GET /my-promotion-schedules][slow] userId=%s took=%dms count=%d limit=%d summary=%s ip=%s",
+        userId,
+        took,
+        snapshot.size,
+        limit,
+        summaryOnly,
+        req.ip || req.headers["x-forwarded-for"] || "unknown"
+      );
+    }
+
+    res.json({
+      schedules,
+      meta: {
+        limit,
+        summary: summaryOnly,
+        hasMore: snapshot.size >= limit,
+      },
     });
-    res.json({ schedules });
   } catch (error) {
     console.error("[GET /my-promotion-schedules] Error:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -1110,6 +1214,94 @@ router.get("/:id/download", authMiddleware, async (req, res) => {
     return res.send(buffer);
   } catch (error) {
     console.error("[GET /:id/download] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/:id/repost-preview", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const ownedContent = await getOwnedContentSnapshot(userId, req.params.id);
+    if (!ownedContent) return res.status(404).json({ error: "Content not found" });
+
+    const record = ownedContent.data || {};
+    const platform = resolvePreviewPlatform(record, req.body && req.body.platform);
+    const sourceUrl = resolvePreviewMediaUrl(record);
+    if (!sourceUrl) return res.status(404).json({ error: "No previewable media found" });
+
+    const attemptNumber = getPreviewAttemptNumber(record, platform);
+    const creativePlan = buildRepostCreativePlan(record, { attemptNumber, platform });
+    const task = await enqueueMediaTransformTask({
+      contentId: ownedContent.id,
+      uid: userId,
+      url: sourceUrl,
+      meta: {
+        previewOnly: true,
+        viral_remix: true,
+        quality_enhanced: true,
+        creativeProfile: "smart_repost_preview_v1",
+        hookText: creativePlan.hook,
+        creativeTitle: creativePlan.title,
+        creativeDescription: creativePlan.description,
+        creativeHashtags: creativePlan.hashtags,
+        creativeCaption: creativePlan.caption,
+        creativePreviewLabel: creativePlan.previewLabel,
+        creativeCreatorLine: creativePlan.creatorLine,
+        targetPlatform: platform,
+        hookIntroSeconds: 3,
+        enableBurnedCaptions: true,
+      },
+    });
+
+    await db
+      .collection("content")
+      .doc(ownedContent.id)
+      .set(
+        {
+          repostPreview: {
+            taskId: task.id,
+            status: "queued",
+            profile: "smart_repost_preview_v1",
+            hookText: creativePlan.hook,
+            caption: creativePlan.caption,
+            title: creativePlan.title,
+            description: creativePlan.description,
+            hashtags: creativePlan.hashtags,
+            previewLabel: creativePlan.previewLabel,
+            creatorLine: creativePlan.creatorLine,
+            niche: creativePlan.niche,
+            targetPlatform: platform,
+            introSeconds: 3,
+            updatedAt: new Date().toISOString(),
+          },
+        },
+        { merge: true }
+      );
+
+    const shouldRunNow = req.body?.runNow === true;
+    let result = null;
+    if (shouldRunNow) {
+      result = await processMediaTransformTaskById(task.id);
+    } else {
+      setImmediate(() => {
+        processMediaTransformTaskById(task.id).catch(error => {
+          console.error("[POST /:id/repost-preview][background] Error:", error);
+        });
+      });
+    }
+
+    const refreshed = await db.collection("content").doc(ownedContent.id).get();
+    return res.json({
+      ok: true,
+      taskId: task.id,
+      processed: !!(result && result.success),
+      preview: (refreshed.data() || {}).repostPreview || null,
+      creativePlan,
+    });
+  } catch (error) {
+    console.error("[POST /:id/repost-preview] Error:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

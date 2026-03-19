@@ -1,7 +1,18 @@
 const { admin, db } = require("./firebaseAdmin");
+const crypto = require("crypto");
 const { tokenInfo } = require("./utils/logSanitizer");
 const diag = require("./diagnostics");
 const { withCache } = require("./utils/simpleCache");
+
+const AUTH_TOKEN_CACHE_TTL_MS = parseInt(process.env.AUTH_TOKEN_CACHE_TTL_MS || "15000", 10);
+
+function getTokenCacheKey(token) {
+  const digest = crypto
+    .createHash("sha1")
+    .update(String(token || ""))
+    .digest("hex");
+  return `auth_token_${digest}`;
+}
 
 const authMiddleware = async (req, res, next) => {
   const startMs = Date.now();
@@ -167,7 +178,11 @@ const authMiddleware = async (req, res, next) => {
     // Verify Firebase token
     let decodedToken;
     try {
-      decodedToken = await admin.auth().verifyIdToken(token);
+      const verified = await withCache(getTokenCacheKey(token), AUTH_TOKEN_CACHE_TTL_MS, () =>
+        admin.auth().verifyIdToken(token)
+      );
+      const { _cached, ...verifiedToken } = verified || {};
+      decodedToken = verifiedToken;
     } catch (verifyErr) {
       diag.incAuthFail("verify_error", requestContext.ip);
       // If many verify errors from same IP, escalate to blocking

@@ -37,8 +37,8 @@
 ## Pre-Deploy Validation
 
 - [ ] `node check-firebase-setup.js` (or existing validation scripts) passes
-- [ ] `/api/health` returns status OK
-- [ ] `/api/health/ready` returns 200 (ready)
+- [ ] `https://api.autopromote.org/api/health` returns status OK
+- [ ] `https://api.autopromote.org/api/health/ready` returns 200 (ready)
 - [ ] At least one admin user created (admin claim set)
 - [ ] Background job logs appear (bandit-tuner / exploration-controller) if enabled
 

@@ -19,7 +19,9 @@ async function sendNotification(userId, message, type = "info", metadata = {}) {
 
     const notification = {
       user_id: userId,
+      title: metadata.title || null,
       message: message,
+      body: message,
       type: type,
       metadata: metadata,
       read: false,

@@ -67,6 +67,7 @@ const UserDashboard = ({
   }, [activeTab]);
 
   const [notifs, setNotifs] = useState(Array.isArray(notifications) ? notifications : []);
+  const [uploadLaunchTab, setUploadLaunchTab] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [platformOptions, setPlatformOptions] = useState({});
@@ -94,6 +95,9 @@ const UserDashboard = ({
   );
   const [paypalEmail, setPaypalEmail] = useState(
     userDefaults?.paypalEmail || user?.paypalEmail || ""
+  );
+  const [autoRepostEnabled, setAutoRepostEnabled] = useState(
+    typeof userDefaults?.autoRepostEnabled === "boolean" ? userDefaults.autoRepostEnabled : true
   );
 
   const [scheduleContentMap, setScheduleContentMap] = useState({});
@@ -127,6 +131,7 @@ const UserDashboard = ({
   const [pinterestCreateVisible, setPinterestCreateVisible] = useState(false);
   const [pinterestCreateName, setPinterestCreateName] = useState("");
   const [pinterestCreateDesc, setPinterestCreateDesc] = useState("");
+  const hasLoadedPlatformStatus = useRef(false);
   const selectedVideoRef = useRef(null);
   const hasAutoRoutedPrimaryTab = useRef(false);
   const contentList = useMemo(() => (Array.isArray(content) ? content : []), [content]);
@@ -151,6 +156,18 @@ const UserDashboard = ({
   const hasConnectedPlatforms = connectedPlatformCount > 0;
 
   const [emailVerified, setEmailVerified] = useState(true);
+  useEffect(() => {
+    setTz(userDefaults?.timezone || "UTC");
+    setDefaultsPlatforms(
+      Array.isArray(userDefaults?.defaultPlatforms) ? userDefaults.defaultPlatforms : []
+    );
+    setDefaultsFrequency(userDefaults?.defaultFrequency || "once");
+    setPaypalEmail(userDefaults?.paypalEmail || user?.paypalEmail || "");
+    setAutoRepostEnabled(
+      typeof userDefaults?.autoRepostEnabled === "boolean" ? userDefaults.autoRepostEnabled : true
+    );
+  }, [userDefaults, user?.paypalEmail]);
+
   useEffect(() => {
     // NEW: Check for "Wolf Hunt" onboarding criteria
     // Triggers if user has >= 2 content items AND hasn't seen the welcome yet
@@ -320,7 +337,7 @@ const UserDashboard = ({
   }, []); // Empty dependency array to run only once on mount
 
   const handleNav = useCallback(
-    tab => {
+    (tab, options = {}) => {
       if (tab === "wolf_hunt" && !ENABLE_WOLF_HUNT) {
         toast("🐺 Wolf Hunt is currently locked. Come back later!", { icon: "🔒" });
         return;
@@ -329,6 +346,7 @@ const UserDashboard = ({
         toast("Clip Studio is currently locked.", { icon: "🔒" });
         return;
       }
+      setUploadLaunchTab(tab === "upload" ? options?.uploadTab || null : null);
       setActiveTab(tab);
       setSidebarOpen(false);
     },
@@ -541,7 +559,7 @@ const UserDashboard = ({
         }
       });
     }
-  }, [activeTab]);
+  }, []);
 
   useEffect(() => {
     const rawPlatforms =
@@ -581,12 +599,14 @@ const UserDashboard = ({
   const handleSaveDefaults = async () => {
     if (!onSaveDefaults) return;
     try {
-      await onSaveDefaults({
+      const saved = await onSaveDefaults({
         timezone: tz,
         defaultPlatforms: defaultsPlatforms,
         defaultFrequency: defaultsFrequency,
+        autoRepostEnabled,
         paypalEmail,
       });
+      if (!saved) throw new Error("save_failed");
       toast.success("Defaults saved successfully!");
     } catch (e) {
       toast.error("Failed to save defaults");
@@ -1237,6 +1257,8 @@ const UserDashboard = ({
             toggleDefaultPlatform={toggleDefaultPlatform}
             setDefaultsFrequency={setDefaultsFrequency}
             setTz={setTz}
+            autoRepostEnabled={autoRepostEnabled}
+            setAutoRepostEnabled={setAutoRepostEnabled}
             handleSaveDefaults={handleSaveDefaults}
             handleConnectTikTok={handleConnectTikTok}
             handleConnectFacebook={handleConnectFacebook}
@@ -1258,6 +1280,8 @@ const UserDashboard = ({
             onUpload={onUpload}
             initialFile={selectedFile}
             onClearInitialFile={() => setSelectedFile(null)}
+            initialTabOverride={uploadLaunchTab}
+            onInitialTabHandled={() => setUploadLaunchTab(null)}
             contentList={contentList}
             platformMetadata={platformMetadata}
             platformOptions={platformOptions}
@@ -1287,7 +1311,11 @@ const UserDashboard = ({
         {activeTab === "rewards" && <RewardsPanel badges={badges} />}
 
         {activeTab === "notifications" && (
-          <NotificationsPanel notifs={notifs} onMarkAllRead={markAllNotificationsRead} />
+          <NotificationsPanel
+            notifs={notifs}
+            onMarkAllRead={markAllNotificationsRead}
+            onNavigate={handleNav}
+          />
         )}
 
         {activeTab === "ads" && <MissionControlPanel />}

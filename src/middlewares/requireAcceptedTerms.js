@@ -1,11 +1,13 @@
 const { db } = require("../../firebaseAdmin");
 const logger = require("../services/logger");
+const { withCache } = require("../utils/simpleCache");
 
 // Factory: returns middleware that enforces acceptance of the given terms version
 // options: { version: string }
 module.exports = function requireAcceptedTerms(options = {}) {
   const requiredVersion =
     options.version || process.env.REQUIRED_TERMS_VERSION || "AUTOPROMOTE-v1.0";
+  const debugTerms = process.env.DEBUG_TERMS === "true";
 
   return async function (req, res, next) {
     try {
@@ -23,14 +25,18 @@ module.exports = function requireAcceptedTerms(options = {}) {
       const isTestToken =
         typeof authHeader === "string" && authHeader.startsWith("Bearer test-token-for-");
       try {
-        // Avoid logging any part of the Authorization header to prevent token leakage.
-        logger.info("requireAcceptedTerms.debug", {
-          isE2EHeader: !!isE2EHeader,
-          isLocalHost: !!isLocalHost,
-          isNodeFetchUA: !!isNodeFetchUA,
-          isTestToken: !!isTestToken,
-          hasAuthHeader: !!authHeader,
-        });
+        if (!debugTerms) {
+          // Skip noisy per-request terms logs unless explicitly debugging the middleware.
+        } else {
+          // Avoid logging any part of the Authorization header to prevent token leakage.
+          logger.info("requireAcceptedTerms.debug", {
+            isE2EHeader: !!isE2EHeader,
+            isLocalHost: !!isLocalHost,
+            isNodeFetchUA: !!isNodeFetchUA,
+            isTestToken: !!isTestToken,
+            hasAuthHeader: !!authHeader,
+          });
+        }
       } catch (e) {}
       // Allow runtime bypass for CI or E2E runs via environment
       if (process.env.BYPASS_ACCEPTED_TERMS === "1") return next();
@@ -41,8 +47,11 @@ module.exports = function requireAcceptedTerms(options = {}) {
       if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
       // Read user's last accepted terms from Firestore user doc
-      const userDoc = await db.collection("users").doc(uid).get();
-      const userData = userDoc.exists ? userDoc.data() : {};
+      const cachedUserData = await withCache(`accepted_terms_${uid}`, 15000, async () => {
+        const userDoc = await db.collection("users").doc(uid).get();
+        return userDoc.exists ? userDoc.data() : {};
+      });
+      const { _cached, ...userData } = cachedUserData || {};
       const last = userData.lastAcceptedTerms || null;
 
       if (last && last.version === requiredVersion) {
