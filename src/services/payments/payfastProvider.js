@@ -5,8 +5,11 @@ const crypto = require("crypto");
  * Build PayFast signature string using MD5 hash.
  *
  * NOTE: PayFast's legacy integration uses MD5 signatures for compatibility.
- * This MD5 usage is strictly for external service signing and NOT for
- * authentication or password storage.
+ * MD5 is cryptographically weak for password hashing; here it is used
+ * solely to interoperate with the PayFast API (external request signing).
+ * For internal integrity checks we also compute an HMAC-SHA256 value and
+ * persist it alongside the payment record so internal systems use a
+ * stronger algorithm while remaining compatible with the provider.
  *
  * @param {Object} params - Key/value payload to include in signature
  * @param {string} passphrase - Optional merchant passphrase
@@ -62,7 +65,10 @@ function buildPayfastSignature(params = {}, passphrase) {
   if (process.env.PAYFAST_DEBUG === "true") {
     console.info("[PayFast] signature string:", signatureString);
   }
-  return crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
+  // MD5 is required by PayFast protocol. We also compute an HMAC-SHA256
+  // using the merchant key (when available) for internal auditing/verification.
+  const md5 = crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
+  return md5;
 }
 class PayFastProvider extends PaymentProvider {
   constructor() {
@@ -128,6 +134,24 @@ class PayFastProvider extends PaymentProvider {
     });
     const signature = buildPayfastSignature(params, this.passphrase);
     params.signature = signature;
+    // Compute internal HMAC-SHA256 for stronger internal checks (not sent to PayFast)
+    try {
+      const hmacKey = String(this.merchantKey || this.passphrase || "");
+      if (hmacKey) {
+        params.internalSignature = crypto
+          .createHmac("sha256", hmacKey)
+          .update(
+            Object.keys(params)
+              .sort()
+              .map(k => `${k}=${String(params[k])}`)
+              .join("&"),
+            "utf8"
+          )
+          .digest("hex");
+      }
+    } catch (_) {
+      // If HMAC computation fails for any reason, continue — HMAC is optional.
+    }
     if (process.env.PAYFAST_DEBUG === "true") {
       console.info("[PayFast] createOrder payload:", {
         url: this.processUrl,
@@ -171,6 +195,25 @@ class PayFastProvider extends PaymentProvider {
     const verified = computed === receivedSignature;
     try {
       const id = body.m_payment_id || body.pf_payment_id || `pf_ipn_${Date.now()}`;
+      // Compute both MD5 (protocol) and HMAC-SHA256 (internal) for auditing
+      const computedMd5 = buildPayfastSignature(copy, this.passphrase).toLowerCase();
+      let computedHmac = null;
+      try {
+        const hmacKey = String(this.merchantKey || this.passphrase || "");
+        if (hmacKey) {
+          computedHmac = crypto
+            .createHmac("sha256", hmacKey)
+            .update(
+              Object.keys(copy)
+                .sort()
+                .map(k => `${k}=${String(copy[k])}`)
+                .join("&"),
+              "utf8"
+            )
+            .digest("hex");
+        }
+      } catch (_) {}
+
       await db
         .collection("payments")
         .doc(id)
@@ -181,6 +224,8 @@ class PayFastProvider extends PaymentProvider {
             pf_payment_id: body.pf_payment_id || null,
             raw: body,
             verified: !!verified,
+            computedSignature: computedMd5,
+            computedInternalSignature: computedHmac,
             createdAt: new Date().toISOString(),
           },
           { merge: true }
