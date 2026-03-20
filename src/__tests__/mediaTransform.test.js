@@ -53,16 +53,23 @@ jest.mock("fluent-ffmpeg", () => {
 jest.mock("ffmpeg-static", () => "ffmpeg", { virtual: true });
 
 describe("mediaTransform", () => {
-  it("escapes subtitle paths before building the ffmpeg subtitles filter", () => {
+  it("accepts generated subtitle paths when building the ffmpeg subtitles filter", () => {
     const filter = __testables.buildSubtitleOverlayFilter(
-      "/tmp/repost:captions,semi;[preview]'quote'.srt",
+      "/tmp/repost-captions-content_123-task-456.srt",
       "youtube"
     );
 
-    expect(filter).toContain(
-      "subtitles='/tmp/repost\\:captions\\,semi\\;\\[preview\\]\\'quote\\'.srt'"
-    );
+    expect(filter).toContain("subtitles='/tmp/repost-captions-content_123-task-456.srt'");
     expect(filter).toContain("force_style='");
+  });
+
+  it("drops subtitle overlays when the subtitle path contains unexpected special characters", () => {
+    expect(
+      __testables.buildSubtitleOverlayFilter(
+        "/tmp/repost:captions,semi;[preview]'quote'.srt",
+        "youtube"
+      )
+    ).toBe("");
   });
 
   it("drops subtitle overlays when the subtitle path contains control characters", () => {
