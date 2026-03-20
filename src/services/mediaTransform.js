@@ -226,12 +226,24 @@ function getHookStyle(platform) {
   return styles[normalizePlatformKey(platform)] || styles.default;
 }
 
+const GENERATED_SUBTITLE_FILENAME_PATTERN = /^repost-captions-[A-Za-z0-9_-]+-[A-Za-z0-9_-]+\.srt$/;
+
 function escapeSubtitlePath(filePath) {
   const normalizedPath = path.resolve(String(filePath || "")).replace(/\\/g, "/");
   if (!normalizedPath || /[\u0000-\u001f\u007f]/.test(normalizedPath)) {
     return "";
   }
-  return normalizedPath.replace(/[':;,\[\]]/g, "\\$&");
+
+  const directory = path.dirname(normalizedPath).replace(/\\/g, "/");
+  const baseName = path.basename(normalizedPath);
+  if (!GENERATED_SUBTITLE_FILENAME_PATTERN.test(baseName)) {
+    return "";
+  }
+  if (!directory || !/^[-./:A-Za-z0-9_]+$/.test(directory)) {
+    return "";
+  }
+
+  return normalizedPath;
 }
 
 function msToSrtTimestamp(ms) {
