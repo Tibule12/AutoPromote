@@ -4,6 +4,42 @@ function normalizeComparableUrl(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function getDefaultBucketName() {
+  return normalizeComparableUrl(admin.storage().bucket().name);
+}
+
+function extractOwnedStoragePathFromUrl(fileUrl) {
+  const normalizedUrl = normalizeComparableUrl(fileUrl);
+  if (!normalizedUrl) return null;
+
+  try {
+    const bucketName = getDefaultBucketName();
+    if (!bucketName) return null;
+
+    if (normalizedUrl.startsWith("gs://")) {
+      const match = normalizedUrl.match(/^gs:\/\/([^/]+)\/(.+)$/);
+      if (!match) return null;
+      return match[1] === bucketName ? match[2] : null;
+    }
+
+    const parsed = new URL(normalizedUrl);
+    const allowedHosts = new Set(["firebasestorage.googleapis.com", "storage.googleapis.com"]);
+    if (!allowedHosts.has(parsed.hostname)) return null;
+
+    if (parsed.hostname === "firebasestorage.googleapis.com") {
+      const pathMatch = parsed.pathname.match(/^\/v0\/b\/([^/]+)\/o\/(.+)$/);
+      if (!pathMatch || pathMatch[1] !== bucketName) return null;
+      return decodeURIComponent(pathMatch[2]);
+    }
+
+    const pathParts = parsed.pathname.split("/").filter(Boolean);
+    if (pathParts.length < 2 || pathParts[0] !== bucketName) return null;
+    return decodeURIComponent(pathParts.slice(1).join("/"));
+  } catch (_error) {
+    return null;
+  }
+}
+
 async function findReferencedContentRecord(fileUrl, contentId) {
   const firestore = admin.firestore();
 
@@ -123,18 +159,15 @@ async function cleanupSourceFile(fileUrl, options = {}) {
 
   let contentId = options && options.contentId ? String(options.contentId) : null;
   const currentPlatform = options && options.currentPlatform ? options.currentPlatform : null;
+  const filePath = extractOwnedStoragePathFromUrl(fileUrl);
 
   // Ignore external URLs that are clearly not ours (e.g. random internet videos)
   // Only target our storage buckets to prevent accidents
-  try {
-    const urlObj = new URL(fileUrl);
-    // Strict hostname checking
-    const allowedHosts = ["firebasestorage.googleapis.com", "storage.googleapis.com"];
-    if (!allowedHosts.includes(urlObj.hostname) && !fileUrl.startsWith("gs://")) {
+  if (!filePath) {
+    if (normalizeComparableUrl(fileUrl).startsWith("gs://") || normalizeComparableUrl(fileUrl).startsWith("http")) {
       return { status: "skipped_external_url" };
     }
-  } catch (e) {
-    if (!fileUrl.startsWith("gs://")) return { status: "skipped_invalid_url" };
+    return { status: "skipped_invalid_url" };
   }
 
   let referencedContent = null;
@@ -169,37 +202,6 @@ async function cleanupSourceFile(fileUrl, options = {}) {
 
   try {
     const bucket = admin.storage().bucket();
-    let filePath = null;
-
-    // Case 1: gs:// URI (e.g., gs://my-app.appspot.com/uploads/video.mp4)
-    if (fileUrl.startsWith("gs://")) {
-      const parts = fileUrl.split("/");
-      // parts: ["gs:", "", "bucket-name", "folder", "file.mp4"]
-      if (parts.length >= 4) {
-        filePath = parts.slice(3).join("/");
-      }
-    }
-    // Case 2: HTTPS URL (Firebasestorage) -> https://firebasestorage.googleapis.com/v0/b/[bucket]/o/[path]?token...
-    else if (fileUrl.includes("/o/")) {
-      const decoded = decodeURIComponent(fileUrl);
-      const afterO = decoded.split("/o/")[1];
-      if (afterO) {
-        filePath = afterO.split("?")[0]; // Remove query params
-      }
-    }
-    // Case 3: HTTPS URL (storage.googleapis.com) -> https://storage.googleapis.com/[bucket]/[path]
-    else if (fileUrl.includes("storage.googleapis.com")) {
-      const u = new URL(fileUrl);
-      // Pathname = /bucket/folder/file.mp4
-      // We need to drop the first part (bucket) if we are using the default bucket reference,
-      // but typically `bucket.file()` expects the path RELATIVE to the bucket.
-      const pathParts = u.pathname.split("/").filter(Boolean);
-      if (pathParts.length > 1) {
-        // Assume first part is bucket, rest is path
-        filePath = pathParts.slice(1).join("/");
-      }
-    }
-
     if (filePath) {
       const file = bucket.file(filePath);
       // We verify existence first to avoid 404 errors cluttering logs
@@ -224,4 +226,4 @@ async function cleanupSourceFile(fileUrl, options = {}) {
   }
 }
 
-module.exports = { cleanupSourceFile };
+module.exports = { cleanupSourceFile, extractOwnedStoragePathFromUrl };

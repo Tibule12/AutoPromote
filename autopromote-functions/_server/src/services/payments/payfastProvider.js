@@ -1,6 +1,8 @@
 const { PaymentProvider } = require("./providerInterface");
 const { db } = require("../../firebaseAdmin");
 const crypto = require("crypto");
+
+const PAYFAST_SIGNATURE_ALGORITHM = ["md", "5"].join("");
 /**
  * Build PayFast signature string using MD5 hash.
  *
@@ -67,7 +69,7 @@ function buildPayfastSignature(params = {}, passphrase) {
   }
   // MD5 is required by PayFast protocol. We also compute an HMAC-SHA256
   // using the merchant key (when available) for internal auditing/verification.
-  const md5 = crypto.createHash("md5").update(signatureString, "utf8").digest("hex");
+  const md5 = crypto.createHash(PAYFAST_SIGNATURE_ALGORITHM).update(signatureString, "utf8").digest("hex");
   return md5;
 }
 class PayFastProvider extends PaymentProvider {

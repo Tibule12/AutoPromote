@@ -33,8 +33,15 @@ const RAINBOW_COLORS = [
   "#89CFF0", // Baby Blue
 ];
 
+const normalizePlainText = value =>
+  String(value ?? "")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/[<>]/g, "")
+    .trim();
+
 const RainbowText = ({ text, offset = 0 }) => {
-  if (!text) return null;
+  const safeText = normalizePlainText(text);
+  if (!safeText) return null;
   return (
     <span
       style={{
@@ -46,7 +53,7 @@ const RainbowText = ({ text, offset = 0 }) => {
         fontSize: "24px", // Bigger by default
       }}
     >
-      {text.split("").map((char, index) => (
+      {safeText.split("").map((char, index) => (
         <span
           key={index}
           style={{ color: RAINBOW_COLORS[(index + offset) % RAINBOW_COLORS.length] }}
@@ -991,7 +998,8 @@ const ViralClipStudio = ({
   };
 
   const updateOverlayText = (id, newText) => {
-    setOverlays(overlays.map(o => (o.id === id ? { ...o, text: newText } : o)));
+    const safeText = normalizePlainText(newText);
+    setOverlays(overlays.map(o => (o.id === id ? { ...o, text: safeText } : o)));
   };
 
   const deleteOverlay = id => {
@@ -1170,8 +1178,8 @@ const ViralClipStudio = ({
                       onTouchStart={e => handleDragStart(e, overlay)}
                       onDoubleClick={() => {
                         if (overlay.type === "text") {
-                          const newText = prompt("Edit Text:", overlay.text);
-                          if (newText) updateOverlayText(overlay.id, newText);
+                          const newText = prompt("Edit Text:", normalizePlainText(overlay.text));
+                          if (newText !== null) updateOverlayText(overlay.id, newText);
                         }
                       }}
                     >
@@ -1179,7 +1187,7 @@ const ViralClipStudio = ({
                         overlay.isRainbow ? (
                           <RainbowText text={overlay.text} offset={overlay.rainbowOffset || 0} />
                         ) : (
-                          overlay.text
+                          normalizePlainText(overlay.text)
                         )
                       ) : overlay.type === "image" ? (
                         <img
@@ -1753,7 +1761,7 @@ const ViralClipStudio = ({
                   >
                     <span className="clip-badge">#{idx + 1}</span>
                     <span className="clip-time">{Math.round(clip.duration)}s</span>
-                    <p>{clip.reason}</p>
+                    <p>{normalizePlainText(clip.reason)}</p>
                     {orderedClips.length > 1 && (
                       <div style={{ display: "flex", gap: "4px", marginLeft: "8px" }}>
                         <button

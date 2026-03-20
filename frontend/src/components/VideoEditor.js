@@ -223,7 +223,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     if (!window.paypal || !paypalButtonsRef.current) return;
 
     const container = paypalButtonsRef.current;
-    container.innerHTML = "";
+    container.replaceChildren();
 
     window.paypal
       .Buttons({
