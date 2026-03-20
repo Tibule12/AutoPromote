@@ -88,6 +88,182 @@ function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
   };
 }
 
+async function fetchPayPalSubscriptionDetails(subscriptionId) {
+  if (!subscriptionId) return null;
+
+  if (paypal && paypal.subscriptions && paypal.subscriptions.SubscriptionsGetRequest) {
+    const client = paypalClient.client();
+    const request = new paypal.subscriptions.SubscriptionsGetRequest(subscriptionId);
+    const subscription = await client.execute(request);
+    return subscription.result;
+  }
+
+  console.warn("[PayPal] SDK SubscriptionsGetRequest missing; using REST fallback");
+  const access = await getAccessToken();
+  const base =
+    process.env.PAYPAL_MODE === "live"
+      ? "https://api-m.paypal.com"
+      : "https://api-m.sandbox.paypal.com";
+  const res = await safeFetch(base + `/v1/billing/subscriptions/${subscriptionId}`, fetchFn, {
+    fetchOptions: { method: "GET", headers: { Authorization: `Bearer ${access}` } },
+    requireHttps: true,
+    allowHosts: ["api-m.paypal.com", "api-m.sandbox.paypal.com"],
+  });
+  return await res.json().catch(() => null);
+}
+
+async function persistActivatedSubscription({ userId, subscriptionId, planId, paypalSub, intent }) {
+  const normalizedPlanId = normalizePlanId(planId);
+  const plan = resolvePlan(normalizedPlanId);
+  const nowIso = new Date().toISOString();
+  const nextBillingDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  await db
+    .collection("users")
+    .doc(userId)
+    .set(
+      {
+        subscriptionTier: normalizedPlanId,
+        subscriptionStatus: "active",
+        paypalSubscriptionId: subscriptionId,
+        subscriptionStartedAt: nowIso,
+        subscriptionPeriodStart: nowIso,
+        subscriptionPeriodEnd: nextBillingDate,
+        isPaid: true,
+        unlimited: plan.features.uploads === "unlimited",
+        features: plan.features,
+        updatedAt: nowIso,
+      },
+      { merge: true }
+    );
+
+  await db.collection("user_billing").doc(userId).set(
+    {
+      tier: normalizedPlanId,
+      status: "active",
+      paypalSubscriptionId: subscriptionId,
+      nextBillingDate,
+      updatedAt: nowIso,
+    },
+    { merge: true }
+  );
+
+  await db
+    .collection("user_subscriptions")
+    .doc(userId)
+    .set(
+      {
+        userId,
+        planId: normalizedPlanId,
+        planName: plan.name,
+        paypalSubscriptionId: subscriptionId,
+        status: "active",
+        amount: plan.price,
+        currency: paypalSub?.billing_info?.last_payment?.amount?.currency_code || "USD",
+        billingCycle: "monthly",
+        startDate: nowIso,
+        nextBillingDate,
+        features: plan.features,
+        createdAt: intent?.createdAt || nowIso,
+        updatedAt: nowIso,
+      },
+      { merge: true }
+    );
+
+  await db
+    .collection("subscription_intents")
+    .doc(subscriptionId)
+    .set(
+      {
+        userId,
+        planId: normalizedPlanId,
+        paypalSubscriptionId: subscriptionId,
+        status: "activated",
+        activatedAt: nowIso,
+        amount: plan.price,
+        source: intent?.source || "paypal_reconcile",
+      },
+      { merge: true }
+    );
+
+  await db.collection("subscription_events").add({
+    userId,
+    type: "subscription_activated",
+    planId: normalizedPlanId,
+    paypalSubscriptionId: subscriptionId,
+    amount: plan.price,
+    timestamp: nowIso,
+    source: intent?.source || "paypal_reconcile",
+  });
+
+  audit.log("paypal.subscription.activated", {
+    userId,
+    planId: normalizedPlanId,
+    subscriptionId,
+    source: intent?.source || "paypal_reconcile",
+  });
+
+  return {
+    planId: normalizedPlanId,
+    planName: plan.name,
+    status: "active",
+    features: plan.features,
+  };
+}
+
+async function reconcileMissedPayPalActivation(userId) {
+  if (!userId) return null;
+
+  const intentSnapshot = await db
+    .collection("subscription_intents")
+    .where("userId", "==", userId)
+    .get();
+  if (intentSnapshot.empty) return null;
+
+  const candidateIntents = intentSnapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .filter(intent => ["pending", "approved"].includes(String(intent.status || "").toLowerCase()))
+    .sort((left, right) =>
+      String(right.createdAt || "").localeCompare(String(left.createdAt || ""))
+    );
+
+  for (const intent of candidateIntents) {
+    const subscriptionId = intent.paypalSubscriptionId || intent.id;
+    if (!subscriptionId) continue;
+
+    try {
+      const paypalSub = await fetchPayPalSubscriptionDetails(subscriptionId);
+      if (
+        !paypalSub ||
+        !["ACTIVE", "APPROVED"].includes(String(paypalSub.status || "").toUpperCase())
+      ) {
+        continue;
+      }
+      if (paypalSub.custom_id && paypalSub.custom_id !== userId) {
+        continue;
+      }
+
+      const derivedPlanId =
+        normalizePlanId(intent.planId) || findInternalPlanIdByPayPalPlanId(paypalSub.plan_id);
+      if (!derivedPlanId || derivedPlanId === "free") {
+        continue;
+      }
+
+      return await persistActivatedSubscription({
+        userId,
+        subscriptionId,
+        planId: derivedPlanId,
+        paypalSub,
+        intent,
+      });
+    } catch (error) {
+      console.error("[PayPal] Reconcile missed activation error:", error);
+    }
+  }
+
+  return null;
+}
+
 async function getAccessToken() {
   if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET)
     throw new Error("paypal_creds_missing");
@@ -339,27 +515,7 @@ router.post("/activate", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    // Get subscription details from PayPal - use SDK if available else REST fallback
-    let paypalSub = null;
-    if (paypal && paypal.subscriptions && paypal.subscriptions.SubscriptionsGetRequest) {
-      const client = paypalClient.client();
-      const request = new paypal.subscriptions.SubscriptionsGetRequest(subscriptionId);
-      const subscription = await client.execute(request);
-      paypalSub = subscription.result;
-    } else {
-      console.warn("[PayPal] SDK SubscriptionsGetRequest missing; using REST fallback");
-      const access = await getAccessToken();
-      const base =
-        process.env.PAYPAL_MODE === "live"
-          ? "https://api-m.paypal.com"
-          : "https://api-m.sandbox.paypal.com";
-      const res = await safeFetch(base + `/v1/billing/subscriptions/${subscriptionId}`, fetchFn, {
-        fetchOptions: { method: "GET", headers: { Authorization: `Bearer ${access}` } },
-        requireHttps: true,
-        allowHosts: ["api-m.paypal.com", "api-m.sandbox.paypal.com"],
-      });
-      paypalSub = await res.json().catch(() => null);
-    }
+    const paypalSub = await fetchPayPalSubscriptionDetails(subscriptionId);
 
     if (!paypalSub || (paypalSub.status !== "ACTIVE" && paypalSub.status !== "APPROVED")) {
       return res.status(400).json({
@@ -394,87 +550,18 @@ router.post("/activate", authMiddleware, async (req, res) => {
         });
     }
 
-    const plan = resolvePlan(planId);
-
-    // Update user subscription in Firestore
-    await db
-      .collection("users")
-      .doc(userId)
-      .update({
-        subscriptionTier: planId,
-        subscriptionStatus: "active",
-        paypalSubscriptionId: subscriptionId,
-        subscriptionStartedAt: new Date().toISOString(),
-        subscriptionPeriodStart: new Date().toISOString(),
-        subscriptionPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        isPaid: true,
-        unlimited: plan.features.uploads === "unlimited",
-        features: plan.features,
-        updatedAt: new Date().toISOString(),
-      });
-
-    await db.collection("user_billing").doc(userId).set(
-      {
-        tier: planId,
-        updatedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
-
-    // Create subscription record
-    await db
-      .collection("user_subscriptions")
-      .doc(userId)
-      .set({
-        userId,
-        planId,
-        planName: plan.name,
-        paypalSubscriptionId: subscriptionId,
-        status: "active",
-        amount: plan.price,
-        currency: "USD",
-        billingCycle: "monthly",
-        startDate: new Date().toISOString(),
-        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        features: plan.features,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-
-    // Update intent status
-    await db.collection("subscription_intents").doc(subscriptionId).set(
-      {
-        status: "activated",
-        activatedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
-
-    // Log subscription event
-    await db.collection("subscription_events").add({
+    const activatedSubscription = await persistActivatedSubscription({
       userId,
-      type: "subscription_activated",
-      planId,
-      paypalSubscriptionId: subscriptionId,
-      amount: plan.price,
-      timestamp: new Date().toISOString(),
-    });
-
-    audit.log("paypal.subscription.activated", {
-      userId,
-      planId,
       subscriptionId,
+      planId,
+      paypalSub,
+      intent,
     });
 
     res.json({
       success: true,
-      message: `Successfully subscribed to ${plan.name}`,
-      subscription: {
-        planId,
-        planName: plan.name,
-        status: "active",
-        features: plan.features,
-      },
+      message: `Successfully subscribed to ${activatedSubscription.planName}`,
+      subscription: activatedSubscription,
     });
   } catch (error) {
     console.error("[PayPal] Activate subscription error:", error);
@@ -615,6 +702,8 @@ router.get("/status", async (req, res) => {
         }),
       });
     }
+
+    await reconcileMissedPayPalActivation(userId);
 
     // Get user subscription
     let subDoc;
