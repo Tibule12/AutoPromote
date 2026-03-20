@@ -40,6 +40,15 @@ if (!fetchFn) {
 
 const { safeFetch } = require("../utils/ssrfGuard");
 
+function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
+  if (!paypalPlanId) return null;
+  const match = Object.values(SUBSCRIPTION_PLANS).find(plan => {
+    const configuredId = plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : null;
+    return configuredId && configuredId === paypalPlanId;
+  });
+  return match ? match.id : null;
+}
+
 function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
   const effectivePlan = resolvePlan(snapshot.tierId || "free");
   const rawStatus = String(
@@ -318,20 +327,15 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
 router.post("/activate", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
-    const { subscriptionId } = req.body;
+    const { subscriptionId, planId: requestedPlanId } = req.body;
 
     if (!userId || !subscriptionId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Get subscription intent
     const intentDoc = await db.collection("subscription_intents").doc(subscriptionId).get();
-    if (!intentDoc.exists) {
-      return res.status(404).json({ error: "Subscription not found" });
-    }
-
-    const intent = intentDoc.data();
-    if (intent.userId !== userId) {
+    const intent = intentDoc.exists ? intentDoc.data() : null;
+    if (intent && intent.userId !== userId) {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
@@ -364,7 +368,29 @@ router.post("/activate", authMiddleware, async (req, res) => {
       });
     }
 
-    const planId = normalizePlanId(intent.planId);
+    if (paypalSub.custom_id && paypalSub.custom_id !== userId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const derivedPlanId =
+      findInternalPlanIdByPayPalPlanId(paypalSub.plan_id) || normalizePlanId(requestedPlanId);
+    const planId = normalizePlanId(intent?.planId || derivedPlanId);
+    if (!planId || planId === "free") {
+      return res.status(400).json({ error: "Subscription plan not recognized" });
+    }
+
+    if (!intentDoc.exists) {
+      await db.collection("subscription_intents").doc(subscriptionId).set({
+        userId,
+        planId,
+        paypalSubscriptionId: subscriptionId,
+        status: "approved",
+        amount: resolvePlan(planId).price,
+        createdAt: new Date().toISOString(),
+        source: "paypal_sdk",
+      });
+    }
+
     const plan = resolvePlan(planId);
 
     // Update user subscription in Firestore
@@ -413,10 +439,10 @@ router.post("/activate", authMiddleware, async (req, res) => {
       });
 
     // Update intent status
-    await db.collection("subscription_intents").doc(subscriptionId).update({
+    await db.collection("subscription_intents").doc(subscriptionId).set({
       status: "activated",
       activatedAt: new Date().toISOString(),
-    });
+    }, { merge: true });
 
     // Log subscription event
     await db.collection("subscription_events").add({

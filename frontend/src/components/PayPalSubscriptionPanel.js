@@ -1,14 +1,13 @@
 // PayPalSubscriptionPanel.js
 // PayPal subscription management component
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { auth } from "../firebaseClient";
 import { parseJsonSafe } from "../utils/parseJsonSafe";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import toast from "react-hot-toast";
 import "./PayPalSubscriptionPanel.css";
 
-// Return a resolved API URL that prefers same-origin during local development
 function resolveApi(path) {
   try {
     const hostname = typeof window !== "undefined" ? window.location.hostname : "";
@@ -21,52 +20,57 @@ function resolveApi(path) {
   }
 }
 
-const PayPalSubscriptionPanel = () => {
+function normalizeSuggestedPlanId(planId) {
+  if (!planId) return null;
+  const normalized = String(planId).trim().toLowerCase();
+  if (["starter", "free"].includes(normalized)) return "free";
+  if (["basic", "premium", "creator"].includes(normalized)) return "premium";
+  if (["pro", "studio"].includes(normalized)) return "pro";
+  if (["enterprise", "team"].includes(normalized)) return "enterprise";
+  return normalized;
+}
+
+const PAYPAL_SUBSCRIPTION_NAMESPACE = "paypalSubscriptionsSdk";
+const PAYPAL_SUBSCRIPTION_SCRIPT_ID = "paypal-sdk-subscriptions";
+
+const PayPalSubscriptionPanel = ({
+  compact = false,
+  highlightPlanId = null,
+  onUpgradeSuccess,
+  onClose,
+  title,
+  subtitle,
+}) => {
   const [plans, setPlans] = useState([]);
   const [currentSubscription, setCurrentSubscription] = useState(null);
   const [usage, setUsage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [paypalLoaded, setPaypalLoaded] = useState(false);
+  const [paypalSdkError, setPaypalSdkError] = useState("");
+  const [paypalConfig, setPaypalConfig] = useState(null);
+  const [activatingPlanId, setActivatingPlanId] = useState(null);
+  const buttonContainerRefs = useRef({});
+  const buttonInstancesRef = useRef({});
 
-  useEffect(() => {
-    fetchPlans();
-    fetchCurrentSubscription();
-    fetchUsage();
+  const normalizedHighlightPlanId = normalizeSuggestedPlanId(highlightPlanId);
 
-    // Detect return from PayPal (e.g., /dashboard?payment=success or ?payment=cancelled)
-    try {
-      // Collect params from both search and hash (hash may contain query when using hash-routing)
-      const params = new URLSearchParams(window.location.search);
-      if (window.location.hash && window.location.hash.includes("?")) {
-        const hashQs = window.location.hash.split("?")[1];
-        const hashParams = new URLSearchParams(hashQs);
-        for (const [k, v] of hashParams.entries()) params.set(k, v);
+  const getAuthToken = async forceRefresh => {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      try {
+        return await currentUser.getIdToken(Boolean(forceRefresh));
+      } catch (_) {
+        return null;
       }
-      const payment = params.get("payment");
-      const subscriptionParam =
-        params.get("subscriptionId") ||
-        params.get("subscription_id") ||
-        params.get("token") ||
-        params.get("id");
-      if (payment === "success" || payment === "cancelled") {
-        if (payment === "success") {
-          if (subscriptionParam) {
-            activateSubscription(subscriptionParam);
-          } else {
-            fetchCurrentSubscription();
-          }
-        } else if (payment === "cancelled") {
-          toast("Payment cancelled", { icon: "⚠️" });
-        }
-        // Remove query params to clean URL after handling
-        const cleanedHash = window.location.hash ? window.location.hash.split("?")[0] : "";
-        const newUrl = window.location.pathname + (cleanedHash || window.location.hash);
-        window.history.replaceState({}, document.title, newUrl);
-      }
-    } catch (e) {
-      // ignore
     }
-  }, []);
+
+    if (typeof window !== "undefined" && window.__E2E_BYPASS === true && window.__E2E_TEST_TOKEN) {
+      return window.__E2E_TEST_TOKEN;
+    }
+
+    return null;
+  };
 
   const fetchPlans = async () => {
     try {
@@ -85,7 +89,6 @@ const PayPalSubscriptionPanel = () => {
     try {
       const currentUser = auth.currentUser;
       const isE2E = typeof window !== "undefined" && window.__E2E_BYPASS === true;
-      // If no signed-in user, show free plan directly
       if (!currentUser && !isE2E) {
         setCurrentSubscription({
           planId: "free",
@@ -97,38 +100,24 @@ const PayPalSubscriptionPanel = () => {
         return;
       }
 
-      let token = null;
-      try {
-        token = await currentUser.getIdToken();
-      } catch (e) {
-        token = null;
-      }
-
+      let token = await getAuthToken(false);
       const endpoint = resolveApi("/api/paypal-subscriptions/status");
       let parsed = null;
+
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(endpoint, { headers });
-        // If 401, try forced token refresh once
         if (res.status === 401 && token) {
-          try {
-            token = await currentUser.getIdToken(true);
-            const retryRes = await fetch(endpoint, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            parsed = await parseJsonSafe(retryRes);
-          } catch (e) {
-            parsed = { ok: false, status: "error", error: e.message };
-          }
+          token = await getAuthToken(true);
+          const retryRes = await fetch(endpoint, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          parsed = await parseJsonSafe(retryRes);
         } else {
           parsed = await parseJsonSafe(res);
         }
 
-        // If endpoint not found (404), fall back to free plan silently
         if (parsed && parsed.status === 404) {
-          console.warn(
-            "PayPal subscription status endpoint returned 404; falling back to free plan"
-          );
           setCurrentSubscription({
             planId: "free",
             planName: "Free",
@@ -139,44 +128,16 @@ const PayPalSubscriptionPanel = () => {
           return;
         }
       } catch (e) {
-        // Network or other fetch error: if we're on localhost, try same-origin fallback
-        const hostname = typeof window !== "undefined" ? window.location.hostname : "";
-        const isLocal =
-          /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(hostname) || hostname.endsWith(".local");
-        if (isLocal) {
-          try {
-            const fallbackRes = await fetch("/api/paypal-subscriptions/status", {
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
-            parsed = await parseJsonSafe(fallbackRes);
-          } catch (fallbackErr) {
-            console.error("Failed to fetch PayPal subscription status (fallback):", fallbackErr);
-            parsed = { ok: false, status: "error", error: fallbackErr.message };
-          }
-        } else {
-          console.error("Failed to fetch PayPal subscription status:", e);
-          parsed = { ok: false, status: "error", error: e.message };
-        }
+        console.error("Failed to fetch PayPal subscription status:", e);
+        parsed = { ok: false, status: "error", error: e.message };
       }
 
       if (parsed && parsed.ok && parsed.json) {
         setCurrentSubscription(parsed.json.subscription);
       } else {
         if (parsed && parsed.status === 401) {
-          // Unauthorized after refresh: prompt user
           toast.error("Please sign in to view subscription status");
-        } else if (parsed && parsed.status === 404) {
-          // Already handled above, but be defensive
-          console.warn("PayPal subscription status not available (404)");
-        } else if (parsed && parsed.status === "error") {
-          // Non-fatal network/config issue
-          console.warn(
-            "PayPal subscription fetch error:",
-            parsed.error || parsed.textPreview || parsed.status
-          );
         }
-
-        // Always fallback to free plan
         setCurrentSubscription({
           planId: "free",
           planName: "Free",
@@ -193,17 +154,7 @@ const PayPalSubscriptionPanel = () => {
 
   const fetchUsage = async () => {
     try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        setUsage(null);
-        return;
-      }
-      let token;
-      try {
-        token = await currentUser.getIdToken(true);
-      } catch (e) {
-        token = null;
-      }
+      const token = await getAuthToken(true);
       if (!token) {
         setUsage(null);
         return;
@@ -221,7 +172,54 @@ const PayPalSubscriptionPanel = () => {
     }
   };
 
-  const handleSubscribe = async planId => {
+  const activateSubscription = async (subscriptionId, planId) => {
+    if (!subscriptionId) return false;
+
+    const currentUser = auth.currentUser;
+    const isE2E = typeof window !== "undefined" && window.__E2E_BYPASS === true;
+    if (!currentUser && !isE2E) {
+      toast.error("Please sign in to activate your subscription");
+      return false;
+    }
+
+    setProcessing(true);
+    setActivatingPlanId(planId || null);
+    try {
+      const token = await getAuthToken(true);
+      const res = await fetch(resolveApi("/api/paypal-subscriptions/activate"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ subscriptionId, planId }),
+      });
+      const parsed = await parseJsonSafe(res);
+      if (res.ok && parsed.ok) {
+        await Promise.all([fetchCurrentSubscription(), fetchUsage()]);
+        toast.success(parsed.json?.message || "Subscription activated");
+        if (onUpgradeSuccess) {
+          onUpgradeSuccess({ subscriptionId, planId: normalizeSuggestedPlanId(planId) });
+        }
+        return true;
+      }
+
+      console.error("Activation failed:", parsed);
+      toast.error(
+        (parsed && parsed.json && parsed.json.error) || "Failed to activate subscription"
+      );
+      return false;
+    } catch (e) {
+      console.error("Activation error:", e);
+      toast.error("Failed to activate subscription");
+      return false;
+    } finally {
+      setProcessing(false);
+      setActivatingPlanId(null);
+    }
+  };
+
+  const handleLegacySubscribe = async planId => {
     if (processing) return;
 
     const currentUser = auth.currentUser;
@@ -233,25 +231,24 @@ const PayPalSubscriptionPanel = () => {
 
     setProcessing(true);
     try {
-      let token = null;
-      try {
-        if (currentUser) token = await currentUser.getIdToken(true);
-      } catch (_) {
-        token = null;
-      }
-      if (!token && isE2E && typeof window !== "undefined") token = window.__E2E_TEST_TOKEN || null;
+      const token = await getAuthToken(true);
       const headers = {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       };
 
-      const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/create-subscription`, {
+      const returnBase = compact
+        ? `${window.location.origin}${window.location.pathname}${window.location.hash || ""}`
+        : `${window.location.origin}/#/dashboard`;
+
+      const querySeparator = returnBase.includes("?") ? "&" : "?";
+      const res = await fetch(resolveApi("/api/paypal-subscriptions/create-subscription"), {
         method: "POST",
         headers,
         body: JSON.stringify({
           planId,
-          returnUrl: `${window.location.origin}/#/dashboard?payment=success`,
-          cancelUrl: `${window.location.origin}/#/dashboard?payment=cancelled`,
+          returnUrl: `${returnBase}${querySeparator}payment=success`,
+          cancelUrl: `${returnBase}${querySeparator}payment=cancelled`,
         }),
       });
 
@@ -262,77 +259,25 @@ const PayPalSubscriptionPanel = () => {
           toast.error("Please sign in to upgrade");
           return;
         }
-        console.error("Failed to create subscription:", parsed);
         const errorMessage =
           (parsed && parsed.json && parsed.json.error) ||
           parsed?.error ||
           parsed?.textPreview ||
           "Failed to create subscription";
-        if (errorMessage && String(errorMessage).toLowerCase().includes("paypal sdk")) {
-          toast.error(
-            "Payment service unavailable; the PayPal SDK is not available on the server. Please contact support."
-          );
-        } else {
-          toast.error(errorMessage);
-        }
+        toast.error(errorMessage);
         return;
       }
 
-      const data = parsed.json || null;
-      if (data && data.approvalUrl) {
-        const approvalUrl = data.approvalUrl;
-        const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+      const approvalUrl = parsed.json?.approvalUrl;
+      if (approvalUrl) {
         toast.success("Opening PayPal...");
-        if (isMobile) {
-          window.location.href = approvalUrl;
-        } else {
-          window.open(approvalUrl, "_blank", "noopener,noreferrer");
-        }
+        window.open(approvalUrl, "_blank", "noopener,noreferrer");
       } else {
-        console.warn("Create subscription returned no approval URL:", parsed);
-        toast.error("Could not obtain an approval link; please try again or contact support");
+        toast.error("Could not obtain an approval link; please try again.");
       }
     } catch (error) {
       console.error("Error subscribing:", error);
       toast.error("Failed to process subscription");
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const activateSubscription = async subscriptionId => {
-    if (!subscriptionId) return;
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      toast.error("Please sign in to activate your subscription");
-      return;
-    }
-
-    setProcessing(true);
-    try {
-      const token = await currentUser.getIdToken(true);
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      };
-      const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/activate`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ subscriptionId }),
-      });
-      const parsed = await parseJsonSafe(res);
-      if (res.ok && parsed.ok) {
-        toast.success(parsed.json?.message || "Subscription activated");
-        fetchCurrentSubscription();
-      } else {
-        console.error("Activation failed:", parsed);
-        toast.error(
-          (parsed && parsed.json && parsed.json.error) || "Failed to activate subscription"
-        );
-      }
-    } catch (e) {
-      console.error("Activation error:", e);
-      toast.error("Failed to activate subscription");
     } finally {
       setProcessing(false);
     }
@@ -347,22 +292,20 @@ const PayPalSubscriptionPanel = () => {
       return;
     }
 
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
+    const token = await getAuthToken(true);
+    if (!token) {
       toast.error("Please sign in to cancel your subscription");
       return;
     }
 
     setProcessing(true);
     try {
-      const token = await currentUser.getIdToken(true);
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      };
-      const res = await fetch(`${API_BASE_URL}/api/paypal-subscriptions/cancel`, {
+      const res = await fetch(resolveApi("/api/paypal-subscriptions/cancel"), {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ reason: "User requested cancellation" }),
       });
 
@@ -383,6 +326,202 @@ const PayPalSubscriptionPanel = () => {
     }
   };
 
+  useEffect(() => {
+    fetchPlans();
+    fetchCurrentSubscription();
+    fetchUsage();
+
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (window.location.hash && window.location.hash.includes("?")) {
+        const hashQs = window.location.hash.split("?")[1];
+        const hashParams = new URLSearchParams(hashQs);
+        for (const [key, value] of hashParams.entries()) params.set(key, value);
+      }
+      const payment = params.get("payment");
+      const subscriptionParam =
+        params.get("subscriptionId") ||
+        params.get("subscription_id") ||
+        params.get("token") ||
+        params.get("id");
+
+      if (payment === "success" || payment === "cancelled") {
+        if (payment === "success") {
+          if (subscriptionParam) {
+            activateSubscription(subscriptionParam, normalizedHighlightPlanId);
+          } else {
+            fetchCurrentSubscription();
+          }
+        } else {
+          toast("Payment cancelled", { icon: "⚠️" });
+        }
+
+        const cleanedHash = window.location.hash ? window.location.hash.split("?")[0] : "";
+        const newUrl = window.location.pathname + (cleanedHash || window.location.hash);
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    } catch (_) {
+      // ignore return parsing issues
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadPayPalSdk = async () => {
+      const paidPlans = plans.filter(plan => plan.id !== "free" && plan.paypalPlanId);
+      if (paidPlans.length === 0) return;
+
+      try {
+        const res = await fetch(API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG);
+        const text = await res.text();
+        let data = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (e) {
+          console.warn("PayPal config endpoint returned invalid JSON", {
+            status: res.status,
+            text,
+          });
+        }
+
+        const clientId = data?.clientId || "";
+        const currency = data?.currency || "USD";
+        if (!clientId) {
+          setPaypalSdkError("PayPal is not configured yet.");
+          return;
+        }
+
+        setPaypalConfig({ clientId, currency });
+
+        if (window[PAYPAL_SUBSCRIPTION_NAMESPACE]?.Buttons) {
+          if (!cancelled) setPaypalLoaded(true);
+          return;
+        }
+
+        const existing = document.getElementById(PAYPAL_SUBSCRIPTION_SCRIPT_ID);
+        if (existing) {
+          existing.addEventListener("load", () => {
+            if (!cancelled) setPaypalLoaded(true);
+          });
+          existing.addEventListener("error", () => {
+            if (!cancelled) setPaypalSdkError("Unable to load PayPal checkout.");
+          });
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.id = PAYPAL_SUBSCRIPTION_SCRIPT_ID;
+        script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
+          clientId
+        )}&currency=${encodeURIComponent(currency)}&vault=true&intent=subscription&components=buttons`;
+        script.async = true;
+        script.setAttribute("data-namespace", PAYPAL_SUBSCRIPTION_NAMESPACE);
+        script.onload = () => {
+          if (!cancelled) setPaypalLoaded(true);
+        };
+        script.onerror = () => {
+          if (!cancelled) setPaypalSdkError("Unable to load PayPal checkout.");
+        };
+        document.body.appendChild(script);
+      } catch (error) {
+        console.warn("Failed to load PayPal SDK:", error);
+        if (!cancelled) setPaypalSdkError("Unable to load PayPal checkout.");
+      }
+    };
+
+    loadPayPalSdk();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [plans]);
+
+  useEffect(() => {
+    const paypalSdk = window[PAYPAL_SUBSCRIPTION_NAMESPACE];
+    if (!paypalLoaded || !paypalSdk?.Buttons) return undefined;
+
+    const cleanupInstances = [];
+    const paidPlans = plans.filter(plan => plan.id !== "free" && plan.paypalPlanId);
+    const normalizedCurrentPlan = normalizeSuggestedPlanId(currentSubscription?.planId);
+
+    paidPlans.forEach(plan => {
+      const normalizedPlanId = normalizeSuggestedPlanId(plan.id);
+      const container = buttonContainerRefs.current[normalizedPlanId];
+      if (!container) return;
+
+      if (buttonInstancesRef.current[normalizedPlanId]?.close) {
+        try {
+          buttonInstancesRef.current[normalizedPlanId].close();
+        } catch (_) {
+          // ignore SDK cleanup failures
+        }
+      }
+
+      container.innerHTML = "";
+
+      if (normalizedCurrentPlan === normalizedPlanId || processing || !auth.currentUser) {
+        return;
+      }
+
+      const buttons = paypalSdk.Buttons({
+        style: {
+          layout: "vertical",
+          shape: "rect",
+          color: "gold",
+          label: "subscribe",
+        },
+        createSubscription: (_, actions) => {
+          const currentUser = auth.currentUser;
+          if (!currentUser) {
+            toast.error("Please sign in to upgrade");
+            throw new Error("not_signed_in");
+          }
+          return actions.subscription.create({
+            plan_id: plan.paypalPlanId,
+            custom_id: currentUser.uid,
+            application_context: {
+              shipping_preference: "NO_SHIPPING",
+              user_action: "SUBSCRIBE_NOW",
+            },
+          });
+        },
+        onApprove: async data => {
+          const subscriptionId = data?.subscriptionID || data?.subscriptionId;
+          const activated = await activateSubscription(subscriptionId, normalizedPlanId);
+          if (activated && compact && onClose) {
+            onClose();
+          }
+        },
+        onCancel: () => {
+          toast("PayPal checkout cancelled", { icon: "⚠️" });
+        },
+        onError: err => {
+          console.error("PayPal subscription buttons error", err);
+          toast.error("PayPal checkout failed. You can use the fallback link instead.");
+        },
+      });
+
+      buttonInstancesRef.current[normalizedPlanId] = buttons;
+      cleanupInstances.push(buttons);
+      buttons.render(container).catch(err => {
+        console.error("Failed to render PayPal subscription buttons", err);
+      });
+    });
+
+    return () => {
+      cleanupInstances.forEach(instance => {
+        if (instance?.close) {
+          try {
+            instance.close();
+          } catch (_) {
+            // ignore SDK cleanup failures
+          }
+        }
+      });
+    };
+  }, [compact, currentSubscription?.planId, onClose, paypalLoaded, plans, processing]);
+
   const getFeatureIcon = feature => {
     const icons = {
       uploads: "📤",
@@ -390,7 +529,7 @@ const PayPalSubscriptionPanel = () => {
       aiClips: "🤖",
       analytics: "📊",
       support: "🎧",
-      watermark: "�",
+      watermark: "⭐",
       viralBoost: "🚀",
       priorityModeration: "⚡",
       creatorTipping: "💰",
@@ -421,6 +560,7 @@ const PayPalSubscriptionPanel = () => {
       whiteLabel: "White-label",
       wolfHuntTasks: "Mission opportunities",
     };
+
     return (
       labels[key] ||
       key
@@ -431,12 +571,8 @@ const PayPalSubscriptionPanel = () => {
   };
 
   const renderFeatureValue = (key, value) => {
-    if (typeof value === "boolean") {
-      return value ? "✅ Included" : "❌ Not included";
-    }
-    if (value === "unlimited") {
-      return "♾️ Unlimited";
-    }
+    if (typeof value === "boolean") return value ? "Included" : "Not included";
+    if (value === "unlimited") return "Unlimited";
     if (key === "platformLimit" && typeof value === "number") {
       return `${value} platform${value === 1 ? "" : "s"}`;
     }
@@ -454,7 +590,7 @@ const PayPalSubscriptionPanel = () => {
       return (
         <div className="usage-bar">
           <div className="usage-bar-fill unlimited" style={{ width: "100%" }} />
-          <span className="usage-text">♾️ Unlimited</span>
+          <span className="usage-text">Unlimited</span>
         </div>
       );
     }
@@ -469,7 +605,7 @@ const PayPalSubscriptionPanel = () => {
           style={{ width: `${percentage}%` }}
         />
         <span className="usage-text">
-          {used} / {limit} used {isOverLimit && "⚠️"}
+          {used} / {limit} used
         </span>
       </div>
     );
@@ -479,44 +615,52 @@ const PayPalSubscriptionPanel = () => {
     return <div className="loading">Loading subscription details...</div>;
   }
 
-  // current plan resolved but not currently used in UI
+  const effectiveTitle =
+    title || (compact ? "Upgrade to keep publishing" : "Plans For Cross-Platform Publishing");
+  const effectiveSubtitle =
+    subtitle ||
+    (compact
+      ? "Finish the upgrade right here, then we will retry your blocked publish automatically."
+      : "Paid plans are billed as monthly PayPal subscriptions. Choose a plan, subscribe inside the app, and keep your workflow moving.");
 
   return (
-    <div className="paypal-subscription-panel">
-      <h2>💳 Plans For Cross-Platform Publishing</h2>
-      <p style={{ marginTop: "0.5rem", color: "#4b5563", maxWidth: 760 }}>
-        Paid plans are billed as monthly PayPal subscriptions. You are paying for more publishing
-        throughput, more connected destinations, deeper workflow visibility, and better support as
-        your operation grows.
-      </p>
-      <div
-        style={{
-          marginTop: "1rem",
-          marginBottom: "1.5rem",
-          padding: "14px 16px",
-          borderRadius: 14,
-          background: "#f8fafc",
-          border: "1px solid #e5e7eb",
-          color: "#374151",
-        }}
-      >
-        <strong>When billing starts:</strong> you choose a paid plan here, approve the PayPal
-        checkout, and the subscription is activated on return. Cancellation keeps access active
-        until the end of the current billing period.
+    <div className={`paypal-subscription-panel${compact ? " compact" : ""}`}>
+      <div className="paypal-subscription-panel-header">
+        <div>
+          <h2>{effectiveTitle}</h2>
+          <p className="paypal-subscription-panel-subtitle">{effectiveSubtitle}</p>
+        </div>
+        {compact && onClose && (
+          <button type="button" className="subscription-panel-close" onClick={onClose}>
+            ×
+          </button>
+        )}
       </div>
 
-      {/* Current Subscription Status */}
-      {currentSubscription && (
+      {paypalSdkError && (
+        <div className="paypal-sdk-notice warning">
+          {paypalSdkError} You can still use the fallback checkout link below.
+        </div>
+      )}
+
+      {!compact && (
+        <div className="paypal-sdk-notice neutral">
+          {paypalConfig?.currency ? `Billing currency: ${paypalConfig.currency}. ` : ""}
+          Subscription activation happens immediately after PayPal approval.
+        </div>
+      )}
+
+      {!compact && currentSubscription && (
         <div className="current-subscription-card">
           <div className="subscription-header">
             <div>
               <h3>{currentSubscription.planName} Plan</h3>
               <span className={`status-badge ${currentSubscription.status}`}>
                 {currentSubscription.status === "active"
-                  ? "✅ Active"
+                  ? "Active"
                   : currentSubscription.status === "cancelled"
-                    ? "⚠️ Cancelled"
-                    : "⏸️ " + currentSubscription.status}
+                    ? "Cancelled"
+                    : currentSubscription.status}
               </span>
             </div>
             {currentSubscription.amount > 0 && (
@@ -547,10 +691,9 @@ const PayPalSubscriptionPanel = () => {
         </div>
       )}
 
-      {/* Usage Stats */}
-      {usage && (
+      {!compact && usage && (
         <div className="usage-section">
-          <h3>📊 Usage This Period</h3>
+          <h3>Usage This Period</h3>
           <p className="period-info">
             Period: {new Date(usage.periodStart).toLocaleDateString()} -
             {usage.periodEnd ? new Date(usage.periodEnd).toLocaleDateString() : "Ongoing"}
@@ -558,12 +701,12 @@ const PayPalSubscriptionPanel = () => {
 
           <div className="usage-grid">
             <div className="usage-item">
-              <label>📤 Uploads</label>
+              <label>Uploads</label>
               {renderUsageBar(usage.uploads.used, usage.uploads.limit, usage.uploads.unlimited)}
             </div>
 
             <div className="usage-item">
-              <label> Mission Opportunities</label>
+              <label>Mission Opportunities</label>
               {renderUsageBar(
                 usage.viralBoosts.used,
                 usage.viralBoosts.limit,
@@ -574,19 +717,25 @@ const PayPalSubscriptionPanel = () => {
         </div>
       )}
 
-      {/* Available Plans */}
       <div className="plans-section">
-        <h3>💎 Available Plans</h3>
+        <h3>{compact ? "Choose your next plan" : "Available Plans"}</h3>
         <div className="plans-grid">
           {plans.map(plan => {
-            const isCurrent = plan.id === currentSubscription?.planId;
+            const normalizedPlanId = normalizeSuggestedPlanId(plan.id);
+            const isCurrent =
+              normalizedPlanId === normalizeSuggestedPlanId(currentSubscription?.planId);
+            const isSuggested =
+              normalizedHighlightPlanId && normalizedPlanId === normalizedHighlightPlanId;
+            const canUseEmbeddedCheckout =
+              paypalLoaded && Boolean(plan.paypalPlanId) && plan.id !== "free" && auth.currentUser;
 
             return (
               <div
                 key={plan.id}
-                className={`plan-card ${isCurrent ? "current-plan" : ""} ${plan.id === "pro" ? "recommended" : ""}`}
+                className={`plan-card ${isCurrent ? "current-plan" : ""} ${plan.id === "pro" ? "recommended" : ""} ${isSuggested ? "suggested-plan" : ""}`}
               >
-                {plan.id === "pro" && <span className="recommended-badge">⭐ Most Popular</span>}
+                {plan.id === "pro" && <span className="recommended-badge">Most Popular</span>}
+                {isSuggested && <span className="suggested-badge">Best fit for this publish</span>}
 
                 <h4>{plan.name}</h4>
 
@@ -612,20 +761,44 @@ const PayPalSubscriptionPanel = () => {
                 </div>
 
                 {!isCurrent && plan.id !== "free" && (
-                  <button
-                    className="subscribe-btn"
-                    onClick={() => handleSubscribe(plan.id)}
-                    disabled={processing}
-                  >
-                    {processing ? "Processing..." : `Upgrade to ${plan.name}`}
-                  </button>
+                  <div className="plan-checkout-zone">
+                    {canUseEmbeddedCheckout ? (
+                      <>
+                        <div
+                          className={`paypal-subscription-button-shell ${activatingPlanId === normalizedPlanId ? "is-activating" : ""}`}
+                          ref={node => {
+                            buttonContainerRefs.current[normalizedPlanId] = node;
+                          }}
+                        />
+                        <button
+                          className="subscribe-btn secondary"
+                          onClick={() => handleLegacySubscribe(normalizedPlanId)}
+                          disabled={processing}
+                        >
+                          Open checkout in PayPal instead
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className="subscribe-btn"
+                        onClick={() => handleLegacySubscribe(normalizedPlanId)}
+                        disabled={processing}
+                      >
+                        {processing ? "Processing..." : `Upgrade to ${plan.name}`}
+                      </button>
+                    )}
+
+                    {!auth.currentUser && (
+                      <p className="checkout-helper-text">Sign in first to use in-app checkout.</p>
+                    )}
+                  </div>
                 )}
 
-                {isCurrent && <div className="current-plan-badge">✅ Your Current Plan</div>}
+                {isCurrent && <div className="current-plan-badge">Your Current Plan</div>}
 
                 {plan.id === "free" && currentSubscription?.planId !== "free" && (
                   <div className="downgrade-note">
-                    Cancel your subscription to return to free tier
+                    Cancel your subscription to return to the free tier.
                   </div>
                 )}
               </div>
@@ -634,49 +807,34 @@ const PayPalSubscriptionPanel = () => {
         </div>
       </div>
 
-      {/* Secure Payment Badge */}
-      <div
-        className="secure-payment-badge"
-        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}
-      >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <img
-            src="https://www.paypalobjects.com/webstatic/mktg/logo/PP_AcceptanceMarkTray_150x40.png"
-            alt="PayPal"
-            style={{ height: "40px" }}
-          />
-        </div>
-        <p style={{ marginTop: "5px", color: "#666", fontSize: "0.9rem" }}>
-          Secure subscription billing powered by PayPal
-        </p>
-      </div>
+      {!compact && (
+        <>
+          <div className="secure-payment-badge">
+            <img
+              src="https://www.paypalobjects.com/webstatic/mktg/logo/PP_AcceptanceMarkTray_150x40.png"
+              alt="PayPal"
+            />
+            <p>Secure subscription billing powered by PayPal</p>
+          </div>
 
-      <div
-        className="billing-legal-footer"
-        style={{
-          marginTop: "2rem",
-          borderTop: "1px solid #e5e7eb",
-          paddingTop: "1rem",
-          fontSize: "0.8rem",
-          color: "#6b7280",
-          textAlign: "center",
-        }}
-      >
-        <p>
-          By subscribing, you agree to our{" "}
-          <a href="/terms" target="_blank" rel="noopener noreferrer">
-            Terms of Service
-          </a>{" "}
-          and{" "}
-          <a href="/privacy" target="_blank" rel="noopener noreferrer">
-            Privacy Policy
-          </a>
-          . Subscriptions auto-renew monthly through PayPal. You may cancel at any time to stop
-          future renewals. Cancellations take effect at the end of the current billing period. For
-          billing support or refund inquiries, please contact{" "}
-          <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
-        </p>
-      </div>
+          <div className="billing-legal-footer">
+            <p>
+              By subscribing, you agree to our{" "}
+              <a href="/terms" target="_blank" rel="noopener noreferrer">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer">
+                Privacy Policy
+              </a>
+              . Subscriptions auto-renew monthly through PayPal. You may cancel at any time to stop
+              future renewals. Cancellations take effect at the end of the current billing period.
+              For billing support or refund inquiries, please contact{" "}
+              <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 };
