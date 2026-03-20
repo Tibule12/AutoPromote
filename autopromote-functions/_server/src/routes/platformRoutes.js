@@ -48,6 +48,7 @@ const _telegramWebhookWarnCache = new Map();
 // consider a more robust central cache (Redis) if needed.
 const platformStatusCache = new Map();
 const PLATFORM_STATUS_TTL_MS = parseInt(process.env.PLATFORM_STATUS_TTL_MS || "3000", 10);
+const RESERVED_PLATFORM_NAMESPACES = new Set(["paypal-subscriptions"]);
 
 // Try to use global fetch (Node 18+). Fall back to node-fetch if available.
 let fetchFn = global.fetch;
@@ -78,6 +79,14 @@ function sendPlain(res, status, message) {
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
   return res.status(status).send(sanitizeForText(message));
 }
+
+router.use("/:platform", (req, res, next) => {
+  const platform = normalize(req.params.platform);
+  if (RESERVED_PLATFORM_NAMESPACES.has(platform)) {
+    return next("router");
+  }
+  return next();
+});
 
 // Helper: remove sensitive fields from a connection Firestore document before returning
 function sanitizeConnectionForApi(doc) {
