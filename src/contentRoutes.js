@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { db } = require("./firebaseAdmin");
 const logger = require("./utils/logger");
+const { extractOwnedStoragePathFromUrl } = require("./utils/cleanupSource");
 const authMiddleware = require("./authMiddleware");
 const Joi = require("joi");
 const path = require("path");
@@ -246,30 +247,7 @@ function getPreviewAttemptNumber(record, platform) {
 }
 
 function extractStoragePathFromUrl(fileUrl) {
-  if (!fileUrl || typeof fileUrl !== "string") return null;
-
-  try {
-    if (fileUrl.startsWith("gs://")) {
-      const parts = fileUrl.split("/");
-      return parts.length >= 4 ? parts.slice(3).join("/") : null;
-    }
-
-    const decoded = decodeURIComponent(fileUrl);
-    if (decoded.includes("/o/")) {
-      const afterO = decoded.split("/o/")[1];
-      return afterO ? afterO.split("?")[0] : null;
-    }
-
-    if (decoded.includes("storage.googleapis.com")) {
-      const parsed = new URL(decoded);
-      const pathParts = parsed.pathname.split("/").filter(Boolean);
-      return pathParts.length > 1 ? pathParts.slice(1).join("/") : null;
-    }
-  } catch (_error) {
-    return null;
-  }
-
-  return null;
+  return extractOwnedStoragePathFromUrl(fileUrl);
 }
 
 function buildSourceRetentionMetadata(fileUrl) {

@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const { Readable } = require("stream");
 const { v4: uuidv4 } = require("uuid"); // Ensure consistent uuid import
+const { extractOwnedStoragePathFromUrl } = require("../utils/cleanupSource");
 
 // Configure FFmpeg path (Ensure ffmpeg/ffprobe are installed in environment or docker image)
 try {
@@ -33,30 +34,7 @@ try {
  * Automatically fixes "Retention Killers" (Silence, Bad Audio, Wrong Aspect Ratio)
  */
 function extractStoragePathFromUrl(fileUrl) {
-  if (!fileUrl || typeof fileUrl !== "string") return null;
-
-  try {
-    if (fileUrl.startsWith("gs://")) {
-      const parts = fileUrl.split("/");
-      return parts.length >= 4 ? parts.slice(3).join("/") : null;
-    }
-
-    const decoded = decodeURIComponent(fileUrl);
-    if (decoded.includes("/o/")) {
-      const afterO = decoded.split("/o/")[1];
-      return afterO ? afterO.split("?")[0] : null;
-    }
-
-    if (decoded.includes("storage.googleapis.com")) {
-      const parsed = new URL(decoded);
-      const pathParts = parsed.pathname.split("/").filter(Boolean);
-      return pathParts.length > 1 ? pathParts.slice(1).join("/") : null;
-    }
-  } catch (_error) {
-    return null;
-  }
-
-  return null;
+  return extractOwnedStoragePathFromUrl(fileUrl);
 }
 
 async function downloadSourceMedia(data, destinationPath) {
@@ -253,9 +231,10 @@ function escapeSubtitlePath(filePath) {
   if (!normalizedPath || /[\u0000-\u001f\u007f]/.test(normalizedPath)) {
     return "";
   }
-  // Escape characters that could break shell/ffmpeg parsing or be used in
-  // injection contexts. Keep the path safe for inclusion in filter strings.
-  return normalizedPath.replace(/["'`:;,\[\]{}()<>|&]/g, "\\$&");
+  if (!/^[-./A-Za-z0-9_]+$/.test(normalizedPath)) {
+    return "";
+  }
+  return normalizedPath;
 }
 
 function msToSrtTimestamp(ms) {
