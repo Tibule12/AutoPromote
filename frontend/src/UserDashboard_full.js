@@ -542,6 +542,23 @@ const UserDashboard = ({
   useEffect(() => {
     // Check URL params for OAuth callback success/error
     const params = new URLSearchParams(window.location.search);
+    if (window.location.hash && window.location.hash.includes("?")) {
+      const hashQs = window.location.hash.split("?")[1];
+      const hashParams = new URLSearchParams(hashQs);
+      for (const [key, value] of hashParams.entries()) params.set(key, value);
+    }
+
+    const hasPayPalReturn =
+      params.has("payment") ||
+      params.has("subscription_id") ||
+      params.has("subscriptionId") ||
+      params.has("ba_token");
+
+    if (hasPayPalReturn) {
+      setActiveTab("billing");
+      hasAutoRoutedPrimaryTab.current = true;
+    }
+
     const oauthPlatform =
       params.get("oauth") ||
       params.get("youtube") ||
