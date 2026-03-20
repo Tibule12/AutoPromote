@@ -2,6 +2,7 @@
 // PayPal subscription management component
 
 import React, { useEffect, useRef, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseClient";
 import { parseJsonSafe } from "../utils/parseJsonSafe";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
@@ -50,13 +51,18 @@ const PayPalSubscriptionPanel = ({
   const [paypalSdkError, setPaypalSdkError] = useState("");
   const [paypalConfig, setPaypalConfig] = useState(null);
   const [activatingPlanId, setActivatingPlanId] = useState(null);
+  const [authUser, setAuthUser] = useState(() => auth.currentUser);
+  const [authResolved, setAuthResolved] = useState(() => Boolean(auth.currentUser));
   const buttonContainerRefs = useRef({});
   const buttonInstancesRef = useRef({});
+  const handledReturnRef = useRef(false);
 
   const normalizedHighlightPlanId = normalizeSuggestedPlanId(highlightPlanId);
 
+  const getCurrentUser = () => auth.currentUser || authUser;
+
   const getAuthToken = async forceRefresh => {
-    const currentUser = auth.currentUser;
+    const currentUser = getCurrentUser();
     if (currentUser) {
       try {
         return await currentUser.getIdToken(Boolean(forceRefresh));
@@ -87,8 +93,11 @@ const PayPalSubscriptionPanel = ({
 
   const fetchCurrentSubscription = async () => {
     try {
-      const currentUser = auth.currentUser;
+      const currentUser = getCurrentUser();
       const isE2E = typeof window !== "undefined" && window.__E2E_BYPASS === true;
+      if (!currentUser && !isE2E && !authResolved) {
+        return;
+      }
       if (!currentUser && !isE2E) {
         setCurrentSubscription({
           planId: "free",
@@ -175,7 +184,7 @@ const PayPalSubscriptionPanel = ({
   const activateSubscription = async (subscriptionId, planId) => {
     if (!subscriptionId) return false;
 
-    const currentUser = auth.currentUser;
+    const currentUser = getCurrentUser();
     const isE2E = typeof window !== "undefined" && window.__E2E_BYPASS === true;
     if (!currentUser && !isE2E) {
       toast.error("Please sign in to activate your subscription");
@@ -222,7 +231,7 @@ const PayPalSubscriptionPanel = ({
   const handleLegacySubscribe = async planId => {
     if (processing) return;
 
-    const currentUser = auth.currentUser;
+    const currentUser = getCurrentUser();
     const isE2E = typeof window !== "undefined" && window.__E2E_BYPASS === true;
     if (!currentUser && !isE2E) {
       toast.error("Please sign in to upgrade");
@@ -327,9 +336,27 @@ const PayPalSubscriptionPanel = ({
   };
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      setAuthUser(user);
+      setAuthResolved(true);
+    });
+
     fetchPlans();
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!authResolved) return;
+
     fetchCurrentSubscription();
     fetchUsage();
+  }, [authResolved, authUser?.uid]);
+
+  useEffect(() => {
+    if (!authResolved || handledReturnRef.current) return;
 
     try {
       const params = new URLSearchParams(window.location.search);
@@ -346,6 +373,7 @@ const PayPalSubscriptionPanel = ({
         params.get("id");
 
       if (payment === "success" || payment === "cancelled") {
+        handledReturnRef.current = true;
         if (payment === "success") {
           if (subscriptionParam) {
             activateSubscription(subscriptionParam, normalizedHighlightPlanId);
@@ -363,7 +391,7 @@ const PayPalSubscriptionPanel = ({
     } catch (_) {
       // ignore return parsing issues
     }
-  }, []);
+  }, [authResolved, normalizedHighlightPlanId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -460,7 +488,7 @@ const PayPalSubscriptionPanel = ({
 
       container.innerHTML = "";
 
-      if (normalizedCurrentPlan === normalizedPlanId || processing || !auth.currentUser) {
+      if (normalizedCurrentPlan === normalizedPlanId || processing || !authUser) {
         return;
       }
 
@@ -472,7 +500,7 @@ const PayPalSubscriptionPanel = ({
           label: "subscribe",
         },
         createSubscription: (_, actions) => {
-          const currentUser = auth.currentUser;
+          const currentUser = getCurrentUser();
           if (!currentUser) {
             toast.error("Please sign in to upgrade");
             throw new Error("not_signed_in");
@@ -520,7 +548,7 @@ const PayPalSubscriptionPanel = ({
         }
       });
     };
-  }, [compact, currentSubscription?.planId, onClose, paypalLoaded, plans, processing]);
+  }, [authUser, compact, currentSubscription?.planId, onClose, paypalLoaded, plans, processing]);
 
   const getFeatureIcon = feature => {
     const icons = {
