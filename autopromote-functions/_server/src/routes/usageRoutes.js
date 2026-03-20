@@ -130,22 +130,25 @@ router.post("/upgrade", authMiddleware, async (req, res) => {
       { merge: true }
     );
 
-    await db.collection("user_subscriptions").doc(userId).set(
-      {
-        userId,
-        tier: normalizedTier,
-        tierId: normalizedTier,
-        planId: normalizedTier,
-        planName: plan.name,
-        status: "active",
-        amount: Number(plan.price) || 0,
-        currency: "USD",
-        currentPeriodEnd: periodEnd,
-        nextBillingDate: periodEnd,
-        updatedAt: now,
-      },
-      { merge: true }
-    );
+    await db
+      .collection("user_subscriptions")
+      .doc(userId)
+      .set(
+        {
+          userId,
+          tier: normalizedTier,
+          tierId: normalizedTier,
+          planId: normalizedTier,
+          planName: plan.name,
+          status: "active",
+          amount: Number(plan.price) || 0,
+          currency: "USD",
+          currentPeriodEnd: periodEnd,
+          nextBillingDate: periodEnd,
+          updatedAt: now,
+        },
+        { merge: true }
+      );
 
     // Log subscription event
     await db.collection("subscription_events").add({

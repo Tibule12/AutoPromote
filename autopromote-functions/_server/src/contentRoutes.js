@@ -6,7 +6,11 @@ const authMiddleware = require("./authMiddleware");
 const Joi = require("joi");
 const path = require("path");
 const sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
-const { usageLimitMiddleware, trackUsage, getUserUsageStats } = require("./middlewares/usageLimitMiddleware");
+const {
+  usageLimitMiddleware,
+  trackUsage,
+  getUserUsageStats,
+} = require("./middlewares/usageLimitMiddleware");
 const costControlMiddleware = require("./middlewares/costControlMiddleware");
 const fetch = require("node-fetch");
 const { safeFetch } = require("./utils/ssrfGuard");
@@ -342,9 +346,7 @@ async function getPromotionQuotaSnapshot(userId, tierId) {
   }
 
   const now = new Date();
-  const monthStart = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
-  ).toISOString();
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
   const snap = await db
     .collection("promotion_tasks")
     .where("uid", "==", userId)
@@ -404,7 +406,11 @@ async function evaluateUploadReadiness(userId, options = {}) {
     };
   }
 
-  if (platformCount > 0 && tier.platform_limit !== Infinity && platformCount > tier.platform_limit) {
+  if (
+    platformCount > 0 &&
+    tier.platform_limit !== Infinity &&
+    platformCount > tier.platform_limit
+  ) {
     return {
       ...base,
       allowed: false,
@@ -445,20 +451,25 @@ async function evaluateUploadReadiness(userId, options = {}) {
   return base;
 }
 
-router.post("/upload/readiness", authMiddleware, rateLimitMiddleware(20, 60000), async (req, res) => {
-  try {
-    const userId = req.userId || req.user?.uid;
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+router.post(
+  "/upload/readiness",
+  authMiddleware,
+  rateLimitMiddleware(20, 60000),
+  async (req, res) => {
+    try {
+      const userId = req.userId || req.user?.uid;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    const readiness = await evaluateUploadReadiness(userId, req.body || {});
-    return res.json({ ok: true, readiness });
-  } catch (error) {
-    logger.error("[upload.readiness] Failed to evaluate readiness", {
-      error: error && error.message ? error.message : String(error),
-    });
-    return res.status(500).json({ error: "Failed to evaluate upload readiness" });
+      const readiness = await evaluateUploadReadiness(userId, req.body || {});
+      return res.json({ ok: true, readiness });
+    } catch (error) {
+      logger.error("[upload.readiness] Failed to evaluate readiness", {
+        error: error && error.message ? error.message : String(error),
+      });
+      return res.status(500).json({ error: "Failed to evaluate upload readiness" });
+    }
   }
-});
+);
 
 // Content upload schema
 const contentUploadSchema = Joi.object({

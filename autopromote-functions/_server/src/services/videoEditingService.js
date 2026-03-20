@@ -230,7 +230,8 @@ class VideoEditingService {
             ...o,
             start_time:
               o.start_time !== undefined && o.start_time !== null ? o.start_time : o.startTime,
-            duration: o.duration !== undefined && o.duration !== null ? Number(o.duration) : o.duration,
+            duration:
+              o.duration !== undefined && o.duration !== null ? Number(o.duration) : o.duration,
             width: o.width !== undefined && o.width !== null ? Number(o.width) : o.width,
             height: o.height !== undefined && o.height !== null ? Number(o.height) : o.height,
           })),

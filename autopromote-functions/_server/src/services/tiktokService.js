@@ -1007,14 +1007,11 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
               videoUrl = signed;
               // persist fresh URL
               try {
-                await db
-                  .collection("content")
-                  .doc(contentId)
-                  .update({
-                    storagePath,
-                    mediaUrl: signed,
-                    urlSignedAt: new Date().toISOString(),
-                  });
+                await db.collection("content").doc(contentId).update({
+                  storagePath,
+                  mediaUrl: signed,
+                  urlSignedAt: new Date().toISOString(),
+                });
               } catch (_) {}
             } catch (e) {
               console.warn(

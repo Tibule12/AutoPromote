@@ -1,10 +1,7 @@
 const { storage, db } = require("../firebaseAdmin");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
 
-const SOURCE_UPLOAD_RETENTION_DAYS = parseInt(
-  process.env.SOURCE_UPLOAD_RETENTION_DAYS || "14",
-  10
-);
+const SOURCE_UPLOAD_RETENTION_DAYS = parseInt(process.env.SOURCE_UPLOAD_RETENTION_DAYS || "14", 10);
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_SCAN_LIMIT = parseInt(process.env.SOURCE_UPLOAD_RETENTION_SCAN_LIMIT || "200", 10);
 
@@ -49,10 +46,7 @@ function resolveSourceUploadState(contentId, data = {}) {
   if (!storagePath || !storagePath.startsWith("uploads/")) return null;
 
   const createdAtMs =
-    toMillis(data.created_at) ||
-    toMillis(data.createdAt) ||
-    toMillis(data.sourceCreatedAt) ||
-    0;
+    toMillis(data.created_at) || toMillis(data.createdAt) || toMillis(data.sourceCreatedAt) || 0;
   const deleteAfterMs =
     toMillis(data.sourceDeleteAfter) ||
     (createdAtMs > 0 ? createdAtMs + SOURCE_UPLOAD_RETENTION_DAYS * ONE_DAY_MS : 0);
@@ -166,7 +160,9 @@ async function cleanupTempUploads() {
 
 async function cleanupExpiredSourceUploads() {
   if (!storage || !db) {
-    console.warn("[StorageCleanup] Firestore/Storage service not available, skipping source cleanup.");
+    console.warn(
+      "[StorageCleanup] Firestore/Storage service not available, skipping source cleanup."
+    );
     return;
   }
 

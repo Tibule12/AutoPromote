@@ -43,7 +43,10 @@ const { safeFetch } = require("../utils/ssrfGuard");
 function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
   const effectivePlan = resolvePlan(snapshot.tierId || "free");
   const rawStatus = String(
-    subscription.status || snapshot.userData?.subscriptionStatus || snapshot.billingData?.status || "active"
+    subscription.status ||
+      snapshot.userData?.subscriptionStatus ||
+      snapshot.billingData?.status ||
+      "active"
   ).toLowerCase();
 
   return {
@@ -71,7 +74,8 @@ function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
           snapshot.userData?.subscriptionExpiresAt ||
           snapshot.userData?.subscriptionPeriodEnd ||
           null,
-    subscriptionId: subscription.paypalSubscriptionId || snapshot.userData?.paypalSubscriptionId || null,
+    subscriptionId:
+      subscription.paypalSubscriptionId || snapshot.userData?.paypalSubscriptionId || null,
   };
 }
 

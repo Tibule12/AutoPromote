@@ -138,9 +138,9 @@ async function resolveEffectiveTierId(userId, billingData, userData) {
   );
 
   const now = Date.now();
-  const normalizedStatus = String(
-    safeUser.subscriptionStatus || safeBilling.status || ""
-  ).trim().toLowerCase();
+  const normalizedStatus = String(safeUser.subscriptionStatus || safeBilling.status || "")
+    .trim()
+    .toLowerCase();
   const rawExpiry =
     safeUser.subscriptionPeriodEnd ||
     safeUser.subscriptionExpiresAt ||
@@ -213,7 +213,9 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
   try {
     const normalizedStatus = String(
       (userData && userData.subscriptionStatus) || (billingData && billingData.status) || ""
-    ).trim().toLowerCase();
+    )
+      .trim()
+      .toLowerCase();
     const expiry =
       (userData && (userData.subscriptionPeriodEnd || userData.subscriptionExpiresAt)) ||
       (billingData && (billingData.expiresAt || billingData.nextBillingDate)) ||
@@ -221,8 +223,7 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
     const billingTier = normalizePlanId((billingData && billingData.tier) || "free");
     const userTier = normalizePlanId(
       (userData &&
-        (userData.subscriptionTier ||
-          (userData.subscription && userData.subscription.planId))) ||
+        (userData.subscriptionTier || (userData.subscription && userData.subscription.planId))) ||
         "free"
     );
     console.debug(

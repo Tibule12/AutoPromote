@@ -389,10 +389,8 @@ router.post("/users/:id/upgrade", authMiddleware, adminOnly, async (req, res) =>
       { merge: true }
     );
 
-    await db
-      .collection("user_subscriptions")
-      .doc(userId)
-      .set({
+    await db.collection("user_subscriptions").doc(userId).set(
+      {
         userId,
         tier: normalizedPlanId,
         tierId: normalizedPlanId,

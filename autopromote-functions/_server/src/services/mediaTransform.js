@@ -146,13 +146,32 @@ function probeMedia(filePath) {
 }
 
 function escapeDrawtext(value) {
-  return String(value || "")
-    .replace(/\\/g, "\\\\")
-    .replace(/:/g, "\\:")
-    .replace(/'/g, "\\\\'")
-    .replace(/,/g, "\\,")
-    .replace(/%/g, "\\%")
-    .replace(/\n/g, "\\n");
+  // FFmpeg drawtext needs several characters escaped; include a broad set
+  // of potentially harmful or syntax-breaking characters. We avoid
+  // constructing a RegExp from user input elsewhere; this is a simple
+  // character-level escape for drawtext literals.
+  return (
+    String(value || "")
+      .replace(/\\/g, "\\\\")
+      .replace(/:/g, "\\:")
+      .replace(/'/g, "\\\\'")
+      .replace(/"/g, '\\"')
+      .replace(/,/g, "\\,")
+      .replace(/%/g, "\\%")
+      // Replace actual newline characters with the literal escaped sequence
+      .replace(/\n/g, "\\n")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)")
+      .replace(/;/g, "\\;")
+      .replace(/&/g, "\\&")
+      .replace(/\$/g, "\\$")
+      .replace(/`/g, "\\`")
+      .replace(/</g, "\\<")
+      .replace(/>/g, "\\>")
+      .replace(/\|/g, "\\|")
+      .replace(/\*/g, "\\*")
+      .replace(/\?/g, "\\?")
+  );
 }
 
 function normalizePlatformKey(platform) {
@@ -234,7 +253,9 @@ function escapeSubtitlePath(filePath) {
   if (!normalizedPath || /[\u0000-\u001f\u007f]/.test(normalizedPath)) {
     return "";
   }
-  return normalizedPath.replace(/[':,;\[\]]/g, "\\$&");
+  // Escape characters that could break shell/ffmpeg parsing or be used in
+  // injection contexts. Keep the path safe for inclusion in filter strings.
+  return normalizedPath.replace(/["'`:;,\[\]{}()<>|&]/g, "\\$&");
 }
 
 function msToSrtTimestamp(ms) {

@@ -29,7 +29,6 @@ try {
 }
 const authMiddleware = require("../authMiddleware");
 const rateLimit = require("../middlewares/simpleRateLimit");
-const { SUBSCRIPTION_PLANS } = require("../config/subscriptionPlans");
 
 const { safeFetch } = require("../utils/ssrfGuard");
 // Polyfill / select fetch implementation (Render may run Node < 18 in some cases)
@@ -403,15 +402,20 @@ router.post(
               } catch (e) {}
 
               try {
-                await db.collection("user_billing").doc(userId).set(
-                  {
-                    tier: planId,
-                    status: "active",
-                    nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-                    updatedAt: new Date().toISOString(),
-                  },
-                  { merge: true }
-                );
+                await db
+                  .collection("user_billing")
+                  .doc(userId)
+                  .set(
+                    {
+                      tier: planId,
+                      status: "active",
+                      nextBillingDate: new Date(
+                        Date.now() + 30 * 24 * 60 * 60 * 1000
+                      ).toISOString(),
+                      updatedAt: new Date().toISOString(),
+                    },
+                    { merge: true }
+                  );
               } catch (e) {}
 
               // Create or update user_subscriptions doc
@@ -520,7 +524,8 @@ router.post(
                       subscriptionPeriodEnd: new Date().toISOString(),
                       isPaid: false,
                       unlimited: false,
-                      features: SUBSCRIPTION_PLANS.free.features,
+                      features: require("../config/subscriptionPlans").SUBSCRIPTION_PLANS.free
+                        .features,
                       updatedAt: new Date().toISOString(),
                     })
                     .catch(() => {});

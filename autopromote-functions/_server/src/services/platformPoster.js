@@ -440,7 +440,12 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
       if (missingMedia) {
         // Prefer processed/optimized URL, then raw upload URL, then link
         const mediaUrl =
-          ctx.processedUrl || ctx.persistentMediaUrl || ctx.url || ctx.mediaUrl || ctx.landingPageUrl || null;
+          ctx.processedUrl ||
+          ctx.persistentMediaUrl ||
+          ctx.url ||
+          ctx.mediaUrl ||
+          ctx.landingPageUrl ||
+          null;
         if (mediaUrl) payload.mediaUrl = mediaUrl;
       }
       if (missingTitle && ctx.title) payload.title = ctx.title;

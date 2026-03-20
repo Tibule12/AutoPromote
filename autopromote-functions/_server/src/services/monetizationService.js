@@ -22,7 +22,9 @@ const LEGACY_TIER_ALIASES = Object.freeze({
 });
 
 function normalizeMonetizationTierId(value) {
-  const raw = String(value || "free").trim().toLowerCase();
+  const raw = String(value || "free")
+    .trim()
+    .toLowerCase();
   return LEGACY_TIER_ALIASES[raw] || normalizePlanId(raw);
 }
 
@@ -278,7 +280,9 @@ class MonetizationService {
         },
         canPerformAction,
         upgradeRequired: !canPerformAction,
-        suggestedTier: canPerformAction ? null : this.suggestUpgradeTier(subscription.tierId, action),
+        suggestedTier: canPerformAction
+          ? null
+          : this.suggestUpgradeTier(subscription.tierId, action),
       };
     } catch (error) {
       logger.error("Monetization.checkSubscriptionLimitsError", {
