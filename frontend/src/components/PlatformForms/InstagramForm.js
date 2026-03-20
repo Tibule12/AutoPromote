@@ -26,10 +26,18 @@ const InstagramForm = ({
   onReviewAI,
   onFindViralClips,
 }) => {
+  const [title, setTitle] = useState(initialData.title || globalTitle || "");
+  const [isTitleDirty, setIsTitleDirty] = useState(false);
   const [caption, setCaption] = useState(
     initialData.caption || globalTitle + "\n\n" + globalDescription
   );
   const [isCaptionDirty, setIsCaptionDirty] = useState(false);
+
+  useEffect(() => {
+    if (!isTitleDirty && globalTitle && globalTitle !== title) {
+      setTitle(globalTitle);
+    }
+  }, [globalTitle, isTitleDirty, title]);
 
   // Sync Global Title/Description changes UNLESS user has edited caption locally
   useEffect(() => {
@@ -104,6 +112,7 @@ const InstagramForm = ({
 
     onChange({
       platform: "instagram",
+      title,
       caption,
       location,
       isReel,
@@ -114,6 +123,7 @@ const InstagramForm = ({
       username, // Pass username for preview
     });
   }, [
+    title,
     caption,
     location,
     isReel,
@@ -531,6 +541,21 @@ const InstagramForm = ({
             you authorize.
           </p>
         </div>
+      </div>
+
+      <div className="form-group-modern">
+        <label>Title</label>
+        <input
+          type="text"
+          className="modern-input"
+          value={title}
+          onChange={e => {
+            setTitle(e.target.value);
+            setIsTitleDirty(true);
+          }}
+          placeholder="Enter an Instagram title"
+          maxLength={120}
+        />
       </div>
 
       <div className="form-group-modern">

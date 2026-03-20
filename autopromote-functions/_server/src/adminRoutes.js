@@ -3,6 +3,7 @@ const { admin, db, auth, storage } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
 const router = express.Router();
 const { rateLimiter } = require("./middlewares/globalRateLimiter");
+const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
 
 const adminPublicLimiter = rateLimiter({
   capacity: parseInt(process.env.RATE_LIMIT_ADMIN_PUBLIC || "60", 10),
@@ -349,40 +350,79 @@ router.post("/users/:id/upgrade", authMiddleware, adminOnly, async (req, res) =>
   try {
     const userId = req.params.id;
     const { planId } = req.body;
-    if (!planId) return res.status(400).json({ error: "planId required" });
+    const normalizedPlanId = normalizePlanId(planId);
+    if (!planId || normalizedPlanId === "free") {
+      return res.status(400).json({ error: "A paid planId is required" });
+    }
 
     const userRef = db.collection("users").doc(userId);
     const userDoc = await userRef.get();
     if (!userDoc.exists) return res.status(404).json({ error: "User not found" });
 
-    // Update user subscriptions - write to both users and user_subscriptions collections
-    const planName = planId; // For basic set; real implementations map planId to human name
-    await userRef.update({
-      subscriptionTier: planId,
-      subscriptionStatus: "active",
-      updatedAt: new Date().toISOString(),
-    });
+    const plan = resolvePlan(normalizedPlanId);
+    const now = new Date().toISOString();
+    const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    await userRef.set(
+      {
+        subscriptionTier: normalizedPlanId,
+        subscriptionStatus: "active",
+        subscriptionPeriodEnd: periodEnd,
+        subscriptionExpiresAt: periodEnd,
+        isPaid: true,
+        unlimited: false,
+        features: plan.features,
+        upgradedAt: now,
+        updatedAt: now,
+      },
+      { merge: true }
+    );
+
+    await db.collection("user_billing").doc(userId).set(
+      {
+        tier: normalizedPlanId,
+        status: "active",
+        expiresAt: periodEnd,
+        nextBillingDate: periodEnd,
+        updatedAt: now,
+      },
+      { merge: true }
+    );
 
     await db
       .collection("user_subscriptions")
       .doc(userId)
       .set({
         userId,
-        planId,
-        planName,
+        tier: normalizedPlanId,
+        tierId: normalizedPlanId,
+        planId: normalizedPlanId,
+        planName: plan.name,
         status: "active",
         amount: 0,
         currency: "USD",
-        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
+        currentPeriodEnd: periodEnd,
+        nextBillingDate: periodEnd,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { merge: true }
+    );
+
+    await db.collection("subscription_events").add({
+      userId,
+      type: "admin_upgrade",
+      tier: normalizedPlanId,
+      timestamp: now,
+      source: "admin_upgrade_route",
+      adminId: req.user.uid,
+    });
 
     await db.collection("audit_logs").add({
       action: "upgrade_user_subscription",
       adminId: req.user.uid,
       targetId: userId,
-      details: { planId },
+      details: { planId: normalizedPlanId },
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
     });
 

@@ -26,9 +26,10 @@ To prevent excessive billing for storage, we must ensure temporary files are del
 
 - **Path:** `uploads/{type}/*`
 - **Action:** Primary source videos.
-- **Policy:** Auto-delete after 30 days.
-  - Rationale: Once posted to platforms (TikTok, YT), we don't need the raw file.
-  - Analytics rely on Firestore metadata, NOT the video file itself.
+- **Policy:** App-managed retention, default 14 days.
+  - The backend writes `sourceDeleteAfter` onto new content records.
+  - Daily cleanup removes expired source uploads only when deletion is safe for history/repost flows.
+  - Files that are still the only user-facing media URL are deferred instead of being hard-deleted by bucket lifecycle rules.
 
 ## Recommended `lifecycle.json` for Firebase Storage:
 
@@ -47,7 +48,7 @@ To prevent excessive billing for storage, we must ensure temporary files are del
         "action": { "type": "Delete" },
         "condition": {
           "age": 30,
-          "matchesPrefix": ["uploads/", "edited_videos/"]
+          "matchesPrefix": ["edited_videos/"]
         }
       }
     ]

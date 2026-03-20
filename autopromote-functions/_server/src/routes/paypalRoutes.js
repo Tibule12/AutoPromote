@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { authMiddleware } = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
+const { getEffectiveTierSnapshot } = require("../services/billingService");
+const { resolvePlan } = require("../config/subscriptionPlans");
 
 // Get subscription status
 router.get("/status", authMiddleware, async (req, res) => {
@@ -14,16 +16,19 @@ router.get("/status", authMiddleware, async (req, res) => {
     }
 
     const userData = userDoc.data();
+    const snapshot = await getEffectiveTierSnapshot(userId, null, userData);
+    const plan = resolvePlan(snapshot.tierId);
 
     // Check various fields where subscription might be stored
     const subscriptionId = userData.paypalSubscriptionId || null;
-    const plan = userData.plan || "free";
-    const status = userData.subscriptionStatus || (plan === "free" ? "inactive" : "active");
+    const status = snapshot.tierId === "free" ? "active" : userData.subscriptionStatus || "active";
 
     res.json({
       status,
       subscriptionId,
-      plan,
+      plan: snapshot.tierId,
+      planName: plan.name,
+      effectiveTier: snapshot.tierId,
       ok: true,
       // Support for PayPalSubscriptionPanel expecting specific structure:
       id: subscriptionId,

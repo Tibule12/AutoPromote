@@ -32,7 +32,88 @@ try {
  * "Sci-Fi" Media Transform Service
  * Automatically fixes "Retention Killers" (Silence, Bad Audio, Wrong Aspect Ratio)
  */
-async function enqueueMediaTransformTask({ contentId, uid, meta, url }) {
+function extractStoragePathFromUrl(fileUrl) {
+  if (!fileUrl || typeof fileUrl !== "string") return null;
+
+  try {
+    if (fileUrl.startsWith("gs://")) {
+      const parts = fileUrl.split("/");
+      return parts.length >= 4 ? parts.slice(3).join("/") : null;
+    }
+
+    const decoded = decodeURIComponent(fileUrl);
+    if (decoded.includes("/o/")) {
+      const afterO = decoded.split("/o/")[1];
+      return afterO ? afterO.split("?")[0] : null;
+    }
+
+    if (decoded.includes("storage.googleapis.com")) {
+      const parsed = new URL(decoded);
+      const pathParts = parsed.pathname.split("/").filter(Boolean);
+      return pathParts.length > 1 ? pathParts.slice(1).join("/") : null;
+    }
+  } catch (_error) {
+    return null;
+  }
+
+  return null;
+}
+
+async function downloadSourceMedia(data, destinationPath) {
+  if (data.sourceStoragePath) {
+    try {
+      const bucket = admin.storage().bucket();
+      const remoteFile = bucket.file(data.sourceStoragePath);
+      await new Promise((resolve, reject) => {
+        const readStream = remoteFile.createReadStream();
+        const writeStream = fs.createWriteStream(destinationPath);
+
+        readStream.on("error", reject);
+        writeStream.on("error", reject);
+        writeStream.on("finish", resolve);
+        readStream.pipe(writeStream);
+      });
+
+      return;
+    } catch (error) {
+      console.warn(
+        `[MediaTransform] Storage download failed for ${data.contentId} (${data.sourceStoragePath}): ${error.message}`
+      );
+    }
+  }
+
+  const fetchFn = global.fetch || require("node-fetch");
+  const res = await fetchFn(data.sourceUrl);
+  if (!res.ok) throw new Error(`download_failed(${res.status})`);
+
+  const fileStream = fs.createWriteStream(destinationPath);
+  const body = res.body;
+  if (!body) throw new Error("download_failed(no_body)");
+
+  if (typeof body.pipe === "function") {
+    await new Promise((resolve, reject) => {
+      body.pipe(fileStream);
+      body.on("error", reject);
+      fileStream.on("finish", resolve);
+    });
+    return;
+  }
+
+  if (typeof body.getReader === "function") {
+    const nodeStream = Readable.fromWeb(body);
+    await new Promise((resolve, reject) => {
+      nodeStream.pipe(fileStream);
+      nodeStream.on("error", reject);
+      fileStream.on("finish", resolve);
+    });
+    return;
+  }
+
+  const buffer = Buffer.from(await res.arrayBuffer());
+  await fs.promises.writeFile(destinationPath, buffer);
+}
+
+async function enqueueMediaTransformTask({ contentId, uid, meta, url, sourceStoragePath }) {
   if (!contentId) throw new Error("contentId required");
   const ref = db.collection("promotion_tasks").doc();
   const baseTask = {
@@ -42,6 +123,7 @@ async function enqueueMediaTransformTask({ contentId, uid, meta, url }) {
     uid,
     meta: meta || {},
     sourceUrl: url || null,
+    sourceStoragePath: sourceStoragePath || extractStoragePathFromUrl(url) || null,
     attempts: 0,
     nextAttemptAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
@@ -429,35 +511,7 @@ async function processMediaTransformTaskDoc(doc) {
 
     // 1. Download source
     console.log(`[MediaTransform] Downloading ${data.contentId}...`);
-    const fetchFn = global.fetch || require("node-fetch");
-    const res = await fetchFn(data.sourceUrl);
-    if (!res.ok) throw new Error(`download_failed(${res.status})`);
-
-    const fileStream = fs.createWriteStream(tmpIn);
-
-    // Handle Node/Fetch stream differences (Node fetch returns Node stream, native fetch returns web stream)
-    const body = res.body;
-    if (!body) throw new Error("download_failed(no_body)");
-
-    if (typeof body.pipe === "function") {
-      await new Promise((resolve, reject) => {
-        body.pipe(fileStream);
-        body.on("error", reject);
-        fileStream.on("finish", resolve);
-      });
-    } else if (typeof body.getReader === "function") {
-      // Web ReadableStream (Node 18+ global fetch)
-      const nodeStream = Readable.fromWeb(body);
-      await new Promise((resolve, reject) => {
-        nodeStream.pipe(fileStream);
-        nodeStream.on("error", reject);
-        fileStream.on("finish", resolve);
-      });
-    } else {
-      // Fallback: load entire body into memory then write.
-      const buffer = Buffer.from(await res.arrayBuffer());
-      await fs.promises.writeFile(tmpIn, buffer);
-    }
+    await downloadSourceMedia(data, tmpIn);
 
     // 2. Probe to check current state
     const metadata = await probeMedia(tmpIn);

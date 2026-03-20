@@ -40,6 +40,61 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [processedFile, setProcessedFile] = useState(null);
   const [clipSuggestions, setClipSuggestions] = useState(null); // Store detected clips
 
+  const getDownloadFileName = () => {
+    const candidateName = processedFile?.name || file?.name || "edited-video.mp4";
+    const safeName = String(candidateName || "edited-video.mp4")
+      .replace(/\?.*$/, "")
+      .replace(/[^a-zA-Z0-9._-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+    if (/\.[a-z0-9]{2,5}$/i.test(safeName)) return safeName;
+    return `${safeName || "edited-video"}.mp4`;
+  };
+
+  const handleDownloadVideo = async () => {
+    if (!videoSrc) {
+      setStatusMessage("No processed video is available to download yet.");
+      return;
+    }
+
+    try {
+      const downloadName = getDownloadFileName();
+
+      if (processedFile instanceof File || processedFile instanceof Blob) {
+        const objectUrl = URL.createObjectURL(processedFile);
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.download = downloadName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(objectUrl);
+        setStatusMessage("Download started.");
+        return;
+      }
+
+      const response = await fetch(videoSrc, { mode: "cors" });
+      if (!response.ok) {
+        throw new Error(`Download failed with status ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = downloadName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+      setStatusMessage("Download started.");
+    } catch (error) {
+      console.warn("Direct download failed, opening video in a new tab instead.", error);
+      window.open(sanitizeUrl(videoSrc), "_blank", "noopener,noreferrer");
+      setStatusMessage("Opened the processed video in a new tab.");
+    }
+  };
+
   // fetch credit balance on mount so user sees it immediately
   useEffect(() => {
     // Warn if the configured API base URL appears to point at the frontend host (common misconfiguration)
@@ -337,11 +392,16 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     smartCrop: false, // 9:16 Vertical Crop (Face Detection)
     cropStyle: "blur", // "blur" (Fit - content safe) or "zoom" (Fill - cuts sides)
     silenceRemoval: false, // Jump Cut / Dead Air Removal
+    silenceThreshold: -35, // Silence threshold in dB
+    minSilenceDuration: 0.75, // Minimum pause before trimming
     captions: false, // Auto-Captions (Whisper)
     muteAudio: false, // Strip original audio
     addMusic: false, // Background Music
+    musicVolume: 0.15, // Base BGM volume
+    musicDucking: true, // Lower music while speech is active
+    musicDuckingStrength: 0.35, // Speech ducking intensity
     removeWatermark: false, // 🚫 Remove TikTok/Reels Watermark
-    watermarkMode: "corners", // corners, top_right, bottom_left, all
+    watermarkMode: "adaptive", // adaptive, corners, top_right, bottom_left, all
     analyzeClips: false, // 🔍 NEW: Find Viral Moments
     isSearch: false, // Use YouTube Search for Music
     safeSearch: true, // Default: Search only royalty-free music
@@ -549,13 +609,13 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         return;
       }
 
-      // Cleanup the temporary source file immediately to save space
-      // Only do this if we uploaded a file (targetFile was Blob/File)
+      // Do not attempt to delete temp uploads from the browser. The client often
+      // lacks Firebase Storage delete permission, which creates noisy 403 errors.
+      // Lifecycle cleanup on the bucket should handle these temporary files.
       if (tempUploadRef) {
-        try {
-          await deleteObject(tempUploadRef).catch(() => {});
-          console.log("Deleted temporary source upload");
-        } catch (cleanupError) {}
+        console.info(
+          "Skipping client-side temp upload deletion; relying on backend/storage cleanup."
+        );
       } else if (fileUrl && fileUrl.includes("temp_uploads") && targetFile.url) {
         // If we used a previous result which was also temp, maybe clean it?
         // But we might need it if user hits 'undo'. Let's keep it for now.
@@ -587,7 +647,11 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         // FORCE RE-RENDER OF VIDEO ELEMENT using the correct ref
         if (videoRef.current) {
           videoRef.current.load();
-          videoRef.current.play().catch(e => console.warn("Auto-play blocked:", e));
+          videoRef.current.play().catch(e => {
+            if (e?.name !== "AbortError") {
+              console.warn("Auto-play blocked:", e);
+            }
+          });
         }
 
         try {
@@ -658,12 +722,29 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       }
 
       // Prepare payload
+      const timelineSegments =
+        Array.isArray(extraOptions.timelineSegments) && extraOptions.timelineSegments.length > 0
+          ? extraOptions.timelineSegments
+          : [
+              {
+                id: "main",
+                url: finalVideoUrl,
+                start_time: selectedClip.start,
+                end_time: selectedClip.end,
+                duration: selectedClip.end - selectedClip.start,
+              },
+            ];
+      const totalDuration = timelineSegments.reduce(
+        (sum, segment) => sum + Math.max(0, Number(segment.duration || 0)),
+        0
+      );
       const payload = {
         video_url: finalVideoUrl,
-        start_time: selectedClip.start,
-        end_time: selectedClip.end,
+        start_time: 0,
+        end_time: totalDuration || selectedClip.end - selectedClip.start,
         overlays: overlays,
         auto_captions: !!extraOptions.autoCaptions,
+        timeline_segments: timelineSegments,
         // smart_crop: !!extraOptions.smartCrop, // Backend supports this? Check Python worker.
       };
 
@@ -788,6 +869,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       <ViralClipStudio
         videoUrl={videoSrc}
         clips={clipSuggestions}
+        images={images}
         onSave={handleViralRender}
         onCancel={() => setClipSuggestions(null)}
         onStatusChange={setStatusMessage}
@@ -1004,14 +1086,13 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   marginTop: "4px",
                 }}
               >
-                <a
-                  href={videoSrc}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={handleDownloadVideo}
                   style={{ color: "#4caf50", textDecoration: "none", fontWeight: "bold" }}
                 >
                   📥 Download / Open Video
-                </a>
+                </button>
               </div>
             </div>
           ) : (
@@ -1176,6 +1257,83 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                       )}
                     </div>
                   )}
+
+                  <div style={{ marginTop: "12px", display: "grid", gap: "10px" }}>
+                    <label
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "4px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      <span>
+                        Music Volume: {Math.round(Number(options.musicVolume || 0) * 100)}%
+                      </span>
+                      <input
+                        type="range"
+                        min="0.05"
+                        max="0.6"
+                        step="0.01"
+                        value={options.musicVolume}
+                        onChange={e =>
+                          setOptions({ ...options, musicVolume: Number(e.target.value) })
+                        }
+                      />
+                    </label>
+
+                    {!options.muteAudio && (
+                      <>
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            fontSize: "12px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={options.musicDucking}
+                            onChange={e =>
+                              setOptions({ ...options, musicDucking: e.target.checked })
+                            }
+                            style={{ marginRight: "6px" }}
+                          />
+                          Auto-lower music under speech
+                        </label>
+
+                        {options.musicDucking && (
+                          <label
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "4px",
+                              fontSize: "12px",
+                            }}
+                          >
+                            <span>
+                              Ducking Strength:{" "}
+                              {Math.round(Number(options.musicDuckingStrength || 0) * 100)}%
+                            </span>
+                            <input
+                              type="range"
+                              min="0.15"
+                              max="0.85"
+                              step="0.05"
+                              value={options.musicDuckingStrength}
+                              onChange={e =>
+                                setOptions({
+                                  ...options,
+                                  musicDuckingStrength: Number(e.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -1261,6 +1419,61 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               </div>
             </label>
 
+            {options.silenceRemoval && (
+              <div
+                className="sub-options"
+                style={{
+                  marginLeft: "34px",
+                  marginBottom: "10px",
+                  padding: "10px",
+                  background: "#202020",
+                  borderRadius: "6px",
+                  display: "grid",
+                  gap: "10px",
+                }}
+              >
+                <label
+                  style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px" }}
+                >
+                  <span>Silence Threshold: {options.silenceThreshold} dB</span>
+                  <input
+                    type="range"
+                    min="-55"
+                    max="-20"
+                    step="1"
+                    value={options.silenceThreshold}
+                    onChange={e =>
+                      setOptions({ ...options, silenceThreshold: Number(e.target.value) })
+                    }
+                  />
+                  <span style={{ fontSize: "11px", color: "#9c9c9c" }}>
+                    Lower values keep more quiet speech. Higher values cut more aggressively.
+                  </span>
+                </label>
+
+                <label
+                  style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px" }}
+                >
+                  <span>
+                    Minimum Pause Length: {Number(options.minSilenceDuration).toFixed(2)}s
+                  </span>
+                  <input
+                    type="range"
+                    min="0.25"
+                    max="2.5"
+                    step="0.05"
+                    value={options.minSilenceDuration}
+                    onChange={e =>
+                      setOptions({ ...options, minSilenceDuration: Number(e.target.value) })
+                    }
+                  />
+                  <span style={{ fontSize: "11px", color: "#9c9c9c" }}>
+                    Shorter values create tighter jump cuts. Longer values preserve natural pauses.
+                  </span>
+                </label>
+              </div>
+            )}
+
             <label className="ai-option">
               <input
                 type="checkbox"
@@ -1302,7 +1515,8 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                     fontSize: "12px",
                   }}
                 >
-                  <option value="corners">Standard (TikTok/Reels - TL & BR)</option>
+                  <option value="adaptive">Adaptive Tracking (Recommended)</option>
+                  <option value="corners">Static Opposite Corners</option>
                   <option value="top_right">Top Right Only</option>
                   <option value="bottom_left">Bottom Left Only</option>
                   <option value="all">Aggressive (All 4 Corners)</option>

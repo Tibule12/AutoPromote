@@ -48,7 +48,9 @@ async function buildContentContext(contentId) {
       description: data.description,
       landingPageUrl: data.landingPageUrl || data.smartLink || data.url,
       processedUrl: data.processedUrl || null,
+      persistentMediaUrl: data.persistentMediaUrl || null,
       url: data.url || null,
+      mediaUrl: data.mediaUrl || data.media_url || data.video_url || data.file_url || null,
       tags: data.tags || [],
       youtubeVideoId: data.youtube && data.youtube.videoId,
     };
@@ -437,7 +439,8 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
 
       if (missingMedia) {
         // Prefer processed/optimized URL, then raw upload URL, then link
-        const mediaUrl = ctx.processedUrl || ctx.url || ctx.landingPageUrl || null;
+        const mediaUrl =
+          ctx.processedUrl || ctx.persistentMediaUrl || ctx.url || ctx.mediaUrl || ctx.landingPageUrl || null;
         if (mediaUrl) payload.mediaUrl = mediaUrl;
       }
       if (missingTitle && ctx.title) payload.title = ctx.title;

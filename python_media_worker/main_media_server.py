@@ -12,6 +12,7 @@ import uuid
 import logging
 import re  # Added for parsing silence output
 import cv2  # OpenCV (Phase 1)
+import numpy as np
 import ffmpeg  # FFmpeg (Phase 1)
 import firebase_admin
 from firebase_admin import credentials, storage, firestore
@@ -121,6 +122,633 @@ def get_whisper_model():
         model_whisper = whisper.load_model("small")
     return model_whisper
 
+def normalize_transcription_language(language):
+    value = str(language or "auto").strip().lower()
+    if value in {"", "auto", "detect", "unknown"}:
+        return None
+    return value
+
+def clamp_float(value, minimum, maximum):
+    try:
+        numeric_value = float(value)
+    except Exception:
+        numeric_value = minimum
+    return max(minimum, min(maximum, numeric_value))
+
+def get_media_duration(input_path):
+    try:
+        result = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                input_path,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True,
+        )
+        return max(0.0, float(result.stdout.strip()))
+    except Exception:
+        return 0.0
+
+def get_video_dimensions(input_path):
+    try:
+        result = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "stream=width,height",
+                "-of",
+                "csv=s=x:p=0",
+                input_path,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True,
+        )
+        width_text, height_text = result.stdout.strip().split("x")
+        return max(320, int(width_text)), max(320, int(height_text))
+    except Exception:
+        return 1080, 1920
+
+async def materialize_video_input(video_url, local_path):
+    source = str(video_url or "").strip()
+    if not source:
+        raise HTTPException(status_code=400, detail="video_url is required")
+
+    if source.startswith("http://") or source.startswith("https://"):
+        await run_subprocess_async(
+            ["ffmpeg", "-user_agent", "Mozilla/5.0", "-i", source, "-c", "copy", "-y", local_path],
+            check=True,
+        )
+        return local_path
+
+    absolute_source = os.path.abspath(source)
+    if not os.path.exists(absolute_source):
+        raise HTTPException(status_code=404, detail=f"Input video not found: {absolute_source}")
+
+    if absolute_source != os.path.abspath(local_path):
+        shutil.copy2(absolute_source, local_path)
+    return local_path
+
+def build_transcription_prompt(extra_hint=""):
+    base = (
+        "Transcribe spoken dialogue accurately. Prefer South African English spellings and names "
+        "when the accent suggests it. Handle South African English, Afrikaans, isiZulu, isiXhosa, "
+        "Sesotho, and Tswana carefully. Ignore background music, filler noise, and invented narration."
+    )
+    hint = str(extra_hint or "").strip()
+    return f"{base} {hint}".strip()
+
+def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, prompt_hint="", task=None):
+    model = get_whisper_model()
+    if not model:
+        raise HTTPException(status_code=500, detail="Whisper model not allocated")
+
+    transcription_options = {
+        "fp16": False,
+        "word_timestamps": word_timestamps,
+        "temperature": 0,
+        "condition_on_previous_text": False,
+        "compression_ratio_threshold": 2.2,
+        "logprob_threshold": -0.8,
+        "no_speech_threshold": 0.45,
+        "initial_prompt": build_transcription_prompt(prompt_hint),
+    }
+    normalized_language = normalize_transcription_language(language)
+    if normalized_language:
+        transcription_options["language"] = normalized_language
+    if task:
+        transcription_options["task"] = task
+
+    return model.transcribe(file_path, **transcription_options)
+
+def score_text_for_virality(text, keyword_weights):
+    normalized = str(text or "").strip().lower()
+    if not normalized:
+        return 0, []
+
+    boost = 0
+    found = []
+    for keyword, weight in keyword_weights.items():
+        if keyword in normalized:
+            boost += weight
+            if len(found) < 4:
+                found.append(keyword)
+
+    if "?" in normalized:
+        boost += 6
+    if any(token in normalized for token in ["wait", "watch", "look", "listen", "stop"]):
+        boost += 5
+    if len(normalized.split()) >= 10:
+        boost += 4
+
+    return boost, found
+
+def build_transcript_windows(transcription_segments, keyword_weights):
+    if not transcription_segments:
+        return []
+
+    windows = []
+    current = None
+    for segment in transcription_segments:
+        start = float(segment.get("start", 0) or 0)
+        end = float(segment.get("end", 0) or 0)
+        text = str(segment.get("text", "") or "").strip()
+        if end <= start or not text:
+            continue
+
+        if not current:
+            current = {
+                "start": start,
+                "end": end,
+                "texts": [text],
+                "segments": [segment],
+            }
+            continue
+
+        gap = start - current["end"]
+        proposed_duration = end - current["start"]
+        if gap <= 1.2 and proposed_duration <= 36:
+            current["end"] = end
+            current["texts"].append(text)
+            current["segments"].append(segment)
+        else:
+            windows.append(current)
+            current = {
+                "start": start,
+                "end": end,
+                "texts": [text],
+                "segments": [segment],
+            }
+
+    if current:
+        windows.append(current)
+
+    ranked = []
+    for index, window in enumerate(windows):
+        duration = window["end"] - window["start"]
+        if duration < 6:
+            continue
+        text = " ".join(window["texts"]).strip()
+        keyword_boost, found_keywords = score_text_for_virality(text, keyword_weights)
+        word_count = len(text.split())
+        density_boost = min(12, max(0, word_count // 6))
+        duration_penalty = 0 if duration <= 28 else min(12, int(duration - 28))
+        score = min(99, 64 + keyword_boost + density_boost - duration_penalty)
+        ranked.append({
+            "id": f"speech_{index}",
+            "start": window["start"],
+            "end": window["end"],
+            "duration": duration,
+            "viralScore": score,
+            "reason": " + ".join(
+                [part for part in [
+                    "Dense spoken segment",
+                    f"Keywords: {', '.join(found_keywords)}" if found_keywords else "",
+                    "Strong question/command phrasing" if keyword_boost >= 10 else "",
+                ] if part]
+            ),
+            "text": text[:220] + ("..." if len(text) > 220 else ""),
+            "source": "speech_window",
+        })
+    return ranked
+
+def align_clip_to_scenes(candidate, scene_list):
+    if not scene_list:
+        return candidate
+
+    start = float(candidate.get("start", 0) or 0)
+    end = float(candidate.get("end", 0) or 0)
+    aligned_start = start
+    aligned_end = end
+
+    for scene in scene_list:
+        scene_start = scene[0].get_seconds()
+        scene_end = scene[1].get_seconds()
+        if scene_start <= start <= scene_end:
+            aligned_start = scene_start
+        if scene_start <= end <= scene_end:
+            aligned_end = scene_end
+            break
+
+    if aligned_end - aligned_start > 45:
+        aligned_end = aligned_start + 45
+    if aligned_end - aligned_start < 6:
+        aligned_end = max(aligned_end, aligned_start + 6)
+
+    updated = dict(candidate)
+    updated["start"] = round(aligned_start, 2)
+    updated["end"] = round(aligned_end, 2)
+    updated["duration"] = round(aligned_end - aligned_start, 2)
+    return updated
+
+def dedupe_ranked_candidates(candidates, max_results=15):
+    ordered = sorted(candidates, key=lambda item: item.get("viralScore", 0), reverse=True)
+    selected = []
+    for candidate in ordered:
+        overlap_found = False
+        for existing in selected:
+            latest_start = max(candidate["start"], existing["start"])
+            earliest_end = min(candidate["end"], existing["end"])
+            overlap = max(0.0, earliest_end - latest_start)
+            smaller = max(1.0, min(candidate["duration"], existing["duration"]))
+            if overlap / smaller >= 0.6:
+                overlap_found = True
+                break
+        if not overlap_found:
+            selected.append(candidate)
+        if len(selected) >= max_results:
+            break
+    return selected
+
+def escape_drawtext_text(text):
+    return (
+        str(text or "")
+        .replace("\\", "\\\\")
+        .replace("'", "")
+        .replace(":", "\\:")
+        .replace("%", "\\%")
+        .replace(",", "\\,")
+        .replace("[", "\\[")
+        .replace("]", "\\]")
+        .replace("\n", "\\n")
+    )
+
+def wrap_hook_text(text, max_chars=18, max_lines=3):
+    words = [word for word in re.split(r"\s+", str(text or "").strip()) if word]
+    if not words:
+        return ""
+
+    lines = []
+    current = ""
+    consumed = 0
+    for word in words:
+        proposal = f"{current} {word}".strip()
+        if current and len(proposal) > max_chars:
+            lines.append(current)
+            current = word
+            if len(lines) >= max_lines - 1:
+                break
+        else:
+            current = proposal
+        consumed += 1
+
+    if current and len(lines) < max_lines:
+        lines.append(current)
+
+    if consumed < len(words) and lines:
+        lines[-1] = re.sub(r"[. ]+$", "", lines[-1]) + "..."
+
+    return "\n".join(lines)
+
+def build_hook_filter_chain(hook_text, intro_seconds):
+    wrapped = wrap_hook_text(hook_text, max_chars=18, max_lines=3)
+    if not wrapped:
+        return ""
+
+    safe_text = escape_drawtext_text(wrapped)
+    banner_text = escape_drawtext_text(wrap_hook_text(hook_text, max_chars=26, max_lines=2))
+    intro = max(2.0, min(float(intro_seconds or 3.4), 6.0))
+    banner_end = intro + 2.6
+    font_size = "if(gt(text_h\\,h*0.22)\\,h*0.05\\,h*0.068)"
+    banner_font_size = "h*0.035"
+
+    return ",".join([
+        f"drawbox=x=0:y=0:w=iw:h=ih:color=black@1.0:t=fill:enable='between(t,0,{intro:.2f})'",
+        f"drawbox=x=iw*0.08:y=ih*0.12:w=iw*0.84:h=ih*0.018:color=0x00F2EA@0.96:t=fill:enable='between(t,0,{intro:.2f})'",
+        f"drawtext=text='HOOK':font='DejaVu Sans':fontcolor=white:fontsize=h*0.03:x=(w-text_w)/2:y=h*0.2:borderw=2:bordercolor=black@0.9:enable='between(t,0,{intro:.2f})'",
+        f"drawtext=text='{safe_text}':font='DejaVu Sans':fontcolor=white:fontsize={font_size}:line_spacing=16:x=(w-text_w)/2:y=(h-text_h)/2-h*0.03:borderw=4:bordercolor=black@0.92:shadowx=3:shadowy=3:enable='between(t,0,{intro:.2f})'",
+        f"drawtext=text='watch this part':font='DejaVu Sans':fontcolor=white@0.92:fontsize=h*0.028:x=(w-text_w)/2:y=h*0.73:borderw=2:bordercolor=black@0.85:enable='between(t,0,{intro:.2f})'",
+        f"drawbox=x=iw*0.05:y=ih*0.06:w=iw*0.9:h=ih*0.12:color=black@0.4:t=fill:enable='between(t,{intro:.2f},{banner_end:.2f})'",
+        f"drawbox=x=iw*0.07:y=ih*0.085:w=iw*0.015:h=ih*0.065:color=0x00F2EA@0.96:t=fill:enable='between(t,{intro:.2f},{banner_end:.2f})'",
+        f"drawtext=text='{banner_text}':font='DejaVu Sans':fontcolor=white:fontsize={banner_font_size}:line_spacing=10:x=w*0.11:y=h*0.093:borderw=3:bordercolor=black@0.86:shadowx=2:shadowy=2:enable='between(t,{intro:.2f},{banner_end:.2f})'",
+    ])
+
+def build_watermark_regions(width, height):
+    width = max(int(width or 1080), 320)
+    height = max(int(height or 1920), 320)
+
+    margin_x = max(18, int(width * 0.018))
+    top_margin = max(18, int(height * 0.018))
+    bottom_margin = max(120, int(height * 0.07))
+    logo_w = max(220, int(width * 0.24))
+    logo_h = max(84, int(height * 0.075))
+    username_w = max(280, int(width * 0.4))
+    username_h = max(96, int(height * 0.085))
+
+    return {
+        "top_left": [
+            (margin_x, top_margin, logo_w, logo_h),
+        ],
+        "top_right": [
+            (max(margin_x, width - logo_w - margin_x), top_margin, logo_w, logo_h),
+        ],
+        "bottom_left": [
+            (margin_x, max(top_margin, height - username_h - bottom_margin), username_w, username_h),
+        ],
+        "bottom_right": [
+            (max(margin_x, width - username_w - margin_x), max(top_margin, height - username_h - bottom_margin), username_w, username_h),
+        ],
+    }
+
+def score_watermark_region(frame, region):
+    x, y, region_w, region_h = region
+    roi = frame[y:y + region_h, x:x + region_w]
+    if roi is None or roi.size == 0:
+        return 0.0
+
+    gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+    edges = cv2.Canny(blurred, 80, 160)
+    _, bright_mask = cv2.threshold(gray, 208, 255, cv2.THRESH_BINARY)
+
+    edge_density = cv2.countNonZero(edges) / float(edges.size or 1)
+    bright_density = cv2.countNonZero(bright_mask) / float(bright_mask.size or 1)
+    contrast_score = float(gray.std()) / 255.0
+    return (edge_density * 0.55) + (bright_density * 0.30) + (contrast_score * 0.15)
+
+def build_alternating_watermark_schedule(duration, window_seconds=3.5):
+    schedule = []
+    position_pairs = [
+        ("top_left", "bottom_right"),
+        ("top_right", "bottom_left"),
+    ]
+
+    safe_duration = max(0.0, float(duration or 0.0))
+    current_start = 0.0
+    window_index = 0
+    while current_start < safe_duration:
+        current_end = min(safe_duration, current_start + window_seconds)
+        schedule.append((current_start, current_end, position_pairs[window_index % len(position_pairs)]))
+        current_start = current_end
+        window_index += 1
+
+    if not schedule:
+        schedule.append((0.0, max(window_seconds, safe_duration), position_pairs[0]))
+    return schedule
+
+def get_default_watermark_keys(sample_index):
+    return ("top_left", "bottom_right") if sample_index % 2 == 0 else ("top_right", "bottom_left")
+
+def build_window_sample_times(start_time, end_time, samples_per_window):
+    sample_count = max(1, int(samples_per_window or 1))
+    duration = max(0.05, float(end_time) - float(start_time))
+    if sample_count == 1:
+        return [start_time + (duration / 2.0)]
+
+    step = duration / float(sample_count + 1)
+    return [start_time + (step * (index + 1)) for index in range(sample_count)]
+
+def choose_watermark_keys(scores, sample_index, previous_keys=None):
+    default_keys = get_default_watermark_keys(sample_index)
+    top_left_score = scores.get("top_left", 0.0)
+    top_right_score = scores.get("top_right", 0.0)
+    bottom_left_score = scores.get("bottom_left", 0.0)
+    bottom_right_score = scores.get("bottom_right", 0.0)
+
+    top_choice = "top_left" if top_left_score >= top_right_score else "top_right"
+    bottom_choice = "bottom_left" if bottom_left_score >= bottom_right_score else "bottom_right"
+
+    selected_keys = []
+    top_gap = abs(top_left_score - top_right_score)
+    bottom_gap = abs(bottom_left_score - bottom_right_score)
+    top_gate = max(0.022, ((top_left_score + top_right_score) / 2.0) + 0.008)
+    bottom_gate = max(0.022, ((bottom_left_score + bottom_right_score) / 2.0) + 0.008)
+
+    if top_gap < 0.012 and previous_keys:
+        previous_top = next((key for key in previous_keys if key.startswith("top_")), None)
+        if previous_top:
+            top_choice = previous_top
+    if bottom_gap < 0.012 and previous_keys:
+        previous_bottom = next((key for key in previous_keys if key.startswith("bottom_")), None)
+        if previous_bottom:
+            bottom_choice = previous_bottom
+
+    if scores.get(top_choice, 0.0) >= top_gate:
+        selected_keys.append(top_choice)
+    if scores.get(bottom_choice, 0.0) >= bottom_gate:
+        selected_keys.append(bottom_choice)
+
+    if not selected_keys:
+        selected_keys = list(default_keys)
+
+    return tuple(dict.fromkeys(selected_keys))
+
+def collapse_watermark_windows(windows):
+    collapsed = []
+    for window in windows:
+        if collapsed and collapsed[-1]["keys"] == window["keys"]:
+            previous = collapsed[-1]
+            collapsed[-1] = {
+                **window,
+                "start": previous["start"],
+                "sample_times": previous.get("sample_times", []) + window.get("sample_times", []),
+            }
+        else:
+            collapsed.append(window)
+    return collapsed
+
+def analyze_dynamic_watermark_schedule(video_path, width, height, duration, mode, window_seconds=2.4, samples_per_window=3):
+    safe_duration = max(0.0, float(duration or 0.0))
+    if safe_duration <= 0:
+        return []
+
+    regions = build_watermark_regions(width, height)
+    capture = cv2.VideoCapture(video_path)
+    if not capture.isOpened():
+        return []
+
+    windows = []
+    current_start = 0.0
+    sample_index = 0
+    previous_keys = None
+    clamped_window = clamp_float(window_seconds, 1.2, 5.0)
+    clamped_samples = max(1, min(5, int(samples_per_window or 3)))
+
+    try:
+        while current_start < safe_duration:
+            current_end = min(safe_duration, current_start + clamped_window)
+            sample_times = build_window_sample_times(current_start, current_end, clamped_samples)
+            aggregated_scores = {key: 0.0 for key in regions.keys()}
+            captured_samples = 0
+
+            for sample_time in sample_times:
+                capture.set(cv2.CAP_PROP_POS_MSEC, sample_time * 1000.0)
+                success, frame = capture.read()
+                if not success or frame is None:
+                    continue
+                captured_samples += 1
+                for key, rects in regions.items():
+                    if rects:
+                        aggregated_scores[key] += score_watermark_region(frame, rects[0])
+
+            if captured_samples > 0:
+                averaged_scores = {
+                    key: aggregated_scores[key] / float(captured_samples)
+                    for key in aggregated_scores.keys()
+                }
+                selected_keys = choose_watermark_keys(averaged_scores, sample_index, previous_keys)
+            else:
+                averaged_scores = {key: 0.0 for key in regions.keys()}
+                selected_keys = get_default_watermark_keys(sample_index)
+
+            sorted_scores = sorted(averaged_scores.values(), reverse=True)
+            confidence = round((sorted_scores[0] - sorted_scores[2]) if len(sorted_scores) >= 3 else sorted_scores[0], 4)
+            windows.append(
+                {
+                    "start": round(current_start, 3),
+                    "end": round(current_end, 3),
+                    "keys": tuple(selected_keys),
+                    "scores": {key: round(value, 4) for key, value in averaged_scores.items()},
+                    "sample_times": [round(value, 3) for value in sample_times],
+                    "captured_samples": captured_samples,
+                    "confidence": confidence,
+                }
+            )
+            previous_keys = tuple(selected_keys)
+            current_start = current_end
+            sample_index += 1
+    finally:
+        capture.release()
+
+    return windows
+
+def detect_dynamic_watermark_schedule(video_path, width, height, duration, mode, window_seconds=3.5):
+    analyzed = analyze_dynamic_watermark_schedule(video_path, width, height, duration, mode, window_seconds=window_seconds)
+    if not analyzed:
+        safe_duration = max(0.0, float(duration or 0.0))
+        return build_alternating_watermark_schedule(safe_duration or window_seconds, window_seconds)
+    analyzed = collapse_watermark_windows(analyzed)
+    return [(window["start"], window["end"], window["keys"]) for window in analyzed]
+
+def create_watermark_preview_sheet(video_path, width, height, analyzed_windows, max_preview_frames=6):
+    if not analyzed_windows:
+        return None
+
+    capture = cv2.VideoCapture(video_path)
+    if not capture.isOpened():
+        return None
+
+    regions = build_watermark_regions(width, height)
+    preview_tiles = []
+    target_count = max(1, min(int(max_preview_frames or 6), len(analyzed_windows)))
+    if len(analyzed_windows) <= target_count:
+        target_windows = analyzed_windows
+    else:
+        step = max(1, len(analyzed_windows) // target_count)
+        target_windows = [analyzed_windows[index] for index in range(0, len(analyzed_windows), step)][:target_count]
+
+    try:
+        for index, window in enumerate(target_windows):
+            sample_time = window.get("sample_times", [window["start"]])[0]
+            capture.set(cv2.CAP_PROP_POS_MSEC, float(sample_time) * 1000.0)
+            success, frame = capture.read()
+            if not success or frame is None:
+                continue
+
+            annotated = frame.copy()
+            for key, rects in regions.items():
+                color = (64, 64, 64)
+                thickness = 1
+                if key in window["keys"]:
+                    color = (0, 220, 255) if key.startswith("top_") else (0, 255, 120)
+                    thickness = 3
+                for x, y, region_w, region_h in rects:
+                    cv2.rectangle(annotated, (x, y), (x + region_w, y + region_h), color, thickness)
+
+            cv2.putText(
+                annotated,
+                f"{window['start']:.1f}s-{window['end']:.1f}s | {', '.join(window['keys'])}",
+                (24, 36),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.82,
+                (255, 255, 255),
+                2,
+                cv2.LINE_AA,
+            )
+            cv2.putText(
+                annotated,
+                f"confidence={window.get('confidence', 0):.3f}",
+                (24, 68),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.68,
+                (240, 240, 240),
+                2,
+                cv2.LINE_AA,
+            )
+
+            preview_tiles.append(cv2.resize(annotated, (480, 270)))
+    finally:
+        capture.release()
+
+    if not preview_tiles:
+        return None
+
+    while len(preview_tiles) % 2 != 0:
+        preview_tiles.append(np.zeros_like(preview_tiles[0]))
+
+    rows = []
+    for index in range(0, len(preview_tiles), 2):
+        rows.append(cv2.hconcat(preview_tiles[index:index + 2]))
+
+    return cv2.vconcat(rows) if len(rows) > 1 else rows[0]
+
+def build_delogo_filters(width, height, mode, duration=None, video_path=None):
+    width = max(int(width or 1080), 320)
+    height = max(int(height or 1920), 320)
+    mode = str(mode or "adaptive").strip().lower()
+    regions = build_watermark_regions(width, height)
+
+    if mode in {"adaptive", "tracked", "moving", "tiktok"} and video_path:
+        filters = []
+        for start_time, end_time, keys in detect_dynamic_watermark_schedule(video_path, width, height, duration, mode):
+            enable_expr = f"between(t\\,{start_time:.3f}\\,{end_time:.3f})"
+            for key in keys:
+                for x, y, region_w, region_h in regions.get(key, []):
+                    x = max(0, min(width - 8, int(x)))
+                    y = max(0, min(height - 8, int(y)))
+                    region_w = max(32, min(width - x, int(region_w)))
+                    region_h = max(24, min(height - y, int(region_h)))
+                    filters.append(
+                        f"delogo=x={x}:y={y}:w={region_w}:h={region_h}:show=0:enable='{enable_expr}'"
+                    )
+        return filters
+
+    selected_regions = []
+    if mode in {"corners", "standard"}:
+        selected_regions.extend(regions["top_left"])
+        selected_regions.extend(regions["bottom_right"])
+    elif mode in regions:
+        selected_regions.extend(regions[mode])
+    elif mode == "all":
+        for key in ("top_left", "top_right", "bottom_left", "bottom_right"):
+            selected_regions.extend(regions[key])
+    else:
+        selected_regions.extend(regions["top_left"])
+        selected_regions.extend(regions["bottom_left"])
+        selected_regions.extend(regions["bottom_right"])
+
+    filters = []
+    for x, y, region_w, region_h in selected_regions:
+        x = max(0, min(width - 8, int(x)))
+        y = max(0, min(height - 8, int(y)))
+        region_w = max(32, min(width - x, int(region_w)))
+        region_h = max(24, min(height - y, int(region_h)))
+        filters.append(f"delogo=x={x}:y={y}:w={region_w}:h={region_h}:show=0")
+    return filters
+
 def upload_file_to_firebase(local_path, destination_path=None):
     """
     Uploads file to Firebase (Signed URL + Fallback).
@@ -178,8 +806,90 @@ def update_firestore_job(job_id, data):
         logger.error(f"Failed to update Firestore for job {job_id}: {e}")
 
 
+def build_safe_music_query(query):
+    safe_query = str(query or "").strip() or "upbeat background music"
+    lowered = safe_query.lower()
+    required_terms = ["royalty free", "no copyright", "background music"]
+    for term in required_terms:
+        if term not in lowered:
+            safe_query = f"{safe_query} {term}"
+    return safe_query.strip()
 
-def download_youtube_audio(query, output_path):
+def score_safe_music_candidate(entry):
+    haystack = " ".join(
+        str(entry.get(field, ""))
+        for field in ("title", "uploader", "channel", "description")
+    ).lower()
+
+    score = 0
+    for term in (
+        "royalty free",
+        "copyright free",
+        "no copyright",
+        "ncs",
+        "audio library",
+        "creator safe",
+        "free to use",
+        "background music",
+    ):
+        if term in haystack:
+            score += 3
+
+    for term in (
+        "official audio",
+        "official video",
+        "lyrics",
+        "vevo",
+        "records",
+        "album",
+        "topic",
+        "feat.",
+        " ft ",
+    ):
+        if term in haystack:
+            score -= 4
+
+    duration = entry.get("duration") or 0
+    if 45 <= duration <= 1800:
+        score += 1
+    if entry.get("availability") in {None, "public"}:
+        score += 1
+    return score
+
+def pick_safe_music_result(query):
+    search_opts = {
+        'skip_download': True,
+        'quiet': True,
+        'extract_flat': True,
+        'noplaylist': True,
+    }
+    with yt_dlp.YoutubeDL(search_opts) as ydl:
+        info = ydl.extract_info(f"ytsearch8:{build_safe_music_query(query)}", download=False)
+
+    entries = info.get("entries") or []
+    best_entry = None
+    best_score = float("-inf")
+    for entry in entries:
+        entry_score = score_safe_music_candidate(entry)
+        if entry_score > best_score:
+            best_score = entry_score
+            best_entry = entry
+
+    if not best_entry or best_score < 2:
+        return None
+
+    webpage_url = best_entry.get("webpage_url")
+    if webpage_url:
+        return webpage_url
+
+    video_id = best_entry.get("id")
+    if video_id:
+        return f"https://www.youtube.com/watch?v={video_id}"
+    return None
+
+
+
+def download_youtube_audio(query, output_path, safe_search=True):
     """
     Searches YouTube and downloads audio.
     Returns the path to the downloaded file.
@@ -203,12 +913,23 @@ def download_youtube_audio(query, output_path):
     }
 
     try:
+        requested_query = str(query or "").strip()
+        if safe_search and requested_query.startswith("http"):
+            logger.warning("Safe music mode rejected a direct music URL")
+            return None
+
+        if safe_search:
+            requested_query = pick_safe_music_result(requested_query)
+            if not requested_query:
+                logger.warning("No royalty-free search result matched the music request")
+                return None
+
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            if not query.startswith("http"):
-                query = f"ytsearch1:{query}" # Search logic
+            if not requested_query.startswith("http"):
+                requested_query = f"ytsearch1:{requested_query}" # Search logic
             
-            logger.info(f"Searching/Downloading song: {query}")
-            ydl.download([query])
+            logger.info(f"Searching/Downloading song: {requested_query}")
+            ydl.download([requested_query])
             
             # yt-dlp appends extension, so check file
             final_path = base_output + ".mp3"
@@ -218,6 +939,29 @@ def download_youtube_audio(query, output_path):
     except Exception as e:
         logger.error(f"yt-dlp error: {e}")
         return None
+
+def resolve_music_input(music_file, output_path, *, is_search=False, safe_search=True):
+    raw_value = str(music_file or "").strip()
+    if not raw_value:
+        raise HTTPException(status_code=400, detail="Music selection is empty")
+
+    if not is_search and raw_value.startswith("http"):
+        if safe_search:
+            raise HTTPException(status_code=400, detail="Direct music URLs are blocked while copyright protection is enabled")
+        return download_youtube_audio(raw_value, output_path, safe_search=False)
+
+    if not is_search and os.path.exists(raw_value):
+        return raw_value
+
+    for candidate in (
+        os.path.join("assets/music", raw_value),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "music", raw_value),
+        os.path.join(os.getcwd(), "assets", "music", raw_value),
+    ):
+        if os.path.exists(candidate):
+            return candidate
+
+    return download_youtube_audio(raw_value, output_path, safe_search=safe_search)
 
 app = FastAPI(title="AutoPromote Media Worker (Python)")
 
@@ -336,24 +1080,42 @@ class CropRequest(BaseModel):
     target_aspect_ratio: str = "9:16"
     crop_style: str = "blur"
 
+class SilenceRemovalRequest(BaseModel):
+    video_url: str
+    silence_threshold_db: float = -35.0
+    min_silence_duration: float = 0.75
+
+class WatermarkPreviewRequest(BaseModel):
+    video_url: str
+    watermark_mode: str = "adaptive"
+    window_seconds: float = 2.4
+    max_preview_frames: int = 6
+
 class VideoProcessRequest(BaseModel):
     video_url: str
     smart_crop: bool = False
     crop_style: str = "blur"
     silence_removal: bool = False
     remove_watermark: bool = False
-    watermark_mode: str = "corners" # corners, top_right, bottom_left, all
+    watermark_mode: str = "adaptive" # adaptive, corners, top_right, bottom_left, all
     montage_segments: Optional[List[dict]] = None
     captions: bool = False  # NEW: For concatenating clips
     captions: bool = False
     add_music: bool = False
     music_file: str = "upbeat.mp3"  # Fixed default
     mute_audio: bool = False
+    music_ducking: bool = True
+    music_ducking_strength: float = 0.35
     add_hook: bool = False
     hook_text: str = ""
+    hook_intro_seconds: float = 3.4
     volume: float = 0.15
     is_search: bool = False
     safe_search: bool = True
+    silence_threshold_db: float = -35.0
+    min_silence_duration: float = 0.75
+    transcription_language: str = "auto"
+    transcription_hint: str = ""
     job_id: Optional[str] = None
     async_mode: bool = True  # DEFAULT TO TRUE to avoid 504 timeouts
 
@@ -416,6 +1178,64 @@ async def process_video_endpoint(request: VideoProcessRequest, background_tasks:
         # Sync mode (blocking)
         return await run_pipeline_impl(request)
 
+@app.post("/preview-watermark-regions")
+async def preview_watermark_regions(request: WatermarkPreviewRequest):
+    job_id = str(uuid.uuid4())
+    shared_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    if not os.path.exists(shared_tmp_dir):
+        os.makedirs(shared_tmp_dir)
+
+    local_input_path = os.path.join(shared_tmp_dir, f"{job_id}_watermark_input.mp4")
+    preview_image_path = os.path.join(shared_tmp_dir, f"{job_id}_watermark_preview.jpg")
+
+    try:
+        await materialize_video_input(request.video_url, local_input_path)
+        width_val, height_val = get_video_dimensions(local_input_path)
+        video_duration = get_media_duration(local_input_path)
+        analyzed_windows = analyze_dynamic_watermark_schedule(
+            local_input_path,
+            width_val,
+            height_val,
+            video_duration,
+            request.watermark_mode,
+            window_seconds=request.window_seconds,
+        )
+        preview_sheet = create_watermark_preview_sheet(
+            local_input_path,
+            width_val,
+            height_val,
+            analyzed_windows,
+            max_preview_frames=request.max_preview_frames,
+        )
+
+        preview_url = None
+        if preview_sheet is not None:
+            cv2.imwrite(preview_image_path, preview_sheet)
+            preview_url = upload_file_to_firebase(preview_image_path, destination_path=f"processed/{os.path.basename(preview_image_path)}")
+
+        return {
+            "status": "completed",
+            "job_id": job_id,
+            "duration": video_duration,
+            "dimensions": {"width": width_val, "height": height_val},
+            "windows": analyzed_windows,
+            "filters": build_delogo_filters(
+                width_val,
+                height_val,
+                request.watermark_mode,
+                duration=video_duration,
+                video_path=local_input_path,
+            ),
+            "preview_image_path": preview_image_path if os.path.exists(preview_image_path) else None,
+            "preview_image_url": preview_url,
+        }
+    finally:
+        if os.path.exists(local_input_path):
+            try:
+                os.remove(local_input_path)
+            except Exception:
+                pass
+
 async def run_pipeline_impl(request: VideoProcessRequest, provided_job_id: str = None):
     """
     Internal implementation of the video pipeline.
@@ -449,26 +1269,7 @@ async def run_pipeline_impl(request: VideoProcessRequest, provided_job_id: str =
     try:
         # Step 0: Download
         logger.info(f"Step 0: Downloading video from {request.video_url}")
-
-        # Check for HTTP 404 upfront before invoking ffmpeg which fails hard
-        import urllib.request
-        try:
-             # Use a custom User-Agent to mimic a browser, avoiding potential 403s on strict servers
-             req = urllib.request.Request(request.video_url, headers={'User-Agent': 'Mozilla/5.0'})
-             with urllib.request.urlopen(req) as response:
-                  if response.getcode() == 404:
-                       raise HTTPException(status_code=404, detail="Video URL not found/accessible (404)")
-        except Exception as e:
-             # If simple check fails, we proceed to try ffmpeg or handle as error
-             # But for Firebase storage specifically, 404 is common if token invalid
-             logger.warning(f"URL check warning: {e}")
-
-        # Use -headers for authenticated URLs if needed, but for public/signed URLs standard input is usually ok.
-        # Adding user agent sometimes helps with strict CDNs
-        await run_subprocess_async(
-            ["ffmpeg", "-user_agent", "Mozilla/5.0", "-i", request.video_url, "-c", "copy", "-y", current_path],
-            check=True
-        )
+        await materialize_video_input(request.video_url, current_path)
 
         # Notify progress: Download Complete
         if request.async_mode:
@@ -540,24 +1341,31 @@ async def run_pipeline_impl(request: VideoProcessRequest, provided_job_id: str =
            logger.info(f"Step {step_count}: Removing Silence (Structural Edit)")
 
            next_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_step{step_count}.mp4")
+           silence_threshold = clamp_float(request.silence_threshold_db, -60.0, -10.0)
+           min_pause_length = clamp_float(request.min_silence_duration, 0.2, 3.0)
            
-           silences = await detect_silence_intervals(current_path)
+           silences = await detect_silence_intervals(
+               current_path,
+               threshold=f"{silence_threshold:.1f}dB",
+               duration=min_pause_length,
+           )
            
            if silences:
                # ... [Keep existing silence logic] ...
                # Invert to Keep Segments
-               total_duration = 0.0
-               try:
-                   probe = await run_subprocess_async(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", current_path], check=True, stdout=subprocess.PIPE, text=True)
-                   total_duration = float(probe.stdout.strip())
-               except: pass
+               total_duration = get_media_duration(current_path)
                
                keep_segments = []
                last_pos = 0.0
+               speech_padding = 0.08
                for s_start, s_end in silences:
-                   if s_start > last_pos: keep_segments.append((last_pos, s_start))
-                   last_pos = s_end
-               if last_pos < total_duration: keep_segments.append((last_pos, total_duration))
+                   padded_start = max(0.0, s_start - speech_padding)
+                   padded_end = min(total_duration, s_end + speech_padding)
+                   if padded_start > last_pos:
+                       keep_segments.append((last_pos, padded_start))
+                   last_pos = max(last_pos, padded_end)
+               if last_pos < total_duration:
+                   keep_segments.append((last_pos, total_duration))
                    
                    
                # Build Filter Complex for Silence
@@ -621,9 +1429,12 @@ async def run_pipeline_impl(request: VideoProcessRequest, provided_job_id: str =
              # PROGRESS UPDATE BEFORE WHISPER STARTS
              if request.async_mode: update_firestore_job(job_id, {"progress": 40, "detail": "Generating Smart Captions (AI)"})
              
-             model = get_whisper_model()
-             # We need to transcribe current_path (which might be silence-removed)
-             result = model.transcribe(current_path, word_timestamps=True, fp16=False)
+             result = transcribe_with_hints(
+                 current_path,
+                 word_timestamps=True,
+                 language=request.transcription_language,
+                 prompt_hint=request.transcription_hint,
+             )
              
              if request.async_mode: update_firestore_job(job_id, {"progress": 60, "detail": "Transcription Complete"})
 
@@ -669,8 +1480,20 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         current_v = f"[{input_map}:v]"
         current_a = f"[{audio_map_idx}:a]"
 
+        # Hook intro should hold the content back until the intro finishes.
+        if request.add_hook and request.hook_text:
+             intro_seconds = max(2.0, min(float(request.hook_intro_seconds or 3.4), 6.0))
+             intro_ms = int(intro_seconds * 1000)
+             main_filters.append(
+                 f"{current_v}tpad=start_duration={intro_seconds:.2f}:start_mode=clone[v_intro_padded]"
+             )
+             current_v = "[v_intro_padded]"
+             main_filters.append(f"{current_a}adelay={intro_ms}:all=1[a_intro_padded]")
+             current_a = "[a_intro_padded]"
+
         # Get dimensions for delogo calculation (since delogo doesn't always support expressions)
         width_val, height_val = 1080, 1920
+        video_duration = get_media_duration(current_path)
         try:
              dim_cmd = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=s=x:p=0", current_path]
              dim_res = await run_subprocess_async(dim_cmd, check=True, stdout=subprocess.PIPE, text=True)
@@ -682,33 +1505,13 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
         # A0. Remove Watermark (TikTok/Reels) - Prioritize this before scaling
         if request.remove_watermark:
-             mode = request.watermark_mode or "corners"
-             filters = []
-             
-             # Filters definitions
-             # Top Left: x=20:y=20:w=250:h=90 (TikTok)
-             f_tl = "delogo=x=20:y=20:w=250:h=90:show=0"
-             # Bottom Right: x=W-270:y=H-150:w=250:h=90 (TikTok Bouncing / Shorts)
-             f_br = f"delogo=x={width_val-270}:y={height_val-150}:w=250:h=90:show=0"
-             # Top Right: x=W-200:y=20:w=180:h=80 (Reels/Kwai sometimes)
-             f_tr = f"delogo=x={width_val-200}:y=20:w=180:h=80:show=0"
-             # Bottom Left: x=20:y=H-150:w=200:h=80 (Less common)
-             f_bl = f"delogo=x=20:y={height_val-150}:w=200:h=80:show=0"
-             
-             if mode == "corners" or mode == "standard":
-                 # Standard TikTok/Reels/Shorts
-                 filters.append(f_tl)
-                 filters.append(f_br)
-             elif mode == "top_right":
-                 filters.append(f_tr)
-             elif mode == "bottom_left":
-                 filters.append(f_bl) 
-             elif mode == "all":
-                 filters.append(f_tl)
-                 filters.append(f_br)
-                 filters.append(f_tr)
-                 filters.append(f_bl)
-                 
+             filters = build_delogo_filters(
+                 width_val,
+                 height_val,
+                 request.watermark_mode,
+                 duration=video_duration,
+                 video_path=current_path,
+             )
              if filters:
                  filter_str = ",".join(filters)
                  main_filters.append(f"{current_v}{filter_str}[v_clean]")
@@ -729,24 +1532,10 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
         # B. Viral Hook (Drawtext)
         if request.add_hook and request.hook_text:
-             safe_text = request.hook_text.replace("'", "").replace(":", "")
-             # We apply drawtext directly to the stream
-             # Need fonts
-             font = "font='Impact'"
-             dt_base = f"fontsize=(h/15):x=(w-text_w)/2:y=(h-text_h)/2:borderw=5:bordercolor=black:shadowx=3:shadowy=3:{font}"
-             # 5 colors
-             colors = ["magenta", "cyan", "yellow", "green", "red"]
-             hook_filters = []
-             hook_filters.append(f"eq=brightness=-0.3:enable='between(t,0,3.5)'")
-             for i, col in enumerate(colors):
-                 start_t = i * 0.7
-                 end_t = (i + 1) * 0.7
-                 hook_filters.append(f"drawtext=text='{safe_text}':fontcolor={col}:{dt_base}:enable='between(t,{start_t},{end_t})'")
-             
-             # Chain them: [in]dt1,dt2,dt3...[out]
-             hook_chain = ",".join(hook_filters)
-             main_filters.append(f"{current_v}{hook_chain}[v_hook]")
-             current_v = "[v_hook]"
+             hook_chain = build_hook_filter_chain(request.hook_text, request.hook_intro_seconds)
+             if hook_chain:
+                 main_filters.append(f"{current_v}{hook_chain}[v_hook]")
+                 current_v = "[v_hook]"
 
         # C. Captions (subtitles filter)
         if request.captions and os.path.exists(ass_path):
@@ -772,19 +1561,19 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
              song_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_song.mp3")
              
              final_song_path = None
-             # Case 1: Direct path provided
-             if not request.music_file.startswith("http") and os.path.exists(request.music_file):
-                  final_song_path = request.music_file
-             # Case 2: Asset lookup
-             elif not request.music_file.startswith("http") and os.path.exists(os.path.join("assets/music", request.music_file)):
-                  final_song_path = os.path.join("assets/music", request.music_file)
-             # Case 3: URL
-             elif request.music_file.startswith("http"):
-                  try:
-                      loop = asyncio.get_running_loop()
-                      final_song_path = await loop.run_in_executor(None, download_youtube_audio, request.music_file, song_path)
-                  except Exception as e:
-                      logger.warning(f"Music download failed: {e}")
+             try:
+                 loop = asyncio.get_running_loop()
+                 final_song_path = await loop.run_in_executor(
+                     None,
+                     lambda: resolve_music_input(
+                         request.music_file,
+                         song_path,
+                         is_search=request.is_search,
+                         safe_search=request.safe_search,
+                     ),
+                 )
+             except Exception as e:
+                 logger.warning(f"Music download failed: {e}")
 
              if final_song_path and os.path.exists(final_song_path):
                  input_args.extend(["-stream_loop", "-1", "-i", final_song_path])
@@ -799,13 +1588,24 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                       main_filters.append(f"[{music_idx}:a]volume=1.0[a_out]")
                  else:
                       # Scenario: MIX audio (Original + Music)
-                      # Apply volume to music stream before mixing
-                      main_filters.append(f"[{music_idx}:a]volume={request.volume}[bgm]")
-                      # Mix original [current_a] with music [bgm]
-                      # 'inputs=2' takes the last 2 labeled inputs or mapped streams
-                      # 'weights' allows better control: 1 1 means equal mix. 
-                      # But if request.volume is small (0.15), bgm is quiet. Original is 100%.
-                      main_filters.append(f"{current_a}[bgm]amix=inputs=2:duration=first:dropout_transition=2[a_out]")
+                      music_gain = clamp_float(request.volume, 0.03, 1.2)
+                      ducking_strength = clamp_float(request.music_ducking_strength, 0.15, 0.95)
+                      if request.music_ducking:
+                          threshold_value = max(0.003, 0.055 - (ducking_strength * 0.04))
+                          ratio_value = round(6.0 + (ducking_strength * 10.0), 2)
+                          main_filters.append(f"{current_a}asplit=2[a_main][a_sidechain]")
+                          main_filters.append(f"[{music_idx}:a]volume={music_gain},aresample=async=1[bgm_raw]")
+                          main_filters.append(
+                              f"[bgm_raw][a_sidechain]sidechaincompress=threshold={threshold_value:.4f}:ratio={ratio_value}:attack=15:release=280:makeup=1[bgm_ducked]"
+                          )
+                          main_filters.append(
+                              f"[a_main][bgm_ducked]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[a_out]"
+                          )
+                      else:
+                          main_filters.append(f"[{music_idx}:a]volume={music_gain}[bgm]")
+                          main_filters.append(
+                              f"{current_a}[bgm]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[a_out]"
+                          )
                  
                  current_a = "[a_out]"
                  music_added_successfully = True
@@ -836,12 +1636,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
              
              cmd.extend(["-filter_complex", filter_str])
              
-             # Map outputs
-             # If we didn't touch audio, map 0:a
-             if "[a_out]" in filter_str:
-                 cmd.extend(["-map", current_v, "-map", "[a_out]"])
-             else:
-                 cmd.extend(["-map", current_v, "-map", "0:a"])
+             # Map the latest video and audio labels so delayed hook audio and
+             # any later audio transforms are actually connected.
+             cmd.extend(["-map", current_v, "-map", current_a])
 
              cmd.extend(["-c:v", "libx264", "-preset", "fast", "-crf", "23", "-c:a", "aac", "-y", final_pass_path])
              
@@ -1001,7 +1798,7 @@ async def smart_crop_video(request: CropRequest):
 # --- Phase 1: Silence Removal (Simple FFmpeg Filter) ---
 
 @app.post("/remove-silence")
-async def remove_silence(request: CropRequest): # Reusing CropRequest just for video_url
+async def remove_silence(request: SilenceRemovalRequest):
     """
     Remove silence using FFmpeg silencedetect + trim/concat.
     This is complex because we must remove segments from BOTH audio and video to keep sync.
@@ -1024,11 +1821,12 @@ async def remove_silence(request: CropRequest): # Reusing CropRequest just for v
         
         # 2. Detect Silence
         # silencedetect output goes to stderr. We look for silence_start: X and silence_duration: Y
-        # We'll use a threshold of -35dB and min duration of 0.5s.
+        silence_threshold = clamp_float(request.silence_threshold_db, -60.0, -10.0)
+        min_pause_length = clamp_float(request.min_silence_duration, 0.2, 3.0)
         logger.info("Detecting silence segments...")
         detect_cmd = [
             "ffmpeg", "-i", input_path,
-            "-af", "silencedetect=noise=-35dB:d=0.75", 
+            "-af", f"silencedetect=noise={silence_threshold:.1f}dB:d={min_pause_length}", 
             "-f", "null", "-"
         ]
         result = subprocess.run(detect_cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
@@ -1065,16 +1863,7 @@ async def remove_silence(request: CropRequest): # Reusing CropRequest just for v
         # Finally keep En to video_end.
         
         # Get video duration first
-        duration_cmd = [
-            "ffprobe", "-v", "error", "-show_entries", "format=duration", 
-            "-of", "default=noprint_wrappers=1:nokey=1", input_path
-        ]
-        duration_res = subprocess.run(duration_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        try:
-            total_duration = float(duration_res.stdout.strip())
-        except:
-            # Fallback if ffprobe fails
-            total_duration = 3600.0 
+        total_duration = get_media_duration(input_path) or 3600.0
 
         segments = []
         current_pos = 0.0
@@ -1409,10 +2198,12 @@ async def analyze_clips(request: Dict[str, Any]):
         def run_whisper():
             if get_whisper_model():
                 logger.info("Task [Whisper]: Starting (Translating to English for Analysis)...")
-                # Extract audio first for speed? No, Whisper handles it.
-                # Use threads=4 to prevent hogging all cores?
-                # FORCE TRANSLATE: We need English text to match our VIRAL_KEYWORDS list.
-                res = get_whisper_model().transcribe(input_path, fp16=False, task="translate")
+                res = transcribe_with_hints(
+                    input_path,
+                    language=request.get("language") or "auto",
+                    prompt_hint=request.get("hint") or "Translate to English for clip analysis while preserving meaning.",
+                    task="translate",
+                )
                 logger.info("Task [Whisper]: Completed.")
                 return res.get("segments", [])
             return []
@@ -1471,7 +2262,7 @@ async def analyze_clips(request: Dict[str, Any]):
         logger.info(f"Parallel Analysis Complete. Scenes: {len(scene_list)}, Segments: {len(transcription_segments)}")
 
         # Map visual scenes to data structure
-        scenes = [] # Ensure scenes list is initialized
+        scenes = []
         for i, scene in enumerate(scene_list):
             start_time_sec = scene[0].get_seconds()
             end_time_sec = scene[1].get_seconds()
@@ -1497,14 +2288,7 @@ async def analyze_clips(request: Dict[str, Any]):
                 full_text = " ".join([s["text"].strip() for s in scene_segments_txt]).lower()
                 scene_text = full_text[:150] + "..." if len(full_text) > 150 else full_text
                 
-                # Score based on keywords
-                keyword_boost = 0
-                found_keywords = []
-                
-                for kw, boost in VIRAL_KEYWORDS.items():
-                    if kw in full_text:
-                        keyword_boost += boost
-                        if len(found_keywords) < 3: found_keywords.append(kw)
+                keyword_boost, found_keywords = score_text_for_virality(full_text, VIRAL_KEYWORDS)
                 
                 if keyword_boost > 0:
                     score += keyword_boost
@@ -1518,23 +2302,24 @@ async def analyze_clips(request: Dict[str, Any]):
             
             scenes.append({
                 "id": f"scene_{i}",
-                "start": start_time_sec,
-                "end": end_time_sec,
-                "duration": duration_sec,
-                "viralScore": score,
+                "start": round(start_time_sec, 2),
+                "end": round(end_time_sec, 2),
+                "duration": round(duration_sec, 2),
+                "viralScore": min(99, score),
                 "reason": " + ".join(reason_parts),
-                "text": scene_text or f"Scene {i+1} (No speech detected)"
+                "text": scene_text or f"Scene {i+1} (No speech detected)",
+                "source": "scene_detect"
             })
-        
-        # Sort by Viral Score (Descending) to show best clips first
-        scenes.sort(key=lambda x: x["viralScore"], reverse=True)
-        
-        # Limit to top 15 suggestions
+
+        transcript_windows = build_transcript_windows(transcription_segments, VIRAL_KEYWORDS)
+        aligned_windows = [align_clip_to_scenes(candidate, scene_list) for candidate in transcript_windows]
+        ranked_candidates = dedupe_ranked_candidates(scenes + aligned_windows, max_results=15)
+
         return {
             "status": "completed",
             "job_id": job_id,
-            "scenes": scenes,
-            "clipSuggestions": scenes[:15]
+            "scenes": ranked_candidates,
+            "clipSuggestions": ranked_candidates
         }
 
     except HTTPException as he:
@@ -1665,6 +2450,8 @@ class MusicRequest(BaseModel):
     volume: float = 0.15  # 0.0 to 1.0 (15% by default)
     is_search: bool = False # NEW: If true, treat music_file as search query
     safe_search: bool = True  # Default to safety
+    music_ducking: bool = True
+    music_ducking_strength: float = 0.35
 
 @app.post("/add-music")
 async def add_music(request: MusicRequest):
@@ -1682,35 +2469,25 @@ async def add_music(request: MusicRequest):
 
     music_path = ""
     downloaded_song = None
+    song_output_path = os.path.join(temp_dir, f"song_search_{uuid.uuid4().hex[:8]}")
 
-    if request.is_search:
-        # Step 1: Search and Download from YouTube
-        song_output_path = os.path.join(temp_dir, f"song_search_{uuid.uuid4().hex[:8]}")
-        
-        # Safety Logic: Append keywords if searching and safety is on
-        search_query = request.music_file
-        if request.safe_search and not "http" in search_query:
-            if "royalty free" not in search_query.lower() and "nocopyright" not in search_query.lower():
-                search_query += " royalty free bgm"
-        
-        # Call helper (without .mp3 suffix, yt-dlp adds it)
-        try:
-            downloaded = download_youtube_audio(search_query, song_output_path)
-            if downloaded and os.path.exists(downloaded):
-                music_path = downloaded
-                downloaded_song = downloaded
-            else:
-                raise HTTPException(status_code=404, detail=f"Could not find music for query: {request.music_file}")
-        except Exception as e:
-             raise HTTPException(status_code=500, detail=f"Music search failed: {str(e)}")
+    try:
+        music_path = resolve_music_input(
+            request.music_file,
+            song_output_path,
+            is_search=request.is_search,
+            safe_search=request.safe_search,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Music search failed: {str(e)}")
 
-    else:
-        # Step 1: Use Local Preset
-        music_path = os.path.join(BASE_DIR, "assets", "music", request.music_file)
-        if not os.path.exists(music_path):
-            cwd_music_path = os.path.join(os.getcwd(), "assets", "music", request.music_file)
-            if os.path.exists(cwd_music_path): music_path = cwd_music_path
-            else: raise HTTPException(status_code=404, detail=f"Preset music '{request.music_file}' not found")
+    if not music_path or not os.path.exists(music_path):
+        raise HTTPException(status_code=404, detail=f"Could not resolve music source: {request.music_file}")
+
+    if os.path.abspath(music_path).startswith(os.path.abspath(temp_dir)):
+        downloaded_song = music_path
 
     # Setup paths
     job_id = str(uuid.uuid4())
@@ -1750,15 +2527,24 @@ async def add_music(request: MusicRequest):
         if has_audio:
             # Mix existing audio with music
             # [0:a] is original, [1:a] is music
-            # amix=inputs=2:duration=first (ends when video ends)
-            # volume filter to lower music volume
-            # We chain filters: [1:a]volume=0.15[music];[0:a][music]amix...
-            filter_complex = f"[1:a]volume={request.volume}[music];[0:a][music]amix=inputs=2:duration=first:dropout_transition=2[aout]"
+            music_gain = clamp_float(request.volume, 0.03, 1.2)
+            ducking_strength = clamp_float(request.music_ducking_strength, 0.15, 0.95)
+            if request.music_ducking:
+                threshold_value = max(0.003, 0.055 - (ducking_strength * 0.04))
+                ratio_value = round(6.0 + (ducking_strength * 10.0), 2)
+                filter_complex = (
+                    f"[0:a]asplit=2[a_main][a_sidechain];"
+                    f"[1:a]volume={music_gain}[music];"
+                    f"[music][a_sidechain]sidechaincompress=threshold={threshold_value:.4f}:ratio={ratio_value}:attack=15:release=280:makeup=1[music_ducked];"
+                    f"[a_main][music_ducked]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[aout]"
+                )
+            else:
+                filter_complex = f"[1:a]volume={music_gain}[music];[0:a][music]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[aout]"
             cmd_map = ["-filter_complex", filter_complex, "-map", "0:v", "-map", "[aout]", "-shortest"]
         else:
             # No original audio, just use music (looped)
             # Reduce volume of music
-            filter_complex = f"[1:a]volume={request.volume}[aout]"
+            filter_complex = f"[1:a]volume={clamp_float(request.volume, 0.03, 1.2)}[aout]"
             cmd_map = ["-filter_complex", filter_complex, "-map", "0:v", "-map", "[aout]", "-shortest"]
 
         # Final command
@@ -2049,9 +2835,17 @@ class ViralOverlay(BaseModel):
     x: float
     y: float
     width: Optional[float] = None 
+    height: Optional[float] = None
     bg: Optional[str] = None 
     color: Optional[str] = None
     start_time: Optional[float] = None
+    duration: Optional[float] = None
+
+class ViralTimelineSegment(BaseModel):
+    id: Optional[Union[str, int]] = None
+    url: str
+    start_time: float = 0.0
+    end_time: float
     duration: Optional[float] = None
 
 class RenderViralRequest(BaseModel):
@@ -2061,6 +2855,7 @@ class RenderViralRequest(BaseModel):
     overlays: List[ViralOverlay] = []
     auto_captions: bool = False
     smart_crop: bool = False
+    timeline_segments: Optional[List[ViralTimelineSegment]] = None
     job_id: Optional[str] = None
     async_mode: bool = False
 
@@ -2109,19 +2904,136 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                   return
              raise HTTPException(status_code=400, detail=err_msg)
 
-        # 2. Pre-trim to duration (Async)
-        duration = request.end_time - request.start_time
-        try:
-            await run_subprocess_async([
-                "ffmpeg", "-ss", str(request.start_time), "-i", input_path, 
-                "-t", str(duration), "-c", "copy", "-y", trimmed_path
-            ], check=True)
-        except:
-            # Fallback re-encode if copy fails (keyframes issue)
-            await run_subprocess_async([
-                "ffmpeg", "-ss", str(request.start_time), "-i", input_path, 
-                "-t", str(duration), "-c:v", "libx264", "-y", trimmed_path
-            ], check=True)
+        # 2. Pre-trim to duration or assemble timeline sequence
+        timeline_segments = request.timeline_segments or []
+        if timeline_segments:
+            normalized_segments = [segment for segment in timeline_segments if segment.end_time > segment.start_time]
+        else:
+            normalized_segments = []
+
+        if normalized_segments:
+            segment_paths = []
+            concat_list_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_concat.txt")
+            for index, segment in enumerate(normalized_segments):
+                segment_source_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_src_{index}.mp4")
+                segment_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_{index}.mp4")
+                segment_duration = float(segment.end_time) - float(segment.start_time)
+
+                if segment.url == request.video_url:
+                    segment_source_path = input_path
+                elif str(segment.url).startswith("http"):
+                    await run_subprocess_async(
+                        [
+                            "ffmpeg",
+                            "-user_agent",
+                            "Mozilla/5.0",
+                            "-i",
+                            segment.url,
+                            "-c",
+                            "copy",
+                            "-y",
+                            segment_source_path,
+                        ],
+                        check=True,
+                    )
+                else:
+                    shutil.copy(segment.url, segment_source_path)
+
+                normalize_vf = (
+                    "scale=1080:1920:force_original_aspect_ratio=decrease,"
+                    "pad=1080:1920:(ow-iw)/2:(oh-ih)/2"
+                )
+                await run_subprocess_async(
+                    [
+                        "ffmpeg",
+                        "-ss",
+                        str(segment.start_time),
+                        "-i",
+                        segment_source_path,
+                        "-t",
+                        str(segment_duration),
+                        "-vf",
+                        normalize_vf,
+                        "-map",
+                        "0:v:0",
+                        "-map",
+                        "0:a?",
+                        "-c:v",
+                        "libx264",
+                        "-preset",
+                        "ultrafast",
+                        "-c:a",
+                        "aac",
+                        "-pix_fmt",
+                        "yuv420p",
+                        "-movflags",
+                        "+faststart",
+                        "-y",
+                        segment_output_path,
+                    ],
+                    check=True,
+                )
+                segment_paths.append(segment_output_path)
+
+            if not segment_paths:
+                raise HTTPException(status_code=400, detail="No valid timeline segments supplied")
+
+            if len(segment_paths) == 1:
+                shutil.copy(segment_paths[0], trimmed_path)
+            else:
+                with open(concat_list_path, "w", encoding="utf-8") as concat_file:
+                    for segment_path in segment_paths:
+                        concat_file.write(f"file '{segment_path}'\n")
+                try:
+                    await run_subprocess_async(
+                        [
+                            "ffmpeg",
+                            "-f",
+                            "concat",
+                            "-safe",
+                            "0",
+                            "-i",
+                            concat_list_path,
+                            "-c",
+                            "copy",
+                            "-y",
+                            trimmed_path,
+                        ],
+                        check=True,
+                    )
+                except Exception:
+                    await run_subprocess_async(
+                        [
+                            "ffmpeg",
+                            "-f",
+                            "concat",
+                            "-safe",
+                            "0",
+                            "-i",
+                            concat_list_path,
+                            "-c:v",
+                            "libx264",
+                            "-c:a",
+                            "aac",
+                            "-pix_fmt",
+                            "yuv420p",
+                            "-y",
+                            trimmed_path,
+                        ],
+                        check=True,
+                    )
+        else:
+            duration = request.end_time - request.start_time
+            try:
+                await run_subprocess_async([
+                    "ffmpeg", "-ss", str(request.start_time), "-i", input_path,
+                    "-t", str(duration), "-c", "copy", "-y", trimmed_path
+                ], check=True)
+            except:
+                await run_subprocess_async([
+                    "ffmpeg", "-ss", str(request.start_time), "-i", input_path,
+                    "-t", str(duration), "-c:v", "libx264", "-y", trimmed_path
+                ], check=True)
         
         # 2.5. Smart Crop (Vertical 9:16) - OPTIONAL
         working_path = trimmed_path
@@ -2201,10 +3113,30 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 # Continue without captions
         
         # Use working_path (either original trimmed or cropped version) as base for overlays
+        base_width, base_height = get_video_dimensions(working_path)
         inputs = ["-i", working_path]
         filter_chain = []
         current_v_label = "0:v"
-        input_idx = 1        
+        input_idx = 1
+
+        def build_overlay_scale_filter(input_label, output_label, overlay):
+            width_percent = float(overlay.width) if overlay.width is not None else None
+            height_percent = float(overlay.height) if overlay.height is not None else None
+
+            target_width = max(2, int(base_width * width_percent / 100.0)) if width_percent else -1
+            target_height = max(2, int(base_height * height_percent / 100.0)) if height_percent else -1
+
+            if target_width > 0 and target_height > 0:
+                return (
+                    f"[{input_label}]scale=w={target_width}:h={target_height}:"
+                    f"force_original_aspect_ratio=decrease[{output_label}];"
+                )
+            if target_width > 0:
+                return f"[{input_label}]scale=w={target_width}:h=-1[{output_label}];"
+            if target_height > 0:
+                return f"[{input_label}]scale=w=-1:h={target_height}[{output_label}];"
+            return f"[{input_label}]scale=w=iw*0.3:h=-1[{output_label}];"
+
         # Process Video Overlays
         video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
         
@@ -2226,11 +3158,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             if ov_path:
                 # Add -stream_loop -1 to loop the overlay video indefinitely
                 inputs.extend(["-stream_loop", "-1", "-i", ov_path])
-                w_scale = (ov.width or 30) / 100.0
-                scale_filter = f"[{input_idx}:v]scale=w=iw*{w_scale}:h=-1[ov{input_idx}];"
+                scale_filter = build_overlay_scale_filter(f"{input_idx}:v", f"ov{input_idx}", ov)
                 
-                x_expr = f"W*{ov.x/100}"
-                y_expr = f"H*{ov.y/100}"
+                x_expr = f"(W*{ov.x/100})-(w/2)"
+                y_expr = f"(H*{ov.y/100})-(h/2)"
                 
                 enable_expr = ""
                 if ov.start_time is not None and ov.duration is not None:
@@ -2268,12 +3199,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 # Loop 1 ensures image is available as a stream
                 inputs.extend(["-loop", "1", "-i", ov_path])
                 
-                w_scale = (ov.width or 80) / 100.0 
-                # Scale image
-                scale_filter = f"[{input_idx}:v]scale=w=iw*{w_scale}:h=-1[img{input_idx}];"
+                scale_filter = build_overlay_scale_filter(f"{input_idx}:v", f"img{input_idx}", ov)
                 
-                x_expr = f"W*{ov.x/100}"
-                y_expr = f"H*{ov.y/100}"
+                x_expr = f"(W*{ov.x/100})-(w/2)"
+                y_expr = f"(H*{ov.y/100})-(h/2)"
                 
                 enable_expr = ""
                 if ov.start_time is not None and ov.duration is not None:
@@ -2352,7 +3281,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 f"text='{clean_text}':"
                 f"fontcolor={font_color_str}:"
                 f"fontsize=h/20:"
-                f"x=(w*0.5)-(tw/2):"      # Force center X for now based on your previous logic (w*0.28 was specific)
+                f"x=(w*{x_val})-(tw/2):"
                 f"y=(h*{y_val})-(th/2):"  # Use Y from prop
                 f"box=1:"
                 f"boxcolor={bg_color}:"
@@ -2458,11 +3387,12 @@ async def transcribe_video(request: Dict[str, str]):
                  raise HTTPException(status_code=404, detail="File not found")
 
         # 2. Transcribe
-        model = get_whisper_model()
-        if not model:
-            raise HTTPException(status_code=500, detail="Whisper model not allocated")
-            
-        result = model.transcribe(input_path, fp16=False)
+        result = transcribe_with_hints(
+            input_path,
+            word_timestamps=True,
+            language=request.get("language"),
+            prompt_hint=request.get("hint") or request.get("prompt_hint") or "",
+        )
         segments = result.get("segments", [])
         
         # Cleanup

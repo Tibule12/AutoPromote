@@ -52,6 +52,54 @@ const path = require("path");
 const TIKTOK_CAPTURE_DIR =
   process.env.TIKTOK_CAPTURE_DIR || path.join(process.cwd(), "tmp", "tiktok-chunk-captures");
 
+function getConfiguredStorageBucketName() {
+  if (process.env.FIREBASE_STORAGE_BUCKET) {
+    return process.env.FIREBASE_STORAGE_BUCKET;
+  }
+
+  try {
+    const app = typeof admin?.app === "function" ? admin.app() : null;
+    const bucketName = app?.options?.storageBucket;
+    if (bucketName) return bucketName;
+  } catch (_) {}
+
+  try {
+    const bucketName = typeof admin?.storage === "function" ? admin.storage().bucket().name : null;
+    if (bucketName) return bucketName;
+  } catch (_) {}
+
+  return null;
+}
+
+function extractStoragePathFromUrl(fileUrl, bucketName) {
+  if (!fileUrl || typeof fileUrl !== "string") return null;
+
+  try {
+    const parsed = new URL(fileUrl);
+
+    if (parsed.hostname === "firebasestorage.googleapis.com") {
+      const match = parsed.pathname.match(/\/o\/(.+)$/);
+      return match && match[1] ? decodeURIComponent(match[1]) : null;
+    }
+
+    const pathParts = parsed.pathname.split("/").filter(Boolean);
+    if (parsed.hostname === "storage.googleapis.com") {
+      if (bucketName && pathParts[0] === bucketName) {
+        return pathParts.slice(1).join("/") || null;
+      }
+      return pathParts.length > 1 ? pathParts.slice(1).join("/") : null;
+    }
+
+    if (bucketName && pathParts[0] === bucketName) {
+      return pathParts.slice(1).join("/") || null;
+    }
+
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
+
 /**
  * Get user's TikTok connection tokens
  */
@@ -924,33 +972,33 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       if (cSnap.exists) {
         const c = cSnap.data();
         // prefer storagePath if present for deterministic signed URL
+        const bucketName = getConfiguredStorageBucketName();
+        const candidateUrls = [
+          c.storageUrl,
+          c.mediaUrl,
+          c.videoUrl,
+          c.video_url,
+          c.fileUrl,
+          c.file_url,
+          c.url,
+        ].filter(Boolean);
         let storagePath = c.storagePath || null;
-        if (!storagePath && c.url) {
-          try {
-            const u = new URL(c.url);
-            if (u.hostname === "firebasestorage.googleapis.com") {
-              const match = u.pathname.match(/\/o\/(.+)$/);
-              if (match && match[1]) {
-                storagePath = decodeURIComponent(match[1]);
-              }
-            } else {
-              const parts = u.pathname.split("/").filter(Boolean);
-              if (parts.length >= 2) {
-                // strip leading bucket name if present
-                if (parts[0] === (process.env.FIREBASE_STORAGE_BUCKET || "")) parts.shift();
-                storagePath = parts.join("/");
-              }
-            }
-          } catch (e) {
-            /* ignore */
+        if (!storagePath) {
+          for (const candidateUrl of candidateUrls) {
+            storagePath = extractStoragePathFromUrl(candidateUrl, bucketName);
+            if (storagePath) break;
           }
         }
         if (!process.env.TIKTOK_FORCE_FILE_UPLOAD) {
           if (storagePath) {
-            const { Storage } = require("@google-cloud/storage");
-            const storage = new Storage();
             try {
-              const file = storage.bucket(process.env.FIREBASE_STORAGE_BUCKET).file(storagePath);
+              const targetBucketName = bucketName;
+              if (!targetBucketName) {
+                throw new Error("storage_bucket_not_configured");
+              }
+              const { Storage } = require("@google-cloud/storage");
+              const storage = new Storage();
+              const file = storage.bucket(targetBucketName).file(storagePath);
               const [signed] = await file.getSignedUrl({
                 version: "v4",
                 action: "read",
@@ -959,10 +1007,11 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
               videoUrl = signed;
               // persist fresh URL
               try {
-                await db
-                  .collection("content")
-                  .doc(contentId)
-                  .update({ mediaUrl: signed, urlSignedAt: new Date().toISOString() });
+                await db.collection("content").doc(contentId).update({
+                  storagePath,
+                  mediaUrl: signed,
+                  urlSignedAt: new Date().toISOString(),
+                });
               } catch (_) {}
             } catch (e) {
               console.warn(

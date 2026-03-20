@@ -6,6 +6,41 @@ const router = express.Router();
 const authMiddleware = require("../authMiddleware");
 const { getUserUsageStats } = require("../middlewares/usageLimitMiddleware");
 const { db } = require("../firebaseAdmin");
+const { SUBSCRIPTION_PLANS, normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
+
+function formatLimitValue(value, noun) {
+  if (value === Infinity || value === "Unlimited" || value === "unlimited") {
+    return `Unlimited ${noun}`;
+  }
+  return `${value} ${noun}`;
+}
+
+function buildPricingTiers() {
+  return Object.values(SUBSCRIPTION_PLANS).reduce((tiers, plan) => {
+    tiers[plan.id] = {
+      name: plan.name,
+      price: Number(plan.price) || 0,
+      currency: "USD",
+      period: "month",
+      limits: {
+        uploads: plan.features?.uploads,
+        promotions: Number(plan.features?.wolfHuntTasks) || 0,
+        platforms: plan.features?.platformLimit,
+        analytics: plan.features?.analytics || "basic",
+        support: plan.features?.support || "Self-serve",
+      },
+      features: [
+        formatLimitValue(plan.features?.uploads, "content uploads per month"),
+        formatLimitValue(plan.features?.platformLimit, "connected platforms"),
+        `${Number(plan.features?.wolfHuntTasks) || 0} mission opportunities per month`,
+        `${plan.features?.analytics || "Basic"} analytics`,
+        `${plan.features?.support || "Self-serve"} support`,
+      ],
+      popular: plan.id === "pro",
+    };
+    return tiers;
+  }, {});
+}
 
 /**
  * GET /api/usage/stats
@@ -50,15 +85,20 @@ router.post("/upgrade", authMiddleware, async (req, res) => {
     }
 
     const { tier, paymentMethodId } = req.body;
+    const normalizedTier = normalizePlanId(tier);
 
     // Validate tier
     const validTiers = ["premium", "pro"];
-    if (!tier || !validTiers.includes(tier)) {
+    if (!normalizedTier || !validTiers.includes(normalizedTier)) {
       return res.status(400).json({
         error: "Invalid tier",
         message: "Please select a valid subscription tier: premium or pro",
       });
     }
+
+    const plan = resolvePlan(normalizedTier);
+    const now = new Date().toISOString();
+    const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
     // TODO: Integrate with Stripe or payment processor
     // For now, just update the user's subscription status
@@ -66,10 +106,14 @@ router.post("/upgrade", authMiddleware, async (req, res) => {
     const userRef = db.collection("users").doc(userId);
     await userRef.set(
       {
-        subscriptionTier: tier,
+        subscriptionTier: normalizedTier,
+        subscriptionStatus: "active",
+        subscriptionPeriodEnd: periodEnd,
+        subscriptionExpiresAt: periodEnd,
         isPaid: true,
-        unlimited: true,
-        upgradedAt: new Date().toISOString(),
+        unlimited: false,
+        features: plan.features,
+        upgradedAt: now,
         paymentMethod: paymentMethodId ? "stripe" : "manual",
       },
       { merge: true }
@@ -77,8 +121,28 @@ router.post("/upgrade", authMiddleware, async (req, res) => {
 
     await db.collection("user_billing").doc(userId).set(
       {
-        tier,
-        updatedAt: new Date().toISOString(),
+        tier: normalizedTier,
+        status: "active",
+        expiresAt: periodEnd,
+        nextBillingDate: periodEnd,
+        updatedAt: now,
+      },
+      { merge: true }
+    );
+
+    await db.collection("user_subscriptions").doc(userId).set(
+      {
+        userId,
+        tier: normalizedTier,
+        tierId: normalizedTier,
+        planId: normalizedTier,
+        planName: plan.name,
+        status: "active",
+        amount: Number(plan.price) || 0,
+        currency: "USD",
+        currentPeriodEnd: periodEnd,
+        nextBillingDate: periodEnd,
+        updatedAt: now,
       },
       { merge: true }
     );
@@ -87,18 +151,19 @@ router.post("/upgrade", authMiddleware, async (req, res) => {
     await db.collection("subscription_events").add({
       userId,
       type: "upgrade",
-      tier,
-      timestamp: new Date().toISOString(),
+      tier: normalizedTier,
+      timestamp: now,
       paymentMethodId: paymentMethodId || null,
     });
 
     res.json({
       success: true,
-      message: `Successfully upgraded to ${tier} tier`,
+      message: `Successfully upgraded to ${plan.name}`,
       subscription: {
-        tier,
-        unlimited: true,
-        upgradedAt: new Date().toISOString(),
+        tier: normalizedTier,
+        tierName: plan.name,
+        unlimited: false,
+        upgradedAt: now,
       },
     });
   } catch (error) {
@@ -115,77 +180,7 @@ router.get("/pricing", async (req, res) => {
   try {
     res.json({
       success: true,
-      tiers: {
-        free: {
-          name: "Free",
-          price: 0,
-          currency: "USD",
-          period: "month",
-          limits: {
-            uploads: 10,
-            promotions: 10,
-            platforms: "all",
-            viralOptimization: true,
-            analytics: "basic",
-          },
-          features: [
-            "10 content uploads per month",
-            "Automatic promotion to all platforms",
-            "AI-powered viral optimization",
-            "Basic analytics",
-            "Hashtag generation",
-            "Optimal posting times",
-          ],
-        },
-        premium: {
-          name: "Premium",
-          price: 19.99,
-          currency: "USD",
-          period: "month",
-          limits: {
-            uploads: Infinity,
-            promotions: Infinity,
-            platforms: "all",
-            viralOptimization: true,
-            analytics: "advanced",
-            priority: true,
-          },
-          features: [
-            "Unlimited content uploads",
-            "Unlimited promotions",
-            "Advanced analytics & insights",
-            "Priority processing",
-            "A/B testing",
-            "Custom branding",
-            "Email support",
-          ],
-          popular: true,
-        },
-        pro: {
-          name: "Pro",
-          price: 49.99,
-          currency: "USD",
-          period: "month",
-          limits: {
-            uploads: Infinity,
-            promotions: Infinity,
-            platforms: "all",
-            viralOptimization: true,
-            analytics: "enterprise",
-            priority: "highest",
-            teamMembers: 5,
-          },
-          features: [
-            "Everything in Premium",
-            "Team collaboration (5 members)",
-            "White-label reporting",
-            "API access",
-            "Dedicated account manager",
-            "Custom integrations",
-            "Priority support",
-          ],
-        },
-      },
+      tiers: buildPricingTiers(),
     });
   } catch (error) {
     console.error("[usageRoutes] Error getting pricing:", error);

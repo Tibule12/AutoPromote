@@ -29,6 +29,7 @@ try {
 }
 const authMiddleware = require("../authMiddleware");
 const rateLimit = require("../middlewares/simpleRateLimit");
+const { SUBSCRIPTION_PLANS } = require("../config/subscriptionPlans");
 
 const { safeFetch } = require("../utils/ssrfGuard");
 // Polyfill / select fetch implementation (Render may run Node < 18 in some cases)
@@ -401,6 +402,18 @@ router.post(
                   });
               } catch (e) {}
 
+              try {
+                await db.collection("user_billing").doc(userId).set(
+                  {
+                    tier: planId,
+                    status: "active",
+                    nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    updatedAt: new Date().toISOString(),
+                  },
+                  { merge: true }
+                );
+              } catch (e) {}
+
               // Create or update user_subscriptions doc
               try {
                 await db
@@ -500,11 +513,29 @@ router.post(
                   db.collection("users")
                     .doc(userId)
                     .update({
+                      subscriptionTier: "free",
                       subscriptionStatus: "cancelled",
                       subscriptionCancelledAt: new Date().toISOString(),
-                      subscriptionExpiresAt: expiresAt,
+                      subscriptionExpiresAt: new Date().toISOString(),
+                      subscriptionPeriodEnd: new Date().toISOString(),
+                      isPaid: false,
+                      unlimited: false,
+                      features: SUBSCRIPTION_PLANS.free.features,
                       updatedAt: new Date().toISOString(),
                     })
+                    .catch(() => {});
+                  db.collection("user_billing")
+                    .doc(userId)
+                    .set(
+                      {
+                        tier: "free",
+                        status: "cancelled",
+                        expiresAt: new Date().toISOString(),
+                        nextBillingDate: null,
+                        updatedAt: new Date().toISOString(),
+                      },
+                      { merge: true }
+                    )
                     .catch(() => {});
                 }
               });

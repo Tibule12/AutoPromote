@@ -1475,19 +1475,15 @@ try {
   app.get("/api/paypal-subscriptions/status", (req, res) => {
     try {
       console.warn("[PayPal][fallback] Returning default free subscription status (fallback)");
+      const { resolvePlan } = require("./config/subscriptionPlans");
+      const freePlan = resolvePlan("free");
       return res.json({
         success: true,
         subscription: {
           planId: "free",
-          planName: "Free",
+          planName: freePlan.name,
           status: "active",
-          features: {
-            uploads: 50,
-            communityPosts: 20,
-            aiClips: true,
-            analytics: "basic",
-            support: "community",
-          },
+          features: freePlan.features,
         },
       });
     } catch (err) {
@@ -3598,8 +3594,12 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
         const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
         if (!isLeader) return;
         try {
-          const { cleanupTempUploads } = require("./services/storageCleanupService");
+          const {
+            cleanupTempUploads,
+            cleanupExpiredSourceUploads,
+          } = require("./services/storageCleanupService");
           await cleanupTempUploads();
+          await cleanupExpiredSourceUploads();
 
           // Cleanup expired generated clips (older than 5 days)
           try {

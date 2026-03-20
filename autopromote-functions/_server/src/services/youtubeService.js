@@ -428,7 +428,7 @@ async function uploadVideo({
 
   // Trigger aggressive cleanup of the source file to save storage costs
   // We do this in background (no await) or await if we want to ensure it's gone
-  await cleanupSourceFile(fileUrl);
+  await cleanupSourceFile(fileUrl, { contentId, currentPlatform: "youtube" });
 
   return { success: true, videoId, raw: insertRes.data, uploadHash, duplicate: false };
 }

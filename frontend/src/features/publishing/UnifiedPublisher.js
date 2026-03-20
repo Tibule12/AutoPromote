@@ -1325,6 +1325,35 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   const [showViralScanner, setShowViralScanner] = useState(false);
   const [viralScannerFile, setViralScannerFile] = useState(null);
 
+  const formatPublisherError = err => {
+    if (err?.code === "PLATFORM_LIMIT_EXCEEDED" || err?.code === "TIER_LIMIT_EXCEEDED") {
+      const limit = err?.context?.limit;
+      const attempted = err?.context?.attempted;
+      const suggestedTier = err?.context?.suggested_tier;
+      if (limit && attempted) {
+        return `Your current plan allows ${limit} platform${limit === 1 ? "" : "s"} per post. You selected ${attempted}. Remove ${attempted - limit} platform${attempted - limit === 1 ? "" : "s"} or upgrade${suggestedTier ? ` to ${suggestedTier}` : ""}.`;
+      }
+    }
+    if (err?.code === "UPLOAD_CAP_EXCEEDED") {
+      const limit = err?.context?.limit;
+      const used = err?.context?.used;
+      const monthKey = err?.context?.monthKey;
+      const suggestedTier = err?.context?.suggested_tier;
+      if (limit && typeof used === "number") {
+        return `Your plan upload quota for ${monthKey || "this month"} is exhausted (${used}/${limit}). Upgrade${suggestedTier ? ` to ${suggestedTier}` : ""} or wait for the quota reset before publishing again.`;
+      }
+    }
+    if (err?.code === "PROMOTION_TASK_QUOTA_EXCEEDED") {
+      const remaining = err?.context?.remaining;
+      const required = err?.context?.required;
+      const suggestedTier = err?.context?.suggested_tier;
+      if (typeof remaining === "number" && typeof required === "number") {
+        return `Your plan has ${remaining} automated distribution task${remaining === 1 ? "" : "s"} remaining this month, but this publish needs ${required}. Upgrade${suggestedTier ? ` to ${suggestedTier}` : ""} or reduce the selected platforms.`;
+      }
+    }
+    return err?.message ? `Error: ${err.message}` : "Error: Upload failed.";
+  };
+
   // Sync Global File -> Media Processor (Initial Load)
   useEffect(() => {
     if (globalFile && globalFile !== mediaFile) {
@@ -1832,11 +1861,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         }
       });
 
-      const resolvedTitle =
-        (globalTitle || "").trim() ||
-        (fileToUpload && fileToUpload.name
-          ? fileToUpload.name.replace(/\.[^/.]+$/, "")
-          : "Untitled");
+      const resolvedTitle = (globalTitle || "").trim() || "Untitled Post";
 
       if (!globalTitle || !globalTitle.trim()) {
         setGlobalTitle(resolvedTitle);
@@ -1888,7 +1913,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       setFallbackPublishPlatform(null);
     } catch (err) {
       console.error("UnifiedPublisher Error:", err);
-      setFeedbackMessage(`Error: ${err.message}`);
+      setFeedbackMessage(formatPublisherError(err));
       setIsPublishing(false);
       setPublishingPlatform(null);
       setFallbackPublishPlatform(null);

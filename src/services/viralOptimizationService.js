@@ -85,6 +85,7 @@ async function performViralOptimization(contentId, userId, contentData, options 
           contentId: contentId,
           uid: userId,
           url: url,
+          sourceStoragePath: contentData.storagePath || null,
           meta: { quality_enhanced: true, original_quality: quality_score || "standard" },
         });
       } catch (e) {

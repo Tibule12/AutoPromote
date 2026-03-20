@@ -8,6 +8,7 @@ const { db } = require("../firebaseAdmin");
 const { audit } = require("../services/auditLogger");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 const { SUBSCRIPTION_PLANS, normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
+const { getEffectiveTierSnapshot } = require("../services/billingService");
 
 // PayPal SDK + helpers
 const paypalClient = require("../paypalClient");
@@ -38,6 +39,41 @@ if (!fetchFn) {
 }
 
 const { safeFetch } = require("../utils/ssrfGuard");
+
+function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
+  const effectivePlan = resolvePlan(snapshot.tierId || "free");
+  const rawStatus = String(
+    subscription.status || snapshot.userData?.subscriptionStatus || snapshot.billingData?.status || "active"
+  ).toLowerCase();
+
+  return {
+    planId: snapshot.tierId,
+    planName: effectivePlan.name,
+    status: snapshot.tierId === "free" ? "active" : rawStatus,
+    rawStatus,
+    effectiveTier: snapshot.tierId,
+    billingTier: normalizePlanId(snapshot.billingData?.tier || "free"),
+    userTier: normalizePlanId(
+      snapshot.userData?.subscriptionTier || snapshot.userData?.subscription?.planId || "free"
+    ),
+    amount: subscription.amount || effectivePlan.price || 0,
+    currency: subscription.currency || "USD",
+    nextBillingDate:
+      snapshot.tierId === "free"
+        ? null
+        : subscription.nextBillingDate || snapshot.userData?.subscriptionPeriodEnd || null,
+    features: effectivePlan.features,
+    cancelledAt: subscription.cancelledAt || snapshot.userData?.subscriptionCancelledAt || null,
+    expiresAt:
+      snapshot.tierId === "free"
+        ? null
+        : subscription.expiresAt ||
+          snapshot.userData?.subscriptionExpiresAt ||
+          snapshot.userData?.subscriptionPeriodEnd ||
+          null,
+    subscriptionId: subscription.paypalSubscriptionId || snapshot.userData?.paypalSubscriptionId || null,
+  };
+}
 
 async function getAccessToken() {
   if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET)
@@ -444,16 +480,23 @@ router.post("/cancel", authMiddleware, async (req, res) => {
 
     // Update user record
     await db.collection("users").doc(userId).update({
+      subscriptionTier: "free",
       subscriptionStatus: "cancelled",
       subscriptionCancelledAt: new Date().toISOString(),
-      // Keep features until period end
-      subscriptionExpiresAt: userData.subscriptionPeriodEnd,
+      subscriptionExpiresAt: new Date().toISOString(),
+      subscriptionPeriodEnd: new Date().toISOString(),
+      isPaid: false,
+      unlimited: false,
+      features: SUBSCRIPTION_PLANS.free.features,
       updatedAt: new Date().toISOString(),
     });
 
     await db.collection("user_billing").doc(userId).set(
       {
         tier: "free",
+        status: "cancelled",
+        expiresAt: new Date().toISOString(),
+        nextBillingDate: null,
         updatedAt: new Date().toISOString(),
       },
       { merge: true }
@@ -464,7 +507,7 @@ router.post("/cancel", authMiddleware, async (req, res) => {
       status: "cancelled",
       cancelledAt: new Date().toISOString(),
       cancelReason: reason,
-      expiresAt: userData.subscriptionPeriodEnd,
+      expiresAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
 
@@ -486,8 +529,8 @@ router.post("/cancel", authMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      message: "Subscription cancelled. You'll retain access until the end of your billing period.",
-      expiresAt: userData.subscriptionPeriodEnd,
+      message: "Subscription cancelled and downgraded immediately to Free.",
+      expiresAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error("[PayPal] Cancel subscription error:", error);
@@ -529,12 +572,11 @@ router.get("/status", async (req, res) => {
     if (!userId) {
       return res.json({
         success: true,
-        subscription: {
-          planId: "free",
-          planName: "Free",
-          status: "active",
-          features: SUBSCRIPTION_PLANS.free.features,
-        },
+        subscription: buildSubscriptionStatusPayload({
+          tierId: "free",
+          userData: {},
+          billingData: { tier: "free" },
+        }),
       });
     }
 
@@ -545,30 +587,11 @@ router.get("/status", async (req, res) => {
     } catch (dbError) {
       console.error("[PayPal] Database error:", dbError);
       // Return free plan if DB error
-      return res.json({
-        success: true,
-        subscription: {
-          planId: "free",
-          planName: "Free",
-          status: "active",
-          features: SUBSCRIPTION_PLANS.free.features,
-        },
-      });
+      const snapshot = await getEffectiveTierSnapshot(userId);
+      return res.json({ success: true, subscription: buildSubscriptionStatusPayload(snapshot) });
     }
 
-    if (!subDoc.exists) {
-      return res.json({
-        success: true,
-        subscription: {
-          planId: "free",
-          planName: "Free",
-          status: "active",
-          features: SUBSCRIPTION_PLANS.free.features,
-        },
-      });
-    }
-
-    const subscription = subDoc.data();
+    const subscription = subDoc.exists ? subDoc.data() : {};
 
     // Sync with PayPal if active
     if (subscription.paypalSubscriptionId && subscription.status === "active") {
@@ -593,19 +616,10 @@ router.get("/status", async (req, res) => {
       }
     }
 
+    const snapshot = await getEffectiveTierSnapshot(userId);
     res.json({
       success: true,
-      subscription: {
-        planId: subscription.planId,
-        planName: subscription.planName,
-        status: subscription.status,
-        amount: subscription.amount,
-        currency: subscription.currency,
-        nextBillingDate: subscription.nextBillingDate,
-        features: subscription.features,
-        cancelledAt: subscription.cancelledAt,
-        expiresAt: subscription.expiresAt,
-      },
+      subscription: buildSubscriptionStatusPayload(snapshot, subscription),
     });
   } catch (error) {
     console.error("[PayPal] Get status error:", error);
@@ -832,11 +846,27 @@ router.post("/admin/cancel-subscription", authMiddleware, async (req, res) => {
 
     // Update user record
     await db.collection("users").doc(userId).update({
+      subscriptionTier: "free",
       subscriptionStatus: "cancelled",
       subscriptionCancelledAt: new Date().toISOString(),
-      // We don't change expiration because they paid for the month
+      subscriptionExpiresAt: new Date().toISOString(),
+      subscriptionPeriodEnd: new Date().toISOString(),
+      isPaid: false,
+      unlimited: false,
+      features: SUBSCRIPTION_PLANS.free.features,
       updatedAt: new Date().toISOString(),
     });
+
+    await db.collection("user_billing").doc(userId).set(
+      {
+        tier: "free",
+        status: "cancelled",
+        expiresAt: new Date().toISOString(),
+        nextBillingDate: null,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
 
     // Update subscription record
     await db
@@ -846,6 +876,7 @@ router.post("/admin/cancel-subscription", authMiddleware, async (req, res) => {
         status: "cancelled",
         cancelledAt: new Date().toISOString(),
         cancelReason: reason || "Admin action",
+        expiresAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
 
