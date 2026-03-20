@@ -1469,32 +1469,6 @@ try {
   //   console.log("⚠️ PayPal routes mount failed:", e.message);
   // }
 
-  // Fallback handler: return default free subscription status when the PayPal status
-  // endpoint is missing or not reachable in the deployed environment. This keeps the
-  // frontend stable and avoids console errors while we investigate root causes.
-  app.get("/api/paypal-subscriptions/status", (req, res) => {
-    try {
-      console.warn("[PayPal][fallback] Returning default free subscription status (fallback)");
-      const { resolvePlan } = require("./config/subscriptionPlans");
-      const freePlan = resolvePlan("free");
-      return res.json({
-        success: true,
-        subscription: {
-          planId: "free",
-          planName: freePlan.name,
-          status: "active",
-          features: freePlan.features,
-        },
-      });
-    } catch (err) {
-      console.error(
-        "[PayPal][fallback] Error returning fallback status:",
-        err && err.stack ? err.stack : err
-      );
-      return res.status(500).json({ error: "Failed to return fallback subscription status" });
-    }
-  });
-
   // Assistant routes (scaffold) - gated by ASSISTANT_ENABLED env variable
   try {
     const assistantRoutes = require("./routes/assistantRoutes");
@@ -1632,87 +1606,6 @@ try {
     paymentsExtendedRoutes
   );
   app.use("/api/paypal", paypalWebhookRoutes);
-  // Fallback lightweight status endpoint to avoid 404s from frontends if the
-  // full PayPal router isn't available in a particular deploy variant.
-  try {
-    // Lightweight, tolerant status endpoint: accepts optional Bearer ID token.
-    app.get("/api/paypal-subscriptions/status", async (req, res) => {
-      try {
-        const { db, admin } = require("./firebaseAdmin");
-        let userId = req.userId || (req.user && req.user.uid) || null;
-
-        // If no user from middleware, attempt to verify Authorization Bearer token (if provided)
-        if (!userId) {
-          try {
-            const authHeader =
-              (req.headers && (req.headers.authorization || req.headers.Authorization)) || "";
-            if (authHeader && authHeader.startsWith("Bearer ")) {
-              const idToken = authHeader.slice(7).trim();
-              if (idToken) {
-                try {
-                  const decoded = await admin.auth().verifyIdToken(idToken);
-                  userId = decoded && decoded.uid;
-                } catch (vtErr) {
-                  // token invalid/expired; we'll treat as unauthenticated below
-                }
-              }
-            }
-          } catch (e) {
-            // ignore verification errors
-          }
-        }
-
-        // If still no user, return default free subscription so frontend doesn't 404
-        if (!userId) {
-          return res.json({
-            success: true,
-            subscription: { planId: "free", planName: "Free", status: "active", features: {} },
-          });
-        }
-
-        let subDoc;
-        try {
-          subDoc = await db.collection("user_subscriptions").doc(userId).get();
-        } catch (e) {
-          return res.json({
-            success: true,
-            subscription: { planId: "free", planName: "Free", status: "active", features: {} },
-          });
-        }
-
-        if (!subDoc.exists) {
-          return res.json({
-            success: true,
-            subscription: { planId: "free", planName: "Free", status: "active", features: {} },
-          });
-        }
-
-        const subscription = subDoc.data();
-        return res.json({
-          success: true,
-          subscription: {
-            planId: subscription.planId,
-            planName: subscription.planName,
-            status: subscription.status,
-            amount: subscription.amount,
-            currency: subscription.currency,
-            nextBillingDate: subscription.nextBillingDate,
-            features: subscription.features,
-            cancelledAt: subscription.cancelledAt,
-            expiresAt: subscription.expiresAt,
-          },
-        });
-      } catch (err) {
-        console.error("[PayPal-Fallback] status handler error:", err);
-        return res.status(500).json({ error: "Failed to fetch subscription status" });
-      }
-    });
-  } catch (e) {
-    // If authMiddleware or firebaseAdmin are not available in this runtime,
-    // do nothing; the normal router may be mounted elsewhere.
-    console.warn("PayPal fallback status route not mounted:", e && e.message);
-  }
-
   app.use(
     "/api/paypal-subscriptions",
     routeLimiter({ windowHint: "paypal_subscriptions" }),

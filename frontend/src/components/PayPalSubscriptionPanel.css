@@ -9,6 +9,16 @@
 .paypal-subscription-panel.compact {
   padding: 0;
   max-width: none;
+  width: 100%;
+  min-width: 0;
+}
+
+.paypal-subscription-panel.compact .paypal-subscription-panel-header {
+  margin-bottom: 18px;
+}
+
+.paypal-subscription-panel.compact .paypal-subscription-panel-subtitle {
+  margin-bottom: 0;
 }
 
 .paypal-subscription-panel-header {
@@ -455,6 +465,14 @@
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+.paypal-subscription-panel.compact .plans-section,
+.paypal-subscription-panel.compact .plans-grid,
+.paypal-subscription-panel.compact .plan-card,
+.paypal-subscription-panel.compact .plan-features,
+.paypal-subscription-panel.compact .plan-checkout-zone {
+  min-width: 0;
+}
+
 .paypal-subscription-panel.compact .plan-card {
   padding: 20px;
 }
@@ -477,12 +495,28 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .paypal-subscription-panel {
+    padding: 16px;
+  }
+
   .paypal-subscription-panel-header {
     flex-direction: column;
+    gap: 12px;
   }
 
   .subscription-panel-close {
     align-self: flex-end;
+  }
+
+  .paypal-subscription-panel h2 {
+    font-size: 2rem;
+    margin-bottom: 14px;
+    line-height: 1.05;
+  }
+
+  .paypal-subscription-panel-subtitle {
+    font-size: 14px;
+    line-height: 1.45;
   }
 
   .subscription-header {
@@ -496,9 +530,114 @@
 
   .plans-grid {
     grid-template-columns: 1fr;
+    gap: 18px;
   }
 
   .usage-grid {
     grid-template-columns: 1fr;
+  }
+
+  .plan-card {
+    padding: 20px;
+  }
+
+  .plan-card h4 {
+    font-size: 22px;
+  }
+
+  .plan-price {
+    margin-bottom: 18px;
+  }
+
+  .plan-price .price {
+    font-size: 32px;
+  }
+
+  .recommended-badge,
+  .suggested-badge {
+    position: static;
+    display: inline-flex;
+    margin-bottom: 12px;
+  }
+
+  .feature-item {
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 6px 10px;
+    align-items: start;
+  }
+
+  .feature-icon {
+    grid-row: span 2;
+    margin-top: 2px;
+  }
+
+  .feature-name,
+  .feature-value {
+    text-align: left;
+  }
+
+  .feature-value {
+    color: #0f172a;
+    font-size: 13px;
+  }
+
+  .paypal-subscription-button-shell {
+    padding: 8px;
+  }
+
+  .subscribe-btn {
+    font-size: 15px;
+    padding: 13px;
+  }
+
+  .checkout-helper-text {
+    text-align: left;
+  }
+}
+
+@media (max-width: 560px) {
+  .paypal-subscription-panel.compact .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .paypal-subscription-panel {
+    padding: 14px;
+  }
+
+  .paypal-subscription-panel.compact .paypal-subscription-panel-header {
+    margin-bottom: 14px;
+  }
+
+  .paypal-subscription-panel h2 {
+    font-size: 1.75rem;
+  }
+
+  .subscription-panel-close {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+
+  .plan-card {
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .plan-card h4 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .plan-price .price,
+  .paypal-subscription-panel.compact .plan-price .price {
+    font-size: 28px;
+  }
+
+  .free-label {
+    font-size: 22px;
+  }
+
+  .feature-item {
+    padding: 9px 0;
   }
 }
