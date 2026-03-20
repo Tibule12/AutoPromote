@@ -103,6 +103,60 @@ what did /* UnifiedPublisher.css */
   }
 }
 
+@media (max-width: 768px) {
+  .upgrade-modal {
+    width: min(100vw - 16px, 720px) !important;
+    margin: 8px auto;
+    border-radius: 22px;
+  }
+
+  .upgrade-modal-shell {
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .upgrade-modal-copy {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .upgrade-modal-copy h2 {
+    font-size: 1.45rem;
+    line-height: 1.15;
+  }
+
+  .upgrade-modal-copy p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 560px) {
+  .upgrade-modal {
+    width: min(100vw - 10px, 720px) !important;
+    border-radius: 18px;
+  }
+
+  .upgrade-modal-shell {
+    gap: 14px;
+    padding: 12px;
+  }
+
+  .upgrade-modal-copy {
+    padding: 16px;
+  }
+
+  .upgrade-modal-copy h2 {
+    font-size: 1.28rem;
+    margin: 8px 0 10px;
+  }
+
+  .upgrade-modal-kicker {
+    font-size: 0.72rem;
+    padding: 5px 9px;
+  }
+}
+
 /* Keep desktop readable on smaller laptops by stacking preview under the form. */
 @media (max-width: 1450px) {
   .platform-card-body {
@@ -597,4 +651,68 @@ button {
   background: rgba(16, 185, 129, 0.1) !important;
   border: 1px solid rgba(16, 185, 129, 0.3) !important;
   color: #6ee7b7 !important;
+}
+
+@media (max-width: 768px) {
+  .upgrade-modal {
+    width: min(100vw - 16px, 720px) !important;
+    max-width: min(100vw - 16px, 720px) !important;
+    margin: 8px auto !important;
+    border-radius: 22px !important;
+  }
+
+  .upgrade-modal-shell {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    padding: 16px !important;
+  }
+
+  .upgrade-modal-shell > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .upgrade-modal-copy {
+    padding: 18px !important;
+    border-radius: 18px !important;
+  }
+
+  .upgrade-modal-copy h2 {
+    font-size: 1.45rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .upgrade-modal-copy p {
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .upgrade-modal {
+    width: min(100vw - 10px, 720px) !important;
+    max-width: min(100vw - 10px, 720px) !important;
+    border-radius: 18px !important;
+  }
+
+  .upgrade-modal-shell {
+    gap: 14px !important;
+    padding: 12px !important;
+  }
+
+  .upgrade-modal-copy {
+    padding: 16px !important;
+  }
+
+  .upgrade-modal-copy h2 {
+    font-size: 1.28rem !important;
+    margin: 8px 0 10px !important;
+  }
+
+  .upgrade-modal-kicker {
+    font-size: 0.72rem !important;
+    padding: 5px 9px !important;
+  }
 }
