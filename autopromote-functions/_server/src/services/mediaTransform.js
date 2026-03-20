@@ -231,10 +231,7 @@ function escapeSubtitlePath(filePath) {
   if (!normalizedPath || /[\u0000-\u001f\u007f]/.test(normalizedPath)) {
     return "";
   }
-  if (!/^[-./A-Za-z0-9_]+$/.test(normalizedPath)) {
-    return "";
-  }
-  return normalizedPath;
+  return normalizedPath.replace(/[':;,\[\]]/g, "\\$&");
 }
 
 function msToSrtTimestamp(ms) {
