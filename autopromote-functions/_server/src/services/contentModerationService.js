@@ -28,9 +28,13 @@ function checkTextForSafety(text) {
   const flags = [];
 
   BANNED_KEYWORDS.forEach(word => {
+    // Escape the keyword before inserting into a RegExp to avoid ReDoS
+    // or unintended meta-character interpretation.
+    const escapeRegExp = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const safeWord = escapeRegExp(word);
     // Simple word boundary check to avoid false positives (e.g., "kill" in "skill")
     // Note: This is basic. Production would use partial matching carefully or AI.
-    const regex = new RegExp(`\\b${word}\\b`, "i");
+    const regex = new RegExp(`\\b${safeWord}\\b`, "i");
     if (regex.test(lower)) {
       flags.push(word);
     }

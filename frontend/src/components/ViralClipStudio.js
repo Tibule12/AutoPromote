@@ -58,16 +58,48 @@ const RainbowText = ({ text, offset = 0 }) => {
   );
 };
 
+const sidebarSectionTitleStyle = {
+  margin: "0 0 10px 0",
+  color: "#111827",
+  fontWeight: 800,
+};
+
+const sidebarCheckboxLabelStyle = {
+  display: "block",
+  cursor: "pointer",
+  color: "#111827",
+  fontWeight: 700,
+};
+
+const sidebarBodyTextStyle = {
+  fontSize: "13px",
+  color: "#1f2937",
+  fontWeight: 700,
+  lineHeight: 1.45,
+};
+
+const sidebarActionButtonStyle = {
+  padding: "8px",
+  cursor: "pointer",
+  background: "white",
+  border: "1px solid #ccc",
+  borderRadius: "4px",
+  color: "#111827",
+  fontWeight: 700,
+};
+
 const ViralClipStudio = ({
   videoUrl,
   clips,
+  images = [],
   onSave,
   onCancel,
   onStatusChange,
   currentMusic,
   onMusicChange,
 }) => {
-  const [selectedClip, setSelectedClip] = useState(clips[0]);
+  const [orderedClips, setOrderedClips] = useState(clips || []);
+  const [selectedClip, setSelectedClip] = useState((clips || [])[0]);
   const [overlays, setOverlays] = useState([]);
   const [activeOverlayId, setActiveOverlayId] = useState(null);
   const [videoTime, setVideoTime] = useState(0);
@@ -82,9 +114,438 @@ const ViralClipStudio = ({
     return [{ id: "main", url: videoUrl, duration: 0, startRequest: null, endRequest: null }];
   });
   const [activeTimelineIndex, setActiveTimelineIndex] = useState(0);
+  const [draggedOverlayId, setDraggedOverlayId] = useState(null);
+  const [draggedTimelineClipId, setDraggedTimelineClipId] = useState(null);
+  const [draggedDetectedClipId, setDraggedDetectedClipId] = useState(null);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
 
   const videoRef = useRef(null);
   const fileInputRef = useRef(null); // Hidden file input
+  const imageInputRef = useRef(null);
+  const undoStackRef = useRef([]);
+  const redoStackRef = useRef([]);
+  const lastSnapshotRef = useRef(null);
+  const isRestoringHistoryRef = useRef(false);
+
+  const normalizeAssetUrl = asset => {
+    if (!asset) return "";
+    if (typeof asset === "string") return asset;
+    return asset.url || asset.src || asset.downloadURL || asset.mediaUrl || asset.thumbnail || "";
+  };
+
+  const cloneSnapshot = snapshot => JSON.parse(JSON.stringify(snapshot));
+
+  const getEditorSnapshot = () => ({
+    orderedClips,
+    selectedClipId: selectedClip?.id || null,
+    overlays,
+    activeOverlayId,
+    videoFit,
+    autoCaptions,
+    smartCrop,
+    timeline,
+    activeTimelineIndex,
+  });
+
+  const syncHistoryAvailability = () => {
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(redoStackRef.current.length > 0);
+  };
+
+  const applyEditorSnapshot = snapshot => {
+    const normalizedClips = snapshot.orderedClips || [];
+    setOrderedClips(normalizedClips);
+    setSelectedClip(
+      normalizedClips.find(clip => clip.id === snapshot.selectedClipId) ||
+        normalizedClips[0] ||
+        null
+    );
+    setOverlays(snapshot.overlays || []);
+    setActiveOverlayId(snapshot.activeOverlayId || null);
+    setVideoFit(snapshot.videoFit || "contain");
+    setAutoCaptions(!!snapshot.autoCaptions);
+    setSmartCrop(!!snapshot.smartCrop);
+    setTimeline(snapshot.timeline || []);
+    setActiveTimelineIndex(Math.max(0, Number(snapshot.activeTimelineIndex || 0)));
+  };
+
+  const handleUndo = () => {
+    if (!undoStackRef.current.length) return;
+
+    const currentSnapshot = cloneSnapshot(getEditorSnapshot());
+    const previousSnapshot = undoStackRef.current.pop();
+    redoStackRef.current.push(currentSnapshot);
+    isRestoringHistoryRef.current = true;
+    applyEditorSnapshot(cloneSnapshot(previousSnapshot));
+    syncHistoryAvailability();
+  };
+
+  const handleRedo = () => {
+    if (!redoStackRef.current.length) return;
+
+    const currentSnapshot = cloneSnapshot(getEditorSnapshot());
+    const nextSnapshot = redoStackRef.current.pop();
+    undoStackRef.current.push(currentSnapshot);
+    isRestoringHistoryRef.current = true;
+    applyEditorSnapshot(cloneSnapshot(nextSnapshot));
+    syncHistoryAvailability();
+  };
+
+  const addOverlayAsset = ({
+    type,
+    src,
+    file = null,
+    isLocal = false,
+    width = 40,
+    height = 30,
+  }) => {
+    if (!src) return;
+    const newOverlay = {
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      type,
+      src,
+      file,
+      isLocal,
+      x: 50,
+      y: 50,
+      width,
+      height,
+      aspectRatioLocked: type === "video" || type === "image",
+      aspectRatio: height ? width / height : 1,
+      clipId: timeline[activeTimelineIndex]?.id || "main",
+    };
+    setOverlays(prev => [...prev, newOverlay]);
+    setActiveOverlayId(newOverlay.id);
+  };
+
+  const clampOverlayDimension = value => Math.max(10, Math.min(100, Number(value) || 10));
+  const clampOverlayCoordinate = value => Math.max(0, Math.min(100, Number(value) || 0));
+
+  const getOverlayAspectRatio = overlay => {
+    const storedRatio = Number(overlay.aspectRatio);
+    if (Number.isFinite(storedRatio) && storedRatio > 0) return storedRatio;
+
+    const width = clampOverlayDimension(overlay.width ?? 40);
+    const height = clampOverlayDimension(overlay.height ?? 30);
+    return width / height;
+  };
+
+  const updateOverlaySize = (id, dimension, delta) => {
+    setOverlays(prev =>
+      prev.map(overlay => {
+        if (overlay.id !== id) return overlay;
+        const currentWidth = clampOverlayDimension(overlay.width ?? 40);
+        const currentHeight = clampOverlayDimension(overlay.height ?? 30);
+        const nextValue = clampOverlayDimension(
+          Number(overlay[dimension] ?? (dimension === "width" ? currentWidth : currentHeight)) +
+            delta
+        );
+
+        if (overlay.aspectRatioLocked && (overlay.type === "video" || overlay.type === "image")) {
+          const ratio = getOverlayAspectRatio(overlay);
+          if (dimension === "width") {
+            return {
+              ...overlay,
+              width: nextValue,
+              height: clampOverlayDimension(nextValue / ratio),
+            };
+          }
+
+          return {
+            ...overlay,
+            height: nextValue,
+            width: clampOverlayDimension(nextValue * ratio),
+          };
+        }
+
+        const nextWidth = dimension === "width" ? nextValue : currentWidth;
+        const nextHeight = dimension === "height" ? nextValue : currentHeight;
+        return {
+          ...overlay,
+          [dimension]: nextValue,
+          aspectRatio: nextWidth / Math.max(nextHeight, 1),
+        };
+      })
+    );
+  };
+
+  const toggleOverlayAspectRatioLock = id => {
+    setOverlays(prev =>
+      prev.map(overlay => {
+        if (overlay.id !== id) return overlay;
+        return {
+          ...overlay,
+          aspectRatioLocked: !overlay.aspectRatioLocked,
+          aspectRatio: getOverlayAspectRatio(overlay),
+        };
+      })
+    );
+  };
+
+  const moveOverlay = (id, direction) => {
+    setOverlays(prev => {
+      const currentIndex = prev.findIndex(overlay => overlay.id === id);
+      if (currentIndex === -1) return prev;
+
+      const reordered = [...prev];
+      const [overlay] = reordered.splice(currentIndex, 1);
+      let nextIndex = currentIndex;
+
+      if (direction === "forward") nextIndex = Math.min(reordered.length, currentIndex + 1);
+      if (direction === "backward") nextIndex = Math.max(0, currentIndex - 1);
+      if (direction === "front") nextIndex = reordered.length;
+      if (direction === "back") nextIndex = 0;
+
+      reordered.splice(nextIndex, 0, overlay);
+      return reordered;
+    });
+  };
+
+  const moveOverlayToIndex = (id, nextIndex) => {
+    setOverlays(prev => {
+      const currentIndex = prev.findIndex(overlay => overlay.id === id);
+      if (currentIndex === -1) return prev;
+
+      const boundedIndex = Math.max(0, Math.min(prev.length - 1, nextIndex));
+      if (currentIndex === boundedIndex) return prev;
+
+      const reordered = [...prev];
+      const [overlay] = reordered.splice(currentIndex, 1);
+      reordered.splice(boundedIndex, 0, overlay);
+      return reordered;
+    });
+  };
+
+  const moveTimelineClip = (clipId, direction) => {
+    setTimeline(prev => {
+      const currentIndex = prev.findIndex(clip => clip.id === clipId);
+      if (currentIndex === -1) return prev;
+
+      const reordered = [...prev];
+      const [clip] = reordered.splice(currentIndex, 1);
+      let nextIndex = currentIndex;
+
+      if (direction === "forward") nextIndex = Math.min(reordered.length, currentIndex + 1);
+      if (direction === "backward") nextIndex = Math.max(0, currentIndex - 1);
+      if (direction === "front") nextIndex = reordered.length;
+      if (direction === "back") nextIndex = 0;
+
+      reordered.splice(nextIndex, 0, clip);
+
+      setActiveTimelineIndex(prevActiveIndex => {
+        const activeClipId = prev[prevActiveIndex]?.id;
+        const resolvedIndex = reordered.findIndex(item => item.id === activeClipId);
+        return resolvedIndex >= 0 ? resolvedIndex : 0;
+      });
+
+      return reordered;
+    });
+  };
+
+  const moveTimelineClipToIndex = (clipId, nextIndex) => {
+    setTimeline(prev => {
+      const currentIndex = prev.findIndex(clip => clip.id === clipId);
+      if (currentIndex === -1) return prev;
+
+      const boundedIndex = Math.max(0, Math.min(prev.length - 1, nextIndex));
+      if (boundedIndex === currentIndex) return prev;
+
+      const reordered = [...prev];
+      const [clip] = reordered.splice(currentIndex, 1);
+      reordered.splice(boundedIndex, 0, clip);
+
+      setActiveTimelineIndex(prevActiveIndex => {
+        const activeClipId = prev[prevActiveIndex]?.id;
+        const resolvedIndex = reordered.findIndex(item => item.id === activeClipId);
+        return resolvedIndex >= 0 ? resolvedIndex : 0;
+      });
+
+      return reordered;
+    });
+  };
+
+  const reorderDetectedClips = updater => {
+    setOrderedClips(prev => {
+      const nextClips = updater(prev);
+      setSelectedClip(prevSelected => {
+        const selectedId = prevSelected?.id;
+        if (!selectedId) return nextClips[0] || null;
+        return nextClips.find(clip => clip.id === selectedId) || nextClips[0] || null;
+      });
+      return nextClips;
+    });
+  };
+
+  const moveDetectedClip = (clipId, direction) => {
+    reorderDetectedClips(prev => {
+      const currentIndex = prev.findIndex(clip => clip.id === clipId);
+      if (currentIndex === -1) return prev;
+
+      const reordered = [...prev];
+      const [clip] = reordered.splice(currentIndex, 1);
+      let nextIndex = currentIndex;
+
+      if (direction === "forward") nextIndex = Math.min(reordered.length, currentIndex + 1);
+      if (direction === "backward") nextIndex = Math.max(0, currentIndex - 1);
+      if (direction === "front") nextIndex = reordered.length;
+      if (direction === "back") nextIndex = 0;
+
+      reordered.splice(nextIndex, 0, clip);
+      return reordered;
+    });
+  };
+
+  const moveDetectedClipToIndex = (clipId, nextIndex) => {
+    reorderDetectedClips(prev => {
+      const currentIndex = prev.findIndex(clip => clip.id === clipId);
+      if (currentIndex === -1) return prev;
+
+      const boundedIndex = Math.max(0, Math.min(prev.length - 1, nextIndex));
+      if (currentIndex === boundedIndex) return prev;
+
+      const reordered = [...prev];
+      const [clip] = reordered.splice(currentIndex, 1);
+      reordered.splice(boundedIndex, 0, clip);
+      return reordered;
+    });
+  };
+
+  const safePlayMediaElement = mediaElement => {
+    if (!mediaElement || typeof mediaElement.play !== "function") return;
+
+    try {
+      const playResult = mediaElement.play();
+      if (playResult && typeof playResult.catch === "function") {
+        playResult.catch(error => console.log("Auto-play prevented", error));
+      }
+    } catch (error) {
+      console.log("Auto-play prevented", error);
+    }
+  };
+
+  const updateOverlayPosition = (id, axis, delta) => {
+    setOverlays(prev =>
+      prev.map(overlay =>
+        overlay.id === id
+          ? { ...overlay, [axis]: clampOverlayCoordinate(Number(overlay[axis] ?? 50) + delta) }
+          : overlay
+      )
+    );
+  };
+
+  const centerOverlay = id => {
+    setOverlays(prev =>
+      prev.map(overlay => (overlay.id === id ? { ...overlay, x: 50, y: 50 } : overlay))
+    );
+  };
+
+  const duplicateOverlay = id => {
+    setOverlays(prev => {
+      const overlay = prev.find(item => item.id === id);
+      if (!overlay) return prev;
+
+      const duplicate = {
+        ...overlay,
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        x: clampOverlayCoordinate(Number(overlay.x ?? 50) + 4),
+        y: clampOverlayCoordinate(Number(overlay.y ?? 50) + 4),
+      };
+
+      setActiveOverlayId(duplicate.id);
+      return [...prev, duplicate];
+    });
+  };
+
+  const activeOverlay = overlays.find(overlay => overlay.id === activeOverlayId) || null;
+
+  const getTimelineClipWindow = clip => {
+    if (!clip) return { start: 0, end: 0, duration: 0 };
+    const isPrimaryClip = clip.id === "main" && selectedClip;
+    const start =
+      clip.startRequest !== null && clip.startRequest !== undefined
+        ? clip.startRequest
+        : isPrimaryClip
+          ? selectedClip.start
+          : 0;
+    const end =
+      clip.endRequest !== null && clip.endRequest !== undefined
+        ? clip.endRequest
+        : isPrimaryClip
+          ? selectedClip.end
+          : clip.duration || 0;
+    return {
+      start,
+      end,
+      duration: Math.max(0, end - start),
+    };
+  };
+
+  const buildExportTimeline = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) throw new Error("Please login first");
+
+    return Promise.all(
+      timeline.map(async clip => {
+        let clipUrl = clip.url;
+        if (clip.file && clip.isLocal) {
+          const extension = clip.file.name ? clip.file.name.split(".").pop() : "mp4";
+          const fileName = `${Date.now()}_${clip.id}.${extension}`;
+          const storageRef = ref(storage, `timeline/${user.uid}/${fileName}`);
+          await uploadBytes(storageRef, clip.file);
+          clipUrl = await getDownloadURL(storageRef);
+        }
+
+        const window = getTimelineClipWindow(clip);
+        return {
+          id: clip.id,
+          url: clipUrl,
+          start_time: window.start,
+          end_time: window.end,
+          duration: window.duration,
+        };
+      })
+    );
+  };
+
+  const normalizeOverlaysForExport = (exportTimeline, sourceOverlays) => {
+    const offsetByClipId = new Map();
+    let runningOffset = 0;
+    exportTimeline.forEach(segment => {
+      offsetByClipId.set(segment.id, {
+        offset: runningOffset,
+        start: segment.start_time || 0,
+        end: segment.end_time || 0,
+      });
+      runningOffset += Math.max(0, Number(segment.duration || 0));
+    });
+
+    return sourceOverlays.map(overlay => {
+      const clipMeta = offsetByClipId.get(overlay.clipId || "main") || {
+        offset: 0,
+        start: 0,
+        end: selectedClip ? selectedClip.end : 0,
+      };
+      const previewStart =
+        overlay.startTime !== undefined && overlay.startTime !== null
+          ? overlay.startTime
+          : overlay.start_time;
+      const normalizedStart =
+        previewStart !== undefined && previewStart !== null
+          ? clipMeta.offset + Math.max(0, Number(previewStart) - Number(clipMeta.start || 0))
+          : undefined;
+
+      return {
+        ...overlay,
+        start_time: normalizedStart,
+        duration:
+          overlay.duration !== undefined && overlay.duration !== null
+            ? Number(overlay.duration)
+            : overlay.duration,
+      };
+    });
+  };
 
   // Dragging State
   const [isDragging, setIsDragging] = useState(false);
@@ -109,6 +570,150 @@ const ViralClipStudio = ({
       );
     }
   };
+
+  useEffect(() => {
+    setOrderedClips(clips || []);
+  }, [clips]);
+
+  useEffect(() => {
+    if (orderedClips && orderedClips.length > 0) {
+      if (!selectedClip || !orderedClips.some(clip => clip.id === selectedClip.id)) {
+        setSelectedClip(orderedClips[0]);
+      }
+      return;
+    }
+
+    if (selectedClip) {
+      setSelectedClip(null);
+    }
+  }, [orderedClips, selectedClip]);
+
+  useEffect(() => {
+    const snapshot = cloneSnapshot(getEditorSnapshot());
+    const serializedSnapshot = JSON.stringify(snapshot);
+
+    if (lastSnapshotRef.current === null) {
+      lastSnapshotRef.current = serializedSnapshot;
+      syncHistoryAvailability();
+      return;
+    }
+
+    // Dragging can emit many overlay updates per second. Record a single history snapshot
+    // when the drag completes instead of pushing one entry for every mouse move.
+    if (isDragging) {
+      return;
+    }
+
+    if (serializedSnapshot === lastSnapshotRef.current) {
+      syncHistoryAvailability();
+      return;
+    }
+
+    if (isRestoringHistoryRef.current) {
+      isRestoringHistoryRef.current = false;
+      lastSnapshotRef.current = serializedSnapshot;
+      syncHistoryAvailability();
+      return;
+    }
+
+    undoStackRef.current.push(JSON.parse(lastSnapshotRef.current));
+    if (undoStackRef.current.length > 50) {
+      undoStackRef.current.shift();
+    }
+    redoStackRef.current = [];
+    lastSnapshotRef.current = serializedSnapshot;
+    syncHistoryAvailability();
+  }, [
+    orderedClips,
+    selectedClip,
+    overlays,
+    activeOverlayId,
+    videoFit,
+    autoCaptions,
+    smartCrop,
+    timeline,
+    activeTimelineIndex,
+    isDragging,
+  ]);
+
+  useEffect(() => {
+    const handleHistoryKeyDown = event => {
+      const targetTag = event.target?.tagName;
+      const isTypingTarget =
+        event.target?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(targetTag);
+      if (isTypingTarget) return;
+
+      const isUndo =
+        (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z" && !event.shiftKey;
+      const isRedoShortcut =
+        (event.metaKey || event.ctrlKey) &&
+        ((event.key.toLowerCase() === "z" && event.shiftKey) || event.key.toLowerCase() === "y");
+
+      if (isUndo) {
+        event.preventDefault();
+        handleUndo();
+      } else if (isRedoShortcut) {
+        event.preventDefault();
+        handleRedo();
+      }
+    };
+
+    window.addEventListener("keydown", handleHistoryKeyDown);
+    return () => window.removeEventListener("keydown", handleHistoryKeyDown);
+  }, [
+    orderedClips,
+    selectedClip,
+    overlays,
+    activeOverlayId,
+    videoFit,
+    autoCaptions,
+    smartCrop,
+    timeline,
+    activeTimelineIndex,
+  ]);
+
+  useEffect(() => {
+    if (!activeOverlayId) return undefined;
+
+    const handleKeyDown = event => {
+      const targetTag = event.target?.tagName;
+      const isTypingTarget =
+        event.target?.isContentEditable ||
+        ["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(targetTag);
+      if (isTypingTarget) return;
+
+      const step = event.shiftKey ? 5 : 1;
+
+      if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault();
+        deleteOverlay(activeOverlayId);
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setActiveOverlayId(null);
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        updateOverlayPosition(activeOverlayId, "x", -step);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        updateOverlayPosition(activeOverlayId, "x", step);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        updateOverlayPosition(activeOverlayId, "y", -step);
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        updateOverlayPosition(activeOverlayId, "y", step);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeOverlayId]);
 
   // Playback Logic: Handle loop of single clip OR sequence of timeline
   useEffect(() => {
@@ -160,7 +765,7 @@ const ViralClipStudio = ({
         // Reset to start
         videoRef.current.currentTime =
           clip.startRequest || (selectedClip && activeTimelineIndex === 0 ? selectedClip.start : 0);
-        videoRef.current.play().catch(e => console.log("Auto-play prevented", e));
+        safePlayMediaElement(videoRef.current);
       }
       // 2. Handle JUMP within same file (when selecting a Viral Clip)
       else if (selectedClip && activeTimelineIndex === 0) {
@@ -170,7 +775,7 @@ const ViralClipStudio = ({
           videoRef.current.currentTime = targetStart;
           // Ensure playing
           if (videoRef.current.paused) {
-            videoRef.current.play().catch(e => console.log("Auto-play prevented", e));
+            safePlayMediaElement(videoRef.current);
           }
         }
       }
@@ -209,8 +814,9 @@ const ViralClipStudio = ({
       bg: "rgba(0,0,0,0.5)",
       scale: 1,
       isRainbow: true,
-      start_time: relativeStartTime,
+      startTime: relativeStartTime,
       duration: 3.0, // Default 3 seconds duration
+      clipId: timeline[activeTimelineIndex]?.id || "main",
     };
     setOverlays([...overlays, newOverlay]);
     setActiveOverlayId(newOverlay.id);
@@ -246,6 +852,9 @@ const ViralClipStudio = ({
         y: 50,
         width: 40,
         height: 30,
+        aspectRatioLocked: true,
+        aspectRatio: 40 / 30,
+        clipId: timeline[activeTimelineIndex]?.id || "main",
       };
       setOverlays(prev => [...prev, newOverlay]);
       setActiveOverlayId(newOverlay.id);
@@ -284,6 +893,43 @@ const ViralClipStudio = ({
     event.target.value = null;
   };
 
+  const addImageLayer = event => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file.");
+      return;
+    }
+
+    addOverlayAsset({
+      type: "image",
+      src: URL.createObjectURL(file),
+      file,
+      isLocal: true,
+      width: 35,
+      height: 35,
+    });
+
+    event.target.value = null;
+  };
+
+  const addExistingImageOverlay = imageAsset => {
+    const src = normalizeAssetUrl(imageAsset);
+    if (!src) {
+      alert("This image could not be added as an overlay.");
+      return;
+    }
+
+    addOverlayAsset({
+      type: "image",
+      src,
+      isLocal: false,
+      width: 35,
+      height: 35,
+    });
+  };
+
   // --- NEW: Split Screen (Gameplay Mode) ---
   const handleSplitScreen = (type = "runner") => {
     // 1. Pick a gameplay video based on selection
@@ -310,6 +956,8 @@ const ViralClipStudio = ({
       y: 75, // Center of bottom half (50 + 25)
       width: 100, // Full width
       height: 50, // Half height
+      aspectRatioLocked: true,
+      aspectRatio: 100 / 50,
       scale: 1,
       // Metadata for UI
       tag: "gameplay",
@@ -333,6 +981,8 @@ const ViralClipStudio = ({
       y: 75,
       width: 100,
       height: 50,
+      aspectRatioLocked: true,
+      aspectRatio: 100 / 50,
       tag: "gameplay",
     };
 
@@ -371,9 +1021,18 @@ const ViralClipStudio = ({
     percentX = Math.max(0, Math.min(100, percentX));
     percentY = Math.max(0, Math.min(100, percentY));
 
-    setOverlays(prev =>
-      prev.map(o => (o.id === dragItem.current ? { ...o, x: percentX, y: percentY } : o))
-    );
+    setOverlays(prev => {
+      const currentOverlay = prev.find(o => o.id === dragItem.current);
+      if (!currentOverlay) return prev;
+
+      const currentX = Number(currentOverlay.x ?? 50);
+      const currentY = Number(currentOverlay.y ?? 50);
+      if (Math.abs(currentX - percentX) < 0.1 && Math.abs(currentY - percentY) < 0.1) {
+        return prev;
+      }
+
+      return prev.map(o => (o.id === dragItem.current ? { ...o, x: percentX, y: percentY } : o));
+    });
   };
 
   const handleDragStart = (e, overlay) => {
@@ -395,9 +1054,33 @@ const ViralClipStudio = ({
         {/* Header */}
         <div className="studio-header">
           <h3>✨ Viral Clip Studio</h3>
-          <button className="close-btn" onClick={onCancel}>
-            &times;
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button
+              type="button"
+              className="tool-btn"
+              onClick={handleUndo}
+              disabled={!canUndo}
+              data-testid="studio-undo-button"
+              title="Undo (Ctrl/Cmd+Z)"
+              style={{ opacity: canUndo ? 1 : 0.5 }}
+            >
+              ↶ Undo
+            </button>
+            <button
+              type="button"
+              className="tool-btn"
+              onClick={handleRedo}
+              disabled={!canRedo}
+              data-testid="studio-redo-button"
+              title="Redo (Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y)"
+              style={{ opacity: canRedo ? 1 : 0.5 }}
+            >
+              ↷ Redo
+            </button>
+            <button className="close-btn" onClick={onCancel}>
+              &times;
+            </button>
+          </div>
         </div>
 
         <div className="studio-layout">
@@ -455,8 +1138,12 @@ const ViralClipStudio = ({
                     if (!belongsToClip) return false;
 
                     // If it has specific start/duration (like captions), check time
-                    if (o.startTime !== undefined && o.duration !== undefined) {
-                      return videoTime >= o.startTime && videoTime <= o.startTime + o.duration;
+                    const overlayStart =
+                      o.startTime !== undefined && o.startTime !== null
+                        ? o.startTime
+                        : o.start_time;
+                    if (overlayStart !== undefined && o.duration !== undefined) {
+                      return videoTime >= overlayStart && videoTime <= overlayStart + o.duration;
                     }
                     return true;
                   })
@@ -467,11 +1154,14 @@ const ViralClipStudio = ({
                       style={{
                         top: `${overlay.y}%`,
                         left: `${overlay.x}%`,
-                        width: overlay.type === "video" ? `${overlay.width}%` : "auto",
+                        width:
+                          overlay.type === "video" || overlay.type === "image"
+                            ? `${overlay.width || 35}%`
+                            : "auto",
                         height:
-                          overlay.type === "video"
-                            ? "auto"
-                            : "auto" /* Let aspect ratio decide height */,
+                          overlay.type === "video" || overlay.type === "image"
+                            ? `${overlay.height || 35}%`
+                            : "auto",
                         backgroundColor: overlay.type === "text" ? overlay.bg : "transparent",
                         color: overlay.color,
                         zIndex: 100 + index,
@@ -491,6 +1181,18 @@ const ViralClipStudio = ({
                         ) : (
                           overlay.text
                         )
+                      ) : overlay.type === "image" ? (
+                        <img
+                          src={sanitizeUrl(overlay.src)}
+                          alt="Overlay"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            borderRadius: "12px",
+                            pointerEvents: "none",
+                          }}
+                        />
                       ) : (
                         <video
                           src={sanitizeUrl(overlay.src)}
@@ -500,7 +1202,7 @@ const ViralClipStudio = ({
                           style={{
                             width: "100%",
                             height: "100%",
-                            objectFit: "cover",
+                            objectFit: "contain",
                             borderRadius: "12px",
                             pointerEvents: "none",
                           }}
@@ -520,7 +1222,7 @@ const ViralClipStudio = ({
                             >
                               &times;
                             </button>
-                            {overlay.type === "video" && (
+                            {(overlay.type === "video" || overlay.type === "image") && (
                               <div
                                 className="resize-handle"
                                 onMouseDown={e => {
@@ -532,32 +1234,121 @@ const ViralClipStudio = ({
                                   onClick={e => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    setOverlays(
-                                      overlays.map(o =>
-                                        o.id === overlay.id
-                                          ? { ...o, width: Math.max(10, o.width - 5) }
-                                          : o
-                                      )
-                                    );
+                                    updateOverlaySize(overlay.id, "width", -5);
                                   }}
                                 >
-                                  -
+                                  W-
                                 </button>
                                 <button
                                   className="resize-btn"
                                   onClick={e => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    setOverlays(
-                                      overlays.map(o =>
-                                        o.id === overlay.id
-                                          ? { ...o, width: Math.min(100, o.width + 5) }
-                                          : o
-                                      )
-                                    );
+                                    updateOverlaySize(overlay.id, "width", 5);
                                   }}
                                 >
-                                  +
+                                  W+
+                                </button>
+                                <button
+                                  className="resize-btn"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    updateOverlaySize(overlay.id, "height", -5);
+                                  }}
+                                >
+                                  H-
+                                </button>
+                                <button
+                                  className="resize-btn"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    updateOverlaySize(overlay.id, "height", 5);
+                                  }}
+                                >
+                                  H+
+                                </button>
+                                <button
+                                  className="resize-btn"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    toggleOverlayAspectRatioLock(overlay.id);
+                                  }}
+                                  title={
+                                    overlay.aspectRatioLocked
+                                      ? "Unlock aspect ratio"
+                                      : "Lock aspect ratio"
+                                  }
+                                >
+                                  {overlay.aspectRatioLocked ? "Lock" : "Free"}
+                                </button>
+                                <button
+                                  className="resize-btn"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    centerOverlay(overlay.id);
+                                  }}
+                                  title="Center overlay"
+                                >
+                                  Center
+                                </button>
+                                <button
+                                  className="resize-btn"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    duplicateOverlay(overlay.id);
+                                  }}
+                                  title="Duplicate overlay"
+                                >
+                                  Copy
+                                </button>
+                                <button
+                                  className="resize-btn"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    moveOverlay(overlay.id, "backward");
+                                  }}
+                                  title="Move layer backward"
+                                >
+                                  Down
+                                </button>
+                                <button
+                                  className="resize-btn"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    moveOverlay(overlay.id, "forward");
+                                  }}
+                                  title="Move layer forward"
+                                >
+                                  Up
+                                </button>
+                                <button
+                                  className="resize-btn"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    moveOverlay(overlay.id, "back");
+                                  }}
+                                  title="Send layer to back"
+                                >
+                                  Back
+                                </button>
+                                <button
+                                  className="resize-btn"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    moveOverlay(overlay.id, "front");
+                                  }}
+                                  title="Bring layer to front"
+                                >
+                                  Front
                                 </button>
                               </div>
                             )}
@@ -581,9 +1372,28 @@ const ViralClipStudio = ({
                 {timeline.map((clip, index) => (
                   <div
                     key={clip.id}
+                    data-testid={`timeline-clip-${clip.id}`}
                     onClick={() => setActiveTimelineIndex(index)}
+                    draggable={timeline.length > 1}
+                    onDragStart={() => setDraggedTimelineClipId(clip.id)}
+                    onDragEnd={() => setDraggedTimelineClipId(null)}
+                    onDragOver={e => {
+                      e.preventDefault();
+                    }}
+                    onDrop={e => {
+                      e.preventDefault();
+                      if (draggedTimelineClipId === null || draggedTimelineClipId === clip.id)
+                        return;
+                      moveTimelineClipToIndex(draggedTimelineClipId, index);
+                      setDraggedTimelineClipId(null);
+                    }}
                     className={`timeline-clip-thumb ${activeTimelineIndex === index ? "active" : ""}`}
                     title={clip.name || `Clip ${index + 1}`}
+                    style={
+                      draggedTimelineClipId === clip.id
+                        ? { borderStyle: "dashed", borderColor: "#e52e71" }
+                        : undefined
+                    }
                   >
                     {/* If clip has a name, show first few chars, otherwise show index */}
                     <span
@@ -611,6 +1421,52 @@ const ViralClipStudio = ({
                       className="clip-mini-controls"
                       style={{ display: "flex", gap: "4px", marginTop: "4px" }}
                     >
+                      {timeline.length > 1 && (
+                        <>
+                          <button
+                            className="clip-caption-btn"
+                            title="Move clip earlier"
+                            data-testid={`timeline-move-left-${clip.id}`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              moveTimelineClip(clip.id, "backward");
+                            }}
+                            disabled={index === 0}
+                            style={{
+                              fontSize: "10px",
+                              padding: "2px 5px",
+                              borderRadius: "4px",
+                              border: "1px solid #ccc",
+                              background: "#fff",
+                              cursor: index === 0 ? "default" : "pointer",
+                              opacity: index === 0 ? 0.5 : 1,
+                            }}
+                          >
+                            ←
+                          </button>
+                          <button
+                            className="clip-caption-btn"
+                            title="Move clip later"
+                            data-testid={`timeline-move-right-${clip.id}`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              moveTimelineClip(clip.id, "forward");
+                            }}
+                            disabled={index === timeline.length - 1}
+                            style={{
+                              fontSize: "10px",
+                              padding: "2px 5px",
+                              borderRadius: "4px",
+                              border: "1px solid #ccc",
+                              background: "#fff",
+                              cursor: index === timeline.length - 1 ? "default" : "pointer",
+                              opacity: index === timeline.length - 1 ? 0.5 : 1,
+                            }}
+                          >
+                            →
+                          </button>
+                        </>
+                      )}
                       {/* Auto-Caption Button */}
                       <button
                         className="clip-caption-btn"
@@ -740,7 +1596,7 @@ const ViralClipStudio = ({
                               bg: "rgba(0,0,0,0.6)",
                               scale: 1,
                               isRainbow: true, // Enable cute mode by default for captions
-                              startTime: (clip.startTime || 0) + seg.start,
+                              startTime: (clip.startRequest || 0) + seg.start,
                               duration: seg.end - seg.start,
                               isCaption: true,
                               clipId: clip.id,
@@ -800,6 +1656,7 @@ const ViralClipStudio = ({
                 <label className="add-clip-btn" title="Add Video to Timeline">
                   +
                   <input
+                    data-testid="timeline-add-clip-input"
                     type="file"
                     accept="video/*"
                     style={{ display: "none" }}
@@ -866,18 +1723,67 @@ const ViralClipStudio = ({
             <div className="clips-list">
               <h4>🔥 Detected Viral Moments</h4>
               <div className="clips-scroller">
-                {clips.map((clip, idx) => (
+                {orderedClips.map((clip, idx) => (
                   <div
                     key={clip.id}
+                    data-testid={`detected-clip-${clip.id}`}
                     className={`clip-card ${selectedClip && selectedClip.id === clip.id ? "active" : ""}`}
+                    draggable={orderedClips.length > 1}
+                    onDragStart={() => setDraggedDetectedClipId(clip.id)}
+                    onDragEnd={() => setDraggedDetectedClipId(null)}
+                    onDragOver={e => {
+                      e.preventDefault();
+                    }}
+                    onDrop={e => {
+                      e.preventDefault();
+                      if (draggedDetectedClipId === null || draggedDetectedClipId === clip.id)
+                        return;
+                      moveDetectedClipToIndex(draggedDetectedClipId, idx);
+                      setDraggedDetectedClipId(null);
+                    }}
                     onClick={() => {
                       setSelectedClip(clip);
                       videoRef.current.src = sanitizeUrl(videoUrl); // Reset to main video source
                     }}
+                    style={
+                      draggedDetectedClipId === clip.id
+                        ? { borderStyle: "dashed", borderColor: "#e52e71" }
+                        : undefined
+                    }
                   >
                     <span className="clip-badge">#{idx + 1}</span>
                     <span className="clip-time">{Math.round(clip.duration)}s</span>
                     <p>{clip.reason}</p>
+                    {orderedClips.length > 1 && (
+                      <div style={{ display: "flex", gap: "4px", marginLeft: "8px" }}>
+                        <button
+                          type="button"
+                          className="resize-btn"
+                          title="Move moment earlier"
+                          data-testid={`detected-move-left-${clip.id}`}
+                          onClick={e => {
+                            e.stopPropagation();
+                            moveDetectedClip(clip.id, "backward");
+                          }}
+                          disabled={idx === 0}
+                        >
+                          ←
+                        </button>
+                        <button
+                          type="button"
+                          className="resize-btn"
+                          title="Move moment later"
+                          data-testid={`detected-move-right-${clip.id}`}
+                          onClick={e => {
+                            e.stopPropagation();
+                            moveDetectedClip(clip.id, "forward");
+                          }}
+                          disabled={idx === orderedClips.length - 1}
+                        >
+                          →
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -904,6 +1810,9 @@ const ViralClipStudio = ({
               >
                 <span>📹</span> Add Video
               </button>
+              <button className="tool-btn" onClick={() => imageInputRef.current?.click()}>
+                <span>🖼️</span> Add Image
+              </button>
               <button
                 className="tool-btn"
                 onClick={() => setVideoFit(prev => (prev === "contain" ? "cover" : "contain"))}
@@ -917,6 +1826,55 @@ const ViralClipStudio = ({
                 style={{ display: "none" }}
                 onChange={addVideoLayer}
               />
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={addImageLayer}
+              />
+              {images.length > 0 && (
+                <div
+                  style={{
+                    marginTop: "10px",
+                    padding: "10px",
+                    background: "#f5f5f5",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <h5 style={{ margin: "0 0 8px 0" }}>🖼️ Image Library</h5>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    {images.slice(0, 6).map((imageAsset, index) => {
+                      const imageSrc = normalizeAssetUrl(imageAsset);
+                      if (!imageSrc) return null;
+                      return (
+                        <button
+                          key={imageAsset.id || imageSrc || index}
+                          type="button"
+                          onClick={() => addExistingImageOverlay(imageAsset)}
+                          style={{
+                            width: "58px",
+                            height: "58px",
+                            padding: 0,
+                            borderRadius: "8px",
+                            border: "1px solid #d0d0d0",
+                            overflow: "hidden",
+                            cursor: "pointer",
+                            background: "#fff",
+                          }}
+                          title="Add image overlay"
+                        >
+                          <img
+                            src={sanitizeUrl(imageSrc)}
+                            alt="Overlay option"
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               <button
                 className="tool-btn"
                 onClick={() => {
@@ -949,8 +1907,8 @@ const ViralClipStudio = ({
                   borderRadius: "8px",
                 }}
               >
-                <h5 style={{ margin: "0 0 10px 0" }}>🤖 AI Enhancements</h5>
-                <label style={{ display: "block", marginBottom: "8px", cursor: "pointer" }}>
+                <h5 style={sidebarSectionTitleStyle}>🤖 AI Enhancements</h5>
+                <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "8px" }}>
                   <input
                     type="checkbox"
                     checked={autoCaptions}
@@ -959,7 +1917,7 @@ const ViralClipStudio = ({
                   />
                   Auto-Captions (Burn-in)
                 </label>
-                <label style={{ display: "block", cursor: "pointer" }}>
+                <label style={sidebarCheckboxLabelStyle}>
                   <input
                     type="checkbox"
                     checked={smartCrop}
@@ -969,6 +1927,231 @@ const ViralClipStudio = ({
                   Smart Crop (Keep face centered)
                 </label>
               </div>
+
+              {overlays.length > 0 && (
+                <div
+                  style={{
+                    marginTop: "15px",
+                    padding: "10px",
+                    background: "#f5f5f5",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <h5 style={{ margin: "0 0 10px 0" }}>🧱 Overlay Layers</h5>
+                  <p style={{ fontSize: "12px", color: "#666", margin: "0 0 8px 0" }}>
+                    Top layer is listed first. Reordering here affects preview and final render.
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    {[...overlays].reverse().map((overlay, reversedIndex) => {
+                      const actualIndex = overlays.length - 1 - reversedIndex;
+                      const isActive = activeOverlayId === overlay.id;
+                      const label =
+                        overlay.type === "text"
+                          ? `Text: ${(overlay.text || "").slice(0, 16) || "Untitled"}`
+                          : overlay.tag === "gameplay"
+                            ? "Gameplay Layer"
+                            : `${overlay.type === "image" ? "Image" : "Video"} Overlay`;
+
+                      return (
+                        <div
+                          key={overlay.id}
+                          onClick={() => setActiveOverlayId(overlay.id)}
+                          draggable
+                          onDragStart={() => setDraggedOverlayId(overlay.id)}
+                          onDragEnd={() => setDraggedOverlayId(null)}
+                          onDragOver={e => {
+                            e.preventDefault();
+                          }}
+                          onDrop={e => {
+                            e.preventDefault();
+                            if (draggedOverlayId === null || draggedOverlayId === overlay.id)
+                              return;
+                            moveOverlayToIndex(draggedOverlayId, actualIndex);
+                            setDraggedOverlayId(null);
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            padding: "8px",
+                            borderRadius: "8px",
+                            border:
+                              draggedOverlayId === overlay.id
+                                ? "2px dashed #e52e71"
+                                : isActive
+                                  ? "2px solid #111"
+                                  : "1px solid #ddd",
+                            background: isActive ? "#fff" : "#fafafa",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <span style={{ flex: 1, fontSize: "12px", fontWeight: 600 }}>
+                            {label}
+                          </span>
+                          {(overlay.type === "video" || overlay.type === "image") && (
+                            <button
+                              type="button"
+                              className="resize-btn"
+                              onClick={e => {
+                                e.stopPropagation();
+                                toggleOverlayAspectRatioLock(overlay.id);
+                              }}
+                              title={
+                                overlay.aspectRatioLocked
+                                  ? "Unlock aspect ratio"
+                                  : "Lock aspect ratio"
+                              }
+                            >
+                              {overlay.aspectRatioLocked ? "Lock" : "Free"}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="resize-btn"
+                            onClick={e => {
+                              e.stopPropagation();
+                              moveOverlay(overlay.id, "forward");
+                            }}
+                            disabled={actualIndex === overlays.length - 1}
+                            title="Move toward the front"
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            className="resize-btn"
+                            onClick={e => {
+                              e.stopPropagation();
+                              moveOverlay(overlay.id, "backward");
+                            }}
+                            disabled={actualIndex === 0}
+                            title="Move toward the back"
+                          >
+                            ↓
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {activeOverlay && (
+                <div
+                  style={{
+                    marginTop: "15px",
+                    padding: "10px",
+                    background: "#f5f5f5",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <h5 style={{ margin: "0 0 10px 0" }}>🎛️ Active Overlay</h5>
+                  <p style={{ fontSize: "12px", color: "#666", margin: "0 0 10px 0" }}>
+                    Arrow keys nudge the selected overlay. Hold Shift for larger steps.
+                  </p>
+                  <div style={{ display: "grid", gap: "8px" }}>
+                    <label style={{ fontSize: "12px", fontWeight: 600 }}>
+                      X Position: {Math.round(activeOverlay.x || 0)}%
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={activeOverlay.x || 0}
+                        onChange={e =>
+                          updateOverlayPosition(
+                            activeOverlay.id,
+                            "x",
+                            Number(e.target.value) - Number(activeOverlay.x || 0)
+                          )
+                        }
+                        style={{ width: "100%" }}
+                      />
+                    </label>
+                    <label style={{ fontSize: "12px", fontWeight: 600 }}>
+                      Y Position: {Math.round(activeOverlay.y || 0)}%
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={activeOverlay.y || 0}
+                        onChange={e =>
+                          updateOverlayPosition(
+                            activeOverlay.id,
+                            "y",
+                            Number(e.target.value) - Number(activeOverlay.y || 0)
+                          )
+                        }
+                        style={{ width: "100%" }}
+                      />
+                    </label>
+                    {(activeOverlay.type === "video" || activeOverlay.type === "image") && (
+                      <>
+                        <label style={{ fontSize: "12px", fontWeight: 600 }}>
+                          Width: {Math.round(activeOverlay.width || 0)}%
+                          <input
+                            type="range"
+                            min={10}
+                            max={100}
+                            step={1}
+                            value={activeOverlay.width || 35}
+                            onChange={e =>
+                              updateOverlaySize(
+                                activeOverlay.id,
+                                "width",
+                                Number(e.target.value) - Number(activeOverlay.width || 35)
+                              )
+                            }
+                            style={{ width: "100%" }}
+                          />
+                        </label>
+                        <label style={{ fontSize: "12px", fontWeight: 600 }}>
+                          Height: {Math.round(activeOverlay.height || 0)}%
+                          <input
+                            type="range"
+                            min={10}
+                            max={100}
+                            step={1}
+                            value={activeOverlay.height || 35}
+                            onChange={e =>
+                              updateOverlaySize(
+                                activeOverlay.id,
+                                "height",
+                                Number(e.target.value) - Number(activeOverlay.height || 35)
+                              )
+                            }
+                            style={{ width: "100%" }}
+                          />
+                        </label>
+                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                          <button
+                            type="button"
+                            className="tool-btn"
+                            onClick={() => toggleOverlayAspectRatioLock(activeOverlay.id)}
+                          >
+                            {activeOverlay.aspectRatioLocked ? "Unlock Ratio" : "Lock Ratio"}
+                          </button>
+                          <button
+                            type="button"
+                            className="tool-btn"
+                            onClick={() => centerOverlay(activeOverlay.id)}
+                          >
+                            Center Overlay
+                          </button>
+                          <button
+                            type="button"
+                            className="tool-btn"
+                            onClick={() => duplicateOverlay(activeOverlay.id)}
+                          >
+                            Duplicate
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div
@@ -979,44 +2162,26 @@ const ViralClipStudio = ({
                 borderRadius: "8px",
               }}
             >
-              <h5 style={{ margin: "0 0 10px 0" }}>🎮 Split-Screen (Retention)</h5>
-              <p style={{ fontSize: "12px", color: "#666", marginBottom: "8px" }}>
+              <h5 style={sidebarSectionTitleStyle}>🎮 Split-Screen (Retention)</h5>
+              <p style={{ ...sidebarBodyTextStyle, margin: "0 0 8px 0" }}>
                 Add a gameplay loop to default to keep viewers watching if there's a lull in your
                 video.
               </p>
               <div style={{ display: "flex", gap: "5px", flexDirection: "column" }}>
                 <button
-                  style={{
-                    padding: "8px",
-                    cursor: "pointer",
-                    background: "white",
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                  }}
+                  style={sidebarActionButtonStyle}
                   onClick={() => handleSplitScreen("runner")}
                 >
                   🏎️ Add Runner
                 </button>
                 <button
-                  style={{
-                    padding: "8px",
-                    cursor: "pointer",
-                    background: "white",
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                  }}
+                  style={sidebarActionButtonStyle}
                   onClick={() => handleSplitScreen("shooter")}
                 >
                   🔫 Add Shooter
                 </button>
                 <button
-                  style={{
-                    padding: "8px",
-                    cursor: "pointer",
-                    background: "white",
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                  }}
+                  style={sidebarActionButtonStyle}
                   onClick={() => document.getElementById("gameplay-upload-input").click()}
                 >
                   📁 Upload Custom
@@ -1039,7 +2204,7 @@ const ViralClipStudio = ({
                 borderRadius: "8px",
               }}
             >
-              <h5 style={{ margin: "0 0 10px 0" }}>🤖 AI Enhancements</h5>
+              <h5 style={sidebarSectionTitleStyle}>🤖 AI Enhancements</h5>
 
               <button
                 className="export-btn"
@@ -1053,6 +2218,7 @@ const ViralClipStudio = ({
                   if (!auth.currentUser) return alert("Please login first");
 
                   try {
+                    const exportTimeline = await buildExportTimeline();
                     const newOverlays = await Promise.all(
                       overlays.map(async overlay => {
                         let fileToUpload = overlay.file;
@@ -1133,9 +2299,18 @@ const ViralClipStudio = ({
                       })
                     );
 
+                    const normalizedOverlays = normalizeOverlaysForExport(
+                      exportTimeline,
+                      newOverlays
+                    );
+
                     setOverlays(newOverlays);
                     // Pass AI options to the save handler
-                    onSave(selectedClip, newOverlays, { autoCaptions, smartCrop });
+                    onSave(selectedClip, normalizedOverlays, {
+                      autoCaptions,
+                      smartCrop,
+                      timelineSegments: exportTimeline,
+                    });
                   } catch (err) {
                     alert("Export failed: " + err.message);
                   } finally {

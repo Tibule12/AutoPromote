@@ -6,10 +6,15 @@ const authMiddleware = require("./authMiddleware");
 const Joi = require("joi");
 const path = require("path");
 const sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
-const { usageLimitMiddleware, trackUsage } = require("./middlewares/usageLimitMiddleware");
+const {
+  usageLimitMiddleware,
+  trackUsage,
+  getUserUsageStats,
+} = require("./middlewares/usageLimitMiddleware");
 const costControlMiddleware = require("./middlewares/costControlMiddleware");
 const fetch = require("node-fetch");
 const { safeFetch } = require("./utils/ssrfGuard");
+const { getPlan } = require("./services/planService");
 // NEW: Services for Engagement-as-Currency Architecture
 const billingService = require("./services/billingService");
 const complianceService = require("./services/complianceService");
@@ -175,12 +180,54 @@ function summarizeSchedule(doc) {
   };
 }
 
+function isExternalPlatformPageUrl(value) {
+  if (!value || typeof value !== "string") return false;
+
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase();
+    return [
+      "tiktok.com",
+      "youtube.com",
+      "youtu.be",
+      "instagram.com",
+      "facebook.com",
+      "fb.watch",
+      "twitter.com",
+      "x.com",
+      "linkedin.com",
+      "reddit.com",
+      "pinterest.com",
+      "snapchat.com",
+    ].some(domain => host === domain || host.endsWith(`.${domain}`));
+  } catch (_error) {
+    return false;
+  }
+}
+
 function resolveContentMediaUrl(record) {
-  return record.url || record.media_url || record.video_url || record.file_url || null;
+  const candidates = [
+    record.processedUrl,
+    record.persistentMediaUrl,
+    record.downloadInfo?.url,
+    record.url,
+    record.mediaUrl,
+    record.media_url,
+    record.video_url,
+    record.file_url,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string" || !candidate.trim()) continue;
+    if (isExternalPlatformPageUrl(candidate)) continue;
+    return candidate;
+  }
+
+  return null;
 }
 
 function resolvePreviewMediaUrl(record) {
-  return record.processedUrl || record.persistentMediaUrl || resolveContentMediaUrl(record);
+  return resolveContentMediaUrl(record);
 }
 
 function resolvePreviewPlatform(record, requestedPlatform) {
@@ -196,6 +243,50 @@ function resolvePreviewPlatform(record, requestedPlatform) {
 function getPreviewAttemptNumber(record, platform) {
   const current = Number(record?.autoRepostState?.platforms?.[platform]?.attemptsScheduled || 0);
   return Math.max(1, current + 1);
+}
+
+function extractStoragePathFromUrl(fileUrl) {
+  if (!fileUrl || typeof fileUrl !== "string") return null;
+
+  try {
+    if (fileUrl.startsWith("gs://")) {
+      const parts = fileUrl.split("/");
+      return parts.length >= 4 ? parts.slice(3).join("/") : null;
+    }
+
+    const decoded = decodeURIComponent(fileUrl);
+    if (decoded.includes("/o/")) {
+      const afterO = decoded.split("/o/")[1];
+      return afterO ? afterO.split("?")[0] : null;
+    }
+
+    if (decoded.includes("storage.googleapis.com")) {
+      const parsed = new URL(decoded);
+      const pathParts = parsed.pathname.split("/").filter(Boolean);
+      return pathParts.length > 1 ? pathParts.slice(1).join("/") : null;
+    }
+  } catch (_error) {
+    return null;
+  }
+
+  return null;
+}
+
+function buildSourceRetentionMetadata(fileUrl) {
+  const storagePath = extractStoragePathFromUrl(fileUrl);
+  if (!storagePath || !storagePath.startsWith("uploads/")) {
+    return {};
+  }
+
+  const retentionDays = parseInt(process.env.SOURCE_UPLOAD_RETENTION_DAYS || "14", 10);
+  const deleteAfter = new Date(Date.now() + retentionDays * 24 * 60 * 60 * 1000).toISOString();
+  return {
+    storagePath,
+    sourceRetentionDays: retentionDays,
+    sourceDeleteAfter: deleteAfter,
+    sourceRetentionStatus: "active",
+    sourceRetentionUpdatedAt: new Date().toISOString(),
+  };
 }
 
 function inferDownloadExtension(mediaUrl, type) {
@@ -240,6 +331,172 @@ function hasExplicitFutureSchedule(scheduledPromotionTime) {
   const scheduledAt = Date.parse(scheduledPromotionTime);
   return Number.isFinite(scheduledAt) && scheduledAt > Date.now() + 30000;
 }
+
+function toPositiveFiniteNumber(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+async function getPromotionQuotaSnapshot(userId, tierId) {
+  const plan = getPlan(tierId);
+  const quota = toPositiveFiniteNumber(plan && plan.monthlyTaskQuota);
+
+  if (quota <= 0) {
+    return { enforced: false, limit: null, used: 0, remaining: null };
+  }
+
+  const now = new Date();
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+  const snap = await db
+    .collection("promotion_tasks")
+    .where("uid", "==", userId)
+    .where("createdAt", ">=", monthStart)
+    .where("type", "==", "platform_post")
+    .limit(quota + 5)
+    .get();
+
+  return {
+    enforced: true,
+    limit: quota,
+    used: snap.size,
+    remaining: Math.max(0, quota - snap.size),
+  };
+}
+
+async function evaluateUploadReadiness(userId, options = {}) {
+  const targetPlatforms = Array.isArray(options.target_platforms)
+    ? options.target_platforms.filter(Boolean)
+    : [];
+  const platformCount = targetPlatforms.length;
+  const scheduledPromotionTime = options.scheduled_promotion_time || null;
+  const requiredDistributionTasks =
+    platformCount > 0 && !hasExplicitFutureSchedule(scheduledPromotionTime) ? platformCount : 0;
+
+  const [{ tierId, tier }, usageStats] = await Promise.all([
+    billingService.getEffectiveTierSnapshot(userId),
+    getUserUsageStats(userId),
+  ]);
+  const promotionQuota = await getPromotionQuotaSnapshot(userId, tierId);
+
+  const base = {
+    allowed: true,
+    tierId,
+    tierName: tier.name,
+    upload: usageStats,
+    platformLimit: tier.platform_limit,
+    promotionQuota,
+    requiredDistributionTasks,
+  };
+
+  if (usageStats.limit !== Infinity && usageStats.remaining <= 0) {
+    return {
+      ...base,
+      allowed: false,
+      code: "UPLOAD_CAP_EXCEEDED",
+      message: `Your ${tier.name} plan has no uploads remaining for ${usageStats.monthKey}.`,
+      context: {
+        tier: tierId,
+        limit: usageStats.limit,
+        used: usageStats.used,
+        remaining: usageStats.remaining,
+        monthKey: usageStats.monthKey,
+        upgrade_required: true,
+        suggested_tier: tierId === "free" ? "PREMIUM" : "PRO",
+      },
+    };
+  }
+
+  if (
+    platformCount > 0 &&
+    tier.platform_limit !== Infinity &&
+    platformCount > tier.platform_limit
+  ) {
+    return {
+      ...base,
+      allowed: false,
+      code: "PLATFORM_LIMIT_EXCEEDED",
+      message: `Your ${tier.name} plan is limited to ${tier.platform_limit} platform(s) per post.`,
+      context: {
+        tier: tierId,
+        limit: tier.platform_limit,
+        attempted: platformCount,
+        upgrade_required: true,
+        suggested_tier: platformCount > 3 ? "PRO" : "PREMIUM",
+      },
+    };
+  }
+
+  if (
+    requiredDistributionTasks > 0 &&
+    promotionQuota.enforced &&
+    requiredDistributionTasks > promotionQuota.remaining
+  ) {
+    return {
+      ...base,
+      allowed: false,
+      code: "PROMOTION_TASK_QUOTA_EXCEEDED",
+      message: `Your ${tier.name} plan has ${promotionQuota.remaining} automated distribution task(s) remaining this month. Publishing to ${platformCount} platform(s) needs ${requiredDistributionTasks}.`,
+      context: {
+        tier: tierId,
+        required: requiredDistributionTasks,
+        limit: promotionQuota.limit,
+        used: promotionQuota.used,
+        remaining: promotionQuota.remaining,
+        upgrade_required: true,
+        suggested_tier: tierId === "free" ? "PREMIUM" : "PRO",
+      },
+    };
+  }
+
+  return base;
+}
+
+function shouldBypassUploadReadinessForTest(req) {
+  if (process.env.NODE_ENV === "production") return false;
+
+  const authHeader = req.headers?.authorization || req.headers?.Authorization || "";
+  const hasTestToken =
+    typeof authHeader === "string" && authHeader.includes("test-token-for-");
+  const isTestRuntime =
+    process.env.NODE_ENV === "test" || typeof process.env.JEST_WORKER_ID !== "undefined";
+
+  return isTestRuntime && req.user?.test === true && hasTestToken;
+}
+
+router.post(
+  "/upload/readiness",
+  authMiddleware,
+  rateLimitMiddleware(20, 60000),
+  async (req, res) => {
+    try {
+      const userId = req.userId || req.user?.uid;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+      if (shouldBypassUploadReadinessForTest(req)) {
+        return res.json({
+          ok: true,
+          readiness: {
+            allowed: true,
+            tierId: "test",
+            tierName: "Test",
+            upload: null,
+            platformLimit: Infinity,
+            promotionQuota: { enforced: false, limit: null, used: 0, remaining: null },
+            requiredDistributionTasks: 0,
+          },
+        });
+      }
+
+      const readiness = await evaluateUploadReadiness(userId, req.body || {});
+      return res.json({ ok: true, readiness });
+    } catch (error) {
+      logger.error("[upload.readiness] Failed to evaluate readiness", {
+        error: error && error.message ? error.message : String(error),
+      });
+      return res.status(500).json({ error: "Failed to evaluate upload readiness" });
+    }
+  }
+);
 
 // Content upload schema
 const contentUploadSchema = Joi.object({
@@ -475,6 +732,23 @@ router.post(
       const isAdmin = !!(req.user && (req.user.isAdmin === true || req.user.role === "admin"));
       const detectedIntent = determineContentIntent(platform_options);
 
+      if (!req.body.isDryRun) {
+        if (!shouldBypassUploadReadinessForTest(req)) {
+          const readiness = await evaluateUploadReadiness(userId, {
+            target_platforms,
+            scheduled_promotion_time,
+          });
+          if (!readiness.allowed) {
+            return res.status(403).json({
+              error: readiness.message,
+              code: readiness.code || "TIER_LIMIT_EXCEEDED",
+              upgrade_required: readiness.context?.upgrade_required === true,
+              context: readiness.context || null,
+            });
+          }
+        }
+      }
+
       // 1. COMPLIANCE CHECK (The "Lawyer" Layer)
       // Ensures content meets platform-specific legal/ToS requirements before processing
       try {
@@ -521,8 +795,9 @@ router.post(
         logger.warn(`[Billing] Limit reached for user ${userId}: ${err.message}`);
         return res.status(403).json({
           error: err.message,
-          code: "TIER_LIMIT_EXCEEDED",
-          upgrade_required: true,
+          code: err.code || "TIER_LIMIT_EXCEEDED",
+          upgrade_required: err.context?.upgrade_required === true || true,
+          context: err.context || null,
         });
       }
 
@@ -561,6 +836,7 @@ router.post(
         approvalStatus: "approved",
         status: "approved",
         viral_optimized: true,
+        ...buildSourceRetentionMetadata(url),
       };
 
       // Support preview/dry-run requests from the frontend: do not persist content,
@@ -1237,6 +1513,7 @@ router.post("/:id/repost-preview", authMiddleware, async (req, res) => {
       contentId: ownedContent.id,
       uid: userId,
       url: sourceUrl,
+      sourceStoragePath: record.storagePath || extractStoragePathFromUrl(sourceUrl),
       meta: {
         previewOnly: true,
         viral_remix: true,

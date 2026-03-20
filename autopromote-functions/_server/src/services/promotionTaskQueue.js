@@ -611,12 +611,8 @@ async function enqueuePlatformPostTask({
   // Quota enforcement (monthly task quota based on plan)
   try {
     console.log("[enqueue] checking quota for uid", uid);
-    const userRef = db.collection("users").doc(uid);
-    const userSnap = await userRef.get();
-    const planTier =
-      userSnap.exists && userSnap.data().plan
-        ? userSnap.data().plan.tier || userSnap.data().plan.id || "free"
-        : "free";
+    const { getEffectiveTierSnapshot } = require("./billingService");
+    const { tierId: planTier } = await getEffectiveTierSnapshot(uid);
     console.log("[enqueue] plan tier:", planTier);
     const { getPlan } = require("./planService");
     const plan = getPlan(planTier);

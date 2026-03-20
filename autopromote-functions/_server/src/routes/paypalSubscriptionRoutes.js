@@ -8,6 +8,7 @@ const { db } = require("../firebaseAdmin");
 const { audit } = require("../services/auditLogger");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 const { SUBSCRIPTION_PLANS, normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
+const { getEffectiveTierSnapshot } = require("../services/billingService");
 
 // PayPal SDK + helpers
 const paypalClient = require("../paypalClient");
@@ -38,6 +39,54 @@ if (!fetchFn) {
 }
 
 const { safeFetch } = require("../utils/ssrfGuard");
+
+function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
+  if (!paypalPlanId) return null;
+  const match = Object.values(SUBSCRIPTION_PLANS).find(plan => {
+    const configuredId = plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : null;
+    return configuredId && configuredId === paypalPlanId;
+  });
+  return match ? match.id : null;
+}
+
+function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
+  const effectivePlan = resolvePlan(snapshot.tierId || "free");
+  const rawStatus = String(
+    subscription.status ||
+      snapshot.userData?.subscriptionStatus ||
+      snapshot.billingData?.status ||
+      "active"
+  ).toLowerCase();
+
+  return {
+    planId: snapshot.tierId,
+    planName: effectivePlan.name,
+    status: snapshot.tierId === "free" ? "active" : rawStatus,
+    rawStatus,
+    effectiveTier: snapshot.tierId,
+    billingTier: normalizePlanId(snapshot.billingData?.tier || "free"),
+    userTier: normalizePlanId(
+      snapshot.userData?.subscriptionTier || snapshot.userData?.subscription?.planId || "free"
+    ),
+    amount: subscription.amount || effectivePlan.price || 0,
+    currency: subscription.currency || "USD",
+    nextBillingDate:
+      snapshot.tierId === "free"
+        ? null
+        : subscription.nextBillingDate || snapshot.userData?.subscriptionPeriodEnd || null,
+    features: effectivePlan.features,
+    cancelledAt: subscription.cancelledAt || snapshot.userData?.subscriptionCancelledAt || null,
+    expiresAt:
+      snapshot.tierId === "free"
+        ? null
+        : subscription.expiresAt ||
+          snapshot.userData?.subscriptionExpiresAt ||
+          snapshot.userData?.subscriptionPeriodEnd ||
+          null,
+    subscriptionId:
+      subscription.paypalSubscriptionId || snapshot.userData?.paypalSubscriptionId || null,
+  };
+}
 
 async function getAccessToken() {
   if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET)
@@ -278,20 +327,15 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
 router.post("/activate", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
-    const { subscriptionId } = req.body;
+    const { subscriptionId, planId: requestedPlanId } = req.body;
 
     if (!userId || !subscriptionId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Get subscription intent
     const intentDoc = await db.collection("subscription_intents").doc(subscriptionId).get();
-    if (!intentDoc.exists) {
-      return res.status(404).json({ error: "Subscription not found" });
-    }
-
-    const intent = intentDoc.data();
-    if (intent.userId !== userId) {
+    const intent = intentDoc.exists ? intentDoc.data() : null;
+    if (intent && intent.userId !== userId) {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
@@ -324,7 +368,29 @@ router.post("/activate", authMiddleware, async (req, res) => {
       });
     }
 
-    const planId = normalizePlanId(intent.planId);
+    if (paypalSub.custom_id && paypalSub.custom_id !== userId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const derivedPlanId =
+      findInternalPlanIdByPayPalPlanId(paypalSub.plan_id) || normalizePlanId(requestedPlanId);
+    const planId = normalizePlanId(intent?.planId || derivedPlanId);
+    if (!planId || planId === "free") {
+      return res.status(400).json({ error: "Subscription plan not recognized" });
+    }
+
+    if (!intentDoc.exists) {
+      await db.collection("subscription_intents").doc(subscriptionId).set({
+        userId,
+        planId,
+        paypalSubscriptionId: subscriptionId,
+        status: "approved",
+        amount: resolvePlan(planId).price,
+        createdAt: new Date().toISOString(),
+        source: "paypal_sdk",
+      });
+    }
+
     const plan = resolvePlan(planId);
 
     // Update user subscription in Firestore
@@ -373,10 +439,10 @@ router.post("/activate", authMiddleware, async (req, res) => {
       });
 
     // Update intent status
-    await db.collection("subscription_intents").doc(subscriptionId).update({
+    await db.collection("subscription_intents").doc(subscriptionId).set({
       status: "activated",
       activatedAt: new Date().toISOString(),
-    });
+    }, { merge: true });
 
     // Log subscription event
     await db.collection("subscription_events").add({
@@ -444,16 +510,23 @@ router.post("/cancel", authMiddleware, async (req, res) => {
 
     // Update user record
     await db.collection("users").doc(userId).update({
+      subscriptionTier: "free",
       subscriptionStatus: "cancelled",
       subscriptionCancelledAt: new Date().toISOString(),
-      // Keep features until period end
-      subscriptionExpiresAt: userData.subscriptionPeriodEnd,
+      subscriptionExpiresAt: new Date().toISOString(),
+      subscriptionPeriodEnd: new Date().toISOString(),
+      isPaid: false,
+      unlimited: false,
+      features: SUBSCRIPTION_PLANS.free.features,
       updatedAt: new Date().toISOString(),
     });
 
     await db.collection("user_billing").doc(userId).set(
       {
         tier: "free",
+        status: "cancelled",
+        expiresAt: new Date().toISOString(),
+        nextBillingDate: null,
         updatedAt: new Date().toISOString(),
       },
       { merge: true }
@@ -464,7 +537,7 @@ router.post("/cancel", authMiddleware, async (req, res) => {
       status: "cancelled",
       cancelledAt: new Date().toISOString(),
       cancelReason: reason,
-      expiresAt: userData.subscriptionPeriodEnd,
+      expiresAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
 
@@ -486,8 +559,8 @@ router.post("/cancel", authMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      message: "Subscription cancelled. You'll retain access until the end of your billing period.",
-      expiresAt: userData.subscriptionPeriodEnd,
+      message: "Subscription cancelled and downgraded immediately to Free.",
+      expiresAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error("[PayPal] Cancel subscription error:", error);
@@ -529,12 +602,11 @@ router.get("/status", async (req, res) => {
     if (!userId) {
       return res.json({
         success: true,
-        subscription: {
-          planId: "free",
-          planName: "Free",
-          status: "active",
-          features: SUBSCRIPTION_PLANS.free.features,
-        },
+        subscription: buildSubscriptionStatusPayload({
+          tierId: "free",
+          userData: {},
+          billingData: { tier: "free" },
+        }),
       });
     }
 
@@ -545,30 +617,11 @@ router.get("/status", async (req, res) => {
     } catch (dbError) {
       console.error("[PayPal] Database error:", dbError);
       // Return free plan if DB error
-      return res.json({
-        success: true,
-        subscription: {
-          planId: "free",
-          planName: "Free",
-          status: "active",
-          features: SUBSCRIPTION_PLANS.free.features,
-        },
-      });
+      const snapshot = await getEffectiveTierSnapshot(userId);
+      return res.json({ success: true, subscription: buildSubscriptionStatusPayload(snapshot) });
     }
 
-    if (!subDoc.exists) {
-      return res.json({
-        success: true,
-        subscription: {
-          planId: "free",
-          planName: "Free",
-          status: "active",
-          features: SUBSCRIPTION_PLANS.free.features,
-        },
-      });
-    }
-
-    const subscription = subDoc.data();
+    const subscription = subDoc.exists ? subDoc.data() : {};
 
     // Sync with PayPal if active
     if (subscription.paypalSubscriptionId && subscription.status === "active") {
@@ -593,19 +646,10 @@ router.get("/status", async (req, res) => {
       }
     }
 
+    const snapshot = await getEffectiveTierSnapshot(userId);
     res.json({
       success: true,
-      subscription: {
-        planId: subscription.planId,
-        planName: subscription.planName,
-        status: subscription.status,
-        amount: subscription.amount,
-        currency: subscription.currency,
-        nextBillingDate: subscription.nextBillingDate,
-        features: subscription.features,
-        cancelledAt: subscription.cancelledAt,
-        expiresAt: subscription.expiresAt,
-      },
+      subscription: buildSubscriptionStatusPayload(snapshot, subscription),
     });
   } catch (error) {
     console.error("[PayPal] Get status error:", error);
@@ -832,11 +876,27 @@ router.post("/admin/cancel-subscription", authMiddleware, async (req, res) => {
 
     // Update user record
     await db.collection("users").doc(userId).update({
+      subscriptionTier: "free",
       subscriptionStatus: "cancelled",
       subscriptionCancelledAt: new Date().toISOString(),
-      // We don't change expiration because they paid for the month
+      subscriptionExpiresAt: new Date().toISOString(),
+      subscriptionPeriodEnd: new Date().toISOString(),
+      isPaid: false,
+      unlimited: false,
+      features: SUBSCRIPTION_PLANS.free.features,
       updatedAt: new Date().toISOString(),
     });
+
+    await db.collection("user_billing").doc(userId).set(
+      {
+        tier: "free",
+        status: "cancelled",
+        expiresAt: new Date().toISOString(),
+        nextBillingDate: null,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
 
     // Update subscription record
     await db
@@ -846,6 +906,7 @@ router.post("/admin/cancel-subscription", authMiddleware, async (req, res) => {
         status: "cancelled",
         cancelledAt: new Date().toISOString(),
         cancelReason: reason || "Admin action",
+        expiresAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
 

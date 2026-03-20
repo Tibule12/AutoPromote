@@ -5,6 +5,7 @@ const { db, storage } = require("../firebaseAdmin");
 const logger = require("../utils/logger");
 const url = require("url");
 const { normalizePlanId, getUploadLimitForPlan } = require("../config/subscriptionPlans");
+const { getEffectiveTierSnapshot } = require("../services/billingService");
 
 // Free tier upload limit (per month). Can be overridden with env var FREE_UPLOAD_LIMIT.
 // Default matches the PayPal plan configuration (5 uploads/month).
@@ -74,8 +75,6 @@ function usageLimitMiddleware(options = {}) {
       // Also permit bypass when a recognized E2E header/token/host is present.
       const hostHeader = req.headers && (req.headers.host || "");
       const isE2EDebugHeader = req.headers && req.headers["x-playwright-e2e"] === "1";
-      const isLocalHost =
-        hostHeader && (hostHeader.includes("127.0.0.1") || hostHeader.includes("localhost"));
       const ua = req.headers && req.headers["user-agent"];
       const isNodeFetchUA = typeof ua === "string" && ua.includes("node-fetch");
       const auth = req.headers && req.headers.authorization;
@@ -88,7 +87,6 @@ function usageLimitMiddleware(options = {}) {
         typeof process.env.JEST_WORKER_ID !== "undefined" ||
         process.env.BYPASS_ACCEPTED_TERMS === "1" ||
         isE2EDebugHeader ||
-        isLocalHost ||
         isNodeFetchUA ||
         isTestToken
       ) {
@@ -103,7 +101,6 @@ function usageLimitMiddleware(options = {}) {
           logger.debug("[usageLimit] E2E/Test bypass applied", {
             hostHeader: hostHeader,
             isE2EDebugHeader,
-            isLocalHost,
             isNodeFetchUA,
             isTestToken,
           });
@@ -127,35 +124,21 @@ function usageLimitMiddleware(options = {}) {
       // Check if user has subscription info
       const userDoc = await db.collection("users").doc(userId).get();
       const userData = userDoc.data() || {};
-      const createdAt = userData.createdAt
-        ? userData.createdAt.toDate
-          ? userData.createdAt.toDate()
-          : new Date(userData.createdAt)
-        : new Date(0); // fallback if missing
-
-      // Phase 1: Onboarding Logic - Unlimited uploads for first 3 months (90 days)
-      const ONBOARDING_PERIOD_MS = 90 * 24 * 60 * 60 * 1000;
-      const isInOnboarding = Date.now() - createdAt.getTime() < ONBOARDING_PERIOD_MS;
 
       // Determine the user's subscription tier
-      const subscriptionTier = normalizePlanId(
-        userData.subscriptionTier ||
-          (userData.subscription && userData.subscription.planId) ||
-          "free"
-      );
+      const { tierId: subscriptionTier } = await getEffectiveTierSnapshot(userId, null, userData);
 
       // Determine upload limit for the user based on plan
       const planLimit = SUBSCRIPTION_UPLOAD_LIMITS[subscriptionTier] ?? FREE_UPLOAD_LIMIT;
       const hasUnlimitedUploads = planLimit === Infinity;
 
-      // If the user has unlimited (paid) or is in onboarding, allow without counting
-      if (hasUnlimitedUploads || isInOnboarding) {
+      // Paid tiers with unlimited uploads bypass monthly counting.
+      if (hasUnlimitedUploads) {
         req.userUsage = {
           limit: planLimit,
           used: 0,
           remaining: planLimit,
           isPaid: hasUnlimitedUploads,
-          isInOnboarding: !hasUnlimitedUploads && isInOnboarding,
           monthKey: new Date().toISOString().slice(0, 7),
         };
         return next();
@@ -292,9 +275,8 @@ async function getUserUsageStats(userId) {
     const userDoc = await db.collection("users").doc(userId).get();
     const userData = userDoc.data() || {};
 
-    const normalizedTier = normalizePlanId(userData.subscriptionTier || "free");
-    const isPaidTier =
-      normalizedTier !== "free" || userData.isPaid === true || userData.unlimited === true;
+    const { tierId: normalizedTier } = await getEffectiveTierSnapshot(userId, null, userData);
+    const isPaidTier = normalizedTier !== "free";
 
     // Get upload count for current month
     const usageSnap = await db

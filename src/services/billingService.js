@@ -4,19 +4,25 @@
 const { db, admin } = require("../firebaseAdmin");
 const {
   normalizePlanId,
+  resolvePlan,
   getUploadLimitForPlan,
   getPlatformLimitForPlan,
 } = require("../config/subscriptionPlans");
 
+const FREE_PLAN = resolvePlan("free");
+const PREMIUM_PLAN = resolvePlan("premium");
+const PRO_PLAN = resolvePlan("pro");
+const ENTERPRISE_PLAN = resolvePlan("enterprise");
+
 const TIERS = {
   FREE: {
     id: "free",
-    name: "Starter",
+    name: FREE_PLAN.name,
     monthly_upload_cap: getUploadLimitForPlan("free"),
     monthly_ai_cap: 3,
     monthly_bot_cap: 2, // TEASER: Allow 2 bot-boosted uploads to get them hooked
     platform_limit: 1, // NEW: Single platform only for free users
-    monthly_price: 0,
+    monthly_price: Number(FREE_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
       bot_boost: true, // Unlocked for teaser
@@ -28,12 +34,12 @@ const TIERS = {
   },
   BASIC: {
     id: "basic", // Legacy ID
-    name: "Creator",
+    name: PREMIUM_PLAN.name,
     monthly_upload_cap: getUploadLimitForPlan("premium"),
     monthly_ai_cap: 50,
     monthly_bot_cap: 5,
     platform_limit: getPlatformLimitForPlan("premium"),
-    monthly_price: 29.0,
+    monthly_price: Number(PREMIUM_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
       bot_boost: true,
@@ -45,12 +51,12 @@ const TIERS = {
   },
   PREMIUM: {
     id: "premium", // Matches PayPal Plan
-    name: "Premium",
+    name: PREMIUM_PLAN.name,
     monthly_upload_cap: getUploadLimitForPlan("premium"),
     monthly_ai_cap: 20,
     monthly_bot_cap: 10,
     platform_limit: getPlatformLimitForPlan("premium"),
-    monthly_price: 9.99,
+    monthly_price: Number(PREMIUM_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
       bot_boost: true,
@@ -62,12 +68,12 @@ const TIERS = {
   },
   PRO: {
     id: "pro",
-    name: "Pro",
+    name: PRO_PLAN.name,
     monthly_upload_cap: getUploadLimitForPlan("pro"),
     monthly_ai_cap: 500,
     monthly_bot_cap: 100,
     platform_limit: getPlatformLimitForPlan("pro"),
-    monthly_price: 29.99,
+    monthly_price: Number(PRO_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
       bot_boost: true,
@@ -85,12 +91,12 @@ const TIERS = {
   },
   ENTERPRISE: {
     id: "enterprise",
-    name: "Enterprise",
+    name: ENTERPRISE_PLAN.name,
     monthly_upload_cap: getUploadLimitForPlan("enterprise"),
     monthly_ai_cap: 2000,
     monthly_bot_cap: 500,
     platform_limit: getPlatformLimitForPlan("enterprise"),
-    monthly_price: 99.99,
+    monthly_price: Number(ENTERPRISE_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
       bot_boost: true,
@@ -131,15 +137,106 @@ async function resolveEffectiveTierId(userId, billingData, userData) {
     safeUser.subscriptionTier || (safeUser.subscription && safeUser.subscription.planId) || "free"
   );
 
-  if (
-    safeUser.isPaid === true ||
-    safeUser.unlimited === true ||
-    safeUser.subscriptionStatus === "active"
-  ) {
-    return userTier;
+  const now = Date.now();
+  const normalizedStatus = String(safeUser.subscriptionStatus || safeBilling.status || "")
+    .trim()
+    .toLowerCase();
+  const rawExpiry =
+    safeUser.subscriptionPeriodEnd ||
+    safeUser.subscriptionExpiresAt ||
+    safeBilling.expiresAt ||
+    safeBilling.nextBillingDate ||
+    null;
+  const expiryMs = rawExpiry ? Date.parse(rawExpiry) : NaN;
+  const hasKnownExpiry = Number.isFinite(expiryMs);
+  const hasFutureExpiry = hasKnownExpiry && expiryMs > now;
+  const isExpired = hasKnownExpiry && expiryMs <= now;
+  const isCancelledState = ["cancelled", "canceled", "suspended", "expired", "inactive"].includes(
+    normalizedStatus
+  );
+
+  if (isCancelledState) {
+    return "free";
   }
 
-  return billingTier !== "free" ? billingTier : userTier;
+  if (normalizedStatus === "active") {
+    if (isExpired) return billingTier !== "free" ? billingTier : "free";
+    if (billingTier !== "free") return billingTier;
+    if (hasFutureExpiry && userTier !== "free") return userTier;
+    return "free";
+  }
+
+  if (isExpired) {
+    return billingTier !== "free" ? billingTier : "free";
+  }
+
+  if (!normalizedStatus) {
+    if (hasFutureExpiry) {
+      if (billingTier !== "free") return billingTier;
+      if (userTier !== "free") return userTier;
+    }
+    return "free";
+  }
+
+  if (billingTier !== "free") {
+    return billingTier;
+  }
+
+  if (safeUser.isPaid === true || safeUser.unlimited === true) {
+    return normalizedStatus === "active" && userTier !== "free" ? userTier : "free";
+  }
+
+  return userTier;
+}
+
+async function getEffectiveTierSnapshot(userId, providedBillingData, providedUserData) {
+  let userData = providedUserData || null;
+  let billingData = providedBillingData || null;
+
+  if (!userData || !billingData) {
+    const [userSnap, billingSnap] = await Promise.all([
+      userData ? null : db.collection("users").doc(userId).get(),
+      billingData ? null : db.collection("user_billing").doc(userId).get(),
+    ]);
+
+    if (!userData) {
+      userData = userSnap && userSnap.exists ? userSnap.data() || {} : {};
+    }
+    if (!billingData) {
+      billingData = billingSnap && billingSnap.exists ? billingSnap.data() || {} : { tier: "free" };
+    }
+  }
+
+  const tierId = await resolveEffectiveTierId(userId, billingData, userData);
+  const tier = TIERS[tierId.toUpperCase()] || TIERS.FREE;
+
+  try {
+    const normalizedStatus = String(
+      (userData && userData.subscriptionStatus) || (billingData && billingData.status) || ""
+    )
+      .trim()
+      .toLowerCase();
+    const expiry =
+      (userData && (userData.subscriptionPeriodEnd || userData.subscriptionExpiresAt)) ||
+      (billingData && (billingData.expiresAt || billingData.nextBillingDate)) ||
+      "none";
+    const billingTier = normalizePlanId((billingData && billingData.tier) || "free");
+    const userTier = normalizePlanId(
+      (userData &&
+        (userData.subscriptionTier || (userData.subscription && userData.subscription.planId))) ||
+        "free"
+    );
+    console.debug(
+      `[entitlement] uid=${userId} status=${normalizedStatus || "none"} expiry=${expiry} billingTier=${billingTier} userTier=${userTier} effectiveTier=${tierId}`
+    );
+  } catch (_) {}
+
+  return {
+    tierId,
+    tier,
+    userData: userData || {},
+    billingData: billingData || { tier: "free" },
+  };
 }
 
 /**
@@ -246,12 +343,7 @@ async function checkViralCoins(userId) {
  * Enforces the "Global Distribution" tier limits.
  */
 async function checkPlatformLimit(userId, platformCount) {
-  const billingDocRef = db.collection("user_billing").doc(userId);
-  const billingSnap = await billingDocRef.get();
-  const billingData = billingSnap.data() || { tier: "free" };
-
-  const userTierId = await resolveEffectiveTierId(userId, billingData);
-  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const { tierId: userTierId, tier: userTier } = await getEffectiveTierSnapshot(userId);
 
   const limit = userTier.platform_limit || 1;
 
@@ -408,6 +500,7 @@ async function trackBotUsage(userId, amount = 1) {
 
 module.exports = {
   calculateCreatorCharge,
+  getEffectiveTierSnapshot,
   checkAILimit,
   checkPlatformLimit, // NEW
   checkConnectionLimit, // NEW — OAuth connection-time enforcement

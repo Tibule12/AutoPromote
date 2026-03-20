@@ -10,7 +10,7 @@ const fs = require("fs");
 // Point to the Python service (default to Cloud Run in production, localhost in dev)
 // Use the deployed URL for stability if env var is missing
 const MEDIA_WORKER_URL =
-  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
+  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-jddzncgt2a-uc.a.run.app";
 
 const { v4: uuidv4 } = require("uuid");
 
@@ -178,34 +178,62 @@ class VideoEditingService {
         smart_crop: options.smartCrop || false,
         crop_style: cropStyle,
         silence_removal: options.silenceRemoval || false,
+        silence_threshold_db: Number(options.silenceThreshold ?? -35),
+        min_silence_duration: Number(options.minSilenceDuration ?? 0.75),
         captions: options.captions || false,
         remove_watermark: options.removeWatermark || false,
-        watermark_mode: options.watermarkMode || "corners",
+        watermark_mode: options.watermarkMode || "adaptive",
         add_music: options.addMusic || false,
         music_file: options.musicFile || "upbeat.mp3", // Changed default to upbeat.mp3
         mute_audio: options.muteAudio || false,
-        volume: options.musicVolume || 0.15,
+        music_ducking: options.musicDucking !== undefined ? options.musicDucking : true,
+        music_ducking_strength: Number(options.musicDuckingStrength ?? 0.35),
+        volume: Number(options.musicVolume ?? 0.15),
         is_search: options.isSearch || false,
         safe_search: options.safeSearch !== undefined ? options.safeSearch : true,
 
         // Viral Hook Feature
         add_hook: options.addHook || false,
         hook_text: options.hookText || "WAIT TILL THE END 🚨",
+        hook_intro_seconds: Number(options.hookIntroSeconds || 3.4),
+        transcription_language: options.transcriptionLanguage || "auto",
+        transcription_hint:
+          options.transcriptionHint ||
+          "South African English accent possible. Preserve local names, slang, and code-switching.",
       };
 
       // If rendering a Viral Clip, attach specific data
       if (options.renderViral && options.viralData) {
+        const viralData = options.viralData;
+        const timelineSegments = Array.isArray(viralData.timeline_segments)
+          ? viralData.timeline_segments
+          : [];
+        const timelineDuration = timelineSegments.reduce(
+          (sum, segment) => sum + Math.max(0, Number(segment.duration || 0)),
+          0
+        );
+        const startTime = Number(viralData.start_time ?? viralData.clipTime?.start ?? 0);
+        const endTime = Number(
+          viralData.end_time ??
+            viralData.clipTime?.end ??
+            (timelineDuration > 0 ? timelineDuration : startTime)
+        );
         endpoint = "/render-viral-clip";
         payload = {
           ...payload,
-          start_time: options.viralData.clipTime.start,
-          end_time: options.viralData.clipTime.end,
-          auto_captions: options.captions, // Remap captions -> auto_captions
-          // Map JS startTime -> Python start_time
-          overlays: (options.viralData.overlays || []).map(o => ({
+          start_time: startTime,
+          end_time: endTime,
+          auto_captions:
+            viralData.auto_captions !== undefined ? !!viralData.auto_captions : options.captions,
+          timeline_segments: timelineSegments,
+          overlays: (viralData.overlays || []).map(o => ({
             ...o,
-            start_time: o.startTime,
-            duration: o.duration,
+            start_time:
+              o.start_time !== undefined && o.start_time !== null ? o.start_time : o.startTime,
+            duration:
+              o.duration !== undefined && o.duration !== null ? Number(o.duration) : o.duration,
+            width: o.width !== undefined && o.width !== null ? Number(o.width) : o.width,
+            height: o.height !== undefined && o.height !== null ? Number(o.height) : o.height,
           })),
         };
       }
@@ -453,7 +481,8 @@ class VideoEditingService {
         `${MEDIA_WORKER_URL}/transcribe`,
         {
           video_url: videoUrl,
-          language: "auto", // Allow auto-detect
+          language: "auto",
+          hint: "South African English accent possible. Preserve local names, slang, and code-switching.",
         },
         {
           timeout: 600000, // 10 minutes

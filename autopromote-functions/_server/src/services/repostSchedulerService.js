@@ -6,6 +6,52 @@ const monetizationService = require("./monetizationService"); // This will lever
 const notificationEngine = require("./notificationEngine");
 const logger = require("./logger");
 
+function isExternalPlatformPageUrl(value) {
+  if (!value || typeof value !== "string") return false;
+
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase();
+    return [
+      "tiktok.com",
+      "youtube.com",
+      "youtu.be",
+      "instagram.com",
+      "facebook.com",
+      "fb.watch",
+      "twitter.com",
+      "x.com",
+      "linkedin.com",
+      "reddit.com",
+      "pinterest.com",
+      "snapchat.com",
+    ].some(domain => host === domain || host.endsWith(`.${domain}`));
+  } catch (_error) {
+    return false;
+  }
+}
+
+function resolveRepostSourceUrl(contentData = {}) {
+  const candidates = [
+    contentData.processedUrl,
+    contentData.persistentMediaUrl,
+    contentData.downloadInfo?.url,
+    contentData.url,
+    contentData.mediaUrl,
+    contentData.media_url,
+    contentData.video_url,
+    contentData.file_url,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string" || !candidate.trim()) continue;
+    if (isExternalPlatformPageUrl(candidate)) continue;
+    return candidate;
+  }
+
+  return null;
+}
+
 const DEFAULT_REPOST_LIMITS = Object.freeze({
   free: 2,
   premium: 3,
@@ -800,11 +846,7 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
       if (!contentData) continue;
 
       const uid = contentData.user_id || contentData.uid;
-      const persistentMediaUrl =
-        contentData.processedUrl ||
-        contentData.url ||
-        contentData.mediaUrl ||
-        contentData.downloadInfo?.url;
+      const persistentMediaUrl = resolveRepostSourceUrl(contentData);
 
       if (!uid) continue;
 
@@ -920,7 +962,7 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
       );
 
       try {
-        const sourceUrl = t.mediaUrl || t.payload?.mediaUrl || t.payload?.url || persistentMediaUrl;
+        const sourceUrl = persistentMediaUrl;
         if (sourceUrl) {
           console.log(
             `[RepostScheduler] Routing ${t.contentId} through Strategic Transform for safety.`

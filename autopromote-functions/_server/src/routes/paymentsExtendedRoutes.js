@@ -16,6 +16,7 @@ const { audit } = require("../services/auditLogger");
 const { recordUsage } = require("../services/usageLedgerService");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 const { PayFastProvider } = require("../services/payments/payfastProvider");
+const { SUBSCRIPTION_PLANS } = require("../config/subscriptionPlans");
 // Initialize provider instance
 const payfastProvider = new PayFastProvider();
 
@@ -645,11 +646,15 @@ router.get("/balance", authMiddleware, async (req, res) => {
 
 // GET /api/payments/plans (static or env-driven)
 router.get("/plans", async (_req, res) => {
-  const plans = [
-    { id: "free", priceId: null, monthly: 0, quota: process.env.FREE_PLAN_QUOTA || "50" },
-    { id: "pro", monthly: 29, quota: process.env.PRO_PLAN_QUOTA || "500" },
-    { id: "scale", monthly: 99, quota: process.env.SCALE_PLAN_QUOTA || "5000" },
-  ];
+  const plans = Object.values(SUBSCRIPTION_PLANS).map(plan => ({
+    id: plan.id,
+    name: plan.name,
+    priceId: null,
+    monthly: Number(plan.price) || 0,
+    quota: String(Number(plan.features?.wolfHuntTasks) || 0),
+    uploads: plan.features?.uploads,
+    platformLimit: plan.features?.platformLimit,
+  }));
   return res.json({ ok: true, plans });
 });
 

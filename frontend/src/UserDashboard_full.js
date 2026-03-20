@@ -66,7 +66,18 @@ const UserDashboard = ({
     }
   }, [activeTab]);
 
-  const [notifs, setNotifs] = useState(Array.isArray(notifications) ? notifications : []);
+  const [notifs, setNotifs] = useState(
+    Array.isArray(notifications) ? notifications.filter(notification => !notification?.read) : []
+  );
+  const notifiedNotificationIdsRef = useRef(
+    new Set(
+      (Array.isArray(notifications) ? notifications : [])
+        .map(notification => notification?.id)
+        .filter(Boolean)
+    )
+  );
+  const notificationSessionStartedAtRef = useRef(Date.now());
+  const didHydrateNotificationPollRef = useRef(false);
   const [uploadLaunchTab, setUploadLaunchTab] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
@@ -167,6 +178,35 @@ const UserDashboard = ({
       typeof userDefaults?.autoRepostEnabled === "boolean" ? userDefaults.autoRepostEnabled : true
     );
   }, [userDefaults, user?.paypalEmail]);
+
+  useEffect(() => {
+    const unreadNotifications = Array.isArray(notifications)
+      ? notifications.filter(notification => !notification?.read)
+      : [];
+    unreadNotifications.forEach(notification => {
+      if (notification?.id) notifiedNotificationIdsRef.current.add(notification.id);
+    });
+
+    setNotifs(prevNotifs => {
+      const previous = Array.isArray(prevNotifs) ? prevNotifs : [];
+      if (previous.length !== unreadNotifications.length) {
+        return unreadNotifications;
+      }
+
+      const hasChanged = previous.some((notification, index) => {
+        const nextNotification = unreadNotifications[index];
+        return (
+          notification?.id !== nextNotification?.id ||
+          notification?.read !== nextNotification?.read ||
+          notification?.message !== nextNotification?.message ||
+          notification?.title !== nextNotification?.title ||
+          notification?.created_at !== nextNotification?.created_at
+        );
+      });
+
+      return hasChanged ? unreadNotifications : previous;
+    });
+  }, [notifications]);
 
   useEffect(() => {
     // NEW: Check for "Wolf Hunt" onboarding criteria
@@ -286,30 +326,57 @@ const UserDashboard = ({
         const json = await res.json();
         if (!json.notifications) return;
         const incoming = Array.isArray(json.notifications) ? json.notifications : [];
+        const incomingUnread = incoming.filter(notification => !notification?.read);
+        const unseenRecentUnread = incomingUnread.filter(notification => {
+          if (!notification?.id || notifiedNotificationIdsRef.current.has(notification.id)) {
+            return false;
+          }
+          const createdAt = Date.parse(notification.created_at || notification.timestamp || "");
+          return Number.isFinite(createdAt) && createdAt >= notificationSessionStartedAtRef.current;
+        });
+
+        incomingUnread.forEach(notification => {
+          if (notification?.id) notifiedNotificationIdsRef.current.add(notification.id);
+        });
 
         setNotifs(prevNotifs => {
-          const currentList = prevNotifs || [];
-          const existingIds = new Set(currentList.map(n => n.id));
-          const newOnes = incoming.filter(n => !existingIds.has(n.id));
+          const currentList = Array.isArray(prevNotifs) ? prevNotifs : [];
+          const syntheticNotifications = currentList.filter(notification =>
+            String(notification?.id || "").startsWith("wolf-hunt-welcome-")
+          );
+          const merged = [...incomingUnread, ...syntheticNotifications].reduce(
+            (acc, notification) => {
+              const key =
+                notification?.id ||
+                `${notification?.title || "notification"}-${notification?.created_at || ""}`;
+              if (
+                !acc.some(
+                  item =>
+                    (item?.id || `${item?.title || "notification"}-${item?.created_at || ""}`) ===
+                    key
+                )
+              ) {
+                acc.push(notification);
+              }
+              return acc;
+            },
+            []
+          );
 
-          if (newOnes.length > 0) {
-            // Side effect in set state is bad practice, but we need to check against 'prev'
-            // We'll wrap the toast in a setTimeout to push it to the next tick
-            // preventing the "Cannot update while rendering" error
+          if (didHydrateNotificationPollRef.current && unseenRecentUnread.length > 0) {
             setTimeout(() => {
-              newOnes.forEach(n => {
-                // Only notify for actually new unread notifications
-                if (!n.read) {
-                  try {
-                    toast(n.message || n.title || "You have a new notification");
-                  } catch (_) {}
-                }
+              unseenRecentUnread.forEach(notification => {
+                try {
+                  toast(
+                    notification.message || notification.title || "You have a new notification"
+                  );
+                } catch (_) {}
               });
             }, 0);
-
-            return [...newOnes, ...currentList].slice(0, 200);
           }
-          return currentList;
+
+          didHydrateNotificationPollRef.current = true;
+          return merged.slice(0, 200);
         });
       } catch (e) {
         // ignore polling errors

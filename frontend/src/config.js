@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
 
   // Content endpoints
   CONTENT_UPLOAD: `${API_BASE_URL}/api/content/upload`,
+  CONTENT_UPLOAD_READINESS: `${API_BASE_URL}/api/content/upload/readiness`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
   MY_SCHEDULES: `${API_BASE_URL}/api/content/my-promotion-schedules`,
   CONTENT_DIAGNOSIS: id => `${API_BASE_URL}/api/content/${encodeURIComponent(id)}/diagnosis`,
@@ -149,7 +150,7 @@ export const API_ENDPOINTS = {
 
   // Notifications (v2)
   NOTIFICATIONS_LIST: `${API_BASE_URL}/api/notifications`,
-  NOTIFICATIONS_MARK_READ: `${API_BASE_URL}/api/notifications/read`,
+  NOTIFICATIONS_MARK_READ: `${API_BASE_URL}/api/notifications/read-all`,
 
   // Analytics endpoints
   ANALYTICS_USER: `${API_BASE_URL}/api/analytics/user`,

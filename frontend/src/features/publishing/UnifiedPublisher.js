@@ -28,6 +28,7 @@ import TikTokForm from "../../components/PlatformForms/TikTokForm";
 import YouTubeForm from "../../components/PlatformForms/YouTubeForm";
 import InstagramForm from "../../components/PlatformForms/InstagramForm";
 import FacebookForm from "../../components/PlatformForms/FacebookForm";
+import PayPalSubscriptionPanel from "../../components/PayPalSubscriptionPanel";
 
 // --- New Features ---
 import ViralScanner from "../../components/ViralScanner";
@@ -47,6 +48,39 @@ const getPlatformName = platformId => {
   return (
     PLATFORM_LABELS[platformId] || `${platformId.charAt(0).toUpperCase()}${platformId.slice(1)}`
   );
+};
+
+const buildStructuredUploadError = (result, fallbackMessage, httpStatus) => {
+  const serverErr =
+    (result && (result.error || result.message || result.text)) ||
+    fallbackMessage ||
+    "Upload failed";
+  const enrichedError = new Error(serverErr);
+  if (result && typeof result === "object") {
+    enrichedError.code = result.code;
+    enrichedError.context = result.context || null;
+    enrichedError.upgradeRequired = result.upgrade_required === true;
+  }
+  if (httpStatus) enrichedError.httpStatus = httpStatus;
+  return enrichedError;
+};
+
+const EXPECTED_PUBLISH_BLOCK_CODES = new Set([
+  "TIER_LIMIT_EXCEEDED",
+  "PLATFORM_LIMIT_EXCEEDED",
+  "UPLOAD_CAP_EXCEEDED",
+  "PROMOTION_TASK_QUOTA_EXCEEDED",
+]);
+
+const formatMonthLabel = monthKey => {
+  if (!monthKey || typeof monthKey !== "string") return "this month";
+  const parsed = Date.parse(`${monthKey}-01T00:00:00Z`);
+  if (!Number.isFinite(parsed)) return monthKey;
+  return new Date(parsed).toLocaleString(undefined, {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 };
 
 function normalizeTikTokCreatorInfo(primary, fallbackRaw, fallbackSummary) {
@@ -215,6 +249,16 @@ function normalizeRedditCreatorInfo(primary, fallbackRaw, fallbackSummary) {
       total_karma: totalKarma,
     },
   };
+}
+
+function normalizeUpgradePlanId(planId) {
+  if (!planId) return null;
+  const normalized = String(planId).trim().toLowerCase();
+  if (["starter", "free"].includes(normalized)) return "free";
+  if (["basic", "premium", "creator"].includes(normalized)) return "premium";
+  if (["pro", "studio"].includes(normalized)) return "pro";
+  if (["enterprise", "team"].includes(normalized)) return "enterprise";
+  return normalized;
 }
 
 async function fetchPlatformStatusSnapshot(token) {
@@ -1320,10 +1364,123 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [fallbackPublishPlatform, setFallbackPublishPlatform] = useState(null);
   const [editingTarget, setEditingTarget] = useState(null); // 'global' or platformId
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradePlanId, setUpgradePlanId] = useState(null);
+  const [upgradePromptMessage, setUpgradePromptMessage] = useState("");
+  const [pendingPublishRequest, setPendingPublishRequest] = useState(null);
 
   // --- Viral Scanner State ---
   const [showViralScanner, setShowViralScanner] = useState(false);
   const [viralScannerFile, setViralScannerFile] = useState(null);
+
+  const formatPublisherError = err => {
+    if (err?.code === "PLATFORM_LIMIT_EXCEEDED" || err?.code === "TIER_LIMIT_EXCEEDED") {
+      const limit = err?.context?.limit;
+      const attempted = err?.context?.attempted;
+      const suggestedTier = err?.context?.suggested_tier;
+      if (limit && attempted) {
+        return `That post is a little bigger than your current plan allows. You can publish to ${limit} platform${limit === 1 ? "" : "s"} at a time, and this one has ${attempted}. Remove ${attempted - limit} platform${attempted - limit === 1 ? "" : "s"} or upgrade${suggestedTier ? ` to ${suggestedTier}` : ""}.`;
+      }
+    }
+    if (err?.code === "UPLOAD_CAP_EXCEEDED") {
+      const limit = err?.context?.limit;
+      const used = err?.context?.used;
+      const monthKey = err?.context?.monthKey;
+      const suggestedTier = err?.context?.suggested_tier;
+      if (limit && typeof used === "number") {
+        return `You have reached your upload limit for ${formatMonthLabel(monthKey)} (${used}/${limit}). Your file stayed safely on this device and was not uploaded. Upgrade${suggestedTier ? ` to ${suggestedTier}` : ""} or wait for your quota to reset.`;
+      }
+    }
+    if (err?.code === "PROMOTION_TASK_QUOTA_EXCEEDED") {
+      const remaining = err?.context?.remaining;
+      const required = err?.context?.required;
+      const suggestedTier = err?.context?.suggested_tier;
+      if (typeof remaining === "number" && typeof required === "number") {
+        return `You only have ${remaining} auto-publish slot${remaining === 1 ? "" : "s"} left this month, and this publish needs ${required}. Trim a few platforms or upgrade${suggestedTier ? ` to ${suggestedTier}` : ""}.`;
+      }
+    }
+    return err?.message || "Upload failed. Please try again.";
+  };
+
+  const getUploadAuthToken = async () => {
+    let token = null;
+    try {
+      const current = auth && auth.currentUser;
+      if (current) token = await current.getIdToken(true);
+    } catch (_) {
+      token = null;
+    }
+
+    if (
+      !token &&
+      typeof window !== "undefined" &&
+      window.__E2E_BYPASS === true &&
+      window.__E2E_TEST_TOKEN
+    ) {
+      token = window.__E2E_TEST_TOKEN;
+    }
+
+    return token;
+  };
+
+  const closeUpgradeModal = () => {
+    setShowUpgradeModal(false);
+    setUpgradePlanId(null);
+    setUpgradePromptMessage("");
+    setPendingPublishRequest(null);
+  };
+
+  const openUpgradeModal = (err, platforms, label) => {
+    setUpgradePlanId(normalizeUpgradePlanId(err?.context?.suggested_tier));
+    setUpgradePromptMessage(formatPublisherError(err));
+    setPendingPublishRequest({ platforms, label });
+    setShowUpgradeModal(true);
+  };
+
+  const preflightUploadReadiness = async ({ token, platforms, scheduledTime }) => {
+    const readinessResponse = await fetch(API_ENDPOINTS.CONTENT_UPLOAD_READINESS, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        target_platforms: platforms,
+        scheduled_promotion_time: scheduledTime || null,
+      }),
+    });
+
+    let readinessResult = null;
+    try {
+      readinessResult = await readinessResponse.json();
+    } catch (_) {
+      readinessResult = null;
+    }
+
+    if (!readinessResponse.ok) {
+      throw buildStructuredUploadError(
+        readinessResult,
+        `HTTP ${readinessResponse.status}`,
+        readinessResponse.status
+      );
+    }
+
+    if (readinessResult?.readiness?.allowed === false) {
+      throw buildStructuredUploadError(
+        {
+          error: readinessResult.readiness.message,
+          code: readinessResult.readiness.code,
+          context: readinessResult.readiness.context,
+          upgrade_required: readinessResult.readiness.context?.upgrade_required === true,
+        },
+        readinessResult.readiness.message,
+        403
+      );
+    }
+
+    return readinessResult?.readiness || null;
+  };
 
   // Sync Global File -> Media Processor (Initial Load)
   useEffect(() => {
@@ -1723,7 +1880,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   };
 
   // 4. Publish Action
-  const publish = async (platforms, label) => {
+  const publish = async (platforms, label, options = {}) => {
     // Determine the file to upload: prefer global file, but fall back to a single-platform file if set.
     let fileToUpload = globalFile;
 
@@ -1766,6 +1923,18 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         (fileToUpload && fileToUpload.type && fileToUpload.type.split("/")[0]) ||
         mediaType ||
         "video";
+
+      const token = await getUploadAuthToken();
+      if (!token) {
+        throw new Error("Please sign in again before publishing.");
+      }
+
+      setFeedbackMessage("Checking plan limits...");
+      await preflightUploadReadiness({
+        token,
+        platforms,
+        scheduledTime: scheduledTime ? new Date(scheduledTime).toISOString() : null,
+      });
 
       if (fileToUpload instanceof Blob && fileToUpload.size > MAX_SIZE_MB * 1024 * 1024) {
         throw new Error(`File too large. Maximum upload size is ${MAX_SIZE_MB}MB.`);
@@ -1832,11 +2001,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         }
       });
 
-      const resolvedTitle =
-        (globalTitle || "").trim() ||
-        (fileToUpload && fileToUpload.name
-          ? fileToUpload.name.replace(/\.[^/.]+$/, "")
-          : "Untitled");
+      const resolvedTitle = (globalTitle || "").trim() || "Untitled Post";
 
       if (!globalTitle || !globalTitle.trim()) {
         setGlobalTitle(resolvedTitle);
@@ -1887,8 +2052,26 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       setPublishingPlatform(null);
       setFallbackPublishPlatform(null);
     } catch (err) {
-      console.error("UnifiedPublisher Error:", err);
-      setFeedbackMessage(`Error: ${err.message}`);
+      const friendlyMessage = formatPublisherError(err);
+      if (EXPECTED_PUBLISH_BLOCK_CODES.has(err?.code)) {
+        console.info("[UnifiedPublisher] publish blocked", {
+          code: err?.code,
+          context: err?.context || null,
+        });
+      } else {
+        console.error("UnifiedPublisher Error:", err);
+      }
+      setFeedbackMessage(friendlyMessage);
+
+      if (err?.upgradeRequired && !options.skipUpgradePrompt) {
+        toast(friendlyMessage, { icon: "💡", duration: 6000 });
+        openUpgradeModal(err, platforms, label);
+      } else if (EXPECTED_PUBLISH_BLOCK_CODES.has(err?.code)) {
+        toast(friendlyMessage, { icon: "⚠️", duration: 5000 });
+      } else {
+        toast.error(friendlyMessage, { duration: 5000 });
+      }
+
       setIsPublishing(false);
       setPublishingPlatform(null);
       setFallbackPublishPlatform(null);
@@ -1898,7 +2081,20 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   const handlePublishAll = () => publish(selectedPlatforms, "Publish Everywhere");
   const handlePublishPlatform = platformId => publish([platformId], `Publish to ${platformId}`);
 
-  const modalOpen = showVideoEditor || showViralScanner || showCropper;
+  const handleUpgradeSuccess = async () => {
+    const pending = pendingPublishRequest;
+    setShowUpgradeModal(false);
+    setUpgradePlanId(null);
+    setUpgradePromptMessage("");
+    setPendingPublishRequest(null);
+
+    if (!pending) return;
+
+    toast.success("Plan updated. Retrying your publish now...");
+    await publish(pending.platforms, pending.label, { skipUpgradePrompt: true });
+  };
+
+  const modalOpen = showVideoEditor || showViralScanner || showCropper || showUpgradeModal;
 
   return (
     <div className={`unified-publisher-container${modalOpen ? " modal-open" : ""}`}>
@@ -2464,6 +2660,55 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               }}
               onCancel={() => setShowCropper(false)}
             />
+          </div>
+        </div>
+      )}
+
+      {showUpgradeModal && (
+        <div
+          className="modal-overlay open"
+          style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            overflowY: "auto",
+            zIndex: 3200,
+          }}
+          onClick={closeUpgradeModal}
+        >
+          <div
+            className="modal upgrade-modal"
+            style={{
+              maxWidth: "1100px",
+              width: "min(1100px, 94vw)",
+              background: "#f8fafc",
+              color: "#0f172a",
+              position: "relative",
+            }}
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="upgrade-modal-shell">
+              <div className="upgrade-modal-copy">
+                <span className="upgrade-modal-kicker">Upgrade and continue</span>
+                <h2>That publish is ready. Your current plan is the only blocker.</h2>
+                <p>{upgradePromptMessage}</p>
+                <p>
+                  Complete the subscription here and the same publish will retry automatically with
+                  your new entitlement.
+                </p>
+              </div>
+
+              <PayPalSubscriptionPanel
+                compact
+                highlightPlanId={upgradePlanId}
+                onUpgradeSuccess={handleUpgradeSuccess}
+                onClose={closeUpgradeModal}
+                title="Choose a plan and stay in the flow"
+                subtitle="PayPal checkout runs inside this modal when available. If not, the fallback link is still here."
+              />
+            </div>
           </div>
         </div>
       )}

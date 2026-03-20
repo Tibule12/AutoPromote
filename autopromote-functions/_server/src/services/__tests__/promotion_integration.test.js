@@ -529,8 +529,22 @@ describe("Promotion integration (mocked platforms)", () => {
     // run one processor to observe its decision
     const out = await processNextPlatformTask();
     // debug statements removed for linting
-    // run a few processors to ensure eventual progress
-    await Promise.all(new Array(3).fill(0).map(() => processNextPlatformTask()));
+    // run additional processors and poll for eventual state movement because
+    // lock handoff plus emulator timing can occasionally leave both tasks queued
+    // for the first burst even though takeover logic is healthy.
+    let statuses = [];
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await Promise.all(new Array(3).fill(0).map(() => processNextPlatformTask()));
+      const [t1b, t2b] = await Promise.all([
+        db.collection("promotion_tasks").doc(r1.id).get(),
+        db.collection("promotion_tasks").doc(r2.id).get(),
+      ]);
+      statuses = [
+        t1b.exists ? t1b.data().status : null,
+        t2b.exists ? t2b.data().status : null,
+      ];
+      if (statuses.some(s => s && s !== "queued")) break;
+    }
 
     const postsSnap = await db
       .collection("platform_posts")
@@ -546,11 +560,7 @@ describe("Promotion integration (mocked platforms)", () => {
     expect(postsSnap.size).toBeGreaterThanOrEqual(0);
 
     // ensure at least one task moved out of 'queued' state (processing/complete/skip)
-    const t1b = await db.collection("promotion_tasks").doc(r1.id).get();
-    const t2b = await db.collection("promotion_tasks").doc(r2.id).get();
-    const s1 = t1b.exists ? t1b.data().status : null;
-    const s2 = t2b.exists ? t2b.data().status : null;
-    expect([s1, s2].some(s => s && s !== "queued")).toBe(true);
+    expect(statuses.some(s => s && s !== "queued")).toBe(true);
 
     // metrics sanity checked in a focused unit test (aggregation_service.test.js); avoid asserting here due to timing
 

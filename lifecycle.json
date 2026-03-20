@@ -12,7 +12,7 @@
         "action": { "type": "Delete" },
         "condition": {
           "age": 30,
-          "matchesPrefix": ["uploads/", "edited_videos/"]
+          "matchesPrefix": ["edited_videos/"]
         }
       }
     ]

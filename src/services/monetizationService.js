@@ -8,6 +8,68 @@ const logger = require("../utils/logger");
 const paypalClient = require("./paypal");
 const performanceValidationEngine = require("./performanceValidationEngine");
 const viralMissionControl = require("./viralMissionControl"); // Integration for Organic Missions
+const { normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
+const { getEffectiveTierSnapshot } = require("./billingService");
+
+const LEGACY_TIER_ALIASES = Object.freeze({
+  free: "free",
+  basic: "premium",
+  premium: "premium",
+  growth_pro: "premium",
+  analytics_plus: "pro",
+  pro: "pro",
+  enterprise: "enterprise",
+});
+
+function normalizeMonetizationTierId(value) {
+  const raw = String(value || "free")
+    .trim()
+    .toLowerCase();
+  return LEGACY_TIER_ALIASES[raw] || normalizePlanId(raw);
+}
+
+function toTierStorageKey(value) {
+  return normalizeMonetizationTierId(value).toUpperCase();
+}
+
+function buildTierConfig(planId) {
+  const plan = resolvePlan(planId);
+  return {
+    name: plan.name,
+    price: Number(plan.price) || 0,
+    limits: {
+      monthlyUploads: Number(plan.features?.uploads) || 0,
+      monthlyBoosts: Number(plan.features?.wolfHuntTasks) || 0,
+      analytics: plan.features?.analytics || "basic",
+      support: plan.features?.support || "Self-serve",
+      platforms: plan.features?.platformLimit,
+    },
+    features: [
+      `${plan.features?.uploads} monthly uploads`,
+      `${plan.features?.platformLimit} connected platforms`,
+      `${Number(plan.features?.wolfHuntTasks) || 0} mission opportunities`,
+      `${plan.features?.analytics || "Basic"} analytics`,
+      `${plan.features?.support || "Self-serve"} support`,
+    ],
+  };
+}
+
+function buildPremiumTiers() {
+  const free = buildTierConfig("free");
+  const premium = buildTierConfig("premium");
+  const pro = buildTierConfig("pro");
+  const enterprise = buildTierConfig("enterprise");
+
+  return {
+    FREE: free,
+    BASIC: premium,
+    PREMIUM: premium,
+    GROWTH_PRO: premium,
+    PRO: pro,
+    ANALYTICS_PLUS: pro,
+    ENTERPRISE: enterprise,
+  };
+}
 
 class MonetizationService {
   // Results-Based Pricing Configuration (Cost in Credits)
@@ -21,79 +83,19 @@ class MonetizationService {
 
   // Premium tier definitions
   get PREMIUM_TIERS() {
-    return {
-      FREE: {
-        name: "Free",
-        price: 0,
-        limits: {
-          monthlyUploads: 5,
-          monthlyBoosts: 2,
-          analytics: "basic",
-          support: "community",
-        },
-        features: ["Basic optimization", "Community support"],
-      },
-      GROWTH_PRO: {
-        name: "Growth Pro",
-        price: 29.99,
-        limits: {
-          monthlyUploads: 50,
-          monthlyBoosts: 20,
-          analytics: "advanced",
-          support: "priority",
-        },
-        features: [
-          "Advanced optimization",
-          "Influencer reposts",
-          "A/B testing",
-          "Priority support",
-          "Custom hashtags",
-          "Growth reports",
-        ],
-      },
-      ANALYTICS_PLUS: {
-        name: "Analytics Plus",
-        price: 49.99,
-        limits: {
-          monthlyUploads: 100,
-          monthlyBoosts: 50,
-          analytics: "premium",
-          support: "dedicated",
-        },
-        features: [
-          "All Growth Pro features",
-          "Competitor tracking",
-          "Deep analytics",
-          "ROI reports",
-          "API access",
-          "Dedicated support",
-        ],
-      },
-      ENTERPRISE: {
-        name: "Enterprise",
-        price: 99.99,
-        limits: {
-          monthlyUploads: -1, // unlimited
-          monthlyBoosts: -1,
-          analytics: "enterprise",
-          support: "white_glove",
-        },
-        features: [
-          "All Analytics Plus features",
-          "Custom integrations",
-          "Team management",
-          "White-glove support",
-          "Custom reporting",
-        ],
-      },
-    };
+    return buildPremiumTiers();
+  }
+
+  getTierConfig(tierName) {
+    return this.PREMIUM_TIERS[toTierStorageKey(tierName)] || this.PREMIUM_TIERS.FREE;
   }
 
   // Subscribe user to premium tier
   async subscribeToTier(userId, tierName, paymentMethod = "paypal") {
     try {
-      const tier = this.PREMIUM_TIERS[tierName];
-      if (!tier) {
+      const normalizedTierId = normalizeMonetizationTierId(tierName);
+      const tier = this.getTierConfig(normalizedTierId);
+      if (!tier || normalizedTierId === "free") {
         throw new Error("Invalid tier name");
       }
 
@@ -120,7 +122,8 @@ class MonetizationService {
       // Update user subscription
       const subscription = {
         userId,
-        tier: tierName,
+        tier: toTierStorageKey(normalizedTierId),
+        tierId: normalizedTierId,
         status: "active",
         startedAt: new Date().toISOString(),
         currentPeriodStart: new Date().toISOString(),
@@ -234,31 +237,33 @@ class MonetizationService {
   // Check user's subscription status and limits
   async checkSubscriptionLimits(userId, action = "upload") {
     try {
-      const subscriptionDoc = await db.collection("user_subscriptions").doc(userId).get();
+      const [subscriptionDoc, effectiveSnapshot] = await Promise.all([
+        db.collection("user_subscriptions").doc(userId).get(),
+        getEffectiveTierSnapshot(userId),
+      ]);
 
-      let subscription;
-      if (subscriptionDoc.exists) {
-        subscription = subscriptionDoc.data();
+      const persisted = subscriptionDoc.exists ? subscriptionDoc.data() || {} : {};
+      const tierId = normalizeMonetizationTierId(
+        effectiveSnapshot?.tierId || persisted.tierId || persisted.tier || "free"
+      );
+      const tierKey = toTierStorageKey(tierId);
+      const subscription = {
+        ...persisted,
+        tier: tierKey,
+        tierId,
+        status:
+          tierId === "free"
+            ? "active"
+            : String(
+                effectiveSnapshot?.userData?.subscriptionStatus ||
+                  effectiveSnapshot?.billingData?.status ||
+                  persisted.status ||
+                  "active"
+              ).toLowerCase(),
+        usage: persisted.usage || { uploadsThisMonth: 0, boostsThisMonth: 0 },
+      };
 
-        // Check if subscription is still active
-        if (new Date() > new Date(subscription.currentPeriodEnd)) {
-          if (subscription.autoRenew) {
-            // Auto-renew subscription
-            subscription = await this.renewSubscription(userId, subscription);
-          } else {
-            subscription.status = "expired";
-          }
-        }
-      } else {
-        // Free tier
-        subscription = {
-          tier: "FREE",
-          status: "active",
-          usage: { uploadsThisMonth: 0, boostsThisMonth: 0 },
-        };
-      }
-
-      const tier = this.PREMIUM_TIERS[subscription.tier];
+      const tier = this.getTierConfig(tierId);
       const limits = tier.limits;
 
       // Check monthly limits
@@ -268,13 +273,16 @@ class MonetizationService {
         userId,
         subscription: {
           tier: subscription.tier,
+          tierId: subscription.tierId,
           status: subscription.status,
           limits,
           usage: subscription.usage,
         },
         canPerformAction,
         upgradeRequired: !canPerformAction,
-        suggestedTier: canPerformAction ? null : this.suggestUpgradeTier(subscription.tier, action),
+        suggestedTier: canPerformAction
+          ? null
+          : this.suggestUpgradeTier(subscription.tierId, action),
       };
     } catch (error) {
       logger.error("Monetization.checkSubscriptionLimitsError", {
@@ -302,21 +310,22 @@ class MonetizationService {
 
   // Suggest upgrade tier
   suggestUpgradeTier(currentTier, action) {
-    const tierOrder = ["FREE", "GROWTH_PRO", "ANALYTICS_PLUS", "ENTERPRISE"];
-    const currentIndex = tierOrder.indexOf(currentTier);
+    const tierOrder = ["free", "premium", "pro", "enterprise"];
+    const normalizedCurrentTier = normalizeMonetizationTierId(currentTier);
+    const currentIndex = tierOrder.indexOf(normalizedCurrentTier);
 
     if (currentIndex === -1 || currentIndex === tierOrder.length - 1) {
       return null;
     }
 
     const suggestedTier = tierOrder[currentIndex + 1];
-    const tier = this.PREMIUM_TIERS[suggestedTier];
+    const tier = this.getTierConfig(suggestedTier);
 
     return {
       tier: suggestedTier,
       name: tier.name,
       price: tier.price,
-      reason: `Your ${currentTier} tier limit exceeded for ${action}s`,
+      reason: `Your ${normalizedCurrentTier} tier limit exceeded for ${action}s`,
     };
   }
 
@@ -398,9 +407,11 @@ class MonetizationService {
       const subscriptionDoc = await subscriptionRef.get();
 
       if (!subscriptionDoc.exists) {
+        const snapshot = await getEffectiveTierSnapshot(userId);
         // Free tier user - still track usage
         await subscriptionRef.set({
-          tier: "FREE",
+          tier: toTierStorageKey(snapshot.tierId),
+          tierId: snapshot.tierId,
           status: "active",
           usage: {
             uploadsThisMonth: action === "upload" ? 1 : 0,
@@ -443,7 +454,7 @@ class MonetizationService {
   // Renew subscription
   async renewSubscription(userId, subscription) {
     try {
-      const tier = this.PREMIUM_TIERS[subscription.tier];
+      const tier = this.getTierConfig(subscription.tierId || subscription.tier);
 
       // Process renewal payment
       const paymentResult = await this.processPayment(
@@ -468,6 +479,8 @@ class MonetizationService {
       // Update subscription
       const renewedSubscription = {
         ...subscription,
+        tier: toTierStorageKey(subscription.tierId || subscription.tier),
+        tierId: normalizeMonetizationTierId(subscription.tierId || subscription.tier),
         status: "active",
         currentPeriodStart: new Date().toISOString(),
         currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -693,7 +706,7 @@ class MonetizationService {
     try {
       // Check subscription allows influencer reposts
       const limitsCheck = await this.checkSubscriptionLimits(userId, "boost");
-      if (limitsCheck.subscription.tier === "FREE") {
+      if (limitsCheck.subscription.tierId === "free") {
         throw new Error("Influencer reposts require a premium subscription");
       }
 
@@ -822,7 +835,14 @@ class MonetizationService {
     try {
       // Get subscription info
       const subscriptionDoc = await db.collection("user_subscriptions").doc(userId).get();
-      const subscription = subscriptionDoc.exists ? subscriptionDoc.data() : { tier: "FREE" };
+      const effectiveSnapshot = await getEffectiveTierSnapshot(userId);
+      const subscription = subscriptionDoc.exists
+        ? subscriptionDoc.data()
+        : { tier: "FREE", tierId: effectiveSnapshot.tierId };
+      const tierId = normalizeMonetizationTierId(
+        effectiveSnapshot.tierId || subscription.tierId || subscription.tier
+      );
+      const tierConfig = this.getTierConfig(tierId);
 
       // Get credit balance
       const creditsDoc = await db.collection("user_credits").doc(userId).get();
@@ -847,7 +867,8 @@ class MonetizationService {
       return {
         userId,
         subscription: {
-          tier: subscription.tier,
+          tier: toTierStorageKey(tierId),
+          tierId,
           status: subscription.status || "active",
           currentPeriodEnd: subscription.currentPeriodEnd,
           usage: subscription.usage,
@@ -858,8 +879,8 @@ class MonetizationService {
         },
         recentBoosts,
         earnings,
-        tierLimits: this.PREMIUM_TIERS[subscription.tier].limits,
-        upgradeOptions: this.getUpgradeOptions(subscription.tier),
+        tierLimits: tierConfig.limits,
+        upgradeOptions: this.getUpgradeOptions(tierId),
         generatedAt: new Date().toISOString(),
       };
     } catch (error) {
@@ -900,8 +921,9 @@ class MonetizationService {
 
   // Get upgrade options
   getUpgradeOptions(currentTier) {
-    const tierOrder = ["FREE", "GROWTH_PRO", "ANALYTICS_PLUS", "ENTERPRISE"];
-    const currentIndex = tierOrder.indexOf(currentTier);
+    const tierOrder = ["free", "premium", "pro", "enterprise"];
+    const normalizedCurrentTier = normalizeMonetizationTierId(currentTier);
+    const currentIndex = tierOrder.indexOf(normalizedCurrentTier);
 
     if (currentIndex === -1 || currentIndex === tierOrder.length - 1) {
       return [];
@@ -910,7 +932,7 @@ class MonetizationService {
     const upgradeOptions = [];
     for (let i = currentIndex + 1; i < tierOrder.length; i++) {
       const tierName = tierOrder[i];
-      const tier = this.PREMIUM_TIERS[tierName];
+      const tier = this.getTierConfig(tierName);
       upgradeOptions.push({
         tier: tierName,
         name: tier.name,

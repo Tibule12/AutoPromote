@@ -3,8 +3,9 @@ const paypal = require("@paypal/paypal-server-sdk");
 function environment() {
   let clientId = process.env.PAYPAL_CLIENT_ID || "";
   let clientSecret = process.env.PAYPAL_CLIENT_SECRET || "";
+  const mode = (process.env.PAYPAL_MODE || "").toLowerCase();
 
-  if (process.env.NODE_ENV === "production") {
+  if (mode === "live" || process.env.NODE_ENV === "production") {
     return new paypal.core.LiveEnvironment(clientId, clientSecret);
   } else {
     return new paypal.core.SandboxEnvironment(clientId, clientSecret);

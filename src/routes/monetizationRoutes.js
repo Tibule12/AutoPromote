@@ -19,29 +19,12 @@ router.use((req, res, next) => monetizationPublicLimiter(req, res, next));
 
 // POST /subscription/subscribe - Subscribe to premium tier
 router.post("/subscription/subscribe", authMiddleware, async (req, res) => {
-  try {
-    const userId = req.userId;
-    const { tier, paymentMethod } = req.body;
-
-    if (!tier) {
-      return res.status(400).json({ error: "Tier is required" });
-    }
-
-    const subscription = await monetizationService.subscribeToTier(
-      userId,
-      tier,
-      paymentMethod || "stripe"
-    );
-
-    res.json({
-      success: true,
-      subscription,
-      subscribedAt: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("Error subscribing to tier:", error);
-    res.status(500).json({ error: "Failed to subscribe to tier" });
-  }
+  return res.status(410).json({
+    error: "Legacy monetization subscription flow has been retired.",
+    message:
+      "Use the canonical PayPal subscription flow at /api/paypal-subscriptions/create-subscription and /api/paypal-subscriptions/status.",
+    recommendedEndpoint: "/api/paypal-subscriptions/create-subscription",
+  });
 });
 
 // GET /subscription/status - Get subscription status and limits

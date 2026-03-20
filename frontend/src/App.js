@@ -30,7 +30,7 @@ import {
   addDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { API_ENDPOINTS, API_BASE_URL, PUBLIC_SITE_URL } from "./config";
 import { parseJsonSafe } from "./utils/parseJsonSafe";
 import ChatWidget from "./ChatWidget";
@@ -817,6 +817,31 @@ function App() {
 
   // Content upload handler (with file and platforms)
   const handleContentUpload = async params => {
+    const uploadedStorageRefs = [];
+    const blockingErrorCodes = new Set([
+      "TIER_LIMIT_EXCEEDED",
+      "PLATFORM_LIMIT_EXCEEDED",
+      "UPLOAD_CAP_EXCEEDED",
+      "PROMOTION_TASK_QUOTA_EXCEEDED",
+    ]);
+    const buildStructuredUploadError = (result, fallbackMessage, httpStatus) => {
+      const serverErr =
+        (result && (result.error || result.message || result.text)) || fallbackMessage;
+      const enrichedError = new Error(serverErr || "Upload failed");
+      if (result && typeof result === "object") {
+        enrichedError.code = result.code;
+        enrichedError.context = result.context || null;
+        enrichedError.upgradeRequired = result.upgrade_required === true;
+      }
+      if (httpStatus) enrichedError.httpStatus = httpStatus;
+      return enrichedError;
+    };
+    const cleanupUploadedFiles = async () => {
+      if (uploadedStorageRefs.length === 0) return;
+      await Promise.allSettled(
+        uploadedStorageRefs.map(storageRef => deleteObject(storageRef).catch(() => null))
+      );
+    };
     // If called without params (e.g. from ClipStudioPanel refresh), just reload content
     if (!params) {
       console.log("[App] handleContentUpload called without params -> refreshing content");
@@ -850,6 +875,10 @@ function App() {
         flipH,
         flipV,
       } = params;
+      const requestedPlatforms =
+        platforms && platforms.length
+          ? platforms
+          : userDefaults.defaultPlatforms || ["youtube", "tiktok", "instagram"];
       // Use Firebase auth token when available; fall back to app user token or runtime E2E test token
       let token = null;
       try {
@@ -869,6 +898,49 @@ function App() {
       if (!token) {
         throw new Error("Authentication token missing for content upload request");
       }
+      if (!isDryRun) {
+        const readinessResponse = await fetch(API_ENDPOINTS.CONTENT_UPLOAD_READINESS, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            target_platforms: requestedPlatforms,
+            scheduled_promotion_time:
+              params.scheduled_promotion_time ||
+              schedule?.when ||
+              schedule?.scheduled_promotion_time ||
+              null,
+          }),
+        });
+        let readinessResult = null;
+        try {
+          readinessResult = await readinessResponse.json();
+        } catch (_) {
+          readinessResult = null;
+        }
+        if (!readinessResponse.ok) {
+          throw buildStructuredUploadError(
+            readinessResult,
+            `HTTP ${readinessResponse.status}`,
+            readinessResponse.status
+          );
+        }
+        if (readinessResult?.readiness?.allowed === false) {
+          throw buildStructuredUploadError(
+            {
+              error: readinessResult.readiness.message,
+              code: readinessResult.readiness.code,
+              context: readinessResult.readiness.context,
+              upgrade_required: readinessResult.readiness.context?.upgrade_required === true,
+            },
+            readinessResult.readiness.message,
+            403
+          );
+        }
+      }
       let finalUrl = "";
       // If this is a preview/dry-run, do NOT upload the file to storage.
       // Use a `preview://` URL so preview pipelines and workers treat it as a local preview token.
@@ -886,6 +958,7 @@ function App() {
           }
           const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
           const storageRef = ref(storage, filePath);
+          uploadedStorageRefs.push(storageRef);
           const uploadResult = await uploadBytes(storageRef, file);
 
           if (uploadResult.metadata.size < 100) {
@@ -910,6 +983,7 @@ function App() {
             try {
               const pPath = `uploads/${type}s/${Date.now()}_${pName}_${pFile.name}`;
               const pRef = ref(storage, pPath);
+              uploadedStorageRefs.push(pRef);
               await uploadBytes(pRef, pFile);
               const pUrl = await getDownloadURL(pRef);
 
@@ -955,10 +1029,11 @@ function App() {
         product_link: tiktokOps.product_link || "",
         commercial_rights: !!tiktokOps.commercialContent,
       };
+      const normalizedTitle = (title || "").trim() || "Untitled Post";
 
       const payload = {
         isDryRun: !!isDryRun,
-        title: title || (file ? file.name : ""),
+        title: normalizedTitle,
         type: type || "video",
         url: finalUrl,
         description: description || "",
@@ -1021,9 +1096,7 @@ function App() {
         }
       }
       if (!res.ok) {
-        const serverErr =
-          (result && (result.error || result.message || result.text)) || `HTTP ${res.status}`;
-        throw new Error(serverErr || "Upload/preview failed");
+        throw buildStructuredUploadError(result, `HTTP ${res.status}`, res.status);
       }
       if (isDryRun) {
         return result;
@@ -1086,7 +1159,7 @@ function App() {
               body: JSON.stringify({
                 contentId,
                 videoUrl: payload.url,
-                title: title || (file ? file.name : ""),
+                title: normalizedTitle,
                 description: description || "",
                 shortsMode: payload.platform_options?.youtube?.shortsMode,
               }),
@@ -1112,7 +1185,7 @@ function App() {
               content: {
                 type: type || "video",
                 url: payload.url,
-                title: title || (file ? file.name : ""),
+                title: normalizedTitle,
                 description: description || "",
               },
             };
@@ -1171,8 +1244,13 @@ function App() {
       );
       return result;
     } catch (error) {
+      if (!params?.isDryRun && blockingErrorCodes.has(error?.code)) {
+        await cleanupUploadedFiles();
+      }
       console.error("handleContentUpload error:", error);
-      alert("Error uploading content: " + error.message);
+      if (!blockingErrorCodes.has(error?.code)) {
+        alert("Error uploading content: " + error.message);
+      }
       throw error;
     }
   };

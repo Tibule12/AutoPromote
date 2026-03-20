@@ -54,6 +54,16 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
   const [showLibrary, setShowLibrary] = useState(false);
   const fileInputRef = useRef(null); // Ref for file upload
 
+  const resolveContentVideoUrl = contentItem =>
+    contentItem?.processedUrl ||
+    contentItem?.persistentMediaUrl ||
+    contentItem?.url ||
+    contentItem?.mediaUrl ||
+    contentItem?.media_url ||
+    contentItem?.video_url ||
+    contentItem?.file_url ||
+    null;
+
   // Filter for videos only, and exclude generated AI clips to keep the library clean
   // Updated: Only show videos explicitly uploaded via Clip Studio (source_context = clip_studio) to separate from general uploads
   const videoContent = content.filter(
@@ -170,7 +180,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
   };
 
   const analyzeVideo = async contentItem => {
-    if (!contentItem.url) {
+    const sourceVideoUrl = resolveContentVideoUrl(contentItem);
+    if (!sourceVideoUrl) {
       toast.error("Video URL not available");
       return;
     }
@@ -192,7 +203,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
         },
         body: JSON.stringify({
           contentId: contentItem.id,
-          videoUrl: contentItem.url, // Ensure we pass the URL
+          videoUrl: sourceVideoUrl,
         }),
       });
 
@@ -1030,7 +1041,11 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                           {previewClipId === (clip.id || index) ? (
                             <div className="clip-preview-player">
                               <video
-                                src={currentAnalysis.videoUrl || selectedContent?.url}
+                                src={
+                                  currentAnalysis.videoUrl ||
+                                  currentAnalysis.url ||
+                                  resolveContentVideoUrl(selectedContent)
+                                }
                                 controls
                                 autoPlay
                                 style={{
@@ -1119,7 +1134,11 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                         <button
                           className="btn-viral-lab"
                           onClick={() =>
-                            openComposerWithClip(currentAnalysis.url || currentAnalysis.videoUrl)
+                            openComposerWithClip(
+                              currentAnalysis.url ||
+                                currentAnalysis.videoUrl ||
+                                resolveContentVideoUrl(selectedContent)
+                            )
                           }
                           title="Open in Viral Lab"
                         >
