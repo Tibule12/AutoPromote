@@ -203,19 +203,38 @@ function scopeStringIncludes(scopeString, scope) {
   return parseScopeList(scopeString).includes(scope);
 }
 
+function getTikTokOpenId(connection = {}) {
+  return (
+    connection.open_id ||
+    connection.openId ||
+    connection.meta?.open_id ||
+    connection.meta?.openId ||
+    null
+  );
+}
+
+function getTikTokScopeValue(connection = {}) {
+  if (typeof connection.scope === "string" && connection.scope.trim()) return connection.scope;
+  if (Array.isArray(connection.scope)) return connection.scope.join(" ");
+  if (typeof connection.scopes === "string" && connection.scopes.trim()) return connection.scopes;
+  if (Array.isArray(connection.scopes)) return connection.scopes.join(" ");
+  return "";
+}
+
 function getTikTokPublishReadiness(connection = {}) {
   const tokenBlob =
     tokensFromDoc(connection) ||
     (connection.tokens && typeof connection.tokens === "object" ? connection.tokens : null);
+  const scopeValue = getTikTokScopeValue(connection);
   const hasAccessToken = !!(
     tokenBlob &&
     typeof tokenBlob.access_token === "string" &&
     tokenBlob.access_token.trim()
   );
-  const hasOpenId = !!(connection.open_id || connection.openId);
-  const grantedScopes = parseScopeList(connection.scope);
+  const hasOpenId = !!getTikTokOpenId(connection);
+  const grantedScopes = parseScopeList(scopeValue);
   const missingScopes = REQUIRED_PUBLISH_SCOPES.filter(
-    scope => !scopeStringIncludes(connection.scope, scope)
+    scope => !scopeStringIncludes(scopeValue, scope)
   );
   const publishReady = hasAccessToken && hasOpenId && missingScopes.length === 0;
 
@@ -864,17 +883,25 @@ router.get(
         if (!snap.exists) return { connected: false };
         const data = snap.data() || {};
         const readiness = getTikTokPublishReadiness(data);
+        const tokens =
+          tokensFromDoc(data) ||
+          (data.tokens && typeof data.tokens === "object" ? data.tokens : null);
+        const accessToken =
+          tokens && typeof tokens.access_token === "string" && tokens.access_token.trim()
+            ? tokens.access_token.trim()
+            : null;
+        const scopeValue = getTikTokScopeValue(data);
         const base = {
           connected: true,
-          open_id: data.open_id,
-          scope: data.scope,
+          open_id: getTikTokOpenId(data),
+          scope: scopeValue,
           obtainedAt: data.obtainedAt,
           storedMode: data.mode || null,
           serverMode: TIKTOK_ENV,
           reauthRequired: !!(data.mode && data.mode !== TIKTOK_ENV),
           ...readiness,
         };
-        if (data.access_token && scopeStringIncludes(data.scope, REQUIRED_PROFILE_SCOPE)) {
+        if (accessToken && scopeStringIncludes(scopeValue, REQUIRED_PROFILE_SCOPE)) {
           try {
             const info = await instrument("tiktokIdentityFetch", async () => {
               // Use safeFetch for SSRF protection
@@ -884,7 +911,7 @@ router.get(
                 {
                   fetchOptions: {
                     method: "GET",
-                    headers: { Authorization: `Bearer ${data.access_token}` },
+                    headers: { Authorization: `Bearer ${accessToken}` },
                     timeout: 3500,
                   },
                   requireHttps: true,

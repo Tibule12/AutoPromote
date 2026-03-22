@@ -7,6 +7,7 @@ jest.setTimeout(20000);
 describe("content diagnosis and remediation routes", () => {
   const contentId = "diag-content-001";
   let previousAutomationConfig = null;
+  let previousBillingData = null;
 
   beforeAll(async () => {
     const globalConfigRef = db.collection("system_config").doc("global");
@@ -14,6 +15,10 @@ describe("content diagnosis and remediation routes", () => {
     previousAutomationConfig = configSnap.exists
       ? (configSnap.data() || {}).recoveryAutomation || null
       : null;
+
+    const billingRef = db.collection("user_billing").doc("testUser123");
+    const billingSnap = await billingRef.get();
+    previousBillingData = billingSnap.exists ? billingSnap.data() || null : null;
 
     await globalConfigRef.set(
       {
@@ -43,6 +48,17 @@ describe("content diagnosis and remediation routes", () => {
         },
         { merge: true }
       );
+
+    await db
+      .collection("user_billing")
+      .doc("testUser123")
+      .set(
+        {
+          tier: "pro",
+          status: "active",
+        },
+        { merge: true }
+      );
   });
 
   afterAll(async () => {
@@ -51,6 +67,15 @@ describe("content diagnosis and remediation routes", () => {
     } catch (_) {}
     try {
       await db.collection("content_diagnosis").doc(contentId).delete();
+    } catch (_) {}
+    try {
+      await db
+        .collection("user_billing")
+        .doc("testUser123")
+        .set(previousBillingData || {}, { merge: false });
+      if (!previousBillingData) {
+        await db.collection("user_billing").doc("testUser123").delete();
+      }
     } catch (_) {}
     try {
       await db

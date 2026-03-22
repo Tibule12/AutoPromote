@@ -83,6 +83,24 @@ const formatMonthLabel = monthKey => {
   });
 };
 
+const STORAGE_UPLOAD_LIMIT_MB = 500;
+
+const buildClientUploadError = error => {
+  const code = error && typeof error.code === "string" ? error.code : "";
+  if (code === "storage/unauthorized") {
+    return new Error(
+      `Upload blocked by Firebase Storage permissions. Make sure you are signed in and the file is under ${STORAGE_UPLOAD_LIMIT_MB}MB.`
+    );
+  }
+  if (code === "storage/canceled") {
+    return new Error("Upload canceled before completion.");
+  }
+  if (code === "storage/retry-limit-exceeded") {
+    return new Error("Upload timed out before completion. Check your connection and retry.");
+  }
+  return new Error(error?.message || "Upload failed. Please try again.");
+};
+
 function normalizeTikTokCreatorInfo(primary, fallbackRaw, fallbackSummary) {
   const displayName =
     primary?.display_name ||
@@ -1918,7 +1936,6 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
     try {
       // --- 1. Validation ---
-      const MAX_SIZE_MB = 500;
       const effectiveMediaType =
         (fileToUpload && fileToUpload.type && fileToUpload.type.split("/")[0]) ||
         mediaType ||
@@ -1936,8 +1953,11 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         scheduledTime: scheduledTime ? new Date(scheduledTime).toISOString() : null,
       });
 
-      if (fileToUpload instanceof Blob && fileToUpload.size > MAX_SIZE_MB * 1024 * 1024) {
-        throw new Error(`File too large. Maximum upload size is ${MAX_SIZE_MB}MB.`);
+      if (
+        fileToUpload instanceof Blob &&
+        fileToUpload.size > STORAGE_UPLOAD_LIMIT_MB * 1024 * 1024
+      ) {
+        throw new Error(`File too large. Maximum upload size is ${STORAGE_UPLOAD_LIMIT_MB}MB.`);
       }
 
       // --- 2. Upload with Progress ---
@@ -1957,7 +1977,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
             },
             error => {
               console.error("Upload failed:", error);
-              reject(new Error("Upload failed. Please check your connection."));
+              reject(buildClientUploadError(error));
             },
             async () => {
               try {
