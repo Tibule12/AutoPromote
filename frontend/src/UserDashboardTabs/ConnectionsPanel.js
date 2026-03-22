@@ -145,6 +145,22 @@ const ConnectionsPanel = ({
         return null;
     }
   };
+
+  const getTikTokStatusNote = () => {
+    if (!tiktokStatus?.connected) {
+      return "Connect to link your TikTok account for future posting and analytics.";
+    }
+    if (tiktokStatus.publishReady) {
+      return "Upload-ready for TikTok publishing.";
+    }
+    if (tiktokStatus.missingScopes?.length) {
+      return "Connected for profile access only. Reconnect TikTok and approve posting access before uploading.";
+    }
+    if (!tiktokStatus.hasAccessToken || !tiktokStatus.hasOpenId) {
+      return "TikTok connection is incomplete. Reconnect before uploading.";
+    }
+    return "TikTok needs reconnect before publishing.";
+  };
   return (
     <section className="connections-panel">
       <div
@@ -276,11 +292,21 @@ const ConnectionsPanel = ({
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {tiktokStatus?.connected ? (
             <>
-              <span style={{ color: "#cbd5e1" }}>
-                {getPlatformLabel("tiktok") || "TikTok connected"}
-              </span>
+              <div style={{ display: "grid", gap: 4 }}>
+                <span style={{ color: "#cbd5e1" }}>
+                  {getPlatformLabel("tiktok") || "TikTok connected"}
+                </span>
+                <span
+                  style={{
+                    color: tiktokStatus.publishReady ? "#86efac" : "#fbbf24",
+                    fontSize: 12,
+                  }}
+                >
+                  {getTikTokStatusNote()}
+                </span>
+              </div>
               <button className="check-quality" onClick={handleConnectTikTok}>
-                Reconnect
+                {tiktokStatus.publishReady ? "Reconnect" : "Reconnect TikTok"}
               </button>
               {handleDisconnectPlatform && (
                 <button
@@ -297,9 +323,7 @@ const ConnectionsPanel = ({
               <button className="check-quality" onClick={handleConnectTikTok}>
                 Connect TikTok
               </button>
-              <span style={{ color: "#9aa4b2" }}>
-                Connect to link your TikTok account for future posting and analytics.
-              </span>
+              <span style={{ color: "#9aa4b2" }}>{getTikTokStatusNote()}</span>
             </>
           )}
         </div>

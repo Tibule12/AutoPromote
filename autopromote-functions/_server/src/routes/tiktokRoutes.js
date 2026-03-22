@@ -183,6 +183,7 @@ const SUPPRESSION_SNIPPET = `
 // APPROVED SCOPES: user.info.profile, video.list (as of Dec 2025)
 const DEFAULT_TIKTOK_SCOPES = "user.info.profile video.list";
 const REQUIRED_PROFILE_SCOPE = "user.info.profile";
+const REQUIRED_PUBLISH_SCOPES = ["video.upload", "video.publish"];
 
 function configuredScopes() {
   // Accept both comma-separated and space-separated lists in the env var.
@@ -197,6 +198,35 @@ function scopeStringIncludes(scopeString, scope) {
     .map(s => s.trim())
     .filter(Boolean)
     .includes(scope);
+}
+
+function getTikTokPublishReadiness(connection = {}) {
+  const tokenBlob =
+    tokensFromDoc(connection) ||
+    (connection.tokens && typeof connection.tokens === "object" ? connection.tokens : null);
+  const hasAccessToken = !!(
+    tokenBlob &&
+    typeof tokenBlob.access_token === "string" &&
+    tokenBlob.access_token.trim()
+  );
+  const hasOpenId = !!(connection.open_id || connection.openId);
+  const grantedScopes = String(connection.scope || "")
+    .split(/\s+/)
+    .map(scope => scope.trim())
+    .filter(Boolean);
+  const missingScopes = REQUIRED_PUBLISH_SCOPES.filter(
+    scope => !scopeStringIncludes(connection.scope, scope)
+  );
+  const publishReady = hasAccessToken && hasOpenId && missingScopes.length === 0;
+
+  return {
+    publishReady,
+    hasAccessToken,
+    hasOpenId,
+    grantedScopes,
+    missingScopes,
+    reauthRecommended: !publishReady,
+  };
 }
 
 function constructAuthUrl(cfg, state, scope = configuredScopes()) {
@@ -833,6 +863,7 @@ router.get(
         );
         if (!snap.exists) return { connected: false };
         const data = snap.data() || {};
+        const readiness = getTikTokPublishReadiness(data);
         const base = {
           connected: true,
           open_id: data.open_id,
@@ -841,6 +872,7 @@ router.get(
           storedMode: data.mode || null,
           serverMode: TIKTOK_ENV,
           reauthRequired: !!(data.mode && data.mode !== TIKTOK_ENV),
+          ...readiness,
         };
         if (data.access_token && scopeStringIncludes(data.scope, REQUIRED_PROFILE_SCOPE)) {
           try {
@@ -1376,6 +1408,25 @@ router.post(
           .json({ error: "tiktok_not_connected", message: "TikTok account not connected." });
       }
 
+      const readiness = getTikTokPublishReadiness(conn);
+      if (!readiness.hasAccessToken || !readiness.hasOpenId) {
+        return res.status(400).json({
+          error: "tiktok_token_missing",
+          message: "Valid TikTok access token not found.",
+          uploadReady: false,
+          connection: readiness,
+        });
+      }
+      if (readiness.missingScopes.length) {
+        return res.status(403).json({
+          error: "tiktok_publish_scope_missing",
+          message:
+            "TikTok is connected for profile access, but this account was not connected with posting permissions. Reconnect TikTok and approve posting access.",
+          uploadReady: false,
+          connection: readiness,
+        });
+      }
+
       const tokens =
         tokensFromDoc(conn) ||
         (conn.tokens && typeof conn.tokens === "object" ? conn.tokens : null);
@@ -1384,9 +1435,12 @@ router.post(
       const openId = conn.open_id || conn.openId;
 
       if (!accessToken || !openId) {
-        return res
-          .status(400)
-          .json({ error: "tiktok_token_missing", message: "Valid TikTok access token not found." });
+        return res.status(400).json({
+          error: "tiktok_token_missing",
+          message: "Valid TikTok access token not found.",
+          uploadReady: false,
+          connection: readiness,
+        });
       }
 
       // 2. Resolve File URL
