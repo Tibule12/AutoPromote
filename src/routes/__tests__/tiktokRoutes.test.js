@@ -78,6 +78,7 @@ describe("tiktokRoutes", () => {
   });
 
   test("status treats encrypted tokens and legacy open_id/scope shapes as publish-ready", async () => {
+    firebaseAdmin.admin.auth = () => ({ verifyIdToken: async _token => ({ uid: "testUser456" }) });
     const originalCollection = firebaseAdmin.db.collection;
     firebaseAdmin.db.collection = _name => ({
       doc: _id => ({
@@ -101,9 +102,10 @@ describe("tiktokRoutes", () => {
 
     const res = await request(app)
       .get("/api/tiktok/status")
-      .set("Authorization", "Bearer test-token-for-testUser123");
+      .set("Authorization", "Bearer test-token-for-testUser456");
 
     firebaseAdmin.db.collection = originalCollection;
+    firebaseAdmin.admin.auth = () => ({ verifyIdToken: async _token => ({ uid: "testUser123" }) });
 
     expect(res.status).toBe(200);
     expect(res.body.connected).toBe(true);
