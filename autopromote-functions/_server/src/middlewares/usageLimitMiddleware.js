@@ -127,6 +127,7 @@ function usageLimitMiddleware(options = {}) {
 
       // Determine the user's subscription tier
       const { tierId: subscriptionTier } = await getEffectiveTierSnapshot(userId, null, userData);
+      const isPaidTier = subscriptionTier !== "free";
 
       // Determine upload limit for the user based on plan
       const planLimit = SUBSCRIPTION_UPLOAD_LIMITS[subscriptionTier] ?? FREE_UPLOAD_LIMIT;
@@ -138,7 +139,7 @@ function usageLimitMiddleware(options = {}) {
           limit: planLimit,
           used: 0,
           remaining: planLimit,
-          isPaid: hasUnlimitedUploads,
+          isPaid: isPaidTier,
           monthKey: new Date().toISOString().slice(0, 7),
         };
         return next();
@@ -165,14 +166,14 @@ function usageLimitMiddleware(options = {}) {
         usageCount += data.count || 1;
       });
 
-      const remaining = freeLimit - usageCount;
+      const remaining = Math.max(0, planLimit - usageCount);
 
       // Attach usage info to request for logging
       req.userUsage = {
         limit: planLimit,
         used: usageCount,
         remaining: remaining,
-        isPaid: false,
+        isPaid: isPaidTier,
         monthKey: monthKey,
       };
 

@@ -23,13 +23,21 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
             <div>
               <h1 className="new-welcome-title">AutoPromote</h1>
               <p className="new-welcome-tagline-small">
-                Cross-platform publishing control for creators who need clarity.
+                Create once. Publish everywhere. Learn what actually works.
               </p>
               <p
                 className="new-welcome-subline"
                 style={{ marginTop: "0.5rem", opacity: 0.9, fontSize: "1.1rem" }}
               >
-                Upload once, publish deliberately, track what happened, and learn what to improve.
+                AutoPromote is an AI-powered platform that helps creators, teams, and businesses
+                manage, track, and improve content performance across multiple platforms from one
+                dashboard.
+              </p>
+              <p
+                className="new-welcome-subline"
+                style={{ marginTop: "0.5rem", opacity: 0.82, fontSize: "1rem" }}
+              >
+                Stop guessing what works. Start learning from real results.
               </p>
             </div>
           </div>
@@ -51,14 +59,26 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
         <div className="hp-main">
           <Section id="what-is" title="What is AutoPromote?">
             <p>
-              AutoPromote is a cross-platform publishing control layer for creators and teams who
-              already publish content and want a cleaner way to manage distribution.
+              AutoPromote is an AI-powered content operations platform for people who publish across
+              multiple platforms and want one clearer workflow.
             </p>
             <p>
-              Instead of repeating the same workflow on every native platform, AutoPromote helps you
-              upload once, choose your destinations, track publishing state, and make better
-              decisions from one dashboard.
+              Instead of repeating the same steps on every native platform, AutoPromote helps you
+              upload once, choose destinations, track publishing state, and review results from one
+              dashboard.
             </p>
+            <p>
+              AutoPromote is built to support SMEs, creators, and digital teams managing content
+              across multiple platforms at scale.
+            </p>
+            <p style={{ marginTop: "1rem", marginBottom: "0.5rem", fontWeight: 600 }}>
+              Who it's for:
+            </p>
+            <ul className="hp-list" style={{ marginTop: "0.25rem" }}>
+              <li>Creators publishing on multiple platforms</li>
+              <li>Small businesses managing digital marketing</li>
+              <li>Teams needing structured content workflows</li>
+            </ul>
             <p
               className="highlight-text"
               style={{
@@ -68,8 +88,27 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
                 paddingLeft: "1rem",
               }}
             >
-              AutoPromote helps creators test, learn, and improve content performance using real
-              outcomes — not assumptions.
+              AutoPromote helps users test, learn, and improve content performance using real
+              outcomes, not assumptions.
+            </p>
+          </Section>
+
+          <Section id="today" title="What Works Today">
+            <ul className="hp-list">
+              <li>Upload, queue, and schedule content across connected platforms</li>
+              <li>Track publishing state, worker health, and platform connection status</li>
+              <li>Review analytics and post-performance data that linked platforms expose</li>
+              <li>Use built-in editing, clip, caption, and formatting tools before publishing</li>
+              <li>Download your uploaded media and review publish history from the dashboard</li>
+            </ul>
+            <p className="muted">
+              Some integrations and automation paths are still feature-gated or account-dependent,
+              so AutoPromote only promises what your connected platforms and current plan support.
+            </p>
+            <p className="muted">
+              If you only need one native platform, its own tools may be enough. AutoPromote is most
+              useful when managing the same workflow across multiple destinations becomes the real
+              bottleneck.
             </p>
           </Section>
 
@@ -82,8 +121,8 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
               <li>Confidence comes from evidence, not promises</li>
             </ul>
             <p className="muted">
-              AutoPromote does not guarantee virality. It guarantees smarter attempts and clearer
-              learning.
+              AutoPromote focuses on improving consistency, clarity, and measurable results rather
+              than chasing unpredictable virality.
             </p>
           </Section>
 
@@ -138,25 +177,6 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
                 <p>The goal is learning, not guessing.</p>
               </li>
             </ol>
-          </Section>
-
-          <Section id="today" title="What Works Today">
-            <ul className="hp-list">
-              <li>Upload, queue, and schedule content across connected platforms</li>
-              <li>Track publishing state, worker health, and platform connection status</li>
-              <li>Review analytics and post-performance data that linked platforms expose</li>
-              <li>Use built-in editing, clip, caption, and formatting tools before publishing</li>
-              <li>Download your uploaded media and review publish history from the dashboard</li>
-            </ul>
-            <p className="muted">
-              Some integrations and automation paths are still feature-gated or account-dependent,
-              so AutoPromote only promises what your connected platforms and current plan support.
-            </p>
-            <p className="muted">
-              If you only need one native platform, its own tools may be enough. AutoPromote is most
-              useful when repeating the workflow across multiple destinations becomes the real
-              bottleneck.
-            </p>
           </Section>
 
           <Section id="not" title="What AutoPromote Is NOT">
