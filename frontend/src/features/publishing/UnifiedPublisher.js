@@ -1970,7 +1970,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       let finalUrl = "";
       if (fileToUpload instanceof Blob) {
         try {
-          const uploadResult = await uploadBlobViaBackend({
+          const uploadResult = await uploadSourceFileViaBackend({
             file: fileToUpload,
             token,
             mediaType: effectiveMediaType,
