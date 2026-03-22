@@ -18,6 +18,7 @@ const MissionControlPanel = () => {
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false); // New state for upload status
   const [isLocked] = useState(false);
+  const [missionStatus, setMissionStatus] = useState(null);
 
   // Reactor State
   const [prompt, setPrompt] = useState("");
@@ -35,6 +36,43 @@ const MissionControlPanel = () => {
 
   // Visualization State
   const canvasRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadMissionStatus = async currentUser => {
+      if (!currentUser) {
+        if (!cancelled) setMissionStatus(null);
+        return;
+      }
+
+      try {
+        const token = await currentUser.getIdToken();
+        const response = await fetch(
+          `${API_ENDPOINTS.MONETIZATION_SUBSCRIPTION_STATUS}?action=boost`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!cancelled) setMissionStatus(data);
+      } catch (_error) {}
+    };
+
+    loadMissionStatus(user);
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const boostLimit = missionStatus?.status?.subscription?.limits?.monthlyBoosts ?? 0;
+  const boostsUsed = missionStatus?.status?.subscription?.usage?.boostsThisMonth ?? 0;
+  const remainingBoosts =
+    missionStatus?.remaining?.boosts ??
+    (boostLimit === -1 ? -1 : Math.max(0, boostLimit - boostsUsed));
 
   useEffect(() => {
     if (!user) return;
@@ -318,6 +356,9 @@ const MissionControlPanel = () => {
         const data = await response.json();
 
         if (!response.ok) {
+          if (data.code === "BOOST_LIMIT_EXCEEDED") {
+            setMissionStatus(prev => ({ ...(prev || {}), ...data }));
+          }
           throw new Error(data.error || "Failed to ignite campaign");
         }
 
@@ -350,6 +391,19 @@ const MissionControlPanel = () => {
         });
 
         // Reset
+        const refreshedStatus = await fetch(
+          `${API_ENDPOINTS.MONETIZATION_SUBSCRIPTION_STATUS}?action=boost`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          }
+        );
+        if (refreshedStatus.ok) {
+          const refreshed = await refreshedStatus.json();
+          setMissionStatus(refreshed);
+        }
         setPrompt("");
         setIsStabilizing(false);
         setTimeout(() => setReactorState("idle"), 2000);
@@ -496,6 +550,35 @@ const MissionControlPanel = () => {
     <div className="ads-reactor-container">
       <h1 className="reactor-title">VIRAL MISSION CONTROL</h1>
 
+      {missionStatus ? (
+        <div
+          style={{
+            marginBottom: "1rem",
+            padding: "0.9rem 1rem",
+            border: "1px solid #00ff4155",
+            borderRadius: 12,
+            background: "rgba(0, 20, 10, 0.55)",
+            color: "#d1fae5",
+            display: "flex",
+            justifyContent: "space-between",
+            gap: "1rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <span>
+            PLAN: {(missionStatus.entitlements && missionStatus.entitlements.planName) || "Starter"}
+          </span>
+          <span>
+            MISSION QUOTA: {remainingBoosts === -1 ? "Unlimited" : remainingBoosts} remaining this
+            month
+          </span>
+          <span>
+            USED: {boostsUsed}
+            {boostLimit === -1 ? " / Unlimited" : ` / ${boostLimit}`}
+          </span>
+        </div>
+      ) : null}
+
       <div className="reactor-grid">
         {/* Control Core */}
         <div className="reactor-module control-core">
@@ -609,9 +692,13 @@ const MissionControlPanel = () => {
           <button
             className={`ignite-button ${isStabilizing ? "stabilizing" : ""}`}
             onClick={handleIgnite}
-            disabled={isStabilizing}
+            disabled={isStabilizing || (!simulationMode && remainingBoosts === 0)}
           >
-            {isStabilizing ? "CALCULATING..." : "LAUNCH MISSION"}
+            {isStabilizing
+              ? "CALCULATING..."
+              : !simulationMode && remainingBoosts === 0
+                ? "MISSION QUOTA EXHAUSTED"
+                : "LAUNCH MISSION"}
           </button>
         </div>
 

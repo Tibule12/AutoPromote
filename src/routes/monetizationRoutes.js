@@ -7,6 +7,7 @@ const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
 const monetizationService = require("../services/monetizationService");
 const referralGrowthEngine = require("../services/referralGrowthEngine");
+const { getPlanCapabilities } = require("../config/subscriptionPlans");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 
 // Apply a light router-level limiter for monetization endpoints
@@ -34,10 +35,24 @@ router.get("/subscription/status", authMiddleware, async (req, res) => {
     const { action } = req.query;
 
     const status = await monetizationService.checkSubscriptionLimits(userId, action || "upload");
+    const entitlements = getPlanCapabilities(status.subscription.tierId);
+    const uploadLimit = status.subscription.limits.monthlyUploads;
+    const boostLimit = status.subscription.limits.monthlyBoosts;
 
     res.json({
       success: true,
       status,
+      entitlements,
+      remaining: {
+        uploads:
+          uploadLimit === -1
+            ? -1
+            : Math.max(0, uploadLimit - (status.subscription.usage.uploadsThisMonth || 0)),
+        boosts:
+          boostLimit === -1
+            ? -1
+            : Math.max(0, boostLimit - (status.subscription.usage.boostsThisMonth || 0)),
+      },
       checkedAt: new Date().toISOString(),
     });
   } catch (error) {
@@ -70,6 +85,25 @@ router.post("/boost/create", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating paid boost:", error);
+    if ((error && error.message) || req.userId) {
+      const message = error && error.message ? error.message : "Failed to create paid boost";
+      if (String(message).includes("Boost limit exceeded")) {
+        try {
+          const status = await monetizationService.checkSubscriptionLimits(req.userId, "boost");
+          const boostLimit = status.subscription.limits.monthlyBoosts;
+          return res.status(403).json({
+            error: message,
+            code: "BOOST_LIMIT_EXCEEDED",
+            status,
+            entitlements: getPlanCapabilities(status.subscription.tierId),
+            remainingBoosts:
+              boostLimit === -1
+                ? -1
+                : Math.max(0, boostLimit - (status.subscription.usage.boostsThisMonth || 0)),
+          });
+        } catch (_statusError) {}
+      }
+    }
     res.status(500).json({ error: "Failed to create paid boost" });
   }
 });

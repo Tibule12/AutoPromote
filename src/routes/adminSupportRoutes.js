@@ -3,6 +3,37 @@ const router = express.Router();
 const authMiddleware = require("../authMiddleware");
 const adminOnly = require("../middlewares/adminOnly");
 const { db, admin } = require("../firebaseAdmin");
+const { getPlanCapabilities } = require("../config/subscriptionPlans");
+const { getEffectiveTierSnapshot } = require("../services/billingService");
+
+function normalizeTicket(doc) {
+  const ticketData = doc.data();
+  return {
+    id: doc.id,
+    ...ticketData,
+    createdAt: ticketData.createdAt?.toDate?.() || ticketData.createdAt || null,
+    updatedAt: ticketData.updatedAt?.toDate?.() || ticketData.updatedAt || null,
+  };
+}
+
+router.get("/tickets/mine", authMiddleware, async (req, res) => {
+  try {
+    const snapshot = await db
+      .collection("support_tickets")
+      .where("userId", "==", req.user.uid)
+      .orderBy("createdAt", "desc")
+      .limit(parseInt(req.query.limit || 25, 10))
+      .get();
+
+    res.json({
+      success: true,
+      tickets: snapshot.docs.map(normalizeTicket),
+    });
+  } catch (error) {
+    console.error("Error fetching user tickets:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // Get all support tickets
 router.get("/tickets", authMiddleware, adminOnly, async (req, res) => {
@@ -58,14 +89,44 @@ router.get("/tickets", authMiddleware, adminOnly, async (req, res) => {
 router.post("/tickets", authMiddleware, async (req, res) => {
   try {
     const { subject, description, priority, category } = req.body;
+    const tierSnapshot = await getEffectiveTierSnapshot(req.user.uid);
+    const capabilities = getPlanCapabilities(tierSnapshot.tierId);
+
+    if (!capabilities.support.ticketAccess) {
+      return res.status(403).json({
+        success: false,
+        error: "Your current plan includes self-serve support only.",
+        entitlements: capabilities,
+        upgradeRequired: true,
+      });
+    }
+
+    if (!subject || !description) {
+      return res.status(400).json({
+        success: false,
+        error: "Subject and description are required.",
+      });
+    }
+
+    const normalizedPriority = (priority || "medium").toLowerCase();
+    if (!capabilities.support.allowedPriorities.includes(normalizedPriority)) {
+      return res.status(400).json({
+        success: false,
+        error: `Your ${capabilities.planName} plan does not include ${normalizedPriority} priority tickets.`,
+        entitlements: capabilities,
+      });
+    }
 
     const ticketData = {
       userId: req.user.uid,
       subject,
       description,
-      priority: priority || "medium",
+      priority: normalizedPriority,
       category: category || "general",
       status: "open",
+      supportPlan: capabilities.planId,
+      supportLane: capabilities.support.channel,
+      responseTarget: capabilities.support.responseTarget,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };

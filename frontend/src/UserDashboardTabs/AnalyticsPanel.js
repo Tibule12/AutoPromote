@@ -3,6 +3,14 @@ import { auth } from "../firebaseClient";
 import { API_ENDPOINTS } from "../config";
 import "./AnalyticsPanel.css";
 
+const RANGE_OPTIONS = [
+  { value: "24h", label: "Last 24 Hours" },
+  { value: "7d", label: "Last 7 Days" },
+  { value: "30d", label: "Last 30 Days" },
+  { value: "90d", label: "Last 90 Days" },
+  { value: "all", label: "All Time" },
+];
+
 const AnalyticsPanel = () => {
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState(null);
@@ -23,6 +31,17 @@ const AnalyticsPanel = () => {
   const [recoveryLoading, setRecoveryLoading] = useState(false);
   const [policySaving, setPolicySaving] = useState(false);
   const [recoveryMessage, setRecoveryMessage] = useState("");
+
+  const analyticsEntitlements = analytics?.entitlements?.analytics || {
+    allowedRanges: ["24h", "7d"],
+    platformBreakdown: false,
+    recoveryLab: false,
+    canExport: false,
+    topContentLimit: 10,
+    label: "Basic",
+    summary: "Recent KPI snapshot for published content.",
+  };
+  const recoveryEnabled = Boolean(analyticsEntitlements.recoveryLab);
 
   const authedFetch = useCallback(async (url, options = {}) => {
     const currentUser = auth.currentUser;
@@ -61,6 +80,9 @@ const AnalyticsPanel = () => {
         if (res.ok) {
           const data = await res.json();
           setAnalytics(data);
+          if (data.range && data.range !== timeRange) {
+            setTimeRange(data.range);
+          }
           setError("");
           return;
         }
@@ -106,6 +128,12 @@ const AnalyticsPanel = () => {
   }, [loadAnalytics]);
 
   const loadRecoveryAssets = useCallback(async () => {
+    if (!recoveryEnabled) {
+      setContentItems([]);
+      setSelectedContentId("");
+      return;
+    }
+
     try {
       const res = await authedFetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0`, {
         method: "GET",
@@ -120,10 +148,11 @@ const AnalyticsPanel = () => {
     } catch (_e) {
       // Recovery tools are optional; fail silently to avoid blocking analytics panel.
     }
-  }, [authedFetch, selectedContentId]);
+  }, [authedFetch, recoveryEnabled, selectedContentId]);
 
   const loadRecoveryForContent = useCallback(
     async contentId => {
+      if (!recoveryEnabled || !contentId) return;
       if (!contentId) return;
       setRecoveryLoading(true);
       setRecoveryMessage("");
@@ -154,7 +183,7 @@ const AnalyticsPanel = () => {
         setRecoveryLoading(false);
       }
     },
-    [authedFetch]
+    [authedFetch, recoveryEnabled]
   );
 
   useEffect(() => {
@@ -166,7 +195,7 @@ const AnalyticsPanel = () => {
   }, [selectedContentId, loadRecoveryForContent]);
 
   const runRemediation = async dryRun => {
-    if (!selectedContentId) return;
+    if (!selectedContentId || !recoveryEnabled) return;
     setRecoveryLoading(true);
     setRecoveryMessage("");
     try {
@@ -191,7 +220,7 @@ const AnalyticsPanel = () => {
   };
 
   const savePolicy = async () => {
-    if (!selectedContentId) return;
+    if (!selectedContentId || !recoveryEnabled) return;
     setPolicySaving(true);
     setRecoveryMessage("");
     try {
@@ -210,7 +239,7 @@ const AnalyticsPanel = () => {
   };
 
   const runAutoPolicyNow = async dryRun => {
-    if (!selectedContentId) return;
+    if (!selectedContentId || !recoveryEnabled) return;
     setRecoveryLoading(true);
     setRecoveryMessage("");
     try {
@@ -291,6 +320,41 @@ const AnalyticsPanel = () => {
 
   const rangeStartLabel = formatRangeDate(stats.rangeStartAt);
   const rangeEndLabel = formatRangeDate(stats.rangeEndAt);
+  const availableRangeOptions = RANGE_OPTIONS.filter(option =>
+    (analyticsEntitlements.allowedRanges || []).includes(option.value)
+  );
+
+  const exportAnalyticsSnapshot = () => {
+    const rows = [
+      ["metric", "value"],
+      ["plan", analytics?.plan?.name || "Unknown"],
+      ["range", stats.range || timeRange],
+      ["totalViews", stats.totalViews || 0],
+      ["totalClicks", stats.totalClicks || 0],
+      ["ctr", stats.ctr || 0],
+      ["topPlatform", stats.topPlatform || "N/A"],
+      [],
+      ["platform", "views", "clicks", "ctr"],
+      ...sortedPlatformBreakdown.map(([platform, data]) => [
+        platform,
+        data.views || 0,
+        data.clicks || 0,
+        data.ctr || 0,
+      ]),
+    ];
+    const csv = rows
+      .map(row => row.map(value => `"${String(value ?? "").replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = `autopromote-analytics-${stats.range || timeRange}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(href);
+  };
 
   return (
     <section className="analytics-panel">
@@ -308,24 +372,35 @@ const AnalyticsPanel = () => {
           <span style={{ fontSize: "0.8rem", color: "#64748b" }}>
             Real performance from published platform posts
           </span>
+          <div style={{ marginTop: "0.5rem", fontSize: "0.82rem", color: "#93c5fd" }}>
+            {analytics?.plan?.name || "Starter"}: {analyticsEntitlements.label}.{" "}
+            {analyticsEntitlements.summary}
+          </div>
         </div>
-        <select
-          value={timeRange}
-          onChange={e => setTimeRange(e.target.value)}
-          style={{
-            padding: "0.5rem",
-            borderRadius: "6px",
-            border: "1px solid var(--border)",
-            background: "var(--card)",
-            color: "var(--text)",
-          }}
-        >
-          <option value="24h">Last 24 Hours</option>
-          <option value="7d">Last 7 Days</option>
-          <option value="30d">Last 30 Days</option>
-          <option value="90d">Last 90 Days</option>
-          <option value="all">All Time</option>
-        </select>
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          {analyticsEntitlements.canExport ? (
+            <button type="button" onClick={exportAnalyticsSnapshot}>
+              Export CSV
+            </button>
+          ) : null}
+          <select
+            value={timeRange}
+            onChange={e => setTimeRange(e.target.value)}
+            style={{
+              padding: "0.5rem",
+              borderRadius: "6px",
+              border: "1px solid var(--border)",
+              background: "var(--card)",
+              color: "var(--text)",
+            }}
+          >
+            {availableRangeOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {error ? (
@@ -397,230 +472,252 @@ const AnalyticsPanel = () => {
         </div>
       ) : null}
 
-      <div
-        className="ap-analytics-panel-card"
-        style={{
-          background: "var(--card)",
-          padding: "1rem",
-          borderRadius: "12px",
-          border: "1px solid var(--border)",
-          marginBottom: "1.5rem",
-        }}
-      >
+      {recoveryEnabled ? (
         <div
+          className="ap-analytics-panel-card"
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: "0.75rem",
-            flexWrap: "wrap",
+            background: "var(--card)",
+            padding: "1rem",
+            borderRadius: "12px",
+            border: "1px solid var(--border)",
+            marginBottom: "1.5rem",
           }}
         >
-          <div>
-            <h4 style={{ margin: 0 }}>Recovery Lab</h4>
-            <div style={{ color: "var(--muted)", fontSize: ".82rem", marginTop: "0.2rem" }}>
-              Diagnose weak content, run remediation, and configure guardrails.
-            </div>
-          </div>
-          <select
-            value={selectedContentId}
-            onChange={e => setSelectedContentId(e.target.value)}
+          <div
             style={{
-              minWidth: 220,
-              padding: "0.45rem 0.6rem",
-              borderRadius: 8,
-              border: "1px solid var(--border)",
-              background: "var(--bg-2)",
-              color: "var(--text)",
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "0.75rem",
+              flexWrap: "wrap",
             }}
           >
-            <option value="">Select content…</option>
-            {contentItems.map(item => (
-              <option key={item.id || item._id} value={item.id || item._id}>
-                {(item.title || "Untitled").slice(0, 48)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {recoveryMessage ? (
-          <div style={{ marginTop: ".85rem", color: "#93c5fd", fontSize: ".85rem" }}>
-            {recoveryMessage}
-          </div>
-        ) : null}
-
-        {diagnosisData ? (
-          <div style={{ marginTop: "0.85rem", display: "grid", gap: "0.5rem" }}>
-            <div style={{ fontSize: ".88rem" }}>
-              Status: <b style={{ textTransform: "capitalize" }}>{diagnosisData.status}</b> | Health
-              Score: <b>{diagnosisData.healthScore}</b>
+            <div>
+              <h4 style={{ margin: 0 }}>Recovery Lab</h4>
+              <div style={{ color: "var(--muted)", fontSize: ".82rem", marginTop: "0.2rem" }}>
+                Diagnose weak content, run remediation, and configure guardrails.
+              </div>
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
-              {(diagnosisData.issues || []).slice(0, 5).map(issue => (
-                <span
-                  key={`${issue.type}-${issue.severity}`}
-                  style={{
-                    fontSize: ".75rem",
-                    background: "rgba(248,113,113,0.15)",
-                    border: "1px solid rgba(248,113,113,0.35)",
-                    borderRadius: 999,
-                    padding: "0.2rem 0.5rem",
-                    color: "#fecaca",
-                  }}
-                >
-                  {issue.type}
-                </span>
+            <select
+              value={selectedContentId}
+              onChange={e => setSelectedContentId(e.target.value)}
+              style={{
+                minWidth: 220,
+                padding: "0.45rem 0.6rem",
+                borderRadius: 8,
+                border: "1px solid var(--border)",
+                background: "var(--bg-2)",
+                color: "var(--text)",
+              }}
+            >
+              <option value="">Select content…</option>
+              {contentItems.map(item => (
+                <option key={item.id || item._id} value={item.id || item._id}>
+                  {(item.title || "Untitled").slice(0, 48)}
+                </option>
               ))}
-            </div>
+            </select>
           </div>
-        ) : null}
 
-        <div style={{ marginTop: "0.9rem", display: "flex", gap: "0.55rem", flexWrap: "wrap" }}>
-          <button
-            disabled={!selectedContentId || recoveryLoading}
-            onClick={() => runRemediation(true)}
+          {recoveryMessage ? (
+            <div style={{ marginTop: ".85rem", color: "#93c5fd", fontSize: ".85rem" }}>
+              {recoveryMessage}
+            </div>
+          ) : null}
+
+          {diagnosisData ? (
+            <div style={{ marginTop: "0.85rem", display: "grid", gap: "0.5rem" }}>
+              <div style={{ fontSize: ".88rem" }}>
+                Status: <b style={{ textTransform: "capitalize" }}>{diagnosisData.status}</b> |
+                Health Score: <b>{diagnosisData.healthScore}</b>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+                {(diagnosisData.issues || []).slice(0, 5).map(issue => (
+                  <span
+                    key={`${issue.type}-${issue.severity}`}
+                    style={{
+                      fontSize: ".75rem",
+                      background: "rgba(248,113,113,0.15)",
+                      border: "1px solid rgba(248,113,113,0.35)",
+                      borderRadius: 999,
+                      padding: "0.2rem 0.5rem",
+                      color: "#fecaca",
+                    }}
+                  >
+                    {issue.type}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <div style={{ marginTop: "0.9rem", display: "flex", gap: "0.55rem", flexWrap: "wrap" }}>
+            <button
+              disabled={!selectedContentId || recoveryLoading}
+              onClick={() => runRemediation(true)}
+            >
+              Dry Run Remediation
+            </button>
+            <button
+              disabled={!selectedContentId || recoveryLoading}
+              onClick={() => runRemediation(false)}
+            >
+              Execute Remediation
+            </button>
+            <button
+              disabled={!selectedContentId || recoveryLoading}
+              onClick={() => runAutoPolicyNow(true)}
+            >
+              Dry Run Auto Policy
+            </button>
+            <button
+              disabled={!selectedContentId || recoveryLoading}
+              onClick={() => runAutoPolicyNow(false)}
+            >
+              Run Auto Policy
+            </button>
+          </div>
+
+          <div
+            style={{
+              marginTop: "1rem",
+              display: "grid",
+              gap: "0.65rem",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            }}
           >
-            Dry Run Remediation
-          </button>
-          <button
-            disabled={!selectedContentId || recoveryLoading}
-            onClick={() => runRemediation(false)}
-          >
-            Execute Remediation
-          </button>
-          <button
-            disabled={!selectedContentId || recoveryLoading}
-            onClick={() => runAutoPolicyNow(true)}
-          >
-            Dry Run Auto Policy
-          </button>
-          <button
-            disabled={!selectedContentId || recoveryLoading}
-            onClick={() => runAutoPolicyNow(false)}
-          >
-            Run Auto Policy
-          </button>
+            <label style={{ fontSize: ".8rem" }}>
+              <input
+                type="checkbox"
+                checked={Boolean(policyState.enabled)}
+                onChange={e => setPolicyState(prev => ({ ...prev, enabled: e.target.checked }))}
+              />{" "}
+              Enable Auto Recovery
+            </label>
+            <label style={{ fontSize: ".8rem" }}>
+              Cadence (hours)
+              <input
+                type="number"
+                min={1}
+                max={168}
+                value={policyState.cadenceHours}
+                onChange={e =>
+                  setPolicyState(prev => ({ ...prev, cadenceHours: Number(e.target.value || 24) }))
+                }
+              />
+            </label>
+            <label style={{ fontSize: ".8rem" }}>
+              Min Health Score
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={policyState.minHealthScore}
+                onChange={e =>
+                  setPolicyState(prev => ({
+                    ...prev,
+                    minHealthScore: Number(e.target.value || 45),
+                  }))
+                }
+              />
+            </label>
+            <label style={{ fontSize: ".8rem" }}>
+              Max Daily Runs
+              <input
+                type="number"
+                min={1}
+                max={10}
+                value={policyState.maxDailyRuns}
+                onChange={e =>
+                  setPolicyState(prev => ({ ...prev, maxDailyRuns: Number(e.target.value || 2) }))
+                }
+              />
+            </label>
+            <label style={{ fontSize: ".8rem" }}>
+              Cooldown (hours)
+              <input
+                type="number"
+                min={1}
+                max={48}
+                value={policyState.cooldownHours}
+                onChange={e =>
+                  setPolicyState(prev => ({ ...prev, cooldownHours: Number(e.target.value || 6) }))
+                }
+              />
+            </label>
+            <label style={{ fontSize: ".8rem" }}>
+              <input
+                type="checkbox"
+                checked={Boolean(policyState.dryRunOnly)}
+                onChange={e => setPolicyState(prev => ({ ...prev, dryRunOnly: e.target.checked }))}
+              />{" "}
+              Dry Run Only
+            </label>
+          </div>
+
+          <div style={{ marginTop: "0.75rem" }}>
+            <button disabled={!selectedContentId || policySaving} onClick={savePolicy}>
+              {policySaving ? "Saving..." : "Save Policy"}
+            </button>
+          </div>
+
+          <div style={{ marginTop: "1rem" }}>
+            <h5 style={{ margin: 0, marginBottom: ".4rem" }}>Recent Recovery Actions</h5>
+            {recoveryLoading ? (
+              <div style={{ color: "var(--muted)", fontSize: ".82rem" }}>
+                Loading recovery data...
+              </div>
+            ) : recoveryHistory.length ? (
+              <div style={{ display: "grid", gap: ".45rem" }}>
+                {recoveryHistory.slice(0, 5).map(entry => (
+                  <div
+                    key={entry.id || entry.executedAt}
+                    style={{
+                      fontSize: ".8rem",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      padding: ".5rem .65rem",
+                      background: "var(--bg-2)",
+                    }}
+                  >
+                    <div>
+                      {entry.executedAt
+                        ? new Date(entry.executedAt).toLocaleString()
+                        : "Unknown time"}{" "}
+                      | {entry.diagnosisStatus || "n/a"}
+                    </div>
+                    <div style={{ color: "var(--muted)", marginTop: ".2rem" }}>
+                      {Array.isArray(entry.actions)
+                        ? entry.actions.map(a => `${a.type}:${a.status}`).join(" | ")
+                        : "No action details"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ color: "var(--muted)", fontSize: ".82rem" }}>
+                No remediation history yet.
+              </div>
+            )}
+          </div>
         </div>
-
+      ) : (
         <div
+          className="ap-analytics-panel-card"
           style={{
-            marginTop: "1rem",
-            display: "grid",
-            gap: "0.65rem",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            background: "var(--card)",
+            padding: "1rem",
+            borderRadius: "12px",
+            border: "1px solid rgba(148,163,184,0.25)",
+            marginBottom: "1.5rem",
           }}
         >
-          <label style={{ fontSize: ".8rem" }}>
-            <input
-              type="checkbox"
-              checked={Boolean(policyState.enabled)}
-              onChange={e => setPolicyState(prev => ({ ...prev, enabled: e.target.checked }))}
-            />{" "}
-            Enable Auto Recovery
-          </label>
-          <label style={{ fontSize: ".8rem" }}>
-            Cadence (hours)
-            <input
-              type="number"
-              min={1}
-              max={168}
-              value={policyState.cadenceHours}
-              onChange={e =>
-                setPolicyState(prev => ({ ...prev, cadenceHours: Number(e.target.value || 24) }))
-              }
-            />
-          </label>
-          <label style={{ fontSize: ".8rem" }}>
-            Min Health Score
-            <input
-              type="number"
-              min={0}
-              max={100}
-              value={policyState.minHealthScore}
-              onChange={e =>
-                setPolicyState(prev => ({ ...prev, minHealthScore: Number(e.target.value || 45) }))
-              }
-            />
-          </label>
-          <label style={{ fontSize: ".8rem" }}>
-            Max Daily Runs
-            <input
-              type="number"
-              min={1}
-              max={10}
-              value={policyState.maxDailyRuns}
-              onChange={e =>
-                setPolicyState(prev => ({ ...prev, maxDailyRuns: Number(e.target.value || 2) }))
-              }
-            />
-          </label>
-          <label style={{ fontSize: ".8rem" }}>
-            Cooldown (hours)
-            <input
-              type="number"
-              min={1}
-              max={48}
-              value={policyState.cooldownHours}
-              onChange={e =>
-                setPolicyState(prev => ({ ...prev, cooldownHours: Number(e.target.value || 6) }))
-              }
-            />
-          </label>
-          <label style={{ fontSize: ".8rem" }}>
-            <input
-              type="checkbox"
-              checked={Boolean(policyState.dryRunOnly)}
-              onChange={e => setPolicyState(prev => ({ ...prev, dryRunOnly: e.target.checked }))}
-            />{" "}
-            Dry Run Only
-          </label>
+          <h4 style={{ marginTop: 0, marginBottom: "0.35rem" }}>Recovery Lab</h4>
+          <div style={{ color: "var(--muted)", fontSize: ".85rem" }}>
+            Recovery Lab is unlocked on Studio and Team plans. Creator keeps workflow analytics,
+            while Studio and Team add diagnostics, remediation, and automation controls.
+          </div>
         </div>
-
-        <div style={{ marginTop: "0.75rem" }}>
-          <button disabled={!selectedContentId || policySaving} onClick={savePolicy}>
-            {policySaving ? "Saving..." : "Save Policy"}
-          </button>
-        </div>
-
-        <div style={{ marginTop: "1rem" }}>
-          <h5 style={{ margin: 0, marginBottom: ".4rem" }}>Recent Recovery Actions</h5>
-          {recoveryLoading ? (
-            <div style={{ color: "var(--muted)", fontSize: ".82rem" }}>
-              Loading recovery data...
-            </div>
-          ) : recoveryHistory.length ? (
-            <div style={{ display: "grid", gap: ".45rem" }}>
-              {recoveryHistory.slice(0, 5).map(entry => (
-                <div
-                  key={entry.id || entry.executedAt}
-                  style={{
-                    fontSize: ".8rem",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    padding: ".5rem .65rem",
-                    background: "var(--bg-2)",
-                  }}
-                >
-                  <div>
-                    {entry.executedAt
-                      ? new Date(entry.executedAt).toLocaleString()
-                      : "Unknown time"}{" "}
-                    | {entry.diagnosisStatus || "n/a"}
-                  </div>
-                  <div style={{ color: "var(--muted)", marginTop: ".2rem" }}>
-                    {Array.isArray(entry.actions)
-                      ? entry.actions.map(a => `${a.type}:${a.status}`).join(" | ")
-                      : "No action details"}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ color: "var(--muted)", fontSize: ".82rem" }}>
-              No remediation history yet.
-            </div>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* --- SALES SHARK PROGRESS TRACKERS --- */}
       {analytics && (
@@ -803,50 +900,68 @@ const AnalyticsPanel = () => {
         </div>
       </div>
 
-      <div
-        className="platform-breakdown ap-analytics-panel-card"
-        style={{
-          background: "var(--card)",
-          padding: "1.5rem",
-          borderRadius: "12px",
-          border: "1px solid var(--border)",
-          marginBottom: "1.5rem",
-        }}
-      >
-        <h4 style={{ marginTop: 0, marginBottom: "1rem" }}>Platform Breakdown</h4>
-        {sortedPlatformBreakdown.length > 0 ? (
-          <div style={{ display: "grid", gap: "0.75rem" }}>
-            {sortedPlatformBreakdown.map(([platform, data]) => (
-              <div
-                key={platform}
-                className="ap-platform-row"
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "0.75rem",
-                  background: "var(--bg-2)",
-                  borderRadius: "8px",
-                }}
-              >
-                <span style={{ textTransform: "capitalize", fontWeight: 500 }}>{platform}</span>
+      {analyticsEntitlements.platformBreakdown ? (
+        <div
+          className="platform-breakdown ap-analytics-panel-card"
+          style={{
+            background: "var(--card)",
+            padding: "1.5rem",
+            borderRadius: "12px",
+            border: "1px solid var(--border)",
+            marginBottom: "1.5rem",
+          }}
+        >
+          <h4 style={{ marginTop: 0, marginBottom: "1rem" }}>Platform Breakdown</h4>
+          {sortedPlatformBreakdown.length > 0 ? (
+            <div style={{ display: "grid", gap: "0.75rem" }}>
+              {sortedPlatformBreakdown.map(([platform, data]) => (
                 <div
-                  className="ap-platform-row-stats"
-                  style={{ display: "flex", gap: "1rem", color: "var(--muted)" }}
+                  key={platform}
+                  className="ap-platform-row"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "0.75rem",
+                    background: "var(--bg-2)",
+                    borderRadius: "8px",
+                  }}
                 >
-                  <span>{data.views || 0} views</span>
-                  <span>{data.clicks || 0} clicks</span>
-                  <span style={{ color: "var(--brand)" }}>{data.ctr?.toFixed(1) || 0}% CTR</span>
+                  <span style={{ textTransform: "capitalize", fontWeight: 500 }}>{platform}</span>
+                  <div
+                    className="ap-platform-row-stats"
+                    style={{ display: "flex", gap: "1rem", color: "var(--muted)" }}
+                  >
+                    <span>{data.views || 0} views</span>
+                    <span>{data.clicks || 0} clicks</span>
+                    <span style={{ color: "var(--brand)" }}>{data.ctr?.toFixed(1) || 0}% CTR</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          ) : (
+            <div style={{ color: "var(--muted)", textAlign: "center", padding: "2rem" }}>
+              No platform data yet. Start uploading content to see analytics!
+            </div>
+          )}
+        </div>
+      ) : (
+        <div
+          className="platform-breakdown ap-analytics-panel-card"
+          style={{
+            background: "var(--card)",
+            padding: "1.25rem",
+            borderRadius: "12px",
+            border: "1px solid rgba(148,163,184,0.25)",
+            marginBottom: "1.5rem",
+          }}
+        >
+          <h4 style={{ marginTop: 0, marginBottom: "0.35rem" }}>Platform Breakdown</h4>
+          <div style={{ color: "var(--muted)", fontSize: ".85rem" }}>
+            Platform-level breakdown starts on the Creator plan and above.
           </div>
-        ) : (
-          <div style={{ color: "var(--muted)", textAlign: "center", padding: "2rem" }}>
-            No platform data yet. Start uploading content to see analytics!
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div
         className="recent-content ap-analytics-panel-card"

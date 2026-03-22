@@ -7,7 +7,12 @@ const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
 const { audit } = require("../services/auditLogger");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
-const { SUBSCRIPTION_PLANS, normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
+const {
+  SUBSCRIPTION_PLANS,
+  normalizePlanId,
+  resolvePlan,
+  getPlanCapabilities,
+} = require("../config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("../services/billingService");
 
 // PayPal SDK + helpers
@@ -74,6 +79,7 @@ function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
       snapshot.tierId === "free"
         ? null
         : subscription.nextBillingDate || snapshot.userData?.subscriptionPeriodEnd || null,
+    capabilities: getPlanCapabilities(snapshot.tierId),
     features: effectivePlan.features,
     cancelledAt: subscription.cancelledAt || snapshot.userData?.subscriptionCancelledAt || null,
     expiresAt:
