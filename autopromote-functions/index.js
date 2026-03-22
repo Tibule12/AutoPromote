@@ -70,7 +70,9 @@ const corsAllowAll = corsAllowAllFlag && isCI;
 let corsOptions;
 if (corsAllowAll) {
   corsOptions = {
-    origin: "*",
+    origin: function (_origin, callback) {
+      return callback(null, true);
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization", "X-File-Name", "X-Media-Type"],
   };
