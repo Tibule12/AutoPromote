@@ -1080,6 +1080,10 @@ try {
       "X-Requested-With",
       "x-correlation-id",
       "x-request-id",
+      "X-File-Name",
+      "X-Media-Type",
+      "x-file-name",
+      "x-media-type",
     ],
     credentials: true,
     optionsSuccessStatus: 204,
@@ -1094,8 +1098,10 @@ try {
   // Debug: Log inbound upload related requests and headers (helps debug CORS/preflight)
   app.use((req, res, next) => {
     try {
+      const isContentUploadRoute =
+        typeof req.path === "string" && req.path.startsWith("/api/content/upload");
       if (
-        req.path === "/api/content/upload" ||
+        isContentUploadRoute ||
         (req.headers && req.headers.origin && req.headers.origin.includes("127.0.0.1"))
       ) {
         // Log a summarized set of headers for the upload route to help identify why requests are blocked by CORS
@@ -1123,7 +1129,7 @@ try {
 
   // Extra debug: For upload route, log incoming requests and ensure we capture any 403 responses
   app.use((req, res, next) => {
-    if (req.path === "/api/content/upload") {
+    if (typeof req.path === "string" && req.path.startsWith("/api/content/upload")) {
       res.once("finish", () => {
         if (res.statusCode === 403) {
           try {

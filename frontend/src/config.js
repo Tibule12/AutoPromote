@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
 
   // Content endpoints
   CONTENT_UPLOAD: `${API_BASE_URL}/api/content/upload`,
+  CONTENT_SOURCE_UPLOAD: `${API_BASE_URL}/api/content/upload/source-file`,
   CONTENT_UPLOAD_READINESS: `${API_BASE_URL}/api/content/upload/readiness`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
   MY_SCHEDULES: `${API_BASE_URL}/api/content/my-promotion-schedules`,

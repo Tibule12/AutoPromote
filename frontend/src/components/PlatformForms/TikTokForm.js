@@ -6,6 +6,9 @@ import { OPTIMAL_TIMES } from "../BestTimeToPost";
 import FilterEffects from "../FilterEffects";
 import { sanitizeUrl } from "../../utils/security";
 
+const buildDefaultCaption = (title, description) =>
+  [String(title || "").trim(), String(description || "").trim()].filter(Boolean).join("\n");
+
 // Helper for Declaration JSX
 const getTikTokDeclarationJSX = (commercialContent, brandedContent) => {
   if (!commercialContent) {
@@ -111,20 +114,43 @@ const TikTokForm = ({
       false
   );
 
+  const [title, setTitle] = useState(initialData.title || globalTitle || "");
+  const [description, setDescription] = useState(
+    initialData.description || globalDescription || ""
+  );
+  const [isTitleDirty, setIsTitleDirty] = useState(Boolean(initialData.title));
+  const [isDescriptionDirty, setIsDescriptionDirty] = useState(Boolean(initialData.description));
+
   const [caption, setCaption] = useState(
-    initialData.caption || (globalTitle ? `${globalTitle} ${globalDescription || ""}` : "")
+    initialData.caption ||
+      buildDefaultCaption(
+        initialData.title || globalTitle,
+        initialData.description || globalDescription
+      )
   );
   const [isCaptionDirty, setIsCaptionDirty] = useState(false);
 
-  // Sync Global Title/Description changes UNLESS user has edited caption locally
   useEffect(() => {
-    if (!isCaptionDirty && (globalTitle || globalDescription)) {
-      const newCaption = `${globalTitle || ""} ${globalDescription || ""}`.trim();
-      if (newCaption && newCaption !== caption) {
+    if (!isTitleDirty && globalTitle !== title) {
+      setTitle(globalTitle || "");
+    }
+  }, [globalTitle, isTitleDirty, title]);
+
+  useEffect(() => {
+    if (!isDescriptionDirty && globalDescription !== description) {
+      setDescription(globalDescription || "");
+    }
+  }, [globalDescription, isDescriptionDirty, description]);
+
+  // Sync Title/Description changes UNLESS user has edited caption locally
+  useEffect(() => {
+    if (!isCaptionDirty) {
+      const newCaption = buildDefaultCaption(title, description);
+      if (newCaption !== caption) {
         setCaption(newCaption);
       }
     }
-  }, [globalTitle, globalDescription, isCaptionDirty]);
+  }, [title, description, isCaptionDirty, caption]);
 
   const [showBrandTooltip, setShowBrandTooltip] = useState(false);
   const [showBrandedTooltip, setShowBrandedTooltip] = useState(false);
@@ -176,6 +202,8 @@ const TikTokForm = ({
       yourBrand,
       brandedContent,
       aiGenerated,
+      title,
+      description,
       caption,
       consentChecked,
     });
@@ -193,6 +221,8 @@ const TikTokForm = ({
     yourBrand,
     brandedContent,
     aiGenerated,
+    title,
+    description,
     caption,
     consentChecked,
     onChange,
@@ -266,6 +296,45 @@ const TikTokForm = ({
             video-only options) require a video to be selected.
           </div>
         )}
+      </div>
+
+      <div className="form-group-modern">
+        <label htmlFor="tiktok-title">Title</label>
+        <input
+          id="tiktok-title"
+          className="modern-input"
+          value={title}
+          onChange={e => {
+            const nextTitle = e.target.value;
+            setTitle(nextTitle);
+            setIsTitleDirty(true);
+            if (!isCaptionDirty) {
+              setCaption(buildDefaultCaption(nextTitle, description));
+            }
+          }}
+          placeholder="Enter the TikTok post title"
+          maxLength={150}
+        />
+      </div>
+
+      <div className="form-group-modern">
+        <label htmlFor="tiktok-description">Description</label>
+        <textarea
+          id="tiktok-description"
+          className="modern-input"
+          value={description}
+          onChange={e => {
+            const nextDescription = e.target.value;
+            setDescription(nextDescription);
+            setIsDescriptionDirty(true);
+            if (!isCaptionDirty) {
+              setCaption(buildDefaultCaption(title, nextDescription));
+            }
+          }}
+          placeholder="Add the description you want viewers to see"
+          maxLength={1000}
+          rows={3}
+        />
       </div>
 
       <div className="form-group-modern">
