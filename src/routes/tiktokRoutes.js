@@ -185,6 +185,13 @@ const DEFAULT_TIKTOK_SCOPES = "user.info.profile video.list";
 const REQUIRED_PROFILE_SCOPE = "user.info.profile";
 const REQUIRED_PUBLISH_SCOPES = ["video.upload", "video.publish"];
 
+function parseScopeList(scopeValue) {
+  return String(scopeValue || "")
+    .split(/[\s,]+/)
+    .map(scope => scope.trim())
+    .filter(Boolean);
+}
+
 function configuredScopes() {
   // Accept both comma-separated and space-separated lists in the env var.
   // Normalize to a single space-separated string so downstream code can split on whitespace.
@@ -193,11 +200,7 @@ function configuredScopes() {
 }
 
 function scopeStringIncludes(scopeString, scope) {
-  return String(scopeString || "")
-    .split(/\s+/)
-    .map(s => s.trim())
-    .filter(Boolean)
-    .includes(scope);
+  return parseScopeList(scopeString).includes(scope);
 }
 
 function getTikTokPublishReadiness(connection = {}) {
@@ -210,10 +213,7 @@ function getTikTokPublishReadiness(connection = {}) {
     tokenBlob.access_token.trim()
   );
   const hasOpenId = !!(connection.open_id || connection.openId);
-  const grantedScopes = String(connection.scope || "")
-    .split(/\s+/)
-    .map(scope => scope.trim())
-    .filter(Boolean);
+  const grantedScopes = parseScopeList(connection.scope);
   const missingScopes = REQUIRED_PUBLISH_SCOPES.filter(
     scope => !scopeStringIncludes(connection.scope, scope)
   );

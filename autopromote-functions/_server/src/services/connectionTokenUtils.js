@@ -14,6 +14,12 @@ function parseMaybeJson(str) {
 
 function tokensFromDoc(doc) {
   if (!doc) return null;
+  const plainAccessToken =
+    typeof doc.access_token === "string" && doc.access_token.trim() ? doc.access_token.trim() : null;
+  const plainRefreshToken =
+    typeof doc.refresh_token === "string" && doc.refresh_token.trim()
+      ? doc.refresh_token.trim()
+      : null;
   // If tokens is an object (legacy), return as-is
   if (doc.tokens && typeof doc.tokens === "object") return doc.tokens;
   // If tokens is a string, decrypt + parse JSON
@@ -35,6 +41,13 @@ function tokensFromDoc(doc) {
     if (refresh) tokens.refresh_token = refresh;
     if (doc.expires_in) tokens.expires_in = doc.expires_in;
     if (doc.refresh_token && !tokens.refresh_token) tokens.refresh_token = doc.refresh_token;
+    return tokens;
+  }
+  if (plainAccessToken || plainRefreshToken) {
+    const tokens = {};
+    if (plainAccessToken) tokens.access_token = plainAccessToken;
+    if (plainRefreshToken) tokens.refresh_token = plainRefreshToken;
+    if (doc.expires_in) tokens.expires_in = doc.expires_in;
     return tokens;
   }
   return null;
