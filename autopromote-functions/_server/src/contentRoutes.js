@@ -466,6 +466,11 @@ function sanitizeUploadFileName(fileName) {
   return (baseName || "untitled").replace(/[^a-zA-Z0-9._ -]/g, "-");
 }
 
+function normalizeSingleStringInput(value, fallback = "") {
+  const candidate = Array.isArray(value) ? value[0] : value;
+  return typeof candidate === "string" ? candidate : fallback;
+}
+
 function buildFirebaseDownloadUrl(bucketName, storagePath, token) {
   return `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(bucketName)}/o/${encodeURIComponent(storagePath)}?alt=media&token=${encodeURIComponent(token)}`;
 }
@@ -515,7 +520,10 @@ router.post(
       const userId = req.userId || req.user?.uid;
       if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-      const mediaType = String(req.query.mediaType || req.headers["x-media-type"] || "video")
+      const mediaType = normalizeSingleStringInput(
+        req.query.mediaType || req.headers["x-media-type"],
+        "video"
+      )
         .toLowerCase()
         .trim();
       if (!["video", "image", "audio"].includes(mediaType)) {
@@ -530,12 +538,18 @@ router.post(
         return res.status(400).json({ error: "File too large" });
       }
 
-      const rawFileName = req.headers["x-file-name"] || req.query.fileName || "untitled";
+      const rawFileName = normalizeSingleStringInput(
+        req.headers["x-file-name"] || req.query.fileName,
+        "untitled"
+      );
       const safeFileName = sanitizeUploadFileName(rawFileName);
       const storagePath = `uploads/${mediaType}s/${Date.now()}_${safeFileName}`;
       const downloadToken = crypto.randomUUID();
       const bucket = admin.storage().bucket();
-      const contentType = String(req.headers["content-type"] || "application/octet-stream");
+      const contentType = normalizeSingleStringInput(
+        req.headers["content-type"],
+        "application/octet-stream"
+      );
 
       await bucket.file(storagePath).save(fileBuffer, {
         resumable: false,
