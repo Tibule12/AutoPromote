@@ -77,6 +77,46 @@ describe("tiktokRoutes", () => {
     expect(res.body.connected).toBe(false);
   });
 
+  test("status treats encrypted tokens and legacy open_id/scope shapes as publish-ready", async () => {
+    firebaseAdmin.admin.auth = () => ({ verifyIdToken: async _token => ({ uid: "testUser456" }) });
+    const originalCollection = firebaseAdmin.db.collection;
+    firebaseAdmin.db.collection = _name => ({
+      doc: _id => ({
+        collection: _sub => ({
+          doc: _subId => ({
+            get: async () => ({
+              exists: true,
+              data: () => ({
+                tokens: { access_token: "TEST_A", refresh_token: "TEST_R" },
+                meta: { open_id: "open_legacy_1" },
+                scopes: ["user.info.profile", "video.upload", "video.publish"],
+              }),
+            }),
+            set: async () => true,
+          }),
+        }),
+        get: async () => ({ exists: false, data: () => ({}) }),
+        set: async () => true,
+      }),
+    });
+
+    const res = await request(app)
+      .get("/api/tiktok/status")
+      .set("Authorization", "Bearer test-token-for-testUser456");
+
+    firebaseAdmin.db.collection = originalCollection;
+    firebaseAdmin.admin.auth = () => ({ verifyIdToken: async _token => ({ uid: "testUser123" }) });
+
+    expect(res.status).toBe(200);
+    expect(res.body.connected).toBe(true);
+    expect(res.body.hasAccessToken).toBe(true);
+    expect(res.body.hasOpenId).toBe(true);
+    expect(res.body.publishReady).toBe(true);
+    expect(res.body.missingScopes).toEqual([]);
+    expect(res.body.open_id).toBe("open_legacy_1");
+    expect(res.body.scope).toContain("video.publish");
+  });
+
   test("callback stores encrypted tokens when encryption enabled", async () => {
     // Enable encryption key for secretVault
     process.env.GENERIC_TOKEN_ENCRYPTION_KEY = "unit-test-key-123";

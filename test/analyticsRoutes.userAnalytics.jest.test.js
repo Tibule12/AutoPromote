@@ -139,6 +139,13 @@ describe("analyticsRoutes /user", () => {
 
     jest.doMock("../src/routes/platformAnalyticsRoutes", () => express.Router());
 
+    jest.doMock("../src/services/billingService", () => ({
+      getEffectiveTierSnapshot: jest.fn().mockResolvedValue({
+        tierId: "pro",
+        tier: { id: "pro", name: "Studio" },
+      }),
+    }));
+
     const analyticsRoutes = require("../src/analyticsRoutes");
     app = express();
     app.use(express.json());

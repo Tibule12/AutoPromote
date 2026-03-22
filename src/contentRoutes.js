@@ -315,7 +315,8 @@ async function getOwnedContentSnapshot(userId, identifier) {
   }
   if (!contentDoc || !contentDoc.exists) return null;
   const data = contentDoc.data() || {};
-  if (data.user_id !== userId) return null;
+  const ownerId = data.user_id || data.userId || data.uid || data.ownerId || data.creatorId || null;
+  if (ownerId !== userId) return null;
   return { id: contentDoc.id, data };
 }
 

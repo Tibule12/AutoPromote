@@ -27,6 +27,16 @@ service firebase.storage {
         && request.resource.size < 500 * 1024 * 1024; // 500MB limit
     }
 
+    // UnifiedPublisher uploads to uploads/<mediaType>s/... and the frontend enforces a 500MB cap.
+    // Keep rules aligned so authenticated uploads do not fail with misleading permission errors.
+    match /uploads/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.size < 500 * 1024 * 1024
+        && (!firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+            || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.uploadBlocked != true);
+    }
+
     // Allow all authenticated users to read and write files
     match /{allPaths=**} {
       allow read: if request.auth != null;
