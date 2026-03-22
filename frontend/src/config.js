@@ -57,6 +57,7 @@ export const API_ENDPOINTS = {
 
   // Boost endpoints (Legacy) / Viral Bounty (New)
   CREATE_BOOST: `${API_BASE_URL}/api/monetization/boost/create`,
+  MONETIZATION_SUBSCRIPTION_STATUS: `${API_BASE_URL}/api/monetization/subscription/status`,
   CREATE_BOUNTY: `${API_BASE_URL}/api/revenue/create-bounty`,
   BOUNTY_BOARD: `${API_BASE_URL}/api/revenue/bounty-board`,
   MY_BOUNTIES: `${API_BASE_URL}/api/revenue/my-bounties`,
@@ -154,6 +155,10 @@ export const API_ENDPOINTS = {
 
   // Analytics endpoints
   ANALYTICS_USER: `${API_BASE_URL}/api/analytics/user`,
+
+  // Support endpoints
+  SUPPORT_TICKETS_SELF: `${API_BASE_URL}/api/admin/support/tickets/mine`,
+  SUPPORT_TICKETS_CREATE: `${API_BASE_URL}/api/admin/support/tickets`,
 
   // Usage & Limits
   USAGE_STATS: `${API_BASE_URL}/api/usage/stats`,

@@ -1,6 +1,8 @@
 const express = require("express");
 const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
+const { getPlanCapabilities } = require("./config/subscriptionPlans");
+const { getEffectiveTierSnapshot } = require("./services/billingService");
 const router = express.Router();
 
 function parseTimestamp(value) {
@@ -190,9 +192,16 @@ router.get("/overview", authMiddleware, async (req, res) => {
 // Get user analytics with time range
 router.get("/user", authMiddleware, async (req, res) => {
   try {
-    const range = req.query.range || "7d";
+    const requestedRange = req.query.range || "7d";
     const uid = req.user?.uid || req.userId;
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+    const snapshot = await getEffectiveTierSnapshot(uid);
+    const entitlements = getPlanCapabilities(snapshot.tierId);
+    const allowedRanges = entitlements.analytics.allowedRanges || ["7d"];
+    const range = allowedRanges.includes(requestedRange)
+      ? requestedRange
+      : allowedRanges[allowedRanges.length - 1] || "7d";
 
     // Parse time range
     const now = new Date();
@@ -443,13 +452,19 @@ router.get("/user", authMiddleware, async (req, res) => {
         const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
         return db - da;
       })
-      .slice(0, 50);
+      .slice(0, entitlements.analytics.topContentLimit || 10);
 
     const latestSnapshotAt = lastUpdatedAt ? new Date(lastUpdatedAt).toISOString() : null;
     const nextUpdateAtStr = nextUpdateAt ? new Date(nextUpdateAt).toISOString() : null;
 
     res.json({
+      requestedRange,
       range,
+      plan: {
+        tierId: snapshot.tierId,
+        name: entitlements.planName,
+      },
+      entitlements,
       totalContent: contentIds.size,
       publishedPostCount: publishedPosts.length,
       publishedPostCountAllTime: publishedPostsAllTime.length,
@@ -464,8 +479,8 @@ router.get("/user", authMiddleware, async (req, res) => {
       ctr: totalViews > 0 ? parseFloat(((totalClicks / totalViews) * 100).toFixed(2)) : 0,
 
       // Frontend specific keys
-      platformBreakdown: contentByPlatform, // Matches frontend expectation
-      byPlatform: contentByPlatform, // Keep for backward compat if any
+      platformBreakdown: entitlements.analytics.platformBreakdown ? contentByPlatform : {},
+      byPlatform: entitlements.analytics.platformBreakdown ? contentByPlatform : {},
       topPlatform,
       topContent,
 

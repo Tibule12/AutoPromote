@@ -20,6 +20,7 @@ const { getPlan } = require("./services/planService");
 const billingService = require("./services/billingService");
 const complianceService = require("./services/complianceService");
 const { getVariantStats } = require("./services/variantStatsService");
+const { getPlanCapabilities } = require("./config/subscriptionPlans");
 
 // --- OPTIMIZATION START: Eager Loading for Performance ---
 // Previously lazy-loaded inside request handler causing 2-5s lag per upload.
@@ -37,6 +38,20 @@ const {
   setDiagnosisPolicy,
   runDuePolicies,
 } = require("./services/contentRecoveryService");
+
+async function ensureRecoveryLabAccess(userId) {
+  const snapshot = await billingService.getEffectiveTierSnapshot(userId);
+  const entitlements = getPlanCapabilities(snapshot.tierId);
+
+  if (!entitlements.analytics.recoveryLab) {
+    const error = new Error("Recovery Lab is available on Studio and Team plans.");
+    error.statusCode = 403;
+    error.entitlements = entitlements;
+    throw error;
+  }
+
+  return entitlements;
+}
 const {
   enqueueMediaTransformTask,
   processMediaTransformTaskById,
@@ -1603,6 +1618,7 @@ router.get("/:id/diagnosis", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    await ensureRecoveryLabAccess(userId);
 
     const owned = await getOwnedContentSnapshot(userId, req.params.id);
     if (!owned) return res.status(404).json({ error: "Content not found" });
@@ -1619,6 +1635,11 @@ router.get("/:id/diagnosis", authMiddleware, async (req, res) => {
     return res.json({ diagnosis });
   } catch (error) {
     console.error("[GET /:id/diagnosis] Error:", error);
+    if (error.statusCode) {
+      return res
+        .status(error.statusCode)
+        .json({ error: error.message, entitlements: error.entitlements, upgradeRequired: true });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -1628,6 +1649,7 @@ router.post("/:id/diagnosis/remediate", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    await ensureRecoveryLabAccess(userId);
 
     const owned = await getOwnedContentSnapshot(userId, req.params.id);
     if (!owned) return res.status(404).json({ error: "Content not found" });
@@ -1643,6 +1665,11 @@ router.post("/:id/diagnosis/remediate", authMiddleware, async (req, res) => {
     return res.json({ remediation });
   } catch (error) {
     console.error("[POST /:id/diagnosis/remediate] Error:", error);
+    if (error.statusCode) {
+      return res
+        .status(error.statusCode)
+        .json({ error: error.message, entitlements: error.entitlements, upgradeRequired: true });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -1652,6 +1679,7 @@ router.get("/:id/diagnosis/history", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    await ensureRecoveryLabAccess(userId);
 
     const owned = await getOwnedContentSnapshot(userId, req.params.id);
     if (!owned) return res.status(404).json({ error: "Content not found" });
@@ -1667,6 +1695,11 @@ router.get("/:id/diagnosis/history", authMiddleware, async (req, res) => {
     return res.json({ history, count: history.length });
   } catch (error) {
     console.error("[GET /:id/diagnosis/history] Error:", error);
+    if (error.statusCode) {
+      return res
+        .status(error.statusCode)
+        .json({ error: error.message, entitlements: error.entitlements, upgradeRequired: true });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -1676,6 +1709,7 @@ router.get("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    await ensureRecoveryLabAccess(userId);
 
     const owned = await getOwnedContentSnapshot(userId, req.params.id);
     if (!owned) return res.status(404).json({ error: "Content not found" });
@@ -1685,6 +1719,11 @@ router.get("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
     return res.json({ policy });
   } catch (error) {
     console.error("[GET /:id/diagnosis/policy] Error:", error);
+    if (error.statusCode) {
+      return res
+        .status(error.statusCode)
+        .json({ error: error.message, entitlements: error.entitlements, upgradeRequired: true });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -1694,6 +1733,7 @@ router.put("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    await ensureRecoveryLabAccess(userId);
 
     const owned = await getOwnedContentSnapshot(userId, req.params.id);
     if (!owned) return res.status(404).json({ error: "Content not found" });
@@ -1708,6 +1748,11 @@ router.put("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
     return res.json({ policy: updated });
   } catch (error) {
     console.error("[PUT /:id/diagnosis/policy] Error:", error);
+    if (error.statusCode) {
+      return res
+        .status(error.statusCode)
+        .json({ error: error.message, entitlements: error.entitlements, upgradeRequired: true });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -1717,6 +1762,7 @@ router.post("/:id/diagnosis/run-auto", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    await ensureRecoveryLabAccess(userId);
 
     const owned = await getOwnedContentSnapshot(userId, req.params.id);
     if (!owned) return res.status(404).json({ error: "Content not found" });
@@ -1745,6 +1791,11 @@ router.post("/:id/diagnosis/run-auto", authMiddleware, async (req, res) => {
     return res.json({ autoRun: match, dryRun });
   } catch (error) {
     console.error("[POST /:id/diagnosis/run-auto] Error:", error);
+    if (error.statusCode) {
+      return res
+        .status(error.statusCode)
+        .json({ error: error.message, entitlements: error.entitlements, upgradeRequired: true });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 });
