@@ -4,7 +4,7 @@ import React, { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import DojoPage from "./DojoPage";
 import "./App.css";
-import { auth, db, storage } from "./firebaseClient";
+import { auth, db } from "./firebaseClient";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -30,9 +30,13 @@ import {
   addDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { API_ENDPOINTS, API_BASE_URL, PUBLIC_SITE_URL } from "./config";
 import { parseJsonSafe } from "./utils/parseJsonSafe";
+import {
+  buildBackendUploadError,
+  inferUploadMediaType,
+  uploadSourceFileViaBackend,
+} from "./utils/sourceUpload";
 import ChatWidget from "./ChatWidget";
 import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import { Sentry } from "./sentryClient";
@@ -817,7 +821,6 @@ function App() {
 
   // Content upload handler (with file and platforms)
   const handleContentUpload = async params => {
-    const uploadedStorageRefs = [];
     const blockingErrorCodes = new Set([
       "TIER_LIMIT_EXCEEDED",
       "PLATFORM_LIMIT_EXCEEDED",
@@ -836,12 +839,7 @@ function App() {
       if (httpStatus) enrichedError.httpStatus = httpStatus;
       return enrichedError;
     };
-    const cleanupUploadedFiles = async () => {
-      if (uploadedStorageRefs.length === 0) return;
-      await Promise.allSettled(
-        uploadedStorageRefs.map(storageRef => deleteObject(storageRef).catch(() => null))
-      );
-    };
+    const cleanupUploadedFiles = async () => Promise.resolve();
     // If called without params (e.g. from ClipStudioPanel refresh), just reload content
     if (!params) {
       console.log("[App] handleContentUpload called without params -> refreshing content");
@@ -956,18 +954,22 @@ function App() {
           if (file.size < 100) {
             throw new Error("File too small. Please check the file.");
           }
-          const filePath = `uploads/${type}s/${Date.now()}_${file.name}`;
-          const storageRef = ref(storage, filePath);
-          uploadedStorageRefs.push(storageRef);
-          const uploadResult = await uploadBytes(storageRef, file);
+          const uploadResult = await uploadSourceFileViaBackend({
+            file,
+            token,
+            mediaType: inferUploadMediaType(file, type || "video"),
+            fileName: file.name,
+          }).catch(error => {
+            throw buildBackendUploadError(error);
+          });
 
-          if (uploadResult.metadata.size < 100) {
+          if ((uploadResult.size || 0) < 100) {
             throw new Error(
-              `Upload failed: File corrupted (size: ${uploadResult.metadata.size} bytes).`
+              `Upload failed: File corrupted (size: ${uploadResult.size || 0} bytes).`
             );
           }
 
-          finalUrl = await getDownloadURL(storageRef);
+          finalUrl = uploadResult.url;
         }
       }
 
@@ -981,11 +983,13 @@ function App() {
         for (const [pName, pFile] of Object.entries(platformFiles)) {
           if (pFile && pFile instanceof File) {
             try {
-              const pPath = `uploads/${type}s/${Date.now()}_${pName}_${pFile.name}`;
-              const pRef = ref(storage, pPath);
-              uploadedStorageRefs.push(pRef);
-              await uploadBytes(pRef, pFile);
-              const pUrl = await getDownloadURL(pRef);
+              const uploadResult = await uploadSourceFileViaBackend({
+                file: pFile,
+                token,
+                mediaType: inferUploadMediaType(pFile, type || "video"),
+                fileName: `${pName}_${pFile.name}`,
+              });
+              const pUrl = uploadResult.url;
 
               // Inject into options so backend sees it
               if (!platformOptionsObj[pName]) platformOptionsObj[pName] = {};

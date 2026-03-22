@@ -913,12 +913,18 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
     process.env.FIREBASE_ADMIN_BYPASS === "1" ||
     process.env.NODE_ENV === "test" ||
     typeof process.env.JEST_WORKER_ID !== "undefined";
+  const captionText = String(payload?.caption || "").trim();
+  const titleText = String(payload?.title || "").trim();
+  const descriptionText = String(payload?.description || "").trim();
+  const bypassTitle =
+    captionText || [titleText, descriptionText].filter(Boolean).join("\n") || "AutoPromote Video";
   if (bypass) {
     // Return simulated response in test/bypass mode to avoid heavy network calls
     return {
       platform: "tiktok",
       success: true,
       simulated: true,
+      title: bypassTitle,
       videoId: `sim_${Date.now().toString(36)}`,
     };
   }
@@ -937,7 +943,11 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
 
   // Construct Caption/Title: TikTok 'title' is actually the post caption.
   // We must incorporate hashtags if they are provided separately.
-  let baseTitle = payload?.title || payload?.message || "AutoPromote Video";
+  let baseTitle =
+    captionText ||
+    [titleText, descriptionText].filter(Boolean).join("\n") ||
+    payload?.message ||
+    "AutoPromote Video";
 
   // Append hashtags if present and not already in the title
   if (payload?.hashtagString && !baseTitle.includes(payload.hashtagString.trim())) {

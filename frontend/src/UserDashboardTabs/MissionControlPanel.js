@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { db, auth, storage } from "../firebaseClient";
+import { db, auth } from "../firebaseClient";
 import { collection, query, where, onSnapshot, orderBy, getDocs, limit } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { toast } from "react-hot-toast";
 import { API_ENDPOINTS } from "../config";
 import { isSafeRedirectUrl } from "../utils/security";
+import {
+  buildBackendUploadError,
+  inferUploadMediaType,
+  uploadSourceFileViaBackend,
+} from "../utils/sourceUpload";
 import "./MissionControlPanel.css";
 import UserLiveLogViewer from "../components/UserLiveLogViewer";
 
@@ -453,19 +457,21 @@ const MissionControlPanel = () => {
     addLog(`INITIALIZING UPLOAD SEQUENCE: ${file.name}`);
     addLog(`PAYLOAD SIZE: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
 
-    // Upload directly to Firebase Storage first (Client-side)
-    const storagePath = `users/${user.uid}/uploads/${Date.now()}_${file.name}`;
-    const storageRef = ref(storage, storagePath);
-
     try {
-      addLog("ESTABLISHING UPLINK TO STORAGE VAULT...");
-      const snapshot = await uploadBytesResumable(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
+      addLog("SENDING ASSET TO BACKEND UPLOAD SERVICE...");
+      const token = await user.getIdToken();
+      const uploadResult = await uploadSourceFileViaBackend({
+        file,
+        token,
+        mediaType: inferUploadMediaType(file),
+        fileName: file.name,
+      }).catch(error => {
+        throw buildBackendUploadError(error);
+      });
+      const downloadURL = uploadResult.url;
       addLog("ASSET SECURED. REGISTERING METADATA...");
 
       // Register metadata with backend
-      const token = await user.getIdToken();
-
       const payload = {
         title: file.name.split(".")[0] || "Mission Asset",
         type: file.type.startsWith("video/") ? "video" : "image",

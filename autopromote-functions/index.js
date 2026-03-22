@@ -72,7 +72,7 @@ if (corsAllowAll) {
   corsOptions = {
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-File-Name", "X-Media-Type"],
   };
 } else if (allowedOriginsEnv) {
   const allowedList = allowedOriginsEnv
@@ -87,7 +87,7 @@ if (corsAllowAll) {
       return callback(new Error("Not allowed by CORS"), false);
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-File-Name", "X-Media-Type"],
   };
 } else {
   // Conservative default: allow requests from known production domains
@@ -102,7 +102,7 @@ if (corsAllowAll) {
       return callback(new Error("Not allowed by CORS"), false);
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-File-Name", "X-Media-Type"],
   };
 }
 app.use(cors(corsOptions));

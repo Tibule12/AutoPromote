@@ -18,6 +18,11 @@ import toast from "react-hot-toast";
 import { usePublishingState } from "./hooks/usePublishingState";
 import { useMediaProcessor } from "./hooks/useMediaProcessor";
 import { sanitizeUrl } from "../../utils/security";
+import {
+  buildBackendUploadError,
+  STORAGE_UPLOAD_LIMIT_MB,
+  uploadSourceFileViaBackend,
+} from "../../utils/sourceUpload";
 
 // --- Components ---
 import VideoEditor from "../../components/VideoEditor";
@@ -82,53 +87,14 @@ const formatMonthLabel = monthKey => {
   });
 };
 
-const STORAGE_UPLOAD_LIMIT_MB = 500;
-
 const buildClientUploadError = error => {
-  const code = error && typeof error.code === "string" ? error.code : "";
-  if (code === "storage/unauthorized") {
-    return new Error(
-      `Upload blocked by Firebase Storage permissions. Make sure you are signed in and the file is under ${STORAGE_UPLOAD_LIMIT_MB}MB.`
-    );
-  }
-  if (code === "storage/canceled") {
-    return new Error("Upload canceled before completion.");
-  }
-  if (code === "storage/retry-limit-exceeded") {
-    return new Error("Upload timed out before completion. Check your connection and retry.");
-  }
-  return new Error(error?.message || "Upload failed. Please try again.");
+  return buildBackendUploadError(error);
 };
 
-const uploadBlobViaBackend = async ({ file, token, mediaType, onProgress }) => {
-  if (typeof onProgress === "function") {
-    onProgress(0, file.size || 0);
-  }
-
-  const response = await fetch(
-    `${API_ENDPOINTS.CONTENT_SOURCE_UPLOAD}?mediaType=${encodeURIComponent(mediaType || "video")}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": file.type || "application/octet-stream",
-        "X-File-Name": file.name || "untitled",
-        "X-Media-Type": mediaType || "video",
-      },
-      body: file,
-    }
-  );
-
-  const result = await response.json().catch(() => null);
-  if (!response.ok || !result?.url) {
-    throw buildStructuredUploadError(result, "Failed to upload source media", response.status);
-  }
-
-  if (typeof onProgress === "function") {
-    onProgress(file.size || result.size || 0, file.size || result.size || 0);
-  }
-
-  return result;
+const buildTikTokCaption = ({ title, description, caption }) => {
+  const manualCaption = String(caption || "").trim();
+  if (manualCaption) return manualCaption;
+  return [String(title || "").trim(), String(description || "").trim()].filter(Boolean).join("\n");
 };
 
 function normalizeTikTokCreatorInfo(primary, fallbackRaw, fallbackSummary) {
@@ -476,6 +442,11 @@ const PlatformPreview = ({
 
   // 1. TikTok Mockup
   if (platformId === "tiktok") {
+    const previewCaption = buildTikTokCaption({
+      title: data.title,
+      description: data.description,
+      caption: data.caption,
+    });
     return (
       <div
         className="platform-preview-mockup tiktok-mockup"
@@ -511,8 +482,13 @@ const PlatformPreview = ({
               creatorInfo?.open_id ||
               "@your_username"}
           </div>
-          <div style={{ fontSize: "0.9rem", marginBottom: "10px", lineHeight: "1.2" }}>
-            {data.caption || "Your caption will appear here..."}
+          {data.title ? (
+            <div style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "4px" }}>
+              {data.title}
+            </div>
+          ) : null}
+          <div style={{ fontSize: "0.9rem", marginBottom: "10px", lineHeight: "1.25" }}>
+            {previewCaption || "Your title and description will appear here..."}
           </div>
           <div style={{ display: "flex", alignItems: "center", fontSize: "0.8rem" }}>
             <span>🎵</span>{" "}
@@ -2026,7 +2002,24 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         const data = getPlatformEffectiveData(p);
         platformOptionsMap[p] = { ...data };
 
+        const platformTitle = String(data.title || "").trim();
+        const platformDescription = String(data.description || "").trim();
+        if (platformTitle) {
+          platformOptionsMap[p].title = platformTitle;
+        }
+        if (platformDescription) {
+          platformOptionsMap[p].description = platformDescription;
+        }
+
         if (p === "tiktok") {
+          const tiktokCaption = buildTikTokCaption({
+            title: platformTitle || globalTitle,
+            description: platformDescription || globalDescription,
+            caption: data.caption,
+          });
+          if (tiktokCaption) {
+            platformOptionsMap[p].caption = tiktokCaption;
+          }
           platformOptionsMap[p].commercial = {
             isCommercial: data.commercialContent,
             yourBrand: data.yourBrand,
@@ -2046,7 +2039,13 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         }
       });
 
-      const resolvedTitle = (globalTitle || "").trim() || "Untitled Post";
+      const primaryPlatformData =
+        platforms.length === 1 ? getPlatformEffectiveData(platforms[0]) : null;
+      const resolvedTitle =
+        String(primaryPlatformData?.title || globalTitle || "").trim() || "Untitled Post";
+      const resolvedDescription = String(
+        primaryPlatformData?.description || globalDescription || ""
+      ).trim();
 
       if (!globalTitle || !globalTitle.trim()) {
         setGlobalTitle(resolvedTitle);
@@ -2058,7 +2057,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         type: effectiveMediaType,
         platforms,
         title: resolvedTitle,
-        description: globalDescription,
+        description: resolvedDescription,
         platform_options: platformOptionsMap,
         bounty: {
           amount: bountyAmount,
