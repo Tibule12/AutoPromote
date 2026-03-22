@@ -40,7 +40,19 @@ const PLATFORM_CONFIG = {
   },
   tiktok: {
     endpoint: API_ENDPOINTS.TIKTOK_STATUS,
-    mapResponse: d => ({ connected: !!d.connected, meta: d.meta || null }),
+    mapResponse: d => ({
+      connected: !!d.connected,
+      meta: d.meta || null,
+      display_name: d.display_name || d.meta?.display_name || null,
+      avatar_url: d.avatar_url || null,
+      publishReady: d.publishReady === true,
+      reauthRequired: d.reauthRequired === true,
+      reauthRecommended: d.reauthRecommended === true,
+      missingScopes: Array.isArray(d.missingScopes) ? d.missingScopes : [],
+      grantedScopes: Array.isArray(d.grantedScopes) ? d.grantedScopes : [],
+      hasAccessToken: d.hasAccessToken === true,
+      hasOpenId: d.hasOpenId === true,
+    }),
   },
   twitter: {
     endpoint: API_ENDPOINTS.TWITTER_STATUS,
