@@ -11,8 +11,7 @@ import "../../components/PlatformForms/PlatformForms.css";
 
 // --- Config / Services ---
 import { API_ENDPOINTS } from "../../config";
-import { auth, storage } from "../../firebaseClient";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { auth } from "../../firebaseClient";
 import toast from "react-hot-toast";
 
 // --- Hooks ---
@@ -99,6 +98,37 @@ const buildClientUploadError = error => {
     return new Error("Upload timed out before completion. Check your connection and retry.");
   }
   return new Error(error?.message || "Upload failed. Please try again.");
+};
+
+const uploadBlobViaBackend = async ({ file, token, mediaType, onProgress }) => {
+  if (typeof onProgress === "function") {
+    onProgress(0, file.size || 0);
+  }
+
+  const response = await fetch(
+    `${API_ENDPOINTS.CONTENT_SOURCE_UPLOAD}?mediaType=${encodeURIComponent(mediaType || "video")}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": file.type || "application/octet-stream",
+        "X-File-Name": file.name || "untitled",
+        "X-Media-Type": mediaType || "video",
+      },
+      body: file,
+    }
+  );
+
+  const result = await response.json().catch(() => null);
+  if (!response.ok || !result?.url) {
+    throw buildStructuredUploadError(result, "Failed to upload source media", response.status);
+  }
+
+  if (typeof onProgress === "function") {
+    onProgress(file.size || result.size || 0, file.size || result.size || 0);
+  }
+
+  return result;
 };
 
 function normalizeTikTokCreatorInfo(primary, fallbackRaw, fallbackSummary) {
@@ -1963,32 +1993,27 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       // --- 2. Upload with Progress ---
       let finalUrl = "";
       if (fileToUpload instanceof Blob) {
-        // File or Blob
-        const storagePath = `uploads/${effectiveMediaType}s/${Date.now()}_${fileToUpload.name || "untitled"}`;
-        const storageRef = ref(storage, storagePath);
-        const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
-
-        await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            snapshot => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        try {
+          const uploadResult = await uploadBlobViaBackend({
+            file: fileToUpload,
+            token,
+            mediaType: effectiveMediaType,
+            onProgress: (sent, total) => {
+              const safeTotal = total || fileToUpload.size || 0;
+              if (!safeTotal) {
+                setFeedbackMessage("Uploading...");
+                return;
+              }
+              const progress = (sent / safeTotal) * 100;
               setFeedbackMessage(`Uploading: ${Math.round(progress)}%`);
             },
-            error => {
-              console.error("Upload failed:", error);
-              reject(buildClientUploadError(error));
-            },
-            async () => {
-              try {
-                finalUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                resolve();
-              } catch (e) {
-                reject(e);
-              }
-            }
-          );
-        });
+          });
+          finalUrl = uploadResult.url;
+        } catch (error) {
+          console.error("Upload failed:", error);
+          throw error?.httpStatus || error?.code ? error : buildClientUploadError(error);
+        }
+
         setFeedbackMessage("Finalizing...");
       } else if (typeof fileToUpload === "string") {
         finalUrl = fileToUpload;

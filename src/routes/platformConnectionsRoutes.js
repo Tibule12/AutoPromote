@@ -24,6 +24,80 @@ const PLATFORM_NAMES = [
   "snapchat",
 ];
 
+const TIKTOK_REQUIRED_PUBLISH_SCOPES = ["video.upload", "video.publish"];
+
+function parseScopeList(scopeValue) {
+  if (Array.isArray(scopeValue)) {
+    return scopeValue.map(scope => String(scope || "").trim()).filter(Boolean);
+  }
+  return String(scopeValue || "")
+    .split(/[\s,]+/)
+    .map(scope => scope.trim())
+    .filter(Boolean);
+}
+
+function getTikTokScopeValue(connection) {
+  if (!connection || typeof connection !== "object") return "";
+  if (typeof connection.scope === "string" && connection.scope.trim()) return connection.scope;
+  if (Array.isArray(connection.scope)) return connection.scope.join(" ");
+  if (typeof connection.scopes === "string" && connection.scopes.trim()) return connection.scopes;
+  if (Array.isArray(connection.scopes)) return connection.scopes.join(" ");
+  return "";
+}
+
+function getTikTokOpenId(connection) {
+  return (
+    connection?.open_id ||
+    connection?.openId ||
+    connection?.meta?.open_id ||
+    connection?.meta?.openId ||
+    null
+  );
+}
+
+function hasTikTokAccessToken(connection) {
+  if (!connection || typeof connection !== "object") return false;
+  if (connection.hasAccessToken === true) return true;
+  if (connection.hasEncryption === true) return true;
+  if (typeof connection.access_token === "string" && connection.access_token.trim()) return true;
+  if (
+    typeof connection.encrypted_access_token === "string" &&
+    connection.encrypted_access_token.trim()
+  )
+    return true;
+  if (
+    typeof connection.encrypted_user_access_token === "string" &&
+    connection.encrypted_user_access_token.trim()
+  ) {
+    return true;
+  }
+  if (connection.tokens && typeof connection.tokens === "object") {
+    return !!(
+      typeof connection.tokens.access_token === "string" && connection.tokens.access_token.trim()
+    );
+  }
+  if (typeof connection.tokens === "string" && connection.tokens.trim()) return true;
+  return false;
+}
+
+function buildTikTokReadiness(connection) {
+  const scopeValue = getTikTokScopeValue(connection);
+  const grantedScopes = parseScopeList(scopeValue);
+  const hasOpenId = !!getTikTokOpenId(connection);
+  const hasAccessToken = hasTikTokAccessToken(connection);
+  const missingScopes = TIKTOK_REQUIRED_PUBLISH_SCOPES.filter(
+    scope => !grantedScopes.includes(scope)
+  );
+  return {
+    hasAccessToken,
+    hasOpenId,
+    grantedScopes,
+    missingScopes,
+    publishReady: hasAccessToken && hasOpenId && missingScopes.length === 0,
+    reauthRecommended: !(hasAccessToken && hasOpenId && missingScopes.length === 0),
+  };
+}
+
 function sanitizeConnection(data) {
   if (!data || typeof data !== "object") return {};
   const safe = Object.assign({}, data);
@@ -137,6 +211,16 @@ router.get(
     const telegram = connections.telegram || { connected: false };
     const pinterest = connections.pinterest || { connected: false };
     const snapchat = connections.snapchat || { connected: false };
+    const tiktokReadiness = tiktok.connected
+      ? buildTikTokReadiness(connectionDocs.tiktok || tiktok)
+      : {
+          hasAccessToken: false,
+          hasOpenId: false,
+          grantedScopes: [],
+          missingScopes: [],
+          publishReady: false,
+          reauthRecommended: false,
+        };
 
     const summary = {
       twitter: {
@@ -170,6 +254,7 @@ router.get(
       tiktok: {
         connected: tiktok.connected,
         display_name: tiktok.display_name || tiktok.meta?.display_name,
+        publishReady: tiktokReadiness.publishReady,
       },
       spotify: {
         connected: spotify.connected,
@@ -227,7 +312,7 @@ router.get(
         youtube: sanitizeConnection(youtube),
         facebook: sanitizeConnection(facebook),
         instagram: sanitizeConnection(instagram),
-        tiktok: sanitizeConnection(tiktok),
+        tiktok: { ...sanitizeConnection(tiktok), ...tiktokReadiness },
         spotify: sanitizeConnection(spotify),
         reddit: sanitizeConnection(reddit),
         discord: sanitizeConnection(discord),

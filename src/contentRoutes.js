@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { db } = require("./firebaseAdmin");
+const { db, admin } = require("./firebaseAdmin");
 const logger = require("./utils/logger");
 const { extractOwnedStoragePathFromUrl } = require("./utils/cleanupSource");
 const authMiddleware = require("./authMiddleware");
 const Joi = require("joi");
+const crypto = require("crypto");
 const path = require("path");
 const sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
 const {
@@ -456,6 +457,18 @@ function shouldBypassUploadReadinessForTest(req) {
   return isTestRuntime && req.user?.test === true && hasTestToken;
 }
 
+function sanitizeUploadFileName(fileName) {
+  const baseName = String(fileName || "untitled")
+    .replace(/[\\/]+/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+  return (baseName || "untitled").replace(/[^a-zA-Z0-9._ -]/g, "-");
+}
+
+function buildFirebaseDownloadUrl(bucketName, storagePath, token) {
+  return `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(bucketName)}/o/${encodeURIComponent(storagePath)}?alt=media&token=${encodeURIComponent(token)}`;
+}
+
 router.post(
   "/upload/readiness",
   authMiddleware,
@@ -487,6 +500,66 @@ router.post(
         error: error && error.message ? error.message : String(error),
       });
       return res.status(500).json({ error: "Failed to evaluate upload readiness" });
+    }
+  }
+);
+
+router.post(
+  "/upload/source-file",
+  authMiddleware,
+  rateLimitMiddleware(10, 60000),
+  express.raw({ type: "*/*", limit: "500mb" }),
+  async (req, res) => {
+    try {
+      const userId = req.userId || req.user?.uid;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+      const mediaType = String(req.query.mediaType || req.headers["x-media-type"] || "video")
+        .toLowerCase()
+        .trim();
+      if (!["video", "image", "audio"].includes(mediaType)) {
+        return res.status(400).json({ error: "Invalid media type" });
+      }
+
+      const fileBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || "");
+      if (!fileBuffer.length) {
+        return res.status(400).json({ error: "Missing upload body" });
+      }
+      if (fileBuffer.length > 500 * 1024 * 1024) {
+        return res.status(400).json({ error: "File too large" });
+      }
+
+      const rawFileName = req.headers["x-file-name"] || req.query.fileName || "untitled";
+      const safeFileName = sanitizeUploadFileName(rawFileName);
+      const storagePath = `uploads/${mediaType}s/${Date.now()}_${safeFileName}`;
+      const downloadToken = crypto.randomUUID();
+      const bucket = admin.storage().bucket();
+      const contentType = String(req.headers["content-type"] || "application/octet-stream");
+
+      await bucket.file(storagePath).save(fileBuffer, {
+        resumable: false,
+        contentType,
+        metadata: {
+          contentType,
+          metadata: {
+            firebaseStorageDownloadTokens: downloadToken,
+            ownerUid: String(userId),
+            source: "unified_publisher_backend_upload",
+          },
+        },
+      });
+
+      return res.status(201).json({
+        ok: true,
+        storagePath,
+        url: buildFirebaseDownloadUrl(bucket.name, storagePath, downloadToken),
+        size: fileBuffer.length,
+      });
+    } catch (error) {
+      logger.error("[upload.source-file] Failed to store uploaded media", {
+        error: error && error.message ? error.message : String(error),
+      });
+      return res.status(500).json({ error: "Failed to upload source file" });
     }
   }
 );

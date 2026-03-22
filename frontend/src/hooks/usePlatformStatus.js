@@ -5,6 +5,62 @@ import { cachedFetch } from "../utils/requestCache";
 
 const DEFAULT_STATUS = { connected: false, meta: null };
 
+function parseScopeList(scopeValue) {
+  if (Array.isArray(scopeValue)) {
+    return scopeValue.map(scope => String(scope || "").trim()).filter(Boolean);
+  }
+  return String(scopeValue || "")
+    .split(/[\s,]+/)
+    .map(scope => scope.trim())
+    .filter(Boolean);
+}
+
+function getTikTokScopeValue(data) {
+  if (!data || typeof data !== "object") return "";
+  if (typeof data.scope === "string" && data.scope.trim()) return data.scope;
+  if (Array.isArray(data.scope)) return data.scope.join(" ");
+  if (typeof data.scopes === "string" && data.scopes.trim()) return data.scopes;
+  if (Array.isArray(data.scopes)) return data.scopes.join(" ");
+  return "";
+}
+
+export function mapTikTokStatusResponse(d = {}) {
+  const scopeValue = getTikTokScopeValue(d);
+  const grantedScopes = Array.isArray(d.grantedScopes)
+    ? d.grantedScopes
+    : parseScopeList(scopeValue);
+  const missingScopes = Array.isArray(d.missingScopes)
+    ? d.missingScopes
+    : ["video.upload", "video.publish"].filter(scope => !grantedScopes.includes(scope));
+  const hasOpenId =
+    d.hasOpenId === true || Boolean(d.open_id || d.openId || d.meta?.open_id || d.meta?.openId);
+  const hasAccessToken =
+    d.hasAccessToken === true ||
+    d.hasEncryption === true ||
+    Boolean(
+      (typeof d.access_token === "string" && d.access_token.trim()) ||
+      d.tokens ||
+      (typeof d.encrypted_access_token === "string" && d.encrypted_access_token.trim()) ||
+      (typeof d.encrypted_user_access_token === "string" && d.encrypted_user_access_token.trim())
+    );
+  const publishReady =
+    d.publishReady === true || (hasAccessToken && hasOpenId && missingScopes.length === 0);
+
+  return {
+    connected: !!d.connected,
+    meta: d.meta || null,
+    display_name: d.display_name || d.meta?.display_name || null,
+    avatar_url: d.avatar_url || null,
+    publishReady,
+    reauthRequired: d.reauthRequired === true,
+    reauthRecommended: d.reauthRecommended === true || (!publishReady && !!d.connected),
+    missingScopes,
+    grantedScopes,
+    hasAccessToken,
+    hasOpenId,
+  };
+}
+
 /**
  * Configuration for each platform's status loading.
  * - endpoint: API endpoint for individual status check
@@ -40,19 +96,7 @@ const PLATFORM_CONFIG = {
   },
   tiktok: {
     endpoint: API_ENDPOINTS.TIKTOK_STATUS,
-    mapResponse: d => ({
-      connected: !!d.connected,
-      meta: d.meta || null,
-      display_name: d.display_name || d.meta?.display_name || null,
-      avatar_url: d.avatar_url || null,
-      publishReady: d.publishReady === true,
-      reauthRequired: d.reauthRequired === true,
-      reauthRecommended: d.reauthRecommended === true,
-      missingScopes: Array.isArray(d.missingScopes) ? d.missingScopes : [],
-      grantedScopes: Array.isArray(d.grantedScopes) ? d.grantedScopes : [],
-      hasAccessToken: d.hasAccessToken === true,
-      hasOpenId: d.hasOpenId === true,
-    }),
+    mapResponse: mapTikTokStatusResponse,
   },
   twitter: {
     endpoint: API_ENDPOINTS.TWITTER_STATUS,
