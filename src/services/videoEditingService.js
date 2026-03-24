@@ -15,6 +15,68 @@ const MEDIA_WORKER_URL =
 const { v4: uuidv4 } = require("uuid");
 
 class VideoEditingService {
+  async startAudioExtractionJob(videoUrl, userId, options = {}) {
+    const jobId = uuidv4();
+    console.log(`[VideoEditing] Starting audio extraction job ${jobId} for User ${userId}`);
+
+    try {
+      await db
+        .collection("video_edits")
+        .doc(jobId)
+        .set({
+          jobId,
+          type: "audio_extraction",
+          userId,
+          videoUrl,
+          sourceLabel: options.sourceLabel || "",
+          status: "queued",
+          progress: 0,
+          createdAt: new Date().toISOString(),
+        });
+
+      const response = await axios.post(
+        `${MEDIA_WORKER_URL}/extract-audio`,
+        {
+          video_url: videoUrl,
+          output_format: "mp3",
+          job_id: jobId,
+          async_mode: true,
+        },
+        { timeout: 60000 }
+      );
+
+      const workerResult = response.data || {};
+      await db
+        .collection("video_edits")
+        .doc(jobId)
+        .set(
+          {
+            status: workerResult.status === "processing" ? "processing" : "queued",
+            progress: 5,
+            workerJobId: workerResult.job_id || jobId,
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+
+      return { jobId };
+    } catch (error) {
+      console.error(`[VideoEditing] Failed to start audio extraction job ${jobId}:`, error.message);
+
+      await db.collection("video_edits").doc(jobId).set(
+        {
+          status: "failed",
+          error: error.message,
+          progress: 0,
+          failedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+
+      throw new Error("Failed to queue audio extraction job");
+    }
+  }
+
   /**
    * Start an async video processing job
    * Returns a jobId immediately for polling.

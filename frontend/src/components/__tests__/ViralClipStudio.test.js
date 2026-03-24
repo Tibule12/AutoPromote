@@ -1,6 +1,7 @@
 import React from "react";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import ViralClipStudio from "../ViralClipStudio";
+import { uploadSourceFileViaBackend } from "../../utils/sourceUpload";
 
 jest.mock("../../firebaseClient", () => ({
   storage: {},
@@ -23,18 +24,66 @@ jest.mock("firebase/auth", () => ({
 
 jest.mock("html2canvas", () => jest.fn(() => Promise.resolve({ toBlob: cb => cb(new Blob()) })));
 
+jest.mock("../../utils/sourceUpload", () => ({
+  uploadSourceFileViaBackend: jest.fn(),
+}));
+
 describe("ViralClipStudio timeline sequencing", () => {
   const originalConfirm = window.confirm;
   const originalAlert = window.alert;
   const originalPrompt = window.prompt;
   const originalCreateElement = document.createElement.bind(document);
   const originalPlay = window.HTMLMediaElement.prototype.play;
+  const originalPause = window.HTMLMediaElement.prototype.pause;
+  const originalLoad = window.HTMLMediaElement.prototype.load;
+  const originalFetch = global.fetch;
+  const originalConsoleError = console.error;
+  let consoleErrorSpy;
 
   beforeEach(() => {
     window.confirm = jest.fn(() => false);
     window.alert = jest.fn();
     window.prompt = jest.fn(() => null);
-    window.HTMLMediaElement.prototype.play = jest.fn(() => Promise.resolve());
+    Object.defineProperty(window.HTMLMediaElement.prototype, "play", {
+      configurable: true,
+      writable: true,
+      value: jest.fn(() => Promise.resolve()),
+    });
+    Object.defineProperty(window.HTMLMediaElement.prototype, "pause", {
+      configurable: true,
+      writable: true,
+      value: jest.fn(),
+    });
+    Object.defineProperty(window.HTMLMediaElement.prototype, "load", {
+      configurable: true,
+      writable: true,
+      value: jest.fn(),
+    });
+    global.fetch = jest.fn();
+    document.createElement = jest.fn(tagName => {
+      const element = originalCreateElement(tagName);
+      if (tagName === "audio" || tagName === "video") {
+        Object.defineProperty(element, "play", {
+          configurable: true,
+          writable: true,
+          value: jest.fn(() => Promise.resolve()),
+        });
+        Object.defineProperty(element, "pause", {
+          configurable: true,
+          writable: true,
+          value: jest.fn(),
+        });
+        Object.defineProperty(element, "load", {
+          configurable: true,
+          writable: true,
+          value: jest.fn(),
+        });
+      }
+      return element;
+    });
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation((...args) => {
+      originalConsoleError(...args);
+    });
   });
 
   afterEach(() => {
@@ -43,6 +92,10 @@ describe("ViralClipStudio timeline sequencing", () => {
     window.prompt = originalPrompt;
     document.createElement = originalCreateElement;
     window.HTMLMediaElement.prototype.play = originalPlay;
+    window.HTMLMediaElement.prototype.pause = originalPause;
+    window.HTMLMediaElement.prototype.load = originalLoad;
+    global.fetch = originalFetch;
+    consoleErrorSpy?.mockRestore();
     jest.clearAllMocks();
   });
 
@@ -50,6 +103,23 @@ describe("ViralClipStudio timeline sequencing", () => {
     const createdVideos = [];
     document.createElement = jest.fn(tagName => {
       const element = originalCreateElement(tagName);
+      if (tagName === "audio" || tagName === "video") {
+        Object.defineProperty(element, "play", {
+          configurable: true,
+          writable: true,
+          value: jest.fn(() => Promise.resolve()),
+        });
+        Object.defineProperty(element, "pause", {
+          configurable: true,
+          writable: true,
+          value: jest.fn(),
+        });
+        Object.defineProperty(element, "load", {
+          configurable: true,
+          writable: true,
+          value: jest.fn(),
+        });
+      }
       if (tagName === "video") {
         Object.defineProperty(element, "duration", {
           configurable: true,
@@ -215,5 +285,82 @@ describe("ViralClipStudio timeline sequencing", () => {
     await waitFor(() => {
       expect(getOverlayTextNode()).not.toBeNull();
     });
+  });
+
+  test("adds extracted background audio controls after uploading a source video", async () => {
+    uploadSourceFileViaBackend.mockResolvedValue({
+      url: "https://example.com/source-upload.mp4",
+    });
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ jobId: "audio-job-1" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          status: "completed",
+          progress: 100,
+          audio_url: "https://example.com/audio.mp3",
+          result: {
+            audioUrl: "https://example.com/audio.mp3",
+            audioDuration: 14.5,
+            format: "mp3",
+          },
+        }),
+      });
+
+    const onStatusChange = jest.fn();
+    const { container } = render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={onStatusChange}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    const audioUploadInput = screen.getByTestId("background-audio-upload-input");
+
+    await act(async () => {
+      fireEvent.change(audioUploadInput, {
+        target: {
+          files: [new File(["video"], "sound-source.mp4", { type: "video/mp4" })],
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(uploadSourceFileViaBackend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mediaType: "video",
+          fileName: "sound-source.mp4",
+        })
+      );
+    });
+
+    await waitFor(
+      () => {
+        expect(screen.getByText("Background audio added to the timeline.")).toBeInTheDocument();
+        expect(screen.getByText("sound-source.mp4")).toBeInTheDocument();
+        expect(screen.getByText(/Trim Start:/i)).toBeInTheDocument();
+        expect(screen.getByText(/Volume:/i)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Pause Track/i })).toBeInTheDocument();
+      },
+      { timeout: 4000 }
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Pause Track/i }));
+    expect(screen.getByRole("button", { name: /Play Track/i })).toBeInTheDocument();
+
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(onStatusChange).toHaveBeenCalledWith(
+      "Background audio extracted and added to the timeline."
+    );
   });
 });

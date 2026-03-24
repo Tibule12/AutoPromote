@@ -35,6 +35,7 @@ export const API_ENDPOINTS = {
   CONTENT_UPLOAD: `${API_BASE_URL}/api/content/upload`,
   CONTENT_SOURCE_UPLOAD: `${API_BASE_URL}/api/content/upload/source-file`,
   CONTENT_UPLOAD_READINESS: `${API_BASE_URL}/api/content/upload/readiness`,
+  MEDIA_EXTRACT_AUDIO: `${API_BASE_URL}/api/media/extract-audio`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
   MY_SCHEDULES: `${API_BASE_URL}/api/content/my-promotion-schedules`,
   CONTENT_DIAGNOSIS: id => `${API_BASE_URL}/api/content/${encodeURIComponent(id)}/diagnosis`,
