@@ -177,10 +177,34 @@ def get_video_dimensions(input_path):
             text=True,
             check=True,
         )
-        width_text, height_text = result.stdout.strip().split("x")
+        width_text, height_text = result.stdout.strip().split("x") if "x" in result.stdout else (1080, 1920)
         return max(320, int(width_text)), max(320, int(height_text))
     except Exception:
         return 1080, 1920
+
+def has_audio_stream(input_path):
+    try:
+        result = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-select_streams",
+                "a",
+                "-show_entries",
+                "stream=codec_type",
+                "-of",
+                "csv=p=0",
+                input_path,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True,
+        )
+        return bool(result.stdout.strip())
+    except Exception:
+        return False
 
 async def materialize_video_input(video_url, local_path):
     source = str(video_url or "").strip()
@@ -1119,6 +1143,12 @@ class VideoProcessRequest(BaseModel):
     job_id: Optional[str] = None
     async_mode: bool = True  # DEFAULT TO TRUE to avoid 504 timeouts
 
+class ExtractAudioRequest(BaseModel):
+    video_url: str
+    output_format: str = "mp3"
+    job_id: Optional[str] = None
+    async_mode: bool = True
+
 async def detect_silence_intervals(input_path, threshold="-30dB", duration=0.5):
     """
     Returns list of (start, end) tuples for SILENCE.
@@ -1157,6 +1187,112 @@ async def detect_silence_intervals(input_path, threshold="-30dB", duration=0.5):
         intervals.append((s, e))
         
     return intervals
+
+@app.post("/extract-audio")
+async def extract_audio(request: ExtractAudioRequest, background_tasks: BackgroundTasks):
+    if request.async_mode:
+        job_id = request.job_id or str(uuid.uuid4())
+        logger.info(f"Queuing audio extraction job {job_id}")
+        background_tasks.add_task(extract_audio_impl, request, job_id)
+        return {"status": "processing", "job_id": job_id, "mode": "async"}
+
+    return await extract_audio_impl(request)
+
+async def extract_audio_impl(request: ExtractAudioRequest, provided_job_id: str = None):
+    job_id = provided_job_id or request.job_id or str(uuid.uuid4())
+    SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    if not os.path.exists(SHARED_TMP_DIR):
+        os.makedirs(SHARED_TMP_DIR)
+
+    output_format = "wav" if str(request.output_format or "").lower() == "wav" else "mp3"
+    input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_audio_source.mp4")
+    output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_audio_extract.{output_format}")
+
+    try:
+        if request.async_mode:
+            update_firestore_job(job_id, {"status": "processing", "progress": 10, "type": "audio_extraction"})
+
+        if str(request.video_url).startswith("http"):
+            await run_subprocess_async(
+                [
+                    "ffmpeg",
+                    "-user_agent",
+                    "Mozilla/5.0",
+                    "-i",
+                    request.video_url,
+                    "-c",
+                    "copy",
+                    "-y",
+                    input_path,
+                ],
+                check=True,
+                job_context=job_id,
+            )
+        else:
+            shutil.copy(request.video_url, input_path)
+
+        if not has_audio_stream(input_path):
+            raise HTTPException(status_code=400, detail="The uploaded video does not contain an audio track")
+
+        if request.async_mode:
+            update_firestore_job(job_id, {"progress": 55, "detail": "Extracting audio"})
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-i",
+            input_path,
+            "-vn",
+            "-ac",
+            "2",
+            "-ar",
+            "44100",
+            "-y",
+        ]
+
+        if output_format == "wav":
+            ffmpeg_cmd.extend(["-c:a", "pcm_s16le", output_path])
+        else:
+            ffmpeg_cmd.extend(["-c:a", "libmp3lame", "-b:a", "192k", output_path])
+
+        await run_subprocess_async(ffmpeg_cmd, check=True, job_context=job_id)
+
+        extracted_duration = get_media_duration(output_path)
+        public_url = upload_file_to_firebase(output_path, f"editor_audio/{job_id}.{output_format}")
+        if not public_url:
+            raise HTTPException(status_code=500, detail="Failed to upload extracted audio")
+
+        result_data = {
+            "status": "completed",
+            "job_id": job_id,
+            "audio_url": public_url,
+            "progress": 100,
+            "result": {
+                "audioUrl": public_url,
+                "audioDuration": extracted_duration,
+                "format": output_format,
+                "sourceVideoUrl": request.video_url,
+            },
+        }
+
+        if request.async_mode:
+            update_firestore_job(job_id, result_data)
+
+        return result_data
+    except HTTPException as e:
+        logger.error(f"Audio extraction failed for job {job_id}: {e.detail}")
+        if request.async_mode:
+            update_firestore_job(job_id, {"status": "failed", "error": str(e.detail), "progress": 0})
+        raise
+    except Exception as e:
+        logger.error(f"Audio extraction failed for job {job_id}: {e}")
+        if request.async_mode:
+            update_firestore_job(job_id, {"status": "failed", "error": str(e), "progress": 0})
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if os.path.exists(input_path):
+            os.remove(input_path)
+        if os.path.exists(output_path):
+            os.remove(output_path)
 
 @app.post("/process-video")
 async def process_video_endpoint(request: VideoProcessRequest, background_tasks: BackgroundTasks):
@@ -2848,6 +2984,12 @@ class ViralTimelineSegment(BaseModel):
     end_time: float
     duration: Optional[float] = None
 
+class BackgroundAudioTrack(BaseModel):
+    url: str
+    trim_start: float = 0.0
+    volume: float = 0.7
+    enabled: bool = True
+
 class RenderViralRequest(BaseModel):
     video_url: str
     start_time: float
@@ -2856,6 +2998,7 @@ class RenderViralRequest(BaseModel):
     auto_captions: bool = False
     smart_crop: bool = False
     timeline_segments: Optional[List[ViralTimelineSegment]] = None
+    background_audio: Optional[BackgroundAudioTrack] = None
     job_id: Optional[str] = None
     async_mode: bool = False
 
@@ -2883,6 +3026,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_input.mp4")
     trimmed_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_trimmed.mp4")
     output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_viral.mp4")
+    downloaded_background_audio_path = None
 
     # Initial async update
     if request.async_mode:
@@ -3304,11 +3448,58 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              # But if filter chain is empty (no overlays), we just copy
              pass 
 
+        background_audio = request.background_audio if request.background_audio and request.background_audio.enabled else None
+        audio_filter_chain = []
+        has_main_audio = has_audio_stream(working_path)
+
+        if background_audio and background_audio.url:
+            background_audio_source = str(background_audio.url).strip()
+            if background_audio_source:
+                if background_audio_source.startswith("http"):
+                    downloaded_background_audio_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_bg_audio.mp3")
+                    await run_subprocess_async(
+                        [
+                            "ffmpeg",
+                            "-user_agent",
+                            "Mozilla/5.0",
+                            "-i",
+                            background_audio_source,
+                            "-vn",
+                            "-c:a",
+                            "libmp3lame",
+                            "-b:a",
+                            "192k",
+                            "-y",
+                            downloaded_background_audio_path,
+                        ],
+                        check=True,
+                        job_context=job_id,
+                    )
+                    background_audio_source = downloaded_background_audio_path
+
+                trim_start = max(0.0, float(background_audio.trim_start or 0.0))
+                input_args = ["-stream_loop", "-1"]
+                if trim_start > 0:
+                    input_args.extend(["-ss", str(trim_start)])
+                input_args.extend(["-i", background_audio_source])
+                inputs.extend(input_args)
+                background_audio_idx = input_idx
+                input_idx += 1
+
+                bg_volume = clamp_float(background_audio.volume, 0.0, 1.5)
+                audio_filter_chain.append(f"[{background_audio_idx}:a]volume={bg_volume}[bg_track]")
+                if has_main_audio:
+                    audio_filter_chain.append(
+                        f"[0:a][bg_track]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[a_mix]"
+                    )
+                else:
+                    audio_filter_chain.append("[bg_track]anull[a_mix]")
+
         # Build Command
         cmd = ["ffmpeg"]
         cmd.extend(inputs)
-             
-        if not filter_chain:
+
+        if not filter_chain and not audio_filter_chain:
              # Just Trim? We already trimmed. So this is a no-op / copy.
              cmd.extend(["-c", "copy", "-y", output_path])
         else:
@@ -3316,10 +3507,23 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              if current_v_label != "output":
                  # Alias the last label to [output]
                  filter_chain.append(f"[{current_v_label}]null[output]")
-            
+
              # Join filter chain with semicolons
-             complex_filter = ";".join(filter_chain)
-             cmd.extend(["-filter_complex", complex_filter, "-map", "[output]", "-map", "0:a", "-shortest", "-c:v", "libx264", "-c:a", "copy", "-y", output_path])
+             complex_filter = ";".join(filter_chain + audio_filter_chain)
+             if complex_filter:
+                 cmd.extend(["-filter_complex", complex_filter])
+
+             if filter_chain:
+                 cmd.extend(["-map", "[output]"])
+             else:
+                 cmd.extend(["-map", "0:v:0"])
+
+             if audio_filter_chain:
+                 cmd.extend(["-map", "[a_mix]", "-c:a", "aac"])
+             else:
+                 cmd.extend(["-map", "0:a?", "-c:a", "copy"])
+
+             cmd.extend(["-shortest", "-c:v", "libx264", "-y", output_path])
         
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
         await run_subprocess_async(cmd, check=True)
@@ -3355,6 +3559,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     finally:
         # Cleanup inputs
         if os.path.exists(input_path): os.remove(input_path)
+        if downloaded_background_audio_path and os.path.exists(downloaded_background_audio_path):
+            os.remove(downloaded_background_audio_path)
 
 @app.post("/transcribe")
 async def transcribe_video(request: Dict[str, str]):

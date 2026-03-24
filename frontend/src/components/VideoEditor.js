@@ -745,6 +745,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         overlays: overlays,
         auto_captions: !!extraOptions.autoCaptions,
         timeline_segments: timelineSegments,
+        background_audio: extraOptions.backgroundAudio || null,
         // smart_crop: !!extraOptions.smartCrop, // Backend supports this? Check Python worker.
       };
 

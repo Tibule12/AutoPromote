@@ -1,5 +1,6 @@
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { sanitizeUrl } from "../utils/security";
+import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import React, { useState, useRef, useEffect } from "react";
 import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -38,6 +39,14 @@ const normalizePlainText = value =>
     .replace(/[\u0000-\u001f\u007f]/g, " ")
     .replace(/[<>]/g, "")
     .trim();
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const clampAudioControl = (value, minimum, maximum, fallback) => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.max(minimum, Math.min(maximum, numeric));
+};
 
 const RainbowText = ({ text, offset = 0 }) => {
   const safeText = normalizePlainText(text);
@@ -115,6 +124,9 @@ const ViralClipStudio = ({
   // New AI Options for users
   const [autoCaptions, setAutoCaptions] = useState(false);
   const [smartCrop, setSmartCrop] = useState(false);
+  const [extractedAudio, setExtractedAudio] = useState(null);
+  const [audioExtractionStatus, setAudioExtractionStatus] = useState("");
+  const [isExtractingAudio, setIsExtractingAudio] = useState(false);
 
   const [timeline, setTimeline] = useState(() => {
     // Initial timeline is just the main video URL, effectively one clip
@@ -128,8 +140,10 @@ const ViralClipStudio = ({
   const [canRedo, setCanRedo] = useState(false);
 
   const videoRef = useRef(null);
+  const audioRef = useRef(null);
   const fileInputRef = useRef(null); // Hidden file input
   const imageInputRef = useRef(null);
+  const audioSourceInputRef = useRef(null);
   const undoStackRef = useRef([]);
   const redoStackRef = useRef([]);
   const lastSnapshotRef = useRef(null);
@@ -151,6 +165,7 @@ const ViralClipStudio = ({
     videoFit,
     autoCaptions,
     smartCrop,
+    extractedAudio,
     timeline,
     activeTimelineIndex,
   });
@@ -173,6 +188,7 @@ const ViralClipStudio = ({
     setVideoFit(snapshot.videoFit || "contain");
     setAutoCaptions(!!snapshot.autoCaptions);
     setSmartCrop(!!snapshot.smartCrop);
+    setExtractedAudio(snapshot.extractedAudio || null);
     setTimeline(snapshot.timeline || []);
     setActiveTimelineIndex(Math.max(0, Number(snapshot.activeTimelineIndex || 0)));
   };
@@ -488,6 +504,162 @@ const ViralClipStudio = ({
     };
   };
 
+  const getPreviewTimelineTime = sourceTime => {
+    let elapsed = 0;
+    for (let index = 0; index < activeTimelineIndex; index += 1) {
+      elapsed += Math.max(0, Number(getTimelineClipWindow(timeline[index]).duration || 0));
+    }
+
+    const currentClip = timeline[activeTimelineIndex];
+    const currentWindow = getTimelineClipWindow(currentClip);
+    const localStart = Number(currentWindow.start || 0);
+    const localDuration = Math.max(0, Number(currentWindow.duration || 0));
+    const localTime = Math.max(0, Number(sourceTime || 0) - localStart);
+
+    return elapsed + Math.min(localTime, localDuration || localTime);
+  };
+
+  const normalizeBackgroundAudioForExport = audioTrack => {
+    if (!audioTrack?.url || audioTrack.enabled === false) return null;
+
+    return {
+      url: audioTrack.url,
+      trim_start: clampAudioControl(audioTrack.trimStart, 0, audioTrack.duration || 36000, 0),
+      volume: clampAudioControl(audioTrack.volume, 0, 1.5, 0.7),
+      enabled: true,
+    };
+  };
+
+  const handleAudioSourceUpload = async event => {
+    const sourceFile = event.target.files && event.target.files[0];
+    if (!sourceFile) return;
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Please login first");
+      event.target.value = "";
+      return;
+    }
+
+    setIsExtractingAudio(true);
+    setAudioExtractionStatus("Uploading source video...");
+    if (onStatusChange) onStatusChange("Uploading source video for audio extraction...");
+
+    try {
+      let token = await user.getIdToken();
+      const uploadResult = await uploadSourceFileViaBackend({
+        file: sourceFile,
+        token,
+        mediaType: "video",
+        fileName: sourceFile.name,
+      });
+
+      setAudioExtractionStatus("Queueing extraction...");
+      if (onStatusChange) onStatusChange("Queueing background-audio extraction...");
+
+      let response = await fetch(API_ENDPOINTS.MEDIA_EXTRACT_AUDIO, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileUrl: uploadResult.url,
+          sourceLabel: sourceFile.name,
+        }),
+      });
+
+      if (response.status === 401) {
+        token = await user.getIdToken(true);
+        response = await fetch(API_ENDPOINTS.MEDIA_EXTRACT_AUDIO, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fileUrl: uploadResult.url,
+            sourceLabel: sourceFile.name,
+          }),
+        });
+      }
+
+      const startPayload = await response.json().catch(() => null);
+      if (!response.ok || !startPayload?.jobId) {
+        throw new Error(
+          startPayload?.details || startPayload?.message || "Failed to start audio extraction"
+        );
+      }
+
+      const jobId = startPayload.jobId;
+      let attempts = 0;
+      while (attempts < 180) {
+        attempts += 1;
+        await sleep(2000);
+
+        let statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (statusResponse.status === 401) {
+          token = await user.getIdToken(true);
+          statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        }
+
+        if (!statusResponse.ok) continue;
+        const statusPayload = await statusResponse.json();
+
+        if (statusPayload.status === "failed") {
+          throw new Error(statusPayload.error || "Audio extraction failed on the server");
+        }
+
+        if (statusPayload.status === "completed") {
+          const result = statusPayload.result || {};
+          const audioUrl = result.audioUrl || statusPayload.audio_url;
+          if (!audioUrl) {
+            throw new Error("Audio extraction completed but no audio URL was returned");
+          }
+
+          const audioDuration = clampAudioControl(result.audioDuration, 0, 36000, 0);
+          setExtractedAudio({
+            id: jobId,
+            url: audioUrl,
+            sourceVideoUrl: uploadResult.url,
+            sourceVideoName: sourceFile.name,
+            trimStart: 0,
+            volume: 0.7,
+            enabled: true,
+            duration: audioDuration,
+            format: result.format || "mp3",
+          });
+          setAudioExtractionStatus("Background audio added to the timeline.");
+          if (onStatusChange)
+            onStatusChange("Background audio extracted and added to the timeline.");
+          return;
+        }
+
+        const progress = clampAudioControl(statusPayload.progress, 0, 100, 0);
+        setAudioExtractionStatus(`Extracting audio... ${Math.round(progress)}%`);
+        if (onStatusChange)
+          onStatusChange(`Extracting background audio... ${Math.round(progress)}%`);
+      }
+
+      throw new Error("Audio extraction timed out");
+    } catch (error) {
+      console.error("Audio extraction failed", error);
+      setAudioExtractionStatus(error.message || "Audio extraction failed");
+      if (onStatusChange)
+        onStatusChange(`Audio extraction failed: ${error.message || "Unknown error"}`);
+      alert(`Audio extraction failed: ${error.message || "Unknown error"}`);
+    } finally {
+      setIsExtractingAudio(false);
+      event.target.value = "";
+    }
+  };
+
   const buildExportTimeline = async () => {
     const auth = getAuth();
     const user = auth.currentUser;
@@ -638,6 +810,7 @@ const ViralClipStudio = ({
     videoFit,
     autoCaptions,
     smartCrop,
+    extractedAudio,
     timeline,
     activeTimelineIndex,
     isDragging,
@@ -675,6 +848,7 @@ const ViralClipStudio = ({
     videoFit,
     autoCaptions,
     smartCrop,
+    extractedAudio,
     timeline,
     activeTimelineIndex,
   ]);
@@ -788,6 +962,81 @@ const ViralClipStudio = ({
       }
     }
   }, [activeTimelineIndex, timeline, selectedClip, isDragging]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (!extractedAudio?.url) {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+      return;
+    }
+
+    const syncBackgroundAudio = () => {
+      if (!video || !extractedAudio?.url) return;
+
+      audio.volume = clampAudioControl(extractedAudio.volume, 0, 1, 0.7);
+      audio.playbackRate = video.playbackRate || 1;
+
+      if (extractedAudio.enabled === false) {
+        audio.pause();
+        return;
+      }
+
+      const previewTimelineTime = getPreviewTimelineTime(video.currentTime || 0);
+      const targetTime = clampAudioControl(
+        previewTimelineTime + Number(extractedAudio.trimStart || 0),
+        0,
+        (extractedAudio.duration || previewTimelineTime + Number(extractedAudio.trimStart || 0)) +
+          1,
+        0
+      );
+
+      if (Number.isFinite(targetTime) && Math.abs((audio.currentTime || 0) - targetTime) > 0.35) {
+        try {
+          audio.currentTime = targetTime;
+        } catch (error) {
+          console.log("Audio sync seek skipped", error);
+        }
+      }
+
+      if (video.paused) {
+        audio.pause();
+      } else {
+        safePlayMediaElement(audio);
+      }
+    };
+
+    const pauseBackgroundAudio = () => audio.pause();
+
+    if (video) {
+      video.addEventListener("play", syncBackgroundAudio);
+      video.addEventListener("pause", pauseBackgroundAudio);
+      video.addEventListener("seeking", syncBackgroundAudio);
+      video.addEventListener("seeked", syncBackgroundAudio);
+      video.addEventListener("timeupdate", syncBackgroundAudio);
+      video.addEventListener("loadedmetadata", syncBackgroundAudio);
+      video.addEventListener("ratechange", syncBackgroundAudio);
+    }
+
+    syncBackgroundAudio();
+
+    return () => {
+      if (video) {
+        video.removeEventListener("play", syncBackgroundAudio);
+        video.removeEventListener("pause", pauseBackgroundAudio);
+        video.removeEventListener("seeking", syncBackgroundAudio);
+        video.removeEventListener("seeked", syncBackgroundAudio);
+        video.removeEventListener("timeupdate", syncBackgroundAudio);
+        video.removeEventListener("loadedmetadata", syncBackgroundAudio);
+        video.removeEventListener("ratechange", syncBackgroundAudio);
+      }
+      audio.pause();
+    };
+  }, [extractedAudio, activeTimelineIndex, timeline, selectedClip]);
 
   const addTextOverlay = () => {
     // START TIME: Use current video playback time
@@ -1117,6 +1366,12 @@ const ViralClipStudio = ({
                   zIndex: 10,
                 }}
                 onClick={() => setActiveOverlayId(null)} // Deselect on video click
+              />
+              <audio
+                ref={audioRef}
+                preload="auto"
+                src={extractedAudio?.url ? sanitizeUrl(extractedAudio.url) : undefined}
+                style={{ display: "none" }}
               />
 
               {/* Background Layer (Static Gradient instead of Video for Performance) */}
@@ -1723,6 +1978,177 @@ const ViralClipStudio = ({
                 </div>
               </div>
             )}
+
+            <div className="studio-trim-controls">
+              <div className="trim-header">🎧 Background Audio</div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "10px" }}>
+                <button
+                  type="button"
+                  className="tool-btn"
+                  onClick={() => audioSourceInputRef.current?.click()}
+                  disabled={isExtractingAudio}
+                >
+                  <span>🎵</span> {isExtractingAudio ? "Extracting..." : "Upload Video For Sound"}
+                </button>
+                {extractedAudio ? (
+                  <button
+                    type="button"
+                    className="tool-btn"
+                    onClick={() =>
+                      setExtractedAudio(prev => (prev ? { ...prev, enabled: !prev.enabled } : prev))
+                    }
+                  >
+                    <span>{extractedAudio.enabled === false ? "▶️" : "⏸️"}</span>{" "}
+                    {extractedAudio.enabled === false ? "Play Track" : "Pause Track"}
+                  </button>
+                ) : null}
+                {extractedAudio ? (
+                  <button
+                    type="button"
+                    className="tool-btn"
+                    onClick={() => setExtractedAudio(null)}
+                  >
+                    <span>🗑️</span> Remove Track
+                  </button>
+                ) : null}
+                <input
+                  data-testid="background-audio-upload-input"
+                  ref={audioSourceInputRef}
+                  type="file"
+                  accept="video/*"
+                  style={{ display: "none" }}
+                  onChange={handleAudioSourceUpload}
+                />
+              </div>
+
+              {audioExtractionStatus ? (
+                <div
+                  style={{
+                    marginBottom: "10px",
+                    padding: "8px 10px",
+                    borderRadius: "8px",
+                    background: "#f3f4f6",
+                    color: "#111827",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                  }}
+                >
+                  {audioExtractionStatus}
+                </div>
+              ) : null}
+
+              {extractedAudio ? (
+                <div
+                  style={{
+                    padding: "10px",
+                    borderRadius: "10px",
+                    background: "linear-gradient(135deg, #fff4d6 0%, #ffe4bf 100%)",
+                    border: "1px solid rgba(17, 24, 39, 0.1)",
+                  }}
+                >
+                  <div style={{ fontWeight: 800, color: "#111827", marginBottom: "6px" }}>
+                    {extractedAudio.sourceVideoName || "Extracted audio"}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#374151", marginBottom: "8px" }}>
+                    Added as a single background-audio lane for preview and final export.
+                  </div>
+                  <div
+                    style={{
+                      height: "10px",
+                      borderRadius: "999px",
+                      background: "rgba(17, 24, 39, 0.12)",
+                      overflow: "hidden",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        background:
+                          extractedAudio.enabled === false
+                            ? "linear-gradient(90deg, #9ca3af 0%, #6b7280 100%)"
+                            : "linear-gradient(90deg, #f59e0b 0%, #ef4444 100%)",
+                      }}
+                    />
+                  </div>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "#111827",
+                    }}
+                  >
+                    Trim Start:{" "}
+                    {clampAudioControl(
+                      extractedAudio.trimStart,
+                      0,
+                      extractedAudio.duration || 36000,
+                      0
+                    ).toFixed(1)}
+                    s
+                    <input
+                      type="range"
+                      min={0}
+                      max={Math.max(0, extractedAudio.duration || 0)}
+                      step={0.1}
+                      value={clampAudioControl(
+                        extractedAudio.trimStart,
+                        0,
+                        extractedAudio.duration || 36000,
+                        0
+                      )}
+                      onChange={e =>
+                        setExtractedAudio(prev =>
+                          prev
+                            ? {
+                                ...prev,
+                                trimStart: clampAudioControl(
+                                  e.target.value,
+                                  0,
+                                  prev.duration || 36000,
+                                  0
+                                ),
+                              }
+                            : prev
+                        )
+                      }
+                      style={{ width: "100%", marginTop: "6px" }}
+                    />
+                  </label>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "#111827",
+                      marginTop: "10px",
+                    }}
+                  >
+                    Volume: {Math.round(clampAudioControl(extractedAudio.volume, 0, 1, 0.7) * 100)}%
+                    <input
+                      type="range"
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      value={clampAudioControl(extractedAudio.volume, 0, 1, 0.7)}
+                      onChange={e =>
+                        setExtractedAudio(prev =>
+                          prev
+                            ? {
+                                ...prev,
+                                volume: clampAudioControl(e.target.value, 0, 1, 0.7),
+                              }
+                            : prev
+                        )
+                      }
+                      style={{ width: "100%", marginTop: "6px" }}
+                    />
+                  </label>
+                </div>
+              ) : null}
+            </div>
           </div>
           {/* End of phone-preview-container */}
 
@@ -2318,6 +2744,7 @@ const ViralClipStudio = ({
                       autoCaptions,
                       smartCrop,
                       timelineSegments: exportTimeline,
+                      backgroundAudio: normalizeBackgroundAudioForExport(extractedAudio),
                     });
                   } catch (err) {
                     alert("Export failed: " + err.message);

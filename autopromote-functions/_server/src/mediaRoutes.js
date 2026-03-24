@@ -113,6 +113,28 @@ router.post("/process", async (req, res) => {
   }
 });
 
+router.post("/extract-audio", async (req, res) => {
+  const userId = req.user.uid;
+  const fileUrl = typeof req.body?.fileUrl === "string" ? req.body.fileUrl.trim() : "";
+  const sourceLabel = typeof req.body?.sourceLabel === "string" ? req.body.sourceLabel.trim() : "";
+
+  if (!fileUrl) {
+    return res.status(400).json({ message: "No file provided" });
+  }
+
+  try {
+    const job = await videoEditingService.startAudioExtractionJob(fileUrl, userId, { sourceLabel });
+    res.json({
+      success: true,
+      jobId: job.jobId,
+      message: "Audio extraction started",
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Audio extraction error:", error.message);
+    res.status(500).json({ message: "Audio extraction failed", details: error.message });
+  }
+});
+
 // Route: GET /api/media/status/:jobId
 // Check status of async video processing
 router.get("/status/:jobId", async (req, res) => {
@@ -137,6 +159,7 @@ router.get("/status/:jobId", async (req, res) => {
       progress: data.progress,
       result: data.result, // Node worker result
       output_url: data.output_url, // Python worker result (Async)
+      audio_url: data.audio_url,
       outputUrl: data.outputUrl, // Legacy Node worker result
       clipSuggestions: data.clipSuggestions, // Viral clips
       error: data.error,
