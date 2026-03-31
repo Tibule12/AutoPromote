@@ -48,7 +48,6 @@ const HOOK_MIN_SEGMENT_DURATION = 2;
 const HOOK_MAX_SEGMENT_DURATION = 5;
 
 const GENERIC_HOOK_TEXTS = new Set([
-  "",
   "WAIT FOR IT...",
   "WAIT FOR IT",
   "THIS CHANGES FAST",
@@ -1035,7 +1034,7 @@ const ViralClipStudio = ({
     );
     setActiveWatermarkRegionId(snapshot.activeWatermarkRegionId || null);
     setAddHook(!!snapshot.addHook);
-    setHookText(snapshot.hookText || DEFAULT_HOOK_TEXT);
+    setHookText(snapshot.hookText ?? DEFAULT_HOOK_TEXT);
     setHookTemplate(snapshot.hookTemplate || "blur_reveal");
     setHookIntroSeconds(Number(snapshot.hookIntroSeconds ?? 3));
     setHookStartTime(Number(snapshot.hookStartTime ?? 0.8));
@@ -1496,6 +1495,7 @@ const ViralClipStudio = ({
         ? { active: false }
         : {
             active: true,
+            mode: "manual-preview",
             timelineIndex: activeTimelineIndex,
             absoluteStart: absoluteHookStart,
             absoluteEnd: absoluteHookEnd,
@@ -3002,6 +3002,7 @@ const ViralClipStudio = ({
         const window = getTimelineClipWindow(clip);
         return {
           id: clip.id,
+          source_clip_id: clip.id,
           url: clipUrl,
           start_time: window.start,
           end_time: window.end,
@@ -3020,15 +3021,45 @@ const ViralClipStudio = ({
     const hookSourceEnd = Number(sourceWindow.start || 0) + hookEnd;
     const hookSegmentDuration = Math.max(0.1, hookSourceEnd - hookSourceStart);
 
+    const beforeHookDuration = Math.max(0, hookSourceStart - Number(activeSegment.start_time || 0));
+    const afterHookDuration = Math.max(0, Number(activeSegment.end_time || 0) - hookSourceEnd);
+    const leadingSegments = exportSegments.slice(0, activeTimelineIndex);
+    const trailingSegments = exportSegments.slice(activeTimelineIndex + 1);
+    const hookAwareSegments = [
+      ...leadingSegments,
+      ...(beforeHookDuration > 0.05
+        ? [
+            {
+              ...activeSegment,
+              id: `${activeSegment.id}-before-hook`,
+              end_time: hookSourceStart,
+              duration: beforeHookDuration,
+            },
+          ]
+        : []),
+      ...(afterHookDuration > 0.05
+        ? [
+            {
+              ...activeSegment,
+              id: `${activeSegment.id}-after-hook`,
+              start_time: hookSourceEnd,
+              duration: afterHookDuration,
+            },
+          ]
+        : []),
+      ...trailingSegments,
+    ];
+
     return [
       {
         id: `hook-intro-${activeSegment.id}`,
+        source_clip_id: activeSegment.source_clip_id || activeSegment.id,
         url: activeSegment.url,
         start_time: hookSourceStart,
         end_time: hookSourceEnd,
         duration: hookSegmentDuration,
       },
-      ...exportSegments,
+      ...hookAwareSegments,
     ];
   };
 
@@ -3036,24 +3067,36 @@ const ViralClipStudio = ({
     const offsetByClipId = new Map();
     let runningOffset = 0;
     exportTimeline.forEach(segment => {
-      offsetByClipId.set(segment.id, {
+      const sourceClipId = segment.source_clip_id || segment.id;
+      const nextMeta = {
         offset: runningOffset,
         start: segment.start_time || 0,
         end: segment.end_time || 0,
-      });
+      };
+      const existing = offsetByClipId.get(sourceClipId) || [];
+      existing.push(nextMeta);
+      offsetByClipId.set(sourceClipId, existing);
       runningOffset += Math.max(0, Number(segment.duration || 0));
     });
 
     return sourceOverlays.map(overlay => {
-      const clipMeta = offsetByClipId.get(overlay.clipId || "main") || {
-        offset: 0,
-        start: 0,
-        end: selectedClip ? selectedClip.end : 0,
-      };
       const previewStart =
         overlay.startTime !== undefined && overlay.startTime !== null
           ? overlay.startTime
           : overlay.start_time;
+      const clipMetas = offsetByClipId.get(overlay.clipId || "main") || [];
+      const clipMeta = clipMetas.find(meta => {
+        if (previewStart === undefined || previewStart === null) return false;
+        return (
+          Number(previewStart) >= Number(meta.start || 0) &&
+          Number(previewStart) < Number(meta.end || 0)
+        );
+      }) ||
+        clipMetas[0] || {
+          offset: 0,
+          start: 0,
+          end: selectedClip ? selectedClip.end : 0,
+        };
       const normalizedStart =
         previewStart !== undefined && previewStart !== null
           ? clipMeta.offset + Math.max(0, Number(previewStart) - Number(clipMeta.start || 0))
@@ -3537,7 +3580,11 @@ const ViralClipStudio = ({
       const absoluteHookEnd = startTime + hookEnd;
 
       if (absoluteHookEnd <= absoluteHookStart + 0.05) return;
-      if (hookPreviewSequenceRef.current.active) return;
+      if (
+        hookPreviewSequenceRef.current.active ||
+        hookPreviewSequenceRef.current.phase === "skip-duplicate"
+      )
+        return;
 
       const startingFromClipStart = Math.abs(video.currentTime - startTime) <= 0.12;
       const startingFromHookStart = Math.abs(video.currentTime - absoluteHookStart) <= 0.12;
@@ -3546,6 +3593,8 @@ const ViralClipStudio = ({
 
       hookPreviewSequenceRef.current = {
         active: true,
+        mode: "opening-sequence",
+        phase: "opening",
         timelineIndex: activeTimelineIndex,
         absoluteStart: absoluteHookStart,
         absoluteEnd: absoluteHookEnd,
@@ -3571,13 +3620,38 @@ const ViralClipStudio = ({
 
       if (hookPreviewSequence.active && hookPreviewSequence.timelineIndex === activeTimelineIndex) {
         if (video.currentTime >= hookPreviewSequence.absoluteEnd - 0.02) {
-          hookPreviewSequenceRef.current = { active: false };
+          const nextSequenceState =
+            hookPreviewSequence.mode === "opening-sequence"
+              ? {
+                  active: false,
+                  mode: "opening-sequence",
+                  phase: "skip-duplicate",
+                  timelineIndex: activeTimelineIndex,
+                  absoluteStart: absoluteHookStart,
+                  absoluteEnd: absoluteHookEnd,
+                }
+              : { active: false };
+          hookPreviewSequenceRef.current = nextSequenceState;
           video.currentTime = startTime;
           if (previewPlaybackIntentRef.current) {
             safePlayMediaElement(video);
           }
           return;
         }
+      }
+
+      if (
+        hookPreviewSequence.phase === "skip-duplicate" &&
+        hookPreviewSequence.timelineIndex === activeTimelineIndex &&
+        video.currentTime >= absoluteHookStart - 0.02 &&
+        video.currentTime < absoluteHookEnd - 0.02
+      ) {
+        hookPreviewSequenceRef.current = { active: false };
+        video.currentTime = absoluteHookEnd;
+        if (previewPlaybackIntentRef.current) {
+          safePlayMediaElement(video);
+        }
+        return;
       }
 
       if (addHook && hookPreviewLoop && absoluteHookEnd > absoluteHookStart + 0.05) {
@@ -4596,7 +4670,7 @@ const ViralClipStudio = ({
                     />
 
                     <div className="overlays-layer">
-                      {hookFocusMode || (addHook && hookFreezeFrame) ? (
+                      {hookFocusMode ? (
                         <div
                           className={`hook-focus-target ${hookFocusMode ? "active" : ""}`}
                           data-testid="hook-focus-target"
@@ -6555,10 +6629,11 @@ const ViralClipStudio = ({
                     <div className="hook-segment-card">
                       <div className="hook-segment-header">
                         <div>
-                          <strong>Hook Segment Selection</strong>
+                          <strong>Hook Source Span</strong>
                           <p>
-                            Choose the exact source slice to open with. The selected range plays
-                            first, then the clip restarts from 0.
+                            This is the same opening hook, not a second one. It controls how much
+                            source footage the opening uses before the clip continues without
+                            replaying that hook section again.
                           </p>
                         </div>
                         <button

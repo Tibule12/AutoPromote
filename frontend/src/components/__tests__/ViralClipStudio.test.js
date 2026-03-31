@@ -411,6 +411,33 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByRole("button", { name: /Freeze \+ Text/i })).toHaveClass("active");
   });
 
+  test("allows clearing hook text completely", async () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    ensureHookControlsOpen();
+
+    const hookTextArea = screen.getByPlaceholderText(/Type a curiosity hook/i);
+    expect(hookTextArea.value).not.toBe("");
+
+    await act(async () => {
+      fireEvent.change(hookTextArea, { target: { value: "" } });
+    });
+
+    await waitFor(() => {
+      expect(hookTextArea.value).toBe("");
+    });
+  });
+
   test("captures preview focus targeting and exports cover frame metadata", async () => {
     const onSave = jest.fn();
     const { container } = render(
@@ -455,9 +482,12 @@ describe("ViralClipStudio timeline sequencing", () => {
       fireEvent.click(screen.getByRole("button", { name: /Pick Focus/i }));
     });
 
+    expect(screen.getByTestId("hook-focus-target")).toBeInTheDocument();
+
     fireEvent.click(previewFrame, { clientX: 150, clientY: 60 });
 
     expect(screen.getByText(/Focus target 75% x 25%/i)).toBeInTheDocument();
+    expect(screen.queryByTestId("hook-focus-target")).not.toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Choose Hook/i }));
@@ -860,7 +890,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
-  test("prepends the selected hook segment to the export timeline", async () => {
+  test("exports the selected hook once and removes the duplicate span from the main clip", async () => {
     const onSave = jest.fn();
     const { container } = render(
       <ViralClipStudio
@@ -914,7 +944,18 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
     expect(saveOptions.timelineSegments[1]).toEqual(
       expect.objectContaining({
-        id: "main",
+        id: "main-before-hook",
+        start_time: 0,
+        end_time: expect.closeTo(1.2, 1),
+        duration: expect.closeTo(1.2, 1),
+      })
+    );
+    expect(saveOptions.timelineSegments[2]).toEqual(
+      expect.objectContaining({
+        id: "main-after-hook",
+        start_time: expect.closeTo(3.4, 1),
+        end_time: 10,
+        duration: expect.closeTo(6.6, 1),
       })
     );
   });
@@ -1014,6 +1055,13 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
 
     expect(previewVideo.currentTime).toBeCloseTo(0, 1);
+
+    await act(async () => {
+      previewVideo.currentTime = 1.21;
+      previewVideo.dispatchEvent(new Event("timeupdate"));
+    });
+
+    expect(previewVideo.currentTime).toBeCloseTo(3.4, 1);
     expect(previewVideo.play).toHaveBeenCalled();
   });
 
