@@ -3647,6 +3647,20 @@ class BackgroundAudioTrack(BaseModel):
     ducking_strength: float = 0.45
     enabled: bool = True
 
+class HookFocusPoint(BaseModel):
+    x: float = 50.0
+    y: float = 42.0
+
+class CoverFrameRequest(BaseModel):
+    timelineTime: float = 0.0
+    sourceTime: Optional[float] = None
+    clipId: Optional[Union[str, int]] = None
+    focusPoint: Optional[HookFocusPoint] = None
+    template: Optional[str] = None
+    freezeFrame: bool = False
+    strategy: Optional[str] = None
+    purpose: Optional[str] = None
+
 class RenderViralRequest(BaseModel):
     video_url: str
     start_time: float
@@ -3664,6 +3678,9 @@ class RenderViralRequest(BaseModel):
     hook_freeze_frame: bool = False
     hook_zoom_scale: float = 1.08
     hook_text_animation: str = "slide_up"
+    hook_focus_point: Optional[HookFocusPoint] = None
+    cover_frame: Optional[CoverFrameRequest] = None
+    thumbnail_frame: Optional[CoverFrameRequest] = None
     timeline_segments: Optional[List[ViralTimelineSegment]] = None
     background_audio: Optional[BackgroundAudioTrack] = None
     job_id: Optional[str] = None
@@ -3693,6 +3710,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_input.mp4")
     trimmed_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_trimmed.mp4")
     output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_viral.mp4")
+    thumbnail_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_thumbnail.jpg")
     downloaded_background_audio_path = None
 
     # Initial async update
@@ -4228,12 +4246,74 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         if os.path.exists(output_path):
             public_url = upload_file_to_firebase(output_path)
+            cover_frame_request = request.thumbnail_frame or request.cover_frame
+            thumbnail_url = None
+            cover_frame_result = None
+            thumbnail_frame_result = None
+
+            if cover_frame_request:
+                requested_timeline_time = clamp_float(
+                    float(cover_frame_request.timelineTime or 0.0),
+                    0.0,
+                    max(0.0, float(request.end_time or 0.0) - float(request.start_time or 0.0)),
+                )
+                thumbnail_seek_time = round(max(0.0, requested_timeline_time), 3)
+                try:
+                    await run_subprocess_async(
+                        [
+                            "ffmpeg",
+                            "-ss",
+                            str(thumbnail_seek_time),
+                            "-i",
+                            output_path,
+                            "-frames:v",
+                            "1",
+                            "-q:v",
+                            "2",
+                            "-y",
+                            thumbnail_output_path,
+                        ],
+                        check=True,
+                    )
+                    if os.path.exists(thumbnail_output_path):
+                        thumbnail_destination = f"processed/thumbnails/{job_id}_cover.jpg"
+                        thumbnail_url = upload_file_to_firebase(
+                            thumbnail_output_path,
+                            destination_path=thumbnail_destination,
+                        )
+                except Exception as thumbnail_error:
+                    logger.error(f"Thumbnail extraction failed: {thumbnail_error}")
+
+                cover_frame_result = {
+                    "timeline_time": requested_timeline_time,
+                    "source_time": float(cover_frame_request.sourceTime or 0.0),
+                    "clip_id": str(cover_frame_request.clipId) if cover_frame_request.clipId is not None else None,
+                    "focus_point": (
+                        {
+                            "x": clamp_float(float(cover_frame_request.focusPoint.x), 0.0, 100.0),
+                            "y": clamp_float(float(cover_frame_request.focusPoint.y), 0.0, 100.0),
+                        }
+                        if cover_frame_request.focusPoint
+                        else None
+                    ),
+                    "template": cover_frame_request.template,
+                    "freeze_frame": bool(cover_frame_request.freezeFrame),
+                    "strategy": cover_frame_request.strategy,
+                    "thumbnail_url": thumbnail_url,
+                }
+                thumbnail_frame_result = {
+                    **cover_frame_result,
+                    "purpose": cover_frame_request.purpose or "thumbnail",
+                }
             
             result_data = {
                 "status": "completed", 
                 "job_id": job_id, 
                 "output_path": output_path,
-                "output_url": public_url
+                "output_url": public_url,
+                "thumbnail_url": thumbnail_url,
+                "cover_frame": cover_frame_result,
+                "thumbnail_frame": thumbnail_frame_result,
             }
             
             if request.async_mode:
@@ -4259,6 +4339,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         if os.path.exists(input_path): os.remove(input_path)
         if downloaded_background_audio_path and os.path.exists(downloaded_background_audio_path):
             os.remove(downloaded_background_audio_path)
+        if os.path.exists(thumbnail_output_path):
+            os.remove(thumbnail_output_path)
 
 @app.post("/transcribe")
 async def transcribe_video(request: Dict[str, str]):

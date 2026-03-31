@@ -240,6 +240,282 @@ describe("ViralClipStudio timeline sequencing", () => {
     }
   }
 
+  test("does not auto-enable hook controls on initial render", () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByLabelText(/Add Viral Hook/i)).not.toBeChecked();
+    expect(screen.queryByRole("button", { name: /Select Hook Segment/i })).not.toBeInTheDocument();
+  });
+
+  test("dragging the selected hook range does not toggle selection mode", () => {
+    const { container } = render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    ensureHookControlsOpen();
+
+    const selectionButton = screen.getByRole("button", { name: /Select Hook Segment/i });
+    expect(selectionButton).toBeInTheDocument();
+
+    const selectionRange = container.querySelector(".hook-segment-selection");
+    expect(selectionRange).not.toBeNull();
+
+    fireEvent.mouseDown(selectionRange, { clientX: 120 });
+
+    expect(screen.getByRole("button", { name: /Select Hook Segment/i })).toBeInTheDocument();
+  });
+
+  test("allows choosing a hook point from the timeline and setting it as the hook", async () => {
+    const onSave = jest.fn();
+    const { container } = render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    ensureHookControlsOpen();
+
+    const previewVideo = container.querySelector(".studio-video");
+    expect(previewVideo).not.toBeNull();
+
+    Object.defineProperty(previewVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+    Object.defineProperty(previewVideo, "duration", {
+      configurable: true,
+      writable: true,
+      value: 10,
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Choose Hook/i }));
+    });
+
+    const hookTrack = container.querySelector(".hook-segment-track");
+    expect(hookTrack).not.toBeNull();
+    hookTrack.getBoundingClientRect = () => ({
+      left: 0,
+      width: 200,
+      top: 0,
+      bottom: 56,
+      right: 200,
+      height: 56,
+    });
+
+    await act(async () => {
+      fireEvent.mouseDown(hookTrack, { clientX: 104 });
+    });
+
+    expect(previewVideo.currentTime).toBeCloseTo(5.2, 1);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Set as Hook/i }));
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector(".hook-segment-readout")?.textContent).toContain("0:5.20");
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    });
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalled();
+    });
+
+    const saveOptions = onSave.mock.calls[0][2];
+    expect(saveOptions.hookSourceStartTime).toBeCloseTo(5.2, 1);
+    expect(saveOptions.hookSourceEndTime).toBeCloseTo(8.2, 1);
+  });
+
+  test("setting a hook point freezes the chosen opening moment", async () => {
+    const { container } = render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    ensureHookControlsOpen();
+
+    const previewVideo = container.querySelector(".studio-video");
+    expect(previewVideo).not.toBeNull();
+
+    Object.defineProperty(previewVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+    Object.defineProperty(previewVideo, "duration", {
+      configurable: true,
+      writable: true,
+      value: 10,
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Choose Hook/i }));
+    });
+
+    const hookTrack = container.querySelector(".hook-segment-track");
+    expect(hookTrack).not.toBeNull();
+    hookTrack.getBoundingClientRect = () => ({
+      left: 0,
+      width: 200,
+      top: 0,
+      bottom: 56,
+      right: 200,
+      height: 56,
+    });
+
+    await act(async () => {
+      fireEvent.mouseDown(hookTrack, { clientX: 104 });
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Set as Hook/i }));
+    });
+
+    expect(screen.getByLabelText(/Freeze opening frame/i)).toBeChecked();
+    expect(screen.getByRole("button", { name: /Freeze \+ Text/i })).toHaveClass("active");
+  });
+
+  test("captures preview focus targeting and exports cover frame metadata", async () => {
+    const onSave = jest.fn();
+    const { container } = render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    ensureHookControlsOpen();
+
+    const previewVideo = container.querySelector(".studio-video");
+    expect(previewVideo).not.toBeNull();
+
+    Object.defineProperty(previewVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+    Object.defineProperty(previewVideo, "duration", {
+      configurable: true,
+      writable: true,
+      value: 10,
+    });
+
+    const previewFrame = screen.getByTestId("hook-preview-frame");
+    previewFrame.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 200,
+      height: 240,
+      right: 200,
+      bottom: 240,
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Pick Focus/i }));
+    });
+
+    fireEvent.click(previewFrame, { clientX: 150, clientY: 60 });
+
+    expect(screen.getByText(/Focus target 75% x 25%/i)).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Choose Hook/i }));
+    });
+
+    const hookTrack = container.querySelector(".hook-segment-track");
+    expect(hookTrack).not.toBeNull();
+    hookTrack.getBoundingClientRect = () => ({
+      left: 0,
+      width: 200,
+      top: 0,
+      bottom: 56,
+      right: 200,
+      height: 56,
+    });
+
+    await act(async () => {
+      fireEvent.mouseDown(hookTrack, { clientX: 104 });
+    });
+
+    previewVideo.currentTime = 5.2;
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Set as Hook/i }));
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    });
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalled();
+    });
+
+    const saveOptions = onSave.mock.calls[0][2];
+    expect(saveOptions.hookFocusPoint?.x).toBeCloseTo(75, 0);
+    expect(saveOptions.hookFocusPoint?.y).toBeCloseTo(25, 0);
+    expect(saveOptions.coverFrame).toEqual(
+      expect.objectContaining({
+        sourceTime: expect.closeTo(5.2, 1),
+        freezeFrame: true,
+        template: "freeze_text",
+        focusPoint: expect.objectContaining({ x: 75, y: 25 }),
+      })
+    );
+    expect(saveOptions.thumbnailFrame).toEqual(
+      expect.objectContaining({
+        purpose: "thumbnail",
+        sourceTime: expect.closeTo(5.2, 1),
+      })
+    );
+    expect(saveOptions.hook).toEqual(
+      expect.objectContaining({
+        focusPoint: expect.objectContaining({ x: 75, y: 25 }),
+      })
+    );
+  });
+
   async function appendTimelineClip(input, createdVideos, fileName, fileContents) {
     const initialCount = createdVideos.length;
     fireEvent.change(input, {
@@ -663,6 +939,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     const hookTextArea = screen.getByPlaceholderText(/Type a curiosity hook/i);
     expect(hookTextArea.value).toBe("WATCH WHAT HAPPENS NEXT");
     fireEvent.change(hookTextArea, { target: { value: "THIS CHANGES FAST" } });
+    const freezeToggle = screen.getByLabelText(/Freeze opening frame/i);
+    fireEvent.click(freezeToggle);
+    expect(freezeToggle).toBeChecked();
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Suggest Hook/i }));
@@ -681,10 +960,61 @@ describe("ViralClipStudio timeline sequencing", () => {
       fireEvent.click(screen.getByRole("button", { name: /Apply suggested segment/i }));
     });
 
+    expect(screen.getByLabelText(/Freeze opening frame/i)).toBeChecked();
     expect(hookTextArea.value).not.toBe("THIS CHANGES FAST");
     expect(container.querySelector(".hook-segment-readout")?.textContent).not.toContain(
       "0:00.80 to 0:03.80"
     );
+  });
+
+  test("selected hook segment plays as the opening during normal playback", async () => {
+    const { container } = render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    ensureHookControlsOpen();
+
+    const hookRangeInputs = container.querySelectorAll(
+      ".hook-segment-scrubbers input[type='range']"
+    );
+    fireEvent.change(hookRangeInputs[0], { target: { value: "1.2" } });
+    fireEvent.change(hookRangeInputs[1], { target: { value: "3.4" } });
+
+    const previewVideo = container.querySelector(".studio-video");
+    expect(previewVideo).not.toBeNull();
+
+    Object.defineProperty(previewVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+    Object.defineProperty(previewVideo, "duration", {
+      configurable: true,
+      writable: true,
+      value: 10,
+    });
+
+    await act(async () => {
+      previewVideo.dispatchEvent(new Event("play"));
+    });
+
+    expect(previewVideo.currentTime).toBeCloseTo(1.2, 1);
+
+    await act(async () => {
+      previewVideo.currentTime = 3.41;
+      previewVideo.dispatchEvent(new Event("timeupdate"));
+    });
+
+    expect(previewVideo.currentTime).toBeCloseTo(0, 1);
+    expect(previewVideo.play).toHaveBeenCalled();
   });
 
   test("preview hook once plays the selected range first then jumps back to clip start", async () => {
@@ -708,7 +1038,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(hookRangeInputs).toHaveLength(2);
 
     fireEvent.change(hookRangeInputs[0], { target: { value: "1.2" } });
-    fireEvent.change(hookRangeInputs[1], { target: { value: "2.6" } });
+    fireEvent.change(hookRangeInputs[1], { target: { value: "3.4" } });
 
     const previewVideo = container.querySelector(".studio-video");
     expect(previewVideo).not.toBeNull();
@@ -731,7 +1061,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(previewVideo.currentTime).toBeCloseTo(1.2, 1);
 
     await act(async () => {
-      previewVideo.currentTime = 2.61;
+      previewVideo.currentTime = 3.41;
       previewVideo.dispatchEvent(new Event("timeupdate"));
     });
 

@@ -308,6 +308,9 @@ class VideoEditingService {
             viralData.auto_captions !== undefined ? !!viralData.auto_captions : options.captions,
           timeline_segments: timelineSegments,
           background_audio: viralData.background_audio || null,
+          hook_focus_point: viralData.hook_focus_point || null,
+          cover_frame: viralData.cover_frame || null,
+          thumbnail_frame: viralData.thumbnail_frame || viralData.cover_frame || null,
           overlays: (viralData.overlays || []).map(o => ({
             ...o,
             start_time:
@@ -349,6 +352,9 @@ class VideoEditingService {
         return {
           success: true,
           url: result.output_url,
+          thumbnailUrl: result.thumbnail_url || result.thumbnailUrl || null,
+          coverFrame: result.cover_frame || result.coverFrame || null,
+          thumbnailFrame: result.thumbnail_frame || result.thumbnailFrame || null,
           duration: result.duration || 0,
           message: "Processing completed (Remote Worker)",
         };
