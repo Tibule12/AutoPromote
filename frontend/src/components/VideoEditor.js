@@ -38,7 +38,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   ];
 
   const [processedFile, setProcessedFile] = useState(null);
-  const [clipSuggestions, setClipSuggestions] = useState(null); // Store detected clips
+  const [clipSuggestions, setClipSuggestions] = useState(null); // Store detected clips or manual studio entry
 
   const getDownloadFileName = () => {
     const candidateName = processedFile?.name || file?.name || "edited-video.mp4";
@@ -686,6 +686,23 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     }
   };
 
+  const handleLaunchStudio = () => {
+    const previewDuration = Number(videoRef.current?.duration || 0);
+    const fallbackDuration =
+      Number.isFinite(previewDuration) && previewDuration > 0 ? previewDuration : 30;
+
+    setStatusMessage("");
+    setClipSuggestions([
+      {
+        id: "full-video",
+        start: 0,
+        end: fallbackDuration,
+        duration: fallbackDuration,
+        reason: "Full source video loaded for manual editing",
+      },
+    ]);
+  };
+
   const handleSave = () => {
     // Return the processed file (or original if failed/skipped) to the parent form
     if (processedFile) {
@@ -764,6 +781,68 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           fileUrl: finalVideoUrl,
           options: {
             ...options,
+            ...(extraOptions.addMusic !== undefined ? { addMusic: !!extraOptions.addMusic } : {}),
+            ...(extraOptions.musicFile !== undefined ? { musicFile: extraOptions.musicFile } : {}),
+            ...(extraOptions.isSearch !== undefined ? { isSearch: !!extraOptions.isSearch } : {}),
+            ...(extraOptions.safeSearch !== undefined
+              ? { safeSearch: !!extraOptions.safeSearch }
+              : {}),
+            ...(extraOptions.musicVolume !== undefined
+              ? { musicVolume: Number(extraOptions.musicVolume) }
+              : {}),
+            ...(extraOptions.musicDucking !== undefined
+              ? { musicDucking: !!extraOptions.musicDucking }
+              : {}),
+            ...(extraOptions.musicDuckingStrength !== undefined
+              ? { musicDuckingStrength: Number(extraOptions.musicDuckingStrength) }
+              : {}),
+            ...(extraOptions.muteAudio !== undefined
+              ? { muteAudio: !!extraOptions.muteAudio }
+              : {}),
+            ...(extraOptions.silenceRemoval !== undefined
+              ? { silenceRemoval: !!extraOptions.silenceRemoval }
+              : {}),
+            ...(extraOptions.silenceThreshold !== undefined
+              ? { silenceThreshold: Number(extraOptions.silenceThreshold) }
+              : {}),
+            ...(extraOptions.minSilenceDuration !== undefined
+              ? { minSilenceDuration: Number(extraOptions.minSilenceDuration) }
+              : {}),
+            ...(extraOptions.removeWatermark !== undefined
+              ? { removeWatermark: !!extraOptions.removeWatermark }
+              : {}),
+            ...(extraOptions.watermarkMode !== undefined
+              ? { watermarkMode: extraOptions.watermarkMode }
+              : {}),
+            ...(extraOptions.manualWatermarkRegions !== undefined
+              ? { manualWatermarkRegions: extraOptions.manualWatermarkRegions }
+              : {}),
+            ...(extraOptions.addHook !== undefined ? { addHook: !!extraOptions.addHook } : {}),
+            ...(extraOptions.hookText !== undefined ? { hookText: extraOptions.hookText } : {}),
+            ...(extraOptions.hookIntroSeconds !== undefined
+              ? { hookIntroSeconds: Number(extraOptions.hookIntroSeconds) }
+              : {}),
+            ...(extraOptions.hookTemplate !== undefined
+              ? { hookTemplate: extraOptions.hookTemplate }
+              : {}),
+            ...(extraOptions.hookStartTime !== undefined
+              ? { hookStartTime: Number(extraOptions.hookStartTime) }
+              : {}),
+            ...(extraOptions.hookBlurBackground !== undefined
+              ? { hookBlurBackground: !!extraOptions.hookBlurBackground }
+              : {}),
+            ...(extraOptions.hookDarkOverlay !== undefined
+              ? { hookDarkOverlay: !!extraOptions.hookDarkOverlay }
+              : {}),
+            ...(extraOptions.hookFreezeFrame !== undefined
+              ? { hookFreezeFrame: !!extraOptions.hookFreezeFrame }
+              : {}),
+            ...(extraOptions.hookZoomScale !== undefined
+              ? { hookZoomScale: Number(extraOptions.hookZoomScale) }
+              : {}),
+            ...(extraOptions.hookTextAnimation !== undefined
+              ? { hookTextAnimation: extraOptions.hookTextAnimation }
+              : {}),
             renderViral: true,
             analyzeClips: false,
             viralData: payload,
@@ -886,7 +965,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   return (
     <div className="video-editor-container">
       <div className="video-editor-header">
-        <h2>✨ Smart AI Video Editor (Phase 1)</h2>
+        <h2>Video Editing Workspace</h2>
         <button className="close-btn" onClick={onCancel}>
           &times;
         </button>
@@ -1068,7 +1147,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         </div>
       ) : null}
 
-      <div className="editor-layout">
+      <div className="editor-layout studio-first">
         <div className="video-preview">
           {videoSrc ? (
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -1102,514 +1181,23 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         </div>
 
         <div className="ai-controls">
-          <h3>AI Enhancements</h3>
-
-          <div className="options-list">
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <label className="ai-option">
-                <input
-                  type="checkbox"
-                  checked={options.muteAudio}
-                  onChange={() => toggleOption("muteAudio")}
-                />
-                <div className="option-label">
-                  <div className="option-title">🔇 Mute Audio</div>
-                  <div className="option-desc">Remove all original sound</div>
-                </div>
-              </label>
-
-              <label className="ai-option">
-                <input
-                  type="checkbox"
-                  checked={options.addMusic}
-                  onChange={() => toggleOption("addMusic")}
-                />
-                <div className="option-label">
-                  <div className="option-title">🎵 Add Background Music</div>
-                  <div className="option-desc">Add music track (select genre or search)</div>
-                </div>
-              </label>
-
-              {options.addMusic && (
-                <div
-                  className="music-selection"
-                  style={{
-                    marginTop: "10px",
-                    marginLeft: "34px",
-                    padding: "10px",
-                    background: "#2a2a2a",
-                    borderRadius: "6px",
-                  }}
-                >
-                  <div style={{ display: "flex", gap: "10px", marginBottom: "8px" }}>
-                    <label
-                      style={{
-                        fontSize: "13px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        name="musicType"
-                        checked={!options.isSearch}
-                        onChange={() =>
-                          setOptions({
-                            ...options,
-                            isSearch: false,
-                            musicFile: "upbeat_pop.mp3",
-                          })
-                        }
-                        style={{ marginRight: "5px" }}
-                      />
-                      Preset
-                    </label>
-                    <label
-                      style={{
-                        fontSize: "13px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        name="musicType"
-                        checked={options.isSearch}
-                        onChange={() => setOptions({ ...options, isSearch: true, musicFile: "" })}
-                        style={{ marginRight: "5px" }}
-                      />
-                      Search (YouTube)
-                    </label>
-                  </div>
-
-                  {!options.isSearch ? (
-                    <select
-                      value={options.musicFile}
-                      onChange={e => setOptions({ ...options, musicFile: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "6px",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                      }}
-                    >
-                      <option value="upbeat_pop.mp3">Upbeat Pop</option>
-                      <option value="lofi_chill.mp3">Lofi Chill</option>
-                      <option value="cinematic.mp3">Cinematic</option>
-                      <option value="corporate.mp3">Corporate</option>
-                    </select>
-                  ) : (
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <input
-                        type="text"
-                        placeholder="Type song or genre (e.g. 'Amapiano Beats')"
-                        value={options.musicFile}
-                        onChange={e => setOptions({ ...options, musicFile: e.target.value })}
-                        style={{
-                          width: "100%",
-                          padding: "6px",
-                          borderRadius: "4px",
-                          border: "1px solid #ccc",
-                        }}
-                      />
-
-                      <label
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          marginTop: "6px",
-                          fontSize: "12px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={options.safeSearch}
-                          onChange={e => setOptions({ ...options, safeSearch: e.target.checked })}
-                          style={{ marginRight: "6px" }}
-                        />
-                        Enable Copyright Protection (Royalty-Free Only)
-                      </label>
-
-                      {options.safeSearch ? (
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            color: "#4caf50",
-                            marginLeft: "20px",
-                            fontStyle: "italic",
-                          }}
-                        >
-                          ✅ Safe from strikes. Might not find famous songs.
-                        </span>
-                      ) : (
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            color: "#ff5722",
-                            marginLeft: "20px",
-                            fontStyle: "italic",
-                          }}
-                        >
-                          ⚠️ Risks account suspension if used on YouTube/TikTok.
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  <div style={{ marginTop: "12px", display: "grid", gap: "10px" }}>
-                    <label
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "4px",
-                        fontSize: "12px",
-                      }}
-                    >
-                      <span>
-                        Music Volume: {Math.round(Number(options.musicVolume || 0) * 100)}%
-                      </span>
-                      <input
-                        type="range"
-                        min="0.05"
-                        max="0.6"
-                        step="0.01"
-                        value={options.musicVolume}
-                        onChange={e =>
-                          setOptions({ ...options, musicVolume: Number(e.target.value) })
-                        }
-                      />
-                    </label>
-
-                    {!options.muteAudio && (
-                      <>
-                        <label
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            fontSize: "12px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={options.musicDucking}
-                            onChange={e =>
-                              setOptions({ ...options, musicDucking: e.target.checked })
-                            }
-                            style={{ marginRight: "6px" }}
-                          />
-                          Auto-lower music under speech
-                        </label>
-
-                        {options.musicDucking && (
-                          <label
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "4px",
-                              fontSize: "12px",
-                            }}
-                          >
-                            <span>
-                              Ducking Strength:{" "}
-                              {Math.round(Number(options.musicDuckingStrength || 0) * 100)}%
-                            </span>
-                            <input
-                              type="range"
-                              min="0.15"
-                              max="0.85"
-                              step="0.05"
-                              value={options.musicDuckingStrength}
-                              onChange={e =>
-                                setOptions({
-                                  ...options,
-                                  musicDuckingStrength: Number(e.target.value),
-                                })
-                              }
-                            />
-                          </label>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <label className="ai-option">
-                <input
-                  type="checkbox"
-                  checked={options.smartCrop}
-                  onChange={() => toggleOption("smartCrop")}
-                />
-                <div className="option-label">
-                  <div className="option-title">📱 Smart Crop (9:16)</div>
-                  <div className="option-desc">Transform horizontal video to vertical</div>
-                </div>
-              </label>
-
-              {options.smartCrop && (
-                <div className="sub-options" style={{ paddingLeft: "34px", paddingBottom: "10px" }}>
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      fontSize: "13px",
-                      marginBottom: "8px",
-                      cursor: "pointer",
-                      color: options.cropStyle === "blur" ? "#fff" : "#aaa",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name="cropStyle"
-                      value="blur"
-                      checked={options.cropStyle === "blur"}
-                      onChange={() => setOptions(prev => ({ ...prev, cropStyle: "blur" }))}
-                      style={{ marginRight: "8px", accentColor: "#7c4dff" }}
-                    />
-                    <div>
-                      <strong>Safe Fit (Blur Background)</strong>
-                      <div style={{ fontSize: "11px", color: "#888" }}>
-                        Essential for UI/Screen Recordings
-                      </div>
-                    </div>
-                  </label>
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      fontSize: "13px",
-                      cursor: "pointer",
-                      color: options.cropStyle === "zoom" ? "#fff" : "#aaa",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name="cropStyle"
-                      value="zoom"
-                      checked={options.cropStyle === "zoom"}
-                      onChange={() => {
-                        console.log("User selected ZOOM style");
-                        setOptions(prev => ({ ...prev, cropStyle: "zoom" }));
-                      }}
-                      style={{ marginRight: "8px", accentColor: "#7c4dff" }}
-                    />
-                    <div>
-                      <strong>Full Zoom (Center Copy)</strong>
-                      <div style={{ fontSize: "11px", color: "#888" }}>
-                        Best for Talking Heads/Vlogs
-                      </div>
-                    </div>
-                  </label>
-                </div>
-              )}
+          <div className="studio-launch-card">
+            <div className="studio-launch-eyebrow">Primary workflow</div>
+            <h3>Open Viral Clip Studio</h3>
+            <p>
+              This screen is now only a launch surface. Viral Clip Studio opens immediately with
+              your current video loaded so you can edit timing, overlays, captions, donor audio, and
+              export from one workspace.
+            </p>
+            <div className="studio-launch-actions">
+              <button
+                className="process-btn studio-launch-btn"
+                onClick={handleLaunchStudio}
+                disabled={processing}
+              >
+                {processing ? "Launching Studio..." : "🔥 Launch Viral Clip Studio"}
+              </button>
             </div>
-
-            <label className="ai-option">
-              <input
-                type="checkbox"
-                checked={options.silenceRemoval}
-                onChange={() => toggleOption("silenceRemoval")}
-              />
-              <div className="option-label">
-                <div className="option-title">✂️ Remove Silence</div>
-                <div className="option-desc">Cuts dead air & pauses automatically</div>
-              </div>
-            </label>
-
-            {options.silenceRemoval && (
-              <div
-                className="sub-options"
-                style={{
-                  marginLeft: "34px",
-                  marginBottom: "10px",
-                  padding: "10px",
-                  background: "#202020",
-                  borderRadius: "6px",
-                  display: "grid",
-                  gap: "10px",
-                }}
-              >
-                <label
-                  style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px" }}
-                >
-                  <span>Silence Threshold: {options.silenceThreshold} dB</span>
-                  <input
-                    type="range"
-                    min="-55"
-                    max="-20"
-                    step="1"
-                    value={options.silenceThreshold}
-                    onChange={e =>
-                      setOptions({ ...options, silenceThreshold: Number(e.target.value) })
-                    }
-                  />
-                  <span style={{ fontSize: "11px", color: "#9c9c9c" }}>
-                    Lower values keep more quiet speech. Higher values cut more aggressively.
-                  </span>
-                </label>
-
-                <label
-                  style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px" }}
-                >
-                  <span>
-                    Minimum Pause Length: {Number(options.minSilenceDuration).toFixed(2)}s
-                  </span>
-                  <input
-                    type="range"
-                    min="0.25"
-                    max="2.5"
-                    step="0.05"
-                    value={options.minSilenceDuration}
-                    onChange={e =>
-                      setOptions({ ...options, minSilenceDuration: Number(e.target.value) })
-                    }
-                  />
-                  <span style={{ fontSize: "11px", color: "#9c9c9c" }}>
-                    Shorter values create tighter jump cuts. Longer values preserve natural pauses.
-                  </span>
-                </label>
-              </div>
-            )}
-
-            <label className="ai-option">
-              <input
-                type="checkbox"
-                checked={options.captions}
-                onChange={() => toggleOption("captions")}
-              />
-              <div className="option-label">
-                <div className="option-title">📝 AI Captions & Subtitles</div>
-                <div className="option-desc">
-                  Auto-detects language (English, Zulu, Xhosa, Afrikaans, etc.)
-                </div>
-              </div>
-            </label>
-
-            <label className="ai-option">
-              <input
-                type="checkbox"
-                checked={options.removeWatermark}
-                onChange={() => toggleOption("removeWatermark")}
-              />
-              <div className="option-label">
-                <div className="option-title">🚫 Remove Platform Watermarks</div>
-                <div className="option-desc">Auto-erasers logos (TikTok, Reels, Shorts, etc.)</div>
-              </div>
-            </label>
-
-            {options.removeWatermark && (
-              <div style={{ marginLeft: "34px", marginBottom: "10px" }}>
-                <select
-                  value={options.watermarkMode}
-                  onChange={e => setOptions({ ...options, watermarkMode: e.target.value })}
-                  style={{
-                    width: "100%",
-                    padding: "6px",
-                    borderRadius: "4px",
-                    border: "1px solid #444",
-                    background: "#222",
-                    color: "#fff",
-                    fontSize: "12px",
-                  }}
-                >
-                  <option value="adaptive">Adaptive Tracking (Recommended)</option>
-                  <option value="corners">Static Opposite Corners</option>
-                  <option value="top_right">Top Right Only</option>
-                  <option value="bottom_left">Bottom Left Only</option>
-                  <option value="all">Aggressive (All 4 Corners)</option>
-                </select>
-              </div>
-            )}
-
-            <label className="ai-option">
-              <input
-                type="checkbox"
-                checked={options.addHook}
-                onChange={() =>
-                  setOptions(prev => ({ ...prev, addHook: !prev.addHook, analyzeClips: false }))
-                }
-              />
-              <div className="option-label">
-                <div className="option-title">🎣 Add Viral Hook (Split-Second)</div>
-                <div className="option-desc">Stops the scroll with an explosive intro text</div>
-              </div>
-            </label>
-
-            {options.addHook && (
-              <div
-                style={{
-                  marginLeft: "36px",
-                  marginTop: "-8px",
-                  marginBottom: "12px",
-                  background: "#222",
-                  padding: "8px",
-                  borderRadius: "0 0 8px 8px",
-                }}
-              >
-                <input
-                  type="text"
-                  value={options.hookText}
-                  onChange={e => setOptions(prev => ({ ...prev, hookText: e.target.value }))}
-                  placeholder="e.g. 3 Secrets They Don't Want You To Know..."
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "4px",
-                    border: "1px solid #444",
-                    background: "#000",
-                    color: "#fff",
-                  }}
-                />
-              </div>
-            )}
-
-            <label
-              className="ai-option viral-studio-option"
-              style={{
-                background: options.analyzeClips
-                  ? "linear-gradient(45deg, #FF512F, #DD2476)"
-                  : "#2a2a2a",
-                border: options.analyzeClips ? "2px solid #fff" : "1px solid #444",
-                transform: options.analyzeClips ? "scale(1.02)" : "scale(1)",
-                boxShadow: options.analyzeClips ? "0 4px 15px rgba(221, 36, 118, 0.4)" : "none",
-                transition: "all 0.3s ease",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={options.analyzeClips}
-                onChange={() => {
-                  // Exclusive Logic: Turn OFF all other AI options if enabled
-                  if (!options.analyzeClips) {
-                    setOptions(prev => ({
-                      ...prev,
-                      analyzeClips: true,
-                      smartCrop: false,
-                      silenceRemoval: false,
-                      captions: false,
-                      muteAudio: false,
-                      addMusic: false,
-                      addHook: false,
-                      musicFile: "",
-                    }));
-                  } else {
-                    toggleOption("analyzeClips");
-                  }
-                }}
-              />
-              <div className="option-label">
-                <div className="option-title" style={{ fontWeight: "800", fontSize: "1.1em" }}>
-                  🔥 Viral Clip Studio
-                </div>
-                <div className="option-desc">
-                  Launch the full multi-track editor & viral moment finder
-                </div>
-              </div>
-            </label>
           </div>
 
           <div className="status-message-container">
@@ -1620,23 +1208,6 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               </div>
             )}
           </div>
-
-          <button
-            className="process-btn"
-            onClick={handleProcess}
-            disabled={
-              processing ||
-              (!options.smartCrop &&
-                !options.silenceRemoval &&
-                !options.captions &&
-                !options.muteAudio &&
-                !options.addMusic &&
-                !options.analyzeClips &&
-                !options.addHook)
-            }
-          >
-            {processing ? "Processing..." : "✨ Run AI Magic"}
-          </button>
 
           <div className="video-actions">
             <button className="cancel-btn" onClick={onCancel} disabled={processing}>

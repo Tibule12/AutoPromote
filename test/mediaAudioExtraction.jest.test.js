@@ -77,6 +77,7 @@ describe("media audio extraction routes", () => {
       data: () => ({
         userId: "testUser123",
         status: "completed",
+        stage: "completed",
         progress: 100,
         audio_url: "https://storage.example.com/audio.mp3",
         result: {
@@ -92,6 +93,7 @@ describe("media audio extraction routes", () => {
       expect.objectContaining({
         success: true,
         status: "completed",
+        stage: "completed",
         progress: 100,
         audio_url: "https://storage.example.com/audio.mp3",
         result: expect.objectContaining({

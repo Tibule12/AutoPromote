@@ -48,6 +48,7 @@
   "dependencies": {
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "@google-cloud/storage": "^7.19.0",
+    "@google-cloud/tasks": "^5.5.2",
     "@paypal/paypal-server-sdk": "^0.6.0",
     "@sendgrid/mail": "^8.1.4",
     "@sentry/node": "^7.72.0",

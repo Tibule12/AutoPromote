@@ -4,15 +4,240 @@ import { storage, auth } from "../firebaseClient";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { sanitizeUrl } from "../utils/security";
+import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
+
+const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
+
+const normalizePlainText = value =>
+  String(value ?? "")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/[<>]/g, "")
+    .trim();
+
+const CATEGORY_TAG_RULES = [
+  {
+    label: "High Energy",
+    icon: "🔥",
+    pattern:
+      /(motion|movement|fast|energy|action|impact|laugh|dance|switch|cut|dynamic|spike|reveal)/i,
+  },
+  {
+    label: "Emotional",
+    icon: "😳",
+    pattern: /(emotional|cry|reaction|heart|shock|confession|surprise|love|angry|fear|dramatic)/i,
+  },
+  {
+    label: "Educational",
+    icon: "🎓",
+    pattern: /(how|why|lesson|learn|tutorial|guide|tip|explains|education|mistake|truth|secret)/i,
+  },
+  {
+    label: "Funny",
+    icon: "😂",
+    pattern: /(funny|laugh|joke|prank|comedy|hilarious|meme)/i,
+  },
+  {
+    label: "Promotional",
+    icon: "💰",
+    pattern: /(promo|promotional|offer|sale|product|launch|brand|ad|subscribe|buy|deal)/i,
+  },
+];
+
+const getHookPreviewCopy = clip => {
+  const reason = normalizePlainText(clip?.reason || "");
+  if (/(why|how|what|question|asks)/i.test(reason)) return "THE ANSWER HITS HERE";
+  if (/(emotion|shock|reveal|surprise|confession)/i.test(reason)) return "WAIT FOR THE TURN";
+  if (/(fast|motion|energy|action|impact)/i.test(reason)) return "DON'T BLINK HERE";
+  return "WATCH WHAT HAPPENS NEXT";
+};
+
+const scrollElementIntoView = (element, options) => {
+  if (!element || typeof element.scrollIntoView !== "function") return;
+  element.scrollIntoView(options);
+};
+
+const buildScannerClipGuidance = clip => {
+  const descriptorText = normalizePlainText(
+    [clip?.reason, clip?.label, clip?.transcript, clip?.text].filter(Boolean).join(" ")
+  );
+  const duration = Math.max(
+    0,
+    Number(clip?.duration || Number(clip?.end || 0) - Number(clip?.start || 0))
+  );
+  const transcriptWordCount = normalizePlainText(clip?.transcript || clip?.text || "")
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  const signals = {
+    speech:
+      transcriptWordCount >= 4 ||
+      /(question|asks|says|voice|speaks|talks|explains|dialogue|quote|story|lesson|statement|answer)/i.test(
+        descriptorText
+      ),
+    subject:
+      /(face|speaker|person|host|reaction|close[- ]?up|portrait|eye contact|subject|center|centered|framed)/i.test(
+        descriptorText
+      ),
+    motion:
+      /(motion|movement|fast|scene|cut|switch|laugh|energy|action|impact|reveal|pace|pacing|dynamic|spike|transition|surprise)/i.test(
+        descriptorText
+      ),
+    idealLength: duration >= 10 && duration <= 25,
+    hook:
+      /(\?|why|how|what|wait|watch|stop|secret|mistake|truth|never|before|after|until|confession|shocking|emotional|reveal)/i.test(
+        descriptorText
+      ) || transcriptWordCount >= 8,
+  };
+
+  const score =
+    (signals.speech ? 20 : 0) +
+    (signals.subject ? 20 : 0) +
+    (signals.motion ? 20 : 0) +
+    (signals.idealLength ? 20 : 0) +
+    (signals.hook ? 20 : 0);
+
+  const reasons = [];
+  if (signals.speech) reasons.push("Starts with a spoken beat or voice-led setup");
+  if (signals.subject) reasons.push("Clear face or central subject stays visible");
+  if (signals.motion) reasons.push("Fast pacing or a scene change adds momentum");
+  if (signals.idealLength) reasons.push("Length fits the short-form sweet spot");
+  if (signals.hook) reasons.push("The opening has clear hook potential");
+  if (reasons.length < 3 && descriptorText) reasons.push(descriptorText);
+  while (reasons.length < 3) {
+    reasons.push("The clip is cleanly isolated and ready for editing");
+  }
+
+  const improvements = [];
+  if (!signals.speech || !signals.hook) improvements.push("Cut the first 2 seconds");
+  if (!signals.hook) improvements.push("Add hook");
+  if (!signals.speech) improvements.push("Add captions");
+  if (!signals.subject) improvements.push("Use zoom or crop to center the subject");
+  if (!signals.idealLength) {
+    improvements.push(duration < 10 ? "Extend to the payoff" : "Trim closer to 10-25 seconds");
+  }
+
+  const categories = CATEGORY_TAG_RULES.filter(rule => rule.pattern.test(descriptorText)).slice(
+    0,
+    3
+  );
+  if (categories.length === 0) {
+    categories.push({
+      label: signals.motion ? "High Energy" : "Educational",
+      icon: signals.motion ? "🔥" : "🎓",
+    });
+  }
+
+  return {
+    score,
+    reasons: reasons.slice(0, 5),
+    improvements: [...new Set(improvements)].slice(0, 3),
+    categories,
+    signals,
+    hookText: getHookPreviewCopy(clip),
+  };
+};
+
+const buildSourceFingerprint = file => {
+  if (!file) return "";
+
+  if (typeof file === "string") {
+    try {
+      const parsedUrl = new URL(file, window.location.origin);
+      return `remote:${parsedUrl.origin}${parsedUrl.pathname}`.slice(0, 180);
+    } catch (_error) {
+      return `remote:${String(file).split("?")[0]}`.slice(0, 180);
+    }
+  }
+
+  const name = normalizePlainText(file.name || "scan.mp4");
+  const size = Number(file.size || 0);
+  const lastModified = Number(file.lastModified || 0);
+  const type = normalizePlainText(file.type || "application/octet-stream");
+  return `local:${name}:${size}:${lastModified}:${type}`.slice(0, 180);
+};
+
+const getSourceLabel = file => {
+  if (!file) return "Untitled source";
+  if (typeof file === "string") {
+    const cleaned = String(file).split("?")[0];
+    return cleaned.split("/").pop() || "Remote video";
+  }
+  return file.name || "Uploaded video";
+};
+
+const applyGuidanceToScenes = scenes =>
+  (Array.isArray(scenes) ? scenes : []).map((scene, index) => {
+    const baseClip = {
+      ...scene,
+      id: scene?.id ?? index,
+      start: Number(scene?.start_time ?? scene?.start ?? 0),
+      end: Number(scene?.end_time ?? scene?.end ?? scene?.start ?? 0),
+      duration: Math.max(
+        0,
+        Number(
+          scene?.duration ??
+            Number(scene?.end_time ?? scene?.end ?? 0) -
+              Number(scene?.start_time ?? scene?.start ?? 0)
+        )
+      ),
+      backendScore: Number(scene?.backendScore ?? scene?.viral_score ?? scene?.score ?? 0),
+      reason: scene?.label || scene?.reason || "High engagement potential detected",
+      transcript: scene?.transcript || scene?.text || "",
+    };
+
+    const guidance = buildScannerClipGuidance(baseClip);
+    return {
+      ...baseClip,
+      score: Number(scene?.score ?? guidance.score),
+      reasons:
+        Array.isArray(scene?.reasons) && scene.reasons.length ? scene.reasons : guidance.reasons,
+      improvements:
+        Array.isArray(scene?.improvements) && scene.improvements.length
+          ? scene.improvements
+          : guidance.improvements,
+      categories:
+        Array.isArray(scene?.categories) && scene.categories.length
+          ? scene.categories
+          : guidance.categories,
+      hookText: scene?.hookText || guidance.hookText,
+      signals: scene?.signals || guidance.signals,
+    };
+  });
+
+const saveClipScannerCache = async ({ token, sourceFingerprint, sourceLabel, results }) => {
+  if (!token || !sourceFingerprint || !Array.isArray(results) || !results.length) return;
+
+  await fetch(API_ENDPOINTS.ANALYTICS_CLIP_SCANNER_CACHE, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      sourceFingerprint,
+      sourceLabel,
+      resultCount: results.length,
+      topScore: Math.max(...results.map(item => Number(item.score || 0)), 0),
+      results,
+    }),
+  });
+};
 
 const ViralScanner = ({ file, onSelectClip, onClose }) => {
   const videoRef = useRef(null);
+  const videoSectionRef = useRef(null);
+  const previewStopHandlerRef = useRef(null);
+  const scanSessionIdRef = useRef(`scan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  const loggedPreviewClipIdsRef = useRef(new Set());
+  const sourceFingerprintRef = useRef("");
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [results, setResults] = useState([]);
   const [previewClip, setPreviewClip] = useState(null);
+  const [selectedClip, setSelectedClip] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [videoSrc, setVideoSrc] = useState(null);
+  const [cachedScanMeta, setCachedScanMeta] = useState(null);
 
   // --- Credit System State ---
   const [creditBalance, setCreditBalance] = useState(null);
@@ -40,7 +265,25 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   };
 
   useEffect(() => {
+    void trackClipWorkflowEvent("scanner_opened", {
+      scanSessionId: scanSessionIdRef.current,
+      sourceType: typeof file === "string" ? "remote_url" : "local_file",
+    });
+
+    sourceFingerprintRef.current = buildSourceFingerprint(file);
+    setCachedScanMeta(null);
+    setResults([]);
+    setSelectedClip(null);
+    setPreviewClip(null);
+    setStatusMessage("");
+
     if (file) {
+      const activeVideo = videoRef.current;
+      if (activeVideo && previewStopHandlerRef.current) {
+        activeVideo.removeEventListener("timeupdate", previewStopHandlerRef.current);
+        previewStopHandlerRef.current = null;
+      }
+
       if (typeof file === "string") {
         setVideoSrc(file);
       } else {
@@ -50,6 +293,68 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       }
     }
   }, [file]);
+
+  useEffect(() => {
+    const loadCachedScan = async () => {
+      try {
+        const user = auth.currentUser;
+        const sourceFingerprint = sourceFingerprintRef.current;
+        if (!user || !sourceFingerprint) return;
+
+        const token = await user.getIdToken();
+        const response = await fetch(
+          `${API_ENDPOINTS.ANALYTICS_CLIP_SCANNER_CACHE}?sourceFingerprint=${encodeURIComponent(sourceFingerprint)}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const cache = data?.cache;
+        if (!cache || !Array.isArray(cache.results) || !cache.results.length) return;
+        if (Number(cache.expiresAt || 0) <= Date.now()) return;
+
+        const hydratedResults = applyGuidanceToScenes(cache.results);
+        const rankedCachedResults = [...hydratedResults].sort(
+          (left, right) => right.score - left.score || right.backendScore - left.backendScore
+        );
+        const bestCachedClip = rankedCachedResults[0] || null;
+
+        setResults(hydratedResults);
+        setSelectedClip(bestCachedClip);
+        setCachedScanMeta({
+          createdAt: cache.createdAt,
+          expiresAt: cache.expiresAt,
+          resultCount: cache.resultCount,
+          topScore: cache.topScore,
+          sourceLabel: cache.sourceLabel,
+        });
+        setStatusMessage("Loaded saved scan results. Re-scan if you want a fresh read.");
+
+        void trackClipWorkflowEvent("scan_cache_loaded", {
+          scanSessionId: scanSessionIdRef.current,
+          sourceFingerprint,
+          resultCount: hydratedResults.length,
+          cacheAgeHours: Math.round((Date.now() - Number(cache.createdAt || Date.now())) / 3600000),
+        });
+      } catch (_error) {}
+    };
+
+    void loadCachedScan();
+  }, [file]);
+
+  useEffect(() => {
+    return () => {
+      const activeVideo = videoRef.current;
+      if (activeVideo && previewStopHandlerRef.current) {
+        activeVideo.removeEventListener("timeupdate", previewStopHandlerRef.current);
+      }
+      previewStopHandlerRef.current = null;
+    };
+  }, []);
 
   // Fetch Credits on Mount
   useEffect(() => {
@@ -163,10 +468,20 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   }, [paypalLoaded, selectedPackage]);
 
   const startScan = async () => {
+    const activeSessionId = `scan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    scanSessionIdRef.current = activeSessionId;
+    loggedPreviewClipIdsRef.current = new Set();
+
     setIsScanning(true);
     setScanProgress(0);
     setResults([]);
+    setSelectedClip(null);
     setStatusMessage("Preparing video for AI analysis...");
+
+    void trackClipWorkflowEvent("scan_started", {
+      scanSessionId: activeSessionId,
+      sourceType: typeof file === "string" ? "remote_url" : "local_file",
+    });
 
     try {
       const user = auth.currentUser;
@@ -216,6 +531,9 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       });
 
       if (response.status === 403 || response.status === 402) {
+        void trackClipWorkflowEvent("scan_blocked_insufficient_credits", {
+          scanSessionId: activeSessionId,
+        });
         setNeedsCredits(true);
         setShowCreditShop(true);
         setStatusMessage("Insufficient credits. Please top up to continue.");
@@ -235,13 +553,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         setCreditBalance(data.remainingCredits);
       }
 
-      const validScenes = (data.scenes || []).map((s, idx) => ({
-        id: idx,
-        start: s.start_time || s.start,
-        end: s.end_time || s.end,
-        score: s.viral_score || s.score || 80,
-        reason: s.label || s.reason || "High engagement potential detected",
-      }));
+      const validScenes = applyGuidanceToScenes(data.scenes || []);
 
       if (validScenes.length === 0) {
         setStatusMessage("No specific viral moments found.");
@@ -250,9 +562,46 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         setStatusMessage("Analysis Complete.");
       }
 
+      const rankedScenes = [...validScenes].sort(
+        (left, right) => right.score - left.score || right.backendScore - left.backendScore
+      );
       setResults(validScenes);
+      setCachedScanMeta({
+        createdAt: Date.now(),
+        expiresAt: Date.now() + CLIP_SCANNER_CACHE_TTL_MS,
+        resultCount: validScenes.length,
+        topScore: rankedScenes[0]?.score ?? 0,
+        sourceLabel: getSourceLabel(file),
+      });
+
+      await saveClipScannerCache({
+        token,
+        sourceFingerprint: sourceFingerprintRef.current,
+        sourceLabel: getSourceLabel(file),
+        results: validScenes,
+      }).catch(() => {});
+
+      void trackClipWorkflowEvent("scan_completed", {
+        scanSessionId: activeSessionId,
+        resultCount: validScenes.length,
+        topScore: rankedScenes[0]?.score ?? 0,
+        backendTopScore: rankedScenes[0]?.backendScore ?? 0,
+      });
+
+      if (rankedScenes.length > 0) {
+        setSelectedClip(rankedScenes[0]);
+        setTimeout(
+          () =>
+            handlePreviewClip(rankedScenes[0], { keepSelection: true, source: "auto_top_pick" }),
+          0
+        );
+      }
     } catch (err) {
       console.error("Scan failed:", err);
+      void trackClipWorkflowEvent("scan_failed", {
+        scanSessionId: activeSessionId,
+        message: err?.message || "Unknown scan failure",
+      });
       setStatusMessage("Error: " + err.message);
     } finally {
       setIsScanning(false);
@@ -260,27 +609,105 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
     }
   };
 
-  const handlePreviewClip = clip => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = clip.start;
-      videoRef.current.play();
-      setPreviewClip(clip);
+  const handlePreviewClip = (clip, options = {}) => {
+    const video = videoRef.current;
+    if (!video) return;
 
-      const stopHandler = () => {
-        if (videoRef.current.currentTime >= clip.end) {
-          videoRef.current.pause();
-          videoRef.current.removeEventListener("timeupdate", stopHandler);
-          setPreviewClip(null);
-        }
-      };
-      videoRef.current.addEventListener("timeupdate", stopHandler);
+    if (clip?.id !== undefined && !loggedPreviewClipIdsRef.current.has(clip.id)) {
+      loggedPreviewClipIdsRef.current.add(clip.id);
+      void trackClipWorkflowEvent("clip_previewed", {
+        scanSessionId: scanSessionIdRef.current,
+        clipId: String(clip.id),
+        score: Number(clip.score || 0),
+        source: options.source || "preview",
+      });
     }
+
+    scrollElementIntoView(videoSectionRef.current, {
+      behavior: options.instantScroll ? "auto" : "smooth",
+      block: "start",
+      inline: "nearest",
+    });
+
+    if (previewStopHandlerRef.current) {
+      video.removeEventListener("timeupdate", previewStopHandlerRef.current);
+      previewStopHandlerRef.current = null;
+    }
+
+    video.currentTime = clip.start;
+    video.play();
+    setPreviewClip(clip);
+    if (!options.keepSelection) {
+      setSelectedClip(clip);
+    }
+
+    const stopHandler = () => {
+      const activeVideo = videoRef.current;
+      if (!activeVideo) {
+        previewStopHandlerRef.current = null;
+        return;
+      }
+
+      if (activeVideo.currentTime >= clip.end) {
+        activeVideo.pause();
+        activeVideo.removeEventListener("timeupdate", stopHandler);
+        previewStopHandlerRef.current = null;
+        setPreviewClip(null);
+      }
+    };
+
+    previewStopHandlerRef.current = stopHandler;
+    video.addEventListener("timeupdate", stopHandler);
   };
 
   const formatTime = seconds => {
     const min = Math.floor(seconds / 60);
     const sec = Math.floor(seconds % 60);
     return `${min}:${sec < 10 ? "0" + sec : sec}`;
+  };
+
+  const rankedResults = [...results].sort(
+    (left, right) => right.score - left.score || right.backendScore - left.backendScore
+  );
+  const bestClipId = rankedResults[0]?.id ?? null;
+  const topPickIds = new Set(rankedResults.slice(0, 2).map(clip => clip.id));
+
+  const jumpToClipBoundary = (clip, boundary) => {
+    const video = videoRef.current;
+    if (!video || !clip) return;
+
+    scrollElementIntoView(videoSectionRef.current, {
+      behavior: "smooth",
+      block: "start",
+      inline: "nearest",
+    });
+
+    const targetTime = boundary === "end" ? Number(clip.end || 0) : Number(clip.start || 0);
+    video.currentTime = targetTime;
+    video.pause();
+    setPreviewClip(null);
+    setSelectedClip(clip);
+  };
+
+  const handleUseClip = (clip, improvementMode = false) => {
+    if (!clip) return;
+
+    void trackClipWorkflowEvent("clip_sent_to_editor", {
+      scanSessionId: scanSessionIdRef.current,
+      clipId: String(clip.id),
+      score: Number(clip.score || 0),
+      improveInEditor: improvementMode,
+      rank: rankedResults.findIndex(item => item.id === clip.id) + 1,
+    });
+
+    onSelectClip({
+      ...clip,
+      suggestedHookText: clip.hookText,
+      suggestedImprovements: clip.improvements,
+      guidedScore: clip.score,
+      improveInEditor: improvementMode,
+      scanSessionId: scanSessionIdRef.current,
+    });
   };
 
   return (
@@ -380,14 +807,16 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         )}
 
         <div className="scanner-body">
-          <div className="scanner-video-column">
+          <div ref={videoSectionRef} className="scanner-video-column">
             {videoSrc ? (
-              <video
-                ref={videoRef}
-                src={sanitizeUrl(videoSrc)}
-                controls
-                style={{ borderRadius: "8px" }}
-              />
+              <div className="scanner-video-frame">
+                <video
+                  ref={videoRef}
+                  src={sanitizeUrl(videoSrc)}
+                  controls
+                  style={{ borderRadius: "8px" }}
+                />
+              </div>
             ) : (
               <div style={{ color: "#fff" }}>No video loaded</div>
             )}
@@ -398,7 +827,8 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
               {!isScanning && results.length === 0 ? (
                 <div style={{ textAlign: "center" }}>
                   <p style={{ color: "#cbd5e1", marginBottom: "15px" }}>
-                    AI will analyze your video for engagement spikes, hooks, and retention drivers.
+                    Let AutoPromote rank the moments most likely to earn the next watch, then move
+                    the winner into Studio.
                   </p>
 
                   {needsCredits ? (
@@ -441,10 +871,19 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                 </div>
               ) : (
                 <div style={{ textAlign: "center" }}>
-                  <h4 style={{ color: "#f8fafc", margin: "0 0 5px 0" }}>Scan Complete!</h4>
+                  <h4 style={{ color: "#f8fafc", margin: "0 0 5px 0" }}>
+                    AutoPromote Scan Complete
+                  </h4>
                   <p style={{ color: "#cbd5e1", fontSize: "0.9rem" }}>
-                    Found {results.length} viral opportunities.
+                    Found {results.length} ranked moments. Preview the best candidate, then open it
+                    in Studio.
                   </p>
+                  {cachedScanMeta?.createdAt ? (
+                    <p style={{ color: "#93c5fd", fontSize: "0.8rem", marginTop: "6px" }}>
+                      Saved scan from {new Date(cachedScanMeta.createdAt).toLocaleString()}{" "}
+                      available for 3 days.
+                    </p>
+                  ) : null}
                   <button
                     className="scan-btn"
                     onClick={startScan}
@@ -461,34 +900,154 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
               )}
             </div>
 
+            {selectedClip ? (
+              <div
+                className={`scanner-guidance-card ${selectedClip.id === bestClipId ? "is-best" : ""}`}
+                data-testid="scanner-guidance-card"
+              >
+                <div className="scanner-guidance-head">
+                  <div>
+                    <span className="scanner-guidance-kicker">
+                      {selectedClip.id === bestClipId
+                        ? "BEST CLIP"
+                        : topPickIds.has(selectedClip.id)
+                          ? "TOP PICK"
+                          : "Selected clip"}
+                    </span>
+                    <h4>🔥 Viral Score: {selectedClip.score}</h4>
+                  </div>
+                  <span className="scanner-guidance-rank-pill">
+                    #{rankedResults.findIndex(clip => clip.id === selectedClip.id) + 1}
+                  </span>
+                </div>
+                <p className="scanner-guidance-summary">
+                  {selectedClip.id === bestClipId
+                    ? "This is AutoPromote's strongest candidate from the scan."
+                    : "This moment is strong enough to shape inside Studio."}
+                </p>
+                <div className="scanner-guidance-timing">
+                  <span>Start: {Number(selectedClip.start || 0).toFixed(1)}s</span>
+                  <span>End: {Number(selectedClip.end || 0).toFixed(1)}s</span>
+                  <span>{Number(selectedClip.duration || 0).toFixed(1)}s</span>
+                </div>
+                <div className="scanner-tag-row">
+                  {selectedClip.categories.map((category, index) => (
+                    <span
+                      key={`${selectedClip.id}-${category.label}-${index}`}
+                      className="scanner-tag-pill"
+                    >
+                      {category.icon} {category.label}
+                    </span>
+                  ))}
+                </div>
+                <div className="scanner-reasons-list">
+                  <strong>Why this clip</strong>
+                  {selectedClip.reasons.slice(0, 4).map((reason, index) => (
+                    <div key={`${selectedClip.id}-${index}`} className="scanner-reason-item">
+                      ✔ {reason}
+                    </div>
+                  ))}
+                </div>
+                <div className="scanner-guidance-actions">
+                  <button
+                    className="scanner-action-btn scanner-action-btn-primary"
+                    onClick={() => handlePreviewClip(selectedClip, { keepSelection: true })}
+                  >
+                    Preview clip
+                  </button>
+                  <button
+                    className="scanner-action-btn scanner-action-btn-primary"
+                    onClick={() => handleUseClip(selectedClip)}
+                  >
+                    Open in Studio
+                  </button>
+                </div>
+                {selectedClip.score < 60 ? (
+                  <div className="scanner-fix-card">
+                    <strong>This clip can perform better</strong>
+                    {selectedClip.improvements.map((item, index) => (
+                      <div key={`${selectedClip.id}-fix-${index}`} className="scanner-fix-item">
+                        • {item}
+                      </div>
+                    ))}
+                    <button
+                      className="scanner-action-btn scanner-action-btn-primary"
+                      onClick={() => handleUseClip(selectedClip, true)}
+                    >
+                      Improve Clip
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             <div className="results-list">
               {results.map(clip => (
                 <div
                   key={clip.id}
-                  className={`result-card ${previewClip?.id === clip.id ? "active" : ""}`}
+                  data-testid={`scanner-result-${clip.id}`}
+                  className={`result-card ${selectedClip?.id === clip.id ? "active" : ""} ${clip.id === bestClipId ? "best-pick" : ""} ${topPickIds.has(clip.id) && clip.id !== bestClipId ? "runner-up" : ""}`}
                   onClick={() => handlePreviewClip(clip)}
                 >
                   <div className="result-header">
-                    <span className="result-time">
-                      {formatTime(clip.start)} - {formatTime(clip.end)}
-                    </span>
-                    <span className="viral-score">⚡ {clip.score}</span>
+                    <div>
+                      <div className="result-badge-row">
+                        <span className="result-time">
+                          {formatTime(clip.start)} - {formatTime(clip.end)}
+                        </span>
+                        {clip.id === bestClipId ? (
+                          <span className="scanner-priority-pill best">BEST CLIP</span>
+                        ) : null}
+                        {topPickIds.has(clip.id) && clip.id !== bestClipId ? (
+                          <span className="scanner-priority-pill">TOP PICK</span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <span className="viral-score">🔥 {clip.score}</span>
                   </div>
                   <p className="result-reason">{clip.reason}</p>
-                  <button
-                    className="use-clip-btn"
-                    onClick={e => {
-                      e.stopPropagation();
-                      onSelectClip(clip);
-                    }}
-                  >
-                    Use This Clip
-                  </button>
+                  <div className="scanner-tag-row compact">
+                    {clip.categories.map((category, index) => (
+                      <span key={`${clip.id}-tag-${index}`} className="scanner-tag-pill compact">
+                        {category.icon} {category.label}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="scanner-mini-reasons">
+                    {clip.reasons.slice(0, 3).map((reason, index) => (
+                      <div key={`${clip.id}-reason-${index}`} className="scanner-mini-reason-item">
+                        ✔ {reason}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="scanner-card-actions">
+                    <button
+                      className="scanner-card-btn"
+                      onClick={e => {
+                        e.stopPropagation();
+                        handlePreviewClip(clip, { keepSelection: true });
+                      }}
+                    >
+                      Preview
+                    </button>
+                    <button
+                      className="scanner-card-btn scanner-card-btn-primary"
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleUseClip(clip);
+                      }}
+                    >
+                      Open in Studio
+                    </button>
+                  </div>
+                  {clip.score < 60 ? (
+                    <div className="scanner-inline-warning">⚠ This clip can perform better</div>
+                  ) : null}
                 </div>
               ))}
               {results.length === 0 && !isScanning && !needsCredits && (
                 <div className="empty-state">
-                  Click "Start AI Scan" to identify the best parts of your video automatically.
+                  Run an AutoPromote scan to surface the moments most worth editing.
                 </div>
               )}
             </div>

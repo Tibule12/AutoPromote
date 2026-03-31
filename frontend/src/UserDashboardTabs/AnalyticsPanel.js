@@ -11,11 +11,22 @@ const RANGE_OPTIONS = [
   { value: "all", label: "All Time" },
 ];
 
+const WORKFLOW_EVENT_LABELS = {
+  scanner_opened: "Scanner Opened",
+  scan_started: "Scan Started",
+  scan_completed: "Scan Completed",
+  clip_previewed: "Previewed a Clip",
+  clip_sent_to_editor: "Sent to Editor",
+  scanner_clip_export_started: "Started Export",
+};
+
 const AnalyticsPanel = () => {
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState(null);
+  const [workflowSummary, setWorkflowSummary] = useState(null);
   const [timeRange, setTimeRange] = useState("7d");
   const [error, setError] = useState("");
+  const [workflowError, setWorkflowError] = useState("");
   const [contentItems, setContentItems] = useState([]);
   const [selectedContentId, setSelectedContentId] = useState("");
   const [diagnosisData, setDiagnosisData] = useState(null);
@@ -72,14 +83,31 @@ const AnalyticsPanel = () => {
         }
 
         const token = await currentUser.getIdToken(forceRefreshToken);
-        const res = await fetch(`${API_ENDPOINTS.ANALYTICS_USER}?range=${timeRange}`, {
-          headers: { Authorization: `Bearer ${token}` },
-          credentials: "include",
-        }).catch(() => ({ ok: false, status: 500 }));
+        const [res, workflowRes] = await Promise.all([
+          fetch(`${API_ENDPOINTS.ANALYTICS_USER}?range=${timeRange}`, {
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          }).catch(() => ({ ok: false, status: 500 })),
+          fetch(
+            `${API_ENDPOINTS.ANALYTICS_WORKFLOW_SUMMARY}?workflow=clip_scanner&range=${timeRange}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              credentials: "include",
+            }
+          ).catch(() => ({ ok: false, status: 500 })),
+        ]);
 
         if (res.ok) {
           const data = await res.json();
           setAnalytics(data);
+          if (workflowRes.ok) {
+            const workflowData = await workflowRes.json();
+            setWorkflowSummary(workflowData);
+            setWorkflowError("");
+          } else {
+            setWorkflowSummary(null);
+            setWorkflowError("Clip workflow summary is unavailable right now.");
+          }
           if (data.range && data.range !== timeRange) {
             setTimeRange(data.range);
           }
@@ -108,6 +136,8 @@ const AnalyticsPanel = () => {
         );
       } catch (_e) {
         setAnalytics(null);
+        setWorkflowSummary(null);
+        setWorkflowError("Clip workflow summary is unavailable right now.");
         setError("Could not load analytics right now.");
       } finally {
         if (retryCount === 0) setLoading(false);
@@ -323,6 +353,18 @@ const AnalyticsPanel = () => {
   const availableRangeOptions = RANGE_OPTIONS.filter(option =>
     (analyticsEntitlements.allowedRanges || []).includes(option.value)
   );
+  const workflowMetrics = workflowSummary?.metrics || {
+    scanStartRate: 0,
+    scanCompletionRate: 0,
+    previewRate: 0,
+    editorConversionRate: 0,
+    exportConversionRate: 0,
+    averageTopScore: 0,
+    averageResultCount: 0,
+  };
+  const workflowFunnel = Array.isArray(workflowSummary?.funnel) ? workflowSummary.funnel : [];
+  const workflowEventCounts = workflowSummary?.eventCounts || {};
+  const formatPercent = value => `${Math.round((Number(value) || 0) * 100)}%`;
 
   const exportAnalyticsSnapshot = () => {
     const rows = [
@@ -471,6 +513,144 @@ const AnalyticsPanel = () => {
           full history.
         </div>
       ) : null}
+
+      <div
+        className="ap-analytics-panel-card"
+        style={{
+          background: "var(--card)",
+          padding: "1.25rem",
+          borderRadius: "12px",
+          border: "1px solid rgba(96,165,250,0.25)",
+          marginBottom: "1.5rem",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: "1rem",
+            flexWrap: "wrap",
+            marginBottom: "1rem",
+          }}
+        >
+          <div>
+            <h4 style={{ margin: 0 }}>Clip Scanner Funnel</h4>
+            <div style={{ color: "var(--muted)", fontSize: ".85rem", marginTop: ".25rem" }}>
+              This is the evidence layer for whether scanner sessions actually move users into
+              editing and export.
+            </div>
+          </div>
+          <div style={{ color: "#93c5fd", fontSize: ".8rem" }}>
+            Sessions: {workflowSummary?.totalSessions || 0} | Events:{" "}
+            {workflowSummary?.totalEvents || 0}
+          </div>
+        </div>
+
+        {workflowError ? (
+          <div style={{ color: "#fca5a5", fontSize: ".85rem" }}>{workflowError}</div>
+        ) : workflowSummary ? (
+          <>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+                gap: "0.75rem",
+                marginBottom: "1rem",
+              }}
+            >
+              <div className="ap-workflow-stat-card">
+                <strong>{formatPercent(workflowMetrics.scanCompletionRate)}</strong>
+                <span>Scan completion</span>
+              </div>
+              <div className="ap-workflow-stat-card">
+                <strong>{formatPercent(workflowMetrics.editorConversionRate)}</strong>
+                <span>Editor conversion</span>
+              </div>
+              <div className="ap-workflow-stat-card">
+                <strong>{formatPercent(workflowMetrics.exportConversionRate)}</strong>
+                <span>Export conversion</span>
+              </div>
+              <div className="ap-workflow-stat-card">
+                <strong>{workflowMetrics.averageTopScore}</strong>
+                <span>Average top score</span>
+              </div>
+              <div className="ap-workflow-stat-card">
+                <strong>{workflowMetrics.averageResultCount}</strong>
+                <span>Average clips found</span>
+              </div>
+            </div>
+
+            {workflowFunnel.length ? (
+              <div style={{ display: "grid", gap: "0.65rem", marginBottom: "1rem" }}>
+                {workflowFunnel.map(step => (
+                  <div
+                    key={step.event}
+                    className="ap-workflow-funnel-row"
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "minmax(0, 1.2fr) minmax(100px, 0.5fr) minmax(90px, 0.4fr)",
+                      gap: "0.75rem",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 700, color: "var(--text)" }}>
+                        {WORKFLOW_EVENT_LABELS[step.event] || step.event}
+                      </div>
+                      <div style={{ fontSize: ".8rem", color: "var(--muted)" }}>
+                        {step.sessions} session(s)
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        height: 9,
+                        borderRadius: 999,
+                        background: "rgba(148,163,184,0.16)",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: `${Math.max(4, Math.round((Number(step.rateFromPrevious) || 0) * 100))}%`,
+                          height: "100%",
+                          background: "linear-gradient(90deg, #38bdf8, #6366f1)",
+                        }}
+                      ></div>
+                    </div>
+                    <div style={{ textAlign: "right", fontSize: ".82rem", color: "#cbd5e1" }}>
+                      {formatPercent(step.rateFromPrevious)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ color: "var(--muted)", fontSize: ".85rem", marginBottom: "1rem" }}>
+                No clip scanner sessions have been recorded in this range yet.
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "0.5rem",
+              }}
+            >
+              {Object.entries(workflowEventCounts).map(([eventName, count]) => (
+                <span key={eventName} className="ap-workflow-chip">
+                  {WORKFLOW_EVENT_LABELS[eventName] || eventName}: {count}
+                </span>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div style={{ color: "var(--muted)", fontSize: ".85rem" }}>
+            Loading clip workflow summary...
+          </div>
+        )}
+      </div>
 
       {recoveryEnabled ? (
         <div

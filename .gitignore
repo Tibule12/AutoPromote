@@ -56,7 +56,9 @@ lerna-debug.log*
 
 # Python
 venv/
+.venv/
 python_media_worker/venv/
+python_media_worker/.venv/
 __pycache__/
 
 # Temp scripts
