@@ -61,8 +61,8 @@ export function applySafeMediaSource(element, url) {
     return false;
   }
 
-  if (element.getAttribute("src") !== safeUrl) {
-    element.setAttribute("src", safeUrl);
+  if (element.src !== safeUrl) {
+    element.src = safeUrl;
   }
 
   return true;

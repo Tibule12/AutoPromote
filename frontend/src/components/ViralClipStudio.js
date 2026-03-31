@@ -789,6 +789,7 @@ const ViralClipStudio = ({
   const hookBackdropVideoRef = useRef(null);
   const hookFreezeVideoRef = useRef(null);
   const musicPreviewRef = useRef(null);
+  const watermarkCleanupPreviewImageRef = useRef(null);
   const musicPreviewObjectUrlRef = useRef(null);
   const musicPreviewAudioContextRef = useRef(null);
   const musicPreviewGainNodeRef = useRef(null);
@@ -3879,6 +3880,32 @@ const ViralClipStudio = ({
   ]);
 
   useEffect(() => {
+    applySafeMediaSource(
+      watermarkCleanupPreviewImageRef.current,
+      shouldShowWatermarkCleanupOnVideo ? watermarkCleanupPreview?.cleanedImageUrl : null
+    );
+    applySafeMediaSource(
+      smartCropForegroundVideoRef.current,
+      smartCrop ? currentTimelineClip?.url : null
+    );
+    applySafeMediaSource(hookBackdropVideoRef.current, currentTimelineClip?.url);
+    applySafeMediaSource(hookFreezeVideoRef.current, currentTimelineClip?.url);
+    applySafeMediaSource(audioRef.current, extractedAudio?.url);
+    applySafeMediaSource(
+      musicPreviewRef.current,
+      !musicSearchMode ? effectiveMusicPreviewUrl : null
+    );
+  }, [
+    currentTimelineClip,
+    effectiveMusicPreviewUrl,
+    extractedAudio,
+    musicSearchMode,
+    shouldShowWatermarkCleanupOnVideo,
+    smartCrop,
+    watermarkCleanupPreview,
+  ]);
+
+  useEffect(() => {
     const video = videoRef.current;
     const backdrop = hookBackdropVideoRef.current;
     const freezeVideo = hookFreezeVideoRef.current;
@@ -4601,7 +4628,7 @@ const ViralClipStudio = ({
                     />
                     {shouldShowWatermarkCleanupOnVideo ? (
                       <img
-                        src={getSafeMediaSource(watermarkCleanupPreview.cleanedImageUrl)}
+                        ref={watermarkCleanupPreviewImageRef}
                         alt="Cleaned watermark preview on video"
                         className="watermark-cleanup-video-overlay"
                       />
@@ -4613,7 +4640,6 @@ const ViralClipStudio = ({
                         preload="auto"
                         muted
                         playsInline
-                        src={getSafeMediaSource(currentTimelineClip?.url)}
                         style={{ objectPosition: hookObjectPosition }}
                       />
                     ) : null}
@@ -4623,7 +4649,6 @@ const ViralClipStudio = ({
                       preload="auto"
                       muted
                       playsInline
-                      src={getSafeMediaSource(currentTimelineClip?.url)}
                       style={{ opacity: hookBackdropOpacity, objectPosition: hookObjectPosition }}
                     />
                     <video
@@ -4632,7 +4657,6 @@ const ViralClipStudio = ({
                       preload="auto"
                       muted
                       playsInline
-                      src={getSafeMediaSource(currentTimelineClip?.url)}
                       style={{
                         opacity: hookFreezeOpacity,
                         objectPosition: hookObjectPosition,
@@ -4640,20 +4664,8 @@ const ViralClipStudio = ({
                         transform: `scale(${effectiveHookZoomTarget.toFixed(3)})`,
                       }}
                     />
-                    <audio
-                      ref={audioRef}
-                      preload="auto"
-                      src={getSafeMediaSource(extractedAudio?.url)}
-                      style={{ display: "none" }}
-                    />
-                    <audio
-                      ref={musicPreviewRef}
-                      preload="auto"
-                      src={
-                        !musicSearchMode ? getSafeMediaSource(effectiveMusicPreviewUrl) : undefined
-                      }
-                      style={{ display: "none" }}
-                    />
+                    <audio ref={audioRef} preload="auto" style={{ display: "none" }} />
+                    <audio ref={musicPreviewRef} preload="auto" style={{ display: "none" }} />
 
                     <div
                       className="video-bg-layer"
@@ -4897,7 +4909,9 @@ const ViralClipStudio = ({
                                 )
                               ) : overlay.type === "image" && safeOverlaySrc ? (
                                 <img
-                                  src={safeOverlaySrc}
+                                  ref={element => {
+                                    applySafeMediaSource(element, safeOverlaySrc);
+                                  }}
                                   alt="Overlay"
                                   style={{
                                     width: "100%",
@@ -4909,7 +4923,9 @@ const ViralClipStudio = ({
                                 />
                               ) : safeOverlaySrc ? (
                                 <video
-                                  src={safeOverlaySrc}
+                                  ref={element => {
+                                    applySafeMediaSource(element, safeOverlaySrc);
+                                  }}
                                   autoPlay
                                   loop
                                   muted

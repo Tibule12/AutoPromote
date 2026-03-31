@@ -3,7 +3,7 @@ import "./ViralScanner.css";
 import { storage, auth } from "../firebaseClient";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
-import { createSecureId, getSafeMediaSource } from "../utils/security";
+import { applySafeMediaSource, createSecureId } from "../utils/security";
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
@@ -293,6 +293,13 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       }
     }
   }, [file]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    applySafeMediaSource(video, videoSrc);
+  }, [videoSrc]);
 
   useEffect(() => {
     const loadCachedScan = async () => {
@@ -810,12 +817,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           <div ref={videoSectionRef} className="scanner-video-column">
             {videoSrc ? (
               <div className="scanner-video-frame">
-                <video
-                  ref={videoRef}
-                  src={getSafeMediaSource(videoSrc)}
-                  controls
-                  style={{ borderRadius: "8px" }}
-                />
+                <video ref={videoRef} controls style={{ borderRadius: "8px" }} />
               </div>
             ) : (
               <div style={{ color: "#fff" }}>No video loaded</div>
