@@ -13,9 +13,9 @@ Your platform already has **3 powerful OpenAI integrations** built and ready:
 
 **File:** `src/services/chatbotService.js`
 
-- **Model:** GPT-4o (latest, best multilingual)
+- **Model:** GPT-4o (strong multilingual coverage, but output quality still depends on prompt quality and review)
 - **Features:**
-  - 11 South African languages support
+  - Broad multilingual handling for South African users
   - AutoPromote platform knowledge
   - User troubleshooting
   - Content recommendations
@@ -33,6 +33,7 @@ Your platform already has **3 powerful OpenAI integrations** built and ready:
   - Scene detection
   - Viral clip suggestions
   - Automatic editing
+  - Best-effort caption drafts that should be reviewed before export, especially for mixed South African languages
 - **Cost:** $0.006 per minute of audio
 - **Monthly estimate:** $3-15 for 100 videos
 

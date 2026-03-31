@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+const axios = require("axios");
 const admin = require("firebase-admin");
 const { v4: uuidv4 } = require("uuid");
 // Import as class to instantiate per request or use singleton if it's stateless
@@ -10,6 +11,51 @@ const videoEditingService = new VideoEditingService(); // Instantiate for genera
 
 const authMiddleware = require("./authMiddleware");
 const { deductCredits } = require("./creditSystem");
+const MEDIA_WORKER_URL =
+  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-jddzncgt2a-uc.a.run.app";
+const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
+const VIDEO_EDITOR_CREDITS_DISABLED = process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true";
+
+const shouldRetryWithLocalWorker = error => {
+  const status = error.response?.status;
+  const code = error.code;
+  return (
+    status === 404 ||
+    code === "ECONNREFUSED" ||
+    code === "ENOTFOUND" ||
+    code === "ETIMEDOUT" ||
+    code === "ECONNABORTED"
+  );
+};
+
+const postToMediaWorker = async (endpoint, payload, timeout = 120000) => {
+  try {
+    return await axios.post(`${MEDIA_WORKER_URL}${endpoint}`, payload, { timeout });
+  } catch (error) {
+    const canFallback =
+      LOCAL_MEDIA_WORKER_URL &&
+      LOCAL_MEDIA_WORKER_URL !== MEDIA_WORKER_URL &&
+      shouldRetryWithLocalWorker(error);
+
+    if (!canFallback) throw error;
+
+    console.warn(
+      `[MediaRoute] Falling back to local worker for ${endpoint}. Primary worker: ${MEDIA_WORKER_URL}`
+    );
+    return axios.post(`${LOCAL_MEDIA_WORKER_URL}${endpoint}`, payload, { timeout });
+  }
+};
+
+const chargeVideoEditorCredits = async (userId, amount, routeName) => {
+  if (VIDEO_EDITOR_CREDITS_DISABLED) {
+    console.log(
+      `[MediaRoute] Credit billing bypassed for ${routeName}. User ${userId}, amount ${amount}`
+    );
+    return { success: true, remaining: null, skipped: true };
+  }
+
+  return deductCredits(userId, amount);
+};
 
 // Configure Multer (Buffer storage)
 const upload = multer({
@@ -85,7 +131,7 @@ router.post("/process", async (req, res) => {
 
   // 1. Deduct Credits
   try {
-    const result = await deductCredits(userId, cost);
+    const result = await chargeVideoEditorCredits(userId, cost, "/process");
     if (!result.success) {
       return res.status(403).json({
         message: "Insufficient credits. Please purchase more credits.",
@@ -106,6 +152,7 @@ router.post("/process", async (req, res) => {
       jobId: job.jobId,
       message: "Processing started",
       remainingCredits: result.remaining,
+      billingDisabled: !!result.skipped,
     });
   } catch (error) {
     console.error("[MediaRoute] Processing error:", error.message);
@@ -135,6 +182,89 @@ router.post("/extract-audio", async (req, res) => {
   }
 });
 
+router.post("/preview-silence", async (req, res) => {
+  const fileUrl = typeof req.body?.fileUrl === "string" ? req.body.fileUrl.trim() : "";
+  if (!fileUrl) {
+    return res.status(400).json({ message: "No file provided" });
+  }
+
+  try {
+    const response = await postToMediaWorker(
+      "/preview-silence",
+      {
+        video_url: fileUrl,
+        silence_threshold_db: Number(req.body?.silenceThreshold ?? -35),
+        min_silence_duration: Number(req.body?.minSilenceDuration ?? 0.75),
+      },
+      120000
+    );
+    res.json(response.data || {});
+  } catch (error) {
+    console.error("[MediaRoute] Silence preview error:", error.message);
+    res.status(500).json({
+      message: "Silence preview failed",
+      details: error.response?.data?.detail || error.message,
+    });
+  }
+});
+
+router.post("/preview-watermark-cleanup", async (req, res) => {
+  const fileUrl = typeof req.body?.fileUrl === "string" ? req.body.fileUrl.trim() : "";
+  if (!fileUrl) {
+    return res.status(400).json({ message: "No file provided" });
+  }
+
+  try {
+    const response = await postToMediaWorker(
+      "/preview-watermark-cleanup",
+      {
+        video_url: fileUrl,
+        watermark_mode:
+          typeof req.body?.watermarkMode === "string" ? req.body.watermarkMode : "adaptive",
+        watermark_regions: Array.isArray(req.body?.manualWatermarkRegions)
+          ? req.body.manualWatermarkRegions
+          : [],
+        preview_time: Number(req.body?.previewTime ?? 0),
+      },
+      120000
+    );
+    res.json(response.data || {});
+  } catch (error) {
+    console.error("[MediaRoute] Watermark cleanup preview error:", error.message);
+    res.status(500).json({
+      message: "Watermark cleanup preview failed",
+      details: error.response?.data?.detail || error.message,
+    });
+  }
+});
+
+router.post("/preview-music", async (req, res) => {
+  const musicFile = typeof req.body?.musicFile === "string" ? req.body.musicFile.trim() : "";
+  if (!musicFile) {
+    return res.status(400).json({ message: "No music selection provided" });
+  }
+
+  try {
+    const response = await postToMediaWorker(
+      "/preview-music",
+      {
+        music_file: musicFile,
+        is_search: !!req.body?.isSearch,
+        safe_search: req.body?.safeSearch !== undefined ? !!req.body.safeSearch : true,
+        preview_duration: Number(req.body?.previewDuration ?? 20),
+      },
+      120000
+    );
+    res.json(response.data || {});
+  } catch (error) {
+    console.error("[MediaRoute] Music preview error:", error.message);
+    res.status(500).json({
+      message: "Music preview failed",
+      details: error.response?.data?.detail || error.message,
+    });
+  }
+});
+
 // Route: GET /api/media/status/:jobId
 // Check status of async video processing
 router.get("/status/:jobId", async (req, res) => {
@@ -156,6 +286,7 @@ router.get("/status/:jobId", async (req, res) => {
     res.json({
       success: true,
       status: data.status,
+      stage: data.stage,
       progress: data.progress,
       result: data.result, // Node worker result
       output_url: data.output_url, // Python worker result (Async)
@@ -180,7 +311,7 @@ router.post("/analyze", async (req, res) => {
     console.log(`[MediaRoute] Analyze clip request for user ${userId}, file: ${fileUrl}`);
 
     // Check and deduct credits first
-    const credits = await deductCredits(userId, cost);
+    const credits = await chargeVideoEditorCredits(userId, cost, "/analyze");
     if (!credits.success) {
       console.warn(
         `[MediaRoute] Insufficient credits for user ${userId}. Required: ${cost}, Msg: ${credits.message}`
@@ -194,7 +325,12 @@ router.post("/analyze", async (req, res) => {
 
     console.log(`[MediaRoute] Credits OK. Starting analysis...`);
     const scenes = await videoEditingService.analyzeVideo(fileUrl, userId);
-    res.json({ success: true, scenes: scenes, remainingCredits: credits.remaining });
+    res.json({
+      success: true,
+      scenes: scenes,
+      remainingCredits: credits.remaining,
+      billingDisabled: !!credits.skipped,
+    });
   } catch (error) {
     console.error(`[MediaRoute] Analyze error:`, error);
     res.status(500).json({ message: "Analysis failed", details: error.message });
@@ -208,14 +344,16 @@ router.post("/render-clip", async (req, res) => {
   const cost = 5; // Simpler cut is cheaper
 
   try {
-    /*
-      const creditRes = await deductCredits(userId, cost);
-      if (!creditRes.success) return res.status(403).json({ message: "Insufficient credits" });
-      */
-    const creditRes = { success: true, remaining: 9999 };
+    const creditRes = await chargeVideoEditorCredits(userId, cost, "/render-clip");
+    if (!creditRes.success) return res.status(403).json({ message: "Insufficient credits" });
 
     const result = await videoEditingService.renderClip(fileUrl, startTime, endTime, userId);
-    res.json({ success: true, url: result.url, remainingCredits: creditRes.remaining });
+    res.json({
+      success: true,
+      url: result.url,
+      remainingCredits: creditRes.remaining,
+      billingDisabled: !!creditRes.skipped,
+    });
   } catch (error) {
     res.status(500).json({ message: "Rendering failed", details: error.message });
   }

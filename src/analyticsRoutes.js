@@ -90,6 +90,89 @@ function getPostEventDate(post) {
   );
 }
 
+function normalizeWorkflowToken(value, fallback = "") {
+  const normalized = String(value ?? fallback)
+    .trim()
+    .replace(/[^a-zA-Z0-9_.-]/g, "_")
+    .slice(0, 80);
+  return normalized || fallback;
+}
+
+function sanitizeWorkflowProperties(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+
+  return Object.entries(value).reduce((accumulator, [key, rawValue]) => {
+    const normalizedKey = normalizeWorkflowToken(key);
+    if (!normalizedKey || rawValue === undefined || rawValue === null) return accumulator;
+
+    if (typeof rawValue === "number" || typeof rawValue === "boolean") {
+      accumulator[normalizedKey] = rawValue;
+      return accumulator;
+    }
+
+    if (typeof rawValue === "string") {
+      accumulator[normalizedKey] = rawValue.slice(0, 300);
+      return accumulator;
+    }
+
+    if (Array.isArray(rawValue)) {
+      accumulator[normalizedKey] = rawValue.slice(0, 12).map(item => {
+        if (typeof item === "number" || typeof item === "boolean") return item;
+        return String(item).slice(0, 120);
+      });
+      return accumulator;
+    }
+
+    if (typeof rawValue === "object") {
+      accumulator[normalizedKey] = Object.fromEntries(
+        Object.entries(rawValue)
+          .slice(0, 20)
+          .map(([nestedKey, nestedValue]) => [normalizeWorkflowToken(nestedKey), nestedValue])
+          .filter(
+            ([nestedKey, nestedValue]) =>
+              nestedKey && nestedValue !== undefined && nestedValue !== null
+          )
+      );
+    }
+
+    return accumulator;
+  }, {});
+}
+
+function getWorkflowRangeStart(range) {
+  const now = Date.now();
+  switch (
+    String(range || "7d")
+      .trim()
+      .toLowerCase()
+  ) {
+    case "24h":
+      return now - 24 * 60 * 60 * 1000;
+    case "30d":
+      return now - 30 * 24 * 60 * 60 * 1000;
+    case "90d":
+      return now - 90 * 24 * 60 * 60 * 1000;
+    case "all":
+      return 0;
+    case "7d":
+    default:
+      return now - 7 * 24 * 60 * 60 * 1000;
+  }
+}
+
+function getClipScannerCacheId(uid, sourceFingerprint) {
+  const safeUid = normalizeWorkflowToken(uid, "user");
+  const safeFingerprint = normalizeWorkflowToken(sourceFingerprint, "source");
+  return `${safeUid}__${safeFingerprint}`.slice(0, 180);
+}
+
+function isFreshClipScannerCache(record, now = Date.now()) {
+  const createdAt = Number(record?.createdAt || 0);
+  const expiresAt = Number(record?.expiresAt || 0);
+  if (!createdAt || !expiresAt) return false;
+  return createdAt <= now && expiresAt > now;
+}
+
 function isPublishedPlatformPost(post) {
   if (!post) return false;
   // Exclude synthetic/test placeholders from user-facing analytics.
@@ -498,6 +581,250 @@ router.get("/user", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Error getting user analytics:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/workflow-events", authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user?.uid || req.userId;
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+    const workflow = normalizeWorkflowToken(req.body?.workflow, "clip_scanner");
+    const eventName = normalizeWorkflowToken(req.body?.eventName);
+    if (!eventName) return res.status(400).json({ error: "eventName is required" });
+
+    const properties = sanitizeWorkflowProperties(req.body?.properties);
+    const event = {
+      uid,
+      workflow,
+      eventName,
+      properties,
+      createdAt: Date.now(),
+    };
+
+    const saved = await db.collection("workflow_events").add(event);
+    res.status(201).json({ ok: true, id: saved.id });
+  } catch (error) {
+    console.error("Error storing workflow event:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/workflow-summary", authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user?.uid || req.userId;
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+    const workflow = normalizeWorkflowToken(req.query.workflow, "clip_scanner");
+    const range = String(req.query.range || "7d");
+    const rangeStart = getWorkflowRangeStart(range);
+
+    const snapshot = await db
+      .collection("workflow_events")
+      .where("uid", "==", uid)
+      .limit(500)
+      .get();
+    const events = [];
+    snapshot.forEach(doc => {
+      const data = doc.data() || {};
+      const createdAt = Number(data.createdAt || 0);
+      if ((workflow && data.workflow !== workflow) || createdAt < rangeStart) return;
+      events.push({ id: doc.id, ...data, createdAt });
+    });
+
+    events.sort((left, right) => left.createdAt - right.createdAt);
+
+    const eventCounts = events.reduce((accumulator, event) => {
+      accumulator[event.eventName] = (accumulator[event.eventName] || 0) + 1;
+      return accumulator;
+    }, {});
+
+    const sessionStates = new Map();
+    events.forEach(event => {
+      const sessionId = event.properties?.scanSessionId;
+      if (!sessionId) return;
+      if (!sessionStates.has(sessionId)) {
+        sessionStates.set(sessionId, {
+          opened: false,
+          started: false,
+          completed: false,
+          previewed: false,
+          sentToEditor: false,
+          openedInEditor: false,
+          exportStarted: false,
+          exportFailed: false,
+          resultCount: 0,
+          topScore: 0,
+        });
+      }
+
+      const session = sessionStates.get(sessionId);
+      if (event.eventName === "scanner_opened") session.opened = true;
+      if (event.eventName === "scan_started") session.started = true;
+      if (event.eventName === "scan_completed") {
+        session.completed = true;
+        session.resultCount = Math.max(
+          session.resultCount,
+          Number(event.properties?.resultCount || 0)
+        );
+        session.topScore = Math.max(session.topScore, Number(event.properties?.topScore || 0));
+      }
+      if (event.eventName === "clip_previewed") session.previewed = true;
+      if (event.eventName === "clip_sent_to_editor") session.sentToEditor = true;
+      if (event.eventName === "scanner_clip_opened_in_editor") session.openedInEditor = true;
+      if (event.eventName === "scanner_clip_export_started") session.exportStarted = true;
+      if (event.eventName === "scanner_clip_export_failed") session.exportFailed = true;
+    });
+
+    const sessions = [...sessionStates.values()];
+    const openedSessions = sessions.filter(session => session.opened).length;
+    const startedSessions = sessions.filter(session => session.started).length;
+    const completedSessions = sessions.filter(session => session.completed).length;
+    const previewedSessions = sessions.filter(session => session.previewed).length;
+    const editorSessions = sessions.filter(
+      session => session.sentToEditor || session.openedInEditor
+    ).length;
+    const exportSessions = sessions.filter(session => session.exportStarted).length;
+
+    const successfulScans = sessions.filter(
+      session => session.completed && session.resultCount > 0
+    );
+    const averageTopScore = successfulScans.length
+      ? Math.round(
+          successfulScans.reduce((sum, session) => sum + Number(session.topScore || 0), 0) /
+            successfulScans.length
+        )
+      : 0;
+    const averageResultCount = successfulScans.length
+      ? Number(
+          (
+            successfulScans.reduce((sum, session) => sum + Number(session.resultCount || 0), 0) /
+            successfulScans.length
+          ).toFixed(1)
+        )
+      : 0;
+
+    const funnel = [
+      { event: "scanner_opened", sessions: openedSessions },
+      { event: "scan_started", sessions: startedSessions },
+      { event: "scan_completed", sessions: completedSessions },
+      { event: "clip_previewed", sessions: previewedSessions },
+      { event: "clip_sent_to_editor", sessions: editorSessions },
+      { event: "scanner_clip_export_started", sessions: exportSessions },
+    ].map((step, index, steps) => ({
+      ...step,
+      rateFromPrevious:
+        index === 0 || !steps[index - 1].sessions
+          ? 1
+          : Number((step.sessions / steps[index - 1].sessions).toFixed(3)),
+    }));
+
+    res.json({
+      workflow,
+      range,
+      totalEvents: events.length,
+      totalSessions: sessions.length,
+      eventCounts,
+      funnel,
+      metrics: {
+        scanStartRate: openedSessions ? Number((startedSessions / openedSessions).toFixed(3)) : 0,
+        scanCompletionRate: startedSessions
+          ? Number((completedSessions / startedSessions).toFixed(3))
+          : 0,
+        previewRate: completedSessions
+          ? Number((previewedSessions / completedSessions).toFixed(3))
+          : 0,
+        editorConversionRate: completedSessions
+          ? Number((editorSessions / completedSessions).toFixed(3))
+          : 0,
+        exportConversionRate: editorSessions
+          ? Number((exportSessions / editorSessions).toFixed(3))
+          : 0,
+        averageTopScore,
+        averageResultCount,
+      },
+      recentEvents: events.slice(-25).reverse(),
+    });
+  } catch (error) {
+    console.error("Error building workflow summary:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/clip-scanner-cache", authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user?.uid || req.userId;
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+    const sourceFingerprint = normalizeWorkflowToken(req.query.sourceFingerprint);
+    if (!sourceFingerprint) {
+      return res.status(400).json({ error: "sourceFingerprint is required" });
+    }
+
+    const docId = getClipScannerCacheId(uid, sourceFingerprint);
+    const snapshot = await db.collection("clip_scanner_cache").doc(docId).get();
+    if (!snapshot.exists) {
+      return res.json({ hit: false, cache: null });
+    }
+
+    const data = snapshot.data() || {};
+    if (!isFreshClipScannerCache(data)) {
+      await db
+        .collection("clip_scanner_cache")
+        .doc(docId)
+        .delete()
+        .catch(() => {});
+      return res.json({ hit: false, cache: null, expired: true });
+    }
+
+    res.json({
+      hit: true,
+      cache: {
+        sourceFingerprint: data.sourceFingerprint,
+        sourceLabel: data.sourceLabel || "Untitled source",
+        createdAt: data.createdAt,
+        expiresAt: data.expiresAt,
+        resultCount: Number(data.resultCount || 0),
+        topScore: Number(data.topScore || 0),
+        results: Array.isArray(data.results) ? data.results : [],
+      },
+    });
+  } catch (error) {
+    console.error("Error getting clip scanner cache:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/clip-scanner-cache", authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user?.uid || req.userId;
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+    const sourceFingerprint = normalizeWorkflowToken(req.body?.sourceFingerprint);
+    if (!sourceFingerprint) {
+      return res.status(400).json({ error: "sourceFingerprint is required" });
+    }
+
+    const results = Array.isArray(req.body?.results) ? req.body.results.slice(0, 30) : [];
+    const now = Date.now();
+    const expiresAt = now + 3 * 24 * 60 * 60 * 1000;
+    const payload = {
+      uid,
+      sourceFingerprint,
+      sourceLabel: String(req.body?.sourceLabel || "Untitled source").slice(0, 200),
+      createdAt: now,
+      expiresAt,
+      resultCount: Number(req.body?.resultCount || results.length || 0),
+      topScore: Number(req.body?.topScore || 0),
+      results,
+    };
+
+    const docId = getClipScannerCacheId(uid, sourceFingerprint);
+    await db.collection("clip_scanner_cache").doc(docId).set(payload);
+    res.status(201).json({ ok: true, expiresAt });
+  } catch (error) {
+    console.error("Error saving clip scanner cache:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

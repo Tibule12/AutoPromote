@@ -157,6 +157,8 @@ export const API_ENDPOINTS = {
 
   // Analytics endpoints
   ANALYTICS_USER: `${API_BASE_URL}/api/analytics/user`,
+  ANALYTICS_WORKFLOW_SUMMARY: `${API_BASE_URL}/api/analytics/workflow-summary`,
+  ANALYTICS_CLIP_SCANNER_CACHE: `${API_BASE_URL}/api/analytics/clip-scanner-cache`,
 
   // Support endpoints
   SUPPORT_TICKETS_SELF: `${API_BASE_URL}/api/admin/support/tickets/mine`,

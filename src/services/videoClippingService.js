@@ -23,6 +23,10 @@ const crypto = require("crypto");
 // Point to the Python service (default localhost:8000)
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
+const GENERATED_CLIP_RETENTION_DAYS = parseInt(
+  process.env.GENERATED_CLIP_RETENTION_DAYS || "3",
+  10
+);
 
 class VideoClippingService {
   /**
@@ -335,7 +339,7 @@ class VideoClippingService {
       const publicUrl = `https://storage.googleapis.com/${bucket.name}/${destination}`;
 
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 5);
+      expiresAt.setDate(expiresAt.getDate() + GENERATED_CLIP_RETENTION_DAYS);
 
       // 5. Save to Content Collection (So user sees it in dashboard)
       const newContentId = `clip-${clipId}-${Date.now()}`;
@@ -348,6 +352,7 @@ class VideoClippingService {
           id: newContentId,
           userId: userId,
           url: publicUrl,
+          storagePath: destination,
           title: isMontage ? `🔥 Viral Montage` : `Clip: ${clip.text || "Untitled"}`,
           createdAt: new Date().toISOString(),
           expiresAt: expiresAt.toISOString(),
@@ -366,6 +371,7 @@ class VideoClippingService {
           userId: userId,
           type: "video",
           url: publicUrl,
+          storagePath: destination,
           title: isMontage ? `🔥 Viral Montage` : `Clip: ${clip.text || "Untitled"}`,
           description: `AI Generated ${isMontage ? "Montage" : "Clip"} from Analysis ${analysisId}`,
           createdAt: new Date().toISOString(),
@@ -429,29 +435,29 @@ class VideoClippingService {
         // A. Delete file from Storage
         if (data.url) {
           try {
-            // Extract path from URL (simple heuristic for public URLs)
-            // URL format: https://storage.googleapis.com/{bucket}/{path}
-            // Better to store path, but let's try to infer if stored path not available.
-            // Actually, we used destination = `generated_clips/${userId}/${clipId}_${Date.now()}.mp4`
-            // Let's try to find the match or just search by prefix if needed
-            // But wait, makePublic() URL doesn't easily reverse to path.
-            // Strategy: We can reconstruct the path format or just rely on the stored URL if we saved the path.
-            // We didn't save the path explicitly, only URL.
-            // Let's parse the URL.
-
-            const urlParts = data.url.split(`https://storage.googleapis.com/${bucket.name}/`);
-            if (urlParts.length === 2) {
-              const filePath = decodeURIComponent(urlParts[1]);
+            const storedPath = typeof data.storagePath === "string" ? data.storagePath : "";
+            if (storedPath) {
               await bucket
-                .file(filePath)
+                .file(storedPath)
                 .delete()
                 .catch(err => {
-                  // Ignore "Not Found" error
                   if (err.code !== 404)
-                    console.error(`Failed to delete storage file ${filePath}:`, err);
+                    console.error(`Failed to delete storage file ${storedPath}:`, err);
                 });
             } else {
-              console.warn(`Could not parse storage path from URL: ${data.url}`);
+              const urlParts = data.url.split(`https://storage.googleapis.com/${bucket.name}/`);
+              if (urlParts.length === 2) {
+                const filePath = decodeURIComponent(urlParts[1]);
+                await bucket
+                  .file(filePath)
+                  .delete()
+                  .catch(err => {
+                    if (err.code !== 404)
+                      console.error(`Failed to delete storage file ${filePath}:`, err);
+                  });
+              } else {
+                console.warn(`Could not parse storage path from URL: ${data.url}`);
+              }
             }
           } catch (storageError) {
             console.error(`Error deleting file for clip ${clipId}:`, storageError);

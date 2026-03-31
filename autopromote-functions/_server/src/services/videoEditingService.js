@@ -6,6 +6,7 @@ const axios = require("axios");
 const admin = require("firebase-admin");
 const db = admin.firestore();
 const fs = require("fs");
+const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
 
 // Point to the Python service (default to Cloud Run in production, localhost in dev)
 // Use the deployed URL for stability if env var is missing
@@ -26,28 +27,33 @@ class VideoEditingService {
         userId,
         videoUrl,
         sourceLabel: options.sourceLabel || "",
+        source: {
+          kind: "audio_donor_video",
+          url: videoUrl,
+          label: options.sourceLabel || "",
+        },
         status: "queued",
+        stage: "queued_for_dispatch",
         progress: 0,
+        result: null,
+        expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
         createdAt: new Date().toISOString(),
       });
 
-      const response = await axios.post(
-        `${MEDIA_WORKER_URL}/extract-audio`,
-        {
-          video_url: videoUrl,
-          output_format: "mp3",
-          job_id: jobId,
-          async_mode: true,
-        },
-        { timeout: 60000 }
-      );
-
-      const workerResult = response.data || {};
+      const workerResult = await queueAudioExtractionTask({
+        jobId,
+        videoUrl,
+        outputFormat: "mp3",
+      });
       await db.collection("video_edits").doc(jobId).set(
         {
-          status: workerResult.status === "processing" ? "processing" : "queued",
+          status: "queued",
+          stage: "queued_for_worker",
           progress: 5,
-          workerJobId: workerResult.job_id || jobId,
+          dispatchMode: workerResult.dispatchMode,
+          taskName: workerResult.taskName || null,
+          taskTargetUrl: workerResult.taskTargetUrl,
+          workerJobId: workerResult.workerJobId || jobId,
           updatedAt: new Date().toISOString(),
         },
         { merge: true }
@@ -232,6 +238,8 @@ class VideoEditingService {
 
         // Pipeline Flags
         smart_crop: options.smartCrop || false,
+        quality_enhancement: options.enhanceQuality || false,
+        quality_enhancement_profile: options.qualityEnhancementProfile || "safe_clean",
         crop_style: cropStyle,
         silence_removal: options.silenceRemoval || false,
         silence_threshold_db: Number(options.silenceThreshold ?? -35),
@@ -239,6 +247,9 @@ class VideoEditingService {
         captions: options.captions || false,
         remove_watermark: options.removeWatermark || false,
         watermark_mode: options.watermarkMode || "adaptive",
+        watermark_regions: Array.isArray(options.manualWatermarkRegions)
+          ? options.manualWatermarkRegions
+          : [],
         add_music: options.addMusic || false,
         music_file: options.musicFile || "upbeat.mp3", // Changed default to upbeat.mp3
         mute_audio: options.muteAudio || false,
@@ -252,6 +263,15 @@ class VideoEditingService {
         add_hook: options.addHook || false,
         hook_text: options.hookText || "WAIT TILL THE END 🚨",
         hook_intro_seconds: Number(options.hookIntroSeconds || 3.4),
+        hook_template: options.hookTemplate || "blur_reveal",
+        hook_start_time: Number(options.hookStartTime || 0),
+        hook_blur_background:
+          options.hookBlurBackground !== undefined ? !!options.hookBlurBackground : true,
+        hook_dark_overlay:
+          options.hookDarkOverlay !== undefined ? !!options.hookDarkOverlay : true,
+        hook_freeze_frame: !!options.hookFreezeFrame,
+        hook_zoom_scale: Number(options.hookZoomScale || 1.08),
+        hook_text_animation: options.hookTextAnimation || "slide_up",
         transcription_language: options.transcriptionLanguage || "auto",
         transcription_hint:
           options.transcriptionHint ||
@@ -282,6 +302,7 @@ class VideoEditingService {
           auto_captions:
             viralData.auto_captions !== undefined ? !!viralData.auto_captions : options.captions,
           timeline_segments: timelineSegments,
+          background_audio: viralData.background_audio || null,
           overlays: (viralData.overlays || []).map(o => ({
             ...o,
             start_time:

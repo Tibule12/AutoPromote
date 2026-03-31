@@ -50,7 +50,8 @@ body.dashboard-mode .modal-overlay {
 /* global body class to suppress scrolling when a modal is active */
 body.modal-open {
   overflow: hidden !important;
-  touch-action: none; /* prevent mobile overscroll */
+  overscroll-behavior: none;
+  touch-action: pan-y pinch-zoom;
 }
 
 .App {

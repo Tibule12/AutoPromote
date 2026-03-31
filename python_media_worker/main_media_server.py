@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks
+from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional, Union, Dict, Any
@@ -10,6 +10,8 @@ import os
 import shutil
 import uuid
 import logging
+import base64
+import mimetypes
 import re  # Added for parsing silence output
 import cv2  # OpenCV (Phase 1)
 import numpy as np
@@ -106,6 +108,8 @@ except ImportError:
 # Logging setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("MediaWorker")
+FIREBASE_STATUS_UPDATES_ENABLED = bool(firebase_admin._apps)
+MEDIA_WORKER_TASK_SECRET = os.getenv("MEDIA_WORKER_TASK_SECRET", "")
 
 # Initialize Whisper model (lazy load or global)
 # 'tiny' is fast but less accurate. 'base' or 'small' are better for production.
@@ -437,28 +441,86 @@ def wrap_hook_text(text, max_chars=18, max_lines=3):
 
     return "\n".join(lines)
 
-def build_hook_filter_chain(hook_text, intro_seconds):
+def build_hook_filter_chain(
+    hook_text,
+    intro_seconds,
+    width_val=1080,
+    height_val=1920,
+    template="blur_reveal",
+    hook_start_time=0.0,
+    blur_background=True,
+    dark_overlay=True,
+    freeze_frame=False,
+    zoom_scale=1.08,
+    text_animation="slide_up",
+):
     wrapped = wrap_hook_text(hook_text, max_chars=18, max_lines=3)
     if not wrapped:
         return ""
 
     safe_text = escape_drawtext_text(wrapped)
-    banner_text = escape_drawtext_text(wrap_hook_text(hook_text, max_chars=26, max_lines=2))
-    intro = max(2.0, min(float(intro_seconds or 3.4), 6.0))
-    banner_end = intro + 2.6
+    intro = max(0.8, min(float(intro_seconds or 3.0), 5.0))
+    hook_start = max(0.0, min(float(hook_start_time or 0.0), 1.5))
+    hook_end = hook_start + intro
+    outro_end = hook_end + 0.45
+    normalized_template = str(template or "blur_reveal").strip().lower()
+    normalized_animation = str(text_animation or "slide_up").strip().lower().replace("-", "_")
+    zoom_delta = max(0.0, min(float(zoom_scale or 1.08), 1.14) - 1.0)
+    progress_expr = f"max(0\\,min(1\\,(t-{hook_start:.2f})/{max(intro, 0.01):.2f}))"
+    intro_text_expr = f"max(0\\,min(1\\,(t-{hook_start:.2f})/0.35))"
+    fade_expr = f"if(lte(t\\,{hook_end:.2f})\\,1\\,max(0\\,1-((t-{hook_end:.2f})/0.45)))"
     font_size = "if(gt(text_h\\,h*0.22)\\,h*0.05\\,h*0.068)"
-    banner_font_size = "h*0.035"
 
-    return ",".join([
-        f"drawbox=x=0:y=0:w=iw:h=ih:color=black@1.0:t=fill:enable='between(t,0,{intro:.2f})'",
-        f"drawbox=x=iw*0.08:y=ih*0.12:w=iw*0.84:h=ih*0.018:color=0x00F2EA@0.96:t=fill:enable='between(t,0,{intro:.2f})'",
-        f"drawtext=text='HOOK':font='DejaVu Sans':fontcolor=white:fontsize=h*0.03:x=(w-text_w)/2:y=h*0.2:borderw=2:bordercolor=black@0.9:enable='between(t,0,{intro:.2f})'",
-        f"drawtext=text='{safe_text}':font='DejaVu Sans':fontcolor=white:fontsize={font_size}:line_spacing=16:x=(w-text_w)/2:y=(h-text_h)/2-h*0.03:borderw=4:bordercolor=black@0.92:shadowx=3:shadowy=3:enable='between(t,0,{intro:.2f})'",
-        f"drawtext=text='watch this part':font='DejaVu Sans':fontcolor=white@0.92:fontsize=h*0.028:x=(w-text_w)/2:y=h*0.73:borderw=2:bordercolor=black@0.85:enable='between(t,0,{intro:.2f})'",
-        f"drawbox=x=iw*0.05:y=ih*0.06:w=iw*0.9:h=ih*0.12:color=black@0.4:t=fill:enable='between(t,{intro:.2f},{banner_end:.2f})'",
-        f"drawbox=x=iw*0.07:y=ih*0.085:w=iw*0.015:h=ih*0.065:color=0x00F2EA@0.96:t=fill:enable='between(t,{intro:.2f},{banner_end:.2f})'",
-        f"drawtext=text='{banner_text}':font='DejaVu Sans':fontcolor=white:fontsize={banner_font_size}:line_spacing=10:x=w*0.11:y=h*0.093:borderw=3:bordercolor=black@0.86:shadowx=2:shadowy=2:enable='between(t,{intro:.2f},{banner_end:.2f})'",
-    ])
+    filters = []
+
+    if zoom_delta > 0.001:
+        zoom_expr = f"(1+{zoom_delta:.4f}*{progress_expr})"
+        filters.append(
+            f"scale=w={width_val}*{zoom_expr}:h={height_val}*{zoom_expr}:eval=frame,crop={width_val}:{height_val}:(iw-{width_val})/2:(ih-{height_val})/2"
+        )
+
+    if blur_background and normalized_template == "blur_reveal":
+        filters.append(
+            f"gblur=sigma=12:steps=1:enable='between(t,{hook_start:.2f},{outro_end:.2f})'"
+        )
+
+    if dark_overlay:
+        overlay_alpha = 0.26 if normalized_template == "zoom_focus" else 0.36
+        filters.append(
+            f"drawbox=x=0:y=0:w=iw:h=ih:color=black@{overlay_alpha:.2f}:t=fill:enable='between(t,{hook_start:.2f},{outro_end:.2f})'"
+        )
+
+    if normalized_template in {"blur_reveal", "freeze_text"}:
+        filters.append(
+            f"drawbox=x=iw*0.08:y=ih*0.15:w=iw*0.84:h=ih*0.012:color=0xF97316@0.96:t=fill:enable='between(t,{hook_start:.2f},{hook_end:.2f})'"
+        )
+
+    if normalized_animation == "fade_in":
+        text_y = "(h-text_h)/2-h*0.03"
+    else:
+        text_y = f"(h-text_h)/2-h*0.03+((1-{intro_text_expr})*40)"
+
+    filters.append(
+        f"drawtext=text='{safe_text}':font='DejaVu Sans':fontcolor=white:alpha={fade_expr}*{intro_text_expr}:fontsize={font_size}:line_spacing=18:x=(w-text_w)/2:y={text_y}:borderw=5:bordercolor=black@0.94:shadowx=4:shadowy=4:enable='between(t,{hook_start:.2f},{outro_end:.2f})'"
+    )
+
+    filters.append(
+        f"drawtext=text='HOOK':font='DejaVu Sans':fontcolor=white:alpha={fade_expr}:fontsize=h*0.028:x=(w-text_w)/2:y=h*0.21:borderw=2:bordercolor=black@0.88:enable='between(t,{hook_start:.2f},{outro_end:.2f})'"
+    )
+
+    return ",".join(filters)
+
+def build_quality_enhancement_filter_chain(profile="safe_clean"):
+    normalized_profile = str(profile or "safe_clean").strip().lower()
+
+    if normalized_profile == "safe_clean":
+        return ",".join([
+            "hqdn3d=1.1:1.1:5.5:5.5",
+            "eq=brightness=0.01:contrast=1.04:saturation=1.03",
+            "unsharp=5:5:0.42:5:5:0.0",
+        ])
+
+    return ""
 
 def build_watermark_regions(width, height):
     width = max(int(width or 1080), 320)
@@ -466,11 +528,16 @@ def build_watermark_regions(width, height):
 
     margin_x = max(18, int(width * 0.018))
     top_margin = max(18, int(height * 0.018))
-    bottom_margin = max(120, int(height * 0.07))
-    logo_w = max(220, int(width * 0.24))
-    logo_h = max(84, int(height * 0.075))
-    username_w = max(280, int(width * 0.4))
-    username_h = max(96, int(height * 0.085))
+    bottom_margin = max(68, int(height * 0.052))
+    logo_w = max(88, int(width * 0.16))
+    logo_h = max(54, int(height * 0.06))
+    username_w = max(124, int(width * 0.22))
+    username_h = max(44, int(height * 0.046))
+    username_gap = max(8, int(width * 0.012))
+    bottom_y = max(top_margin, height - username_h - bottom_margin)
+    bottom_right_x = max(margin_x, width - username_w - margin_x)
+    icon_bottom_y = max(top_margin, bottom_y - max(10, int(height * 0.01)))
+    icon_right_x = max(margin_x, width - logo_w - margin_x)
 
     return {
         "top_left": [
@@ -480,10 +547,12 @@ def build_watermark_regions(width, height):
             (max(margin_x, width - logo_w - margin_x), top_margin, logo_w, logo_h),
         ],
         "bottom_left": [
-            (margin_x, max(top_margin, height - username_h - bottom_margin), username_w, username_h),
+            (margin_x, icon_bottom_y, logo_w, logo_h),
+            (margin_x + logo_w - max(4, int(width * 0.006)), bottom_y, username_w, username_h),
         ],
         "bottom_right": [
-            (max(margin_x, width - username_w - margin_x), max(top_margin, height - username_h - bottom_margin), username_w, username_h),
+            (icon_right_x, icon_bottom_y, logo_w, logo_h),
+            (bottom_right_x - logo_w - username_gap + max(4, int(width * 0.006)), bottom_y, username_w, username_h),
         ],
     }
 
@@ -729,22 +798,303 @@ def create_watermark_preview_sheet(video_path, width, height, analyzed_windows, 
 
     return cv2.vconcat(rows) if len(rows) > 1 else rows[0]
 
-def build_delogo_filters(width, height, mode, duration=None, video_path=None):
+def clamp_delogo_region(width, height, x, y, region_w, region_h):
+    safe_width = max(int(width or 1080), 32)
+    safe_height = max(int(height or 1920), 32)
+
+    x = int(x)
+    y = int(y)
+    region_w = int(region_w)
+    region_h = int(region_h)
+
+    x = max(1, min(safe_width - 2, x))
+    y = max(1, min(safe_height - 2, y))
+    region_w = max(1, min(safe_width - x - 1, region_w))
+    region_h = max(1, min(safe_height - y - 1, region_h))
+    return x, y, region_w, region_h
+
+def read_video_frame_at_time(capture, time_seconds):
+    capture.set(cv2.CAP_PROP_POS_MSEC, max(0.0, float(time_seconds or 0.0)) * 1000.0)
+    success, frame = capture.read()
+    if not success or frame is None:
+        return None
+    return frame
+
+def build_tracking_candidate_windows(width, height, region_w, region_h, previous_box=None, seed_box=None):
+    windows = []
+
+    def add_window(x, y, window_w, window_h):
+        x = max(0, min(width - 2, int(x)))
+        y = max(0, min(height - 2, int(y)))
+        window_w = max(region_w + 2, min(width - x, int(window_w)))
+        window_h = max(region_h + 2, min(height - y, int(window_h)))
+        key = (x, y, window_w, window_h)
+        if window_w > region_w and window_h > region_h and key not in windows:
+            windows.append(key)
+
+    def add_local_windows(box, padding_scale_x=2.6, padding_scale_y=2.4):
+        if not box:
+            return
+        box_x, box_y, box_w, box_h = box
+        pad_x = max(40, int(box_w * padding_scale_x), int(width * 0.08))
+        pad_y = max(32, int(box_h * padding_scale_y), int(height * 0.07))
+        add_window(box_x - pad_x, box_y - pad_y, box_w + (pad_x * 2), box_h + (pad_y * 2))
+
+        mirrored_x = max(0, width - box_x - box_w)
+        add_window(mirrored_x - pad_x, box_y - pad_y, box_w + (pad_x * 2), box_h + (pad_y * 2))
+
+    add_local_windows(previous_box)
+    add_local_windows(seed_box, padding_scale_x=3.0, padding_scale_y=2.8)
+
+    corner_w = max(region_w + max(72, int(width * 0.18)), int(width * 0.34))
+    corner_h = max(region_h + max(60, int(height * 0.12)), int(height * 0.24))
+    add_window(0, 0, corner_w, corner_h)
+    add_window(width - corner_w, 0, corner_w, corner_h)
+    add_window(0, height - corner_h, corner_w, corner_h)
+    add_window(width - corner_w, height - corner_h, corner_w, corner_h)
+    add_window(0, max(0, int(height * 0.42)), max(region_w + 80, int(width * 0.42)), max(region_h + 80, int(height * 0.24)))
+    add_window(max(0, int(width * 0.58)), max(0, int(height * 0.42)), max(region_w + 80, int(width * 0.42)), max(region_h + 80, int(height * 0.24)))
+    return windows
+
+def locate_template_in_frame(frame, template_gray, width, height, region_w, region_h, previous_box=None, seed_box=None):
+    if frame is None or template_gray is None or template_gray.size == 0:
+        return None
+
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    candidate_windows = build_tracking_candidate_windows(width, height, region_w, region_h, previous_box, seed_box)
+    best_match = None
+
+    for window_x, window_y, window_w, window_h in candidate_windows:
+        roi = frame_gray[window_y:window_y + window_h, window_x:window_x + window_w]
+        if roi is None or roi.size == 0:
+            continue
+        if roi.shape[0] <= template_gray.shape[0] or roi.shape[1] <= template_gray.shape[1]:
+            continue
+
+        result = cv2.matchTemplate(roi, template_gray, cv2.TM_CCOEFF_NORMED)
+        _, score, _, max_loc = cv2.minMaxLoc(result)
+        candidate = (
+            window_x + int(max_loc[0]),
+            window_y + int(max_loc[1]),
+            region_w,
+            region_h,
+            float(score),
+        )
+        if best_match is None or candidate[4] > best_match[4]:
+            best_match = candidate
+
+    return best_match
+
+def build_manual_tracking_times(seed_time, duration, sample_interval, target_time=None):
+    safe_duration = max(0.0, float(duration or 0.0))
+    safe_seed = clamp_float(seed_time, 0.0, safe_duration if safe_duration > 0 else 0.0)
+    safe_interval = clamp_float(sample_interval, 0.35, 2.0)
+
+    if target_time is not None:
+        safe_target = clamp_float(target_time, 0.0, safe_duration if safe_duration > 0 else 0.0)
+        times = {round(safe_seed, 3), round(safe_target, 3)}
+        if safe_target >= safe_seed:
+            current_time = safe_seed
+            while current_time < safe_target:
+                times.add(round(current_time, 3))
+                current_time += safe_interval
+        else:
+            current_time = safe_seed
+            while current_time > safe_target:
+                times.add(round(current_time, 3))
+                current_time -= safe_interval
+        return sorted(times)
+
+    times = {0.0, round(safe_seed, 3), round(safe_duration, 3)}
+    current_time = 0.0
+    while current_time < safe_duration:
+        times.add(round(current_time, 3))
+        current_time += safe_interval
+    times.add(round(safe_duration, 3))
+    return sorted(times)
+
+def track_manual_region_positions(video_path, width, height, duration, region, target_time=None, sample_interval=0.9):
+    safe_duration = max(0.0, float(duration or 0.0))
+    seed_time = clamp_float(region.get("seed_time", 0.0), 0.0, safe_duration if safe_duration > 0 else 0.0)
+
+    left = max(0.0, min(100.0, float(region.get("left", 0.0))))
+    top = max(0.0, min(100.0, float(region.get("top", 0.0))))
+    region_w_pct = max(1.0, min(100.0, float(region.get("width", 0.0))))
+    region_h_pct = max(1.0, min(100.0, float(region.get("height", 0.0))))
+    seed_x = int((left / 100.0) * width)
+    seed_y = int((top / 100.0) * height)
+    seed_w = max(32, int((region_w_pct / 100.0) * width))
+    seed_h = max(24, int((region_h_pct / 100.0) * height))
+    seed_box = clamp_delogo_region(width, height, seed_x, seed_y, seed_w, seed_h)
+
+    times = build_manual_tracking_times(seed_time, safe_duration, sample_interval, target_time)
+    if len(times) <= 1 or not video_path:
+        return {times[0] if times else round(seed_time, 3): seed_box}
+
+    capture = cv2.VideoCapture(video_path)
+    if not capture.isOpened():
+        return {time_value: seed_box for time_value in times}
+
+    positions = {round(seed_time, 3): seed_box}
+
+    try:
+        seed_frame = read_video_frame_at_time(capture, seed_time)
+        if seed_frame is None:
+            return {time_value: seed_box for time_value in times}
+
+        box_x, box_y, box_w, box_h = seed_box
+        template = seed_frame[box_y:box_y + box_h, box_x:box_x + box_w]
+        if template is None or template.size == 0:
+            return {time_value: seed_box for time_value in times}
+
+        template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+        times_sorted = sorted(times)
+        seed_key = round(seed_time, 3)
+        if seed_key not in times_sorted:
+            times_sorted.append(seed_key)
+            times_sorted.sort()
+
+        seed_index = times_sorted.index(seed_key)
+
+        previous_box = seed_box
+        for time_value in times_sorted[seed_index + 1:]:
+            frame = read_video_frame_at_time(capture, time_value)
+            best_match = locate_template_in_frame(
+                frame,
+                template_gray,
+                width,
+                height,
+                box_w,
+                box_h,
+                previous_box=previous_box,
+                seed_box=seed_box,
+            )
+            if best_match and best_match[4] >= 0.18:
+                previous_box = clamp_delogo_region(width, height, best_match[0], best_match[1], box_w, box_h)
+            positions[time_value] = previous_box
+
+        previous_box = seed_box
+        for time_value in reversed(times_sorted[:seed_index]):
+            frame = read_video_frame_at_time(capture, time_value)
+            best_match = locate_template_in_frame(
+                frame,
+                template_gray,
+                width,
+                height,
+                box_w,
+                box_h,
+                previous_box=previous_box,
+                seed_box=seed_box,
+            )
+            if best_match and best_match[4] >= 0.18:
+                previous_box = clamp_delogo_region(width, height, best_match[0], best_match[1], box_w, box_h)
+            positions[time_value] = previous_box
+    finally:
+        capture.release()
+
+    return positions
+
+def build_tracked_manual_filters(width, height, duration, video_path, manual_regions, target_time=None):
+    filters = []
+    safe_duration = max(0.0, float(duration or 0.0))
+
+    for region in manual_regions:
+        tracking_enabled = bool(region.get("track", True))
+        if not tracking_enabled or not video_path:
+            left = max(0.0, min(100.0, float(region.get("left", 0.0))))
+            top = max(0.0, min(100.0, float(region.get("top", 0.0))))
+            region_w_pct = max(1.0, min(100.0, float(region.get("width", 0.0))))
+            region_h_pct = max(1.0, min(100.0, float(region.get("height", 0.0))))
+            region_x = int((left / 100.0) * width)
+            region_y = int((top / 100.0) * height)
+            region_w = max(32, int((region_w_pct / 100.0) * width))
+            region_h = max(24, int((region_h_pct / 100.0) * height))
+            region_x, region_y, region_w, region_h = clamp_delogo_region(width, height, region_x, region_y, region_w, region_h)
+            filters.append(f"delogo=x={region_x}:y={region_y}:w={region_w}:h={region_h}:show=0")
+            continue
+
+        tracked_positions = track_manual_region_positions(
+            video_path,
+            width,
+            height,
+            safe_duration,
+            region,
+            target_time=target_time,
+            sample_interval=0.9,
+        )
+        if target_time is not None:
+            target_key = sorted(tracked_positions.keys(), key=lambda value: abs(value - float(target_time)))[0]
+            region_x, region_y, region_w, region_h = tracked_positions[target_key]
+            filters.append(f"delogo=x={region_x}:y={region_y}:w={region_w}:h={region_h}:show=0")
+            continue
+
+        ordered_times = sorted(tracked_positions.keys())
+        if not ordered_times:
+            continue
+
+        merged_windows = []
+        for index, start_time in enumerate(ordered_times):
+            end_time = safe_duration if index == len(ordered_times) - 1 else ordered_times[index + 1]
+            box = tracked_positions[start_time]
+            if merged_windows and merged_windows[-1]["box"] == box:
+                merged_windows[-1]["end"] = end_time
+            else:
+                merged_windows.append({"start": start_time, "end": end_time, "box": box})
+
+        for window in merged_windows:
+            region_x, region_y, region_w, region_h = window["box"]
+            enable_expr = f"between(t\\,{window['start']:.3f}\\,{window['end']:.3f})"
+            filters.append(
+                f"delogo=x={region_x}:y={region_y}:w={region_w}:h={region_h}:show=0:enable='{enable_expr}'"
+            )
+
+    return filters
+
+def resolve_schedule_keys_at_time(schedule, target_time):
+    if not schedule:
+        return ()
+
+    safe_target = float(target_time or 0.0)
+    for start_time, end_time, keys in schedule:
+        if safe_target >= float(start_time) and safe_target <= float(end_time):
+            return tuple(keys)
+
+    nearest_window = min(
+        schedule,
+        key=lambda window: min(abs(safe_target - float(window[0])), abs(safe_target - float(window[1]))),
+    )
+    return tuple(nearest_window[2])
+
+def build_delogo_filters(width, height, mode, duration=None, video_path=None, manual_regions=None, target_time=None):
     width = max(int(width or 1080), 320)
     height = max(int(height or 1920), 320)
     mode = str(mode or "adaptive").strip().lower()
     regions = build_watermark_regions(width, height)
 
+    if mode == "manual" and manual_regions:
+        filters = build_tracked_manual_filters(width, height, duration, video_path, manual_regions, target_time)
+        if filters:
+            return filters
+
     if mode in {"adaptive", "tracked", "moving", "tiktok"} and video_path:
+        if target_time is not None:
+            filters = []
+            active_keys = resolve_schedule_keys_at_time(
+                detect_dynamic_watermark_schedule(video_path, width, height, duration, mode),
+                target_time,
+            )
+            for key in active_keys:
+                for x, y, region_w, region_h in regions.get(key, []):
+                    x, y, region_w, region_h = clamp_delogo_region(width, height, x, y, region_w, region_h)
+                    filters.append(f"delogo=x={x}:y={y}:w={region_w}:h={region_h}:show=0")
+            return filters
+
         filters = []
         for start_time, end_time, keys in detect_dynamic_watermark_schedule(video_path, width, height, duration, mode):
             enable_expr = f"between(t\\,{start_time:.3f}\\,{end_time:.3f})"
             for key in keys:
                 for x, y, region_w, region_h in regions.get(key, []):
-                    x = max(0, min(width - 8, int(x)))
-                    y = max(0, min(height - 8, int(y)))
-                    region_w = max(32, min(width - x, int(region_w)))
-                    region_h = max(24, min(height - y, int(region_h)))
+                    x, y, region_w, region_h = clamp_delogo_region(width, height, x, y, region_w, region_h)
                     filters.append(
                         f"delogo=x={x}:y={y}:w={region_w}:h={region_h}:show=0:enable='{enable_expr}'"
                     )
@@ -766,10 +1116,7 @@ def build_delogo_filters(width, height, mode, duration=None, video_path=None):
 
     filters = []
     for x, y, region_w, region_h in selected_regions:
-        x = max(0, min(width - 8, int(x)))
-        y = max(0, min(height - 8, int(y)))
-        region_w = max(32, min(width - x, int(region_w)))
-        region_h = max(24, min(height - y, int(region_h)))
+        x, y, region_w, region_h = clamp_delogo_region(width, height, x, y, region_w, region_h)
         filters.append(f"delogo=x={x}:y={y}:w={region_w}:h={region_h}:show=0")
     return filters
 
@@ -812,11 +1159,24 @@ def upload_file_to_firebase(local_path, destination_path=None):
         logger.error(f"Firebase Upload CRITICAL: {e}")
         return None
 
+def encode_file_as_data_url(local_path):
+    try:
+        mime_type, _ = mimetypes.guess_type(local_path)
+        safe_mime = mime_type or "application/octet-stream"
+        with open(local_path, "rb") as source_file:
+            encoded = base64.b64encode(source_file.read()).decode("ascii")
+        return f"data:{safe_mime};base64,{encoded}"
+    except Exception as e:
+        logger.error(f"Failed to encode preview asset as data URL: {e}")
+        return None
+
 def update_firestore_job(job_id, data):
     """
     Update Firestore job status (for async processing).
     """
-    if not job_id: return
+    global FIREBASE_STATUS_UPDATES_ENABLED
+    if not job_id or not FIREBASE_STATUS_UPDATES_ENABLED:
+        return
     try:
         db = firestore.client()
         # Ensure timestamp is set properly if needed, but 'merge=True' handles partial updates
@@ -827,6 +1187,7 @@ def update_firestore_job(job_id, data):
         doc_ref.set(data, merge=True)
         logger.info(f"Firestore updated for job {job_id}: {data.get('status')}")
     except Exception as e:
+        FIREBASE_STATUS_UPDATES_ENABLED = False
         logger.error(f"Failed to update Firestore for job {job_id}: {e}")
 
 
@@ -1109,19 +1470,35 @@ class SilenceRemovalRequest(BaseModel):
     silence_threshold_db: float = -35.0
     min_silence_duration: float = 0.75
 
+class SilencePreviewRequest(BaseModel):
+    video_url: str
+    silence_threshold_db: float = -35.0
+    min_silence_duration: float = 0.75
+
+class MusicPreviewRequest(BaseModel):
+    music_file: str
+    is_search: bool = False
+    safe_search: bool = True
+    preview_duration: float = 20.0
+
 class WatermarkPreviewRequest(BaseModel):
     video_url: str
     watermark_mode: str = "adaptive"
+    watermark_regions: Optional[List[dict]] = None
+    preview_time: float = 0.0
     window_seconds: float = 2.4
     max_preview_frames: int = 6
 
 class VideoProcessRequest(BaseModel):
     video_url: str
     smart_crop: bool = False
+    quality_enhancement: bool = False
+    quality_enhancement_profile: str = "safe_clean"
     crop_style: str = "blur"
     silence_removal: bool = False
     remove_watermark: bool = False
     watermark_mode: str = "adaptive" # adaptive, corners, top_right, bottom_left, all
+    watermark_regions: Optional[List[dict]] = None
     montage_segments: Optional[List[dict]] = None
     captions: bool = False  # NEW: For concatenating clips
     captions: bool = False
@@ -1133,6 +1510,13 @@ class VideoProcessRequest(BaseModel):
     add_hook: bool = False
     hook_text: str = ""
     hook_intro_seconds: float = 3.4
+    hook_template: str = "blur_reveal"
+    hook_start_time: float = 0.0
+    hook_blur_background: bool = True
+    hook_dark_overlay: bool = True
+    hook_freeze_frame: bool = False
+    hook_zoom_scale: float = 1.08
+    hook_text_animation: str = "slide_up"
     volume: float = 0.15
     is_search: bool = False
     safe_search: bool = True
@@ -1148,6 +1532,14 @@ class ExtractAudioRequest(BaseModel):
     output_format: str = "mp3"
     job_id: Optional[str] = None
     async_mode: bool = True
+
+def authorize_worker_task(request: Request):
+    if not MEDIA_WORKER_TASK_SECRET:
+        return
+
+    provided_secret = request.headers.get("x-worker-task-secret", "")
+    if provided_secret != MEDIA_WORKER_TASK_SECRET:
+        raise HTTPException(status_code=401, detail="Invalid worker task secret")
 
 async def detect_silence_intervals(input_path, threshold="-30dB", duration=0.5):
     """
@@ -1198,6 +1590,11 @@ async def extract_audio(request: ExtractAudioRequest, background_tasks: Backgrou
 
     return await extract_audio_impl(request)
 
+@app.post("/extract-audio-task")
+async def extract_audio_task(request: Request, payload: ExtractAudioRequest):
+    authorize_worker_task(request)
+    return await extract_audio_impl(payload, payload.job_id)
+
 async def extract_audio_impl(request: ExtractAudioRequest, provided_job_id: str = None):
     job_id = provided_job_id or request.job_id or str(uuid.uuid4())
     SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
@@ -1209,8 +1606,12 @@ async def extract_audio_impl(request: ExtractAudioRequest, provided_job_id: str 
     output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_audio_extract.{output_format}")
 
     try:
-        if request.async_mode:
-            update_firestore_job(job_id, {"status": "processing", "progress": 10, "type": "audio_extraction"})
+        update_firestore_job(job_id, {
+            "status": "processing",
+            "progress": 10,
+            "type": "audio_extraction",
+            "stage": "downloading_source",
+        })
 
         if str(request.video_url).startswith("http"):
             await run_subprocess_async(
@@ -1234,8 +1635,11 @@ async def extract_audio_impl(request: ExtractAudioRequest, provided_job_id: str 
         if not has_audio_stream(input_path):
             raise HTTPException(status_code=400, detail="The uploaded video does not contain an audio track")
 
-        if request.async_mode:
-            update_firestore_job(job_id, {"progress": 55, "detail": "Extracting audio"})
+        update_firestore_job(job_id, {
+            "progress": 55,
+            "detail": "Extracting audio",
+            "stage": "extracting_audio",
+        })
 
         ffmpeg_cmd = [
             "ffmpeg",
@@ -1257,6 +1661,11 @@ async def extract_audio_impl(request: ExtractAudioRequest, provided_job_id: str 
         await run_subprocess_async(ffmpeg_cmd, check=True, job_context=job_id)
 
         extracted_duration = get_media_duration(output_path)
+        update_firestore_job(job_id, {
+            "progress": 90,
+            "detail": "Uploading extracted audio",
+            "stage": "uploading_audio",
+        })
         public_url = upload_file_to_firebase(output_path, f"editor_audio/{job_id}.{output_format}")
         if not public_url:
             raise HTTPException(status_code=500, detail="Failed to upload extracted audio")
@@ -1265,28 +1674,30 @@ async def extract_audio_impl(request: ExtractAudioRequest, provided_job_id: str 
             "status": "completed",
             "job_id": job_id,
             "audio_url": public_url,
+            "stage": "completed",
             "progress": 100,
             "result": {
                 "audioUrl": public_url,
                 "audioDuration": extracted_duration,
                 "format": output_format,
                 "sourceVideoUrl": request.video_url,
+                "sourceAsset": {
+                    "kind": "audio_donor_video",
+                    "videoUrl": request.video_url,
+                },
             },
         }
 
-        if request.async_mode:
-            update_firestore_job(job_id, result_data)
+        update_firestore_job(job_id, result_data)
 
         return result_data
     except HTTPException as e:
         logger.error(f"Audio extraction failed for job {job_id}: {e.detail}")
-        if request.async_mode:
-            update_firestore_job(job_id, {"status": "failed", "error": str(e.detail), "progress": 0})
+        update_firestore_job(job_id, {"status": "failed", "error": str(e.detail), "progress": 0, "stage": "failed"})
         raise
     except Exception as e:
         logger.error(f"Audio extraction failed for job {job_id}: {e}")
-        if request.async_mode:
-            update_firestore_job(job_id, {"status": "failed", "error": str(e), "progress": 0})
+        update_firestore_job(job_id, {"status": "failed", "error": str(e), "progress": 0, "stage": "failed"})
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         if os.path.exists(input_path):
@@ -1369,6 +1780,226 @@ async def preview_watermark_regions(request: WatermarkPreviewRequest):
         if os.path.exists(local_input_path):
             try:
                 os.remove(local_input_path)
+            except Exception:
+                pass
+
+@app.post("/preview-watermark-cleanup")
+async def preview_watermark_cleanup(request: WatermarkPreviewRequest):
+    job_id = str(uuid.uuid4())
+    shared_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    if not os.path.exists(shared_tmp_dir):
+        os.makedirs(shared_tmp_dir)
+
+    local_input_path = os.path.join(shared_tmp_dir, f"{job_id}_watermark_cleanup_input.mp4")
+    original_frame_path = os.path.join(shared_tmp_dir, f"{job_id}_watermark_original.png")
+    cleaned_frame_path = os.path.join(shared_tmp_dir, f"{job_id}_watermark_cleaned.png")
+
+    try:
+        await materialize_video_input(request.video_url, local_input_path)
+        width_val, height_val = get_video_dimensions(local_input_path)
+        video_duration = get_media_duration(local_input_path)
+        safe_preview_time = clamp_float(
+            request.preview_time,
+            0.0,
+            max(0.0, video_duration - 0.05) if video_duration > 0 else 0.0,
+        )
+
+        filters = build_delogo_filters(
+            width_val,
+            height_val,
+            request.watermark_mode,
+            duration=video_duration,
+            video_path=local_input_path,
+            manual_regions=request.watermark_regions,
+            target_time=safe_preview_time,
+        )
+        if not filters:
+            raise HTTPException(status_code=400, detail="No watermark cleanup filters could be generated")
+
+        capture = cv2.VideoCapture(local_input_path)
+        try:
+            original_frame = read_video_frame_at_time(capture, safe_preview_time)
+        finally:
+            capture.release()
+
+        if original_frame is None:
+            raise HTTPException(status_code=500, detail="Failed to capture preview frame")
+
+        cv2.imwrite(original_frame_path, original_frame)
+
+        await run_subprocess_async(
+            [
+                "ffmpeg",
+                "-i",
+                original_frame_path,
+                "-vf",
+                ",".join(filters),
+                "-update",
+                "1",
+                "-frames:v",
+                "1",
+                "-y",
+                cleaned_frame_path,
+            ],
+            check=True,
+        )
+
+        original_frame_url = upload_file_to_firebase(
+            original_frame_path,
+            destination_path=f"processed/{os.path.basename(original_frame_path)}",
+        )
+        cleaned_frame_url = upload_file_to_firebase(
+            cleaned_frame_path,
+            destination_path=f"processed/{os.path.basename(cleaned_frame_path)}",
+        )
+        if not original_frame_url and os.path.exists(original_frame_path):
+            original_frame_url = encode_file_as_data_url(original_frame_path)
+        if not cleaned_frame_url and os.path.exists(cleaned_frame_path):
+            cleaned_frame_url = encode_file_as_data_url(cleaned_frame_path)
+
+        return {
+            "status": "completed",
+            "job_id": job_id,
+            "preview_time": round(safe_preview_time, 3),
+            "duration": video_duration,
+            "dimensions": {"width": width_val, "height": height_val},
+            "filters": filters,
+            "original_image_url": original_frame_url,
+            "cleaned_image_url": cleaned_frame_url,
+        }
+    finally:
+        for path in (local_input_path, original_frame_path, cleaned_frame_path):
+            if os.path.exists(path):
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass
+
+@app.post("/preview-silence")
+async def preview_silence(request: SilencePreviewRequest):
+    job_id = str(uuid.uuid4())
+    shared_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    if not os.path.exists(shared_tmp_dir):
+        os.makedirs(shared_tmp_dir)
+
+    local_input_path = os.path.join(shared_tmp_dir, f"{job_id}_silence_preview_input.mp4")
+
+    try:
+        await materialize_video_input(request.video_url, local_input_path)
+        duration = get_media_duration(local_input_path)
+        silence_threshold = clamp_float(request.silence_threshold_db, -60.0, -10.0)
+        min_pause_length = clamp_float(request.min_silence_duration, 0.2, 3.0)
+        silences = await detect_silence_intervals(
+            local_input_path,
+            threshold=f"{silence_threshold:.1f}dB",
+            duration=min_pause_length,
+        )
+
+        keep_segments = []
+        cursor = 0.0
+        for silence_start, silence_end in silences:
+            safe_start = max(0.0, float(silence_start))
+            safe_end = max(safe_start, float(silence_end))
+            if safe_start > cursor:
+                keep_segments.append({
+                    "start": round(cursor, 3),
+                    "end": round(safe_start, 3),
+                    "duration": round(max(0.0, safe_start - cursor), 3),
+                })
+            cursor = max(cursor, safe_end)
+
+        if duration > cursor:
+            keep_segments.append({
+                "start": round(cursor, 3),
+                "end": round(duration, 3),
+                "duration": round(max(0.0, duration - cursor), 3),
+            })
+
+        return {
+            "status": "completed",
+            "job_id": job_id,
+            "duration": duration,
+            "silence_segments": [
+                {
+                    "start": round(float(start), 3),
+                    "end": round(float(end), 3),
+                    "duration": round(max(0.0, float(end) - float(start)), 3),
+                }
+                for start, end in silences
+            ],
+            "keep_segments": keep_segments,
+        }
+    finally:
+        if os.path.exists(local_input_path):
+            try:
+                os.remove(local_input_path)
+            except Exception:
+                pass
+
+@app.post("/preview-music")
+async def preview_music(request: MusicPreviewRequest):
+    job_id = str(uuid.uuid4())
+    shared_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    if not os.path.exists(shared_tmp_dir):
+        os.makedirs(shared_tmp_dir)
+
+    resolved_output_path = os.path.join(shared_tmp_dir, f"{job_id}_music_source.mp3")
+    preview_output_path = os.path.join(shared_tmp_dir, f"{job_id}_music_preview.mp3")
+
+    try:
+        resolved_path = resolve_music_input(
+            request.music_file,
+            resolved_output_path,
+            is_search=bool(request.is_search),
+            safe_search=bool(request.safe_search),
+        )
+        if not resolved_path or not os.path.exists(resolved_path):
+            raise HTTPException(status_code=404, detail="Music preview source could not be resolved")
+
+        preview_duration = clamp_float(request.preview_duration, 5.0, 30.0)
+        await run_subprocess_async(
+            [
+                "ffmpeg",
+                "-y",
+                "-ss",
+                "0",
+                "-t",
+                f"{preview_duration:.2f}",
+                "-i",
+                resolved_path,
+                "-vn",
+                "-acodec",
+                "libmp3lame",
+                "-b:a",
+                "192k",
+                preview_output_path,
+            ],
+            check=True,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True,
+            job_context=job_id,
+        )
+
+        preview_url = upload_file_to_firebase(preview_output_path, f"preview_audio/{job_id}.mp3")
+        if not preview_url:
+            preview_url = encode_file_as_data_url(preview_output_path)
+        return {
+            "status": "completed",
+            "job_id": job_id,
+            "preview_url": preview_url,
+            "resolved_source": os.path.basename(resolved_path),
+            "preview_duration": preview_duration,
+        }
+    finally:
+        if os.path.exists(preview_output_path):
+            try:
+                os.remove(preview_output_path)
+            except Exception:
+                pass
+        if os.path.exists(resolved_output_path):
+            try:
+                os.remove(resolved_output_path)
             except Exception:
                 pass
 
@@ -1617,8 +2248,10 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         current_a = f"[{audio_map_idx}:a]"
 
         # Hook intro should hold the content back until the intro finishes.
-        if request.add_hook and request.hook_text:
-             intro_seconds = max(2.0, min(float(request.hook_intro_seconds or 3.4), 6.0))
+        if request.add_hook and request.hook_text and (
+            request.hook_freeze_frame or str(request.hook_template or "").strip().lower() == "freeze_text"
+        ):
+             intro_seconds = max(0.8, min(float(request.hook_intro_seconds or 3.0), 5.0))
              intro_ms = int(intro_seconds * 1000)
              main_filters.append(
                  f"{current_v}tpad=start_duration={intro_seconds:.2f}:start_mode=clone[v_intro_padded]"
@@ -1647,6 +2280,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                  request.watermark_mode,
                  duration=video_duration,
                  video_path=current_path,
+                 manual_regions=request.watermark_regions,
              )
              if filters:
                  filter_str = ",".join(filters)
@@ -1666,9 +2300,30 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                  main_filters.append(f"[bg][fg]overlay=(W-w)/2:(H-h)/2[v_cropped]")
              current_v = "[v_cropped]"
 
+        # A.1 Conservative quality cleanup for export footage only
+        if request.quality_enhancement:
+             enhancement_chain = build_quality_enhancement_filter_chain(
+                 request.quality_enhancement_profile
+             )
+             if enhancement_chain:
+                 main_filters.append(f"{current_v}{enhancement_chain}[v_enhanced]")
+                 current_v = "[v_enhanced]"
+
         # B. Viral Hook (Drawtext)
         if request.add_hook and request.hook_text:
-             hook_chain = build_hook_filter_chain(request.hook_text, request.hook_intro_seconds)
+             hook_chain = build_hook_filter_chain(
+                 request.hook_text,
+                 request.hook_intro_seconds,
+                 width_val=width_val,
+                 height_val=height_val,
+                 template=request.hook_template,
+                 hook_start_time=request.hook_start_time,
+                 blur_background=request.hook_blur_background,
+                 dark_overlay=request.hook_dark_overlay,
+                 freeze_frame=request.hook_freeze_frame,
+                 zoom_scale=request.hook_zoom_scale,
+                 text_animation=request.hook_text_animation,
+             )
              if hook_chain:
                  main_filters.append(f"{current_v}{hook_chain}[v_hook]")
                  current_v = "[v_hook]"
@@ -2988,6 +3643,8 @@ class BackgroundAudioTrack(BaseModel):
     url: str
     trim_start: float = 0.0
     volume: float = 0.7
+    mode: str = "mix"
+    ducking_strength: float = 0.45
     enabled: bool = True
 
 class RenderViralRequest(BaseModel):
@@ -2997,6 +3654,16 @@ class RenderViralRequest(BaseModel):
     overlays: List[ViralOverlay] = []
     auto_captions: bool = False
     smart_crop: bool = False
+    add_hook: bool = False
+    hook_text: str = ""
+    hook_intro_seconds: float = 3.0
+    hook_template: str = "blur_reveal"
+    hook_start_time: float = 0.0
+    hook_blur_background: bool = True
+    hook_dark_overlay: bool = True
+    hook_freeze_frame: bool = False
+    hook_zoom_scale: float = 1.08
+    hook_text_animation: str = "slide_up"
     timeline_segments: Optional[List[ViralTimelineSegment]] = None
     background_audio: Optional[BackgroundAudioTrack] = None
     job_id: Optional[str] = None
@@ -3263,6 +3930,24 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         current_v_label = "0:v"
         input_idx = 1
 
+        if request.add_hook and request.hook_text:
+            hook_chain = build_hook_filter_chain(
+                request.hook_text,
+                request.hook_intro_seconds,
+                width_val=base_width,
+                height_val=base_height,
+                template=request.hook_template,
+                hook_start_time=request.hook_start_time,
+                blur_background=request.hook_blur_background,
+                dark_overlay=request.hook_dark_overlay,
+                freeze_frame=request.hook_freeze_frame,
+                zoom_scale=request.hook_zoom_scale,
+                text_animation=request.hook_text_animation,
+            )
+            if hook_chain:
+                filter_chain.append(f"[{current_v_label}]{hook_chain}[v_hook];")
+                current_v_label = "v_hook"
+
         def build_overlay_scale_filter(input_label, output_label, overlay):
             width_percent = float(overlay.width) if overlay.width is not None else None
             height_percent = float(overlay.height) if overlay.height is not None else None
@@ -3487,11 +4172,24 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 input_idx += 1
 
                 bg_volume = clamp_float(background_audio.volume, 0.0, 1.5)
+                background_audio_mode = str(background_audio.mode or "mix").strip().lower()
+                if background_audio_mode not in {"mix", "replace", "duck_original"}:
+                    background_audio_mode = "mix"
+                ducking_strength = clamp_float(background_audio.ducking_strength, 0.15, 0.95)
                 audio_filter_chain.append(f"[{background_audio_idx}:a]volume={bg_volume}[bg_track]")
                 if has_main_audio:
-                    audio_filter_chain.append(
-                        f"[0:a][bg_track]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[a_mix]"
-                    )
+                    if background_audio_mode == "replace":
+                        audio_filter_chain.append("[bg_track]anull[a_mix]")
+                    elif background_audio_mode == "duck_original":
+                        main_gain = max(0.05, 1.0 - ducking_strength)
+                        audio_filter_chain.append(f"[0:a]volume={main_gain:.2f}[main_ducked]")
+                        audio_filter_chain.append(
+                            f"[main_ducked][bg_track]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[a_mix]"
+                        )
+                    else:
+                        audio_filter_chain.append(
+                            f"[0:a][bg_track]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[a_mix]"
+                        )
                 else:
                     audio_filter_chain.append("[bg_track]anull[a_mix]")
 
