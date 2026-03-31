@@ -12,7 +12,6 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import html2canvas from "html2canvas"; // For rendering styled captions
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
-import { createSecureId, sanitizeMediaUrl, sanitizeUrl } from "../utils/security";
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
 const RAINBOW_COLORS = [
@@ -6501,6 +6500,52 @@ const ViralClipStudio = ({
               </div>
             </section>
 
+            <section className="studio-panel export-panel">
+              <div className="panel-heading compact">
+                <div>
+                  <span className="panel-kicker">Publish</span>
+                  <h4>Render and export</h4>
+                </div>
+              </div>
+              <p className="panel-description">
+                Final export uses the active timeline, overlay stack, AI settings, and donor audio
+                configuration shown above, exactly as approved in Studio.
+              </p>
+              <div className="clip-guidance-actions render-destination-row">
+                <button
+                  type="button"
+                  className="clip-action-btn"
+                  onClick={() => void handleExportRender("tiktok")}
+                  disabled={isExporting}
+                >
+                  Export TikTok
+                </button>
+                <button
+                  type="button"
+                  className="clip-action-btn"
+                  onClick={() => void handleExportRender("reels")}
+                  disabled={isExporting}
+                >
+                  Export Reels
+                </button>
+                <button
+                  type="button"
+                  className="clip-action-btn"
+                  onClick={() => void handleExportRender("shorts")}
+                  disabled={isExporting}
+                >
+                  Export Shorts
+                </button>
+              </div>
+              <button
+                className="export-btn"
+                onClick={() => void handleExportRender("general")}
+                disabled={isExporting}
+              >
+                {exportStatusLabel}
+              </button>
+            </section>
+
             {overlays.length > 0 && (
               <section className="studio-panel layer-panel">
                 <h5 style={{ margin: "0 0 10px 0" }}>🧱 Visual Layers</h5>
@@ -6659,44 +6704,7 @@ const ViralClipStudio = ({
                       </label>
                     </>
                   )}
-                  <p className="panel-description">
-                    Final export uses the active timeline, overlay stack, AI settings, and donor
-                    audio configuration shown above, exactly as approved in Studio.
-                  </p>
                 </div>
-                <div className="clip-guidance-actions render-destination-row">
-                  <button
-                    type="button"
-                    className="clip-action-btn"
-                    onClick={() => void handleExportRender("tiktok")}
-                    disabled={isExporting}
-                  >
-                    Export TikTok
-                  </button>
-                  <button
-                    type="button"
-                    className="clip-action-btn"
-                    onClick={() => void handleExportRender("reels")}
-                    disabled={isExporting}
-                  >
-                    Export Reels
-                  </button>
-                  <button
-                    type="button"
-                    className="clip-action-btn"
-                    onClick={() => void handleExportRender("shorts")}
-                    disabled={isExporting}
-                  >
-                    Export Shorts
-                  </button>
-                </div>
-                <button
-                  className="export-btn"
-                  onClick={() => void handleExportRender("general")}
-                  disabled={isExporting}
-                >
-                  {exportStatusLabel}
-                </button>
               </section>
             )}
           </div>
