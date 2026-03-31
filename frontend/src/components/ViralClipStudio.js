@@ -44,11 +44,10 @@ const normalizeHookText = value =>
 
 const DEFAULT_HOOK_TEXT = "THIS CHANGES FAST";
 
-const HOOK_MIN_SEGMENT_DURATION = 0.8;
+const HOOK_MIN_SEGMENT_DURATION = 2;
 const HOOK_MAX_SEGMENT_DURATION = 5;
 
 const GENERIC_HOOK_TEXTS = new Set([
-  "",
   "WAIT FOR IT...",
   "WAIT FOR IT",
   "THIS CHANGES FAST",
@@ -112,6 +111,13 @@ const HOOK_TEMPLATES = {
     textAnimation: "fade-in",
   },
 };
+
+const DEFAULT_HOOK_FOCUS_POINT = Object.freeze({ x: 50, y: 42 });
+
+const normalizeHookFocusPoint = point => ({
+  x: clampNumber(point?.x, 0, 100, DEFAULT_HOOK_FOCUS_POINT.x),
+  y: clampNumber(point?.y, 0, 100, DEFAULT_HOOK_FOCUS_POINT.y),
+});
 
 const getHookTemplateConfig = templateKey =>
   HOOK_TEMPLATES[templateKey] || HOOK_TEMPLATES.blur_reveal;
@@ -733,6 +739,9 @@ const ViralClipStudio = ({
   const [hookTextAnimation, setHookTextAnimation] = useState("slide-up");
   const [hookPreviewLoop, setHookPreviewLoop] = useState(false);
   const [hookSelectionMode, setHookSelectionMode] = useState(false);
+  const [hookPickMode, setHookPickMode] = useState(false);
+  const [hookFocusMode, setHookFocusMode] = useState(false);
+  const [hookFocusPoint, setHookFocusPoint] = useState(DEFAULT_HOOK_FOCUS_POINT);
   const [hookAnalysisStatus, setHookAnalysisStatus] = useState("idle");
   const [hookAnalysisMessage, setHookAnalysisMessage] = useState("");
   const [hookSuggestedRange, setHookSuggestedRange] = useState(null);
@@ -799,10 +808,10 @@ const ViralClipStudio = ({
   const watermarkDragRef = useRef(null);
   const hookSegmentTrackRef = useRef(null);
   const hookSelectionDragRef = useRef(null);
+  const hookPlayheadDragRef = useRef(null);
   const hookPreviewSequenceRef = useRef({ active: false });
   const hookAnalysisRequestRef = useRef(0);
   const pendingClipActionRef = useRef(null);
-  const lastAutoPreviewedClipIdRef = useRef(null);
 
   const normalizeAssetUrl = asset => {
     if (!asset) return "";
@@ -980,6 +989,7 @@ const ViralClipStudio = ({
     hookZoomScale,
     hookTextAnimation,
     hookPreviewLoop,
+    hookFocusPoint,
     addMusic,
     muteOriginalAudio,
     musicSelection,
@@ -1024,7 +1034,7 @@ const ViralClipStudio = ({
     );
     setActiveWatermarkRegionId(snapshot.activeWatermarkRegionId || null);
     setAddHook(!!snapshot.addHook);
-    setHookText(snapshot.hookText || DEFAULT_HOOK_TEXT);
+    setHookText(snapshot.hookText ?? DEFAULT_HOOK_TEXT);
     setHookTemplate(snapshot.hookTemplate || "blur_reveal");
     setHookIntroSeconds(Number(snapshot.hookIntroSeconds ?? 3));
     setHookStartTime(Number(snapshot.hookStartTime ?? 0.8));
@@ -1041,6 +1051,7 @@ const ViralClipStudio = ({
     setHookFreezeFrame(!!snapshot.hookFreezeFrame);
     setHookZoomScale(Number(snapshot.hookZoomScale ?? 1.08));
     setHookTextAnimation(snapshot.hookTextAnimation || "slide-up");
+    setHookFocusPoint(normalizeHookFocusPoint(snapshot.hookFocusPoint));
     setHookPreviewLoop(!!snapshot.hookPreviewLoop);
     setAddMusic(!!snapshot.addMusic);
     setMuteOriginalAudio(!!snapshot.muteOriginalAudio);
@@ -1079,6 +1090,70 @@ const ViralClipStudio = ({
     setHookDarkOverlay(template.darkOverlay);
     setHookFreezeFrame(template.freezeFrame);
     setHookTextAnimation(template.textAnimation);
+  };
+
+  const setHookDuration = durationSeconds => {
+    const nextDuration = clampNumber(
+      durationSeconds,
+      hookMinDuration,
+      hookMaxDuration,
+      hookIntroSeconds || 3
+    );
+    setHookSegmentRange(resolvedHookStart, resolvedHookStart + nextDuration);
+  };
+
+  const seekHookTimelineTime = targetTime => {
+    const video = videoRef.current;
+    const boundedTime = clampNumber(
+      targetTime,
+      0,
+      Math.max(0, Number(currentTimelineWindow.duration || 0)),
+      0
+    );
+
+    if (!video) return;
+
+    video.currentTime = Number(currentTimelineWindow.start || 0) + boundedTime;
+    setVideoTime(video.currentTime);
+  };
+
+  const setCurrentTimeAsHook = () => {
+    const currentVideoTime = Number(videoRef.current?.currentTime || 0);
+    const localHookTime = Math.max(0, currentVideoTime - Number(currentTimelineWindow.start || 0));
+    const nextStart = clampNumber(localHookTime, 0, hookStartLimit, resolvedHookStart);
+    setAddHook(true);
+    applyHookTemplate("freeze_text");
+    setHookFreezeFrame(true);
+    setHookAnalysisStatus("ready");
+    setHookAnalysisMessage("Selected moment saved as the frozen opening hook.");
+    setHookSegmentRange(nextStart, nextStart + hookDuration, { preview: false });
+    setHookFocusMode(false);
+    setHookPickMode(false);
+  };
+
+  const handlePreviewFrameClick = event => {
+    setActiveOverlayId(null);
+    setActiveWatermarkRegionId(null);
+
+    if (!hookFocusMode || isDragging) return;
+
+    const frame = phoneFrameRef.current;
+    if (!frame) return;
+
+    const rect = frame.getBoundingClientRect();
+    const nextFocusPoint = normalizeHookFocusPoint({
+      x: ((event.clientX - rect.left) / Math.max(1, rect.width)) * 100,
+      y: ((event.clientY - rect.top) / Math.max(1, rect.height)) * 100,
+    });
+
+    setAddHook(true);
+    setHookFocusPoint(nextFocusPoint);
+    setHookFocusMode(false);
+    setHookZoomScale(current => Math.max(1.12, Number(current || 0)));
+    setHookAnalysisStatus("ready");
+    setHookAnalysisMessage("Focus target locked for the frozen opening frame.");
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   const setHookSegmentRange = (startTime, endTime, options = {}) => {
@@ -1131,7 +1206,6 @@ const ViralClipStudio = ({
 
     event.preventDefault();
     event.stopPropagation();
-    setHookSelectionMode(true);
 
     hookSelectionDragRef.current = {
       target,
@@ -1142,7 +1216,32 @@ const ViralClipStudio = ({
     };
   };
 
+  const beginHookPlayheadDrag = event => {
+    const track = hookSegmentTrackRef.current;
+    if (!track || !currentTimelineWindow.duration) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    hookPlayheadDragRef.current = {
+      startClientX: event.clientX,
+      anchorTime: trimAwareCurrentTime,
+      rect: track.getBoundingClientRect(),
+    };
+  };
+
   const handleHookTrackPointerDown = event => {
+    if (hookPickMode) {
+      const track = hookSegmentTrackRef.current;
+      if (!track || !currentTimelineWindow.duration) return;
+
+      const rect = track.getBoundingClientRect();
+      const ratio = clampNumber((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1, 0);
+      const clickedTime = ratio * Number(currentTimelineWindow.duration || 0);
+      seekHookTimelineTime(clickedTime);
+      return;
+    }
+
     if (!hookSelectionMode) return;
 
     const track = hookSegmentTrackRef.current;
@@ -1273,7 +1372,7 @@ const ViralClipStudio = ({
         };
       });
 
-      const candidateDurations = [1.2, 1.8, 2.4, 3, 3.6, 4.2, 5]
+      const candidateDurations = [2, 2.4, 3, 3.6, 4.2, 5]
         .filter(duration => duration <= Math.min(HOOK_MAX_SEGMENT_DURATION, fullWindowDuration))
         .map(duration => Number(duration.toFixed(2)));
 
@@ -1396,6 +1495,7 @@ const ViralClipStudio = ({
         ? { active: false }
         : {
             active: true,
+            mode: "manual-preview",
             timelineIndex: activeTimelineIndex,
             absoluteStart: absoluteHookStart,
             absoluteEnd: absoluteHookEnd,
@@ -1537,7 +1637,6 @@ const ViralClipStudio = ({
   };
 
   const applyCurrentHookSuggestion = shouldLoopPreview => {
-    applyHookTemplate(currentHookSuggestion.templateKey);
     setHookSegmentRange(currentHookSuggestion.startTime, currentHookSuggestion.endTime, {
       textSuggestion: currentHookSuggestion.textSuggestion,
     });
@@ -2044,6 +2143,7 @@ const ViralClipStudio = ({
     Number(videoTime || 0) - Number(currentTimelineWindow.start || 0)
   );
   const normalizedHookText = normalizeHookText(hookText);
+  const hasHookText = !!normalizedHookText;
   const fallbackHookSuggestion = buildFallbackHookRange(
     selectedClip,
     currentTimelineWindow.duration
@@ -2113,7 +2213,6 @@ const ViralClipStudio = ({
   const hookLeadOut = 0.45;
   const isHookWithinPreviewWindow =
     addHook &&
-    normalizedHookText &&
     previewTimelineTime >= resolvedHookStart &&
     previewTimelineTime <= hookEnd + hookLeadOut;
   const hookProgress = isHookWithinPreviewWindow
@@ -2134,13 +2233,20 @@ const ViralClipStudio = ({
   const freezeReleaseProgress = hookFreezeFrame
     ? clampNumber((hookProgress - 0.78) / 0.22, 0, 1, 0)
     : 1;
+  const resolvedHookFocusPoint = normalizeHookFocusPoint(hookFocusPoint);
+  const hasCustomHookFocusPoint =
+    Math.abs(resolvedHookFocusPoint.x - DEFAULT_HOOK_FOCUS_POINT.x) > 1 ||
+    Math.abs(resolvedHookFocusPoint.y - DEFAULT_HOOK_FOCUS_POINT.y) > 1;
   const hookZoomTarget = Math.max(
     hookZoomScale,
     isZoomFocusTemplate ? hookZoomScale + 0.06 : hookZoomScale
   );
+  const effectiveHookZoomTarget =
+    hookFreezeFrame && hasCustomHookFocusPoint ? Math.max(hookZoomTarget, 1.12) : hookZoomTarget;
   const hookVisualScale = isHookWithinPreviewWindow
     ? 1 +
-      Math.max(0, hookZoomTarget - 1) * (hookFreezeFrame ? 0 : 1 - Math.pow(1 - hookProgress, 2))
+      Math.max(0, effectiveHookZoomTarget - 1) *
+        (hookFreezeFrame ? 0 : 1 - Math.pow(1 - hookProgress, 2))
     : 1;
   const showHookPreview = !!isHookWithinPreviewWindow;
   const hookVideoBlur =
@@ -2193,6 +2299,9 @@ const ViralClipStudio = ({
     : 1;
   const hookFreezeOpacity =
     showHookPreview && hookFreezeFrame ? hookOutroOpacity * (1 - freezeReleaseProgress * 0.92) : 0;
+  const hookVisualFocusPoint = showHookPreview ? resolvedHookFocusPoint : DEFAULT_HOOK_FOCUS_POINT;
+  const hookTransformOrigin = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
+  const hookObjectPosition = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
   const smartCropBackgroundBlur = smartCrop ? 18 : 0;
   const smartCropBackgroundBrightness = smartCrop ? 0.52 : 1;
   const smartCropBackgroundScale = smartCrop ? 1.08 : 1;
@@ -2244,12 +2353,25 @@ const ViralClipStudio = ({
     setHookAnalysisStatus("idle");
     setHookAnalysisMessage("");
     setHookSelectionMode(false);
+    setHookPickMode(false);
+    setHookFocusMode(false);
+    setHookFocusPoint(DEFAULT_HOOK_FOCUS_POINT);
     hookPreviewSequenceRef.current = { active: false };
   }, [activeTimelineIndex]);
 
   useEffect(() => {
     const handlePointerMove = event => {
       const drag = hookSelectionDragRef.current;
+      const playheadDrag = hookPlayheadDragRef.current;
+
+      if (playheadDrag && currentTimelineWindow.duration) {
+        const trackWidth = Math.max(1, playheadDrag.rect.width);
+        const deltaRatio = (event.clientX - playheadDrag.startClientX) / trackWidth;
+        const deltaTime = deltaRatio * Number(currentTimelineWindow.duration || 0);
+        seekHookTimelineTime(playheadDrag.anchorTime + deltaTime);
+        return;
+      }
+
       if (!drag || !currentTimelineWindow.duration) return;
 
       const trackWidth = Math.max(1, drag.rect.width);
@@ -2278,6 +2400,7 @@ const ViralClipStudio = ({
 
     const handlePointerUp = () => {
       hookSelectionDragRef.current = null;
+      hookPlayheadDragRef.current = null;
     };
 
     window.addEventListener("mousemove", handlePointerMove);
@@ -2364,17 +2487,9 @@ const ViralClipStudio = ({
   useEffect(() => {
     if (!addHook) {
       setHookPreviewLoop(false);
-      return;
+      hookPreviewSequenceRef.current = { active: false };
     }
-
-    const video = videoRef.current;
-    if (!video || !normalizedHookText) return;
-
-    video.currentTime = Number(currentTimelineWindow.start || 0) + resolvedHookStart;
-    if (previewPlaybackIntentRef.current) {
-      safePlayMediaElement(video);
-    }
-  }, [addHook, normalizedHookText, currentTimelineWindow.start, resolvedHookStart]);
+  }, [addHook]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -2887,6 +3002,7 @@ const ViralClipStudio = ({
         const window = getTimelineClipWindow(clip);
         return {
           id: clip.id,
+          source_clip_id: clip.id,
           url: clipUrl,
           start_time: window.start,
           end_time: window.end,
@@ -2895,7 +3011,7 @@ const ViralClipStudio = ({
       })
     );
 
-    if (!addHook || !normalizedHookText || !exportSegments[activeTimelineIndex]) {
+    if (!addHook || !exportSegments[activeTimelineIndex]) {
       return exportSegments;
     }
 
@@ -2905,15 +3021,45 @@ const ViralClipStudio = ({
     const hookSourceEnd = Number(sourceWindow.start || 0) + hookEnd;
     const hookSegmentDuration = Math.max(0.1, hookSourceEnd - hookSourceStart);
 
+    const beforeHookDuration = Math.max(0, hookSourceStart - Number(activeSegment.start_time || 0));
+    const afterHookDuration = Math.max(0, Number(activeSegment.end_time || 0) - hookSourceEnd);
+    const leadingSegments = exportSegments.slice(0, activeTimelineIndex);
+    const trailingSegments = exportSegments.slice(activeTimelineIndex + 1);
+    const hookAwareSegments = [
+      ...leadingSegments,
+      ...(beforeHookDuration > 0.05
+        ? [
+            {
+              ...activeSegment,
+              id: `${activeSegment.id}-before-hook`,
+              end_time: hookSourceStart,
+              duration: beforeHookDuration,
+            },
+          ]
+        : []),
+      ...(afterHookDuration > 0.05
+        ? [
+            {
+              ...activeSegment,
+              id: `${activeSegment.id}-after-hook`,
+              start_time: hookSourceEnd,
+              duration: afterHookDuration,
+            },
+          ]
+        : []),
+      ...trailingSegments,
+    ];
+
     return [
       {
         id: `hook-intro-${activeSegment.id}`,
+        source_clip_id: activeSegment.source_clip_id || activeSegment.id,
         url: activeSegment.url,
         start_time: hookSourceStart,
         end_time: hookSourceEnd,
         duration: hookSegmentDuration,
       },
-      ...exportSegments,
+      ...hookAwareSegments,
     ];
   };
 
@@ -2921,24 +3067,36 @@ const ViralClipStudio = ({
     const offsetByClipId = new Map();
     let runningOffset = 0;
     exportTimeline.forEach(segment => {
-      offsetByClipId.set(segment.id, {
+      const sourceClipId = segment.source_clip_id || segment.id;
+      const nextMeta = {
         offset: runningOffset,
         start: segment.start_time || 0,
         end: segment.end_time || 0,
-      });
+      };
+      const existing = offsetByClipId.get(sourceClipId) || [];
+      existing.push(nextMeta);
+      offsetByClipId.set(sourceClipId, existing);
       runningOffset += Math.max(0, Number(segment.duration || 0));
     });
 
     return sourceOverlays.map(overlay => {
-      const clipMeta = offsetByClipId.get(overlay.clipId || "main") || {
-        offset: 0,
-        start: 0,
-        end: selectedClip ? selectedClip.end : 0,
-      };
       const previewStart =
         overlay.startTime !== undefined && overlay.startTime !== null
           ? overlay.startTime
           : overlay.start_time;
+      const clipMetas = offsetByClipId.get(overlay.clipId || "main") || [];
+      const clipMeta = clipMetas.find(meta => {
+        if (previewStart === undefined || previewStart === null) return false;
+        return (
+          Number(previewStart) >= Number(meta.start || 0) &&
+          Number(previewStart) < Number(meta.end || 0)
+        );
+      }) ||
+        clipMetas[0] || {
+          offset: 0,
+          start: 0,
+          end: selectedClip ? selectedClip.end : 0,
+        };
       const normalizedStart =
         previewStart !== undefined && previewStart !== null
           ? clipMeta.offset + Math.max(0, Number(previewStart) - Number(clipMeta.start || 0))
@@ -3052,6 +3210,19 @@ const ViralClipStudio = ({
       );
 
       const normalizedOverlays = normalizeOverlaysForExport(exportTimeline, newOverlays);
+      const persistedHookFocusPoint = addHook ? normalizeHookFocusPoint(hookFocusPoint) : null;
+      const coverFrame = addHook
+        ? {
+            timelineTime: 0,
+            sourceTime: Number(currentTimelineWindow.start || 0) + resolvedHookStart,
+            clipId: currentTimelineClip?.id || selectedClip?.id || null,
+            focusPoint: persistedHookFocusPoint,
+            template: hookTemplate,
+            freezeFrame: hookFreezeFrame,
+            strategy: hookFreezeFrame ? "hook_freeze_frame" : "hook_intro_start",
+          }
+        : null;
+      const thumbnailFrame = coverFrame ? { ...coverFrame, purpose: "thumbnail" } : null;
 
       setOverlays(newOverlays);
       onSave(selectedClip, normalizedOverlays, {
@@ -3072,6 +3243,13 @@ const ViralClipStudio = ({
         hookEndTime: hookDuration,
         hookSourceStartTime: Number(currentTimelineWindow.start || 0) + resolvedHookStart,
         hookSourceEndTime: Number(currentTimelineWindow.start || 0) + hookEnd,
+        hookFocusPoint: persistedHookFocusPoint,
+        coverFrame,
+        coverFrameTime: coverFrame ? Number(coverFrame.timelineTime || 0) : null,
+        coverFrameSourceTime: coverFrame ? Number(coverFrame.sourceTime || 0) : null,
+        thumbnailFrame,
+        thumbnailTime: thumbnailFrame ? Number(thumbnailFrame.timelineTime || 0) : null,
+        thumbnailSourceTime: thumbnailFrame ? Number(thumbnailFrame.sourceTime || 0) : null,
         hook: {
           startTime: 0,
           endTime: hookDuration,
@@ -3080,6 +3258,8 @@ const ViralClipStudio = ({
           sourceEndTime: Number(currentTimelineWindow.start || 0) + hookEnd,
           template: hookTemplate,
           text: normalizedHookText,
+          focusPoint: persistedHookFocusPoint,
+          coverFrame,
           effects: {
             blurBackground: hookBlurBackground,
             darkOverlay: hookDarkOverlay,
@@ -3178,36 +3358,6 @@ const ViralClipStudio = ({
       setSelectedClip(null);
     }
   }, [orderedClips, selectedClip]);
-
-  useEffect(() => {
-    if (!selectedClip) return;
-
-    const pendingAction = pendingClipActionRef.current;
-    if (pendingAction?.clipId === selectedClip.id) return;
-    if (lastAutoPreviewedClipIdRef.current === selectedClip.id) return;
-
-    lastAutoPreviewedClipIdRef.current = selectedClip.id;
-
-    const guidance = clipGuidanceById.get(selectedClip.id);
-    const suggestion = buildFallbackHookRange(
-      selectedClip,
-      Math.max(0, getClipDurationSeconds(selectedClip))
-    );
-
-    setAddHook(true);
-    applyHookTemplate(suggestion.templateKey);
-    setHookSuggestedRange(suggestion);
-    setHookAnalysisStatus("ready");
-    setHookAnalysisMessage("Previewing this clip with a suggested hook treatment.");
-    setHookSegmentRange(suggestion.startTime, suggestion.endTime, {
-      textSuggestion: guidance?.hookText || suggestion.textSuggestion,
-      preview: false,
-    });
-    previewHookSegment(false, {
-      startTime: suggestion.startTime,
-      endTime: suggestion.endTime,
-    });
-  }, [selectedClip, clipGuidanceById]);
 
   useEffect(() => {
     if (!selectedClip) return;
@@ -3420,6 +3570,41 @@ const ViralClipStudio = ({
     const video = videoRef.current;
     if (!video) return;
 
+    const handlePlay = () => {
+      const currentClip = timeline[activeTimelineIndex];
+      if (!currentClip || !addHook || hookPreviewLoop || trimPreviewLoop) return;
+
+      const currentWindow = getTimelineClipWindow(currentClip);
+      const startTime = Number(currentWindow.start || 0);
+      const absoluteHookStart = startTime + resolvedHookStart;
+      const absoluteHookEnd = startTime + hookEnd;
+
+      if (absoluteHookEnd <= absoluteHookStart + 0.05) return;
+      if (
+        hookPreviewSequenceRef.current.active ||
+        hookPreviewSequenceRef.current.phase === "skip-duplicate"
+      )
+        return;
+
+      const startingFromClipStart = Math.abs(video.currentTime - startTime) <= 0.12;
+      const startingFromHookStart = Math.abs(video.currentTime - absoluteHookStart) <= 0.12;
+
+      if (!startingFromClipStart && !startingFromHookStart) return;
+
+      hookPreviewSequenceRef.current = {
+        active: true,
+        mode: "opening-sequence",
+        phase: "opening",
+        timelineIndex: activeTimelineIndex,
+        absoluteStart: absoluteHookStart,
+        absoluteEnd: absoluteHookEnd,
+      };
+
+      if (startingFromClipStart) {
+        video.currentTime = absoluteHookStart;
+      }
+    };
+
     const handleTimeUpdate = () => {
       setVideoTime(video.currentTime);
 
@@ -3435,7 +3620,18 @@ const ViralClipStudio = ({
 
       if (hookPreviewSequence.active && hookPreviewSequence.timelineIndex === activeTimelineIndex) {
         if (video.currentTime >= hookPreviewSequence.absoluteEnd - 0.02) {
-          hookPreviewSequenceRef.current = { active: false };
+          const nextSequenceState =
+            hookPreviewSequence.mode === "opening-sequence"
+              ? {
+                  active: false,
+                  mode: "opening-sequence",
+                  phase: "skip-duplicate",
+                  timelineIndex: activeTimelineIndex,
+                  absoluteStart: absoluteHookStart,
+                  absoluteEnd: absoluteHookEnd,
+                }
+              : { active: false };
+          hookPreviewSequenceRef.current = nextSequenceState;
           video.currentTime = startTime;
           if (previewPlaybackIntentRef.current) {
             safePlayMediaElement(video);
@@ -3445,11 +3641,20 @@ const ViralClipStudio = ({
       }
 
       if (
-        addHook &&
-        hookPreviewLoop &&
-        normalizedHookText &&
-        absoluteHookEnd > absoluteHookStart + 0.05
+        hookPreviewSequence.phase === "skip-duplicate" &&
+        hookPreviewSequence.timelineIndex === activeTimelineIndex &&
+        video.currentTime >= absoluteHookStart - 0.02 &&
+        video.currentTime < absoluteHookEnd - 0.02
       ) {
+        hookPreviewSequenceRef.current = { active: false };
+        video.currentTime = absoluteHookEnd;
+        if (previewPlaybackIntentRef.current) {
+          safePlayMediaElement(video);
+        }
+        return;
+      }
+
+      if (addHook && hookPreviewLoop && absoluteHookEnd > absoluteHookStart + 0.05) {
         if (video.currentTime < absoluteHookStart || video.currentTime >= absoluteHookEnd) {
           video.currentTime = absoluteHookStart;
           if (previewPlaybackIntentRef.current) {
@@ -3513,9 +3718,11 @@ const ViralClipStudio = ({
       }
     };
 
+    video.addEventListener("play", handlePlay);
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     return () => {
+      video.removeEventListener("play", handlePlay);
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
@@ -3524,7 +3731,6 @@ const ViralClipStudio = ({
     activeTimelineIndex,
     hookEnd,
     hookPreviewLoop,
-    normalizedHookText,
     resolvedHookStart,
     selectedClip,
     silencePreview,
@@ -4361,7 +4567,9 @@ const ViralClipStudio = ({
                 <div className="preview-player-shell">
                   <div
                     ref={phoneFrameRef}
-                    className="phone-frame"
+                    data-testid="hook-preview-frame"
+                    className={`phone-frame ${hookFocusMode ? "hook-focus-enabled" : ""}`}
+                    onClick={handlePreviewFrameClick}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleDragEnd}
                     onMouseLeave={handleDragEnd}
@@ -4376,22 +4584,19 @@ const ViralClipStudio = ({
                       playsInline
                       style={{
                         objectFit: effectiveVideoFit,
+                        objectPosition: hookObjectPosition,
                         width: "100%",
                         height: "100%",
                         background: "transparent",
                         position: "relative",
                         zIndex: 10,
-                        transformOrigin: isZoomFocusTemplate ? "50% 42%" : "50% 50%",
+                        transformOrigin: hookTransformOrigin,
                         transform: `scale(${(hookVisualScale * smartCropBackgroundScale).toFixed(3)})`,
                         opacity: hookPrimaryVideoOpacity,
                         filter: `blur(${(hookVideoBlur + smartCropBackgroundBlur).toFixed(2)}px) brightness(${(hookVideoBrightness * smartCropBackgroundBrightness * previewClarityBrightness).toFixed(3)}) contrast(${(hookVideoContrast * previewClarityContrast).toFixed(3)}) saturate(${(hookVideoSaturate * previewClaritySaturate).toFixed(3)})${previewClarityHalo}`,
                         transition:
                           "transform 150ms linear, opacity 160ms linear, filter 160ms linear",
                         willChange: "transform, opacity, filter",
-                      }}
-                      onClick={() => {
-                        setActiveOverlayId(null);
-                        setActiveWatermarkRegionId(null);
                       }}
                     />
                     {shouldShowWatermarkCleanupOnVideo ? (
@@ -4409,6 +4614,7 @@ const ViralClipStudio = ({
                         muted
                         playsInline
                         src={getSafeMediaSource(currentTimelineClip?.url)}
+                        style={{ objectPosition: hookObjectPosition }}
                       />
                     ) : null}
                     <video
@@ -4418,7 +4624,7 @@ const ViralClipStudio = ({
                       muted
                       playsInline
                       src={getSafeMediaSource(currentTimelineClip?.url)}
-                      style={{ opacity: hookBackdropOpacity }}
+                      style={{ opacity: hookBackdropOpacity, objectPosition: hookObjectPosition }}
                     />
                     <video
                       ref={hookFreezeVideoRef}
@@ -4427,7 +4633,12 @@ const ViralClipStudio = ({
                       muted
                       playsInline
                       src={getSafeMediaSource(currentTimelineClip?.url)}
-                      style={{ opacity: hookFreezeOpacity }}
+                      style={{
+                        opacity: hookFreezeOpacity,
+                        objectPosition: hookObjectPosition,
+                        transformOrigin: hookTransformOrigin,
+                        transform: `scale(${effectiveHookZoomTarget.toFixed(3)})`,
+                      }}
                     />
                     <audio
                       ref={audioRef}
@@ -4459,6 +4670,21 @@ const ViralClipStudio = ({
                     />
 
                     <div className="overlays-layer">
+                      {hookFocusMode ? (
+                        <div
+                          className={`hook-focus-target ${hookFocusMode ? "active" : ""}`}
+                          data-testid="hook-focus-target"
+                          style={{
+                            left: `${resolvedHookFocusPoint.x}%`,
+                            top: `${resolvedHookFocusPoint.y}%`,
+                          }}
+                        >
+                          <span className="hook-focus-target-dot" />
+                          <span className="hook-focus-target-label">
+                            {hookFocusMode ? "Tap face or object" : "Opening focus"}
+                          </span>
+                        </div>
+                      ) : null}
                       {showHookPreview && hookDarkOverlay ? (
                         <div
                           className={`hook-preview-shade hook-preview-shade-${hookTemplate.replace(/_/g, "-")}`}
@@ -4548,7 +4774,7 @@ const ViralClipStudio = ({
                             </div>
                           ))
                         : null}
-                      {showHookPreview ? (
+                      {showHookPreview && hasHookText ? (
                         <div
                           className={`hook-preview-banner hook-preview-banner-${hookTemplate.replace(/_/g, "-")} hook-text-${hookTextAnimation}`}
                           style={{
@@ -5616,7 +5842,7 @@ const ViralClipStudio = ({
                       className="clip-action-btn"
                       onClick={() => handleClipAction(selectedClip, { type: "use" })}
                     >
-                      Open in Studio
+                      Use in Editor
                     </button>
                     <button
                       type="button"
@@ -5765,7 +5991,7 @@ const ViralClipStudio = ({
                               handleClipAction(clip, { type: "use" });
                             }}
                           >
-                            Open in Studio
+                            Use in Editor
                           </button>
                           <button
                             type="button"
@@ -6272,26 +6498,159 @@ const ViralClipStudio = ({
                         rows={3}
                       />
                     </label>
+                    <div className="hook-preset-card">
+                      <strong>Hook templates</strong>
+                      <div className="mini-toggle-row">
+                        {Object.entries(HOOK_TEMPLATES).map(([templateKey, template]) => (
+                          <button
+                            key={templateKey}
+                            type="button"
+                            className={`mini-toggle-btn ${hookTemplate === templateKey ? "active" : ""}`}
+                            onClick={() => applyHookTemplate(templateKey)}
+                          >
+                            {template.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="hook-treatment-card">
+                      <div className="hook-treatment-header">
+                        <strong>Hook treatment</strong>
+                        <p>{hookTemplateConfig.description}</p>
+                      </div>
+                      <div className="hook-treatment-toggle-grid">
+                        <label style={sidebarCheckboxLabelStyle}>
+                          <input
+                            type="checkbox"
+                            checked={hookBlurBackground}
+                            onChange={e => setHookBlurBackground(e.target.checked)}
+                            style={{ marginRight: "8px" }}
+                          />
+                          Blur background
+                        </label>
+                        <label style={sidebarCheckboxLabelStyle}>
+                          <input
+                            type="checkbox"
+                            checked={hookDarkOverlay}
+                            onChange={e => setHookDarkOverlay(e.target.checked)}
+                            style={{ marginRight: "8px" }}
+                          />
+                          Dark overlay
+                        </label>
+                        <label style={sidebarCheckboxLabelStyle}>
+                          <input
+                            type="checkbox"
+                            checked={hookFreezeFrame}
+                            onChange={e => setHookFreezeFrame(e.target.checked)}
+                            style={{ marginRight: "8px" }}
+                          />
+                          Freeze opening frame
+                        </label>
+                      </div>
+                      <label className="studio-slider-label">
+                        <span>Text animation</span>
+                        <select
+                          value={hookTextAnimation}
+                          onChange={e => setHookTextAnimation(e.target.value)}
+                        >
+                          <option value="slide-up">Slide Up</option>
+                          <option value="fade-in">Fade In</option>
+                        </select>
+                      </label>
+                      <label className="studio-slider-label">
+                        <span>Zoom intensity {hookZoomScale.toFixed(2)}x</span>
+                        <input
+                          type="range"
+                          min={1}
+                          max={1.24}
+                          step={0.01}
+                          value={hookZoomScale}
+                          onChange={e => setHookZoomScale(Number(e.target.value))}
+                        />
+                      </label>
+                    </div>
+                    <label className="studio-slider-label">
+                      <span>Hook duration {hookDuration.toFixed(2)}s</span>
+                      <input
+                        type="range"
+                        min={hookMinDuration}
+                        max={hookMaxDuration}
+                        step={0.05}
+                        value={hookDuration}
+                        onChange={e => setHookDuration(Number(e.target.value))}
+                      />
+                    </label>
+                    <div className="hook-preset-card">
+                      <strong>Manual hook selection</strong>
+                      <div className="mini-toggle-row">
+                        <button
+                          type="button"
+                          className={`mini-toggle-btn ${hookPickMode ? "active" : ""}`}
+                          onClick={() => {
+                            setHookPickMode(prev => !prev);
+                            setHookSelectionMode(false);
+                            setHookFocusMode(false);
+                          }}
+                        >
+                          {hookPickMode ? "Choosing hook" : "Choose Hook"}
+                        </button>
+                        <button
+                          type="button"
+                          className={`mini-toggle-btn ${hookFocusMode ? "active" : ""}`}
+                          onClick={() => {
+                            setAddHook(true);
+                            setHookFocusMode(prev => !prev);
+                            setHookSelectionMode(false);
+                            setHookPickMode(false);
+                          }}
+                        >
+                          {hookFocusMode ? "Picking focus" : "Pick Focus"}
+                        </button>
+                        <button
+                          type="button"
+                          className="mini-toggle-btn"
+                          onClick={setCurrentTimeAsHook}
+                        >
+                          Set as Hook
+                        </button>
+                      </div>
+                      <p className="hook-manual-copy">
+                        Choose the exact opening moment on the timeline, then click the preview if
+                        you want the frozen frame to zoom toward a face or object.
+                      </p>
+                      <div className="hook-manual-readout">
+                        <span>Hook point {formatPreviewTimePrecise(trimAwareCurrentTime)}</span>
+                        <span>
+                          Focus target {Math.round(resolvedHookFocusPoint.x)}% x{" "}
+                          {Math.round(resolvedHookFocusPoint.y)}%
+                        </span>
+                      </div>
+                    </div>
                     <div className="hook-segment-card">
                       <div className="hook-segment-header">
                         <div>
-                          <strong>Hook Segment Selection</strong>
+                          <strong>Hook Source Span</strong>
                           <p>
-                            Choose the exact source slice to open with. The selected range plays
-                            first, then the clip restarts from 0.
+                            This is the same opening hook, not a second one. It controls how much
+                            source footage the opening uses before the clip continues without
+                            replaying that hook section again.
                           </p>
                         </div>
                         <button
                           type="button"
                           className={`mini-toggle-btn ${hookSelectionMode ? "active" : ""}`}
-                          onClick={() => setHookSelectionMode(prev => !prev)}
+                          onClick={() => {
+                            setHookSelectionMode(prev => !prev);
+                            setHookPickMode(false);
+                            setHookFocusMode(false);
+                          }}
                         >
                           {hookSelectionMode ? "Selection active" : "Select Hook Segment"}
                         </button>
                       </div>
                       <div
                         ref={hookSegmentTrackRef}
-                        className={`hook-segment-track ${hookSelectionMode ? "selection-enabled" : ""}`}
+                        className={`hook-segment-track ${hookSelectionMode ? "selection-enabled" : ""} ${hookPickMode ? "playhead-enabled" : ""}`}
                         onMouseDown={handleHookTrackPointerDown}
                         role="presentation"
                       >
@@ -6306,6 +6665,17 @@ const ViralClipStudio = ({
                         <span
                           className="hook-segment-playhead"
                           style={{ left: `${hookPlayheadLeft}%` }}
+                        />
+                        <button
+                          type="button"
+                          className={`hook-playhead-handle ${hookPickMode ? "active" : ""}`}
+                          style={{ left: `${hookPlayheadLeft}%` }}
+                          onMouseDown={hookPickMode ? beginHookPlayheadDrag : undefined}
+                          aria-label="Drag hook playhead"
+                        />
+                        <span
+                          className="hook-segment-marker"
+                          style={{ left: `${hookSelectionLeft}%` }}
                         />
                         <span
                           className="hook-segment-selection"

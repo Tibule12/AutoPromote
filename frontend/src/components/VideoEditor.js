@@ -763,6 +763,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         auto_captions: !!extraOptions.autoCaptions,
         timeline_segments: timelineSegments,
         background_audio: extraOptions.backgroundAudio || null,
+        hook_focus_point: extraOptions.hookFocusPoint || null,
+        cover_frame: extraOptions.coverFrame || null,
+        thumbnail_frame: extraOptions.thumbnailFrame || extraOptions.coverFrame || null,
         // smart_crop: !!extraOptions.smartCrop, // Backend supports this? Check Python worker.
       };
 
@@ -843,6 +846,15 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             ...(extraOptions.hookTextAnimation !== undefined
               ? { hookTextAnimation: extraOptions.hookTextAnimation }
               : {}),
+            ...(extraOptions.hookFocusPoint !== undefined
+              ? { hookFocusPoint: extraOptions.hookFocusPoint }
+              : {}),
+            ...(extraOptions.coverFrame !== undefined
+              ? { coverFrame: extraOptions.coverFrame }
+              : {}),
+            ...(extraOptions.thumbnailFrame !== undefined
+              ? { thumbnailFrame: extraOptions.thumbnailFrame }
+              : {}),
             renderViral: true,
             analyzeClips: false,
             viralData: payload,
@@ -917,6 +929,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           name: `viral_clip_rendered.mp4`,
           type: "video/mp4",
           url: result.url,
+          thumbnailUrl: result.thumbnailUrl || null,
+          coverFrame: result.coverFrame || null,
+          thumbnailFrame: result.thumbnailFrame || null,
           isRemote: true,
         };
         setProcessedFile(fakeFile);
