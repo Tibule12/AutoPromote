@@ -33,10 +33,15 @@ jobs:
       - name: Verify build artifact exists
         working-directory: frontend
         run: |
-          if [ ! -f build/index.html ]; then
-            echo "ERROR: build/index.html not found in frontend. Ensure build step ran successfully.";
+          if [ -f build/index.html ]; then
+            echo "Verified frontend artifact at build/index.html"
+          elif [ -f docs/index.html ]; then
+            echo "Verified frontend artifact at docs/index.html"
+          else
+            echo "ERROR: Neither build/index.html nor docs/index.html was found in frontend. Ensure build step ran successfully and BUILD_PATH is configured as expected.";
             ls -la . || true;
             ls -la build || true;
+            ls -la docs || true;
             exit 1;
           fi
 
