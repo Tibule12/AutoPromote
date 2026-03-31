@@ -1,5 +1,6 @@
 const SAFE_DATA_URL_PATTERN = /^data:(image|video|audio)\/[a-z0-9.+-]+;base64,[a-z0-9+/=]+$/i;
 const SAFE_PROTOCOLS = new Set(["http:", "https:"]);
+const UNSAFE_URL_TEXT_PATTERN = /[<>"'`\\]/;
 
 function stripUnsafeCharacters(value) {
   return String(value ?? "")
@@ -11,7 +12,15 @@ function sanitizeRelativeUrl(url) {
   const cleaned = String(url ?? "").trim();
   if (!cleaned) return "";
   if (cleaned.startsWith("//")) return "";
-  return cleaned;
+  if (UNSAFE_URL_TEXT_PATTERN.test(cleaned)) return "";
+
+  try {
+    const baseOrigin = globalThis.location?.origin || "http://localhost";
+    const parsed = new URL(cleaned, baseOrigin);
+    return parsed.origin === baseOrigin ? parsed.href : "";
+  } catch {
+    return "";
+  }
 }
 
 export function sanitizeMediaUrl(url) {
@@ -37,6 +46,26 @@ export function sanitizeMediaUrl(url) {
   } catch {
     return rawUrl.includes(":") ? "" : sanitizeRelativeUrl(rawUrl);
   }
+}
+
+export function getSafeMediaSource(url) {
+  return sanitizeMediaUrl(url) || undefined;
+}
+
+export function applySafeMediaSource(element, url) {
+  if (!element) return false;
+
+  const safeUrl = sanitizeMediaUrl(url);
+  if (!safeUrl) {
+    element.removeAttribute("src");
+    return false;
+  }
+
+  if (element.getAttribute("src") !== safeUrl) {
+    element.setAttribute("src", safeUrl);
+  }
+
+  return true;
 }
 
 // Helper to sanitize URLs for use in src/href.

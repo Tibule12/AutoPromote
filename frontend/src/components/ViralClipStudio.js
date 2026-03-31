@@ -1,3 +1,9 @@
+import {
+  applySafeMediaSource,
+  createSecureId,
+  getSafeMediaSource,
+  sanitizeUrl,
+} from "../utils/security";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import React, { useState, useRef, useEffect } from "react";
@@ -1195,11 +1201,9 @@ const ViralClipStudio = ({
       analysisVideo.playsInline = true;
       analysisVideo.preload = "auto";
       analysisVideo.crossOrigin = "anonymous";
-      const safeAnalysisUrl = sanitizeMediaUrl(analysisUrl);
-      if (!safeAnalysisUrl) {
+      if (!applySafeMediaSource(analysisVideo, analysisUrl)) {
         throw new Error("This clip source uses an unsupported preview URL.");
       }
-      analysisVideo.src = safeAnalysisUrl;
 
       if (Number.isNaN(analysisVideo.duration) || !analysisVideo.duration) {
         await waitForVideoEvent(analysisVideo, "loadedmetadata");
@@ -1843,9 +1847,7 @@ const ViralClipStudio = ({
 
     const video = videoRef.current;
     if (video) {
-      const safeVideoUrl = sanitizeMediaUrl(videoUrl);
-      if (!safeVideoUrl) return;
-      video.src = safeVideoUrl;
+      if (!applySafeMediaSource(video, videoUrl)) return;
       video.currentTime = boundaryTime;
       setVideoTime(boundaryTime);
       if (options.play) {
@@ -4052,12 +4054,10 @@ const ViralClipStudio = ({
       // Create temp video to get duration
       const tempId = Date.now();
       const tempVideo = document.createElement("video");
-      const safePreviewUrl = sanitizeMediaUrl(url);
-      if (!safePreviewUrl) {
+      if (!applySafeMediaSource(tempVideo, url)) {
         reject(new Error("This clip source uses an unsupported preview URL."));
         return;
       }
-      tempVideo.src = safePreviewUrl;
       tempVideo.preload = "metadata";
 
       tempVideo.onloadedmetadata = () => {
@@ -4397,7 +4397,7 @@ const ViralClipStudio = ({
                     />
                     {shouldShowWatermarkCleanupOnVideo ? (
                       <img
-                        src={sanitizeMediaUrl(watermarkCleanupPreview.cleanedImageUrl)}
+                        src={getSafeMediaSource(watermarkCleanupPreview.cleanedImageUrl)}
                         alt="Cleaned watermark preview on video"
                         className="watermark-cleanup-video-overlay"
                       />
@@ -4409,11 +4409,7 @@ const ViralClipStudio = ({
                         preload="auto"
                         muted
                         playsInline
-                        src={
-                          currentTimelineClip?.url
-                            ? sanitizeMediaUrl(currentTimelineClip.url)
-                            : undefined
-                        }
+                        src={getSafeMediaSource(currentTimelineClip?.url)}
                       />
                     ) : null}
                     <video
@@ -4422,11 +4418,7 @@ const ViralClipStudio = ({
                       preload="auto"
                       muted
                       playsInline
-                      src={
-                        currentTimelineClip?.url
-                          ? sanitizeMediaUrl(currentTimelineClip.url)
-                          : undefined
-                      }
+                      src={getSafeMediaSource(currentTimelineClip?.url)}
                       style={{ opacity: hookBackdropOpacity }}
                     />
                     <video
@@ -4435,26 +4427,20 @@ const ViralClipStudio = ({
                       preload="auto"
                       muted
                       playsInline
-                      src={
-                        currentTimelineClip?.url
-                          ? sanitizeMediaUrl(currentTimelineClip.url)
-                          : undefined
-                      }
+                      src={getSafeMediaSource(currentTimelineClip?.url)}
                       style={{ opacity: hookFreezeOpacity }}
                     />
                     <audio
                       ref={audioRef}
                       preload="auto"
-                      src={extractedAudio?.url ? sanitizeMediaUrl(extractedAudio.url) : undefined}
+                      src={getSafeMediaSource(extractedAudio?.url)}
                       style={{ display: "none" }}
                     />
                     <audio
                       ref={musicPreviewRef}
                       preload="auto"
                       src={
-                        !musicSearchMode
-                          ? sanitizeMediaUrl(effectiveMusicPreviewUrl) || undefined
-                          : undefined
+                        !musicSearchMode ? getSafeMediaSource(effectiveMusicPreviewUrl) : undefined
                       }
                       style={{ display: "none" }}
                     />
@@ -4642,219 +4628,222 @@ const ViralClipStudio = ({
                           }
                           return true;
                         })
-                        .map((overlay, index) => (
-                          <div
-                            key={overlay.id}
-                            className={`draggable-overlay ${activeOverlayId === overlay.id ? "active" : ""}`}
-                            style={{
-                              top: `${overlay.y}%`,
-                              left: `${overlay.x}%`,
-                              width:
-                                overlay.type === "video" || overlay.type === "image"
-                                  ? `${overlay.width || 35}%`
-                                  : "auto",
-                              height:
-                                overlay.type === "video" || overlay.type === "image"
-                                  ? `${overlay.height || 35}%`
-                                  : "auto",
-                              backgroundColor: overlay.type === "text" ? overlay.bg : "transparent",
-                              color: overlay.color,
-                              zIndex: 100 + index,
-                            }}
-                            onMouseDown={e => handleDragStart(e, overlay)}
-                            onTouchStart={e => handleDragStart(e, overlay)}
-                            onDoubleClick={() => {
-                              if (overlay.type === "text") {
-                                const newText = prompt(
-                                  "Edit Text:",
-                                  normalizePlainText(overlay.text)
-                                );
-                                if (newText !== null) updateOverlayText(overlay.id, newText);
-                              }
-                            }}
-                          >
-                            {overlay.type === "text" ? (
-                              overlay.isRainbow ? (
-                                <RainbowText
-                                  text={overlay.text}
-                                  offset={overlay.rainbowOffset || 0}
-                                />
-                              ) : (
-                                normalizePlainText(overlay.text)
-                              )
-                            ) : overlay.type === "image" ? (
-                              <img
-                                src={sanitizeMediaUrl(overlay.src)}
-                                alt="Overlay"
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "contain",
-                                  borderRadius: "12px",
-                                  pointerEvents: "none",
-                                }}
-                              />
-                            ) : (
-                              <video
-                                src={sanitizeMediaUrl(overlay.src)}
-                                autoPlay
-                                loop
-                                muted
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "contain",
-                                  borderRadius: "12px",
-                                  pointerEvents: "none",
-                                }}
-                              />
-                            )}
+                        .map((overlay, index) => {
+                          const safeOverlayText = normalizePlainText(overlay.text);
+                          const safeOverlaySrc = getSafeMediaSource(overlay.src);
 
-                            {activeOverlayId === overlay.id && (
-                              <div className="overlay-controls">
-                                <button
-                                  className="overlay-delete-btn"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    deleteOverlay(overlay.id);
+                          return (
+                            <div
+                              key={overlay.id}
+                              className={`draggable-overlay ${activeOverlayId === overlay.id ? "active" : ""}`}
+                              style={{
+                                top: `${overlay.y}%`,
+                                left: `${overlay.x}%`,
+                                width:
+                                  overlay.type === "video" || overlay.type === "image"
+                                    ? `${overlay.width || 35}%`
+                                    : "auto",
+                                height:
+                                  overlay.type === "video" || overlay.type === "image"
+                                    ? `${overlay.height || 35}%`
+                                    : "auto",
+                                backgroundColor:
+                                  overlay.type === "text" ? overlay.bg : "transparent",
+                                color: overlay.color,
+                                zIndex: 100 + index,
+                              }}
+                              onMouseDown={e => handleDragStart(e, overlay)}
+                              onTouchStart={e => handleDragStart(e, overlay)}
+                              onDoubleClick={() => {
+                                if (overlay.type === "text") {
+                                  const newText = prompt("Edit Text:", safeOverlayText);
+                                  if (newText !== null) updateOverlayText(overlay.id, newText);
+                                }
+                              }}
+                            >
+                              {overlay.type === "text" ? (
+                                overlay.isRainbow ? (
+                                  <RainbowText
+                                    text={safeOverlayText}
+                                    offset={overlay.rainbowOffset || 0}
+                                  />
+                                ) : (
+                                  safeOverlayText
+                                )
+                              ) : overlay.type === "image" && safeOverlaySrc ? (
+                                <img
+                                  src={safeOverlaySrc}
+                                  alt="Overlay"
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "contain",
+                                    borderRadius: "12px",
+                                    pointerEvents: "none",
                                   }}
-                                >
-                                  &times;
-                                </button>
-                                {(overlay.type === "video" || overlay.type === "image") && (
-                                  <div
-                                    className="resize-handle"
-                                    onMouseDown={e => {
+                                />
+                              ) : safeOverlaySrc ? (
+                                <video
+                                  src={safeOverlaySrc}
+                                  autoPlay
+                                  loop
+                                  muted
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "contain",
+                                    borderRadius: "12px",
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                              ) : null}
+
+                              {activeOverlayId === overlay.id && (
+                                <div className="overlay-controls">
+                                  <button
+                                    className="overlay-delete-btn"
+                                    onClick={e => {
                                       e.stopPropagation();
+                                      deleteOverlay(overlay.id);
                                     }}
                                   >
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
+                                    &times;
+                                  </button>
+                                  {(overlay.type === "video" || overlay.type === "image") && (
+                                    <div
+                                      className="resize-handle"
+                                      onMouseDown={e => {
                                         e.stopPropagation();
-                                        e.preventDefault();
-                                        updateOverlaySize(overlay.id, "width", -5);
                                       }}
                                     >
-                                      W-
-                                    </button>
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        updateOverlaySize(overlay.id, "width", 5);
-                                      }}
-                                    >
-                                      W+
-                                    </button>
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        updateOverlaySize(overlay.id, "height", -5);
-                                      }}
-                                    >
-                                      H-
-                                    </button>
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        updateOverlaySize(overlay.id, "height", 5);
-                                      }}
-                                    >
-                                      H+
-                                    </button>
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        toggleOverlayAspectRatioLock(overlay.id);
-                                      }}
-                                      title={
-                                        overlay.aspectRatioLocked
-                                          ? "Unlock aspect ratio"
-                                          : "Lock aspect ratio"
-                                      }
-                                    >
-                                      {overlay.aspectRatioLocked ? "Lock" : "Free"}
-                                    </button>
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        centerOverlay(overlay.id);
-                                      }}
-                                      title="Center overlay"
-                                    >
-                                      Center
-                                    </button>
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        duplicateOverlay(overlay.id);
-                                      }}
-                                      title="Duplicate overlay"
-                                    >
-                                      Copy
-                                    </button>
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        moveOverlay(overlay.id, "backward");
-                                      }}
-                                      title="Move layer backward"
-                                    >
-                                      Down
-                                    </button>
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        moveOverlay(overlay.id, "forward");
-                                      }}
-                                      title="Move layer forward"
-                                    >
-                                      Up
-                                    </button>
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        moveOverlay(overlay.id, "back");
-                                      }}
-                                      title="Send layer to back"
-                                    >
-                                      Back
-                                    </button>
-                                    <button
-                                      className="resize-btn"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        moveOverlay(overlay.id, "front");
-                                      }}
-                                      title="Bring layer to front"
-                                    >
-                                      Front
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          updateOverlaySize(overlay.id, "width", -5);
+                                        }}
+                                      >
+                                        W-
+                                      </button>
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          updateOverlaySize(overlay.id, "width", 5);
+                                        }}
+                                      >
+                                        W+
+                                      </button>
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          updateOverlaySize(overlay.id, "height", -5);
+                                        }}
+                                      >
+                                        H-
+                                      </button>
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          updateOverlaySize(overlay.id, "height", 5);
+                                        }}
+                                      >
+                                        H+
+                                      </button>
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          toggleOverlayAspectRatioLock(overlay.id);
+                                        }}
+                                        title={
+                                          overlay.aspectRatioLocked
+                                            ? "Unlock aspect ratio"
+                                            : "Lock aspect ratio"
+                                        }
+                                      >
+                                        {overlay.aspectRatioLocked ? "Lock" : "Free"}
+                                      </button>
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          centerOverlay(overlay.id);
+                                        }}
+                                        title="Center overlay"
+                                      >
+                                        Center
+                                      </button>
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          duplicateOverlay(overlay.id);
+                                        }}
+                                        title="Duplicate overlay"
+                                      >
+                                        Copy
+                                      </button>
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          moveOverlay(overlay.id, "backward");
+                                        }}
+                                        title="Move layer backward"
+                                      >
+                                        Down
+                                      </button>
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          moveOverlay(overlay.id, "forward");
+                                        }}
+                                        title="Move layer forward"
+                                      >
+                                        Up
+                                      </button>
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          moveOverlay(overlay.id, "back");
+                                        }}
+                                        title="Send layer to back"
+                                      >
+                                        Back
+                                      </button>
+                                      <button
+                                        className="resize-btn"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          moveOverlay(overlay.id, "front");
+                                        }}
+                                        title="Bring layer to front"
+                                      >
+                                        Front
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
                 </div>
@@ -5914,7 +5903,7 @@ const ViralClipStudio = ({
                           title="Add image overlay"
                         >
                           <img
-                            src={sanitizeMediaUrl(imageSrc)}
+                            src={getSafeMediaSource(imageSrc)}
                             alt="Overlay option"
                             style={{ width: "100%", height: "100%", objectFit: "cover" }}
                           />
@@ -6195,7 +6184,7 @@ const ViralClipStudio = ({
                             <span className="watermark-cleanup-preview-label">Original frame</span>
                             {watermarkCleanupPreview.originalImageUrl ? (
                               <img
-                                src={sanitizeMediaUrl(watermarkCleanupPreview.originalImageUrl)}
+                                src={getSafeMediaSource(watermarkCleanupPreview.originalImageUrl)}
                                 alt="Original watermark frame"
                                 className="watermark-cleanup-preview-image"
                               />
@@ -6205,7 +6194,7 @@ const ViralClipStudio = ({
                             <span className="watermark-cleanup-preview-label">Cleaned frame</span>
                             {watermarkCleanupPreview.cleanedImageUrl ? (
                               <img
-                                src={sanitizeMediaUrl(watermarkCleanupPreview.cleanedImageUrl)}
+                                src={getSafeMediaSource(watermarkCleanupPreview.cleanedImageUrl)}
                                 alt="Watermark-cleaned frame preview"
                                 className="watermark-cleanup-preview-image"
                               />
@@ -6618,24 +6607,10 @@ const ViralClipStudio = ({
                       style={{ width: "100%" }}
                     />
                   </label>
-                  <div className="overlay-action-row">
+                  <div>
                     <button
                       type="button"
-                      className="tool-btn"
-                      onClick={() => centerOverlay(activeOverlay.id)}
-                    >
-                      Center
-                    </button>
-                    <button
-                      type="button"
-                      className="tool-btn"
-                      onClick={() => duplicateOverlay(activeOverlay.id)}
-                    >
-                      Duplicate
-                    </button>
-                    <button
-                      type="button"
-                      className="tool-btn"
+                      className="mini-toggle-btn"
                       onClick={() => {
                         deleteOverlay(activeOverlay.id);
                         setActiveOverlayId(null);
@@ -6682,65 +6657,48 @@ const ViralClipStudio = ({
                           style={{ width: "100%" }}
                         />
                       </label>
-                      <div className="overlay-action-row">
-                        <button
-                          type="button"
-                          className="tool-btn"
-                          onClick={() => toggleOverlayAspectRatioLock(activeOverlay.id)}
-                        >
-                          {activeOverlay.aspectRatioLocked ? "Unlock Ratio" : "Lock Ratio"}
-                        </button>
-                      </div>
                     </>
                   )}
-                </div>
-              </section>
-            )}
-            <section className="action-buttons studio-panel">
-              <div className="panel-heading compact">
-                <div>
-                  <span className="panel-kicker">Publish</span>
-                  <h4>Render for platform</h4>
                   <p className="panel-description">
                     Final export uses the active timeline, overlay stack, AI settings, and donor
                     audio configuration shown above, exactly as approved in Studio.
                   </p>
                 </div>
-              </div>
-              <div className="clip-guidance-actions render-destination-row">
+                <div className="clip-guidance-actions render-destination-row">
+                  <button
+                    type="button"
+                    className="clip-action-btn"
+                    onClick={() => void handleExportRender("tiktok")}
+                    disabled={isExporting}
+                  >
+                    Export TikTok
+                  </button>
+                  <button
+                    type="button"
+                    className="clip-action-btn"
+                    onClick={() => void handleExportRender("reels")}
+                    disabled={isExporting}
+                  >
+                    Export Reels
+                  </button>
+                  <button
+                    type="button"
+                    className="clip-action-btn"
+                    onClick={() => void handleExportRender("shorts")}
+                    disabled={isExporting}
+                  >
+                    Export Shorts
+                  </button>
+                </div>
                 <button
-                  type="button"
-                  className="clip-action-btn"
-                  onClick={() => void handleExportRender("tiktok")}
+                  className="export-btn"
+                  onClick={() => void handleExportRender("general")}
                   disabled={isExporting}
                 >
-                  Export TikTok
+                  {exportStatusLabel}
                 </button>
-                <button
-                  type="button"
-                  className="clip-action-btn"
-                  onClick={() => void handleExportRender("reels")}
-                  disabled={isExporting}
-                >
-                  Export Reels
-                </button>
-                <button
-                  type="button"
-                  className="clip-action-btn"
-                  onClick={() => void handleExportRender("shorts")}
-                  disabled={isExporting}
-                >
-                  Export Shorts
-                </button>
-              </div>
-              <button
-                className="export-btn"
-                onClick={() => void handleExportRender("general")}
-                disabled={isExporting}
-              >
-                {exportStatusLabel}
-              </button>
-            </section>
+              </section>
+            )}
           </div>
         </div>
       </div>
