@@ -23,16 +23,20 @@ jobs:
         run: npm ci
 
       - name: Install frontend dependencies
-        run: npm ci --prefix frontend
+        working-directory: frontend
+        run: npm ci
 
       - name: Build frontend
-        run: npm --prefix frontend run build --if-present
+        working-directory: frontend
+        run: npm run build
 
       - name: Verify build artifact exists
+        working-directory: frontend
         run: |
-          if [ ! -f frontend/build/index.html ]; then
-            echo "ERROR: frontend/build/index.html not found. Ensure build step ran successfully.";
-            ls -la frontend || true;
+          if [ ! -f build/index.html ]; then
+            echo "ERROR: build/index.html not found in frontend. Ensure build step ran successfully.";
+            ls -la . || true;
+            ls -la build || true;
             exit 1;
           fi
 
