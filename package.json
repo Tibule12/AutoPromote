@@ -91,8 +91,10 @@
     "router": {
       "path-to-regexp": "8.4.0"
     },
-    "express@4": {
-      "path-to-regexp": "0.1.13"
+    "firebase-tools": {
+      "express": {
+        "path-to-regexp": "0.1.13"
+      }
     },
     "anymatch": {
       "picomatch": "2.3.2"
@@ -104,6 +106,9 @@
       "picomatch": "2.3.2"
     },
     "jest-util": {
+      "picomatch": "4.0.4"
+    },
+    "tinyglobby": {
       "picomatch": "4.0.4"
     },
     "minimatch@3": {
