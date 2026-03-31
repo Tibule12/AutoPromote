@@ -3,7 +3,7 @@ import "./ViralScanner.css";
 import { storage, auth } from "../firebaseClient";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
-import { createSecureId, sanitizeMediaUrl } from "../utils/security";
+import { createSecureId, getSafeMediaSource } from "../utils/security";
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
@@ -812,7 +812,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
               <div className="scanner-video-frame">
                 <video
                   ref={videoRef}
-                  src={sanitizeMediaUrl(videoSrc)}
+                  src={getSafeMediaSource(videoSrc)}
                   controls
                   style={{ borderRadius: "8px" }}
                 />

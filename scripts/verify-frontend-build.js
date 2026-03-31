@@ -1,12 +1,19 @@
 const fs = require('fs');
 const path = require('path');
 
-const frontIndex = path.join(__dirname, '..', 'frontend', 'build', 'index.html');
+const candidates = [
+  path.join(__dirname, '..', 'frontend', 'build', 'index.html'),
+  path.join(__dirname, '..', 'frontend', 'docs', 'index.html'),
+];
 
-if (!fs.existsSync(frontIndex)) {
-  console.error(`Frontend build missing at ${frontIndex}. Run 'npm --prefix frontend run build' and ensure it succeeds.`);
+const resolvedArtifact = candidates.find(candidate => fs.existsSync(candidate));
+
+if (!resolvedArtifact) {
+  console.error(
+    `Frontend build missing. Checked: ${candidates.join(', ')}. Run 'npm --prefix frontend run build' and ensure it succeeds.`
+  );
   process.exit(1);
 }
 
-console.log('Frontend build verified:', frontIndex);
+console.log('Frontend build verified:', resolvedArtifact);
 process.exit(0);
