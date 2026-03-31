@@ -61,8 +61,10 @@ export function applySafeMediaSource(element, url) {
     return false;
   }
 
-  if (element.src !== safeUrl) {
-    element.src = safeUrl;
+  const encodedSafeUrl = encodeURI(safeUrl);
+
+  if (element.src !== encodedSafeUrl) {
+    element.src = encodedSafeUrl;
   }
 
   return true;
