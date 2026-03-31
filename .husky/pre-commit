@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
-
 # Skip frontend lint if frontend/node_modules isn't installed to avoid blocking commits in dev envs
 if [ -d "frontend/node_modules" ]; then
   npx --no-install lint-staged

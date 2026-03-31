@@ -44,16 +44,50 @@
     "firebase-functions-test": "^3.1.0"
   },
   "overrides": {
+    "brace-expansion": "5.0.5",
     "js-yaml": "^4.1.1",
     "glob": "^11.1.0",
     "minimatch": "^10.2.3",
-    "node-forge": "1.3.2",
+    "node-forge": "1.4.0",
     "@tootallnate/once": "3.0.1",
     "@grpc/grpc-js": "1.14.3",
     "flatted": "3.4.2",
     "fast-xml-parser": "$fast-xml-parser",
     "qs": "6.14.2",
-    "lodash": "^4.17.23"
+    "lodash": "^4.17.23",
+    "router": {
+      "path-to-regexp": "8.4.0"
+    },
+    "express": {
+      "path-to-regexp": "0.1.13"
+    },
+    "anymatch": {
+      "picomatch": "2.3.2"
+    },
+    "micromatch": {
+      "picomatch": "2.3.2"
+    },
+    "readdirp": {
+      "picomatch": "2.3.2"
+    },
+    "jest-util": {
+      "picomatch": "4.0.4"
+    },
+    "minimatch@3": {
+      "brace-expansion": "1.1.13"
+    },
+    "minimatch@5": {
+      "brace-expansion": "2.0.3"
+    },
+    "minimatch@6": {
+      "brace-expansion": "2.0.3"
+    },
+    "minimatch@9": {
+      "brace-expansion": "2.0.3"
+    },
+    "minimatch@10": {
+      "brace-expansion": "5.0.5"
+    }
   },
   "private": true
 }

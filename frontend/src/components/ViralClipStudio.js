@@ -1,5 +1,4 @@
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
-import { sanitizeUrl } from "../utils/security";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import React, { useState, useRef, useEffect } from "react";
 import { storage } from "../firebaseClient";
@@ -7,6 +6,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import html2canvas from "html2canvas"; // For rendering styled captions
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
+import { createSecureId, sanitizeMediaUrl, sanitizeUrl } from "../utils/security";
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
 const RAINBOW_COLORS = [
@@ -585,7 +585,7 @@ const clampManualWatermarkRegion = region => {
 
 const createManualWatermarkRegion = () =>
   clampManualWatermarkRegion({
-    id: `watermark-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    id: createSecureId("watermark"),
     left: 4,
     top: 4,
     width: 26,
@@ -1195,7 +1195,11 @@ const ViralClipStudio = ({
       analysisVideo.playsInline = true;
       analysisVideo.preload = "auto";
       analysisVideo.crossOrigin = "anonymous";
-      analysisVideo.src = sanitizeUrl(analysisUrl);
+      const safeAnalysisUrl = sanitizeMediaUrl(analysisUrl);
+      if (!safeAnalysisUrl) {
+        throw new Error("This clip source uses an unsupported preview URL.");
+      }
+      analysisVideo.src = safeAnalysisUrl;
 
       if (Number.isNaN(analysisVideo.duration) || !analysisVideo.duration) {
         await waitForVideoEvent(analysisVideo, "loadedmetadata");
@@ -1595,7 +1599,7 @@ const ViralClipStudio = ({
   }) => {
     if (!src) return;
     const newOverlay = {
-      id: Date.now() + Math.floor(Math.random() * 1000),
+      id: createSecureId("overlay"),
       type,
       src,
       file,
@@ -1839,7 +1843,9 @@ const ViralClipStudio = ({
 
     const video = videoRef.current;
     if (video) {
-      video.src = sanitizeUrl(videoUrl);
+      const safeVideoUrl = sanitizeMediaUrl(videoUrl);
+      if (!safeVideoUrl) return;
+      video.src = safeVideoUrl;
       video.currentTime = boundaryTime;
       setVideoTime(boundaryTime);
       if (options.play) {
@@ -1967,7 +1973,7 @@ const ViralClipStudio = ({
 
       const duplicate = {
         ...overlay,
-        id: Date.now() + Math.floor(Math.random() * 1000),
+        id: createSecureId("overlay"),
         x: clampOverlayCoordinate(Number(overlay.x ?? 50) + 4),
         y: clampOverlayCoordinate(Number(overlay.y ?? 50) + 4),
       };
@@ -3030,7 +3036,7 @@ const ViralClipStudio = ({
               : fileToUpload.name
                 ? fileToUpload.name.split(".").pop()
                 : "bin";
-            const fileName = `${Date.now()}_${overlay.id}.${ext}`;
+            const fileName = `${createSecureId("overlay")}.${ext}`;
             const storageRef = ref(storage, `overlays/${auth.currentUser.uid}/${fileName}`);
             await uploadBytes(storageRef, fileToUpload);
             const url = await getDownloadURL(storageRef);
@@ -4046,7 +4052,12 @@ const ViralClipStudio = ({
       // Create temp video to get duration
       const tempId = Date.now();
       const tempVideo = document.createElement("video");
-      tempVideo.src = sanitizeUrl(url);
+      const safePreviewUrl = sanitizeMediaUrl(url);
+      if (!safePreviewUrl) {
+        reject(new Error("This clip source uses an unsupported preview URL."));
+        return;
+      }
+      tempVideo.src = safePreviewUrl;
       tempVideo.preload = "metadata";
 
       tempVideo.onloadedmetadata = () => {
@@ -4386,7 +4397,7 @@ const ViralClipStudio = ({
                     />
                     {shouldShowWatermarkCleanupOnVideo ? (
                       <img
-                        src={sanitizeUrl(watermarkCleanupPreview.cleanedImageUrl)}
+                        src={sanitizeMediaUrl(watermarkCleanupPreview.cleanedImageUrl)}
                         alt="Cleaned watermark preview on video"
                         className="watermark-cleanup-video-overlay"
                       />
@@ -4400,7 +4411,7 @@ const ViralClipStudio = ({
                         playsInline
                         src={
                           currentTimelineClip?.url
-                            ? sanitizeUrl(currentTimelineClip.url)
+                            ? sanitizeMediaUrl(currentTimelineClip.url)
                             : undefined
                         }
                       />
@@ -4412,7 +4423,9 @@ const ViralClipStudio = ({
                       muted
                       playsInline
                       src={
-                        currentTimelineClip?.url ? sanitizeUrl(currentTimelineClip.url) : undefined
+                        currentTimelineClip?.url
+                          ? sanitizeMediaUrl(currentTimelineClip.url)
+                          : undefined
                       }
                       style={{ opacity: hookBackdropOpacity }}
                     />
@@ -4423,20 +4436,26 @@ const ViralClipStudio = ({
                       muted
                       playsInline
                       src={
-                        currentTimelineClip?.url ? sanitizeUrl(currentTimelineClip.url) : undefined
+                        currentTimelineClip?.url
+                          ? sanitizeMediaUrl(currentTimelineClip.url)
+                          : undefined
                       }
                       style={{ opacity: hookFreezeOpacity }}
                     />
                     <audio
                       ref={audioRef}
                       preload="auto"
-                      src={extractedAudio?.url ? sanitizeUrl(extractedAudio.url) : undefined}
+                      src={extractedAudio?.url ? sanitizeMediaUrl(extractedAudio.url) : undefined}
                       style={{ display: "none" }}
                     />
                     <audio
                       ref={musicPreviewRef}
                       preload="auto"
-                      src={!musicSearchMode ? effectiveMusicPreviewUrl || undefined : undefined}
+                      src={
+                        !musicSearchMode
+                          ? sanitizeMediaUrl(effectiveMusicPreviewUrl) || undefined
+                          : undefined
+                      }
                       style={{ display: "none" }}
                     />
 
@@ -4665,7 +4684,7 @@ const ViralClipStudio = ({
                               )
                             ) : overlay.type === "image" ? (
                               <img
-                                src={sanitizeUrl(overlay.src)}
+                                src={sanitizeMediaUrl(overlay.src)}
                                 alt="Overlay"
                                 style={{
                                   width: "100%",
@@ -4677,7 +4696,7 @@ const ViralClipStudio = ({
                               />
                             ) : (
                               <video
-                                src={sanitizeUrl(overlay.src)}
+                                src={sanitizeMediaUrl(overlay.src)}
                                 autoPlay
                                 loop
                                 muted
@@ -5895,7 +5914,7 @@ const ViralClipStudio = ({
                           title="Add image overlay"
                         >
                           <img
-                            src={sanitizeUrl(imageSrc)}
+                            src={sanitizeMediaUrl(imageSrc)}
                             alt="Overlay option"
                             style={{ width: "100%", height: "100%", objectFit: "cover" }}
                           />
@@ -6176,7 +6195,7 @@ const ViralClipStudio = ({
                             <span className="watermark-cleanup-preview-label">Original frame</span>
                             {watermarkCleanupPreview.originalImageUrl ? (
                               <img
-                                src={sanitizeUrl(watermarkCleanupPreview.originalImageUrl)}
+                                src={sanitizeMediaUrl(watermarkCleanupPreview.originalImageUrl)}
                                 alt="Original watermark frame"
                                 className="watermark-cleanup-preview-image"
                               />
@@ -6186,7 +6205,7 @@ const ViralClipStudio = ({
                             <span className="watermark-cleanup-preview-label">Cleaned frame</span>
                             {watermarkCleanupPreview.cleanedImageUrl ? (
                               <img
-                                src={sanitizeUrl(watermarkCleanupPreview.cleanedImageUrl)}
+                                src={sanitizeMediaUrl(watermarkCleanupPreview.cleanedImageUrl)}
                                 alt="Watermark-cleaned frame preview"
                                 className="watermark-cleanup-preview-image"
                               />

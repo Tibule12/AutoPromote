@@ -3,7 +3,7 @@ import "./ViralScanner.css";
 import { storage, auth } from "../firebaseClient";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
-import { sanitizeUrl } from "../utils/security";
+import { createSecureId, sanitizeMediaUrl } from "../utils/security";
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
@@ -227,7 +227,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   const videoRef = useRef(null);
   const videoSectionRef = useRef(null);
   const previewStopHandlerRef = useRef(null);
-  const scanSessionIdRef = useRef(`scan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  const scanSessionIdRef = useRef(createSecureId("scan"));
   const loggedPreviewClipIdsRef = useRef(new Set());
   const sourceFingerprintRef = useRef("");
   const [isScanning, setIsScanning] = useState(false);
@@ -413,7 +413,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   useEffect(() => {
     if (!paypalLoaded || !selectedPackage || !window.paypal || !paypalButtonsRef.current) return;
     const container = paypalButtonsRef.current;
-    container.innerHTML = "";
+    container.replaceChildren();
 
     window.paypal
       .Buttons({
@@ -468,7 +468,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   }, [paypalLoaded, selectedPackage]);
 
   const startScan = async () => {
-    const activeSessionId = `scan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const activeSessionId = createSecureId("scan");
     scanSessionIdRef.current = activeSessionId;
     loggedPreviewClipIdsRef.current = new Set();
 
@@ -812,7 +812,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
               <div className="scanner-video-frame">
                 <video
                   ref={videoRef}
-                  src={sanitizeUrl(videoSrc)}
+                  src={sanitizeMediaUrl(videoSrc)}
                   controls
                   style={{ borderRadius: "8px" }}
                 />

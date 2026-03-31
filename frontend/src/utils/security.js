@@ -1,39 +1,68 @@
-// Helper to sanitize URLs for use in src/href
-// Prevents javascript: protocol and ensures only approved protocols
-export function sanitizeUrl(url) {
-  if (!url) return "";
+const SAFE_DATA_URL_PATTERN = /^data:(image|video|audio)\/[a-z0-9.+-]+;base64,[a-z0-9+/=]+$/i;
+const SAFE_PROTOCOLS = new Set(["http:", "https:"]);
 
-  // If it's a relative path, allow it (but carefully)
-  if (url.startsWith("/") || url.startsWith("./") || url.startsWith("../")) {
-    return url;
+function stripUnsafeCharacters(value) {
+  return String(value ?? "")
+    .trim()
+    .replace(/[\u0000-\u001f\u007f\s]+/g, "");
+}
+
+function sanitizeRelativeUrl(url) {
+  const cleaned = String(url ?? "").trim();
+  if (!cleaned) return "";
+  if (cleaned.startsWith("//")) return "";
+  return cleaned;
+}
+
+export function sanitizeMediaUrl(url) {
+  const rawUrl = String(url ?? "").trim();
+  if (!rawUrl) return "";
+
+  if (rawUrl.startsWith("/") || rawUrl.startsWith("./") || rawUrl.startsWith("../")) {
+    return sanitizeRelativeUrl(rawUrl);
   }
 
-  // If it's a blob url (created by URL.createObjectURL), allow it
-  if (url.startsWith("blob:")) {
-    return url;
+  if (rawUrl.startsWith("blob:")) {
+    return rawUrl;
   }
 
-  // If it's a data url, allow safe image/video mime types
-  if (url.startsWith("data:")) {
-    // Basic check for safe mimetypes
-    if (url.match(/^data:(image|video|audio)\/[\w\-\+]+;base64,/)) {
-      return url;
-    }
+  if (rawUrl.startsWith("data:")) {
+    return SAFE_DATA_URL_PATTERN.test(rawUrl) ? rawUrl : "";
   }
 
   try {
-    const parsed = new URL(url);
-    if (["http:", "https:"].includes(parsed.protocol)) {
-      return url;
-    }
-  } catch (e) {
-    // If it fails parsing and doesn't look like a protocol, maybe relative?
-    // But we handled relative above.
-    // If it contains a colon, it might be a weird protocol.
-    if (!url.includes(":")) return url;
+    const parsed = new URL(rawUrl, window.location.origin);
+    if (!SAFE_PROTOCOLS.has(parsed.protocol)) return "";
+    return parsed.href;
+  } catch {
+    return rawUrl.includes(":") ? "" : sanitizeRelativeUrl(rawUrl);
+  }
+}
+
+// Helper to sanitize URLs for use in src/href.
+export function sanitizeUrl(url) {
+  return sanitizeMediaUrl(url);
+}
+
+export function createSecureId(prefix = "id") {
+  const safePrefix =
+    String(prefix || "id")
+      .trim()
+      .replace(/[^a-z0-9_-]+/gi, "-")
+      .replace(/^-+|-+$/g, "") || "id";
+
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return `${safePrefix}-${globalThis.crypto.randomUUID()}`;
   }
 
-  return "";
+  if (typeof globalThis.crypto?.getRandomValues === "function") {
+    const buffer = new Uint32Array(4);
+    globalThis.crypto.getRandomValues(buffer);
+    const suffix = Array.from(buffer, value => value.toString(16).padStart(8, "0")).join("");
+    return `${safePrefix}-${suffix}`;
+  }
+
+  return `${safePrefix}-${Date.now().toString(36)}`;
 }
 
 // Validate redirect URLs to prevent open redirect attacks.
