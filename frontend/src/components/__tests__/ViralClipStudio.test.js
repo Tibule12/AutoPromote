@@ -546,6 +546,82 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
+  test("uses face-aware hook banner placement and freeze-text offset in the preview", async () => {
+    const { container } = render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    ensureHookControlsOpen();
+
+    const previewVideo = container.querySelector(".studio-video");
+    expect(previewVideo).not.toBeNull();
+
+    Object.defineProperty(previewVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+    Object.defineProperty(previewVideo, "duration", {
+      configurable: true,
+      writable: true,
+      value: 10,
+    });
+
+    const previewFrame = screen.getByTestId("hook-preview-frame");
+    previewFrame.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 200,
+      height: 240,
+      right: 200,
+      bottom: 240,
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Pick Focus/i }));
+    });
+
+    fireEvent.click(previewFrame, { clientX: 110, clientY: 60 });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Choose Hook/i }));
+    });
+
+    const hookTrack = container.querySelector(".hook-segment-track");
+    expect(hookTrack).not.toBeNull();
+    hookTrack.getBoundingClientRect = () => ({
+      left: 0,
+      width: 200,
+      top: 0,
+      bottom: 56,
+      right: 200,
+      height: 56,
+    });
+
+    await act(async () => {
+      fireEvent.mouseDown(hookTrack, { clientX: 104 });
+    });
+
+    previewVideo.currentTime = 5.2;
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Set as Hook/i }));
+    });
+
+    const banner = await screen.findByTestId("hook-preview-banner");
+    expect(banner.className).toContain("hook-preview-banner-position-left");
+    expect(banner.className).toContain("hook-preview-banner-subject-face");
+    expect(parseFloat(banner.style.top)).toBeLessThanOrEqual(9);
+  });
+
   async function appendTimelineClip(input, createdVideos, fileName, fileContents) {
     const initialCount = createdVideos.length;
     fireEvent.change(input, {
