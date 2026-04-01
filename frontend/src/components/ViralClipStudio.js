@@ -2303,6 +2303,52 @@ const ViralClipStudio = ({
   const hookVisualFocusPoint = showHookPreview ? resolvedHookFocusPoint : DEFAULT_HOOK_FOCUS_POINT;
   const hookTransformOrigin = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
   const hookObjectPosition = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
+  const hookBannerSubjectType = hasCustomHookFocusPoint
+    ? resolvedHookFocusPoint.y <= 42 && Math.abs(resolvedHookFocusPoint.x - 50) <= 18
+      ? "face"
+      : "object"
+    : "neutral";
+  const hookBannerSide = hasCustomHookFocusPoint
+    ? hookBannerSubjectType === "face"
+      ? resolvedHookFocusPoint.x >= 50
+        ? "left"
+        : "right"
+      : resolvedHookFocusPoint.x >= 64
+        ? "left"
+        : resolvedHookFocusPoint.x <= 36
+          ? "right"
+          : "center"
+    : "center";
+  const hookBannerAnchorX =
+    hookBannerSide === "left"
+      ? hookBannerSubjectType === "face"
+        ? 8
+        : 12
+      : hookBannerSide === "right"
+        ? hookBannerSubjectType === "face"
+          ? 92
+          : 88
+        : 50;
+  const hookBannerTranslateX =
+    hookBannerSide === "left" ? "0%" : hookBannerSide === "right" ? "-100%" : "-50%";
+  const hookBannerBaseTop =
+    resolvedHookFocusPoint.y <= 30
+      ? 7.5
+      : resolvedHookFocusPoint.y <= 42
+        ? 9.25
+        : resolvedHookFocusPoint.y <= 56
+          ? 11.25
+          : 12.75;
+  const hookBannerTemplateOffset = isFreezeTextTemplate ? 1.15 : isZoomFocusTemplate ? 0.55 : -0.35;
+  const hookBannerSubjectOffset =
+    hookBannerSubjectType === "face" ? -0.45 : hookBannerSubjectType === "object" ? 0.3 : 0;
+  const hookBannerTop = `${clampNumber(
+    hookBannerBaseTop + hookBannerTemplateOffset + hookBannerSubjectOffset,
+    7,
+    16,
+    10
+  )}%`;
+  const hookBannerTextAlign = hookBannerSide === "center" ? "center" : "left";
   const smartCropBackgroundBlur = smartCrop ? 18 : 0;
   const smartCropBackgroundBrightness = smartCrop ? 0.52 : 1;
   const smartCropBackgroundScale = smartCrop ? 1.08 : 1;
@@ -4788,10 +4834,14 @@ const ViralClipStudio = ({
                         : null}
                       {showHookPreview && hasHookText ? (
                         <div
-                          className={`hook-preview-banner hook-preview-banner-${hookTemplate.replace(/_/g, "-")} hook-text-${hookTextAnimation}`}
+                          data-testid="hook-preview-banner"
+                          className={`hook-preview-banner hook-preview-banner-${hookTemplate.replace(/_/g, "-")} hook-preview-banner-position-${hookBannerSide} hook-preview-banner-subject-${hookBannerSubjectType} hook-text-${hookTextAnimation}`}
                           style={{
                             opacity: hookOutroOpacity * Math.max(0.35, hookTextIntroProgress),
-                            transform: `translate(-50%, ${Math.round((1 - hookTextIntroProgress) * 24)}px) scale(${hookBannerScale.toFixed(3)})`,
+                            top: hookBannerTop,
+                            left: `${hookBannerAnchorX}%`,
+                            textAlign: hookBannerTextAlign,
+                            transform: `translate(${hookBannerTranslateX}, ${Math.round((1 - hookTextIntroProgress) * 12)}px) scale(${hookBannerScale.toFixed(3)})`,
                           }}
                         >
                           <span

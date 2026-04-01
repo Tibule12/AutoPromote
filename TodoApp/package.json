@@ -25,6 +25,7 @@
   },
   "private": true,
   "overrides": {
+    "@xmldom/xmldom": "0.9.9",
     "glob": "^11.1.0",
     "js-yaml": "^4.1.1",
     "node-forge": "1.4.0",
