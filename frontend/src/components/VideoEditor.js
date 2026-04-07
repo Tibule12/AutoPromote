@@ -39,6 +39,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
   const [processedFile, setProcessedFile] = useState(null);
   const [clipSuggestions, setClipSuggestions] = useState(null); // Store detected clips or manual studio entry
+  const autoOpenedStudioRef = useRef(false);
 
   const getDownloadFileName = () => {
     const candidateName = processedFile?.name || file?.name || "edited-video.mp4";
@@ -426,6 +427,21 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       }
     }
   }, [file]);
+
+  useEffect(() => {
+    if (autoOpenedStudioRef.current || clipSuggestions || processing || !videoSrc) return;
+    if (typeof window === "undefined" || typeof navigator === "undefined") return;
+
+    const isSmallTouchDevice =
+      window.matchMedia?.("(max-width: 768px)")?.matches &&
+      Number(navigator.maxTouchPoints || 0) > 0;
+    const isIosDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+
+    if (!isSmallTouchDevice && !isIosDevice) return;
+
+    autoOpenedStudioRef.current = true;
+    handleLaunchStudio();
+  }, [clipSuggestions, processing, videoSrc]);
 
   const toggleOption = key => {
     // Allow users to stack multiple AI features comfortably
