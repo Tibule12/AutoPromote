@@ -3,6 +3,9 @@
     "name": "TodoApp",
     "slug": "TodoApp",
     "version": "1.0.0",
+    "extra": {
+      "studioUrl": "https://www.autopromote.org"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
