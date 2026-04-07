@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import "./VideoEditor.css";
 // Use the main API URL (Node.js) instead of direct Python worker
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
@@ -976,7 +977,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   };
 
   if (clipSuggestions) {
-    return (
+    const studio = (
       <ViralClipStudio
         videoUrl={videoSrc}
         clips={clipSuggestions}
@@ -991,6 +992,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         }}
       />
     );
+
+    if (typeof document !== "undefined" && document.body) {
+      return createPortal(studio, document.body);
+    }
+
+    return studio;
   }
 
   return (
