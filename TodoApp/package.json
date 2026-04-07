@@ -14,10 +14,12 @@
   "dependencies": {
     "autopromote-server": "file:..",
     "expo": "~53.0.22",
+    "expo-constants": "~17.1.8",
     "expo-status-bar": "~2.2.3",
     "hono": "^4.12.7",
     "react": "19.0.0",
     "react-native": "0.79.6",
+    "react-native-webview": "13.16.1",
     "undici": "^7.24.2"
   },
   "devDependencies": {
