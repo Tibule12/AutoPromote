@@ -69,7 +69,7 @@
     "dompurify": "^3.3.2",
     "fast-xml-parser": "^5.5.7",
     "firebase": "^12.2.1",
-    "hono": "^4.12.7",
+    "hono": "^4.12.12",
     "html2canvas": "^1.4.1",
     "idb": "^8.0.3",
     "multer": "^2.1.1",
