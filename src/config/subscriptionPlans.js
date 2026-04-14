@@ -4,53 +4,89 @@ const SUBSCRIPTION_PLANS = {
     name: "Starter",
     price: 0,
     features: {
-      uploads: 5,
+      monthlyCredits: 15,
+      uploads: 3,
       platformLimit: 1,
-      wolfHuntTasks: 5,
+      wolfHuntTasks: 3,
       analytics: "Basic",
       support: "Self-serve",
+      multicam: false,
+      teamSeats: 1,
     },
   },
   premium: {
     id: "premium",
     name: "Creator",
-    price: 9.99,
+    price: 14.99,
     paypalPlanIdEnv: "PAYPAL_PREMIUM_PLAN_ID",
     features: {
-      uploads: 15,
-      platformLimit: 3,
+      monthlyCredits: 150,
+      uploads: 20,
+      platformLimit: 5,
       wolfHuntTasks: 20,
       analytics: "Workflow analytics",
       support: "Email support",
+      multicam: false,
+      teamSeats: 1,
     },
   },
   pro: {
     id: "pro",
     name: "Studio",
-    price: 29.99,
+    price: 34.99,
     paypalPlanIdEnv: "PAYPAL_PRO_PLAN_ID",
     features: {
-      uploads: 25,
+      monthlyCredits: 500,
+      uploads: "Unlimited",
       platformLimit: "Unlimited",
       wolfHuntTasks: 100,
       analytics: "Advanced insights",
       support: "Priority support",
+      multicam: true,
+      teamSeats: 3,
     },
   },
   enterprise: {
     id: "enterprise",
-    name: "Team",
+    name: "Agency",
     price: 99.99,
     paypalPlanIdEnv: "PAYPAL_ENTERPRISE_PLAN_ID",
     features: {
-      uploads: 50,
+      monthlyCredits: 2000,
+      uploads: "Unlimited",
       platformLimit: "Unlimited",
       wolfHuntTasks: 500,
       analytics: "Team reporting",
       support: "Dedicated support",
+      multicam: true,
+      teamSeats: 10,
     },
   },
 };
+
+/**
+ * Credit costs per media operation.
+ * These are deducted from the user's monthly credit allocation (or purchased top-ups).
+ */
+const CREDIT_COSTS = {
+  process: 10,       // Smart Crop + Silence Removal + full pipeline
+  "render-multicam": 15,
+  analyze: 8,
+  "render-clip": 5,
+  transcribe: 3,
+  hook: 3,
+  music: 1,
+};
+
+/**
+ * Credit top-up packages (one-time purchase via PayPal).
+ * These supplement the monthly allocation for power users.
+ */
+const CREDIT_TOP_UP_PACKS = [
+  { id: "pack_boost", credits: 50, price: 4.99, name: "Boost Pack" },
+  { id: "pack_pro", credits: 200, price: 14.99, name: "Pro Pack", savings: "25%" },
+  { id: "pack_studio", credits: 500, price: 29.99, name: "Studio Pack", savings: "40%" },
+];
 
 const PLAN_CAPABILITIES = {
   free: {
@@ -160,15 +196,33 @@ function getPlanCapabilities(planId) {
       label: `${plan.features.wolfHuntTasks} mission opportunities per month`,
       monthlyBoosts: Number.isFinite(missionQuota) ? missionQuota : 0,
     },
+    credits: {
+      monthlyAllocation: plan.features.monthlyCredits || 0,
+      label: `${plan.features.monthlyCredits || 0} editing credits per month`,
+    },
+    multicam: !!plan.features.multicam,
+    teamSeats: plan.features.teamSeats || 1,
   };
+}
+
+function getMonthlyCreditLimit(planId) {
+  return resolvePlan(planId).features.monthlyCredits || 0;
+}
+
+function getCreditCost(operation) {
+  return CREDIT_COSTS[operation] || 0;
 }
 
 module.exports = {
   SUBSCRIPTION_PLANS,
   PLAN_CAPABILITIES,
+  CREDIT_COSTS,
+  CREDIT_TOP_UP_PACKS,
   normalizePlanId,
   resolvePlan,
   getUploadLimitForPlan,
   getPlatformLimitForPlan,
   getPlanCapabilities,
+  getMonthlyCreditLimit,
+  getCreditCost,
 };

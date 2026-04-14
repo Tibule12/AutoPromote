@@ -77,6 +77,15 @@ router.post(
 router.get("/performance/:contentId", authMiddleware, repostPublicLimiter, async (req, res) => {
   try {
     const { contentId } = req.params;
+    const userId = req.userId || req.user?.uid;
+
+    // Verify ownership
+    const { db } = require("../firebaseAdmin");
+    const contentDoc = await db.collection("content").doc(contentId).get();
+    const cData = contentDoc.data();
+    if (!contentDoc.exists || ((cData.user_id || cData.userId) !== userId)) {
+      return res.status(403).json({ error: "Not authorized to view this content" });
+    }
 
     const summary = await repostDrivenEngine.getRepostPerformanceSummary(contentId);
 
@@ -99,6 +108,14 @@ router.get(
   async (req, res) => {
     try {
       const { contentId, platform } = req.params;
+      const userId = req.userId || req.user?.uid;
+
+      const { db } = require("../firebaseAdmin");
+      const contentDoc = await db.collection("content").doc(contentId).get();
+      const cOwner = contentDoc.exists ? contentDoc.data() : {};
+      if (!contentDoc.exists || ((cOwner.user_id || cOwner.userId) !== userId)) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
 
       const suggestions = await repostDrivenEngine.suggestRepostTiming(contentId, platform);
 
@@ -120,6 +137,7 @@ router.get(
 router.post("/scrape/:repostId", authMiddleware, repostWriteLimiter, async (req, res) => {
   try {
     const { repostId } = req.params;
+    const userId = req.userId || req.user?.uid;
 
     // Get repost data
     const { db } = require("../firebaseAdmin");
@@ -130,6 +148,11 @@ router.post("/scrape/:repostId", authMiddleware, repostWriteLimiter, async (req,
     }
 
     const repost = repostDoc.data();
+
+    // Verify ownership
+    if (repost.userId !== userId) {
+      return res.status(403).json({ error: "Not authorized to scrape this repost" });
+    }
 
     // Trigger scraping
     await repostDrivenEngine.scrapeRepostMetrics(repostId, repost.platform, repost.repostUrl);
@@ -156,6 +179,14 @@ router.post("/actions/trigger/:contentId", authMiddleware, repostWriteLimiter, a
   try {
     const { contentId } = req.params;
     const { repostMetrics } = req.body;
+    const userId = req.userId || req.user?.uid;
+
+    const { db } = require("../firebaseAdmin");
+    const contentDoc = await db.collection("content").doc(contentId).get();
+    const cOwner = contentDoc.exists ? contentDoc.data() : {};
+    if (!contentDoc.exists || ((cOwner.user_id || cOwner.userId) !== userId)) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
 
     if (!repostMetrics) {
       return res.status(400).json({ error: "Repost metrics are required" });
@@ -178,6 +209,14 @@ router.post("/actions/trigger/:contentId", authMiddleware, repostWriteLimiter, a
 router.get("/fingerprint/:contentId", authMiddleware, repostPublicLimiter, async (req, res) => {
   try {
     const { contentId } = req.params;
+    const userId = req.userId || req.user?.uid;
+
+    const { db } = require("../firebaseAdmin");
+    const contentDoc = await db.collection("content").doc(contentId).get();
+    const cOwner = contentDoc.exists ? contentDoc.data() : {};
+    if (!contentDoc.exists || ((cOwner.user_id || cOwner.userId) !== userId)) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
 
     const fingerprint = repostDrivenEngine.generateContentFingerprint(contentId);
 
@@ -201,6 +240,14 @@ router.post(
   async (req, res) => {
     try {
       const { contentId, platform } = req.params;
+      const userId = req.userId || req.user?.uid;
+
+      const { db } = require("../firebaseAdmin");
+      const contentDoc = await db.collection("content").doc(contentId).get();
+      const cOwner = contentDoc.exists ? contentDoc.data() : {};
+      if (!contentDoc.exists || ((cOwner.user_id || cOwner.userId) !== userId)) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
 
       const markers = repostDrivenEngine.generateTrackingMarkers(contentId, platform);
 

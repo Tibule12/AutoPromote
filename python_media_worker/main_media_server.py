@@ -125,6 +125,8 @@ ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK = env_flag(
 
 FIREBASE_STATUS_UPDATES_ENABLED = bool(firebase_admin._apps)
 MEDIA_WORKER_TASK_SECRET = os.getenv("MEDIA_WORKER_TASK_SECRET", "")
+if IS_PRODUCTION_ENV and not MEDIA_WORKER_TASK_SECRET:
+    logger.warning("MEDIA_WORKER_TASK_SECRET is not set in production — task endpoints are unprotected!")
 
 # Initialize Whisper model (lazy load or global)
 # 'tiny' is fast but less accurate. 'base' or 'small' are better for production.
@@ -230,6 +232,7 @@ async def materialize_video_input(video_url, local_path):
     if not source:
         raise HTTPException(status_code=400, detail="video_url is required")
 
+    # Security: only allow http/https URLs — reject local file paths and file:// URIs
     if source.startswith("http://") or source.startswith("https://"):
         await run_subprocess_async(
             ["ffmpeg", "-user_agent", "Mozilla/5.0", "-i", source, "-c", "copy", "-y", local_path],
@@ -237,7 +240,15 @@ async def materialize_video_input(video_url, local_path):
         )
         return local_path
 
+    # In production, never accept local paths
+    if IS_PRODUCTION_ENV:
+        raise HTTPException(status_code=400, detail="Only http/https URLs are accepted for video_url")
+
+    # Development only: allow local paths within the tmp directory
     absolute_source = os.path.abspath(source)
+    allowed_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tmp"))
+    if not absolute_source.startswith(allowed_dir + os.sep):
+        raise HTTPException(status_code=400, detail="Local paths must be within the tmp directory")
     if not os.path.exists(absolute_source):
         raise HTTPException(status_code=404, detail=f"Input video not found: {absolute_source}")
 
@@ -2826,11 +2837,12 @@ async def mute_audio(request: CropRequest):
             "-y", output_path
         ], check=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         
+        output_url = upload_file_to_firebase(output_path)
         return {
             "status": "completed", 
             "job_id": job_id, 
             "output_path": output_path,
-            "output_url": "PLACEHOLDER"
+            "output_url": output_url
         }
     except Exception as e:
         logger.error(f"Error muting: {e}")
@@ -2934,49 +2946,15 @@ async def add_captions(request: CropRequest):
         ], check=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         
         if os.path.exists(output_path):
+             output_url = upload_file_to_firebase(output_path)
              return {
                  "status": "completed", 
                  "job_id": job_id, 
                  "output_path": output_path,
-                 "output_url": "PLACEHOLDER"
+                 "output_url": output_url
              }
         else:
              raise Exception("Output file not generated")
-        with open(subtitle_path, "w", encoding="utf-8") as srt:
-             for i, segment in enumerate(result["segments"]):
-                 start = format_timestamp(segment["start"])
-                 end = format_timestamp(segment["end"])
-                 text = segment["text"].strip()
-                 srt.write(f"{i+1}\n{start} --> {end}\n{text}\n\n")
-
-        # 4. Burn-In Subtitles (Hardsub)
-        # Using subtitles filter. Requires path escaping sometimes on Windows.
-        # Ideally using confusing escaping for windows paths in ffmpeg filters
-        escaped_sub_path = subtitle_path.replace("\\", "/").replace(":", "\\:")
-        
-        # Note: Filter complex escaping is tricky. 
-        # Using simplified approach: output srt, return srt path?
-        # A safer way on Windows is to use relative path if CWD allows, or forward slashes.
-        # Let's try basic forward slash replacement which usually works in FFmpeg windows builds.
-        
-        vf_string = f"subtitles='{escaped_sub_path}':force_style='FontName=Arial,FontSize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=2,Shadow=0'"
-
-        subprocess.run([
-            "ffmpeg", "-i", input_path,
-            "-vf", vf_string,
-            "-c:a", "copy",
-            "-y", output_path
-        ], check=True)
-
-        if os.path.exists(output_path):
-             return {
-                 "status": "completed",
-                 "job_id": job_id,
-                 "output_path": output_path,
-                 "output_url": upload_file_to_firebase(output_path)
-             }
-        else:
-             raise Exception("Output caption video not generated")
 
     except Exception as e:
         logger.error(f"Caption Error: {e}")

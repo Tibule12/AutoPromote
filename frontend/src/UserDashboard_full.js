@@ -18,6 +18,7 @@ import WolfHuntDashboard from "./EngagementMarketplace";
 import ClipStudioPanel from "./UserDashboardTabs/ClipStudioPanel";
 import IdeaVideoPanel from "./UserDashboardTabs/IdeaVideoPanel";
 import MissionControlPanel from "./UserDashboardTabs/MissionControlPanel";
+import RepostPanel from "./UserDashboardTabs/RepostPanel";
 // LiveWatch import removed
 // LiveHub import removed
 import FloatingActions from "./components/FloatingActions";
@@ -1082,6 +1083,12 @@ const UserDashboard = ({
                 Analytics
               </li>
               <li
+                className={activeTab === "reposts" ? "active" : ""}
+                onClick={() => handleNav("reposts")}
+              >
+                Reposts
+              </li>
+              <li
                 className={activeTab === "billing" ? "active" : ""}
                 onClick={() => handleNav("billing")}
               >
@@ -1391,6 +1398,8 @@ const UserDashboard = ({
         )}
 
         {activeTab === "analytics" && <AnalyticsPanel />}
+
+        {activeTab === "reposts" && <RepostPanel />}
 
         {activeTab === "rewards" && <RewardsPanel badges={badges} />}
 

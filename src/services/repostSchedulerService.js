@@ -1105,12 +1105,9 @@ async function analyzeAndScheduleReposts({ limit = 10 }) {
 async function scheduleResultVerifications(limit = 5) {
   try {
     // Look for posts that are at least 24 hours old (so metrics have settled)
-    const minAge = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    // But not older than 7 days (ancient history checks)
-    const maxAge = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const minAge = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     // Query platform_posts where we flagged 'isOptimizationRun' but haven't 'validated'
-    // Note: This requires a composite index if we sort, but for now we limit 5
     const snapshot = await db
       .collection("platform_posts")
       .where("isOptimizationRun", "==", true)

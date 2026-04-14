@@ -15,6 +15,7 @@ import GeneratePublishModal from "./GeneratePublishModal";
 const ClipStudioPanel = ({ content = [], onRefresh }) => {
   const [selectedContent, setSelectedContent] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const pollIntervalRef = useRef(null);
   const [currentAnalysis, setCurrentAnalysis] = useState(null);
   const [generatedClips, setGeneratedClips] = useState([]);
   // Note: unused preview/analysis state removed to satisfy linter warnings
@@ -54,6 +55,13 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
   const [showLibrary, setShowLibrary] = useState(false);
   const fileInputRef = useRef(null); // Ref for file upload
 
+  // Cleanup polling interval on unmount
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, []);
+
   const resolveContentVideoUrl = contentItem =>
     contentItem?.processedUrl ||
     contentItem?.persistentMediaUrl ||
@@ -65,14 +73,13 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     null;
 
   // Filter for videos only, and exclude generated AI clips to keep the library clean
-  // Updated: Only show videos explicitly uploaded via Clip Studio (source_context = clip_studio) to separate from general uploads
+  // Show all user-uploaded videos (Clip Studio and general uploads) so users can access their full library
   const videoContent = content.filter(
     c =>
       c.type === "video" &&
       c.sourceType !== "ai_clip" &&
       !c.sourceAnalysisId &&
-      !c.sourceClipId &&
-      c.sourceContext === "clip_studio"
+      !c.sourceClipId
   );
 
   const handleFileUpload = async event => {
@@ -215,15 +222,11 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
             `Insufficient Credits! Needed: ${errorData.required}. Use PayPal or PayFast in Marketplace.`,
             { id: toastId }
           );
-          // Optionally open credit purchase modal here
-          if (
-            window.confirm(
-              "Insufficient credits! Go to Marketplace to purchase via PayPal/PayFast?"
-            )
-          ) {
-            // Assuming this function is executed in context of UserDashboard
-            // We cannot directly switch tabs here without props, but the message is clear.
-          }
+          // Direct user to billing tab via URL hash so they can purchase credits
+          toast("Tap 'Billing' in the sidebar to purchase more credits.", {
+            icon: "💳",
+            duration: 6000,
+          });
           return;
         }
 
@@ -241,7 +244,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
         });
         setAnalyzing(true);
 
-        // Start Polling
+        // Start Polling (store ref for cleanup on unmount)
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
         const pollInterval = setInterval(async () => {
           const token = await auth.currentUser?.getIdToken();
           try {
@@ -271,6 +275,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
             console.warn("Polling error", e);
           }
         }, 5000);
+        pollIntervalRef.current = pollInterval;
       } else {
         // Synchronous fallback (old behavior)
         const clipCount = result.data.clipSuggestions ? result.data.clipSuggestions.length : 0;
@@ -630,7 +635,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                           borderRadius: "4px",
                         }}
                       >
-                        ⚡ Score: {clip.viralScore || 85}
+                        ⚡ Score: {clip.viralScore || "—"}
                       </span>
                       <span style={{ fontSize: "12px", color: "#aaa" }}>
                         {formatDuration(clip.duration)}
@@ -1084,7 +1089,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                           ) : (
                             <div className="clip-score-large">
                               <span className="score-number">
-                                {clip.viralScore || clip.score || 85}
+                                {clip.viralScore || clip.score || "—"}
                               </span>
                               <span className="score-label">Viral Score</span>
                               <button

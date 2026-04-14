@@ -77,21 +77,22 @@ function ContentApprovalPanel() {
   };
 
   const handleApprove = async contentId => {
-    const notes = prompt("Add approval notes (optional):");
     try {
       const token = await auth.currentUser?.getIdToken();
-      await fetch(`${API_BASE_URL}/api/admin/approval/${contentId}/approve`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/approval/${contentId}/approve`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ notes }),
+        body: JSON.stringify({ notes: "" }),
       });
-      alert("Content approved!");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast.success("Content approved");
       fetchData();
     } catch (error) {
       console.error("Error approving content:", error);
+      toast.error("Failed to approve content");
     }
   };
 
@@ -101,7 +102,7 @@ function ContentApprovalPanel() {
 
     try {
       const token = await auth.currentUser?.getIdToken();
-      await fetch(`${API_BASE_URL}/api/admin/approval/${contentId}/reject`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/approval/${contentId}/reject`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -109,10 +110,12 @@ function ContentApprovalPanel() {
         },
         body: JSON.stringify({ reason }),
       });
-      alert("Content rejected");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast.success("Content rejected");
       fetchData();
     } catch (error) {
       console.error("Error rejecting content:", error);
+      toast.error("Failed to reject content");
     }
   };
 
@@ -122,7 +125,7 @@ function ContentApprovalPanel() {
 
     try {
       const token = await auth.currentUser?.getIdToken();
-      await fetch(`${API_BASE_URL}/api/admin/approval/${contentId}/request-changes`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/approval/${contentId}/request-changes`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -130,16 +133,18 @@ function ContentApprovalPanel() {
         },
         body: JSON.stringify({ changes }),
       });
-      alert("Change request sent");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast.success("Change request sent");
       fetchData();
     } catch (error) {
       console.error("Error requesting changes:", error);
+      toast.error("Failed to send change request");
     }
   };
 
   const handleBulkApprove = async () => {
     if (selectedContent.length === 0) {
-      alert("Please select content first");
+      toast.error("Please select content first");
       return;
     }
 
@@ -147,7 +152,7 @@ function ContentApprovalPanel() {
 
     try {
       const token = await auth.currentUser?.getIdToken();
-      await fetch(`${API_BASE_URL}/api/admin/approval/bulk-approve`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/approval/bulk-approve`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -155,11 +160,13 @@ function ContentApprovalPanel() {
         },
         body: JSON.stringify({ contentIds: selectedContent }),
       });
-      alert(`${selectedContent.length} items approved`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast.success(`${selectedContent.length} items approved`);
       setSelectedContent([]);
       fetchData();
     } catch (error) {
       console.error("Error bulk approving:", error);
+      toast.error("Bulk approve failed");
     }
   };
 
@@ -172,11 +179,16 @@ function ContentApprovalPanel() {
       });
       const data = await response.json();
       if (data.success) {
-        alert(data.flagged ? "Content flagged as unsafe!" : "Content appears safe");
+        if (data.flagged) {
+          toast.error("Content flagged as unsafe!");
+        } else {
+          toast.success("Content appears safe");
+        }
         fetchData();
       }
     } catch (error) {
       console.error("Error scanning content:", error);
+      toast.error("Content scan failed");
     }
   };
 

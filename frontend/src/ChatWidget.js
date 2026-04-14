@@ -88,10 +88,10 @@ const ChatWidget = ({ user }) => {
                 className="pricing-options"
                 style={{ width: "100%", display: "flex", flexDirection: "column", gap: "16px" }}
               >
-                {/* Pay As You Go Option */}
+                {/* Boost Pack */}
                 <div
                   className="price-card"
-                  onClick={() => !loadingPayment && handlePurchase("ai_credits", 5.0)}
+                  onClick={() => !loadingPayment && handlePurchase("ai_credits", 4.99)}
                   style={{
                     padding: "16px",
                     borderRadius: "12px",
@@ -111,18 +111,18 @@ const ChatWidget = ({ user }) => {
                       marginBottom: "4px",
                     }}
                   >
-                    <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 600 }}>Pay As You Go</h4>
-                    <span style={{ fontWeight: 700, color: "#6366f1" }}>$5.00</span>
+                    <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 600 }}>Boost Pack</h4>
+                    <span style={{ fontWeight: 700, color: "#6366f1" }}>$4.99</span>
                   </div>
                   <p style={{ margin: 0, fontSize: "0.875rem", color: "#6b7280" }}>
-                    50 Credits (Quick Help)
+                    50 Credits
                   </p>
                 </div>
 
-                {/* Pro Bundle Option */}
+                {/* Pro Pack */}
                 <div
                   className="price-card"
-                  onClick={() => !loadingPayment && handlePurchase("ai_credits", 19.99)}
+                  onClick={() => !loadingPayment && handlePurchase("ai_credits", 14.99)}
                   style={{
                     padding: "16px",
                     borderRadius: "12px",
@@ -141,18 +141,18 @@ const ChatWidget = ({ user }) => {
                       marginBottom: "4px",
                     }}
                   >
-                    <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 600 }}>Pro Bundle</h4>
-                    <span style={{ fontWeight: 700, color: "#6366f1" }}>$19.99</span>
+                    <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 600 }}>Pro Pack</h4>
+                    <span style={{ fontWeight: 700, color: "#6366f1" }}>$14.99</span>
                   </div>
                   <p style={{ margin: 0, fontSize: "0.875rem", color: "#6b7280" }}>
-                    250 Credits (Best Value)
+                    200 Credits — Save 25%
                   </p>
                 </div>
 
-                {/* Unlimited Monthly Option */}
+                {/* Studio Pack */}
                 <div
                   className="price-card"
-                  onClick={() => !loadingPayment && handlePurchase("ai_subscription", 29.99)}
+                  onClick={() => !loadingPayment && handlePurchase("ai_credits", 29.99)}
                   style={{
                     padding: "16px",
                     borderRadius: "12px",
@@ -171,12 +171,12 @@ const ChatWidget = ({ user }) => {
                     }}
                   >
                     <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 600, color: "#1e40af" }}>
-                      Unlimited
+                      Studio Pack
                     </h4>
                     <span style={{ fontWeight: 700, color: "#1e40af" }}>$29.99</span>
                   </div>
                   <p style={{ margin: 0, fontSize: "0.875rem", color: "#1e40af" }}>
-                    Unlimited Access (30 Days)
+                    500 Credits — Save 40%
                   </p>
                 </div>
               </div>

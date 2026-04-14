@@ -2,6 +2,15 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import GeneratePublishModal from "../GeneratePublishModal";
 
+// Mock firebase/auth
+jest.mock("firebase/auth", () => ({
+  getAuth: () => ({
+    currentUser: {
+      getIdToken: async () => "mock-token",
+    },
+  }),
+}));
+
 // Use an explicit async mock to avoid intermittent undefined resolution
 global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({ jobId: "job1" }) }));
 

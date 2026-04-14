@@ -557,7 +557,7 @@ router.get("/user", authMiddleware, async (req, res) => {
       totalViews,
       totalLikes,
       totalShares,
-      totalRevenue,
+      totalRevenue: 0, // Pay-per-view is disabled; zero to match /content/:id behavior
       totalClicks,
       ctr: totalViews > 0 ? parseFloat(((totalClicks / totalViews) * 100).toFixed(2)) : 0,
 
@@ -620,16 +620,18 @@ router.get("/workflow-summary", authMiddleware, async (req, res) => {
     const range = String(req.query.range || "7d");
     const rangeStart = getWorkflowRangeStart(range);
 
-    const snapshot = await db
+    let query = db
       .collection("workflow_events")
-      .where("uid", "==", uid)
-      .limit(500)
-      .get();
+      .where("uid", "==", uid);
+    if (workflow) {
+      query = query.where("workflow", "==", workflow);
+    }
+    const snapshot = await query.limit(500).get();
     const events = [];
     snapshot.forEach(doc => {
       const data = doc.data() || {};
       const createdAt = Number(data.createdAt || 0);
-      if ((workflow && data.workflow !== workflow) || createdAt < rangeStart) return;
+      if (createdAt < rangeStart) return;
       events.push({ id: doc.id, ...data, createdAt });
     });
 

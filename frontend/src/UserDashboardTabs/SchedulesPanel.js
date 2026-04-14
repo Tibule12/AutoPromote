@@ -52,7 +52,7 @@ const SchedulesPanel = ({
     if (injectData.platforms.length === 0) return toast.error("Target at least one platform");
 
     setIsInjecting(true);
-    const isoDateTime = `${injectData.date}T${injectData.time}:00.000Z`; // Simple ISO construction
+    const isoDateTime = new Date(`${injectData.date}T${injectData.time}`).toISOString(); // Respect local timezone
 
     try {
       if (onCreate) {
@@ -374,7 +374,7 @@ const SchedulesPanel = ({
                     {sch.frequency}
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: "5px" }}>
+                <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
                   {channelList.map(p => (
                     <span
                       key={p}
@@ -389,18 +389,62 @@ const SchedulesPanel = ({
                     </span>
                   ))}
                 </div>
-                <button
-                  onClick={() => onDelete && onDelete(sch.id)}
-                  className="control-btn"
-                  style={{
-                    padding: "4px 8px",
-                    fontSize: "0.7rem",
-                    borderColor: "#ef4444",
-                    color: "#ef4444",
-                  }}
-                >
-                  ABORT
-                </button>
+                <div style={{ display: "flex", gap: "4px" }}>
+                  {sch.status === "paused" ? (
+                    <button
+                      onClick={() => onResume && onResume(sch.id)}
+                      className="control-btn"
+                      style={{
+                        padding: "4px 8px",
+                        fontSize: "0.7rem",
+                        borderColor: "#22c55e",
+                        color: "#22c55e",
+                      }}
+                    >
+                      RESUME
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onPause && onPause(sch.id)}
+                      className="control-btn"
+                      style={{
+                        padding: "4px 8px",
+                        fontSize: "0.7rem",
+                        borderColor: "#f59e0b",
+                        color: "#f59e0b",
+                      }}
+                    >
+                      PAUSE
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      const newTime = prompt("Reschedule to (YYYY-MM-DDTHH:MM):", injectData.date + "T" + injectData.time);
+                      if (newTime && onReschedule) onReschedule(sch.id, newTime + ":00.000Z");
+                    }}
+                    className="control-btn"
+                    style={{
+                      padding: "4px 8px",
+                      fontSize: "0.7rem",
+                      borderColor: "#6366f1",
+                      color: "#6366f1",
+                    }}
+                  >
+                    RESCHEDULE
+                  </button>
+                  <button
+                    onClick={() => onDelete && onDelete(sch.id)}
+                    className="control-btn"
+                    style={{
+                      padding: "4px 8px",
+                      fontSize: "0.7rem",
+                      borderColor: "#ef4444",
+                      color: "#ef4444",
+                    }}
+                  >
+                    ABORT
+                  </button>
+                </div>
               </div>
             );
           })}

@@ -15,6 +15,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [videoSrc, setVideoSrc] = useState("");
   const [processing, setProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const abortRef = useRef(false);
 
   const formatBalance = balance => {
     if (balance === null || typeof balance === "undefined") return 0;
@@ -27,6 +28,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     return String(balance);
   };
   const [creditBalance, setCreditBalance] = useState(null);
+  const [creditBreakdown, setCreditBreakdown] = useState(null);
+  const [creditCosts, setCreditCosts] = useState(null);
+  const [topUpPacks, setTopUpPacks] = useState([]);
   const [needsCredits, setNeedsCredits] = useState(false);
   const [showCreditShop, setShowCreditShop] = useState(false);
   const [paypalLoaded, setPaypalLoaded] = useState(false);
@@ -34,10 +38,13 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const paypalButtonsRef = useRef(null);
 
   const CREDIT_PACKAGES = [
-    { id: "pack_small", credits: 50, price: "4.99", name: "Starter Pack" },
-    { id: "pack_medium", credits: 150, price: "12.99", name: "Pro Pack" },
-    { id: "pack_large", credits: 500, price: "39.99", name: "Mega Pack" },
+    { id: "pack_boost", credits: 50, price: "4.99", name: "Boost Pack" },
+    { id: "pack_pro", credits: 200, price: "14.99", name: "Pro Pack", savings: "25%" },
+    { id: "pack_studio", credits: 500, price: "29.99", name: "Studio Pack", savings: "40%" },
   ];
+
+  // Prefer API-fetched packs, fall back to hardcoded defaults
+  const effectivePackages = topUpPacks.length > 0 ? topUpPacks : CREDIT_PACKAGES;
 
   const [processedFile, setProcessedFile] = useState(null);
   const [clipSuggestions, setClipSuggestions] = useState(null); // Store detected clips or manual studio entry
@@ -123,23 +130,24 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         const user = auth.currentUser;
         if (!user) return; // not logged in yet
         const token = await user.getIdToken();
-        const r = await fetch(API_ENDPOINTS.CREDITS_BALANCE, {
+        const r = await fetch(`${API_BASE_URL.replace(/\/$/, "")}/api/media/credits`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (r.ok) {
-          // Some responses may be HTML/redirects in misconfigured environments.
-          // Guard against JSON parse failures.
           const text = await r.text();
           try {
             const data = JSON.parse(text);
-            console.log("credits/balance response:", data);
-            console.log("credits/balance value:", data.balance && data.balance.balance);
             setCreditBalance(data.balance);
+            setCreditBreakdown(data.monthly || null);
+            setCreditCosts(data.costs || null);
+            if (data.topUpPacks) setTopUpPacks(data.topUpPacks);
+            const monthlyInfo = data.monthly
+              ? ` (${data.monthly.remaining} monthly + ${data.topUp || 0} top-up)`
+              : "";
             setStatusMessage(
-              `You have ${formatBalance(data.balance && data.balance.balance)} credits available.`
+              `You have ${formatBalance(data.balance)} editing credits available${monthlyInfo}.`
             );
           } catch (jsonErr) {
-            // Avoid dumping huge HTML into console while still keeping enough info
             const snippet = (text || "").slice(0, 400).replace(/\s+/g, " ");
             console.warn(
               "Credits endpoint returned non-JSON response (likely misconfigured API base URL)",
@@ -212,9 +220,14 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         )}&currency=${encodeURIComponent(currency)}`;
         script.async = true;
         script.onload = () => setPaypalLoaded(true);
+        script.onerror = () => {
+          console.warn("PayPal SDK failed to load");
+          setStatusMessage("Credit purchase unavailable — payment SDK failed to load. Try refreshing.");
+        };
         document.body.appendChild(script);
       } catch (e) {
         console.warn("Failed to load PayPal SDK:", e);
+        setStatusMessage("Credit purchase unavailable — payment SDK failed to load.");
       }
     };
 
@@ -415,6 +428,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   });
 
   const videoRef = useRef(null);
+  const blobUrlRef = useRef(null);
 
   // Initialize video source from file prop
   useEffect(() => {
@@ -422,14 +436,31 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       if (file.isRemote) {
         setVideoSrc(file.url);
         setProcessedFile(file);
-      } else {
+      } else if (file instanceof File || file instanceof Blob) {
+        // Revoke the previous blob URL only if we're creating a new one for a different file
+        if (blobUrlRef.current) {
+          URL.revokeObjectURL(blobUrlRef.current);
+          blobUrlRef.current = null;
+        }
         const url = URL.createObjectURL(file);
+        blobUrlRef.current = url;
         setVideoSrc(url);
-        setProcessedFile(file); // Default to original
-        return () => URL.revokeObjectURL(url);
+        setProcessedFile(file);
+      } else if (typeof file === "string") {
+        setVideoSrc(file);
       }
     }
   }, [file]);
+
+  // Revoke blob URL only on unmount
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (autoOpenedStudioRef.current || clipSuggestions || processing || !videoSrc) return;
@@ -562,8 +593,10 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         setStatusMessage("Job Queued. Waiting for worker...");
 
         // Poll loop
+        abortRef.current = false;
         let attempts = 0;
         while (true) {
+          if (abortRef.current) throw new Error("Processing cancelled by user.");
           if (attempts > 1800) throw new Error("Processing timed out (1h limit)"); // Extended to 1h for long 0.3x renders
           await new Promise(r => setTimeout(r, 2000)); // Sleep 2s
           attempts++;
@@ -881,6 +914,21 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             ...(extraOptions.thumbnailFrame !== undefined
               ? { thumbnailFrame: extraOptions.thumbnailFrame }
               : {}),
+            ...(extraOptions.enhanceQuality !== undefined
+              ? { enhanceQuality: !!extraOptions.enhanceQuality }
+              : {}),
+            ...(extraOptions.hookEndTime !== undefined
+              ? { hookEndTime: Number(extraOptions.hookEndTime) }
+              : {}),
+            ...(extraOptions.hookSourceStartTime !== undefined
+              ? { hookSourceStartTime: Number(extraOptions.hookSourceStartTime) }
+              : {}),
+            ...(extraOptions.hookSourceEndTime !== undefined
+              ? { hookSourceEndTime: Number(extraOptions.hookSourceEndTime) }
+              : {}),
+            ...(extraOptions.exportDestination !== undefined
+              ? { exportDestination: extraOptions.exportDestination }
+              : {}),
             renderViral: true,
             analyzeClips: false,
             viralData: payload,
@@ -970,14 +1018,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       } else {
         console.error("Rendering succeeded but no URL returned:", result);
         setStatusMessage("Error: Server returned success but no video URL.");
-        alert("Server error: No video URL returned. Check console for details.");
       }
     } catch (error) {
       console.error("Viral Render Error:", error);
       let msg = error.message;
       if (msg === "Failed to fetch") msg = "Network error. Is the backend running?";
       setStatusMessage("Error rendering clip: " + msg);
-      alert("Error rendering clip: " + msg);
       // Do NOT re-open studio automatically, let user decide
       // setClipSuggestions(options.clipSuggestions);
     } finally {
@@ -1104,7 +1150,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               <button
                 onClick={() => {
                   setShowCreditShop(true);
-                  setSelectedPackage(CREDIT_PACKAGES[0]);
+                  setSelectedPackage(effectivePackages[0]);
                 }}
                 style={{
                   marginLeft: "12px",
@@ -1117,7 +1163,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   fontWeight: "700",
                 }}
               >
-                Buy Credits
+                Top Up Credits
               </button>
             ) : null}
           </div>
@@ -1127,7 +1173,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       {needsCredits && !showCreditShop ? (
         <div
           style={{
-            padding: "10px 14px",
+            padding: "14px 18px",
             background: "rgba(255, 220, 220, 0.45)",
             border: "1px solid rgba(255, 100, 100, 0.5)",
             borderRadius: "8px",
@@ -1135,38 +1181,41 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             color: "#1c1c1c",
             fontSize: "0.9rem",
             fontWeight: "700",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
           }}
         >
-          <span>Not enough credits to process the video.</span>
-          <button
-            onClick={() => {
-              setShowCreditShop(true);
-              setSelectedPackage(CREDIT_PACKAGES[0]);
-            }}
-            style={{
-              marginLeft: "12px",
-              background: "#222",
-              color: "#ffd700",
-              border: "1px solid #ffd700",
-              borderRadius: "6px",
-              padding: "6px 12px",
-              cursor: "pointer",
-              fontWeight: "700",
-            }}
-          >
-            Buy Credits
-          </button>
+          <div style={{ marginBottom: "8px" }}>Not enough credits for this operation.</div>
+          <div style={{ fontSize: "0.82rem", fontWeight: 500, opacity: 0.85, marginBottom: "10px" }}>
+            {creditBreakdown
+              ? `Monthly: ${creditBreakdown.remaining} remaining · Top-up: ${formatBalance(creditBalance) - (creditBreakdown.remaining || 0)} available`
+              : `Balance: ${formatBalance(creditBalance)} credits`}
+          </div>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              onClick={() => {
+                setShowCreditShop(true);
+                setSelectedPackage(effectivePackages[0]);
+              }}
+              style={{
+                background: "#222",
+                color: "#ffd700",
+                border: "1px solid #ffd700",
+                borderRadius: "6px",
+                padding: "8px 14px",
+                cursor: "pointer",
+                fontWeight: "700",
+              }}
+            >
+              Buy Credit Top-Up
+            </button>
+          </div>
         </div>
       ) : null}
 
       {showCreditShop ? (
         <div
           style={{
-            padding: "12px 14px",
-            background: "rgba(30, 30, 30, 0.8)",
+            padding: "16px 18px",
+            background: "rgba(30, 30, 30, 0.9)",
             border: "1px solid rgba(150, 150, 150, 0.3)",
             borderRadius: "10px",
             margin: "10px 20px",
@@ -1178,13 +1227,13 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: "10px",
+              marginBottom: "14px",
             }}
           >
             <div>
-              <div style={{ fontWeight: 700, fontSize: "1rem" }}>Buy Growth Credits</div>
+              <div style={{ fontWeight: 700, fontSize: "1rem" }}>Credit Top-Up</div>
               <div style={{ fontSize: "0.85rem", opacity: 0.8 }}>
-                Select a package and complete payment via PayPal.
+                Credits added here stack on top of your monthly plan allocation.
               </div>
             </div>
             <button
@@ -1203,14 +1252,14 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           </div>
 
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            {CREDIT_PACKAGES.map(pkg => (
+            {effectivePackages.map(pkg => (
               <button
                 key={pkg.id}
                 onClick={() => setSelectedPackage(pkg)}
                 style={{
                   flex: 1,
                   minWidth: "140px",
-                  padding: "10px",
+                  padding: "12px",
                   borderRadius: "10px",
                   border:
                     selectedPackage?.id === pkg.id
@@ -1227,6 +1276,11 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 <div style={{ fontSize: "0.85rem", opacity: 0.86 }}>
                   {pkg.credits} credits • ${pkg.price}
                 </div>
+                {pkg.savings ? (
+                  <div style={{ fontSize: "0.78rem", color: "#4caf50", marginTop: "4px" }}>
+                    Save {pkg.savings}
+                  </div>
+                ) : null}
               </button>
             ))}
           </div>
@@ -1299,10 +1353,19 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             <div className="studio-launch-eyebrow">Primary workflow</div>
             <h3>Open Viral Clip Studio</h3>
             <p>
-              This screen is now only a launch surface. Viral Clip Studio opens immediately with
-              your current video loaded so you can edit timing, overlays, captions, donor audio, and
-              export from one workspace.
+              Edit timing, overlays, captions, donor audio, and export — all from one workspace.
             </p>
+            {creditCosts && (
+              <div style={{
+                display: "flex", flexWrap: "wrap", gap: "6px", margin: "8px 0 12px",
+                fontSize: "0.78rem", opacity: 0.85,
+              }}>
+                <span style={{ background: "rgba(255,255,255,0.08)", padding: "3px 8px", borderRadius: "4px" }}>Render clip: {creditCosts["render-clip"] || 5} cr</span>
+                <span style={{ background: "rgba(255,255,255,0.08)", padding: "3px 8px", borderRadius: "4px" }}>Full process: {creditCosts.process || 10} cr</span>
+                <span style={{ background: "rgba(255,255,255,0.08)", padding: "3px 8px", borderRadius: "4px" }}>Analyze: {creditCosts.analyze || 8} cr</span>
+                <span style={{ background: "rgba(255,255,255,0.08)", padding: "3px 8px", borderRadius: "4px" }}>Transcribe: {creditCosts.transcribe || 3} cr</span>
+              </div>
+            )}
             <div className="studio-launch-actions">
               <button
                 className="process-btn studio-launch-btn"
@@ -1330,6 +1393,15 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               <div className="status-message">
                 {processing && <span className="spinner">⏳ </span>}
                 {statusMessage}
+                {processing && (
+                  <button
+                    className="cancel-btn"
+                    style={{ marginLeft: "12px", padding: "4px 12px", fontSize: "0.8rem" }}
+                    onClick={() => { abortRef.current = true; setStatusMessage("Cancelling..."); }}
+                  >
+                    Cancel Processing
+                  </button>
+                )}
               </div>
             )}
           </div>

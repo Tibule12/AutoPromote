@@ -486,6 +486,7 @@ const YouTubeForm = ({
             }}
             placeholder="Tell viewers about your video..."
             rows={5}
+            maxLength={5000}
           />
           <button
             type="button"
@@ -523,6 +524,7 @@ const YouTubeForm = ({
             setIsDescriptionDirty(true);
           }}
         />
+        <div className="char-count">{description.length}/5,000</div>
       </div>
 
       <div className="form-row-modern two-col">
